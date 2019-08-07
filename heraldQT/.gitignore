@@ -1,6 +1,0 @@
-*.user*
-*.a
-*.dll
-*.so
-*.dylib
-target/
