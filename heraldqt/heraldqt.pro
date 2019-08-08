@@ -47,9 +47,9 @@ android {
     LIBS +=  $${PWD}/../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }
 
-iphonesimulator | iphoneos {
+iphonesimulator {
     #IOS will not work because of code signing, but it would with this...?
-    LIBS +=  ${{PWD}}/../libherald/target/x86_64-apple-ios/{RUST_BUILD_TYPE}/libherald.a
+    LIBS +=  $${PWD}/../libherald/target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a
 }
 
 macx {
