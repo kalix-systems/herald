@@ -1,6 +1,6 @@
-use crate::{db::Database, models::Contact};
-use libc::c_int;
-use std::ptr;
+use crate::{db::Database, models::contact};
+use libc::{c_char, c_int};
+use std::{ffi::CString, ptr};
 
 #[no_mangle]
 /// Opens connection to canonical sqlite3 database.
@@ -37,7 +37,7 @@ pub unsafe extern "C" fn contacts_create_table(db: *mut Database) -> c_int {
         eprintln!("Couldn't create contacts table, null pointer");
         -1
     } else {
-        match Contact::create_table(&mut *db) {
+        match contact::create_table(&mut *db) {
             Ok(_) => {
                 println!("Created contacts table");
                 0
@@ -58,19 +58,91 @@ pub unsafe extern "C" fn contacts_create_table(db: *mut Database) -> c_int {
 pub unsafe extern "C" fn contact_insert(db: *mut Database) -> c_int {
     if db.is_null() {
         eprintln!("Couldn't create contacts table, null pointer");
-        -1
-    } else {
-        match Contact::insert(&mut *db) {
-            Ok(_) => {
-                println!("Contact insertion succeeded");
-                0
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                -2
-            }
+        return -1;
+    }
+    match contact::insert(&mut *db) {
+        Ok(_) => {
+            println!("Contact insertion succeeded");
+            0
+        }
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            -2
         }
     }
+}
+
+#[repr(C)]
+pub struct ConstBuffer<Item> {
+    data: *const Item,
+    len: usize,
+}
+
+impl<Item> ConstBuffer<Item> {
+    /// Creates a new [`ConstBuffer`] from a vector.
+    ///
+    /// ATTENTION: This method intentionally cause a "memory leak" so that rustc doesn't drop the
+    /// data when it goes out of scope. Remeber to call [`const_buffer_free`]!.
+    fn new(input: Vec<Item>) -> ConstBuffer<Item> {
+        let mut buf = input.into_boxed_slice();
+        let data = buf.as_mut_ptr();
+        let len = buf.len();
+
+        std::mem::forget(buf);
+        ConstBuffer { data, len }
+    }
+
+    fn len(&self) -> usize {
+        self.len
+    }
+}
+
+pub unsafe extern "C" fn const_buffer_len<Item>(buf: *const ConstBuffer<Item>) -> usize {
+    (&*buf).len()
+}
+
+/// Frees the ConstBuffer
+pub unsafe extern "C" fn const_buffer_free<Item>(buf: *const ConstBuffer<Item>) {
+    let buf = &*buf;
+    let s = std::slice::from_raw_parts(buf.data, buf.len);
+    let s = s.as_ptr();
+    Box::new(s);
+}
+
+/// Utility function, converts Rust [`String`] to C-friendly null terminated pointer.
+fn string_to_ptr(s: String) -> *const c_char {
+    let cs = match CString::new(s) {
+        Ok(cs) => cs,
+        Err(_) => {
+            eprintln!("Failed to convert Rust s");
+            return ptr::null();
+        }
+    };
+
+    let p = cs.as_ptr();
+    std::mem::forget(cs);
+    p
+}
+
+#[no_mangle]
+/// Gets a buffer of contact strings.
+pub unsafe extern "C" fn contacts_get(db: *mut Database) -> *const ConstBuffer<*const c_char> {
+    if db.is_null() {
+        eprintln!("Couldn't get contacts, null pointer");
+        return ptr::null_mut();
+    };
+
+    let contacts = match contact::contacts(&mut *db) {
+        Ok(contacts) => contacts,
+        Err(_) => {
+            eprintln!("Error: Couldn't fetch contacts");
+            return ptr::null_mut();
+        }
+    };
+
+    let data: Vec<*const c_char> = contacts.into_iter().map(string_to_ptr).collect();
+
+    Box::into_raw(Box::new(ConstBuffer::new(data)))
 }
 
 #[cfg(test)]
@@ -109,6 +181,27 @@ mod tests {
             super::contacts_create_table(db);
             super::contact_insert(db);
 
+            super::database_close(db);
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn get_contacts() {
+        // start fresh
+        crate::utils::delete_db();
+
+        unsafe {
+            let db = super::database_open();
+            super::contacts_create_table(db);
+            super::contact_insert(db);
+
+            let contacts = super::contacts_get(db);
+            if contacts.is_null() {
+                panic!("contacts_get returned null pointer")
+            };
+            assert_eq!(super::const_buffer_len(contacts), 3);
+            super::const_buffer_free(contacts);
             super::database_close(db);
         }
     }

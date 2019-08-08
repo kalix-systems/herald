@@ -1,43 +1,43 @@
 use crate::db::Database;
-use failure::*;
 use rusqlite::NO_PARAMS;
 
-#[allow(dead_code)]
-// TODO should this do something?
-pub struct Contact {
-    name: String,
-}
-
-impl Contact {
+pub(crate) mod contact {
+    use super::*;
     /// Creates empty contacts table.
-    pub fn create_table(db: &mut Database) -> Result<(), Error> {
+    pub fn create_table(db: &mut Database) -> Result<(), rusqlite::Error> {
         db.execute(
             "CREATE TABLE IF NOT EXISTS 'Contacts' (
                     'name' TEXT NOT NULL,
                     PRIMARY KEY(name)
            )",
             NO_PARAMS,
-        )
-        .map_err(|e| format_err!("{}", e))?;
+        )?;
 
         Ok(())
     }
 
     /// Inserts default contacts into contacts table.
-    pub fn insert(db: &mut Database) -> Result<(), Error> {
-        db.execute("INSERT INTO Contacts VALUES('Albert Einstein')", NO_PARAMS)
-            .map_err(|e| format_err!("{}", e))?;
+    pub fn insert(db: &mut Database) -> Result<(), rusqlite::Error> {
+        let mut stmt = db.prepare("INSERT INTO Contacts VALUES(?)")?;
 
-        db.execute(
-            "INSERT INTO Contacts VALUES('Ernest Hemmingway')",
-            NO_PARAMS,
-        )
-        .map_err(|e| format_err!("{}", e))?;
-
-        db.execute("INSERT INTO Contacts VALUES('Hans Gude')", NO_PARAMS)
-            .map_err(|e| format_err!("{}", e))?;
+        stmt.execute(&["Albert Einstein"])?;
+        stmt.execute(&["Ernest Hemmingway"])?;
+        stmt.execute(&["Hans Gude"])?;
 
         Ok(())
+    }
+
+    pub fn contacts(db: &mut Database) -> Result<Vec<String>, rusqlite::Error> {
+        let mut stmt = db.prepare("SELECT * FROM Contacts")?;
+
+        let rows = stmt.query_map(NO_PARAMS, |row| row.get(0))?;
+
+        let mut names: Vec<String> = Vec::new();
+        for name_res in rows {
+            names.push(name_res?);
+        }
+
+        Ok(names)
     }
 }
 
@@ -61,7 +61,7 @@ mod tests {
 
         let mut db = Database::new().unwrap();
 
-        Contact::create_table(&mut db).unwrap();
+        contact::create_table(&mut db).unwrap();
     }
 
     #[test]
@@ -72,8 +72,25 @@ mod tests {
 
         let mut db = Database::new().unwrap();
 
-        Contact::create_table(&mut db).unwrap();
+        contact::create_table(&mut db).unwrap();
 
-        Contact::insert(&mut db).unwrap();
+        contact::insert(&mut db).unwrap();
+    }
+
+    #[test]
+    #[serial]
+    fn get_contacts() {
+        // start fresh
+        crate::utils::delete_db();
+
+        let mut db = Database::new().unwrap();
+
+        contact::create_table(&mut db).unwrap();
+
+        contact::insert(&mut db).unwrap();
+
+        let contacts = contact::contacts(&mut db).unwrap();
+
+        assert_eq!(contacts.len(), 3);
     }
 }
