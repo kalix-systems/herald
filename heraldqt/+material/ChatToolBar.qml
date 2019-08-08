@@ -48,19 +48,9 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.13
 import QtQuick.Controls 2.13
+import QtQuick.Controls.Material 2.13
 
-ApplicationWindow {
-    id: window
-    width: 540
-    height: 960
-    visible: true
-
-    StackView {
-        id: stackView
-        anchors.fill: parent
-        initialItem: ContactPage {}
-    }
+ToolBar {
+    Material.theme: Material.Dark
 }
-

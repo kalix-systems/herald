@@ -15,9 +15,14 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-        main.cpp
+        main.cpp \
+        sqlcontactmodel.cpp \
+        sqlconversationmodel.cpp \
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+        shared/shared.qrc\
+
+QT += sql
 
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 
@@ -42,9 +47,9 @@ android {
     LIBS +=  $${PWD}/../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }
 
-iphonesimulator | iphoneos {
+iphonesimulator {
     #IOS will not work because of code signing, but it would with this...?
-    LIBS +=  ${{PWD}}/../libherald/target/x86_64-apple-ios/{RUST_BUILD_TYPE}/libherald.a
+    LIBS +=  $${PWD}/../libherald/target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a
 }
 
 macx {
@@ -62,4 +67,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-        $${PWD}/../libherald/herald.h
+        $${PWD}/../libherald/herald.h \
+        sqlcontactmodel.h \
+        sqlconversationmodel.h \
