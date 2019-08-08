@@ -48,19 +48,15 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.13
-import QtQuick.Controls 2.13
+#ifndef SQLCONTACTMODEL_H
+#define SQLCONTACTMODEL_H
 
-ApplicationWindow {
-    id: window
-    width: 540
-    height: 960
-    visible: true
+#include <QSqlQueryModel>
 
-    StackView {
-        id: stackView
-        anchors.fill: parent
-        initialItem: ContactPage {}
-    }
-}
+class SqlContactModel : public QSqlQueryModel
+{
+public:
+    SqlContactModel(QObject *parent = 0);
+};
 
+#endif // SQLCONTACTMODEL_H

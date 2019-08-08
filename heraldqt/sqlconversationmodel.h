@@ -48,19 +48,32 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.13
-import QtQuick.Controls 2.13
+#ifndef SQLCONVERSATIONMODEL_H
+#define SQLCONVERSATIONMODEL_H
 
-ApplicationWindow {
-    id: window
-    width: 540
-    height: 960
-    visible: true
+#include <QSqlTableModel>
 
-    StackView {
-        id: stackView
-        anchors.fill: parent
-        initialItem: ContactPage {}
-    }
-}
+class SqlConversationModel : public QSqlTableModel
+{
+    Q_OBJECT
+    Q_PROPERTY(QString recipient READ recipient WRITE setRecipient NOTIFY recipientChanged)
 
+public:
+    SqlConversationModel(QObject *parent = 0);
+
+    QString recipient() const;
+    void setRecipient(const QString &recipient);
+
+    QVariant data(const QModelIndex &index, int role) const override;
+    QHash<int, QByteArray> roleNames() const override;
+
+    Q_INVOKABLE void sendMessage(const QString &recipient, const QString &message);
+
+signals:
+    void recipientChanged();
+
+private:
+    QString m_recipient;
+};
+
+#endif // SQLCONVERSATIONMODEL_H
