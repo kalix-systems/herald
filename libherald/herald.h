@@ -20,10 +20,10 @@ int contact_insert(Database *db);
 /// be created.
 int contacts_create_table(Database *db);
 
-/// Closes connections to cannonical sqlite3 database.
+/// Closes connections to canonical sqlite3 database.
 void database_close(Database *db);
 
-/// Opens connection to cannonical sqlite3 database.
+/// Opens connection to canonical sqlite3 database.
 Database *database_open();
 
 } // extern "C"

@@ -3,7 +3,7 @@ use libc::c_int;
 use std::ptr;
 
 #[no_mangle]
-/// Opens connection to cannonical sqlite3 database.
+/// Opens connection to canonical sqlite3 database.
 pub unsafe extern "C" fn database_open() -> *mut Database {
     match Database::new() {
         Ok(db) => {
@@ -18,7 +18,7 @@ pub unsafe extern "C" fn database_open() -> *mut Database {
 }
 
 #[no_mangle]
-/// Closes connections to cannonical sqlite3 database.
+/// Closes connections to canonical sqlite3 database.
 pub unsafe extern "C" fn database_close(db: *mut Database) {
     if db.is_null() {
         eprintln!("Error: Tried to close non-open database")
