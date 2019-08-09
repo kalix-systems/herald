@@ -99,6 +99,10 @@ impl<Item> ConstBuffer<Item> {
     pub fn len(&self) -> usize {
         self.len
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
+    }
 }
 
 #[no_mangle]
@@ -221,6 +225,7 @@ mod tests {
             };
             assert_eq!(super::const_buffer_string_len(contacts), 3);
             super::const_buffer_string_free(contacts);
+            assert_eq!(super::const_buffer_string_len(contacts), 3);
             super::database_close(db);
         }
     }
