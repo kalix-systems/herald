@@ -1,4 +1,4 @@
-use failure::*;
+use crate::errors::*;
 use rusqlite::Connection;
 use std::ops::{Deref, DerefMut};
 
@@ -20,10 +20,10 @@ impl DerefMut for Database {
 }
 
 impl Database {
-    pub fn new() -> Result<Database, Error> {
+    pub fn new() -> Result<Database, HErr> {
         match Connection::open("store.sqlite3") {
             Ok(conn) => Ok(Database(conn)),
-            Err(e) => bail!("{}", e),
+            Err(e) => Err(e.into()),
         }
     }
 }
