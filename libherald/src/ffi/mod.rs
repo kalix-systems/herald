@@ -1,14 +1,20 @@
 pub(crate) mod errors;
 
 use crate::models::contact::{self, Contact};
-use ffi_support::{call_with_result, implement_into_ffi_by_pointer, IntoFfi};
+use ffi_support::{call_with_result, implement_into_ffi_by_pointer, FfiStr, IntoFfi};
 use libc::{c_char, c_int};
-use std::{ffi::CString, ptr};
+use std::{ffi::CString, process::abort, ptr};
 
 /// Error struct. Typically included as the final argument of a function that can produce an error.
 pub type ExternError = ffi_support::ExternError;
 /// Type alias for a raw string.
 pub type RawStr = *const c_char;
+
+fn abort_on_null<T>(ptr: *mut T) -> () {
+    if ptr.is_null() {
+        abort()
+    }
+}
 
 /// Box destructor macro that allows adding a docstring.
 macro_rules! box_destructor {
@@ -39,7 +45,10 @@ pub mod db {
         herald_db_close
     }
 
+    #[no_mangle]
+    /// Initializes connection to database. Aborts if `e` is null.
     pub unsafe extern "C" fn herald_db_init(e: *mut ExternError) -> *mut HeraldDB {
+        abort_on_null(e);
         call_with_result(&mut *e, HeraldDB::new)
     }
 }
@@ -47,10 +56,11 @@ pub mod db {
 /// Functions and data structures related to contacts.
 pub mod contacts {
     use super::*;
-    use crate::db::Database;
+    use crate::errors::HErr;
     use const_buffer::*;
 
     #[repr(C)]
+    /// A contact, consisting of a (local) uid, and a UTF-8 representation of their name.
     pub struct HeraldContact {
         uid: i64,
         name: RawStr,
@@ -72,10 +82,107 @@ pub mod contacts {
         }
     }
 
+    #[no_mangle]
+    /// Creates the contacts table in the database if it does not already exist.
+    ///
+    /// Aborts if `error` is null.
+    pub unsafe extern "C" fn herald_contacts_create_table(
+        db: *mut super::db::HeraldDB,
+        error: *mut ExternError,
+    ) {
+        abort_on_null(error);
+
+        if db.is_null() {
+            *error = HErr::NullPtr.into();
+            return;
+        }
+
+        let db = &mut *db;
+
+        match contact::create_table(db) {
+            Ok(_) => {
+                *error = ExternError::success();
+            }
+            Err(e) => *error = e.into(),
+        }
+    }
+
+    #[no_mangle]
+    /// Adds a contact, returning their UID. Returns 0 if the operation failed.
+    ///
+    /// Aborts if `error` is a null pointer.
+    pub unsafe extern "C" fn herald_contacts_add(
+        db: *mut super::db::HeraldDB,
+        name: RawStr,
+        error: *mut ExternError,
+    ) -> i64 {
+        abort_on_null(db);
+        if db.is_null() {
+            *error = HErr::NullPtr.into();
+            return 0;
+        }
+
+        let db = &mut *db;
+
+        let name = match FfiStr::from_raw(name).as_opt_str() {
+            Some(s) => s,
+            None => {
+                *error = ExternError::from(crate::errors::HErr::InvalidString);
+                return 0;
+            }
+        };
+
+        match contact::add(db, name) {
+            Ok(uid) => {
+                *error = ExternError::success();
+                uid
+            }
+            Err(e) => {
+                *error = e.into();
+                0
+            }
+        }
+    }
+
+    #[no_mangle]
+    /// Drops the contacts table from the database.
+    ///
+    /// Aborts if `error` is a null pointer.
+    pub unsafe extern "C" fn herald_contacts_drop(
+        db: *mut super::db::HeraldDB,
+        error: *mut ExternError,
+    ) {
+        abort_on_null(error);
+        if db.is_null() {
+            *error = HErr::NullPtr.into();
+            return;
+        }
+
+        let db = &mut *db;
+
+        match contact::drop(db) {
+            Ok(_) => {
+                *error = ExternError::success();
+            }
+            Err(e) => {
+                *error = e.into();
+            }
+        }
+    }
+    #[no_mangle]
+    /// Returns all contacts.
+    ///
+    /// Aborts if `error` is a null ponter.
     pub unsafe extern "C" fn herald_contacts_load(
-        db: *mut Database,
+        db: *mut super::db::HeraldDB,
         error: *mut ExternError,
     ) -> *const Contacts {
+        abort_on_null(error);
+        if db.is_null() {
+            *error = HErr::NullPtr.into();
+            return Contacts::ffi_default();
+        }
+
         let db = &mut *db;
 
         match contact::get_all(db) {
@@ -207,53 +314,62 @@ mod tests {
         };
     }
 
-    //#[test]
-    //#[serial]
-    //fn contact_create_table() {
-    //    // start fresh
-    //    crate::utils::delete_db();
+    #[test]
+    #[serial]
+    fn contact_create_table() {
+        unsafe {
+            let e = super::ExternError::default();
+            let e = Box::into_raw(Box::new(e));
+            let db = super::db::herald_db_init(e);
 
-    //    unsafe {
-    //        let db = super::database_open();
-    //        assert_eq!(0, super::contacts_create_table(db));
-    //        super::database_close(db);
-    //    }
-    //}
+            super::contacts::herald_contacts_create_table(db, e);
+            assert_eq!((&*e).get_code().code(), 0);
 
-    //#[test]
-    //#[serial]
-    //fn contact_insert() {
-    //    // start fresh
-    //    crate::utils::delete_db();
+            super::db::herald_db_close(db);
+        };
+    }
 
-    //    unsafe {
-    //        let db = super::database_open();
-    //        super::contacts_create_table(db);
-    //        super::contact_insert(db);
+    #[test]
+    #[serial]
+    fn contact_insert() {
+        unsafe {
+            let e = super::ExternError::default();
+            let e = Box::into_raw(Box::new(e));
+            let db = super::db::herald_db_init(e);
 
-    //        super::database_close(db);
-    //    }
-    //}
+            super::contacts::herald_contacts_drop(db, e);
+            super::contacts::herald_contacts_create_table(db, e);
 
-    //#[test]
-    //#[serial]
-    //fn get_contacts() {
-    //    // start fresh
-    //    crate::utils::delete_db();
+            let uid = super::contacts::herald_contacts_add(
+                db,
+                super::string_to_ptr("Hello World".into()),
+                e,
+            );
+            assert_eq!(uid, 1);
+            assert_eq!((&*e).get_code().code(), 0);
 
-    //    unsafe {
-    //        let db = super::database_open();
-    //        super::contacts_create_table(db);
-    //        super::contact_insert(db);
+            super::db::herald_db_close(db);
+        };
+    }
 
-    //        let contacts = super::contacts_get(db);
-    //        if contacts.is_null() {
-    //            panic!("contacts_get returned null pointer")
-    //        };
-    //        assert_eq!(super::const_buffer_string_len(contacts), 3);
-    //        super::const_buffer_string_free(contacts);
-    //        assert_eq!(super::const_buffer_string_len(contacts), 3);
-    //        super::database_close(db);
-    //    }
-    //}
+    #[test]
+    #[serial]
+    fn get_contacts() {
+        unsafe {
+            let e = super::ExternError::default();
+            let e = Box::into_raw(Box::new(e));
+            let db = super::db::herald_db_init(e);
+
+            super::contacts::herald_contacts_drop(db, e);
+            super::contacts::herald_contacts_create_table(db, e);
+
+            super::contacts::herald_contacts_add(db, super::string_to_ptr("Hello".into()), e);
+            super::contacts::herald_contacts_add(db, super::string_to_ptr("World".into()), e);
+
+            let contacts = super::contacts::herald_contacts_load(db, e);
+            assert_eq!((*contacts).len, 2);
+
+            super::db::herald_db_close(db);
+        };
+    }
 }
