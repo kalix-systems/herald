@@ -2,7 +2,7 @@ pub(crate) mod errors;
 
 use crate::models::contact::{self, Contact};
 use ffi_support::{call_with_result, implement_into_ffi_by_pointer, FfiStr, IntoFfi};
-use libc::{c_char, c_int};
+use libc::c_char;
 use std::{ffi::CString, process::abort, ptr};
 
 /// Error struct. Typically included as the final argument of a function that can produce an error.
@@ -28,6 +28,21 @@ macro_rules! box_destructor {
                     eprintln!("Warning: tried to drop null pointer");
                 }
             }
+    };
+}
+
+macro_rules! nullcheck {
+    ($ptr: ident, $error: ident) => {
+        if $ptr.is_null() {
+            *$error = HErr::NullPtr.into();
+            return;
+        }
+    };
+    ($ptr: ident, $error: ident, $ret_val: expr) => {
+        if $ptr.is_null() {
+            *$error = HErr::NullPtr.into();
+            return $ret_val;
+        }
     };
 }
 
@@ -114,11 +129,7 @@ pub mod contacts {
         error: *mut ExternError,
     ) {
         abort_on_null(error);
-
-        if db.is_null() {
-            *error = HErr::NullPtr.into();
-            return;
-        }
+        nullcheck!(db, error);
 
         let db = &mut *db;
 
@@ -140,10 +151,7 @@ pub mod contacts {
         error: *mut ExternError,
     ) -> i64 {
         abort_on_null(db);
-        if db.is_null() {
-            *error = HErr::NullPtr.into();
-            return 0;
-        }
+        nullcheck!(db, error, 0);
 
         let db = &mut *db;
 
@@ -176,10 +184,7 @@ pub mod contacts {
         error: *mut ExternError,
     ) {
         abort_on_null(error);
-        if db.is_null() {
-            *error = HErr::NullPtr.into();
-            return;
-        }
+        nullcheck!(db, error);
 
         let db = &mut *db;
 
@@ -201,10 +206,7 @@ pub mod contacts {
         error: *mut ExternError,
     ) -> *const Contacts {
         abort_on_null(error);
-        if db.is_null() {
-            *error = HErr::NullPtr.into();
-            return Contacts::ffi_default();
-        }
+        nullcheck!(db, error, Contacts::ffi_default());
 
         let db = &mut *db;
 
