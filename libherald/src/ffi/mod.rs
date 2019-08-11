@@ -31,6 +31,23 @@ macro_rules! box_destructor {
     };
 }
 
+macro_rules! constbuffer_destructor {
+    ($(#[$attr:meta])* => $T:ty, $destructor_name:ident) => {
+        #[no_mangle]
+        $(#[$attr])*
+        pub unsafe extern "C" fn $destructor_name(buf: *const ConstBuffer<*const $T>) {
+            if buf.is_null() {
+                eprintln!("Warning: tried to free non-existent ConstBuffer");
+                return;
+            }
+            let buf = &*buf;
+            let s = std::slice::from_raw_parts(buf.data, buf.len);
+            let s = s.as_ptr();
+            Box::new(s);
+        }
+    };
+}
+
 pub mod db {
     use super::*;
     use crate::db::Database;
@@ -75,6 +92,12 @@ pub mod contacts {
     }
 
     pub type Contacts = ConstBuffer<HeraldContact>;
+
+    constbuffer_destructor! {
+    /// `Contacts` destructor
+    => Contact,
+    herald_contacts_destructor
+    }
 
     impl From<Vec<Contact>> for Contacts {
         fn from(contacts: Vec<Contact>) -> Contacts {
@@ -244,33 +267,33 @@ pub mod const_buffer {
             ptr::null()
         }
     }
-    #[no_mangle]
-    /// Returns number of items in a `ConstBuffer`
-    ///
-    /// Returns -1 on failure.
-    pub unsafe extern "C" fn const_buffer_string_len(
-        buf: *const ConstBuffer<*const c_char>,
-    ) -> c_int {
-        if buf.is_null() {
-            eprintln!("Error: Tried free non-existent ConstBuffer");
-            return -1;
-        }
-        (&*buf).len() as c_int
-    }
 
-    #[no_mangle]
-    /// Frees a ConstBuffer.
-    pub unsafe extern "C" fn const_buffer_string_free(buf: *const ConstBuffer<*const c_char>) {
-        if buf.is_null() {
-            eprintln!("Warning: tried to free non-existent ConstBuffer");
-            return;
-        }
-        let buf = &*buf;
-        let s = std::slice::from_raw_parts(buf.data, buf.len);
-        let s = s.as_ptr();
-        Box::new(s);
-    }
+    //#[no_mangle]
+    ///// Returns number of items in a `ConstBuffer`
+    /////
+    ///// Returns -1 on failure.
+    //pub unsafe extern "C" fn const_buffer_string_len(buf: *const ConstBuffer) -> c_int {
+    //    if buf.is_null() {
+    //        eprintln!("Error: Tried free non-existent ConstBuffer");
+    //        return -1;
+    //    }
+    //    (&*buf).len() as c_int
+    //}
+
+    //#[no_mangle]
+    ///// Frees a ConstBuffer.
+    //pub unsafe extern "C" fn const_buffer_string_free(buf: *const ConstBuffer<*const c_char>) {
+    //    if buf.is_null() {
+    //        eprintln!("Warning: tried to free non-existent ConstBuffer");
+    //        return;
+    //    }
+    //    let buf = &*buf;
+    //    let s = std::slice::from_raw_parts(buf.data, buf.len);
+    //    let s = s.as_ptr();
+    //    Box::new(s);
+    //}
 }
+
 /// Utility function, converts Rust [`String`] to C-friendly null terminated pointer.
 fn string_to_ptr(s: String) -> *const c_char {
     let cs = match CString::new(s) {

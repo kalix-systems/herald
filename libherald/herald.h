@@ -17,15 +17,12 @@ static const int HERALD_ERROR = 1;
 
 static const int INVALID_STRING = 3;
 
+static const int NULL_PTR = 4;
+
+struct Contact;
+
 /// Thin wrapper around sqlite3 database connection.
 struct Database;
-
-/// A constant buffer, templated over the `Item` type.
-template<typename Item>
-struct ConstBuffer {
-  const Item *data;
-  uintptr_t len;
-};
 
 /// Database handle
 using HeraldDB = Database;
@@ -36,6 +33,14 @@ using RawStr = const char*;
 /// Error struct. Typically included as the final argument of a function that can produce an error.
 using ExternError = ExternError;
 
+/// A constant buffer, templated over the `Item` type.
+template<typename Item>
+struct ConstBuffer {
+  const Item *data;
+  uintptr_t len;
+};
+
+/// A contact, consisting of a (local) uid, and a UTF-8 representation of their name.
 struct HeraldContact {
   int64_t uid;
   RawStr name;
@@ -45,24 +50,29 @@ using Contacts = ConstBuffer<HeraldContact>;
 
 extern "C" {
 
-/// Frees a ConstBuffer.
-void const_buffer_string_free(const ConstBuffer<const char*> *buf);
-
-/// Returns number of items in a `ConstBuffer`
-/// Returns -1 on failure.
-int const_buffer_string_len(const ConstBuffer<const char*> *buf);
-
+/// Adds a contact, returning their UID. Returns 0 if the operation failed.
+/// Aborts if `error` is a null pointer.
 int64_t herald_contacts_add(HeraldDB *db, RawStr name, ExternError *error);
 
+/// Creates the contacts table in the database if it does not already exist.
+/// Aborts if `error` is null.
 void herald_contacts_create_table(HeraldDB *db, ExternError *error);
 
+/// `Contacts` destructor
+void herald_contacts_destructor(const ConstBuffer<const Contact*> *buf);
+
+/// Drops the contacts table from the database.
+/// Aborts if `error` is a null pointer.
 void herald_contacts_drop(HeraldDB *db, ExternError *error);
 
+/// Returns all contacts.
+/// Aborts if `error` is a null ponter.
 const Contacts *herald_contacts_load(HeraldDB *db, ExternError *error);
 
 /// Destructor for `HeraldDB`
 void herald_db_close(HeraldDB *v);
 
+/// Initializes connection to database. Aborts if `e` is null.
 HeraldDB *herald_db_init(ExternError *e);
 
 } // extern "C"
