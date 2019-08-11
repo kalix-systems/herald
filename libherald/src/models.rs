@@ -1,7 +1,6 @@
 use crate::{db::Database, errors::HErr};
 use rusqlite::NO_PARAMS;
 
-#[allow(dead_code)]
 pub(crate) mod contact {
     #[derive(Debug, PartialEq)]
     pub struct Contact {
@@ -62,12 +61,31 @@ pub(crate) mod contact {
     }
 }
 
-//struct Message {
-//    author: String,
-//    recipient: String,
-//    timestamp: String,
-//    message: String,
-//}
+pub(crate) mod conversation {
+    use super::*;
+
+    pub fn create_table(db: &mut Database) -> Result<(), HErr> {
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS conversations (
+               author TEXT NOT NULL,
+               recipient TEXT NOT NULL,
+               timestamp TEXT NOT NULL,
+               message TEXT NOT NULL,
+               FOREIGN KEY(author) REFERENCES contacts (name),
+               FOREIGN KEY(recipient) REFERENCES contacts (name)
+               
+            )",
+            NO_PARAMS,
+        )?;
+
+        Ok(())
+    }
+
+    pub fn drop_table(db: &mut Database) -> Result<(), HErr> {
+        db.execute("DROP TABLE IF EXISTS conversations", NO_PARAMS)?;
+        Ok(())
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -115,5 +133,23 @@ mod tests {
         assert_eq!(contacts.len(), 2);
         assert_eq!(contacts[0], contact::Contact::new("Hello".into(), 1));
         assert_eq!(contacts[1], contact::Contact::new("World".into(), 2));
+    }
+
+    #[test]
+    #[serial]
+    fn drop_conversations_table() {
+        let mut db = Database::new().unwrap();
+        conversation::drop_table(&mut db).unwrap();
+
+        conversation::create_table(&mut db).unwrap();
+
+        conversation::drop_table(&mut db).unwrap();
+    }
+    #[test]
+    #[serial]
+    fn create_conversations_table() {
+        let mut db = Database::new().unwrap();
+        conversation::drop_table(&mut db).unwrap();
+        conversation::create_table(&mut db).unwrap();
     }
 }
