@@ -2,7 +2,6 @@ QT += quick
 
 CONFIG += c++11
 
-
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Refer to the documentation for the
@@ -16,21 +15,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-        sqlcontactmodel.cpp \
-        sqlconversationmodel.cpp \
+        $${PWD}/../libherald/qt_ffi/Bindings.cpp
 
-RESOURCES += qml.qrc \
-        shared/shared.qrc\
+HEADERS += $${PWD}/../libherald/qt_ffi/Bindings.h
 
-QT += sql
-
+# silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
-
-# Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH =
-
-# Additional import path used to resolve QML modules just for Qt Quick Designer
-QML_DESIGNER_IMPORT_PATH =
 
 # set build type for Rust library
 debug {
@@ -42,16 +32,20 @@ else {
   }
 }
 
+# Only for simulator right now
 android {
     QMAKE_LFLAGS += -nostdlib++
     LIBS +=  $${PWD}/../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }
 
+# Only for simulator right now
 iphonesimulator {
     #IOS will not work because of code signing, but it would with this...?
     LIBS +=  $${PWD}/../libherald/target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a
 }
 
+# I think this is okay, as building for OS X implies the host is the same as
+# the target
 macx {
   LIBS += -L $${PWD}/../libherald/target/$${RUST_BUILD_TYPE} -lherald
 }
@@ -60,13 +54,15 @@ linux {
   LIBS += $${PWD}/../libherald/target/$${RUST_BUILD_TYPE}/libherald.so
 }
 
+RESOURCES += qml.qrc
+
+# Additional import path used to resolve QML modules in Qt Creator's code model
+QML_IMPORT_PATH =
+
+# Additional import path used to resolve QML modules just for Qt Quick Designer
+QML_DESIGNER_IMPORT_PATH =
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-HEADERS += \
-        $${PWD}/../libherald/herald.h \
-        sqlcontactmodel.h \
-        sqlconversationmodel.h \
