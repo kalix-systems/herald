@@ -38,4 +38,24 @@ impl<V: VerificationAlgorithm> Store<V> {
         serialize_into(File::open(path)?, &meta)?;
         Ok(signed)
     }
+
+    /// Adds a signed key to the user's metadata, which can now be used to sign more keys.
+    /// Returns `Err(_)` if the user or device doesn't exist, or if the filesystem failed to write.
+    pub fn deprecate_key(
+        &self,
+        uid: UserId,
+        did: DeviceId,
+        new_key: RawKey,
+        date: DateTime<Utc>,
+        signature: RawSig,
+    ) -> Result<Signed<RawKey>, Error> {
+        let mut meta = self.read_meta(uid)?;
+        let signed = meta.new_signed(&self.verifier, did, new_key, date, signature)?;
+        let created = CreatedKey::new(signed.clone());
+        meta.add_new_key(created);
+        let mut path = self.rootdir.clone();
+        path.push(uid.to_string());
+        serialize_into(File::open(path)?, &meta)?;
+        Ok(signed)
+    }
 }
