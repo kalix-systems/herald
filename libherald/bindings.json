@@ -37,6 +37,16 @@
                             "type": "qint64"
                         }
                     ]
+                },
+                "update": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "uid",
+                            "type": "qint64"
+                        }
+                    ]
                 }
             }
         }

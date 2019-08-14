@@ -207,6 +207,7 @@ extern "C" {
     void contacts_free(Contacts::Private*);
     qint64 contacts_add(Contacts::Private*, const ushort*, int);
     bool contacts_remove(Contacts::Private*, qint64);
+    bool contacts_update(Contacts::Private*, qint64);
 };
 
 Contacts::Contacts(bool /*owned*/, QObject *parent):
@@ -281,4 +282,8 @@ qint64 Contacts::add(const QString& name)
 bool Contacts::remove(qint64 uid)
 {
     return contacts_remove(m_d, uid);
+}
+bool Contacts::update(qint64 uid)
+{
+    return contacts_update(m_d, uid);
 }

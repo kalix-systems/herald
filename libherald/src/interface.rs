@@ -180,6 +180,7 @@ pub trait ContactsTrait {
     fn emit(&mut self) -> &mut ContactsEmitter;
     fn add(&mut self, name: String) -> i64;
     fn remove(&mut self, uid: i64) -> bool;
+    fn update(&mut self, uid: i64) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -249,6 +250,13 @@ pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, name_str: *const c_ush
 pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, uid: i64) -> bool {
     let o = &mut *ptr;
     let r = o.remove(uid);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_update(ptr: *mut Contacts, uid: i64) -> bool {
+    let o = &mut *ptr;
+    let r = o.update(uid);
     r
 }
 
