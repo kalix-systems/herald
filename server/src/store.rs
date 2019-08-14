@@ -2,16 +2,18 @@ use crate::user::*;
 use bincode::{deserialize_from, serialize_into};
 use chrono::prelude::*;
 use failure::*;
-use ring::signature::VerificationAlgorithm;
+use ring::signature::*;
 use std::fs::File;
 use std::path::PathBuf;
 
-pub struct Store<V> {
+pub static VERIFIER: &EdDSAParameters = &ED25519;
+
+pub struct Store {
     pub rootdir: PathBuf,
-    pub verifier: V,
+    // TODO: add arcmap for transactions
 }
 
-impl<V: VerificationAlgorithm> Store<V> {
+impl Store {
     pub fn read_meta(&self, uid: UserId) -> Result<UserMeta, Error> {
         let mut path = self.rootdir.clone();
         path.push(uid.to_string());
@@ -30,7 +32,7 @@ impl<V: VerificationAlgorithm> Store<V> {
         signature: RawSig,
     ) -> Result<Signed<RawKey>, Error> {
         let mut meta = self.read_meta(uid)?;
-        let signed = meta.new_signed(&self.verifier, did, new_key, date, signature)?;
+        let signed = meta.new_signed(VERIFIER, did, new_key, date, signature)?;
         let created = CreatedKey::new(signed.clone());
         meta.add_new_key(created);
         let mut path = self.rootdir.clone();
@@ -50,11 +52,11 @@ impl<V: VerificationAlgorithm> Store<V> {
         signature: RawSig,
     ) -> Result<Signed<RawKey>, Error> {
         let mut meta = self.read_meta(uid)?;
-        let signed = meta.new_signed(&self.verifier, did, new_key, date, signature)?;
+        let signed = meta.new_signed(VERIFIER, did, new_key, date, signature)?;
         let created = CreatedKey::new(signed.clone());
         meta.add_new_key(created);
         let mut path = self.rootdir.clone();
-        path.push(uid.to_string());
+        path.push(uid.as_str());
         serialize_into(File::open(path)?, &meta)?;
         Ok(signed)
     }

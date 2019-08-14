@@ -15,4 +15,10 @@ failure = "0.1"
 chrono = { version = "0.4", features = ["serde"] }
 # im = {version = "13.0", features = ["serde"] }
 bytes = { version = "0.4", features = ["serde"] }
+ccl = "5.0"
+crossbeam-queue = "0.1"
+tokio = "0.2.0-alpha.1"
+arrayvec = {version = "0.4", features = ["serde-1"]}
+# eventually
+# stubborn_io = "0.1.3"
 

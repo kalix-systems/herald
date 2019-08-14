@@ -6,12 +6,12 @@ use ring::signature::VerificationAlgorithm;
 use serde::{Deserialize, Serialize};
 use untrusted::Input;
 
-pub type UserId = u64;
+pub type UserId = arrayvec::ArrayString<[u8; 256]>;
 pub type RawKey = Bytes;
 pub type RawSig = Bytes;
 pub type RawMsg = Bytes;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum DeviceId {
     Original,
     Verified(u64),
@@ -21,7 +21,7 @@ pub enum DeviceId {
 /// A signed and dated piece of data.
 /// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
 /// the device with id `signer` of `(timestamp, data)` serialized with `bincode`.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct Signed<T: Serialize> {
     pub data: T,
     pub timestamp: DateTime<Utc>,
@@ -29,7 +29,7 @@ pub struct Signed<T: Serialize> {
     pub sig: RawSig,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct CreatedKey {
     key: Signed<RawKey>,
     deprecated: Option<Signed<DeviceId>>,
@@ -44,32 +44,33 @@ impl CreatedKey {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct OriginalKey {
     raw: RawKey,
     created_on: DateTime<Utc>,
     deprecated: Option<Signed<DeviceId>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum Key {
     Original(OriginalKey),
     Created(CreatedKey),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
     original: OriginalKey,
     verified_keys: Vec<CreatedKey>,
 }
 
+#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum DeprecationResult {
     /// returned if the key was already deprecated
     AlreadyDeprecated,
     Success,
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum SignatureValidity {
     Valid,
     KeyInactive,
