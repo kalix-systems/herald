@@ -6,12 +6,37 @@
         "implementationModule": "implementation"
     },
     "objects": {
-        "Simple": {
-            "type": "Object",
-            "properties": {
-                "message": {
+        "Contacts": {
+            "type": "List",
+            "itemProperties": {
+                "name": {
                     "type": "QString",
                     "write": true
+                },
+                "contact_uid": {
+                    "type": "qint64"
+                }
+            },
+            "functions": {
+                "add": {
+                    "return": "qint64",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "remove": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "uid",
+                            "type": "qint64"
+                        }
+                    ]
                 }
             }
         }

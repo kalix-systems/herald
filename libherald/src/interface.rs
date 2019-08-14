@@ -10,6 +10,43 @@ use std::ptr::null;
 use crate::implementation::*;
 
 
+#[repr(C)]
+pub struct COption<T> {
+    data: T,
+    some: bool,
+}
+
+impl<T> COption<T> {
+    #![allow(dead_code)]
+    fn into(self) -> Option<T> {
+        if self.some {
+            Some(self.data)
+        } else {
+            None
+        }
+    }
+}
+
+impl<T> From<Option<T>> for COption<T>
+where
+    T: Default,
+{
+    fn from(t: Option<T>) -> COption<T> {
+        if let Some(v) = t {
+            COption {
+                data: v,
+                some: true,
+            }
+        } else {
+            COption {
+                data: T::default(),
+                some: false,
+            }
+        }
+    }
+}
+
+
 pub enum QString {}
 
 fn set_string_from_utf16(s: &mut String, str: *const c_ushort, len: c_int) {
@@ -20,6 +57,20 @@ fn set_string_from_utf16(s: &mut String, str: *const c_ushort, len: c_int) {
     s.extend(characters);
 }
 
+
+
+#[repr(C)]
+#[derive(PartialEq, Eq, Debug)]
+pub enum SortOrder {
+    Ascending = 0,
+    Descending = 1,
+}
+
+#[repr(C)]
+pub struct QModelIndex {
+    row: c_int,
+    internal_id: usize,
+}
 
 
 fn to_usize(n: c_int) -> usize {
@@ -38,81 +89,223 @@ fn to_c_int(n: usize) -> c_int {
 }
 
 
-pub struct SimpleQObject {}
+pub struct ContactsQObject {}
 
-pub struct SimpleEmitter {
-    qobject: Arc<AtomicPtr<SimpleQObject>>,
-    message_changed: fn(*mut SimpleQObject),
+pub struct ContactsEmitter {
+    qobject: Arc<AtomicPtr<ContactsQObject>>,
+    new_data_ready: fn(*mut ContactsQObject),
 }
 
-unsafe impl Send for SimpleEmitter {}
+unsafe impl Send for ContactsEmitter {}
 
-impl SimpleEmitter {
+impl ContactsEmitter {
     /// Clone the emitter
     ///
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
     /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> SimpleEmitter {
-        SimpleEmitter {
+    pub fn clone(&mut self) -> ContactsEmitter {
+        ContactsEmitter {
             qobject: self.qobject.clone(),
-            message_changed: self.message_changed,
+            new_data_ready: self.new_data_ready,
         }
     }
     fn clear(&self) {
-        let n: *const SimpleQObject = null();
-        self.qobject.store(n as *mut SimpleQObject, Ordering::SeqCst);
+        let n: *const ContactsQObject = null();
+        self.qobject.store(n as *mut ContactsQObject, Ordering::SeqCst);
     }
-    pub fn message_changed(&mut self) {
+    pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
-            (self.message_changed)(ptr);
+            (self.new_data_ready)(ptr);
         }
     }
 }
 
-pub trait SimpleTrait {
-    fn new(emit: SimpleEmitter) -> Self;
-    fn emit(&mut self) -> &mut SimpleEmitter;
-    fn message(&self) -> &str;
-    fn set_message(&mut self, value: String);
+#[derive(Clone)]
+pub struct ContactsList {
+    qobject: *mut ContactsQObject,
+    layout_about_to_be_changed: fn(*mut ContactsQObject),
+    layout_changed: fn(*mut ContactsQObject),
+    data_changed: fn(*mut ContactsQObject, usize, usize),
+    begin_reset_model: fn(*mut ContactsQObject),
+    end_reset_model: fn(*mut ContactsQObject),
+    begin_insert_rows: fn(*mut ContactsQObject, usize, usize),
+    end_insert_rows: fn(*mut ContactsQObject),
+    begin_move_rows: fn(*mut ContactsQObject, usize, usize, usize),
+    end_move_rows: fn(*mut ContactsQObject),
+    begin_remove_rows: fn(*mut ContactsQObject, usize, usize),
+    end_remove_rows: fn(*mut ContactsQObject),
+}
+
+impl ContactsList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait ContactsTrait {
+    fn new(emit: ContactsEmitter, model: ContactsList) -> Self;
+    fn emit(&mut self) -> &mut ContactsEmitter;
+    fn add(&mut self, name: String) -> i64;
+    fn remove(&mut self, uid: i64) -> bool;
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn contact_uid(&self, index: usize) -> i64;
+    fn name(&self, index: usize) -> &str;
+    fn set_name(&mut self, index: usize, _: String) -> bool;
 }
 
 #[no_mangle]
-pub extern "C" fn simple_new(
-    simple: *mut SimpleQObject,
-    simple_message_changed: fn(*mut SimpleQObject),
-) -> *mut Simple {
-    let simple_emit = SimpleEmitter {
-        qobject: Arc::new(AtomicPtr::new(simple)),
-        message_changed: simple_message_changed,
+pub extern "C" fn contacts_new(
+    contacts: *mut ContactsQObject,
+    contacts_new_data_ready: fn(*mut ContactsQObject),
+    contacts_layout_about_to_be_changed: fn(*mut ContactsQObject),
+    contacts_layout_changed: fn(*mut ContactsQObject),
+    contacts_data_changed: fn(*mut ContactsQObject, usize, usize),
+    contacts_begin_reset_model: fn(*mut ContactsQObject),
+    contacts_end_reset_model: fn(*mut ContactsQObject),
+    contacts_begin_insert_rows: fn(*mut ContactsQObject, usize, usize),
+    contacts_end_insert_rows: fn(*mut ContactsQObject),
+    contacts_begin_move_rows: fn(*mut ContactsQObject, usize, usize, usize),
+    contacts_end_move_rows: fn(*mut ContactsQObject),
+    contacts_begin_remove_rows: fn(*mut ContactsQObject, usize, usize),
+    contacts_end_remove_rows: fn(*mut ContactsQObject),
+) -> *mut Contacts {
+    let contacts_emit = ContactsEmitter {
+        qobject: Arc::new(AtomicPtr::new(contacts)),
+        new_data_ready: contacts_new_data_ready,
     };
-    let d_simple = Simple::new(simple_emit);
-    Box::into_raw(Box::new(d_simple))
+    let model = ContactsList {
+        qobject: contacts,
+        layout_about_to_be_changed: contacts_layout_about_to_be_changed,
+        layout_changed: contacts_layout_changed,
+        data_changed: contacts_data_changed,
+        begin_reset_model: contacts_begin_reset_model,
+        end_reset_model: contacts_end_reset_model,
+        begin_insert_rows: contacts_begin_insert_rows,
+        end_insert_rows: contacts_end_insert_rows,
+        begin_move_rows: contacts_begin_move_rows,
+        end_move_rows: contacts_end_move_rows,
+        begin_remove_rows: contacts_begin_remove_rows,
+        end_remove_rows: contacts_end_remove_rows,
+    };
+    let d_contacts = Contacts::new(contacts_emit, model);
+    Box::into_raw(Box::new(d_contacts))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn simple_free(ptr: *mut Simple) {
+pub unsafe extern "C" fn contacts_free(ptr: *mut Contacts) {
     Box::from_raw(ptr).emit().clear();
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn simple_message_get(
-    ptr: *const Simple,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.message();
-    let s: *const c_char = v.as_ptr() as (*const c_char);
-    set(p, s, to_c_int(v.len()));
+pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, name_str: *const c_ushort, name_len: c_int) -> i64 {
+    let mut name = String::new();
+    set_string_from_utf16(&mut name, name_str, name_len);
+    let o = &mut *ptr;
+    let r = o.add(name);
+    r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn simple_message_set(ptr: *mut Simple, v: *const c_ushort, len: c_int) {
+pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, uid: i64) -> bool {
     let o = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, v, len);
-    o.set_message(s);
+    let r = o.remove(uid);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_row_count(ptr: *const Contacts) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+#[no_mangle]
+pub unsafe extern "C" fn contacts_insert_rows(ptr: *mut Contacts, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).insert_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn contacts_remove_rows(ptr: *mut Contacts, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).remove_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn contacts_can_fetch_more(ptr: *const Contacts) -> bool {
+    (&*ptr).can_fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn contacts_fetch_more(ptr: *mut Contacts) {
+    (&mut *ptr).fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn contacts_sort(
+    ptr: *mut Contacts,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_contact_uid(ptr: *const Contacts, row: c_int) -> i64 {
+    let o = &*ptr;
+    o.contact_uid(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_name(
+    ptr: *const Contacts, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.name(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_name(
+    ptr: *mut Contacts, row: c_int,
+    s: *const c_ushort, len: c_int,
+) -> bool {
+    let o = &mut *ptr;
+    let mut v = String::new();
+    set_string_from_utf16(&mut v, s, len);
+    o.set_name(to_usize(row), v)
 }
