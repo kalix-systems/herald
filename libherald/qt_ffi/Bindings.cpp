@@ -30,7 +30,7 @@ namespace {
     }
 }
 extern "C" {
-    qint64 contacts_data_contact_uid(const Contacts::Private*, int);
+    qint64 contacts_data_contact_id(const Contacts::Private*, int);
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
     void contacts_sort(Contacts::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
@@ -105,9 +105,9 @@ Qt::ItemFlags Contacts::flags(const QModelIndex &i) const
     return flags;
 }
 
-qint64 Contacts::contact_uid(int row) const
+qint64 Contacts::contact_id(int row) const
 {
-    return contacts_data_contact_uid(m_d, row);
+    return contacts_data_contact_id(m_d, row);
 }
 
 QString Contacts::name(int row) const
@@ -135,7 +135,7 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(contact_uid(index.row()));
+            return QVariant::fromValue(contact_id(index.row()));
         case Qt::UserRole + 1:
             return QVariant::fromValue(name(index.row()));
         }
@@ -157,7 +157,7 @@ int Contacts::role(const char* name) const {
 }
 QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "contact_uid");
+    names.insert(Qt::UserRole + 0, "contact_id");
     names.insert(Qt::UserRole + 1, "name");
     return names;
 }
@@ -279,11 +279,11 @@ qint64 Contacts::add(const QString& name)
 {
     return contacts_add(m_d, name.utf16(), name.size());
 }
-bool Contacts::remove(qint64 uid)
+bool Contacts::remove(qint64 id)
 {
-    return contacts_remove(m_d, uid);
+    return contacts_remove(m_d, id);
 }
-bool Contacts::update(qint64 uid, const QString& name)
+bool Contacts::update(qint64 id, const QString& name)
 {
-    return contacts_update(m_d, uid, name.utf16(), name.size());
+    return contacts_update(m_d, id, name.utf16(), name.size());
 }

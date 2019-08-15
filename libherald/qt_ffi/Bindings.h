@@ -20,8 +20,8 @@ public:
     explicit Contacts(QObject *parent = nullptr);
     ~Contacts();
     Q_INVOKABLE qint64 add(const QString& name);
-    Q_INVOKABLE bool remove(qint64 uid);
-    Q_INVOKABLE bool update(qint64 uid, const QString& name);
+    Q_INVOKABLE bool remove(qint64 id);
+    Q_INVOKABLE bool update(qint64 id, const QString& name);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -40,7 +40,7 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE qint64 contact_uid(int row) const;
+    Q_INVOKABLE qint64 contact_id(int row) const;
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
 

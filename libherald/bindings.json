@@ -13,7 +13,7 @@
                     "type": "QString",
                     "write": true
                 },
-                "contact_uid": {
+                "contact_id": {
                     "type": "qint64"
                 }
             },
@@ -33,7 +33,7 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "uid",
+                            "name": "id",
                             "type": "qint64"
                         }
                     ]
@@ -43,7 +43,7 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "uid",
+                            "name": "id",
                             "type": "qint64"
                         },
                         {

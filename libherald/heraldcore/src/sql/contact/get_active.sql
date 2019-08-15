@@ -1,6 +1,7 @@
 SELECT
+  id,
   name
 FROM
   contacts
 WHERE
-  id = ?
+  archived = 0

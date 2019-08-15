@@ -1,5 +1,5 @@
 SELECT
-  uid,
+  id,
   name
 FROM
   contacts

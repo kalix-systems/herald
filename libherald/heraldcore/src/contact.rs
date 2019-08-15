@@ -25,16 +25,11 @@ impl DBTable for Contacts {
 
     fn exists(&self) -> bool {
         let db = &self.db;
-
-        let cnt = db
-            .query_row(
-                include_str!("sql/contact/table_exists.sql"),
-                NO_PARAMS,
-                |row| row.get(0),
-            )
-            .unwrap_or(0);
-
-        cnt > 0
+        if let Ok(mut stmt) = db.prepare(include_str!("sql/contact/table_exists.sql")) {
+            stmt.exists(NO_PARAMS).unwrap_or(false)
+        } else {
+            false
+        }
     }
 }
 
@@ -52,38 +47,45 @@ impl Contacts {
         Ok(db.last_insert_rowid())
     }
 
-    /// Change name of contact by their `uid`
-    pub fn update_name(&mut self, uid: i64, name: &str) -> Result<(), HErr> {
+    /// Indicates whether contact exists
+    pub fn contact_exists(&self, id: i64) -> Result<bool, HErr> {
+        let db = &self.db;
+        let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
+        Ok(stmt.exists(&[id])?)
+    }
+
+    /// Change name of contact by their `id`
+    pub fn update_name(&mut self, id: i64, name: &str) -> Result<(), HErr> {
         let db = &self.db;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
-        stmt.execute(&[name, &uid.to_string()])?;
+        stmt.execute(&[name, &id.to_string()])?;
         Ok(())
     }
 
-    /// Gets a contact's name by their `uid`.
-    pub fn get_name(&self, uid: i64) -> Result<String, HErr> {
+    /// Gets a contact's name by their `id`.
+    pub fn get_name(&self, id: i64) -> Result<String, HErr> {
         let db = &self.db;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
-        Ok(stmt.query_row(&[uid], |row| row.get(0))?)
+        Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
 
-    /// Deletes a contact by their `uid`.
-    pub fn delete(&mut self, uid: i64) -> Result<(), HErr> {
+    /// Deletes a contact by their `id`.
+    pub fn delete(&mut self, id: i64) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(include_str!("sql/contact/delete.sql"), &[uid])?;
+        db.execute(include_str!("sql/contact/delete.sql"), &[id])?;
         Ok(())
     }
 
-    /// Returns all contacts.
+    /// Returns all contacts, including archived contacts.
     pub fn get_all(&self) -> Result<Vec<Contact>, HErr> {
         let db = &self.db;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
             Ok(Contact {
-                uid: row.get(0)?,
+                id: row.get(0)?,
                 name: row.get(1)?,
             })
         })?;
@@ -95,17 +97,55 @@ impl Contacts {
 
         Ok(names)
     }
+
+    /// Returns all active contacts, excluding archived contacts.
+    pub fn get_active(&self) -> Result<Vec<Contact>, HErr> {
+        let db = &self.db;
+        let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
+
+        let rows = stmt.query_map(NO_PARAMS, |row| {
+            Ok(Contact {
+                id: row.get(0)?,
+                name: row.get(1)?,
+            })
+        })?;
+
+        let mut names: Vec<Contact> = Vec::new();
+        for name_res in rows {
+            names.push(name_res?);
+        }
+
+        Ok(names)
+    }
+
+    /// Archives a contact.
+    pub fn archive(&mut self, id: i64) -> Result<(), HErr> {
+        let db = &self.db;
+        db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
+        Ok(())
+    }
+
+    /// Indicates whether a contact is archived.
+    pub fn is_archived(&mut self, id: i64) -> Result<bool, HErr> {
+        let db = &self.db;
+
+        let val: i64 = db.query_row(include_str!("sql/contact/is_archived.sql"), &[id], |row| {
+            Ok(row.get(0)?)
+        })?;
+
+        Ok(val == 1)
+    }
 }
 
 #[derive(Debug, PartialEq)]
 pub struct Contact {
     pub name: String,
-    pub uid: i64,
+    pub id: i64,
 }
 
 impl Contact {
-    pub fn new(name: String, uid: i64) -> Self {
-        Contact { name, uid }
+    pub fn new(name: String, id: i64) -> Self {
+        Contact { name, id }
     }
 }
 
@@ -147,13 +187,13 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        let uid1 = contacts.add("Hello").expect("Failed to add contact");
-        let uid2 = contacts.add("World").expect("Failed to add contact");
+        let id1 = contacts.add("Hello").expect("Failed to add contact");
+        let id2 = contacts.add("World").expect("Failed to add contact");
 
-        contacts.delete(uid1).expect("Failed to delete contact");
+        contacts.delete(id1).expect("Failed to delete contact");
 
-        assert!(contacts.get_name(uid1).is_err());
-        assert!(contacts.get_name(uid2).is_ok());
+        assert!(contacts.get_name(id1).is_err());
+        assert!(contacts.get_name(id2).is_ok());
     }
 
     #[test]
@@ -163,9 +203,9 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        let uid = contacts.add("Hello World").expect("Failed to add contact");
+        let id = contacts.add("Hello World").expect("Failed to add contact");
         assert_eq!(
-            contacts.get_name(uid).expect("Failed to get name"),
+            contacts.get_name(id).expect("Failed to get name"),
             "Hello World"
         );
     }
@@ -176,19 +216,19 @@ mod tests {
         contacts.drop_table().unwrap();
         contacts.create_table().unwrap();
 
-        let uid = contacts.add("Hello").unwrap();
+        let id = contacts.add("Hello").unwrap();
         contacts
-            .update_name(uid, "World")
+            .update_name(id, "World")
             .expect("Failed to update name");
         assert_eq!(
-            contacts.get_name(uid).expect("Failed to get contact"),
+            contacts.get_name(id).expect("Failed to get contact"),
             "World"
         );
     }
 
     #[test]
     #[serial]
-    fn get_contacts() {
+    fn get_all_contacts() {
         let mut contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
@@ -201,5 +241,39 @@ mod tests {
         assert_eq!(contacts_vec.len(), 2);
         assert_eq!(contacts_vec[0], Contact::new("Hello".into(), 1));
         assert_eq!(contacts_vec[1], Contact::new("World".into(), 2));
+    }
+
+    #[test]
+    #[serial]
+    fn archive_contact() {
+        let mut contacts = Contacts::default();
+        contacts.drop_table().unwrap();
+
+        contacts.create_table().unwrap();
+
+        let id = contacts.add("Hello World").unwrap();
+        contacts.archive(id).unwrap();
+
+        assert!(contacts
+            .is_archived(id)
+            .expect("Failed to determine if contact was archived"));
+    }
+
+    #[test]
+    #[serial]
+    fn get_active_contacts() {
+        let mut contacts = Contacts::default();
+        contacts.drop_table().unwrap();
+
+        contacts.create_table().unwrap();
+
+        contacts.add("Hello").unwrap();
+
+        let archived_id = contacts.add("World").unwrap();
+        contacts.archive(archived_id).unwrap();
+
+        let contacts_vec = contacts.get_active().unwrap();
+        assert_eq!(contacts_vec.len(), 1);
+        assert_eq!(contacts_vec[0], Contact::new("Hello".into(), 1));
     }
 }

@@ -1,5 +1,5 @@
 SELECT
-  count(*)
+  name
 FROM
   sqlite_master
 WHERE

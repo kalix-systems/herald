@@ -1,3 +1,3 @@
 INSERT INTO
-  contacts(uid, name)
+  contacts(id, name)
 VALUES(NULL, ?)

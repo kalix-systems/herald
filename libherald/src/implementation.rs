@@ -4,17 +4,17 @@ use im_rc::vector::Vector as ImVector;
 
 #[derive(Default, Clone)]
 struct ContactsItem {
-    contact_uid: i64,
+    contact_id: i64,
     name: String,
 }
 
 impl From<contact::Contact> for ContactsItem {
     fn from(val: contact::Contact) -> Self {
         let contact::Contact {
-            uid: contact_uid,
+            id: contact_id,
             name,
         } = val;
-        ContactsItem { contact_uid, name }
+        ContactsItem { contact_id, name }
     }
 }
 
@@ -43,27 +43,27 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    /// Adds a contact by their `name`, returns their assigned `uid`.
+    /// Adds a contact by their `name`, returns their assigned `id`.
     ///
     /// Returns -1 on failure.
     fn add(&mut self, name: String) -> i64 {
-        let contact_uid = match self.core.add(&name) {
+        let contact_id = match self.core.add(&name) {
             Ok(i) => i,
             Err(e) => {
                 eprintln!("Error: {}", e);
                 return -1;
             }
         };
-        self.list.push_front(ContactsItem { contact_uid, name });
-        contact_uid
+        self.list.push_front(ContactsItem { contact_id, name });
+        contact_id
     }
 
-    /// Removes a contact by their `uid`, returns a boolean to indicate success.
-    fn remove(&mut self, uid: i64) -> bool {
-        if self.core.delete(uid).is_err() {
+    /// Removes a contact by their `id`, returns a boolean to indicate success.
+    fn remove(&mut self, id: i64) -> bool {
+        if self.core.delete(id).is_err() {
             return false;
         }
-        let index = match self.list.iter().position(|c| c.contact_uid == uid) {
+        let index = match self.list.iter().position(|c| c.contact_id == id) {
             Some(index) => index,
             None => return false,
         };
@@ -73,11 +73,11 @@ impl ContactsTrait for Contacts {
     }
 
     /// Updates a contact's name, returns a boolean to indicate success.
-    fn update(&mut self, uid: i64, name: String) -> bool {
-        if self.core.update_name(uid, &name).is_err() {
+    fn update(&mut self, id: i64, name: String) -> bool {
+        if self.core.update_name(id, &name).is_err() {
             return false;
         }
-        let index = match self.list.iter().position(|c| c.contact_uid == uid) {
+        let index = match self.list.iter().position(|c| c.contact_id == id) {
             Some(index) => index,
             None => return false,
         };
@@ -94,8 +94,8 @@ impl ContactsTrait for Contacts {
         self.list.len()
     }
 
-    fn contact_uid(&self, index: usize) -> i64 {
-        self.list[index].contact_uid
+    fn contact_id(&self, index: usize) -> i64 {
+        self.list[index].contact_id
     }
 
     fn name(&self, index: usize) -> &str {

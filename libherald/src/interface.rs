@@ -179,8 +179,8 @@ pub trait ContactsTrait {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Self;
     fn emit(&mut self) -> &mut ContactsEmitter;
     fn add(&mut self, name: String) -> i64;
-    fn remove(&mut self, uid: i64) -> bool;
-    fn update(&mut self, uid: i64, name: String) -> bool;
+    fn remove(&mut self, id: i64) -> bool;
+    fn update(&mut self, id: i64, name: String) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -189,7 +189,7 @@ pub trait ContactsTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn contact_uid(&self, index: usize) -> i64;
+    fn contact_id(&self, index: usize) -> i64;
     fn name(&self, index: usize) -> &str;
     fn set_name(&mut self, index: usize, _: String) -> bool;
 }
@@ -247,18 +247,18 @@ pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, name_str: *const c_ush
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, uid: i64) -> bool {
+pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, id: i64) -> bool {
     let o = &mut *ptr;
-    let r = o.remove(uid);
+    let r = o.remove(id);
     r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_update(ptr: *mut Contacts, uid: i64, name_str: *const c_ushort, name_len: c_int) -> bool {
+pub unsafe extern "C" fn contacts_update(ptr: *mut Contacts, id: i64, name_str: *const c_ushort, name_len: c_int) -> bool {
     let mut name = String::new();
     set_string_from_utf16(&mut name, name_str, name_len);
     let o = &mut *ptr;
-    let r = o.update(uid, name);
+    let r = o.update(id, name);
     r
 }
 
@@ -292,9 +292,9 @@ pub unsafe extern "C" fn contacts_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_data_contact_uid(ptr: *const Contacts, row: c_int) -> i64 {
+pub unsafe extern "C" fn contacts_data_contact_id(ptr: *const Contacts, row: c_int) -> i64 {
     let o = &*ptr;
-    o.contact_uid(to_usize(row)).into()
+    o.contact_id(to_usize(row)).into()
 }
 
 #[no_mangle]

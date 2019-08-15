@@ -25,16 +25,11 @@ impl DBTable for Conversations {
 
     fn exists(&self) -> bool {
         let db = &self.db;
-
-        let cnt = db
-            .query_row(
-                include_str!("sql/conversation/table_exists.sql"),
-                NO_PARAMS,
-                |row| row.get(0),
-            )
-            .unwrap_or(0);
-
-        cnt > 0
+        if let Ok(mut stmt) = db.prepare(include_str!("sql/conversation/table_exists.sql")) {
+            stmt.exists(NO_PARAMS).unwrap_or(false)
+        } else {
+            false
+        }
     }
 }
 
