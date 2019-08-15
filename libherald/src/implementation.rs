@@ -47,7 +47,7 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns -1 on failure.
     fn add(&mut self, name: String) -> i64 {
-        let contact_id = match self.core.add(&name) {
+        let contact_id = match self.core.add(&name, None) {
             Ok(i) => i,
             Err(e) => {
                 eprintln!("Error: {}", e);
@@ -56,6 +56,26 @@ impl ContactsTrait for Contacts {
         };
         self.list.push_front(ContactsItem { contact_id, name });
         contact_id
+    }
+
+    /// Adds a contact by their `name`, returns their assigned `id`.
+    ///
+    /// Returns -1 on failure.
+    fn add_with_profile_picture(&mut self, name: String, picture: &[u8]) -> i64 {
+        let contact_id = match self.core.add(&name, Some(picture)) {
+            Ok(i) => i,
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                return -1;
+            }
+        };
+        self.list.push_front(ContactsItem { contact_id, name });
+        contact_id
+    }
+
+    /// Returns profile picture given the contact's id.
+    fn profile_picture(&self, id: i64) -> Vec<u8> {
+        self.core.get_profile_picture(id).unwrap_or(vec![])
     }
 
     /// Removes a contact by their `id`, returns a boolean to indicate success.
@@ -73,7 +93,7 @@ impl ContactsTrait for Contacts {
     }
 
     /// Updates a contact's name, returns a boolean to indicate success.
-    fn update(&mut self, id: i64, name: String) -> bool {
+    fn update_name(&mut self, id: i64, name: String) -> bool {
         if self.core.update_name(id, &name).is_err() {
             return false;
         }
@@ -100,9 +120,5 @@ impl ContactsTrait for Contacts {
 
     fn name(&self, index: usize) -> &str {
         &self.list[index].name
-    }
-    fn set_name(&mut self, index: usize, v: String) -> bool {
-        self.list[index].name = v;
-        true
     }
 }

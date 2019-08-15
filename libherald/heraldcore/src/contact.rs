@@ -39,11 +39,19 @@ impl Contacts {
     }
 
     /// Inserts contact into contacts table. On success, returns the contacts UID.
-    pub fn add(&mut self, name: &str) -> Result<i64, HErr> {
+    pub fn add(&mut self, name: &str, profile_picture: Option<&[u8]>) -> Result<i64, HErr> {
         let db = &self.db;
-        let mut stmt = db.prepare(include_str!("sql/contact/add.sql"))?;
-        stmt.execute(&[name])?;
-
+        match profile_picture {
+            None => {
+                let mut stmt = db.prepare(include_str!("sql/contact/add.sql"))?;
+                stmt.execute(&[name])?;
+            }
+            Some(picture) => {
+                let mut stmt =
+                    db.prepare(include_str!("sql/contact/add_with_profile_picture.sql"))?;
+                stmt.execute(&[name.as_bytes(), picture])?;
+            }
+        }
         Ok(db.last_insert_rowid())
     }
 
@@ -67,6 +75,14 @@ impl Contacts {
     pub fn get_name(&self, id: i64) -> Result<String, HErr> {
         let db = &self.db;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
+
+        Ok(stmt.query_row(&[id], |row| row.get(0))?)
+    }
+
+    /// Gets a contact's profile picture by their `id`.
+    pub fn get_profile_picture(&self, id: i64) -> Result<Vec<u8>, HErr> {
+        let db = &self.db;
+        let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
         Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
@@ -177,7 +193,9 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        contacts.add("Hello World").expect("Failed to add contact");
+        contacts
+            .add("Hello World", None)
+            .expect("Failed to add contact");
     }
 
     #[test]
@@ -187,8 +205,8 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        let id1 = contacts.add("Hello").expect("Failed to add contact");
-        let id2 = contacts.add("World").expect("Failed to add contact");
+        let id1 = contacts.add("Hello", None).expect("Failed to add contact");
+        let id2 = contacts.add("World", None).expect("Failed to add contact");
 
         contacts.delete(id1).expect("Failed to delete contact");
 
@@ -203,12 +221,33 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        let id = contacts.add("Hello World").expect("Failed to add contact");
+        let id = contacts
+            .add("Hello World", None)
+            .expect("Failed to add contact");
         assert_eq!(
             contacts.get_name(id).expect("Failed to get name"),
             "Hello World"
         );
     }
+
+    #[test]
+    #[serial]
+    fn get_contact_profile_picture() {
+        let mut contacts = Contacts::default();
+        contacts.drop_table().unwrap();
+
+        contacts.create_table().unwrap();
+        let id = contacts
+            .add("Hello World", Some(&[0]))
+            .expect("Failed to add contact");
+        assert_eq!(
+            contacts
+                .get_profile_picture(id)
+                .expect("Failed to get name"),
+            &[0]
+        );
+    }
+
     #[test]
     #[serial]
     fn update_name() {
@@ -216,7 +255,7 @@ mod tests {
         contacts.drop_table().unwrap();
         contacts.create_table().unwrap();
 
-        let id = contacts.add("Hello").unwrap();
+        let id = contacts.add("Hello", None).unwrap();
         contacts
             .update_name(id, "World")
             .expect("Failed to update name");
@@ -234,8 +273,8 @@ mod tests {
 
         contacts.create_table().unwrap();
 
-        contacts.add("Hello").unwrap();
-        contacts.add("World").unwrap();
+        contacts.add("Hello", None).unwrap();
+        contacts.add("World", None).unwrap();
 
         let contacts_vec = contacts.get_all().unwrap();
         assert_eq!(contacts_vec.len(), 2);
@@ -251,7 +290,7 @@ mod tests {
 
         contacts.create_table().unwrap();
 
-        let id = contacts.add("Hello World").unwrap();
+        let id = contacts.add("Hello World", None).unwrap();
         contacts.archive(id).unwrap();
 
         assert!(contacts
@@ -267,9 +306,9 @@ mod tests {
 
         contacts.create_table().unwrap();
 
-        contacts.add("Hello").unwrap();
+        contacts.add("Hello", None).unwrap();
 
-        let archived_id = contacts.add("World").unwrap();
+        let archived_id = contacts.add("World", None).unwrap();
         contacts.archive(archived_id).unwrap();
 
         let contacts_vec = contacts.get_active().unwrap();

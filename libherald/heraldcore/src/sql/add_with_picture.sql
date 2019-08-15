@@ -1,3 +1,3 @@
 INSERT INTO
   contacts(name)
-VALUES(?)
+VALUES(NULL, ?)

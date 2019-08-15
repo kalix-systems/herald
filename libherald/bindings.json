@@ -10,8 +10,7 @@
             "type": "List",
             "itemProperties": {
                 "name": {
-                    "type": "QString",
-                    "write": true
+                    "type": "QString"
                 },
                 "contact_id": {
                     "type": "qint64"
@@ -28,6 +27,20 @@
                         }
                     ]
                 },
+                "add_with_profile_picture": {
+                    "return": "qint64",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "profile",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "remove": {
                     "return": "bool",
                     "mut": true,
@@ -38,7 +51,7 @@
                         }
                     ]
                 },
-                "update": {
+                "update_name": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
@@ -49,6 +62,15 @@
                         {
                             "name": "name",
                             "type": "QString"
+                        }
+                    ]
+                },
+                "profile_picture": {
+                    "return": "QByteArray",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "qint64"
                         }
                     ]
                 }

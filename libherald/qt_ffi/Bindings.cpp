@@ -21,6 +21,16 @@ namespace {
         *val = QString::fromUtf8(utf8, nbytes);
     }
 
+    typedef void (*qbytearray_set)(QByteArray* val, const char* bytes, int nbytes);
+    void set_qbytearray(QByteArray* v, const char* bytes, int nbytes) {
+        if (v->isNull() && nbytes == 0) {
+            *v = QByteArray(bytes, nbytes);
+        } else {
+            v->truncate(0);
+            v->append(bytes, nbytes);
+        }
+    }
+
     struct qmodelindex_t {
         int row;
         quintptr id;
@@ -32,7 +42,6 @@ namespace {
 extern "C" {
     qint64 contacts_data_contact_id(const Contacts::Private*, int);
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
-    bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
     void contacts_sort(Contacts::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int contacts_row_count(const Contacts::Private*);
@@ -99,9 +108,6 @@ void Contacts::sort(int column, Qt::SortOrder order)
 Qt::ItemFlags Contacts::flags(const QModelIndex &i) const
 {
     auto flags = QAbstractItemModel::flags(i);
-    if (i.column() == 0) {
-        flags |= Qt::ItemIsEditable;
-    }
     return flags;
 }
 
@@ -115,17 +121,6 @@ QString Contacts::name(int row) const
     QString s;
     contacts_data_name(m_d, row, &s, set_qstring);
     return s;
-}
-
-bool Contacts::setName(int row, const QString& value)
-{
-    bool set = false;
-    set = contacts_set_data_name(m_d, row, value.utf16(), value.length());
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 QVariant Contacts::data(const QModelIndex &index, int role) const
@@ -178,18 +173,6 @@ bool Contacts::setHeaderData(int section, Qt::Orientation orientation, const QVa
     return true;
 }
 
-bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (index.column() == 0) {
-        if (role == Qt::UserRole + 1) {
-            if (value.canConvert(qMetaTypeId<QString>())) {
-                return setName(index.row(), value.value<QString>());
-            }
-        }
-    }
-    return false;
-}
-
 extern "C" {
     Contacts::Private* contacts_new(Contacts*,
         void (*)(const Contacts*),
@@ -206,8 +189,10 @@ extern "C" {
         void (*)(Contacts*));
     void contacts_free(Contacts::Private*);
     qint64 contacts_add(Contacts::Private*, const ushort*, int);
+    qint64 contacts_add_with_profile_picture(Contacts::Private*, const ushort*, int, const char*, int);
+    void contacts_profile_picture(const Contacts::Private*, qint64, QByteArray*, qbytearray_set);
     bool contacts_remove(Contacts::Private*, qint64);
-    bool contacts_update(Contacts::Private*, qint64, const ushort*, int);
+    bool contacts_update_name(Contacts::Private*, qint64, const ushort*, int);
 };
 
 Contacts::Contacts(bool /*owned*/, QObject *parent):
@@ -279,11 +264,21 @@ qint64 Contacts::add(const QString& name)
 {
     return contacts_add(m_d, name.utf16(), name.size());
 }
+qint64 Contacts::add_with_profile_picture(const QString& name, const QByteArray& profile)
+{
+    return contacts_add_with_profile_picture(m_d, name.utf16(), name.size(), profile.data(), profile.size());
+}
+QByteArray Contacts::profile_picture(qint64 id) const
+{
+    QByteArray s;
+    contacts_profile_picture(m_d, id, &s, set_qbytearray);
+    return s;
+}
 bool Contacts::remove(qint64 id)
 {
     return contacts_remove(m_d, id);
 }
-bool Contacts::update(qint64 id, const QString& name)
+bool Contacts::update_name(qint64 id, const QString& name)
 {
-    return contacts_update(m_d, id, name.utf16(), name.size());
+    return contacts_update_name(m_d, id, name.utf16(), name.size());
 }
