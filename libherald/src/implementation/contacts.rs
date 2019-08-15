@@ -1,5 +1,5 @@
 use crate::interface::*;
-use heraldcore::contact;
+use heraldcore::{contact, db::DBTable};
 use im_rc::vector::Vector as ImVector;
 
 #[derive(Default, Clone)]
@@ -29,10 +29,14 @@ pub struct Contacts {
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, _model: ContactsList) -> Contacts {
         let core = contact::Contacts::default();
+
+        // create table if it does not already exist
+        core.create_table();
+
         let list = match core.get_all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
             Err(e) => {
-                eprintln!("Error: {}", e);
+                core.create_table();
                 ImVector::new()
             }
         };

@@ -5,27 +5,27 @@ use crate::{
 use rusqlite::NO_PARAMS;
 
 #[derive(Default)]
-pub struct Conversations {
+pub struct Messages {
     db: Database,
 }
 
-impl DBTable for Conversations {
+impl DBTable for Messages {
     fn create_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
     fn exists(&self) -> bool {
         let db = &self.db;
-        if let Ok(mut stmt) = db.prepare(include_str!("sql/conversation/table_exists.sql")) {
+        if let Ok(mut stmt) = db.prepare(include_str!("sql/message/table_exists.sql")) {
             stmt.exists(NO_PARAMS).unwrap_or(false)
         } else {
             false
@@ -41,16 +41,16 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
-        let mut convs = Conversations::default();
+        let mut messages = Messages::default();
         // drop twice, it shouldn't panic on multiple drops
-        convs.drop_table().unwrap();
-        convs.drop_table().unwrap();
+        messages.drop_table().unwrap();
+        messages.drop_table().unwrap();
 
-        convs.create_table().unwrap();
-        assert!(convs.exists());
-        convs.create_table().unwrap();
-        assert!(convs.exists());
-        convs.drop_table().unwrap();
-        assert!(!convs.exists());
+        messages.create_table().unwrap();
+        assert!(messages.exists());
+        messages.create_table().unwrap();
+        assert!(messages.exists());
+        messages.drop_table().unwrap();
+        assert!(!messages.exists());
     }
 }

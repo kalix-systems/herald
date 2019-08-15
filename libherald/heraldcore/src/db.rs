@@ -6,10 +6,10 @@ use std::{
 };
 
 /// Canonical database path.
-pub static DB_PATH: &str = "store.sqlite3";
+static DB_PATH: &str = "store.sqlite3";
 
 /// Thin wrapper around sqlite3 database connection.
-pub struct Database(Connection);
+pub(crate) struct Database(Connection);
 
 impl Deref for Database {
     type Target = Connection;
@@ -27,12 +27,13 @@ impl DerefMut for Database {
 
 impl Database {
     /// Establish connection with canonical database.
-    pub fn default() -> Result<Database, HErr> {
+    #[allow(dead_code)]
+    pub(crate) fn default() -> Result<Database, HErr> {
         Self::new(DB_PATH)
     }
 
     /// Connect to database at path `P`.
-    pub fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
+    pub(crate) fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
             Ok(conn) => Ok(Database(conn)),
             Err(e) => Err(e.into()),

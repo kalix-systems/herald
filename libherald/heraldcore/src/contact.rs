@@ -34,7 +34,8 @@ impl DBTable for Contacts {
 }
 
 impl Contacts {
-    pub fn new(db: Database) -> Self {
+    #![allow(dead_code)]
+    pub(crate) fn new(db: Database) -> Self {
         Contacts { db }
     }
 
