@@ -4,4 +4,4 @@ FROM
   sqlite_master
 WHERE
   type = 'table'
-  AND name = 'conversations'
+  AND name = 'messages'
