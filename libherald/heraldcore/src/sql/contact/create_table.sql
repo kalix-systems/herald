@@ -1,8 +1,5 @@
-CREATE TABLE IF NOT EXISTS conversations (
-  author TEXT NOT NULL,
-  recipient TEXT NOT NULL,
-  timestamp TEXT NOT NULL,
-  message TEXT NOT NULL,
-  FOREIGN KEY(author) REFERENCES contacts (name),
-  FOREIGN KEY(recipient) REFERENCES contacts (name)
+CREATE TABLE IF NOT EXISTS contacts (
+  uid INTEGER PRIMARY KEY,
+  name TEXT,
+  archived INTEGER DEFAULT 0 -- Indicates whether contact is archived, defaults to false
 )

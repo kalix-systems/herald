@@ -12,14 +12,14 @@ pub struct Contacts {
 impl DBTable for Contacts {
     fn create_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(include_str!("sql/contact/create.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(include_str!("sql/contact/drop.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
@@ -27,9 +27,11 @@ impl DBTable for Contacts {
         let db = &self.db;
 
         let cnt = db
-            .query_row(include_str!("sql/contact/exists.sql"), NO_PARAMS, |row| {
-                row.get(0)
-            })
+            .query_row(
+                include_str!("sql/contact/table_exists.sql"),
+                NO_PARAMS,
+                |row| row.get(0),
+            )
             .unwrap_or(0);
 
         cnt > 0
@@ -109,25 +111,23 @@ impl Contact {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
     use serial_test_derive::serial;
 
     #[test]
     #[serial]
-    fn drop_contacts() {
+    fn create_drop_exists() {
         let mut contacts = Contacts::default();
+        // drop twice, it shouldn't panic on multiple drops
         contacts.drop_table().unwrap();
-        contacts.drop_table().unwrap();
-    }
-
-    #[test]
-    #[serial]
-    fn create_contacts() {
-        let mut contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
+        assert!(contacts.exists());
+        contacts.create_table().unwrap();
+        assert!(contacts.exists());
+        contacts.drop_table().unwrap();
+        assert!(!contacts.exists());
     }
 
     #[test]
