@@ -9,6 +9,7 @@ struct ContactsItem {
 }
 
 impl From<contact::Contact> for ContactsItem {
+    #[inline]
     fn from(val: contact::Contact) -> Self {
         let contact::Contact {
             id: contact_id,
@@ -26,7 +27,7 @@ pub struct Contacts {
 }
 
 impl ContactsTrait for Contacts {
-    fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
+    fn new(emit: ContactsEmitter, _model: ContactsList) -> Contacts {
         let core = contact::Contacts::default();
         let list = match core.get_all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
@@ -38,7 +39,7 @@ impl ContactsTrait for Contacts {
         Contacts {
             emit,
             core,
-            _model: model,
+            _model,
             list,
         }
     }
