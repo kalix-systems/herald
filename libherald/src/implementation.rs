@@ -1,6 +1,3 @@
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(dead_code)]
 use crate::interface::*;
 use heraldcore::contact;
 use im_rc::vector::Vector as ImVector;
@@ -23,7 +20,7 @@ impl From<contact::Contact> for ContactsItem {
 
 pub struct Contacts {
     emit: ContactsEmitter,
-    model: ContactsList,
+    _model: ContactsList,
     core: contact::Contacts,
     list: ImVector<ContactsItem>,
 }
@@ -33,12 +30,15 @@ impl ContactsTrait for Contacts {
         let core = contact::Contacts::default();
         let list = match core.get_all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
-            Err(e) => ImVector::new(),
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                ImVector::new()
+            }
         };
         Contacts {
             emit,
             core,
-            model,
+            _model: model,
             list,
         }
     }
@@ -73,9 +73,19 @@ impl ContactsTrait for Contacts {
     }
 
     /// Updates a contact's name, returns a boolean to indicate success.
-    fn update(&mut self, uid: i64) -> bool {
-        false
+    fn update(&mut self, uid: i64, name: String) -> bool {
+        if self.core.update_name(uid, &name).is_err() {
+            return false;
+        }
+        let index = match self.list.iter().position(|c| c.contact_uid == uid) {
+            Some(index) => index,
+            None => return false,
+        };
+
+        self.list[index].name = name;
+        true
     }
+
     fn emit(&mut self) -> &mut ContactsEmitter {
         &mut self.emit
     }

@@ -6,7 +6,7 @@ use std::{
 };
 
 /// Canonical database path.
-pub static DB_PATH: &'static str = "store.sqlite3";
+pub static DB_PATH: &str = "store.sqlite3";
 
 /// Thin wrapper around sqlite3 database connection.
 pub struct Database(Connection);

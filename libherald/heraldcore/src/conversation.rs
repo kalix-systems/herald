@@ -12,24 +12,14 @@ pub struct Conversations {
 impl DBTable for Conversations {
     fn create_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(
-            "CREATE TABLE IF NOT EXISTS conversations (
-               author TEXT NOT NULL,
-               recipient TEXT NOT NULL,
-               timestamp TEXT NOT NULL,
-               message TEXT NOT NULL,
-               FOREIGN KEY(author) REFERENCES contacts (name),
-               FOREIGN KEY(recipient) REFERENCES contacts (name)
-            )",
-            NO_PARAMS,
-        )?;
+        db.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute("DROP TABLE IF EXISTS conversations", NO_PARAMS)?;
+        db.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
@@ -38,7 +28,7 @@ impl DBTable for Conversations {
 
         let cnt = db
             .query_row(
-                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='conversations'",
+                include_str!("sql/conversation/table_exists.sql"),
                 NO_PARAMS,
                 |row| row.get(0),
             )

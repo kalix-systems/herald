@@ -21,7 +21,7 @@ public:
     ~Contacts();
     Q_INVOKABLE qint64 add(const QString& name);
     Q_INVOKABLE bool remove(qint64 uid);
-    Q_INVOKABLE bool update(qint64 uid);
+    Q_INVOKABLE bool update(qint64 uid, const QString& name);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

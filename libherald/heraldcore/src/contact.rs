@@ -12,20 +12,14 @@ pub struct Contacts {
 impl DBTable for Contacts {
     fn create_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute(
-            "CREATE TABLE IF NOT EXISTS contacts (
-                    'uid'  INTEGER PRIMARY KEY,
-                    'name' TEXT
-           )",
-            NO_PARAMS,
-        )?;
+        db.execute(include_str!("sql/contact/create.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&mut self) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute("DROP TABLE IF EXISTS contacts", NO_PARAMS)?;
+        db.execute(include_str!("sql/contact/drop.sql"), NO_PARAMS)?;
         Ok(())
     }
 
@@ -33,11 +27,9 @@ impl DBTable for Contacts {
         let db = &self.db;
 
         let cnt = db
-            .query_row(
-                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='contacts'",
-                NO_PARAMS,
-                |row| row.get(0),
-            )
+            .query_row(include_str!("sql/contact/exists.sql"), NO_PARAMS, |row| {
+                row.get(0)
+            })
             .unwrap_or(0);
 
         cnt > 0
@@ -52,7 +44,7 @@ impl Contacts {
     /// Inserts contact into contacts table. On success, returns the contacts UID.
     pub fn add(&mut self, name: &str) -> Result<i64, HErr> {
         let db = &self.db;
-        let mut stmt = db.prepare("INSERT INTO contacts(uid, name) VALUES(NULL, ?)")?;
+        let mut stmt = db.prepare(include_str!("sql/contact/add.sql"))?;
         stmt.execute(&[name])?;
 
         Ok(db.last_insert_rowid())
@@ -61,7 +53,7 @@ impl Contacts {
     /// Change name of contact by their `uid`
     pub fn update_name(&mut self, uid: i64, name: &str) -> Result<(), HErr> {
         let db = &self.db;
-        let mut stmt = db.prepare("UPDATE contacts SET name = ?1 WHERE uid = ?2")?;
+        let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
         stmt.execute(&[name, &uid.to_string()])?;
         Ok(())
@@ -70,7 +62,7 @@ impl Contacts {
     /// Gets a contact's name by their `uid`.
     pub fn get_name(&self, uid: i64) -> Result<String, HErr> {
         let db = &self.db;
-        let mut stmt = db.prepare("SELECT name FROM contacts WHERE uid=?")?;
+        let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
         Ok(stmt.query_row(&[uid], |row| row.get(0))?)
     }
@@ -78,14 +70,14 @@ impl Contacts {
     /// Deletes a contact by their `uid`.
     pub fn delete(&mut self, uid: i64) -> Result<(), HErr> {
         let db = &self.db;
-        db.execute("DELETE FROM contacts WHERE uid=?", &[uid])?;
+        db.execute(include_str!("sql/contact/delete.sql"), &[uid])?;
         Ok(())
     }
 
     /// Returns all contacts.
     pub fn get_all(&self) -> Result<Vec<Contact>, HErr> {
         let db = &self.db;
-        let mut stmt = db.prepare("SELECT uid, name FROM contacts")?;
+        let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
             Ok(Contact {
@@ -158,7 +150,7 @@ mod tests {
         let uid1 = contacts.add("Hello").expect("Failed to add contact");
         let uid2 = contacts.add("World").expect("Failed to add contact");
 
-        contacts.delete(uid1).expect("Failed to delte contact");
+        contacts.delete(uid1).expect("Failed to delete contact");
 
         assert!(contacts.get_name(uid1).is_err());
         assert!(contacts.get_name(uid2).is_ok());

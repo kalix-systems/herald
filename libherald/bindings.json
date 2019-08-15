@@ -45,6 +45,10 @@
                         {
                             "name": "uid",
                             "type": "qint64"
+                        },
+                        {
+                            "name": "name",
+                            "type": "QString"
                         }
                     ]
                 }
