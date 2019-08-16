@@ -28,17 +28,14 @@ pub struct Contacts {
 
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, _model: ContactsList) -> Contacts {
-        let core = contact::Contacts::default();
+        let mut core = contact::Contacts::default();
 
         // create table if it does not already exist
-        core.create_table();
+        core.create_table().ok();
 
         let list = match core.get_all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
-            Err(e) => {
-                core.create_table();
-                ImVector::new()
-            }
+            Err(_) => ImVector::new(),
         };
         Contacts {
             emit,
