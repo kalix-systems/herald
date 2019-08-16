@@ -2,9 +2,10 @@ use crate::store::*;
 use crate::user::*;
 use ccl::dashmap::DashMap;
 use crossbeam_queue::*;
+use failure::*;
 use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
-use tokio::io::*;
+use tokio::prelude::*;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct GlobalId {
@@ -30,7 +31,6 @@ pub enum MessageToDevice {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    Connect(GlobalId),
     RegisterKey(Signed<RawKey>),
     DeprecateKey(Signed<RawKey>),
     SendMessage { to: UserId, msg: Signed<RawMsg> },
@@ -40,4 +40,14 @@ pub struct AppState<Sock: AsyncWrite + AsyncRead> {
     open: DashMap<GlobalId, Sock>,
     pending: DashMap<GlobalId, SegQueue<MessageToDevice>>,
     meta: Store,
+}
+
+impl<S: AsyncWrite + AsyncRead + Unpin> AppState<S> {
+    pub async fn handle_incoming(&self, mut incoming: S) -> Result<(), Error> {
+        let mut buf = [0u8; 8];
+        incoming.read_exact(&mut buf).await?;
+        let len = u64::from_le_bytes(buf) as usize;
+
+        Ok(())
+    }
 }

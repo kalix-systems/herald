@@ -1,8 +1,8 @@
 use crate::user::*;
-use bincode::{deserialize_from, serialize_into};
 use chrono::prelude::*;
 use failure::*;
 use ring::signature::*;
+use serde_cbor::{from_reader as deserialize_from, to_writer as serialize_into};
 use std::fs::File;
 use std::path::PathBuf;
 

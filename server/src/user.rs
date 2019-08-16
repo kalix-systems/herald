@@ -1,9 +1,9 @@
-use bincode::serialize;
 use bytes::Bytes;
 use chrono::prelude::*;
 use failure::*;
 use ring::signature::VerificationAlgorithm;
 use serde::{Deserialize, Serialize};
+use serde_cbor::{from_slice as deserialize, to_vec as serialize};
 use untrusted::Input;
 
 pub type UserId = arrayvec::ArrayString<[u8; 256]>;
@@ -17,10 +17,9 @@ pub enum DeviceId {
     Verified(u64),
 }
 
-// should we be using bincode or something more standard/stable here?
 /// A signed and dated piece of data.
 /// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
-/// the device with id `signer` of `(timestamp, data)` serialized with `bincode`.
+/// the device with id `signer` of `(timestamp, data)` serialized with `CBOR`.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct Signed<T: Serialize> {
     pub data: T,

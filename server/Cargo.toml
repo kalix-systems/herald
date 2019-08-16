@@ -10,7 +10,7 @@ edition = "2018"
 ring = "0.16"
 untrusted = "0.7"
 serde = { version = "1.0", features = ["derive"] }
-bincode = "1.1"
+serde_cbor = "0.10"
 failure = "0.1"
 chrono = { version = "0.4", features = ["serde"] }
 # im = {version = "13.0", features = ["serde"] }
