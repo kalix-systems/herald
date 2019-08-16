@@ -44,7 +44,9 @@ ApplicationWindow {
         anchors.fill: parent
         model: contacts
         boundsBehavior: Flickable.StopAtBounds
+        clip: true
         ScrollBar.vertical: ScrollBar {
+            policy: ScrollBar.AlwaysOn
         }
         delegate: contactDelegate
     }
@@ -54,12 +56,10 @@ ApplicationWindow {
         Item {
             width: 180
             height: 40
-            Column {
-                Rectangle {
-                    color: "lightblue"
-                    Text {
-                        text: name
-                    }
+            Rectangle {
+                anchors.fill: parent
+                Text {
+                    text: name
                 }
             }
         }
