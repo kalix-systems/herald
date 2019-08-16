@@ -31,7 +31,7 @@ pub struct GlobalId {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    Login(GlobalId),
+    // Login(GlobalId),
     Send { to: UserId, text: RawMsg },
 }
 
@@ -43,6 +43,9 @@ pub enum MessageToClient {
         time: DateTime<Utc>,
     },
 }
+
+use MessageToClient::*;
+use MessageToServer::*;
 
 pub struct AppState<Sock: AsyncWrite> {
     meta: Arc<DashMap<UserId, User>>,
@@ -68,7 +71,7 @@ impl<Sock: AsyncWrite> AppState<Sock> {
         }
     }
 
-    pub fn send_msg(&self, to: UserId, msg: RawMsg) -> Result<(), Error> {
+    pub async fn send_msg(&self, to: UserId, msg: RawMsg) -> Result<(), Error> {
         unimplemented!()
     }
 }
@@ -116,9 +119,19 @@ async fn main() {
                         }
                     }
                 }
+                loop {
+                    let e: Result<MessageToServer, _> = read_datagram(&mut reader).await;
+                    match e {
+                        Ok(Send { to, text }) => state.send_msg(to, text).await?,
+                        Err(e) => {
+                            eprintln!("connection to {} closing with msg {:?}", addr, e);
+                            break;
+                        }
+                    }
+                }
             };
             if let Err(e) = comp {
-                eprintln!("connection failed, error was: {:?}", e);
+                eprintln!("connection to {} failed, error was: {:?}", addr, e);
             }
         });
     }
