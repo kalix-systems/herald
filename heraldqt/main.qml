@@ -8,6 +8,12 @@ ApplicationWindow {
     width: 640
     height: 480
     title: qsTr("Contacts")
+    header: ToolBar {
+        anchors.fill: parent
+        text: qsTr("Contacts")
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+    }
 
     Contacts {
         id: contacts
@@ -17,6 +23,7 @@ ApplicationWindow {
         TextField {
             id: name_input
             placeholderText: "Add Contact"
+            selectByMouse: true // this should be enabled on Desktop
             focus: true
             Keys.onReturnPressed: {
                 contacts.add(name_input.text.trim())
