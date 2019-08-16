@@ -45,7 +45,7 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    fn clear(&mut self) {
+    fn remove_all(&mut self) {
         self.model.begin_reset_model();
 
         self.core.drop_table().expect("Couldn't drop contacts");

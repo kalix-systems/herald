@@ -21,9 +21,9 @@ public:
     ~Contacts();
     Q_INVOKABLE qint64 add(const QString& name);
     Q_INVOKABLE qint64 add_with_profile_picture(const QString& name, const QByteArray& profile);
-    Q_INVOKABLE void clear();
     Q_INVOKABLE QByteArray profile_picture(qint64 id) const;
     Q_INVOKABLE bool remove(qint64 id);
+    Q_INVOKABLE void remove_all();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

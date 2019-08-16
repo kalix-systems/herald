@@ -19,21 +19,21 @@ ApplicationWindow {
             placeholderText: "Add Contact"
             focus: true
             Keys.onReturnPressed: {
-                contacts.add(name_input.text)
+                contacts.add(name_input.text.trim())
                 name_input.clear()
             }
         }
         Button {
             text: "add"
             onClicked: {
-                contacts.add(name_input.text)
+                contacts.add(name_input.text.trim())
                 name_input.clear()
             }
         }
         Button {
             text: "Erase all contacts"
             onClicked: {
-                contacts.clear()
+                contacts.remove_all()
             }
         }
     }
@@ -43,6 +43,9 @@ ApplicationWindow {
         anchors.topMargin: 65
         anchors.fill: parent
         model: contacts
+        boundsBehavior: Flickable.StopAtBounds
+        ScrollBar.vertical: ScrollBar {
+        }
         delegate: contactDelegate
     }
 

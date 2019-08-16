@@ -217,9 +217,9 @@ extern "C" {
     void contacts_free(Contacts::Private*);
     qint64 contacts_add(Contacts::Private*, const ushort*, int);
     qint64 contacts_add_with_profile_picture(Contacts::Private*, const ushort*, int, const char*, int);
-    void contacts_clear(Contacts::Private*);
     void contacts_profile_picture(const Contacts::Private*, qint64, QByteArray*, qbytearray_set);
     bool contacts_remove(Contacts::Private*, qint64);
+    void contacts_remove_all(Contacts::Private*);
 };
 
 Contacts::Contacts(bool /*owned*/, QObject *parent):
@@ -295,10 +295,6 @@ qint64 Contacts::add_with_profile_picture(const QString& name, const QByteArray&
 {
     return contacts_add_with_profile_picture(m_d, name.utf16(), name.size(), profile.data(), profile.size());
 }
-void Contacts::clear()
-{
-    return contacts_clear(m_d);
-}
 QByteArray Contacts::profile_picture(qint64 id) const
 {
     QByteArray s;
@@ -308,4 +304,8 @@ QByteArray Contacts::profile_picture(qint64 id) const
 bool Contacts::remove(qint64 id)
 {
     return contacts_remove(m_d, id);
+}
+void Contacts::remove_all()
+{
+    return contacts_remove_all(m_d);
 }

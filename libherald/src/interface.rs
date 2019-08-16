@@ -183,9 +183,9 @@ pub trait ContactsTrait {
     fn emit(&mut self) -> &mut ContactsEmitter;
     fn add(&mut self, name: String) -> i64;
     fn add_with_profile_picture(&mut self, name: String, profile: &[u8]) -> i64;
-    fn clear(&mut self) -> ();
     fn profile_picture(&self, id: i64) -> Vec<u8>;
     fn remove(&mut self, id: i64) -> bool;
+    fn remove_all(&mut self) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -262,13 +262,6 @@ pub unsafe extern "C" fn contacts_add_with_profile_picture(ptr: *mut Contacts, n
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_clear(ptr: *mut Contacts) -> () {
-    let o = &mut *ptr;
-    let r = o.clear();
-    r
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn contacts_profile_picture(ptr: *const Contacts, id: i64, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let o = &*ptr;
     let r = o.profile_picture(id);
@@ -280,6 +273,13 @@ pub unsafe extern "C" fn contacts_profile_picture(ptr: *const Contacts, id: i64,
 pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, id: i64) -> bool {
     let o = &mut *ptr;
     let r = o.remove(id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_remove_all(ptr: *mut Contacts) -> () {
+    let o = &mut *ptr;
+    let r = o.remove_all();
     r
 }
 
