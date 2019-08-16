@@ -50,10 +50,10 @@ impl Default for Database {
 
 pub trait DBTable: Default {
     /// Drops table if it exists.
-    fn drop_table(&mut self) -> Result<(), HErr>;
+    fn drop_table(&self) -> Result<(), HErr>;
 
     /// Creates table if it does not exist.
-    fn create_table(&mut self) -> Result<(), HErr>;
+    fn create_table(&self) -> Result<(), HErr>;
 
     /// Indicates whether the table exists in the database.
     fn exists(&self) -> bool;

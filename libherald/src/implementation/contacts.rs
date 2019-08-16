@@ -28,7 +28,7 @@ pub struct Contacts {
 
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, _model: ContactsList) -> Contacts {
-        let mut core = contact::Contacts::default();
+        let core = contact::Contacts::default();
 
         // create table if it does not already exist
         core.create_table().ok();

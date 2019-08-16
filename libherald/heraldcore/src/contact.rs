@@ -10,14 +10,14 @@ pub struct Contacts {
 }
 
 impl DBTable for Contacts {
-    fn create_table(&mut self) -> Result<(), HErr> {
+    fn create_table(&self) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
-    fn drop_table(&mut self) -> Result<(), HErr> {
+    fn drop_table(&self) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
         Ok(())
@@ -40,7 +40,7 @@ impl Contacts {
     }
 
     /// Inserts contact into contacts table. On success, returns the contacts UID.
-    pub fn add(&mut self, name: &str, profile_picture: Option<&[u8]>) -> Result<i64, HErr> {
+    pub fn add(&self, name: &str, profile_picture: Option<&[u8]>) -> Result<i64, HErr> {
         let db = &self.db;
         match profile_picture {
             None => {
@@ -64,7 +64,7 @@ impl Contacts {
     }
 
     /// Change name of contact by their `id`
-    pub fn update_name(&mut self, id: i64, name: &str) -> Result<(), HErr> {
+    pub fn update_name(&self, id: i64, name: &str) -> Result<(), HErr> {
         let db = &self.db;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
@@ -89,7 +89,7 @@ impl Contacts {
     }
 
     /// Deletes a contact by their `id`.
-    pub fn delete(&mut self, id: i64) -> Result<(), HErr> {
+    pub fn delete(&self, id: i64) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/contact/delete.sql"), &[id])?;
         Ok(())
@@ -136,14 +136,14 @@ impl Contacts {
     }
 
     /// Archives a contact.
-    pub fn archive(&mut self, id: i64) -> Result<(), HErr> {
+    pub fn archive(&self, id: i64) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
         Ok(())
     }
 
     /// Indicates whether a contact is archived.
-    pub fn is_archived(&mut self, id: i64) -> Result<bool, HErr> {
+    pub fn is_archived(&self, id: i64) -> Result<bool, HErr> {
         let db = &self.db;
 
         let val: i64 = db.query_row(include_str!("sql/contact/is_archived.sql"), &[id], |row| {
@@ -174,7 +174,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         // drop twice, it shouldn't panic on multiple drops
         contacts.drop_table().unwrap();
         contacts.drop_table().unwrap();
@@ -190,7 +190,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_contact() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -202,7 +202,7 @@ mod tests {
     #[test]
     #[serial]
     fn delete_contact() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -218,7 +218,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_contact_name() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -234,7 +234,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_contact_profile_picture() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -252,7 +252,7 @@ mod tests {
     #[test]
     #[serial]
     fn update_name() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
         contacts.create_table().unwrap();
 
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_all_contacts() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -286,7 +286,7 @@ mod tests {
     #[test]
     #[serial]
     fn archive_contact() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
@@ -302,7 +302,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_active_contacts() {
-        let mut contacts = Contacts::default();
+        let contacts = Contacts::default();
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();

@@ -10,14 +10,14 @@ pub struct Messages {
 }
 
 impl DBTable for Messages {
-    fn create_table(&mut self) -> Result<(), HErr> {
+    fn create_table(&self) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
-    fn drop_table(&mut self) -> Result<(), HErr> {
+    fn drop_table(&self) -> Result<(), HErr> {
         let db = &self.db;
         db.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
         Ok(())
@@ -41,7 +41,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
-        let mut messages = Messages::default();
+        let messages = Messages::default();
         // drop twice, it shouldn't panic on multiple drops
         messages.drop_table().unwrap();
         messages.drop_table().unwrap();
