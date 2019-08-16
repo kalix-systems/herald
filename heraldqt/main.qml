@@ -1,16 +1,64 @@
-import QtQuick 2.6
-import QtQuick.Window 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.5
+import QtQuick.Layouts 1.12
+import LibHerald 1.0
 
-Window {
+ApplicationWindow {
     visible: true
     width: 640
     height: 480
-    title: qsTr("Hello World")
+    title: qsTr("Contacts")
 
-    MainForm {
+    Contacts {
+        id: contacts
+    }
+
+    RowLayout {
+        TextField {
+            id: name_input
+            placeholderText: "Add Contact"
+            focus: true
+            Keys.onReturnPressed: {
+                contacts.add(name_input.text)
+                name_input.clear()
+            }
+        }
+        Button {
+            text: "add"
+            onClicked: {
+                contacts.add(name_input.text)
+                name_input.clear()
+            }
+        }
+        Button {
+            text: "Erase all contacts"
+            onClicked: {
+                contacts.clear()
+            }
+        }
+    }
+
+    ListView {
+        id: contactsView
+        anchors.topMargin: 65
         anchors.fill: parent
-        mouseArea.onClicked: {
-            console.log(qsTr('Clicked on background. Text: "' + textEdit.text + '"'))
+        model: contacts
+        delegate: contactDelegate
+    }
+
+    Component {
+        id: contactDelegate
+        Item {
+            width: 180
+            height: 40
+            Column {
+                Rectangle {
+                    color: "lightblue"
+                    Text {
+                        text: name
+                    }
+                }
+            }
         }
     }
 }

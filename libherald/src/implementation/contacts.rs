@@ -21,13 +21,13 @@ impl From<contact::Contact> for ContactsItem {
 
 pub struct Contacts {
     emit: ContactsEmitter,
-    _model: ContactsList,
+    model: ContactsList,
     core: contact::Contacts,
     list: ImVector<ContactsItem>,
 }
 
 impl ContactsTrait for Contacts {
-    fn new(emit: ContactsEmitter, _model: ContactsList) -> Contacts {
+    fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
         let core = contact::Contacts::default();
 
         // create table if it does not already exist
@@ -40,15 +40,29 @@ impl ContactsTrait for Contacts {
         Contacts {
             emit,
             core,
-            _model,
+            model,
             list,
         }
+    }
+
+    fn clear(&mut self) {
+        self.model.begin_reset_model();
+
+        self.core.drop_table().expect("Couldn't drop contacts");
+        self.core.create_table().unwrap();
+
+        self.list = ImVector::new();
+
+        self.model.end_reset_model();
     }
 
     /// Adds a contact by their `name`, returns their assigned `id`.
     ///
     /// Returns -1 on failure.
     fn add(&mut self, name: String) -> i64 {
+        if name.is_empty() {
+            return -1;
+        }
         let contact_id = match self.core.add(&name, None) {
             Ok(i) => i,
             Err(e) => {
@@ -56,7 +70,10 @@ impl ContactsTrait for Contacts {
                 return -1;
             }
         };
+
+        self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem { contact_id, name });
+        self.model.end_insert_rows();
         contact_id
     }
 
@@ -71,7 +88,11 @@ impl ContactsTrait for Contacts {
                 return -1;
             }
         };
+
+        self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem { contact_id, name });
+        self.model.end_insert_rows();
+
         contact_id
     }
 
@@ -90,12 +111,17 @@ impl ContactsTrait for Contacts {
             None => return false,
         };
 
+        self.model.begin_remove_rows(0, 0);
         self.list.remove(index);
+        self.model.end_remove_rows();
+
         true
     }
 
     /// Updates a contact's name, returns a boolean to indicate success.
-    fn update_name(&mut self, id: i64, name: String) -> bool {
+    fn set_name(&mut self, row_id: usize, name: String) -> bool {
+        let id = self.list[row_id].contact_id;
+
         if self.core.update_name(id, &name).is_err() {
             return false;
         }

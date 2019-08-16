@@ -183,9 +183,9 @@ pub trait ContactsTrait {
     fn emit(&mut self) -> &mut ContactsEmitter;
     fn add(&mut self, name: String) -> i64;
     fn add_with_profile_picture(&mut self, name: String, profile: &[u8]) -> i64;
+    fn clear(&mut self) -> ();
     fn profile_picture(&self, id: i64) -> Vec<u8>;
     fn remove(&mut self, id: i64) -> bool;
-    fn update_name(&mut self, id: i64, name: String) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -196,6 +196,7 @@ pub trait ContactsTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn contact_id(&self, index: usize) -> i64;
     fn name(&self, index: usize) -> &str;
+    fn set_name(&mut self, index: usize, _: String) -> bool;
 }
 
 #[no_mangle]
@@ -261,6 +262,13 @@ pub unsafe extern "C" fn contacts_add_with_profile_picture(ptr: *mut Contacts, n
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn contacts_clear(ptr: *mut Contacts) -> () {
+    let o = &mut *ptr;
+    let r = o.clear();
+    r
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn contacts_profile_picture(ptr: *const Contacts, id: i64, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let o = &*ptr;
     let r = o.profile_picture(id);
@@ -272,15 +280,6 @@ pub unsafe extern "C" fn contacts_profile_picture(ptr: *const Contacts, id: i64,
 pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, id: i64) -> bool {
     let o = &mut *ptr;
     let r = o.remove(id);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_update_name(ptr: *mut Contacts, id: i64, name_str: *const c_ushort, name_len: c_int) -> bool {
-    let mut name = String::new();
-    set_string_from_utf16(&mut name, name_str, name_len);
-    let o = &mut *ptr;
-    let r = o.update_name(id, name);
     r
 }
 
@@ -329,4 +328,15 @@ pub unsafe extern "C" fn contacts_data_name(
     let data = o.name(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_name(
+    ptr: *mut Contacts, row: c_int,
+    s: *const c_ushort, len: c_int,
+) -> bool {
+    let o = &mut *ptr;
+    let mut v = String::new();
+    set_string_from_utf16(&mut v, s, len);
+    o.set_name(to_usize(row), v)
 }

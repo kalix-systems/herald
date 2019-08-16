@@ -10,6 +10,7 @@
             "type": "List",
             "itemProperties": {
                 "name": {
+                    "write": true,
                     "type": "QString"
                 },
                 "contact_id": {
@@ -17,6 +18,10 @@
                 }
             },
             "functions": {
+                "clear": {
+                    "mut": true,
+                    "return": "void"
+                },
                 "add": {
                     "return": "qint64",
                     "mut": true,
@@ -48,20 +53,6 @@
                         {
                             "name": "id",
                             "type": "qint64"
-                        }
-                    ]
-                },
-                "update_name": {
-                    "return": "bool",
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "qint64"
-                        },
-                        {
-                            "name": "name",
-                            "type": "QString"
                         }
                     ]
                 },
