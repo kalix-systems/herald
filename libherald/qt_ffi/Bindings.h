@@ -5,9 +5,9 @@
 #include <QtCore/QObject>
 #include <QtCore/QAbstractItemModel>
 
-class Simple;
+class Contacts;
 
-class Simple : public QObject
+class Contacts : public QAbstractItemModel
 {
     Q_OBJECT
 public:
@@ -15,14 +15,44 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString message READ message WRITE setMessage NOTIFY messageChanged FINAL)
-    explicit Simple(bool owned, QObject *parent);
+    explicit Contacts(bool owned, QObject *parent);
 public:
-    explicit Simple(QObject *parent = nullptr);
-    ~Simple();
-    QString message() const;
-    void setMessage(const QString& v);
+    explicit Contacts(QObject *parent = nullptr);
+    ~Contacts();
+    Q_INVOKABLE qint64 add(const QString& name);
+    Q_INVOKABLE qint64 add_with_profile_picture(const QString& name, const QByteArray& profile);
+    Q_INVOKABLE QByteArray profile_picture(qint64 id) const;
+    Q_INVOKABLE bool remove(qint64 id);
+    Q_INVOKABLE void remove_all();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE qint64 contact_id(int row) const;
+    Q_INVOKABLE QString name(int row) const;
+    Q_INVOKABLE bool setName(int row, const QString& value);
+
 Q_SIGNALS:
-    void messageChanged();
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
 };
 #endif // BINDINGS_H

@@ -1,4 +1,5 @@
 import QtQuick 2.13
+import LibHerald 1.0
 
 /// --- displays a list of contacts
 ListView {
@@ -37,6 +38,5 @@ ListView {
 
         }
 
-        model: PlaceHolderData {}
     }
 

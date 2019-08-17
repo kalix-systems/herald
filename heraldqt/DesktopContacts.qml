@@ -1,8 +1,44 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.4
+import LibHerald 1.0
+
 
     Pane {
+
+        Popup {
+            id: newContactDialogue
+            modal: true
+            focus: true
+            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+            width: 500
+            height: 300
+
+            Text {
+                text: "this is a placeholder, forgive me"
+                anchors.bottom: parent.bottom
+            }
+
+            TextArea {
+                id : entryField
+                placeholderText: qsTr("Enter contact name")
+            }
+
+            Button {
+                text: "submit"
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                onClicked:
+                {
+                    contacts.add(entryField.text.trim());
+                    entryField.clear();
+                    newContactDialogue.close();
+                }
+            }
+        }
+
+        Contacts { id : contacts }
+
         property real windowFraction: 0.25                       // By default set the width to 1/4 the total window size.
         property bool isContactOnlyView: false                   // set true if the only view is the contact list
         property real maxWindowFraction:  0.66
@@ -78,6 +114,7 @@ import QtQuick.Layouts 1.4
                             onExited: { bg.color = Qt.lighter(bg.color, 1.5);  }
                             onPressed: {  bg.color = Qt.darker(bg.color, 2.5);  }
                             onReleased: {  bg.color = Qt.lighter(bg.color, 2.5);  }
+                            onClicked: { newContactDialogue.open(); }
                         }
                     }
 
@@ -100,6 +137,7 @@ import QtQuick.Layouts 1.4
                 anchors.bottom : parent.bottom
                 ContactView {
                      anchors.fill : parent
+                     model : contacts
                 }
             }
 

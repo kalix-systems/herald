@@ -6,12 +6,64 @@
         "implementationModule": "implementation"
     },
     "objects": {
-        "Simple": {
-            "type": "Object",
-            "properties": {
-                "message": {
-                    "type": "QString",
-                    "write": true
+        "Contacts": {
+            "type": "List",
+            "itemProperties": {
+                "name": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "contact_id": {
+                    "type": "qint64"
+                }
+            },
+            "functions": {
+                "remove_all": {
+                    "mut": true,
+                    "return": "void"
+                },
+                "add": {
+                    "return": "qint64",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "add_with_profile_picture": {
+                    "return": "qint64",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "profile",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "remove": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "qint64"
+                        }
+                    ]
+                },
+                "profile_picture": {
+                    "return": "QByteArray",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "qint64"
+                        }
+                    ]
                 }
             }
         }

@@ -33,4 +33,18 @@ ApplicationWindow {
                 }
             }
     }
+
+    Component {
+        id: contactDelegate
+        Item {
+            width: 180
+            height: 40
+            Rectangle {
+                anchors.fill: parent
+                Text {
+                    text: name
+                }
+            }
+        }
+    }
 }
