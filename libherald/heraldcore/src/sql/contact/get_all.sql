@@ -2,4 +2,4 @@ SELECT
   id,
   name
 FROM
-  contacts
+  contacts;

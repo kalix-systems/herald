@@ -1,6 +1,6 @@
 UPDATE
   contacts
 SET
-  name = @1
+  name = @2
 WHERE
-  id = @2
+  id = @1

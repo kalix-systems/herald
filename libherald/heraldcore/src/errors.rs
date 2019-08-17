@@ -1,3 +1,4 @@
+use herald_common::CapacityError;
 use std::{fmt, sync::PoisonError};
 
 #[derive(Debug)]
@@ -5,6 +6,7 @@ pub enum HErr {
     HeraldError(String),
     DatabaseError(rusqlite::Error),
     MutexError(String),
+    InvalidUserId(String),
 }
 
 impl fmt::Display for HErr {
@@ -14,6 +16,7 @@ impl fmt::Display for HErr {
             DatabaseError(e) => write!(f, "Database Error: {}", e),
             HeraldError(s) => write!(f, "Herald Error: {}", s),
             MutexError(s) => write!(f, "Mutex Error: {}", s),
+            InvalidUserId(s) => write!(f, "InvalidUserId: {}", s),
         }
     }
 }
@@ -23,6 +26,12 @@ impl std::error::Error for HErr {}
 impl<T> From<PoisonError<T>> for HErr {
     fn from(e: PoisonError<T>) -> Self {
         HErr::MutexError(e.to_string())
+    }
+}
+
+impl From<CapacityError<&str>> for HErr {
+    fn from(e: CapacityError<&str>) -> Self {
+        HErr::InvalidUserId(e.to_string())
     }
 }
 

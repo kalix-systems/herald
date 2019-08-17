@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS contacts (
   -- user id
-  id INTEGER PRIMARY KEY,
+  id TEXT PRIMARY KEY NOT NULL,
   -- name as a string
   name TEXT,
   -- profile picture
