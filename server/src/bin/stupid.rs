@@ -3,9 +3,8 @@
 /// offline delivery only works as long as the server is online.
 ///
 /// Nothing is encrypted, except maybe eventually with TLS.
-use bytes::Bytes;
 use ccl::dashmap::DashMap;
-use chrono::prelude::*;
+use herald_common::*;
 use crossbeam_queue::SegQueue;
 use failure::*;
 use serde::{Deserialize, Serialize};
@@ -14,37 +13,6 @@ use std::sync::Arc;
 use tokio::net;
 use tokio::prelude::*;
 
-pub type UserId = arrayvec::ArrayString<[u8; 256]>;
-pub type DeviceId = usize;
-pub type RawMsg = Bytes;
-
-#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
-pub struct User {
-    num_devices: usize,
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
-pub struct GlobalId {
-    uid: UserId,
-    did: DeviceId,
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToServer {
-    // Login(GlobalId),
-    Send { to: UserId, text: RawMsg },
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToClient {
-    Message {
-        from: UserId,
-        text: RawMsg,
-        time: DateTime<Utc>,
-    },
-}
-
-use MessageToClient::*;
 use MessageToServer::*;
 
 pub struct AppState<Sock: AsyncWrite> {
@@ -71,6 +39,8 @@ impl<Sock: AsyncWrite> AppState<Sock> {
         }
     }
 
+    // TODO implement this
+    #[allow(unused_variables)]
     pub async fn send_msg(&self, to: UserId, msg: RawMsg) -> Result<(), Error> {
         unimplemented!()
     }

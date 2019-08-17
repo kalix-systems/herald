@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 ring = "0.16"
 untrusted = "0.7"
+herald_common = { path = "../common"}
 serde = { version = "1.0", features = ["derive"] }
 serde_cbor = "0.10"
 failure = "0.1"
