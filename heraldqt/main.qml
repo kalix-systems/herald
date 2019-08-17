@@ -9,10 +9,12 @@ ApplicationWindow {
     height: 480
     title: qsTr("Contacts")
     header: ToolBar {
-        anchors.fill: parent
-        text: qsTr("Contacts")
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
+        Label {
+            anchors.fill: parent
+            text: qsTr("Contacts")
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
     }
 
     Contacts {
