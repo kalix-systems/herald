@@ -1,16 +1,36 @@
-import QtQuick 2.6
-import QtQuick.Window 2.2
+import QtQuick 2.13
+import QtQuick.Window 2.13
+import QtQuick.Layouts 1.3
+import QtQuick.Controls 2.13
+import QtQuick.Controls.Material 2.12
+import Qt.labs.settings 1.0
 
-Window {
+ApplicationWindow {
     visible: true
-    width: 640
-    height: 480
-    title: qsTr("Hello World")
+    width: 900
+    height: 640
+    title: qsTr("Herald")
+    id : root
 
-    MainForm {
+
+    SplitView {
+        id: rootSplitView
         anchors.fill: parent
-        mouseArea.onClicked: {
-            console.log(qsTr('Clicked on background. Text: "' + textEdit.text + '"'))
-        }
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        orientation: Qt.Horizontal
+
+        /// Contacts view for the desktop client, in DesktopContacts.qml
+        DesktopContacts {  id : contacts }
+
+        /// placeholder element
+        Rectangle {
+                id : placeholder
+                color: "lightblue"
+                Text {
+                    text: "Chat View Placeholder"
+                    anchors.centerIn: parent
+                }
+            }
     }
 }
