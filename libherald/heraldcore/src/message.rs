@@ -5,31 +5,26 @@ use crate::{
 use rusqlite::NO_PARAMS;
 
 #[derive(Default)]
-pub struct Messages {
-    db: Database,
-}
+pub struct Messages {}
 
 impl DBTable for Messages {
     fn create_table(&self) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&self) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
-    fn exists(&self) -> bool {
-        let db = &self.db;
-        if let Ok(mut stmt) = db.prepare(include_str!("sql/message/table_exists.sql")) {
-            stmt.exists(NO_PARAMS).unwrap_or(false)
-        } else {
-            false
-        }
+    fn exists(&self) -> Result<bool, HErr> {
+        let db = Database::get()?;
+        let mut stmt = db.prepare(include_str!("sql/message/table_exists.sql"))?;
+        Ok(stmt.exists(NO_PARAMS)?)
     }
 }
 
@@ -47,10 +42,10 @@ mod tests {
         messages.drop_table().unwrap();
 
         messages.create_table().unwrap();
-        assert!(messages.exists());
+        assert!(messages.exists().unwrap());
         messages.create_table().unwrap();
-        assert!(messages.exists());
+        assert!(messages.exists().unwrap());
         messages.drop_table().unwrap();
-        assert!(!messages.exists());
+        assert!(!messages.exists().unwrap());
     }
 }

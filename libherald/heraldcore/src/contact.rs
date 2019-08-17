@@ -6,43 +6,35 @@ use rusqlite::NO_PARAMS;
 
 #[derive(Default)]
 /// Wrapper around contacts table.
-pub struct Contacts {
-    db: Database,
-}
+/// TODO This possibly should just be a module,
+/// but we might want to store state in it?
+pub struct Contacts {}
 
 impl DBTable for Contacts {
     fn create_table(&self) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn drop_table(&self) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
-    fn exists(&self) -> bool {
-        let db = &self.db;
-        if let Ok(mut stmt) = db.prepare(include_str!("sql/contact/table_exists.sql")) {
-            stmt.exists(NO_PARAMS).unwrap_or(false)
-        } else {
-            false
-        }
+    fn exists(&self) -> Result<bool, HErr> {
+        let db = Database::get()?;
+        let mut stmt = db.prepare(include_str!("sql/contact/table_exists.sql"))?;
+        Ok(stmt.exists(NO_PARAMS)?)
     }
 }
 
 impl Contacts {
-    #![allow(dead_code)]
-    pub(crate) fn new(db: Database) -> Self {
-        Contacts { db }
-    }
-
     /// Inserts contact into contacts table. On success, returns the contacts UID.
     pub fn add(&self, name: &str, profile_picture: Option<&[u8]>) -> Result<i64, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         match profile_picture {
             None => {
                 let mut stmt = db.prepare(include_str!("sql/contact/add.sql"))?;
@@ -59,14 +51,14 @@ impl Contacts {
 
     /// Indicates whether contact exists
     pub fn contact_exists(&self, id: i64) -> Result<bool, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
         Ok(stmt.exists(&[id])?)
     }
 
     /// Change name of contact by their `id`
     pub fn update_name(&self, id: i64, name: &str) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
         stmt.execute(&[name, &id.to_string()])?;
@@ -75,7 +67,7 @@ impl Contacts {
 
     /// Gets a contact's name by their `id`.
     pub fn get_name(&self, id: i64) -> Result<String, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
         Ok(stmt.query_row(&[id], |row| row.get(0))?)
@@ -83,7 +75,7 @@ impl Contacts {
 
     /// Gets a contact's profile picture by their `id`.
     pub fn get_profile_picture(&self, id: i64) -> Result<Vec<u8>, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
         Ok(stmt.query_row(&[id], |row| row.get(0))?)
@@ -91,14 +83,14 @@ impl Contacts {
 
     /// Deletes a contact by their `id`.
     pub fn delete(&self, id: i64) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/contact/delete.sql"), &[id])?;
         Ok(())
     }
 
     /// Returns all contacts, including archived contacts.
     pub fn get_all(&self) -> Result<Vec<Contact>, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
@@ -118,7 +110,7 @@ impl Contacts {
 
     /// Returns all active contacts, excluding archived contacts.
     pub fn get_active(&self) -> Result<Vec<Contact>, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
@@ -138,14 +130,14 @@ impl Contacts {
 
     /// Archives a contact.
     pub fn archive(&self, id: i64) -> Result<(), HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
         db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
         Ok(())
     }
 
     /// Indicates whether a contact is archived.
     pub fn is_archived(&self, id: i64) -> Result<bool, HErr> {
-        let db = &self.db;
+        let db = Database::get()?;
 
         let val: i64 = db.query_row(include_str!("sql/contact/is_archived.sql"), &[id], |row| {
             Ok(row.get(0)?)
@@ -185,11 +177,11 @@ mod tests {
         contacts.drop_table().unwrap();
 
         contacts.create_table().unwrap();
-        assert!(contacts.exists());
+        assert!(contacts.exists().unwrap());
         contacts.create_table().unwrap();
-        assert!(contacts.exists());
+        assert!(contacts.exists().unwrap());
         contacts.drop_table().unwrap();
-        assert!(!contacts.exists());
+        assert!(!contacts.exists().unwrap());
     }
 
     #[test]
