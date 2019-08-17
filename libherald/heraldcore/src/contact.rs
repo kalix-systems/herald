@@ -5,6 +5,7 @@ use crate::{
 use rusqlite::NO_PARAMS;
 
 #[derive(Default)]
+/// Wrapper around contacts table.
 pub struct Contacts {
     db: Database,
 }
@@ -155,12 +156,16 @@ impl Contacts {
 }
 
 #[derive(Debug, PartialEq)]
+/// A Herald contact.
 pub struct Contact {
+    /// Contact name
     pub name: String,
+    /// Contact id
     pub id: i64,
 }
 
 impl Contact {
+    /// Create new contact.
     pub fn new(name: String, id: i64) -> Self {
         Contact { name, id }
     }
