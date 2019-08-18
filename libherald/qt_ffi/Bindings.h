@@ -19,10 +19,8 @@ private:
 public:
     explicit Contacts(QObject *parent = nullptr);
     ~Contacts();
-    Q_INVOKABLE qint64 add(const QString& name);
-    Q_INVOKABLE qint64 add_with_profile_picture(const QString& name, const QByteArray& profile);
-    Q_INVOKABLE QByteArray profile_picture(qint64 id) const;
-    Q_INVOKABLE bool remove(qint64 id);
+    Q_INVOKABLE bool add(const QString& id);
+    Q_INVOKABLE bool remove(const QString& id);
     Q_INVOKABLE void remove_all();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -42,9 +40,11 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE qint64 contact_id(int row) const;
+    Q_INVOKABLE QString contact_id(int row) const;
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
+    Q_INVOKABLE QByteArray profile_picture(int row) const;
+    Q_INVOKABLE bool setProfile_picture(int row, const QByteArray& value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

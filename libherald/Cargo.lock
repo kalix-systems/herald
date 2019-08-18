@@ -60,6 +60,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "herald"
 version = "0.1.0"
 dependencies = [
+ "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im-rc 13.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.60 (registry+https://github.com/rust-lang/crates.io-index)",

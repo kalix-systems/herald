@@ -181,10 +181,8 @@ impl ContactsList {
 pub trait ContactsTrait {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Self;
     fn emit(&mut self) -> &mut ContactsEmitter;
-    fn add(&mut self, name: String) -> i64;
-    fn add_with_profile_picture(&mut self, name: String, profile: &[u8]) -> i64;
-    fn profile_picture(&self, id: i64) -> Vec<u8>;
-    fn remove(&mut self, id: i64) -> bool;
+    fn add(&mut self, id: String) -> bool;
+    fn remove(&mut self, id: String) -> bool;
     fn remove_all(&mut self) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -194,9 +192,11 @@ pub trait ContactsTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn contact_id(&self, index: usize) -> i64;
-    fn name(&self, index: usize) -> &str;
-    fn set_name(&mut self, index: usize, _: String) -> bool;
+    fn contact_id(&self, index: usize) -> &str;
+    fn name(&self, index: usize) -> Option<&str>;
+    fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
+    fn profile_picture(&self, index: usize) -> Option<&[u8]>;
+    fn set_profile_picture(&mut self, index: usize, _: Option<&[u8]>) -> bool;
 }
 
 #[no_mangle]
@@ -243,34 +243,18 @@ pub unsafe extern "C" fn contacts_free(ptr: *mut Contacts) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, name_str: *const c_ushort, name_len: c_int) -> i64 {
-    let mut name = String::new();
-    set_string_from_utf16(&mut name, name_str, name_len);
+pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, id_str: *const c_ushort, id_len: c_int) -> bool {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
-    let r = o.add(name);
+    let r = o.add(id);
     r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_add_with_profile_picture(ptr: *mut Contacts, name_str: *const c_ushort, name_len: c_int, profile_str: *const c_char, profile_len: c_int) -> i64 {
-    let mut name = String::new();
-    set_string_from_utf16(&mut name, name_str, name_len);
-    let profile = { slice::from_raw_parts(profile_str as *const u8, to_usize(profile_len)) };
-    let o = &mut *ptr;
-    let r = o.add_with_profile_picture(name, profile);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_profile_picture(ptr: *const Contacts, id: i64, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
-    let o = &*ptr;
-    let r = o.profile_picture(id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, id: i64) -> bool {
+pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, id_str: *const c_ushort, id_len: c_int) -> bool {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
     let r = o.remove(id);
     r
@@ -313,9 +297,15 @@ pub unsafe extern "C" fn contacts_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_data_contact_id(ptr: *const Contacts, row: c_int) -> i64 {
+pub unsafe extern "C" fn contacts_data_contact_id(
+    ptr: *const Contacts, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
     let o = &*ptr;
-    o.contact_id(to_usize(row)).into()
+    let data = o.contact_id(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -326,8 +316,10 @@ pub unsafe extern "C" fn contacts_data_name(
 ) {
     let o = &*ptr;
     let data = o.name(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -338,5 +330,39 @@ pub unsafe extern "C" fn contacts_set_data_name(
     let o = &mut *ptr;
     let mut v = String::new();
     set_string_from_utf16(&mut v, s, len);
-    o.set_name(to_usize(row), v)
+    o.set_name(to_usize(row), Some(v))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_name_none(ptr: *mut Contacts, row: c_int) -> bool {
+    (&mut *ptr).set_name(to_usize(row), None)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_profile_picture(
+    ptr: *const Contacts, row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.profile_picture(to_usize(row));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_profile_picture(
+    ptr: *mut Contacts, row: c_int,
+    s: *const c_char, len: c_int,
+) -> bool {
+    let o = &mut *ptr;
+    let slice = ::std::slice::from_raw_parts(s as *const u8, to_usize(len));
+    o.set_profile_picture(to_usize(row), Some(slice))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contacts, row: c_int) -> bool {
+    (&mut *ptr).set_profile_picture(to_usize(row), None)
 }

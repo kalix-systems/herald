@@ -1,6 +1,6 @@
 UPDATE
   contacts
 SET
-  name = @1
+  profile_picture = @1
 WHERE
   id = @2
