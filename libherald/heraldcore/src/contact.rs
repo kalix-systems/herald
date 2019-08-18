@@ -227,10 +227,10 @@ mod tests {
 
         Contacts::create_table().unwrap();
 
-        // let id1 = UserId::from("Hello").unwrap();
+        let id1 = UserId::from("Hello").unwrap();
         let id2 = UserId::from("World").unwrap();
 
-        // Contacts::add(id1, Some("name"), None).expect("Failed to add contact");
+        Contacts::add(id1, Some("name"), None).expect("Failed to add contact");
         Contacts::add(id2, None, None).expect("Failed to add contact");
     }
 
