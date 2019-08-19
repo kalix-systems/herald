@@ -4,7 +4,6 @@
         <file>qtquickcontrols2.conf</file>
         <file>ContactView.qml</file>
         <file>DesktopContacts.qml</file>
-        <file>PlaceHolderData.qml</file>
         <file>icons/plus.png</file>
     </qresource>
 </RCC>

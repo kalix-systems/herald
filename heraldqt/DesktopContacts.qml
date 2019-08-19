@@ -1,6 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.4
+import QtQuick.Layouts 1.13
 import LibHerald 1.0
 
 
@@ -36,8 +36,6 @@ import LibHerald 1.0
                 }
             }
         }
-
-        Contacts { id : contacts }
 
         property real windowFraction: 0.25                       // By default set the width to 1/4 the total window size.
         property bool isContactOnlyView: false                   // set true if the only view is the contact list
@@ -130,7 +128,9 @@ import LibHerald 1.0
             }
 
 ///--- Contacts View Actual
+            Contacts { id : contacts }
             Pane {
+                padding: 0
                 anchors.right: parent.right
                 anchors.left: parent.left
                 anchors.top : searchBarBorder.bottom
