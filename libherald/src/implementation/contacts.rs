@@ -1,5 +1,4 @@
 use crate::interface::*;
-use herald_common::UserId;
 use heraldcore::{
     contact::{self, Contacts as Core},
     db::DBTable,
@@ -8,7 +7,7 @@ use im_rc::vector::Vector as ImVector;
 
 #[derive(Default, Clone)]
 struct ContactsItem {
-    contact_id: UserId,
+    contact_id: String,
     name: Option<String>,
     profile_picture: Option<Vec<u8>>,
 }
@@ -40,7 +39,7 @@ impl ContactsTrait for Contacts {
         // create table if it does not already exist
         Core::create_table().ok();
 
-        let list = match contact::Contacts::get_all() {
+        let list = match Core::get_all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
             Err(_) => ImVector::new(),
         };
@@ -62,16 +61,10 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns `false` on failure.
     fn add(&mut self, id: String) -> bool {
-        let id = match UserId::from(&id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
+        assert!(id.len() < 256);
 
-        if let Err(e) = Core::add(id, None, None) {
-            eprintln!("Oops Error: {}", e);
+        if let Err(e) = Core::add(id.as_str(), None, None) {
+            eprintln!("Error: {}", e);
             return false;
         }
 
@@ -97,7 +90,7 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<&[u8]>) -> bool {
-        let id = self.list[row_index].contact_id;
+        let id = self.list[row_index].contact_id.as_str();
 
         if Core::update_profile_picture(id, picture).is_err() {
             return false;
@@ -107,46 +100,35 @@ impl ContactsTrait for Contacts {
     }
 
     /// Removes a contact by their `id`, returns a boolean to indicate success.
-    fn remove(&mut self, id: String) -> bool {
-        let id = match UserId::from(&id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
+    fn remove(&mut self, row_index: u64) -> bool {
+        let row_index = row_index as usize;
+
+        let id = self.list[row_index].contact_id.as_str();
+        match Core::delete(id) {
+            Ok(_) => {
+                self.model.begin_remove_rows(row_index, row_index);
+                self.list.remove(row_index);
+                self.model.end_remove_rows();
+                true
             }
-        };
-
-        if Core::delete(id).is_err() {
-            return false;
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                false
+            }
         }
-        let index = match self.list.iter().position(|c| c.contact_id == id) {
-            Some(index) => index,
-            None => return false,
-        };
-
-        self.model.begin_remove_rows(0, 0);
-        self.list.remove(index);
-        self.model.end_remove_rows();
-
-        true
     }
 
     /// Updates a contact's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_id: usize, name: Option<String>) -> bool {
-        let id = self.list[row_id].contact_id;
+    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+        self.list[row_index].name = name;
+        let id = self.list[row_index].contact_id.as_str();
 
-        let name = name.as_ref().map(|n| n.as_str());
+        let name = self.list[row_index].name.as_ref().map(|n| n.as_str());
 
         if Core::update_name(id, name).is_err() {
             return false;
         }
 
-        let index = match self.list.iter().position(|c| c.contact_id == id) {
-            Some(index) => index,
-            None => return false,
-        };
-
-        self.list[index].name = name.map(|n| n.into());
         true
     }
 
@@ -158,11 +140,11 @@ impl ContactsTrait for Contacts {
         self.list.len()
     }
 
-    fn contact_id(&self, index: usize) -> &str {
-        self.list[index].contact_id.as_str()
+    fn contact_id(&self, row_index: usize) -> &str {
+        self.list[row_index].contact_id.as_str()
     }
 
-    fn name(&self, index: usize) -> Option<&str> {
-        self.list[index].name.as_ref().map(|n| n.as_str())
+    fn name(&self, row_index: usize) -> Option<&str> {
+        self.list[row_index].name.as_ref().map(|n| n.as_str())
     }
 }

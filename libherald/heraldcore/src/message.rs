@@ -2,35 +2,45 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
 };
-use chrono::{DateTime, Utc};
-use herald_common::{RawMsg, UserId};
+use chrono::{DateTime, NaiveDateTime, Utc};
 use rusqlite::{ToSql, NO_PARAMS};
 
+static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
+
 #[derive(Default)]
+/// Messages
 pub struct Messages {}
 
+/// Message
 pub struct Message {
-    author: UserId,
-    recipient: UserId,
-    body: RawMsg,
-    timestamp: Option<DateTime<Utc>>,
+    /// Local message id
+    pub message_id: i64,
+    /// Author user id
+    pub author: String,
+    /// Recipient user id
+    pub recipient: String,
+    /// Body of message
+    pub body: String,
+    /// Time the message was sent or received at the server.
+    pub timestamp: DateTime<Utc>,
 }
 
 impl Messages {
+    /// Adds a message to the database.
     pub fn add_message(
-        author: UserId,
-        recipient: UserId,
-        body: RawMsg,
+        author: &str,
+        recipient: &str,
+        body: &str,
         timestamp: Option<DateTime<Utc>>,
     ) -> Result<(), HErr> {
         let timestamp = match timestamp {
             Some(ts) => ts,
             None => Utc::now(),
         }
-        .format("%Y-%m-%d %H:%M:%S")
+        .format(DATE_FMT)
         .to_string();
-        let recipient = recipient.to_string();
-        let author = author.to_string();
+
+        println!("{}", timestamp);
         let body = body.to_sql()?;
 
         let db = Database::get()?;
@@ -47,22 +57,36 @@ impl Messages {
         Ok(())
     }
 
-    /// Get all messages with `id`
-    pub fn get_conversation(id: UserId) -> Result<Vec<Message>, HErr> {
-        let id = id.to_string();
+    /// Deletes a message
+    pub fn delete_message(id: i64) -> Result<(), HErr> {
+        let db = Database::get()?;
+
+        db.execute(include_str!("sql/message/delete.sql"), &[id])?;
+        Ok(())
+    }
+
+    /// Get all messages with `user_id` as author or recipient.
+    pub fn get_conversation(id: &str) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation.sql"))?;
         let res = stmt.query_map(&[id.to_sql()?], |row| {
-            let author: String = row.get(0)?;
-            let recipient: String = row.get(1)?;
-            let body: Vec<u8> = row.get(2)?;
-            let timestamp: String = row.get(3)?;
+            let message_id: i64 = row.get(0)?;
+            let author: String = row.get(1)?;
+            let recipient: String = row.get(2)?;
+            let body: String = row.get(3)?;
+            let timestamp: String = row.get(4)?;
+
             Ok(Message {
-                author: UserId::from(&author).unwrap(),
-                recipient: UserId::from(&recipient).unwrap(),
-                body: RawMsg::from(body),
-                timestamp: timestamp.parse().ok(),
+                message_id,
+                author,
+                recipient,
+                body,
+                timestamp: DateTime::from_utc(
+                    NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
+                        .expect("Failed to parse timestamp"),
+                    Utc,
+                ),
             })
         })?;
 
@@ -122,14 +146,15 @@ mod tests {
         Messages::drop_table().unwrap();
         Messages::create_table().unwrap();
 
-        let author = UserId::from("Hello").unwrap();
-        let recipient = UserId::from("World").unwrap();
-        Messages::add_message(author, recipient, RawMsg::from("1"), None).unwrap();
-        Messages::add_message(author, recipient, RawMsg::from("2"), None).unwrap();
+        let author = "Hello";
+        let recipient = "World";
+        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
+        Messages::add_message(author, recipient, "2", None).expect("Failed to add second message");
 
-        let v1 = Messages::get_conversation(author).unwrap();
+        let v1 = Messages::get_conversation(author).expect("Failed to get conversation by author");
         assert_eq!(v1.len(), 2);
-        let v2 = Messages::get_conversation(recipient).unwrap();
+        let v2 =
+            Messages::get_conversation(recipient).expect("Failed to get conversation by recipient");
         assert_eq!(v2.len(), 2);
     }
 }

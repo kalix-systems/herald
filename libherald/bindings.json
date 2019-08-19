@@ -24,10 +24,6 @@
                 }
             },
             "functions": {
-                "remove_all": {
-                    "mut": true,
-                    "return": "void"
-                },
                 "add": {
                     "return": "bool",
                     "mut": true,
@@ -43,8 +39,62 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "id",
+                            "name": "row_index",
+                            "type": "quint64"
+                        }
+                    ]
+                },
+                "remove_all": {
+                    "mut": true,
+                    "return": "void"
+                }
+            }
+        },
+        "Messages": {
+            "type": "List",
+            "properties": {
+                "conversation_id": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                }
+            },
+            "itemProperties": {
+                "message_id": {
+                    "type": "qint64"
+                },
+                "author": {
+                    "type": "QString"
+                },
+                "recipient": {
+                    "type": "QString"
+                },
+                "body": {
+                    "type": "QString"
+                }
+            },
+            "functions": {
+                "send_message": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "recipient",
                             "type": "QString"
+                        },
+                        {
+                            "name": "body",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "delete_message": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
                         }
                     ]
                 }

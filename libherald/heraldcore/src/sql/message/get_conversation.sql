@@ -1,4 +1,5 @@
 SELECT
+  id,
   author,
   recipient,
   body,

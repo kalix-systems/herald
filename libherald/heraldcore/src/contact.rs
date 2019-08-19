@@ -2,7 +2,6 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
 };
-use herald_common::UserId;
 use rusqlite::{
     types::{Null, ToSql},
     NO_PARAMS,
@@ -37,12 +36,12 @@ impl DBTable for Contacts {
 
 impl Contacts {
     /// Inserts contact into contacts table.
-    pub fn add(id: UserId, name: Option<&str>, profile_picture: Option<&[u8]>) -> Result<(), HErr> {
+    pub fn add(id: &str, name: Option<&str>, profile_picture: Option<&[u8]>) -> Result<(), HErr> {
         let db = Database::get()?;
 
         let name = match name {
             Some(name) => name.to_sql()?,
-            None => id.as_str().to_sql()?,
+            None => id.to_sql()?,
         };
 
         let profile_picture = match profile_picture {
@@ -52,21 +51,21 @@ impl Contacts {
 
         db.execute(
             include_str!("sql/contact/add.sql"),
-            &[id.as_str().to_sql()?, name, profile_picture],
+            &[id.to_sql()?, name, profile_picture],
         )?;
         Ok(())
     }
 
     /// Gets a contact's name by their `id`.
-    pub fn get_name(id: UserId) -> Result<Option<String>, HErr> {
+    pub fn get_name(id: &str) -> Result<Option<String>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
-        Ok(stmt.query_row(&[id.as_str()], |row| row.get(0))?)
+        Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
 
     /// Change name of contact by their `id`
-    pub fn update_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
+    pub fn update_name(id: &str, name: Option<&str>) -> Result<(), HErr> {
         let name = match name {
             Some(name) => name.to_sql()?,
             None => Null.to_sql()?,
@@ -75,12 +74,12 @@ impl Contacts {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
-        stmt.execute(&[name, id.as_str().to_sql()?])?;
+        stmt.execute(&[name, id.to_sql()?])?;
         Ok(())
     }
 
     /// Gets a contact's profile picture by their `id`.
-    pub fn get_profile_picture(id: UserId) -> Result<Option<Vec<u8>>, HErr> {
+    pub fn get_profile_picture(id: String) -> Result<Option<Vec<u8>>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
@@ -88,7 +87,7 @@ impl Contacts {
     }
 
     /// Updates a contact's profile picture.
-    pub fn update_profile_picture(id: UserId, picture: Option<&[u8]>) -> Result<(), HErr> {
+    pub fn update_profile_picture(id: &str, picture: Option<&[u8]>) -> Result<(), HErr> {
         let picture = match picture {
             Some(picture) => picture.to_sql()?,
             None => Null.to_sql()?,
@@ -98,45 +97,40 @@ impl Contacts {
 
         db.execute(
             include_str!("sql/contact/update_profile_picture.sql"),
-            &[picture, id.as_str().to_sql()?],
+            &[picture, id.to_sql()?],
         )?;
         Ok(())
     }
 
     /// Indicates whether contact exists
-    pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
+    pub fn contact_exists(id: &str) -> Result<bool, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
-        Ok(stmt.exists(&[id.as_str()])?)
+        Ok(stmt.exists(&[id])?)
     }
 
     /// Deletes a contact by their `id`.
-    pub fn delete(id: UserId) -> Result<(), HErr> {
+    pub fn delete(id: &str) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/contact/delete.sql"), &[id.as_str()])?;
+        db.execute(include_str!("sql/contact/delete.sql"), &[id])?;
         Ok(())
     }
 
     /// Archives a contact.
-    pub fn archive(id: UserId) -> Result<(), HErr> {
+    pub fn archive(id: &str) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(
-            include_str!("sql/contact/archive_contact.sql"),
-            &[id.as_str()],
-        )?;
+        db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
         Ok(())
     }
 
     /// Indicates whether a contact is archived.
-    pub fn is_archived(id: UserId) -> Result<bool, HErr> {
+    pub fn is_archived(id: &str) -> Result<bool, HErr> {
         let db = Database::get()?;
 
-        let val: i64 = db.query_row(
-            include_str!("sql/contact/is_archived.sql"),
-            &[id.as_str()],
-            |row| Ok(row.get(0)?),
-        )?;
+        let val: i64 = db.query_row(include_str!("sql/contact/is_archived.sql"), &[id], |row| {
+            Ok(row.get(0)?)
+        })?;
 
         Ok(val == 1)
     }
@@ -147,9 +141,8 @@ impl Contacts {
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
-            let id: String = row.get(0)?;
             Ok(Contact {
-                id: UserId::from(id.as_str()).unwrap(),
+                id: row.get(0)?,
                 name: row.get(1)?,
             })
         })?;
@@ -168,9 +161,8 @@ impl Contacts {
         let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
 
         let rows = stmt.query_map(NO_PARAMS, |row| {
-            let id: String = row.get(0)?;
             Ok(Contact {
-                id: UserId::from(id.as_str()).unwrap(),
+                id: row.get(0)?,
                 name: row.get(1)?,
             })
         })?;
@@ -190,12 +182,12 @@ pub struct Contact {
     /// Contact name
     pub name: Option<String>,
     /// Contact id
-    pub id: UserId,
+    pub id: String,
 }
 
 impl Contact {
     /// Create new contact.
-    pub fn new(name: Option<String>, id: UserId) -> Self {
+    pub fn new(name: Option<String>, id: String) -> Self {
         Contact { name, id }
     }
 }
@@ -227,8 +219,8 @@ mod tests {
 
         Contacts::create_table().unwrap();
 
-        let id1 = UserId::from("Hello").unwrap();
-        let id2 = UserId::from("World").unwrap();
+        let id1 = "Hello";
+        let id2 = "World";
 
         Contacts::add(id1, Some("name"), None).expect("Failed to add contact");
         Contacts::add(id2, None, None).expect("Failed to add contact");
@@ -240,8 +232,8 @@ mod tests {
         Contacts::drop_table().unwrap();
 
         Contacts::create_table().unwrap();
-        let id1 = UserId::from("Hello").unwrap();
-        let id2 = UserId::from("World").unwrap();
+        let id1 = "Hello";
+        let id2 = "World";
 
         Contacts::add(id1, None, None).expect("Failed to add contact");
         Contacts::add(id2, None, None).expect("Failed to add contact");
@@ -258,7 +250,7 @@ mod tests {
         Contacts::drop_table().unwrap();
 
         Contacts::create_table().unwrap();
-        let id = UserId::from("Hello World").unwrap();
+        let id = "Hello World";
 
         Contacts::add(id, Some("name"), None).expect("Failed to add contact");
         assert_eq!(
@@ -273,10 +265,10 @@ mod tests {
         Contacts::drop_table().unwrap();
 
         Contacts::create_table().unwrap();
-        let id = UserId::from("Hello World").unwrap();
+        let id = "Hello World";
         Contacts::add(id, None, Some(&[0])).expect("Failed to add contact");
         assert_eq!(
-            Contacts::get_profile_picture(id).expect("Failed to get profile picture"),
+            Contacts::get_profile_picture(id.into()).expect("Failed to get profile picture"),
             Some(vec![0])
         );
     }
@@ -287,7 +279,7 @@ mod tests {
         Contacts::drop_table().unwrap();
         Contacts::create_table().unwrap();
 
-        let id = UserId::from("userid").unwrap();
+        let id = "userid";
 
         Contacts::add(id, Some("Hello"), None).unwrap();
         Contacts::update_name(id, Some("World")).expect("Failed to update name");
@@ -307,8 +299,8 @@ mod tests {
 
         Contacts::create_table().unwrap();
 
-        let id1 = UserId::from("Hello").unwrap();
-        let id2 = UserId::from("World").unwrap();
+        let id1 = "Hello";
+        let id2 = "World";
 
         Contacts::add(id1, None, None).expect("Failed to add id1");
         Contacts::add(id2, None, None).expect("Failed to add id2");
@@ -326,7 +318,7 @@ mod tests {
 
         Contacts::create_table().unwrap();
 
-        let id = UserId::from("Hello World").unwrap();
+        let id = "Hello World";
         Contacts::add(id, None, None).unwrap();
         Contacts::archive(id).unwrap();
 
@@ -340,8 +332,8 @@ mod tests {
 
         Contacts::create_table().unwrap();
 
-        let id1 = UserId::from("Hello").unwrap();
-        let id2 = UserId::from("World").unwrap();
+        let id1 = "Hello";
+        let id2 = "World";
 
         Contacts::add(id1, None, None).unwrap();
         Contacts::add(id2, None, None).unwrap();
