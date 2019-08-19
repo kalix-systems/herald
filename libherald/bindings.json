@@ -6,6 +6,21 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "HeraldState": {
+            "type": "Object",
+            "functions": {
+                "create_min_config": {
+                    "mut": true,
+                    "return": "void",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            }
+        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
@@ -97,6 +112,24 @@
                             "type": "quint64"
                         }
                     ]
+                }
+            }
+        },
+        "Config": {
+            "type": "Object",
+            "properties": {
+                "id": {
+                    "type": "QString"
+                },
+                "name": {
+                    "type": "QString",
+                    "write": true,
+                    "optional": true
+                },
+                "profile_picture": {
+                    "type": "QByteArray",
+                    "write": true,
+                    "optional": true
                 }
             }
         }

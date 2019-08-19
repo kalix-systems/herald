@@ -92,6 +92,155 @@ fn to_c_int(n: usize) -> c_int {
 }
 
 
+pub struct ConfigQObject {}
+
+pub struct ConfigEmitter {
+    qobject: Arc<AtomicPtr<ConfigQObject>>,
+    id_changed: fn(*mut ConfigQObject),
+    name_changed: fn(*mut ConfigQObject),
+    profile_picture_changed: fn(*mut ConfigQObject),
+}
+
+unsafe impl Send for ConfigEmitter {}
+
+impl ConfigEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> ConfigEmitter {
+        ConfigEmitter {
+            qobject: self.qobject.clone(),
+            id_changed: self.id_changed,
+            name_changed: self.name_changed,
+            profile_picture_changed: self.profile_picture_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const ConfigQObject = null();
+        self.qobject.store(n as *mut ConfigQObject, Ordering::SeqCst);
+    }
+    pub fn id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.id_changed)(ptr);
+        }
+    }
+    pub fn name_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.name_changed)(ptr);
+        }
+    }
+    pub fn profile_picture_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.profile_picture_changed)(ptr);
+        }
+    }
+}
+
+pub trait ConfigTrait {
+    fn new(emit: ConfigEmitter) -> Self;
+    fn emit(&mut self) -> &mut ConfigEmitter;
+    fn id(&self) -> &str;
+    fn name(&self) -> Option<&str>;
+    fn set_name(&mut self, value: Option<String>);
+    fn profile_picture(&self) -> Option<&[u8]>;
+    fn set_profile_picture(&mut self, value: Option<&[u8]>);
+}
+
+#[no_mangle]
+pub extern "C" fn config_new(
+    config: *mut ConfigQObject,
+    config_id_changed: fn(*mut ConfigQObject),
+    config_name_changed: fn(*mut ConfigQObject),
+    config_profile_picture_changed: fn(*mut ConfigQObject),
+) -> *mut Config {
+    let config_emit = ConfigEmitter {
+        qobject: Arc::new(AtomicPtr::new(config)),
+        id_changed: config_id_changed,
+        name_changed: config_name_changed,
+        profile_picture_changed: config_profile_picture_changed,
+    };
+    let d_config = Config::new(config_emit);
+    Box::into_raw(Box::new(d_config))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_free(ptr: *mut Config) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_id_get(
+    ptr: *const Config,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.id();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_name_get(
+    ptr: *const Config,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.name();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_name_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_name(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_name_set_none(ptr: *mut Config) {
+    let o = &mut *ptr;
+    o.set_name(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_profile_picture_get(
+    ptr: *const Config,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.profile_picture();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_profile_picture(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
+    let o = &mut *ptr;
+    o.set_profile_picture(None);
+}
+
 pub struct ContactsQObject {}
 
 pub struct ContactsEmitter {
@@ -363,6 +512,63 @@ pub unsafe extern "C" fn contacts_set_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contacts, row: c_int) -> bool {
     (&mut *ptr).set_profile_picture(to_usize(row), None)
+}
+
+pub struct HeraldStateQObject {}
+
+pub struct HeraldStateEmitter {
+    qobject: Arc<AtomicPtr<HeraldStateQObject>>,
+}
+
+unsafe impl Send for HeraldStateEmitter {}
+
+impl HeraldStateEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> HeraldStateEmitter {
+        HeraldStateEmitter {
+            qobject: self.qobject.clone(),
+        }
+    }
+    fn clear(&self) {
+        let n: *const HeraldStateQObject = null();
+        self.qobject.store(n as *mut HeraldStateQObject, Ordering::SeqCst);
+    }
+}
+
+pub trait HeraldStateTrait {
+    fn new(emit: HeraldStateEmitter) -> Self;
+    fn emit(&mut self) -> &mut HeraldStateEmitter;
+    fn create_min_config(&mut self, id: String) -> ();
+}
+
+#[no_mangle]
+pub extern "C" fn herald_state_new(
+    herald_state: *mut HeraldStateQObject,
+) -> *mut HeraldState {
+    let herald_state_emit = HeraldStateEmitter {
+        qobject: Arc::new(AtomicPtr::new(herald_state)),
+    };
+    let d_herald_state = HeraldState::new(herald_state_emit);
+    Box::into_raw(Box::new(d_herald_state))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_free(ptr: *mut HeraldState) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_create_min_config(ptr: *mut HeraldState, id_str: *const c_ushort, id_len: c_int) -> () {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    let o = &mut *ptr;
+    let r = o.create_min_config(id);
+    r
 }
 
 pub struct MessagesQObject {}

@@ -5,8 +5,36 @@
 #include <QtCore/QObject>
 #include <QtCore/QAbstractItemModel>
 
+class Config;
 class Contacts;
+class HeraldState;
 class Messages;
+
+class Config : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString id READ id NOTIFY idChanged FINAL)
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
+    Q_PROPERTY(QByteArray profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
+    explicit Config(bool owned, QObject *parent);
+public:
+    explicit Config(QObject *parent = nullptr);
+    ~Config();
+    QString id() const;
+    QString name() const;
+    void setName(const QString& v);
+    QByteArray profile_picture() const;
+    void setProfile_picture(const QByteArray& v);
+Q_SIGNALS:
+    void idChanged();
+    void nameChanged();
+    void profile_pictureChanged();
+};
 
 class Contacts : public QAbstractItemModel
 {
@@ -54,6 +82,22 @@ private:
     QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
     void initHeaderData();
     void updatePersistentIndexes();
+Q_SIGNALS:
+};
+
+class HeraldState : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    explicit HeraldState(bool owned, QObject *parent);
+public:
+    explicit HeraldState(QObject *parent = nullptr);
+    ~HeraldState();
+    Q_INVOKABLE void create_min_config(const QString& id);
 Q_SIGNALS:
 };
 

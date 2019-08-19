@@ -38,11 +38,35 @@ namespace {
     inline QVariant cleanNullQVariant(const QVariant& v) {
         return (v.isNull()) ?QVariant() :v;
     }
+    inline void configIdChanged(Config* o)
+    {
+        Q_EMIT o->idChanged();
+    }
+    inline void configNameChanged(Config* o)
+    {
+        Q_EMIT o->nameChanged();
+    }
+    inline void configProfile_pictureChanged(Config* o)
+    {
+        Q_EMIT o->profile_pictureChanged();
+    }
     inline void messagesConversation_idChanged(Messages* o)
     {
         Q_EMIT o->conversation_idChanged();
     }
 }
+extern "C" {
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    void config_free(Config::Private*);
+    void config_id_get(const Config::Private*, QString*, qstring_set);
+    void config_name_get(const Config::Private*, QString*, qstring_set);
+    void config_name_set(Config::Private*, const ushort *str, int len);
+    void config_name_set_none(Config::Private*);
+    void config_profile_picture_get(const Config::Private*, QByteArray*, qbytearray_set);
+    void config_profile_picture_set(Config::Private*, const char* bytes, int len);
+    void config_profile_picture_set_none(Config::Private*);
+};
+
 extern "C" {
     void contacts_data_contact_id(const Contacts::Private*, int, QString*, qstring_set);
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
@@ -265,6 +289,12 @@ extern "C" {
 };
 
 extern "C" {
+    HeraldState::Private* herald_state_new(HeraldState*);
+    void herald_state_free(HeraldState::Private*);
+    void herald_state_create_min_config(HeraldState::Private*, const ushort*, int);
+};
+
+extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     qint64 messages_data_message_id(const Messages::Private*, int);
@@ -442,6 +472,60 @@ extern "C" {
     bool messages_send_message(Messages::Private*, const ushort*, int, const ushort*, int);
 };
 
+Config::Config(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+Config::Config(QObject *parent):
+    QObject(parent),
+    m_d(config_new(this,
+        configIdChanged,
+        configNameChanged,
+        configProfile_pictureChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+Config::~Config() {
+    if (m_ownsPrivate) {
+        config_free(m_d);
+    }
+}
+QString Config::id() const
+{
+    QString v;
+    config_id_get(m_d, &v, set_qstring);
+    return v;
+}
+QString Config::name() const
+{
+    QString v;
+    config_name_get(m_d, &v, set_qstring);
+    return v;
+}
+void Config::setName(const QString& v) {
+    if (v.isNull()) {
+        config_name_set_none(m_d);
+    } else {
+    config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+    }
+}
+QByteArray Config::profile_picture() const
+{
+    QByteArray v;
+    config_profile_picture_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void Config::setProfile_picture(const QByteArray& v) {
+    if (v.isNull()) {
+        config_profile_picture_set_none(m_d);
+    } else {
+    config_profile_picture_set(m_d, v.data(), v.size());
+    }
+}
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -518,6 +602,29 @@ bool Contacts::remove(quint64 row_index)
 void Contacts::remove_all()
 {
     return contacts_remove_all(m_d);
+}
+HeraldState::HeraldState(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+HeraldState::HeraldState(QObject *parent):
+    QObject(parent),
+    m_d(herald_state_new(this)),
+    m_ownsPrivate(true)
+{
+}
+
+HeraldState::~HeraldState() {
+    if (m_ownsPrivate) {
+        herald_state_free(m_d);
+    }
+}
+void HeraldState::create_min_config(const QString& id)
+{
+    return herald_state_create_min_config(m_d, id.utf16(), id.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
