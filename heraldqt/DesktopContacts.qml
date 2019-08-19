@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 
     Pane {
-
+        // popup dialog containing contact insertion UI
         Popup {
             id: newContactDialogue
             modal: true
@@ -20,6 +20,7 @@ import LibHerald 1.0
             }
 
             TextArea {
+                focus : true
                 id : entryField
                 placeholderText: qsTr("Enter contact name")
             }
