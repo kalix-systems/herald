@@ -5,38 +5,6 @@ import LibHerald 1.0
 
 
     Pane {
-        // popup dialog containing contact insertion UI
-        Popup {
-            id: newContactDialogue
-            modal: true
-            focus: true
-            closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-            width: 500
-            height: 300
-
-            Text {
-                text: "this is a placeholder, forgive me"
-                anchors.bottom: parent.bottom
-            }
-
-            TextArea {
-                focus : true
-                id : entryField
-                placeholderText: qsTr("Enter contact name")
-            }
-
-            Button {
-                text: "submit"
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                onClicked:
-                {
-                    contacts.add(entryField.text.trim());
-                    entryField.clear();
-                    newContactDialogue.close();
-                }
-            }
-        }
 
         property real windowFraction: 0.25                       // By default set the width to 1/4 the total window size.
         property bool isContactOnlyView: false                   // set true if the only view is the contact list
@@ -141,6 +109,46 @@ import LibHerald 1.0
                      model : contacts
                 }
             }
+
+///--- popup dialog containing contact insertion UI
+            function insertContact() {
+                if ( entryField.text.trim().length == 0 ) {return}
+                contacts.add(entryField.text.trim());
+                entryField.clear();
+                newContactDialogue.close();
+            }
+
+            Popup {
+                id: newContactDialogue
+                modal: true
+                focus: true
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                width: 500
+                height: 300
+
+
+                Text {
+                    text: "this is a placeholder, forgive me"
+                    anchors.bottom: parent.bottom
+                }
+
+                TextArea {
+                    focus : true
+                    id : entryField
+                    placeholderText: qsTr("Enter contact name")
+                    Keys.onReturnPressed: insertContact("");
+                }
+
+                Button {
+                    text: "submit"
+                    id: submissionButton
+                    anchors.bottom: parent.bottom
+                    anchors.right: parent.right
+                    onClicked: insertContact("");
+                }
+
+            }
+
 
 
     }
