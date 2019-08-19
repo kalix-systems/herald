@@ -7,6 +7,7 @@ ListView {
         clip: true
         delegate: Item {
             property int rowHeight: 60
+            property string displayName: name ? name : contact_id
             height: rowHeight
             width: parent.width
 
@@ -29,7 +30,7 @@ ListView {
                     radius: 100
                     ///---- initial
                     Text {
-                        text: qsTr(name[0].toUpperCase())
+                        text: qsTr(displayName[0].toUpperCase())
                         font.bold: true
                         color: "#FFFFFF"
                         anchors.centerIn: parent
@@ -37,24 +38,14 @@ ListView {
                     }
                 }
 
-                Text {
-                    text: name
-                    font.bold: true
-                    anchors.verticalCenter: parent.verticalCenter
-                }
 
-                spacing: 10
+            Text {
+                text: displayName
+                font.bold: true
+                anchors.verticalCenter: parent.verticalCenter
             }
 
+            spacing: 10
         }
-        model: ListModel{ ListElement{ name: qsTr("arg") } }
     }
-
-
-
-
-
-/*##^## Designer {
-    D{i:0;autoSize:true;height:480;width:640}
 }
- ##^##*/

@@ -73,6 +73,7 @@ async fn main() {
     let state: AppState<net::tcp::split::TcpStreamWriteHalf> = AppState::new();
     let addr = format!("0.0.0.0:{}", PORT).parse().unwrap();
 
+    println!("Listening on: {}", addr); 
     let mut listener = net::TcpListener::bind(&addr).expect("unable to bind TCP listener");
     while let Ok((stream, addr)) = listener.accept().await {
         let state = state.clone();

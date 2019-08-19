@@ -3,6 +3,7 @@ target
 _build/
 *.install
 .direnv
+stats/
 
 ## profiling data
 callgrind.out*

@@ -2,6 +2,8 @@ use bytes::Bytes;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
 
+pub use arrayvec::CapacityError;
+
 pub type UserId = arrayvec::ArrayString<[u8; 256]>;
 pub type DeviceId = usize;
 pub type RawMsg = Bytes;

@@ -6,43 +6,46 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "HeraldState": {
+            "type": "Object",
+            "functions": {
+                "create_min_config": {
+                    "mut": true,
+                    "return": "void",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            }
+        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
                 "name": {
                     "write": true,
-                    "type": "QString"
+                    "type": "QString",
+                    "optional": true
+                },
+                "profile_picture": {
+                    "write": true,
+                    "type": "QByteArray",
+                    "optional": true
                 },
                 "contact_id": {
-                    "type": "qint64"
+                    "type": "QString"
                 }
             },
             "functions": {
-                "remove_all": {
-                    "mut": true,
-                    "return": "void"
-                },
                 "add": {
-                    "return": "qint64",
+                    "return": "bool",
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "name",
+                            "name": "id",
                             "type": "QString"
-                        }
-                    ]
-                },
-                "add_with_profile_picture": {
-                    "return": "qint64",
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "name",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "profile",
-                            "type": "QByteArray"
                         }
                     ]
                 },
@@ -51,19 +54,82 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "id",
-                            "type": "qint64"
+                            "name": "row_index",
+                            "type": "quint64"
                         }
                     ]
                 },
-                "profile_picture": {
-                    "return": "QByteArray",
+                "remove_all": {
+                    "mut": true,
+                    "return": "void"
+                }
+            }
+        },
+        "Messages": {
+            "type": "List",
+            "properties": {
+                "conversation_id": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                }
+            },
+            "itemProperties": {
+                "message_id": {
+                    "type": "qint64"
+                },
+                "author": {
+                    "type": "QString"
+                },
+                "recipient": {
+                    "type": "QString"
+                },
+                "body": {
+                    "type": "QString"
+                }
+            },
+            "functions": {
+                "send_message": {
+                    "return": "bool",
+                    "mut": true,
                     "arguments": [
                         {
-                            "name": "id",
-                            "type": "qint64"
+                            "name": "recipient",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "body",
+                            "type": "QString"
                         }
                     ]
+                },
+                "delete_message": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        }
+                    ]
+                }
+            }
+        },
+        "Config": {
+            "type": "Object",
+            "properties": {
+                "id": {
+                    "type": "QString"
+                },
+                "name": {
+                    "type": "QString",
+                    "write": true,
+                    "optional": true
+                },
+                "profile_picture": {
+                    "type": "QByteArray",
+                    "write": true,
+                    "optional": true
                 }
             }
         }
