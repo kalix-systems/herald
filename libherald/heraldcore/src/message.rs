@@ -157,4 +157,19 @@ mod tests {
             Messages::get_conversation(recipient).expect("Failed to get conversation by recipient");
         assert_eq!(v2.len(), 2);
     }
+
+    #[test]
+    #[serial]
+    fn delete_message() {
+        Messages::drop_table().unwrap();
+        Messages::create_table().unwrap();
+
+        let author = "Hello";
+        let recipient = "World";
+        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
+
+        Messages::delete_message(1).unwrap();
+
+        assert!(Messages::get_conversation(author).unwrap().is_empty());
+    }
 }
