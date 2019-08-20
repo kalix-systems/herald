@@ -106,7 +106,20 @@ impl MessagesTrait for Messages {
             body.as_str(),
             None,
         ) {
-            Ok(_) => true,
+            Ok((msg_id, timestamp)) => {
+                let msg = MessagesItem {
+                    author: "userid".into(),
+                    recipient: self.conversation_id.clone().unwrap_or("userid2".into()),
+                    body: body,
+                    message_id: msg_id,
+                    timestamp,
+                };
+                self.model
+                    .begin_insert_rows(self.row_count(), self.row_count());
+                self.list.push_back(msg);
+                self.model.end_insert_rows();
+                true
+            }
             Err(e) => {
                 eprintln!("Error: {}", e);
                 false
