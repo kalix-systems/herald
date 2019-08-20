@@ -8,7 +8,7 @@ ApplicationWindow {
     width: 900
     height: 640
     title: qsTr("Herald")
-    id : root
+    id: root
 
     SplitView {
 
@@ -18,12 +18,12 @@ ApplicationWindow {
         Layout.fillHeight: true
         orientation: Qt.Horizontal
         /// Contacts view for the desktop client, in DesktopContacts.qml
-        DesktopContacts {  id : contacts  }
+        DesktopContacts {
+            id: contacts
+        }
 
         /// placeholder element
-     ChatView {  }
-
+        ChatView {
+        }
     }
-
-
 }

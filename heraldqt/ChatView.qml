@@ -11,6 +11,7 @@ Pane {
     }
     ///--- chat view, shows messages
     ListView {
+        boundsBehavior: Flickable.StopAtBounds
         anchors {
             right: parent.right
             bottom: chatBox.top
