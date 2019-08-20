@@ -23,18 +23,18 @@ Pane {
         ScrollBar.vertical: ScrollBar {
         }
         delegate: Item {
-            height: text.height
+            height: messageText.height
             Row {
                 Rectangle {
                     id: bubble
-                    width: text.width + 10
-                    height: text.height + 10
+                    width: messageText.width + 10
+                    height: messageText.height + 10
                     color: "lightgrey"
                     radius: 10
                     Text {
                         anchors.centerIn: bubble
                         wrapMode: Text.WordWrap
-                        id: text
+                        id: messageText
                         text: qsTr(body)
                     }
                 }
