@@ -90,7 +90,10 @@ impl MessagesTrait for Messages {
     fn send_message(&mut self, body: String) -> bool {
         match Core::add_message(
             "userid", // heraldcore::config::Config::get_id().unwrap().as_str(),
-            self.conversation_id.as_ref().unwrap(),
+            self.conversation_id
+                .as_ref()
+                .map(|s| s.as_str())
+                .unwrap_or("userid2"),
             body.as_str(),
             None,
         ) {
