@@ -15,14 +15,14 @@ pub struct User {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct GlobalId {
-    uid: UserId,
-    did: DeviceId,
+    pub uid: UserId,
+    pub did: DeviceId,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
     // Login(GlobalId),
-    Send { to: UserId, text: RawMsg },
+    SendMsg { to: UserId, text: RawMsg },
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
