@@ -27,7 +27,7 @@ Pane {
                     width: text.width + 10
                     height: text.height + 10
                     color: "lightgrey"
-                    radius: 50
+                    radius: 10
                     Text {
                         anchors.centerIn: bubble
                         wrapMode: Text.WordWrap
