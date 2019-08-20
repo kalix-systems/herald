@@ -32,7 +32,7 @@ impl Messages {
         recipient: &str,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
-    ) -> Result<(), HErr> {
+    ) -> Result<(i64, String), HErr> {
         let timestamp = match timestamp {
             Some(ts) => ts,
             None => Utc::now(),
@@ -54,7 +54,7 @@ impl Messages {
                 timestamp.to_sql()?,
             ],
         )?;
-        Ok(())
+        Ok((db.last_insert_rowid(), timestamp))
     }
 
     /// Deletes a message
