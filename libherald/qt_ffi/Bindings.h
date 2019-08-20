@@ -109,13 +109,13 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString conversation_id READ conversation_id WRITE setConversation_id NOTIFY conversation_idChanged FINAL)
+    Q_PROPERTY(QString conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
     ~Messages();
-    QString conversation_id() const;
-    void setConversation_id(const QString& v);
+    QString conversationId() const;
+    void setConversationId(const QString& v);
     Q_INVOKABLE bool delete_message(quint64 row_index);
     Q_INVOKABLE bool send_message(const QString& body);
 
@@ -148,6 +148,6 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
-    void conversation_idChanged();
+    void conversationIdChanged();
 };
 #endif // BINDINGS_H

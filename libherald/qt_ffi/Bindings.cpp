@@ -50,9 +50,9 @@ namespace {
     {
         Q_EMIT o->profile_pictureChanged();
     }
-    inline void messagesConversation_idChanged(Messages* o)
+    inline void messagesConversationIdChanged(Messages* o)
     {
-        Q_EMIT o->conversation_idChanged();
+        Q_EMIT o->conversationIdChanged();
     }
 }
 extern "C" {
@@ -637,7 +637,7 @@ Messages::Messages(bool /*owned*/, QObject *parent):
 Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
-        messagesConversation_idChanged,
+        messagesConversationIdChanged,
         [](const Messages* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -692,13 +692,13 @@ Messages::~Messages() {
 }
 void Messages::initHeaderData() {
 }
-QString Messages::conversation_id() const
+QString Messages::conversationId() const
 {
     QString v;
     messages_conversation_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Messages::setConversation_id(const QString& v) {
+void Messages::setConversationId(const QString& v) {
     if (v.isNull()) {
         messages_conversation_id_set_none(m_d);
     } else {

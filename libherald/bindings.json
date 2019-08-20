@@ -68,7 +68,7 @@
         "Messages": {
             "type": "List",
             "properties": {
-                "conversation_id": {
+                "conversationId": {
                     "type": "QString",
                     "optional": true,
                     "write": true
