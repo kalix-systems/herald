@@ -20,6 +20,8 @@ Pane {
         }
         spacing: 20
         model: messageModel
+        ScrollBar.vertical: ScrollBar {
+        }
         delegate: Item {
             height: text.height
             Row {
