@@ -59,12 +59,14 @@ extern "C" {
     Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     void config_id_get(const Config::Private*, QString*, qstring_set);
+    void config_id_set(Config::Private*, const ushort *str, int len);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
     void config_profile_picture_get(const Config::Private*, QByteArray*, qbytearray_set);
     void config_profile_picture_set(Config::Private*, const char* bytes, int len);
     void config_profile_picture_set_none(Config::Private*);
+    bool config_exists(const Config::Private*);
 };
 
 extern "C" {
@@ -500,6 +502,9 @@ QString Config::id() const
     config_id_get(m_d, &v, set_qstring);
     return v;
 }
+void Config::setId(const QString& v) {
+    config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
 QString Config::name() const
 {
     QString v;
@@ -525,6 +530,10 @@ void Config::setProfile_picture(const QByteArray& v) {
     } else {
     config_profile_picture_set(m_d, v.data(), v.size());
     }
+}
+bool Config::exists() const
+{
+    return config_exists(m_d);
 }
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

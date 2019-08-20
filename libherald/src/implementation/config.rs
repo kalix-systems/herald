@@ -1,5 +1,5 @@
 use crate::interface::*;
-use heraldcore::config::Config as Core;
+use heraldcore::{config::Config as Core, db::DBTable};
 
 pub struct Config {
     emit: ConfigEmitter,
@@ -10,6 +10,7 @@ pub struct Config {
 
 impl ConfigTrait for Config {
     fn new(emit: ConfigEmitter) -> Self {
+        Core::create_table().unwrap();
         Config {
             emit,
             id: "".into(),
@@ -18,8 +19,20 @@ impl ConfigTrait for Config {
         }
     }
 
+    fn exists(&self) -> bool {
+        Core::exists().unwrap_or(false)
+    }
+
     fn emit(&mut self) -> &mut ConfigEmitter {
         &mut self.emit
+    }
+
+    fn set_id(&mut self, id: String) {
+        self.id = id;
+
+        if let Err(e) = Core::add(self.id.as_str(), None, None) {
+            eprintln!("{}", e);
+        }
     }
 
     fn id(&self) -> &str {

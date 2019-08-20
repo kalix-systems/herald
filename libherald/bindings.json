@@ -115,7 +115,8 @@
             "type": "Object",
             "properties": {
                 "id": {
-                    "type": "QString"
+                    "type": "QString",
+                    "write": true
                 },
                 "name": {
                     "type": "QString",
@@ -126,6 +127,11 @@
                     "type": "QByteArray",
                     "write": true,
                     "optional": true
+                }
+            },
+            "functions": {
+                "exists": {
+                    "return": "bool"
                 }
             }
         }
