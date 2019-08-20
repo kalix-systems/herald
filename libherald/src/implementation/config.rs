@@ -20,7 +20,7 @@ impl ConfigTrait for Config {
     }
 
     fn exists(&self) -> bool {
-        Core::exists().unwrap_or(false)
+        Core::get_id().is_ok()
     }
 
     fn emit(&mut self) -> &mut ConfigEmitter {
