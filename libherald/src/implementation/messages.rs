@@ -67,6 +67,11 @@ impl MessagesTrait for Messages {
             self.model.begin_insert_rows(0, messages.len());
             self.list = messages;
             self.model.end_insert_rows();
+            println!(
+                "Inserted {} messages with {}",
+                self.list.len(),
+                conversation_id
+            )
         }
     }
 
