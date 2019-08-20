@@ -1,5 +1,8 @@
 use crate::interface::*;
-use heraldcore::message::{Message, Messages as Core};
+use heraldcore::{
+    db::DBTable,
+    message::{Message, Messages as Core},
+};
 use im_rc::vector::Vector as ImVector;
 
 #[derive(Clone)]
@@ -40,6 +43,7 @@ pub struct Messages {
 
 impl MessagesTrait for Messages {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
+        Core::create_table().ok();
         Messages {
             conversation_id: None,
             list: ImVector::new(),
