@@ -5,5 +5,6 @@
         <file>ContactView.qml</file>
         <file>DesktopContacts.qml</file>
         <file>icons/plus.png</file>
+        <file>ChatView.qml</file>
     </qresource>
 </RCC>

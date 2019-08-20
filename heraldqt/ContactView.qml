@@ -4,14 +4,17 @@ import QtQuick.Layouts 1.12
 /// --- displays a list of contacts
 ListView {
     Layout.leftMargin: 0
-        clip: true
+    clip: true
+
         delegate: Item {
             property int rowHeight: 60
             property string displayName: name ? name : contact_id
             height: rowHeight
             width: parent.width
 
+
             Rectangle {
+                id : bgBox
                 width : parent.width
                 height : rowHeight
                 color : index %2 ? "#f3f3f3" : "white"

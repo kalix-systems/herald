@@ -23,7 +23,6 @@ import LibHerald 1.0
             border.color: "#AFAFAF"
         }
 
-///--- DesktopContacts Contents area
 
 ///--- Username and Settings gear button
             ToolBar {

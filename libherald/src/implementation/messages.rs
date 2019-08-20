@@ -53,6 +53,7 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<String>) {
+        println!("Setting conversation_id to: {:?}", conversation_id);
         self.conversation_id = conversation_id;
 
         if let Some(conversation_id) = self.conversation_id.as_ref() {

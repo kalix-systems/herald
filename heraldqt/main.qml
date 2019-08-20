@@ -18,18 +18,11 @@ ApplicationWindow {
         Layout.fillHeight: true
         orientation: Qt.Horizontal
         /// Contacts view for the desktop client, in DesktopContacts.qml
-        DesktopContacts {  id : contacts
-           }
+        DesktopContacts {  id : contacts  }
 
         /// placeholder element
-        Rectangle {
-                id : placeholder
-                color: "lightblue"
-                Text {
-                    text: "Chat View Placeholder"
-                    anchors.centerIn: parent
-                }
-            }
+     ChatView {  }
+
     }
 
 
