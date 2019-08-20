@@ -469,7 +469,7 @@ extern "C" {
     void messages_conversation_id_set(Messages::Private*, const ushort *str, int len);
     void messages_conversation_id_set_none(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_send_message(Messages::Private*, const ushort*, int, const ushort*, int);
+    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 Config::Config(bool /*owned*/, QObject *parent):
@@ -709,7 +709,7 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::send_message(const QString& recipient, const QString& body)
+bool Messages::send_message(const QString& body)
 {
-    return messages_send_message(m_d, recipient.utf16(), recipient.size(), body.utf16(), body.size());
+    return messages_send_message(m_d, body.utf16(), body.size());
 }

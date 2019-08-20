@@ -94,10 +94,6 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "recipient",
-                            "type": "QString"
-                        },
-                        {
                             "name": "body",
                             "type": "QString"
                         }

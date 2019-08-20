@@ -117,7 +117,7 @@ public:
     QString conversation_id() const;
     void setConversation_id(const QString& v);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool send_message(const QString& recipient, const QString& body);
+    Q_INVOKABLE bool send_message(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

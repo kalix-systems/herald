@@ -87,10 +87,10 @@ impl MessagesTrait for Messages {
     }
 
     // TODO add networking component
-    fn send_message(&mut self, recipient: String, body: String) -> bool {
+    fn send_message(&mut self, body: String) -> bool {
         match Core::add_message(
-            heraldcore::config::Config::get_id().unwrap().as_str(),
-            recipient.as_str(),
+            "userid", // heraldcore::config::Config::get_id().unwrap().as_str(),
+            self.conversation_id.as_ref().unwrap(),
             body.as_str(),
             None,
         ) {
