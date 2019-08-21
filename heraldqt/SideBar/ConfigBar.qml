@@ -72,7 +72,7 @@ ToolBar {
         width: height
         anchors.right: parent.right
         background: Image {
-            source: "icons/gear.png"
+            source: "qrc:///icons/gear.png"
             width: parent.height
             height: width
             scale: 0.7

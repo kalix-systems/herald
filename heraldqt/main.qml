@@ -32,7 +32,7 @@ ApplicationWindow {
         orientation: Qt.Horizontal
         /// Contacts view for the desktop client, in DesktopContacts.qml
         /// includes the config and contacts toolbars
-        DesktopContacts {
+        SideBar {
             id: contacts
         }
 
