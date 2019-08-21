@@ -70,7 +70,11 @@ impl MessagesTrait for Messages {
                     }
                 };
 
-            self.model.begin_insert_rows(0, messages.len());
+            if messages.is_empty() {
+                return;
+            }
+
+            self.model.begin_insert_rows(0, messages.len() - 1);
             self.list = messages;
             self.model.end_insert_rows();
             println!(
