@@ -8,28 +8,39 @@ Pane {
     property var messageModel: Messages {
         conversationId: chatId
     }
+    topPadding: 0 /// for better clipping behavior
+    rightPadding: 0 /// for the scrollbar
 
     ///--- chat view, shows messages
     ListView {
+        header: Rectangle {
+            height: 10
+        }
         boundsBehavior: Flickable.StopAtBounds
         anchors {
             right: parent.right
             bottom: chatBox.top
             top: parent.top
             left: parent.left
+            bottomMargin: 20 ///allow one unit of spacing between base and final message
         }
         spacing: 20
         model: messageModel
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
-            x: parent.width //TODO : not hardcode this.
             Component.onCompleted: {
                 position = 1.0
             }
         }
-        delegate: Item {
+        delegate: Column {
+            readonly property bool outbound: author == config.id
             height: messageText.height
+            anchors {
+                right: outbound ? parent.right : undefined
+                rightMargin: 10
+            }
             Row {
+                anchors.right: parent.right
                 Rectangle {
                     id: bubble
                     width: messageText.width + 10
@@ -43,7 +54,6 @@ Pane {
                         text: qsTr(body)
                     }
                 }
-                anchors.verticalCenter: parent.verticalCenter
             }
         }
     }
