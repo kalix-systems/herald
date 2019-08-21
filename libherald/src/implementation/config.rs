@@ -11,11 +11,27 @@ pub struct Config {
 impl ConfigTrait for Config {
     fn new(emit: ConfigEmitter) -> Self {
         Core::create_table().unwrap();
-        Config {
-            emit,
-            id: "".into(),
-            name: None,
-            profile_picture: None,
+        match Core::get() {
+            Ok(c) => {
+                let heraldcore::config::Config {
+                    id,
+                    name,
+                    profile_picture,
+                } = c;
+
+                Config {
+                    id,
+                    name,
+                    profile_picture,
+                    emit,
+                }
+            }
+            Err(_) => Config {
+                emit,
+                id: "".into(),
+                name: None,
+                profile_picture: None,
+            },
         }
     }
 
