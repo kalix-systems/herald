@@ -51,10 +51,13 @@ Pane {
     }
     Pane {
         padding: 0
-        anchors.right: parent.right
-        anchors.left: parent.left
-        anchors.top: searchBarBorder.bottom
-        anchors.bottom: parent.bottom
+        anchors {
+            right: parent.right
+            left: parent.left
+            top: searchBarBorder.bottom
+            bottom: parent.bottom
+        }
+
         ContactView {
             anchors.fill: parent
             model: contacts

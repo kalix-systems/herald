@@ -1,13 +1,14 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 
 ToolBar {
     id: toolBar
-    anchors.left: parent.left
-    anchors.top: parent.top
+    anchors {
+        left: parent.left
+        top: parent.top
+    }
     width: contactPane.width
     height: 40
     background: Rectangle {
@@ -22,7 +23,7 @@ ToolBar {
         focus: true
         width: 300
         height: 300
-        ColumnLayout {
+        Column {
             ///  TODO : This field should really not exist but it had to be here
             /// until a hero fixes the server
             ///  TODO : Also write a validator object which sanitizes all input

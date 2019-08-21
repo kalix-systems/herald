@@ -1,7 +1,5 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
-import QtQuick.Layouts 1.13
-import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 
 ToolBar {
@@ -86,15 +84,17 @@ ToolBar {
             focus: true
             id: entryField
             placeholderText: qsTr("Enter contact name")
-            Keys.onReturnPressed: insertContact("")
+            Keys.onReturnPressed: insertContact()
         }
 
         Button {
             text: "submit"
             id: submissionButton
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            onClicked: insertContact("")
+            anchors {
+                bottom: parent.bottom
+                right: parent.right
+            }
+            onClicked: insertContact()
         }
     }
 }
