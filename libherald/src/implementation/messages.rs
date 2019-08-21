@@ -1,5 +1,8 @@
 use crate::interface::*;
-use heraldcore::message::{Message, Messages as Core};
+use heraldcore::{
+    db::DBTable,
+    message::{Message, Messages as Core},
+};
 use im_rc::vector::Vector as ImVector;
 
 #[derive(Clone)]
@@ -40,6 +43,7 @@ pub struct Messages {
 
 impl MessagesTrait for Messages {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
+        Core::create_table().ok();
         Messages {
             conversation_id: None,
             list: ImVector::new(),
@@ -49,9 +53,14 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<String>) {
+        println!("Setting conversation_id to: {:?}", conversation_id);
         self.conversation_id = conversation_id;
 
         if let Some(conversation_id) = self.conversation_id.as_ref() {
+            self.model.begin_reset_model();
+            self.list = ImVector::new();
+            self.model.end_reset_model();
+
             let messages: ImVector<MessagesItem> =
                 match Core::get_conversation(conversation_id.as_str()) {
                     Ok(ms) => ms.into_iter().map(|m| m.into()).collect(),
@@ -60,9 +69,19 @@ impl MessagesTrait for Messages {
                         return;
                     }
                 };
-            self.model.begin_insert_rows(0, messages.len());
+
+            if messages.is_empty() {
+                return;
+            }
+
+            self.model.begin_insert_rows(0, messages.len() - 1);
             self.list = messages;
             self.model.end_insert_rows();
+            println!(
+                "Inserted {} messages with {}",
+                self.list.len(),
+                conversation_id
+            )
         }
     }
 
@@ -87,14 +106,28 @@ impl MessagesTrait for Messages {
     }
 
     // TODO add networking component
-    fn send_message(&mut self, recipient: String, body: String) -> bool {
-        match Core::add_message(
-            heraldcore::config::Config::get_id().unwrap().as_str(),
-            recipient.as_str(),
-            body.as_str(),
-            None,
-        ) {
-            Ok(_) => true,
+    fn send_message(&mut self, body: String) -> bool {
+        let id = heraldcore::config::Config::get_id().expect("User id not set");
+        let conversation_id = match &self.conversation_id {
+            Some(conv) => conv,
+            None => return false,
+        };
+
+        match Core::add_message(id.as_str(), conversation_id.as_str(), body.as_str(), None) {
+            Ok((msg_id, timestamp)) => {
+                let msg = MessagesItem {
+                    author: id,
+                    recipient: self.conversation_id.clone().unwrap_or("userid2".into()),
+                    body: body,
+                    message_id: msg_id,
+                    timestamp,
+                };
+                self.model
+                    .begin_insert_rows(self.row_count(), self.row_count());
+                self.list.push_back(msg);
+                self.model.end_insert_rows();
+                true
+            }
             Err(e) => {
                 eprintln!("Error: {}", e);
                 false

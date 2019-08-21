@@ -7,9 +7,9 @@ use rusqlite::{ToSql, NO_PARAMS};
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
-    id: String,
-    name: Option<String>,
-    profile_picture: Option<Vec<u8>>,
+    pub id: String,
+    pub name: Option<String>,
+    pub profile_picture: Option<Vec<u8>>,
 }
 
 impl DBTable for Config {

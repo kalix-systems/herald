@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QGuiApplication app(argc, argv);
     qmlRegisterType<Contacts>("LibHerald", 1, 0, "Contacts");
+    qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
+    qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

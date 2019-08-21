@@ -68,7 +68,7 @@
         "Messages": {
             "type": "List",
             "properties": {
-                "conversation_id": {
+                "conversationId": {
                     "type": "QString",
                     "optional": true,
                     "write": true
@@ -94,10 +94,6 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "recipient",
-                            "type": "QString"
-                        },
-                        {
                             "name": "body",
                             "type": "QString"
                         }
@@ -119,7 +115,8 @@
             "type": "Object",
             "properties": {
                 "id": {
-                    "type": "QString"
+                    "type": "QString",
+                    "write": true
                 },
                 "name": {
                     "type": "QString",
@@ -130,6 +127,11 @@
                     "type": "QByteArray",
                     "write": true,
                     "optional": true
+                }
+            },
+            "functions": {
+                "exists": {
+                    "return": "bool"
                 }
             }
         }

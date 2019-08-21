@@ -10,8 +10,7 @@ ApplicationWindow {
     width: 900
     height: 640
     title: qsTr("Herald")
-    id : root
-
+    id: root
 
     SplitView {
         id: rootSplitView
@@ -21,27 +20,27 @@ ApplicationWindow {
         orientation: Qt.Horizontal
 
         /// Contacts view for the desktop client, in DesktopContacts.qml
-        DesktopContacts {  id : contacts }
+        DesktopContacts {
+            id: contacts
+        }
 
         /// placeholder element
         Rectangle {
-                id : placeholder
-                color: "lightblue"
-                Text {
-                    text: "View 1"
-                    anchors.centerIn: parent
-                }
+            id: placeholder
+            color: "lightblue"
+            Text {
+                text: "View 1"
+                anchors.centerIn: parent
             }
+        }
     }
 
     /// signals autoscaling behavior
 
     //SplitView {
-   // }
-
+    // }
 
     /// bottom border... this is a documented solution
-
 
     //    GridLayout {
 
@@ -51,8 +50,6 @@ ApplicationWindow {
     //        columns: 2
     //        Layout.fillWidth: true
     //        Layout.fillHeight: true
-
-
 
     //       //Column {
     ////            id: contactCol
@@ -202,13 +199,3 @@ ApplicationWindow {
     //        }
     //    }
 }
-
-
-
-
-
-
-
-
-
-

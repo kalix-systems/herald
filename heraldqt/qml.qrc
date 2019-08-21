@@ -2,8 +2,13 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>qtquickcontrols2.conf</file>
-        <file>ContactView.qml</file>
-        <file>DesktopContacts.qml</file>
+        <file>SideBar/ContactView.qml</file>
+        <file>SideBar.qml</file>
         <file>icons/plus.png</file>
+        <file>icons/gear.svg</file>
+        <file>icons/gear.png</file>
+        <file>ChatView.qml</file>
+        <file>SideBar/ConfigBar.qml</file>
+        <file>SideBar/SearchBar.qml</file>
     </qresource>
 </RCC>

@@ -18,7 +18,7 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString id READ id NOTIFY idChanged FINAL)
+    Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QByteArray profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
@@ -26,10 +26,12 @@ public:
     explicit Config(QObject *parent = nullptr);
     ~Config();
     QString id() const;
+    void setId(const QString& v);
     QString name() const;
     void setName(const QString& v);
     QByteArray profile_picture() const;
     void setProfile_picture(const QByteArray& v);
+    Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void idChanged();
     void nameChanged();
@@ -109,15 +111,15 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString conversation_id READ conversation_id WRITE setConversation_id NOTIFY conversation_idChanged FINAL)
+    Q_PROPERTY(QString conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
     ~Messages();
-    QString conversation_id() const;
-    void setConversation_id(const QString& v);
+    QString conversationId() const;
+    void setConversationId(const QString& v);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool send_message(const QString& recipient, const QString& body);
+    Q_INVOKABLE bool send_message(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -148,6 +150,6 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
-    void conversation_idChanged();
+    void conversationIdChanged();
 };
 #endif // BINDINGS_H

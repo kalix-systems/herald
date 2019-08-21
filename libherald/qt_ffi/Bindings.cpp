@@ -50,21 +50,23 @@ namespace {
     {
         Q_EMIT o->profile_pictureChanged();
     }
-    inline void messagesConversation_idChanged(Messages* o)
+    inline void messagesConversationIdChanged(Messages* o)
     {
-        Q_EMIT o->conversation_idChanged();
+        Q_EMIT o->conversationIdChanged();
     }
 }
 extern "C" {
     Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     void config_id_get(const Config::Private*, QString*, qstring_set);
+    void config_id_set(Config::Private*, const ushort *str, int len);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
     void config_profile_picture_get(const Config::Private*, QByteArray*, qbytearray_set);
     void config_profile_picture_set(Config::Private*, const char* bytes, int len);
     void config_profile_picture_set_none(Config::Private*);
+    bool config_exists(const Config::Private*);
 };
 
 extern "C" {
@@ -469,7 +471,7 @@ extern "C" {
     void messages_conversation_id_set(Messages::Private*, const ushort *str, int len);
     void messages_conversation_id_set_none(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_send_message(Messages::Private*, const ushort*, int, const ushort*, int);
+    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 Config::Config(bool /*owned*/, QObject *parent):
@@ -500,6 +502,9 @@ QString Config::id() const
     config_id_get(m_d, &v, set_qstring);
     return v;
 }
+void Config::setId(const QString& v) {
+    config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
 QString Config::name() const
 {
     QString v;
@@ -525,6 +530,10 @@ void Config::setProfile_picture(const QByteArray& v) {
     } else {
     config_profile_picture_set(m_d, v.data(), v.size());
     }
+}
+bool Config::exists() const
+{
+    return config_exists(m_d);
 }
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -637,7 +646,7 @@ Messages::Messages(bool /*owned*/, QObject *parent):
 Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
-        messagesConversation_idChanged,
+        messagesConversationIdChanged,
         [](const Messages* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -692,13 +701,13 @@ Messages::~Messages() {
 }
 void Messages::initHeaderData() {
 }
-QString Messages::conversation_id() const
+QString Messages::conversationId() const
 {
     QString v;
     messages_conversation_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Messages::setConversation_id(const QString& v) {
+void Messages::setConversationId(const QString& v) {
     if (v.isNull()) {
         messages_conversation_id_set_none(m_d);
     } else {
@@ -709,7 +718,7 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::send_message(const QString& recipient, const QString& body)
+bool Messages::send_message(const QString& body)
 {
-    return messages_send_message(m_d, recipient.utf16(), recipient.size(), body.utf16(), body.size());
+    return messages_send_message(m_d, body.utf16(), body.size());
 }

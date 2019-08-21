@@ -146,10 +146,12 @@ pub trait ConfigTrait {
     fn new(emit: ConfigEmitter) -> Self;
     fn emit(&mut self) -> &mut ConfigEmitter;
     fn id(&self) -> &str;
+    fn set_id(&mut self, value: String);
     fn name(&self) -> Option<&str>;
     fn set_name(&mut self, value: Option<String>);
     fn profile_picture(&self) -> Option<&[u8]>;
     fn set_profile_picture(&mut self, value: Option<&[u8]>);
+    fn exists(&self) -> bool;
 }
 
 #[no_mangle]
@@ -184,6 +186,14 @@ pub unsafe extern "C" fn config_id_get(
     let v = o.id();
     let s: *const c_char = v.as_ptr() as (*const c_char);
     set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_id_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_id(s);
 }
 
 #[no_mangle]
@@ -239,6 +249,13 @@ pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, v: *const 
 pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
     let o = &mut *ptr;
     o.set_profile_picture(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_exists(ptr: *const Config) -> bool {
+    let o = &*ptr;
+    let r = o.exists();
+    r
 }
 
 pub struct ContactsQObject {}
@@ -671,7 +688,7 @@ pub trait MessagesTrait {
     fn conversation_id(&self) -> Option<&str>;
     fn set_conversation_id(&mut self, value: Option<String>);
     fn delete_message(&mut self, row_index: u64) -> bool;
-    fn send_message(&mut self, recipient: String, body: String) -> bool;
+    fn send_message(&mut self, body: String) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -767,13 +784,11 @@ pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_send_message(ptr: *mut Messages, recipient_str: *const c_ushort, recipient_len: c_int, body_str: *const c_ushort, body_len: c_int) -> bool {
-    let mut recipient = String::new();
-    set_string_from_utf16(&mut recipient, recipient_str, recipient_len);
+pub unsafe extern "C" fn messages_send_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
     let o = &mut *ptr;
-    let r = o.send_message(recipient, body);
+    let r = o.send_message(body);
     r
 }
 

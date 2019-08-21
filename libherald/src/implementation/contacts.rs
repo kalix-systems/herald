@@ -35,7 +35,6 @@ pub struct Contacts {
 
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
-        Core::drop_table().ok();
         // create table if it does not already exist
         Core::create_table().ok();
 
