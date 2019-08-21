@@ -43,11 +43,14 @@ impl ConfigTrait for Config {
         &mut self.emit
     }
 
+    // TODO this is terrible, but it works for development
     fn set_id(&mut self, id: String) {
         self.id = id;
 
-        if let Err(e) = Core::add(self.id.as_str(), None, None) {
-            eprintln!("{}", e);
+        if !self.exists() {
+            if let Err(e) = Core::add(self.id.as_str(), None, None) {
+                eprintln!("{}", e);
+            }
         }
     }
 
