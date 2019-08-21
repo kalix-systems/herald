@@ -14,21 +14,37 @@ ListView {
     delegate: Item {
         property int rowHeight: 60
         property string displayName: name ? name : contact_id
+        id: contactItem
         height: rowHeight
         width: parent.width
 
         Rectangle {
+
+            MouseArea {
+                z: 10
+                anchors.fill: parent
+                onClicked: {
+                    contactItem.focus = true
+                    chatView.messageModel.conversationId = contact_id
+                }
+            }
+
             id: bgBox
             width: parent.width
             height: rowHeight
-            color: index % 2 ? "#f3f3f3" : "white"
+            color: {
+                if (contactItem.focus) {
+                    return "lightsteelblue"
+                } else {
+                    return index % 2 ? "#f3f3f3" : "white"
+                }
+            }
         }
 
         Row {
             ///--- Circle with initial
             leftPadding: 10
             anchors.verticalCenter: parent.verticalCenter
-
             Rectangle {
                 width: rowHeight - 10
                 height: rowHeight - 10

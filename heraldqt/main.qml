@@ -38,6 +38,7 @@ ApplicationWindow {
 
         /// placeholder element
         ChatView {
+            id: chatView
         }
     }
 }
