@@ -7,8 +7,11 @@ use rusqlite::{ToSql, NO_PARAMS};
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
+    /// id of the current user
     pub id: String,
+    /// Display name for the current user
     pub name: Option<String>,
+    /// Profile picture for the current user
     pub profile_picture: Option<Vec<u8>>,
 }
 
