@@ -45,7 +45,7 @@ Pane {
                     id: bubble
                     width: messageText.width + 10
                     height: messageText.height + 10
-                    color: "lightgrey"
+                    color: outbound ? "lightsteelblue" : "lightgrey"
                     radius: 10
                     Text {
                         anchors.centerIn: bubble
@@ -72,6 +72,9 @@ Pane {
             color: "gray"
         }
         Keys.onReturnPressed: {
+            if (chatBox.text.length <= 0) {
+                return
+            }
             messageModel.send_message(chatBox.text)
             chatScrollBar.position = 1.0
             chatBox.clear()
