@@ -5,10 +5,10 @@ import LibHerald 1.0
 Pane {
     property string chatId: "empty"
     ///--- Rust model for messages and use ID's
-    Messages {
-        id: messageModel
+    property var messageModel: Messages {
         conversationId: chatId
     }
+
     ///--- chat view, shows messages
     ListView {
         boundsBehavior: Flickable.StopAtBounds
