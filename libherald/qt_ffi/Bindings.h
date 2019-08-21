@@ -20,7 +20,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
-    Q_PROPERTY(QByteArray profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
+    Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
 public:
     explicit Config(QObject *parent = nullptr);
@@ -29,8 +29,8 @@ public:
     void setId(const QString& v);
     QString name() const;
     void setName(const QString& v);
-    QByteArray profile_picture() const;
-    void setProfile_picture(const QByteArray& v);
+    QString profile_picture() const;
+    void setProfile_picture(const QString& v);
     Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void idChanged();
@@ -74,8 +74,8 @@ public:
     Q_INVOKABLE QString contact_id(int row) const;
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
-    Q_INVOKABLE QByteArray profile_picture(int row) const;
-    Q_INVOKABLE bool setProfile_picture(int row, const QByteArray& value);
+    Q_INVOKABLE QString profile_picture(int row) const;
+    Q_INVOKABLE bool setProfile_picture(int row, const QString& value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

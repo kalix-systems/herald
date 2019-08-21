@@ -57,7 +57,7 @@ impl Contacts {
     }
 
     /// Gets a contact's name by their `id`.
-    pub fn get_name(id: &str) -> Result<Option<String>, HErr> {
+    pub fn name(id: &str) -> Result<Option<String>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
@@ -79,7 +79,7 @@ impl Contacts {
     }
 
     /// Gets a contact's profile picture by their `id`.
-    pub fn get_profile_picture(id: String) -> Result<Option<Vec<u8>>, HErr> {
+    pub fn profile_picture(id: String) -> Result<Option<Vec<u8>>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
@@ -87,17 +87,12 @@ impl Contacts {
     }
 
     /// Updates a contact's profile picture.
-    pub fn update_profile_picture(id: &str, picture: Option<&[u8]>) -> Result<(), HErr> {
-        let picture = match picture {
-            Some(picture) => picture.to_sql()?,
-            None => Null.to_sql()?,
-        };
-
+    pub fn update_profile_picture(id: &str, picture: Option<String>) -> Result<(), HErr> {
         let db = Database::get()?;
 
         db.execute(
             include_str!("sql/contact/update_profile_picture.sql"),
-            &[picture, id.to_sql()?],
+            &[picture.to_sql()?, id.to_sql()?],
         )?;
         Ok(())
     }
@@ -136,7 +131,7 @@ impl Contacts {
     }
 
     /// Returns all contact, including archived contacts
-    pub fn get_all() -> Result<Vec<Contact>, HErr> {
+    pub fn all() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
@@ -144,6 +139,7 @@ impl Contacts {
             Ok(Contact {
                 id: row.get(0)?,
                 name: row.get(1)?,
+                profile_picture: row.get(2)?,
             })
         })?;
 
@@ -156,7 +152,7 @@ impl Contacts {
     }
 
     /// Returns all active Contacts:: excluding archived Contacts::
-    pub fn get_active() -> Result<Vec<Contact>, HErr> {
+    pub fn active() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
 
@@ -164,6 +160,7 @@ impl Contacts {
             Ok(Contact {
                 id: row.get(0)?,
                 name: row.get(1)?,
+                profile_picture: row.get(2)?,
             })
         })?;
 
@@ -179,16 +176,22 @@ impl Contacts {
 #[derive(Debug, PartialEq)]
 /// A Herald contact.
 pub struct Contact {
-    /// Contact name
-    pub name: Option<String>,
     /// Contact id
     pub id: String,
+    /// Contact name
+    pub name: Option<String>,
+    /// Path of profile picture
+    pub profile_picture: Option<String>,
 }
 
 impl Contact {
     /// Create new contact.
-    pub fn new(name: Option<String>, id: String) -> Self {
-        Contact { name, id }
+    pub fn new(id: String, name: Option<String>, profile_picture: Option<String>) -> Self {
+        Contact {
+            name,
+            id,
+            profile_picture,
+        }
     }
 }
 
@@ -240,8 +243,8 @@ mod tests {
 
         Contacts::delete(id1).expect("Failed to delete contact");
 
-        assert!(Contacts::get_name(id1).is_err());
-        assert!(Contacts::get_name(id2).is_ok());
+        assert!(Contacts::name(id1).is_err());
+        assert!(Contacts::name(id2).is_ok());
     }
 
     #[test]
@@ -254,7 +257,7 @@ mod tests {
 
         Contacts::add(id, Some("name"), None).expect("Failed to add contact");
         assert_eq!(
-            Contacts::get_name(id).expect("Failed to get name").unwrap(),
+            Contacts::name(id).expect("Failed to get name").unwrap(),
             "name"
         );
     }
@@ -268,7 +271,7 @@ mod tests {
         let id = "Hello World";
         Contacts::add(id, None, Some(&[0])).expect("Failed to add contact");
         assert_eq!(
-            Contacts::get_profile_picture(id.into()).expect("Failed to get profile picture"),
+            Contacts::profile_picture(id.into()).expect("Failed to get profile picture"),
             Some(vec![0])
         );
     }
@@ -285,16 +288,14 @@ mod tests {
         Contacts::update_name(id, Some("World")).expect("Failed to update name");
 
         assert_eq!(
-            Contacts::get_name(id)
-                .expect("Failed to get contact")
-                .unwrap(),
+            Contacts::name(id).expect("Failed to get contact").unwrap(),
             "World"
         );
     }
 
     #[test]
     #[serial]
-    fn get_all_contacts() {
+    fn all_contacts() {
         Contacts::drop_table().unwrap();
 
         Contacts::create_table().unwrap();
@@ -305,7 +306,7 @@ mod tests {
         Contacts::add(id1, None, None).expect("Failed to add id1");
         Contacts::add(id2, None, None).expect("Failed to add id2");
 
-        let contacts = Contacts::get_all().unwrap();
+        let contacts = Contacts::all().unwrap();
         assert_eq!(contacts.len(), 2);
         assert_eq!(contacts[0].id, id1);
         assert_eq!(contacts[1].id, id2);
@@ -340,7 +341,7 @@ mod tests {
 
         Contacts::archive(id2).unwrap();
 
-        let contacts = Contacts::get_active().unwrap();
+        let contacts = Contacts::active().unwrap();
         assert_eq!(contacts.len(), 1);
         assert_eq!(contacts[0].id, id1);
     }

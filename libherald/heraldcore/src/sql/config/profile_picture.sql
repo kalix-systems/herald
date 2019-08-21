@@ -1,6 +1,6 @@
 SELECT
-  id,
-  name,
   profile_picture
 FROM
-  contacts;
+  config
+LIMIT
+  1

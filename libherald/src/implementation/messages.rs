@@ -107,10 +107,20 @@ impl MessagesTrait for Messages {
 
     // TODO add networking component
     fn send_message(&mut self, body: String) -> bool {
-        let id = heraldcore::config::Config::get_id().expect("User id not set");
+        let id = match heraldcore::config::Config::id() {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
+
         let conversation_id = match &self.conversation_id {
             Some(conv) => conv,
-            None => return false,
+            None => {
+                eprintln!("Error: conversation_id not set.");
+                return false;
+            }
         };
 
         match Core::add_message(id.as_str(), conversation_id.as_str(), body.as_str(), None) {

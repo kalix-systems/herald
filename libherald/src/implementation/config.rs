@@ -5,7 +5,7 @@ pub struct Config {
     emit: ConfigEmitter,
     id: String,
     name: Option<String>,
-    profile_picture: Option<Vec<u8>>,
+    profile_picture: Option<String>,
 }
 
 impl ConfigTrait for Config {
@@ -36,7 +36,7 @@ impl ConfigTrait for Config {
     }
 
     fn exists(&self) -> bool {
-        Core::get_id().is_ok()
+        Core::id().is_ok()
     }
 
     fn emit(&mut self) -> &mut ConfigEmitter {
@@ -71,12 +71,13 @@ impl ConfigTrait for Config {
         }
     }
 
-    fn profile_picture(&self) -> Option<&[u8]> {
-        self.profile_picture.as_ref().map(|p| p.as_slice())
+    fn profile_picture(&self) -> Option<&str> {
+        self.profile_picture.as_ref().map(|p| p.as_str())
     }
 
-    fn set_profile_picture(&mut self, picture: Option<&[u8]>) {
-        self.profile_picture = picture.map(|p| p.to_vec());
+    fn set_profile_picture(&mut self, picture: Option<String>) {
+        self.profile_picture = picture;
+        let picture = self.profile_picture.as_ref().map(|s| s.as_str());
         if let Err(e) = Core::update_profile_picture(picture) {
             eprintln!("Error: {}", e);
         }

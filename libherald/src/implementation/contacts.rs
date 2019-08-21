@@ -9,7 +9,7 @@ use im_rc::vector::Vector as ImVector;
 struct ContactsItem {
     contact_id: String,
     name: Option<String>,
-    profile_picture: Option<Vec<u8>>,
+    profile_picture: Option<String>,
 }
 
 impl From<contact::Contact> for ContactsItem {
@@ -18,11 +18,12 @@ impl From<contact::Contact> for ContactsItem {
         let contact::Contact {
             id: contact_id,
             name,
+            profile_picture,
         } = val;
         ContactsItem {
             contact_id,
             name,
-            profile_picture: None,
+            profile_picture,
         }
     }
 }
@@ -38,7 +39,7 @@ impl ContactsTrait for Contacts {
         // create table if it does not already exist
         Core::create_table().ok();
 
-        let list = match Core::get_all() {
+        let list = match Core::all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
             Err(_) => ImVector::new(),
         };
@@ -78,17 +79,17 @@ impl ContactsTrait for Contacts {
     }
 
     /// Returns profile picture given the contact's id.
-    fn profile_picture(&self, row_index: usize) -> Option<&[u8]> {
+    fn profile_picture(&self, row_index: usize) -> Option<&str> {
         self.list[row_index]
             .profile_picture
             .as_ref()
-            .map(|v| v.as_slice())
+            .map(|s| s.as_str())
     }
 
     /// Sets profile picture.
     ///
     /// Returns bool indicating success.
-    fn set_profile_picture(&mut self, row_index: usize, picture: Option<&[u8]>) -> bool {
+    fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let id = self.list[row_index].contact_id.as_str();
 
         if Core::update_profile_picture(id, picture).is_err() {

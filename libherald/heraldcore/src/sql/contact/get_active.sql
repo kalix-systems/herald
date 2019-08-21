@@ -1,6 +1,7 @@
 SELECT
   id,
-  name
+  name,
+  profile_picture
 FROM
   contacts
 WHERE

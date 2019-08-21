@@ -31,7 +31,7 @@
                 },
                 "profile_picture": {
                     "write": true,
-                    "type": "QByteArray",
+                    "type": "QString",
                     "optional": true
                 },
                 "contact_id": {
@@ -124,7 +124,7 @@
                     "optional": true
                 },
                 "profile_picture": {
-                    "type": "QByteArray",
+                    "type": "QString",
                     "write": true,
                     "optional": true
                 }

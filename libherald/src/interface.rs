@@ -59,9 +59,6 @@ fn set_string_from_utf16(s: &mut String, str: *const c_ushort, len: c_int) {
 
 
 
-pub enum QByteArray {}
-
-
 #[repr(C)]
 #[derive(PartialEq, Eq, Debug)]
 pub enum SortOrder {
@@ -149,8 +146,8 @@ pub trait ConfigTrait {
     fn set_id(&mut self, value: String);
     fn name(&self) -> Option<&str>;
     fn set_name(&mut self, value: Option<String>);
-    fn profile_picture(&self) -> Option<&[u8]>;
-    fn set_profile_picture(&mut self, value: Option<&[u8]>);
+    fn profile_picture(&self) -> Option<&str>;
+    fn set_profile_picture(&mut self, value: Option<String>);
     fn exists(&self) -> bool;
 }
 
@@ -227,8 +224,8 @@ pub unsafe extern "C" fn config_name_set_none(ptr: *mut Config) {
 #[no_mangle]
 pub unsafe extern "C" fn config_profile_picture_get(
     ptr: *const Config,
-    p: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
 ) {
     let o = &*ptr;
     let v = o.profile_picture();
@@ -239,10 +236,11 @@ pub unsafe extern "C" fn config_profile_picture_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, v: *const c_char, len: c_int) {
+pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
     let o = &mut *ptr;
-    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
-    o.set_profile_picture(Some(v.into()));
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_profile_picture(Some(s));
 }
 
 #[no_mangle]
@@ -361,8 +359,8 @@ pub trait ContactsTrait {
     fn contact_id(&self, index: usize) -> &str;
     fn name(&self, index: usize) -> Option<&str>;
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
-    fn profile_picture(&self, index: usize) -> Option<&[u8]>;
-    fn set_profile_picture(&mut self, index: usize, _: Option<&[u8]>) -> bool;
+    fn profile_picture(&self, index: usize) -> Option<&str>;
+    fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
 }
 
 #[no_mangle]
@@ -505,8 +503,8 @@ pub unsafe extern "C" fn contacts_set_data_name_none(ptr: *mut Contacts, row: c_
 #[no_mangle]
 pub unsafe extern "C" fn contacts_data_profile_picture(
     ptr: *const Contacts, row: c_int,
-    d: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, len: c_int),
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
     let data = o.profile_picture(to_usize(row));
@@ -519,11 +517,12 @@ pub unsafe extern "C" fn contacts_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_profile_picture(
     ptr: *mut Contacts, row: c_int,
-    s: *const c_char, len: c_int,
+    s: *const c_ushort, len: c_int,
 ) -> bool {
     let o = &mut *ptr;
-    let slice = ::std::slice::from_raw_parts(s as *const u8, to_usize(len));
-    o.set_profile_picture(to_usize(row), Some(slice))
+    let mut v = String::new();
+    set_string_from_utf16(&mut v, s, len);
+    o.set_profile_picture(to_usize(row), Some(v))
 }
 
 #[no_mangle]

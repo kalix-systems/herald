@@ -21,16 +21,6 @@ namespace {
         *val = QString::fromUtf8(utf8, nbytes);
     }
 
-    typedef void (*qbytearray_set)(QByteArray* val, const char* bytes, int nbytes);
-    void set_qbytearray(QByteArray* v, const char* bytes, int nbytes) {
-        if (v->isNull() && nbytes == 0) {
-            *v = QByteArray(bytes, nbytes);
-        } else {
-            v->truncate(0);
-            v->append(bytes, nbytes);
-        }
-    }
-
     struct qmodelindex_t {
         int row;
         quintptr id;
@@ -63,8 +53,8 @@ extern "C" {
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
-    void config_profile_picture_get(const Config::Private*, QByteArray*, qbytearray_set);
-    void config_profile_picture_set(Config::Private*, const char* bytes, int len);
+    void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
+    void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
     bool config_exists(const Config::Private*);
 };
@@ -74,8 +64,8 @@ extern "C" {
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_name_none(Contacts::Private*, int);
-    void contacts_data_profile_picture(const Contacts::Private*, int, QByteArray*, qbytearray_set);
-    bool contacts_set_data_profile_picture(Contacts::Private*, int, const char* s, int len);
+    void contacts_data_profile_picture(const Contacts::Private*, int, QString*, qstring_set);
+    bool contacts_set_data_profile_picture(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_profile_picture_none(Contacts::Private*, int);
     void contacts_sort(Contacts::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -178,20 +168,20 @@ bool Contacts::setName(int row, const QString& value)
     return set;
 }
 
-QByteArray Contacts::profile_picture(int row) const
+QString Contacts::profile_picture(int row) const
 {
-    QByteArray b;
-    contacts_data_profile_picture(m_d, row, &b, set_qbytearray);
-    return b;
+    QString s;
+    contacts_data_profile_picture(m_d, row, &s, set_qstring);
+    return s;
 }
 
-bool Contacts::setProfile_picture(int row, const QByteArray& value)
+bool Contacts::setProfile_picture(int row, const QString& value)
 {
     bool set = false;
     if (value.isNull()) {
         set = contacts_set_data_profile_picture_none(m_d, row);
     } else {
-    set = contacts_set_data_profile_picture(m_d, row, value.data(), value.length());
+    set = contacts_set_data_profile_picture(m_d, row, value.utf16(), value.length());
     }
     if (set) {
         QModelIndex index = createIndex(row, 0, row);
@@ -262,8 +252,8 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
             }
         }
         if (role == Qt::UserRole + 2) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QByteArray>())) {
-                return setProfile_picture(index.row(), value.value<QByteArray>());
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setProfile_picture(index.row(), value.value<QString>());
             }
         }
     }
@@ -518,17 +508,17 @@ void Config::setName(const QString& v) {
     config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
 }
-QByteArray Config::profile_picture() const
+QString Config::profile_picture() const
 {
-    QByteArray v;
-    config_profile_picture_get(m_d, &v, set_qbytearray);
+    QString v;
+    config_profile_picture_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setProfile_picture(const QByteArray& v) {
+void Config::setProfile_picture(const QString& v) {
     if (v.isNull()) {
         config_profile_picture_set_none(m_d);
     } else {
-    config_profile_picture_set(m_d, v.data(), v.size());
+    config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
 }
 bool Config::exists() const

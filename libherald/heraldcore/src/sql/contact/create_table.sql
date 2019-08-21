@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- name as a string
   name TEXT,
   -- profile picture
-  profile_picture BLOB,
+  profile_picture TEXT,
   -- Indicates whether contact is archived, defaults to false
   archived INTEGER DEFAULT 0
 )

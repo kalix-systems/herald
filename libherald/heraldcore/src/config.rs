@@ -11,8 +11,8 @@ pub struct Config {
     pub id: String,
     /// Display name for the current user
     pub name: Option<String>,
-    /// Profile picture for the current user
-    pub profile_picture: Option<Vec<u8>>,
+    /// Path to profile picture for the current user
+    pub profile_picture: Option<String>,
 }
 
 impl DBTable for Config {
@@ -53,7 +53,7 @@ impl Config {
     }
 
     /// Creates config.
-    pub fn add(id: &str, name: Option<&str>, profile_picture: Option<&[u8]>) -> Result<(), HErr> {
+    pub fn add(id: &str, name: Option<&str>, profile_picture: Option<&str>) -> Result<(), HErr> {
         let id = id.to_sql()?;
         let name = name.to_sql()?;
         let profile_picture = profile_picture.to_sql()?;
@@ -68,7 +68,7 @@ impl Config {
     }
 
     /// Gets id
-    pub fn get_id() -> Result<String, HErr> {
+    pub fn id() -> Result<String, HErr> {
         let db = Database::get()?;
         Ok(
             db.query_row(include_str!("sql/config/get_id.sql"), NO_PARAMS, |row| {
@@ -86,7 +86,7 @@ impl Config {
     }
 
     /// Updates profile picture
-    pub fn update_profile_picture(profile_picture: Option<&[u8]>) -> Result<(), HErr> {
+    pub fn update_profile_picture(profile_picture: Option<&str>) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/config/update_name.sql"),
@@ -132,7 +132,7 @@ mod tests {
         Config::create_table().unwrap();
 
         let name = "stuff";
-        let profile_picture = b"stuff";
+        let profile_picture = "stuff";
         Config::add(id, Some(name), Some(profile_picture)).unwrap();
         assert_eq!(Config::get().unwrap().id, "HelloWorld");
         assert_eq!(Config::get().unwrap().name.unwrap(), name);
@@ -151,6 +151,6 @@ mod tests {
         let id = "HelloWorld";
         Config::add(id, None, None).unwrap();
 
-        assert_eq!(Config::get_id().unwrap(), id);
+        assert_eq!(Config::id().unwrap(), id);
     }
 }
