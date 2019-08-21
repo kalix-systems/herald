@@ -98,8 +98,10 @@ impl MessagesTrait for Messages {
 
     // TODO add networking component
     fn send_message(&mut self, body: String) -> bool {
+        let id = heraldcore::config::Config::get_id().expect("User id not set");
+
         match Core::add_message(
-            "userid", // heraldcore::config::Config::get_id().unwrap().as_str(),
+            id.as_str(),
             self.conversation_id
                 .as_ref()
                 .map(|s| s.as_str())
@@ -109,7 +111,7 @@ impl MessagesTrait for Messages {
         ) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
-                    author: "userid".into(),
+                    author: id,
                     recipient: self.conversation_id.clone().unwrap_or("userid2".into()),
                     body: body,
                     message_id: msg_id,
