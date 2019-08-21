@@ -57,6 +57,10 @@ impl MessagesTrait for Messages {
         self.conversation_id = conversation_id;
 
         if let Some(conversation_id) = self.conversation_id.as_ref() {
+            self.model.begin_reset_model();
+            self.list = ImVector::new();
+            self.model.end_reset_model();
+
             let messages: ImVector<MessagesItem> =
                 match Core::get_conversation(conversation_id.as_str()) {
                     Ok(ms) => ms.into_iter().map(|m| m.into()).collect(),
@@ -65,6 +69,7 @@ impl MessagesTrait for Messages {
                         return;
                     }
                 };
+
             self.model.begin_insert_rows(0, messages.len());
             self.list = messages;
             self.model.end_insert_rows();
@@ -99,16 +104,12 @@ impl MessagesTrait for Messages {
     // TODO add networking component
     fn send_message(&mut self, body: String) -> bool {
         let id = heraldcore::config::Config::get_id().expect("User id not set");
+        let conversation_id = match &self.conversation_id {
+            Some(conv) => conv,
+            None => return false,
+        };
 
-        match Core::add_message(
-            id.as_str(),
-            self.conversation_id
-                .as_ref()
-                .map(|s| s.as_str())
-                .unwrap_or("userid2"),
-            body.as_str(),
-            None,
-        ) {
+        match Core::add_message(id.as_str(), conversation_id.as_str(), body.as_str(), None) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
                     author: id,
