@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
+import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 
 Pane {
@@ -26,16 +27,8 @@ Pane {
     }
 
     ///--- Username and Settings gear button
-    ToolBar {
+    ConfigBar {
         id: toolBar
-        anchors.left: parent.left
-        anchors.top: parent.top
-        width: contactPane.width
-        height: 40
-        background: Rectangle {
-            color: "#EFEFEF"
-            border.color: "#AFAFAF"
-        }
     }
 
     ///--- SearchBar for contacts, add contact button

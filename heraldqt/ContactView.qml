@@ -9,11 +9,6 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
     clip: true
     ScrollBar.vertical: ScrollBar {
-        id: chatScroll
-        parent: parent.parent
-        anchors.top: parent.top
-        anchors.left: parent.right
-        anchors.bottom: parent.bottom
     }
 
     delegate: Item {
