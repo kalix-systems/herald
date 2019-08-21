@@ -46,7 +46,8 @@ Pane {
                     radius: 10
                     Text {
                         anchors.centerIn: bubble
-                        wrapMode: Text.WordWrap
+                        width: Math.min(messageText.contentWidth, root.width * 1/4)
+                        wrapMode: Text.Wrap
                         id: messageText
                         text: qsTr(body)
                     }
