@@ -3,10 +3,7 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 
 Pane {
-    property string chatId: "empty"
-    ///--- Rust model for messages and use ID's
     property var messageModel: Messages {
-        conversationId: chatId
     }
 
     ///--- chat view, shows messages
