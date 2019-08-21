@@ -5,7 +5,7 @@ import QtQuick.Controls 2.12
 
 /// --- displays a list of contacts
 ListView {
-    Layout.leftMargin: 0
+    id: contactList
     boundsBehavior: Flickable.StopAtBounds
     clip: true
     ScrollBar.vertical: ScrollBar {

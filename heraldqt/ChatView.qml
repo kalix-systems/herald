@@ -21,20 +21,25 @@ Pane {
         spacing: 20
         model: messageModel
         ScrollBar.vertical: ScrollBar {
+            id: chatScrollBar
+            x: parent.width //TODO : not hardcode this.
+            Component.onCompleted: {
+                position = 1.0
+            }
         }
         delegate: Item {
-            height: text.height
+            height: messageText.height
             Row {
                 Rectangle {
                     id: bubble
-                    width: text.width + 10
-                    height: text.height + 10
+                    width: messageText.width + 10
+                    height: messageText.height + 10
                     color: "lightgrey"
                     radius: 10
                     Text {
                         anchors.centerIn: bubble
                         wrapMode: Text.WordWrap
-                        id: text
+                        id: messageText
                         text: qsTr(body)
                     }
                 }
@@ -58,6 +63,7 @@ Pane {
         }
         Keys.onReturnPressed: {
             messageModel.send_message(chatBox.text)
+            chatScrollBar.position = 1.0
             chatBox.clear()
         }
     }
