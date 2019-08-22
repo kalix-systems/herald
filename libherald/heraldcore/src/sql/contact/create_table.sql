@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS contacts (
   name TEXT,
   -- profile picture
   profile_picture TEXT,
+  -- user color
+  color INTEGER NOT NULL,
   -- Indicates whether contact is archived, defaults to false
-  archived INTEGER DEFAULT 0
+  archived INTEGER DEFAULT(0)
 )

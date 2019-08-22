@@ -1,6 +1,8 @@
 SELECT
   id,
   name,
-  profile_picture
+  profile_picture,
+  color,
+  archived
 FROM
   contacts;
