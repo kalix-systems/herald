@@ -19,12 +19,68 @@ ListView {
         Rectangle {
 
             MouseArea {
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 z: 10
                 anchors.fill: parent
                 onClicked: {
-                    contactItem.focus = true
-                    chatView.messageModel.conversationId = contact_id
+                    if (mouse.button === Qt.LeftButton) {
+                        contactItem.focus = true
+                        chatView.messageModel.conversationId = contact_id }
+                    else {
+                        optionsMenu.x = mouse.x;
+                        optionsMenu.y = mouse.y;
+                        optionsMenu.open()
+                        }
                 }
+
+            }
+
+            Menu {
+                id: optionsMenu
+                closePolicy: Popup.CloseOnPressOutside
+                MenuItem {
+                   text: 'Delete Contact'
+                   onTriggered: contacts.remove(root.index)
+                }
+                MenuItem {
+                    text: 'Rename Contact'
+                    onTriggered: renameContactDialogue.open()
+                }
+            }
+
+            function renameContact() {
+                if (entryField.text.trim().length == 0) {
+                    return
+                }
+                contactItem.displayName = entryField.text.trim()
+                entryField.clear()
+                renameContactDialogue.close()
+            }
+
+            Popup {
+                id: renameContactDialogue
+                closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                width: 300
+                height: 100
+
+                TextArea {
+                    focus: true
+                    id: entryField
+                    placeholderText: qsTr("Enter new name")
+                    Keys.onReturnPressed: bgBox.renameContact()
+                }
+
+                Button {
+                    text: "Submit"
+                    id: submissionButton
+                    anchors {
+                        bottom: parent.bottom
+                        right: parent.right
+                    }
+                    onClicked: bgBox.renameContact()
+
+            }
+
             }
 
             id: bgBox
