@@ -123,8 +123,12 @@ impl Contacts {
 
     /// Deletes a contact by their `id`.
     pub fn delete(id: &str) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("sql/contact/delete.sql"), &[id])?;
+        let mut db = Database::get()?;
+
+        let tx = db.transaction()?;
+        tx.execute(include_str!("sql/contact/delete.sql"), &[id])?;
+        tx.execute(include_str!("sql/message/delete_conversation.sql"), &[id])?;
+        tx.commit()?;
         Ok(())
     }
 
@@ -256,6 +260,7 @@ mod tests {
 
         Contacts::add(id1, None, None).expect("Failed to add contact");
         Contacts::add(id2, None, None).expect("Failed to add contact");
+        crate::message::Messages::create_table().unwrap();
 
         Contacts::delete(id1).expect("Failed to delete contact");
 

@@ -108,6 +108,10 @@
                             "type": "quint64"
                         }
                     ]
+                },
+                "delete_conversation": {
+                    "return": "bool",
+                    "mut": true
                 }
             }
         },

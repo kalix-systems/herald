@@ -460,6 +460,7 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QString*, qstring_set);
     void messages_conversation_id_set(Messages::Private*, const ushort *str, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     bool messages_send_message(Messages::Private*, const ushort*, int);
 };
@@ -703,6 +704,10 @@ void Messages::setConversationId(const QString& v) {
     } else {
     messages_conversation_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
+}
+bool Messages::delete_conversation()
+{
+    return messages_delete_conversation(m_d);
 }
 bool Messages::delete_message(quint64 row_index)
 {

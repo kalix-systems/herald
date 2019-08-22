@@ -164,6 +164,29 @@ impl MessagesTrait for Messages {
         }
     }
 
+    fn delete_conversation(&mut self) -> bool {
+        let id = match &self.conversation_id {
+            Some(id) => id,
+            None => {
+                eprintln!("Warning: Conversation id not set");
+                return false;
+            }
+        };
+
+        match Core::delete_conversation(id) {
+            Ok(_) => {
+                self.model.begin_remove_rows(0, self.row_count());
+                self.list = ImVector::new();
+                self.model.end_remove_rows();
+                true
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                false
+            }
+        }
+    }
+
     fn emit(&mut self) -> &mut MessagesEmitter {
         &mut self.emit
     }

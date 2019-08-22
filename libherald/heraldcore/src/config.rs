@@ -161,7 +161,7 @@ mod tests {
 
         let id = "HelloWorld";
 
-        Config::new(id, None, None).unwrap();
+        Config::new(id.into(), None, None).unwrap();
         assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
 
         Config::drop_table().unwrap();
@@ -169,7 +169,7 @@ mod tests {
 
         let name = "stuff";
         let profile_picture = "stuff";
-        Config::new(id, Some(name), Some(profile_picture)).unwrap();
+        Config::new(id.into(), Some(name), Some(profile_picture)).unwrap();
         assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
         assert_eq!(Config::get().unwrap().name.unwrap(), name);
         assert_eq!(
@@ -185,7 +185,7 @@ mod tests {
         Config::create_table().unwrap();
 
         let id = "HelloWorld";
-        let config = Config::new(id, None, None).unwrap();
+        let config = Config::new(id.into(), None, None).unwrap();
 
         assert_eq!(config.id().unwrap(), id);
     }

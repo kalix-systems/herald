@@ -97,6 +97,16 @@ impl Messages {
 
         Ok(msgs)
     }
+
+    /// Deletes all messages in a conversation.
+    pub fn delete_conversation(conversation_id: &str) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message/delete_conversation.sql"),
+            &[conversation_id],
+        )?;
+        Ok(())
+    }
 }
 
 impl DBTable for Messages {
@@ -169,6 +179,22 @@ mod tests {
         Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
 
         Messages::delete_message(1).unwrap();
+
+        assert!(Messages::get_conversation(author).unwrap().is_empty());
+    }
+
+    #[test]
+    #[serial]
+    fn delete_conversation() {
+        Messages::drop_table().unwrap();
+        Messages::create_table().unwrap();
+
+        let author = "Hello";
+        let recipient = "World";
+        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
+        Messages::add_message(recipient, author, "1", None).expect("Failed to add first message");
+
+        Messages::delete_conversation(recipient).unwrap();
 
         assert!(Messages::get_conversation(author).unwrap().is_empty());
     }
