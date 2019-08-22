@@ -3,7 +3,7 @@ import QtQuick 2.5
 
 Item {
     Theme { id: themeEnum }
-    property int theme: themeEnum.light
+    property int theme: themeEnum.light /// user settable
     /// edge rounding for all rectangles
     /// that use the radius property
     readonly property int radius: 10

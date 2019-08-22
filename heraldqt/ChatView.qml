@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-
+import "ChatView"
 Pane {
     id: chatPane
     property var messageModel: Messages {
@@ -30,36 +30,16 @@ Pane {
         }
         delegate: Column {
 
-            readonly property bool outbound: author == config.id
+            readonly property bool outbound: author === config.id
 
             anchors {
                 right: outbound ? parent.right : undefined
                 rightMargin: chatScrollBar.width * 2
             }
 
-            Row {
-
-                TextMetrics {
-                    id: messageMetrics
-                    text: qsTr(body)
-                }
-
-                Rectangle {
-                    id: bubble
-                    color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
-                    radius: QmlCfg.radius
-                    width: bubbleText.width + 10
-                    height: bubbleText.height + 10
-                    Label {
-                        property bool tooLong: (messageMetrics.width >= chatPane.width / 2)
-                        id: bubbleText
-                        wrapMode: Text.Wrap
-                        width: tooLong ? chatPane.width / 2 : undefined
-                        text: messageMetrics.text
-                        anchors.centerIn: bubble
-                    } /// Text
-                } /// Chat bubble
-            } /// Delegate Row
+             ChatBubble {
+                  text: body
+             }
         } /// Delegate
     } /// ListView
 

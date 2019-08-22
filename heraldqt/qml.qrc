@@ -12,5 +12,8 @@
         <file>SideBar/UtilityBar.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/Theme.qml</file>
+        <file>main.cpp</file>
+        <file>ChatView/ChatBubble.qml</file>
+        <file>common/Avatar.qml</file>
     </qresource>
 </RCC>

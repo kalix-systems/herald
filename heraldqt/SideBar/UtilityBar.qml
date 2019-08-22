@@ -72,7 +72,7 @@ ToolBar {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         width: 300
         height: 200
-        anchors.centerIn: root //TODO : this is unassignable
+        //anchors.centerIn: root //TODO : this is unassignable
 
         TextArea {
             focus: true
