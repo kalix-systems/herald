@@ -8,9 +8,12 @@ pub mod config;
 pub mod contact;
 /// Wrapper around database.
 pub mod db;
+/// Errors
 mod errors;
-
+/// Image processing
+pub(crate) mod image_utils;
 /// Functions and data structures related to messages.
 pub mod message;
+
 ///// Networking
 //pub mod network;

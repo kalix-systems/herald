@@ -37,7 +37,9 @@ pub struct Contacts {
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
         // create table if it does not already exist
-        Core::create_table().ok();
+        if let Err(e) = Core::create_table() {
+            eprintln!("{}", e);
+        }
 
         let list = match Core::all() {
             Ok(v) => v.into_iter().map(|c| c.into()).collect(),
@@ -49,8 +51,12 @@ impl ContactsTrait for Contacts {
     fn remove_all(&mut self) {
         self.model.begin_reset_model();
 
-        Core::drop_table().expect("Couldn't drop contacts");
-        Core::create_table().unwrap();
+        if let Err(e) = Core::drop_table() {
+            eprintln!("{}", e);
+        }
+        if let Err(e) = Core::create_table() {
+            eprintln!("{}", e);
+        }
 
         self.list = ImVector::new();
 
@@ -92,11 +98,16 @@ impl ContactsTrait for Contacts {
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let id = self.list[row_index].contact_id.as_str();
 
-        if Core::update_profile_picture(id, picture).is_err() {
-            return false;
+        match Core::set_profile_picture(id, picture) {
+            Ok(s) => {
+                self.list[row_index].profile_picture = s;
+                true
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                false
+            }
         }
-
-        true
     }
 
     /// Removes a contact by their `id`, returns a boolean to indicate success.
@@ -125,7 +136,7 @@ impl ContactsTrait for Contacts {
 
         let name = self.list[row_index].name.as_ref().map(|n| n.as_str());
 
-        if Core::update_name(id, name).is_err() {
+        if Core::set_name(id, name).is_err() {
             return false;
         }
 

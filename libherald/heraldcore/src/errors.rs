@@ -1,4 +1,5 @@
 use herald_common::CapacityError;
+use image;
 use std::{fmt, sync::PoisonError};
 
 #[derive(Debug)]
@@ -7,6 +8,8 @@ pub enum HErr {
     DatabaseError(rusqlite::Error),
     MutexError(String),
     InvalidUserId(String),
+    IoError(std::io::Error),
+    ImageError(String),
 }
 
 impl fmt::Display for HErr {
@@ -17,6 +20,8 @@ impl fmt::Display for HErr {
             HeraldError(s) => write!(f, "Herald Error: {}", s),
             MutexError(s) => write!(f, "Mutex Error: {}", s),
             InvalidUserId(s) => write!(f, "InvalidUserId: {}", s),
+            IoError(e) => write!(f, "IoError: {}", e),
+            ImageError(s) => write!(f, "ImageError: {}", s),
         }
     }
 }
@@ -38,5 +43,27 @@ impl From<CapacityError<&str>> for HErr {
 impl From<rusqlite::Error> for HErr {
     fn from(e: rusqlite::Error) -> Self {
         HErr::DatabaseError(e)
+    }
+}
+
+impl From<std::io::Error> for HErr {
+    fn from(e: std::io::Error) -> Self {
+        HErr::IoError(e)
+    }
+}
+
+impl From<image::ImageError> for HErr {
+    fn from(e: image::ImageError) -> Self {
+        use image::ImageError;
+        match e {
+            ImageError::IoError(e) => e.into(),
+            e => HErr::ImageError(e.to_string()),
+        }
+    }
+}
+
+impl From<std::ffi::OsString> for HErr {
+    fn from(e: std::ffi::OsString) -> Self {
+        HErr::HeraldError(format!("Bad path: {:?}", e))
     }
 }

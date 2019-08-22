@@ -43,7 +43,9 @@ pub struct Messages {
 
 impl MessagesTrait for Messages {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
-        Core::create_table().ok();
+        if let Err(e) = Core::create_table() {
+            eprintln!("{}", e);
+        }
         Messages {
             conversation_id: None,
             list: ImVector::new(),
@@ -107,7 +109,7 @@ impl MessagesTrait for Messages {
 
     // TODO add networking component
     fn send_message(&mut self, body: String) -> bool {
-        let id = match heraldcore::config::Config::id() {
+        let id = match heraldcore::config::Config::static_id() {
             Ok(id) => id,
             Err(e) => {
                 eprintln!("{}", e);

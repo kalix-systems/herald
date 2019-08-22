@@ -1,14 +1,15 @@
 use crate::{
     db::{DBTable, Database},
     errors::*,
+    image_utils,
 };
 use rusqlite::{ToSql, NO_PARAMS};
 
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
-    /// id of the current user
-    pub id: String,
+    /// Id of the current user
+    pub id: Option<String>,
     /// Display name for the current user
     pub name: Option<String>,
     /// Path to profile picture for the current user
@@ -36,7 +37,7 @@ impl DBTable for Config {
 }
 
 impl Config {
-    /// Gets the users configuration
+    /// Gets the user's configuration
     pub fn get() -> Result<Config, HErr> {
         let db = Database::get()?;
         Ok(db.query_row(
@@ -53,7 +54,17 @@ impl Config {
     }
 
     /// Creates config.
-    pub fn add(id: &str, name: Option<&str>, profile_picture: Option<&str>) -> Result<(), HErr> {
+    pub fn new(
+        id: String,
+        name: Option<&str>,
+        profile_picture: Option<&str>,
+    ) -> Result<Config, HErr> {
+        let config = Config {
+            id: Some(id.to_owned()),
+            name: name.map(|n| n.to_owned()),
+            profile_picture: profile_picture.map(|p| p.to_owned()),
+        };
+
         let id = id.to_sql()?;
         let name = name.to_sql()?;
         let profile_picture = profile_picture.to_sql()?;
@@ -64,11 +75,19 @@ impl Config {
             &[id, name, profile_picture],
         )?;
 
-        Ok(())
+        Ok(config)
     }
 
     /// Gets id
-    pub fn id() -> Result<String, HErr> {
+    pub fn id(&self) -> Result<&str, HErr> {
+        match &self.id {
+            Some(id) => Ok(id),
+            None => Err(HErr::HeraldError("User id has not been set".into())),
+        }
+    }
+
+    /// Gets id
+    pub fn static_id() -> Result<String, HErr> {
         let db = Database::get()?;
         Ok(
             db.query_row(include_str!("sql/config/get_id.sql"), NO_PARAMS, |row| {
@@ -78,20 +97,37 @@ impl Config {
     }
 
     /// Updates name
-    pub fn update_name(name: Option<&str>) -> Result<(), HErr> {
+    pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
+        self.name = name;
+
         let db = Database::get()?;
-        db.execute(include_str!("sql/config/update_name.sql"), &[name])?;
+        db.execute(include_str!("sql/config/update_name.sql"), &[&self.name])?;
 
         Ok(())
     }
 
     /// Updates profile picture
-    pub fn update_profile_picture(profile_picture: Option<&str>) -> Result<(), HErr> {
+    pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
+        let id = self.id()?;
+
+        self.profile_picture = match profile_picture {
+            Some(path) => {
+                let path = image_utils::save_profile_picture(id, path)?
+                    .into_os_string()
+                    .into_string()?;
+
+                Some(path)
+            }
+            None => {
+                image_utils::delete_profile_picture(id)?;
+                None
+            }
+        };
+
+        let path = self.profile_picture.as_ref().map(|s| s.as_str());
+
         let db = Database::get()?;
-        db.execute(
-            include_str!("sql/config/update_name.sql"),
-            &[profile_picture],
-        )?;
+        db.execute(include_str!("sql/config/update_name.sql"), &[path])?;
 
         Ok(())
     }
@@ -125,16 +161,16 @@ mod tests {
 
         let id = "HelloWorld";
 
-        Config::add(id, None, None).unwrap();
-        assert_eq!(Config::get().unwrap().id, "HelloWorld");
+        Config::new(id, None, None).unwrap();
+        assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
 
         Config::drop_table().unwrap();
         Config::create_table().unwrap();
 
         let name = "stuff";
         let profile_picture = "stuff";
-        Config::add(id, Some(name), Some(profile_picture)).unwrap();
-        assert_eq!(Config::get().unwrap().id, "HelloWorld");
+        Config::new(id, Some(name), Some(profile_picture)).unwrap();
+        assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
         assert_eq!(Config::get().unwrap().name.unwrap(), name);
         assert_eq!(
             Config::get().unwrap().profile_picture.unwrap(),
@@ -149,8 +185,8 @@ mod tests {
         Config::create_table().unwrap();
 
         let id = "HelloWorld";
-        Config::add(id, None, None).unwrap();
+        let config = Config::new(id, None, None).unwrap();
 
-        assert_eq!(Config::id().unwrap(), id);
+        assert_eq!(config.id().unwrap(), id);
     }
 }
