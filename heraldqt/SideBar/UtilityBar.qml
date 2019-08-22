@@ -27,7 +27,7 @@ ToolBar {
 
         background: Rectangle {
             id: bg
-            color: "#3c7c9b"
+            color: Qt.darker(QmlCfg.palette.tertiaryColor, 1.3)
             radius: 100
             Image {
                 source: "qrc:///icons/plus.png"
