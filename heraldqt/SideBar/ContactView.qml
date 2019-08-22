@@ -89,9 +89,9 @@ ListView {
             height: rowHeight
             color: {
                 if (contactItem.focus) {
-                    return "lightsteelblue"
+                    return QmlCfg.palette.tertiaryColor
                 } else {
-                    return index % 2 ? "#f3f3f3" : "white"
+                    return index % 2 ? QmlCfg.palette.secondaryColor : QmlCfg.palette.mainColor
                 }
             }
         }
@@ -104,13 +104,13 @@ ListView {
                 width: rowHeight - 10
                 height: rowHeight - 10
                 anchors.verticalCenter: parent.verticalCenter
-                color: "#000000"
+                color:  QmlCfg.palette.mainTextColor
                 radius: 100
                 ///---- initial
                 Text {
                     text: qsTr(displayName[0].toUpperCase())
                     font.bold: true
-                    color: "#FFFFFF"
+                    color: QmlCfg.palette.mainColor
                     anchors.centerIn: parent
                     font.pixelSize: parent.height - 5
                 }

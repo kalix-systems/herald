@@ -7,10 +7,10 @@ Item {
     /// edge rounding for all rectangles
     /// that use the radius property
     readonly property int radius: 10
-    /// pallete :
+    /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme
-    property var pallete: QtObject{
+    property var palette: QtObject{
         /// mainColor:
         /// used for backgrounds and default fills
         property string mainColor: "white"

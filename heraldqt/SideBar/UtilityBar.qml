@@ -11,7 +11,7 @@ ToolBar {
     font.pointSize: 25
     background: Rectangle {
         anchors.fill: parent
-        color: "#FFFFFF"
+        color: QmlCfg.palette.secondaryColor
     }
 
     ///--- Add contact button

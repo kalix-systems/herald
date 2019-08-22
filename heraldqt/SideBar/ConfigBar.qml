@@ -13,8 +13,8 @@ ToolBar {
     height: 40
 
     background: Rectangle {
-        color: QmlCfg.pallete.mainColor
-        border.color: "#AFAFAF"
+        color: QmlCfg.palette.mainColor
+        border.color: QmlCfg.palette.secondaryColor
     }
 
     /// unpolished temporary Popup

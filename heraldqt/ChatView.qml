@@ -46,7 +46,7 @@ Pane {
 
                 Rectangle {
                     id: bubble
-                    color: outbound ? QmlCfg.pallete.tertiaryColor : QmlCfg.pallete.secondaryColor
+                    color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
                     radius: QmlCfg.radius
                     width: bubbleText.width + 10
                     height: bubbleText.height + 10
@@ -72,12 +72,12 @@ Pane {
             left: parent.left
         }
         background: Rectangle {
-            color: QmlCfg.pallete.mainColor
+            color: QmlCfg.palette.mainColor
         }
         height: Math.min(contentHeight, 100)
         TextArea {
             background: Rectangle {
-                color: QmlCfg.pallete.secondaryColor
+                color: QmlCfg.palette.secondaryColor
                 anchors.fill: parent
                 anchors.margins: 5
                 radius: QmlCfg.radius
