@@ -2,7 +2,6 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "common"
 
 Pane {
     id: chatPane
@@ -27,9 +26,7 @@ Pane {
         ///--- scrollbar for chat messages
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
-            Component.onCompleted: {
-                position = 1.0
-            }
+            Component.onCompleted: position = 1.0
         }
         delegate: Column {
 
@@ -49,8 +46,8 @@ Pane {
 
                 Rectangle {
                     id: bubble
-                    color: outbound ? "lightsteelblue" : "lightgrey"
-                    radius: 10
+                    color: outbound ? QmlCfg.pallete.tertiaryColor : QmlCfg.pallete.secondaryColor
+                    radius: QmlCfg.radius
                     width: bubbleText.width + 10
                     height: bubbleText.height + 10
                     Label {
@@ -75,15 +72,15 @@ Pane {
             left: parent.left
         }
         background: Rectangle {
-            color: "white"
+            color: QmlCfg.pallete.mainColor
         }
         height: Math.min(contentHeight, 100)
         TextArea {
             background: Rectangle {
-                color: "lightgray"
+                color: QmlCfg.pallete.secondaryColor
                 anchors.fill: parent
                 anchors.margins: 5
-                radius: 10
+                radius: QmlCfg.radius
             }
 
             padding: 10

@@ -1,7 +1,6 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "../common"
 
 ToolBar {
     id: utilityBar
@@ -59,9 +58,8 @@ ToolBar {
     }
 
    function insertContact() {
-                    if (entryField.text.trim().length === 0) {
+                    if (entryField.text.trim().length === 0)
                         return
-                    }
                     contacts.add(entryField.text.trim())
                     entryField.clear()
                     newContactDialogue.close()
@@ -74,7 +72,7 @@ ToolBar {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         width: 300
         height: 200
-        anchors.centerIn: root
+        anchors.centerIn: root //TODO : this is unassignable
 
         TextArea {
             focus: true

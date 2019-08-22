@@ -1,7 +1,6 @@
 import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.12
-import "../common"
 
 /// --- displays a list of contacts
 ListView {
@@ -96,7 +95,7 @@ ListView {
                 }
             }
         }
-
+        ///TODO make and avatar component
         Row {
             ///--- Circle with initial
             leftPadding: 10
@@ -122,7 +121,6 @@ ListView {
                 font.bold: true
                 anchors.verticalCenter: parent.verticalCenter
             }
-
             spacing: 10
         }
     }
