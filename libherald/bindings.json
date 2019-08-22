@@ -109,9 +109,23 @@
                         }
                     ]
                 },
+                "clear_conversation_view": {
+                    "mut": true,
+                    "return": "void"
+                },
                 "delete_conversation": {
-                    "return": "bool",
-                    "mut": true
+                    "mut": true,
+                    "return": "bool"
+                },
+                "delete_conversation_by_id": {
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "conversation_id",
+                            "type": "QString"
+                        }
+                    ],
+                    "return": "bool"
                 }
             }
         },

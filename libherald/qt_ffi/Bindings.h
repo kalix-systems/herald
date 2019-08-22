@@ -118,7 +118,9 @@ public:
     ~Messages();
     QString conversationId() const;
     void setConversationId(const QString& v);
+    Q_INVOKABLE void clear_conversation_view();
     Q_INVOKABLE bool delete_conversation();
+    Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
     Q_INVOKABLE bool send_message(const QString& body);
 

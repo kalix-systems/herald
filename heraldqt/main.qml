@@ -5,7 +5,6 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "common"
 
-
 ApplicationWindow {
     visible: true
     width: 900
@@ -24,7 +23,9 @@ ApplicationWindow {
         }
     }
 
-    CommonConfig { id: comCfg }
+    CommonConfig {
+        id: comCfg
+    }
 
     /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
@@ -37,7 +38,7 @@ ApplicationWindow {
         /// Contacts view for the desktop client, in DesktopContacts.qml
         /// includes the config and contacts toolbars
         SideBar {
-            id: contacts
+            id: contacts // TODO fix this
         }
 
         /// placeholder element

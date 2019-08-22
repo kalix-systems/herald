@@ -49,6 +49,7 @@ Pane {
     Contacts {
         id: contacts
     }
+
     Pane {
         padding: 0
         anchors {

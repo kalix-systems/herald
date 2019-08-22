@@ -164,6 +164,7 @@ impl MessagesTrait for Messages {
         }
     }
 
+    /// Deletes all messages in the current conversation.
     fn delete_conversation(&mut self) -> bool {
         let id = match &self.conversation_id {
             Some(id) => id,
@@ -175,9 +176,10 @@ impl MessagesTrait for Messages {
 
         match Core::delete_conversation(id) {
             Ok(_) => {
-                self.model.begin_remove_rows(0, self.row_count());
+                self.model.begin_reset_model();
                 self.list = ImVector::new();
-                self.model.end_remove_rows();
+                self.conversation_id = None;
+                self.model.end_reset_model();
                 true
             }
             Err(e) => {
@@ -185,6 +187,32 @@ impl MessagesTrait for Messages {
                 false
             }
         }
+    }
+
+    /// Deletes all messages in a conversation.
+    fn delete_conversation_by_id(&mut self, id: String) -> bool {
+        match Core::delete_conversation(id.as_str()) {
+            Ok(_) => {
+                if Some(id) == self.conversation_id {
+                    self.model.begin_reset_model();
+                    self.list = ImVector::new();
+                    self.model.end_reset_model();
+                }
+                true
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                false
+            }
+        }
+    }
+
+    /// Clears the current view without modifying the underlying data
+    fn clear_conversation_view(&mut self) {
+        self.model.begin_reset_model();
+        self.list = ImVector::new();
+        self.conversation_id = None;
+        self.model.end_reset_model();
     }
 
     fn emit(&mut self) -> &mut MessagesEmitter {

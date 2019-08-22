@@ -686,7 +686,9 @@ pub trait MessagesTrait {
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn conversation_id(&self) -> Option<&str>;
     fn set_conversation_id(&mut self, value: Option<String>);
+    fn clear_conversation_view(&mut self) -> ();
     fn delete_conversation(&mut self) -> bool;
+    fn delete_conversation_by_id(&mut self, conversation_id: String) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn send_message(&mut self, body: String) -> bool;
     fn row_count(&self) -> usize;
@@ -777,9 +779,25 @@ pub unsafe extern "C" fn messages_conversation_id_set_none(ptr: *mut Messages) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_clear_conversation_view(ptr: *mut Messages) -> () {
+    let o = &mut *ptr;
+    let r = o.clear_conversation_view();
+    r
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_delete_conversation(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
     let r = o.delete_conversation();
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_delete_conversation_by_id(ptr: *mut Messages, conversation_id_str: *const c_ushort, conversation_id_len: c_int) -> bool {
+    let mut conversation_id = String::new();
+    set_string_from_utf16(&mut conversation_id, conversation_id_str, conversation_id_len);
+    let o = &mut *ptr;
+    let r = o.delete_conversation_by_id(conversation_id);
     r
 }
 

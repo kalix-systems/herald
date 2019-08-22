@@ -7,15 +7,16 @@ ListView {
     id: contactList
     boundsBehavior: Flickable.StopAtBounds
     clip: true
+    currentIndex: -1
     ScrollBar.vertical: ScrollBar {
     }
-
     delegate: Item {
         property int rowHeight: 60
         property string displayName: name ? name : contact_id
         id: contactItem
         height: rowHeight
         width: parent.width
+
         Rectangle {
 
             MouseArea {
@@ -39,7 +40,10 @@ ListView {
                 closePolicy: Popup.CloseOnPressOutside
                 MenuItem {
                     text: 'Delete Contact'
-                    onTriggered: contacts.remove(index)
+                    onTriggered: {
+                        contacts.remove(index)
+                        chatView.messageModel.clear_conversation_view()
+                    }
                 }
                 MenuItem {
                     text: 'Rename Contact'
