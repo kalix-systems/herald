@@ -12,7 +12,7 @@ ListView {
     }
     delegate: Item {
         property int rowHeight: 60
-        property string displayName: name ? name : contact_id
+
         id: contactItem
         height: rowHeight
         width: parent.width
@@ -96,6 +96,6 @@ ListView {
             }
         }
         ///TODO make and avatar component
-        Avatar {  }
+        Avatar { displayName:  name ? name : contact_id }
     }
 }

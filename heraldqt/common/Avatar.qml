@@ -4,6 +4,7 @@ import QtQuick.Controls 2.12
 
 /// --- displays a list of contacts
 Row {
+    property string displayName: ""
     ///--- Circle with initial
     leftPadding: 10
     anchors.verticalCenter: parent.verticalCenter
