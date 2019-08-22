@@ -12,6 +12,8 @@ ApplicationWindow {
     height: 640
     title: qsTr("Herald")
     id: root
+    minimumWidth: 250
+    minimumHeight: 300
 
     /// global configurations item
     Config {
