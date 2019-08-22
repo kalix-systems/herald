@@ -1,5 +1,6 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Pane {
@@ -7,21 +8,20 @@ Pane {
     }
     topPadding: 0 /// for better clipping behavior
     rightPadding: 0 /// for the scrollbar
-
+    bottomPadding: 0
     ///--- chat view, shows messages
     ListView {
-        header: Rectangle {
-            height: 10
-        }
+
         boundsBehavior: Flickable.StopAtBounds
         anchors {
             right: parent.right
             bottom: chatBox.top
             top: parent.top
             left: parent.left
-            bottomMargin: 20 ///allow one unit of spacing between base and final message
+            topMargin: 20 /// allow one unit of spacing between ceiling and first message
+            bottomMargin: 20 /// allow one unit of spacing between base and final message
         }
-        spacing: 20
+        spacing: 10
         model: messageModel
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
@@ -31,25 +31,30 @@ Pane {
         }
         delegate: Column {
             readonly property bool outbound: author == config.id
-            height: messageText.height
             anchors {
                 right: outbound ? parent.right : undefined
-                rightMargin: 10
+                rightMargin: chatScrollBar.width * 2
             }
             Row {
-                anchors.right: parent.right
+                TextMetrics {
+                    id: messageMetrics
+                    text: qsTr(body)
+                }
+
                 Rectangle {
-                    id: bubble
-                    width: messageText.width + 10
-                    height: messageText.height + 10
+                    id: recto
                     color: outbound ? "lightsteelblue" : "lightgrey"
                     radius: 10
-                    Text {
-                        anchors.centerIn: bubble
-                        width: Math.min(messageText.contentWidth, root.width * 1/4)
+                    width: labo.width + 10
+                    height: labo.height + 10
+
+                    Label {
+                        property bool tooLong: (messageMetrics.width >= root.width / 4)
+                        id: labo
                         wrapMode: Text.Wrap
-                        id: messageText
-                        text: qsTr(body)
+                        width: tooLong ? root.width / 4 : messageMetrics.advanceWidth
+                        text: messageMetrics.text
+                        anchors.centerIn: recto
                     }
                 }
             }
@@ -57,25 +62,33 @@ Pane {
     }
 
     ///--- Text entry area
-    TextArea {
+    Rectangle {
         id: chatBox
+        height: 50
         anchors {
             right: parent.right
             bottom: parent.bottom
             left: parent.left
         }
-        placeholderText: "Send a Message ..."
-        background: Rectangle {
-            radius: 100
-            color: "gray"
-        }
-        Keys.onReturnPressed: {
-            if (chatBox.text.length <= 0) {
-                return
+        TextArea {
+            id: chatTextArea
+            width: parent.width
+            anchors {
+                centerIn: parent
             }
-            messageModel.send_message(chatBox.text)
-            chatScrollBar.position = 1.0
-            chatBox.clear()
+            placeholderText: "Send a Message ..."
+            background: Rectangle {
+                radius: 100
+                color: "gray"
+            }
+            Keys.onReturnPressed: {
+                if (chatTextArea.text.length <= 0) {
+                    return
+                }
+                messageModel.send_message(chatTextArea.text)
+                chatScrollBar.position = 1.0
+                chatTextArea.clear()
+            }
         }
     }
 }

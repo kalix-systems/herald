@@ -16,7 +16,6 @@ ListView {
         id: contactItem
         height: rowHeight
         width: parent.width
-
         Rectangle {
 
             MouseArea {

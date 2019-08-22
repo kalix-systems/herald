@@ -10,5 +10,7 @@
         <file>ChatView.qml</file>
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/SearchBar.qml</file>
+        <file>main.cpp</file>
+        <file>common/CommonConfig.qml</file>
     </qresource>
 </RCC>
