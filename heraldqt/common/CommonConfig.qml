@@ -1,11 +1,15 @@
 import QtQuick 2.0
 
 Item {
+    id: commonCfg
     Theme { id: themeEnum }
     property int theme: themeEnum.light
+    /// edge rounding for all rectangles
+    /// that use the radius property
+    property int radius: 10
     /// pallete :
     /// object which contains all of the color configurations
-    // this is defaulted to the Light color scheme
+    /// this is defaulted to the Light color scheme
     property var pallete: QtObject{
         /// mainColor:
         /// used for backgrounds and default fills

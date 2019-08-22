@@ -11,6 +11,7 @@ ApplicationWindow {
     height: 640
     title: qsTr("Herald")
     id: root
+
     /// global configurations item
     Config {
         id: config
@@ -23,13 +24,10 @@ ApplicationWindow {
         }
     }
 
-    CommonConfig {
-        id: comCfg
-    }
+
 
     /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
-
         id: rootSplitView
         anchors.fill: parent
         Layout.fillWidth: true
