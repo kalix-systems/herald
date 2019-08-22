@@ -33,22 +33,21 @@ Pane {
     }
 
     ///--- SearchBar for contacts, add contact button
-    SearchBar {
-        id: searchBar
+    UtilityBar {
+        id: utilityBar
     }
+
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Rectangle {
         id: searchBarBorder
-        anchors.top: searchBar.bottom
+        anchors.top: utilityBar.bottom
         color: "#AFAFAF"
         width: parent.width
         height: 1
     }
 
     ///--- Contacts View Actual
-    Contacts {
-        id: contacts
-    }
+
 
     Pane {
         padding: 0
@@ -61,8 +60,11 @@ Pane {
 
         ContactView {
             anchors.fill: parent
-            model: contacts
+            model: Contacts {
+                id: contacts
+            }
         }
+
     }
 }
 

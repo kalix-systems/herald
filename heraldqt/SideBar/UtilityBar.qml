@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 
 ToolBar {
-    id: searchBar
+    id: utilityBar
     anchors.left: parent.left
     y: toolBar.y + toolBar.height
     width: contactPane.width
