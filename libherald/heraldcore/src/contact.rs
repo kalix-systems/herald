@@ -193,7 +193,7 @@ impl Contacts {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 /// A Herald contact.
 pub struct Contact {
     /// Contact id
@@ -212,6 +212,30 @@ impl Contact {
             id,
             profile_picture,
         }
+    }
+
+    /// Returns name
+    pub fn name(&self) -> Option<&str> {
+        self.name.as_ref().map(|s| s.as_str())
+    }
+
+    /// Sets contact name
+    pub fn set_name(&mut self, name: Option<&str>) -> Result<(), HErr> {
+        Contacts::set_name(self.id.as_str(), name)?;
+        self.name = name.map(|s| s.to_owned());
+        Ok(())
+    }
+
+    /// Returns path to profile picture
+    pub fn profile_picture(&self) -> Option<&str> {
+        self.profile_picture.as_ref().map(|s| s.as_ref())
+    }
+
+    /// Sets profile picture
+    pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
+        let path = Contacts::set_profile_picture(self.id.as_str(), profile_picture)?;
+        self.profile_picture = path;
+        Ok(())
     }
 }
 

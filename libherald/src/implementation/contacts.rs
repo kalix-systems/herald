@@ -5,27 +5,9 @@ use heraldcore::{
 };
 use im_rc::vector::Vector as ImVector;
 
-#[derive(Default, Clone)]
+#[derive(Clone)]
 struct ContactsItem {
-    contact_id: String,
-    name: Option<String>,
-    profile_picture: Option<String>,
-}
-
-impl From<contact::Contact> for ContactsItem {
-    #[inline]
-    fn from(val: contact::Contact) -> Self {
-        let contact::Contact {
-            id: contact_id,
-            name,
-            profile_picture,
-        } = val;
-        ContactsItem {
-            contact_id,
-            name,
-            profile_picture,
-        }
-    }
+    inner: contact::Contact,
 }
 
 pub struct Contacts {
@@ -42,7 +24,7 @@ impl ContactsTrait for Contacts {
         }
 
         let list = match Core::all() {
-            Ok(v) => v.into_iter().map(|c| c.into()).collect(),
+            Ok(v) => v.into_iter().map(|c| ContactsItem { inner: c }).collect(),
             Err(_) => ImVector::new(),
         };
         Contacts { emit, model, list }
@@ -76,17 +58,39 @@ impl ContactsTrait for Contacts {
 
         self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem {
-            contact_id: id,
-            name: None,
-            profile_picture: None,
+            inner: contact::Contact::new(id, None, None),
         });
         self.model.end_insert_rows();
+        true
+    }
+
+    /// Returns contact id.
+    fn contact_id(&self, row_index: usize) -> &str {
+        self.list[row_index].inner.id.as_str()
+    }
+
+    /// Returns contacts name
+    fn name(&self, row_index: usize) -> Option<&str> {
+        self.list[row_index].inner.name.as_ref().map(|n| n.as_str())
+    }
+
+    /// Updates a contact's name, returns a boolean to indicate success.
+    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+        if self.list[row_index]
+            .inner
+            .set_name((&name).as_ref().map(|n| n.as_str()))
+            .is_err()
+        {
+            return false;
+        }
+
         true
     }
 
     /// Returns profile picture given the contact's id.
     fn profile_picture(&self, row_index: usize) -> Option<&str> {
         self.list[row_index]
+            .inner
             .profile_picture
             .as_ref()
             .map(|s| s.as_str())
@@ -96,13 +100,8 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
-        let id = self.list[row_index].contact_id.as_str();
-
-        match Core::set_profile_picture(id, picture) {
-            Ok(s) => {
-                self.list[row_index].profile_picture = s;
-                true
-            }
+        match self.list[row_index].inner.set_profile_picture(picture) {
+            Ok(_) => true,
             Err(e) => {
                 eprintln!("{}", e);
                 false
@@ -114,7 +113,7 @@ impl ContactsTrait for Contacts {
     fn remove(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 
-        let id = self.list[row_index].contact_id.as_str();
+        let id = self.list[row_index].inner.id.as_str();
         match Core::delete(id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
@@ -129,33 +128,11 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    /// Updates a contact's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
-        self.list[row_index].name = name;
-        let id = self.list[row_index].contact_id.as_str();
-
-        let name = self.list[row_index].name.as_ref().map(|n| n.as_str());
-
-        if Core::set_name(id, name).is_err() {
-            return false;
-        }
-
-        true
-    }
-
     fn emit(&mut self) -> &mut ContactsEmitter {
         &mut self.emit
     }
 
     fn row_count(&self) -> usize {
         self.list.len()
-    }
-
-    fn contact_id(&self, row_index: usize) -> &str {
-        self.list[row_index].contact_id.as_str()
-    }
-
-    fn name(&self, row_index: usize) -> Option<&str> {
-        self.list[row_index].name.as_ref().map(|n| n.as_str())
     }
 }
