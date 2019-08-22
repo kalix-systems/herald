@@ -47,9 +47,6 @@ ToolBar {
                 property bool pfpValid: true
             }
 
-            /// TODO : make this do anything.
-            /// we think this is going to have to
-            /// happen from rust... xhr request bull..
             Button {
                 text: "select profile picture"
                 onClicked: {

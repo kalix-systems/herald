@@ -36,7 +36,7 @@ Pane {
 
             anchors {
                 right: outbound ? parent.right : undefined
-                rightMargin: chatScrollBar.width * 2 ///
+                rightMargin: chatScrollBar.width * 2
             }
 
             Row {
@@ -47,24 +47,23 @@ Pane {
                 }
 
                 Rectangle {
-                    id: recto
+                    id: bubble
                     color: outbound ? "lightsteelblue" : "lightgrey"
                     radius: 10
-                    width: labo.width + 10
-                    height: labo.height + 10
-
+                    width: bubbleText.width + 10
+                    height: bubbleText.height + 10
                     Label {
-                        property bool tooLong: (messageMetrics.width >= root.width / 4)
-                        id: labo
+                        property bool tooLong: (messageMetrics.width >= pane.width / 2)
+                        id: bubbleText
                         wrapMode: Text.Wrap
-                        width: tooLong ? root.width / 4 : messageMetrics.advanceWidth
+                        width: tooLong ? pane.width / 2 : undefined
                         text: messageMetrics.text
-                        anchors.centerIn: recto
-                    }
-                }
-            }
-        }
-    }
+                        anchors.centerIn: bubble
+                    } /// Text
+                } /// Chat bubble
+            } /// Delegate Row
+        } /// Delegate
+    } /// ListView
 
     ///--- Text entry area
     ScrollView {
@@ -79,7 +78,14 @@ Pane {
         }
         height: Math.min(contentHeight, 100)
         TextArea {
-            padding: 5
+            background: Rectangle {
+                color: "lightgray"
+                anchors.fill: parent
+                anchors.margins: 5
+                radius: 10
+            }
+
+            padding: 10
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.onReturnPressed: {
@@ -89,6 +95,6 @@ Pane {
                 chatScrollBar.position = 1.0
                 clear()
             }
-        }
-    }
+        } /// Chat entry field
+    } /// scroll area
 }
