@@ -9,7 +9,7 @@
         <file>icons/gear.png</file>
         <file>ChatView.qml</file>
         <file>SideBar/ConfigBar.qml</file>
-        <file>SideBar/SearchBar.qml</file>
+        <file>SideBar/UtilityBar.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/Theme.qml</file>
     </qresource>

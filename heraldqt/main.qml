@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "common"
+import "SideBar"
 
 ApplicationWindow {
     visible: true
@@ -26,6 +27,7 @@ ApplicationWindow {
 
 
 
+
     /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
         id: rootSplitView
@@ -36,12 +38,13 @@ ApplicationWindow {
         /// Contacts view for the desktop client, in DesktopContacts.qml
         /// includes the config and contacts toolbars
         SideBar {
-            id: contacts // TODO fix this
+            id: sideBar
         }
 
         /// placeholder element
         ChatView {
             id: chatView
         }
+
     }
 }

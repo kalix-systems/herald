@@ -4,7 +4,7 @@ import LibHerald 1.0
 import "../common"
 
 ToolBar {
-    id: searchBar
+    id: utilityBar
     anchors.left: parent.left
     y: toolBar.y + toolBar.height
     width: contactPane.width

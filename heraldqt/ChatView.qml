@@ -5,7 +5,7 @@ import LibHerald 1.0
 import "common"
 
 Pane {
-    id: pane
+    id: chatPane
     property var messageModel: Messages {
     }
     padding: 0
@@ -54,10 +54,10 @@ Pane {
                     width: bubbleText.width + 10
                     height: bubbleText.height + 10
                     Label {
-                        property bool tooLong: (messageMetrics.width >= pane.width / 2)
+                        property bool tooLong: (messageMetrics.width >= chatPane.width / 2)
                         id: bubbleText
                         wrapMode: Text.Wrap
-                        width: tooLong ? pane.width / 2 : undefined
+                        width: tooLong ? chatPane.width / 2 : undefined
                         text: messageMetrics.text
                         anchors.centerIn: bubble
                     } /// Text
