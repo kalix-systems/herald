@@ -1,7 +1,8 @@
 SELECT
   id,
   name,
-  profile_picture
+  profile_picture,
+  colorscheme
 FROM
   config
 LIMIT

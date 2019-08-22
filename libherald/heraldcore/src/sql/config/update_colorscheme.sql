@@ -1,0 +1,4 @@
+UPDATE
+  config
+SET
+  colorscheme = ?
