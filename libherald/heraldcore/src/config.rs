@@ -8,7 +8,7 @@ use rusqlite::{ToSql, NO_PARAMS};
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
-    /// Id of the current user
+    /// ID of the current user
     pub id: Option<String>,
     /// Display name for the current user
     pub name: Option<String>,
@@ -53,7 +53,7 @@ impl Config {
         )?)
     }
 
-    /// Creates config.
+    /// Creates user configuration.
     pub fn new(
         id: String,
         name: Option<&str>,
@@ -78,7 +78,7 @@ impl Config {
         Ok(config)
     }
 
-    /// Gets id
+    /// Gets user id
     pub fn id(&self) -> Result<&str, HErr> {
         match &self.id {
             Some(id) => Ok(id),
@@ -86,7 +86,7 @@ impl Config {
         }
     }
 
-    /// Gets id
+    /// Gets user id directly from database.
     pub fn static_id() -> Result<String, HErr> {
         let db = Database::get()?;
         Ok(
@@ -96,7 +96,7 @@ impl Config {
         )
     }
 
-    /// Updates name
+    /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
         self.name = name;
 
@@ -106,7 +106,7 @@ impl Config {
         Ok(())
     }
 
-    /// Updates profile picture
+    /// Updates user's profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
         let id = self.id()?;
 
