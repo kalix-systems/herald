@@ -4,25 +4,26 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Pane {
+    id: pane
     property var messageModel: Messages {
     }
-    topPadding: 0 /// for better clipping behavior
-    rightPadding: 0 /// for the scrollbar
-    bottomPadding: 0
+    padding: 0
     ///--- chat view, shows messages
     ListView {
 
-        boundsBehavior: Flickable.StopAtBounds
         anchors {
             right: parent.right
-            bottom: chatBox.top
+            bottom: chatTextAreaScroll.top
             top: parent.top
             left: parent.left
             topMargin: 20 /// allow one unit of spacing between ceiling and first message
             bottomMargin: 20 /// allow one unit of spacing between base and final message
         }
+
+        boundsBehavior: Flickable.StopAtBounds
         spacing: 10
         model: messageModel
+        ///--- scrollbar for chat messages
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
             Component.onCompleted: {
@@ -30,12 +31,16 @@ Pane {
             }
         }
         delegate: Column {
+
             readonly property bool outbound: author == config.id
+
             anchors {
                 right: outbound ? parent.right : undefined
-                rightMargin: chatScrollBar.width * 2
+                rightMargin: chatScrollBar.width * 2 ///
             }
+
             Row {
+
                 TextMetrics {
                     id: messageMetrics
                     text: qsTr(body)
@@ -62,32 +67,27 @@ Pane {
     }
 
     ///--- Text entry area
-    Rectangle {
-        id: chatBox
-        height: 50
+    ScrollView {
+        id: chatTextAreaScroll
         anchors {
             right: parent.right
             bottom: parent.bottom
             left: parent.left
         }
+        background: Rectangle {
+            color: "white"
+        }
+        height: Math.min(contentHeight, 100)
         TextArea {
-            id: chatTextArea
-            width: parent.width
-            anchors {
-                centerIn: parent
-            }
+            padding: 5
+            wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
-            background: Rectangle {
-                radius: 100
-                color: "gray"
-            }
             Keys.onReturnPressed: {
-                if (chatTextArea.text.length <= 0) {
+                if (text.length <= 0)
                     return
-                }
-                messageModel.send_message(chatTextArea.text)
+                messageModel.send_message(text)
                 chatScrollBar.position = 1.0
-                chatTextArea.clear()
+                clear()
             }
         }
     }
