@@ -11,6 +11,7 @@ ToolBar {
     }
     width: contactPane.width
     height: 40
+
     background: Rectangle {
         color: "#EFEFEF"
         border.color: "#AFAFAF"
@@ -23,6 +24,8 @@ ToolBar {
         focus: true
         width: 300
         height: 300
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
         Column {
             ///  TODO : This field should really not exist but it had to be here
             /// until a hero fixes the server

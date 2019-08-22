@@ -72,13 +72,9 @@ ToolBar {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        width: 500
-        height: 300
 
-        Text {
-            text: "this is a placeholder, forgive me"
-            anchors.bottom: parent.bottom
-        }
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
 
         TextArea {
             focus: true
