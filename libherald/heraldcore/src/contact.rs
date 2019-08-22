@@ -220,6 +220,15 @@ impl From<bool> for ArchiveStatus {
     }
 }
 
+impl From<ArchiveStatus> for bool {
+    fn from(archived: ArchiveStatus) -> Self {
+        match archived {
+            ArchiveStatus::Archived => true,
+            ArchiveStatus::Active => false,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 /// A Herald contact.
 pub struct Contact {
@@ -281,6 +290,13 @@ impl Contact {
     /// Returns contact's color
     pub fn color(&self) -> u32 {
         self.color
+    }
+
+    /// Sets color
+    pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
+        Contacts::set_color(self.id.as_str(), color)?;
+        self.color = color;
+        Ok(())
     }
 
     /// Archives the contact

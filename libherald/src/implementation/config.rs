@@ -20,34 +20,12 @@ impl ConfigTrait for Config {
                     id: None,
                     name: None,
                     profile_picture: None,
+                    colorscheme: 0,
                 };
                 (uninit_inner, false)
             }
         };
         Config { emit, inner, init }
-    }
-
-    fn exists(&self) -> bool {
-        self.init
-    }
-
-    fn emit(&mut self) -> &mut ConfigEmitter {
-        &mut self.emit
-    }
-
-    fn set_id(&mut self, id: String) {
-        if !self.init {
-            self.inner = match Core::new(id, None, None) {
-                Ok(c) => {
-                    self.init = true;
-                    c
-                }
-                Err(e) => {
-                    eprintln!("{}", e);
-                    return;
-                }
-            };
-        }
     }
 
     fn id(&self) -> &str {
@@ -57,6 +35,21 @@ impl ConfigTrait for Config {
                 eprintln!("{}", e);
                 ""
             }
+        }
+    }
+
+    fn set_id(&mut self, id: String) {
+        if !self.init {
+            self.inner = match Core::new(id, None, None, Some(0)) {
+                Ok(c) => {
+                    self.init = true;
+                    c
+                }
+                Err(e) => {
+                    eprintln!("{}", e);
+                    return;
+                }
+            };
         }
     }
 
@@ -78,5 +71,23 @@ impl ConfigTrait for Config {
         if let Err(e) = self.inner.set_profile_picture(picture) {
             eprintln!("Error: {}", e);
         }
+    }
+
+    fn colorscheme(&self) -> u32 {
+        self.inner.colorscheme
+    }
+
+    fn set_colorscheme(&mut self, colorscheme: u32) {
+        if let Err(e) = self.inner.set_colorscheme(colorscheme) {
+            eprintln!("{}", e);
+        }
+    }
+
+    fn exists(&self) -> bool {
+        self.init
+    }
+
+    fn emit(&mut self) -> &mut ConfigEmitter {
+        &mut self.emit
     }
 }

@@ -28,6 +28,10 @@ namespace {
     inline QVariant cleanNullQVariant(const QVariant& v) {
         return (v.isNull()) ?QVariant() :v;
     }
+    inline void configColorschemeChanged(Config* o)
+    {
+        Q_EMIT o->colorschemeChanged();
+    }
     inline void configIdChanged(Config* o)
     {
         Q_EMIT o->idChanged();
@@ -46,8 +50,10 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
+    quint32 config_colorscheme_get(const Config::Private*);
+    void config_colorscheme_set(Config::Private*, quint32);
     void config_id_get(const Config::Private*, QString*, qstring_set);
     void config_id_set(Config::Private*, const ushort *str, int len);
     void config_name_get(const Config::Private*, QString*, qstring_set);
@@ -60,6 +66,9 @@ extern "C" {
 };
 
 extern "C" {
+    bool contacts_data_archive_status(const Contacts::Private*, int);
+    quint32 contacts_data_color(const Contacts::Private*, int);
+    bool contacts_set_data_color(Contacts::Private*, int, quint32);
     void contacts_data_contact_id(const Contacts::Private*, int, QString*, qstring_set);
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
@@ -139,6 +148,27 @@ Qt::ItemFlags Contacts::flags(const QModelIndex &i) const
     return flags;
 }
 
+bool Contacts::archive_status(int row) const
+{
+    return contacts_data_archive_status(m_d, row);
+}
+
+quint32 Contacts::color(int row) const
+{
+    return contacts_data_color(m_d, row);
+}
+
+bool Contacts::setColor(int row, quint32 value)
+{
+    bool set = false;
+    set = contacts_set_data_color(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 QString Contacts::contact_id(int row) const
 {
     QString s;
@@ -197,10 +227,14 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(contact_id(index.row()));
+            return QVariant::fromValue(archive_status(index.row()));
         case Qt::UserRole + 1:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+            return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 2:
+            return QVariant::fromValue(contact_id(index.row()));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+        case Qt::UserRole + 4:
             return cleanNullQVariant(QVariant::fromValue(profile_picture(index.row())));
         }
         break;
@@ -221,9 +255,11 @@ int Contacts::role(const char* name) const {
 }
 QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "contact_id");
-    names.insert(Qt::UserRole + 1, "name");
-    names.insert(Qt::UserRole + 2, "profile_picture");
+    names.insert(Qt::UserRole + 0, "archive_status");
+    names.insert(Qt::UserRole + 1, "color");
+    names.insert(Qt::UserRole + 2, "contact_id");
+    names.insert(Qt::UserRole + 3, "name");
+    names.insert(Qt::UserRole + 4, "profile_picture");
     return names;
 }
 QVariant Contacts::headerData(int section, Qt::Orientation orientation, int role) const
@@ -247,11 +283,16 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
 {
     if (index.column() == 0) {
         if (role == Qt::UserRole + 1) {
+            if (value.canConvert(qMetaTypeId<quint32>())) {
+                return setColor(index.row(), value.value<quint32>());
+            }
+        }
+        if (role == Qt::UserRole + 3) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setName(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 2) {
+        if (role == Qt::UserRole + 4) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setProfile_picture(index.row(), value.value<QString>());
             }
@@ -477,6 +518,7 @@ Config::Config(bool /*owned*/, QObject *parent):
 Config::Config(QObject *parent):
     QObject(parent),
     m_d(config_new(this,
+        configColorschemeChanged,
         configIdChanged,
         configNameChanged,
         configProfile_pictureChanged)),
@@ -488,6 +530,13 @@ Config::~Config() {
     if (m_ownsPrivate) {
         config_free(m_d);
     }
+}
+quint32 Config::colorscheme() const
+{
+    return config_colorscheme_get(m_d);
+}
+void Config::setColorscheme(quint32 v) {
+    config_colorscheme_set(m_d, v);
 }
 QString Config::id() const
 {
