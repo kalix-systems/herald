@@ -96,6 +96,6 @@ ListView {
             }
         }
         ///TODO make and avatar component
-        Avatar { }
+        Avatar {  }
     }
 }
