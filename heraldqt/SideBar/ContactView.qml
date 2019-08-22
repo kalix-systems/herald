@@ -39,7 +39,7 @@ ListView {
                 closePolicy: Popup.CloseOnPressOutside
                 MenuItem {
                     text: 'Delete Contact'
-                    onTriggered: contacts.remove(root.index)
+                    onTriggered: contacts.remove(index)
                 }
                 MenuItem {
                     text: 'Rename Contact'
