@@ -25,22 +25,21 @@ ListView {
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
                         contactItem.focus = true
-                        chatView.messageModel.conversationId = contact_id }
-                    else {
-                        optionsMenu.x = mouse.x;
-                        optionsMenu.y = mouse.y;
+                        chatView.messageModel.conversationId = contact_id
+                    } else {
+                        optionsMenu.x = mouse.x
+                        optionsMenu.y = mouse.y
                         optionsMenu.open()
-                        }
+                    }
                 }
-
             }
 
             Menu {
                 id: optionsMenu
                 closePolicy: Popup.CloseOnPressOutside
                 MenuItem {
-                   text: 'Delete Contact'
-                   onTriggered: contacts.remove(root.index)
+                    text: 'Delete Contact'
+                    onTriggered: contacts.remove(root.index)
                 }
                 MenuItem {
                     text: 'Rename Contact'
@@ -78,9 +77,7 @@ ListView {
                         right: parent.right
                     }
                     onClicked: bgBox.renameContact()
-
-            }
-
+                }
             }
 
             id: bgBox
