@@ -39,8 +39,11 @@ Item {
 
     Component.onCompleted: {
                 switch(theme) {
-                /// no themese besides Light implemented ATM
+                /// none of these besides Light implemented ATM
                 case (themeEnum.light) :
+                    avatarColors = ["#d93434","#c48531","#a68b1e",
+                                    "#2e8ccf","#d13a82","#32a198",
+                                    "#8ab872","#729eb8","#cd74d4"]
                     break;
                 case(themeEnum.dark) :
                     break;
@@ -50,6 +53,10 @@ Item {
                     break;
                 }
     }
+    /// Todo : finish these later
+    property var avatarColors: ["#d93434","#c48531","#a68b1e",
+                                "#2e8ccf","#d13a82","#32a198",
+                                "#8ab872","#729eb8","#cd74d4"]
 
     /// Default Font:
     /// Default Text Size:

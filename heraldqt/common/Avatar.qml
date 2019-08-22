@@ -5,6 +5,8 @@ import QtQuick.Controls 2.12
 /// --- displays a list of contacts
 Row {
     property string displayName: ""
+    property int colorHash: 0
+    property int shapeEnum: 0 /// { individual, group ... }
     ///--- Circle with initial
     leftPadding: 10
     anchors.verticalCenter: parent.verticalCenter
@@ -12,13 +14,13 @@ Row {
         width: rowHeight - 10
         height: rowHeight - 10
         anchors.verticalCenter: parent.verticalCenter
-        color:  QmlCfg.palette.mainTextColor
-        radius: 100
+        color:  QmlCfg.avatarColors[colorHash]
+        radius: shapeEnum == 0 ? width : 0
         ///---- initial
         Text {
             text: qsTr(displayName[0].toUpperCase())
             font.bold: true
-            color: QmlCfg.palette.mainColor
+            color: "white"
             anchors.centerIn: parent
             font.pixelSize: parent.height - 5
         }

@@ -11,12 +11,10 @@ Pane {
     ///--- chat view, shows messages
 
     ScrollView {
-        width: chatPane.width
-        height:chatPane.height
+        anchors.fill: parent
         clip: true
 
     ListView {
-
         anchors {
             right: parent.right
             bottom: chatTextAreaScroll.top
