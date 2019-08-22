@@ -93,6 +93,7 @@ pub struct ConfigQObject {}
 
 pub struct ConfigEmitter {
     qobject: Arc<AtomicPtr<ConfigQObject>>,
+    colorscheme_changed: fn(*mut ConfigQObject),
     id_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
@@ -110,6 +111,7 @@ impl ConfigEmitter {
     pub fn clone(&mut self) -> ConfigEmitter {
         ConfigEmitter {
             qobject: self.qobject.clone(),
+            colorscheme_changed: self.colorscheme_changed,
             id_changed: self.id_changed,
             name_changed: self.name_changed,
             profile_picture_changed: self.profile_picture_changed,
@@ -118,6 +120,12 @@ impl ConfigEmitter {
     fn clear(&self) {
         let n: *const ConfigQObject = null();
         self.qobject.store(n as *mut ConfigQObject, Ordering::SeqCst);
+    }
+    pub fn colorscheme_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.colorscheme_changed)(ptr);
+        }
     }
     pub fn id_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -142,6 +150,8 @@ impl ConfigEmitter {
 pub trait ConfigTrait {
     fn new(emit: ConfigEmitter) -> Self;
     fn emit(&mut self) -> &mut ConfigEmitter;
+    fn colorscheme(&self) -> u32;
+    fn set_colorscheme(&mut self, value: u32);
     fn id(&self) -> &str;
     fn set_id(&mut self, value: String);
     fn name(&self) -> Option<&str>;
@@ -154,12 +164,14 @@ pub trait ConfigTrait {
 #[no_mangle]
 pub extern "C" fn config_new(
     config: *mut ConfigQObject,
+    config_colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
+        colorscheme_changed: config_colorscheme_changed,
         id_changed: config_id_changed,
         name_changed: config_name_changed,
         profile_picture_changed: config_profile_picture_changed,
@@ -171,6 +183,16 @@ pub extern "C" fn config_new(
 #[no_mangle]
 pub unsafe extern "C" fn config_free(ptr: *mut Config) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_colorscheme_get(ptr: *const Config) -> u32 {
+    (&*ptr).colorscheme()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_colorscheme_set(ptr: *mut Config, v: u32) {
+    (&mut *ptr).set_colorscheme(v);
 }
 
 #[no_mangle]
@@ -356,6 +378,9 @@ pub trait ContactsTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn archive_status(&self, index: usize) -> bool;
+    fn color(&self, index: usize) -> u32;
+    fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn contact_id(&self, index: usize) -> &str;
     fn name(&self, index: usize) -> Option<&str>;
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
@@ -456,6 +481,26 @@ pub unsafe extern "C" fn contacts_sort(
     order: SortOrder,
 ) {
     (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_archive_status(ptr: *const Contacts, row: c_int) -> bool {
+    let o = &*ptr;
+    o.archive_status(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_color(ptr: *const Contacts, row: c_int) -> u32 {
+    let o = &*ptr;
+    o.color(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_color(
+    ptr: *mut Contacts, row: c_int,
+    v: u32,
+) -> bool {
+    (&mut *ptr).set_color(to_usize(row), v)
 }
 
 #[no_mangle]

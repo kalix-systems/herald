@@ -51,14 +51,14 @@ impl ContactsTrait for Contacts {
     fn add(&mut self, id: String) -> bool {
         assert!(id.len() < 256);
 
-        if let Err(e) = Core::add(id.as_str(), None, None) {
+        if let Err(e) = Core::add(id.as_str(), None, None, None) {
             eprintln!("Error: {}", e);
             return false;
         }
 
         self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem {
-            inner: contact::Contact::new(id, None, None),
+            inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
         });
         self.model.end_insert_rows();
         true
@@ -109,7 +109,31 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    /// Removes a contact by their `id`, returns a boolean to indicate success.
+    /// Returns contact's color
+    fn color(&self, row_index: usize) -> u32 {
+        self.list[row_index].inner.color
+    }
+
+    /// Sets color
+    fn set_color(&mut self, row_index: usize, color: u32) -> bool {
+        match self.list[row_index].inner.set_color(color) {
+            Ok(_) => true,
+            Err(e) => {
+                eprintln!("{}", e);
+                false
+            }
+        }
+    }
+
+    /// Indicates whether user is archived.
+    ///
+    /// User is archived => true,
+    /// User is active => false,
+    fn archive_status(&self, row_index: usize) -> bool {
+        self.list[row_index].inner.archive_status.into()
+    }
+
+    /// Removes a contact, returns a boolean to indicate success.
     fn remove(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 

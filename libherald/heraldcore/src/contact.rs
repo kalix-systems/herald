@@ -8,6 +8,8 @@ use rusqlite::{
     NO_PARAMS,
 };
 
+const NUM_COLORS: u64 = 9;
+
 #[derive(Default)]
 /// Wrapper around contacts table.
 /// TODO This will be stateful when we have caching logic.
@@ -37,7 +39,12 @@ impl DBTable for Contacts {
 
 impl Contacts {
     /// Inserts contact into contacts table.
-    pub fn add(id: &str, name: Option<&str>, profile_picture: Option<&str>) -> Result<(), HErr> {
+    pub fn add(
+        id: &str,
+        name: Option<&str>,
+        profile_picture: Option<&str>,
+        color: Option<u32>,
+    ) -> Result<(), HErr> {
         let name = match name {
             Some(name) => name.to_sql()?,
             None => id.to_sql()?,
@@ -48,10 +55,12 @@ impl Contacts {
             None => Null.to_sql()?,
         };
 
+        let color = color.unwrap_or_else(|| Contact::id_to_color(id));
+
         let db = Database::get()?;
         db.execute(
             include_str!("sql/contact/add.sql"),
-            &[id.to_sql()?, name, profile_picture],
+            &[id.to_sql()?, name, profile_picture, color.to_sql()?],
         )?;
         Ok(())
     }
@@ -113,6 +122,17 @@ impl Contacts {
         Ok(profile_picture)
     }
 
+    /// Sets a contact's color
+    pub fn set_color(id: &str, color: u32) -> Result<(), HErr> {
+        let db = Database::get()?;
+
+        db.execute(
+            include_str!("sql/contact/update_color.sql"),
+            &[id.to_sql()?, color.to_sql()?],
+        )?;
+        Ok(())
+    }
+
     /// Indicates whether contact exists
     pub fn contact_exists(id: &str) -> Result<bool, HErr> {
         let db = Database::get()?;
@@ -155,13 +175,7 @@ impl Contacts {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
-        let rows = stmt.query_map(NO_PARAMS, |row| {
-            Ok(Contact {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                profile_picture: row.get(2)?,
-            })
-        })?;
+        let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
 
         let mut names: Vec<Contact> = Vec::new();
         for name_res in rows {
@@ -171,18 +185,12 @@ impl Contacts {
         Ok(names)
     }
 
-    /// Returns all active Contacts:: excluding archived Contacts::
+    /// Returns all active contacts excluding archived Contacts::
     pub fn active() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
 
-        let rows = stmt.query_map(NO_PARAMS, |row| {
-            Ok(Contact {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                profile_picture: row.get(2)?,
-            })
-        })?;
+        let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
 
         let mut names: Vec<Contact> = Vec::new();
         for name_res in rows {
@@ -190,6 +198,34 @@ impl Contacts {
         }
 
         Ok(names)
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+/// Whether or not the the contact is archived
+pub enum ArchiveStatus {
+    /// The contact is active
+    Active,
+    /// The contact is archived
+    Archived,
+}
+
+impl From<bool> for ArchiveStatus {
+    fn from(archived: bool) -> Self {
+        if archived {
+            ArchiveStatus::Archived
+        } else {
+            ArchiveStatus::Active
+        }
+    }
+}
+
+impl From<ArchiveStatus> for bool {
+    fn from(archived: ArchiveStatus) -> Self {
+        match archived {
+            ArchiveStatus::Archived => true,
+            ArchiveStatus::Active => false,
+        }
     }
 }
 
@@ -202,15 +238,28 @@ pub struct Contact {
     pub name: Option<String>,
     /// Path of profile picture
     pub profile_picture: Option<String>,
+    /// User set color for user
+    pub color: u32,
+    /// Indicates wheter user is archived
+    pub archive_status: ArchiveStatus,
 }
 
 impl Contact {
     /// Create new contact.
-    pub fn new(id: String, name: Option<String>, profile_picture: Option<String>) -> Self {
+    pub fn new(
+        id: String,
+        name: Option<String>,
+        profile_picture: Option<String>,
+        color: Option<u32>,
+        archive_status: ArchiveStatus,
+    ) -> Self {
+        let color = color.unwrap_or_else(|| Contact::id_to_color(&id));
         Contact {
             name,
             id,
             profile_picture,
+            color,
+            archive_status,
         }
     }
 
@@ -236,6 +285,46 @@ impl Contact {
         let path = Contacts::set_profile_picture(self.id.as_str(), profile_picture)?;
         self.profile_picture = path;
         Ok(())
+    }
+
+    /// Returns contact's color
+    pub fn color(&self) -> u32 {
+        self.color
+    }
+
+    /// Sets color
+    pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
+        Contacts::set_color(self.id.as_str(), color)?;
+        self.color = color;
+        Ok(())
+    }
+
+    /// Archives the contact
+    pub fn archive(&mut self) -> Result<(), HErr> {
+        Contacts::archive(self.id.as_str())?;
+        self.archive_status = ArchiveStatus::Archived;
+        Ok(())
+    }
+
+    fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        let archive_status: bool = row.get(4)?;
+
+        Ok(Contact {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            profile_picture: row.get(2)?,
+            color: row.get(3)?,
+            archive_status: archive_status.into(),
+        })
+    }
+
+    fn id_to_color(id: &str) -> u32 {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+
+        let mut state = DefaultHasher::default();
+        id.hash(&mut state);
+        (state.finish() % NUM_COLORS) as u32
     }
 }
 
@@ -269,8 +358,8 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, Some("name"), None).expect("Failed to add contact");
-        Contacts::add(id2, None, None).expect("Failed to add contact");
+        Contacts::add(id1, Some("name"), None, None).expect("Failed to add contact");
+        Contacts::add(id2, None, None, Some(1)).expect("Failed to add contact");
     }
 
     #[test]
@@ -282,8 +371,8 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, None, None).expect("Failed to add contact");
-        Contacts::add(id2, None, None).expect("Failed to add contact");
+        Contacts::add(id1, None, None, None).expect("Failed to add contact");
+        Contacts::add(id2, None, None, None).expect("Failed to add contact");
         crate::message::Messages::create_table().unwrap();
 
         Contacts::delete(id1).expect("Failed to delete contact");
@@ -300,7 +389,7 @@ mod tests {
         Contacts::create_table().unwrap();
         let id = "Hello World";
 
-        Contacts::add(id, Some("name"), None).expect("Failed to add contact");
+        Contacts::add(id, Some("name"), None, None).expect("Failed to add contact");
         assert_eq!(
             Contacts::name(id).expect("Failed to get name").unwrap(),
             "name"
@@ -315,7 +404,7 @@ mod tests {
         Contacts::create_table().unwrap();
         let id = "Hello World";
         let profile_picture = "picture";
-        Contacts::add(id, None, Some(profile_picture)).expect("Failed to add contact");
+        Contacts::add(id, None, Some(profile_picture), None).expect("Failed to add contact");
         assert_eq!(
             Contacts::profile_picture(id.into())
                 .expect("Failed to get profile picture")
@@ -333,7 +422,7 @@ mod tests {
 
         let id = "userid";
 
-        Contacts::add(id, Some("Hello"), None).unwrap();
+        Contacts::add(id, Some("Hello"), None, None).unwrap();
         Contacts::set_name(id, Some("World")).expect("Failed to update name");
 
         assert_eq!(
@@ -352,8 +441,8 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, None, None).expect("Failed to add id1");
-        Contacts::add(id2, None, None).expect("Failed to add id2");
+        Contacts::add(id1, None, None, None).expect("Failed to add id1");
+        Contacts::add(id2, None, None, None).expect("Failed to add id2");
 
         let contacts = Contacts::all().unwrap();
         assert_eq!(contacts.len(), 2);
@@ -369,7 +458,7 @@ mod tests {
         Contacts::create_table().unwrap();
 
         let id = "Hello World";
-        Contacts::add(id, None, None).unwrap();
+        Contacts::add(id, None, None, None).unwrap();
         Contacts::archive(id).unwrap();
 
         assert!(Contacts::is_archived(id).expect("Failed to determine if contact was archived"));
@@ -385,8 +474,8 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, None, None).unwrap();
-        Contacts::add(id2, None, None).unwrap();
+        Contacts::add(id1, None, None, None).unwrap();
+        Contacts::add(id2, None, None, None).unwrap();
 
         Contacts::archive(id2).unwrap();
 

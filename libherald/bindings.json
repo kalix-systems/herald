@@ -24,6 +24,9 @@
         "Contacts": {
             "type": "List",
             "itemProperties": {
+                "contact_id": {
+                    "type": "QString"
+                },
                 "name": {
                     "write": true,
                     "type": "QString",
@@ -34,8 +37,12 @@
                     "type": "QString",
                     "optional": true
                 },
-                "contact_id": {
-                    "type": "QString"
+                "color": {
+                    "write": true,
+                    "type": "quint32"
+                },
+                "archive_status": {
+                    "type": "bool"
                 }
             },
             "functions": {
@@ -145,6 +152,10 @@
                     "type": "QString",
                     "write": true,
                     "optional": true
+                },
+                "colorscheme": {
+                    "type": "quint32",
+                    "write": true
                 }
             },
             "functions": {

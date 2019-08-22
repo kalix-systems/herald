@@ -18,6 +18,7 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
     Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
@@ -25,6 +26,8 @@ private:
 public:
     explicit Config(QObject *parent = nullptr);
     ~Config();
+    quint32 colorscheme() const;
+    void setColorscheme(quint32 v);
     QString id() const;
     void setId(const QString& v);
     QString name() const;
@@ -33,6 +36,7 @@ public:
     void setProfile_picture(const QString& v);
     Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
+    void colorschemeChanged();
     void idChanged();
     void nameChanged();
     void profile_pictureChanged();
@@ -71,6 +75,9 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool archive_status(int row) const;
+    Q_INVOKABLE quint32 color(int row) const;
+    Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QString contact_id(int row) const;
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);

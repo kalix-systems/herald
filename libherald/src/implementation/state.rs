@@ -16,7 +16,7 @@ impl HeraldStateTrait for HeraldState {
 
     /// TODO implement other variations
     fn create_min_config(&mut self, id: String) {
-        if let Err(e) = Config::new(id, None, None) {
+        if let Err(e) = Config::new(id, None, None, None) {
             eprintln!("{}", e);
         }
     }
