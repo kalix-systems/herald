@@ -9,12 +9,15 @@ lazy_static! {
     static ref IMAGE_PATH: PathBuf = PathBuf::from("profile_pictures");
 }
 
+/// Determines path of profile picture for user id.
 pub fn profile_picture_path(id: &str) -> PathBuf {
     let mut image_path = IMAGE_PATH.clone();
     image_path.push(id);
     image_path
 }
 
+/// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
+/// herald's storage.
 pub fn save_profile_picture<P>(id: &str, source: P) -> Result<PathBuf, HErr>
 where
     P: AsRef<Path>,
