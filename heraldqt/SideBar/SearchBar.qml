@@ -57,24 +57,23 @@ ToolBar {
         }
     }
 
-    ///--- popup dialog containing contact insertion UI
-    function insertContact() {
-        if (entryField.text.trim().length == 0) {
-            return
-        }
-        contacts.add(entryField.text.trim())
-        entryField.clear()
-        newContactDialogue.close()
-    }
+   function insertContact() {
+                    if (entryField.text.trim().length === 0) {
+                        return
+                    }
+                    contacts.add(entryField.text.trim())
+                    entryField.clear()
+                    newContactDialogue.close()
+                }
 
     Popup {
         id: newContactDialogue
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-        x: (root.width - width) / 2
-        y: (root.height - height) / 2
+        width: 300
+        height: 200
+        anchors.centerIn: root
 
         TextArea {
             focus: true
@@ -93,4 +92,8 @@ ToolBar {
             onClicked: insertContact()
         }
     }
+
+
 }
+
+
