@@ -9,6 +9,12 @@ Pane {
     }
     padding: 0
     ///--- chat view, shows messages
+
+    ScrollView {
+        width: chatPane.width
+        height:chatPane.height
+        clip: true
+
     ListView {
 
         anchors {
@@ -28,6 +34,7 @@ Pane {
             id: chatScrollBar
             Component.onCompleted: position = 1.0
         }
+
         delegate: Column {
 
             readonly property bool outbound: author === config.id
@@ -43,8 +50,11 @@ Pane {
         } /// Delegate
     } /// ListView
 
+    }
+
     ///--- Text entry area
     ScrollView {
+        clip: true
         id: chatTextAreaScroll
         anchors {
             right: parent.right
@@ -76,3 +86,4 @@ Pane {
         } /// Chat entry field
     } /// scroll area
 }
+

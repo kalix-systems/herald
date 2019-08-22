@@ -24,7 +24,7 @@ Pane {
     padding: 0 // All Interior Elements span the entire pane
     height: parent.height
     background: Rectangle {
-        border.color: "#AFAFAF"
+        border.color: QmlCfg.palette.secondaryColor
     }
 
     ///--- Username and Settings gear button
@@ -41,7 +41,7 @@ Pane {
     Rectangle {
         id: searchBarBorder
         anchors.top: utilityBar.bottom
-        color: "#AFAFAF"
+        color: QmlCfg.palette.secondaryColor
         width: parent.width
         height: 1
     }
