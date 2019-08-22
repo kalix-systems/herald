@@ -96,6 +96,7 @@ ListView {
             }
         }
         ///TODO make and avatar component
-        Avatar { displayName:  name ? name : contact_id }
+        Avatar { displayName:  name ? name : contact_id
+                 colorHash: color }
     }
 }
