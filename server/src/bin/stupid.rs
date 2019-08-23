@@ -4,15 +4,17 @@
 ///
 /// Nothing is encrypted, except maybe eventually with TLS.
 use ccl::dashmap::DashMap;
-use herald_common::*;
+use chrono::prelude::*;
 use crossbeam_queue::SegQueue;
 use failure::*;
+use herald_common::*;
 use serde::{Deserialize, Serialize};
 use std::ops::DerefMut;
 use std::sync::Arc;
 use tokio::net;
 use tokio::prelude::*;
 
+use MessageToClient::*;
 use MessageToServer::*;
 
 pub struct AppState<Sock: AsyncWrite> {
@@ -30,7 +32,7 @@ impl<S: AsyncWrite> Clone for AppState<S> {
         }
     }
 }
-impl<Sock: AsyncWrite> AppState<Sock> {
+impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     pub fn new() -> Self {
         AppState {
             meta: Arc::new(DashMap::default()),
@@ -41,8 +43,26 @@ impl<Sock: AsyncWrite> AppState<Sock> {
 
     // TODO implement this
     #[allow(unused_variables)]
-    pub async fn send_msg(&self, to: UserId, msg: RawMsg) -> Result<(), Error> {
-        unimplemented!()
+    pub async fn send_msg(&self, to: UserId, msg: MessageToClient) -> Result<(), Error> {
+        let u = self
+            .meta
+            .async_get(to)
+            .await
+            .ok_or(format_err!("couldn't find user {}", to))?;
+        for d in 0..u.num_devices {
+            let gid = GlobalId { uid: to, did: d };
+            if let Some(mut s) = self.open.async_get_mut(gid).await {
+                let raw = serde_cbor::to_vec(&msg)?;
+                s.write_all(&raw).await?;
+            } else if let Some(q) = self.pending.async_get(gid).await {
+                // TODO: consider removing cloning here?
+                q.push(msg.clone());
+            } else {
+                let q = self.pending.get_or_insert_with(&gid, || SegQueue::new());
+                q.push(msg.clone());
+            }
+        }
+        Ok(())
     }
 }
 
@@ -73,17 +93,28 @@ async fn main() {
     let state: AppState<net::tcp::split::TcpStreamWriteHalf> = AppState::new();
     let addr = format!("0.0.0.0:{}", PORT).parse().unwrap();
 
-    println!("Listening on: {}", addr); 
+    println!("Listening on: {}", addr);
     let mut listener = net::TcpListener::bind(&addr).expect("unable to bind TCP listener");
     while let Ok((stream, addr)) = listener.accept().await {
         let state = state.clone();
         tokio::spawn(async move {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
-                let uid: GlobalId = read_datagram(&mut reader).await?;
-                state.open.insert(uid, writer);
-                if let Some((_, p)) = state.pending.remove(&uid) {
-                    if let Some(mut w) = state.open.async_get_mut(uid).await {
+                let gid: GlobalId = read_datagram(&mut reader).await?;
+                state.open.insert(gid, writer);
+                if let Some(mut u) = state.meta.async_get_mut(gid.uid).await {
+                    let devs = std::cmp::max(u.num_devices, gid.did + 1);
+                    u.num_devices = devs;
+                } else {
+                    state.meta.insert(
+                        gid.uid.clone(),
+                        User {
+                            num_devices: gid.did + 1,
+                        },
+                    );
+                }
+                if let Some((_, p)) = state.pending.remove(&gid) {
+                    if let Some(mut w) = state.open.async_get_mut(gid).await {
                         while !p.is_empty() {
                             let msg = p.pop()?;
                             send_datagram(w.deref_mut(), &msg).await?;
@@ -93,7 +124,18 @@ async fn main() {
                 loop {
                     let e: Result<MessageToServer, _> = read_datagram(&mut reader).await;
                     match e {
-                        Ok(Send { to, text }) => state.send_msg(to, text).await?,
+                        Ok(SendMsg { to, text }) => {
+                            state
+                                .send_msg(
+                                    to,
+                                    MessageToClient::Message {
+                                        from: gid.uid,
+                                        text: text,
+                                        time: Utc::now(),
+                                    },
+                                )
+                                .await?
+                        }
                         Err(e) => {
                             eprintln!("connection to {} closing with msg {:?}", addr, e);
                             break;

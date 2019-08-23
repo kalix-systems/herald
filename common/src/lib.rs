@@ -10,7 +10,7 @@ pub type RawMsg = Bytes;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
 pub struct User {
-    num_devices: usize,
+    pub num_devices: usize,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
