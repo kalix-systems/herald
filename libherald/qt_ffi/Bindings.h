@@ -9,6 +9,7 @@ class Config;
 class Contacts;
 class HeraldState;
 class Messages;
+class NetworkHandle;
 
 class Config : public QObject
 {
@@ -161,5 +162,24 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void conversationIdChanged();
+};
+
+class NetworkHandle : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(bool new_message READ new_message NOTIFY new_messageChanged FINAL)
+    explicit NetworkHandle(bool owned, QObject *parent);
+public:
+    explicit NetworkHandle(QObject *parent = nullptr);
+    ~NetworkHandle();
+    bool new_message() const;
+    Q_INVOKABLE bool send_message(const QString& message_body, const QString& to) const;
+Q_SIGNALS:
+    void new_messageChanged();
 };
 #endif // BINDINGS_H

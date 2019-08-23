@@ -932,3 +932,78 @@ pub unsafe extern "C" fn messages_data_recipient(
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
 }
+
+pub struct NetworkHandleQObject {}
+
+pub struct NetworkHandleEmitter {
+    qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
+    new_message_changed: fn(*mut NetworkHandleQObject),
+}
+
+unsafe impl Send for NetworkHandleEmitter {}
+
+impl NetworkHandleEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> NetworkHandleEmitter {
+        NetworkHandleEmitter {
+            qobject: self.qobject.clone(),
+            new_message_changed: self.new_message_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const NetworkHandleQObject = null();
+        self.qobject.store(n as *mut NetworkHandleQObject, Ordering::SeqCst);
+    }
+    pub fn new_message_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_message_changed)(ptr);
+        }
+    }
+}
+
+pub trait NetworkHandleTrait {
+    fn new(emit: NetworkHandleEmitter) -> Self;
+    fn emit(&mut self) -> &mut NetworkHandleEmitter;
+    fn new_message(&self) -> bool;
+    fn send_message(&self, message_body: String, to: String) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn network_handle_new(
+    network_handle: *mut NetworkHandleQObject,
+    network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
+) -> *mut NetworkHandle {
+    let network_handle_emit = NetworkHandleEmitter {
+        qobject: Arc::new(AtomicPtr::new(network_handle)),
+        new_message_changed: network_handle_new_message_changed,
+    };
+    let d_network_handle = NetworkHandle::new(network_handle_emit);
+    Box::into_raw(Box::new(d_network_handle))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_free(ptr: *mut NetworkHandle) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_new_message_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).new_message()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_send_message(ptr: *const NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_ushort, to_len: c_int) -> bool {
+    let mut message_body = String::new();
+    set_string_from_utf16(&mut message_body, message_body_str, message_body_len);
+    let mut to = String::new();
+    set_string_from_utf16(&mut to, to_str, to_len);
+    let o = &*ptr;
+    let r = o.send_message(message_body, to);
+    r
+}

@@ -6,6 +6,29 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "NetworkHandle": {
+            "type": "Object",
+            "functions": {
+                "send_message": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "message_body",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "to",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "new_message": {
+                    "type": "bool"
+                }
+            }
+        },
         "HeraldState": {
             "type": "Object",
             "functions": {

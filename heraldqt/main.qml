@@ -15,6 +15,8 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
+    NetworkHandle { }
+
     /// global configurations item
     Config {
         id: config
@@ -26,7 +28,6 @@ ApplicationWindow {
             }
         }
     }
-
 
     /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
