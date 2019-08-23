@@ -35,15 +35,19 @@ ListView {
                     }
                 }
             }
+
             FileDialog {
                     id: pfpDialog
                     onSelectionAccepted: {
-                        print(fileUrl)
                         var retCode = contacts.setProfile_picture(index, fileUrl);
-                        print(profile_picture, "retCode : ", retCode)
+                        if(retCode)
+                            contactAvatar.set_new_image();
+                        else
+                          print("TODO: Error popup here...");
                         close()
                     }
             }
+
             Menu {
 
                 id: optionsMenu
@@ -110,9 +114,10 @@ ListView {
                 }
             }
         }
-        ///TODO make and avatar component
-        Avatar { displayName:  name ? name : contact_id
+
+        Avatar { id: contactAvatar
+                 displayName:  name ? name : contact_id
                  colorHash: color
-                 pfpUrl: profile_picture == undefined ? "" : profile_picture }
-    }
+                 pfpUrl: profile_picture === undefined ? "" : profile_picture }
+        }
 }
