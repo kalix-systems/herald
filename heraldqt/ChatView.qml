@@ -9,19 +9,15 @@ Pane {
     }
     padding: 0
     ///--- chat view, shows messages
-
     ScrollView {
+        bottomPadding: 15
         anchors.fill: parent
         clip: true
-
+        anchors.bottom: chatTextAreaScroll.top
+        anchors.bottomMargin: 35 /// allow one unit of spacing between base and final message
     ListView {
         anchors {
-            right: parent.right
-            bottom: chatTextAreaScroll.top
-            top: parent.top
-            left: parent.left
-            topMargin: 20 /// allow one unit of spacing between ceiling and first message
-            bottomMargin: 20 /// allow one unit of spacing between base and final message
+            fill: parent
         }
 
         boundsBehavior: Flickable.StopAtBounds
@@ -47,8 +43,7 @@ Pane {
              }
         } /// Delegate
     } /// ListView
-
-    }
+ }
 
     ///--- Text entry area
     ScrollView {
@@ -70,7 +65,6 @@ Pane {
                 anchors.margins: 5
                 radius: QmlCfg.radius
             }
-
             padding: 10
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
