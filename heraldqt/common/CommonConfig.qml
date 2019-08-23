@@ -1,8 +1,10 @@
 pragma Singleton
-import QtQuick 2.5
+import QtQuick 2.13
 
 Item {
-    Theme { id: themeEnum }
+    Theme {
+        id: themeEnum
+    }
     property int theme: themeEnum.light /// user settable
     /// edge rounding for all rectangles
     /// that use the radius property
@@ -10,7 +12,7 @@ Item {
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme
-    property var palette: QtObject{
+    property var palette: QtObject {
         /// mainColor:
         /// used for backgrounds and default fills
         property string mainColor: "white"
@@ -38,25 +40,21 @@ Item {
     }
 
     Component.onCompleted: {
-                switch(theme) {
-                /// none of these besides Light implemented ATM
-                case (themeEnum.light) :
-                    avatarColors = ["#d93434","#c48531","#a68b1e",
-                                    "#2e8ccf","#d13a82","#32a198",
-                                    "#8ab872","#729eb8","#cd74d4"]
-                    break;
-                case(themeEnum.dark) :
-                    break;
-                case(themeEnum.solarized_dark) :
-                    break;
-                case(themeEnum.solarized_light) :
-                    break;
-                }
+        switch (theme) {
+            /// none of these besides Light implemented ATM
+            case (themeEnum.light):
+            avatarColors = ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
+            break
+            case (themeEnum.dark):
+            break
+            case (themeEnum.solarized_dark):
+            break
+            case (themeEnum.solarized_light):
+            break
+        }
     }
     /// Todo : finish these later
-    property var avatarColors: ["#d93434","#c48531","#a68b1e",
-                                "#2e8ccf","#d13a82","#32a198",
-                                "#8ab872","#729eb8","#cd74d4"]
+    property var avatarColors: ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
 
     /// Default Font:
     /// Default Text Size:

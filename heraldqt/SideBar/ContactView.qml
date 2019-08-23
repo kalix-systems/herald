@@ -3,6 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.3
 import "../common"
+
 /// --- displays a list of contacts
 ListView {
     id: contactList
@@ -37,15 +38,15 @@ ListView {
             }
 
             FileDialog {
-                    id: pfpDialog
-                    onSelectionAccepted: {
-                        var retCode = contacts.setProfile_picture(index, fileUrl);
-                        if(retCode)
-                            contactAvatar.set_new_image();
-                        else
-                          print("TODO: Error popup here...");
-                        close()
-                    }
+                id: pfpDialog
+                onSelectionAccepted: {
+                    var retCode = contacts.setProfile_picture(index, fileUrl)
+                    if (retCode)
+                        contactAvatar.set_new_image()
+                    else
+                        print("TODO: Error popup here...")
+                    close()
+                }
             }
 
             Menu {
@@ -115,9 +116,11 @@ ListView {
             }
         }
 
-        Avatar { id: contactAvatar
-                 displayName:  name ? name : contact_id
-                 colorHash: color
-                 pfpUrl: profile_picture === undefined ? "" : profile_picture }
+        Avatar {
+            id: contactAvatar
+            displayName: name ? name : contact_id
+            colorHash: color
+            pfpUrl: profile_picture === undefined ? "" : profile_picture
         }
+    }
 }

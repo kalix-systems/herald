@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 
@@ -33,6 +33,7 @@ ToolBar {
                 source: "qrc:///icons/plus.png"
                 anchors.fill: parent
                 scale: 0.7
+                mipmap: true
             }
         }
 
@@ -57,13 +58,13 @@ ToolBar {
         }
     }
 
-   function insertContact() {
-                    if (entryField.text.trim().length === 0)
-                        return
-                    contacts.add(entryField.text.trim())
-                    entryField.clear()
-                    newContactDialogue.close()
-                }
+    function insertContact() {
+        if (entryField.text.trim().length === 0)
+            return
+        contacts.add(entryField.text.trim())
+        entryField.clear()
+        newContactDialogue.close()
+    }
 
     Popup {
         id: newContactDialogue
@@ -72,8 +73,8 @@ ToolBar {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         width: 300
         height: 200
-        //anchors.centerIn: root //TODO : this is unassignable
 
+        //anchors.centerIn: root //TODO : this is unassignable
         TextArea {
             focus: true
             id: entryField
@@ -91,8 +92,4 @@ ToolBar {
             onClicked: insertContact()
         }
     }
-
-
 }
-
-

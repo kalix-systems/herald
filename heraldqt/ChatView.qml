@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "ChatView"
+
 Pane {
     id: chatPane
     property var messageModel: Messages {
@@ -15,35 +16,35 @@ Pane {
         clip: true
         anchors.bottom: chatTextAreaScroll.top
         anchors.bottomMargin: 35 /// allow one unit of spacing between base and final message
-    ListView {
-        anchors {
-            fill: parent
-        }
-
-        boundsBehavior: Flickable.StopAtBounds
-        spacing: 10
-        model: messageModel
-        ///--- scrollbar for chat messages
-        ScrollBar.vertical: ScrollBar {
-            id: chatScrollBar
-            Component.onCompleted: position = 1.0
-        }
-
-        delegate: Column {
-
-            readonly property bool outbound: author === config.id
-
+        ListView {
             anchors {
-                right: outbound ? parent.right : undefined
-                rightMargin: chatScrollBar.width * 2
+                fill: parent
             }
 
-             ChatBubble {
-                  text: body
-             }
-        } /// Delegate
-    } /// ListView
- }
+            boundsBehavior: Flickable.StopAtBounds
+            spacing: 10
+            model: messageModel
+            ///--- scrollbar for chat messages
+            ScrollBar.vertical: ScrollBar {
+                id: chatScrollBar
+                Component.onCompleted: position = 1.0
+            }
+
+            delegate: Column {
+
+                readonly property bool outbound: author === config.id
+
+                anchors {
+                    right: outbound ? parent.right : undefined
+                    rightMargin: chatScrollBar.width * 2
+                }
+
+                ChatBubble {
+                    text: body
+                }
+            } /// Delegate
+        } /// ListView
+    }
 
     ///--- Text entry area
     ScrollView {
@@ -78,4 +79,3 @@ Pane {
         } /// Chat entry field
     } /// scroll area
 }
-

@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import QtQuick.Dialogs 1.3
@@ -47,8 +47,6 @@ Pane {
     }
 
     ///--- Contacts View Actual
-
-
     Pane {
         padding: 0
         anchors {
@@ -64,7 +62,6 @@ Pane {
                 id: contacts
             }
         }
-
     }
 }
 

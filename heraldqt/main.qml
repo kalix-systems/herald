@@ -27,7 +27,6 @@ ApplicationWindow {
         }
     }
 
-
     /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
         id: rootSplitView
@@ -45,6 +44,5 @@ ApplicationWindow {
         ChatView {
             id: chatView
         }
-
     }
 }
