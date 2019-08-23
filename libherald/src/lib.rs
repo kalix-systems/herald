@@ -8,14 +8,4 @@ mod implementation;
 #[allow(missing_docs)]
 pub mod interface;
 
-fn strip_qrc(path: Option<String>) -> Option<String> {
-    let mut path = path;
-
-    match &mut path {
-        Some(path) => {
-            let stripped = path.split_off(7);
-            Some(stripped)
-        }
-        None => None,
-    }
-}
+pub(crate) mod utils;

@@ -68,7 +68,10 @@ impl ConfigTrait for Config {
     }
 
     fn set_profile_picture(&mut self, picture: Option<String>) {
-        if let Err(e) = self.inner.set_profile_picture(crate::strip_qrc(picture)) {
+        if let Err(e) = self
+            .inner
+            .set_profile_picture(crate::utils::strip_qrc(picture))
+        {
             eprintln!("Error: {}", e);
         }
     }

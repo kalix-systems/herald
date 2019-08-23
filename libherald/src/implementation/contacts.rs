@@ -102,7 +102,7 @@ impl ContactsTrait for Contacts {
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         match self.list[row_index]
             .inner
-            .set_profile_picture(crate::strip_qrc(picture))
+            .set_profile_picture(crate::utils::strip_qrc(picture))
         {
             Ok(_) => true,
             Err(e) => {
