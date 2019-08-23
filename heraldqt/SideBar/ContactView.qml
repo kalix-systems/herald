@@ -70,7 +70,7 @@ ListView {
                 if (entryField.text.trim().length == 0) {
                     return
                 }
-                contactItem.displayName = entryField.text.trim()
+                name = entryField.text.trim()
                 entryField.clear()
                 renameContactDialogue.close()
             }
