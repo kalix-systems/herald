@@ -10,6 +10,7 @@ pub enum HErr {
     InvalidUserId(String),
     IoError(std::io::Error),
     ImageError(String),
+    SerializationError(String),
 }
 
 impl fmt::Display for HErr {
@@ -22,6 +23,7 @@ impl fmt::Display for HErr {
             InvalidUserId(s) => write!(f, "InvalidUserId: {}", s),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
+            SerializationError(s) => write!(f, "SerializationError: {}", s),
         }
     }
 }
@@ -65,5 +67,11 @@ impl From<image::ImageError> for HErr {
 impl From<std::ffi::OsString> for HErr {
     fn from(e: std::ffi::OsString) -> Self {
         HErr::HeraldError(format!("Bad path: {:?}", e))
+    }
+}
+
+impl From<serde_cbor::Error> for HErr {
+    fn from(e: serde_cbor::Error) -> Self {
+        HErr::SerializationError(e.to_string())
     }
 }
