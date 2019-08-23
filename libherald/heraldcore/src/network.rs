@@ -37,7 +37,7 @@ pub fn register(user_id: UserId) -> Result<(), HErr> {
     let len = u64::from_le_bytes(buf) as usize;
     let mut buf = vec![0u8; len];
     stream.read_exact(&mut buf)?;
-    let _res = serde_cbor::from_slice(&buf)?;
+    serde_cbor::from_slice(&buf)?;
     Ok(())
 }
 
