@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.12
+import QtQuick.Dialogs 1.3
 import "../common"
 /// --- displays a list of contacts
 ListView {
@@ -34,8 +35,17 @@ ListView {
                     }
                 }
             }
-
+            FileDialog {
+                    id: pfpDialog
+                    onSelectionAccepted: {
+                        print(fileUrl)
+                        var retCode = contacts.setProfile_picture(index, fileUrl);
+                        print(profile_picture, "retCode : ", retCode)
+                        close()
+                    }
+            }
             Menu {
+
                 id: optionsMenu
                 closePolicy: Popup.CloseOnPressOutside
                 MenuItem {
@@ -48,6 +58,11 @@ ListView {
                 MenuItem {
                     text: 'Rename Contact'
                     onTriggered: renameContactDialogue.open()
+                }
+
+                MenuItem {
+                    text: 'Choose avatar'
+                    onTriggered: pfpDialog.open()
                 }
             }
 
@@ -97,6 +112,7 @@ ListView {
         }
         ///TODO make and avatar component
         Avatar { displayName:  name ? name : contact_id
-                 colorHash: color }
+                 colorHash: color
+                 pfpUrl: profile_picture == undefined ? "" : profile_picture }
     }
 }

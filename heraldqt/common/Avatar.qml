@@ -5,6 +5,7 @@ import QtQuick.Controls 2.12
 /// --- displays a list of contacts
 Row {
     property string displayName: ""
+    property string pfpUrl: ""
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
     ///--- Circle with initial

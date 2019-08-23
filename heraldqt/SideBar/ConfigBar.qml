@@ -50,8 +50,6 @@ ToolBar {
             Button {
                 text: "select profile picture"
                 onClicked: {
-                    config.name = cfgUname.text
-                    config.id = cgfUid.text
                     cfgPfp.open()
                 }
             }
