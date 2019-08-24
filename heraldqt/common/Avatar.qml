@@ -10,10 +10,10 @@ Row {
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
-    spacing: 10
+    spacing: QmlCfg.margin
 
     ///--- Circle with initial
-    leftPadding: 10
+    leftPadding: QmlCfg.margin
     anchors.verticalCenter: parent.verticalCenter
 
     Loader {

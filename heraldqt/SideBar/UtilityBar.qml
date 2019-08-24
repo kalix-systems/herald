@@ -11,16 +11,16 @@ ToolBar {
     font.pointSize: 25
     background: Rectangle {
         anchors.fill: parent
-        color: QmlCfg.palette.secondaryColor
+        color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
 
     ///--- Add contact button
     Button {
         id: addContactButton
-        font.pointSize: parent.height - 10
+        font.pointSize: parent.height - QmlCfg.margin
         height: parent.height - 15
         anchors {
-            rightMargin: 10
+            rightMargin: QmlCfg.margin
             verticalCenterOffset: 0
             right: parent.right
             verticalCenter: parent.verticalCenter

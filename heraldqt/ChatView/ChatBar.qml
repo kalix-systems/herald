@@ -17,7 +17,7 @@ ToolBar {
     Avatar {
         id: chatBarAvatar
         anchors.centerIn: parent
-        size: QmlCfg.toolbarHeight - 10
+        size: QmlCfg.toolbarHeight - QmlCfg.margin
     }
 
     background: Rectangle {
