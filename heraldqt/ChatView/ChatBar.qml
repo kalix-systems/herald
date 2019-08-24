@@ -6,6 +6,7 @@ import "../common"
 
 ToolBar {
     property alias chatBarAvatar: chatBarAvatar
+    property int rowHeight: QmlCfg.toolbarHeight
 
     height: QmlCfg.toolbarHeight
     anchors {

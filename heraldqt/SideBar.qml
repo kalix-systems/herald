@@ -6,6 +6,7 @@ import LibHerald 1.0
 import "SideBar"
 
 Pane {
+    id: contactPane
 
     property real windowFraction: 0.25 // By default set the width to 1/4 the total window size.
     property bool isContactOnlyView: false // set true if the only view is the contact list
@@ -20,7 +21,6 @@ Pane {
         windowFraction = width / root.width
     }
 
-    id: contactPane
     padding: 0 // All Interior Elements span the entire pane
     height: parent.height
     background: Rectangle {

@@ -39,6 +39,7 @@ Pane {
             ///--- scrollbar for chat messages
             ScrollBar.vertical: ScrollBar {
                 id: chatScrollBar
+                size: 50
                 Component.onCompleted: position = 1.0
             }
 
