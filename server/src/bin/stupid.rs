@@ -142,6 +142,7 @@ async fn main() {
                         }
                     }
                 }
+                state.open.remove(&gid);
             };
             if let Err(e) = comp {
                 eprintln!("connection to {} failed, error was: {:?}", addr, e);
