@@ -75,8 +75,10 @@ Pane {
         TextArea {
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
-                anchors.fill: parent
-                anchors.margins: 5
+                anchors {
+                    fill: parent
+                    margins: 5
+                }
                 radius: QmlCfg.radius
             }
             padding: 10

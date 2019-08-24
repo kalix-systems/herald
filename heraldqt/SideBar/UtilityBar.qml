@@ -19,10 +19,12 @@ ToolBar {
         id: addContactButton
         font.pointSize: parent.height - 10
         height: parent.height - 15
-        anchors.rightMargin: 10
-        anchors.verticalCenterOffset: 0
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+        anchors {
+            rightMargin: 10
+            verticalCenterOffset: 0
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
         width: height
 
         background: Rectangle {

@@ -21,9 +21,10 @@ Row {
         Label {
             property bool tooLong: (messageMetrics.width >= chatPane.width / 2)
             id: bubbleText
-            wrapMode: Text.Wrap
-            width: tooLong ? chatPane.width / 2 : undefined
             text: messageMetrics.text
+            wrapMode: Text.Wrap
+
+            width: tooLong ? chatPane.width / 2 : undefined
             anchors.centerIn: bubble
         }
     }
