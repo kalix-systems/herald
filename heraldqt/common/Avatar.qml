@@ -1,5 +1,6 @@
 import QtQuick 2.13
 import LibHerald 1.0
+import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.12
 
 /// --- displays a list of contacts
@@ -8,21 +9,19 @@ Row {
     property string pfpUrl: ""
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
-    readonly property var set_new_image: init
+    property int size: 0 /// the size of the avatar, width and height
     spacing: 10
 
     ///--- Circle with initial
     leftPadding: 10
     anchors.verticalCenter: parent.verticalCenter
 
-    Component.onCompleted: {
-        init()
-    }
-
-    Item {
-        width: rowHeight - 10
-        height: rowHeight - 10
-        id: dummy
+    Loader {
+        width: size
+        height: size
+        sourceComponent: { if(!displayName) return undefined;
+                           if(pfpUrl) return imageAvatar;
+                           else return initialAvatar; }
     }
 
     Text {
@@ -35,8 +34,8 @@ Row {
     Component {
         id: initialAvatar
         Rectangle {
-            width: rowHeight - 10
-            height: rowHeight - 10
+            width: size
+            height: size
             anchors.verticalCenter: parent.verticalCenter
             color: QmlCfg.avatarColors[colorHash]
             radius: shapeEnum == 0 ? width : 0
@@ -46,41 +45,34 @@ Row {
                 font.bold: true
                 color: "white"
                 anchors.centerIn: parent
-                font.pixelSize: parent.height - 5
+                font.pixelSize: size
             }
         }
     }
 
     Component {
         id: imageAvatar
+        Item{
+        Rectangle {
+            color: QmlCfg.palette.mainColor
+            width:  size
+            height: size
+            radius: shapeEnum == 0 ? width : 0
+            id: mask
+        }
         Image {
-            width: rowHeight - 10
-            height: rowHeight - 10
             source: "file:" + pfpUrl
+            anchors.fill: mask
+            layer.enabled: true
+            layer.effect: OpacityMask {
+                maskSource: mask
+            }
+            clip: true
             asynchronous: true
             mipmap: true
         }
+      }
     }
 
-    function init() {
-        print("call of init")
-        if (pfpUrl === "")
-            replaceElement(initialAvatar)
-        else
-            replaceElement(imageAvatar)
-    }
 
-    function replaceElement(newElementFactory) {
-        print("call of replace")
-
-        var oldChild = dummy.childAt(0, 0)
-        if (oldChild !== null)
-            oldChild.destroy()
-
-        var element = newElementFactory.createObject(dummy, {
-
-                                                     })
-        if (element === null)
-            print("Error creating object")
-    }
 }

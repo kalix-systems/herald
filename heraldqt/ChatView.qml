@@ -6,8 +6,8 @@ import "ChatView"
 
 Pane {
     id: chatPane
-    property var messageModel: Messages {
-    }
+
+    property var messageModel: Messages {}
 
     property alias messageBar: messageBar
 

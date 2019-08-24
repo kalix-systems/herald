@@ -13,14 +13,13 @@ ListView {
     ScrollBar.vertical: ScrollBar {
     }
     delegate: Item {
-        property int rowHeight: 60
 
         id: contactItem
-        height: rowHeight
+        height: 60
         width: parent.width
 
         Rectangle {
-
+            anchors.fill: parent
             MouseArea {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 z: 10
@@ -45,8 +44,8 @@ ListView {
                 onSelectionAccepted: {
                     var retCode = contacts.setProfile_picture(index, fileUrl)
                     if (retCode) {
-                        contactAvatar.set_new_image()
-                        chatView.messageBar.chatBarAvatar.set_new_image()
+                        contactAvatar.pfpUrl = profile_picture
+                        chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
                     } else
                         print("TODO: Error popup here...")
                     close()
@@ -110,8 +109,6 @@ ListView {
             }
 
             id: bgBox
-            width: parent.width
-            height: rowHeight
             color: {
                 if (contactItem.focus) {
                     return QmlCfg.palette.tertiaryColor
@@ -122,6 +119,7 @@ ListView {
         }
 
         Avatar {
+            size: 50
             id: contactAvatar
             displayName: name ? name : contact_id
             colorHash: color

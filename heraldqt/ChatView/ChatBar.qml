@@ -6,8 +6,7 @@ import "../common"
 
 ToolBar {
     property alias chatBarAvatar: chatBarAvatar
-    property int rowHeight: QmlCfg.toolbarHeight
-
+    clip: true
     height: QmlCfg.toolbarHeight
     anchors {
         top: parent.top
@@ -18,6 +17,7 @@ ToolBar {
     Avatar {
         id: chatBarAvatar
         anchors.centerIn: parent
+        size: QmlCfg.toolbarHeight - 10
     }
 
     background: Rectangle {
