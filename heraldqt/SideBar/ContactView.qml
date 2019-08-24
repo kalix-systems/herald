@@ -78,9 +78,10 @@ ListView {
                     onTriggered: {
                         contactAvatar.pfpUrl = null
                         chatView.messageBar.chatBarAvatar.pfpUrl = null
+                        contacts.setProfile_picture(index, "")
                         //TODO: delete profile picture from database function
+                    }
                 }
-            }
             }
 
             function renameContact() {

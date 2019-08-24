@@ -13,17 +13,22 @@ lazy_static! {
 /// Determines path of profile picture for user id.
 pub fn profile_picture_path(id: &str) -> PathBuf {
     let mut image_path = IMAGE_PATH.clone();
-    image_path.push(format!("{:?}_{}.png", std::time::Instant::now(), id));
+    image_path.push(format!("{}_{}", id, chrono::Utc::now()));
+    image_path.set_extension("png");
     image_path
 }
 
 /// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn save_profile_picture<P>(id: &str, source: P) -> Result<PathBuf, HErr>
+pub fn save_profile_picture<P>(id: &str, source: P, old_path: Option<P>) -> Result<PathBuf, HErr>
 where
-    P: AsRef<Path>,
+    P: AsRef<Path> + std::fmt::Debug,
 {
     std::fs::create_dir_all(PROFILE_PICTURE)?;
+
+    if let Some(old_path) = old_path {
+        std::fs::remove_file(old_path).expect("failed to remove");
+    }
 
     let image_path = profile_picture_path(id);
 
@@ -31,10 +36,4 @@ where
         .resize_exact(IMAGE_SIZE, IMAGE_SIZE, FilterType::Nearest)
         .save_with_format(&image_path, ImageFormat::PNG)?;
     Ok(image_path)
-}
-
-pub fn delete_profile_picture(id: &str) -> Result<(), HErr> {
-    let image_path = profile_picture_path(id);
-
-    Ok(std::fs::remove_file(image_path)?)
 }
