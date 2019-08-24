@@ -28,10 +28,21 @@ Pane {
             right: parent.right
         }
 
+
         ListView {
             anchors {
                 fill: parent
             }
+            id: chatListView
+            Component.onCompleted: forceActiveFocus()
+            MouseArea {
+                anchors.fill: parent
+                onClicked: forceActiveFocus()
+            }
+
+            Keys.onUpPressed: chatScrollBar.decrease()
+
+            Keys.onDownPressed: chatScrollBar.increase()
 
             boundsBehavior: Flickable.StopAtBounds
             spacing: 10
@@ -72,6 +83,7 @@ Pane {
             color: QmlCfg.palette.mainColor
         }
         height: Math.min(contentHeight, 100)
+
         TextArea {
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
@@ -91,6 +103,7 @@ Pane {
                 chatScrollBar.position = 1.0
                 clear()
             }
+
         } /// Chat entry field
     } /// scroll area
 }
