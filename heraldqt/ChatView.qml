@@ -7,7 +7,8 @@ import "ChatView"
 Pane {
     id: chatPane
 
-    property var messageModel: Messages {}
+    property var messageModel: Messages {
+    }
 
     property alias messageBar: messageBar
 
@@ -27,7 +28,6 @@ Pane {
             left: parent.left
             right: parent.right
         }
-
 
         ListView {
             anchors {
@@ -103,7 +103,6 @@ Pane {
                 chatScrollBar.position = 1.0
                 clear()
             }
-
         } /// Chat entry field
     } /// scroll area
 }

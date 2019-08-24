@@ -19,9 +19,14 @@ Row {
     Loader {
         width: size
         height: size
-        sourceComponent: { if(!displayName) return undefined;
-                           if(pfpUrl) return imageAvatar;
-                           else return initialAvatar; }
+        sourceComponent: {
+            if (!displayName)
+                return undefined
+            if (pfpUrl)
+                return imageAvatar
+            else
+                return initialAvatar
+        }
     }
 
     Text {
@@ -52,27 +57,25 @@ Row {
 
     Component {
         id: imageAvatar
-        Item{
-        Rectangle {
-            color: QmlCfg.palette.mainColor
-            width:  size
-            height: size
-            radius: shapeEnum == 0 ? width : 0
-            id: mask
-        }
-        Image {
-            source: "file:" + pfpUrl
-            anchors.fill: mask
-            layer.enabled: true
-            layer.effect: OpacityMask {
-                maskSource: mask
+        Item {
+            Rectangle {
+                color: QmlCfg.palette.mainColor
+                width: size
+                height: size
+                radius: shapeEnum == 0 ? width : 0
+                id: mask
             }
-            clip: true
-            asynchronous: true
-            mipmap: true
+            Image {
+                source: "file:" + pfpUrl
+                anchors.fill: mask
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: mask
+                }
+                clip: true
+                asynchronous: true
+                mipmap: true
+            }
         }
-      }
     }
-
-
 }
