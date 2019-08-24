@@ -14,5 +14,6 @@
         <file>main.cpp</file>
         <file>ChatView/ChatBubble.qml</file>
         <file>common/Avatar.qml</file>
+        <file>ChatView/ChatBar.qml</file>
     </qresource>
 </RCC>

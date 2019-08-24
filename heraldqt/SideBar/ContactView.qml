@@ -29,6 +29,9 @@ ListView {
                     if (mouse.button === Qt.LeftButton) {
                         contactItem.focus = true
                         chatView.messageModel.conversationId = contact_id
+                        chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
+                        chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
+                        chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
                     } else {
                         optionsMenu.x = mouse.x
                         optionsMenu.y = mouse.y
@@ -41,9 +44,10 @@ ListView {
                 id: pfpDialog
                 onSelectionAccepted: {
                     var retCode = contacts.setProfile_picture(index, fileUrl)
-                    if (retCode)
+                    if (retCode) {
                         contactAvatar.set_new_image()
-                    else
+                        chatView.messageBar.chatBarAvatar.set_new_image()
+                    } else
                         print("TODO: Error popup here...")
                     close()
                 }
@@ -76,6 +80,7 @@ ListView {
                     return
                 }
                 name = entryField.text.trim()
+                chatView.messageBar.chatBarAvatar.displayName = name
                 entryField.clear()
                 renameContactDialogue.close()
             }

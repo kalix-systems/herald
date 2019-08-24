@@ -7,7 +7,7 @@ ToolBar {
     anchors.left: parent.left
     y: toolBar.y + toolBar.height
     width: contactPane.width
-    height: 40
+    height: QmlCfg.toolbarHeight
     font.pointSize: 25
     background: Rectangle {
         anchors.fill: parent

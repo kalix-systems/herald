@@ -9,6 +9,8 @@ Item {
     /// edge rounding for all rectangles
     /// that use the radius property
     readonly property int radius: 10
+    /// standard toolbar height
+    readonly property int toolbarHeight: 40
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme

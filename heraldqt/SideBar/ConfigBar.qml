@@ -10,7 +10,7 @@ ToolBar {
         top: parent.top
     }
     width: contactPane.width
-    height: 40
+    height: QmlCfg.toolbarHeight
 
     background: Rectangle {
         color: QmlCfg.palette.mainColor

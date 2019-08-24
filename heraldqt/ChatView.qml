@@ -8,14 +8,26 @@ Pane {
     id: chatPane
     property var messageModel: Messages {
     }
+
+    property alias messageBar: messageBar
+
+    ChatBar {
+        id: messageBar
+    }
+
     padding: 0
+
     ///--- chat view, shows messages
     ScrollView {
-        bottomPadding: 15
-        anchors.fill: parent
+        bottomPadding: 20
         clip: true
-        anchors.bottom: chatTextAreaScroll.top
-        anchors.bottomMargin: 35 /// allow one unit of spacing between base and final message
+        anchors {
+            top: messageBar.bottom
+            bottom: chatTextAreaScroll.top
+            left: parent.left
+            right: parent.right
+        }
+
         ListView {
             anchors {
                 fill: parent
