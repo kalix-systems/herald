@@ -69,9 +69,18 @@ ListView {
                 }
 
                 MenuItem {
-                    text: 'Choose avatar'
+                    text: 'Choose Avatar'
                     onTriggered: pfpDialog.open()
                 }
+
+                MenuItem {
+                    text: 'Clear Avatar'
+                    onTriggered: {
+                        contactAvatar.pfpUrl = null
+                        chatView.messageBar.chatBarAvatar.pfpUrl = null
+                        //TODO: delete profile picture from database function
+                }
+            }
             }
 
             function renameContact() {
