@@ -3,6 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.3
 import "../common"
+
 /// --- displays a list of contacts
 ListView {
     id: contactList
@@ -12,14 +13,13 @@ ListView {
     ScrollBar.vertical: ScrollBar {
     }
     delegate: Item {
-        property int rowHeight: 60
 
         id: contactItem
-        height: rowHeight
+        height: 60
         width: parent.width
 
         Rectangle {
-
+            anchors.fill: parent
             MouseArea {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 z: 10
@@ -28,6 +28,9 @@ ListView {
                     if (mouse.button === Qt.LeftButton) {
                         contactItem.focus = true
                         chatView.messageModel.conversationId = contact_id
+                        chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
+                        chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
+                        chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
                     } else {
                         optionsMenu.x = mouse.x
                         optionsMenu.y = mouse.y
@@ -35,15 +38,20 @@ ListView {
                     }
                 }
             }
+
             FileDialog {
-                    id: pfpDialog
-                    onSelectionAccepted: {
-                        print(fileUrl)
-                        var retCode = contacts.setProfile_picture(index, fileUrl);
-                        print(profile_picture, "retCode : ", retCode)
-                        close()
-                    }
+                id: pfpDialog
+                onSelectionAccepted: {
+                    var retCode = contacts.setProfile_picture(index, fileUrl)
+                    if (retCode) {
+                        contactAvatar.pfpUrl = profile_picture
+                        chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
+                    } else
+                        print("TODO: Error popup here...")
+                    close()
+                }
             }
+
             Menu {
 
                 id: optionsMenu
@@ -61,9 +69,18 @@ ListView {
                 }
 
                 MenuItem {
-                    text: 'Choose avatar'
+                    text: 'Choose Avatar'
                     onTriggered: pfpDialog.open()
                 }
+
+                MenuItem {
+                    text: 'Clear Avatar'
+                    onTriggered: {
+                        contactAvatar.pfpUrl = null
+                        chatView.messageBar.chatBarAvatar.pfpUrl = null
+                        //TODO: delete profile picture from database function
+                }
+            }
             }
 
             function renameContact() {
@@ -71,6 +88,7 @@ ListView {
                     return
                 }
                 name = entryField.text.trim()
+                chatView.messageBar.chatBarAvatar.displayName = name
                 entryField.clear()
                 renameContactDialogue.close()
             }
@@ -100,8 +118,6 @@ ListView {
             }
 
             id: bgBox
-            width: parent.width
-            height: rowHeight
             color: {
                 if (contactItem.focus) {
                     return QmlCfg.palette.tertiaryColor
@@ -110,9 +126,13 @@ ListView {
                 }
             }
         }
-        ///TODO make and avatar component
-        Avatar { displayName:  name ? name : contact_id
-                 colorHash: color
-                 pfpUrl: profile_picture == undefined ? "" : profile_picture }
+
+        Avatar {
+            size: 50
+            id: contactAvatar
+            displayName: name ? name : contact_id
+            colorHash: color
+            pfpUrl: profile_picture === undefined ? "" : profile_picture
+        }
     }
 }

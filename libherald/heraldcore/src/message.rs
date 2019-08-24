@@ -25,6 +25,28 @@ pub struct Message {
     pub timestamp: DateTime<Utc>,
 }
 
+impl Message {
+    fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        let message_id: i64 = row.get(0)?;
+        let author: String = row.get(1)?;
+        let recipient: String = row.get(2)?;
+        let body: String = row.get(3)?;
+        let timestamp: String = row.get(4)?;
+
+        Ok(Message {
+            message_id,
+            author,
+            recipient,
+            body,
+            timestamp: DateTime::from_utc(
+                NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
+                    .expect("Failed to parse timestamp"),
+                Utc,
+            ),
+        })
+    }
+}
+
 impl Messages {
     /// Adds a message to the database.
     pub fn add_message(
@@ -70,25 +92,7 @@ impl Messages {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation.sql"))?;
-        let res = stmt.query_map(&[id.to_sql()?], |row| {
-            let message_id: i64 = row.get(0)?;
-            let author: String = row.get(1)?;
-            let recipient: String = row.get(2)?;
-            let body: String = row.get(3)?;
-            let timestamp: String = row.get(4)?;
-
-            Ok(Message {
-                message_id,
-                author,
-                recipient,
-                body,
-                timestamp: DateTime::from_utc(
-                    NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
-                        .expect("Failed to parse timestamp"),
-                    Utc,
-                ),
-            })
-        })?;
+        let res = stmt.query_map(&[id.to_sql()?], Message::from_db)?;
 
         let mut msgs = Vec::new();
         for msg in res {

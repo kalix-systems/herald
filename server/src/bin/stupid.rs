@@ -53,6 +53,8 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             let gid = GlobalId { uid: to, did: d };
             if let Some(mut s) = self.open.async_get_mut(gid).await {
                 let raw = serde_cbor::to_vec(&msg)?;
+                let len = u64::to_le_bytes(raw.len() as u64);
+                s.write_all(&len).await?;
                 s.write_all(&raw).await?;
             } else if let Some(q) = self.pending.async_get(gid).await {
                 // TODO: consider removing cloning here?

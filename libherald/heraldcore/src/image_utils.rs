@@ -13,7 +13,7 @@ lazy_static! {
 /// Determines path of profile picture for user id.
 pub fn profile_picture_path(id: &str) -> PathBuf {
     let mut image_path = IMAGE_PATH.clone();
-    image_path.push(format!("{}.png", id));
+    image_path.push(format!("{:?}_{}.png", std::time::Instant::now(), id));
     image_path
 }
 
@@ -37,15 +37,4 @@ pub fn delete_profile_picture(id: &str) -> Result<(), HErr> {
     let image_path = profile_picture_path(id);
 
     Ok(std::fs::remove_file(image_path)?)
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn profile_picture_path() {
-        assert_eq!(
-            super::profile_picture_path("yoyo"),
-            super::PathBuf::from("profile_pictures/yoyo.png")
-        );
-    }
 }
