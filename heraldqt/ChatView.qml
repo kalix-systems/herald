@@ -35,9 +35,7 @@ Pane {
             }
             Component.onCompleted: forceActiveFocus()
 
-            Keys.onUpPressed: {
-                console.log("AAH")
-                chatScrollBar.decrease() }
+            Keys.onUpPressed: chatScrollBar.decrease()
 
             Keys.onDownPressed: chatScrollBar.increase()
 
