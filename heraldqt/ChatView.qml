@@ -103,6 +103,9 @@ Pane {
                 chatScrollBar.position = 1.0
                 clear()
             }
+            Keys.onEscapePressed: {
+                chatListView.forceActiveFocus()
+            }
         } /// Chat entry field
     } /// scroll area
 }
