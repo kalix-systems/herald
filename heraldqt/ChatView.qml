@@ -28,10 +28,18 @@ Pane {
             right: parent.right
         }
 
+
         ListView {
             anchors {
                 fill: parent
             }
+            Component.onCompleted: forceActiveFocus()
+
+            Keys.onUpPressed: {
+                console.log("AAH")
+                chatScrollBar.decrease() }
+
+            Keys.onDownPressed: chatScrollBar.increase()
 
             boundsBehavior: Flickable.StopAtBounds
             spacing: 10
