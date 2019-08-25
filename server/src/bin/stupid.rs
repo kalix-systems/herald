@@ -1,8 +1,9 @@
+//! this is the stupidest version of the server I know how to write
+//! offline delivery only works as long as the server is online.
+//!
+//! Nothing is encrypted, except maybe eventually with TLS.
+
 #![feature(async_await, async_closure, try_blocks)]
-/// this is the stupidest version of the server I know how to write
-/// offline delivery only works as long as the server is online.
-///
-/// Nothing is encrypted, except maybe eventually with TLS.
 use ccl::dashmap::DashMap;
 use chrono::prelude::*;
 use crossbeam_queue::SegQueue;
