@@ -177,6 +177,15 @@ async fn main() {
                                 send_datagram(w.deref_mut(), &msg).await?;
                             }
                         }
+                        UpdateBlob { blob } => {
+                            if let Some(mut u) = state.meta.async_get_mut(gid.uid).await {
+                                u.blob = blob;
+                            } else {
+                                eprintln!("user tried to set blob but found no metadata");
+                                eprintln!("this should never happen");
+                                eprintln!("uid was {}, device {}", gid.uid, gid.did);
+                            }
+                        }
                     }
                 }
                 state.open.remove(&gid);

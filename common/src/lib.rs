@@ -24,6 +24,7 @@ pub struct GlobalId {
 pub enum MessageToServer {
     SendMsg { to: UserId, text: RawMsg },
     RequestMeta { of: UserId },
+    UpdateBlob { blob: Bytes },
     RegisterDevice,
 }
 
