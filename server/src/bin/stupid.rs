@@ -32,6 +32,7 @@ impl<S: AsyncWrite> Clone for AppState<S> {
         }
     }
 }
+
 impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     pub fn new() -> Self {
         AppState {
@@ -125,23 +126,53 @@ async fn main() {
                     }
                 }
                 loop {
-                    let e: Result<MessageToServer, _> = read_datagram(&mut reader).await;
-                    match e {
-                        Ok(SendMsg { to, text }) => {
+                    let d = read_datagram(&mut reader).await;
+                    if let Err(e) = d {
+                        eprintln!("connection to {} closing with msg {:?}", addr, e);
+                        break;
+                    };
+                    match d.unwrap() {
+                        SendMsg { to, text } => {
                             state
                                 .send_msg(
                                     to,
-                                    MessageToClient::Message {
-                                        from: gid.uid,
+                                    NewMessage {
+                                        from: gid,
                                         text: text,
                                         time: Utc::now(),
                                     },
                                 )
                                 .await?
                         }
-                        Err(e) => {
-                            eprintln!("connection to {} closing with msg {:?}", addr, e);
-                            break;
+                        RequestMeta { of } => {
+                            let reply = match state.meta.async_get(of).await {
+                                Some(m) => Response::Meta(m.clone()),
+                                None => Response::DataNotFound,
+                            };
+                            let msg = QueryResponse {
+                                res: reply,
+                                query: RequestMeta { of },
+                            };
+                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                                send_datagram(w.deref_mut(), &msg).await?;
+                            }
+                        }
+                        RegisterDevice => {
+                            let reply = match state.meta.async_get_mut(gid.uid).await {
+                                Some(mut m) => {
+                                    let id = m.num_devices;
+                                    m.num_devices += 1;
+                                    Response::DeviceRegistered(id)
+                                }
+                                None => Response::DataNotFound,
+                            };
+                            let msg = MessageToClient::QueryResponse {
+                                res: reply,
+                                query: RegisterDevice,
+                            };
+                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                                send_datagram(w.deref_mut(), &msg).await?;
+                            }
                         }
                     }
                 }

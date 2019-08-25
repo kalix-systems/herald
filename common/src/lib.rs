@@ -21,15 +21,27 @@ pub struct GlobalId {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    // Login(GlobalId),
     SendMsg { to: UserId, text: RawMsg },
+    RequestMeta { of: UserId },
+    RegisterDevice,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
-    Message {
-        from: UserId,
+    NewMessage {
+        from: GlobalId,
         text: RawMsg,
         time: DateTime<Utc>,
     },
+    QueryResponse {
+        res: Response,
+        query: MessageToServer,
+    },
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum Response {
+    Meta(User),
+    DeviceRegistered(DeviceId),
+    DataNotFound,
 }
