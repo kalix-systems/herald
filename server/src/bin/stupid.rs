@@ -151,8 +151,4 @@ async fn main() {
             }
         });
     }
-    let server = listener.incoming().for_each(move |rsock| {
-        let state = state.clone();
-        async move {}
-    });
 }
