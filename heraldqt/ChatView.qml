@@ -41,9 +41,7 @@ Pane {
         }
 
         ListView {
-
             anchors.fill: parent
-
             id: chatListView
             Component.onCompleted: forceActiveFocus()
 
@@ -58,6 +56,7 @@ Pane {
             boundsBehavior: Flickable.StopAtBounds
             spacing: QmlCfg.margin
             model: messageModel
+
             ///--- scrollbar for chat messages
             ScrollBar.vertical: ScrollBar {
                 id: chatScrollBar
@@ -66,9 +65,7 @@ Pane {
             }
 
             delegate: Column {
-
                 readonly property bool outbound: author === config.id
-                topPadding: chatScrollBar.position === 0.0 ? QmlCfg.margin : 0.0
 
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -76,6 +73,7 @@ Pane {
                 }
 
                 ChatBubble {
+                    padding: QmlCfg.margin
                     text: body
                 }
             } /// Delegate
