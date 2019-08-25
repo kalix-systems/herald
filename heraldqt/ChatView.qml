@@ -7,12 +7,24 @@ import "ChatView"
 Pane {
     id: chatPane
 
-    property var messageModel: Messages {}
+    property var messageModel: Messages {
+    }
 
     property alias messageBar: messageBar
 
     ChatBar {
         id: messageBar
+    }
+
+    ///--- border between messageBar and main chat view
+    Rectangle {
+        height: 1
+        color: QmlCfg.palette.secondaryColor
+        anchors {
+            top: messageBar.bottom
+            left: parent.left
+            right: parent.right
+        }
     }
 
     padding: 0
@@ -30,8 +42,8 @@ Pane {
 
         ListView {
             anchors {
-               topMargin: chatScrollBar.position === 0.0 ? QmlCfg.margin : 0
-               fill: parent
+                topMargin: chatScrollBar.position === 0.0 ? QmlCfg.margin : 0
+                fill: parent
             }
             id: chatListView
             Component.onCompleted: forceActiveFocus()
@@ -89,7 +101,7 @@ Pane {
                 color: QmlCfg.palette.secondaryColor
                 anchors {
                     fill: parent
-                    margins: QmlCfg.margin/2
+                    margins: QmlCfg.margin / 2
                 }
                 radius: QmlCfg.radius
             }
