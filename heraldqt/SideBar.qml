@@ -34,6 +34,7 @@ Pane {
 
     ///--- SearchBar for contacts, add contact button
     UtilityBar {
+        anchors.top: toolBar.bottom
         id: utilityBar
     }
 

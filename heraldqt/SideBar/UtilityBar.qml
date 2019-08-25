@@ -6,59 +6,65 @@ import QtQuick.Layouts 1.2
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
-    y: toolBar.y + toolBar.height
-    width: contactPane.width
+    anchors.right: parent.right
     height: QmlCfg.toolbarHeight
-    font.pointSize: 25
+
     background: Rectangle {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
 
+    ScrollView {
+        id: searchScroll
+        anchors {
+            left: parent.left
+            right: searchButton.left
+            leftMargin: 10
+            rightMargin: 10
+            verticalCenter: parent.verticalCenter
+        }
 
-    RowLayout {
-              id: searchBar
-              anchors.right: searchButton.left
-              width: parent.width - searchButton.width - addContactButton.width
-              height: parent.height
-              ScrollView {
-              id: searchScroll
-              implicitWidth: parent.width - searchButton.width
-              TextArea {
-                  id: searchText
-                  placeholderText: qsTr("Search...")
-                  Layout.fillWidth: true
-                  font.pointSize: 20
-              }
-              }
-              Button {
-                  id: searchButton
-                  anchors.right: addContactButton.left
-                  implicitHeight: utilityBar.height - 15
-                  implicitWidth: height
-                  background: Image {
-                      source: "qrc:///icons/search.png"
-                      height: width
-                      scale: 0.9
-                      mipmap: true
-                  }
-                  onClicked: searchScroll.focus = true
-                  }
+        TextArea {
+            background: Rectangle {
+                anchors.fill: parent
+                color: QmlCfg.palette.mainColor
+                radius: QmlCfg.radius
+            }
 
-              }
+            id: searchText
+            placeholderText: qsTr("Search...")
+            Layout.fillWidth: true
+            font.pointSize: 10
+        }
+    }
+    Button {
+        id: searchButton
+        anchors.right: addContactButton.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: QmlCfg.margin
+        implicitHeight: utilityBar.height - 15
+        implicitWidth: height
+        background: Image {
+            source: "qrc:///icons/search.png"
+            height: width
+            scale: 0.9
+            mipmap: true
+        }
+        onClicked: searchScroll.focus = true
+    }
 
     ///--- Add contact button
     Button {
         id: addContactButton
-        font.pointSize: parent.height - QmlCfg.margin
-        height: parent.height - 15
+        height: QmlCfg.toolbarHeight - QmlCfg.margin
+        width: height
+
         anchors {
             rightMargin: QmlCfg.margin
             verticalCenterOffset: 0
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        width: height
 
         background: Rectangle {
             id: bg
