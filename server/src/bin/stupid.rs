@@ -1,8 +1,10 @@
+//! this is the stupidest version of the server I know how to write
+//! offline delivery only works as long as the server is online.
+//!
+//! Nothing is encrypted, except maybe eventually with TLS.
+
 #![feature(async_await, async_closure, try_blocks)]
-/// this is the stupidest version of the server I know how to write
-/// offline delivery only works as long as the server is online.
-///
-/// Nothing is encrypted, except maybe eventually with TLS.
+use bytes::Bytes;
 use ccl::dashmap::DashMap;
 use chrono::prelude::*;
 use crossbeam_queue::SegQueue;
@@ -32,6 +34,7 @@ impl<S: AsyncWrite> Clone for AppState<S> {
         }
     }
 }
+
 impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     pub fn new() -> Self {
         AppState {
@@ -99,6 +102,7 @@ async fn main() {
     let mut listener = net::TcpListener::bind(&addr).expect("unable to bind TCP listener");
     while let Ok((stream, addr)) = listener.accept().await {
         let state = state.clone();
+        // todo: factor this into functions rather than the main from hell
         tokio::spawn(async move {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
@@ -112,6 +116,7 @@ async fn main() {
                         gid.uid.clone(),
                         User {
                             num_devices: gid.did + 1,
+                            blob: Bytes::new(),
                         },
                     );
                 }
@@ -124,23 +129,53 @@ async fn main() {
                     }
                 }
                 loop {
-                    let e: Result<MessageToServer, _> = read_datagram(&mut reader).await;
-                    match e {
-                        Ok(SendMsg { to, text }) => {
+                    let d = read_datagram(&mut reader).await;
+                    if let Err(e) = d {
+                        eprintln!("connection to {} closing with msg {:?}", addr, e);
+                        break;
+                    };
+                    match d.unwrap() {
+                        SendMsg { to, text } => {
                             state
                                 .send_msg(
                                     to,
-                                    MessageToClient::Message {
-                                        from: gid.uid,
+                                    NewMessage {
+                                        from: gid,
                                         text: text,
                                         time: Utc::now(),
                                     },
                                 )
                                 .await?
                         }
-                        Err(e) => {
-                            eprintln!("connection to {} closing with msg {:?}", addr, e);
-                            break;
+                        RequestMeta { of } => {
+                            let reply = match state.meta.async_get(of).await {
+                                Some(m) => Response::Meta(m.clone()),
+                                None => Response::DataNotFound,
+                            };
+                            let msg = QueryResponse {
+                                res: reply,
+                                query: RequestMeta { of },
+                            };
+                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                                send_datagram(w.deref_mut(), &msg).await?;
+                            }
+                        }
+                        RegisterDevice => {
+                            let reply = match state.meta.async_get_mut(gid.uid).await {
+                                Some(mut m) => {
+                                    let id = m.num_devices;
+                                    m.num_devices += 1;
+                                    Response::DeviceRegistered(id)
+                                }
+                                None => Response::DataNotFound,
+                            };
+                            let msg = MessageToClient::QueryResponse {
+                                res: reply,
+                                query: RegisterDevice,
+                            };
+                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                                send_datagram(w.deref_mut(), &msg).await?;
+                            }
                         }
                     }
                 }
@@ -151,8 +186,4 @@ async fn main() {
             }
         });
     }
-    let server = listener.incoming().for_each(move |rsock| {
-        let state = state.clone();
-        async move {}
-    });
 }

@@ -8,9 +8,10 @@ pub type UserId = arrayvec::ArrayString<[u8; 256]>;
 pub type DeviceId = usize;
 pub type RawMsg = Bytes;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct User {
     pub num_devices: usize,
+    pub blob: Bytes,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
@@ -21,15 +22,27 @@ pub struct GlobalId {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    // Login(GlobalId),
     SendMsg { to: UserId, text: RawMsg },
+    RequestMeta { of: UserId },
+    RegisterDevice,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
-    Message {
-        from: UserId,
+    NewMessage {
+        from: GlobalId,
         text: RawMsg,
         time: DateTime<Utc>,
     },
+    QueryResponse {
+        res: Response,
+        query: MessageToServer,
+    },
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum Response {
+    Meta(User),
+    DeviceRegistered(DeviceId),
+    DataNotFound,
 }
