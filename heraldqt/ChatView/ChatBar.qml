@@ -17,12 +17,11 @@ ToolBar {
     Avatar {
         id: chatBarAvatar
         anchors.centerIn: parent
-        size: QmlCfg.toolbarHeight - 10
+        size: QmlCfg.toolbarHeight - QmlCfg.margin
     }
 
     background: Rectangle {
         color: QmlCfg.palette.mainColor
-        border.color: QmlCfg.palette.secondaryColor
         anchors.fill: parent
     }
 }

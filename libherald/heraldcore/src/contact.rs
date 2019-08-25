@@ -99,18 +99,17 @@ impl Contacts {
     pub fn set_profile_picture(
         id: &str,
         profile_picture: Option<String>,
+        old_path: Option<&str>,
     ) -> Result<Option<String>, HErr> {
         let profile_picture = match profile_picture {
             Some(path) => {
-                let path_string = image_utils::save_profile_picture(id, path)?
-                    .into_os_string()
-                    .into_string()?;
+                let path_string =
+                    image_utils::save_profile_picture(id, path, old_path.map(|p| p.into()))?
+                        .into_os_string()
+                        .into_string()?;
                 Some(path_string)
             }
-            None => {
-                image_utils::delete_profile_picture(id)?;
-                None
-            }
+            None => None,
         };
 
         let db = Database::get()?;
@@ -282,7 +281,11 @@ impl Contact {
 
     /// Sets profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-        let path = Contacts::set_profile_picture(self.id.as_str(), profile_picture)?;
+        let path = Contacts::set_profile_picture(
+            self.id.as_str(),
+            profile_picture,
+            self.profile_picture.as_ref().map(|p| p.as_str()),
+        )?;
         self.profile_picture = path;
         Ok(())
     }
@@ -319,8 +322,10 @@ impl Contact {
     }
 
     fn id_to_color(id: &str) -> u32 {
-        use std::collections::hash_map::DefaultHasher;
-        use std::hash::{Hash, Hasher};
+        use std::{
+            collections::hash_map::DefaultHasher,
+            hash::{Hash, Hasher},
+        };
 
         let mut state = DefaultHasher::default();
         id.hash(&mut state);

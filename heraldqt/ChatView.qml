@@ -16,11 +16,22 @@ Pane {
         id: messageBar
     }
 
+    ///--- border between messageBar and main chat view
+    Rectangle {
+        height: 1
+        color: QmlCfg.palette.secondaryColor
+        anchors {
+            top: messageBar.bottom
+            left: parent.left
+            right: parent.right
+        }
+    }
+
     padding: 0
 
     ///--- chat view, shows messages
     ScrollView {
-        bottomPadding: 20
+        bottomPadding: QmlCfg.margin * 2
         clip: true
         anchors {
             top: messageBar.bottom
@@ -31,21 +42,22 @@ Pane {
 
         ListView {
             anchors {
+                topMargin: chatScrollBar.position === 0.0 ? QmlCfg.margin : 0
                 fill: parent
             }
             id: chatListView
             Component.onCompleted: forceActiveFocus()
+
             MouseArea {
                 anchors.fill: parent
                 onClicked: forceActiveFocus()
             }
 
             Keys.onUpPressed: chatScrollBar.decrease()
-
             Keys.onDownPressed: chatScrollBar.increase()
 
             boundsBehavior: Flickable.StopAtBounds
-            spacing: 10
+            spacing: QmlCfg.margin
             model: messageModel
             ///--- scrollbar for chat messages
             ScrollBar.vertical: ScrollBar {
@@ -89,11 +101,11 @@ Pane {
                 color: QmlCfg.palette.secondaryColor
                 anchors {
                     fill: parent
-                    margins: 5
+                    margins: QmlCfg.margin / 2
                 }
                 radius: QmlCfg.radius
             }
-            padding: 10
+            padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.onReturnPressed: {

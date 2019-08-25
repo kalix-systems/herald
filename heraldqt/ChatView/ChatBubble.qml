@@ -16,8 +16,8 @@ Row {
         id: bubble
         color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
         radius: QmlCfg.radius
-        width: bubbleText.width + 10
-        height: bubbleText.height + 10
+        width: bubbleText.width + QmlCfg.margin
+        height: bubbleText.height + QmlCfg.margin
         Label {
             property bool tooLong: (messageMetrics.width >= chatPane.width / 2)
             id: bubbleText

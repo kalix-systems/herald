@@ -78,9 +78,10 @@ ListView {
                     onTriggered: {
                         contactAvatar.pfpUrl = null
                         chatView.messageBar.chatBarAvatar.pfpUrl = null
+                        contacts.setProfile_picture(index, "")
                         //TODO: delete profile picture from database function
+                    }
                 }
-            }
             }
 
             function renameContact() {
@@ -88,7 +89,10 @@ ListView {
                     return
                 }
                 name = entryField.text.trim()
-                chatView.messageBar.chatBarAvatar.displayName = name
+                print(contact_id, chatView.messageBar.contact_id)
+                if (contact_id === chatView.messageModel.conversationId) {
+                    chatView.messageBar.chatBarAvatar.displayName = name
+                }
                 entryField.clear()
                 renameContactDialogue.close()
             }

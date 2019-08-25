@@ -6,9 +6,11 @@ Item {
         id: themeEnum
     }
     property int theme: themeEnum.light /// user settable
-    /// edge rounding for all rectangles
-    /// that use the radius property
+
+    /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
+    /// standard margin size used to interior objects
+    readonly property int margin: 10
     /// standard toolbar height
     readonly property int toolbarHeight: 40
     /// palette :
