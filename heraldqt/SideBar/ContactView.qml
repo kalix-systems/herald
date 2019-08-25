@@ -89,7 +89,10 @@ ListView {
                     return
                 }
                 name = entryField.text.trim()
-                chatView.messageBar.chatBarAvatar.displayName = name
+                print(contact_id, chatView.messageBar.contact_id)
+                if (contact_id === chatView.messageModel.conversationId) {
+                    chatView.messageBar.chatBarAvatar.displayName = name
+                }
                 entryField.clear()
                 renameContactDialogue.close()
             }
