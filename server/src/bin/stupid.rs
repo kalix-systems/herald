@@ -99,6 +99,7 @@ async fn main() {
     let mut listener = net::TcpListener::bind(&addr).expect("unable to bind TCP listener");
     while let Ok((stream, addr)) = listener.accept().await {
         let state = state.clone();
+        // todo: factor this into functions rather than the main from hell
         tokio::spawn(async move {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
