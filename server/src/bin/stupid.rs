@@ -4,6 +4,7 @@
 //! Nothing is encrypted, except maybe eventually with TLS.
 
 #![feature(async_await, async_closure, try_blocks)]
+use bytes::Bytes;
 use ccl::dashmap::DashMap;
 use chrono::prelude::*;
 use crossbeam_queue::SegQueue;
@@ -115,6 +116,7 @@ async fn main() {
                         gid.uid.clone(),
                         User {
                             num_devices: gid.did + 1,
+                            blob: Bytes::new(),
                         },
                     );
                 }
