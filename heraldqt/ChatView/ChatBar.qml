@@ -22,7 +22,6 @@ ToolBar {
 
     background: Rectangle {
         color: QmlCfg.palette.mainColor
-        border.color: QmlCfg.palette.secondaryColor
         anchors.fill: parent
     }
 }

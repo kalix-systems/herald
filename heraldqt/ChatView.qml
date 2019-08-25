@@ -16,6 +16,17 @@ Pane {
         id: messageBar
     }
 
+    ///--- border between messageBar and main chat view
+    Rectangle {
+        height: 1
+        color: QmlCfg.palette.secondaryColor
+        anchors {
+            top: messageBar.bottom
+            left: parent.left
+            right: parent.right
+        }
+    }
+
     padding: 0
 
     ///--- chat view, shows messages
