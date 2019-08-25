@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import QtQuick.Layouts 1.2
 
 ToolBar {
     id: utilityBar
@@ -13,6 +14,38 @@ ToolBar {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
+
+
+    RowLayout {
+              id: searchBar
+              anchors.right: searchButton.left
+              width: parent.width - searchButton.width - addContactButton.width
+              height: parent.height
+              ScrollView {
+              id: searchScroll
+              implicitWidth: parent.width - searchButton.width
+              TextArea {
+                  id: searchText
+                  placeholderText: qsTr("Search...")
+                  Layout.fillWidth: true
+                  font.pointSize: 20
+              }
+              }
+              Button {
+                  id: searchButton
+                  anchors.right: addContactButton.left
+                  implicitHeight: utilityBar.height - 15
+                  implicitWidth: height
+                  background: Image {
+                      source: "qrc:///icons/search.png"
+                      height: width
+                      scale: 0.9
+                      mipmap: true
+                  }
+                  onClicked: searchScroll.focus = true
+                  }
+
+              }
 
     ///--- Add contact button
     Button {

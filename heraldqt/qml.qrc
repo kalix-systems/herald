@@ -15,5 +15,6 @@
         <file>ChatView/ChatBubble.qml</file>
         <file>common/Avatar.qml</file>
         <file>ChatView/ChatBar.qml</file>
+        <file>icons/search.png</file>
     </qresource>
 </RCC>
