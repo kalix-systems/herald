@@ -108,7 +108,7 @@ impl MessagesTrait for Messages {
     }
 
     // TODO add networking component
-    fn send_message(&mut self, body: String) -> bool {
+    fn insert_message(&mut self, body: String) -> bool {
         let id = match heraldcore::config::Config::static_id() {
             Ok(id) => id,
             Err(e) => {

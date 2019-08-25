@@ -735,7 +735,7 @@ pub trait MessagesTrait {
     fn delete_conversation(&mut self) -> bool;
     fn delete_conversation_by_id(&mut self, conversation_id: String) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
-    fn send_message(&mut self, body: String) -> bool;
+    fn insert_message(&mut self, body: String) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -854,11 +854,11 @@ pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_send_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
+pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
     let o = &mut *ptr;
-    let r = o.send_message(body);
+    let r = o.insert_message(body);
     r
 }
 

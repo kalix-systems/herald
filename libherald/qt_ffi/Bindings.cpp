@@ -509,7 +509,7 @@ extern "C" {
     bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_conversation_by_id(Messages::Private*, const ushort*, int);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_send_message(Messages::Private*, const ushort*, int);
+    bool messages_insert_message(Messages::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -783,9 +783,9 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::send_message(const QString& body)
+bool Messages::insert_message(const QString& body)
 {
-    return messages_send_message(m_d, body.utf16(), body.size());
+    return messages_insert_message(m_d, body.utf16(), body.size());
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),

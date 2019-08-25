@@ -1,5 +1,5 @@
 use crate::interface::*;
-use herald_common::{MessageToServer, UserId};
+use herald_common::{MessageToClient, MessageToServer, UserId};
 use std::sync::{
     atomic::{self, AtomicBool},
     mpsc::{channel, Sender},
@@ -9,7 +9,9 @@ use std::thread;
 use std::time::Duration;
 
 pub enum HandleMessages {
-    TxToServer(MessageToServer),
+    Tx(MessageToServer),
+    Rx(MessageToClient),
+    Shutdown,
 }
 
 pub struct NetworkHandle {
@@ -30,7 +32,7 @@ impl NetworkHandleTrait for NetworkHandle {
         let flag = handle.message_received.clone();
 
         thread::spawn(move || loop {
-            if let Ok(HandleMessages::TxToServer(msg)) = rx.try_recv() {
+            if let Ok(HandleMessages::Tx(msg)) = rx.try_recv() {
                 println!("I'm gettin a message here : {:?} ", msg);
                 flag.fetch_xor(false, atomic::Ordering::Relaxed);
             }
@@ -46,7 +48,7 @@ impl NetworkHandleTrait for NetworkHandle {
             text: message_body.into(),
         };
 
-        match self.tx.send(HandleMessages::TxToServer(msg)) {
+        match self.tx.send(HandleMessages::Tx(msg)) {
             Ok(_) => true,
             Err(e) => {
                 eprintln!("{}", e);

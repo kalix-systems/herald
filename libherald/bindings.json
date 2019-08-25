@@ -119,7 +119,7 @@
                 }
             },
             "functions": {
-                "send_message": {
+                "insert_message": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [

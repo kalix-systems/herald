@@ -130,7 +130,7 @@ public:
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool send_message(const QString& body);
+    Q_INVOKABLE bool insert_message(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
