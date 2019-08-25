@@ -36,6 +36,7 @@ ApplicationWindow {
         Layout.fillWidth: true
         Layout.fillHeight: true
         orientation: Qt.Horizontal
+
         /// Contacts view for the desktop client, in DesktopContacts.qml
         /// includes the config and contacts toolbars
         SideBar {
@@ -47,5 +48,12 @@ ApplicationWindow {
             id: chatView
         }
 
+        handle: Rectangle {
+            implicitWidth: 4
+            implicitHeight: 4
+            color: SplitHandle.pressed ? Qt.darker(
+                                             QmlCfg.palette.secondaryColor,
+                                             1.1) : QmlCfg.palette.secondaryColor
+        }
     }
 }

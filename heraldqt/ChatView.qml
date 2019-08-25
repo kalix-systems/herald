@@ -3,47 +3,82 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "ChatView"
+
 Pane {
     id: chatPane
+
     property var messageModel: Messages {
     }
+
+    property alias messageBar: messageBar
+
+    ChatBar {
+        id: messageBar
+    }
+
+    ///--- border between messageBar and main chat view
+    Rectangle {
+        height: 1
+        color: QmlCfg.palette.secondaryColor
+        anchors {
+            top: messageBar.bottom
+            left: parent.left
+            right: parent.right
+        }
+    }
+
     padding: 0
+
     ///--- chat view, shows messages
     ScrollView {
-        bottomPadding: 15
-        anchors.fill: parent
+        bottomPadding: QmlCfg.margin * 2
         clip: true
-        anchors.bottom: chatTextAreaScroll.top
-        anchors.bottomMargin: 35 /// allow one unit of spacing between base and final message
-    ListView {
         anchors {
-            fill: parent
+            top: messageBar.bottom
+            bottom: chatTextAreaScroll.top
+            left: parent.left
+            right: parent.right
         }
 
-        boundsBehavior: Flickable.StopAtBounds
-        spacing: 10
-        model: messageModel
-        ///--- scrollbar for chat messages
-        ScrollBar.vertical: ScrollBar {
-            id: chatScrollBar
-            Component.onCompleted: position = 1.0
-        }
+        ListView {
+            anchors.fill: parent
+            id: chatListView
+            Component.onCompleted: forceActiveFocus()
 
-        delegate: Column {
-
-            readonly property bool outbound: author === config.id
-
-            anchors {
-                right: outbound ? parent.right : undefined
-                rightMargin: chatScrollBar.width * 2
+            MouseArea {
+                anchors.fill: parent
+                onClicked: forceActiveFocus()
             }
 
-             ChatBubble {
-                  text: body
-             }
-        } /// Delegate
-    } /// ListView
- }
+            Keys.onUpPressed: chatScrollBar.decrease()
+            Keys.onDownPressed: chatScrollBar.increase()
+
+            boundsBehavior: Flickable.StopAtBounds
+            spacing: QmlCfg.margin
+            model: messageModel
+
+            ///--- scrollbar for chat messages
+            ScrollBar.vertical: ScrollBar {
+                id: chatScrollBar
+                size: 50
+                Component.onCompleted: position = 1.0
+            }
+
+            delegate: Column {
+                readonly property bool outbound: author === config.id
+
+                anchors {
+                    right: outbound ? parent.right : undefined
+                    rightMargin: chatScrollBar.width * 2
+                }
+
+                ChatBubble {
+                    topPadding: index == 0 ? QmlCfg.margin : 0
+                    text: body
+                }
+            } /// Delegate
+        } /// ListView
+    }
 
     ///--- Text entry area
     ScrollView {
@@ -58,14 +93,17 @@ Pane {
             color: QmlCfg.palette.mainColor
         }
         height: Math.min(contentHeight, 100)
+
         TextArea {
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
-                anchors.fill: parent
-                anchors.margins: 5
+                anchors {
+                    fill: parent
+                    margins: QmlCfg.margin / 2
+                }
                 radius: QmlCfg.radius
             }
-            padding: 10
+            padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.onReturnPressed: {
@@ -75,7 +113,9 @@ Pane {
                 chatScrollBar.position = 1.0
                 clear()
             }
+            Keys.onEscapePressed: {
+                chatListView.forceActiveFocus()
+            }
         } /// Chat entry field
     } /// scroll area
 }
-

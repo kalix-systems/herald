@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import QtQuick.Dialogs 1.3
@@ -6,6 +6,7 @@ import LibHerald 1.0
 import "SideBar"
 
 Pane {
+    id: contactPane
 
     property real windowFraction: 0.25 // By default set the width to 1/4 the total window size.
     property bool isContactOnlyView: false // set true if the only view is the contact list
@@ -20,7 +21,6 @@ Pane {
         windowFraction = width / root.width
     }
 
-    id: contactPane
     padding: 0 // All Interior Elements span the entire pane
     height: parent.height
     background: Rectangle {
@@ -34,6 +34,7 @@ Pane {
 
     ///--- SearchBar for contacts, add contact button
     UtilityBar {
+        anchors.top: toolBar.bottom
         id: utilityBar
     }
 
@@ -47,8 +48,6 @@ Pane {
     }
 
     ///--- Contacts View Actual
-
-
     Pane {
         padding: 0
         anchors {
@@ -64,7 +63,6 @@ Pane {
                 id: contacts
             }
         }
-
     }
 }
 

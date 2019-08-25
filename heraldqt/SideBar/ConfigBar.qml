@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
@@ -10,7 +10,7 @@ ToolBar {
         top: parent.top
     }
     width: contactPane.width
-    height: 40
+    height: QmlCfg.toolbarHeight
 
     background: Rectangle {
         color: QmlCfg.palette.mainColor
@@ -75,6 +75,7 @@ ToolBar {
             width: parent.height
             height: width
             scale: 0.7
+            mipmap: true
         }
         onClicked: {
             configPopup.open()

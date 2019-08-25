@@ -1,4 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.13
+
 QtObject {
     readonly property int dark: 0
     readonly property int light: 1

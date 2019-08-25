@@ -1,29 +1,70 @@
-import QtQuick 2.0
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import QtQuick.Layouts 1.2
 
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
-    y: toolBar.y + toolBar.height
-    width: contactPane.width
-    height: 40
-    font.pointSize: 25
+    anchors.right: parent.right
+    height: QmlCfg.toolbarHeight
+
     background: Rectangle {
         anchors.fill: parent
-        color: QmlCfg.palette.secondaryColor
+        color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
+    }
+
+    ScrollView {
+        id: searchScroll
+        anchors {
+            left: parent.left
+            right: searchButton.left
+            leftMargin: 10
+            rightMargin: 10
+            verticalCenter: parent.verticalCenter
+        }
+
+        TextArea {
+            background: Rectangle {
+                anchors.fill: parent
+                color: QmlCfg.palette.mainColor
+                radius: QmlCfg.radius
+            }
+
+            id: searchText
+            placeholderText: qsTr("Search...")
+            Layout.fillWidth: true
+            font.pointSize: 10
+        }
+    }
+    Button {
+        id: searchButton
+        anchors.right: addContactButton.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.rightMargin: QmlCfg.margin
+        implicitHeight: utilityBar.height - 15
+        implicitWidth: height
+        background: Image {
+            source: "qrc:///icons/search.png"
+            height: width
+            scale: 0.9
+            mipmap: true
+        }
+        onClicked: searchScroll.focus = true
     }
 
     ///--- Add contact button
     Button {
         id: addContactButton
-        font.pointSize: parent.height - 10
-        height: parent.height - 15
-        anchors.rightMargin: 10
-        anchors.verticalCenterOffset: 0
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
+        height: QmlCfg.toolbarHeight - QmlCfg.margin
         width: height
+
+        anchors {
+            rightMargin: QmlCfg.margin
+            verticalCenterOffset: 0
+            right: parent.right
+            verticalCenter: parent.verticalCenter
+        }
 
         background: Rectangle {
             id: bg
@@ -33,6 +74,7 @@ ToolBar {
                 source: "qrc:///icons/plus.png"
                 anchors.fill: parent
                 scale: 0.7
+                mipmap: true
             }
         }
 
@@ -57,13 +99,13 @@ ToolBar {
         }
     }
 
-   function insertContact() {
-                    if (entryField.text.trim().length === 0)
-                        return
-                    contacts.add(entryField.text.trim())
-                    entryField.clear()
-                    newContactDialogue.close()
-                }
+    function insertContact() {
+        if (entryField.text.trim().length === 0)
+            return
+        contacts.add(entryField.text.trim())
+        entryField.clear()
+        newContactDialogue.close()
+    }
 
     Popup {
         id: newContactDialogue
@@ -72,8 +114,8 @@ ToolBar {
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
         width: 300
         height: 200
-        //anchors.centerIn: root //TODO : this is unassignable
 
+        //anchors.centerIn: root //TODO : this is unassignable
         TextArea {
             focus: true
             id: entryField
@@ -91,8 +133,4 @@ ToolBar {
             onClicked: insertContact()
         }
     }
-
-
 }
-
-
