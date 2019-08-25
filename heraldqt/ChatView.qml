@@ -73,7 +73,7 @@ Pane {
                 }
 
                 ChatBubble {
-                    padding: QmlCfg.margin
+                    topPadding: index == 0 ? QmlCfg.margin : 0
                     text: body
                 }
             } /// Delegate
