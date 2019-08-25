@@ -575,63 +575,6 @@ pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contac
     (&mut *ptr).set_profile_picture(to_usize(row), None)
 }
 
-pub struct HeraldStateQObject {}
-
-pub struct HeraldStateEmitter {
-    qobject: Arc<AtomicPtr<HeraldStateQObject>>,
-}
-
-unsafe impl Send for HeraldStateEmitter {}
-
-impl HeraldStateEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> HeraldStateEmitter {
-        HeraldStateEmitter {
-            qobject: self.qobject.clone(),
-        }
-    }
-    fn clear(&self) {
-        let n: *const HeraldStateQObject = null();
-        self.qobject.store(n as *mut HeraldStateQObject, Ordering::SeqCst);
-    }
-}
-
-pub trait HeraldStateTrait {
-    fn new(emit: HeraldStateEmitter) -> Self;
-    fn emit(&mut self) -> &mut HeraldStateEmitter;
-    fn create_min_config(&mut self, id: String) -> ();
-}
-
-#[no_mangle]
-pub extern "C" fn herald_state_new(
-    herald_state: *mut HeraldStateQObject,
-) -> *mut HeraldState {
-    let herald_state_emit = HeraldStateEmitter {
-        qobject: Arc::new(AtomicPtr::new(herald_state)),
-    };
-    let d_herald_state = HeraldState::new(herald_state_emit);
-    Box::into_raw(Box::new(d_herald_state))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_state_free(ptr: *mut HeraldState) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_state_create_min_config(ptr: *mut HeraldState, id_str: *const c_ushort, id_len: c_int) -> () {
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    let o = &mut *ptr;
-    let r = o.create_min_config(id);
-    r
-}
-
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {

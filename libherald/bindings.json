@@ -6,21 +6,6 @@
         "implementationModule": "implementation"
     },
     "objects": {
-        "HeraldState": {
-            "type": "Object",
-            "functions": {
-                "create_min_config": {
-                    "mut": true,
-                    "return": "void",
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "QString"
-                        }
-                    ]
-                }
-            }
-        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
