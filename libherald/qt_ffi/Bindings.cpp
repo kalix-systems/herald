@@ -326,12 +326,6 @@ extern "C" {
 };
 
 extern "C" {
-    HeraldState::Private* herald_state_new(HeraldState*);
-    void herald_state_free(HeraldState::Private*);
-    void herald_state_create_min_config(HeraldState::Private*, const ushort*, int);
-};
-
-extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     qint64 messages_data_message_id(const Messages::Private*, int);
@@ -664,29 +658,6 @@ bool Contacts::remove(quint64 row_index)
 void Contacts::remove_all()
 {
     return contacts_remove_all(m_d);
-}
-HeraldState::HeraldState(bool /*owned*/, QObject *parent):
-    QObject(parent),
-    m_d(nullptr),
-    m_ownsPrivate(false)
-{
-}
-
-HeraldState::HeraldState(QObject *parent):
-    QObject(parent),
-    m_d(herald_state_new(this)),
-    m_ownsPrivate(true)
-{
-}
-
-HeraldState::~HeraldState() {
-    if (m_ownsPrivate) {
-        herald_state_free(m_d);
-    }
-}
-void HeraldState::create_min_config(const QString& id)
-{
-    return herald_state_create_min_config(m_d, id.utf16(), id.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

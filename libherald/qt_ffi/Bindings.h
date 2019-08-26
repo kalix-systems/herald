@@ -7,7 +7,6 @@
 
 class Config;
 class Contacts;
-class HeraldState;
 class Messages;
 class NetworkHandle;
 
@@ -92,22 +91,6 @@ private:
     QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
     void initHeaderData();
     void updatePersistentIndexes();
-Q_SIGNALS:
-};
-
-class HeraldState : public QObject
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    explicit HeraldState(bool owned, QObject *parent);
-public:
-    explicit HeraldState(QObject *parent = nullptr);
-    ~HeraldState();
-    Q_INVOKABLE void create_min_config(const QString& id);
 Q_SIGNALS:
 };
 
