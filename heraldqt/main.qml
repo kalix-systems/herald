@@ -3,8 +3,6 @@ import QtQuick.Window 2.13
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "common"
-import "SideBar"
 
 ApplicationWindow {
     visible: true

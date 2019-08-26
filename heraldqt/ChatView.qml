@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "ChatView"
+import "ChatView" as CVUtils
 
 Pane {
     id: chatPane
@@ -12,7 +12,7 @@ Pane {
 
     property alias messageBar: messageBar
 
-    ChatBar {
+    CVUtils.ChatBar {
         id: messageBar
     }
 
@@ -72,7 +72,7 @@ Pane {
                     rightMargin: chatScrollBar.width * 2
                 }
 
-                ChatBubble {
+                CVUtils.ChatBubble {
                     topPadding: index == 0 ? QmlCfg.margin : 0
                     text: body
                 }

@@ -2,7 +2,7 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.3
-import "../common"
+import "../common" as Common
 
 /// --- displays a list of contacts
 ListView {
@@ -131,7 +131,7 @@ ListView {
             }
         }
 
-        Avatar {
+        Common.Avatar {
             size: 50
             id: contactAvatar
             displayName: name ? name : contact_id

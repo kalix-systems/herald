@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
-import "SideBar"
+import "SideBar" as SBUtils
 
 Pane {
     id: contactPane
@@ -28,12 +28,12 @@ Pane {
     }
 
     ///--- Username and Settings gear button
-    ConfigBar {
+    SBUtils.ConfigBar {
         id: toolBar
     }
 
     ///--- SearchBar for contacts, add contact button
-    UtilityBar {
+    SBUtils.UtilityBar {
         anchors.top: toolBar.bottom
         id: utilityBar
     }
@@ -57,7 +57,7 @@ Pane {
             bottom: parent.bottom
         }
 
-        ContactView {
+        SBUtils.ContactView {
             anchors.fill: parent
             model: Contacts {
                 id: contacts
