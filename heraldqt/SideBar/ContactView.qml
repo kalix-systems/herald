@@ -65,7 +65,6 @@ ListView {
                             chatView.state = "" //TODO clearview should be less imperative
                         contacts.remove(index)
                         chatView.messageModel.clear_conversation_view()
-
                     }
                 }
                 MenuItem {

@@ -119,8 +119,7 @@ Pane {
                 if (event.modifiers & Qt.ShiftModifier) {
                     chatText.text = chatText.text + "\n"
                     chatText.cursorPosition = chatText.text.length
-                }
-                else {
+                } else {
                     if (text.length <= 0) {
                         return
                     }
@@ -137,7 +136,12 @@ Pane {
         } /// Chat entry field
     } /// scroll area
 
-    states: State {name: "visibleview"
-        PropertyChanges {target: chatPane; opacity: 100; enabled: true}
+    states: State {
+        name: "visibleview"
+        PropertyChanges {
+            target: chatPane
+            opacity: 100
+            enabled: true
+        }
     }
 }
