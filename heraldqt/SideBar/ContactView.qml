@@ -31,6 +31,7 @@ ListView {
                         chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
                         chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
                         chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
+                        chatView.state = "visibleview"
                     } else {
                         optionsMenu.x = mouse.x
                         optionsMenu.y = mouse.y
@@ -59,8 +60,11 @@ ListView {
                 MenuItem {
                     text: 'Delete Contact'
                     onTriggered: {
+                        if (contact_id === chatView.messageModel.conversationId)
+                            chatView.state = "" //TODO clearview should be less imperative
                         contacts.remove(index)
                         chatView.messageModel.clear_conversation_view()
+
                     }
                 }
                 MenuItem {
