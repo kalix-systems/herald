@@ -103,6 +103,7 @@ Pane {
         height: Math.min(contentHeight, 100)
 
         TextArea {
+            id: chatText
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
                 anchors {
@@ -115,12 +116,20 @@ Pane {
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.onReturnPressed: {
-                if (text.length <= 0) {
-                    return
+                if (event.modifiers & Qt.ShiftModifier) {
+                    chatText.text = chatText.text + "\n"
+                    chatText.cursorPosition = chatText.text.length
                 }
-                messageModel.send_message(text)
-                chatScrollBar.position = 1.0
-                clear()
+                else {
+                    if (text.length <= 0) {
+                        return
+                    }
+                    if (text.trim().length === 0)
+                        return
+                    messageModel.send_message(text)
+                    chatScrollBar.position = 1.0
+                    clear()
+                }
             }
             Keys.onEscapePressed: {
                 chatListView.forceActiveFocus()
