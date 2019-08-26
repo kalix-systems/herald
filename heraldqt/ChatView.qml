@@ -6,6 +6,8 @@ import "ChatView" as CVUtils
 
 Pane {
     id: chatPane
+    enabled: false
+    opacity: 0
 
     property var messageModel: Messages {
     }
@@ -118,4 +120,8 @@ Pane {
             }
         } /// Chat entry field
     } /// scroll area
+
+    states: State {name: "visibleview"
+        PropertyChanges {target: chatPane; opacity: 100; enabled: true}
+    }
 }
