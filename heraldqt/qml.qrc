@@ -1,20 +1,21 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>common/CommonConfig.qml</file>
+        <file>common/Theme.qml</file>
+        <file>common/Avatar.qml</file>
+        <file>common/utils.js</file>
         <file>SideBar/ContactView.qml</file>
         <file>SideBar.qml</file>
+        <file>SideBar/ConfigBar.qml</file>
+        <file>SideBar/UtilityBar.qml</file>
+        <file>ChatView.qml</file>
+        <file>ChatView/ChatBubble.qml</file>
+        <file>ChatView/ChatBar.qml</file>
         <file>icons/plus.png</file>
         <file>icons/gear.svg</file>
         <file>icons/gear.png</file>
-        <file>ChatView.qml</file>
-        <file>SideBar/ConfigBar.qml</file>
-        <file>SideBar/UtilityBar.qml</file>
-        <file>common/CommonConfig.qml</file>
-        <file>common/Theme.qml</file>
-        <file>main.cpp</file>
-        <file>ChatView/ChatBubble.qml</file>
-        <file>common/Avatar.qml</file>
-        <file>ChatView/ChatBar.qml</file>
         <file>icons/search.png</file>
+        <file>main.cpp</file>
     </qresource>
 </RCC>

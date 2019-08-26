@@ -70,12 +70,18 @@ Pane {
                 readonly property bool outbound: author === config.id
 
                 anchors {
-                    right: outbound ? parent.right : undefined
+                    right: if (outbound) {
+                               parent.right
+                           }
                     rightMargin: chatScrollBar.width * 2
                 }
 
                 CVUtils.ChatBubble {
-                    topPadding: index == 0 ? QmlCfg.margin : 0
+                    topPadding: if (index === 0) {
+                                    QmlCfg.margin
+                                } else {
+                                    0
+                                }
                     text: body
                 }
             } /// Delegate
@@ -109,8 +115,9 @@ Pane {
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.onReturnPressed: {
-                if (text.length <= 0)
+                if (text.length <= 0) {
                     return
+                }
                 messageModel.send_message(text)
                 chatScrollBar.position = 1.0
                 clear()

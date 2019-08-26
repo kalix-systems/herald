@@ -14,6 +14,10 @@ int main(int argc, char *argv[])
     qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
     qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "QmlCfg");
 
+    app.setOrganizationName("Kalix Systems");
+    app.setOrganizationDomain("kalix.io");
+    app.setApplicationName("Herald");
+
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

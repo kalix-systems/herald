@@ -47,9 +47,11 @@ ApplicationWindow {
         handle: Rectangle {
             implicitWidth: 4
             implicitHeight: 4
-            color: SplitHandle.pressed ? Qt.darker(
-                                             QmlCfg.palette.secondaryColor,
-                                             1.1) : QmlCfg.palette.secondaryColor
+            color: if (SplitHandle.pressed) {
+                       Qt.darker(QmlCfg.palette.secondaryColor, 1.1)
+                   } else {
+                       QmlCfg.palette.secondaryColor
+                   }
         }
     }
 }

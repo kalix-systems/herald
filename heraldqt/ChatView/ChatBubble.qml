@@ -14,7 +14,11 @@ Row {
             text: avatarRow.text
         }
         id: bubble
-        color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
+        color: if (outbound) {
+                   QmlCfg.palette.tertiaryColor
+               } else {
+                   QmlCfg.palette.secondaryColor
+               }
         radius: QmlCfg.radius
         width: bubbleText.width + QmlCfg.margin
         height: bubbleText.height + QmlCfg.margin
@@ -24,7 +28,11 @@ Row {
             text: messageMetrics.text
             wrapMode: Text.Wrap
 
-            width: tooLong ? chatPane.width / 2 : undefined
+            width: if (tooLong) {
+                       chatPane.width / 2
+                   } else {
+                       undefined
+                   }
             anchors.centerIn: bubble
         }
     }
