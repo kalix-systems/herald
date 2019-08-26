@@ -3,6 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.12
 import QtQuick.Dialogs 1.3
 import "../common" as Common
+import "../common/utils.js" as Utils
 
 /// --- displays a list of contacts
 ListView {
@@ -76,16 +77,15 @@ ListView {
                 MenuItem {
                     text: 'Clear Avatar'
                     onTriggered: {
-                        contactAvatar.pfpUrl = null
-                        chatView.messageBar.chatBarAvatar.pfpUrl = null
+                        contactAvatar.pfpUrl = ""
+                        chatView.messageBar.chatBarAvatar.pfpUrl = ""
                         contacts.setProfile_picture(index, "")
-                        //TODO: delete profile picture from database function
                     }
                 }
             }
 
             function renameContact() {
-                if (entryField.text.trim().length == 0) {
+                if (entryField.text.trim() === "") {
                     return
                 }
                 name = entryField.text.trim()
@@ -126,7 +126,7 @@ ListView {
                 if (contactItem.focus) {
                     return QmlCfg.palette.tertiaryColor
                 } else {
-                    return index % 2 ? QmlCfg.palette.secondaryColor : QmlCfg.palette.mainColor
+                    return QmlCfg.palette.mainColor
                 }
             }
         }
@@ -134,9 +134,9 @@ ListView {
         Common.Avatar {
             size: 50
             id: contactAvatar
-            displayName: name ? name : contact_id
+            displayName: Utils.unwrap_or(name, contact_id)
             colorHash: color
-            pfpUrl: profile_picture === undefined ? "" : profile_picture
+            pfpUrl: Utils.unwrap_or(profile_picture, "")
         }
     }
 }
