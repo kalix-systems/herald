@@ -48,6 +48,10 @@ namespace {
     {
         Q_EMIT o->conversationIdChanged();
     }
+    inline void networkHandleNew_messageChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->new_messageChanged();
+    }
 }
 extern "C" {
     Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
@@ -499,7 +503,14 @@ extern "C" {
     bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_conversation_by_id(Messages::Private*, const ushort*, int);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_send_message(Messages::Private*, const ushort*, int);
+    bool messages_insert_message(Messages::Private*, const ushort*, int);
+};
+
+extern "C" {
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*));
+    void network_handle_free(NetworkHandle::Private*);
+    bool network_handle_new_message_get(const NetworkHandle::Private*);
+    bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const ushort*, int);
 };
 
 Config::Config(bool /*owned*/, QObject *parent):
@@ -743,7 +754,35 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::send_message(const QString& body)
+bool Messages::insert_message(const QString& body)
 {
-    return messages_send_message(m_d, body.utf16(), body.size());
+    return messages_insert_message(m_d, body.utf16(), body.size());
+}
+NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+NetworkHandle::NetworkHandle(QObject *parent):
+    QObject(parent),
+    m_d(network_handle_new(this,
+        networkHandleNew_messageChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+NetworkHandle::~NetworkHandle() {
+    if (m_ownsPrivate) {
+        network_handle_free(m_d);
+    }
+}
+bool NetworkHandle::new_message() const
+{
+    return network_handle_new_message_get(m_d);
+}
+bool NetworkHandle::send_message(const QString& message_body, const QString& to) const
+{
+    return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.utf16(), to.size());
 }

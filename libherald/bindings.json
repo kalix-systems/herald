@@ -6,6 +6,44 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "NetworkHandle": {
+            "type": "Object",
+            "functions": {
+                "send_message": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "message_body",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "to",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "new_message": {
+                    "type": "bool"
+                }
+            }
+        },
+        "HeraldState": {
+            "type": "Object",
+            "functions": {
+                "create_min_config": {
+                    "mut": true,
+                    "return": "void",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            }
+        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
@@ -81,7 +119,7 @@
                 }
             },
             "functions": {
-                "send_message": {
+                "insert_message": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [

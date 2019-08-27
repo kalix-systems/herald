@@ -8,6 +8,7 @@
 class Config;
 class Contacts;
 class Messages;
+class NetworkHandle;
 
 class Config : public QObject
 {
@@ -112,7 +113,7 @@ public:
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool send_message(const QString& body);
+    Q_INVOKABLE bool insert_message(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -144,5 +145,24 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void conversationIdChanged();
+};
+
+class NetworkHandle : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(bool new_message READ new_message NOTIFY new_messageChanged FINAL)
+    explicit NetworkHandle(bool owned, QObject *parent);
+public:
+    explicit NetworkHandle(QObject *parent = nullptr);
+    ~NetworkHandle();
+    bool new_message() const;
+    Q_INVOKABLE bool send_message(const QString& message_body, const QString& to) const;
+Q_SIGNALS:
+    void new_messageChanged();
 };
 #endif // BINDINGS_H
