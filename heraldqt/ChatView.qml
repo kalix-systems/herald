@@ -8,11 +8,10 @@ Pane {
     id: chatPane
     enabled: false
     opacity: 0
-
+    padding: 0
+    property alias messageBar: messageBar
     property Messages messageModel: Messages {
     }
-
-    property alias messageBar: messageBar
 
     CVUtils.ChatBar {
         id: messageBar
@@ -28,8 +27,6 @@ Pane {
             right: parent.right
         }
     }
-
-    padding: 0
 
     ///--- chat view, shows messages
     ScrollView {
