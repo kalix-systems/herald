@@ -39,10 +39,23 @@ Pane {
             right: parent.right
         }
 
-        ListView {
+        ///--- scrollbar for chat messages
+        ScrollBar.vertical: ScrollBar {
+            id: chatScrollBar
+            Component.onCompleted: position = 1.0
+            height: parent.height
+            anchors.right: parent.right
+        }
+
+        Column {
+            width: chatPane.width
+            spacing: QmlCfg.margin
+
+        Repeater {
             anchors.fill: parent
             id: chatListView
             Component.onCompleted: forceActiveFocus()
+            model: messageModel
 
             MouseArea {
                 anchors.fill: parent
@@ -52,17 +65,6 @@ Pane {
             Keys.onUpPressed: chatScrollBar.decrease()
             Keys.onDownPressed: chatScrollBar.increase()
 
-            boundsBehavior: Flickable.StopAtBounds
-            spacing: QmlCfg.margin
-            model: messageModel
-
-            ///--- scrollbar for chat messages
-            ScrollBar.vertical: ScrollBar {
-                id: chatScrollBar
-                size: 50
-                Component.onCompleted: position = 1.0
-            }
-
             delegate: Column {
                 readonly property bool outbound: author === config.id
 
@@ -70,7 +72,7 @@ Pane {
                     right: if (outbound) {
                                return parent.right
                            }
-                    rightMargin: chatScrollBar.width * 2
+                    rightMargin: chatScrollBar.width * 1.5
                 }
 
                 CVUtils.ChatBubble {
@@ -83,6 +85,7 @@ Pane {
                 }
             } /// Delegate
         } /// ListView
+        }
     }
 
     ///--- Text entry area
