@@ -123,7 +123,7 @@ Pane {
                     if (text.trim().length === 0) {
                         return
                     }
-                    messageModel.send_message(text)
+                    messageModel.insert_message(text)
                     chatScrollBar.position = 1.0
                     clear()
                 }

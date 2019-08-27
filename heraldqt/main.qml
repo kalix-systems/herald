@@ -3,6 +3,7 @@ import QtQuick.Window 2.13
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import "SideBar/popups" as Popups
 
 ApplicationWindow {
     visible: true
@@ -17,14 +18,9 @@ ApplicationWindow {
         id: networkHandle
     }
 
-    //    Popup {
-    //        id: firstTimePopup
-    //        focus: true
-    //        modal: true
-    //        anchors.centerIn: parent
-    //        anchors.Fill: parent
-    //        anchors.Margin: QmlCfg.margin
-    //    }
+    Popups.ConfigPopup {
+        id: firstTimePopup
+    }
 
     /// global configurations item
     Config {
