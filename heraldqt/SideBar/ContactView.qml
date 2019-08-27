@@ -14,17 +14,44 @@ ListView {
     ScrollBar.vertical: ScrollBar {
     }
     delegate: Item {
-
         id: contactItem
         height: 60
         width: parent.width
 
         Rectangle {
+            property color focusColor: QmlCfg.palette.tertiaryColor
+            property color hoverColor: QmlCfg.palette.secondaryColor
+            property color defaultColor: QmlCfg.palette.mainColor
+
             anchors.fill: parent
+
+            states: [
+                State {
+                    name: "hovering"
+                    PropertyChanges {
+                        target: bgBox
+                        color: hoverColor
+                    }
+                },
+                State {
+                    name: "focused"
+                    PropertyChanges {
+                        target: bgBox
+                        color: focusColor
+                    }
+                }
+            ]
             MouseArea {
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                hoverEnabled: true
                 z: 10
                 anchors.fill: parent
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                onEntered: {
+                    parent.state = "hovering"
+                }
+                onExited: {
+                    parent.state = ""
+                }
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
                         contactItem.focus = true
@@ -37,6 +64,13 @@ ListView {
                         optionsMenu.x = mouse.x
                         optionsMenu.y = mouse.y
                         optionsMenu.open()
+                    }
+                }
+                onReleased: {
+                    if (containsMouse) {
+                        parent.state = "hovering"
+                    } else {
+                        parent.state = ""
                     }
                 }
             }
@@ -127,9 +161,9 @@ ListView {
             id: bgBox
             color: {
                 if (contactItem.focus) {
-                    return QmlCfg.palette.tertiaryColor
+                    return focusColor
                 } else {
-                    return QmlCfg.palette.mainColor
+                    return defaultColor
                 }
             }
         }
