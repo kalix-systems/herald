@@ -132,5 +132,6 @@ ToolBar {
             }
             onClicked: insertContact()
         }
+
     }
 }
