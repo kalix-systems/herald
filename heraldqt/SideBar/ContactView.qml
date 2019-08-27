@@ -19,9 +19,18 @@ ListView {
         width: parent.width
 
         Rectangle {
+            id: bgBox
             property color focusColor: QmlCfg.palette.tertiaryColor
             property color hoverColor: QmlCfg.palette.secondaryColor
             property color defaultColor: QmlCfg.palette.mainColor
+
+            Rectangle {
+                anchors.verticalCenter: parent.bottom
+                color: QmlCfg.palette.secondaryColor
+                width: parent.width
+                height: 1.5
+            }
+
 
             anchors.fill: parent
 
@@ -41,6 +50,9 @@ ListView {
                     }
                 }
             ]
+
+
+
             MouseArea {
                 hoverEnabled: true
                 z: 10
@@ -158,7 +170,6 @@ ListView {
                 }
             }
 
-            id: bgBox
             color: {
                 if (contactItem.focus) {
                     return focusColor
@@ -167,6 +178,8 @@ ListView {
                 }
             }
         }
+
+
 
         Common.Avatar {
             size: 50
