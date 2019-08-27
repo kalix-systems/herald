@@ -31,7 +31,6 @@ ListView {
                 height: 1.5
             }
 
-
             anchors.fill: parent
 
             states: [
@@ -50,8 +49,6 @@ ListView {
                     }
                 }
             ]
-
-
 
             MouseArea {
                 hoverEnabled: true
@@ -178,8 +175,6 @@ ListView {
                 }
             }
         }
-
-
 
         Common.Avatar {
             size: 50
