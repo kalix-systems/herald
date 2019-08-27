@@ -71,7 +71,6 @@ ToolBar {
             enabled: cfgUid.userIdValid && cfgUname.usernameValid
                      && cfgPfp.pfpValid
             onClicked: {
-
                 configPopup.close()
             }
         }

@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import "ChatBubble.js" as JS
 
 /// Avatar:
 /// Obj
@@ -23,16 +24,11 @@ Row {
         width: bubbleText.width + QmlCfg.margin
         height: bubbleText.height + QmlCfg.margin
         Label {
-            property bool tooLong: (messageMetrics.width >= chatPane.width / 2)
             id: bubbleText
             text: messageMetrics.text
             wrapMode: Text.Wrap
 
-            width: if (tooLong) {
-                       chatPane.width / 2
-                   } else {
-                       undefined
-                   }
+            width: JS.calculate_width(chatPane.width, messageMetrics.width)
             anchors.centerIn: bubble
         }
     }
