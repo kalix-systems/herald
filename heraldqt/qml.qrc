@@ -18,5 +18,7 @@
         <file>icons/gear.png</file>
         <file>icons/search.png</file>
         <file>main.cpp</file>
+        <file>SideBar/popups/NewContactDialogue.qml</file>
+        <file>SideBar/popups/ContactClickedPopup.qml</file>
     </qresource>
 </RCC>

@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.2
+import "popups" as Popups
 
 ToolBar {
     id: utilityBar
@@ -99,38 +100,7 @@ ToolBar {
         }
     }
 
-    function insertContact() {
-        if (entryField.text.trim().length === 0)
-            return
-        contacts.add(entryField.text.trim())
-        entryField.clear()
-        newContactDialogue.close()
-    }
-
-    Popup {
+    Popups.NewContactDialogue {
         id: newContactDialogue
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        width: 300
-        height: 200
-
-        //anchors.centerIn: root //TODO : this is unassignable
-        TextArea {
-            focus: true
-            id: entryField
-            placeholderText: qsTr("Enter contact name")
-            Keys.onReturnPressed: insertContact()
-        }
-
-        Button {
-            text: "submit"
-            id: submissionButton
-            anchors {
-                bottom: parent.bottom
-                right: parent.right
-            }
-            onClicked: insertContact()
-        }
     }
 }
