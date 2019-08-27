@@ -12,8 +12,8 @@ Pane {
     property bool isContactOnlyView: false // set true if the only view is the contact list
     property real maxWindowFraction: 0.66
 
-    SplitView.maximumWidth: root.width
-                            * maxWindowFraction // maximum width, where root is ApplicationWindow
+    // maximum width, where root is ApplicationWindow
+    SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
 

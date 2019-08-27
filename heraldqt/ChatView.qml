@@ -9,7 +9,7 @@ Pane {
     enabled: false
     opacity: 0
 
-    property var messageModel: Messages {
+    property Messages messageModel: Messages {
     }
 
     property alias messageBar: messageBar
@@ -71,16 +71,16 @@ Pane {
 
                 anchors {
                     right: if (outbound) {
-                               parent.right
+                               return parent.right
                            }
                     rightMargin: chatScrollBar.width * 2
                 }
 
                 CVUtils.ChatBubble {
                     topPadding: if (index === 0) {
-                                    QmlCfg.margin
+                                    return QmlCfg.margin
                                 } else {
-                                    0
+                                    return 0
                                 }
                     text: body
                 }
@@ -123,8 +123,9 @@ Pane {
                     if (text.length <= 0) {
                         return
                     }
-                    if (text.trim().length === 0)
+                    if (text.trim().length === 0) {
                         return
+                    }
                     messageModel.send_message(text)
                     chatScrollBar.position = 1.0
                     clear()
