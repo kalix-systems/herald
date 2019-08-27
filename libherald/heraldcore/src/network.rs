@@ -1,5 +1,5 @@
 use crate::errors::HErr;
-use herald_common::{GlobalId, MessageToClient, MessageToServer, RawMsg, UserId};
+use herald_common::{GlobalId, MessageToServer, RawMsg, UserId};
 use serde::{Deserialize, Serialize};
 use std::{
     io::{Read, Write},

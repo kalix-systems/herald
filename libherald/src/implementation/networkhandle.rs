@@ -10,7 +10,7 @@ use std::time::Duration;
 
 pub enum HandleMessages {
     Tx(MessageToServer),
-    Shutdown,
+    //Shutdown,
 }
 
 pub struct NetworkHandle {
@@ -23,7 +23,7 @@ impl NetworkHandleTrait for NetworkHandle {
     fn new(emit: NetworkHandleEmitter) -> Self {
         let (tx, rx) = channel::<HandleMessages>();
 
-        let mut handle = NetworkHandle {
+        let handle = NetworkHandle {
             emit,
             message_received: Arc::new(AtomicBool::new(false)),
             tx,
@@ -32,7 +32,6 @@ impl NetworkHandleTrait for NetworkHandle {
         let flag = handle.message_received.clone();
 
         thread::spawn(move || loop {
-            use MessageToClient::*;
             use MessageToServer::*;
 
             match rx.try_recv() {
@@ -44,8 +43,8 @@ impl NetworkHandleTrait for NetworkHandle {
                     UpdateBlob { .. } => unimplemented!(),
                     RequestMeta { .. } => unimplemented!(),
                 },
-                Ok(HandleMessages::Shutdown) => unimplemented!(),
-                Err(e) => {}
+                //Ok(HandleMessages::Shutdown) => unimplemented!(),
+                Err(_e) => {}
             }
             if let Ok(HandleMessages::Tx(msg)) = rx.try_recv() {
                 println!("I'm gettin a message here : {:?} ", msg);
