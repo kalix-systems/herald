@@ -1,13 +1,23 @@
 use crate::errors::HErr;
 use herald_common::{GlobalId, MessageToServer, RawMsg, UserId};
+use lazy_static::*;
 use serde::{Deserialize, Serialize};
 use std::{
+    env,
     io::{Read, Write},
-    net::{SocketAddrV4, TcpStream},
+    net::{Ipv4Addr, SocketAddrV4, TcpStream},
 };
 
-const PORT: u16 = 8000;
-const SERVER_ADDR: [u8; 4] = [127, 0, 0, 1];
+const DEFAULT_PORT: u16 = 8000;
+const DEFUALT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
+
+lazy_static! {
+    static ref SERVER_ADDR: String = env::var("SERVER_ADDR").unwrap_or_else(|_| format!(
+        "{}:{}",
+        Ipv4Addr::from(DEFUALT_SERVER_IP_ADDR),
+        DEFAULT_PORT
+    ));
+}
 
 /// Sends `data` such as messages, Registration requests,
 /// and metadata to the server.
@@ -31,7 +41,7 @@ pub fn read_from_server<T: for<'de> Deserialize<'de>>(stream: &mut TcpStream) ->
 
 /// Registers `user_id` on the server.
 pub fn register(user_id: UserId) -> Result<(), HErr> {
-    let socket = SocketAddrV4::new(SERVER_ADDR.into(), PORT);
+    let socket: SocketAddrV4 = SERVER_ADDR.parse().expect("Invalid server address");
 
     let gid = GlobalId {
         did: 0,
