@@ -78,7 +78,7 @@ Item {
             focus: true
             id: entryField
             placeholderText: qsTr("Enter new name")
-            Keys.onReturnPressed: bgBox.renameContact()
+            Keys.onReturnPressed: renameContact()
         }
 
         Button {
@@ -88,7 +88,7 @@ Item {
                 bottom: parent.bottom
                 right: parent.right
             }
-            onClicked: bgBox.renameContact()
+            onClicked: renameContact()
         }
     }
 }

@@ -13,15 +13,25 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
-    NetworkHandle { }
+    NetworkHandle {
+        id: networkHandle
+    }
+
+    //    Popup {
+    //        id: firstTimePopup
+    //        focus: true
+    //        modal: true
+    //        anchors.centerIn: parent
+    //        anchors.Fill: parent
+    //        anchors.Margin: QmlCfg.margin
+    //    }
 
     /// global configurations item
     Config {
         id: config
         Component.onCompleted: {
-            if (config.exists) {
-                print("IT existed, y'all good")
-            } else {
+            if (!config.exists) {
+                firstTimePopup.open()
                 print("placeholder for a popup which forces first time config.")
             }
         }
