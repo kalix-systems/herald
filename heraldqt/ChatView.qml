@@ -127,6 +127,8 @@ Pane {
                         return
                     }
                     messageModel.insert_message(text)
+                    networkHandle.send_message(text,
+                                               messageModel.conversationId)
                     chatScrollBar.position = 1.0
                     clear()
                 }
