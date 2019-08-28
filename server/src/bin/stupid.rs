@@ -131,7 +131,7 @@ async fn main() {
                 loop {
                     let d = read_datagram(&mut reader).await;
                     if let Err(e) = d {
-                        eprintln!("connection to {} closing with msg {:?}", addr, e);
+                        eprintln!("invalid msg from addr {}, error was {:?}", addr, e);
                         break;
                     };
                     match d.unwrap() {
@@ -188,10 +188,13 @@ async fn main() {
                         }
                     }
                 }
+                dbg!("closing connection with {}", gid);
                 state.open.remove(&gid);
+                let open: Vec<GlobalId> = state.open.iter().map(|p| p.key().clone()).collect();
+                dbg!("current open connections are: {:?}", open);
             };
             if let Err(e) = comp {
-                eprintln!("connection to {} failed, error was: {:?}", addr, e);
+                eprintln!("session with {} failed, error was: {:?}", addr, e);
             }
         });
     }
