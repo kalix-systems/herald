@@ -5,23 +5,25 @@ use serde::Serialize;
 use std::{
     env,
     io::{Read, Write},
-    net::{Ipv4Addr, SocketAddrV4, TcpStream},
+    net::{SocketAddrV4, TcpStream},
 };
 
 const DEFAULT_PORT: u16 = 8000;
 const DEFUALT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
-    static ref SERVER_ADDR: String = env::var("SERVER_ADDR").unwrap_or_else(|_| format!(
-        "{}:{}",
-        Ipv4Addr::from(DEFUALT_SERVER_IP_ADDR),
-        DEFAULT_PORT
-    ));
+    static ref SERVER_ADDR: SocketAddrV4 = match env::var("SERVER_ADDR") {
+        Ok(addr) => addr
+            .parse()
+            .expect(&format!("Provided address {} is invalid", addr)),
+        Err(_) => SocketAddrV4::new(DEFUALT_SERVER_IP_ADDR.into(), DEFAULT_PORT),
+    };
 }
 
 /// Initializes connection with the server.
 pub fn open_connection() -> Result<TcpStream, HErr> {
-    let socket: SocketAddrV4 = SERVER_ADDR.parse().expect("Invalid server address");
+    let socket: SocketAddrV4 = *SERVER_ADDR;
+    println!("Client connecting to {}", *SERVER_ADDR);
     let mut stream = TcpStream::connect(socket)?;
 
     login(&mut stream)?;
