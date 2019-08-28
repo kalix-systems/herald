@@ -8,6 +8,7 @@
 class Config;
 class Contacts;
 class Messages;
+class NetworkHandle;
 
 class Config : public QObject
 {
@@ -18,7 +19,7 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
-    Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged FINAL)
+    Q_PROPERTY(QString config_id READ config_id WRITE setConfig_id NOTIFY config_idChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
@@ -27,8 +28,8 @@ public:
     ~Config();
     quint32 colorscheme() const;
     void setColorscheme(quint32 v);
-    QString id() const;
-    void setId(const QString& v);
+    QString config_id() const;
+    void setConfig_id(const QString& v);
     QString name() const;
     void setName(const QString& v);
     QString profile_picture() const;
@@ -36,7 +37,7 @@ public:
     Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void colorschemeChanged();
-    void idChanged();
+    void config_idChanged();
     void nameChanged();
     void profile_pictureChanged();
 };
@@ -112,7 +113,7 @@ public:
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool send_message(const QString& body);
+    Q_INVOKABLE bool insert_message(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -144,5 +145,24 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void conversationIdChanged();
+};
+
+class NetworkHandle : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(bool new_message READ new_message NOTIFY new_messageChanged FINAL)
+    explicit NetworkHandle(bool owned, QObject *parent);
+public:
+    explicit NetworkHandle(QObject *parent = nullptr);
+    ~NetworkHandle();
+    bool new_message() const;
+    Q_INVOKABLE bool send_message(const QString& message_body, const QString& to) const;
+Q_SIGNALS:
+    void new_messageChanged();
 };
 #endif // BINDINGS_H

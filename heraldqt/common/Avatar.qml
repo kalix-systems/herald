@@ -20,9 +20,9 @@ Row {
         width: size
         height: size
         sourceComponent: {
-            if (!displayName)
+            if (displayName === "")
                 return undefined
-            if (pfpUrl)
+            if (pfpUrl !== "")
                 return imageAvatar
             else
                 return initialAvatar
@@ -43,7 +43,11 @@ Row {
             height: size
             anchors.verticalCenter: parent.verticalCenter
             color: QmlCfg.avatarColors[colorHash]
-            radius: shapeEnum == 0 ? width : 0
+            radius: if (shapeEnum === 0) {
+                        width
+                    } else {
+                        0
+                    }
             ///---- initial
             Text {
                 text: qsTr(displayName[0].toUpperCase())
@@ -62,7 +66,11 @@ Row {
                 color: QmlCfg.palette.mainColor
                 width: size
                 height: size
-                radius: shapeEnum == 0 ? width : 0
+                radius: if (shapeEnum === 0) {
+                            width
+                        } else {
+                            0
+                        }
                 id: mask
             }
             Image {

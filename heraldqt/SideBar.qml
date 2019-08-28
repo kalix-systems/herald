@@ -2,8 +2,9 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import QtQuick.Dialogs 1.3
+import QtTest 1.12
 import LibHerald 1.0
-import "SideBar"
+import "SideBar" as SBUtils
 
 Pane {
     id: contactPane
@@ -11,9 +12,8 @@ Pane {
     property real windowFraction: 0.25 // By default set the width to 1/4 the total window size.
     property bool isContactOnlyView: false // set true if the only view is the contact list
     property real maxWindowFraction: 0.66
-
-    SplitView.maximumWidth: root.width
-                            * maxWindowFraction // maximum width, where root is ApplicationWindow
+    // maximum width, where root is ApplicationWindow
+    SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
 
@@ -28,12 +28,12 @@ Pane {
     }
 
     ///--- Username and Settings gear button
-    ConfigBar {
+    SBUtils.ConfigBar {
         id: toolBar
     }
 
     ///--- SearchBar for contacts, add contact button
-    UtilityBar {
+    SBUtils.UtilityBar {
         anchors.top: toolBar.bottom
         id: utilityBar
     }
@@ -57,7 +57,7 @@ Pane {
             bottom: parent.bottom
         }
 
-        ContactView {
+        SBUtils.ContactView {
             anchors.fill: parent
             model: Contacts {
                 id: contacts

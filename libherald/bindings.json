@@ -6,6 +6,29 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "NetworkHandle": {
+            "type": "Object",
+            "functions": {
+                "send_message": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "message_body",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "to",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            },
+            "properties": {
+                "new_message": {
+                    "type": "bool"
+                }
+            }
+        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
@@ -81,7 +104,7 @@
                 }
             },
             "functions": {
-                "send_message": {
+                "insert_message": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
@@ -124,7 +147,7 @@
         "Config": {
             "type": "Object",
             "properties": {
-                "id": {
+                "config_id": {
                     "type": "QString",
                     "write": true
                 },
