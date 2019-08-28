@@ -22,8 +22,11 @@ lazy_static! {
 /// Initializes connection with the server.
 pub fn open_connection() -> Result<TcpStream, HErr> {
     let socket: SocketAddrV4 = SERVER_ADDR.parse().expect("Invalid server address");
+    let mut stream = TcpStream::connect(socket)?;
 
-    Ok(TcpStream::connect(socket)?)
+    login(&mut stream)?;
+
+    Ok(stream)
 }
 
 /// Sends `data` such as messages, Registration requests,
@@ -89,6 +92,16 @@ pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
     read_from_server(stream)?;
 
     Ok(())
+}
+
+/// Login
+pub fn login(stream: &mut TcpStream) -> Result<(), HErr> {
+    let gid = GlobalId {
+        did: 0,
+        uid: UserId::from(crate::config::Config::static_id()?.as_str())?,
+    };
+
+    send_to_server(&gid, stream)
 }
 
 /// Sends message to server.
