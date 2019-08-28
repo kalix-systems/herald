@@ -71,6 +71,7 @@ extern "C" {
 
 extern "C" {
     bool contacts_data_archive_status(const Contacts::Private*, int);
+    bool contacts_set_data_archive_status(Contacts::Private*, int, bool);
     quint32 contacts_data_color(const Contacts::Private*, int);
     bool contacts_set_data_color(Contacts::Private*, int, quint32);
     void contacts_data_contact_id(const Contacts::Private*, int, QString*, qstring_set);
@@ -155,6 +156,17 @@ Qt::ItemFlags Contacts::flags(const QModelIndex &i) const
 bool Contacts::archive_status(int row) const
 {
     return contacts_data_archive_status(m_d, row);
+}
+
+bool Contacts::setArchive_status(int row, bool value)
+{
+    bool set = false;
+    set = contacts_set_data_archive_status(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
 }
 
 quint32 Contacts::color(int row) const
@@ -286,6 +298,11 @@ bool Contacts::setHeaderData(int section, Qt::Orientation orientation, const QVa
 bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.column() == 0) {
+        if (role == Qt::UserRole + 0) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
+                return setArchive_status(index.row(), value.value<bool>());
+            }
+        }
         if (role == Qt::UserRole + 1) {
             if (value.canConvert(qMetaTypeId<quint32>())) {
                 return setColor(index.row(), value.value<quint32>());
