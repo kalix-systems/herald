@@ -29,21 +29,6 @@
                 }
             }
         },
-        "HeraldState": {
-            "type": "Object",
-            "functions": {
-                "create_min_config": {
-                    "mut": true,
-                    "return": "void",
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "QString"
-                        }
-                    ]
-                }
-            }
-        },
         "Contacts": {
             "type": "List",
             "itemProperties": {
@@ -162,7 +147,7 @@
         "Config": {
             "type": "Object",
             "properties": {
-                "id": {
+                "config_id": {
                     "type": "QString",
                     "write": true
                 },

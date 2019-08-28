@@ -104,7 +104,7 @@ impl Config {
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/config/update_name.sql"), &[&self.name])?;
+        db.execute(include_str!("sql/config/update_name.sql"), &[&name])?;
 
         self.name = name;
 

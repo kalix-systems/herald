@@ -28,7 +28,7 @@ impl ConfigTrait for Config {
         Config { emit, inner, init }
     }
 
-    fn id(&self) -> &str {
+    fn config_id(&self) -> &str {
         match self.inner.id() {
             Ok(s) => s,
             Err(e) => {
@@ -38,7 +38,7 @@ impl ConfigTrait for Config {
         }
     }
 
-    fn set_id(&mut self, id: String) {
+    fn set_config_id(&mut self, id: String) {
         if !self.init {
             self.inner = match Core::new(id, None, None, Some(0)) {
                 Ok(c) => {

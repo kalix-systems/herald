@@ -20,5 +20,6 @@
         <file>main.cpp</file>
         <file>SideBar/popups/NewContactDialogue.qml</file>
         <file>SideBar/popups/ContactClickedPopup.qml</file>
+        <file>SideBar/popups/ConfigPopup.qml</file>
     </qresource>
 </RCC>
