@@ -1,3 +1,6 @@
+use core::convert::{TryFrom, TryInto};
+use pqcrypto_falcon::falcon1024 as falcon;
+use pqcrypto_traits::sign::{PublicKey, SecretKey};
 use serde::*;
 
 use crate::*;
@@ -22,16 +25,17 @@ pub struct Pub {
 deref_struct!(Pub, [u8; PUB_BYTES], inner);
 byte_array_hash!(Pub, inner);
 byte_array_eq!(Pub, inner);
+byte_array_from!(Pub, PUB_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Sec {
     #[serde(with = "asec")]
     inner: [u8; SEC_BYTES],
 }
-
 deref_struct!(Sec, [u8; SEC_BYTES], inner);
 byte_array_hash!(Sec, inner);
 byte_array_eq!(Sec, inner);
+byte_array_from!(Sec, SEC_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Sig {
@@ -42,9 +46,19 @@ pub struct Sig {
 deref_struct!(Sig, [u8; SIG_BYTES], inner);
 byte_array_hash!(Sig, inner);
 byte_array_eq!(Sig, inner);
+byte_array_from!(Sig, SIG_BYTES);
 
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Pair {
     pub pub_key: Pub,
     pub sec_key: Sec,
+}
+
+impl Pair {
+    fn new() -> Self {
+        let (prepub, presec) = falcon::keypair();
+        let pub_key: Pub = prepub.as_bytes().try_into().expect("pubkey had bad length");
+        let sec_key: Sec = presec.as_bytes().try_into().expect("seckey had bad length");
+        Pair { pub_key, sec_key }
+    }
 }

@@ -1,4 +1,7 @@
 use crate::*;
+use core::convert::{TryFrom, TryInto};
+use pqcrypto_ntru::ntruhps4096821 as ntru;
+use pqcrypto_traits::kem::{PublicKey, SecretKey};
 
 pub const PUB_BYTES: usize = 1230;
 const PUB_BYTES_UPPER: usize = 2048;
@@ -23,6 +26,7 @@ pub struct Pub {
 deref_struct!(Pub, [u8; PUB_BYTES], inner);
 byte_array_hash!(Pub, inner);
 byte_array_eq!(Pub, inner);
+byte_array_from!(Pub, PUB_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Sec {
@@ -33,6 +37,7 @@ pub struct Sec {
 deref_struct!(Sec, [u8; SEC_BYTES], inner);
 byte_array_hash!(Sec, inner);
 byte_array_eq!(Sec, inner);
+byte_array_from!(Sec, SEC_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Cipher {
@@ -43,6 +48,7 @@ pub struct Cipher {
 deref_struct!(Cipher, [u8; CIPHER_BYTES], inner);
 byte_array_hash!(Cipher, inner);
 byte_array_eq!(Cipher, inner);
+byte_array_from!(Cipher, CIPHER_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Shared {
@@ -53,9 +59,19 @@ pub struct Shared {
 deref_struct!(Shared, [u8; SHARED_BYTES], inner);
 byte_array_hash!(Shared, inner);
 byte_array_eq!(Shared, inner);
+byte_array_from!(Shared, SHARED_BYTES);
 
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Pair {
     pub pub_key: Pub,
     pub sec_key: Sec,
+}
+
+impl Pair {
+    fn new() -> Self {
+        let (prepub, presec) = ntru::keypair();
+        let pub_key: Pub = prepub.as_bytes().try_into().expect("pubkey had bad length");
+        let sec_key: Sec = presec.as_bytes().try_into().expect("seckey had bad length");
+        Pair { pub_key, sec_key }
+    }
 }

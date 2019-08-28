@@ -67,3 +67,22 @@ macro_rules! byte_array_eq {
         impl Eq for $ty {}
     };
 }
+
+#[macro_export]
+macro_rules! byte_array_from {
+    ($ty: tt, $len: expr) => {
+        impl<'a> TryFrom<&'a [u8]> for $ty {
+            type Error = ();
+
+            fn try_from(value: &'a [u8]) -> Result<Self, Self::Error> {
+                if value.len() == $len {
+                    let mut inner = [0u8; $len];
+                    inner.copy_from_slice(value);
+                    Ok($ty { inner })
+                } else {
+                    Err(())
+                }
+            }
+        }
+    };
+}
