@@ -151,10 +151,17 @@ impl Contacts {
         Ok(())
     }
 
-    /// Archives a contact.
+    /// Archives a contact if it is not already archived.
     pub fn archive(id: &str) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
+        Ok(())
+    }
+
+    /// Activates contact if it is not already activated.
+    pub fn activate(id: &str) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(include_str!("sql/contact/activate_contact.sql"), &[id])?;
         Ok(())
     }
 
@@ -302,10 +309,17 @@ impl Contact {
         Ok(())
     }
 
-    /// Archives the contact
+    /// Archives the contact if it is active.
     pub fn archive(&mut self) -> Result<(), HErr> {
         Contacts::archive(self.id.as_str())?;
         self.archive_status = ArchiveStatus::Archived;
+        Ok(())
+    }
+
+    /// Activates the contact if it is archived.
+    pub fn activate(&mut self) -> Result<(), HErr> {
+        Contacts::activate(self.id.as_str())?;
+        self.archive_status = ArchiveStatus::Active;
         Ok(())
     }
 

@@ -1,5 +1,5 @@
 import QtQuick 2.13
-import QtQuick.Controls 2.12
+import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "ChatView" as CVUtils
@@ -127,6 +127,8 @@ Pane {
                         return
                     }
                     messageModel.insert_message(text)
+                    networkHandle.send_message(text,
+                                               messageModel.conversationId)
                     chatScrollBar.position = 1.0
                     clear()
                 }

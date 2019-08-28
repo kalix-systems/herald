@@ -50,6 +50,7 @@
                     "type": "quint32"
                 },
                 "archive_status": {
+                    "write": true,
                     "type": "bool"
                 }
             },

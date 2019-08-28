@@ -131,9 +131,28 @@ impl ContactsTrait for Contacts {
     /// Indicates whether user is archived.
     ///
     /// User is archived => true,
-    /// User is active => false,
+    /// User is active => false
     fn archive_status(&self, row_index: usize) -> bool {
         self.list[row_index].inner.archive_status.into()
+    }
+
+    /// Updates archive status.
+    ///
+    /// true => archives,
+    /// false => activates
+    fn set_archive_status(&mut self, row_index: usize, archive_status: bool) -> bool {
+        if archive_status {
+            if let Err(e) = self.list[row_index].inner.archive() {
+                eprintln!("{}", e);
+                return false;
+            }
+        } else {
+            if let Err(e) = self.list[row_index].inner.activate() {
+                eprintln!("{}", e);
+                return false;
+            }
+        }
+        true
     }
 
     /// Removes a contact, returns a boolean to indicate success.
