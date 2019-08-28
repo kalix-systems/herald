@@ -28,8 +28,6 @@ pub enum MessageToServer {
     RegisterDevice,
 }
 
-
-
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
     NewMessage {
@@ -49,4 +47,3 @@ pub enum Response {
     DeviceRegistered(DeviceId),
     DataNotFound,
 }
-

@@ -1,15 +1,17 @@
 use crate::interface::*;
 use herald_common::*;
-use std::sync::{
-    atomic::{self, AtomicBool},
-    mpsc::{channel, Sender},
-    Arc,
+use std::{
+    sync::{
+        atomic::{self, AtomicBool},
+        mpsc::{channel, Sender},
+        Arc,
+    },
+    thread,
+    time::Duration,
 };
-use std::thread;
-use std::time::Duration;
 
 pub enum HandleMessages {
-    Tx(MessageToServer),
+    ToServer(MessageToServer),
     //Shutdown,
 }
 
@@ -35,10 +37,10 @@ impl NetworkHandleTrait for NetworkHandle {
             use MessageToServer::*;
 
             match rx.try_recv() {
-                Ok(HandleMessages::Tx(message)) => match message {
-                    // request from QT to send a message
+                Ok(HandleMessages::ToServer(message)) => match message {
+                    // request from Qt to send a message
                     SendMsg { .. } => {}
-                    // request from QT to register a device
+                    // request from Qt to register a device
                     RegisterDevice => {}
                     UpdateBlob { .. } => unimplemented!(),
                     RequestMeta { .. } => unimplemented!(),
@@ -46,7 +48,7 @@ impl NetworkHandleTrait for NetworkHandle {
                 //Ok(HandleMessages::Shutdown) => unimplemented!(),
                 Err(_e) => {}
             }
-            if let Ok(HandleMessages::Tx(msg)) = rx.try_recv() {
+            if let Ok(HandleMessages::ToServer(msg)) = rx.try_recv() {
                 println!("I'm gettin a message here : {:?} ", msg);
                 flag.fetch_xor(false, atomic::Ordering::Relaxed);
             }
@@ -58,12 +60,20 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
+        let to = match UserId::from(&to) {
+            Ok(to) => to,
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                return false;
+            }
+        };
+
         let msg = MessageToServer::SendMsg {
-            to: UserId::from(&to).unwrap(),
+            to,
             text: message_body.into(),
         };
 
-        match self.tx.send(HandleMessages::Tx(msg)) {
+        match self.tx.send(HandleMessages::ToServer(msg)) {
             Ok(_) => true,
             Err(e) => {
                 eprintln!("{}", e);
