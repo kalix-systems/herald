@@ -33,7 +33,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
         thread::spawn(move || loop {
             use MessageToServer::*;
-
             match rx.try_recv() {
                 Ok(HandleMessages::Tx(message)) => match message {
                     // request from QT to send a message
@@ -46,12 +45,13 @@ impl NetworkHandleTrait for NetworkHandle {
                 //Ok(HandleMessages::Shutdown) => unimplemented!(),
                 Err(_e) => {}
             }
+
             if let Ok(HandleMessages::Tx(msg)) = rx.try_recv() {
                 println!("I'm gettin a message here : {:?} ", msg);
                 flag.fetch_xor(false, atomic::Ordering::Relaxed);
             }
 
-            thread::sleep(Duration::from_secs(1));
+            thread::sleep(Duration::from_micros(10));
         });
 
         handle
