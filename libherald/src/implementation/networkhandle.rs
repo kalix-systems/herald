@@ -1,15 +1,18 @@
 use crate::interface::*;
 use herald_common::*;
-use std::sync::{
-    atomic::{self, AtomicBool},
-    mpsc::{channel, Sender},
-    Arc,
+use heraldcore::network::*;
+use std::{
+    sync::{
+        atomic::{self, AtomicBool},
+        mpsc::{channel, Sender},
+        Arc,
+    },
+    thread,
+    time::Duration,
 };
-use std::thread;
-use std::time::Duration;
 
 pub enum HandleMessages {
-    Tx(MessageToServer),
+    ToServer(MessageToServer),
     //Shutdown,
 }
 
@@ -31,39 +34,60 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let flag = handle.message_received.clone();
 
-        thread::spawn(move || loop {
-            use MessageToServer::*;
-            match rx.try_recv() {
-                Ok(HandleMessages::Tx(message)) => match message {
-                    // request from QT to send a message
-                    SendMsg { .. } => {}
-                    // request from QT to register a device
-                    RegisterDevice => {}
-                    UpdateBlob { .. } => unimplemented!(),
-                    RequestMeta { .. } => unimplemented!(),
-                },
-                //Ok(HandleMessages::Shutdown) => unimplemented!(),
-                Err(_e) => {}
-            }
+        thread::spawn(move || {
+            let mut stream = match open_connection() {
+                Ok(stream) => stream,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    return;
+                }
+            };
+            loop {
+                use MessageToServer::*;
 
-            if let Ok(HandleMessages::Tx(msg)) = rx.try_recv() {
-                println!("I'm gettin a message here : {:?} ", msg);
-                flag.fetch_xor(false, atomic::Ordering::Relaxed);
-            }
+                match rx.try_recv() {
+                    Ok(HandleMessages::ToServer(message)) => match message {
+                        // request from Qt to send a message
+                        SendMsg { to, text } => {
+                            send_message(to, text, &mut stream).unwrap();
+                        }
+                        // request from Qt to register a device
+                        RegisterDevice => {}
+                        UpdateBlob { .. } => unimplemented!(),
+                        RequestMeta { .. } => unimplemented!(),
+                    },
+                    //Ok(HandleMessages::Shutdown) => unimplemented!(),
+                    Err(_e) => {}
+                }
 
-            thread::sleep(Duration::from_micros(10));
+                // check os queue for tcp messages, they are inserted into
+                // the db. set flag on the QML side...
+                flag.fetch_xor(
+                    read_from_server(&mut stream).is_ok(),
+                    atomic::Ordering::Relaxed,
+                );
+                thread::sleep(Duration::from_micros(10));
+            }
         });
 
         handle
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
+        let to = match UserId::from(&to) {
+            Ok(to) => to,
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                return false;
+            }
+        };
+
         let msg = MessageToServer::SendMsg {
-            to: UserId::from(&to).unwrap(),
+            to,
             text: message_body.into(),
         };
 
-        match self.tx.send(HandleMessages::Tx(msg)) {
+        match self.tx.send(HandleMessages::ToServer(msg)) {
             Ok(_) => true,
             Err(e) => {
                 eprintln!("{}", e);

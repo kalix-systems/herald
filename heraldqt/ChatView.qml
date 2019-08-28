@@ -51,40 +51,40 @@ Pane {
             width: chatPane.width
             spacing: QmlCfg.margin
 
-        Repeater {
-            anchors.fill: parent
-            id: chatListView
-            Component.onCompleted: forceActiveFocus()
-            model: messageModel
-
-            MouseArea {
+            Repeater {
                 anchors.fill: parent
-                onClicked: forceActiveFocus()
-            }
+                id: chatListView
+                Component.onCompleted: forceActiveFocus()
+                model: messageModel
 
-            Keys.onUpPressed: chatScrollBar.decrease()
-            Keys.onDownPressed: chatScrollBar.increase()
-
-            delegate: Column {
-                readonly property bool outbound: author === config.id
-
-                anchors {
-                    right: if (outbound) {
-                               return parent.right
-                           }
-                    rightMargin: chatScrollBar.width * 1.5
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: forceActiveFocus()
                 }
 
-                CVUtils.ChatBubble {
-                    topPadding: if (index === 0) {
-                                    return QmlCfg.margin
-                                } else {
-                                    return 0
-                                }
-                    text: body
-                }
-            } /// Delegate
-        } /// ListView
+                Keys.onUpPressed: chatScrollBar.decrease()
+                Keys.onDownPressed: chatScrollBar.increase()
+
+                delegate: Column {
+                    readonly property bool outbound: author === config.config_id
+
+                    anchors {
+                        right: if (outbound) {
+                                   return parent.right
+                               }
+                        rightMargin: chatScrollBar.width * 1.5
+                    }
+
+                    CVUtils.ChatBubble {
+                        topPadding: if (index === 0) {
+                                        return QmlCfg.margin
+                                    } else {
+                                        return 0
+                                    }
+                        text: body
+                    }
+                } /// Delegate
+            } /// ListView
         }
     }
 
