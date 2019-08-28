@@ -77,11 +77,11 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
 pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
     let gid = GlobalId {
         did: 0,
-        uid: user_id,
+        uid: user_id.clone(),
     };
 
     let msg = MessageToServer::SendMsg {
-        to: user_id,
+        to: user_id.clone(),
         text: RawMsg::from(""),
     };
 
@@ -98,7 +98,7 @@ pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
 pub fn login(stream: &mut TcpStream) -> Result<(), HErr> {
     let gid = GlobalId {
         did: 0,
-        uid: UserId::from(crate::config::Config::static_id()?.as_str())?,
+        uid: crate::config::Config::static_id()?,
     };
 
     send_to_server(&gid, stream)
@@ -139,7 +139,7 @@ mod tests {
                 return;
             }
         };
-        if super::register(super::UserId::from("hello").unwrap(), &mut stream).is_err() {
+        if super::register(super::UserId::from("hello"), &mut stream).is_err() {
             child.kill().expect("Failed to kill child");
             return;
         }

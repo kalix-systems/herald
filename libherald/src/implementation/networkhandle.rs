@@ -74,13 +74,7 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
-        let to = match UserId::from(&to) {
-            Ok(to) => to,
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return false;
-            }
-        };
+        let to = UserId::from(&to);
 
         let msg = MessageToServer::SendMsg {
             to,
@@ -108,13 +102,14 @@ impl NetworkHandleTrait for NetworkHandle {
 
 impl NetworkHandle {}
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[cfg(test)]
-    pub fn headless_send() {}
-
-    #[cfg(test)]
-    pub fn headless_receive() {}
-}
+// TODO add these
+//#[cfg(test)]
+//mod test {
+//    use super::*;
+//
+//    #[cfg(test)]
+//    pub fn headless_send() {}
+//
+//    #[cfg(test)]
+//    pub fn headless_receive() {}
+//}

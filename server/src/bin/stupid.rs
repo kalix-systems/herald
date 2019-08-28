@@ -49,17 +49,17 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     pub async fn send_msg(&self, to: UserId, msg: MessageToClient) -> Result<(), Error> {
         let u = self
             .meta
-            .async_get(to)
+            .async_get(to.clone())
             .await
-            .ok_or(format_err!("couldn't find user {}", to))?;
+            .ok_or(format_err!("couldn't find user {}", to.clone()))?;
         for d in 0..u.num_devices {
-            let gid = GlobalId { uid: to, did: d };
-            if let Some(mut s) = self.open.async_get_mut(gid).await {
+            let gid = GlobalId { uid: to.clone(), did: d };
+            if let Some(mut s) = self.open.async_get_mut(gid.clone()).await {
                 let raw = serde_cbor::to_vec(&msg)?;
                 let len = u64::to_le_bytes(raw.len() as u64);
                 s.write_all(&len).await?;
                 s.write_all(&raw).await?;
-            } else if let Some(q) = self.pending.async_get(gid).await {
+            } else if let Some(q) = self.pending.async_get(gid.clone()).await {
                 // TODO: consider removing cloning here?
                 q.push(msg.clone());
             } else {
@@ -107,8 +107,8 @@ async fn main() {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
                 let gid: GlobalId = read_datagram(&mut reader).await?;
-                state.open.insert(gid, writer);
-                if let Some(mut u) = state.meta.async_get_mut(gid.uid).await {
+                state.open.insert(gid.clone(), writer);
+                if let Some(mut u) = state.meta.async_get_mut(gid.uid.clone()).await {
                     let devs = std::cmp::max(u.num_devices, gid.did + 1);
                     u.num_devices = devs;
                 } else {
@@ -121,7 +121,7 @@ async fn main() {
                     );
                 }
                 if let Some((_, p)) = state.pending.remove(&gid) {
-                    if let Some(mut w) = state.open.async_get_mut(gid).await {
+                    if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
                         while !p.is_empty() {
                             let msg = p.pop()?;
                             send_datagram(w.deref_mut(), &msg).await?;
@@ -140,7 +140,7 @@ async fn main() {
                                 .send_msg(
                                     to,
                                     NewMessage {
-                                        from: gid,
+                                        from: gid.clone(),
                                         text: text,
                                         time: Utc::now(),
                                     },
@@ -148,7 +148,7 @@ async fn main() {
                                 .await?
                         }
                         RequestMeta { of } => {
-                            let reply = match state.meta.async_get(of).await {
+                            let reply = match state.meta.async_get(of.clone()).await {
                                 Some(m) => Response::Meta(m.clone()),
                                 None => Response::DataNotFound,
                             };
@@ -156,12 +156,12 @@ async fn main() {
                                 res: reply,
                                 query: RequestMeta { of },
                             };
-                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                            if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
                                 send_datagram(w.deref_mut(), &msg).await?;
                             }
                         }
                         RegisterDevice => {
-                            let reply = match state.meta.async_get_mut(gid.uid).await {
+                            let reply = match state.meta.async_get_mut(gid.uid.clone()).await {
                                 Some(mut m) => {
                                     let id = m.num_devices;
                                     m.num_devices += 1;
@@ -173,12 +173,12 @@ async fn main() {
                                 res: reply,
                                 query: RegisterDevice,
                             };
-                            if let Some(mut w) = state.open.async_get_mut(gid).await {
+                            if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
                                 send_datagram(w.deref_mut(), &msg).await?;
                             }
                         }
                         UpdateBlob { blob } => {
-                            if let Some(mut u) = state.meta.async_get_mut(gid.uid).await {
+                            if let Some(mut u) = state.meta.async_get_mut(gid.uid.clone()).await {
                                 u.blob = blob;
                             } else {
                                 eprintln!("user tried to set blob but found no metadata");
@@ -188,10 +188,10 @@ async fn main() {
                         }
                     }
                 }
-                dbg!("closing connection with {}", gid);
+                dbg!("closing connection with {}", &gid);
                 state.open.remove(&gid);
                 let open: Vec<GlobalId> = state.open.iter().map(|p| p.key().clone()).collect();
-                dbg!("current open connections are: {:?}", open);
+                dbg!("current open connections are: {:?}", &open);
             };
             if let Err(e) = comp {
                 eprintln!("session with {} failed, error was: {:?}", addr, e);
