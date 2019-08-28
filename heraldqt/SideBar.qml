@@ -12,7 +12,6 @@ Pane {
     property real windowFraction: 0.25 // By default set the width to 1/4 the total window size.
     property bool isContactOnlyView: false // set true if the only view is the contact list
     property real maxWindowFraction: 0.66
-
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250

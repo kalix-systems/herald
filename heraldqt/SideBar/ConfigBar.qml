@@ -21,8 +21,8 @@ ToolBar {
     }
 
     Common.Avatar {
-        id: contactAvatar
-        displayName: Utils.unwrap_or(config.name, config.id)
+        id: configAvatar
+        displayName: Utils.unwrap_or(config.name, config.config_id)
         colorHash: 0
         pfpUrl: Utils.unwrap_or(config.profile_picture, "")
         anchors.horizontalCenter: parent.horizontalCenter
