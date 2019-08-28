@@ -33,7 +33,7 @@ pub fn open_connection() -> Result<TcpStream, HErr> {
 /// and metadata to the server.
 pub fn send_to_server<T: Serialize>(data: &T, stream: &mut TcpStream) -> Result<(), HErr> {
     let msg_v = serde_cbor::to_vec(data)?;
-    stream.write_all(&msg_v.len().to_le_bytes())?;
+    stream.write_all(&(msg_v.len() as u64).to_le_bytes())?;
     stream.write_all(msg_v.as_slice())?;
     Ok(())
 }
