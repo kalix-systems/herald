@@ -1,6 +1,6 @@
 import QtQuick 2.13
 import LibHerald 1.0
-import QtQuick.Controls 2.12
+import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.js" as Utils
