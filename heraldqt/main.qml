@@ -16,6 +16,9 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
+        onNew_messageChanged: {
+            print("message received.")
+        }
     }
 
     Popups.ConfigPopup {
