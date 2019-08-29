@@ -1,16 +1,16 @@
 use core::convert::{TryFrom, TryInto};
-use pqcrypto_falcon::falcon1024 as falcon;
+use pqcrypto_falcon::falcon512 as falcon;
 use pqcrypto_traits::sign::{PublicKey, SecretKey};
 use serde::*;
 
 use crate::*;
 
-pub const PUB_BYTES: usize = 1793;
-const PUB_BYTES_UPPER: usize = 2048;
-pub const SEC_BYTES: usize = 2305;
-const SEC_BYTES_UPPER: usize = 4096;
-pub const SIG_BYTES: usize = 1330;
-const SIG_BYTES_UPPER: usize = 2048;
+pub const SEC_BYTES: usize = 1281;
+const SEC_BYTES_UPPER: usize = 2048;
+pub const PUB_BYTES: usize = 897;
+const PUB_BYTES_UPPER: usize = 1024;
+pub const SIG_BYTES: usize = 690;
+const SIG_BYTES_UPPER: usize = 768;
 
 serde_array!(apub, PUB_BYTES, PUB_BYTES_UPPER);
 serde_array!(asec, SEC_BYTES, SEC_BYTES_UPPER);

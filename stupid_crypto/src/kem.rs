@@ -1,13 +1,13 @@
 use crate::*;
 use core::convert::{TryFrom, TryInto};
-use pqcrypto_ntru::ntruhps4096821 as ntru;
+use pqcrypto_ntru::ntruhrss701 as ntru;
 use pqcrypto_traits::kem::{PublicKey, SecretKey};
 
-pub const PUB_BYTES: usize = 1230;
-const PUB_BYTES_UPPER: usize = 2048;
-pub const SEC_BYTES: usize = 1590;
+pub const SEC_BYTES: usize = 1450;
 const SEC_BYTES_UPPER: usize = 2048;
-pub const CIPHER_BYTES: usize = 1230;
+pub const PUB_BYTES: usize = 1138;
+const PUB_BYTES_UPPER: usize = 2048;
+pub const CIPHER_BYTES: usize = 1138;
 const CIPHER_BYTES_UPPER: usize = 2048;
 pub const SHARED_BYTES: usize = 32;
 pub const SHARED_BYTES_UPPER: usize = 32;
