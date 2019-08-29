@@ -14,6 +14,8 @@ mod errors;
 pub(crate) mod image_utils;
 /// Functions and data structures related to messages.
 pub mod message;
+/// Utils
+pub(crate) mod utils;
 
 /// Networking
 pub mod network;
