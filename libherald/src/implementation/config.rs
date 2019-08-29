@@ -20,6 +20,7 @@ impl ConfigTrait for Config {
                     id: None,
                     name: None,
                     profile_picture: None,
+                    color: 0,
                     colorscheme: 0,
                 };
                 (uninit_inner, false)
@@ -40,7 +41,7 @@ impl ConfigTrait for Config {
 
     fn set_config_id(&mut self, id: String) {
         if !self.init {
-            self.inner = match Core::new(id, None, None, Some(0)) {
+            self.inner = match Core::new(id, None, None, Some(0), None) {
                 Ok(c) => {
                     self.init = true;
                     c
@@ -73,6 +74,16 @@ impl ConfigTrait for Config {
             .set_profile_picture(crate::utils::strip_qrc(picture))
         {
             eprintln!("Error: {}", e);
+        }
+    }
+
+    fn color(&self) -> u32 {
+        self.inner.color
+    }
+
+    fn set_color(&mut self, color: u32) {
+        if let Err(e) = self.inner.set_color(color) {
+            eprintln!("{}", e);
         }
     }
 

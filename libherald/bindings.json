@@ -162,6 +162,10 @@
                     "write": true,
                     "optional": true
                 },
+                "color": {
+                    "type": "quint32",
+                    "write": true
+                },
                 "colorscheme": {
                     "type": "quint32",
                     "write": true

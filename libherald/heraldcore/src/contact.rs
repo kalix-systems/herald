@@ -8,8 +8,6 @@ use rusqlite::{
     NO_PARAMS,
 };
 
-const NUM_COLORS: u64 = 9;
-
 #[derive(Default)]
 /// Wrapper around contacts table.
 /// TODO This will be stateful when we have caching logic.
@@ -55,7 +53,7 @@ impl Contacts {
             None => Null.to_sql()?,
         };
 
-        let color = color.unwrap_or_else(|| Contact::id_to_color(id));
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id));
 
         let db = Database::get()?;
         db.execute(
@@ -259,7 +257,7 @@ impl Contact {
         color: Option<u32>,
         archive_status: ArchiveStatus,
     ) -> Self {
-        let color = color.unwrap_or_else(|| Contact::id_to_color(&id));
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         Contact {
             name,
             id,
@@ -333,17 +331,6 @@ impl Contact {
             color: row.get(3)?,
             archive_status: archive_status.into(),
         })
-    }
-
-    fn id_to_color(id: &str) -> u32 {
-        use std::{
-            collections::hash_map::DefaultHasher,
-            hash::{Hash, Hasher},
-        };
-
-        let mut state = DefaultHasher::default();
-        id.hash(&mut state);
-        (state.finish() % NUM_COLORS) as u32
     }
 }
 

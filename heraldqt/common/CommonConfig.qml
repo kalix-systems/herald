@@ -57,7 +57,7 @@ Item {
             break
         }
     }
-    /// Todo : finish these later
+    /// Todo : finish these later THIS LIST IS APPEND ONLY
     property var avatarColors: ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
 
     /// Default Font:

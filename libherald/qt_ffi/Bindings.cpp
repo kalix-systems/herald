@@ -28,6 +28,10 @@ namespace {
     inline QVariant cleanNullQVariant(const QVariant& v) {
         return (v.isNull()) ?QVariant() :v;
     }
+    inline void configColorChanged(Config* o)
+    {
+        Q_EMIT o->colorChanged();
+    }
     inline void configColorschemeChanged(Config* o)
     {
         Q_EMIT o->colorschemeChanged();
@@ -54,8 +58,10 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
+    quint32 config_color_get(const Config::Private*);
+    void config_color_set(Config::Private*, quint32);
     quint32 config_colorscheme_get(const Config::Private*);
     void config_colorscheme_set(Config::Private*, quint32);
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
@@ -540,6 +546,7 @@ Config::Config(bool /*owned*/, QObject *parent):
 Config::Config(QObject *parent):
     QObject(parent),
     m_d(config_new(this,
+        configColorChanged,
         configColorschemeChanged,
         configConfig_idChanged,
         configNameChanged,
@@ -552,6 +559,13 @@ Config::~Config() {
     if (m_ownsPrivate) {
         config_free(m_d);
     }
+}
+quint32 Config::color() const
+{
+    return config_color_get(m_d);
+}
+void Config::setColor(quint32 v) {
+    config_color_set(m_d, v);
 }
 quint32 Config::colorscheme() const
 {

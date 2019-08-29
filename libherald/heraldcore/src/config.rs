@@ -14,6 +14,8 @@ pub struct Config {
     pub name: Option<String>,
     /// Path to profile picture for the current user
     pub profile_picture: Option<String>,
+    /// Color of the current user
+    pub color: u32,
     /// Colorscheme
     pub colorscheme: u32,
 }
@@ -50,7 +52,8 @@ impl Config {
                     id: row.get(0)?,
                     name: row.get(1)?,
                     profile_picture: row.get(2)?,
-                    colorscheme: row.get(3)?,
+                    color: row.get(3)?,
+                    colorscheme: row.get(4)?,
                 })
             },
         )?)
@@ -61,23 +64,28 @@ impl Config {
         id: String,
         name: Option<&str>,
         profile_picture: Option<&str>,
+        color: Option<u32>,
         colorscheme: Option<u32>,
     ) -> Result<Config, HErr> {
+        let color = color.unwrap_or(crate::utils::id_to_color(id.as_str()));
+
         let config = Config {
-            id: Some(id.to_owned()),
+            id: Some(id.clone()),
             name: name.map(|n| n.to_owned()),
             profile_picture: profile_picture.map(|p| p.to_owned()),
+            color: color,
             colorscheme: colorscheme.unwrap_or(1),
         };
 
         let id = id.to_sql()?;
         let name = name.to_sql()?;
         let profile_picture = profile_picture.to_sql()?;
+        let color = color.to_sql()?;
 
         let db = Database::get()?;
         db.execute(
             include_str!("sql/config/add_config.sql"),
-            &[id, name, profile_picture],
+            &[id, name, profile_picture, color],
         )?;
 
         Ok(config)
@@ -140,6 +148,14 @@ impl Config {
         Ok(())
     }
 
+    /// Update user's color
+    pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(include_str!("sql/config/update_color.sql"), &[color])?;
+
+        Ok(())
+    }
+
     /// Update user's colorscheme
     pub fn set_colorscheme(&mut self, colorscheme: u32) -> Result<(), HErr> {
         let db = Database::get()?;
@@ -179,7 +195,7 @@ mod tests {
 
         let id = "HelloWorld";
 
-        Config::new(id.into(), None, None, None).unwrap();
+        Config::new(id.into(), None, None, None, None).unwrap();
         assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
 
         Config::drop_table().unwrap();
@@ -187,7 +203,7 @@ mod tests {
 
         let name = "stuff";
         let profile_picture = "stuff";
-        Config::new(id.into(), Some(name), Some(profile_picture), None).unwrap();
+        Config::new(id.into(), Some(name), Some(profile_picture), None, None).unwrap();
         assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
         assert_eq!(Config::get().unwrap().name.unwrap(), name);
         assert_eq!(Config::get().unwrap().colorscheme, 0);
@@ -204,7 +220,7 @@ mod tests {
         Config::create_table().unwrap();
 
         let id = "HelloWorld";
-        let config = Config::new(id.into(), None, None, None).unwrap();
+        let config = Config::new(id.into(), None, None, None, None).unwrap();
 
         assert_eq!(config.id().unwrap(), id);
     }

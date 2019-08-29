@@ -93,6 +93,7 @@ pub struct ConfigQObject {}
 
 pub struct ConfigEmitter {
     qobject: Arc<AtomicPtr<ConfigQObject>>,
+    color_changed: fn(*mut ConfigQObject),
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
@@ -111,6 +112,7 @@ impl ConfigEmitter {
     pub fn clone(&mut self) -> ConfigEmitter {
         ConfigEmitter {
             qobject: self.qobject.clone(),
+            color_changed: self.color_changed,
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
             name_changed: self.name_changed,
@@ -120,6 +122,12 @@ impl ConfigEmitter {
     fn clear(&self) {
         let n: *const ConfigQObject = null();
         self.qobject.store(n as *mut ConfigQObject, Ordering::SeqCst);
+    }
+    pub fn color_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.color_changed)(ptr);
+        }
     }
     pub fn colorscheme_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -150,6 +158,8 @@ impl ConfigEmitter {
 pub trait ConfigTrait {
     fn new(emit: ConfigEmitter) -> Self;
     fn emit(&mut self) -> &mut ConfigEmitter;
+    fn color(&self) -> u32;
+    fn set_color(&mut self, value: u32);
     fn colorscheme(&self) -> u32;
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
@@ -164,6 +174,7 @@ pub trait ConfigTrait {
 #[no_mangle]
 pub extern "C" fn config_new(
     config: *mut ConfigQObject,
+    config_color_changed: fn(*mut ConfigQObject),
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
@@ -171,6 +182,7 @@ pub extern "C" fn config_new(
 ) -> *mut Config {
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
+        color_changed: config_color_changed,
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
@@ -183,6 +195,16 @@ pub extern "C" fn config_new(
 #[no_mangle]
 pub unsafe extern "C" fn config_free(ptr: *mut Config) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_color_get(ptr: *const Config) -> u32 {
+    (&*ptr).color()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_color_set(ptr: *mut Config, v: u32) {
+    (&mut *ptr).set_color(v);
 }
 
 #[no_mangle]

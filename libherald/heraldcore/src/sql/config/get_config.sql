@@ -2,6 +2,7 @@ SELECT
   id,
   name,
   profile_picture,
+  color,
   colorscheme
 FROM
   config
