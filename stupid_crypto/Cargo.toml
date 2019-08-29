@@ -11,5 +11,15 @@ pqcrypto-falcon = "0.1"
 pqcrypto-ntru = "0.4"
 pqcrypto-traits = "0.3"
 serde = {version = "1.0", features = ["derive"]}
-serde-big-array = "0.1"
 arrayvec = {version = "0.4", features = ["serde-1"]}
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "sig"
+harness = false
+
+[[bench]]
+name = "kem"
+harness = false

@@ -1,13 +1,9 @@
-use serde::*;
-
 #[macro_export]
 macro_rules! serde_array {
     ($m: tt, $ty: ty, $u: expr) => {
         pub mod $m {
             use super::*;
             use arrayvec::*;
-            use serde::*;
-            use std::{mem, ptr};
 
             pub fn serialize<S: Serializer>(arr: &$ty, serializer: S) -> Result<S::Ok, S::Error> {
                 arr.as_bytes().serialize(serializer)

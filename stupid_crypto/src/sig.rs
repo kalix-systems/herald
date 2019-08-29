@@ -1,4 +1,4 @@
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryFrom;
 use pqcrypto_falcon::falcon512 as falcon;
 use pqcrypto_traits::sign::*;
 use serde::*;
@@ -39,17 +39,25 @@ pub struct Sig {
 
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Pair {
-    pub pub_key: Pub,
-    pub sec_key: Sec,
+    pub_key: Pub,
+    sec_key: Sec,
 }
 
 impl Pair {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let (prepub, presec) = falcon::keypair();
         Pair {
             pub_key: Pub { inner: prepub },
             sec_key: Sec { inner: presec },
         }
+    }
+
+    pub fn pub_key(&self) -> &Pub {
+        &self.pub_key
+    }
+
+    pub fn sec_key(&self) -> &Sec {
+        &self.sec_key
     }
 }
 
@@ -62,5 +70,17 @@ mod test {
         assert_eq!(SEC_BYTES, falcon::secret_key_bytes());
         assert_eq!(PUB_BYTES, falcon::public_key_bytes());
         assert_eq!(SIG_BYTES, falcon::signature_bytes());
+    }
+
+    const CHECK_ITERS: usize = 100;
+
+    #[test]
+    fn sig_works() {
+        let pair = Pair::new();
+        for i in 0..CHECK_ITERS {
+            let msg = usize::to_le_bytes(i);
+            let sig = pair.sec_key().sign(&msg);
+            assert!(pair.pub_key().verify(&msg, &sig));
+        }
     }
 }

@@ -1,8 +1,5 @@
-#![allow(warnings)]
-
 use serde::*;
-use serde_big_array::*;
 
-mod kem;
-mod sig;
+pub mod kem;
+pub mod sig;
 mod util;

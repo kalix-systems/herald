@@ -1,5 +1,5 @@
 use crate::*;
-use core::convert::{TryFrom, TryInto};
+use core::convert::TryFrom;
 use pqcrypto_ntru::ntruhrss701 as ntru;
 use pqcrypto_traits::kem::*;
 
@@ -73,17 +73,25 @@ impl Capsule {
 
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Pair {
-    pub pub_key: Pub,
-    pub sec_key: Sec,
+    pub_key: Pub,
+    sec_key: Sec,
 }
 
 impl Pair {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let (prepub, presec) = ntru::keypair();
         Pair {
             pub_key: Pub { inner: prepub },
             sec_key: Sec { inner: presec },
         }
+    }
+
+    pub fn pub_key(&self) -> &Pub {
+        &self.pub_key
+    }
+
+    pub fn sec_key(&self) -> &Sec {
+        &self.sec_key
     }
 }
 
@@ -97,5 +105,17 @@ mod test {
         assert_eq!(PUB_BYTES, ntru::public_key_bytes());
         assert_eq!(CIPHER_BYTES, ntru::ciphertext_bytes());
         assert_eq!(SHARED_BYTES, ntru::shared_secret_bytes());
+    }
+
+    const CHECK_ITERS: usize = 1000;
+
+    #[test]
+    fn kem_works() {
+        let pair = Pair::new();
+        for _ in 0..CHECK_ITERS {
+            let capsule = pair.pub_key().encapsulate();
+            let ss = pair.sec_key().decapsulate(capsule.cipher());
+            assert!(capsule.shared() == &ss);
+        }
     }
 }
