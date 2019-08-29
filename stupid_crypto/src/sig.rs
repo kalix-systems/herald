@@ -37,30 +37,6 @@ pub struct Sig {
     inner: falcon::DetachedSignature,
 }
 
-#[derive(Hash, Serialize, Deserialize)]
-pub struct Pair {
-    pub_key: Pub,
-    sec_key: Sec,
-}
-
-impl Pair {
-    pub fn new() -> Self {
-        let (prepub, presec) = falcon::keypair();
-        Pair {
-            pub_key: Pub { inner: prepub },
-            sec_key: Sec { inner: presec },
-        }
-    }
-
-    pub fn pub_key(&self) -> &Pub {
-        &self.pub_key
-    }
-
-    pub fn sec_key(&self) -> &Sec {
-        &self.sec_key
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;

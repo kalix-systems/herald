@@ -2,4 +2,4 @@ use serde::*;
 
 pub mod kem;
 pub mod sig;
-mod util;
+mod utils;
