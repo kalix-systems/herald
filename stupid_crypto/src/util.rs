@@ -18,18 +18,6 @@ macro_rules! serde_array {
 }
 
 #[macro_export]
-macro_rules! deref_struct {
-    ($ty: ty, $target: ty, $field: tt) => {
-        impl std::ops::Deref for $ty {
-            type Target = $target;
-            fn deref(&self) -> &Self::Target {
-                &self.$field
-            }
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! byte_array_hash {
     ($ty: ty, $field: tt) => {
         impl std::hash::Hash for $ty {
@@ -95,5 +83,29 @@ macro_rules! pub_secret_types {
 
         byte_array_impls!(Pub, $m::PublicKey, inner);
         byte_array_impls!(Sec, $m::SecretKey, inner);
+
+        #[derive(Hash, Serialize, Deserialize)]
+        pub struct Pair {
+            pub_key: Pub,
+            sec_key: Sec,
+        }
+
+        impl Pair {
+            pub fn new() -> Self {
+                let (prepub, presec) = $m::keypair();
+                Pair {
+                    pub_key: Pub { inner: prepub },
+                    sec_key: Sec { inner: presec },
+                }
+            }
+
+            pub fn pub_key(&self) -> &Pub {
+                &self.pub_key
+            }
+
+            pub fn sec_key(&self) -> &Sec {
+                &self.sec_key
+            }
+        }
     };
 }
