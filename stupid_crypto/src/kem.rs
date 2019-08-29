@@ -1,65 +1,75 @@
 use crate::*;
 use core::convert::{TryFrom, TryInto};
 use pqcrypto_ntru::ntruhrss701 as ntru;
-use pqcrypto_traits::kem::{PublicKey, SecretKey};
+use pqcrypto_traits::kem::*;
 
+/// Length of secret key in bytes.
 pub const SEC_BYTES: usize = 1450;
 const SEC_BYTES_UPPER: usize = 2048;
+/// Length of public key in bytes.
 pub const PUB_BYTES: usize = 1138;
 const PUB_BYTES_UPPER: usize = 2048;
+/// Length of ciphertext in bytes.
 pub const CIPHER_BYTES: usize = 1138;
 const CIPHER_BYTES_UPPER: usize = 2048;
+/// Length of shared secret in bytes.
 pub const SHARED_BYTES: usize = 32;
-pub const SHARED_BYTES_UPPER: usize = 32;
+const SHARED_BYTES_UPPER: usize = 32;
 
-serde_array!(apub, PUB_BYTES, PUB_BYTES_UPPER);
-serde_array!(asec, SEC_BYTES, SEC_BYTES_UPPER);
-serde_array!(acipher, CIPHER_BYTES, CIPHER_BYTES_UPPER);
-serde_array!(ashared, SHARED_BYTES, SHARED_BYTES_UPPER);
+pub_secret_types!(ntru, SEC_BYTES_UPPER, PUB_BYTES_UPPER);
 
-#[derive(Serialize, Deserialize)]
-pub struct Pub {
-    #[serde(with = "apub")]
-    inner: [u8; PUB_BYTES],
+impl Pub {
+    pub fn encapsulate(&self) -> Capsule {
+        let (ss, ct) = ntru::encapsulate(&self.inner);
+
+        let shared = Shared { inner: ss };
+        let cipher = Cipher { inner: ct };
+
+        Capsule { shared, cipher }
+    }
 }
 
-deref_struct!(Pub, [u8; PUB_BYTES], inner);
-byte_array_hash!(Pub, inner);
-byte_array_eq!(Pub, inner);
-byte_array_from!(Pub, PUB_BYTES);
-
-#[derive(Serialize, Deserialize)]
-pub struct Sec {
-    #[serde(with = "asec")]
-    inner: [u8; SEC_BYTES],
+impl Sec {
+    pub fn decapsulate(&self, ct: &Cipher) -> Shared {
+        Shared {
+            inner: ntru::decapsulate(&ct.inner, &self.inner),
+        }
+    }
 }
 
-deref_struct!(Sec, [u8; SEC_BYTES], inner);
-byte_array_hash!(Sec, inner);
-byte_array_eq!(Sec, inner);
-byte_array_from!(Sec, SEC_BYTES);
+serde_array!(acipher, ntru::Ciphertext, CIPHER_BYTES_UPPER);
+serde_array!(ashared, ntru::SharedSecret, SHARED_BYTES_UPPER);
 
 #[derive(Serialize, Deserialize)]
 pub struct Cipher {
     #[serde(with = "acipher")]
-    inner: [u8; CIPHER_BYTES],
+    inner: ntru::Ciphertext,
 }
-
-deref_struct!(Cipher, [u8; CIPHER_BYTES], inner);
-byte_array_hash!(Cipher, inner);
-byte_array_eq!(Cipher, inner);
-byte_array_from!(Cipher, CIPHER_BYTES);
 
 #[derive(Serialize, Deserialize)]
 pub struct Shared {
     #[serde(with = "ashared")]
-    inner: [u8; SHARED_BYTES],
+    inner: ntru::SharedSecret,
 }
 
-deref_struct!(Shared, [u8; SHARED_BYTES], inner);
-byte_array_hash!(Shared, inner);
-byte_array_eq!(Shared, inner);
-byte_array_from!(Shared, SHARED_BYTES);
+byte_array_impls!(Cipher, ntru::Ciphertext, inner);
+byte_array_impls!(Shared, ntru::SharedSecret, inner);
+
+#[derive(Hash)]
+pub struct Capsule {
+    shared: Shared,
+    cipher: Cipher,
+}
+
+impl Capsule {
+    pub fn shared(&self) -> &Shared {
+        &self.shared
+    }
+
+    pub fn cipher(&self) -> &Cipher {
+        &self.cipher
+    }
+}
 
 #[derive(Hash, Serialize, Deserialize)]
 pub struct Pair {
@@ -70,8 +80,22 @@ pub struct Pair {
 impl Pair {
     fn new() -> Self {
         let (prepub, presec) = ntru::keypair();
-        let pub_key: Pub = prepub.as_bytes().try_into().expect("pubkey had bad length");
-        let sec_key: Sec = presec.as_bytes().try_into().expect("seckey had bad length");
-        Pair { pub_key, sec_key }
+        Pair {
+            pub_key: Pub { inner: prepub },
+            sec_key: Sec { inner: presec },
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn lengths_corr() {
+        assert_eq!(SEC_BYTES, ntru::secret_key_bytes());
+        assert_eq!(PUB_BYTES, ntru::public_key_bytes());
+        assert_eq!(CIPHER_BYTES, ntru::ciphertext_bytes());
+        assert_eq!(SHARED_BYTES, ntru::shared_secret_bytes());
     }
 }
