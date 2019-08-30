@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
-
+import "common/utils.js" as Utils
 ApplicationWindow {
     visible: true
     width: 900
@@ -19,6 +19,15 @@ ApplicationWindow {
         onNew_messageChanged: {
             print("message received.")
         }
+    }
+
+    Messages {
+        property string currentId : Utils.try_index_or(
+                                             sideBar.contactUi.currentIndex,
+                                             sideBar.contactData.contact_id,
+                                             sideBar.contactData.rowCount(),"")
+        id: messageModel
+        conversationId: currentId
     }
 
     Popups.ConfigPopup {

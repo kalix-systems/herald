@@ -10,8 +10,6 @@ Pane {
     opacity: 0
     padding: 0
     property alias messageBar: messageBar
-    property Messages messageModel: Messages {
-    }
 
     CVUtils.ChatBar {
         id: messageBar
@@ -115,6 +113,8 @@ Pane {
             padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
+
+
             Keys.onReturnPressed: {
                 if (event.modifiers & Qt.ShiftModifier) {
                     chatText.text = chatText.text + "\n"
