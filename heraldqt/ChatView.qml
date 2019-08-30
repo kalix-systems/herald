@@ -42,7 +42,6 @@ Pane {
         ///--- scrollbar for chat messages
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
-            Component.onCompleted: position = 1.0
             height: parent.height
             anchors.right: parent.right
         }
@@ -83,6 +82,9 @@ Pane {
                                     }
                         text: body
                     }
+
+                 Component.onCompleted: chatScrollBar.position = 1.0
+
                 } /// Delegate
             } /// ListView
         }
