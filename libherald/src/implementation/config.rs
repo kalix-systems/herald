@@ -20,7 +20,7 @@ impl ConfigTrait for Config {
                     id: None,
                     name: None,
                     profile_picture: None,
-                    color: 0,
+                    color: None,
                     colorscheme: 0,
                 };
                 (uninit_inner, false)
@@ -41,7 +41,7 @@ impl ConfigTrait for Config {
 
     fn set_config_id(&mut self, id: String) {
         if !self.init {
-            self.inner = match Core::new(id, None, None, Some(0), None) {
+            self.inner = match Core::new(id, None, None, None, None) {
                 Ok(c) => {
                     self.init = true;
                     c
@@ -59,8 +59,9 @@ impl ConfigTrait for Config {
     }
 
     fn set_name(&mut self, name: Option<String>) {
-        if let Err(e) = self.inner.set_name(name) {
-            eprintln!("Error: {}", e);
+        match self.inner.set_name(name) {
+            Ok(()) => self.emit.name_changed(),
+            Err(e) => eprintln!("Error: {}", e),
         }
     }
 
@@ -69,21 +70,23 @@ impl ConfigTrait for Config {
     }
 
     fn set_profile_picture(&mut self, picture: Option<String>) {
-        if let Err(e) = self
+        match self
             .inner
             .set_profile_picture(crate::utils::strip_qrc(picture))
         {
-            eprintln!("Error: {}", e);
+            Ok(()) => self.emit.profile_picture_changed(),
+            Err(e) => eprintln!("Error: {}", e),
         }
     }
 
     fn color(&self) -> u32 {
-        self.inner.color
+        self.inner.color.unwrap_or(0)
     }
 
     fn set_color(&mut self, color: u32) {
-        if let Err(e) = self.inner.set_color(color) {
-            eprintln!("{}", e);
+        match self.inner.set_color(color) {
+            Ok(()) => self.emit.color_changed(),
+            Err(e) => eprintln!("Error: {}", e),
         }
     }
 
@@ -92,8 +95,9 @@ impl ConfigTrait for Config {
     }
 
     fn set_colorscheme(&mut self, colorscheme: u32) {
-        if let Err(e) = self.inner.set_colorscheme(colorscheme) {
-            eprintln!("{}", e);
+        match self.inner.set_colorscheme(colorscheme) {
+            Ok(()) => self.emit.colorscheme_changed(),
+            Err(e) => eprintln!("Error: {}", e),
         }
     }
 

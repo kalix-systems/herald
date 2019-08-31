@@ -4,7 +4,6 @@ use heraldcore::{
     db::DBTable,
 };
 use im_rc::vector::Vector as ImVector;
-
 #[derive(Clone)]
 struct ContactsItem {
     inner: contact::Contact,

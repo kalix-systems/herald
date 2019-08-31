@@ -12,9 +12,9 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
     clip: true
     currentIndex: -1
-
     ScrollBar.vertical: ScrollBar {
     }
+
     delegate: Item {
         id: contactItem
         height: 60
@@ -66,14 +66,9 @@ ListView {
                 // Note : this is really imperative, we should do this somehow else.
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
-                        contactItem.focus = true
-                        chatView.messageModel.conversationId = contact_id
-                        chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
-                        chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
-                        chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
+                        currentIndex = index
                         chatView.state = "visibleview"
                     } else {
-
                         popupManager.optionsMenu.x = mouse.x
                         popupManager.optionsMenu.y = mouse.y
                         popupManager.optionsMenu.open()

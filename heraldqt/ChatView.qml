@@ -10,8 +10,6 @@ Pane {
     opacity: 0
     padding: 0
     property alias messageBar: messageBar
-    property Messages messageModel: Messages {
-    }
 
     CVUtils.ChatBar {
         id: messageBar
@@ -42,7 +40,6 @@ Pane {
         ///--- scrollbar for chat messages
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
-            Component.onCompleted: position = 1.0
             height: parent.height
             anchors.right: parent.right
         }
@@ -83,6 +80,9 @@ Pane {
                                     }
                         text: body
                     }
+
+                 Component.onCompleted: chatScrollBar.position = 1.0
+
                 } /// Delegate
             } /// ListView
         }
@@ -115,6 +115,8 @@ Pane {
             padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
+
+
             Keys.onReturnPressed: {
                 if (event.modifiers & Qt.ShiftModifier) {
                     chatText.text = chatText.text + "\n"

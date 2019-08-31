@@ -15,7 +15,7 @@ pub struct Config {
     /// Path to profile picture for the current user
     pub profile_picture: Option<String>,
     /// Color of the current user
-    pub color: u32,
+    pub color: Option<u32>,
     /// Colorscheme
     pub colorscheme: u32,
 }
@@ -67,13 +67,12 @@ impl Config {
         color: Option<u32>,
         colorscheme: Option<u32>,
     ) -> Result<Config, HErr> {
-        let color = color.unwrap_or(crate::utils::id_to_color(id.as_str()));
-
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let config = Config {
             id: Some(id.clone()),
             name: name.map(|n| n.to_owned()),
             profile_picture: profile_picture.map(|p| p.to_owned()),
-            color: color,
+            color: Some(color),
             colorscheme: colorscheme.unwrap_or(1),
         };
 
@@ -115,7 +114,6 @@ impl Config {
         db.execute(include_str!("sql/config/update_name.sql"), &[&name])?;
 
         self.name = name;
-
         Ok(())
     }
 

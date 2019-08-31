@@ -3,6 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../common" as Common
+import "../common/utils.js" as Utils
 
 ToolBar {
     property alias chatBarAvatar: chatBarAvatar
@@ -15,7 +16,19 @@ ToolBar {
     }
 
     Common.Avatar {
+       displayName : Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                        sideBar.contactData.name,
+                                        sideBar.contactData.rowCount(),"")
+
+      colorHash : Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                     sideBar.contactData.color,
+                                     sideBar.contactData.rowCount(), 0)
+
+        pfpUrl: Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                   sideBar.contactData.profile_picture,
+                                    sideBar.contactData.rowCount(),"")
         id: chatBarAvatar
+
         anchors.centerIn: parent
         size: QmlCfg.toolbarHeight - QmlCfg.margin
     }
