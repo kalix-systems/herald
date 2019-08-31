@@ -1,0 +1,11 @@
+[package]
+name = "doubleclank"
+version = "0.1.0"
+authors = ["theseriousadult <jack@gallabytes.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sodiumoxide = "0.2"
+libsodium-sys = "0.2"
