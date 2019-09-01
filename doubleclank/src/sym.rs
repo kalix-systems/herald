@@ -36,19 +36,31 @@ impl MessageKey {
 }
 
 impl ChainKey {
-    fn kdf(&self) -> (Self, MessageKey) {
-        let mut output = [0u8; CHAIN_KEY_BYTES + MSG_KEY_BYTES];
-        crate::utils::kdf_derive(self.0.as_ref(), 0, 0, &mut output);
-        (
-            ChainKey(secretbox::Key::from_slice(&output[..CHAIN_KEY_BYTES]).unwrap()),
-            MessageKey(secretbox::Key::from_slice(&output[CHAIN_KEY_BYTES..]).unwrap()),
-        )
+    fn kdf(&self, idx: u64) -> MessageKey {
+        let mut output = [0u8; MSG_KEY_BYTES];
+        crate::utils::kdf_derive(self.0.as_ref(), idx, 0, &mut output);
+        MessageKey(secretbox::Key(output))
+    }
+}
+
+pub struct Chain {
+    msg_id: u64,
+    key: ChainKey,
+}
+
+impl Chain {
+    pub fn new(key: ChainKey) -> Self {
+        Chain { msg_id: 0, key }
+    }
+
+    fn kdf(&self) -> MessageKey {
+        self.key.kdf(self.msg_id)
     }
 
     fn ratchet(&mut self) -> MessageKey {
-        let (key, msg) = self.kdf();
-        self.0 = key.0;
-        msg
+        let res = self.kdf();
+        self.msg_id += 1;
+        res
     }
 
     pub fn seal<'a>(&mut self, msg: &'a mut [u8]) -> Ciphertext<'a> {
@@ -56,10 +68,10 @@ impl ChainKey {
     }
 
     pub fn open<'a>(&mut self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
-        let (chain_key, msg_key) = self.kdf();
+        let msg_key = self.kdf();
         let res = msg_key.open(cipher);
         if res.is_some() {
-            self.0 = chain_key.0;
+            self.msg_id += 1;
         }
         res
     }

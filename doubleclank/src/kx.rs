@@ -1,6 +1,6 @@
 use sodiumoxide::crypto::kx;
 
-use crate::sym::{ChainKey, Ciphertext};
+use crate::sym::{Chain, Ciphertext};
 
 pub struct RootKey(kx::SessionKey);
 pub const ROOT_KEY_BYTES: usize = kx::SESSIONKEYBYTES;
@@ -18,24 +18,24 @@ impl KeyPair {
 }
 
 pub struct Session {
-    send_ratchet: ChainKey,
-    recv_ratchet: ChainKey,
+    send_ratchet: Chain,
+    recv_ratchet: Chain,
 }
 
 impl KeyPair {
     pub fn init_with(&self, them: &kx::PublicKey) -> Option<Session> {
         let (rx, tx) = kx::client_session_keys(&self.pub_key, &self.sec_key, them).ok()?;
         Some(Session {
-            send_ratchet: rx.into(),
-            recv_ratchet: tx.into(),
+            send_ratchet: Chain::new(rx.into()),
+            recv_ratchet: Chain::new(tx.into()),
         })
     }
 
     pub fn recv_init(&self, them: &kx::PublicKey) -> Option<Session> {
         let (rx, tx) = kx::server_session_keys(&self.pub_key, &self.sec_key, them).ok()?;
         Some(Session {
-            send_ratchet: tx.into(),
-            recv_ratchet: rx.into(),
+            send_ratchet: Chain::new(tx.into()),
+            recv_ratchet: Chain::new(rx.into()),
         })
     }
 }
