@@ -193,7 +193,14 @@ async fn main() {
                             to,
                             update_code,
                             message_id,
-                        } => {}
+                        } => {
+                            let msg = MessageToClient::ServerMessageAck {
+                                from: gid.clone(),
+                                update_code,
+                                message_id,
+                            };
+                            state.send_msg(to, msg).await?;
+                        }
                     }
                 }
                 dbg!("closing connection with {}", &gid);
