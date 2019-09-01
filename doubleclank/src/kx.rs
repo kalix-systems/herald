@@ -1,6 +1,6 @@
 use sodiumoxide::crypto::kx;
 
-use crate::sym::{Chain, Ciphertext};
+use crate::{kdf_chain::Chain, sym::Ciphertext};
 
 pub struct RootKey(kx::SessionKey);
 pub const ROOT_KEY_BYTES: usize = kx::SESSIONKEYBYTES;

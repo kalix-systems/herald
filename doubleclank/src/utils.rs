@@ -1,4 +1,4 @@
-pub fn kdf_derive(key: &[u8], subkey_id: u64, ctx: u64, out: &mut [u8]) {
+pub fn kdf_derive(key: &[u8; 32], subkey_id: u64, ctx: u64, out: &mut [u8]) {
     // TODO: replace this with sodiumoxide bindings when they merge pull request, push to crates.io
     unsafe {
         let r = libsodium_sys::crypto_kdf_blake2b_derive_from_key(
