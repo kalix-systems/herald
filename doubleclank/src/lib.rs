@@ -1,13 +1,6 @@
-use sodiumoxide::crypto::secretbox;
-
 pub mod kx;
 pub mod sym;
 mod utils;
-
-use utils::*;
-
-pub struct ConversationId(u64);
-pub struct MessageId(u64);
 
 // pub struct RootChain {
 //     key: RootKey,

@@ -1,6 +1,4 @@
-use sodiumoxide::crypto::secretbox;
-
-use crate::*;
+use sodiumoxide::crypto::{self, secretbox};
 
 pub struct Ciphertext<'a> {
     tag: secretbox::Tag,
@@ -8,20 +6,26 @@ pub struct Ciphertext<'a> {
     msg: &'a mut [u8],
 }
 
-const MSG_KEY_BYTES: usize = secretbox::KEYBYTES;
+pub const MSG_KEY_BYTES: usize = secretbox::KEYBYTES;
 pub struct MessageKey(secretbox::Key);
 
-const CHAIN_KEY_BYTES: usize = secretbox::KEYBYTES;
+pub const CHAIN_KEY_BYTES: usize = secretbox::KEYBYTES;
 pub struct ChainKey(secretbox::Key);
 
+impl From<crypto::kx::SessionKey> for ChainKey {
+    fn from(sk: crypto::kx::SessionKey) -> Self {
+        ChainKey(secretbox::Key(sk.0))
+    }
+}
+
 impl MessageKey {
-    fn seal<'a>(&self, msg: &'a mut [u8]) -> Ciphertext<'a> {
+    pub fn seal<'a>(&self, msg: &'a mut [u8]) -> Ciphertext<'a> {
         let nonce = secretbox::gen_nonce();
         let tag = secretbox::seal_detached(msg, &nonce, &self.0);
         Ciphertext { tag, nonce, msg }
     }
 
-    fn open<'a>(&self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
+    pub fn open<'a>(&self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
         let Ciphertext { tag, nonce, msg } = cipher;
         if secretbox::open_detached(msg, &tag, &nonce, &self.0).is_ok() {
             Some(msg)
@@ -31,18 +35,20 @@ impl MessageKey {
     }
 }
 
-pub struct Chain {
-    msg: MessageId,
-    ctx: ConversationId,
-    key: ChainKey,
-}
-
-impl Chain {
-    fn ratchet(&mut self) -> MessageKey {
+impl ChainKey {
+    fn kdf(&self) -> (Self, MessageKey) {
         let mut output = [0u8; CHAIN_KEY_BYTES + MSG_KEY_BYTES];
-        crate::utils::kdf_derive(self.key.0.as_ref(), self.msg.0, self.ctx.0, &mut output);
-        self.key = ChainKey(secretbox::Key::from_slice(&output[..CHAIN_KEY_BYTES]).unwrap());
-        MessageKey(secretbox::Key::from_slice(&output[CHAIN_KEY_BYTES..]).unwrap())
+        crate::utils::kdf_derive(self.0.as_ref(), 0, 0, &mut output);
+        (
+            ChainKey(secretbox::Key::from_slice(&output[..CHAIN_KEY_BYTES]).unwrap()),
+            MessageKey(secretbox::Key::from_slice(&output[CHAIN_KEY_BYTES..]).unwrap()),
+        )
+    }
+
+    fn ratchet(&mut self) -> MessageKey {
+        let (key, msg) = self.kdf();
+        self.0 = key.0;
+        msg
     }
 
     pub fn seal<'a>(&mut self, msg: &'a mut [u8]) -> Ciphertext<'a> {
@@ -50,7 +56,12 @@ impl Chain {
     }
 
     pub fn open<'a>(&mut self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
-        self.ratchet().open(cipher)
+        let (chain_key, msg_key) = self.kdf();
+        let res = msg_key.open(cipher);
+        if res.is_some() {
+            self.0 = chain_key.0;
+        }
+        res
     }
 }
 
