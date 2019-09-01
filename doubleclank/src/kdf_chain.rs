@@ -35,12 +35,6 @@ impl Chain {
         Chain { key }
     }
 
-    fn ratchet(&mut self) -> MessageKey {
-        let (new, res) = self.key.kdf();
-        self.key = new;
-        res
-    }
-
     pub fn with_key<F, X>(&mut self, f: F) -> Option<X>
     where
         F: FnOnce(MessageKey) -> Option<X>,
@@ -51,6 +45,10 @@ impl Chain {
             self.key = new;
         }
         res
+    }
+
+    fn ratchet(&mut self) -> MessageKey {
+        self.with_key(Some).unwrap()
     }
 
     pub fn seal<'a>(&mut self, msg: &'a mut [u8]) -> Ciphertext<'a> {
