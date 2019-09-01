@@ -60,12 +60,12 @@ mod tests {
     #[test]
     fn keys_length_relations() {
         assert!(
-            CHAIN_KEY_BYTES + MSG_KEY_BYTES <= libsodium_sys::crypto_kdf_blake2b_BYTES_MAX as usize,
-            "keygen will fail - chain and msg keys too long"
+            MSG_KEY_BYTES <= libsodium_sys::crypto_kdf_blake2b_BYTES_MAX as usize,
+            "keygen will fail - msg keys too long"
         );
         assert!(
-            libsodium_sys::crypto_kdf_blake2b_BYTES_MIN as usize <= CHAIN_KEY_BYTES + MSG_KEY_BYTES,
-            "keygen will fail - chain and msg keys too short"
+            libsodium_sys::crypto_kdf_blake2b_BYTES_MIN as usize <= MSG_KEY_BYTES,
+            "keygen will fail - msg keys too short"
         );
     }
 }
