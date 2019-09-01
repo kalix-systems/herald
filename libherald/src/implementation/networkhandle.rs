@@ -78,6 +78,11 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
+        if self.connection_pending() {
+            println!("you are literally not connected to the server.");
+            return false;
+        }
+
         let to = UserId::from(&to);
 
         let msg = MessageToServer::SendMsg {
@@ -133,19 +138,22 @@ impl NetworkHandle {
                     Ok(HandleMessages::ToServer(message)) => match message {
                         // request from Qt to send a message
                         SendMsg { to, text } => {
-                            println!("send Message");
                             send_message(to, text, &mut stream).unwrap();
                         }
                         // request from Qt to register a device
                         RegisterDevice => {}
                         UpdateBlob { .. } => unimplemented!(),
                         RequestMeta { .. } => unimplemented!(),
+                        // request from the network thread to
+                        // ack that a message has been received and or read
+                        ClientMessageAck { .. } => unimplemented!(),
+                        _ => unimplemented!(),
                     },
                     //Ok(HandleMessages::Shutdown) => unimplemented!(),
                     Err(_e) => {}
                 }
 
-                // check os queue for tcp messages, they are inserted into
+                // check os queue for tcp messages, they are inserted into db
                 if let Ok(()) = read_from_server(&mut stream) {
                     flag.emit_new_msg();
                 }

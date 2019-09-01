@@ -3,24 +3,9 @@ use crate::{
     errors::HErr,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
+use herald_common::MessageStatus;
 use rusqlite::{ToSql, NO_PARAMS};
-
 static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
-
-/// the network status of a message
-#[derive(Clone)]
-pub enum MessageStatus {
-    /// No ack from any third party
-    NoAck = 0,
-    /// Received by the server
-    ServerAck = 1,
-    /// Received by the recipient
-    RecipientAck = 2,
-    /// The message has timedout.
-    Timeout = 3,
-    /// we did not write this message
-    Inbound = 4,
-}
 
 #[derive(Default)]
 /// Messages
@@ -120,6 +105,24 @@ impl Messages {
         }
 
         Ok(msgs)
+    }
+
+    /// sets the message status of an item in the DB
+    pub fn update_status(
+        conversation_id: &str,
+        row: i64,
+        status: MessageStatus,
+    ) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message/update_status.sql"),
+            &[
+                conversation_id.to_sql()?,
+                row.to_sql()?,
+                (status as u32).to_sql()?,
+            ],
+        )?;
+        Ok(())
     }
 
     /// Deletes all messages in a conversation.

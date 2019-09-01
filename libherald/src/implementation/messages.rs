@@ -1,7 +1,8 @@
 use crate::interface::*;
+use herald_common::MessageStatus;
 use heraldcore::{
     db::DBTable,
-    message::{Message, MessageStatus, Messages as Core},
+    message::{Message, Messages as Core},
 };
 use im_rc::vector::Vector as ImVector;
 
@@ -110,7 +111,32 @@ impl MessagesTrait for Messages {
         self.conversation_id.as_ref().map(|s| s.as_str())
     }
 
-    // TODO add networking component
+    /// queries if the message has timed out
+    fn error_sending(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::Timeout => true,
+            _ => false,
+        }
+    }
+    /// queries if the message is at the server
+    /// but has not yet reached the recipient
+    fn reached_server(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::ReceivedAck => true,
+            _ => false,
+        }
+    }
+    /// queries if the message has been seen by the recipient
+    fn reached_recipient(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::RecpientReadAck => true,
+            _ => false,
+        }
+    }
+    // currently just returns the index itself
+    fn uuid(&self, index: usize) -> i64 {
+        index as i64
+    }
     fn insert_message(&mut self, body: String) -> bool {
         let id = match heraldcore::config::Config::static_id() {
             Ok(id) => id,
@@ -133,7 +159,7 @@ impl MessagesTrait for Messages {
             conversation_id.as_str(),
             body.as_str(),
             None,
-            MessageStatus::Inbound,
+            MessageStatus::NoAck,
         ) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
@@ -142,7 +168,7 @@ impl MessagesTrait for Messages {
                     body: body,
                     message_id: msg_id,
                     timestamp,
-                    message_status: MessageStatus::Inbound,
+                    message_status: MessageStatus::NoAck,
                 };
                 self.model
                     .begin_insert_rows(self.row_count(), self.row_count());
@@ -224,32 +250,6 @@ impl MessagesTrait for Messages {
         self.conversation_id = None;
         self.model.end_reset_model();
     }
-
-    fn error_sending(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::Timeout => true,
-            _ => false,
-        }
-    }
-
-    fn reached_server(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::ServerAck => true,
-            _ => false,
-        }
-    }
-
-    fn reached_recipient(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::RecipientAck => true,
-            _ => false,
-        }
-    }
-    // currently just returns the index itself
-    fn uuid(&self, index: usize) -> i64 {
-        index as i64
-    }
-
     fn emit(&mut self) -> &mut MessagesEmitter {
         &mut self.emit
     }

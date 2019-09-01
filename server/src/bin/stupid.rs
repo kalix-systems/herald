@@ -53,7 +53,10 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             .await
             .ok_or(format_err!("couldn't find user {}", to.clone()))?;
         for d in 0..u.num_devices {
-            let gid = GlobalId { uid: to.clone(), did: d };
+            let gid = GlobalId {
+                uid: to.clone(),
+                did: d,
+            };
             if let Some(mut s) = self.open.async_get_mut(gid.clone()).await {
                 let raw = serde_cbor::to_vec(&msg)?;
                 let len = u64::to_le_bytes(raw.len() as u64);
@@ -186,6 +189,11 @@ async fn main() {
                                 eprintln!("uid was {}, device {}", gid.uid, gid.did);
                             }
                         }
+                        ClientMessageAck {
+                            to,
+                            update_code,
+                            message_id,
+                        } => {}
                     }
                 }
                 dbg!("closing connection with {}", &gid);

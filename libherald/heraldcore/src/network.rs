@@ -1,5 +1,5 @@
 use crate::errors::HErr;
-use herald_common::{GlobalId, MessageToClient, MessageToServer, RawMsg, UserId};
+use herald_common::{GlobalId, MessageStatus, MessageToClient, MessageToServer, RawMsg, UserId};
 use lazy_static::*;
 use serde::Serialize;
 use std::{
@@ -61,13 +61,22 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
             let recipient = crate::config::Config::static_id()?;
             let GlobalId { uid: from, .. } = from;
 
-            crate::message::Messages::add_message(
+            let (row, _) = crate::message::Messages::add_message(
                 from.to_string().as_str(),
                 recipient.as_str(),
                 body.as_str(),
                 Some(time),
-                crate::message::MessageStatus::NoAck,
+                MessageStatus::Inbound, //all messages are inbound
             )?;
+
+            send_ack(from, MessageStatus::ReceivedAck, row, stream)?;
+        }
+        MessageToClient::ServerMessageAck {
+            from,
+            message_id,
+            update_code,
+        } => {
+            crate::message::Messages::update_status(&from.uid, message_id, update_code)?;
         }
         _ => unimplemented!(),
     }
@@ -91,7 +100,6 @@ pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
 
     // Shim code to ack self because the server is ~stupid~
     read_from_server(stream)?;
-
     Ok(())
 }
 
@@ -110,6 +118,22 @@ pub fn send_message(to: UserId, text: RawMsg, stream: &mut TcpStream) -> Result<
     let msg = MessageToServer::SendMsg { to, text };
 
     send_to_server(&msg, stream)?;
+    Ok(())
+}
+
+/// Sends message to server.
+pub fn send_ack(
+    to: UserId,
+    update_code: MessageStatus,
+    message_id: i64,
+    stream: &mut TcpStream,
+) -> Result<(), HErr> {
+    let ack = MessageToServer::ClientMessageAck {
+        to,
+        update_code,
+        message_id,
+    };
+    send_to_server(&ack, stream)?;
     Ok(())
 }
 
