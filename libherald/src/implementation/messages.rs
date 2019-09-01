@@ -1,7 +1,7 @@
 use crate::interface::*;
 use heraldcore::{
     db::DBTable,
-    message::{Message, Messages as Core},
+    message::{Message, MessageStatus, Messages as Core},
 };
 use im_rc::vector::Vector as ImVector;
 
@@ -12,6 +12,7 @@ struct MessagesItem {
     recipient: String,
     body: String,
     timestamp: String,
+    message_status: MessageStatus,
 }
 
 impl From<Message> for MessagesItem {
@@ -23,6 +24,7 @@ impl From<Message> for MessagesItem {
             recipient,
             body,
             timestamp,
+            message_status,
         } = m;
         MessagesItem {
             message_id,
@@ -30,6 +32,7 @@ impl From<Message> for MessagesItem {
             recipient,
             body,
             timestamp: timestamp.format("%Y-%m-%d %H:%M:%S").to_string(),
+            message_status,
         }
     }
 }
@@ -125,7 +128,13 @@ impl MessagesTrait for Messages {
             }
         };
 
-        match Core::add_message(id.as_str(), conversation_id.as_str(), body.as_str(), None) {
+        match Core::add_message(
+            id.as_str(),
+            conversation_id.as_str(),
+            body.as_str(),
+            None,
+            MessageStatus::Inbound,
+        ) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
                     author: id,
@@ -133,6 +142,7 @@ impl MessagesTrait for Messages {
                     body: body,
                     message_id: msg_id,
                     timestamp,
+                    message_status: MessageStatus::Inbound,
                 };
                 self.model
                     .begin_insert_rows(self.row_count(), self.row_count());
@@ -213,6 +223,31 @@ impl MessagesTrait for Messages {
         self.list = ImVector::new();
         self.conversation_id = None;
         self.model.end_reset_model();
+    }
+
+    fn error_sending(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::Timeout => true,
+            _ => false,
+        }
+    }
+
+    fn reached_server(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::ServerAck => true,
+            _ => false,
+        }
+    }
+
+    fn reached_recipient(&self, index: usize) -> bool {
+        match self.list[index].message_status {
+            MessageStatus::RecipientAck => true,
+            _ => false,
+        }
+    }
+    // currently just returns the index itself
+    fn uuid(&self, index: usize) -> i64 {
+        index as i64
     }
 
     fn emit(&mut self) -> &mut MessagesEmitter {

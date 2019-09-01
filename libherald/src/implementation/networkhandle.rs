@@ -3,13 +3,52 @@ use herald_common::*;
 use heraldcore::network::*;
 use std::{
     sync::{
-        atomic::{self, AtomicBool},
-        mpsc::{channel, Sender},
+        atomic::{AtomicU16, Ordering},
+        mpsc::{channel, Receiver, Sender},
         Arc,
     },
     thread,
     time::Duration,
 };
+
+type FlagType = AtomicU16;
+type FlagPrimitive = u16;
+// indicates connection is down
+static NET_ONLINE: FlagPrimitive = 0x01;
+// if connection status is low, and this is low,
+// indicates network errors
+static NET_PENDING: FlagPrimitive = 0x02;
+// indicates that a new message is available
+static NET_NEW_MSG: FlagPrimitive = 0x04;
+
+trait NetworkFlag {
+    fn emit_net_down(&self) {}
+    fn emit_net_up(&self) {}
+    fn emit_net_pending(&self) {}
+    fn emit_new_msg(&self) {}
+}
+
+impl NetworkFlag for FlagType {
+    #[inline(always)]
+    fn emit_net_down(&self) {
+        // drop the pending and online flags, we are in a fail state
+        self.fetch_nand(NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+    }
+    #[inline(always)]
+    fn emit_net_up(&self) {
+        // drops pending, start connection retries
+        self.fetch_and(NET_ONLINE | !NET_PENDING, Ordering::Relaxed);
+    }
+    #[inline(always)]
+    fn emit_net_pending(&self) {
+        // sets pending, drops online
+        self.fetch_and(!NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+    }
+    #[inline(always)]
+    fn emit_new_msg(&self) {
+        self.fetch_and(NET_NEW_MSG, Ordering::Relaxed);
+    }
+}
 
 pub enum HandleMessages {
     ToServer(MessageToServer),
@@ -18,7 +57,7 @@ pub enum HandleMessages {
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
-    message_received: Arc<AtomicBool>,
+    status_flag: Arc<FlagType>,
     tx: Sender<HandleMessages>,
 }
 
@@ -28,48 +67,13 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let handle = NetworkHandle {
             emit,
-            message_received: Arc::new(AtomicBool::new(false)),
+            status_flag: Arc::new(FlagType::new(NET_PENDING)),
             tx,
         };
 
-        let flag = handle.message_received.clone();
+        let flag = handle.status_flag.clone();
 
-        thread::spawn(move || {
-            let mut stream = match open_connection() {
-                Ok(stream) => stream,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    return;
-                }
-            };
-            loop {
-                use MessageToServer::*;
-
-                match rx.try_recv() {
-                    Ok(HandleMessages::ToServer(message)) => match message {
-                        // request from Qt to send a message
-                        SendMsg { to, text } => {
-                            send_message(to, text, &mut stream).unwrap();
-                        }
-                        // request from Qt to register a device
-                        RegisterDevice => {}
-                        UpdateBlob { .. } => unimplemented!(),
-                        RequestMeta { .. } => unimplemented!(),
-                    },
-                    //Ok(HandleMessages::Shutdown) => unimplemented!(),
-                    Err(_e) => {}
-                }
-
-                // check os queue for tcp messages, they are inserted into
-                // the db. set flag on the QML side...
-                flag.fetch_xor(
-                    read_from_server(&mut stream).is_ok(),
-                    atomic::Ordering::Relaxed,
-                );
-                thread::sleep(Duration::from_micros(10));
-            }
-        });
-
+        NetworkHandle::connect_to_server(flag, rx);
         handle
     }
 
@@ -91,8 +95,15 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn new_message(&self) -> bool {
-        self.message_received
-            .fetch_and(true, atomic::Ordering::Relaxed)
+        self.status_flag.fetch_and(NET_NEW_MSG, Ordering::Relaxed) != 0
+    }
+
+    fn connection_up(&self) -> bool {
+        self.status_flag.fetch_and(NET_ONLINE, Ordering::Relaxed) != 0
+    }
+
+    fn connection_pending(&self) -> bool {
+        self.status_flag.fetch_and(NET_PENDING, Ordering::Relaxed) != 0
     }
 
     fn emit(&mut self) -> &mut NetworkHandleEmitter {
@@ -100,7 +111,68 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 }
 
-impl NetworkHandle {}
+impl NetworkHandle {
+    pub fn connect_to_server(flag: Arc<FlagType>, rx: Receiver<HandleMessages>) {
+        thread::spawn(move || {
+            flag.emit_net_pending();
+            let mut stream = match open_connection() {
+                Ok(stream) => {
+                    flag.emit_net_up();
+                    stream
+                }
+                Err(e) => {
+                    flag.emit_net_down();
+                    eprintln!("{}", e);
+                    return;
+                }
+            };
+
+            loop {
+                use MessageToServer::*;
+                match rx.try_recv() {
+                    Ok(HandleMessages::ToServer(message)) => match message {
+                        // request from Qt to send a message
+                        SendMsg { to, text } => {
+                            println!("send Message");
+                            send_message(to, text, &mut stream).unwrap();
+                        }
+                        // request from Qt to register a device
+                        RegisterDevice => {}
+                        UpdateBlob { .. } => unimplemented!(),
+                        RequestMeta { .. } => unimplemented!(),
+                    },
+                    //Ok(HandleMessages::Shutdown) => unimplemented!(),
+                    Err(_e) => {}
+                }
+
+                // check os queue for tcp messages, they are inserted into
+                if let Ok(()) = read_from_server(&mut stream) {
+                    flag.emit_new_msg();
+                }
+
+                thread::sleep(Duration::from_micros(10));
+                // check and repair dead connection
+                // retry logic should go here, this should infinite
+                // loop until the net comes back
+                let mut buf = [0; 1];
+                if let Ok(0) = stream.peek(&mut buf) {
+                    flag.emit_net_pending();
+                    stream = match open_connection() {
+                        Ok(stream) => {
+                            flag.emit_net_up();
+                            stream
+                        }
+                        Err(e) => {
+                            flag.emit_net_down();
+                            eprintln!("{}", e);
+                            return;
+                        }
+                    };
+                }
+            }
+        });
+    }
+}
 
 // TODO add these
 //#[cfg(test)]

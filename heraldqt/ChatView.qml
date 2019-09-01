@@ -129,8 +129,7 @@ Pane {
                         return
                     }
                     messageModel.insert_message(text)
-                    networkHandle.send_message(text,
-                                               messageModel.conversationId)
+                    networkHandle.send_message(text, messageModel.conversationId)
                     chatScrollBar.position = 1.0
                     clear()
                 }
@@ -141,12 +140,12 @@ Pane {
         } /// Chat entry field
     } /// scroll area
 
-    states: State {
+    states: [ State {
         name: "visibleview"
         PropertyChanges {
             target: chatPane
             opacity: 100
             enabled: true
         }
-    }
+    } ]
 }

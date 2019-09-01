@@ -16,7 +16,7 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-        onNew_messageChanged: {
+        onNewMessageChanged: {
             print("message received.")
         }
     }
@@ -35,6 +35,7 @@ ApplicationWindow {
     }
 
     /// global configurations item
+    /// ToDo : implement login page logic here instead
     Config {
         id: config
         Component.onCompleted: {
@@ -59,7 +60,6 @@ ApplicationWindow {
             id: sideBar
         }
 
-        /// placeholder element
         ChatView {
             id: chatView
         }
