@@ -56,7 +56,7 @@ impl Chain {
     }
 
     pub fn open<'a>(&mut self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
-        self.with_key(move |key| key.open(cipher))
+        self.with_key(|key| key.open(cipher))
     }
 }
 
