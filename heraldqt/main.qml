@@ -20,7 +20,7 @@ ApplicationWindow {
             print("message received.")
         }
         onConnectionPendingChanged: {
-            print(connectionPending)
+            print("network pending status is : ", connectionPending)
         }
     }
 
