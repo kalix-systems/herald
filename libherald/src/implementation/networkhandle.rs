@@ -27,7 +27,9 @@ trait NetworkFlag {
     fn emit_net_pending(&self) {}
     fn emit_new_msg(&self) {}
 }
-
+// i'm kind of assuming that these emit a change
+// they may very well not, I doubt that these poll
+// across the FFI boundary
 impl NetworkFlag for FlagType {
     #[inline(always)]
     fn emit_net_down(&self) {

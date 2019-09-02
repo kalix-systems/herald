@@ -19,6 +19,9 @@ ApplicationWindow {
         onNewMessageChanged: {
             print("message received.")
         }
+        onConnectionPendingChanged: {
+            print(connectionPending)
+        }
     }
 
     Messages {
