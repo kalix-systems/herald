@@ -29,10 +29,10 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             onTriggered: {
-                if (contact_id === chatView.messageModel.conversationId)
+                if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
                 contacts.remove(index)
-                chatView.messageModel.clear_conversation_view()
+                messageModel.clear_conversation_view()
             }
         }
         MenuItem {
@@ -61,7 +61,7 @@ Item {
         }
         name = entryField.text.trim()
         print(contact_id, chatView.messageBar.contact_id)
-        if (contact_id === chatView.messageModel.conversationId) {
+        if (contact_id === messageModel.conversationId) {
             chatView.messageBar.chatBarAvatar.displayName = name
         }
         entryField.clear()
