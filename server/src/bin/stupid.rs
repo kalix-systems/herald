@@ -139,6 +139,7 @@ async fn main() {
                     };
                     match d.unwrap() {
                         SendMsg { to, text } => {
+                            println!(" Message received {} , text: {:?}", to, text);
                             state
                                 .send_msg(
                                     to,

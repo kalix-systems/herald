@@ -174,6 +174,7 @@ impl MessagesTrait for Messages {
                     .begin_insert_rows(self.row_count(), self.row_count());
                 self.list.push_back(msg);
                 self.model.end_insert_rows();
+                self.emit.new_data_ready();
                 true
             }
             Err(e) => {
