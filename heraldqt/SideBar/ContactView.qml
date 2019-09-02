@@ -15,6 +15,8 @@ ListView {
     ScrollBar.vertical: ScrollBar {
     }
 
+
+
     delegate: Item {
         id: contactItem
         height: 60

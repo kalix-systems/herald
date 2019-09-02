@@ -15,8 +15,29 @@ ToolBar {
         right: parent.right
     }
 
+
     Common.Avatar {
-       displayName : Utils.try_index_or(sideBar.contactUi.currentIndex,
+
+       Connections {
+           target: sideBar.contactData
+           /// this is what the code would call anyways
+           onDataChanged : {
+               chatBarAvatar.displayName = Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                                  sideBar.contactData.name,
+                                                  sideBar.contactData.rowCount(),"")
+
+                chatBarAvatar.colorHash = Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                               sideBar.contactData.color,
+                                               sideBar.contactData.rowCount(), 0)
+
+                  chatBarAvatar.pfpUrl = Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                             sideBar.contactData.profile_picture,
+                                              sideBar.contactData.rowCount(),"")
+           }
+       }
+
+
+     displayName : Utils.try_index_or(sideBar.contactUi.currentIndex,
                                         sideBar.contactData.name,
                                         sideBar.contactData.rowCount(),"")
 
