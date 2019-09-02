@@ -34,27 +34,30 @@ impl NetworkFlag for FlagType {
     #[inline(always)]
     fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
         // drop the pending and online flags, we are in a fail state
-        self.fetch_nand(NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+        self.fetch_and(!NET_ONLINE, Ordering::Relaxed);
+        self.fetch_or(NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
     }
     #[inline(always)]
     fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-        // drops pending, start connection retries
-        self.fetch_and(NET_ONLINE | !NET_PENDING, Ordering::Relaxed);
+        // drops pending, set online
+        self.fetch_or(NET_ONLINE, Ordering::Relaxed);
+        self.fetch_and(!NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
     }
     #[inline(always)]
     fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
         // sets pending, drops online
-        self.fetch_and(!NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+        self.fetch_and(!NET_ONLINE, Ordering::Relaxed);
+        self.fetch_or(NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
     }
     #[inline(always)]
     fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-        self.fetch_and(NET_NEW_MSG, Ordering::Relaxed);
+        self.fetch_or(NET_NEW_MSG, Ordering::Relaxed);
         emit.new_message_changed();
     }
 }
@@ -195,14 +198,32 @@ impl NetworkHandle {
     }
 }
 
-// TODO add these
-//#[cfg(test)]
-//mod test {
-//    use super::*;
-//
-//    #[cfg(test)]
-//    pub fn headless_send() {}
-//
-//    #[cfg(test)]
-//    pub fn headless_receive() {}
-//}
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::interface::*;
+
+    // just copy pasting logic out of the interior
+    // here because I can't instantiate the emitter
+    #[test]
+    fn bit_flags_work() {
+        let flag: FlagType = FlagType::new(0);
+        // emit net up
+        flag.fetch_or(NET_ONLINE, Ordering::Relaxed);
+        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
+        assert_eq!(0b01u16, flag.fetch_and(0u16, Ordering::Relaxed));
+        // emit net down and pending
+        flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
+        flag.fetch_or(NET_PENDING, Ordering::Relaxed);
+        assert_eq!(0b10u16, flag.fetch_and(0u16, Ordering::Relaxed));
+        // emit net down, forever
+        flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
+        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
+        assert_eq!(0u16, flag.fetch_and(0u16, Ordering::Relaxed));
+        // new message
+        flag.fetch_or(NET_NEW_MSG, Ordering::Relaxed);
+        assert_eq!(0b100u16, flag.fetch_and(0u16, Ordering::Relaxed));
+    }
+    #[cfg(test)]
+    pub fn headless_receive() {}
+}
