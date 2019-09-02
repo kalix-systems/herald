@@ -22,10 +22,10 @@ static NET_PENDING: FlagPrimitive = 0x02;
 static NET_NEW_MSG: FlagPrimitive = 0x04;
 
 trait NetworkFlag {
-    fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {}
-    fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {}
-    fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {}
-    fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {}
+    fn emit_net_down(&self, emit: &mut NetworkHandleEmitter);
+    fn emit_net_up(&self, emit: &mut NetworkHandleEmitter);
+    fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter);
+    fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter);
 }
 // i'm kind of assuming that these emit a change
 // they may very well not, I doubt that these poll
@@ -38,6 +38,7 @@ impl NetworkFlag for FlagType {
         self.fetch_or(NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
+        println!("Net Down!");
     }
     #[inline(always)]
     fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
@@ -46,6 +47,7 @@ impl NetworkFlag for FlagType {
         self.fetch_and(!NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
+        println!("Net up!");
     }
     #[inline(always)]
     fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
@@ -54,6 +56,7 @@ impl NetworkFlag for FlagType {
         self.fetch_or(NET_PENDING, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
+        println!("Net pending?!");
     }
     #[inline(always)]
     fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
@@ -76,11 +79,11 @@ pub struct NetworkHandle {
 impl NetworkHandleTrait for NetworkHandle {
     fn new(mut emit: NetworkHandleEmitter) -> Self {
         let (tx, rx) = channel::<HandleMessages>();
-        let mut emitter_clone = emit.clone();
+        let emitter_clone = emit.clone();
 
         let handle = NetworkHandle {
             emit,
-            status_flag: Arc::new(FlagType::new(NET_PENDING)),
+            status_flag: Arc::new(FlagType::new(0)),
             tx,
         };
 
@@ -90,7 +93,7 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
-        if self.connection_pending() {
+        if !self.connection_up() {
             println!("you are literally not connected to the server.");
             return false;
         }
@@ -157,13 +160,12 @@ impl NetworkHandle {
                             send_message(to, text, &mut stream).unwrap();
                         }
                         // request from Qt to register a device
-                        RegisterDevice => {}
+                        RegisterDevice => unimplemented!(),
                         UpdateBlob { .. } => unimplemented!(),
                         RequestMeta { .. } => unimplemented!(),
                         // request from the network thread to
                         // ack that a message has been received and or read
                         ClientMessageAck { .. } => unimplemented!(),
-                        _ => unimplemented!(),
                     },
                     //Ok(HandleMessages::Shutdown) => unimplemented!(),
                     Err(_e) => {}
@@ -178,7 +180,7 @@ impl NetworkHandle {
                 // check and repair dead connection
                 // retry logic should go here, this should infinite
                 // loop until the net comes back
-                let mut buf = [0; 1];
+                let mut buf = [0; 8];
                 if let Ok(0) = stream.peek(&mut buf) {
                     flag.emit_net_pending(&mut emit);
                     stream = match open_connection() {
@@ -201,21 +203,23 @@ impl NetworkHandle {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::interface::*;
 
     // just copy pasting logic out of the interior
     // here because I can't instantiate the emitter
     #[test]
     fn bit_flags_work() {
         let flag: FlagType = FlagType::new(0);
-        // emit net up
-        flag.fetch_or(NET_ONLINE, Ordering::Relaxed);
-        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
-        assert_eq!(0b01u16, flag.fetch_and(0u16, Ordering::Relaxed));
+
         // emit net down and pending
         flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
         flag.fetch_or(NET_PENDING, Ordering::Relaxed);
         assert_eq!(0b10u16, flag.fetch_and(0u16, Ordering::Relaxed));
+
+        // emit net up
+        flag.fetch_or(NET_ONLINE, Ordering::Relaxed);
+        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
+        assert_eq!(0b01u16, flag.fetch_and(0u16, Ordering::Relaxed));
+
         // emit net down, forever
         flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
         flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
@@ -224,6 +228,4 @@ mod test {
         flag.fetch_or(NET_NEW_MSG, Ordering::Relaxed);
         assert_eq!(0b100u16, flag.fetch_and(0u16, Ordering::Relaxed));
     }
-    #[cfg(test)]
-    pub fn headless_receive() {}
 }
