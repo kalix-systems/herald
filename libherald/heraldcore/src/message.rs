@@ -106,8 +106,9 @@ impl Messages {
     }
 
     /// sets the message status of an item in the DB
+    /// currently assumes conversations are SYNCED
     pub fn update_status(
-        _conversation_id: &str,
+        conversation_id: &str,
         row: i64,
         status: MessageStatus,
     ) -> Result<(), HErr> {
@@ -115,7 +116,7 @@ impl Messages {
         db.execute(
             include_str!("sql/message/update_status.sql"),
             &[
-                // conversation_id.to_sql()?,
+                conversation_id.to_sql()?,
                 row.to_sql()?,
                 (status as u32).to_sql()?,
             ],
