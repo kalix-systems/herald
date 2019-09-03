@@ -13,9 +13,10 @@ const DEFUALT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
     static ref SERVER_ADDR: SocketAddrV4 = match env::var("SERVER_ADDR") {
-        Ok(addr) => addr
-            .parse()
-            .expect(&format!("Provided address {} is invalid", addr)),
+        Ok(addr) => addr.parse().unwrap_or_else(|e| {
+            eprintln!("Provided address {} is invalid: {}", addr, e);
+            std::process::abort();
+        }),
         Err(_) => SocketAddrV4::new(DEFUALT_SERVER_IP_ADDR.into(), DEFAULT_PORT),
     };
 }
