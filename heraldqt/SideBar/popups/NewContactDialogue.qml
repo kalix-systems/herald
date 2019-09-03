@@ -15,7 +15,7 @@ Popup {
     function insertContact() {
         if (entryField.text.trim().length === 0)
             return
-        sideBar.contactData.add(entryField.text.trim())
+        contacts.add(entryField.text.trim())
         entryField.clear()
         newContactDialogue.close()
     }

@@ -13,7 +13,7 @@ Item {
     FileDialog {
         id: pfpDialog
         onSelectionAccepted: {
-            var retCode =  sideBar.contactData.setProfile_picture(index, fileUrl)
+            var retCode =  contacts.setProfile_picture(index, fileUrl)
             if (retCode) {
                 contactAvatar.pfpUrl = profile_picture
                 chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
@@ -31,7 +31,7 @@ Item {
             onTriggered: {
                 if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
-                 sideBar.contactData.remove(index)
+                contacts.remove(index)
                 messageModel.clear_conversation_view()
             }
         }
@@ -61,7 +61,7 @@ Item {
         }
         name = entryField.text.trim()
         print(contact_id, chatView.messageBar.contact_id)
-        if (contact_id === messageModel.conversationId) {
+        if (contact_id === chatView.messageModel.conversationId) {
             chatView.messageBar.chatBarAvatar.displayName = name
         }
         entryField.clear()
