@@ -26,9 +26,7 @@ pub fn open_connection() -> Result<TcpStream, HErr> {
     let socket: SocketAddrV4 = *SERVER_ADDR;
     println!("Client connecting to {}", *SERVER_ADDR);
     let mut stream = TcpStream::connect(socket)?;
-
     login(&mut stream)?;
-
     Ok(stream)
 }
 
@@ -69,6 +67,7 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
                 recipient.as_str(),
                 body.as_str(),
                 Some(time),
+                crate::message::MessageStatus::NoAck,
             )?;
         }
         _ => unimplemented!(),

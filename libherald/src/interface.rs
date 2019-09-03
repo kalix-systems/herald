@@ -720,8 +720,12 @@ pub trait MessagesTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> &str;
+    fn error_sending(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> i64;
+    fn reached_recipient(&self, index: usize) -> bool;
+    fn reached_server(&self, index: usize) -> bool;
     fn recipient(&self, index: usize) -> &str;
+    fn uuid(&self, index: usize) -> i64;
 }
 
 #[no_mangle]
@@ -890,9 +894,27 @@ pub unsafe extern "C" fn messages_data_body(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_error_sending(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.error_sending(to_usize(row)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_message_id(ptr: *const Messages, row: c_int) -> i64 {
     let o = &*ptr;
     o.message_id(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_reached_recipient(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.reached_recipient(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_reached_server(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.reached_server(to_usize(row)).into()
 }
 
 #[no_mangle]
@@ -907,10 +929,18 @@ pub unsafe extern "C" fn messages_data_recipient(
     set(d, s, to_c_int(data.len()));
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_uuid(ptr: *const Messages, row: c_int) -> i64 {
+    let o = &*ptr;
+    o.uuid(to_usize(row)).into()
+}
+
 pub struct NetworkHandleQObject {}
 
 pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
+    connection_pending_changed: fn(*mut NetworkHandleQObject),
+    connection_up_changed: fn(*mut NetworkHandleQObject),
     new_message_changed: fn(*mut NetworkHandleQObject),
 }
 
@@ -926,12 +956,26 @@ impl NetworkHandleEmitter {
     pub fn clone(&mut self) -> NetworkHandleEmitter {
         NetworkHandleEmitter {
             qobject: self.qobject.clone(),
+            connection_pending_changed: self.connection_pending_changed,
+            connection_up_changed: self.connection_up_changed,
             new_message_changed: self.new_message_changed,
         }
     }
     fn clear(&self) {
         let n: *const NetworkHandleQObject = null();
         self.qobject.store(n as *mut NetworkHandleQObject, Ordering::SeqCst);
+    }
+    pub fn connection_pending_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_pending_changed)(ptr);
+        }
+    }
+    pub fn connection_up_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_up_changed)(ptr);
+        }
     }
     pub fn new_message_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -944,6 +988,8 @@ impl NetworkHandleEmitter {
 pub trait NetworkHandleTrait {
     fn new(emit: NetworkHandleEmitter) -> Self;
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
+    fn connection_pending(&self) -> bool;
+    fn connection_up(&self) -> bool;
     fn new_message(&self) -> bool;
     fn send_message(&self, message_body: String, to: String) -> bool;
 }
@@ -951,10 +997,14 @@ pub trait NetworkHandleTrait {
 #[no_mangle]
 pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
+    network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
+    network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
+        connection_pending_changed: network_handle_connection_pending_changed,
+        connection_up_changed: network_handle_connection_up_changed,
         new_message_changed: network_handle_new_message_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
@@ -964,6 +1014,16 @@ pub extern "C" fn network_handle_new(
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_free(ptr: *mut NetworkHandle) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_connection_pending_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).connection_pending()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).connection_up()
 }
 
 #[no_mangle]

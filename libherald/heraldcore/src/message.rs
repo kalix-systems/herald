@@ -7,6 +7,21 @@ use rusqlite::{ToSql, NO_PARAMS};
 
 static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
 
+/// the network status of a message
+#[derive(Clone)]
+pub enum MessageStatus {
+    /// No ack from any third party
+    NoAck = 0,
+    /// Received by the server
+    ServerAck = 1,
+    /// Received by the recipient
+    RecipientAck = 2,
+    /// The message has timedout.
+    Timeout = 3,
+    /// we did not write this message
+    Inbound = 4,
+}
+
 #[derive(Default)]
 /// Messages
 pub struct Messages {}
@@ -23,6 +38,8 @@ pub struct Message {
     pub body: String,
     /// Time the message was sent or received at the server.
     pub timestamp: DateTime<Utc>,
+    /// has anyone seen this message yet.
+    pub message_status: MessageStatus,
 }
 
 impl Message {
@@ -43,6 +60,7 @@ impl Message {
                     .expect("Failed to parse timestamp"),
                 Utc,
             ),
+            message_status: MessageStatus::NoAck,
         })
     }
 }
@@ -54,6 +72,7 @@ impl Messages {
         recipient: &str,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
+        status: MessageStatus,
     ) -> Result<(i64, String), HErr> {
         let timestamp = match timestamp {
             Some(ts) => ts,
@@ -74,6 +93,7 @@ impl Messages {
                 recipient.to_sql()?,
                 body.to_sql()?,
                 timestamp.to_sql()?,
+                (status as u32).to_sql()?,
             ],
         )?;
         Ok((db.last_insert_rowid(), timestamp))
@@ -162,8 +182,10 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
-        Messages::add_message(author, recipient, "2", None).expect("Failed to add second message");
+        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+            .expect("Failed to add first message");
+        Messages::add_message(author, recipient, "2", None, MessageStatus::NoAck)
+            .expect("Failed to add second message");
 
         let v1 = Messages::get_conversation(author).expect("Failed to get conversation by author");
         assert_eq!(v1.len(), 2);
@@ -180,7 +202,8 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
+        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+            .expect("Failed to add first message");
 
         Messages::delete_message(1).unwrap();
 
@@ -195,8 +218,10 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None).expect("Failed to add first message");
-        Messages::add_message(recipient, author, "1", None).expect("Failed to add first message");
+        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+            .expect("Failed to add first message");
+        Messages::add_message(recipient, author, "1", None, MessageStatus::NoAck)
+            .expect("Failed to add first message");
 
         Messages::delete_conversation(recipient).unwrap();
 

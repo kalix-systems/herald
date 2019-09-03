@@ -52,9 +52,17 @@ namespace {
     {
         Q_EMIT o->conversationIdChanged();
     }
-    inline void networkHandleNew_messageChanged(NetworkHandle* o)
+    inline void networkHandleConnectionPendingChanged(NetworkHandle* o)
     {
-        Q_EMIT o->new_messageChanged();
+        Q_EMIT o->connectionPendingChanged();
+    }
+    inline void networkHandleConnectionUpChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->connectionUpChanged();
+    }
+    inline void networkHandleNewMessageChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->newMessageChanged();
     }
 }
 extern "C" {
@@ -351,8 +359,12 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
+    bool messages_data_error_sending(const Messages::Private*, int);
     qint64 messages_data_message_id(const Messages::Private*, int);
+    bool messages_data_reached_recipient(const Messages::Private*, int);
+    bool messages_data_reached_server(const Messages::Private*, int);
     void messages_data_recipient(const Messages::Private*, int, QString*, qstring_set);
+    qint64 messages_data_uuid(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -436,9 +448,24 @@ QString Messages::body(int row) const
     return s;
 }
 
+bool Messages::error_sending(int row) const
+{
+    return messages_data_error_sending(m_d, row);
+}
+
 qint64 Messages::message_id(int row) const
 {
     return messages_data_message_id(m_d, row);
+}
+
+bool Messages::reached_recipient(int row) const
+{
+    return messages_data_reached_recipient(m_d, row);
+}
+
+bool Messages::reached_server(int row) const
+{
+    return messages_data_reached_server(m_d, row);
 }
 
 QString Messages::recipient(int row) const
@@ -446,6 +473,11 @@ QString Messages::recipient(int row) const
     QString s;
     messages_data_recipient(m_d, row, &s, set_qstring);
     return s;
+}
+
+qint64 Messages::uuid(int row) const
+{
+    return messages_data_uuid(m_d, row);
 }
 
 QVariant Messages::data(const QModelIndex &index, int role) const
@@ -459,9 +491,17 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(message_id(index.row()));
+            return QVariant::fromValue(error_sending(index.row()));
         case Qt::UserRole + 3:
+            return QVariant::fromValue(message_id(index.row()));
+        case Qt::UserRole + 4:
+            return QVariant::fromValue(reached_recipient(index.row()));
+        case Qt::UserRole + 5:
+            return QVariant::fromValue(reached_server(index.row()));
+        case Qt::UserRole + 6:
             return QVariant::fromValue(recipient(index.row()));
+        case Qt::UserRole + 7:
+            return QVariant::fromValue(uuid(index.row()));
         }
         break;
     }
@@ -483,8 +523,12 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "message_id");
-    names.insert(Qt::UserRole + 3, "recipient");
+    names.insert(Qt::UserRole + 2, "error_sending");
+    names.insert(Qt::UserRole + 3, "message_id");
+    names.insert(Qt::UserRole + 4, "reached_recipient");
+    names.insert(Qt::UserRole + 5, "reached_server");
+    names.insert(Qt::UserRole + 6, "recipient");
+    names.insert(Qt::UserRole + 7, "uuid");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -530,8 +574,10 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
+    bool network_handle_connection_pending_get(const NetworkHandle::Private*);
+    bool network_handle_connection_up_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const ushort*, int);
 };
@@ -799,7 +845,9 @@ NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
 NetworkHandle::NetworkHandle(QObject *parent):
     QObject(parent),
     m_d(network_handle_new(this,
-        networkHandleNew_messageChanged)),
+        networkHandleConnectionPendingChanged,
+        networkHandleConnectionUpChanged,
+        networkHandleNewMessageChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -809,7 +857,15 @@ NetworkHandle::~NetworkHandle() {
         network_handle_free(m_d);
     }
 }
-bool NetworkHandle::new_message() const
+bool NetworkHandle::connectionPending() const
+{
+    return network_handle_connection_pending_get(m_d);
+}
+bool NetworkHandle::connectionUp() const
+{
+    return network_handle_connection_up_get(m_d);
+}
+bool NetworkHandle::newMessage() const
 {
     return network_handle_new_message_get(m_d);
 }

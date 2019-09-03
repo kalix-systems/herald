@@ -24,7 +24,13 @@
                 }
             },
             "properties": {
-                "new_message": {
+                "newMessage": {
+                    "type": "bool"
+                },
+                "connectionUp": {
+                    "type": "bool"
+                },
+                "connectionPending": {
                     "type": "bool"
                 }
             }
@@ -102,6 +108,18 @@
                 },
                 "body": {
                     "type": "QString"
+                },
+                "uuid": {
+                    "type": "qint64"
+                },
+                "reached_server": {
+                    "type": "bool"
+                },
+                "reached_recipient": {
+                    "type": "bool"
+                },
+                "error_sending": {
+                    "type": "bool"
                 }
             },
             "functions": {

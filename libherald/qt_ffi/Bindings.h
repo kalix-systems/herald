@@ -138,8 +138,12 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
+    Q_INVOKABLE bool error_sending(int row) const;
     Q_INVOKABLE qint64 message_id(int row) const;
+    Q_INVOKABLE bool reached_recipient(int row) const;
+    Q_INVOKABLE bool reached_server(int row) const;
     Q_INVOKABLE QString recipient(int row) const;
+    Q_INVOKABLE qint64 uuid(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -160,14 +164,20 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(bool new_message READ new_message NOTIFY new_messageChanged FINAL)
+    Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
+    Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
+    Q_PROPERTY(bool newMessage READ newMessage NOTIFY newMessageChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
     ~NetworkHandle();
-    bool new_message() const;
+    bool connectionPending() const;
+    bool connectionUp() const;
+    bool newMessage() const;
     Q_INVOKABLE bool send_message(const QString& message_body, const QString& to) const;
 Q_SIGNALS:
-    void new_messageChanged();
+    void connectionPendingChanged();
+    void connectionUpChanged();
+    void newMessageChanged();
 };
 #endif // BINDINGS_H

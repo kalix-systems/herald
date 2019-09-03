@@ -35,6 +35,7 @@ pub enum MessageToClient {
         text: RawMsg,
         time: DateTime<Utc>,
     },
+    
     QueryResponse {
         res: Response,
         query: MessageToServer,
