@@ -13,7 +13,7 @@ Item {
     FileDialog {
         id: pfpDialog
         onSelectionAccepted: {
-            var retCode = contacts.setProfile_picture(index, fileUrl)
+            var retCode = contactData.setProfile_picture(index, fileUrl)
             if (retCode) {
                 contactAvatar.pfpUrl = profile_picture
                 chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
@@ -29,10 +29,10 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             onTriggered: {
-                if (contact_id === chatView.messageModel.conversationId)
+                if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
-                contacts.remove(index)
-                chatView.messageModel.clear_conversation_view()
+                contactData.remove(index)
+                messageModel.clear_conversation_view()
             }
         }
         MenuItem {
@@ -50,7 +50,7 @@ Item {
             onTriggered: {
                 contactAvatar.pfpUrl = ""
                 chatView.messageBar.chatBarAvatar.pfpUrl = ""
-                contacts.setProfile_picture(index, "")
+                contactData.setProfile_picture(index, "")
             }
         }
     }
@@ -61,7 +61,7 @@ Item {
         }
         name = entryField.text.trim()
         print(contact_id, chatView.messageBar.contact_id)
-        if (contact_id === chatView.messageModel.conversationId) {
+        if (contact_id === messageModel.conversationId) {
             chatView.messageBar.chatBarAvatar.displayName = name
         }
         entryField.clear()
