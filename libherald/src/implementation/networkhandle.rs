@@ -3,7 +3,7 @@ use herald_common::*;
 use heraldcore::network::*;
 use std::{
     sync::{
-        atomic::{AtomicU16, Ordering},
+        atomic::{AtomicBool, Ordering},
         mpsc::{channel, Receiver, Sender},
         Arc,
     },
@@ -11,56 +11,44 @@ use std::{
     time::Duration,
 };
 
-type FlagType = AtomicU16;
-type FlagPrimitive = u16;
-/// indicates connection is down
-const NET_ONLINE: FlagPrimitive = 0x01;
-/// if connection status is low, and this is low,
-/// indicates network errors
-const NET_PENDING: FlagPrimitive = 0x02;
-/// indicates that a new message is available
-const NET_NEW_MSG: FlagPrimitive = 0x04;
-
-trait NetworkFlag {
-    fn emit_net_down(&self, emit: &mut NetworkHandleEmitter);
-    fn emit_net_up(&self, emit: &mut NetworkHandleEmitter);
-    fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter);
-    fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter);
+pub struct NetworkFlags {
+    net_online: AtomicBool,
+    net_pending: AtomicBool,
+    net_new_message: AtomicBool,
 }
-// i'm kind of assuming that these emit a change
-// they may very well not, I doubt that these poll
-// across the FFI boundary
-impl NetworkFlag for FlagType {
-    #[inline(always)]
-    fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
+
+impl NetworkFlags {
+    pub fn new() -> Self {
+        NetworkFlags {
+            net_online: AtomicBool::new(false),
+            net_pending: AtomicBool::new(false),
+            net_new_message: AtomicBool::new(false),
+        }
+    }
+    pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
         // drop the pending and online flags, we are in a fail state
-        self.fetch_and(!NET_ONLINE, Ordering::Relaxed);
-        self.fetch_or(NET_PENDING, Ordering::Relaxed);
+        self.net_online.fetch_and(false, Ordering::Relaxed);
+        self.net_pending.fetch_and(true, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
         println!("Net Down!");
     }
-    #[inline(always)]
-    fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-        // drops pending, set online
-        self.fetch_or(NET_ONLINE, Ordering::Relaxed);
-        self.fetch_and(!NET_PENDING, Ordering::Relaxed);
+    pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_online.fetch_and(true, Ordering::Relaxed);
+        self.net_pending.fetch_and(false, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
-        println!("Net up!");
+        println!("Net Up!")
     }
-    #[inline(always)]
-    fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
-        // sets pending, drops online
-        self.fetch_and(!NET_ONLINE, Ordering::Relaxed);
-        self.fetch_or(NET_PENDING, Ordering::Relaxed);
+    pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_online.fetch_and(false, Ordering::Relaxed);
+        self.net_pending.fetch_and(true, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
-        println!("Net pending?!");
+        println!("Net Pending!")
     }
-    #[inline(always)]
-    fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-        self.fetch_or(NET_NEW_MSG, Ordering::Relaxed);
+    pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_new_message.fetch_and(true, Ordering::Relaxed);
         emit.new_message_changed();
     }
 }
@@ -70,9 +58,9 @@ pub enum HandleMessages {
     //Shutdown,
 }
 
-pub struct NetworkHandle {
+struct NetworkHandle {
     emit: NetworkHandleEmitter,
-    status_flag: Arc<FlagType>,
+    status_flags: Arc<NetworkFlags>,
     tx: Sender<HandleMessages>,
 }
 
@@ -83,11 +71,11 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let handle = NetworkHandle {
             emit,
-            status_flag: Arc::new(FlagType::new(0)),
+            status_flags: Arc::new(NetworkFlags::new()),
             tx,
         };
 
-        let flag = handle.status_flag.clone();
+        let flag = handle.status_flags.clone();
         NetworkHandle::connect_to_server(flag, rx, emitter_clone);
         handle
     }
@@ -110,15 +98,15 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn new_message(&self) -> bool {
-        self.status_flag.fetch_and(NET_NEW_MSG, Ordering::Relaxed) != 0
+        self.status_flags.net_new_message.load(Ordering::Relaxed)
     }
 
     fn connection_up(&self) -> bool {
-        self.status_flag.fetch_and(NET_ONLINE, Ordering::Relaxed) != 0
+        self.status_flags.net_online.load(Ordering::Relaxed)
     }
 
     fn connection_pending(&self) -> bool {
-        self.status_flag.fetch_and(NET_PENDING, Ordering::Relaxed) != 0
+        self.status_flags.net_pending.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut NetworkHandleEmitter {
@@ -128,7 +116,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
 impl NetworkHandle {
     pub fn connect_to_server(
-        flag: Arc<FlagType>,
+        flag: Arc<NetworkFlags>,
         rx: Receiver<HandleMessages>,
         mut emit: NetworkHandleEmitter,
     ) {
@@ -198,35 +186,5 @@ impl NetworkHandle {
                 }
             }
         });
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    // just copy pasting logic out of the interior
-    // here because I can't instantiate the emitter
-    #[test]
-    fn bit_flags_work() {
-        let flag: FlagType = FlagType::new(0);
-
-        // emit net down and pending
-        flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
-        flag.fetch_or(NET_PENDING, Ordering::Relaxed);
-        assert_eq!(0b10u16, flag.fetch_and(0u16, Ordering::Relaxed));
-
-        // emit net up
-        flag.fetch_or(NET_ONLINE, Ordering::Relaxed);
-        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
-        assert_eq!(0b01u16, flag.fetch_and(0u16, Ordering::Relaxed));
-
-        // emit net down, forever
-        flag.fetch_and(!NET_ONLINE, Ordering::Relaxed);
-        flag.fetch_and(!NET_PENDING, Ordering::Relaxed);
-        assert_eq!(0u16, flag.fetch_and(0u16, Ordering::Relaxed));
-        // new message
-        flag.fetch_or(NET_NEW_MSG, Ordering::Relaxed);
-        assert_eq!(0b100u16, flag.fetch_and(0u16, Ordering::Relaxed));
     }
 }
