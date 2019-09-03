@@ -1,8 +1,10 @@
 use sodiumoxide::crypto::{kx, secretbox};
 
+use crate::prelude::*;
 use crate::sym::*;
 
 pub const CHAIN_KEY_BYTES: usize = secretbox::KEYBYTES;
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct ChainKey(secretbox::Key);
 
 impl From<kx::SessionKey> for ChainKey {
@@ -26,13 +28,16 @@ impl ChainKey {
     }
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct Chain {
     key: ChainKey,
 }
 
 impl Chain {
-    pub fn new(key: ChainKey) -> Self {
-        Chain { key }
+    pub fn new(sess: kx::SessionKey) -> Self {
+        Chain {
+            key: ChainKey(secretbox::Key(sess.0)),
+        }
     }
 
     pub fn with_key<F, X>(&mut self, f: F) -> Option<X>
@@ -51,11 +56,15 @@ impl Chain {
         self.with_key(Some).unwrap()
     }
 
-    pub fn seal<'a>(&mut self, msg: &'a mut [u8]) -> Ciphertext<'a> {
+    pub fn seal_in_place(&mut self, msg: BytesMut) -> Ciphertext {
+        self.ratchet().seal_in_place(msg)
+    }
+
+    pub fn seal(&mut self, msg: &[u8]) -> Ciphertext {
         self.ratchet().seal(msg)
     }
 
-    pub fn open<'a>(&mut self, cipher: Ciphertext<'a>) -> Option<&'a mut [u8]> {
+    pub fn open(&mut self, cipher: Ciphertext) -> Option<BytesMut> {
         self.with_key(|key| key.open(cipher))
     }
 }
