@@ -264,13 +264,14 @@ mod tests {
 
         Messages::update_status(recipient, row, MessageStatus::Timeout)
             .expect("could not update status :");
-
+        //if this fails the UPDATE call was not specific enough
         assert_eq!(
             Messages::get_conversation(author)
                 .expect("failed to get conversation by author, the second time")[0]
                 .message_status,
             MessageStatus::NoAck
         );
+
         assert_eq!(
             Messages::get_conversation(author)
                 .expect("failed to get conversation by author, the third time")[1]

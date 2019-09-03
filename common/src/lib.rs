@@ -7,6 +7,7 @@ pub type UserId = String;
 pub type DeviceId = usize;
 pub type RawMsg = Bytes;
 
+
 // the network status of a message
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
 pub enum MessageStatus {
@@ -14,7 +15,7 @@ pub enum MessageStatus {
     NoAck,
     /// Received by the server, and made it to the user
     ReceivedAck,
-    /// Received by the recipient
+    /// Read by the recipient
     RecipientReadAck,
     /// The message has timedout.
     Timeout,

@@ -13,13 +13,13 @@ use std::{
 
 type FlagType = AtomicU16;
 type FlagPrimitive = u16;
-// indicates connection is down
-static NET_ONLINE: FlagPrimitive = 0x01;
-// if connection status is low, and this is low,
-// indicates network errors
-static NET_PENDING: FlagPrimitive = 0x02;
-// indicates that a new message is available
-static NET_NEW_MSG: FlagPrimitive = 0x04;
+/// indicates connection is down
+const NET_ONLINE: FlagPrimitive = 0x01;
+/// if connection status is low, and this is low,
+/// indicates network errors
+const NET_PENDING: FlagPrimitive = 0x02;
+/// indicates that a new message is available
+const NET_NEW_MSG: FlagPrimitive = 0x04;
 
 trait NetworkFlag {
     fn emit_net_down(&self, emit: &mut NetworkHandleEmitter);
