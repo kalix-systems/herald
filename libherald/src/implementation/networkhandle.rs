@@ -58,7 +58,7 @@ pub enum HandleMessages {
     //Shutdown,
 }
 
-struct NetworkHandle {
+pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<NetworkFlags>,
     tx: Sender<HandleMessages>,
