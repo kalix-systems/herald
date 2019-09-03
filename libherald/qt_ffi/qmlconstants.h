@@ -16,17 +16,17 @@ public:
   enum AckTypes
   {
     /// No ack from any third party
-    NoAck = 0,
+    NoAck,
     /// Received by the server, and made it to the user
-    ReceivedAck = 1,
+    ReceivedAck,
     /// Received by the recipient
-    RecpientReadAck = 2,
+    RecpientReadAck,
     /// The message has timedout.
-    Timeout = 3,
+    Timeout,
     /// we did not write this message
-    Inbound = 4,
+    Inbound,
     /// The user has read receipts turned off
-    AckTerminal = 5,
+    AckTerminal,
   };
   Q_ENUM(AckTypes)
 };

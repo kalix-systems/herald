@@ -1,3 +1,5 @@
 UPDATE messages
-SET status = @3, 
-WHERE conversationId = @1, row = @2;
+SET send_status=?2
+WHERE ID=?1;
+
+  

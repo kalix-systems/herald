@@ -111,33 +111,16 @@ impl MessagesTrait for Messages {
         self.conversation_id.as_ref().map(|s| s.as_str())
     }
 
-    /// queries if the message has timed out
-    fn error_sending(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::Timeout => true,
-            _ => false,
-        }
+    fn send_status(&self, index: usize) -> u32 {
+        self.list[index].message_status as u32
     }
-    /// queries if the message is at the server
-    /// but has not yet reached the recipient
-    fn reached_server(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::ReceivedAck => true,
-            _ => false,
-        }
-    }
-    /// queries if the message has been seen by the recipient
-    fn reached_recipient(&self, index: usize) -> bool {
-        match self.list[index].message_status {
-            MessageStatus::RecpientReadAck => true,
-            _ => false,
-        }
-    }
+
     // currently just returns the index itself
     fn uuid(&self, index: usize) -> i64 {
         index as i64
     }
-    fn insert_message(&mut self, body: String) -> bool {
+    /// send status: true if the last message sent, false if not.
+    fn insert_message(&mut self, body: String, send_status: bool) -> bool {
         let id = match heraldcore::config::Config::static_id() {
             Ok(id) => id,
             Err(e) => {
@@ -154,12 +137,18 @@ impl MessagesTrait for Messages {
             }
         };
 
+        let stat = if send_status {
+            MessageStatus::NoAck
+        } else {
+            MessageStatus::Timeout //or rather, some vague failure
+        };
+
         match Core::add_message(
             id.as_str(),
             conversation_id.as_str(),
             body.as_str(),
             None,
-            MessageStatus::NoAck,
+            stat,
         ) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
@@ -168,7 +157,7 @@ impl MessagesTrait for Messages {
                     body: body,
                     message_id: msg_id,
                     timestamp,
-                    message_status: MessageStatus::NoAck,
+                    message_status: stat,
                 };
                 self.model
                     .begin_insert_rows(self.row_count(), self.row_count());

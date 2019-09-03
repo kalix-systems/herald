@@ -359,11 +359,9 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
-    bool messages_data_error_sending(const Messages::Private*, int);
     qint64 messages_data_message_id(const Messages::Private*, int);
-    bool messages_data_reached_recipient(const Messages::Private*, int);
-    bool messages_data_reached_server(const Messages::Private*, int);
     void messages_data_recipient(const Messages::Private*, int, QString*, qstring_set);
+    quint32 messages_data_send_status(const Messages::Private*, int);
     qint64 messages_data_uuid(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -448,24 +446,9 @@ QString Messages::body(int row) const
     return s;
 }
 
-bool Messages::error_sending(int row) const
-{
-    return messages_data_error_sending(m_d, row);
-}
-
 qint64 Messages::message_id(int row) const
 {
     return messages_data_message_id(m_d, row);
-}
-
-bool Messages::reached_recipient(int row) const
-{
-    return messages_data_reached_recipient(m_d, row);
-}
-
-bool Messages::reached_server(int row) const
-{
-    return messages_data_reached_server(m_d, row);
 }
 
 QString Messages::recipient(int row) const
@@ -473,6 +456,11 @@ QString Messages::recipient(int row) const
     QString s;
     messages_data_recipient(m_d, row, &s, set_qstring);
     return s;
+}
+
+quint32 Messages::send_status(int row) const
+{
+    return messages_data_send_status(m_d, row);
 }
 
 qint64 Messages::uuid(int row) const
@@ -491,16 +479,12 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(error_sending(index.row()));
-        case Qt::UserRole + 3:
             return QVariant::fromValue(message_id(index.row()));
-        case Qt::UserRole + 4:
-            return QVariant::fromValue(reached_recipient(index.row()));
-        case Qt::UserRole + 5:
-            return QVariant::fromValue(reached_server(index.row()));
-        case Qt::UserRole + 6:
+        case Qt::UserRole + 3:
             return QVariant::fromValue(recipient(index.row()));
-        case Qt::UserRole + 7:
+        case Qt::UserRole + 4:
+            return QVariant::fromValue(send_status(index.row()));
+        case Qt::UserRole + 5:
             return QVariant::fromValue(uuid(index.row()));
         }
         break;
@@ -523,12 +507,10 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "error_sending");
-    names.insert(Qt::UserRole + 3, "message_id");
-    names.insert(Qt::UserRole + 4, "reached_recipient");
-    names.insert(Qt::UserRole + 5, "reached_server");
-    names.insert(Qt::UserRole + 6, "recipient");
-    names.insert(Qt::UserRole + 7, "uuid");
+    names.insert(Qt::UserRole + 2, "message_id");
+    names.insert(Qt::UserRole + 3, "recipient");
+    names.insert(Qt::UserRole + 4, "send_status");
+    names.insert(Qt::UserRole + 5, "uuid");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -570,7 +552,7 @@ extern "C" {
     bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_conversation_by_id(Messages::Private*, const ushort*, int);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_insert_message(Messages::Private*, const ushort*, int);
+    bool messages_insert_message(Messages::Private*, const ushort*, int, bool);
 };
 
 extern "C" {
@@ -831,9 +813,9 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::insert_message(const QString& body)
+bool Messages::insert_message(const QString& body, bool send_status)
 {
-    return messages_insert_message(m_d, body.utf16(), body.size());
+    return messages_insert_message(m_d, body.utf16(), body.size(), send_status);
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),

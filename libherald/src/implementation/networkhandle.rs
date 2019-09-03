@@ -93,11 +93,6 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn send_message(&self, message_body: String, to: String) -> bool {
-        if !self.connection_up() {
-            println!("you are literally not connected to the server.");
-            return false;
-        }
-
         let to = UserId::from(&to);
 
         let msg = MessageToServer::SendMsg {
@@ -165,7 +160,13 @@ impl NetworkHandle {
                         RequestMeta { .. } => unimplemented!(),
                         // request from the network thread to
                         // ack that a message has been received and or read
-                        ClientMessageAck { .. } => unimplemented!(),
+                        ClientMessageAck {
+                            to,
+                            update_code,
+                            message_id,
+                        } => {
+                            send_ack(to, update_code, message_id, &mut stream).unwrap();
+                        }
                     },
                     //Ok(HandleMessages::Shutdown) => unimplemented!(),
                     Err(_e) => {}

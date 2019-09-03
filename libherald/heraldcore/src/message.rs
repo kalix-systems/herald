@@ -34,6 +34,7 @@ impl Message {
         let recipient: String = row.get(2)?;
         let body: String = row.get(3)?;
         let timestamp: String = row.get(4)?;
+        let message_status: u32 = row.get(5)?;
 
         Ok(Message {
             message_id,
@@ -45,7 +46,7 @@ impl Message {
                     .expect("Failed to parse timestamp"),
                 Utc,
             ),
-            message_status: MessageStatus::NoAck,
+            message_status: MessageStatus::from(message_status),
         })
     }
 }
@@ -66,11 +67,8 @@ impl Messages {
         .format(DATE_FMT)
         .to_string();
 
-        println!("{}", timestamp);
         let body = body.to_sql()?;
-
         let db = Database::get()?;
-
         db.execute(
             include_str!("sql/message/add.sql"),
             &[
@@ -109,7 +107,7 @@ impl Messages {
 
     /// sets the message status of an item in the DB
     pub fn update_status(
-        conversation_id: &str,
+        _conversation_id: &str,
         row: i64,
         status: MessageStatus,
     ) -> Result<(), HErr> {
@@ -117,7 +115,7 @@ impl Messages {
         db.execute(
             include_str!("sql/message/update_status.sql"),
             &[
-                conversation_id.to_sql()?,
+                // conversation_id.to_sql()?,
                 row.to_sql()?,
                 (status as u32).to_sql()?,
             ],
@@ -229,5 +227,54 @@ mod tests {
         Messages::delete_conversation(recipient).unwrap();
 
         assert!(Messages::get_conversation(author).unwrap().is_empty());
+    }
+
+    #[test]
+    #[serial]
+    fn message_status_updates() {
+        Messages::drop_table().unwrap();
+        Messages::create_table().unwrap();
+
+        let author = "Hello";
+        let recipient = "World";
+        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+            .expect("Failed to add first message");
+
+        assert_eq!(
+            Messages::get_conversation(author).expect("failed to get conversation by author")[0]
+                .message_status,
+            MessageStatus::NoAck
+        );
+
+        let (row, body) = Messages::add_message(
+            author,
+            recipient,
+            "new",
+            None,
+            MessageStatus::RecipientReadAck,
+        )
+        .expect("Failed to add first message");
+
+        assert_eq!(
+            Messages::get_conversation(author).expect("failed to get conversation by author")[1]
+                .message_status,
+            MessageStatus::RecipientReadAck
+        );
+
+        Messages::update_status(recipient, row, MessageStatus::Timeout)
+            .expect("could not update status :");
+
+        assert_eq!(
+            Messages::get_conversation(author)
+                .expect("failed to get conversation by author, the second time")[0]
+                .message_status,
+            MessageStatus::NoAck
+        );
+        assert_eq!(
+            Messages::get_conversation(author)
+                .expect("failed to get conversation by author, the third time")[1]
+                .message_status,
+            MessageStatus::Timeout
+        );
     }
 }

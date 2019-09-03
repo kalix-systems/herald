@@ -3,7 +3,8 @@ SELECT
   author,
   recipient,
   body,
-  timestamp
+  timestamp,
+  send_status
 FROM
   messages
 WHERE
