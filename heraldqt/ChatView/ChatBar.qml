@@ -15,25 +15,20 @@ ToolBar {
         right: parent.right
     }
 
-
     Common.Avatar {
+       displayName : Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                        sideBar.contactData.name,
+                                        sideBar.contactData.rowCount(),"")
 
-        Connections {
-            target: sideBar.contactData
-            onDataChanged :{ //stutter and forced revaluation of all functions
-               chatBarAvatar.get = sideBar.contactData
-            }
-        }
+      colorHash : Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                     sideBar.contactData.color,
+                                     sideBar.contactData.rowCount(), 0)
 
-        property var valid_index: sideBar.contactData.hasIndex
-        property int currentIndex: sideBar.contactUi.currentIndex
-        property var get: sideBar.contactData
-
-        displayName: if(valid_index(currentIndex,0)) get.name(currentIndex)
-        colorHash: if(valid_index(currentIndex,0)) get.color(currentIndex)
-        pfpUrl: if(valid_index(currentIndex,0)) get.profile_picture(currentIndex)
-
+        pfpUrl: Utils.try_index_or(sideBar.contactUi.currentIndex,
+                                   sideBar.contactData.profile_picture,
+                                    sideBar.contactData.rowCount(),"")
         id: chatBarAvatar
+
         anchors.centerIn: parent
         size: QmlCfg.toolbarHeight - QmlCfg.margin
     }

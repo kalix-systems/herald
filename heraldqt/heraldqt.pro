@@ -16,12 +16,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 INCLUDEPATH += $$PWD/../libherald/qt_ffi
 
 SOURCES += \
-        ../libherald/qt_ffi/qmlconstants.cpp \
         main.cpp \
         $${PWD}/../libherald/qt_ffi/Bindings.cpp
 
-HEADERS += $${PWD}/../libherald/qt_ffi/Bindings.h \
-    ../libherald/qt_ffi/qmlconstants.h
+HEADERS += $${PWD}/../libherald/qt_ffi/Bindings.h
 
 # silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]

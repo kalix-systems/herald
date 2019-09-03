@@ -16,17 +16,6 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-        onNewMessageChanged: {
-            print("message received.")
-        }
-
-        onConnectionUpChanged: {
-            print("network up status is : ", connectionUp)
-        }
-
-        onConnectionPendingChanged: {
-            print("network pending status is : ", connectionPending)
-        }
     }
 
     Messages {
@@ -43,7 +32,6 @@ ApplicationWindow {
     }
 
     /// global configurations item
-    /// ToDo : implement login page logic here instead
     Config {
         id: config
         Component.onCompleted: {
@@ -68,6 +56,7 @@ ApplicationWindow {
             id: sideBar
         }
 
+        /// placeholder element
         ChatView {
             id: chatView
         }

@@ -70,7 +70,6 @@ Pane {
                                    return parent.right
                                }
                         rightMargin: chatScrollBar.width * 1.5
-                        leftMargin: anchors.rightMargin
                     }
 
                     CVUtils.ChatBubble {
@@ -79,9 +78,7 @@ Pane {
                                     } else {
                                         return 0
                                     }
-                        sendStatus: send_status
                         text: body
-
                     }
 
                  Component.onCompleted: chatScrollBar.position = 1.0
@@ -131,7 +128,8 @@ Pane {
                     if (text.trim().length === 0) {
                         return
                     }
-                    const result = networkHandle.send_message(text, messageModel.conversationId)
+                    var result = networkHandle.send_message(text,
+                                               messageModel.conversationId)
                     messageModel.insert_message(text, result)
                     chatScrollBar.position = 1.0
                     clear()
@@ -143,12 +141,12 @@ Pane {
         } /// Chat entry field
     } /// scroll area
 
-    states: [ State {
+    states: State {
         name: "visibleview"
         PropertyChanges {
             target: chatPane
             opacity: 100
             enabled: true
         }
-    } ]
+    }
 }

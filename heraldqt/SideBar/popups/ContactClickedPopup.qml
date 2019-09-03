@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.js" as Utils
 
-/// --- displays a list of contacts
+/// --- displays a list of  sideBar.contactData
 Item {
 
     property alias optionsMenu: optionsMenu
@@ -13,10 +13,12 @@ Item {
     FileDialog {
         id: pfpDialog
         onSelectionAccepted: {
-            var retCode = contactData.setProfile_picture(index, fileUrl)
+            var retCode =  sideBar.contactData.setProfile_picture(index, fileUrl)
             if (retCode) {
                 contactAvatar.pfpUrl = profile_picture
-            }
+                chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
+            } else
+                print("TODO: Error popup here...")
             close()
         }
     }
@@ -29,7 +31,7 @@ Item {
             onTriggered: {
                 if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
-                contactData.remove(index)
+                 sideBar.contactData.remove(index)
                 messageModel.clear_conversation_view()
             }
         }
@@ -47,7 +49,8 @@ Item {
             text: 'Clear Avatar'
             onTriggered: {
                 contactAvatar.pfpUrl = ""
-                contactData.setProfile_picture(index, "")
+                chatView.messageBar.chatBarAvatar.pfpUrl = ""
+                 sideBar.contactData.setProfile_picture(index, "")
             }
         }
     }
@@ -57,6 +60,10 @@ Item {
             return
         }
         name = entryField.text.trim()
+        print(contact_id, chatView.messageBar.contact_id)
+        if (contact_id === messageModel.conversationId) {
+            chatView.messageBar.chatBarAvatar.displayName = name
+        }
         entryField.clear()
         renameContactDialogue.close()
     }
