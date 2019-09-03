@@ -1,9 +1,13 @@
 use sodiumoxide::crypto::sign;
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct SecretKey(sign::SecretKey);
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct PublicKey(sign::PublicKey);
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct Signature(sign::Signature);
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct KeyPair {
     sec_key: SecretKey,
     pub_key: PublicKey,
@@ -27,31 +31,14 @@ impl KeyPair {
     }
 }
 
-pub struct Signed<'a> {
-    msg: &'a [u8],
-    signer: &'a PublicKey,
-    signature: Signature,
-}
-
 impl SecretKey {
-    fn sign(&self, msg: &[u8]) -> Signature {
+    pub fn sign(&self, msg: &[u8]) -> Signature {
         Signature(sign::sign_detached(msg, &self.0))
     }
 }
 
 impl PublicKey {
-    fn verify(&self, msg: &[u8], sig: &Signature) -> bool {
+    pub fn verify(&self, msg: &[u8], sig: &Signature) -> bool {
         sign::verify_detached(&sig.0, msg, &self.0)
-    }
-}
-
-impl KeyPair {
-    pub fn sign<'a>(&'a self, msg: &'a [u8]) -> Signed<'a> {
-        let signature = self.sec_key.sign(msg);
-        Signed {
-            msg,
-            signature,
-            signer: self.pub_key(),
-        }
     }
 }

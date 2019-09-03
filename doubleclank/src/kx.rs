@@ -1,7 +1,9 @@
 use sodiumoxide::crypto::kx;
 
+use crate::prelude::*;
 use crate::{kdf_chain::Chain, sym::Ciphertext};
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct KeyPair {
     sec_key: kx::SecretKey,
     pub_key: kx::PublicKey,
@@ -12,11 +14,20 @@ impl KeyPair {
         let (pub_key, sec_key) = kx::gen_keypair();
         KeyPair { sec_key, pub_key }
     }
+
+    pub fn pub_key(&self) -> &kx::PublicKey {
+        &self.pub_key
+    }
+
+    pub fn sec_key(&self) -> &kx::SecretKey {
+        &self.sec_key
+    }
 }
 
+#[cfg_attr(feature = "serde-support", derive(Serialize, Deserialize))]
 pub struct Session {
-    send_ratchet: Chain,
-    recv_ratchet: Chain,
+    pub send_ratchet: Chain,
+    pub recv_ratchet: Chain,
 }
 
 impl KeyPair {
@@ -38,11 +49,11 @@ impl KeyPair {
 }
 
 impl Session {
-    pub fn send_msg<'a>(&mut self, msg: &'a mut [u8]) -> Ciphertext<'a> {
+    pub fn send_msg(&mut self, msg: &[u8]) -> Ciphertext {
         self.send_ratchet.seal(msg)
     }
 
-    pub fn recv_msg<'a>(&mut self, msg: Ciphertext<'a>) -> Option<&'a mut [u8]> {
+    pub fn recv_msg(&mut self, msg: Ciphertext) -> Option<BytesMut> {
         self.recv_ratchet.open(msg)
     }
 }
