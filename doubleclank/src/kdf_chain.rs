@@ -31,8 +31,10 @@ pub struct Chain {
 }
 
 impl Chain {
-    pub fn new(key: ChainKey) -> Self {
-        Chain { key }
+    pub fn new(sess: kx::SessionKey) -> Self {
+        Chain {
+            key: ChainKey(secretbox::Key(sess.0)),
+        }
     }
 
     pub fn with_key<F, X>(&mut self, f: F) -> Option<X>
