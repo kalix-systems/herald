@@ -8,20 +8,34 @@ pub type DeviceId = usize;
 pub type RawMsg = Bytes;
 
 // the network status of a message
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
 pub enum MessageStatus {
     /// No ack from any third party
-    NoAck = 0,
+    NoAck,
     /// Received by the server, and made it to the user
-    ReceivedAck = 1,
+    ReceivedAck,
     /// Received by the recipient
-    RecpientReadAck = 2,
+    RecipientReadAck,
     /// The message has timedout.
-    Timeout = 3,
+    Timeout,
     /// we did not write this message
-    Inbound = 4,
+    Inbound,
     /// The user has read receipts turned off
-    AckTerminal = 5,
+    AckTerminal,
+}
+
+impl From<u32> for MessageStatus {
+    fn from(value: u32) -> MessageStatus {
+        match value {
+            0 => MessageStatus::NoAck,
+            1 => MessageStatus::ReceivedAck,
+            2 => MessageStatus::RecipientReadAck,
+            3 => MessageStatus::Timeout,
+            4 => MessageStatus::Inbound,
+            5 => MessageStatus::AckTerminal,
+            _ => panic!("not a valid message status")
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
