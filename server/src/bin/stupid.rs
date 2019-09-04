@@ -12,6 +12,7 @@ use failure::*;
 use herald_common::*;
 use serde::{Deserialize, Serialize};
 use std::ops::DerefMut;
+use std::convert::TryInto;
 use std::sync::Arc;
 use tokio::net;
 use tokio::prelude::*;
@@ -44,10 +45,10 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
         }
     }
 
-    pub async fn send_msg(&self, from: GlobalId, to: UserId, text: RawMsg) -> Result<(), Error> {
-        let wrapped = NewMessage {
+    pub async fn send_msg(&self, from: GlobalId, to: UserId, body: RawMsg) -> Result<(), Error> {
+        let wrapped = Push {
             from,
-            text,
+            body,
             time: Utc::now(),
         };
         let u = self
@@ -59,7 +60,7 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
         for d in 0..u.num_devices {
             let gid = GlobalId {
                 uid: to.clone(),
-                did: d,
+                did: d.try_into()?,
             };
             if let Some(mut s) = self.open.async_get_mut(gid.clone()).await {
                 let raw = serde_cbor::to_vec(&wrapped)?;
@@ -92,7 +93,7 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
                 Some(mut m) => {
                     let id = m.num_devices;
                     m.num_devices += 1;
-                    Response::DeviceRegistered(id)
+                    Response::DeviceRegistered(id.try_into()?)
                 }
                 None => Response::DataNotFound,
             }
@@ -111,14 +112,15 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     }
 
     pub async fn login(&self, gid: &GlobalId, writer: Sock) -> Result<(), Error> {
+        let device_id : usize = (gid.did + 1) as usize;
         if let Some(mut u) = self.meta.async_get_mut(gid.uid.clone()).await {
-            let devs = std::cmp::max(u.num_devices, gid.did + 1);
+            let devs = std::cmp::max(u.num_devices, device_id);
             u.num_devices = devs;
         } else {
             self.meta.insert(
                 gid.uid.clone(),
                 User {
-                    num_devices: gid.did + 1,
+                    num_devices: device_id,
                     blob: Bytes::new(),
                 },
             );
@@ -137,8 +139,8 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
 
     pub async fn handle_msg(&self, gid: &GlobalId, msg: MessageToServer) -> Result<(), Error> {
         let reply = match &msg {
-            SendMsg { to, text } => {
-                self.send_msg(gid.clone(), to.clone(), text.clone()).await?;
+            SendMsg { to, body } => {
+                self.send_msg(gid.clone(), to.clone(), body.clone()).await?;
                 None
             }
             RequestMeta { of } => Some(self.request_meta(of).await?),

@@ -85,7 +85,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let msg = MessageToServer::SendMsg {
             to,
-            text: message_body.into(),
+            body: message_body.into(),
         };
 
         match self.tx.send(HandleMessages::ToServer(msg)) {
@@ -139,8 +139,8 @@ impl NetworkHandle {
                 match rx.try_recv() {
                     Ok(HandleMessages::ToServer(message)) => match message {
                         // request from Qt to send a message
-                        SendMsg { to, text } => {
-                            send_message(to, text, &mut stream).unwrap();
+                        SendMsg { to, body } => {
+                            send_message(to, body, &mut stream).unwrap();
                         }
                         // request from Qt to register a device
                         RegisterDevice => unimplemented!(),
@@ -148,13 +148,6 @@ impl NetworkHandle {
                         RequestMeta { .. } => unimplemented!(),
                         // request from the network thread to
                         // ack that a message has been received and or read
-                        ClientMessageAck {
-                            to,
-                            update_code,
-                            message_id,
-                        } => {
-                            send_ack(to, update_code, message_id, &mut stream).unwrap();
-                        }
                     },
                     //Ok(HandleMessages::Shutdown) => unimplemented!(),
                     Err(_e) => {}

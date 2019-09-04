@@ -3,7 +3,7 @@ use crate::{
     errors::HErr,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::MessageStatus;
+use herald_common::{MessageStatus, TryFromPrimitive};
 use rusqlite::{ToSql, NO_PARAMS};
 static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
 
@@ -34,19 +34,22 @@ impl Message {
         let recipient: String = row.get(2)?;
         let body: String = row.get(3)?;
         let timestamp: String = row.get(4)?;
-        let message_status: u32 = row.get(5)?;
+        let message_status: u8 = row.get(5)?;
 
         Ok(Message {
             message_id,
             author,
             recipient,
             body,
-            timestamp: DateTime::from_utc(
-                NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
-                    .expect("Failed to parse timestamp"),
-                Utc,
-            ),
-            message_status.into(),
+            timestamp: match NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT) {
+                Ok(ts) => DateTime::from_utc(ts, Utc),
+                Err(e) => {
+                    eprintln!("Error parsing time stamp {}", e);
+                    Utc::now()
+                }
+            },
+            message_status: MessageStatus::try_from_primitive(message_status)
+                .unwrap_or(MessageStatus::NoAck),
         })
     }
 }
@@ -247,19 +250,19 @@ mod tests {
             MessageStatus::NoAck
         );
 
-        let (row, body) = Messages::add_message(
+        let (row, _) = Messages::add_message(
             author,
             recipient,
             "new",
             None,
-            MessageStatus::RecipientReadAck,
+            MessageStatus::RecipReceivedAck,
         )
         .expect("Failed to add first message");
 
         assert_eq!(
             Messages::get_conversation(author).expect("failed to get conversation by author")[1]
                 .message_status,
-            MessageStatus::RecipientReadAck
+            MessageStatus::RecipReceivedAck
         );
 
         Messages::update_status(recipient, row, MessageStatus::Timeout)

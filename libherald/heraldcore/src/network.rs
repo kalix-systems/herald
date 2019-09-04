@@ -1,6 +1,7 @@
 use crate::errors::HErr;
 use herald_common::{
-    ClientMessageAck, GlobalId, MessageStatus, MessageToClient, MessageToServer, RawMsg, UserId,
+    Body, ClientMessageAck, GlobalId, MessageStatus, MessageToClient, MessageToServer, RawMsg,
+    UserId,
 };
 use lazy_static::*;
 use serde::Serialize;
@@ -57,29 +58,30 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
     let msg = serde_cbor::from_slice(&buf)?;
 
     match msg {
-        MessageToClient::NewMessage { from, text, time } => {
-            let body = String::from_utf8(text.to_vec())
-                .map_err(|_| HErr::HeraldError("Bad string".into()))?;
-
-            let recipient = crate::config::Config::static_id()?;
-            let GlobalId { uid: from, .. } = from;
-
-            let (row, _) = crate::message::Messages::add_message(
-                from.to_string().as_str(),
-                recipient.as_str(),
-                body.as_str(),
-                Some(time),
-                MessageStatus::Inbound, //all messages are inbound
-            )?;
-
-            send_ack(from, MessageStatus::ReceivedAck, row, stream)?;
-        }
-        MessageToClient::ServerMessageAck {
-            from,
-            message_id,
-            update_code,
-        } => {
-            crate::message::Messages::update_status(&from.uid, message_id, update_code)?;
+        MessageToClient::Push { from, body, time } => {
+            match serde_cbor::de::from_slice(&body) {
+                Ok(Body::Message(body)) => {
+                    let recipient = crate::config::Config::static_id()?;
+                    let GlobalId { uid: from, .. } = from;
+                    let (row, _) = crate::message::Messages::add_message(
+                        from.to_string().as_str(),
+                        recipient.as_str(),
+                        body.as_str(),
+                        Some(time),
+                        MessageStatus::Inbound, //all messages are inbound
+                    )?;
+                    send_ack(from, MessageStatus::RecipReceivedAck, row, stream)?;
+                }
+                Ok(Body::Ack(ClientMessageAck {
+                    update_code,
+                    message_id,
+                })) => crate::message::Messages::update_status(
+                    from.uid.to_string().as_str(),
+                    message_id,
+                    update_code,
+                )?,
+                Err(e) => eprintln!("Error decoding new message {}", e),
+            };
         }
         _ => unimplemented!(),
     }
@@ -95,7 +97,7 @@ pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
 
     let msg = MessageToServer::SendMsg {
         to: user_id.clone(),
-        text: RawMsg::from(""),
+        body: serde_cbor::ser::to_vec(&Body::Message(String::from("")))?.into(),
     };
 
     send_to_server(&gid, stream)?;
@@ -117,9 +119,8 @@ pub fn login(stream: &mut TcpStream) -> Result<(), HErr> {
 }
 
 /// Sends message to server.
-pub fn send_message(to: UserId, text: RawMsg, stream: &mut TcpStream) -> Result<(), HErr> {
-    let msg = MessageToServer::SendMsg { to, text };
-
+pub fn send_message(to: UserId, body: RawMsg, stream: &mut TcpStream) -> Result<(), HErr> {
+    let msg = MessageToServer::SendMsg { to, body };
     send_to_server(&msg, stream)?;
     Ok(())
 }
@@ -138,9 +139,10 @@ pub fn send_ack(
 
     let msg = MessageToServer::SendMsg {
         to,
-        text: serde_cbor::to_vec(&ack)?.into(),
+        body: serde_cbor::to_vec(&ack)?.into(),
     };
-    send_to_server(&ack, stream)?;
+
+    send_to_server(&msg, stream)?;
     Ok(())
 }
 
