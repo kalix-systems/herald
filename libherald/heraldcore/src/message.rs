@@ -46,7 +46,7 @@ impl Message {
                     .expect("Failed to parse timestamp"),
                 Utc,
             ),
-            message_status: MessageStatus::from(message_status),
+            message_status.into(),
         })
     }
 }

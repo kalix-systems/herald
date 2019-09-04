@@ -1,15 +1,15 @@
+pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
 use serde::{Deserialize, Serialize};
-pub use arrayvec::CapacityError;
 
 pub type UserId = String;
 pub type DeviceId = usize;
 pub type RawMsg = Bytes;
 
-
 // the network status of a message
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[repr(u8)]
 pub enum MessageStatus {
     /// No ack from any third party
     NoAck,
@@ -25,20 +25,6 @@ pub enum MessageStatus {
     AckTerminal,
 }
 
-impl From<u32> for MessageStatus {
-    fn from(value: u32) -> MessageStatus {
-        match value {
-            0 => MessageStatus::NoAck,
-            1 => MessageStatus::ReceivedAck,
-            2 => MessageStatus::RecipientReadAck,
-            3 => MessageStatus::Timeout,
-            4 => MessageStatus::Inbound,
-            5 => MessageStatus::AckTerminal,
-            _ => panic!("not a valid message status")
-        }
-    }
-}
-
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct User {
     pub num_devices: usize,
@@ -52,14 +38,15 @@ pub struct GlobalId {
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct ClientMessageAck {
+    update_code: MessageStatus,
+    message_id: i64,
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
     SendMsg { to: UserId, text: RawMsg },
     RequestMeta { of: UserId },
-    ClientMessageAck {
-        to: UserId,
-        update_code: MessageStatus,
-        message_id: i64,// currently just acks with the row in the DB... change this
-    },
     UpdateBlob { blob: Bytes },
     RegisterDevice,
 }
@@ -74,7 +61,7 @@ pub enum MessageToClient {
     ServerMessageAck {
         from: GlobalId,
         update_code: MessageStatus,
-        message_id: i64,// currently just acks with the row in the DB... change this
+        message_id: i64, // currently just acks with the row in the DB... change this
     },
     QueryResponse {
         res: Response,

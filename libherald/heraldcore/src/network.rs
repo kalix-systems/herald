@@ -1,5 +1,7 @@
 use crate::errors::HErr;
-use herald_common::{GlobalId, MessageStatus, MessageToClient, MessageToServer, RawMsg, UserId};
+use herald_common::{
+    ClientMessageAck, GlobalId, MessageStatus, MessageToClient, MessageToServer, RawMsg, UserId,
+};
 use lazy_static::*;
 use serde::Serialize;
 use std::{
@@ -129,10 +131,14 @@ pub fn send_ack(
     message_id: i64,
     stream: &mut TcpStream,
 ) -> Result<(), HErr> {
-    let ack = MessageToServer::ClientMessageAck {
-        to,
+    let ack = ClientMessageAck {
         update_code,
         message_id,
+    };
+
+    let msg = MessageToServer::SendMsg {
+        to,
+        text: serde_cbor::to_vec(&ack)?.into(),
     };
     send_to_server(&ack, stream)?;
     Ok(())
