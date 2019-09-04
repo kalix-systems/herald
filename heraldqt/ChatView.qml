@@ -102,10 +102,19 @@ Pane {
         }
         height: Math.min(contentHeight, 100)
 
+        //highlight border
+        onFocusChanged: {
+            if (focus) { chatText.background.border.width = 2 }
+            else {chatText.background.border.width = 0 }
+        }
+
         TextArea {
             id: chatText
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
+                border.color: QmlCfg.palette.tertiaryColor
+                border.width: 0
+
                 anchors {
                     fill: parent
                     margins: QmlCfg.margin / 2
