@@ -44,30 +44,117 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
         }
     }
 
-    // TODO implement this
-    #[allow(unused_variables)]
-    pub async fn send_msg(&self, to: UserId, msg: MessageToClient) -> Result<(), Error> {
+    pub async fn send_msg(&self, from: GlobalId, to: UserId, text: RawMsg) -> Result<(), Error> {
+        let wrapped = NewMessage {
+            from,
+            text,
+            time: Utc::now(),
+        };
         let u = self
             .meta
             .async_get(to.clone())
             .await
             .ok_or(format_err!("couldn't find user {}", to.clone()))?;
+
         for d in 0..u.num_devices {
             let gid = GlobalId {
                 uid: to.clone(),
                 did: d,
             };
             if let Some(mut s) = self.open.async_get_mut(gid.clone()).await {
-                let raw = serde_cbor::to_vec(&msg)?;
+                let raw = serde_cbor::to_vec(&wrapped)?;
                 let len = u64::to_le_bytes(raw.len() as u64);
                 s.write_all(&len).await?;
                 s.write_all(&raw).await?;
             } else if let Some(q) = self.pending.async_get(gid.clone()).await {
                 // TODO: consider removing cloning here?
-                q.push(msg.clone());
+                q.push(wrapped.clone());
             } else {
                 let q = self.pending.get_or_insert_with(&gid, || SegQueue::new());
-                q.push(msg.clone());
+                q.push(wrapped.clone());
+            }
+        }
+        Ok(())
+    }
+
+    pub async fn request_meta(&self, of: &UserId) -> Result<Response, Error> {
+        try {
+            match self.meta.async_get(of.clone()).await {
+                Some(m) => Response::Meta(m.clone()),
+                None => Response::DataNotFound,
+            }
+        }
+    }
+
+    pub async fn register_device(&self, uid: UserId) -> Result<Response, Error> {
+        try {
+            match self.meta.async_get_mut(uid).await {
+                Some(mut m) => {
+                    let id = m.num_devices;
+                    m.num_devices += 1;
+                    Response::DeviceRegistered(id)
+                }
+                None => Response::DataNotFound,
+            }
+        }
+    }
+
+    pub async fn update_blob(&self, uid: UserId, blob: Bytes) -> Result<(), Error> {
+        if let Some(mut u) = self.meta.async_get_mut(uid.clone()).await {
+            u.blob = blob;
+        } else {
+            eprintln!("user tried to set blob but found no metadata");
+            eprintln!("this should never happen");
+            eprintln!("uid was {}", uid);
+        }
+        Ok(())
+    }
+
+    pub async fn login(&self, gid: &GlobalId, writer: Sock) -> Result<(), Error> {
+        if let Some(mut u) = self.meta.async_get_mut(gid.uid.clone()).await {
+            let devs = std::cmp::max(u.num_devices, gid.did + 1);
+            u.num_devices = devs;
+        } else {
+            self.meta.insert(
+                gid.uid.clone(),
+                User {
+                    num_devices: gid.did + 1,
+                    blob: Bytes::new(),
+                },
+            );
+        }
+        self.open.insert(gid.clone(), writer);
+        if let Some((_, p)) = self.pending.remove(&gid) {
+            if let Some(mut w) = self.open.async_get_mut(gid.clone()).await {
+                while !p.is_empty() {
+                    let msg = p.pop()?;
+                    send_datagram(w.deref_mut(), &msg).await?;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub async fn handle_msg(&self, gid: &GlobalId, msg: MessageToServer) -> Result<(), Error> {
+        let reply = match &msg {
+            SendMsg { to, text } => {
+                self.send_msg(gid.clone(), to.clone(), text.clone()).await?;
+                None
+            }
+            RequestMeta { of } => Some(self.request_meta(of).await?),
+            RegisterDevice => Some(self.register_device(gid.uid.clone()).await?),
+            UpdateBlob { blob } => {
+                self.update_blob(gid.uid.clone(), blob.clone()).await?;
+                None
+            }
+        };
+        if let Some(res) = reply {
+            let wrapped = QueryResponse {
+                res,
+                query: msg.clone(),
+            };
+            if let Some(mut w) = self.open.async_get_mut(gid.clone()).await {
+                send_datagram(w.deref_mut(), &wrapped).await?;
             }
         }
         Ok(())
@@ -110,99 +197,14 @@ async fn main() {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
                 let gid: GlobalId = read_datagram(&mut reader).await?;
-                state.open.insert(gid.clone(), writer);
-                if let Some(mut u) = state.meta.async_get_mut(gid.uid.clone()).await {
-                    let devs = std::cmp::max(u.num_devices, gid.did + 1);
-                    u.num_devices = devs;
-                } else {
-                    state.meta.insert(
-                        gid.uid.clone(),
-                        User {
-                            num_devices: gid.did + 1,
-                            blob: Bytes::new(),
-                        },
-                    );
-                }
-                if let Some((_, p)) = state.pending.remove(&gid) {
-                    if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
-                        while !p.is_empty() {
-                            let msg = p.pop()?;
-                            send_datagram(w.deref_mut(), &msg).await?;
-                        }
-                    }
-                }
+                state.login(&gid, writer).await?;
                 loop {
                     let d = read_datagram(&mut reader).await;
                     if let Err(e) = d {
                         eprintln!("invalid msg from addr {}, error was {:?}", addr, e);
                         break;
                     };
-                    match d.unwrap() {
-                        SendMsg { to, text } => {
-                            println!(" Message received {} , text: {:?}", to, text);
-                            state
-                                .send_msg(
-                                    to,
-                                    NewMessage {
-                                        from: gid.clone(),
-                                        text: text,
-                                        time: Utc::now(),
-                                    },
-                                )
-                                .await?
-                        }
-                        RequestMeta { of } => {
-                            let reply = match state.meta.async_get(of.clone()).await {
-                                Some(m) => Response::Meta(m.clone()),
-                                None => Response::DataNotFound,
-                            };
-                            let msg = QueryResponse {
-                                res: reply,
-                                query: RequestMeta { of },
-                            };
-                            if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
-                                send_datagram(w.deref_mut(), &msg).await?;
-                            }
-                        }
-                        RegisterDevice => {
-                            let reply = match state.meta.async_get_mut(gid.uid.clone()).await {
-                                Some(mut m) => {
-                                    let id = m.num_devices;
-                                    m.num_devices += 1;
-                                    Response::DeviceRegistered(id)
-                                }
-                                None => Response::DataNotFound,
-                            };
-                            let msg = MessageToClient::QueryResponse {
-                                res: reply,
-                                query: RegisterDevice,
-                            };
-                            if let Some(mut w) = state.open.async_get_mut(gid.clone()).await {
-                                send_datagram(w.deref_mut(), &msg).await?;
-                            }
-                        }
-                        UpdateBlob { blob } => {
-                            if let Some(mut u) = state.meta.async_get_mut(gid.uid.clone()).await {
-                                u.blob = blob;
-                            } else {
-                                eprintln!("user tried to set blob but found no metadata");
-                                eprintln!("this should never happen");
-                                eprintln!("uid was {}, device {}", gid.uid, gid.did);
-                            }
-                        }
-                        ClientMessageAck {
-                            to,
-                            update_code,
-                            message_id,
-                        } => {
-                            let msg = MessageToClient::ServerMessageAck {
-                                from: gid.clone(),
-                                update_code,
-                                message_id,
-                            };
-                            state.send_msg(to, msg).await?;
-                        }
-                    }
+                    state.handle_msg(&gid, d.unwrap()).await?;
                 }
                 dbg!("closing connection with {}", &gid);
                 state.open.remove(&gid);

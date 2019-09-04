@@ -58,11 +58,7 @@ pub enum MessageToClient {
         text: RawMsg,
         time: DateTime<Utc>,
     },
-    ServerMessageAck {
-        from: GlobalId,
-        update_code: MessageStatus,
-        message_id: i64, // currently just acks with the row in the DB... change this
-    },
+
     QueryResponse {
         res: Response,
         query: MessageToServer,
