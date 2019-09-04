@@ -33,6 +33,7 @@ Popup {
 
         FileDialog {
             id: cfgPfp
+            folder: shortcuts.home
             property bool pfpValid: true
             onSelectionAccepted: {
                 config.profile_picture = profile_picture

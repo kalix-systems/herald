@@ -12,6 +12,7 @@ Item {
 
     FileDialog {
         id: pfpDialog
+        folder: shortcuts.home
         onSelectionAccepted: {
             var retCode =  contacts.setProfile_picture(index, fileUrl)
             if (retCode) {
