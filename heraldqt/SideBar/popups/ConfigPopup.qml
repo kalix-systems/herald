@@ -36,8 +36,8 @@ Popup {
             folder: shortcuts.home
             property bool pfpValid: true
             onSelectionAccepted: {
-                config.profile_picture = profile_picture
-                print("No PFP api right now")
+                config.profile_picture = fileUrl
+                print("set to", fileUrl)
             }
         }
 

@@ -2,11 +2,15 @@ use crate::interface::*;
 use heraldcore::{
     contact::{self, Contacts as Core},
     db::DBTable,
+    utils::SearchPattern,
 };
+
 use im_rc::vector::Vector as ImVector;
+
 #[derive(Clone)]
 struct ContactsItem {
     inner: contact::Contact,
+    visible: bool,
 }
 
 pub struct Contacts {
@@ -23,7 +27,13 @@ impl ContactsTrait for Contacts {
         }
 
         let list = match Core::all() {
-            Ok(v) => v.into_iter().map(|c| ContactsItem { inner: c }).collect(),
+            Ok(v) => v
+                .into_iter()
+                .map(|c| ContactsItem {
+                    inner: c,
+                    visible: true,
+                })
+                .collect(),
             Err(_) => ImVector::new(),
         };
         Contacts { emit, model, list }
@@ -48,7 +58,9 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns `false` on failure.
     fn add(&mut self, id: String) -> bool {
-        assert!(id.len() < 256);
+        if id.len() > 256 {
+            return false;
+        }
 
         if let Err(e) = Core::add(id.as_str(), None, None, None) {
             eprintln!("Error: {}", e);
@@ -58,6 +70,7 @@ impl ContactsTrait for Contacts {
         self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem {
             inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
+            visible: true,
         });
         self.model.end_insert_rows();
         true
@@ -154,6 +167,15 @@ impl ContactsTrait for Contacts {
         true
     }
 
+    fn visible(&self, row_index: usize) -> bool {
+        self.list[row_index].visible
+    }
+
+    fn set_visible(&mut self, row_index: usize, value: bool) -> bool {
+        self.list[row_index].visible = value;
+        true
+    }
+
     /// Removes a contact, returns a boolean to indicate success.
     fn remove(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
@@ -171,6 +193,46 @@ impl ContactsTrait for Contacts {
                 false
             }
         }
+    }
+
+    fn filter(&mut self, pattern: String, regex: bool) -> bool {
+        let pattern = if regex {
+            match SearchPattern::new_regex(pattern) {
+                Ok(pat) => pat,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    return false;
+                }
+            }
+        } else {
+            match SearchPattern::new_normal(pattern) {
+                Ok(pat) => pat,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    return false;
+                }
+            }
+        };
+
+        for contact in self.list.iter_mut() {
+            let name = match contact.inner.name.as_ref() {
+                Some(name) => name,
+                None => return false,
+            };
+
+            if !(pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str())) {
+                contact.visible = false;
+            }
+        }
+        self.model.data_changed(0, self.list.len());
+        false
+    }
+
+    fn clear_filter(&mut self) {
+        for contact in self.list.iter_mut() {
+            contact.visible = true;
+        }
+        self.model.data_changed(0, self.list.len());
     }
 
     fn emit(&mut self) -> &mut ContactsEmitter {

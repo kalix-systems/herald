@@ -1,4 +1,4 @@
-use crate::errors::*;
+use crate::{errors::*, utils::SearchPattern};
 use lazy_static::*;
 use rusqlite::Connection;
 use std::{
@@ -38,16 +38,39 @@ impl DerefMut for Database {
 }
 
 impl Database {
-    /// Establish connection with canonical database.
-    #[allow(dead_code)]
-    pub(crate) fn default() -> Database {
-        Self::new(DB_PATH).expect("Failed to initialize database connection")
-    }
-
     /// Connect to database at path `P`.
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
-            Ok(conn) => Ok(Database(conn)),
+            Ok(conn) => {
+                // `NormalPattern`
+                conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
+                    let pattern = ctx.get::<String>(0)?;
+                    let value = ctx.get::<String>(1)?;
+
+                    let re = match SearchPattern::new_normal(pattern) {
+                        Ok(SearchPattern::Normal(re)) => re,
+                        _ => return Ok(false),
+                    };
+
+                    Ok(re.is_match(value.as_str()))
+                })?;
+
+                // `RegexPattern`
+                conn.create_scalar_function("regex_pattern", 2, true, |ctx| {
+                    let pattern = ctx.get::<String>(0)?;
+                    let value = ctx.get::<String>(1)?;
+
+                    let re = match SearchPattern::new_regex(pattern) {
+                        Ok(SearchPattern::Regex(re)) => re,
+                        _ => return Ok(false),
+                    };
+
+                    Ok(re.is_match(value.as_str()))
+                })?;
+
+                let db = Database(conn);
+                Ok(db)
+            }
             Err(e) => Err(e.into()),
         }
     }
@@ -56,7 +79,13 @@ impl Database {
 impl Default for Database {
     /// Establish connection with canonical database.
     fn default() -> Self {
-        Self::new(DB_PATH).expect("Failed to open database")
+        match Self::new(DB_PATH) {
+            Ok(db) => db,
+            Err(e) => {
+                eprintln!("Failed to open database, aborting: {}", e);
+                std::process::abort();
+            }
+        }
     }
 }
 

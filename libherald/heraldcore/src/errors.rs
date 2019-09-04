@@ -1,5 +1,6 @@
 use herald_common::CapacityError;
 use image;
+use regex;
 use std::{fmt, sync::PoisonError};
 
 #[derive(Debug)]
@@ -9,8 +10,9 @@ pub enum HErr {
     MutexError(String),
     InvalidUserId(String),
     IoError(std::io::Error),
-    ImageError(String),
+    ImageError(image::ImageError),
     SerializationError(String),
+    RegexError(regex::Error),
 }
 
 impl fmt::Display for HErr {
@@ -24,6 +26,7 @@ impl fmt::Display for HErr {
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
             SerializationError(s) => write!(f, "SerializationError: {}", s),
+            RegexError(e) => write!(f, "RegexError: {}", e),
         }
     }
 }
@@ -59,8 +62,14 @@ impl From<image::ImageError> for HErr {
         use image::ImageError;
         match e {
             ImageError::IoError(e) => e.into(),
-            e => HErr::ImageError(e.to_string()),
+            e => HErr::ImageError(e),
         }
+    }
+}
+
+impl From<regex::Error> for HErr {
+    fn from(e: regex::Error) -> Self {
+        HErr::RegexError(e)
     }
 }
 
