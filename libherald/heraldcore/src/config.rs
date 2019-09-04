@@ -122,14 +122,11 @@ impl Config {
         let id = self.id()?;
 
         self.profile_picture = match profile_picture {
-            Some(path) => {
-                let path =
-                    image_utils::save_profile_picture(id, path, self.profile_picture.clone())?
-                        .into_os_string()
-                        .into_string()?;
-
-                Some(path)
-            }
+            Some(path) => Some(
+                image_utils::save_profile_picture(id, path, self.profile_picture.clone())?
+                    .into_os_string()
+                    .into_string()?,
+            ),
             None => {
                 if let Some(old_pic) = &self.profile_picture {
                     std::fs::remove_file(old_pic)?;
