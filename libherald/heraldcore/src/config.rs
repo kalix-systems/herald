@@ -137,8 +137,13 @@ impl Config {
 
         let path = self.profile_picture.as_ref().map(|s| s.as_str());
 
+        println!("setting path {:?}", path);
+
         let db = Database::get()?;
-        db.execute(include_str!("sql/config/update_name.sql"), &[path])?;
+        db.execute(
+            include_str!("sql/config/update_profile_picture.sql"),
+            &[path],
+        )?;
 
         Ok(())
     }

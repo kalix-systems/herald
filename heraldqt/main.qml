@@ -16,7 +16,6 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-
     }
 
     Popups.ConfigPopup {
