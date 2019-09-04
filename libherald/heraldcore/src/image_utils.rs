@@ -27,7 +27,9 @@ where
     std::fs::create_dir_all(PROFILE_PICTURE)?;
 
     if let Some(old_path) = old_path {
-        std::fs::remove_file(old_path).expect("failed to remove");
+        if let Err(e) = std::fs::remove_file(old_path) {
+            eprintln!("{}", e);
+        }
     }
 
     let image_path = profile_picture_path(id);

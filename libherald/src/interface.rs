@@ -390,6 +390,8 @@ pub trait ContactsTrait {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Self;
     fn emit(&mut self) -> &mut ContactsEmitter;
     fn add(&mut self, id: String) -> bool;
+    fn clear_filter(&mut self) -> ();
+    fn filter(&mut self, pattern: String, regex: bool) -> bool;
     fn remove(&mut self, row_index: u64) -> bool;
     fn remove_all(&mut self) -> ();
     fn row_count(&self) -> usize;
@@ -409,6 +411,8 @@ pub trait ContactsTrait {
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
     fn profile_picture(&self, index: usize) -> Option<&str>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
+    fn visible(&self, index: usize) -> bool;
+    fn set_visible(&mut self, index: usize, _: bool) -> bool;
 }
 
 #[no_mangle]
@@ -460,6 +464,22 @@ pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, id_str: *const c_ushor
     set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
     let r = o.add(id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_clear_filter(ptr: *mut Contacts) -> () {
+    let o = &mut *ptr;
+    let r = o.clear_filter();
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_filter(ptr: *mut Contacts, pattern_str: *const c_ushort, pattern_len: c_int, regex: bool) -> bool {
+    let mut pattern = String::new();
+    set_string_from_utf16(&mut pattern, pattern_str, pattern_len);
+    let o = &mut *ptr;
+    let r = o.filter(pattern, regex);
     r
 }
 
@@ -604,6 +624,20 @@ pub unsafe extern "C" fn contacts_set_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contacts, row: c_int) -> bool {
     (&mut *ptr).set_profile_picture(to_usize(row), None)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_visible(ptr: *const Contacts, row: c_int) -> bool {
+    let o = &*ptr;
+    o.visible(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_visible(
+    ptr: *mut Contacts, row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_visible(to_usize(row), v)
 }
 
 pub struct MessagesQObject {}

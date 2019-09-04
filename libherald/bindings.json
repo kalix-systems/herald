@@ -58,6 +58,10 @@
                 "archive_status": {
                     "write": true,
                     "type": "bool"
+                },
+                "visible": {
+                    "write": true,
+                    "type": "bool"
                 }
             },
             "functions": {
@@ -82,6 +86,24 @@
                     ]
                 },
                 "remove_all": {
+                    "mut": true,
+                    "return": "void"
+                },
+                "filter": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "pattern",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "regex",
+                            "type": "bool"
+                        }
+                    ]
+                },
+                "clear_filter": {
                     "mut": true,
                     "return": "void"
                 }

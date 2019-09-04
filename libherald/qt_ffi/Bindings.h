@@ -59,6 +59,8 @@ public:
     explicit Contacts(QObject *parent = nullptr);
     ~Contacts();
     Q_INVOKABLE bool add(const QString& id);
+    Q_INVOKABLE void clear_filter();
+    Q_INVOKABLE bool filter(const QString& pattern, bool regex);
     Q_INVOKABLE bool remove(quint64 row_index);
     Q_INVOKABLE void remove_all();
 
@@ -88,6 +90,8 @@ public:
     Q_INVOKABLE bool setName(int row, const QString& value);
     Q_INVOKABLE QString profile_picture(int row) const;
     Q_INVOKABLE bool setProfile_picture(int row, const QString& value);
+    Q_INVOKABLE bool visible(int row) const;
+    Q_INVOKABLE bool setVisible(int row, bool value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
