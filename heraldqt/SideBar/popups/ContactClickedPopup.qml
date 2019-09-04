@@ -30,10 +30,10 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             onTriggered: {
-                if (contact_id === messageModel.conversationId)
+                if (contact_id === chatView.messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
                 contacts.remove(index)
-                messageModel.clear_conversation_view()
+                chatView.messageModel.clear_conversation_view()
             }
         }
         MenuItem {
