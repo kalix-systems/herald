@@ -128,6 +128,7 @@ Pane {
                     }
                     var result = networkHandle.send_message(text,
                                                messageModel.conversationId)
+                    print("The send status : ", result)
                     messageModel.insert_message(text, result)
                     chatScrollBar.position = 1.0
                     clear()

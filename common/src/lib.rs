@@ -47,6 +47,7 @@ pub struct ClientMessageAck {
     pub update_code: MessageStatus,
     pub message_id: i64,
 }
+
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum Body {
     Message(String),
