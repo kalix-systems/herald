@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- id of message author
   author TEXT NOT NULL,
   -- id of conversation
-  conversation TEXT NOT NULL,
+  conversation BLOB NOT NULL,
   -- timestamp associated with message
   timestamp TEXT NOT NULL,
   -- read and delivery status of message
@@ -14,5 +14,5 @@ CREATE TABLE IF NOT EXISTS messages (
   -- message id of message being replied to
   op INTEGER DEFAULT NULL,
   FOREIGN KEY(conversation) REFERENCES conversations(conversation_id),
-  FOREIGN KEY(author) REFERENCES contacts(contact_id)
+  FOREIGN KEY(author) REFERENCES contacts(user_id)
 )

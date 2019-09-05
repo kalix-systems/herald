@@ -19,5 +19,5 @@ pub mod message;
 /// Utils
 pub mod utils;
 
-/// Networking
-pub mod network;
+///// Networking
+//pub mod network;

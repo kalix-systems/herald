@@ -337,6 +337,7 @@ impl Contact {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     #[test]
@@ -358,6 +359,7 @@ mod tests {
     #[serial]
     fn add_contact() {
         Contacts::reset().unwrap();
+        Conversations::reset().unwrap();
 
         let id1 = "Hello";
         let id2 = "World";
@@ -380,7 +382,7 @@ mod tests {
 
         Contacts::delete(id1).expect("Failed to delete contact");
 
-        assert!(Contacts::name(id1).is_err());
+        assert!(Contacts::name(id1).unwrap().is_none());
         assert!(Contacts::name(id2).is_ok());
     }
 
