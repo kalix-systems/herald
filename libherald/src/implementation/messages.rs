@@ -58,6 +58,9 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<String>) {
+        if self.conversation_id == conversation_id {
+            return;
+        }
         println!("Setting conversation_id to: {:?}", conversation_id);
         self.conversation_id = conversation_id;
 
@@ -86,7 +89,8 @@ impl MessagesTrait for Messages {
                 "Inserted {} messages with {}",
                 self.list.len(),
                 conversation_id
-            )
+            );
+            self.emit.conversation_id_changed();
         }
     }
 

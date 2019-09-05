@@ -12,6 +12,10 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
+                onConversationIdChanged: {
+                    print(
+                               "convo ID changed exterior")
+                }
     }
 
     CVUtils.ChatBar {
@@ -103,6 +107,30 @@ Pane {
     Button {
         id: attachmentsButton
         anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: QmlCfg.margin / 2
+        anchors.rightMargin: QmlCfg.margin / 2
+        height: 25
+        width: height
+        background: Image {
+            source: "qrc:///icons/paperclip.png"
+            height: width
+            scale: 0.9
+            mipmap: true
+        }
+        onClicked: {
+            attachmentsDialogue.open()
+        }
+    }
+
+    Button {
+        id: emojiMenuButton
+        anchors {
+            right: parent.left
+            left: parent.right
+        }
+
+
         anchors.bottom: parent.bottom
         anchors.bottomMargin: QmlCfg.margin / 2
         anchors.rightMargin: QmlCfg.margin / 2
