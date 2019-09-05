@@ -113,6 +113,7 @@ Pane {
             height: width
             scale: 0.9
             mipmap: true
+            z: -100
         }
         onClicked: {
             attachmentsDialogue.open()
@@ -154,6 +155,8 @@ Pane {
                 }
                 radius: QmlCfg.radius
             }
+            selectByKeyboard: true
+            selectByMouse: true
             padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."

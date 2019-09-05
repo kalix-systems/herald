@@ -23,11 +23,12 @@ Row {
         radius: QmlCfg.radius
         width: bubbleText.width + QmlCfg.margin
         height: bubbleText.height + QmlCfg.margin
-        Label {
+        TextEdit {
             id: bubbleText
+            selectByMouse: true
+            readOnly: true
             text: messageMetrics.text
             wrapMode: Text.Wrap
-
             width: JS.calculate_width(chatPane.width, messageMetrics.width)
             anchors.centerIn: bubble
         }
