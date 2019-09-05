@@ -77,6 +77,16 @@ impl Database {
             Err(e) => Err(e.into()),
         }
     }
+
+    #[allow(dead_code)]
+    pub(crate) fn reset_all() -> Result<(), HErr> {
+        crate::message::Messages::reset()?;
+        crate::contact::Contacts::reset()?;
+        crate::config::Config::reset()?;
+        crate::conversation::Members::reset()?;
+        crate::conversation::Conversations::reset()?;
+        Ok(())
+    }
 }
 
 impl Default for Database {

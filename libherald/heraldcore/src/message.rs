@@ -1,6 +1,7 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    utils::ConversationId,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
 use rusqlite::{ToSql, NO_PARAMS};
@@ -34,7 +35,7 @@ pub struct Message {
     /// Author user id
     pub author: String,
     /// Recipient user id
-    pub conversation: String,
+    pub conversation: ConversationId,
     /// Body of message
     pub body: String,
     /// Time the message was sent or received at the server.
@@ -49,7 +50,7 @@ impl Message {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         let message_id: i64 = row.get(0)?;
         let author: String = row.get(1)?;
-        let conversation: String = row.get(2)?;
+        let conversation: Vec<u8> = row.get(2)?;
         let body: String = row.get(3)?;
         let op: Option<i64> = row.get(4)?;
         let timestamp: String = row.get(5)?;
@@ -76,7 +77,7 @@ impl Messages {
     /// Adds a message to the database.
     pub fn add_message(
         author: &str,
-        conversation: &str,
+        conversation: &ConversationId,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
         op: Option<i64>,
@@ -116,7 +117,7 @@ impl Messages {
     }
 
     /// Get all messages with `user_id` as author or recipient.
-    pub fn get_conversation(id: &str) -> Result<Vec<Message>, HErr> {
+    pub fn get_conversation(id: &ConversationId) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation.sql"))?;
@@ -131,7 +132,7 @@ impl Messages {
     }
 
     /// Deletes all messages in a conversation.
-    pub fn delete_conversation(conversation_id: &str) -> Result<(), HErr> {
+    pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/delete_conversation.sql"),
@@ -165,72 +166,97 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{contact::Contacts, conversation::Conversations, db::Database};
     use serial_test_derive::serial;
+
+    use womp::*;
 
     #[test]
     #[serial]
     fn create_drop_exists() {
         // drop twice, it shouldn't panic on multiple drops
-        Messages::drop_table().unwrap();
-        Messages::drop_table().unwrap();
+        Messages::drop_table().expect(womp!());
+        Messages::drop_table().expect(womp!());
 
-        Messages::create_table().unwrap();
-        assert!(Messages::exists().unwrap());
-        Messages::create_table().unwrap();
-        assert!(Messages::exists().unwrap());
-        Messages::drop_table().unwrap();
-        assert!(!Messages::exists().unwrap());
+        Messages::create_table().expect(womp!());
+        assert!(Messages::exists().expect(womp!()));
+        Messages::create_table().expect(womp!());
+        assert!(Messages::exists().expect(womp!()));
+        Messages::drop_table().expect(womp!());
+        assert!(!Messages::exists().expect(womp!()));
     }
 
     #[test]
     #[serial]
     fn add_and_get() {
-        Messages::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        let conversation = "World";
-        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
-            .expect("Failed to add first message");
-        Messages::add_message(author, conversation, "2", None, None, MessageStatus::NoAck)
-            .expect("Failed to add second message");
+        Contacts::add(author, None, None, None).expect(womp!());
 
-        let v1 =
-            Messages::get_conversation(conversation).expect("Failed to get conversation by author");
+        let conversation = vec![0; 32];
+        Conversations::add_conversation(Some(&conversation), None)
+            .expect(womp!("Failed to create conversation"));
+
+        Messages::add_message(author, &conversation, "1", None, None, MessageStatus::NoAck)
+            .expect(womp!("Failed to add first message"));
+
+        Messages::add_message(author, &conversation, "2", None, None, MessageStatus::NoAck)
+            .expect(womp!("Failed to add second message"));
+
+        let v1 = Messages::get_conversation(&conversation)
+            .expect(womp!("Failed to get conversation by author"));
         assert_eq!(v1.len(), 2);
-        let v2 = Messages::get_conversation(conversation)
-            .expect("Failed to get conversation by recipient");
+        let v2 = Messages::get_conversation(&conversation)
+            .expect(womp!("Failed to get conversation by recipient"));
         assert_eq!(v2.len(), 2);
     }
 
     #[test]
     #[serial]
     fn delete_message() {
-        Messages::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        let conversation = "World";
-        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
-            .expect("Failed to add first message");
+        Contacts::add(author, None, None, None).expect(womp!());
 
-        Messages::delete_message(1).unwrap();
+        let conversation = vec![0; 32];
+        Conversations::add_conversation(Some(&conversation), None)
+            .expect(womp!("Failed to create conversation"));
 
-        assert!(Messages::get_conversation(conversation).unwrap().is_empty());
+        Messages::add_message(author, &conversation, "1", None, None, MessageStatus::NoAck)
+            .expect(womp!("Failed to add first message"));
+
+        Messages::delete_message(1).expect(womp!());
+
+        assert!(Messages::get_conversation(&conversation)
+            .expect(womp!())
+            .is_empty());
     }
 
     #[test]
     #[serial]
     fn delete_conversation() {
-        Messages::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        let conversation = "World";
-        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
-            .expect("Failed to add first message");
-        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
-            .expect("Failed to add first message");
+        Contacts::add(author, None, None, None).expect(womp!());
 
-        Messages::delete_conversation(conversation).unwrap();
+        let conversation = vec![0; 32];
+        Conversations::add_conversation(Some(&conversation), None)
+            .expect(womp!("Failed to create conversation"));
 
-        assert!(Messages::get_conversation(conversation).unwrap().is_empty());
+        let author = "Hello";
+        let conversation = vec![0; 32];
+        Messages::add_message(author, &conversation, "1", None, None, MessageStatus::NoAck)
+            .expect(womp!("Failed to add first message"));
+        Messages::add_message(author, &conversation, "1", None, None, MessageStatus::NoAck)
+            .expect(womp!("Failed to add first message"));
+
+        Messages::delete_conversation(&conversation).expect(womp!());
+
+        assert!(Messages::get_conversation(&conversation)
+            .expect(womp!())
+            .is_empty());
     }
 }
