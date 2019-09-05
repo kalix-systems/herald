@@ -4,6 +4,9 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
+import Qt.labs.platform 1.0
+import QtQml 2.13
+
 
 ApplicationWindow {
     visible: true
@@ -14,20 +17,36 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
+    MenuBar {
+        Menu {
+            title: "Herald"
+            MenuItem {text: "Preferences"
+                onTriggered: preferencesPopup.open()
+            }
+        }
+        Menu {
+            title: "Window"
+            MenuItem {text:"Minimize"
+            onTriggered: root.showMinimized()}
+        }
+    }
+
+
     NetworkHandle {
         id: networkHandle
     }
 
     Popups.ConfigPopup {
-        id: firstTimePopup
+        id: preferencesPopup
     }
+
 
     /// global configurations item
     Config {
         id: config
         Component.onCompleted: {
             if (!config.exists()) {
-                firstTimePopup.open()
+                preferencesPopup.open()
                 print("placeholder for a popup which forces first time config.")
             }
         }
