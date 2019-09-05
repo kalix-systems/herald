@@ -5,8 +5,6 @@ use heraldcore::{
     utils::SearchPattern,
 };
 
-use im_rc::vector::Vector as ImVector;
-
 #[derive(Clone)]
 struct ContactsItem {
     inner: contact::Contact,
@@ -16,7 +14,7 @@ struct ContactsItem {
 pub struct Contacts {
     emit: ContactsEmitter,
     model: ContactsList,
-    list: ImVector<ContactsItem>,
+    list: Vec<ContactsItem>,
 }
 
 impl ContactsTrait for Contacts {
@@ -34,7 +32,7 @@ impl ContactsTrait for Contacts {
                     matched: true,
                 })
                 .collect(),
-            Err(_) => ImVector::new(),
+            Err(_) => Vec::new(),
         };
         Contacts { emit, model, list }
     }
@@ -49,7 +47,7 @@ impl ContactsTrait for Contacts {
             eprintln!("{}", e);
         }
 
-        self.list = ImVector::new();
+        self.list = Vec::new();
 
         self.model.end_reset_model();
     }
@@ -68,10 +66,13 @@ impl ContactsTrait for Contacts {
         }
 
         self.model.begin_insert_rows(0, 0);
-        self.list.push_front(ContactsItem {
-            inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
-            matched: true,
-        });
+        self.list.insert(
+            0,
+            ContactsItem {
+                inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
+                matched: true,
+            },
+        );
         self.model.end_insert_rows();
         true
     }

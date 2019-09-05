@@ -3,7 +3,6 @@ use heraldcore::{
     db::DBTable,
     message::{Message, MessageStatus, Messages as Core},
 };
-use im_rc::vector::Vector as ImVector;
 
 #[derive(Clone)]
 struct MessagesItem {
@@ -14,7 +13,7 @@ pub struct Messages {
     conversation_id: Option<String>,
     emit: MessagesEmitter,
     model: MessagesList,
-    list: ImVector<MessagesItem>,
+    list: Vec<MessagesItem>,
 }
 
 impl Messages {
@@ -57,7 +56,7 @@ impl Messages {
                 };
                 self.model
                     .begin_insert_rows(self.row_count(), self.row_count());
-                self.list.push_back(msg);
+                self.list.push(msg);
                 self.model.end_insert_rows();
                 true
             }
@@ -76,7 +75,7 @@ impl MessagesTrait for Messages {
         }
         Messages {
             conversation_id: None,
-            list: ImVector::new(),
+            list: Vec::new(),
             model,
             emit,
         }
@@ -91,17 +90,17 @@ impl MessagesTrait for Messages {
 
         if let Some(conversation_id) = self.conversation_id.as_ref() {
             self.model.begin_reset_model();
-            self.list = ImVector::new();
+            self.list = Vec::new();
             self.model.end_reset_model();
 
-            let messages: ImVector<MessagesItem> =
-                match Core::get_conversation(conversation_id.as_str()) {
-                    Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
-                    Err(e) => {
-                        eprintln!("Error: {}", e);
-                        return;
-                    }
-                };
+            let messages: Vec<MessagesItem> = match Core::get_conversation(conversation_id.as_str())
+            {
+                Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    return;
+                }
+            };
 
             if messages.is_empty() {
                 return;
@@ -181,7 +180,7 @@ impl MessagesTrait for Messages {
         match Core::delete_conversation(id) {
             Ok(_) => {
                 self.model.begin_reset_model();
-                self.list = ImVector::new();
+                self.list = Vec::new();
                 self.conversation_id = None;
                 self.model.end_reset_model();
                 true
@@ -203,7 +202,7 @@ impl MessagesTrait for Messages {
             Ok(_) => {
                 if Some(id) == self.conversation_id {
                     self.model.begin_reset_model();
-                    self.list = ImVector::new();
+                    self.list = Vec::new();
                     self.model.end_reset_model();
                 }
                 true
@@ -218,7 +217,7 @@ impl MessagesTrait for Messages {
     /// Clears the current view without modifying the underlying data
     fn clear_conversation_view(&mut self) {
         self.model.begin_reset_model();
-        self.list = ImVector::new();
+        self.list = Vec::new();
         self.conversation_id = None;
         self.model.end_reset_model();
     }

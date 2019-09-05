@@ -67,8 +67,6 @@ ToolBar {
                     searchButton.background.source = "qrc:///icons/searchRegexTemp.png"
                     searchRegex = true
                 }
-
-                console.log(searchRegex)
             }
         }
     }
