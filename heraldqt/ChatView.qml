@@ -12,10 +12,7 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
-                onConversationIdChanged: {
-                    print(
-                               "convo ID changed exterior")
-                }
+
     }
 
     CVUtils.ChatBar {
@@ -153,6 +150,7 @@ Pane {
     ScrollView {
         clip: true
         id: chatTextAreaScroll
+
         anchors {
             bottom: parent.bottom
             left: parent.left
@@ -172,6 +170,7 @@ Pane {
 
         TextArea {
             id: chatText
+
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
                 border.color: QmlCfg.palette.tertiaryColor
@@ -183,6 +182,7 @@ Pane {
                 }
                 radius: QmlCfg.radius
             }
+
             selectByKeyboard: true
             selectByMouse: true
             padding: QmlCfg.margin

@@ -36,7 +36,7 @@ Item {
         property string mainTextColor: "black"
         /// secondaryTextColor:
         /// the color of text on a surface of the secondaryColor
-        property string secondaryTextColor: "black"
+        property string secondaryTextColor: "grey"
         /// alertTextColor:
         /// Color in alert messages, that can be display on top of the
         /// tertiary color.
