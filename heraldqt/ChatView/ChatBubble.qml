@@ -10,7 +10,6 @@ Row {
 
     property string text: ""
     property bool showAvatar: false
-    property int epoch_time: 0
 
     Rectangle {
         TextMetrics {
@@ -48,7 +47,7 @@ Row {
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
-            text: Utils.friendly_timestamp(epoch_time)
+            text: Utils.friendly_timestamp(epoch_timestamp_ms)
             anchors{
                 margins: QmlCfg.margin/2
                 bottom: bubble.bottom

@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
+import "common/utils.js" as Utils
 
 Pane {
     id: chatPane
@@ -78,7 +79,6 @@ Pane {
                     }
 
                     CVUtils.ChatBubble {
-                        epoch_time: epoch_timestamp_ms
                         topPadding: if (index === 0) {
                                         return QmlCfg.margin
                                     } else {
