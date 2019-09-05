@@ -3,6 +3,7 @@ SELECT
   author,
   recipient,
   body,
+  op,
   timestamp
 FROM
   messages

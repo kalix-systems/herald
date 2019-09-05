@@ -39,6 +39,8 @@ pub struct Message {
     pub body: String,
     /// Time the message was sent or received at the server.
     pub timestamp: DateTime<Utc>,
+    /// Message id of the message being replied to
+    pub op: Option<i64>,
     /// has anyone seen this message yet.
     pub message_status: MessageStatus,
 }
@@ -49,13 +51,15 @@ impl Message {
         let author: String = row.get(1)?;
         let recipient: String = row.get(2)?;
         let body: String = row.get(3)?;
-        let timestamp: String = row.get(4)?;
+        let op: Option<i64> = row.get(4)?;
+        let timestamp: String = row.get(5)?;
 
         Ok(Message {
             message_id,
             author,
             recipient,
             body,
+            op,
             timestamp: DateTime::from_utc(
                 NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
                     .expect("Failed to parse timestamp"),
@@ -73,6 +77,7 @@ impl Messages {
         recipient: &str,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
+        op: Option<i64>,
         status: MessageStatus,
     ) -> Result<(i64, DateTime<Utc>), HErr> {
         let timestamp = match timestamp {
@@ -93,6 +98,7 @@ impl Messages {
                 recipient.to_sql()?,
                 body.to_sql()?,
                 timestamp_string.to_sql()?,
+                op.to_sql()?,
                 (status as u32).to_sql()?,
             ],
         )?;
@@ -182,9 +188,9 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
-        Messages::add_message(author, recipient, "2", None, MessageStatus::NoAck)
+        Messages::add_message(author, recipient, "2", None, None, MessageStatus::NoAck)
             .expect("Failed to add second message");
 
         let v1 = Messages::get_conversation(author).expect("Failed to get conversation by author");
@@ -202,7 +208,7 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
 
         Messages::delete_message(1).unwrap();
@@ -218,9 +224,9 @@ mod tests {
 
         let author = "Hello";
         let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, MessageStatus::NoAck)
+        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
-        Messages::add_message(recipient, author, "1", None, MessageStatus::NoAck)
+        Messages::add_message(recipient, author, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
 
         Messages::delete_conversation(recipient).unwrap();

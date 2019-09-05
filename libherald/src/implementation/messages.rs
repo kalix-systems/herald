@@ -17,6 +17,58 @@ pub struct Messages {
     list: ImVector<MessagesItem>,
 }
 
+impl Messages {
+    fn raw_insert(&mut self, body: String, op: Option<i64>) -> bool {
+        let id = match heraldcore::config::Config::static_id() {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
+
+        let conversation_id = match &self.conversation_id {
+            Some(conv) => conv,
+            None => {
+                eprintln!("Error: conversation_id not set.");
+                return false;
+            }
+        };
+
+        match Core::add_message(
+            id.as_str(),
+            conversation_id.as_str(),
+            body.as_str(),
+            None,
+            op,
+            MessageStatus::Inbound,
+        ) {
+            Ok((msg_id, timestamp)) => {
+                let msg = MessagesItem {
+                    inner: Message {
+                        author: id,
+                        recipient: self.conversation_id.clone().unwrap_or("".into()),
+                        body: body,
+                        message_id: msg_id,
+                        op,
+                        timestamp,
+                        message_status: MessageStatus::Inbound,
+                    },
+                };
+                self.model
+                    .begin_insert_rows(self.row_count(), self.row_count());
+                self.list.push_back(msg);
+                self.model.end_insert_rows();
+                true
+            }
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                false
+            }
+        }
+    }
+}
+
 impl MessagesTrait for Messages {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
         if let Err(e) = Core::create_table() {
@@ -83,56 +135,20 @@ impl MessagesTrait for Messages {
         self.list[row_index].inner.message_id
     }
 
+    fn op(&self, row_index: usize) -> Option<i64> {
+        self.list[row_index].inner.op
+    }
+
     fn conversation_id(&self) -> Option<&str> {
         self.conversation_id.as_ref().map(|s| s.as_str())
     }
 
     fn insert_message(&mut self, body: String) -> bool {
-        let id = match heraldcore::config::Config::static_id() {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
+        self.raw_insert(body, None)
+    }
 
-        let conversation_id = match &self.conversation_id {
-            Some(conv) => conv,
-            None => {
-                eprintln!("Error: conversation_id not set.");
-                return false;
-            }
-        };
-
-        match Core::add_message(
-            id.as_str(),
-            conversation_id.as_str(),
-            body.as_str(),
-            None,
-            MessageStatus::Inbound,
-        ) {
-            Ok((msg_id, timestamp)) => {
-                let msg = MessagesItem {
-                    inner: Message {
-                        author: id,
-                        recipient: self.conversation_id.clone().unwrap_or("".into()),
-                        body: body,
-                        message_id: msg_id,
-                        timestamp,
-                        message_status: MessageStatus::Inbound,
-                    },
-                };
-                self.model
-                    .begin_insert_rows(self.row_count(), self.row_count());
-                self.list.push_back(msg);
-                self.model.end_insert_rows();
-                true
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                false
-            }
-        }
+    fn reply(&mut self, body: String, op: i64) -> bool {
+        self.raw_insert(body, Some(op))
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {

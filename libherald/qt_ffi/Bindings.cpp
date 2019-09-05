@@ -3,6 +3,19 @@
 
 namespace {
 
+    struct option_qint64 {
+    public:
+        qint64 value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_qint64>::value, "option_qint64 must be a POD type.");
+
     struct option_quintptr {
     public:
         quintptr value;
@@ -390,6 +403,7 @@ extern "C" {
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     bool messages_data_error_sending(const Messages::Private*, int);
     qint64 messages_data_message_id(const Messages::Private*, int);
+    option_qint64 messages_data_op(const Messages::Private*, int);
     bool messages_data_reached_recipient(const Messages::Private*, int);
     bool messages_data_reached_server(const Messages::Private*, int);
     void messages_data_recipient(const Messages::Private*, int, QString*, qstring_set);
@@ -492,6 +506,13 @@ qint64 Messages::message_id(int row) const
     return messages_data_message_id(m_d, row);
 }
 
+QVariant Messages::op(int row) const
+{
+    QVariant v;
+    v = messages_data_op(m_d, row);
+    return v;
+}
+
 bool Messages::reached_recipient(int row) const
 {
     return messages_data_reached_recipient(m_d, row);
@@ -531,12 +552,14 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 4:
             return QVariant::fromValue(message_id(index.row()));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(reached_recipient(index.row()));
+            return op(index.row());
         case Qt::UserRole + 6:
-            return QVariant::fromValue(reached_server(index.row()));
+            return QVariant::fromValue(reached_recipient(index.row()));
         case Qt::UserRole + 7:
-            return QVariant::fromValue(recipient(index.row()));
+            return QVariant::fromValue(reached_server(index.row()));
         case Qt::UserRole + 8:
+            return QVariant::fromValue(recipient(index.row()));
+        case Qt::UserRole + 9:
             return QVariant::fromValue(uuid(index.row()));
         }
         break;
@@ -562,10 +585,11 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 2, "epoch_timestamp_ms");
     names.insert(Qt::UserRole + 3, "error_sending");
     names.insert(Qt::UserRole + 4, "message_id");
-    names.insert(Qt::UserRole + 5, "reached_recipient");
-    names.insert(Qt::UserRole + 6, "reached_server");
-    names.insert(Qt::UserRole + 7, "recipient");
-    names.insert(Qt::UserRole + 8, "uuid");
+    names.insert(Qt::UserRole + 5, "op");
+    names.insert(Qt::UserRole + 6, "reached_recipient");
+    names.insert(Qt::UserRole + 7, "reached_server");
+    names.insert(Qt::UserRole + 8, "recipient");
+    names.insert(Qt::UserRole + 9, "uuid");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -608,6 +632,7 @@ extern "C" {
     bool messages_delete_conversation_by_id(Messages::Private*, const ushort*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     bool messages_insert_message(Messages::Private*, const ushort*, int);
+    bool messages_reply(Messages::Private*, const ushort*, int, qint64);
 };
 
 extern "C" {
@@ -879,6 +904,10 @@ bool Messages::delete_message(quint64 row_index)
 bool Messages::insert_message(const QString& body)
 {
     return messages_insert_message(m_d, body.utf16(), body.size());
+}
+bool Messages::reply(const QString& body, qint64 op)
+{
+    return messages_reply(m_d, body.utf16(), body.size(), op);
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
