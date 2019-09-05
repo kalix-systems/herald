@@ -17,8 +17,11 @@ ListView {
     }
     delegate: Item {
         id: contactItem
-        height: 60
+        height: {if (visible) 60
+        }
+
         width: parent.width
+        visible: matched
 
         Rectangle {
             id: bgBox

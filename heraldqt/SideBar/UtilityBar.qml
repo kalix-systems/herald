@@ -36,6 +36,15 @@ ToolBar {
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 10
+            onTextChanged: {
+                contacts.filter(searchText.text, false)
+                                for (var i = 0; i < contacts.rowCount(); i++)
+                                   console.log(contacts.name(i), contacts.matched(i))
+                              //  contacts.clear_filter()
+
+
+
+            }
         }
     }
     Button {
@@ -51,7 +60,11 @@ ToolBar {
             scale: 0.9
             mipmap: true
         }
-        onClicked: searchScroll.focus = true
+        onClicked:  {contacts.filter(searchText.text, false)
+                for (var i = 0; i < contacts.rowCount(); i++)
+                    console.log(contacts.name(i) + " " + contacts.visible(i))
+                contacts.clear_filter()
+        }
     }
 
     ///--- Add contact button
