@@ -2,19 +2,15 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "ChatBubble.js" as JS
 import "../common" as Common
-
+import "../common/utils.js" as Utils
 
 Row {
     id: avatarRow
 
-//    Common.Avatar {
-//        size: 50
-//    }
-
     property string text: ""
     property bool showAvatar: false
+    property int epoch_time: 0
 
     Rectangle {
         TextMetrics {
@@ -33,22 +29,26 @@ Row {
         height: bubbleText.height + timeStamp.height + QmlCfg.margin
         TextEdit {
             id: bubbleText
-            selectByMouse: true
-            readOnly: true
             text: messageMetrics.text
-            wrapMode: Text.Wrap
-            width: JS.calculate_width(chatPane.width, messageMetrics.width)
+            selectByMouse: true
+            mouseSelectionMode: TextEdit.SelectCharacters
+            readOnly: true
+            wrapMode: TextEdit.Wrap
+            width:  Math.min((chatPane.width  / 2), messageMetrics.width) + 10
             anchors{
                 margins: QmlCfg.margin/2
                 top: bubble.top
                 left: bubble.left
                 topMargin: QmlCfg.margin/2
             }
+            Component.onCompleted: {
+                bubbleText.set
+            }
         }
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
-            text: qsTr("4 hr ago")
+            text: Utils.friendly_timestamp(epoch_time)
             anchors{
                 margins: QmlCfg.margin/2
                 bottom: bubble.bottom

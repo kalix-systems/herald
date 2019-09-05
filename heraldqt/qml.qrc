@@ -11,7 +11,6 @@
         <file>SideBar/UtilityBar.qml</file>
         <file>ChatView.qml</file>
         <file>ChatView/ChatBubble.qml</file>
-        <file>ChatView/ChatBubble.js</file>
         <file>ChatView/ChatBar.qml</file>
         <file>icons/plus.png</file>
         <file>icons/gear.svg</file>

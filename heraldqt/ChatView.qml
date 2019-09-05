@@ -78,6 +78,7 @@ Pane {
                     }
 
                     CVUtils.ChatBubble {
+                        epoch_time: epoch_timestamp_ms
                         topPadding: if (index === 0) {
                                         return QmlCfg.margin
                                     } else {
