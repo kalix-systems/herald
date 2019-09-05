@@ -60,11 +60,13 @@ impl Message {
             recipient,
             body,
             op,
-            timestamp: DateTime::from_utc(
-                NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT)
-                    .expect("Failed to parse timestamp"),
-                Utc,
-            ),
+            timestamp: match NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT) {
+                Ok(ts) => DateTime::from_utc(ts, Utc),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    Utc::now()
+                }
+            },
             message_status: MessageStatus::NoAck,
         })
     }
