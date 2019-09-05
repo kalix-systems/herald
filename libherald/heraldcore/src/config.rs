@@ -190,16 +190,14 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get_config() {
-        Config::drop_table().unwrap();
-        Config::create_table().unwrap();
+        Config::reset().unwrap();
 
         let id = "HelloWorld";
 
         Config::new(id.into(), None, None, None, None).unwrap();
         assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
 
-        Config::drop_table().unwrap();
-        Config::create_table().unwrap();
+        Config::reset().unwrap();
 
         let name = "stuff";
         let profile_picture = "stuff";
@@ -216,8 +214,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_id() {
-        Config::drop_table().unwrap();
-        Config::create_table().unwrap();
+        Config::reset().unwrap();
 
         let id = "HelloWorld";
         let config = Config::new(id.into(), None, None, None, None).unwrap();

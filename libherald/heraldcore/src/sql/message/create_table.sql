@@ -12,5 +12,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- body of message
   body TEXT NOT NULL,
   -- message id of message being replied to
-  op INTEGER DEFAULT NULL
+  op INTEGER DEFAULT NULL,
+  FOREIGN KEY(conversation) REFERENCES conversations(conversation_id),
+  FOREIGN KEY(author) REFERENCES contacts(contact_id)
 )

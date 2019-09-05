@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS conversations (
+  conversation_id TEXT PRIMARY KEY NOT NULL,
+  name TEXT DEFAULT NULL
+)

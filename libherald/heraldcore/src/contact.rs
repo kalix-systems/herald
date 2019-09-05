@@ -143,8 +143,8 @@ impl Contacts {
         let mut db = Database::get()?;
 
         let tx = db.transaction()?;
-        tx.execute(include_str!("sql/contact/delete_contact.sql"), &[id])?;
         tx.execute(include_str!("sql/message/delete_conversation.sql"), &[id])?;
+        tx.execute(include_str!("sql/contact/delete_contact.sql"), &[id])?;
         tx.commit()?;
         Ok(())
     }
@@ -357,9 +357,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_contact() {
-        Contacts::drop_table().unwrap();
-
-        Contacts::create_table().unwrap();
+        Contacts::reset().unwrap();
 
         let id1 = "Hello";
         let id2 = "World";
@@ -371,9 +369,8 @@ mod tests {
     #[test]
     #[serial]
     fn delete_contact() {
-        Contacts::drop_table().unwrap();
+        Contacts::reset().unwrap();
 
-        Contacts::create_table().unwrap();
         let id1 = "Hello";
         let id2 = "World";
 
@@ -390,9 +387,8 @@ mod tests {
     #[test]
     #[serial]
     fn get_contact_name() {
-        Contacts::drop_table().unwrap();
+        Contacts::reset().unwrap();
 
-        Contacts::create_table().unwrap();
         let id = "Hello World";
 
         Contacts::add(id, Some("name"), None, None).expect("Failed to add contact");
@@ -405,9 +401,8 @@ mod tests {
     #[test]
     #[serial]
     fn get_contact_profile_picture() {
-        Contacts::drop_table().unwrap();
+        Contacts::reset().unwrap();
 
-        Contacts::create_table().unwrap();
         let id = "Hello World";
         let profile_picture = "picture";
         Contacts::add(id, None, Some(profile_picture), None).expect("Failed to add contact");
@@ -423,8 +418,7 @@ mod tests {
     #[test]
     #[serial]
     fn update_name() {
-        Contacts::drop_table().unwrap();
-        Contacts::create_table().unwrap();
+        Contacts::reset().unwrap();
 
         let id = "userid";
 
@@ -440,9 +434,7 @@ mod tests {
     #[test]
     #[serial]
     fn all_contacts() {
-        Contacts::drop_table().unwrap();
-
-        Contacts::create_table().unwrap();
+        Contacts::reset().unwrap();
 
         let id1 = "Hello";
         let id2 = "World";
@@ -459,9 +451,7 @@ mod tests {
     #[test]
     #[serial]
     fn archive_contact() {
-        Contacts::drop_table().unwrap();
-
-        Contacts::create_table().unwrap();
+        Contacts::reset().unwrap();
 
         let id = "Hello World";
         Contacts::add(id, None, None, None).unwrap();
@@ -473,9 +463,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_active_contacts() {
-        Contacts::drop_table().unwrap();
-
-        Contacts::create_table().unwrap();
+        Contacts::reset().unwrap();
 
         let id1 = "Hello";
         let id2 = "World";

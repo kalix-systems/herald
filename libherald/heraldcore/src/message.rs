@@ -185,8 +185,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get() {
-        Messages::drop_table().unwrap();
-        Messages::create_table().unwrap();
+        Messages::reset().unwrap();
 
         let author = "Hello";
         let conversation = "World";
@@ -206,8 +205,7 @@ mod tests {
     #[test]
     #[serial]
     fn delete_message() {
-        Messages::drop_table().unwrap();
-        Messages::create_table().unwrap();
+        Messages::reset().unwrap();
 
         let author = "Hello";
         let conversation = "World";
@@ -222,8 +220,7 @@ mod tests {
     #[test]
     #[serial]
     fn delete_conversation() {
-        Messages::drop_table().unwrap();
-        Messages::create_table().unwrap();
+        Messages::reset().unwrap();
 
         let author = "Hello";
         let conversation = "World";

@@ -8,5 +8,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- user color
   color INTEGER NOT NULL,
   -- Indicates whether contact is archived, defaults to false
-  archived INTEGER DEFAULT(0)
+  archived INTEGER DEFAULT(0),
+  -- Indicates whether a contact is deleted, defaults to false
+  deleted INTEGER DEFAULT(0)
 )

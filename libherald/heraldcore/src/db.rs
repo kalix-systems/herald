@@ -1,6 +1,6 @@
 use crate::{errors::*, utils::SearchPattern};
 use lazy_static::*;
-use rusqlite::Connection;
+use rusqlite::{Connection, NO_PARAMS};
 use std::{
     ops::{Deref, DerefMut},
     path::Path,
@@ -68,6 +68,9 @@ impl Database {
                     Ok(re.is_match(value.as_str()))
                 })?;
 
+                // set foreign key constraint
+                conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;
+
                 let db = Database(conn);
                 Ok(db)
             }
@@ -99,4 +102,11 @@ pub trait DBTable: Default {
 
     /// Indicates whether the table exists in the database.
     fn exists() -> Result<bool, HErr>;
+
+    /// Resets the table.
+    fn reset() -> Result<(), HErr> {
+        Self::drop_table()?;
+        Self::create_table()?;
+        Ok(())
+    }
 }

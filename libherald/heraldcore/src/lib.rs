@@ -6,6 +6,8 @@
 pub mod config;
 /// Functions and data structures related to contacts.
 pub mod contact;
+/// Conversations
+pub mod conversation;
 /// Wrapper around database.
 pub mod db;
 /// Errors
