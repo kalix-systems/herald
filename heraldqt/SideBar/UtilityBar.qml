@@ -31,7 +31,7 @@ ToolBar {
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
-
+            Keys.onReturnPressed: text = text
             id: searchText
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
