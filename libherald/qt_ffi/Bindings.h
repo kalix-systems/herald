@@ -142,6 +142,7 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
+    Q_INVOKABLE qint64 epoch_timestamp_ms(int row) const;
     Q_INVOKABLE bool error_sending(int row) const;
     Q_INVOKABLE qint64 message_id(int row) const;
     Q_INVOKABLE bool reached_recipient(int row) const;

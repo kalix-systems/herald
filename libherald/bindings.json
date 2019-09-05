@@ -131,6 +131,9 @@
                 "body": {
                     "type": "QString"
                 },
+                "epoch_timestamp_ms": {
+                    "type": "qint64"
+                },
                 "uuid": {
                     "type": "qint64"
                 },

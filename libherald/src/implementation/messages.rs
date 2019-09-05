@@ -7,34 +7,7 @@ use im_rc::vector::Vector as ImVector;
 
 #[derive(Clone)]
 struct MessagesItem {
-    message_id: i64,
-    author: String,
-    recipient: String,
-    body: String,
-    timestamp: String,
-    message_status: MessageStatus,
-}
-
-impl From<Message> for MessagesItem {
-    #[inline]
-    fn from(m: Message) -> MessagesItem {
-        let Message {
-            message_id,
-            author,
-            recipient,
-            body,
-            timestamp,
-            message_status,
-        } = m;
-        MessagesItem {
-            message_id,
-            author,
-            recipient,
-            body,
-            timestamp: timestamp.format("%Y-%m-%d %H:%M:%S").to_string(),
-            message_status,
-        }
-    }
+    inner: Message,
 }
 
 pub struct Messages {
@@ -68,7 +41,7 @@ impl MessagesTrait for Messages {
 
             let messages: ImVector<MessagesItem> =
                 match Core::get_conversation(conversation_id.as_str()) {
-                    Ok(ms) => ms.into_iter().map(|m| m.into()).collect(),
+                    Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
                     Err(e) => {
                         eprintln!("Error: {}", e);
                         return;
@@ -91,26 +64,25 @@ impl MessagesTrait for Messages {
     }
 
     fn author(&self, row_index: usize) -> &str {
-        self.list[row_index].author.as_str()
+        self.list[row_index].inner.author.as_str()
     }
 
     fn recipient(&self, row_index: usize) -> &str {
-        self.list[row_index].recipient.as_str()
+        self.list[row_index].inner.recipient.as_str()
     }
 
     fn body(&self, row_index: usize) -> &str {
-        self.list[row_index].body.as_str()
+        self.list[row_index].inner.body.as_str()
     }
 
     fn message_id(&self, row_index: usize) -> i64 {
-        self.list[row_index].message_id
+        self.list[row_index].inner.message_id
     }
 
     fn conversation_id(&self) -> Option<&str> {
         self.conversation_id.as_ref().map(|s| s.as_str())
     }
 
-    // TODO add networking component
     fn insert_message(&mut self, body: String) -> bool {
         let id = match heraldcore::config::Config::static_id() {
             Ok(id) => id,
@@ -137,12 +109,14 @@ impl MessagesTrait for Messages {
         ) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
-                    author: id,
-                    recipient: self.conversation_id.clone().unwrap_or("userid2".into()),
-                    body: body,
-                    message_id: msg_id,
-                    timestamp,
-                    message_status: MessageStatus::Inbound,
+                    inner: Message {
+                        author: id,
+                        recipient: self.conversation_id.clone().unwrap_or("".into()),
+                        body: body,
+                        message_id: msg_id,
+                        timestamp,
+                        message_status: MessageStatus::Inbound,
+                    },
                 };
                 self.model
                     .begin_insert_rows(self.row_count(), self.row_count());
@@ -159,7 +133,7 @@ impl MessagesTrait for Messages {
 
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
-        let id = self.list[row_index].message_id;
+        let id = self.list[row_index].inner.message_id;
         match Core::delete_message(id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
@@ -199,6 +173,10 @@ impl MessagesTrait for Messages {
         }
     }
 
+    fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
+        self.list[row_index].inner.timestamp.timestamp_millis()
+    }
+
     /// Deletes all messages in a conversation.
     fn delete_conversation_by_id(&mut self, id: String) -> bool {
         match Core::delete_conversation(id.as_str()) {
@@ -226,21 +204,21 @@ impl MessagesTrait for Messages {
     }
 
     fn error_sending(&self, index: usize) -> bool {
-        match self.list[index].message_status {
+        match self.list[index].inner.message_status {
             MessageStatus::Timeout => true,
             _ => false,
         }
     }
 
     fn reached_server(&self, index: usize) -> bool {
-        match self.list[index].message_status {
+        match self.list[index].inner.message_status {
             MessageStatus::ServerAck => true,
             _ => false,
         }
     }
 
     fn reached_recipient(&self, index: usize) -> bool {
-        match self.list[index].message_status {
+        match self.list[index].inner.message_status {
             MessageStatus::RecipientAck => true,
             _ => false,
         }

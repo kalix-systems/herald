@@ -754,6 +754,7 @@ pub trait MessagesTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> &str;
+    fn epoch_timestamp_ms(&self, index: usize) -> i64;
     fn error_sending(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> i64;
     fn reached_recipient(&self, index: usize) -> bool;
@@ -925,6 +926,12 @@ pub unsafe extern "C" fn messages_data_body(
     let data = o.body(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, row: c_int) -> i64 {
+    let o = &*ptr;
+    o.epoch_timestamp_ms(to_usize(row)).into()
 }
 
 #[no_mangle]

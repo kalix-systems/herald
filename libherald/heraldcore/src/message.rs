@@ -22,11 +22,12 @@ pub enum MessageStatus {
     Inbound = 4,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 /// Messages
 pub struct Messages {}
 
 /// Message
+#[derive(Clone)]
 pub struct Message {
     /// Local message id
     pub message_id: i64,
@@ -73,15 +74,14 @@ impl Messages {
         body: &str,
         timestamp: Option<DateTime<Utc>>,
         status: MessageStatus,
-    ) -> Result<(i64, String), HErr> {
+    ) -> Result<(i64, DateTime<Utc>), HErr> {
         let timestamp = match timestamp {
             Some(ts) => ts,
             None => Utc::now(),
-        }
-        .format(DATE_FMT)
-        .to_string();
+        };
 
-        println!("{}", timestamp);
+        let timestamp_string = timestamp.format(DATE_FMT).to_string();
+
         let body = body.to_sql()?;
 
         let db = Database::get()?;
@@ -92,7 +92,7 @@ impl Messages {
                 author.to_sql()?,
                 recipient.to_sql()?,
                 body.to_sql()?,
-                timestamp.to_sql()?,
+                timestamp_string.to_sql()?,
                 (status as u32).to_sql()?,
             ],
         )?;

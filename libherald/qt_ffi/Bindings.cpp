@@ -387,6 +387,7 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
+    qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     bool messages_data_error_sending(const Messages::Private*, int);
     qint64 messages_data_message_id(const Messages::Private*, int);
     bool messages_data_reached_recipient(const Messages::Private*, int);
@@ -476,6 +477,11 @@ QString Messages::body(int row) const
     return s;
 }
 
+qint64 Messages::epoch_timestamp_ms(int row) const
+{
+    return messages_data_epoch_timestamp_ms(m_d, row);
+}
+
 bool Messages::error_sending(int row) const
 {
     return messages_data_error_sending(m_d, row);
@@ -519,16 +525,18 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(error_sending(index.row()));
+            return QVariant::fromValue(epoch_timestamp_ms(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(message_id(index.row()));
+            return QVariant::fromValue(error_sending(index.row()));
         case Qt::UserRole + 4:
-            return QVariant::fromValue(reached_recipient(index.row()));
+            return QVariant::fromValue(message_id(index.row()));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(reached_server(index.row()));
+            return QVariant::fromValue(reached_recipient(index.row()));
         case Qt::UserRole + 6:
-            return QVariant::fromValue(recipient(index.row()));
+            return QVariant::fromValue(reached_server(index.row()));
         case Qt::UserRole + 7:
+            return QVariant::fromValue(recipient(index.row()));
+        case Qt::UserRole + 8:
             return QVariant::fromValue(uuid(index.row()));
         }
         break;
@@ -551,12 +559,13 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "error_sending");
-    names.insert(Qt::UserRole + 3, "message_id");
-    names.insert(Qt::UserRole + 4, "reached_recipient");
-    names.insert(Qt::UserRole + 5, "reached_server");
-    names.insert(Qt::UserRole + 6, "recipient");
-    names.insert(Qt::UserRole + 7, "uuid");
+    names.insert(Qt::UserRole + 2, "epoch_timestamp_ms");
+    names.insert(Qt::UserRole + 3, "error_sending");
+    names.insert(Qt::UserRole + 4, "message_id");
+    names.insert(Qt::UserRole + 5, "reached_recipient");
+    names.insert(Qt::UserRole + 6, "reached_server");
+    names.insert(Qt::UserRole + 7, "recipient");
+    names.insert(Qt::UserRole + 8, "uuid");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
