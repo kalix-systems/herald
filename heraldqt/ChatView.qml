@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
 
 Pane {
@@ -83,8 +84,38 @@ Pane {
                                     }
                         text: body
                     }
-                } /// Delegate
-            } /// ListView
+                    Component.onCompleted: chatScrollBar.position = 1.0
+                } /// Delegate column
+            } /// Repeater
+        } /// Column
+    } /// ScrollView
+
+
+    /// Attachments
+    FileDialog {
+        id: attachmentsDialogue
+        folder: shortcuts.home
+        onSelectionAccepted: {
+            print("todo: attachments api")
+        }
+    }
+
+    Button {
+        id: attachmentsButton
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: QmlCfg.margin / 2
+        anchors.rightMargin: QmlCfg.margin / 2
+        height: 25
+        width: height
+        background: Image {
+            source: "qrc:///icons/paperclip.png"
+            height: width
+            scale: 0.9
+            mipmap: true
+        }
+        onClicked: {
+            attachmentsDialogue.open()
         }
     }
 
@@ -93,19 +124,29 @@ Pane {
         clip: true
         id: chatTextAreaScroll
         anchors {
-            right: parent.right
             bottom: parent.bottom
             left: parent.left
         }
+
         background: Rectangle {
             color: QmlCfg.palette.mainColor
         }
         height: Math.min(contentHeight, 100)
+        width: chatPane.width - attachmentsButton.width - QmlCfg.margin
+
+        //highlight border
+        onFocusChanged: {
+            if (focus) { chatText.background.border.width = 2 }
+            else {chatText.background.border.width = 0 }
+        }
 
         TextArea {
             id: chatText
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
+                border.color: QmlCfg.palette.tertiaryColor
+                border.width: 0
+
                 anchors {
                     fill: parent
                     margins: QmlCfg.margin / 2
@@ -126,9 +167,9 @@ Pane {
                     if (text.trim().length === 0) {
                         return
                     }
-                    messageModel.insert_message(text)
-                    networkHandle.send_message(text,
+                    var result = networkHandle.send_message(text,
                                                messageModel.conversationId)
+                    messageModel.insert_message(text, result)
                     chatScrollBar.position = 1.0
                     clear()
                 }

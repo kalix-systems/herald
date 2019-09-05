@@ -21,5 +21,6 @@
         <file>SideBar/popups/NewContactDialogue.qml</file>
         <file>SideBar/popups/ContactClickedPopup.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
+        <file>icons/paperclip.png</file>
     </qresource>
 </RCC>
