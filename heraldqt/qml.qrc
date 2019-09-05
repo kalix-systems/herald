@@ -22,5 +22,7 @@
         <file>SideBar/popups/ContactClickedPopup.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
         <file>icons/paperclip.png</file>
+        <file>icons/searchRegex.png</file>
+        <file>icons/searchRegexTemp.png</file>
     </qresource>
 </RCC>
