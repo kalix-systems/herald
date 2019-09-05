@@ -117,6 +117,7 @@ Pane {
         onClicked: {
             attachmentsDialogue.open()
         }
+        z: -1
     }
 
     ///--- Text entry area

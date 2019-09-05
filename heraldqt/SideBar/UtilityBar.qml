@@ -62,8 +62,7 @@ ToolBar {
         }
         onClicked:  {contacts.filter(searchText.text, false)
                 for (var i = 0; i < contacts.rowCount(); i++)
-                    console.log(contacts.name(i) + " " + contacts.visible(i))
-                contacts.clear_filter()
+                    console.log(contacts.name(i) + " " + contacts.matched(i))
         }
     }
 
