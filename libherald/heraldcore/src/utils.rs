@@ -1,6 +1,9 @@
 use crate::errors::HErr;
 use regex::{Regex, RegexBuilder};
 
+/// Type alias for conversation id
+pub type ConversationId = Vec<u8>;
+
 const NUM_COLORS: u64 = 9;
 
 pub(crate) fn id_to_color(id: &str) -> u32 {
