@@ -1,5 +1,5 @@
 SELECT
-  id,
+  msg_id,
   author,
   recipient,
   body,

@@ -109,7 +109,7 @@ impl Messages {
     pub fn delete_message(id: i64) -> Result<(), HErr> {
         let db = Database::get()?;
 
-        db.execute(include_str!("sql/message/delete.sql"), &[id])?;
+        db.execute(include_str!("sql/message/delete_message.sql"), &[id])?;
         Ok(())
     }
 
