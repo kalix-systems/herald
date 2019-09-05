@@ -12,6 +12,10 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
+                onConversationIdChanged: {
+                    print(
+                               "convo ID changed exterior")
+                }
     }
 
     CVUtils.ChatBar {
@@ -113,11 +117,36 @@ Pane {
             height: width
             scale: 0.9
             mipmap: true
+            z: -100
         }
         onClicked: {
             attachmentsDialogue.open()
         }
         z: -1
+    }
+
+    Button {
+        id: emojiMenuButton
+        anchors {
+            right: parent.left
+            left: parent.right
+        }
+
+
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: QmlCfg.margin / 2
+        anchors.rightMargin: QmlCfg.margin / 2
+        height: 25
+        width: height
+        background: Image {
+            source: "qrc:///icons/paperclip.png"
+            height: width
+            scale: 0.9
+            mipmap: true
+        }
+        onClicked: {
+            attachmentsDialogue.open()
+        }
     }
 
     ///--- Text entry area
@@ -154,6 +183,8 @@ Pane {
                 }
                 radius: QmlCfg.radius
             }
+            selectByKeyboard: true
+            selectByMouse: true
             padding: QmlCfg.margin
             wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
