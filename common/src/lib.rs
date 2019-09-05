@@ -88,7 +88,7 @@ pub struct GlobalId {
     pub did: DeviceId,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ClientMessageAck {
     pub update_code: MessageStatus,
     pub message_id: i64,

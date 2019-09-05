@@ -16,6 +16,7 @@ image         = "0.22.1"
 serde_cbor    = "0.10.1"
 serde         = "1.0.99"
 regex         = "1.2.1"
+# ccl           = "5.1.5"
 
 [dev-dependencies]
 serial_test        = "0.2.0"

@@ -1,16 +1,23 @@
 use crate::{config::Config, errors::HErr, message as db};
+// use ccl::dashmap::DashMap;
 use chrono::prelude::*;
 use herald_common::{
     read_cbor, send_cbor, ClientMessageAck, GlobalId, MessageStatus, MessageToClient,
-    MessageToPeer, MessageToServer, RawMsg, UserId,
+    MessageToPeer, MessageToServer, RawMsg, Response, UserId,
 };
 use lazy_static::*;
 use serde::Serialize;
+use std::sync::Arc;
 use std::{
+    collections::HashMap,
     env,
     net::{SocketAddr, SocketAddrV4},
 };
-use tokio::{net::*, prelude::*};
+use tokio::{
+    net::*,
+    prelude::*,
+    sync::{mpsc, oneshot},
+};
 
 const DEFAULT_PORT: u16 = 8000;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -26,24 +33,6 @@ lazy_static! {
             DEFAULT_PORT
         )),
     };
-}
-
-/// Initializes connection with the server.
-pub async fn open_connection() -> Result<TcpStream, HErr> {
-    println!("Client connecting to {}", *SERVER_ADDR);
-    let mut stream = TcpStream::connect(*SERVER_ADDR).await?;
-    login(&mut stream).await?;
-    Ok(stream)
-}
-
-/// Login
-pub async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<(), HErr> {
-    let gid = GlobalId {
-        did: 0,
-        uid: Config::static_id()?,
-    };
-    send_cbor(stream, &gid).await?;
-    Ok(())
 }
 
 fn form_ack(update_code: MessageStatus, message_id: i64) -> MessageToPeer {
@@ -109,157 +98,74 @@ pub fn handle_server_msg(msg: MessageToClient) -> Result<Option<MessageToServer>
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use crate::db::DBTable;
-//     use herald_common::*;
-//     use serial_test_derive::serial;
-//     use std::process;
+pub enum Notification {
+    // TODO: include conversation id's here
+    // issue: #15
+    NewMsg(UserId),
+    Ack(ClientMessageAck),
+}
 
-//     fn boot_server() -> std::process::Child {
-//         process::Command::new("cargo")
-//             .args(&["build", "--bin", "stupid"])
-//             .current_dir("../../server")
-//             .output()
-//             .expect("Failed to start server");
+pub struct Session {
+    connection: TcpStream,
+    id: GlobalId,
+    pending: HashMap<MessageToServer, oneshot::Sender<Response>>,
+    notifications: mpsc::UnboundedSender<Notification>,
+}
 
-//         let child = process::Command::new("cargo")
-//             .args(&["run", "--bin", "stupid"])
-//             .current_dir("../../server")
-//             .spawn()
-//             .expect("Failed to start server");
+/// Login
+pub async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> {
+    let gid = GlobalId {
+        did: 0,
+        uid: Config::static_id()?,
+    };
+    send_cbor(stream, &gid).await?;
+    Ok(gid)
+}
 
-//         std::thread::sleep(std::time::Duration::from_secs(1));
+impl Session {
+    /// Initializes connection with the server.
+    pub async fn init() -> Result<(mpsc::UnboundedReceiver<Notification>, Self), HErr> {
+        println!("Client connecting to {}", *SERVER_ADDR);
+        let mut connection = TcpStream::connect(*SERVER_ADDR).await?;
+        let id = login(&mut connection).await?;
+        let (sender, receiver) = mpsc::unbounded_channel();
+        Ok((
+            receiver,
+            Session {
+                connection,
+                id,
+                pending: HashMap::new(),
+                notifications: sender,
+            },
+        ))
+    }
 
-//         child
-//     }
+    fn handle_response(&mut self, res: Response, query: &MessageToServer) {
+        if let Some(s) = self.pending.remove(query) {
+            s.send(res);
+        }
+    }
 
-//     #[test]
-//     fn serialize() {
-//         let msg = form_text_message(String::from("hello"), String::from("world"))
-//             .expect("can't build message");
-//         let ack = form_server_ack(super::UserId::from("Person"), MessageStatus::NoAck, 0)
-//             .expect("can't build ack");
+    async fn send_query(
+        &mut self,
+        query: MessageToServer,
+    ) -> Result<oneshot::Receiver<Response>, HErr> {
+        let (sender, receiver) = oneshot::channel();
+        // this clone looks unnecessary - it's not!
+        // insert before send so that we don't have to worry about what happens if a query is
+        // responded to before this future is executed again
+        self.pending.insert(query.clone(), sender);
+        send_cbor(&mut self.connection, &query).await?;
+        Ok(receiver)
+    }
 
-//         match ack {
-//             MessageToServer::SendMsg { body, .. } => match serde_cbor::de::from_slice(&body) {
-//                 Ok(Body::Ack(ClientMessageAck {
-//                     update_code,
-//                     message_id,
-//                 })) => assert_eq!((update_code, message_id), (MessageStatus::NoAck, 0)),
-//                 _ => panic!("Ack was serialized to wrong type"),
-//             },
-//             _ => panic!("ack was mistyped"),
-//         }
+    pub async fn request_meta(&mut self, of: UserId) -> Result<oneshot::Receiver<Response>, HErr> {
+        let query = MessageToServer::RequestMeta { of };
+        self.send_query(query).await
+    }
 
-//         match msg {
-//             MessageToServer::SendMsg { body, .. } => match serde_cbor::de::from_slice(&body) {
-//                 Ok(Body::Message(string)) => assert_eq!(String::from("world"), string),
-//                 _ => panic!("msg was serialized to wrong type"),
-//             },
-//             _ => panic!("msg was mistyped"),
-//         }
-//     }
-
-//     #[test]
-//     #[serial]
-//     fn register_self() {
-//         crate::config::Config::drop_table().unwrap();
-//         crate::config::Config::create_table().unwrap();
-//         crate::config::Config::new("hello".to_string(), None, None, None, None)
-//             .expect("could not create config");
-
-//         let mut child = boot_server();
-
-//         let mut stream = super::open_connection().unwrap_or_else(|e| {
-//             eprintln!("connection failed, {}", e);
-//             child.kill().expect("Failed to kill child");
-//             panic!()
-//         });
-
-//         super::send_text_message(super::UserId::from("hello"), "world".into(), &mut stream)
-//             .unwrap_or_else(|e| {
-//                 eprintln!("msg to self failed, {}", e);
-//                 child.kill().expect("Failed to kill child");
-//                 panic!()
-//             });
-
-//         super::read_from_server(&mut stream).unwrap_or_else(|e| {
-//             eprintln!("failed to receive from server, {}", e);
-//             child.kill().expect("Failed to kill child");
-//             panic!()
-//         });
-
-//         super::read_from_server(&mut stream).unwrap_or_else(|e| {
-//             eprintln!("failed to receive ack from server, {}", e);
-//             child.kill().expect("Failed to kill child");
-//             panic!()
-//         });
-
-//         child.kill().expect("Failed to kill child");
-//     }
-
-//     // #[test]
-//     // #[serial]
-//     // fn message_to_self() {
-//     // crate::contact::Contacts::drop_table().unwrap();
-//     // crate::contact::Contacts::create_table().unwrap();
-//     // crate::message::Messages::drop_table().unwrap();
-//     // crate::message::Messages::create_table().unwrap();
-//     // crate::config::Config::drop_table().unwrap();
-//     // crate::config::Config::create_table().unwrap();
-//     // crate::config::Config::new("hello".to_string(), None, None, None, None)
-//     //     .expect("could not create config");
-//     //     process::Command::new("cargo")
-//     //         .args(&["build", "--bin", "stupid"])
-//     //         .current_dir("../../server")
-//     //         .output()
-//     //         .expect("Failed to start server");
-
-//     //     let mut child = process::Command::new("cargo")
-//     //         .args(&["run", "--bin", "stupid"])
-//     //         .current_dir("../../server")
-//     //         .spawn()
-//     //         .expect("Failed to start server");
-
-//     //     println!("sleeping thread");
-//     //     std::thread::sleep(std::time::Duration::from_secs(1));
-
-//     //     let mut stream = match super::open_connection() {
-//     //         Ok(stream) => stream,
-//     //         Err(e) => {
-//     //             child.kill().expect("Failed to kill child");
-//     //             panic!("connection could not be opened: {}", e);
-//     //         }
-//     //     };
-//     //     println!("Registering user");
-//     //     match super::register(super::UserId::from("hello"), &mut stream) {
-//     //         Ok(_) => {}
-//     //         Err(e) => {
-//     //             child.kill().expect("Failed to kill child");
-//     //             panic!("registration failed, {}", e);
-//     //         }
-//     //     }
-//     //     println!("Forming message");
-//     //     if let Ok(super::MessageToServer::SendMsg { to, body }) =
-//     //         super::form_text_message("hello".to_string(), "message content".to_string())
-//     //     {
-//     //         super::send_text_message(to, body, &mut stream).expect("could not send message");
-//     //         std::thread::sleep(std::time::Duration::from_secs(3));
-//     //         match super::read_from_server(&mut stream) {
-//     //             Ok(()) => println!(" read from server okay!"),
-//     //             _ => panic!("failed to read message from server!"),
-//     //         }
-//     //         child.kill().expect("Failed to kill child");
-//     //         let messages = crate::message::Messages::get_conversation(&"hello")
-//     //             .expect("could not get messages from DB");
-
-//     //         assert_eq!(&messages[0].body, &"message content");
-//     //         println!("fetched message successfully!");
-//     //     } else {
-//     //         child.kill().expect("Failed to kill child");
-//     //         panic!("Could not conver form text message");
-//     //     }
-//     // }
-// }
+    pub async fn RegisterDevice(&mut self) -> Result<oneshot::Receiver<Response>, HErr> {
+        let query = MessageToServer::RegisterDevice;
+        self.send_query(query).await
+    }
+}
