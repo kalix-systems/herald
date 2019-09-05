@@ -52,7 +52,6 @@ ApplicationWindow {
         }
     }
 
-    /// Todo : make the split handle less intrusive. probably just a line
     SplitView {
         id: rootSplitView
         anchors.fill: parent
@@ -72,7 +71,7 @@ ApplicationWindow {
         }
 
         handle: Rectangle {
-            implicitWidth: 4
+            implicitWidth: 2
             implicitHeight: 4
             color: if (SplitHandle.pressed) {
                        Qt.darker(QmlCfg.palette.secondaryColor, 1.1)
