@@ -48,6 +48,7 @@ Row {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendly_timestamp(epoch_timestamp_ms)
+            font.pointSize: 10
             anchors {
                 margins: QmlCfg.margin / 2
                 bottom: bubble.bottom
