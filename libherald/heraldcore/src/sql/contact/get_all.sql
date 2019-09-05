@@ -1,5 +1,5 @@
 SELECT
-  id,
+  user_id,
   name,
   profile_picture,
   color,

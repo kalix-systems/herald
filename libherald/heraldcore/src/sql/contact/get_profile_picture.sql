@@ -3,6 +3,6 @@ SELECT
 FROM
   contacts
 WHERE
-  id = ?
+  user_id = ?
 LIMIT
   1

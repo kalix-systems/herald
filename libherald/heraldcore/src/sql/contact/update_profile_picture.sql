@@ -3,4 +3,4 @@ UPDATE
 SET
   profile_picture = @1
 WHERE
-  id = @2
+  user_id = @2

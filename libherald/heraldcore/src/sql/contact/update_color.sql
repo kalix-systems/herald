@@ -3,4 +3,4 @@ UPDATE
 SET
   color = @1
 WHERE
-  id = @2
+  user_id = @2

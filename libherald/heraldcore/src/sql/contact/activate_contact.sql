@@ -3,4 +3,4 @@ UPDATE
 SET
   archived = 0
 WHERE
-  id = ?
+  user_id = ?

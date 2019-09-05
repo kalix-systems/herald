@@ -143,7 +143,7 @@ impl Contacts {
         let mut db = Database::get()?;
 
         let tx = db.transaction()?;
-        tx.execute(include_str!("sql/contact/delete.sql"), &[id])?;
+        tx.execute(include_str!("sql/contact/delete_contact.sql"), &[id])?;
         tx.execute(include_str!("sql/message/delete_conversation.sql"), &[id])?;
         tx.commit()?;
         Ok(())
