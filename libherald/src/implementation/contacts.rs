@@ -196,6 +196,11 @@ impl ContactsTrait for Contacts {
     }
 
     fn filter(&mut self, pattern: String, regex: bool) -> bool {
+        if pattern.is_empty() {
+            self.clear_filter();
+            return true;
+        }
+
         let pattern = if regex {
             match SearchPattern::new_regex(pattern) {
                 Ok(pat) => pat,
