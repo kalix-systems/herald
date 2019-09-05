@@ -1,8 +1,12 @@
-use crate::{config::Config, errors::HErr, message as db};
+use crate::{
+    config::Config,
+    errors::HErr::{self, *},
+    message as db,
+};
 use chrono::prelude::*;
 use herald_common::{
-    read_cbor, send_cbor, ClientMessageAck, GlobalId, MessageStatus, MessageToClient,
-    MessageToPeer, MessageToServer, Response, UserId,
+    read_cbor, send_cbor, ClientMessageAck, DeviceId, GlobalId, MessageStatus, MessageToClient,
+    MessageToPeer, MessageToServer, Response, User, UserId,
 };
 use lazy_static::*;
 use qutex::Qutex;
@@ -34,12 +38,28 @@ lazy_static! {
     };
 }
 
+struct Event {
+    reply: Option<MessageToServer>,
+    notification: Option<Notification>,
+}
+
 #[derive(Debug)]
+/// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
     // TODO: include conversation id's here
     // issue: #15
     NewMsg(UserId),
     Ack(ClientMessageAck),
+}
+
+#[derive(Clone)]
+/// `Session` is the main struct for managing networking. Think of it as the sending handle for
+/// interacting with the server. It can make queries and it can send messages.
+pub struct Session {
+    writer: Qutex<TcpStreamWriteHalf>,
+    id: GlobalId,
+    pending: Qutex<HashMap<MessageToServer, oneshot::Sender<Response>>>,
+    notifications: mpsc::UnboundedSender<Notification>,
 }
 
 fn form_ack(update_code: MessageStatus, message_id: i64) -> MessageToPeer {
@@ -67,6 +87,10 @@ fn handle_msg(from: UserId, body: String, time: DateTime<Utc>) -> Result<Event, 
         Some(time),
         MessageStatus::Inbound, //all messages are inbound
     )?;
+    // TODO: use a real message id - the db row is *not* a message id, as it won't be the same
+    // across different devices, and I don't know why it was ever used as one,
+    // but I haven't changed it because I don't know if we're relying on this behavior anywhere.
+    // I'll fix this when I integrate with doubleclank.
     let reply = form_push(from.clone(), form_ack(MessageStatus::RecipReceivedAck, row))?;
     let notification = Notification::NewMsg(from);
     Ok(Event {
@@ -95,21 +119,8 @@ fn handle_push(from: GlobalId, body: MessageToPeer, time: DateTime<Utc>) -> Resu
     }
 }
 
-struct Event {
-    reply: Option<MessageToServer>,
-    notification: Option<Notification>,
-}
-
-#[derive(Clone)]
-pub struct Session {
-    writer: Qutex<TcpStreamWriteHalf>,
-    id: GlobalId,
-    pending: Qutex<HashMap<MessageToServer, oneshot::Sender<Response>>>,
-    notifications: mpsc::UnboundedSender<Notification>,
-}
-
-/// Login
 async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> {
+    // TODO: replace this with a static global_id instead
     let gid = GlobalId {
         did: 0,
         uid: Config::static_id()?,
@@ -118,15 +129,16 @@ async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> 
     Ok(gid)
 }
 
-fn error_abort<E: std::fmt::Display, T>(e: E) -> T {
-    eprintln!("an impossible error happend at {}:{}", file!(), line!());
+// TODO: replace this with a macro?
+fn impossible_error<E: std::fmt::Display, T>(e: E) -> T {
+    eprintln!("an impossible error happened");
     eprintln!("message was: {}", e);
     eprintln!("what have you done?");
     std::process::abort()
 }
 
 impl Session {
-    /// Initializes connection with the server.
+    /// Initializes connection with the server and login.
     pub async fn init() -> Result<(mpsc::UnboundedReceiver<Notification>, Self), HErr> {
         println!("Client connecting to {}", *SERVER_ADDR);
         let stream = TcpStream::connect(*SERVER_ADDR).await?;
@@ -158,19 +170,36 @@ impl Session {
         Ok((receiver, sess))
     }
 
+    /// Sends a `MessageToPeer` through the server.
     pub async fn send_msg(&self, to: UserId, msg: MessageToPeer) -> Result<(), HErr> {
         let push = form_push(to, msg)?;
         self.send_to_server(&push).await
     }
 
-    pub async fn request_meta(&self, of: UserId) -> Result<oneshot::Receiver<Response>, HErr> {
-        let query = MessageToServer::RequestMeta { of };
-        self.send_query(query).await
+    /// Requests the metadata of a user, asynchronously returns the response.
+    pub async fn request_meta(&self, of: UserId) -> Result<User, HErr> {
+        match self
+            .send_query(MessageToServer::RequestMeta { of: of.clone() })
+            .await?
+        {
+            Response::Meta(u) => Ok(u),
+            Response::DataNotFound => Err(InvalidUserId(of)),
+            r => Err(HeraldError(format!(
+                "bad response to metadata request from server from user {} - response was {:?}",
+                of, r
+            ))),
+        }
     }
 
-    pub async fn register_device(&self) -> Result<oneshot::Receiver<Response>, HErr> {
-        let query = MessageToServer::RegisterDevice;
-        self.send_query(query).await
+    /// Registers a new device and returns a future which will contain the new `DeviceId`.
+    pub async fn register_device(&self) -> Result<DeviceId, HErr> {
+        match self.send_query(MessageToServer::RegisterDevice).await? {
+            Response::DeviceRegistered(d) => Ok(d),
+            r => Err(HeraldError(format!(
+                "bad response to device registry request from server - respones was {:?}",
+                r
+            ))),
+        }
     }
 
     async fn send_to_server(&self, msg: &MessageToServer) -> Result<(), HErr> {
@@ -179,33 +208,40 @@ impl Session {
             .clone()
             .lock_async()
             .await
-            .unwrap_or_else(error_abort);
+            .unwrap_or_else(impossible_error);
         send_cbor(writer.deref_mut(), msg).await?;
         Ok(())
     }
 
-    async fn send_query(
-        &self,
-        query: MessageToServer,
-    ) -> Result<oneshot::Receiver<Response>, HErr> {
+    async fn send_query(&self, query: MessageToServer) -> Result<Response, HErr> {
         let (sender, receiver) = oneshot::channel();
         // this clone looks unnecessary - it's not!
         // insert before send so that we don't have to worry about what happens if a query is
         // responded to before this future is executed again
-        self.pending
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(error_abort)
-            .insert(query.clone(), sender);
-        let mut w = self
-            .writer
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(error_abort);
-        send_cbor(w.deref_mut(), &query).await?;
-        Ok(receiver)
+        {
+            let mut p = self
+                .pending
+                .clone()
+                .lock_async()
+                .await
+                .unwrap_or_else(impossible_error);
+            p.insert(query.clone(), sender);
+        }
+        {
+            let mut w = self
+                .writer
+                .clone()
+                .lock_async()
+                .await
+                .unwrap_or_else(impossible_error);
+            send_cbor(w.deref_mut(), &query).await?;
+        }
+        receiver.await.map_err(|e| {
+            HeraldError(format!(
+                "query sender was dropped, query was {:?}, error was {}",
+                query, e,
+            ))
+        })
     }
 
     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
@@ -235,7 +271,7 @@ impl Session {
             .clone()
             .lock_async()
             .await
-            .unwrap_or_else(error_abort)
+            .unwrap_or_else(impossible_error)
             .remove(query)
         {
             drop(s.send(res));

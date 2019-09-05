@@ -104,6 +104,7 @@ pub enum MessageToPeer {
     Ack(ClientMessageAck),
 }
 
+// TODO: lifetime parameters so these are zerocopy
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
     SendMsg { to: UserId, body: RawMsg },
@@ -162,6 +163,7 @@ impl std::fmt::Display for TransportError {
         }
     }
 }
+
 impl std::error::Error for TransportError {
     fn cause(&self) -> Option<&(dyn std::error::Error + 'static)> {
         Some(match self {
