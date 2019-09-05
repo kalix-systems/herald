@@ -17,7 +17,9 @@ ListView {
     }
     delegate: Item {
         id: contactItem
-        height: {if (visible) 60
+        height: {
+            if (visible)
+                60
         }
 
         width: parent.width
@@ -70,7 +72,7 @@ ListView {
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
                         contactItem.focus = true
-                        chatView.messageModel.conversationId = contact_id;
+                        chatView.messageModel.conversationId = contact_id
                         chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
                         chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
                         chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash

@@ -24,7 +24,7 @@ Row {
                }
 
         radius: QmlCfg.radius
-        width: Math.max( bubbleText.width, timeStamp.width) + QmlCfg.margin
+        width: Math.max(bubbleText.width, timeStamp.width) + QmlCfg.margin
         height: bubbleText.height + timeStamp.height + QmlCfg.margin
         TextEdit {
             id: bubbleText
@@ -33,12 +33,12 @@ Row {
             mouseSelectionMode: TextEdit.SelectCharacters
             readOnly: true
             wrapMode: TextEdit.Wrap
-            width:  Math.min((chatPane.width  / 2), messageMetrics.width) + 10
-            anchors{
-                margins: QmlCfg.margin/2
+            width: Math.min((chatPane.width / 2), messageMetrics.width) + 10
+            anchors {
+                margins: QmlCfg.margin / 2
                 top: bubble.top
                 left: bubble.left
-                topMargin: QmlCfg.margin/2
+                topMargin: QmlCfg.margin / 2
             }
             Component.onCompleted: {
                 bubbleText.set
@@ -48,11 +48,11 @@ Row {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendly_timestamp(epoch_timestamp_ms)
-            anchors{
-                margins: QmlCfg.margin/2
+            anchors {
+                margins: QmlCfg.margin / 2
                 bottom: bubble.bottom
                 left: bubble.left
-                bottomMargin: QmlCfg.margin/2
+                bottomMargin: QmlCfg.margin / 2
             }
         }
     }

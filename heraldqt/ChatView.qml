@@ -13,7 +13,6 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
-
     }
 
     CVUtils.ChatBar {
@@ -92,7 +91,6 @@ Pane {
         } /// Column
     } /// ScrollView
 
-
     /// Attachments
     FileDialog {
         id: attachmentsDialogue
@@ -130,7 +128,6 @@ Pane {
             left: parent.right
         }
 
-
         anchors.bottom: parent.bottom
         anchors.bottomMargin: QmlCfg.margin / 2
         anchors.rightMargin: QmlCfg.margin / 2
@@ -165,8 +162,11 @@ Pane {
 
         //highlight border
         onFocusChanged: {
-            if (focus) { chatText.background.border.width = 2 }
-            else {chatText.background.border.width = 0 }
+            if (focus) {
+                chatText.background.border.width = 2
+            } else {
+                chatText.background.border.width = 0
+            }
         }
 
         TextArea {
@@ -200,8 +200,8 @@ Pane {
                     if (text.trim().length === 0) {
                         return
                     }
-                    var result = networkHandle.send_message(text,
-                                               messageModel.conversationId)
+                    var result = networkHandle.send_message(
+                                text, messageModel.conversationId)
                     messageModel.insert_message(text, result)
                     chatScrollBar.position = 1.0
                     clear()

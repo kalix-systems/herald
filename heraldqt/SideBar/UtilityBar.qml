@@ -39,9 +39,9 @@ ToolBar {
             font.pointSize: 10
             onTextChanged: {
                 contacts.filter(searchText.text, searchRegex)
-                                for (var i = 0; i < contacts.rowCount(); i++)
-                                   console.log(contacts.name(i), contacts.matched(i))
-                              //  contacts.clear_filter()
+                for (var i = 0; i < contacts.rowCount(); i++)
+                    console.log(contacts.name(i), contacts.matched(i))
+                //  contacts.clear_filter()
             }
         }
     }
@@ -62,20 +62,17 @@ ToolBar {
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.RightButton
-            onClicked: { if (searchRegex)
-                {
+            onClicked: {
+                if (searchRegex) {
                     searchButton.background.source = "qrc:///icons/search.png"
                     searchRegex = false
-                }
-                else {
+                } else {
                     searchButton.background.source = "qrc:///icons/searchRegexTemp.png"
                     searchRegex = true
                 }
 
                 console.log(searchRegex)
             }
-
-
         }
     }
 

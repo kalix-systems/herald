@@ -7,7 +7,6 @@ import "SideBar/popups" as Popups
 import Qt.labs.platform 1.0
 import QtQml 2.13
 
-
 ApplicationWindow {
     visible: true
     width: 900
@@ -20,17 +19,19 @@ ApplicationWindow {
     MenuBar {
         Menu {
             title: "Herald"
-            MenuItem {text: "Preferences"
+            MenuItem {
+                text: "Preferences"
                 onTriggered: preferencesPopup.open()
             }
         }
         Menu {
             title: "Window"
-            MenuItem {text:"Minimize"
-            onTriggered: root.showMinimized()}
+            MenuItem {
+                text: "Minimize"
+                onTriggered: root.showMinimized()
+            }
         }
     }
-
 
     NetworkHandle {
         id: networkHandle
@@ -39,7 +40,6 @@ ApplicationWindow {
     Popups.ConfigPopup {
         id: preferencesPopup
     }
-
 
     /// global configurations item
     Config {
