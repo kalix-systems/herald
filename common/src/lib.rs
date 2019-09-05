@@ -48,6 +48,9 @@ pub struct ClientMessageAck {
     pub message_id: i64,
 }
 
+/// This type gets serialized into raw bytes and sent to the server
+/// Then it is deserialized again on the client side to implement 
+/// control flow for the frontend.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum Body {
     Message(String),

@@ -44,24 +44,13 @@ pub fn send_to_server<T: Serialize>(data: &T, stream: &mut TcpStream) -> Result<
 
 /// Reads inbound data from the server
 pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
-    stream.set_nonblocking(true)?;
+    // big problem
+    // stream.set_nonblocking(true)?;
 
     let mut buf = [0u8; 8];
-    loop {
-        match stream.read_exact(&mut buf) {
-            Ok(_) => break,
-            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                //platform specific login needs to be here.
-                std::thread::sleep(std::time::Duration::from_secs(2));
-            }
-            Err(e) => {
-                eprintln!("Error reading from server : {}", e);
-                return Err(HErr::IoError(e));
-            }
-        };
-    }
+    stream.read_exact(&mut buf)?;
 
-    stream.set_nonblocking(false)?;
+    // stream.set_nonblocking(false)?;
 
     let len = u64::from_le_bytes(buf) as usize;
     let mut buf = vec![0u8; len];
@@ -90,11 +79,11 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
                     message_id,
                 })) => {
                     println!("ACK Received. Decoding.");
-                    crate::message::Messages::update_status(
-                        from.uid.to_string().as_str(),
-                        message_id,
-                        update_code,
-                    )?
+                    // crate::message::Messages::update_status(
+                    //     from.uid.to_string().as_str(),
+                    //     message_id,
+                    //     update_code,
+                    // )?
                 }
                 Err(e) => {
                     eprintln!("Error decoding new message {}", e);
@@ -103,27 +92,6 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
         }
         _ => unimplemented!(),
     }
-    Ok(())
-}
-
-/// Registers `user_id` on the server.
-pub fn register(user_id: UserId, stream: &mut TcpStream) -> Result<(), HErr> {
-    let gid = GlobalId {
-        did: 0,
-        uid: user_id.clone(),
-    };
-
-    let msg = MessageToServer::SendMsg {
-        to: user_id.clone(),
-        body: serde_cbor::ser::to_vec(&Body::Message(String::from("").into()))?.into(),
-    };
-
-    send_to_server(&gid, stream)?;
-    send_to_server(&msg, stream)?;
-
-    // Shim code to ack self because the server is ~stupid~
-    read_from_server(stream)?;
-
     Ok(())
 }
 
@@ -182,29 +150,20 @@ pub fn send_ack(
 
 #[cfg(test)]
 mod tests {
+    use super::{form_server_ack, form_text_message};
     use crate::db::DBTable;
+    use herald_common::*;
     use serial_test_derive::serial;
     use std::process;
 
-    #[test]
-    #[serial]
-    fn register() {
-        crate::contact::Contacts::drop_table().unwrap();
-        crate::contact::Contacts::create_table().unwrap();
-        crate::message::Messages::drop_table().unwrap();
-        crate::message::Messages::create_table().unwrap();
-        crate::config::Config::drop_table().unwrap();
-        crate::config::Config::create_table().unwrap();
-        crate::config::Config::new("hello".to_string(), None, None, None, None)
-            .expect("could not create config");
-
+    fn boot_server() -> std::process::Child {
         process::Command::new("cargo")
             .args(&["build", "--bin", "stupid"])
             .current_dir("../../server")
             .output()
             .expect("Failed to start server");
 
-        let mut child = process::Command::new("cargo")
+        let child = process::Command::new("cargo")
             .args(&["run", "--bin", "stupid"])
             .current_dir("../../server")
             .spawn()
@@ -212,29 +171,85 @@ mod tests {
 
         std::thread::sleep(std::time::Duration::from_secs(1));
 
-        let mut stream = match super::open_connection() {
-            Ok(stream) => stream,
-            Err(e) => {
-                child.kill().expect("Failed to kill child");
-                panic!("connection failed, {}", e);
-            }
-        };
+        child
+    }
 
-        std::thread::sleep(std::time::Duration::from_secs(2));
+    #[test]
+    fn serialize() {
+        let msg = form_text_message(String::from("hello"), String::from("world"))
+            .expect("can't build message");
+        let ack = form_server_ack(super::UserId::from("Person"), MessageStatus::NoAck, 0)
+            .expect("can't build ack");
 
-        match super::register(super::UserId::from("hello"), &mut stream) {
-            Err(e) => {
+        match ack {
+            MessageToServer::SendMsg { body, .. } => match serde_cbor::de::from_slice(&body) {
+                Ok(Body::Ack(ClientMessageAck {
+                    update_code,
+                    message_id,
+                })) => assert_eq!((update_code, message_id), (MessageStatus::NoAck, 0)),
+                _ => panic!("Ack was serialized to wrong type"),
+            },
+            _ => panic!("ack was mistyped"),
+        }
+
+        match msg {
+            MessageToServer::SendMsg { body, .. } => match serde_cbor::de::from_slice(&body) {
+                Ok(Body::Message(string)) => assert_eq!(String::from("world"), string),
+                _ => panic!("msg was serialized to wrong type"),
+            },
+            _ => panic!("msg was mistyped"),
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn register_self() {
+        crate::config::Config::drop_table().unwrap();
+        crate::config::Config::create_table().unwrap();
+        crate::config::Config::new("hello".to_string(), None, None, None, None)
+            .expect("could not create config");
+
+        let mut child = boot_server();
+
+        let mut stream = super::open_connection().unwrap_or_else(|e| {
+            eprintln!("connection failed, {}", e);
+            child.kill().expect("Failed to kill child");
+            panic!()
+        });
+
+        super::send_text_message(super::UserId::from("hello"), "world".into(), &mut stream)
+            .unwrap_or_else(|e| {
+                eprintln!("msg to self failed, {}", e);
                 child.kill().expect("Failed to kill child");
-                panic!("Registration failed , {}", e);
-            }
-            _ => {}
-        };
+                panic!()
+            });
+
+        super::read_from_server(&mut stream).unwrap_or_else(|e| {
+            eprintln!("failed to receive from server, {}", e);
+            child.kill().expect("Failed to kill child");
+            panic!()
+        });
+
+        super::read_from_server(&mut stream).unwrap_or_else(|e| {
+            eprintln!("failed to receive ack from server, {}", e);
+            child.kill().expect("Failed to kill child");
+            panic!()
+        });
+
         child.kill().expect("Failed to kill child");
     }
 
     // #[test]
     // #[serial]
     // fn message_to_self() {
+    // crate::contact::Contacts::drop_table().unwrap();
+    // crate::contact::Contacts::create_table().unwrap();
+    // crate::message::Messages::drop_table().unwrap();
+    // crate::message::Messages::create_table().unwrap();
+    // crate::config::Config::drop_table().unwrap();
+    // crate::config::Config::create_table().unwrap();
+    // crate::config::Config::new("hello".to_string(), None, None, None, None)
+    //     .expect("could not create config");
     //     process::Command::new("cargo")
     //         .args(&["build", "--bin", "stupid"])
     //         .current_dir("../../server")
