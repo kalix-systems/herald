@@ -225,9 +225,7 @@ impl ContactsTrait for Contacts {
                 None => return false,
             };
 
-            if !(pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str())) {
-                contact.matched = false;
-            }
+            contact.matched = pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str());
         }
         self.model.data_changed(0, self.list.len() - 1);
         false

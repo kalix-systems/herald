@@ -39,9 +39,6 @@ ToolBar {
             font.pointSize: 10
             onTextChanged: {
                 contacts.filter(searchText.text, searchRegex)
-                for (var i = 0; i < contacts.rowCount(); i++)
-                    console.log(contacts.name(i), contacts.matched(i))
-                //  contacts.clear_filter()
             }
         }
     }
