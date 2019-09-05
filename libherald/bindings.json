@@ -59,7 +59,7 @@
                     "write": true,
                     "type": "bool"
                 },
-                "visible": {
+                "matched": {
                     "write": true,
                     "type": "bool"
                 }

@@ -10,7 +10,7 @@ use im_rc::vector::Vector as ImVector;
 #[derive(Clone)]
 struct ContactsItem {
     inner: contact::Contact,
-    visible: bool,
+    matched: bool,
 }
 
 pub struct Contacts {
@@ -31,7 +31,7 @@ impl ContactsTrait for Contacts {
                 .into_iter()
                 .map(|c| ContactsItem {
                     inner: c,
-                    visible: true,
+                    matched: true,
                 })
                 .collect(),
             Err(_) => ImVector::new(),
@@ -70,7 +70,7 @@ impl ContactsTrait for Contacts {
         self.model.begin_insert_rows(0, 0);
         self.list.push_front(ContactsItem {
             inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
-            visible: true,
+            matched: true,
         });
         self.model.end_insert_rows();
         true
@@ -167,12 +167,12 @@ impl ContactsTrait for Contacts {
         true
     }
 
-    fn visible(&self, row_index: usize) -> bool {
-        self.list[row_index].visible
+    fn matched(&self, row_index: usize) -> bool {
+        self.list[row_index].matched
     }
 
-    fn set_visible(&mut self, row_index: usize, value: bool) -> bool {
-        self.list[row_index].visible = value;
+    fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
+        self.list[row_index].matched = value;
         true
     }
 
@@ -221,18 +221,18 @@ impl ContactsTrait for Contacts {
             };
 
             if !(pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str())) {
-                contact.visible = false;
+                contact.matched = false;
             }
         }
-        self.model.data_changed(0, self.list.len());
+        self.model.data_changed(0, self.list.len() - 1);
         false
     }
 
     fn clear_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            contact.visible = true;
+            contact.matched = true;
         }
-        self.model.data_changed(0, self.list.len());
+        self.model.data_changed(0, self.list.len() - 1);
     }
 
     fn emit(&mut self) -> &mut ContactsEmitter {

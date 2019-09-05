@@ -86,12 +86,12 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QString contact_id(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
     Q_INVOKABLE QString profile_picture(int row) const;
     Q_INVOKABLE bool setProfile_picture(int row, const QString& value);
-    Q_INVOKABLE bool visible(int row) const;
-    Q_INVOKABLE bool setVisible(int row, bool value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

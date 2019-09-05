@@ -407,12 +407,12 @@ pub trait ContactsTrait {
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn contact_id(&self, index: usize) -> &str;
+    fn matched(&self, index: usize) -> bool;
+    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> Option<&str>;
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
     fn profile_picture(&self, index: usize) -> Option<&str>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
-    fn visible(&self, index: usize) -> bool;
-    fn set_visible(&mut self, index: usize, _: bool) -> bool;
 }
 
 #[no_mangle]
@@ -567,6 +567,20 @@ pub unsafe extern "C" fn contacts_data_contact_id(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn contacts_data_matched(ptr: *const Contacts, row: c_int) -> bool {
+    let o = &*ptr;
+    o.matched(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_matched(
+    ptr: *mut Contacts, row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_matched(to_usize(row), v)
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn contacts_data_name(
     ptr: *const Contacts, row: c_int,
     d: *mut QString,
@@ -624,20 +638,6 @@ pub unsafe extern "C" fn contacts_set_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contacts, row: c_int) -> bool {
     (&mut *ptr).set_profile_picture(to_usize(row), None)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_data_visible(ptr: *const Contacts, row: c_int) -> bool {
-    let o = &*ptr;
-    o.visible(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_set_data_visible(
-    ptr: *mut Contacts, row: c_int,
-    v: bool,
-) -> bool {
-    (&mut *ptr).set_visible(to_usize(row), v)
 }
 
 pub struct MessagesQObject {}

@@ -89,14 +89,14 @@ extern "C" {
     quint32 contacts_data_color(const Contacts::Private*, int);
     bool contacts_set_data_color(Contacts::Private*, int, quint32);
     void contacts_data_contact_id(const Contacts::Private*, int, QString*, qstring_set);
+    bool contacts_data_matched(const Contacts::Private*, int);
+    bool contacts_set_data_matched(Contacts::Private*, int, bool);
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_name_none(Contacts::Private*, int);
     void contacts_data_profile_picture(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_profile_picture(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_profile_picture_none(Contacts::Private*, int);
-    bool contacts_data_visible(const Contacts::Private*, int);
-    bool contacts_set_data_visible(Contacts::Private*, int, bool);
     void contacts_sort(Contacts::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int contacts_row_count(const Contacts::Private*);
@@ -208,6 +208,22 @@ QString Contacts::contact_id(int row) const
     return s;
 }
 
+bool Contacts::matched(int row) const
+{
+    return contacts_data_matched(m_d, row);
+}
+
+bool Contacts::setMatched(int row, bool value)
+{
+    bool set = false;
+    set = contacts_set_data_matched(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 QString Contacts::name(int row) const
 {
     QString s;
@@ -252,22 +268,6 @@ bool Contacts::setProfile_picture(int row, const QString& value)
     return set;
 }
 
-bool Contacts::visible(int row) const
-{
-    return contacts_data_visible(m_d, row);
-}
-
-bool Contacts::setVisible(int row, bool value)
-{
-    bool set = false;
-    set = contacts_set_data_visible(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 QVariant Contacts::data(const QModelIndex &index, int role) const
 {
     Q_ASSERT(rowCount(index.parent()) > index.row());
@@ -281,11 +281,11 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 2:
             return QVariant::fromValue(contact_id(index.row()));
         case Qt::UserRole + 3:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(profile_picture(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(visible(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(profile_picture(index.row())));
         }
         break;
     }
@@ -308,9 +308,9 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     names.insert(Qt::UserRole + 0, "archive_status");
     names.insert(Qt::UserRole + 1, "color");
     names.insert(Qt::UserRole + 2, "contact_id");
-    names.insert(Qt::UserRole + 3, "name");
-    names.insert(Qt::UserRole + 4, "profile_picture");
-    names.insert(Qt::UserRole + 5, "visible");
+    names.insert(Qt::UserRole + 3, "matched");
+    names.insert(Qt::UserRole + 4, "name");
+    names.insert(Qt::UserRole + 5, "profile_picture");
     return names;
 }
 QVariant Contacts::headerData(int section, Qt::Orientation orientation, int role) const
@@ -344,18 +344,18 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
             }
         }
         if (role == Qt::UserRole + 3) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setName(index.row(), value.value<QString>());
+            if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
             }
         }
         if (role == Qt::UserRole + 4) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setProfile_picture(index.row(), value.value<QString>());
+                return setName(index.row(), value.value<QString>());
             }
         }
         if (role == Qt::UserRole + 5) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setVisible(index.row(), value.value<bool>());
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setProfile_picture(index.row(), value.value<QString>());
             }
         }
     }
