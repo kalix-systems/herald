@@ -165,27 +165,6 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
 
 const PORT: u16 = 8000;
 
-async fn read_datagram<S: AsyncRead + Unpin, T: for<'a> Deserialize<'a>>(
-    s: &mut S,
-) -> Result<T, Error> {
-    let mut buf = [0u8; 8];
-    s.read_exact(&mut buf).await?;
-    let len = u64::from_le_bytes(buf) as usize;
-    let mut buf = vec![0u8; len];
-    s.read_exact(&mut buf).await?;
-    dbg!(&buf);
-    let res = serde_cbor::from_slice(&buf)?;
-    Ok(res)
-}
-
-async fn send_datagram<S: AsyncWrite + Unpin, T: Serialize>(s: &mut S, t: &T) -> Result<(), Error> {
-    let vec = serde_cbor::to_vec(t)?;
-    let len = u64::to_le_bytes(vec.len() as u64);
-    s.write_all(&len).await?;
-    s.write_all(&vec).await?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     let state: AppState<net::tcp::split::TcpStreamWriteHalf> = AppState::new();

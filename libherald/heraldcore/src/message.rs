@@ -3,8 +3,9 @@ use crate::{
     errors::HErr,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::{MessageStatus, TryFromPrimitive};
+use herald_common::MessageStatus;
 use rusqlite::{ToSql, NO_PARAMS};
+use std::convert::TryInto;
 static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
 
 #[derive(Default)]
@@ -48,8 +49,7 @@ impl Message {
                     Utc::now()
                 }
             },
-            message_status: MessageStatus::try_from_primitive(message_status)
-                .unwrap_or(MessageStatus::NoAck),
+            message_status: message_status.try_into().unwrap_or(MessageStatus::NoAck),
         })
     }
 }
