@@ -123,6 +123,7 @@ public:
     Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
     Q_INVOKABLE bool insert_message(const QString& body);
+    Q_INVOKABLE bool reply(const QString& body, qint64 op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -145,6 +146,7 @@ public:
     Q_INVOKABLE qint64 epoch_timestamp_ms(int row) const;
     Q_INVOKABLE bool error_sending(int row) const;
     Q_INVOKABLE qint64 message_id(int row) const;
+    Q_INVOKABLE QVariant op(int row) const;
     Q_INVOKABLE bool reached_recipient(int row) const;
     Q_INVOKABLE bool reached_server(int row) const;
     Q_INVOKABLE QString recipient(int row) const;

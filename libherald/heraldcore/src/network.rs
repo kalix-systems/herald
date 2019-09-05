@@ -67,6 +67,7 @@ pub fn read_from_server(stream: &mut TcpStream) -> Result<(), HErr> {
                 recipient.as_str(),
                 body.as_str(),
                 Some(time),
+                None,
                 crate::message::MessageStatus::NoAck,
             )?;
         }

@@ -134,6 +134,10 @@
                 "epoch_timestamp_ms": {
                     "type": "qint64"
                 },
+                "op": {
+                    "type": "qint64",
+                    "optional": true
+                },
                 "uuid": {
                     "type": "qint64"
                 },
@@ -155,6 +159,20 @@
                         {
                             "name": "body",
                             "type": "QString"
+                        }
+                    ]
+                },
+                "reply": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "body",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "op",
+                            "type": "qint64"
                         }
                     ]
                 },

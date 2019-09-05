@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS messages (
   timestamp TEXT NOT NULL,
   status INTEGER NOT NULL,
   body TEXT NOT NULL,
+  --- message id of message being replied to
+  op INTEGER DEFAULT NULL,
   FOREIGN KEY(author) REFERENCES contacts (id),
   FOREIGN KEY(recipient) REFERENCES contacts (id)
 )

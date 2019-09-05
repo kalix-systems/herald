@@ -744,6 +744,7 @@ pub trait MessagesTrait {
     fn delete_conversation_by_id(&mut self, conversation_id: String) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn insert_message(&mut self, body: String) -> bool;
+    fn reply(&mut self, body: String, op: i64) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -757,6 +758,7 @@ pub trait MessagesTrait {
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
     fn error_sending(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> i64;
+    fn op(&self, index: usize) -> Option<i64>;
     fn reached_recipient(&self, index: usize) -> bool;
     fn reached_server(&self, index: usize) -> bool;
     fn recipient(&self, index: usize) -> &str;
@@ -876,6 +878,15 @@ pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op: i64) -> bool {
+    let mut body = String::new();
+    set_string_from_utf16(&mut body, body_str, body_len);
+    let o = &mut *ptr;
+    let r = o.reply(body, op);
+    r
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_row_count(ptr: *const Messages) -> c_int {
     to_c_int((&*ptr).row_count())
 }
@@ -944,6 +955,12 @@ pub unsafe extern "C" fn messages_data_error_sending(ptr: *const Messages, row: 
 pub unsafe extern "C" fn messages_data_message_id(ptr: *const Messages, row: c_int) -> i64 {
     let o = &*ptr;
     o.message_id(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op(ptr: *const Messages, row: c_int) -> COption<i64> {
+    let o = &*ptr;
+    o.op(to_usize(row)).into()
 }
 
 #[no_mangle]

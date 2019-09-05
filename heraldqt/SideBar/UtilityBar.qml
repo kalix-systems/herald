@@ -14,6 +14,7 @@ ToolBar {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
+    property bool searchRegex: false
 
     ScrollView {
         id: searchScroll
@@ -37,13 +38,14 @@ ToolBar {
             Layout.fillWidth: true
             font.pointSize: 10
             onTextChanged: {
-                contacts.filter(searchText.text, false)
+                contacts.filter(searchText.text, searchRegex)
                                 for (var i = 0; i < contacts.rowCount(); i++)
                                    console.log(contacts.name(i), contacts.matched(i))
                               //  contacts.clear_filter()
             }
         }
     }
+
     Button {
         id: searchButton
         anchors.right: addContactButton.left
@@ -57,9 +59,23 @@ ToolBar {
             scale: 0.9
             mipmap: true
         }
-        onClicked:  {contacts.filter(searchText.text, false)
-                for (var i = 0; i < contacts.rowCount(); i++)
-                    console.log(contacts.name(i) + " " + contacts.matched(i))
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: { if (searchRegex)
+                {
+                    searchButton.background.source = "qrc:///icons/search.png"
+                    searchRegex = false
+                }
+                else {
+                    searchButton.background.source = "qrc:///icons/searchRegexTemp.png"
+                    searchRegex = true
+                }
+
+                console.log(searchRegex)
+            }
+
+
         }
     }
 
