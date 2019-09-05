@@ -1,14 +1,13 @@
 SELECT
   msg_id,
   author,
-  recipient,
+  conversation,
   body,
   op,
   timestamp
 FROM
   messages
 WHERE
-  author = @1
-  OR recipient = @1
+  conversation = ?
 ORDER BY
   timestamp ASC

@@ -34,7 +34,7 @@ pub struct Message {
     /// Author user id
     pub author: String,
     /// Recipient user id
-    pub recipient: String,
+    pub conversation: String,
     /// Body of message
     pub body: String,
     /// Time the message was sent or received at the server.
@@ -49,7 +49,7 @@ impl Message {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         let message_id: i64 = row.get(0)?;
         let author: String = row.get(1)?;
-        let recipient: String = row.get(2)?;
+        let conversation: String = row.get(2)?;
         let body: String = row.get(3)?;
         let op: Option<i64> = row.get(4)?;
         let timestamp: String = row.get(5)?;
@@ -57,7 +57,7 @@ impl Message {
         Ok(Message {
             message_id,
             author,
-            recipient,
+            conversation,
             body,
             op,
             timestamp: match NaiveDateTime::parse_from_str(timestamp.as_str(), DATE_FMT) {
@@ -76,7 +76,7 @@ impl Messages {
     /// Adds a message to the database.
     pub fn add_message(
         author: &str,
-        recipient: &str,
+        conversation: &str,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
         op: Option<i64>,
@@ -97,7 +97,7 @@ impl Messages {
             include_str!("sql/message/add.sql"),
             &[
                 author.to_sql()?,
-                recipient.to_sql()?,
+                conversation.to_sql()?,
                 body.to_sql()?,
                 timestamp_string.to_sql()?,
                 op.to_sql()?,
@@ -189,16 +189,17 @@ mod tests {
         Messages::create_table().unwrap();
 
         let author = "Hello";
-        let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
+        let conversation = "World";
+        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
-        Messages::add_message(author, recipient, "2", None, None, MessageStatus::NoAck)
+        Messages::add_message(author, conversation, "2", None, None, MessageStatus::NoAck)
             .expect("Failed to add second message");
 
-        let v1 = Messages::get_conversation(author).expect("Failed to get conversation by author");
+        let v1 =
+            Messages::get_conversation(conversation).expect("Failed to get conversation by author");
         assert_eq!(v1.len(), 2);
-        let v2 =
-            Messages::get_conversation(recipient).expect("Failed to get conversation by recipient");
+        let v2 = Messages::get_conversation(conversation)
+            .expect("Failed to get conversation by recipient");
         assert_eq!(v2.len(), 2);
     }
 
@@ -209,13 +210,13 @@ mod tests {
         Messages::create_table().unwrap();
 
         let author = "Hello";
-        let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
+        let conversation = "World";
+        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
 
         Messages::delete_message(1).unwrap();
 
-        assert!(Messages::get_conversation(author).unwrap().is_empty());
+        assert!(Messages::get_conversation(conversation).unwrap().is_empty());
     }
 
     #[test]
@@ -225,14 +226,14 @@ mod tests {
         Messages::create_table().unwrap();
 
         let author = "Hello";
-        let recipient = "World";
-        Messages::add_message(author, recipient, "1", None, None, MessageStatus::NoAck)
+        let conversation = "World";
+        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
-        Messages::add_message(recipient, author, "1", None, None, MessageStatus::NoAck)
+        Messages::add_message(author, conversation, "1", None, None, MessageStatus::NoAck)
             .expect("Failed to add first message");
 
-        Messages::delete_conversation(recipient).unwrap();
+        Messages::delete_conversation(conversation).unwrap();
 
-        assert!(Messages::get_conversation(author).unwrap().is_empty());
+        assert!(Messages::get_conversation(conversation).unwrap().is_empty());
     }
 }
