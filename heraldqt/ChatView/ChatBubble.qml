@@ -1,13 +1,13 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
+import QtQuick.Controls.Styles 1.4
 import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.js" as Utils
 
 Row {
     id: avatarRow
-
     property string text: ""
     property bool showAvatar: false
 
@@ -31,6 +31,7 @@ Row {
             text: messageMetrics.text
             selectByMouse: true
             mouseSelectionMode: TextEdit.SelectCharacters
+            selectByKeyboard: true
             readOnly: true
             wrapMode: TextEdit.Wrap
             width: Math.min((chatPane.width / 2), messageMetrics.width) + 10
@@ -48,10 +49,12 @@ Row {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendly_timestamp(epoch_timestamp_ms)
+            font.pixelSize: 10
             anchors {
                 margins: QmlCfg.margin / 2
                 bottom: bubble.bottom
-                left: bubble.left
+                left: if (outbound) { parent.left}
+                right: if (!outbound) { parent.right}
                 bottomMargin: QmlCfg.margin / 2
             }
         }

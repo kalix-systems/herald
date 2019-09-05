@@ -15,6 +15,8 @@ Pane {
     property Messages messageModel: Messages {
     }
 
+    SystemPalette { id: palette;  }
+
     CVUtils.ChatBar {
         id: messageBar
     }
