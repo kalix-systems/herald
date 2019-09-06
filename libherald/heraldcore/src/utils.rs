@@ -1,16 +1,20 @@
 use crate::errors::HErr;
 use regex::{Regex, RegexBuilder};
 
-/// Type alias for conversation id
-pub type ConversationId = Vec<u8>;
-
+pub(crate) static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
+pub(crate) const RAND_ID_LEN: usize = 32;
 const NUM_COLORS: u64 = 9;
 
-pub(crate) fn id_to_color(id: &str) -> u32 {
-    use std::{
-        collections::hash_map::DefaultHasher,
-        hash::{Hash, Hasher},
-    };
+pub(crate) fn rand_id() -> [u8; RAND_ID_LEN] {
+    use rand::{thread_rng, RngCore};
+    let mut rng = thread_rng();
+    let mut buf = [0u8; RAND_ID_LEN];
+    rng.fill_bytes(&mut buf);
+    buf
+}
+
+pub(crate) fn id_to_color<H: std::hash::Hash>(id: H) -> u32 {
+    use std::{collections::hash_map::DefaultHasher, hash::Hasher};
 
     let mut state = DefaultHasher::default();
     id.hash(&mut state);

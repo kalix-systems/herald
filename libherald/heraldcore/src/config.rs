@@ -3,7 +3,7 @@ use crate::{
     errors::*,
     image_utils,
 };
-use rusqlite::{ToSql, NO_PARAMS};
+use rusqlite::{params, NO_PARAMS};
 
 /// User configuration
 #[derive(Clone, Default)]
@@ -76,15 +76,10 @@ impl Config {
             colorscheme: colorscheme.unwrap_or(1),
         };
 
-        let id = id.to_sql()?;
-        let name = name.to_sql()?;
-        let profile_picture = profile_picture.to_sql()?;
-        let color = color.to_sql()?;
-
         let db = Database::get()?;
         db.execute(
             include_str!("sql/config/add_config.sql"),
-            &[id, name, profile_picture, color],
+            params![id, name, profile_picture, color],
         )?;
 
         Ok(config)
@@ -111,7 +106,7 @@ impl Config {
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/config/update_name.sql"), &[&name])?;
+        db.execute(include_str!("sql/config/update_name.sql"), params![name])?;
 
         self.name = name;
         Ok(())

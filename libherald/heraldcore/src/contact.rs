@@ -3,10 +3,7 @@ use crate::{
     errors::HErr,
     image_utils,
 };
-use rusqlite::{
-    types::{Null, ToSql},
-    NO_PARAMS,
-};
+use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
 /// Wrapper around contacts table.
@@ -43,22 +40,12 @@ impl Contacts {
         profile_picture: Option<&str>,
         color: Option<u32>,
     ) -> Result<(), HErr> {
-        let name = match name {
-            Some(name) => name.to_sql()?,
-            None => id.to_sql()?,
-        };
-
-        let profile_picture = match profile_picture {
-            Some(profile_picture) => profile_picture.to_sql()?,
-            None => Null.to_sql()?,
-        };
-
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id));
 
         let db = Database::get()?;
         db.execute(
             include_str!("sql/contact/add.sql"),
-            &[id.to_sql()?, name, profile_picture, color.to_sql()?],
+            params![id, name, profile_picture, color],
         )?;
         Ok(())
     }
@@ -73,15 +60,10 @@ impl Contacts {
 
     /// Change name of contact by their `id`
     pub fn set_name(id: &str, name: Option<&str>) -> Result<(), HErr> {
-        let name = match name {
-            Some(name) => name.to_sql()?,
-            None => Null.to_sql()?,
-        };
-
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
-        stmt.execute(&[name, id.to_sql()?])?;
+        stmt.execute(params![name, id])?;
         Ok(())
     }
 
@@ -114,7 +96,7 @@ impl Contacts {
 
         db.execute(
             include_str!("sql/contact/update_profile_picture.sql"),
-            &[profile_picture.to_sql()?, id.to_sql()?],
+            params![profile_picture, id],
         )?;
         Ok(profile_picture)
     }
@@ -125,7 +107,7 @@ impl Contacts {
 
         db.execute(
             include_str!("sql/contact/update_color.sql"),
-            &[id.to_sql()?, color.to_sql()?],
+            params![id, color],
         )?;
         Ok(())
     }
@@ -136,17 +118,6 @@ impl Contacts {
 
         let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
         Ok(stmt.exists(&[id])?)
-    }
-
-    /// Deletes a contact by their `id`.
-    pub fn delete(id: &str) -> Result<(), HErr> {
-        let mut db = Database::get()?;
-
-        let tx = db.transaction()?;
-        tx.execute(include_str!("sql/message/delete_conversation.sql"), &[id])?;
-        tx.execute(include_str!("sql/contact/delete_contact.sql"), &[id])?;
-        tx.commit()?;
-        Ok(())
     }
 
     /// Archives a contact if it is not already archived.
@@ -337,29 +308,29 @@ impl Contact {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::conversation::Conversations;
+    use crate::db::Database;
     use serial_test_derive::serial;
+    use womp::*;
 
     #[test]
     #[serial]
     fn create_drop_exists() {
         // drop twice, it shouldn't panic on multiple drops
-        Contacts::drop_table().unwrap();
-        Contacts::drop_table().unwrap();
+        Contacts::drop_table().expect(womp!());
+        Contacts::drop_table().expect(womp!());
 
-        Contacts::create_table().unwrap();
-        assert!(Contacts::exists().unwrap());
-        Contacts::create_table().unwrap();
-        assert!(Contacts::exists().unwrap());
-        Contacts::drop_table().unwrap();
-        assert!(!Contacts::exists().unwrap());
+        Contacts::create_table().expect(womp!());
+        assert!(Contacts::exists().expect(womp!()));
+        Contacts::create_table().expect(womp!());
+        assert!(Contacts::exists().expect(womp!()));
+        Contacts::drop_table().expect(womp!());
+        assert!(!Contacts::exists().expect(womp!()));
     }
 
     #[test]
     #[serial]
     fn add_contact() {
-        Contacts::reset().unwrap();
-        Conversations::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id1 = "Hello";
         let id2 = "World";
@@ -370,32 +341,16 @@ mod tests {
 
     #[test]
     #[serial]
-    fn delete_contact() {
-        Contacts::reset().unwrap();
-
-        let id1 = "Hello";
-        let id2 = "World";
-
-        Contacts::add(id1, None, None, None).expect("Failed to add contact");
-        Contacts::add(id2, None, None, None).expect("Failed to add contact");
-        crate::message::Messages::create_table().unwrap();
-
-        Contacts::delete(id1).expect("Failed to delete contact");
-
-        assert!(Contacts::name(id1).unwrap().is_none());
-        assert!(Contacts::name(id2).is_ok());
-    }
-
-    #[test]
-    #[serial]
     fn get_contact_name() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id = "Hello World";
 
         Contacts::add(id, Some("name"), None, None).expect("Failed to add contact");
         assert_eq!(
-            Contacts::name(id).expect("Failed to get name").unwrap(),
+            Contacts::name(id)
+                .expect("Failed to get name")
+                .expect(womp!()),
             "name"
         );
     }
@@ -403,7 +358,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_contact_profile_picture() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id = "Hello World";
         let profile_picture = "picture";
@@ -411,7 +366,7 @@ mod tests {
         assert_eq!(
             Contacts::profile_picture(id.into())
                 .expect("Failed to get profile picture")
-                .unwrap()
+                .expect(womp!())
                 .as_str(),
             profile_picture
         );
@@ -420,15 +375,17 @@ mod tests {
     #[test]
     #[serial]
     fn update_name() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id = "userid";
 
-        Contacts::add(id, Some("Hello"), None, None).unwrap();
+        Contacts::add(id, Some("Hello"), None, None).expect(womp!());
         Contacts::set_name(id, Some("World")).expect("Failed to update name");
 
         assert_eq!(
-            Contacts::name(id).expect("Failed to get contact").unwrap(),
+            Contacts::name(id)
+                .expect("Failed to get contact")
+                .expect(womp!()),
             "World"
         );
     }
@@ -436,7 +393,7 @@ mod tests {
     #[test]
     #[serial]
     fn all_contacts() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id1 = "Hello";
         let id2 = "World";
@@ -444,7 +401,7 @@ mod tests {
         Contacts::add(id1, None, None, None).expect("Failed to add id1");
         Contacts::add(id2, None, None, None).expect("Failed to add id2");
 
-        let contacts = Contacts::all().unwrap();
+        let contacts = Contacts::all().expect(womp!());
         assert_eq!(contacts.len(), 2);
         assert_eq!(contacts[0].id, id1);
         assert_eq!(contacts[1].id, id2);
@@ -453,11 +410,11 @@ mod tests {
     #[test]
     #[serial]
     fn archive_contact() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id = "Hello World";
-        Contacts::add(id, None, None, None).unwrap();
-        Contacts::archive(id).unwrap();
+        Contacts::add(id, None, None, None).expect(womp!());
+        Contacts::archive(id).expect(womp!());
 
         assert!(Contacts::is_archived(id).expect("Failed to determine if contact was archived"));
     }
@@ -465,17 +422,17 @@ mod tests {
     #[test]
     #[serial]
     fn get_active_contacts() {
-        Contacts::reset().unwrap();
+        Database::reset_all().expect(womp!());
 
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, None, None, None).unwrap();
-        Contacts::add(id2, None, None, None).unwrap();
+        Contacts::add(id1, None, None, None).expect(womp!());
+        Contacts::add(id2, None, None, None).expect(womp!());
 
-        Contacts::archive(id2).unwrap();
+        Contacts::archive(id2).expect(womp!());
 
-        let contacts = Contacts::active().unwrap();
+        let contacts = Contacts::active().expect(womp!());
         assert_eq!(contacts.len(), 1);
         assert_eq!(contacts[0].id, id1);
     }

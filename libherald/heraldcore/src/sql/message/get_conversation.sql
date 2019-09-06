@@ -1,13 +1,13 @@
 SELECT
   msg_id,
   author,
-  conversation,
+  conversation_id,
   body,
-  op,
+  op_msg_id,
   timestamp
 FROM
   messages
 WHERE
-  conversation = ?
+  conversation_id = ?
 ORDER BY
   timestamp ASC

@@ -1,4 +1,4 @@
 DELETE FROM
   messages
 WHERE
-  conversation = ?
+  conversation_id = ?
