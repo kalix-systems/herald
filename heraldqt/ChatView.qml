@@ -93,127 +93,63 @@ Pane {
         } /// Column
     } /// ScrollView
 
-    /// Attachments
-    FileDialog {
-        id: attachmentsDialogue
-        folder: shortcuts.home
-        onSelectionAccepted: {
-            print("todo: attachments api")
-        }
-    }
-
-    Button {
-        id: attachmentsButton
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: QmlCfg.margin / 2
-        anchors.rightMargin: QmlCfg.margin / 2
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/paperclip.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-            z: -100
-        }
-        onClicked: {
-            attachmentsDialogue.open()
-        }
-        z: -1
-    }
-
-    Button {
-        id: emojiMenuButton
-        anchors {
-            right: parent.left
-            left: parent.right
-        }
-
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: QmlCfg.margin / 2
-        anchors.rightMargin: QmlCfg.margin / 2
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/paperclip.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-        }
-        onClicked: {
-            attachmentsDialogue.open()
-        }
-    }
-
     ///--- Text entry area
-    ScrollView {
-        clip: true
+    CVUtils.TextArea {
         id: chatTextAreaScroll
+        parentPage: parent
+    }
 
-        anchors {
-            bottom: parent.bottom
-            left: parent.left
-        }
+//    ScrollView {
+//        clip: true
 
-        background: Rectangle {
-            color: QmlCfg.palette.mainColor
-        }
-        height: Math.min(contentHeight, 100)
-        width: chatPane.width - attachmentsButton.width - QmlCfg.margin
+//        anchors {
+//            bottom: parent.bottom
+//            left: parent.left
+//        }
 
-        //highlight border
-        onFocusChanged: {
-            if (focus) {
-                chatText.background.border.width = 2
-            } else {
-                chatText.background.border.width = 0
-            }
-        }
+//        background: Rectangle {
+//            color: QmlCfg.palette.mainColor
+//        }
+//        height: Math.min(contentHeight, 100)
+//        width: chatPane.width - attachmentsButton.width - QmlCfg.margin
 
-        TextArea {
-            id: chatText
+//        //highlight border
+//        onFocusChanged: {
+//            if (focus) {
+//                chatText.background.border.width = 2
+//            } else {
+//                chatText.background.border.width = 0
+//            }
+//        }
 
-            background: Rectangle {
-                color: QmlCfg.palette.secondaryColor
-                border.color: QmlCfg.palette.tertiaryColor
-                border.width: 0
+//        TextArea {
+//            id: chatText
 
-                anchors {
-                    fill: parent
-                    margins: QmlCfg.margin / 2
-                }
-                radius: QmlCfg.radius
-            }
+//            background: Rectangle {
+//                color: QmlCfg.palette.secondaryColor
+//                border.color: QmlCfg.palette.tertiaryColor
+//                border.width: 0
 
-            selectByKeyboard: true
-            selectByMouse: true
-            padding: QmlCfg.margin
-            wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
-            placeholderText: "Send a Message ..."
-            Keys.onReturnPressed: {
-                if (event.modifiers & Qt.ShiftModifier) {
-                    chatText.text = chatText.text + "\n"
-                    chatText.cursorPosition = chatText.text.length
-                } else {
-                    if (text.length <= 0) {
-                        return
-                    }
-                    if (text.trim().length === 0) {
-                        return
-                    }
-                    var result = networkHandle.send_message(
-                                text, messageModel.conversationId)
-                    messageModel.insert_message(text, result)
-                    chatScrollBar.position = 1.0
-                    clear()
-                }
-            }
-            Keys.onEscapePressed: {
-                chatListView.forceActiveFocus()
-            }
-        } /// Chat entry field
-    } /// scroll area
+//                anchors {
+//                    fill: parent
+//                    margins: QmlCfg.margin / 2
+//                }
+//                radius: QmlCfg.radius
+//            }
+
+//            selectByKeyboard: true
+//            selectByMouse: true
+//            padding: QmlCfg.margin
+//            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+//            placeholderText: "Send a Message ..."
+//            Keys.onReturnPressed: {
+//
+//            }
+//            Keys.onEscapePressed: {
+//                chatListView.forceActiveFocus()
+//            }
+//        } /// Chat entry field
+//    } /// scroll area
 
     states: State {
         name: "visibleview"
