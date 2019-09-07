@@ -6,8 +6,9 @@ import "ChatTextAreaUtils.js" as CTUtils
 
 
 TextAreaForm {
+        id: self
 
-    FileDialog {
+   FileDialog {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
@@ -15,12 +16,10 @@ TextAreaForm {
         }
     }
 
-    anchors {
-        left: parentPage.left
-        right: parentPage.right
-        bottom: parentPage.bottom
-        margins: QmlCfg.margin
+    keysProxy: Item {
+        Keys.onReturnPressed: CTUtils.enterHandler(event, self.chatText)
     }
 
+    atcButton.onClicked: attachmentsDialogue.open()
     scrollHeight: Math.min(contentHeight, 100)
 }

@@ -6,11 +6,19 @@ import "ChatTextAreaUtils.js" as CTUtils
 Rectangle {
 
     property var parentPage
+    // height of the text area, computed in JS
     property int scrollHeight
+    // height of the text content proper
     property int contentHeight: scrollView.contentHeight
-    property TextArea chatText: chatText
-    color: "white"
-    height: contentHeight + QmlCfg.margin
+    // object to forward keypresses to.
+    property var keysProxy
+    // the attatchments button
+    property alias atcButton: attachmentsButton
+    // the text area
+    property alias chatText: chatText
+
+    color: QmlCfg.palette.mainColor
+    height: scrollHeight + QmlCfg.margin / 2
     anchors {
         bottom: parentPage.bottom
         left: parentPage.left
@@ -31,12 +39,12 @@ Rectangle {
             scale: 0.9
             mipmap: true
         }
-        onClicked: atcButtonPressedHandler
     }
 
     ScrollView {
         id: scrollView
         height: scrollHeight
+        focus: true
 
         anchors {
             left: parent.left
@@ -44,7 +52,7 @@ Rectangle {
             bottom: parent.bottom
         }
 
-        TextArea {
+        TextArea  {
             id: chatText
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
@@ -55,10 +63,10 @@ Rectangle {
                 }
                 radius: QmlCfg.radius
             }
-            selectByKeyboard: true
             selectByMouse: true
             wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
+            Keys.forwardTo: keysProxy
         }
     }
 }

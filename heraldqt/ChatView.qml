@@ -13,9 +13,8 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
+        onRowsInserted: chatScrollBar.position = 1.0
     }
-
-    SystemPalette { id: palette;  }
 
     CVUtils.ChatBar {
         id: messageBar
@@ -46,15 +45,14 @@ Pane {
         ///--- scrollbar for chat messages
         ScrollBar.vertical: ScrollBar {
             id: chatScrollBar
-            Component.onCompleted: position = 1.0
-            height: parent.height
             anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
         }
 
         Column {
             width: chatPane.width
             spacing: QmlCfg.margin
-
             Repeater {
                 anchors.fill: parent
                 id: chatListView
@@ -87,7 +85,6 @@ Pane {
                                     }
                         text: body
                     }
-                    Component.onCompleted: chatScrollBar.position = 1.0
                 } /// Delegate column
             } /// Repeater
         } /// Column
@@ -96,60 +93,13 @@ Pane {
     ///--- Text entry area
     CVUtils.TextArea {
         id: chatTextAreaScroll
-        parentPage: parent
+        anchors {
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: QmlCfg.margin
+        }
     }
-
-//    ScrollView {
-//        clip: true
-
-//        anchors {
-//            bottom: parent.bottom
-//            left: parent.left
-//        }
-
-//        background: Rectangle {
-//            color: QmlCfg.palette.mainColor
-//        }
-//        height: Math.min(contentHeight, 100)
-//        width: chatPane.width - attachmentsButton.width - QmlCfg.margin
-
-//        //highlight border
-//        onFocusChanged: {
-//            if (focus) {
-//                chatText.background.border.width = 2
-//            } else {
-//                chatText.background.border.width = 0
-//            }
-//        }
-
-//        TextArea {
-//            id: chatText
-
-//            background: Rectangle {
-//                color: QmlCfg.palette.secondaryColor
-//                border.color: QmlCfg.palette.tertiaryColor
-//                border.width: 0
-
-//                anchors {
-//                    fill: parent
-//                    margins: QmlCfg.margin / 2
-//                }
-//                radius: QmlCfg.radius
-//            }
-
-//            selectByKeyboard: true
-//            selectByMouse: true
-//            padding: QmlCfg.margin
-//            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-//            placeholderText: "Send a Message ..."
-//            Keys.onReturnPressed: {
-//
-//            }
-//            Keys.onEscapePressed: {
-//                chatListView.forceActiveFocus()
-//            }
-//        } /// Chat entry field
-//    } /// scroll area
 
     states: State {
         name: "visibleview"
