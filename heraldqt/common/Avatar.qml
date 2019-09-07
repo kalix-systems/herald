@@ -10,6 +10,7 @@ Row {
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
+    property bool labeled: true /// whether or not to show the name
     spacing: QmlCfg.margin
 
     ///--- Circle with initial
@@ -29,11 +30,22 @@ Row {
         }
     }
 
-    Text {
-        text: displayName
-        font.bold: true
+
+    Component {
+        id: component_Text
+        Text {
+            text: displayName
+            font.bold: true
+        }
+    }
+
+    Loader {
+        active: labeled
+        id: loader_Text
+        sourceComponent: component_Text
         anchors.verticalCenter: parent.verticalCenter
     }
+
 
     ///--- potential avatar components
     Component {

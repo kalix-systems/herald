@@ -18,6 +18,7 @@ TextAreaForm {
 
     keysProxy: Item {
         Keys.onReturnPressed: CTUtils.enterHandler(event, self.chatText)
+        // TODO: Tab should cycle through a hierarchy of items as far as focus
     }
 
     atcButton.onClicked: attachmentsDialogue.open()

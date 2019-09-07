@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
 import "common/utils.js" as Utils
 
+
 Pane {
     id: chatPane
     enabled: false
@@ -13,7 +14,6 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages messageModel: Messages {
-        onRowsInserted: chatScrollBar.position = 1.0
     }
 
     CVUtils.ChatBar {
@@ -32,62 +32,14 @@ Pane {
     }
 
     ///--- chat view, shows messages
-    ScrollView {
-        bottomPadding: QmlCfg.margin * 2
-        clip: true
-        anchors {
-            top: messageBar.bottom
-            bottom: chatTextAreaScroll.top
-            left: parent.left
-            right: parent.right
-        }
-
-        ///--- scrollbar for chat messages
-        ScrollBar.vertical: ScrollBar {
-            id: chatScrollBar
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-        }
-
-        Column {
-            width: chatPane.width
-            spacing: QmlCfg.margin
-            Repeater {
-                anchors.fill: parent
-                id: chatListView
-                Component.onCompleted: forceActiveFocus()
-                model: messageModel
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: forceActiveFocus()
-                }
-
-                Keys.onUpPressed: chatScrollBar.decrease()
-                Keys.onDownPressed: chatScrollBar.increase()
-
-                delegate: Column {
-                    readonly property bool outbound: author === config.config_id
-
-                    anchors {
-                        right: if (outbound) {
-                                   return parent.right
-                               }
-                        rightMargin: chatScrollBar.width * 1.5
-                    }
-
-                    CVUtils.ChatBubble {
-                        topPadding: if (index === 0) {
-                                        return QmlCfg.margin
-                                    } else {
-                                        return 0
-                                    }
-                        text: body
-                    }
-                } /// Delegate column
-            } /// Repeater
-        } /// Column
+   CVUtils.ConversationWindow {
+       id: convWindow
+       anchors {
+           top: messageBar.bottom
+           bottom: chatTextAreaScroll.top
+           left: parent.left
+           right: parent.right
+       }
     } /// ScrollView
 
     ///--- Text entry area

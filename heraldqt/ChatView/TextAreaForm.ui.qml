@@ -18,14 +18,8 @@ Rectangle {
     property alias chatText: chatText
 
     color: QmlCfg.palette.mainColor
+    clip: true
     height: scrollHeight + QmlCfg.margin / 2
-    anchors {
-        bottom: parentPage.bottom
-        left: parentPage.left
-        bottomMargin: QmlCfg.margin / 2
-        rightMargin: QmlCfg.margin / 2
-        margins: QmlCfg.margin / 2
-    }
 
     Button {
         id: attachmentsButton

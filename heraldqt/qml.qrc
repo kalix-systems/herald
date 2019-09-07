@@ -26,5 +26,7 @@
         <file>ChatView/TextArea.qml</file>
         <file>ChatView/TextAreaForm.ui.qml</file>
         <file>ChatView/ChatTextAreaUtils.js</file>
+        <file>ChatView/ConversationWindow.qml</file>
+        <file>ChatView/ConversationWindowForm.ui.qml</file>
     </qresource>
 </RCC>
