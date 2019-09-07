@@ -118,7 +118,7 @@ pub trait DBTable: Default {
     /// Creates table if it does not exist.
     fn create_table() -> Result<(), HErr>;
 
-    /// Indicates whether the table exists in the database.
+    /// Indicates whether a table exists
     fn exists() -> Result<bool, HErr>;
 
     /// Resets the table.

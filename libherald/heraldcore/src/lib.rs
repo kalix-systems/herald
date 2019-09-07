@@ -10,6 +10,8 @@ pub mod contact;
 pub mod conversation;
 /// Wrapper around database.
 pub mod db;
+/// Devices
+mod devices;
 /// Errors
 mod errors;
 /// Image processing

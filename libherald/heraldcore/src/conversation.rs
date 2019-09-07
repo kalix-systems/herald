@@ -10,6 +10,35 @@ use rusqlite::{params, NO_PARAMS};
 /// Conversations
 pub struct Conversations;
 
+/// Conversation metadata.
+pub struct ConversationMeta {
+    /// Conversation id
+    pub conversation_id: Vec<u8>,
+    /// User ID's of conversation members
+    pub members: Vec<String>,
+}
+
+/// Conversation
+pub struct Conversation {
+    /// Messages
+    pub messages: Vec<Message>,
+
+    /// Conversation metadata
+    pub meta: ConversationMeta,
+}
+
+impl Conversation {
+    /// Indicates whether conversation is empty
+    pub fn is_empty(&self) -> bool {
+        self.messages.is_empty()
+    }
+
+    /// Number of messages in conversation
+    pub fn len(&self) -> usize {
+        self.messages.len()
+    }
+}
+
 impl Conversations {
     /// Adds a conversation to the database
     pub fn add_conversation(
@@ -58,15 +87,15 @@ impl Conversations {
     pub fn get_conversation(id: &[u8]) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
-        let mut stmt = db.prepare(include_str!("sql/message/get_conversation.sql"))?;
+        let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
         let res = stmt.query_map(&[id], Message::from_db)?;
 
-        let mut msgs = Vec::new();
+        let mut messages = Vec::new();
         for msg in res {
-            msgs.push(msg?);
+            messages.push(msg?);
         }
 
-        Ok(msgs)
+        Ok(messages)
     }
 }
 
@@ -97,14 +126,6 @@ impl DBTable for Conversations {
         tx.commit()?;
         Ok(())
     }
-}
-
-/// Conversation metadata.
-pub struct ConversationMeta {
-    /// Conversation id
-    pub conversation_id: Vec<u8>,
-    /// User ID's of conversation members
-    pub members: Vec<String>,
 }
 
 #[cfg(test)]

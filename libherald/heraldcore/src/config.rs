@@ -3,13 +3,14 @@ use crate::{
     errors::*,
     image_utils,
 };
+use herald_common::UserId;
 use rusqlite::{params, NO_PARAMS};
 
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
     /// ID of the current user
-    pub id: Option<String>,
+    pub id: Option<UserId>,
     /// Display name for the current user
     pub name: Option<String>,
     /// Path to profile picture for the current user
@@ -70,7 +71,7 @@ impl Config {
 
     /// Creates user configuration.
     pub fn new(
-        id: String,
+        id: UserId,
         name: Option<&str>,
         profile_picture: Option<&str>,
         color: Option<u32>,
@@ -95,7 +96,7 @@ impl Config {
     }
 
     /// Gets user id
-    pub fn id(&self) -> Result<&str, HErr> {
+    pub fn id(&self) -> Result<&UserId, HErr> {
         match &self.id {
             Some(id) => Ok(id),
             None => Err(HErr::HeraldError("User id has not been set".into())),
@@ -103,7 +104,7 @@ impl Config {
     }
 
     /// Gets user id directly from database.
-    pub fn static_id() -> Result<String, HErr> {
+    pub fn static_id() -> Result<UserId, HErr> {
         let db = Database::get()?;
         Ok(
             db.query_row(include_str!("sql/config/get_id.sql"), NO_PARAMS, |row| {
