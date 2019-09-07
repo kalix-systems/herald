@@ -4,6 +4,7 @@ use crate::{
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
+use herald_common::{UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 /// the network status of a message
@@ -31,7 +32,7 @@ pub struct Message {
     /// Local message id
     pub message_id: Vec<u8>,
     /// Author user id
-    pub author: String,
+    pub author: UserId,
     /// Recipient user id
     pub conversation: Vec<u8>,
     /// Body of message
@@ -39,7 +40,7 @@ pub struct Message {
     /// Time the message was sent or received at the server.
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
-    pub op: Option<i64>,
+    pub op: Option<Vec<u8>>,
     /// has anyone seen this message yet.
     pub message_status: MessageStatus,
 }
@@ -47,10 +48,10 @@ pub struct Message {
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         let message_id: Vec<u8> = row.get(0)?;
-        let author: String = row.get(1)?;
+        let author: UserId = row.get(1)?;
         let conversation: Vec<u8> = row.get(2)?;
         let body: String = row.get(3)?;
-        let op: Option<i64> = row.get(4)?;
+        let op: Option<Vec<u8>> = row.get(4)?;
         let timestamp: String = row.get(5)?;
 
         Ok(Message {
@@ -75,11 +76,11 @@ impl Messages {
     /// Adds a message to the database.
     pub fn add_message(
         msg_id: Option<Vec<u8>>,
-        author: &str,
+        author: UserIdRef,
         conversation: &[u8],
         body: &str,
         timestamp: Option<DateTime<Utc>>,
-        op: Option<i64>,
+        op: Option<Vec<u8>>,
     ) -> Result<(Vec<u8>, DateTime<Utc>), HErr> {
         let timestamp = timestamp.unwrap_or_else(Utc::now);
         let timestamp_string = timestamp.format(utils::DATE_FMT).to_string();

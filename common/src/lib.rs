@@ -5,7 +5,8 @@ use serde::{Deserialize, Serialize};
 pub use arrayvec::CapacityError;
 
 pub type UserId = String;
-pub type DeviceId = usize;
+pub type UserIdRef<'a> = &'a str;
+pub type DeviceId = u32;
 pub type RawMsg = Bytes;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
@@ -35,7 +36,7 @@ pub enum MessageToClient {
         text: RawMsg,
         time: DateTime<Utc>,
     },
-    
+
     QueryResponse {
         res: Response,
         query: MessageToServer,

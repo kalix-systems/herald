@@ -3,6 +3,7 @@ use crate::{
     errors::HErr,
     image_utils,
 };
+use herald_common::{UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
@@ -44,7 +45,7 @@ impl DBTable for Contacts {
 impl Contacts {
     /// Inserts contact into contacts table.
     pub fn add(
-        id: &str,
+        id: UserIdRef,
         name: Option<&str>,
         profile_picture: Option<&str>,
         color: Option<u32>,
@@ -60,7 +61,7 @@ impl Contacts {
     }
 
     /// Gets a contact's name by their `id`.
-    pub fn name(id: &str) -> Result<Option<String>, HErr> {
+    pub fn name(id: UserIdRef) -> Result<Option<String>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
@@ -68,7 +69,7 @@ impl Contacts {
     }
 
     /// Change name of contact by their `id`
-    pub fn set_name(id: &str, name: Option<&str>) -> Result<(), HErr> {
+    pub fn set_name(id: UserIdRef, name: Option<&str>) -> Result<(), HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
@@ -77,16 +78,16 @@ impl Contacts {
     }
 
     /// Gets a contact's profile picture by their `id`.
-    pub fn profile_picture(id: String) -> Result<Option<String>, HErr> {
+    pub fn profile_picture(id: UserIdRef) -> Result<Option<String>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
-        Ok(stmt.query_row(&[id.as_str()], |row| row.get(0))?)
+        Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
 
     /// Updates a contact's profile picture.
     pub fn set_profile_picture(
-        id: &str,
+        id: UserIdRef,
         profile_picture: Option<String>,
         old_path: Option<&str>,
     ) -> Result<Option<String>, HErr> {
@@ -217,7 +218,7 @@ impl From<ArchiveStatus> for bool {
 /// A Herald contact.
 pub struct Contact {
     /// Contact id
-    pub id: String,
+    pub id: UserId,
     /// Contact name
     pub name: Option<String>,
     /// Path of profile picture
@@ -254,7 +255,7 @@ impl Contact {
 
     /// Sets contact name
     pub fn set_name(&mut self, name: Option<&str>) -> Result<(), HErr> {
-        Contacts::set_name(self.id.as_str(), name)?;
+        Contacts::set_name(&self.id, name)?;
         self.name = name.map(|s| s.to_owned());
         Ok(())
     }

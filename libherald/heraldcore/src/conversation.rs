@@ -4,6 +4,7 @@ use crate::{
     message::Message,
     utils,
 };
+use herald_common::UserId;
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
@@ -15,7 +16,7 @@ pub struct ConversationMeta {
     /// Conversation id
     pub conversation_id: Vec<u8>,
     /// User ID's of conversation members
-    pub members: Vec<String>,
+    pub members: Vec<UserId>,
 }
 
 /// Conversation
@@ -83,12 +84,12 @@ impl Conversations {
         Ok(())
     }
 
-    /// Get all messages with `user_id` as author or recipient.
-    pub fn get_conversation(id: &[u8]) -> Result<Vec<Message>, HErr> {
+    /// Get all messages in a conversation.
+    pub fn get_conversation(conversation_id: &[u8]) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[id], Message::from_db)?;
+        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
 
         let mut messages = Vec::new();
         for msg in res {
