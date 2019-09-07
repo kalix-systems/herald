@@ -17,8 +17,6 @@ ApplicationWindow {
     minimumHeight: 300
 
 
-
-
     MenuBar {
         Menu {
             title: "Herald"
