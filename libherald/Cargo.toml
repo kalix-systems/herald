@@ -12,6 +12,8 @@ libc = "0.2.60"
 heraldcore = {path="./heraldcore"}
 herald_common = {path="../common"}
 
+
+
 [lib]
 crate-type = ["cdylib", "staticlib"]
 

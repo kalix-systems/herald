@@ -141,14 +141,8 @@
                 "uuid": {
                     "type": "qint64"
                 },
-                "reached_server": {
-                    "type": "bool"
-                },
-                "reached_recipient": {
-                    "type": "bool"
-                },
-                "error_sending": {
-                    "type": "bool"
+                "send_status": {
+                    "type": "quint32"
                 }
             },
             "functions": {
@@ -159,6 +153,10 @@
                         {
                             "name": "body",
                             "type": "QString"
+                        },
+                        {
+                            "name": "send_status",
+                            "type": "bool"
                         }
                     ]
                 },

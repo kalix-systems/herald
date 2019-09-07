@@ -1,13 +1,35 @@
+pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
+pub use num_enum::{IntoPrimitive, TryFromPrimitive};
 use serde::{Deserialize, Serialize};
-
-pub use arrayvec::CapacityError;
 
 pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
 pub type DeviceId = u32;
 pub type RawMsg = Bytes;
+
+// the network status of a message
+#[derive(
+    Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy, IntoPrimitive, TryFromPrimitive,
+)]
+#[repr(u8)]
+pub enum MessageStatus {
+    /// No ack from any third party
+    NoAck,
+    /// No ack from any third party
+    NoAckFromServer,
+    /// Received by the server, and made it to the user
+    RecipReceivedAck,
+    /// Read by the recipient
+    RecipReadAck,
+    /// The message has timedout.
+    Timeout,
+    /// we did not write this message
+    Inbound,
+    /// The user has read receipts turned off
+    AckTerminal,
+}
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct User {
@@ -22,8 +44,19 @@ pub struct GlobalId {
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct ClientMessageAck {
+    pub update_code: MessageStatus,
+    pub message_id: i64,
+}
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum Body {
+    Message(String),
+    Ack(ClientMessageAck),
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    SendMsg { to: UserId, text: RawMsg },
+    SendMsg { to: UserId, body: RawMsg },
     RequestMeta { of: UserId },
     UpdateBlob { blob: Bytes },
     RegisterDevice,
@@ -31,9 +64,9 @@ pub enum MessageToServer {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
-    NewMessage {
+    Push {
         from: GlobalId,
-        text: RawMsg,
+        body: RawMsg,
         time: DateTime<Utc>,
     },
 

@@ -4,23 +4,8 @@ use crate::{
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::{UserId, UserIdRef};
+use herald_common::{MessageStatus, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
-
-/// the network status of a message
-#[derive(Clone)]
-pub enum MessageStatus {
-    /// No ack from any third party
-    NoAck = 0,
-    /// Received by the server
-    ServerAck = 1,
-    /// Received by the recipient
-    RecipientAck = 2,
-    /// The message has timedout.
-    Timeout = 3,
-    /// we did not write this message
-    Inbound = 4,
-}
 
 #[derive(Default, Clone)]
 /// Messages
@@ -41,8 +26,6 @@ pub struct Message {
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
     pub op: Option<Vec<u8>>,
-    /// has anyone seen this message yet.
-    pub message_status: MessageStatus,
 }
 
 impl Message {
@@ -67,7 +50,6 @@ impl Message {
                     Utc::now()
                 }
             },
-            message_status: MessageStatus::NoAck,
         })
     }
 }
@@ -94,6 +76,21 @@ impl Messages {
             params![msg_id, author, conversation, body, timestamp_string, op,],
         )?;
         Ok((msg_id, timestamp))
+    }
+
+    /// sets the message status of an item in the DB
+    /// currently assumes conversations are SYNCED
+    pub fn update_status(
+        conversation_id: &[u8],
+        msg_id: &[u8],
+        status: MessageStatus,
+    ) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message/update_status.sql"),
+            params![conversation_id, msg_id, (status as u32),],
+        )?;
+        Ok(())
     }
 
     /// Deletes a message
@@ -138,6 +135,7 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
+    // use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     use womp::*;
@@ -156,4 +154,66 @@ mod tests {
         Messages::drop_table().expect(womp!());
         assert!(!Messages::exists().expect(womp!()));
     }
+
+    //#[test]
+    //#[serial]
+    //fn message_status_updates() {
+    //    Messages::reset().expect(womp!());
+
+    //    let author = "Hello";
+    //    let conversation_id = [0; 32];
+    //    Messages::add_message(
+    //        None,
+    //        author,
+    //        &conversation_id,
+    //        "1",
+    //        None,
+    //        None,
+    //        MessageStatus::NoAck,
+    //    )
+    //    .expect(womp!("Failed to add first message"));
+
+    //    assert_eq!(
+    //        Conversations::get_conversation(&conversation_id)
+    //            .expect(womp!("failed to get conversation by author"))[0]
+    //            .message_status,
+    //        MessageStatus::NoAck
+    //    );
+
+    //    let (msg_id, _) = Messages::add_message(
+    //        None,
+    //        author,
+    //        &conversation_id,
+    //        "new",
+    //        None,
+    //        None,
+    //        MessageStatus::RecipReceivedAck,
+    //    )
+    //    .expect(womp!("Failed to add first message"));
+
+    //    assert_eq!(
+    //        Conversations::get_conversation(&conversation_id)
+    //            .expect(womp!("failed to get conversation by author"))[1]
+    //            .message_status,
+    //        MessageStatus::RecipReceivedAck
+    //    );
+
+    //    Messages::update_status(&conversation_id, &msg_id, MessageStatus::Timeout)
+    //        .expect(womp!("could not update status :"));
+    //    //if this fails the UPDATE call was not specific enough
+    //    assert_eq!(
+    //        Conversations::get_conversation(&conversation_id).expect(womp!(
+    //            "failed to get conversation by author, the second time"
+    //        ))[0]
+    //            .message_status,
+    //        MessageStatus::NoAck
+    //    );
+
+    //    assert_eq!(
+    //        Conversations::get_conversation(&conversation_id)
+    //            .expect("failed to get conversation by author, the third time")[1]
+    //            .message_status,
+    //        MessageStatus::Timeout
+    //    );
+    //}
 }

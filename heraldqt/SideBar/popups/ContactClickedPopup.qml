@@ -5,15 +5,16 @@ import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.js" as Utils
 
-/// --- displays a list of contacts
+/// --- displays a list of  sideBar.contactData
 Item {
 
     property alias optionsMenu: optionsMenu
 
     FileDialog {
         id: pfpDialog
+        folder: shortcuts.home
         onSelectionAccepted: {
-            var retCode = contacts.setProfile_picture(index, fileUrl)
+            var retCode =  contacts.setProfile_picture(index, fileUrl)
             if (retCode) {
                 contactAvatar.pfpUrl = profile_picture
                 chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
@@ -29,10 +30,10 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             onTriggered: {
-                if (contact_id === chatView.messageModel.conversationId)
+                if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
                 contacts.remove(index)
-                chatView.messageModel.clear_conversation_view()
+                messageModel.clear_conversation_view()
             }
         }
         MenuItem {
@@ -50,7 +51,7 @@ Item {
             onTriggered: {
                 contactAvatar.pfpUrl = ""
                 chatView.messageBar.chatBarAvatar.pfpUrl = ""
-                contacts.setProfile_picture(index, "")
+                 sideBar.contactData.setProfile_picture(index, "")
             }
         }
     }

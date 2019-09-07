@@ -12,3 +12,5 @@ serde = { version = "1.0", features = ["derive"] }
 chrono = { version = "0.4", features = ["serde"] }
 arrayvec = {version = "0.4", features = ["serde-1"]}
 rusqlite = "0.20.0"
+num_enum = "0.4.1"
+

@@ -3,7 +3,7 @@ use herald_common::*;
 use heraldcore::network::*;
 use std::{
     sync::{
-        atomic::{AtomicU16, Ordering},
+        atomic::{AtomicBool, Ordering},
         mpsc::{channel, Receiver, Sender},
         Arc,
     },
@@ -11,42 +11,45 @@ use std::{
     time::Duration,
 };
 
-type FlagType = AtomicU16;
-type FlagPrimitive = u16;
-// indicates connection is down
-static NET_ONLINE: FlagPrimitive = 0x01;
-// if connection status is low, and this is low,
-// indicates network errors
-static NET_PENDING: FlagPrimitive = 0x02;
-// indicates that a new message is available
-static NET_NEW_MSG: FlagPrimitive = 0x04;
-
-trait NetworkFlag {
-    fn emit_net_down(&self) {}
-    fn emit_net_up(&self) {}
-    fn emit_net_pending(&self) {}
-    fn emit_new_msg(&self) {}
+pub struct NetworkFlags {
+    net_online: AtomicBool,
+    net_pending: AtomicBool,
+    net_new_message: AtomicBool,
 }
 
-impl NetworkFlag for FlagType {
-    #[inline(always)]
-    fn emit_net_down(&self) {
+impl NetworkFlags {
+    pub fn new() -> Self {
+        NetworkFlags {
+            net_online: AtomicBool::new(false),
+            net_pending: AtomicBool::new(false),
+            net_new_message: AtomicBool::new(false),
+        }
+    }
+    pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
         // drop the pending and online flags, we are in a fail state
-        self.fetch_nand(NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+        self.net_online.fetch_and(false, Ordering::Relaxed);
+        self.net_pending.fetch_and(true, Ordering::Relaxed);
+        emit.connection_up_changed();
+        emit.connection_pending_changed();
+        println!("Net Down!");
     }
-    #[inline(always)]
-    fn emit_net_up(&self) {
-        // drops pending, start connection retries
-        self.fetch_and(NET_ONLINE | !NET_PENDING, Ordering::Relaxed);
+    pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_online.fetch_and(true, Ordering::Relaxed);
+        self.net_pending.fetch_and(false, Ordering::Relaxed);
+        emit.connection_up_changed();
+        emit.connection_pending_changed();
+        println!("Net Up!")
     }
-    #[inline(always)]
-    fn emit_net_pending(&self) {
-        // sets pending, drops online
-        self.fetch_and(!NET_ONLINE | NET_PENDING, Ordering::Relaxed);
+    pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_online.fetch_and(false, Ordering::Relaxed);
+        self.net_pending.fetch_and(true, Ordering::Relaxed);
+        emit.connection_up_changed();
+        emit.connection_pending_changed();
+        println!("Net Pending!")
     }
-    #[inline(always)]
-    fn emit_new_msg(&self) {
-        self.fetch_and(NET_NEW_MSG, Ordering::Relaxed);
+    pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_new_message.fetch_and(true, Ordering::Relaxed);
+        emit.new_message_changed();
     }
 }
 
@@ -57,23 +60,23 @@ pub enum HandleMessages {
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
-    status_flag: Arc<FlagType>,
+    status_flags: Arc<NetworkFlags>,
     tx: Sender<HandleMessages>,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
-    fn new(emit: NetworkHandleEmitter) -> Self {
+    fn new(mut emit: NetworkHandleEmitter) -> Self {
         let (tx, rx) = channel::<HandleMessages>();
+        let emitter_clone = emit.clone();
 
         let handle = NetworkHandle {
             emit,
-            status_flag: Arc::new(FlagType::new(NET_PENDING)),
+            status_flags: Arc::new(NetworkFlags::new()),
             tx,
         };
 
-        let flag = handle.status_flag.clone();
-
-        NetworkHandle::connect_to_server(flag, rx);
+        let flag = handle.status_flags.clone();
+        NetworkHandle::connect_to_server(flag, rx, emitter_clone);
         handle
     }
 
@@ -82,7 +85,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let msg = MessageToServer::SendMsg {
             to,
-            text: message_body.into(),
+            body: message_body.into(),
         };
 
         match self.tx.send(HandleMessages::ToServer(msg)) {
@@ -95,15 +98,15 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn new_message(&self) -> bool {
-        self.status_flag.fetch_and(NET_NEW_MSG, Ordering::Relaxed) != 0
+        self.status_flags.net_new_message.load(Ordering::Relaxed)
     }
 
     fn connection_up(&self) -> bool {
-        self.status_flag.fetch_and(NET_ONLINE, Ordering::Relaxed) != 0
+        self.status_flags.net_online.load(Ordering::Relaxed)
     }
 
     fn connection_pending(&self) -> bool {
-        self.status_flag.fetch_and(NET_PENDING, Ordering::Relaxed) != 0
+        self.status_flags.net_pending.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut NetworkHandleEmitter {
@@ -112,16 +115,20 @@ impl NetworkHandleTrait for NetworkHandle {
 }
 
 impl NetworkHandle {
-    pub fn connect_to_server(flag: Arc<FlagType>, rx: Receiver<HandleMessages>) {
+    pub fn connect_to_server(
+        flag: Arc<NetworkFlags>,
+        rx: Receiver<HandleMessages>,
+        mut emit: NetworkHandleEmitter,
+    ) {
         thread::spawn(move || {
-            flag.emit_net_pending();
+            flag.emit_net_pending(&mut emit);
             let mut stream = match open_connection() {
                 Ok(stream) => {
-                    flag.emit_net_up();
+                    flag.emit_net_up(&mut emit);
                     stream
                 }
                 Err(e) => {
-                    flag.emit_net_down();
+                    flag.emit_net_down(&mut emit);
                     eprintln!("{}", e);
                     return;
                 }
@@ -132,38 +139,39 @@ impl NetworkHandle {
                 match rx.try_recv() {
                     Ok(HandleMessages::ToServer(message)) => match message {
                         // request from Qt to send a message
-                        SendMsg { to, text } => {
-                            println!("send Message");
-                            send_message(to, text, &mut stream).unwrap();
+                        SendMsg { to, body } => {
+                            send_message(to, body, &mut stream).unwrap();
                         }
                         // request from Qt to register a device
-                        RegisterDevice => {}
+                        RegisterDevice => unimplemented!(),
                         UpdateBlob { .. } => unimplemented!(),
                         RequestMeta { .. } => unimplemented!(),
+                        // request from the network thread to
+                        // ack that a message has been received and or read
                     },
                     //Ok(HandleMessages::Shutdown) => unimplemented!(),
                     Err(_e) => {}
                 }
 
-                // check os queue for tcp messages, they are inserted into
+                // check os queue for tcp messages, they are inserted into db
                 if let Ok(()) = read_from_server(&mut stream) {
-                    flag.emit_new_msg();
+                    flag.emit_new_msg(&mut emit);
                 }
 
                 thread::sleep(Duration::from_micros(10));
                 // check and repair dead connection
                 // retry logic should go here, this should infinite
                 // loop until the net comes back
-                let mut buf = [0; 1];
+                let mut buf = [0; 8];
                 if let Ok(0) = stream.peek(&mut buf) {
-                    flag.emit_net_pending();
+                    flag.emit_net_pending(&mut emit);
                     stream = match open_connection() {
                         Ok(stream) => {
-                            flag.emit_net_up();
+                            flag.emit_net_up(&mut emit);
                             stream
                         }
                         Err(e) => {
-                            flag.emit_net_down();
+                            flag.emit_net_down(&mut emit);
                             eprintln!("{}", e);
                             return;
                         }
@@ -173,15 +181,3 @@ impl NetworkHandle {
         });
     }
 }
-
-// TODO add these
-//#[cfg(test)]
-//mod test {
-//    use super::*;
-//
-//    #[cfg(test)]
-//    pub fn headless_send() {}
-//
-//    #[cfg(test)]
-//    pub fn headless_receive() {}
-//}
