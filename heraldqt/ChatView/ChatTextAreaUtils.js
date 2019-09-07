@@ -1,5 +1,7 @@
 
-
+/*
+* a memory tuple class
+**/
 class ChatViewMemory {
     constructor() {
         this.scrollMemory = Number(1.0)

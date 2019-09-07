@@ -8,6 +8,7 @@ import "../common/utils.js" as Utils
 
 Flickable {
     property alias chatScrollBar: chatScrollBar
+    property alias chatListView: chatListView
 
     clip: true
     interactive: true

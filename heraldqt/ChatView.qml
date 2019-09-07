@@ -13,8 +13,6 @@ Pane {
     opacity: 0
     padding: 0
     property alias messageBar: messageBar
-    property Messages messageModel: Messages {
-    }
 
     CVUtils.ChatBar {
         id: messageBar
@@ -40,9 +38,9 @@ Pane {
            left: parent.left
            right: parent.right
        }
-    } /// ScrollView
+    }
 
-    ///--- Text entry area
+    ///--- Text entry area, for typing
     CVUtils.TextArea {
         id: chatTextAreaScroll
         anchors {

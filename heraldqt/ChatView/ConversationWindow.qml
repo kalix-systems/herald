@@ -8,9 +8,14 @@ import "../common/utils.js" as Utils
 
 CVUtils.ConversationWindowForm {
 
-    id: self
+    Connections {
+        target: messageModel
+        onRowsInserted: {
+            contentY = contentHeight
+        }
+    }
+
     Component.onCompleted: forceActiveFocus()
     Keys.onUpPressed: chatScrollBar.decrease()
     Keys.onDownPressed: chatScrollBar.increase()
-
 }

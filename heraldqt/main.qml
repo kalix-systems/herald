@@ -16,6 +16,9 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
+
+
+
     MenuBar {
         Menu {
             title: "Herald"
@@ -53,19 +56,22 @@ ApplicationWindow {
     }
 
     SplitView {
+
         id: rootSplitView
         anchors.fill: parent
         Layout.fillWidth: true
         Layout.fillHeight: true
         orientation: Qt.Horizontal
 
+        Messages {
+            id: messageModel
+        }
         /// Contacts view for the desktop client, in DesktopContacts.qml
         /// includes the config and contacts toolbars
         SideBar {
             id: sideBar
         }
 
-        /// placeholder element
         ChatView {
             id: chatView
         }
@@ -79,5 +85,38 @@ ApplicationWindow {
                        QmlCfg.palette.secondaryColor
                    }
         }
+
+        states: [
+            State {
+                when: width < 350
+                name: "sideBarOnly"
+                StateChangeScript {
+                  script: {
+                            sideBar.maxWindowFraction = 1
+                            sideBar.width = width }
+                }
+            },
+            State {
+                when: width > 350 && width < 450
+                name: "sideBarAndChat"
+                StateChangeScript {
+                  script: {
+                            sideBar.maxWindowFraction = 0.25
+                            sideBar.windowFraction = 0.25
+                     }
+                }
+            },
+           State {
+               when: width > 450
+               name: "SideBarWide"
+               PropertyChanges {
+                target: sideBar
+                maxWindowFraction: 0.66
+                windowFraction: 0.25
+
+               }
+           }
+    ]
     }
+
 }
