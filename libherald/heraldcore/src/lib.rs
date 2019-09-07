@@ -14,6 +14,8 @@ pub mod db;
 mod errors;
 /// Image processing
 pub(crate) mod image_utils;
+/// Members of conversations
+pub mod members;
 /// Functions and data structures related to messages.
 pub mod message;
 /// Utils

@@ -122,9 +122,5 @@ pub trait DBTable: Default {
     fn exists() -> Result<bool, HErr>;
 
     /// Resets the table.
-    fn reset() -> Result<(), HErr> {
-        Self::drop_table()?;
-        Self::create_table()?;
-        Ok(())
-    }
+    fn reset() -> Result<(), HErr>;
 }
