@@ -20,6 +20,8 @@ pub(crate) mod image_utils;
 pub mod members;
 /// Functions and data structures related to messages.
 pub mod message;
+/// message status
+mod message_status;
 /// Utils
 pub mod utils;
 

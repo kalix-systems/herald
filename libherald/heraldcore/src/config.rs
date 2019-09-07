@@ -176,42 +176,52 @@ impl Config {
 mod tests {
     use super::*;
     use serial_test_derive::serial;
+    use womp::*;
 
     #[test]
     #[serial]
     fn create_drop_exists() {
         // drop twice, it shouldn't panic on multiple drops
-        Config::drop_table().unwrap();
-        Config::drop_table().unwrap();
+        Config::drop_table().expect(womp!());
+        Config::drop_table().expect(womp!());
 
-        Config::create_table().unwrap();
-        assert!(Config::exists().unwrap());
-        Config::create_table().unwrap();
-        assert!(Config::exists().unwrap());
-        Config::drop_table().unwrap();
-        assert!(!Config::exists().unwrap());
+        Config::create_table().expect(womp!());
+        assert!(Config::exists().expect(womp!()));
+        Config::create_table().expect(womp!());
+        assert!(Config::exists().expect(womp!()));
+        Config::drop_table().expect(womp!());
+        assert!(!Config::exists().expect(womp!()));
     }
 
     #[test]
     #[serial]
     fn add_and_get_config() {
-        Config::reset().unwrap();
+        Config::reset().expect(womp!());
 
         let id = "HelloWorld";
 
-        Config::new(id.into(), None, None, None, None).unwrap();
-        assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
+        Config::new(id.into(), None, None, None, None).expect(womp!());
+        assert_eq!(
+            Config::get().expect(womp!()).id().expect(womp!()),
+            "HelloWorld"
+        );
 
-        Config::reset().unwrap();
+        Config::reset().expect(womp!());
 
         let name = "stuff";
         let profile_picture = "stuff";
-        Config::new(id.into(), Some(name), Some(profile_picture), None, None).unwrap();
-        assert_eq!(Config::get().unwrap().id().unwrap(), "HelloWorld");
-        assert_eq!(Config::get().unwrap().name.unwrap(), name);
-        assert_eq!(Config::get().unwrap().colorscheme, 0);
+        Config::new(id.into(), Some(name), Some(profile_picture), None, None).expect(womp!());
         assert_eq!(
-            Config::get().unwrap().profile_picture.unwrap(),
+            Config::get().expect(womp!()).id().expect(womp!()),
+            "HelloWorld"
+        );
+        assert_eq!(Config::get().expect(womp!()).name.expect(womp!()), name);
+        assert_eq!(Config::get().expect(womp!()).colorscheme, 0);
+        assert_eq!(
+            Config::get()
+                .expect(womp!())
+                .profile_picture
+                .expect(womp!()),
             profile_picture
         );
     }
@@ -219,11 +229,11 @@ mod tests {
     #[test]
     #[serial]
     fn get_id() {
-        Config::reset().unwrap();
+        Config::reset().expect(womp!());
 
         let id = "HelloWorld";
-        let config = Config::new(id.into(), None, None, None, None).unwrap();
+        let config = Config::new(id.into(), None, None, None, None).expect(womp!());
 
-        assert_eq!(config.id().unwrap(), id);
+        assert_eq!(config.id().expect(womp!()), id);
     }
 }

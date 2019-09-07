@@ -1,3 +1,4 @@
+use arrayvec::ArrayVec;
 pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
@@ -8,6 +9,9 @@ pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
 pub type DeviceId = u32;
 pub type RawMsg = Bytes;
+
+pub type MsgId = ArrayVec<[u8; 32]>;
+pub type ConversationId = ArrayVec<[u8; 32]>;
 
 // the network status of a message
 #[derive(
@@ -46,7 +50,7 @@ pub struct GlobalId {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct ClientMessageAck {
     pub update_code: MessageStatus,
-    pub message_id: i64,
+    pub message_id: MsgId,
 }
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum Body {

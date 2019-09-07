@@ -4,7 +4,7 @@ use crate::{
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::{MessageStatus, UserId, UserIdRef};
+use herald_common::{ConversationId, MessageStatus, MsgId, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default, Clone)]
@@ -15,34 +15,36 @@ pub struct Messages {}
 #[derive(Clone)]
 pub struct Message {
     /// Local message id
-    pub message_id: Vec<u8>,
+    pub message_id: MsgId,
     /// Author user id
     pub author: UserId,
     /// Recipient user id
-    pub conversation: Vec<u8>,
+    pub conversation: ConversationId,
     /// Body of message
     pub body: String,
     /// Time the message was sent or received at the server.
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
-    pub op: Option<Vec<u8>>,
+    pub op: Option<MsgId>,
 }
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         let message_id: Vec<u8> = row.get(0)?;
         let author: UserId = row.get(1)?;
-        let conversation: Vec<u8> = row.get(2)?;
+        let conversation_id: Vec<u8> = row.get(2)?;
         let body: String = row.get(3)?;
         let op: Option<Vec<u8>> = row.get(4)?;
         let timestamp: String = row.get(5)?;
 
         Ok(Message {
-            message_id,
+            // TODO This will truncate id's that are too big, but this should never happen.
+            // Worth thinking about though.
+            message_id: message_id.into_iter().collect(),
             author,
-            conversation,
+            conversation: conversation_id.into_iter().collect(),
             body,
-            op,
+            op: op.map(|op| op.into_iter().collect()),
             timestamp: match NaiveDateTime::parse_from_str(timestamp.as_str(), utils::DATE_FMT) {
                 Ok(ts) => DateTime::from_utc(ts, Utc),
                 Err(e) => {
@@ -57,38 +59,47 @@ impl Message {
 impl Messages {
     /// Adds a message to the database.
     pub fn add_message(
-        msg_id: Option<Vec<u8>>,
+        msg_id: Option<MsgId>,
         author: UserIdRef,
-        conversation: &[u8],
+        conversation_id: &ConversationId,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
-        op: Option<Vec<u8>>,
-    ) -> Result<(Vec<u8>, DateTime<Utc>), HErr> {
+        op: Option<MsgId>,
+    ) -> Result<(MsgId, DateTime<Utc>), HErr> {
         let timestamp = timestamp.unwrap_or_else(Utc::now);
         let timestamp_string = timestamp.format(utils::DATE_FMT).to_string();
 
+        let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
+
         let db = Database::get()?;
-
-        let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().to_vec());
-
         db.execute(
             include_str!("sql/message/add.sql"),
-            params![msg_id, author, conversation, body, timestamp_string, op,],
+            params![
+                msg_id.as_slice(),
+                author,
+                conversation_id.as_slice(),
+                body,
+                timestamp_string,
+                op.map(|x| x.to_vec()),
+            ],
         )?;
         Ok((msg_id, timestamp))
     }
 
-    /// sets the message status of an item in the DB
-    /// currently assumes conversations are SYNCED
+    /// Sets the message status of an item in the database
     pub fn update_status(
-        conversation_id: &[u8],
-        msg_id: &[u8],
+        conversation_id: &ConversationId,
+        msg_id: MsgId,
         status: MessageStatus,
     ) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
-            include_str!("sql/message/update_status.sql"),
-            params![conversation_id, msg_id, (status as u32),],
+            include_str!("sql/message_status/update_message_status.sql"),
+            params![
+                conversation_id.as_slice(),
+                msg_id.as_slice(),
+                (status as u32)
+            ],
         )?;
         Ok(())
     }
@@ -169,7 +180,6 @@ mod tests {
     //        "1",
     //        None,
     //        None,
-    //        MessageStatus::NoAck,
     //    )
     //    .expect(womp!("Failed to add first message"));
 

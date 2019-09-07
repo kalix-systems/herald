@@ -78,15 +78,25 @@ impl Database {
         }
     }
 
+    /// Reset all table in database
     #[allow(dead_code)]
     pub(crate) fn reset_all() -> Result<(), HErr> {
         let mut db = Self::get()?;
         let tx = db.transaction()?;
+
+        // drop
+        tx.execute(include_str!("sql/message_status/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/config/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
+
+        // create
+        tx.execute(
+            include_str!("sql/message_status/create_table.sql"),
+            NO_PARAMS,
+        )?;
         tx.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/config/create_table.sql"), NO_PARAMS)?;

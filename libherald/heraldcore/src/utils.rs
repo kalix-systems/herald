@@ -58,3 +58,17 @@ impl SearchPattern {
         ))
     }
 }
+
+#[macro_export]
+/// Convenience macro to abort on error.
+macro_rules! abort_err {
+    ($maybe: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                eprintln!("{}", e);
+                std::process::abort();
+            }
+        }
+    };
+}

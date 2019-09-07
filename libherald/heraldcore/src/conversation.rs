@@ -4,7 +4,7 @@ use crate::{
     message::Message,
     utils,
 };
-use herald_common::UserId;
+use herald_common::{ConversationId, UserId};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
@@ -14,7 +14,7 @@ pub struct Conversations;
 /// Conversation metadata.
 pub struct ConversationMeta {
     /// Conversation id
-    pub conversation_id: Vec<u8>,
+    pub conversation_id: ConversationId,
     /// User ID's of conversation members
     pub members: Vec<UserId>,
 }
@@ -43,9 +43,9 @@ impl Conversation {
 impl Conversations {
     /// Adds a conversation to the database
     pub fn add_conversation(
-        conversation_id: Option<&[u8]>,
+        conversation_id: Option<&ConversationId>,
         title: Option<&str>,
-    ) -> Result<Vec<u8>, HErr> {
+    ) -> Result<ConversationId, HErr> {
         let id = match conversation_id {
             Some(id) => {
                 if id.len() != utils::RAND_ID_LEN {
@@ -59,7 +59,7 @@ impl Conversations {
             }
             None => {
                 let rand_array = utils::rand_id();
-                rand_array.to_vec()
+                ConversationId::from(rand_array)
             }
         };
 
@@ -68,28 +68,28 @@ impl Conversations {
 
         db.execute(
             include_str!("sql/conversation/add_conversation.sql"),
-            params![id, title, color],
+            params![id.as_slice(), title, color],
         )?;
 
         Ok(id)
     }
 
     /// Deletes all messages in a conversation.
-    pub fn delete_conversation(conversation_id: &[u8]) -> Result<(), HErr> {
+    pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/delete_conversation.sql"),
-            &[conversation_id],
+            &[conversation_id.as_slice()],
         )?;
         Ok(())
     }
 
     /// Get all messages in a conversation.
-    pub fn get_conversation(conversation_id: &[u8]) -> Result<Vec<Message>, HErr> {
+    pub fn get_conversation(conversation_id: &ConversationId) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
+        let res = stmt.query_map(&[conversation_id.as_slice()], Message::from_db)?;
 
         let mut messages = Vec::new();
         for msg in res {
@@ -159,17 +159,18 @@ mod tests {
         // test without id
         Conversations::add_conversation(None, None).expect(womp!("failed to create conversation"));
 
+        let conversation_id = ConversationId::from([0; 32]);
         // test with id
         assert_eq!(
-            vec![0; 32],
-            Conversations::add_conversation(Some(&[0; 32]), None)
+            conversation_id,
+            Conversations::add_conversation(Some(&conversation_id), None)
                 .expect(womp!("failed to create conversation"))
         );
 
-        Conversations::add_conversation(Some(&[1; 32]), Some("el groupo"))
+        Conversations::add_conversation(Some(&[1; 32].into()), Some("el groupo"))
             .expect(womp!("failed to create conversation"));
 
-        Conversations::add_conversation(Some(&[2; 32]), Some("el groupo"))
+        Conversations::add_conversation(Some(&[2; 32].into()), Some("el groupo"))
             .expect(womp!("failed to create conversation"));
     }
 
@@ -181,7 +182,7 @@ mod tests {
         let author = "Hello";
         Contacts::add(author, None, None, None).expect(womp!());
 
-        let conversation = [0; 32];
+        let conversation = ConversationId::from([0; 32]);
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
@@ -205,7 +206,7 @@ mod tests {
         let author = "Hello";
         Contacts::add(author, None, None, None).expect(womp!());
 
-        let conversation = [0; 32];
+        let conversation = ConversationId::from([0; 32]);
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
@@ -227,12 +228,10 @@ mod tests {
         let author = "Hello";
         Contacts::add(author, None, None, None).expect(womp!());
 
-        let conversation = [0; 32];
+        let conversation = [0; 32].into();
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        let author = "Hello";
-        let conversation = [0; 32];
         Messages::add_message(None, author, &conversation, "1", None, None)
             .expect(womp!("Failed to add first message"));
         Messages::add_message(None, author, &conversation, "1", None, None)
