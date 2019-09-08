@@ -76,7 +76,9 @@ impl Conversations {
     }
 
     /// Get all messages in a conversation.
-    pub fn get_conversation(conversation_id: &ConversationId) -> Result<Vec<Message>, HErr> {
+    pub fn get_conversation_messages(
+        conversation_id: &ConversationId,
+    ) -> Result<Vec<Message>, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
@@ -88,6 +90,53 @@ impl Conversations {
         }
 
         Ok(messages)
+    }
+
+    /// Get conversation meta data
+    pub fn get_meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
+        let db = Database::get()?;
+
+        let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
+        let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
+
+        let mut members = Vec::new();
+        for member in res {
+            members.push(member?);
+        }
+
+        Ok(ConversationMeta {
+            conversation_id: conversation_id.clone(),
+            members,
+        })
+    }
+
+    /// Get conversation
+    pub fn get_conversation(conversation_id: &ConversationId) -> Result<Conversation, HErr> {
+        let db = Database::get()?;
+
+        let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
+        let res = stmt.query_map(&[conversation_id.as_slice()], Message::from_db)?;
+
+        let mut messages = Vec::new();
+        for msg in res {
+            messages.push(msg?);
+        }
+
+        let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
+        let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
+
+        let mut members = Vec::new();
+        for member in res {
+            members.push(member?);
+        }
+
+        Ok(Conversation {
+            meta: ConversationMeta {
+                conversation_id: conversation_id.clone(),
+                members,
+            },
+            messages,
+        })
     }
 }
 

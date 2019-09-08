@@ -102,6 +102,17 @@ impl Messages {
         Ok((msg_id, timestamp))
     }
 
+    /// Get message by message id
+    pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
+        let db = Database::get()?;
+
+        Ok(db.query_row(
+            include_str!("sql/message/get_message.sql"),
+            params![msg_id.as_slice()],
+            Message::from_db,
+        )?)
+    }
+
     /// Sets the message status of an item in the database
     pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
         let db = Database::get()?;
@@ -195,8 +206,8 @@ mod tests {
             .expect(womp!("Failed to add first message"));
 
         assert_eq!(
-            Conversations::get_conversation(&conversation_id)
-                .expect(womp!("failed to get conversation by author"))[0]
+            Messages::get_message(&msg_id)
+                .expect(womp!("failed to get conversation by author"))
                 .send_status,
             None,
         );
@@ -204,7 +215,7 @@ mod tests {
         Messages::update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
 
         assert_eq!(
-            Conversations::get_conversation(&conversation_id)
+            Conversations::get_conversation_messages(&conversation_id)
                 .expect(womp!("failed to get conversation by author"))[0]
                 .send_status,
             Some(MessageSendStatus::Ack)
