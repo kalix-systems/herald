@@ -26,22 +26,12 @@ Column {
         text: messageText
     }
 
-
-
     Rectangle {
         id: bubble
-
         color: bubbleColor
         radius: QmlCfg.radius
         width: Math.max(...widthConstraintArray) + QmlCfg.margin
-        height: bubbleText.height + timeStamp.height + QmlCfg.margin
-
-        Loader {
-            active: additionalContent
-            id: attachmentLoader
-            sourceComponent: additionalContent
-        }
-
+        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + QmlCfg.margin * 2
         TextEdit {
             id: bubbleText
             text: messageText
@@ -50,7 +40,7 @@ Column {
 
             anchors {
                 margins: QmlCfg.margin / 2
-                top: bubble.top
+                bottom: timeStamp.top
                 left: bubble.left
             }
 
@@ -58,6 +48,24 @@ Column {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
+        }
+
+
+        Loader {
+            active: additionalContent
+            id: attachmentLoader
+            sourceComponent: Component {
+                Rectangle {
+                    height: 100
+                    width: 200
+                    color: "black"
+                }
+            }
+            anchors {
+                margins: QmlCfg.margin / 2
+                horizontalCenter: bubble.horizontalCenter
+                bottom: bubbleText.top
+            }
         }
 
         Label {
@@ -68,7 +76,7 @@ Column {
             anchors {
                 margins: QmlCfg.margin / 2
                 bottom: bubble.bottom
-                left: parent.left
+                left: bubble.left
             }
         }
     }
