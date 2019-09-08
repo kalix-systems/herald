@@ -182,10 +182,14 @@ mod tests {
     #[serial]
     fn message_send_status_updates() {
         Database::reset_all().expect(womp!());
-        Messages::reset().expect(womp!());
+
+        let conversation_id = [0; 32].into();
+        crate::conversation::Conversations::add_conversation(Some(&conversation_id), None)
+            .expect(womp!());
 
         let author = "Hello";
-        let conversation_id = [0; 32].into();
+        crate::contact::Contacts::add(author, None, None, None).expect(womp!());
+        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
 
         let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, None)
             .expect(womp!("Failed to add first message"));
