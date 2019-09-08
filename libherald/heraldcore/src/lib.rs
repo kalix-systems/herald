@@ -22,8 +22,7 @@ pub mod members;
 pub mod message;
 /// message status
 mod message_status;
+/// Networking
+pub mod network;
 /// Utils
 pub mod utils;
-
-///// Networking
-//pub mod network;

@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS messages (
   timestamp TEXT NOT NULL,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
+  -- send status of the message
+  send_status INT,
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 )

@@ -4,7 +4,9 @@ use crate::{
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::{ConversationId, MessageStatus, MsgId, UserId, UserIdRef};
+use herald_common::{
+    ConversationId, MessageReceiptStatus, MessageSendStatus, MsgId, UserId, UserIdRef,
+};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default, Clone)]
@@ -26,6 +28,10 @@ pub struct Message {
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
     pub op: Option<MsgId>,
+    /// Send status
+    pub send_status: Option<MessageSendStatus>,
+    /// Receipts
+    pub receipts: Option<Vec<(UserId, MessageReceiptStatus)>>,
 }
 
 impl Message {
@@ -35,23 +41,25 @@ impl Message {
         let conversation_id: Vec<u8> = row.get(2)?;
         let body: String = row.get(3)?;
         let op: Option<Vec<u8>> = row.get(4)?;
-        let timestamp: String = row.get(5)?;
-
-        Ok(Message {
-            // TODO This will truncate id's that are too big, but this should never happen.
-            // Worth thinking about though.
-            message_id: message_id.into_iter().collect(),
-            author,
-            conversation: conversation_id.into_iter().collect(),
-            body,
-            op: op.map(|op| op.into_iter().collect()),
-            timestamp: match NaiveDateTime::parse_from_str(timestamp.as_str(), utils::DATE_FMT) {
+        let timestamp =
+            match NaiveDateTime::parse_from_str(row.get::<_, String>(5)?.as_str(), utils::DATE_FMT)
+            {
                 Ok(ts) => DateTime::from_utc(ts, Utc),
                 Err(e) => {
                     eprintln!("Error: {}", e);
                     Utc::now()
                 }
-            },
+            };
+
+        Ok(Message {
+            message_id: message_id.into_iter().collect(),
+            author,
+            conversation: conversation_id.into_iter().collect(),
+            body,
+            op: op.map(|op| op.into_iter().collect()),
+            timestamp,
+            receipts: None,
+            send_status: None,
         })
     }
 }
@@ -67,7 +75,7 @@ impl Messages {
         op: Option<MsgId>,
     ) -> Result<(MsgId, DateTime<Utc>), HErr> {
         let timestamp = timestamp.unwrap_or_else(Utc::now);
-        let timestamp_string = timestamp.format(utils::DATE_FMT).to_string();
+        let timestamp_param = timestamp.format(utils::DATE_FMT).to_string();
 
         let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
 
@@ -79,7 +87,7 @@ impl Messages {
                 author,
                 conversation_id.as_slice(),
                 body,
-                timestamp_string,
+                timestamp_param,
                 op.map(|x| x.to_vec()),
             ],
         )?;
@@ -87,19 +95,11 @@ impl Messages {
     }
 
     /// Sets the message status of an item in the database
-    pub fn update_status(
-        conversation_id: &ConversationId,
-        msg_id: MsgId,
-        status: MessageStatus,
-    ) -> Result<(), HErr> {
+    pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
-            include_str!("sql/message_status/update_message_status.sql"),
-            params![
-                conversation_id.as_slice(),
-                msg_id.as_slice(),
-                (status as u32)
-            ],
+            include_str!("sql/message/update_status.sql"),
+            params![status as u8, msg_id.as_slice()],
         )?;
         Ok(())
     }

@@ -1,5 +1,6 @@
-UPDATE messages
-SET send_status=?3
-WHERE ID=?2 AND (author=?1 or recipient=?1);
-
-  
+UPDATE
+  messages
+SET
+  send_status = @1
+WHERE
+  msg_id = @2
