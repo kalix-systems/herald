@@ -7,5 +7,6 @@ import "../common" as Common
 import "../common/utils.js" as Utils
 
 ChatBubbleForm {
-
+    property color repBubCol: "blue"
+     additionalContent: ReplyComponent {}
 }

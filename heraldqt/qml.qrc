@@ -30,5 +30,6 @@
         <file>ChatView/ConversationWindowForm.qml</file>
         <file>icons/emoji.png</file>
         <file>ChatView/ChatBubbleForm.qml</file>
+        <file>ChatView/ReplyComponent.qml</file>
     </qresource>
 </RCC>

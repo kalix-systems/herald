@@ -31,7 +31,8 @@ Column {
         color: bubbleColor
         radius: QmlCfg.radius
         width: Math.max(...widthConstraintArray) + QmlCfg.margin
-        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + QmlCfg.margin * 2
+        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + QmlCfg.margin
+
         TextEdit {
             id: bubbleText
             text: messageText
@@ -54,13 +55,7 @@ Column {
         Loader {
             active: additionalContent
             id: attachmentLoader
-            sourceComponent: Component {
-                Rectangle {
-                    height: 100
-                    width: 200
-                    color: "black"
-                }
-            }
+            sourceComponent: additionalContent
             anchors {
                 margins: QmlCfg.margin / 2
                 horizontalCenter: bubble.horizontalCenter
