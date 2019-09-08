@@ -2,10 +2,26 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
 };
-use rusqlite::NO_PARAMS;
+use herald_common::{MessageReceiptStatus, MsgId, UserIdRef};
+use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
-struct MessageStatus;
+pub(crate) struct MessageStatus;
+
+impl MessageStatus {
+    pub fn set_message_status(
+        msg_id: MsgId,
+        user_id: UserIdRef,
+        receipt_status: MessageReceiptStatus,
+    ) -> Result<(), HErr> {
+        let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message_status/set_message_status.sql"),
+            params![msg_id.as_slice(), user_id, receipt_status as u8],
+        )?;
+        Ok(())
+    }
+}
 
 impl DBTable for MessageStatus {
     fn create_table() -> Result<(), HErr> {
@@ -45,6 +61,7 @@ impl DBTable for MessageStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{conversation::Conversations, message::Messages};
     use serial_test_derive::serial;
 
     use womp::*;
@@ -52,6 +69,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
+        Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         MessageStatus::drop_table().expect(womp!());
         MessageStatus::drop_table().expect(womp!());
@@ -62,5 +80,24 @@ mod tests {
         assert!(MessageStatus::exists().expect(womp!()));
         MessageStatus::drop_table().expect(womp!());
         assert!(!MessageStatus::exists().expect(womp!()));
+    }
+
+    #[test]
+    #[serial]
+    fn message_send_status_updates() {
+        Database::reset_all().expect(womp!());
+
+        let author = "Hello";
+        let conversation_id = [0; 32].into();
+
+        Conversations::add_conversation(Some(&conversation_id), None).expect(womp!());
+        crate::contact::Contacts::add(author, None, None, None).expect(womp!());
+        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
+
+        let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, None)
+            .expect(womp!("Failed to add first message"));
+
+        MessageStatus::set_message_status(msg_id, author, MessageReceiptStatus::Read)
+            .expect(womp!());
     }
 }

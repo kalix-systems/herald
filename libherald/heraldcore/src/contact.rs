@@ -325,6 +325,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
+        Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         Contacts::drop_table().expect(womp!());
         Contacts::drop_table().expect(womp!());

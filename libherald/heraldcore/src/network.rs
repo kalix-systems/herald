@@ -1,5 +1,6 @@
 use crate::{
     config::Config,
+    message_status,
     errors::HErr::{self, *},
     message,
 };
@@ -101,7 +102,7 @@ fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
         message_id,
         update_code,
     } = ack;
-    // message::Messages::update_status(from.as_str(), message_id, update_code)?;
+    message_status::MessageStatus::set_message_status(message_id, from.as_str(), update_code)?;
     Ok(Event {
         reply: None,
         notification: None,

@@ -87,9 +87,9 @@ impl Database {
         // drop
         tx.execute(include_str!("sql/message_status/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/config/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
 
         // create

@@ -2,6 +2,7 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
 };
+use herald_common::{ConversationId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 /// Conversation members
@@ -10,21 +11,24 @@ pub struct Members;
 
 impl Members {
     /// Add a user with `member_id` to the conversation with `conversation_id`.
-    pub fn add_member(conversation_id: &[u8], member_id: &str) -> Result<(), HErr> {
+    pub fn add_member(conversation_id: &ConversationId, member_id: UserIdRef) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/members/add_member.sql"),
-            params![conversation_id, member_id],
+            params![conversation_id.as_slice(), member_id],
         )?;
         Ok(())
     }
 
     /// Remove a user with `member_id` to the conversation with `conversation_id`.
-    pub fn remove_member(conversation_id: &[u8], member_id: &str) -> Result<(), HErr> {
+    pub fn remove_member(
+        conversation_id: &ConversationId,
+        member_id: UserIdRef,
+    ) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/members/remove_member.sql"),
-            params![conversation_id, member_id],
+            params![conversation_id.as_slice(), member_id],
         )?;
         Ok(())
     }

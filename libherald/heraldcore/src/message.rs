@@ -165,6 +165,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
+        Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         Messages::drop_table().expect(womp!());
         Messages::drop_table().expect(womp!());
@@ -180,6 +181,7 @@ mod tests {
     #[test]
     #[serial]
     fn message_send_status_updates() {
+        Database::reset_all().expect(womp!());
         Messages::reset().expect(womp!());
 
         let author = "Hello";

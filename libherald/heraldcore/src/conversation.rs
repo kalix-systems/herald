@@ -47,16 +47,7 @@ impl Conversations {
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
         let id = match conversation_id {
-            Some(id) => {
-                if id.len() != utils::RAND_ID_LEN {
-                    return Err(HErr::HeraldError(format!(
-                        "IDs should have {} bytes, but {} bytes were found",
-                        utils::RAND_ID_LEN,
-                        id.len()
-                    )));
-                }
-                id.to_owned()
-            }
+            Some(id) => id.to_owned(),
             None => {
                 let rand_array = utils::rand_id();
                 ConversationId::from(rand_array)
