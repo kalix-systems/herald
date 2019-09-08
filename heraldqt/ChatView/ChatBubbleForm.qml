@@ -52,7 +52,7 @@ Row {
               height: 25
               width: height
               background: Image {
-                  source: "qrc:///icons/emoji.png"
+                  source: "qrc:///icons/reply.png"
                   height: width
                   scale: 0.9
                   mipmap: true
