@@ -8,6 +8,7 @@ use herald_common::{
     ConversationId, MessageReceiptStatus, MessageSendStatus, MsgId, UserId, UserIdRef,
 };
 use rusqlite::{params, NO_PARAMS};
+use std::convert::TryInto;
 
 #[derive(Default, Clone)]
 /// Messages
@@ -51,6 +52,11 @@ impl Message {
                 }
             };
 
+        let send_status = match row.get::<_, Option<u8>>(6)? {
+            Some(n) => n.try_into().ok(),
+            None => None,
+        };
+
         Ok(Message {
             message_id: message_id.into_iter().collect(),
             author,
@@ -59,13 +65,15 @@ impl Message {
             op: op.map(|op| op.into_iter().collect()),
             timestamp,
             receipts: None,
-            send_status: None,
+            send_status,
         })
     }
 }
 
 impl Messages {
     /// Adds a message to the database.
+    // TODO should this take statuses? I don't see a case where that makes sense aside from syncing
+    // between devices. Shouldn't server messages just reproduce that though?
     pub fn add_message(
         msg_id: Option<MsgId>,
         author: UserIdRef,
@@ -98,17 +106,20 @@ impl Messages {
     pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
-            include_str!("sql/message/update_status.sql"),
+            include_str!("sql/message/update_send_status.sql"),
             params![status as u8, msg_id.as_slice()],
         )?;
         Ok(())
     }
 
     /// Deletes a message
-    pub fn delete_message(id: &[u8]) -> Result<(), HErr> {
+    pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
         let db = Database::get()?;
 
-        db.execute(include_str!("sql/message/delete_message.sql"), &[id])?;
+        db.execute(
+            include_str!("sql/message/delete_message.sql"),
+            params![id.as_slice()],
+        )?;
         Ok(())
     }
 }
@@ -146,7 +157,7 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // use crate::conversation::Conversations;
+    use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     use womp::*;
@@ -166,64 +177,31 @@ mod tests {
         assert!(!Messages::exists().expect(womp!()));
     }
 
-    //#[test]
-    //#[serial]
-    //fn message_status_updates() {
-    //    Messages::reset().expect(womp!());
+    #[test]
+    #[serial]
+    fn message_send_status_updates() {
+        Messages::reset().expect(womp!());
 
-    //    let author = "Hello";
-    //    let conversation_id = [0; 32];
-    //    Messages::add_message(
-    //        None,
-    //        author,
-    //        &conversation_id,
-    //        "1",
-    //        None,
-    //        None,
-    //    )
-    //    .expect(womp!("Failed to add first message"));
+        let author = "Hello";
+        let conversation_id = [0; 32].into();
 
-    //    assert_eq!(
-    //        Conversations::get_conversation(&conversation_id)
-    //            .expect(womp!("failed to get conversation by author"))[0]
-    //            .message_status,
-    //        MessageStatus::NoAck
-    //    );
+        let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, None)
+            .expect(womp!("Failed to add first message"));
 
-    //    let (msg_id, _) = Messages::add_message(
-    //        None,
-    //        author,
-    //        &conversation_id,
-    //        "new",
-    //        None,
-    //        None,
-    //        MessageStatus::RecipReceivedAck,
-    //    )
-    //    .expect(womp!("Failed to add first message"));
+        assert_eq!(
+            Conversations::get_conversation(&conversation_id)
+                .expect(womp!("failed to get conversation by author"))[0]
+                .send_status,
+            None,
+        );
 
-    //    assert_eq!(
-    //        Conversations::get_conversation(&conversation_id)
-    //            .expect(womp!("failed to get conversation by author"))[1]
-    //            .message_status,
-    //        MessageStatus::RecipReceivedAck
-    //    );
+        Messages::update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
 
-    //    Messages::update_status(&conversation_id, &msg_id, MessageStatus::Timeout)
-    //        .expect(womp!("could not update status :"));
-    //    //if this fails the UPDATE call was not specific enough
-    //    assert_eq!(
-    //        Conversations::get_conversation(&conversation_id).expect(womp!(
-    //            "failed to get conversation by author, the second time"
-    //        ))[0]
-    //            .message_status,
-    //        MessageStatus::NoAck
-    //    );
-
-    //    assert_eq!(
-    //        Conversations::get_conversation(&conversation_id)
-    //            .expect("failed to get conversation by author, the third time")[1]
-    //            .message_status,
-    //        MessageStatus::Timeout
-    //    );
-    //}
+        assert_eq!(
+            Conversations::get_conversation(&conversation_id)
+                .expect(womp!("failed to get conversation by author"))[0]
+                .send_status,
+            Some(MessageSendStatus::Ack)
+        );
+    }
 }

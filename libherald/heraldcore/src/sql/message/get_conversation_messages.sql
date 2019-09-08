@@ -4,7 +4,8 @@ SELECT
   conversation_id,
   body,
   op_msg_id,
-  timestamp
+  timestamp,
+  send_status
 FROM
   messages
 WHERE

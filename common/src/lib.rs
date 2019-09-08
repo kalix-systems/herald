@@ -5,7 +5,7 @@ pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
 use serde::*;
-// use std::convert::{TryFrom, TryInto};
+use std::convert::{TryFrom, TryInto};
 use tokio::prelude::*;
 
 pub type UserId = String;
@@ -25,6 +25,19 @@ pub enum MessageSendStatus {
     Ack = 1,
     /// The message has timed-out.
     Timeout = 2,
+}
+
+impl TryFrom<u8> for MessageSendStatus {
+    type Error = u8;
+
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
+        match val {
+            0 => Ok(Self::NoAck),
+            1 => Ok(Self::Ack),
+            2 => Ok(Self::Timeout),
+            i => Err(i),
+        }
+    }
 }
 
 // the network status of a message

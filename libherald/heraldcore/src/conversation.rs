@@ -213,7 +213,7 @@ mod tests {
         let (msg_id, _) = Messages::add_message(None, author, &conversation, "1", None, None)
             .expect(womp!("Failed to add first message"));
 
-        Messages::delete_message(msg_id.as_slice()).expect(womp!());
+        Messages::delete_message(&msg_id).expect(womp!());
 
         assert!(Conversations::get_conversation(&conversation)
             .expect(womp!())

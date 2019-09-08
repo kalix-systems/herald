@@ -5,9 +5,9 @@ use crate::{
 use rusqlite::NO_PARAMS;
 
 #[derive(Default)]
-struct MessageStatuses;
+struct MessageStatus;
 
-impl DBTable for MessageStatuses {
+impl DBTable for MessageStatus {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
@@ -39,5 +39,28 @@ impl DBTable for MessageStatuses {
         )?;
         tx.commit()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serial_test_derive::serial;
+
+    use womp::*;
+
+    #[test]
+    #[serial]
+    fn create_drop_exists() {
+        // drop twice, it shouldn't panic on multiple drops
+        MessageStatus::drop_table().expect(womp!());
+        MessageStatus::drop_table().expect(womp!());
+
+        MessageStatus::create_table().expect(womp!());
+        assert!(MessageStatus::exists().expect(womp!()));
+        MessageStatus::create_table().expect(womp!());
+        assert!(MessageStatus::exists().expect(womp!()));
+        MessageStatus::drop_table().expect(womp!());
+        assert!(!MessageStatus::exists().expect(womp!()));
     }
 }
