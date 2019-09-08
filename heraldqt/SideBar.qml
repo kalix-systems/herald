@@ -7,13 +7,14 @@ import "SideBar" as SBUtils
 
 Pane {
     id: contactPane
-
+    property alias contactsListView : contactsListView
     property real windowFraction: 0.25 // By default set the width to 1/4 the total window size.
     property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
+
 
     onWidthChanged: {
         windowFraction = width / root.width
@@ -56,6 +57,7 @@ Pane {
         }
 
         SBUtils.ContactView {
+            id: contactsListView
             anchors.fill: parent
             model: Contacts {
                 id: contacts

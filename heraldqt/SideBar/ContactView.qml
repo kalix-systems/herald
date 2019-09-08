@@ -15,7 +15,9 @@ ListView {
 
     ScrollBar.vertical: ScrollBar {
     }
+
     delegate: Item {
+        property Item contactAvatar: contactAvatar
         id: contactItem
         height: {
             if (visible)
@@ -71,11 +73,10 @@ ListView {
                 // Note : this is really imperative, we should do this somehow else.
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
+                        currentIndex = index
+                        print(currentIndex, currentItem.contactAvatar.displayName)
                         contactItem.focus = true
                         messageModel.conversationId = contact_id
-                        chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
-                        chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
-                        chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
                         chatView.state = "visibleview"
                     } else {
 

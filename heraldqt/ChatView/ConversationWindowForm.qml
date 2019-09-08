@@ -43,12 +43,21 @@ Flickable {
                     leftMargin: rightMargin
                 }
 
-
-
                 CVUtils.ChatBubble {
-                    text: body
+                    messageText: body
+                    bubbleColor: if (outbound) {
+                                       QmlCfg.palette.tertiaryColor
+                                   } else {
+                                       QmlCfg.palette.secondaryColor
+                                   }
                 } //bubble
             } //bubble wrapper
         }// Repeater
     } //singleton Col
 } // flickable
+
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

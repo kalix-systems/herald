@@ -7,7 +7,7 @@ import "." as CVUtils
 import "../common/utils.js" as Utils
 
 CVUtils.ConversationWindowForm {
-
+    focus: true
     Connections {
         target: messageModel
         onRowsInserted: {

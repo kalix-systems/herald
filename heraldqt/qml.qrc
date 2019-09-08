@@ -24,9 +24,11 @@
         <file>icons/searchRegex.png</file>
         <file>icons/searchRegexTemp.png</file>
         <file>ChatView/TextArea.qml</file>
-        <file>ChatView/TextAreaForm.ui.qml</file>
+        <file>ChatView/TextAreaForm.qml</file>
         <file>ChatView/ChatTextAreaUtils.js</file>
         <file>ChatView/ConversationWindow.qml</file>
-        <file>ChatView/ConversationWindowForm.ui.qml</file>
+        <file>ChatView/ConversationWindowForm.qml</file>
+        <file>icons/emoji.png</file>
+        <file>ChatView/ChatBubbleForm.qml</file>
     </qresource>
 </RCC>

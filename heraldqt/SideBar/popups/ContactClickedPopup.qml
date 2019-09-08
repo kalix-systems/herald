@@ -16,7 +16,6 @@ Item {
             var retCode = contacts.setProfile_picture(index, fileUrl)
             if (retCode) {
                 contactAvatar.pfpUrl = profile_picture
-                chatView.messageBar.chatBarAvatar.pfpUrl = profile_picture
             } else
                 print("TODO: Error popup here...")
             close()
@@ -29,10 +28,10 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             onTriggered: {
-                if (contact_id === chatView.messageModel.conversationId)
+                if (contact_id === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
                 contacts.remove(index)
-                chatView.messageModel.clear_conversation_view()
+                messageModel.clear_conversation_view()
             }
         }
         MenuItem {
@@ -49,7 +48,6 @@ Item {
             text: 'Clear Avatar'
             onTriggered: {
                 contactAvatar.pfpUrl = ""
-                chatView.messageBar.chatBarAvatar.pfpUrl = ""
                 contacts.setProfile_picture(index, "")
             }
         }
@@ -60,10 +58,6 @@ Item {
             return
         }
         name = entryField.text.trim()
-        print(contact_id, chatView.messageBar.contact_id)
-        if (contact_id === chatView.messageModel.conversationId) {
-            chatView.messageBar.chatBarAvatar.displayName = name
-        }
         entryField.clear()
         renameContactDialogue.close()
     }

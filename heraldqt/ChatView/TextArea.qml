@@ -21,6 +21,7 @@ TextAreaForm {
         // TODO: Tab should cycle through a hierarchy of items as far as focus
     }
 
+    emojiButton.onClicked: print("placeholder until emoji pop up")
     atcButton.onClicked: attachmentsDialogue.open()
     scrollHeight: Math.min(contentHeight, 100)
 }

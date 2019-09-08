@@ -25,9 +25,9 @@ var textAreaMemory = {
 *
 **/
 function getTextAreaMemory(conversationId) {
-        if(!conversationID) {
-            return textAreaMemory.invalid
-        }
+    if (!conversationID) {
+        return textAreaMemory.invalid
+    }
 }
 
 
