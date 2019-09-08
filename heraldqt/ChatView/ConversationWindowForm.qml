@@ -44,7 +44,9 @@ Flickable {
                 }
 
                 CVUtils.ChatBubble {
+                    ReplyComponent { id: temp }
                     messageText: body
+                    additionalContent: if (op > 1) { temp }
                     bubbleColor: if (outbound) {
                                        QmlCfg.palette.tertiaryColor
                                    } else {
@@ -55,6 +57,8 @@ Flickable {
         }// Repeater
     } //singleton Col
 } // flickable
+
+
 
 
 /*##^## Designer {

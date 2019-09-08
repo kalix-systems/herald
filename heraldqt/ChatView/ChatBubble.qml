@@ -6,7 +6,20 @@ import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.js" as Utils
 
+
+
 ChatBubbleForm {
-     property color repBubCol: "blue"
-     additionalContent: ReplyComponent {}
+
+    replyButton.onClicked: {
+        print("kaavya! put some business logic here.")
+    }
+
+    chatBubbleHitbox.onEntered: {
+        replyButton.visible =! replyButton.visible
+    }
+    chatBubbleHitbox.onExited: {
+        replyButton.visible =! replyButton.visible
+    }
+
+
 }

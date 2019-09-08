@@ -9,8 +9,6 @@ ToolBar {
     property alias chatBarAvatar: chatBarAvatar
     property var currentAvatar : Utils.unwrap_or(sideBar.contactsListView.currentItem,
                                                   {contactAvatar: undefined}).contactAvatar
-
-
     clip: true
     height: QmlCfg.toolbarHeight
     anchors {

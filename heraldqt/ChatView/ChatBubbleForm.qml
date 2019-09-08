@@ -6,20 +6,24 @@ import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.js" as Utils
 
-Column {
+Row {
     property string messageText: ""
     property bool showAvatar: false
     property color bubbleColor
     property int bubbleWidth: 0
     property int bubbleHeight: 0
 
+    property alias replyButton: replyButton
+    property alias chatBubbleHitbox: chatBubbleHitbox
     // the width the text sits at without wrapping
-    property int naturalTextWidth: messageMetrics.width
+    readonly property int naturalTextWidth: messageMetrics.width
 
     // the items which potentially constraint width
     property var widthConstraintArray: [bubbleText.width, timeStamp.width, attachmentLoader.width]
 
-    property Component additionalContent
+    property var additionalContent
+    readonly property real marginCount: if (additionalContent === undefined) { 1.5 } else { 2 }
+
 
     TextMetrics {
         id: messageMetrics
@@ -27,11 +31,45 @@ Column {
     }
 
     Rectangle {
+
+        MouseArea {
+            propagateComposedEvents: true
+            id: chatBubbleHitbox
+            hoverEnabled: true
+            width: parent.width + 50
+          anchors {
+            left: if(!outbound) parent.left
+            right: if(outbound) parent.right
+            bottom: parent.bottom
+            top: parent.top
+          }
+          // Emoji button proper
+          Button {
+              visible: false
+              id: replyButton
+              anchors.margins: QmlCfg.margin
+              anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+              height: 25
+              width: height
+              background: Image {
+                  source: "qrc:///icons/emoji.png"
+                  height: width
+                  scale: 0.9
+                  mipmap: true
+              }
+              z: 10
+          }
+        }
+
+
+
+
+
         id: bubble
         color: bubbleColor
         radius: QmlCfg.radius
         width: Math.max(...widthConstraintArray) + QmlCfg.margin
-        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + QmlCfg.margin
+        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + marginCount * QmlCfg.margin
 
         TextEdit {
             id: bubbleText
@@ -51,9 +89,8 @@ Column {
             readOnly: true
         }
 
-
         Loader {
-            active: additionalContent
+            active: additionalContent !== undefined
             id: attachmentLoader
             sourceComponent: additionalContent
             anchors {
