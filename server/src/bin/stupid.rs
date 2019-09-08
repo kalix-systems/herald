@@ -11,8 +11,8 @@ use crossbeam_queue::SegQueue;
 use failure::*;
 use herald_common::*;
 use serde::{Deserialize, Serialize};
-use std::ops::DerefMut;
 use std::convert::TryInto;
+use std::ops::DerefMut;
 use std::sync::Arc;
 use tokio::net;
 use tokio::prelude::*;
@@ -112,7 +112,7 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
     }
 
     pub async fn login(&self, gid: &GlobalId, writer: Sock) -> Result<(), Error> {
-        let device_id : usize = (gid.did + 1) as usize;
+        let device_id: usize = (gid.did + 1) as usize;
         if let Some(mut u) = self.meta.async_get_mut(gid.uid.clone()).await {
             let devs = std::cmp::max(u.num_devices, device_id);
             u.num_devices = devs;
@@ -165,26 +165,6 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
 
 const PORT: u16 = 8000;
 
-async fn read_datagram<S: AsyncRead + Unpin, T: for<'a> Deserialize<'a>>(
-    s: &mut S,
-) -> Result<T, Error> {
-    let mut buf = [0u8; 8];
-    s.read_exact(&mut buf).await?;
-    let len = u64::from_le_bytes(buf) as usize;
-    let mut buf = vec![0u8; len];
-    s.read_exact(&mut buf).await?;
-    let res = serde_cbor::from_slice(&buf)?;
-    Ok(res)
-}
-
-async fn send_datagram<S: AsyncWrite + Unpin, T: Serialize>(s: &mut S, t: &T) -> Result<(), Error> {
-    let vec = serde_cbor::to_vec(t)?;
-    let len = u64::to_le_bytes(vec.len() as u64);
-    s.write_all(&len).await?;
-    s.write_all(&vec).await?;
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() {
     let state: AppState<net::tcp::split::TcpStreamWriteHalf> = AppState::new();
@@ -203,15 +183,15 @@ async fn main() {
                 loop {
                     let d = read_datagram(&mut reader).await;
                     if let Err(e) = d {
-                        eprintln!("invalid msg from addr {}, error was {:?}", addr, e);
+                        dbg!("invalid msg", addr, e);
                         break;
                     };
                     state.handle_msg(&gid, d.unwrap()).await?;
                 }
-                dbg!("closing connection with {}", &gid);
+                dbg!("closing connection", &gid);
                 state.open.remove(&gid);
                 let open: Vec<GlobalId> = state.open.iter().map(|p| p.key().clone()).collect();
-                dbg!("current open connections are: {:?}", &open);
+                dbg!("current open connections are", &open);
             };
             if let Err(e) = comp {
                 eprintln!("session with {} failed, error was: {:?}", addr, e);

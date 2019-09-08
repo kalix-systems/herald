@@ -55,7 +55,6 @@ impl NetworkFlags {
 
 pub enum HandleMessages {
     ToServer(MessageToServer),
-    //Shutdown,
 }
 
 pub struct NetworkHandle {
@@ -80,20 +79,20 @@ impl NetworkHandleTrait for NetworkHandle {
         handle
     }
 
+    /// TRIGGERS the sending of a message
+    /// this is called over FFI by the JS
     fn send_message(&self, message_body: String, to: String) -> bool {
-        let to = UserId::from(&to);
-
-        let msg = MessageToServer::SendMsg {
-            to,
-            body: message_body.into(),
-        };
-
-        match self.tx.send(HandleMessages::ToServer(msg)) {
-            Ok(_) => true,
-            Err(e) => {
-                eprintln!("{}", e);
-                false
+        if let Ok(msg) = form_text_message(to, message_body) {
+            match self.tx.send(HandleMessages::ToServer(msg)) {
+                Ok(_) => true,
+                Err(e) => {
+                    eprintln!("{}", e);
+                    false
+                }
             }
+        } else {
+            eprintln!("error converting message to bytes");
+            false
         }
     }
 
@@ -140,7 +139,8 @@ impl NetworkHandle {
                     Ok(HandleMessages::ToServer(message)) => match message {
                         // request from Qt to send a message
                         SendMsg { to, body } => {
-                            send_message(to, body, &mut stream).unwrap();
+                            println!("Sending from rust!");
+                            send_text_message(to, body, &mut stream).unwrap();
                         }
                         // request from Qt to register a device
                         RegisterDevice => unimplemented!(),

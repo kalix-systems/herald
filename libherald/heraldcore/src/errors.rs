@@ -1,4 +1,4 @@
-use herald_common::CapacityError;
+use herald_common::TransportError;
 use image;
 use regex;
 use std::{fmt, sync::PoisonError};
@@ -9,10 +9,12 @@ pub enum HErr {
     DatabaseError(rusqlite::Error),
     MutexError(String),
     InvalidUserId(String),
+    Utf8Error(std::str::Utf8Error),
     IoError(std::io::Error),
     ImageError(image::ImageError),
-    SerializationError(String),
     RegexError(regex::Error),
+    CborError(serde_cbor::Error),
+    TransportError(TransportError),
 }
 
 impl fmt::Display for HErr {
@@ -25,23 +27,35 @@ impl fmt::Display for HErr {
             InvalidUserId(s) => write!(f, "InvalidUserId: {}", s),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
-            SerializationError(s) => write!(f, "SerializationError: {}", s),
+            Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
+            CborError(e) => write!(f, "CborError error: {}", e),
+            TransportError(s) => write!(f, "TransportError: {}", s),
             RegexError(e) => write!(f, "RegexError: {}", e),
         }
     }
 }
 
-impl std::error::Error for HErr {}
+impl std::error::Error for HErr {
+    fn cause(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        use HErr::*;
+        Some(match self {
+            DatabaseError(e) => e,
+            HeraldError(_) => return None,
+            MutexError(_) => return None,
+            InvalidUserId(_) => return None,
+            IoError(e) => e,
+            ImageError(s) => s,
+            Utf8Error(s) => s,
+            CborError(e) => e,
+            TransportError(s) => s,
+            RegexError(e) => e,
+        })
+    }
+}
 
 impl<T> From<PoisonError<T>> for HErr {
     fn from(e: PoisonError<T>) -> Self {
         HErr::MutexError(e.to_string())
-    }
-}
-
-impl From<CapacityError<&str>> for HErr {
-    fn from(e: CapacityError<&str>) -> Self {
-        HErr::InvalidUserId(e.to_string())
     }
 }
 
@@ -81,6 +95,18 @@ impl From<std::ffi::OsString> for HErr {
 
 impl From<serde_cbor::Error> for HErr {
     fn from(e: serde_cbor::Error) -> Self {
-        HErr::SerializationError(e.to_string())
+        HErr::CborError(e)
+    }
+}
+
+impl From<TransportError> for HErr {
+    fn from(e: TransportError) -> Self {
+        HErr::TransportError(e)
+    }
+}
+
+impl From<std::str::Utf8Error> for HErr {
+    fn from(e: std::str::Utf8Error) -> Self {
+        HErr::Utf8Error(e)
     }
 }
