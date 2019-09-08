@@ -24,7 +24,7 @@ pub struct Message {
     pub conversation: ConversationId,
     /// Body of message
     pub body: String,
-    /// Time the message was sent or received at the server.
+    /// Time the message was sent (if outbound) or received at the server (if inbound).
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
     pub op: Option<MsgId>,
