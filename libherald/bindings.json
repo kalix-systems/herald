@@ -109,11 +109,19 @@
                 }
             }
         },
+        "Conversation": {
+            "type": "object",
+            "properties": {
+                "conversationId": {
+                    "type": "QByteArray"
+                }
+            }
+        },
         "Messages": {
             "type": "List",
             "properties": {
                 "conversationId": {
-                    "type": "QString",
+                    "type": "QByteArray",
                     "optional": true,
                     "write": true
                 }

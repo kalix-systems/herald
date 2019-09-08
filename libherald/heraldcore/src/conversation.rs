@@ -15,14 +15,35 @@ pub struct Conversations;
 pub struct ConversationMeta {
     /// Conversation id
     pub conversation_id: ConversationId,
-    /// User ID's of conversation members
-    pub members: Vec<UserId>,
+    /// Conversation title
+    pub title: Option<String>,
+    /// Conversation picture
+    pub picture: Option<String>,
+    /// Conversation color,
+    pub color: Option<u32>,
+    /// Indicates whether the conversation is muted
+    pub muted: bool,
+}
+
+impl ConversationMeta {
+    fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        Ok(ConversationMeta {
+            conversation_id: row.get::<_, Vec<u8>>(0)?.into_iter().collect(),
+            title: row.get(1)?,
+            picture: row.get(2)?,
+            color: row.get(3)?,
+            muted: row.get(4)?,
+        })
+    }
 }
 
 /// Conversation
 pub struct Conversation {
     /// Messages
     pub messages: Vec<Message>,
+
+    /// User ID's of conversation members
+    pub members: Vec<UserId>,
 
     /// Conversation metadata
     pub meta: ConversationMeta,
@@ -96,6 +117,16 @@ impl Conversations {
     pub fn get_meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
         let db = Database::get()?;
 
+        Ok(db.query_row(
+            include_str!("sql/conversation/get_conversation_meta.sql"),
+            params![conversation_id.as_slice()],
+            ConversationMeta::from_db,
+        )?)
+    }
+
+    pub fn get_members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
+        let db = Database::get()?;
+
         let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
         let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
 
@@ -104,10 +135,7 @@ impl Conversations {
             members.push(member?);
         }
 
-        Ok(ConversationMeta {
-            conversation_id: conversation_id.clone(),
-            members,
-        })
+        Ok(members)
     }
 
     /// Get conversation
@@ -125,16 +153,20 @@ impl Conversations {
         let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
         let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
 
+        let meta = db.query_row(
+            include_str!("sql/conversation/get_conversation_meta.sql"),
+            params![conversation_id.as_slice()],
+            ConversationMeta::from_db,
+        )?;
+
         let mut members = Vec::new();
         for member in res {
             members.push(member?);
         }
 
         Ok(Conversation {
-            meta: ConversationMeta {
-                conversation_id: conversation_id.clone(),
-                members,
-            },
+            meta,
+            members,
             messages,
         })
     }
