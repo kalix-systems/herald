@@ -2,6 +2,7 @@
     "compilerOptions": {
         "declaration": true,
         "strict": true,
+        "noEmitOnError": true,
         "target": "ES2019"
     }
 }
