@@ -1,8 +1,8 @@
 "use strict";
 
-function unwrap_or(maybe_val, fallback) {
+function unwrap_or(maybe_val: any, fallback: any) {
   // TODO this produces false positives
-  if (maybe_val) {
+  if (!!maybe_val) {
     return maybe_val;
   } else {
     return fallback;
