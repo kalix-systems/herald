@@ -228,7 +228,8 @@ impl ContactsTrait for Contacts {
 
             contact.matched = pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str());
         }
-        self.model.data_changed(0, self.list.len() - 1);
+        self.model
+            .data_changed(0, self.list.len().saturating_sub(1));
         false
     }
 
@@ -236,7 +237,8 @@ impl ContactsTrait for Contacts {
         for contact in self.list.iter_mut() {
             contact.matched = true;
         }
-        self.model.data_changed(0, self.list.len() - 1);
+        self.model
+            .data_changed(0, self.list.len().saturating_sub(1));
     }
 
     fn emit(&mut self) -> &mut ContactsEmitter {

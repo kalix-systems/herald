@@ -27,13 +27,13 @@ ToolBar {
         }
 
         TextArea {
+            id: searchText
             background: Rectangle {
                 anchors.fill: parent
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
             Keys.onReturnPressed: text = text
-            id: searchText
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 10
