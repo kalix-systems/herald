@@ -1,5 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Controls 2.13
+import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "ChatTextAreaUtils.js" as CTUtils
 
@@ -18,6 +19,8 @@ Rectangle {
     property alias emojiButton: emojiButton
     // the text area
     property alias chatText: chatText
+    // clippy file Dialog
+    property alias attacmentsDialog : attachmentsDialogue
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -83,4 +86,12 @@ Rectangle {
             Keys.forwardTo: keysProxy
         }
     }
+
+    FileDialog {
+         id: attachmentsDialogue
+         folder: shortcuts.home
+         onSelectionAccepted: {
+             print("todo: attachments api")
+         }
+     }
 }

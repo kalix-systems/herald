@@ -43,10 +43,10 @@ Flickable {
                     leftMargin: rightMargin
                 }
 
-                CVUtils.ChatBubble {
-                    ReplyComponent { id: temp }
+                CVUtils.ChatBubbleForm {
                     messageText: body
-                    additionalContent: if (op > 1) { temp }
+                    additionalContent: "ReplyComponent.qml"
+                    contentArgs: { return { messageText: "get message here", bubbleColor: "green", from: author }; }
                     bubbleColor: if (outbound) {
                                        QmlCfg.palette.tertiaryColor
                                    } else {
@@ -59,9 +59,3 @@ Flickable {
 } // flickable
 
 
-
-
-/*##^## Designer {
-    D{i:0;autoSize:true;height:480;width:640}
-}
- ##^##*/

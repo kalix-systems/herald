@@ -5,6 +5,7 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
 import "common/utils.js" as Utils
+import "ChatView/ChatTextAreaUtils.js" as CTUtils
 
 
 Pane {
@@ -14,6 +15,7 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
 
+    /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
     }
@@ -30,25 +32,43 @@ Pane {
     }
 
     ///--- chat view, shows messages
-   CVUtils.ConversationWindow {
+   CVUtils.ConversationWindowForm {
        id: convWindow
+       focus: true
        anchors {
            top: messageBar.bottom
-           bottom: chatTextAreaScroll.top
+           bottom: chatTextArea.top
            left: parent.left
            right: parent.right
+       }
+       Component.onCompleted: forceActiveFocus()
+       Keys.onUpPressed: chatScrollBar.decrease()
+       Keys.onDownPressed: chatScrollBar.increase()
+       Connections {
+           target: messageModel
+           onRowsInserted: {
+               convWindow.contentY = convWindow.contentHeight
+           }
        }
     }
 
     ///--- Text entry area, for typing
-    CVUtils.TextArea {
-        id: chatTextAreaScroll
+    CVUtils.TextAreaForm {
+        id: chatTextArea
         anchors {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
             margins: QmlCfg.margin
         }
+
+        keysProxy: Item {
+                Keys.onReturnPressed: CTUtils.enterHandler(event, chatTextArea.chatText)
+                // TODO: Tab should cycle through a hierarchy of items as far as focus
+            }
+        emojiButton.onClicked: print("placeholder until emoji pop up")
+        atcButton.onClicked: attachmentsDialogue.open()
+        scrollHeight: Math.min(contentHeight, 100)
     }
 
     states: State {

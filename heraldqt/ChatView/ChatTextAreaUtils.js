@@ -30,6 +30,27 @@ function getTextAreaMemory(conversationId) {
     }
 }
 
+// maybe spawns a new item within the
+// parent object
+function maybeSpawn(component, args, parent) {
+
+    if(component === "") {
+        return
+     }
+
+    var comp = Qt.createComponent(component);
+
+    if (comp.status === Component.Ready) {
+
+         var result = comp.createObject(parent, args);
+    } else {
+        print("Component was not ready!")
+    }
+
+    if (result === null) {
+        console.log("Error creating object in text bubble!!");
+    }
+}
 
 function enterHandler(event, target) {
 
