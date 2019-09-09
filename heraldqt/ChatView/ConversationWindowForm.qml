@@ -45,7 +45,7 @@ Flickable {
 
                 CVUtils.ChatBubbleForm {
                     messageText: body
-                    additionalContent: "ReplyComponent.qml"
+                    additionalContent: ""
                     contentArgs: { return { messageText: "get message here", bubbleColor: "green", from: author }; }
                     bubbleColor: if (outbound) {
                                        QmlCfg.palette.tertiaryColor

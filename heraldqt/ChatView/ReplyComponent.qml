@@ -12,17 +12,19 @@ Rectangle {
     // the width the text sits at without wrapping
     readonly property int naturalWidth:  Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
 
-    TextMetrics {
-        id: messageMetrics
-        text: messageText.slice(0,140)
-    }
-
     id: bubble
     color: bubbleColor
+
+
+    TextMetrics {
+        id: messageMetrics
+        text: messageText
+        elideWidth: 140
+    }
+
     radius: QmlCfg.radius
 
     height: bubbleText.height + who.height +  QmlCfg.margin
-    width: Math.max(naturalWidth , parent.parent.width-QmlCfg.margin)
 
     Label {
         anchors {
@@ -52,12 +54,12 @@ Rectangle {
         }
     }
 
+    onWidthChanged: {
+        parent.prefferredWidth = bubbleText.width + 10
+    }
+
     onHeightChanged: {
         parent.height = height
     }
 
-    onWidthChanged: {
-        if(parent.width < width)
-            parent.width = width
-    }
 }

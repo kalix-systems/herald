@@ -7,7 +7,7 @@ import "../common" as Common
 import "../common/utils.js" as Utils
 import "ChatTextAreaUtils.js" as CTUtils
 
-Row {
+Rectangle {
     id: self
     property string messageText: ""
     //color of the bubble proper
@@ -18,8 +18,6 @@ Row {
     property alias chatBubbleHitbox: chatBubbleHitbox
     // the width the text sits at without wrapping
     readonly property int naturalTextWidth: messageMetrics.width
-    // the items which potentially constraint width
-    property var widthConstraintArray: [bubbleText.width, timeStamp.width]
     // a component to use if there is additional content to spawn inside the chat bubble
     property string additionalContent: ""
     // the args to pass into the content spawner
@@ -27,75 +25,75 @@ Row {
     // an extra margin is needed if there is additionalContent
     readonly property real marginCount: if (additionalContent === "") { 1.5 } else { 2 }
 
-    Component.onCompleted: { CTUtils.maybeSpawn(additionalContent, contentArgs, attachmentLoader) }
+    color: bubbleColor
+    radius: QmlCfg.radius
 
+   // Component.onCompleted: { CTUtils.maybeSpawn(additionalContent, contentArgs, attachmentLoader) }
+    implicitWidth: bubble.implicitWidth
+    implicitHeight: bubble.implicitHeight
     TextMetrics {
         id: messageMetrics
         text: messageText
     }
 
-    Rectangle {
 
-        MouseArea {
-            propagateComposedEvents: true
-            id: chatBubbleHitbox
-            hoverEnabled: true
-            width: parent.width + 50
+    MouseArea {
+        propagateComposedEvents: true
+        id: chatBubbleHitbox
+        hoverEnabled: true
+        width: parent.width + 50
 
-            onEntered: {
-                replyButton.visible =! replyButton.visible
-            }
-
-            onExited: {
-                replyButton.visible =! replyButton.visible
-            }
-
-          anchors {
-            left: if(!outbound) parent.left
-            right: if(outbound) parent.right
-            bottom: parent.bottom
-            top: parent.top
-          }
-          // Emoji button proper
-          Button {
-             onClicked: {
-                  CTUtils.activateReplyPopup();
-                  print("kaavya! put some business logic here.")
-              }
-              visible: false
-              id: replyButton
-              anchors.margins: QmlCfg.margin
-              anchors.verticalCenter: chatBubbleHitbox.verticalCenter
-              height: 25
-              width: height
-              background: Image {
-                  source: "qrc:///icons/reply.png"
-                  height: width
-                  scale: 0.9
-                  mipmap: true
-              }
-              z: 10
-          }
+        onEntered: {
+            replyButton.visible =! replyButton.visible
         }
 
+        onExited: {
+            replyButton.visible =! replyButton.visible
+        }
+
+      anchors {
+        left: if(!outbound) parent.left
+        right: if(outbound) parent.right
+        bottom: parent.bottom
+        top: parent.top
+      }
+      // Emoji button proper
+      Button {
+         onClicked: {
+              CTUtils.activateReplyPopup();
+              print("kaavya! put some business logic here.")
+          }
+          visible: false
+          id: replyButton
+          anchors.margins: QmlCfg.margin
+          anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+          height: 25
+          width: height
+          background: Image {
+              source: "qrc:///icons/reply.png"
+              height: width
+              scale: 0.9
+              mipmap: true
+          }
+          z: 10
+      }
+    }
+
+    ColumnLayout {
         id: bubble
-        color: bubbleColor
-        radius: QmlCfg.radius
-        width: Math.max(...widthConstraintArray) +  QmlCfg.margin
-        height: bubbleText.height + attachmentLoader.height  + timeStamp.height + marginCount * QmlCfg.margin
+       // width:  Math.max(bubbleText.width, timeStamp.width, attachmentLoader.prefferredWidth) +  QmlCfg.margin
+       // height: bubbleText.height + attachmentLoader.height  + timeStamp.height + marginCount * QmlCfg.margin
+
+
 
         TextEdit {
             id: bubbleText
             text: messageText
 
-            width: Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
-
-            anchors {
-                margins: QmlCfg.margin / 2
-                bottom: timeStamp.top
-                left: bubble.left
-            }
-
+            Layout.preferredWidth: Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
+            Layout.alignment: Qt.AlignLeft
+            Layout.margins: QmlCfg.margin / 2
+            Layout.bottomMargin: 0
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             selectByKeyboard: true
@@ -106,13 +104,8 @@ Row {
         // objects spawned if there is an additional
         // content flag
         Item {
+            property int prefferredWidth: 0
             id: attachmentLoader
-            anchors {
-                margins: QmlCfg.margin / 2
-                bottom: bubbleText.top
-                left:  bubble.left
-                right: parent.right
-            }
         }
 
         Label {
@@ -120,11 +113,8 @@ Row {
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendly_timestamp(epoch_timestamp_ms)
             font.pointSize: 10
-            anchors {
-                margins: QmlCfg.margin / 2
-                bottom: bubble.bottom
-                left: bubble.left
-            }
+            Layout.margins: QmlCfg.margin / 2
+            Layout.topMargin: 0
         }
     }
 }
