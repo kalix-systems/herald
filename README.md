@@ -1,5 +1,5 @@
 # herald
-A experimental, cross-platform end-to-end encrypted instant messenger.
+A cross-platform end-to-end encrypted instant messenger.
 
 This project is currently pre-alpha and under active development.
 
