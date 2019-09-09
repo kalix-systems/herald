@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "." as CVUtils
-import "../common/utils.js" as Utils
+import "../common/utils.mjs" as Utils
 
 Flickable {
     property alias chatScrollBar: chatScrollBar
@@ -45,8 +45,8 @@ Flickable {
 
                 CVUtils.ChatBubbleForm {
                     messageText: body
-                    additionalContent: ""
-                    contentArgs: { return { messageText: "get message here", bubbleColor: "green", from: author }; }
+                    additionalContent: ""//"ReplyComponent.qml"
+                    contentArgs: { return {} }//{ return { messageText: "get message here", bubbleColor: "green", from: author }; }
                     bubbleColor: if (outbound) {
                                        QmlCfg.palette.tertiaryColor
                                    } else {
@@ -59,3 +59,14 @@ Flickable {
 } // flickable
 
 
+
+
+
+
+
+
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

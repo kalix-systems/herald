@@ -1,10 +1,9 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import QtQuick.Controls.Styles 1.4
 import LibHerald 1.0
 import "../common" as Common
-import "../common/utils.js" as Utils
+import "../common/utils.mjs" as Utils
 import "ChatTextAreaUtils.js" as CTUtils
 
 Rectangle {
@@ -23,18 +22,9 @@ Rectangle {
     // the args to pass into the content spawner
     property var contentArgs
     // an extra margin is needed if there is additionalContent
-    readonly property real marginCount: if (additionalContent === "") { 1.5 } else { 2 }
 
     color: bubbleColor
     radius: QmlCfg.radius
-
-   // Component.onCompleted: { CTUtils.maybeSpawn(additionalContent, contentArgs, attachmentLoader) }
-    implicitWidth: bubble.implicitWidth
-    implicitHeight: bubble.implicitHeight
-    TextMetrics {
-        id: messageMetrics
-        text: messageText
-    }
 
 
     MouseArea {
@@ -79,42 +69,49 @@ Rectangle {
       }
     }
 
-    ColumnLayout {
-        id: bubble
-       // width:  Math.max(bubbleText.width, timeStamp.width, attachmentLoader.prefferredWidth) +  QmlCfg.margin
-       // height: bubbleText.height + attachmentLoader.height  + timeStamp.height + marginCount * QmlCfg.margin
+   Component.onCompleted: { contentArgs.uiContainer =  bubbleText; attachmentLoader.setSource(additionalContent, contentArgs) }
 
+    implicitWidth: bubble.implicitWidth
+    implicitHeight: bubble.implicitHeight
+
+    TextMetrics {
+        id: messageMetrics
+        text: messageText
+    }
+
+    Column {
+        id: bubble
+        padding: QmlCfg.margin / 2
+
+        Loader {
+             id: attachmentLoader
+             source: additionalContent
+        }
 
 
         TextEdit {
             id: bubbleText
             text: messageText
-
-            Layout.preferredWidth: Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
+            width: Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
             Layout.alignment: Qt.AlignLeft
-            Layout.margins: QmlCfg.margin / 2
-            Layout.bottomMargin: 0
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
         }
 
-        // This is a pseudo loader! it is the parent for
-        // objects spawned if there is an additional
-        // content flag
-        Item {
-            property int prefferredWidth: 0
-            id: attachmentLoader
-        }
-
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
-            text: Utils.friendly_timestamp(epoch_timestamp_ms)
+            text: Utils.friendlyTimestamp(epoch_timestamp_ms)
             font.pointSize: 10
-            Layout.margins: QmlCfg.margin / 2
-            Layout.topMargin: 0
         }
     }
 }
+
+
+
+/*##^## Designer {
+    D{i:0;autoSize:true;height:480;width:640}
+}
+ ##^##*/

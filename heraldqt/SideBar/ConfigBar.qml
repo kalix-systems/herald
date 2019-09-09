@@ -4,7 +4,7 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "popups" as Popups
 import "../common" as Common
-import "../common/utils.js" as Utils
+import "../common/utils.mjs" as Utils
 
 ToolBar {
     id: toolBar
@@ -22,9 +22,9 @@ ToolBar {
 
     Common.Avatar {
         id: configAvatar
-        displayName: Utils.unwrap_or(config.name, config.config_id)
+        displayName: Utils.unwrapOr(config.name, config.config_id)
         colorHash: 0
-        pfpUrl: Utils.unwrap_or(config.profile_picture, "")
+        pfpUrl: Utils.unwrapOr(config.profile_picture, "")
         anchors.horizontalCenter: parent.horizontalCenter
         size: parent.height - QmlCfg.margin
     }

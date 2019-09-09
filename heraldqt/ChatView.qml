@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
-import "common/utils.js" as Utils
+import "common/utils.mjs" as Utils
 import "ChatView/ChatTextAreaUtils.js" as CTUtils
 
 
