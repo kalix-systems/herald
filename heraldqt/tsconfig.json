@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "declaration": true,
-        "strict": true
+        "strict": true,
+        "target": "ES2019"
     }
 }
