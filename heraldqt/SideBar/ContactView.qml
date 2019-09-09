@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
-import "../common/utils.js" as Utils
+import "../common/utils.mjs" as Utils
 import "popups" as Popups
 
 /// --- displays a list of contacts
@@ -110,9 +110,9 @@ ListView {
         Common.Avatar {
             size: 50
             id: contactAvatar
-            displayName: Utils.unwrap_or(name, contact_id)
+            displayName: Utils.unwrapOr(name, contact_id)
             colorHash: color
-            pfpUrl: Utils.unwrap_or(profile_picture, null)
+            pfpUrl: Utils.unwrapOr(profile_picture, null)
         }
     }
 }

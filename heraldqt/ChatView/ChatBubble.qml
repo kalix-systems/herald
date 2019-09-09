@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../common" as Common
-import "../common/utils.js" as Utils
+import "../common/utils.mjs" as Utils
 
 Row {
     id: avatarRow
@@ -47,7 +47,7 @@ Row {
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
-            text: Utils.friendly_timestamp(epoch_timestamp_ms)
+            text: Utils.friendlyTimestamp(epoch_timestamp_ms)
             font.pointSize: 10
             anchors {
                 margins: QmlCfg.margin / 2

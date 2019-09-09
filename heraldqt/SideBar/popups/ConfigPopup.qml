@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "../../common" as Common
-import "../../common/utils.js" as Utils
+import "../../common/utils.mjs" as Utils
 
 Popup {
     id: configPopup

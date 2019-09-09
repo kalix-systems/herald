@@ -1,2 +1,2 @@
-declare function unwrap_or(maybe_val: any, fallback: any): any;
-declare function friendly_timestamp(ms_epoch_time: number): string;
+export declare function unwrapOr<T>(maybeVal: T, fallback: T): any;
+export declare function friendlyTimestamp(msEpochTime: number): string;
