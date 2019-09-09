@@ -16,7 +16,7 @@ pub type RawMsg = Bytes;
 pub type MsgId = ArrayVec<[u8; 32]>;
 pub type ConversationId = ArrayVec<[u8; 32]>;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
 pub enum MessageSendStatus {
     /// No ack from server
@@ -40,8 +40,31 @@ impl TryFrom<u8> for MessageSendStatus {
     }
 }
 
+impl Serialize for MessageSendStatus {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_u8(*self as u8)
+    }
+}
+
+impl<'de> Deserialize<'de> for MessageSendStatus {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        use serde::de::*;
+        let u = u8::deserialize(d)?;
+        u.try_into().map_err(|u| {
+            Error::invalid_value(
+                Unexpected::Unsigned(u as u64),
+                &format!(
+                    "expected a value between {} and {}",
+                    0, 2
+                )
+                .as_str(),
+            )
+        })
+    }
+}
+
 // the network status of a message
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
 pub enum MessageReceiptStatus {
     /// Not acknowledged
@@ -52,6 +75,43 @@ pub enum MessageReceiptStatus {
     Read = 2,
     /// The user has read receipts turned off
     AckTerminal = 3,
+}
+
+impl TryFrom<u8> for MessageReceiptStatus {
+    type Error = u8;
+
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
+        match val {
+            0 => Ok(Self::NoAck),
+            1 => Ok(Self::Received),
+            2 => Ok(Self::Read),
+            3 => Ok(Self::AckTerminal),
+            i => Err(i),
+        }
+    }
+}
+
+impl Serialize for MessageReceiptStatus {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_u8(*self as u8)
+    }
+}
+
+impl<'de> Deserialize<'de> for MessageReceiptStatus {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        use serde::de::*;
+        let u = u8::deserialize(d)?;
+        u.try_into().map_err(|u| {
+            Error::invalid_value(
+                Unexpected::Unsigned(u as u64),
+                &format!(
+                    "expected a value between {} and {}",
+                    0, 3
+                )
+                .as_str(),
+            )
+        })
+    }
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
