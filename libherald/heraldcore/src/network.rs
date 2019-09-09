@@ -23,6 +23,93 @@ use tokio::{
     sync::{mpsc, oneshot},
 };
 
+#[derive(Debug)]
+/// `Notification`s contain info about what updates were made to the db.
+pub enum Notification {
+    // TODO: include conversation id's here
+    // issue: #15
+    NewMsg(UserId),
+    Ack(ClientMessageAck),
+}
+
+#[derive(Clone)]
+/// `Session` is the main struct for managing networking. Think of it as the sending handle for
+/// interacting with the server. It can make queries and it can send messages.
+pub struct Session {
+    writer: Qutex<TcpStreamWriteHalf>,
+    id: GlobalId,
+    pending: Qutex<HashMap<MessageToServer, oneshot::Sender<Response>>>,
+    notifications: mpsc::UnboundedSender<Notification>,
+}
+
+
+impl Session {
+    /// Initalizes connection with the server and login.
+    #[allow(unreachable_code)]
+    pub async fn init() -> Result<(mpsc::UnboundedReceiver<Notification>, Self), HErr> {
+        println!("Client connecting to {}", *SERVER_ADDR);
+        let stream = TcpStream::connect(*SERVER_ADDR).await?;
+        let (mut reader, mut writer) = stream.split();
+        let id = login(&mut writer).await?;
+        let (sender, receiver) = mpsc::unbounded_channel();
+        let sess = Session {
+            writer: Qutex::new(writer),
+            id,
+            // start with capacity because capacity 32 is basically 0 from a load persepective,
+            // and more than we're likely to ever need
+            pending: Qutex::new(HashMap::with_capacity(32)),
+            notifications: sender,
+        };
+        tokio::spawn({
+            let sess = sess.clone();
+            async move {
+                let comp: Result<(), HErr> = try {
+                    loop {
+                        sess.handle_server_msg(read_cbor(&mut reader).await?)
+                            .await?;
+                    }
+                };
+                if let Err(e) = comp {
+                    eprintln!("session ended, code {}", e);
+                }
+            }
+        });
+        Ok((receiver, sess))
+    }
+
+    /// Sends a `MessageToPeer` through the server.
+    pub async fn send_msg(&self, to: UserId, msg: MessageToPeer) -> Result<(), HErr> {
+        let push = form_push(to, msg)?;
+        self.send_to_server(&push).await
+    }
+
+    /// Requests the metadata of a user, asynchronously returns the response.
+    pub async fn request_meta(&self, of: UserId) -> Result<User, HErr> {
+        match self
+            .send_query(MessageToServer::RequestMeta { of: of.clone() })
+            .await?
+        {
+            Response::Meta(u) => Ok(u),
+            Response::DataNotFound => Err(InvalidUserId(of)),
+            r => Err(HeraldError(format!(
+                "bad response to metadata request from server from user {} - response was {:?}",
+                of, r
+            ))),
+        }
+    }
+
+    /// Registers a new device and returns a future which will contain the new `DeviceId`.
+    pub async fn register_device(&self) -> Result<DeviceId, HErr> {
+        match self.send_query(MessageToServer::RegisterDevice).await? {
+            Response::DeviceRegistered(d) => Ok(d),
+            r => Err(HeraldError(format!(
+                "bad response to device registry request from server - respones was {:?}",
+                r
+            ))),
+        }
+    }
+}
+
 const DEFAULT_PORT: u16 = 8000;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
@@ -43,26 +130,6 @@ struct Event {
     reply: Option<MessageToServer>,
     notification: Option<Notification>,
 }
-
-#[derive(Debug)]
-/// `Notification`s contain info about what updates were made to the db.
-pub enum Notification {
-    // TODO: include conversation id's here
-    // issue: #15
-    NewMsg(UserId),
-    Ack(ClientMessageAck),
-}
-
-#[derive(Clone)]
-/// `Session` is the main struct for managing networking. Think of it as the sending handle for
-/// interacting with the server. It can make queries and it can send messages.
-pub struct Session {
-    writer: Qutex<TcpStreamWriteHalf>,
-    id: GlobalId,
-    pending: Qutex<HashMap<MessageToServer, oneshot::Sender<Response>>>,
-    notifications: mpsc::UnboundedSender<Notification>,
-}
-
 fn form_ack(update_code: MessageReceiptStatus, message_id: MsgId) -> MessageToPeer {
     let ack = ClientMessageAck {
         update_code,
@@ -136,71 +203,6 @@ fn impossible_error<E: std::fmt::Display, T>(e: E) -> T {
 }
 
 impl Session {
-    /// Initalizes connection with the server and login.
-    #[allow(unreachable_code)]
-    pub async fn init() -> Result<(mpsc::UnboundedReceiver<Notification>, Self), HErr> {
-        println!("Client connecting to {}", *SERVER_ADDR);
-        let stream = TcpStream::connect(*SERVER_ADDR).await?;
-        let (mut reader, mut writer) = stream.split();
-        let id = login(&mut writer).await?;
-        let (sender, receiver) = mpsc::unbounded_channel();
-        let sess = Session {
-            writer: Qutex::new(writer),
-            id,
-            // start with capacity because capacity 32 is basically 0 from a load persepective,
-            // and more than we're likely to ever need
-            pending: Qutex::new(HashMap::with_capacity(32)),
-            notifications: sender,
-        };
-        tokio::spawn({
-            let sess = sess.clone();
-            async move {
-                let comp: Result<(), HErr> = try {
-                    loop {
-                        sess.handle_server_msg(read_cbor(&mut reader).await?)
-                            .await?;
-                    }
-                };
-                if let Err(e) = comp {
-                    eprintln!("session ended, code {}", e);
-                }
-            }
-        });
-        Ok((receiver, sess))
-    }
-
-    /// Sends a `MessageToPeer` through the server.
-    pub async fn send_msg(&self, to: UserId, msg: MessageToPeer) -> Result<(), HErr> {
-        let push = form_push(to, msg)?;
-        self.send_to_server(&push).await
-    }
-
-    /// Requests the metadata of a user, asynchronously returns the response.
-    pub async fn request_meta(&self, of: UserId) -> Result<User, HErr> {
-        match self
-            .send_query(MessageToServer::RequestMeta { of: of.clone() })
-            .await?
-        {
-            Response::Meta(u) => Ok(u),
-            Response::DataNotFound => Err(InvalidUserId(of)),
-            r => Err(HeraldError(format!(
-                "bad response to metadata request from server from user {} - response was {:?}",
-                of, r
-            ))),
-        }
-    }
-
-    /// Registers a new device and returns a future which will contain the new `DeviceId`.
-    pub async fn register_device(&self) -> Result<DeviceId, HErr> {
-        match self.send_query(MessageToServer::RegisterDevice).await? {
-            Response::DeviceRegistered(d) => Ok(d),
-            r => Err(HeraldError(format!(
-                "bad response to device registry request from server - respones was {:?}",
-                r
-            ))),
-        }
-    }
-
     async fn send_to_server(&self, msg: &MessageToServer) -> Result<(), HErr> {
         let mut writer = self
             .writer
