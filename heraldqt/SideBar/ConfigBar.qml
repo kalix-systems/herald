@@ -6,13 +6,23 @@ import "popups" as Popups
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
+
 ToolBar {
     id: toolBar
+
     anchors {
         left: parent.left
         right: parent.right
         top: parent.top
     }
+
     height: QmlCfg.toolbarHeight
 
     background: Rectangle {
@@ -24,15 +34,18 @@ ToolBar {
         id: configAvatar
         displayName: Utils.unwrapOr(config.name, config.config_id)
         colorHash: 0
+        // Note: use specific fallback value or implicit one from typescript! TS
         pfpUrl: Utils.unwrapOr(config.profile_picture, "")
         anchors.horizontalCenter: parent.horizontalCenter
         size: parent.height - QmlCfg.margin
     }
 
     /// unpolished temporary Popup
+    /// NPB? Remeber that thing we said abut native right click dialogs?
     Popups.ConfigPopup {
         id: configPopup
     }
+
 
     Button {
         height: parent.height
@@ -46,6 +59,9 @@ ToolBar {
             mipmap: true
         }
         onClicked: {
+            /// NPB this should bring up a new window (impossible from QML) ,
+            /// I want an actual config pop up so it feels like i'm using a native app.
+            /// Paul should do this from QT widgets Link [https://www.reddit.com/r/Qt5/comments/aoghwr/multiwindow_in_qml_proof_of_concept]
             configPopup.open()
         }
     }

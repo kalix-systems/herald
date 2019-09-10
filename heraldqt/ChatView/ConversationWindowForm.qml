@@ -6,6 +6,15 @@ import QtQuick.Dialogs 1.3
 import "." as CVUtils
 import "../common/utils.mjs" as Utils
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// RS: Rusts job
+// Factor Component: FC
+
 Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
@@ -17,7 +26,7 @@ Flickable {
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
-        width: 10
+        width: QmlCfg.margin
     }
 
     Column {
@@ -31,22 +40,24 @@ Flickable {
         }
 
         Repeater {
-            anchors.fill: parent
             id: chatListView
+            anchors.fill: parent
             model: messageModel
             delegate: Column {
                 readonly property bool outbound: author === config.config_id
 
+                //NPB: possibly not a column and just fix anchors
                 anchors {
                     right: if (outbound) { parent.right }
                     rightMargin: chatScrollBar.width + QmlCfg.margin
                     leftMargin: rightMargin
                 }
 
+                //NOTE: see chat bubble form. maybe handle this in TS:
                 CVUtils.ChatBubbleForm {
                     messageText: body
-                    additionalContent: ""//"ReplyComponent.qml"
-                    contentArgs: { return {} }//{ return { messageText: "get message here", bubbleColor: "green", from: author }; }
+                    additionalContent: ""
+                    contentArgs: { return {} }
                     bubbleColor: if (outbound) {
                                        QmlCfg.palette.tertiaryColor
                                    } else {
@@ -57,13 +68,6 @@ Flickable {
         }// Repeater
     } //singleton Col
 } // flickable
-
-
-
-
-
-
-
 
 
 /*##^## Designer {

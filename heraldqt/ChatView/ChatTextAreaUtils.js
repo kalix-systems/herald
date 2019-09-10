@@ -1,3 +1,13 @@
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// RS: Rusts job
+// Factor Component: FC
+
+//TS: This whole file.
 
 /*
 * a memory tuple class
@@ -41,7 +51,6 @@ function maybeSpawn(component, args, parent) {
     var comp = Qt.createComponent(component);
 
     if (comp.status === Component.Ready) {
-
          var result = comp.createObject(parent, args);
     } else {
         print("Component was not ready!")

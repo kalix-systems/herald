@@ -7,16 +7,23 @@ import "SideBar/popups" as Popups
 import Qt.labs.platform 1.0
 import QtQml 2.13
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+
 ApplicationWindow {
+    id: root
     visible: true
     width: 900
     height: 640
     title: qsTr("Herald")
-    id: root
     minimumWidth: 250
     minimumHeight: 300
 
-
+    // OSD
     MenuBar {
         Menu {
             title: "Herald"
@@ -42,7 +49,15 @@ ApplicationWindow {
         id: preferencesPopup
     }
 
-    /// global configurations item
+    Messages {
+        id: messageModel
+    }
+
+    Contacts {
+         id: contactsModel
+        }
+
+    // NPB : always instantiated, more like a state, or a page than a popup
     Config {
         id: config
         Component.onCompleted: {
@@ -54,18 +69,12 @@ ApplicationWindow {
     }
 
     SplitView {
-
         id: rootSplitView
         anchors.fill: parent
         Layout.fillWidth: true
         Layout.fillHeight: true
         orientation: Qt.Horizontal
 
-        Messages {
-            id: messageModel
-        }
-        /// Contacts view for the desktop client, in DesktopContacts.qml
-        /// includes the config and contacts toolbars
         SideBar {
             id: sideBar
         }
@@ -77,44 +86,9 @@ ApplicationWindow {
         handle: Rectangle {
             implicitWidth: 2
             implicitHeight: 4
-            color: if (SplitHandle.pressed) {
-                       Qt.darker(QmlCfg.palette.secondaryColor, 1.1)
-                   } else {
-                       QmlCfg.palette.secondaryColor
-                   }
+            color: QmlCfg.palette.secondaryColor
         }
 
-        states: [
-            State {
-                when: width < 350
-                name: "sideBarOnly"
-                StateChangeScript {
-                  script: {
-                            sideBar.maxWindowFraction = 1
-                            sideBar.width = width }
-                }
-            },
-            State {
-                when: width > 350 && width < 450
-                name: "sideBarAndChat"
-                StateChangeScript {
-                  script: {
-                            sideBar.maxWindowFraction = 0.25
-                            sideBar.windowFraction = 0.25
-                     }
-                }
-            },
-           State {
-               when: width > 450
-               name: "SideBarWide"
-               PropertyChanges {
-                target: sideBar
-                maxWindowFraction: 0.66
-                windowFraction: 0.25
-
-               }
-           }
-    ]
     }
 
 }

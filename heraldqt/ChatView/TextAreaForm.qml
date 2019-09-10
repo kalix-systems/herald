@@ -4,6 +4,14 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "ChatTextAreaUtils.js" as CTUtils
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// RS: Rusts job
+// Factor Component: FC
 Rectangle {
 
     property var parentPage
@@ -24,8 +32,11 @@ Rectangle {
 
     color: QmlCfg.palette.mainColor
     clip: true
-    height: scrollHeight + QmlCfg.margin / 2
 
+    /// NPB : why does this need a margin added ?! put in a column.
+    height: scrollHeight + QmlCfg.margin
+
+    // FC: this is a common button pattern
     // attatchments button proper
     Button {
         id: attachmentsButton
@@ -41,6 +52,7 @@ Rectangle {
         }
     }
 
+    // FC: this is a common button pattern
     // Emoji button proper
     Button {
         id: emojiButton
@@ -65,11 +77,12 @@ Rectangle {
             left: emojiButton.right
             right: attachmentsButton.left
             bottom: parent.bottom
+            // FC: small margin vs large margin, /2 is an anti pattern
             leftMargin: QmlCfg.margin/2
             rightMargin: QmlCfg.margin/2
         }
 
-        TextArea  {
+        TextArea {
             id: chatText
             background: Rectangle {
                 color: QmlCfg.palette.secondaryColor
@@ -94,4 +107,4 @@ Rectangle {
              print("todo: attachments api")
          }
      }
-}
+   }

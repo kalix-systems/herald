@@ -4,6 +4,17 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
+// FS: Fix scoping
+
+// General Note : Baeo
+
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
@@ -14,6 +25,8 @@ ToolBar {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
+    // FS: this should be in a lower more specific scope, or maybe a state.*
+    // It is coupled with what Icon we use for searching!
     property bool searchRegex: false
 
     ScrollView {
@@ -33,23 +46,28 @@ ToolBar {
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
+            /// NPB: what is this, please just find a way to reject the key event
             Keys.onReturnPressed: text = text
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 10
             onTextChanged: {
-                contacts.filter(searchText.text, searchRegex)
+                // NOTE: we should probably wrap calls to libherald in call later.
+                // this prevents double calls, and is basically a debounce
+                Qt.callLater(contactsModel.filter, searchText.text, searchRegex)
             }
         }
     }
 
     Button {
         id: searchButton
-        anchors.right: addContactButton.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.rightMargin: QmlCfg.margin
-        implicitHeight: utilityBar.height - 15
-        implicitWidth: height
+        anchors {
+            right: addContactButton.left
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
+        }
+        height: utilityBar.height - 15
+        width: height
         background: Image {
             source: "qrc:///icons/search.png"
             height: width
@@ -59,6 +77,7 @@ ToolBar {
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.RightButton
+            //NOTE: This should be coupled to the afforementioned state*
             onClicked: {
                 if (searchRegex) {
                     searchButton.background.source = "qrc:///icons/search.png"
@@ -96,6 +115,7 @@ ToolBar {
             }
         }
 
+        // NPB: States
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
@@ -117,6 +137,7 @@ ToolBar {
         }
     }
 
+    //NOTE: see previous notes about using native dialogs
     Popups.NewContactDialogue {
         id: newContactDialogue
     }

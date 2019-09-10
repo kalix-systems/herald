@@ -2,23 +2,33 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import "../common/utils.js" as Utils
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
+// FS: Fix scoping
+
+//NPB: just looks kind bad
 Rectangle {
     //message displayed in the textEdit
     property string messageText: ""
     //color of the bubble proper
-    property color bubbleColor
+    property color replyBubbleColor
     //who the message is from
     property string from: ""
     // the width the text sits at without wrapping
-    readonly property int naturalWidth:  Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
+    //TS: NPB: same weird margin fuding
+    readonly property int naturalWidth:Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
     // the width of the parent object that we either match or override
     property var uiContainer: { width: 0}
 
-    id: replyBubble
     color: bubbleColor
     height: col.height
+    //NPB: same weird margin fudging
     width: Math.max(naturalWidth , uiContainer.width) + QmlCfg.margin / 2
 
     TextMetrics {
@@ -47,6 +57,5 @@ Column {
         readOnly: true
     }
 }
-
 
 }
