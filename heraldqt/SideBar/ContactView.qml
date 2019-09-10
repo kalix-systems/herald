@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "../common/utils.mjs" as Utils
+import "./ContactView.mjs" as JS
 import "popups" as Popups
 
 // Reveiw Key
@@ -31,9 +32,7 @@ ListView {
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
 
-        // TS: yes we have a bunch of stupid functions that do one thing
-        height: if (visible)
-                    60
+        height: JS.contactItemHeight(visible)
         width: parent.width
         visible: matched
 
@@ -77,48 +76,23 @@ ListView {
                 z: 10
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onEntered: {
-                    parent.state = "hovering"
-                }
-                onExited: {
-                    parent.state = ""
-                }
-                //TS: This should pass ... some event objects and other context specific goodies.
-                onClicked: {
-                    if (mouse.button === Qt.LeftButton) {
-                        currentIndex = index
-                        print(currentIndex,
-                              currentItem.contactAvatar.displayName)
-                        contactItem.focus = true
-                        messageModel.conversationId = contact_id
-                        chatView.state = "visibleview"
-                    } else {
-                        popupManager.optionsMenu.open()
-                    }
-                }
+                onEntered: parent.state = "hovering"
+                onExited: parent.state = ""
 
-                // TS?: maybe make a "safeSwitch" function so this one line and in TS
-                onReleased: {
-                    if (containsMouse) {
-                        parent.state = "hovering"
-                    } else {
-                        parent.state = ""
-                    }
-                }
+                onClicked: JS.contactClickHandler(mouse, contactList, index,
+                                                  contactId, contactItem,
+                                                  popupManager.optionsMenu,
+                                                  messageModel, chatView)
+
+                onReleased: parent.state = Utils.safeSwitch(containsMouse,
+                                                            "hovering", "")
             }
 
             ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
             Popups.ContactClickedPopup {
                 id: popupManager
             }
-            // TS?: maybe make a "safeSwitch" function so this one line and in TS
-            color: {
-                if (contactItem.focus) {
-                    return focusColor
-                } else {
-                    return defaultColor
-                }
-            }
+            color: Utils.safeSwitch(contactItem.focus, focusColor, defaultColor)
         }
 
         /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
@@ -128,7 +102,7 @@ ListView {
             size: 50
             id: contactAvatar
             /// NPB: use camel case in libherald please
-            displayName: Utils.unwrapOr(name, contact_id)
+            displayName: Utils.unwrapOr(name, contactId)
             colorHash: color
             /// NPB: use camel case in libherald please
             pfpUrl: Utils.unwrapOr(profile_picture, null)

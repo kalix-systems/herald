@@ -42,7 +42,7 @@ Item {
             text: 'Delete Contact'
             //TS: this should be in typescript
             onTriggered: {
-                if (contact_id === messageModel.conversationId)
+                if (contactId === messageModel.conversationId)
                     chatView.state = "" //TODO clearview should be less imperative
                 contactsModel.remove(index)
                 print("index try delete AGAIN: ", index)

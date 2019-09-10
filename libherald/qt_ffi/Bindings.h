@@ -85,7 +85,7 @@ public:
     Q_INVOKABLE bool setArchive_status(int row, bool value);
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
-    Q_INVOKABLE QString contact_id(int row) const;
+    Q_INVOKABLE QString contactId(int row) const;
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;

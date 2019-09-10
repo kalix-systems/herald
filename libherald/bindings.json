@@ -38,7 +38,7 @@
         "Contacts": {
             "type": "List",
             "itemProperties": {
-                "contact_id": {
+                "contactId": {
                     "type": "QString"
                 },
                 "name": {

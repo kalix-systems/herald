@@ -214,7 +214,7 @@ bool Contacts::setColor(int row, quint32 value)
     return set;
 }
 
-QString Contacts::contact_id(int row) const
+QString Contacts::contactId(int row) const
 {
     QString s;
     contacts_data_contact_id(m_d, row, &s, set_qstring);
@@ -292,7 +292,7 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(contact_id(index.row()));
+            return QVariant::fromValue(contactId(index.row()));
         case Qt::UserRole + 3:
             return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
@@ -320,7 +320,7 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "archive_status");
     names.insert(Qt::UserRole + 1, "color");
-    names.insert(Qt::UserRole + 2, "contact_id");
+    names.insert(Qt::UserRole + 2, "contactId");
     names.insert(Qt::UserRole + 3, "matched");
     names.insert(Qt::UserRole + 4, "name");
     names.insert(Qt::UserRole + 5, "profile_picture");

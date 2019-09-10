@@ -28,3 +28,14 @@ export function friendlyTimestamp(msEpochTime) {
     }
     return dt.toDateString();
 }
+export function safeSwitch(cond, first, second) {
+    if (typeof cond !== "boolean") {
+        throw new Error("condition was not of type boolean");
+    }
+    if (cond) {
+        return first;
+    }
+    else {
+        return second;
+    }
+}
