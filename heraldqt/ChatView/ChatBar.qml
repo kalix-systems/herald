@@ -46,7 +46,6 @@ ToolBar {
                                   }).colorHash
     }
 
-    //FC : make a defaultBackground object, just a filling rectange that is mainColor in common
     background: Rectangle {
         color: QmlCfg.palette.mainColor
         anchors.fill: parent

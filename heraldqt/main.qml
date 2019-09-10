@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
-import Qt.labs.platform 1.1
 import QtQml 2.13
 
 // Reveiw Key
@@ -29,10 +28,6 @@ ApplicationWindow {
         id: networkHandle
     }
 
-    Popups.ConfigPopup {
-        id: preferencesPopup
-    }
-
     Messages {
         id: messageModel
     }
@@ -42,6 +37,10 @@ ApplicationWindow {
     }
 
     // NPB : always instantiated, more like a state, or a page than a popup
+    Popups.ConfigPopup {
+        id: preferencesPopup
+    }
+
     Config {
         id: config
         Component.onCompleted: {
