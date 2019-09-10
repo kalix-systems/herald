@@ -23,7 +23,7 @@ private:
     Q_PROPERTY(QString configId READ configId WRITE setConfigId NOTIFY configIdChanged FINAL)
     Q_PROPERTY(bool init READ init NOTIFY initChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
-    Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
+    Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture NOTIFY profilePictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
 public:
     explicit Config(QObject *parent = nullptr);
@@ -37,8 +37,8 @@ public:
     bool init() const;
     QString name() const;
     void setName(const QString& v);
-    QString profile_picture() const;
-    void setProfile_picture(const QString& v);
+    QString profilePicture() const;
+    void setProfilePicture(const QString& v);
     Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void colorChanged();
@@ -46,7 +46,7 @@ Q_SIGNALS:
     void configIdChanged();
     void initChanged();
     void nameChanged();
-    void profile_pictureChanged();
+    void profilePictureChanged();
 };
 
 class Contacts : public QAbstractItemModel
@@ -93,8 +93,8 @@ public:
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
-    Q_INVOKABLE QString profile_picture(int row) const;
-    Q_INVOKABLE bool setProfile_picture(int row, const QString& value);
+    Q_INVOKABLE QString profilePicture(int row) const;
+    Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

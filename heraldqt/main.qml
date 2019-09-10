@@ -12,7 +12,7 @@ ApplicationWindow {
     width: 900
     height: 640
     title: qsTr("Herald")
-    minimumWidth: 250
+    minimumWidth: 500
     minimumHeight: 300
 
     TopMenuBar {

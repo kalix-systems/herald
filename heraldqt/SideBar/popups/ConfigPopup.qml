@@ -29,7 +29,7 @@ Window {
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
-            config.profile_picture = fileUrl
+            config.profilePicture = fileUrl
             print("set to", fileUrl)
         }
     }

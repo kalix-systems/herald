@@ -58,27 +58,18 @@ Rectangle {
             bottom: parent.bottom
             top: parent.top
         }
-        // Emoji button proper
-        // FC: more button reuse
-        Button {
+
+        Common.ButtonForm {
             id: replyButton
+            visible: false
+            anchors.margins: QmlCfg.margin
+            anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+            source: "qrc:///icons/reply.png"
+            z: 10
             onClicked: {
                 CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
             }
-            visible: false
-            anchors.margins: QmlCfg.margin
-            anchors.verticalCenter: chatBubbleHitbox.verticalCenter
-            height: 25
-            width: height
-            background: Image {
-                //FC: replace all icons with constant sources, save on typo hell // refactors
-                source: "qrc:///icons/reply.png"
-                height: width
-                scale: 0.9
-                mipmap: true
-            }
-            z: 10
         }
     }
 

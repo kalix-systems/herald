@@ -46,7 +46,7 @@
                     "type": "QString",
                     "optional": true
                 },
-                "profile_picture": {
+                "profilePicture": {
                     "write": true,
                     "type": "QString",
                     "optional": true
@@ -221,7 +221,7 @@
                     "write": true,
                     "optional": true
                 },
-                "profile_picture": {
+                "profilePicture": {
                     "type": "QString",
                     "write": true,
                     "optional": true

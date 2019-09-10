@@ -25,10 +25,10 @@ Item {
         onSelectionAccepted: {
             // TS:
             // NPB: please use camel case in libherald
-            var retCode = contactsModel.setProfile_picture(index, fileUrl)
+            var retCode = contactsModel.setProfilePicture(index, fileUrl)
             if (retCode) {
                 // NPB: please use camel case in libherald
-                contactAvatar.pfpUrl = profile_picture
+                contactAvatar.pfpUrl = profilePicture
             } else
                 print("TODO: Native Error popup here...")
             close()

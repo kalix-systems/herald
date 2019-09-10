@@ -22,10 +22,19 @@ generate corresponding declaration files.
 An `eslint` configuration for TypeScript is also included in the file
 `.eslintrc.js`.
 
+## Naming conventions
+
+When possible, include type guards to verifying that the types are correct a
+runtime. Functions with type guards should be prefixed by `safe`. For example,
+if `myFunction` has type guards, it should be called `safeMyFunction`.
+
 ## Compiling TypeScript files
 
-This is currently requires running a custom build script because TypeScript 
+This is currently requires running a custom build script because TypeScript
 [currently cannot emit `.mjs` files](https://github.com/microsoft/TypeScript/issues/18442).
+
+You will need to explicitly add new TypeScript and TypeScript declaration files
+by modifying `tsconfig.json`.
 
 To compile the files, rename them, and add new files to `qml.qrc` run:
 

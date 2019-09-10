@@ -36,5 +36,6 @@
         <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
         <file>SideBar/popups/NewContactDialogue.mjs</file>
         <file>SideBar/ContactView.mjs</file>
+        <file>SideBar/ConfigBar.mjs</file>
     </qresource>
 </RCC>
