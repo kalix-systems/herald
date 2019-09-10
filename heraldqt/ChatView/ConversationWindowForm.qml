@@ -28,6 +28,7 @@ Flickable {
         width: QmlCfg.margin
     }
 
+
     Column {
         id: textMessageCol
         focus: true
@@ -38,14 +39,20 @@ Flickable {
             left: parent.left
         }
 
+
+
         Repeater {
             id: chatListView
             anchors.fill: parent
             model: messageModel
+
+
             delegate: Column {
                 readonly property bool outbound: author === config.config_id
 
+
                 //NPB: possibly not a column and just fix anchors
+                // column is most correct to resize for extra content
                 anchors {
                     right: if (outbound) {
                                parent.right

@@ -52,6 +52,7 @@ ApplicationWindow {
         }
     }
 
+    // why does this no longer snap?
     SplitView {
         id: rootSplitView
         anchors.fill: parent

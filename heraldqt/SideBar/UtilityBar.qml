@@ -46,8 +46,7 @@ ToolBar {
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
-            /// NPB: what is this, please just find a way to reject the key event
-            Keys.onReturnPressed: text = text
+            Keys.onReturnPressed: event.accepted = true
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 12
