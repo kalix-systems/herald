@@ -37,7 +37,6 @@ ApplicationWindow {
          id: contactsModel
         }
 
-    // NPB : always instantiated, more like a state, or a page than a popup
     Popups.ConfigPopup {
         id: preferencesPopup
     }
@@ -45,12 +44,20 @@ ApplicationWindow {
     Config {
         id: config
         Component.onCompleted: {
-            if (!config.exists()) {
+            if (!!!config.init) {
                 preferencesPopup.show()
                 print("placeholder for a popup which forces first time config.")
             }
         }
     }
+
+    Loader {
+        anchors.fill: parent
+        id: loginLoader
+        active: !!!config.init
+        sourceComponent: LoginPage {}
+    }
+
 
     SplitView {
         id: rootSplitView
@@ -72,6 +79,43 @@ ApplicationWindow {
             color: QmlCfg.palette.secondaryColor
         }
 
+        states: [
+            State {
+                when: !!!config.init
+                name: "loginPage"
+                PropertyChanges {
+                    target: rootSplitView
+                    visible : false
+
+                }
+                PropertyChanges {
+                    target: root
+                    height: 500
+                    width: 700
+                }
+            },
+            State {
+                when: config.init
+                name: "loggedIn"
+                PropertyChanges {
+                    target: rootSplitView
+                    visible : true
+                }
+                PropertyChanges {
+                    target: root
+                    minimumWidth: 250
+                    minimumHeight: 300
+                    width: 900
+                    height: 640
+                }
+            }
+        ]
+
+        transitions: Transition {
+             NumberAnimation { properties: "width, height"; easing.type: Easing.InOutQuad }
+         }
     }
+
+
 
 }

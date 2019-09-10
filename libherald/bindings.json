@@ -213,6 +213,9 @@
                     "type": "QString",
                     "write": true
                 },
+                "init": {
+                    "type": "bool"
+                },
                 "name": {
                     "type": "QString",
                     "write": true,
@@ -230,11 +233,6 @@
                 "colorscheme": {
                     "type": "quint32",
                     "write": true
-                }
-            },
-            "functions": {
-                "exists": {
-                    "return": "bool"
                 }
             }
         }

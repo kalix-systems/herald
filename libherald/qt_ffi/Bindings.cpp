@@ -53,6 +53,10 @@ namespace {
     {
         Q_EMIT o->config_idChanged();
     }
+    inline void configInitChanged(Config* o)
+    {
+        Q_EMIT o->initChanged();
+    }
     inline void configNameChanged(Config* o)
     {
         Q_EMIT o->nameChanged();
@@ -79,7 +83,7 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     quint32 config_color_get(const Config::Private*);
     void config_color_set(Config::Private*, quint32);
@@ -87,13 +91,13 @@ extern "C" {
     void config_colorscheme_set(Config::Private*, quint32);
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
     void config_config_id_set(Config::Private*, const ushort *str, int len);
+    bool config_init_get(const Config::Private*);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
     void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
     void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
-    bool config_exists(const Config::Private*);
 };
 
 extern "C" {
@@ -657,6 +661,7 @@ Config::Config(QObject *parent):
         configColorChanged,
         configColorschemeChanged,
         configConfig_idChanged,
+        configInitChanged,
         configNameChanged,
         configProfile_pictureChanged)),
     m_ownsPrivate(true)
@@ -691,6 +696,10 @@ QString Config::config_id() const
 void Config::setConfig_id(const QString& v) {
     config_config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
 }
+bool Config::init() const
+{
+    return config_init_get(m_d);
+}
 QString Config::name() const
 {
     QString v;
@@ -716,10 +725,6 @@ void Config::setProfile_picture(const QString& v) {
     } else {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
-}
-bool Config::exists() const
-{
-    return config_exists(m_d);
 }
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

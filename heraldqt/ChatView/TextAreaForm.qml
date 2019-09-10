@@ -29,7 +29,7 @@ Rectangle {
     // the text area
     property alias chatText: chatText
     // clippy file Dialog
-    property alias attacmentsDialog: attachmentsDialogue
+    property alias attachmentsDialogue: attachmentsDialogue
 
     color: QmlCfg.palette.mainColor
     clip: true

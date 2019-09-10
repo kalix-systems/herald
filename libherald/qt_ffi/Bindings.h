@@ -21,6 +21,7 @@ private:
     Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
     Q_PROPERTY(QString config_id READ config_id WRITE setConfig_id NOTIFY config_idChanged FINAL)
+    Q_PROPERTY(bool init READ init NOTIFY initChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
@@ -33,15 +34,16 @@ public:
     void setColorscheme(quint32 v);
     QString config_id() const;
     void setConfig_id(const QString& v);
+    bool init() const;
     QString name() const;
     void setName(const QString& v);
     QString profile_picture() const;
     void setProfile_picture(const QString& v);
-    Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void colorChanged();
     void colorschemeChanged();
     void config_idChanged();
+    void initChanged();
     void nameChanged();
     void profile_pictureChanged();
 };

@@ -33,12 +33,11 @@ Window {
         y = root.y + 100;
     }
 
-
     FileDialog {
         id: cfgPfp
         property bool pfpValid: true
-        folder: shortcuts.home
-        defaultSuffix: "jpg,jpeg,png"
+        folder: shortcuts.desktop
+        nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
             config.profile_picture = fileUrl
             print("set to", fileUrl)

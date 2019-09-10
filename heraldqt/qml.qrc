@@ -31,5 +31,6 @@
         <file>ChatView/ReplyComponent.qml</file>
         <file>icons/reply.png</file>
         <file>TopMenuBar.qml</file>
+        <file>LoginPage.qml</file>
     </qresource>
 </RCC>
