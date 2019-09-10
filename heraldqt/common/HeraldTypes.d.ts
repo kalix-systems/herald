@@ -1,5 +1,7 @@
 declare type ConversationID = number[];
 
+declare class Avatar {}
+
 declare class NetworkHandle {
   sendMessage(text: string, conversationID: ConversationID): boolean;
 }

@@ -9,6 +9,7 @@
         "common/utils.ts",
         "ChatView/ChatTextAreaUtils.ts",
         "common/QtTypes.d.ts",
-        "common/HeraldTypes.d.ts"
+        "common/HeraldTypes.d.ts",
+        "common/Avatar.ts"
     ]
 }

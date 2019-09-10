@@ -31,5 +31,6 @@
         <file>ChatView/ReplyComponent.qml</file>
         <file>icons/reply.png</file>
         <file>TopMenuBar.qml</file>
-    </qresource>
+        <file>common/Avatar.mjs</file>
+                </qresource>
 </RCC>
