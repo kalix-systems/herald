@@ -55,7 +55,7 @@ Window {
                 text: qsTr("UI")
             }
             TabButton {
-                text: qsTr("Authenticaion")
+                text: qsTr("Authentication")
             }
             TabButton {
                 text: qsTr("Notifications")

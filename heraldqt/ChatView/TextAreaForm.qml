@@ -1,4 +1,5 @@
 import QtQuick 2.4
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
@@ -51,7 +52,8 @@ Rectangle {
         source: "qrc:///icons/emoji.png"
     }
 
-    ColumnLayout {
+    // wrapper column so replies load
+    Column {
       id: containerCol
 
       anchors {
@@ -60,15 +62,14 @@ Rectangle {
           leftMargin: QmlCfg.smallMargin
           rightMargin: QmlCfg.smallMargin
       }
+      topPadding: QmlCfg.smallMargin
 
 
     ScrollView {
         id: scrollView
         height: scrollHeight
-        implicitWidth: parent.width
+        width: parent.width
         focus: true
-        topPadding: QmlCfg.smallMargin
-
 
         TextArea {
             id: chatText
