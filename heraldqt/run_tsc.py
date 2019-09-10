@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import json
 import os
 import subprocess
@@ -51,13 +53,14 @@ lines[-2] = lines[-2].replace("><", ">\n<")
 
 parts = lines[-2].splitlines()
 
-indent = " " * 4
-double_ident = indent * 2
+if len(parts) > 1:
+    indent = " " * 4
+    double_ident = indent * 2
 
-for i in range(0, len(parts) - 1):
-    parts[i] = parts[i].replace(indent, indent * 2)
+    for i in range(0, len(parts) - 1):
+        parts[i] = parts[i].replace(indent, indent * 2)
 
-parts[-1] = indent + parts[-1]
+    parts[-1] = indent + parts[-1]
 
 lines[-2] = "\n".join(parts)
 

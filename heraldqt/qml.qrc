@@ -32,5 +32,5 @@
         <file>icons/reply.png</file>
         <file>TopMenuBar.qml</file>
         <file>common/Avatar.mjs</file>
-                </qresource>
+    </qresource>
 </RCC>
