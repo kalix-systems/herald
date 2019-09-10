@@ -70,9 +70,7 @@ Rectangle {
                 CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
             }
-
         }
-
     }
 
     //TS: also a massive anti-pattern
