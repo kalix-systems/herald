@@ -34,10 +34,11 @@ Window {
     }
 
 
-    // RS and HERE : file type constraints : *.jpg,*jpeg,*.png
     FileDialog {
         id: cfgPfp
         property bool pfpValid: true
+        folder: shortcuts.home
+        defaultSuffix: "jpg,jpeg,png"
         onSelectionAccepted: {
             config.profile_picture = fileUrl
             print("set to", fileUrl)
