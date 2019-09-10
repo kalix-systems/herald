@@ -1,5 +1,3 @@
-import "../common/QtTypes.d.ts";
-import "../common/HeraldTypes.d.ts";
 export declare class ChatViewMemory {
     scrollMemory: number;
     textMemory: string;

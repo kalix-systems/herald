@@ -3,5 +3,12 @@
         "declaration": true,
         "strict": true,
         "target": "ES2019"
-    }
+    },
+    "files": [
+        "common/utils.ts",
+        "common/utils.ts",
+        "ChatView/ChatTextAreaUtils.ts",
+        "common/QtTypes.d.ts",
+        "common/HeraldTypes.d.ts"
+    ]
 }

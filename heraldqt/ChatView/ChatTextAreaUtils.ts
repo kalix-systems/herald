@@ -1,6 +1,3 @@
-import "../common/QtTypes.d.ts";
-import "../common/HeraldTypes.d.ts";
-
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
