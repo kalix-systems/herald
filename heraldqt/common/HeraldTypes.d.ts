@@ -1,4 +1,5 @@
 declare type ConversationID = number[];
+declare type UserId = string;
 
 declare class Avatar {}
 
@@ -11,8 +12,12 @@ declare class Messages {
   insertMessage(text: string, success: boolean): boolean;
 }
 
+declare class Contacts {
+  add(userid: UserId): boolean;
+}
+
 declare class Config {
-  name: string;
+  name: UserId;
   configId: string;
 
   exists(): boolean;

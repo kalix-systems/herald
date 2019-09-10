@@ -33,5 +33,6 @@
         <file>TopMenuBar.qml</file>
         <file>common/Avatar.mjs</file>
         <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
+        <file>SideBar/popups/NewContactDialogue.mjs</file>
     </qresource>
 </RCC>

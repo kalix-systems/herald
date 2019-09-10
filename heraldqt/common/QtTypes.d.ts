@@ -25,6 +25,10 @@ declare namespace Qt {
   }
 }
 
+declare class Popup {
+  close(): void;
+}
+
 declare class TextArea {
   text: string;
   cursorPosition: number;
