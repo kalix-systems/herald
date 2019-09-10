@@ -44,7 +44,8 @@ Row {
     Loader {
         width: size
         height: size
-        sourceComponent: JS.avatarSource(displayName, pfpUrl, imageAvatar, initialAvatar)
+        sourceComponent: JS.avatarSource(displayName, pfpUrl, imageAvatar,
+                                         initialAvatar)
     }
 
     Text {

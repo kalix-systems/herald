@@ -52,45 +52,43 @@ Rectangle {
         source: "qrc:///icons/emoji.png"
     }
 
-
     // wrapper column so replies load
     Column {
-      id: containerCol
+        id: containerCol
 
-      anchors {
-          left: emojiButton.right
-          right: attachmentsButton.left
-          leftMargin: QmlCfg.smallMargin
-          rightMargin: QmlCfg.smallMargin
-      }
-      topPadding: QmlCfg.smallMargin
+        anchors {
+            left: emojiButton.right
+            right: attachmentsButton.left
+            leftMargin: QmlCfg.smallMargin
+            rightMargin: QmlCfg.smallMargin
+        }
+        topPadding: QmlCfg.smallMargin
 
+        ScrollView {
+            id: scrollView
+            height: scrollHeight
+            width: containerCol.width
+            focus: true
 
-    ScrollView {
-        id: scrollView
-        height: scrollHeight
-        width: containerCol.width
-        focus: true
-
-        TextArea {
-            id: chatText
-            background: Rectangle {
-                color: QmlCfg.palette.secondaryColor
-                anchors {
-                    fill: parent
-                    horizontalCenter: parent.horizontalCenter
-                    bottom: parent.bottom
+            TextArea {
+                id: chatText
+                background: Rectangle {
+                    color: QmlCfg.palette.secondaryColor
+                    anchors {
+                        fill: parent
+                        horizontalCenter: parent.horizontalCenter
+                        bottom: parent.bottom
+                    }
+                    radius: QmlCfg.radius
                 }
-                radius: QmlCfg.radius
+                selectionColor: QmlCfg.palette.tertiaryColor
+                selectByMouse: true
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                placeholderText: "Send a Message ..."
+                Keys.forwardTo: keysProxy
             }
-            selectionColor: QmlCfg.palette.tertiaryColor
-            selectByMouse: true
-            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-            placeholderText: "Send a Message ..."
-            Keys.forwardTo: keysProxy
         }
     }
-  }
 
     FileDialog {
         id: attachmentsDialogue
