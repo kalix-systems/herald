@@ -56,7 +56,7 @@ ToolBar {
             /// NPB this should bring up a new window (impossible from QML) ,
             /// I want an actual config pop up so it feels like i'm using a native app.
             /// Paul should do this from QT widgets Link [https://www.reddit.com/r/Qt5/comments/aoghwr/multiwindow_in_qml_proof_of_concept]
-            configPopup.open()
+            configPopup.show()
         }
     }
 }
