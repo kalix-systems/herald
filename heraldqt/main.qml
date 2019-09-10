@@ -6,12 +6,6 @@ import LibHerald 1.0
 import "SideBar/popups" as Popups
 import QtQml 2.13
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
 ApplicationWindow {
     id: root
     visible: true
@@ -42,12 +36,6 @@ ApplicationWindow {
 
     Config {
         id: config
-        Component.onCompleted: {
-            if (!!!config.init) {
-                preferencesPopup.show()
-                print("placeholder for a popup which forces first time config.")
-            }
-        }
     }
 
     Loader {
@@ -85,7 +73,6 @@ ApplicationWindow {
                 PropertyChanges {
                     target: rootSplitView
                     visible : false
-
                 }
                 PropertyChanges {
                     target: root

@@ -1,9 +1,10 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
-import LibHerald 1.0
 import QtGraphicalEffects 1.13
+import LibHerald 1.0
 
 Rectangle {
+    readonly property int heightUnit: root.minimumHeight/3
     id: loginPage
     anchors.fill: parent
 
@@ -18,15 +19,16 @@ Rectangle {
 
 Column {
    anchors.fill: parent
-   anchors.margins: 50
+   anchors.margins: heightUnit
    spacing: 20
 
+   /// --- crow emblem place holder
    Rectangle{
        anchors.horizontalCenter: parent.horizontalCenter
-       width: 75
-       height: 75
+       width: heightUnit
+       height: heightUnit
        color: Qt.darker("lightblue", 1.8)
-       radius: 75
+       radius: heightUnit
       Text {
         anchors.centerIn: parent
         color: "white"
@@ -34,6 +36,7 @@ Column {
       }
     }
 
+   /// username entry field
    TextArea {
        id: entryField
        anchors.horizontalCenter: parent.horizontalCenter
@@ -43,7 +46,7 @@ Column {
        placeholderText: qsTr("Register Username...")
        background: Rectangle {
            color: "white"
-           radius: 10
+           radius: 2
        }
    }
 
@@ -58,8 +61,8 @@ Column {
            text: qsTr("Register")
        }
        background: Rectangle {
-           color: Qt.darker("lightblue", 1.8)
-           radius: 10
+           color: "steelblue"
+           radius: 3
        }
        onClicked: {
            config.configId= entryField.text.trim()
@@ -69,7 +72,7 @@ Column {
 
 }
 
-    Rectangle {
+ Rectangle {
         color: Qt.darker("lightblue",1.9)
         height: 60
 

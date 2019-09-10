@@ -39,8 +39,6 @@ ToolBar {
         size: parent.height - QmlCfg.margin
     }
 
-    /// unpolished temporary Popup
-    /// NPB? Remeber that thing we said abut native right click dialogs?
     Popups.ConfigPopup {
         id: configPopup
     }
@@ -53,9 +51,7 @@ ToolBar {
         }
         source: "qrc:///icons/gear.png"
         onClicked: {
-            /// NPB this should bring up a new window (impossible from QML) ,
-            /// I want an actual config pop up so it feels like i'm using a native app.
-            /// Paul should do this from QT widgets Link [https://www.reddit.com/r/Qt5/comments/aoghwr/multiwindow_in_qml_proof_of_concept]
+            /// Note: this needs to pay attention to root state
             configPopup.show()
         }
     }

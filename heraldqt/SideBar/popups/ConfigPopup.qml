@@ -8,17 +8,6 @@ import "../../common" as Common
 import "../../common/utils.mjs" as Utils
 import "./ConfigPopupSubmission.mjs" as JS
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
-
-// Note: we want this to be a seperate window.
-// afaict: all notes here will be tossed
 Window {
     id: configPopup
 
@@ -33,7 +22,6 @@ Window {
         x = root.x + root.width / 3
         y = root.y + 100
     }
-
 
     FileDialog {
         id: cfgPfp
@@ -116,50 +104,6 @@ Window {
             id: notificationPreferences
         }
 
-        states: [
-            State {
-                name: "accPref"
-                when: bar.currentIndex === 0
-                PropertyChanges {
-                    target: configPopup
-                    width: 600
-                    height: 200
-                }
-            },
-            State {
-                name: "uiPref"
-                when: bar.currentIndex === 1
-                PropertyChanges {
-                    target: configPopup
-                    width: 600
-                    height: 400
-                }
-            },
-            State {
-                name: "authPref"
-                when: bar.currentIndex === 2
-                PropertyChanges {
-                    target: configPopup
-                    width: 500
-                    height: 400
-                }
-            },
-            State {
-                name: "notPref"
-                when: bar.currentIndex === 3
-                PropertyChanges {
-                    target: configPopup
-                    width: 500
-                    height: 400
-                }
-            }
-        ]
 
-        transitions: Transition {
-            NumberAnimation {
-                properties: "width, height"
-                easing.type: Easing.InOutQuad
-            }
-        }
     }
 }
