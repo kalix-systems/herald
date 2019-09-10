@@ -1,17 +1,3 @@
-import "../common/QtTypes.d.ts";
-import "../common/HeraldTypes.d.ts";
-
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
-
-//TS: This whole file.
-
 /*
  * a memory tuple class
  **/

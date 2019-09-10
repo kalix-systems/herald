@@ -31,7 +31,7 @@ ToolBar {
 
     Common.Avatar {
         id: configAvatar
-        displayName: Utils.unwrapOr(config.name, config.config_id)
+        displayName: Utils.unwrapOr(config.name, config.configId)
         colorHash: config.color
         // Note: use specific fallback value or implicit one from typescript! TS
         pfpUrl: Utils.unwrapOr(config.profile_picture, "")

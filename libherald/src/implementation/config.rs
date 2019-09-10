@@ -106,6 +106,10 @@ impl ConfigTrait for Config {
         self.init
     }
 
+    fn exists(&self) -> bool {
+        self.init
+    }
+
     fn emit(&mut self) -> &mut ConfigEmitter {
         &mut self.emit
     }

@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import "./NewContactDialogue.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -23,20 +24,12 @@ Popup {
     width: 300
     height: 200
 
-    // TS: also this should take args
-    function insertContact() {
-        if (entryField.text.trim().length === 0)
-            return
-        contactsModel.add(entryField.text.trim())
-        entryField.clear()
-        newContactDialogue.close()
-    }
-
     TextArea {
-        id: entryField
+        id: entryArea
         focus: true
         placeholderText: qsTr("Enter contact name")
-        Keys.onReturnPressed: insertContact()
+        Keys.onReturnPressed: JS.insertContact(newContactDialogue, entryArea,
+                                               contactsModel)
     }
 
     Button {
@@ -46,6 +39,7 @@ Popup {
             bottom: parent.bottom
             right: parent.right
         }
-        onClicked: insertContact()
+        onClicked: JS.insertContact(newContactDialogue, entryArea,
+                                    contactsModel)
     }
 }

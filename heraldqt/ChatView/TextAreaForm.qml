@@ -1,7 +1,9 @@
 import QtQuick 2.4
+import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
+import QtQuick.Layouts 1.13
 import "ChatTextAreaUtils.mjs" as CTUtils
 import "../common" as Common
 
@@ -34,8 +36,7 @@ Rectangle {
     color: QmlCfg.palette.mainColor
     clip: true
 
-    /// NPB : why does this need a margin added ?! put in a column.
-    height: scrollHeight + QmlCfg.margin
+    height: containerCol.height
 
     Common.ButtonForm {
         id: attachmentsButton
@@ -51,34 +52,41 @@ Rectangle {
         source: "qrc:///icons/emoji.png"
     }
 
-    ScrollView {
-        id: scrollView
-        height: scrollHeight
-        focus: true
+    // wrapper column so replies load
+    Column {
+        id: containerCol
 
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            bottom: parent.bottom
             leftMargin: QmlCfg.smallMargin
             rightMargin: QmlCfg.smallMargin
         }
+        topPadding: QmlCfg.smallMargin
 
-        TextArea {
-            id: chatText
-            background: Rectangle {
-                color: QmlCfg.palette.secondaryColor
-                anchors {
-                    fill: parent
-                    horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
+        ScrollView {
+            id: scrollView
+            height: scrollHeight
+            width: containerCol.width
+            focus: true
+
+            TextArea {
+                id: chatText
+                background: Rectangle {
+                    color: QmlCfg.palette.secondaryColor
+                    anchors {
+                        fill: parent
+                        horizontalCenter: parent.horizontalCenter
+                        bottom: parent.bottom
+                    }
+                    radius: QmlCfg.radius
                 }
-                radius: QmlCfg.radius
+                selectionColor: QmlCfg.palette.tertiaryColor
+                selectByMouse: true
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                placeholderText: "Send a Message ..."
+                Keys.forwardTo: keysProxy
             }
-            selectByMouse: true
-            wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-            placeholderText: "Send a Message ..."
-            Keys.forwardTo: keysProxy
         }
     }
 

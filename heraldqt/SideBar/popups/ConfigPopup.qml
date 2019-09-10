@@ -6,6 +6,7 @@ import QtQuick.Window 2.2
 import LibHerald 1.0
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
+import "./ConfigPopupSubmission.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -29,9 +30,10 @@ Window {
     minimumWidth: width
 
     Component.onCompleted: {
-        x = root.x + root.width/3;
-        y = root.y + 100;
+        x = root.x + root.width / 3
+        y = root.y + 100
     }
+
 
     FileDialog {
         id: cfgPfp
@@ -48,36 +50,36 @@ Window {
         width: parent.width
         height: 50
         id: bar
-            TabButton {
-                text: qsTr("Account")
-            }
-            TabButton {
-                text: qsTr("UI")
-            }
-            TabButton {
-                text: qsTr("Authenticaion")
-            }
-            TabButton {
-                text: qsTr("Notifications")
-            }
+        TabButton {
+            text: qsTr("Account")
+        }
+        TabButton {
+            text: qsTr("UI")
+        }
+        TabButton {
+            text: qsTr("Authentication")
+        }
+        TabButton {
+            text: qsTr("Notifications")
+        }
     }
-
 
     StackLayout {
         width: parent.width
         currentIndex: bar.currentIndex
-        anchors.top :  bar.bottom
+        anchors.top: bar.bottom
         ColumnLayout {
             id: accountPreferences
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
-                /// RS: check with the server to prevent duplicate ID's
+            /// RS: check with the server to prevent duplicate ID's
             RowLayout {
                 TextField {
                     id: cfgUid
-                    enabled: !config.config_id
+                    enabled: !config.configId
                     property bool userIdValid: true
-                    placeholderText: enabled ? "Enter UID " : config.config_id
+                    placeholderText: enabled ? "Enter UID " : config.configId
+                    selectionColor: QmlCfg.palette.tertiaryColor
                 }
 
                 TextField {
@@ -85,28 +87,24 @@ Window {
                     maximumLength: 256
                     property bool usernameValid: true
                     placeholderText: "Enter Username"
+                    selectionColor: QmlCfg.palette.tertiaryColor
                 }
             }
 
-                Button {
-                    text: "select profile picture"
-                    onClicked: {
-                        cfgPfp.open()
-                    }
+            Button {
+                text: "select profile picture"
+                onClicked: {
+                    cfgPfp.open()
                 }
+            }
 
             Button {
                 text: "Submit"
                 onClicked: {
-                    // TS: this should be checked in ts.
-                    if (!!!config.config_id) {
-                        config.config_id = cfgUid.text.trim()
-                    }
-                    config.name = cfgUname.text.trim()
+                    JS.submit(config, cfgUid, cfgUname)
                     close()
                 }
             }
-
         }
         Item {
             id: uiPreferences
@@ -158,10 +156,10 @@ Window {
         ]
 
         transitions: Transition {
-             NumberAnimation { properties: "width, height"; easing.type: Easing.InOutQuad }
-         }
+            NumberAnimation {
+                properties: "width, height"
+                easing.type: Easing.InOutQuad
+            }
+        }
     }
-
-
-
 }

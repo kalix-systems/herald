@@ -2,6 +2,7 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
+import "Avatar.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -43,15 +44,8 @@ Row {
     Loader {
         width: size
         height: size
-        /// TS: this should have a specific TS function to set these values
-        sourceComponent: {
-            if (displayName === "")
-                return undefined
-            if (pfpUrl !== "")
-                return imageAvatar
-            else
-                return initialAvatar
-        }
+        sourceComponent: JS.avatarSource(displayName, pfpUrl, imageAvatar,
+                                         initialAvatar)
     }
 
     Text {

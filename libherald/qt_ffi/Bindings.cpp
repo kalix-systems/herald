@@ -49,9 +49,9 @@ namespace {
     {
         Q_EMIT o->colorschemeChanged();
     }
-    inline void configConfig_idChanged(Config* o)
+    inline void configConfigIdChanged(Config* o)
     {
-        Q_EMIT o->config_idChanged();
+        Q_EMIT o->configIdChanged();
     }
     inline void configInitChanged(Config* o)
     {
@@ -98,6 +98,7 @@ extern "C" {
     void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
     void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
+    bool config_exists(const Config::Private*);
 };
 
 extern "C" {
@@ -218,7 +219,7 @@ bool Contacts::setColor(int row, quint32 value)
     return set;
 }
 
-QString Contacts::contact_id(int row) const
+QString Contacts::contactId(int row) const
 {
     QString s;
     contacts_data_contact_id(m_d, row, &s, set_qstring);
@@ -296,7 +297,7 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(contact_id(index.row()));
+            return QVariant::fromValue(contactId(index.row()));
         case Qt::UserRole + 3:
             return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
@@ -324,7 +325,7 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "archive_status");
     names.insert(Qt::UserRole + 1, "color");
-    names.insert(Qt::UserRole + 2, "contact_id");
+    names.insert(Qt::UserRole + 2, "contactId");
     names.insert(Qt::UserRole + 3, "matched");
     names.insert(Qt::UserRole + 4, "name");
     names.insert(Qt::UserRole + 5, "profile_picture");
@@ -660,7 +661,7 @@ Config::Config(QObject *parent):
     m_d(config_new(this,
         configColorChanged,
         configColorschemeChanged,
-        configConfig_idChanged,
+        configConfigIdChanged,
         configInitChanged,
         configNameChanged,
         configProfile_pictureChanged)),
@@ -687,13 +688,13 @@ quint32 Config::colorscheme() const
 void Config::setColorscheme(quint32 v) {
     config_colorscheme_set(m_d, v);
 }
-QString Config::config_id() const
+QString Config::configId() const
 {
     QString v;
     config_config_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setConfig_id(const QString& v) {
+void Config::setConfigId(const QString& v) {
     config_config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
 }
 bool Config::init() const
@@ -725,6 +726,10 @@ void Config::setProfile_picture(const QString& v) {
     } else {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
+}
+bool Config::exists() const
+{
+    return config_exists(m_d);
 }
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

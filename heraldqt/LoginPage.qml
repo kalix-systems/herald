@@ -62,7 +62,7 @@ Column {
            radius: 10
        }
        onClicked: {
-           config.config_id = entryField.text.trim()
+           config.configId= entryField.text.trim()
            config.name = entryField.text.trim()
        }
    }

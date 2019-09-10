@@ -33,3 +33,19 @@ export function friendlyTimestamp(msEpochTime: number): string {
 
   return dt.toDateString();
 }
+
+export function safeSwitch<T>(
+  cond: boolean,
+  first: T,
+  second: T
+): T | undefined {
+  if (typeof cond !== "boolean") {
+    throw new Error("condition was not of type boolean");
+  }
+
+  if (cond) {
+    return first;
+  } else {
+    return second;
+  }
+}

@@ -3,5 +3,17 @@
         "declaration": true,
         "strict": true,
         "target": "ES2019"
-    }
+    },
+    "files": [
+        "common/utils.ts",
+        "ChatView/ChatTextAreaUtils.ts",
+        "SideBar/popups/ConfigPopupSubmission.ts",
+        "SideBar/popups/NewContactDialogue.ts",
+        "SideBar/ContactViewTypes.d.ts",
+        "SideBar/ContactView.ts",
+        "ChatView/ChatViewTypes.d.ts",
+        "common/QtTypes.d.ts",
+        "common/HeraldTypes.d.ts",
+        "common/Avatar.ts"
+    ]
 }

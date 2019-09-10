@@ -12,7 +12,6 @@ import QtQml 2.13
 // Just Hacky: JH
 // Type Script: TS
 // Needs polish badly: NPB
-
 ApplicationWindow {
     id: root
     visible: true
@@ -34,8 +33,8 @@ ApplicationWindow {
     }
 
     Contacts {
-         id: contactsModel
-        }
+        id: contactsModel
+    }
 
     Popups.ConfigPopup {
         id: preferencesPopup
@@ -115,7 +114,4 @@ ApplicationWindow {
              NumberAnimation { properties: "width, height"; easing.type: Easing.InOutQuad }
          }
     }
-
-
-
 }
