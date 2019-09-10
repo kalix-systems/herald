@@ -46,7 +46,13 @@ ToolBar {
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
-            Keys.onReturnPressed: event.accepted = true
+            Keys.onPressed: {
+                if (event.key === Qt.Key_Return) {
+                event.accepted = true }
+                else if (event.key === Qt.Key_Tab) {
+                    event.accepted = true
+                }
+            }
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 12
