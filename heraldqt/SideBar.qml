@@ -12,11 +12,10 @@ import "SideBar" as SBUtils
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
-
 Pane {
     id: contactPane
     // GS : we do this to get the current Item, BAD.
-    property alias contactsListView : contactsListView
+    property alias contactsListView: contactsListView
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
@@ -41,7 +40,6 @@ Pane {
         id: utilityBar
         anchors.top: toolBar.bottom
     }
-
 
     // FC: WE use this border pattern in a few places and it is redundant DRY
     ///--- Border between SearchBar and the Pane Contents (contacts)

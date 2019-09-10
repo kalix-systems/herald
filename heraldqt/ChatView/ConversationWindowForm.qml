@@ -14,7 +14,6 @@ import "../common/utils.mjs" as Utils
 // Needs polish badly: NPB
 // RS: Rusts job
 // Factor Component: FC
-
 Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
@@ -36,7 +35,7 @@ Flickable {
         topPadding: QmlCfg.margin
         anchors {
             right: parent.right
-            left:parent.left
+            left: parent.left
         }
 
         Repeater {
@@ -48,7 +47,9 @@ Flickable {
 
                 //NPB: possibly not a column and just fix anchors
                 anchors {
-                    right: if (outbound) { parent.right }
+                    right: if (outbound) {
+                               parent.right
+                           }
                     rightMargin: chatScrollBar.width + QmlCfg.margin
                     leftMargin: rightMargin
                 }
@@ -57,20 +58,24 @@ Flickable {
                 CVUtils.ChatBubbleForm {
                     messageText: body
                     additionalContent: ""
-                    contentArgs: { return {} }
+                    contentArgs: {
+                        return {
+
+                        }
+                    }
                     bubbleColor: if (outbound) {
-                                       QmlCfg.palette.tertiaryColor
-                                   } else {
-                                       QmlCfg.palette.secondaryColor
-                                   }
+                                     QmlCfg.palette.tertiaryColor
+                                 } else {
+                                     QmlCfg.palette.secondaryColor
+                                 }
                 } //bubble
             } //bubble wrapper
-        }// Repeater
+        } // Repeater
     } //singleton Col
 } // flickable
-
 
 /*##^## Designer {
     D{i:0;autoSize:true;height:480;width:640}
 }
  ##^##*/
+

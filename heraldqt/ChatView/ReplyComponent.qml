@@ -22,14 +22,18 @@ Rectangle {
     property string from: ""
     // the width the text sits at without wrapping
     //TS: NPB: same weird margin fuding
-    readonly property int naturalWidth:Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
+    readonly property int naturalWidth: Math.min(
+                                            2 * chatPane.width / 3,
+                                            messageMetrics.width) + QmlCfg.margin
     // the width of the parent object that we either match or override
-    property var uiContainer: { width: 0}
+    property var uiContainer: {
+        width: 0
+    }
 
     color: bubbleColor
     height: col.height
     //NPB: same weird margin fudging
-    width: Math.max(naturalWidth , uiContainer.width) + QmlCfg.margin / 2
+    width: Math.max(naturalWidth, uiContainer.width) + QmlCfg.margin / 2
 
     TextMetrics {
         id: messageMetrics
@@ -39,23 +43,22 @@ Rectangle {
 
     radius: QmlCfg.radius
 
-Column {
-    id: col
-    spacing: 0
-    Label {
-        id: who
-        text: from
-    }
+    Column {
+        id: col
+        spacing: 0
+        Label {
+            id: who
+            text: from
+        }
 
-    TextEdit {
-        id: bubbleText
-        text: messageMetrics.text
-        width: naturalWidth
-        wrapMode: TextEdit.Wrap
-        selectByMouse: true
-        selectByKeyboard: true
-        readOnly: true
+        TextEdit {
+            id: bubbleText
+            text: messageMetrics.text
+            width: naturalWidth
+            wrapMode: TextEdit.Wrap
+            selectByMouse: true
+            selectByKeyboard: true
+            readOnly: true
+        }
     }
-}
-
 }

@@ -2,7 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
-import "ChatTextAreaUtils.js" as CTUtils
+import "ChatTextAreaUtils.mjs" as CTUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -28,7 +28,7 @@ Rectangle {
     // the text area
     property alias chatText: chatText
     // clippy file Dialog
-    property alias attacmentsDialog : attachmentsDialogue
+    property alias attacmentsDialog: attachmentsDialogue
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -78,8 +78,8 @@ Rectangle {
             right: attachmentsButton.left
             bottom: parent.bottom
             // FC: small margin vs large margin, /2 is an anti pattern
-            leftMargin: QmlCfg.margin/2
-            rightMargin: QmlCfg.margin/2
+            leftMargin: QmlCfg.margin / 2
+            rightMargin: QmlCfg.margin / 2
         }
 
         TextArea {
@@ -101,10 +101,10 @@ Rectangle {
     }
 
     FileDialog {
-         id: attachmentsDialogue
-         folder: shortcuts.home
-         onSelectionAccepted: {
-             print("todo: attachments api")
-         }
-     }
-   }
+        id: attachmentsDialogue
+        folder: shortcuts.home
+        onSelectionAccepted: {
+            print("todo: attachments api")
+        }
+    }
+}

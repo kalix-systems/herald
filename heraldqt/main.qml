@@ -13,7 +13,6 @@ import QtQml 2.13
 // Just Hacky: JH
 // Type Script: TS
 // Needs polish badly: NPB
-
 ApplicationWindow {
     id: root
     visible: true
@@ -54,8 +53,8 @@ ApplicationWindow {
     }
 
     Contacts {
-         id: contactsModel
-        }
+        id: contactsModel
+    }
 
     // NPB : always instantiated, more like a state, or a page than a popup
     Config {
@@ -88,7 +87,5 @@ ApplicationWindow {
             implicitHeight: 4
             color: QmlCfg.palette.secondaryColor
         }
-
     }
-
 }

@@ -22,7 +22,8 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.vertical: ScrollBar {
+    }
 
     delegate: Item {
         id: contactItem
@@ -31,7 +32,8 @@ ListView {
         property Item contactAvatar: contactAvatar
 
         // TS: yes we have a bunch of stupid functions that do one thing
-        height: if (visible)  60
+        height: if (visible)
+                    60
         width: parent.width
         visible: matched
 
@@ -85,7 +87,8 @@ ListView {
                 onClicked: {
                     if (mouse.button === Qt.LeftButton) {
                         currentIndex = index
-                        print(currentIndex, currentItem.contactAvatar.displayName)
+                        print(currentIndex,
+                              currentItem.contactAvatar.displayName)
                         contactItem.focus = true
                         messageModel.conversationId = contact_id
                         chatView.state = "visibleview"

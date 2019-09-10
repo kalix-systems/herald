@@ -11,6 +11,7 @@
         <file>SideBar/UtilityBar.qml</file>
         <file>ChatView.qml</file>
         <file>ChatView/ChatBar.qml</file>
+        <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>icons/plus.png</file>
         <file>icons/gear.svg</file>
         <file>icons/gear.png</file>
@@ -23,7 +24,6 @@
         <file>icons/searchRegex.png</file>
         <file>icons/searchRegexTemp.png</file>
         <file>ChatView/TextAreaForm.qml</file>
-        <file>ChatView/ChatTextAreaUtils.js</file>
         <file>ChatView/ConversationWindowForm.qml</file>
         <file>icons/emoji.png</file>
         <file>ChatView/ChatBubbleForm.qml</file>

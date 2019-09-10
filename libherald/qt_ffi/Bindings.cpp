@@ -901,7 +901,7 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::insert_message(const QString& body)
+bool Messages::insertMessage(const QString& body)
 {
     return messages_insert_message(m_d, body.utf16(), body.size());
 }
@@ -943,7 +943,7 @@ bool NetworkHandle::newMessage() const
 {
     return network_handle_new_message_get(m_d);
 }
-bool NetworkHandle::send_message(const QString& message_body, const QString& to) const
+bool NetworkHandle::sendMessage(const QString& message_body, const QString& to) const
 {
     return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.utf16(), to.size());
 }

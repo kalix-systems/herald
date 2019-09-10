@@ -14,7 +14,6 @@ import "popups" as Popups
 // FS: Fix scoping
 
 // General Note : Baeo
-
 ToolBar {
     id: utilityBar
     anchors.left: parent.left

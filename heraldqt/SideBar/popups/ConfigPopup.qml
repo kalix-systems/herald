@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
 
-
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -17,7 +16,6 @@ import "../../common/utils.mjs" as Utils
 
 // Note: we want this to be a seperate window.
 // afaict: all notes here will be tossed
-
 Popup {
     id: configPopup
     modal: true

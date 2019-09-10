@@ -9,7 +9,6 @@ import QtQuick 2.13
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
-
 Item {
     //TS: This should be an enum defined from typscript.
     Theme {
