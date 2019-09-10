@@ -39,7 +39,7 @@ Window {
         id: cfgPfp
         property bool pfpValid: true
         onSelectionAccepted: {
-            config.profile_picture = fileUrl
+            config.profilePicture = fileUrl
             print("set to", fileUrl)
         }
     }

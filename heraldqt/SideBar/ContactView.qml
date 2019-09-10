@@ -105,7 +105,7 @@ ListView {
             displayName: Utils.unwrapOr(name, contactId)
             colorHash: color
             /// NPB: use camel case in libherald please
-            pfpUrl: Utils.unwrapOr(profile_picture, null)
+            pfpUrl: Utils.unwrapOr(profilePicture, null)
         }
     }
 }

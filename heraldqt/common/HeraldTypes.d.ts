@@ -3,6 +3,7 @@ declare type UserId = string;
 
 declare class Avatar {
   displayName: string;
+  pfpUrl: string | null;
 }
 
 declare class NetworkHandle {
@@ -23,6 +24,7 @@ declare class Contacts {
 declare class Config {
   name: UserId;
   configId: string;
+  pfpUrl: string | null;
 
   exists(): boolean;
 }

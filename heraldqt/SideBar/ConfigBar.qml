@@ -34,7 +34,7 @@ ToolBar {
         displayName: Utils.unwrapOr(config.name, config.configId)
         colorHash: config.color
         // Note: use specific fallback value or implicit one from typescript! TS
-        pfpUrl: Utils.unwrapOr(config.profile_picture, "")
+        pfpUrl: Utils.unwrapOr(config.profilePicture, "")
         anchors.horizontalCenter: parent.horizontalCenter
         size: parent.height - QmlCfg.margin
     }

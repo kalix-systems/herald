@@ -57,9 +57,9 @@ namespace {
     {
         Q_EMIT o->nameChanged();
     }
-    inline void configProfile_pictureChanged(Config* o)
+    inline void configProfilePictureChanged(Config* o)
     {
-        Q_EMIT o->profile_pictureChanged();
+        Q_EMIT o->profilePictureChanged();
     }
     inline void messagesConversationIdChanged(Messages* o)
     {
@@ -259,14 +259,14 @@ bool Contacts::setName(int row, const QString& value)
     return set;
 }
 
-QString Contacts::profile_picture(int row) const
+QString Contacts::profilePicture(int row) const
 {
     QString s;
     contacts_data_profile_picture(m_d, row, &s, set_qstring);
     return s;
 }
 
-bool Contacts::setProfile_picture(int row, const QString& value)
+bool Contacts::setProfilePicture(int row, const QString& value)
 {
     bool set = false;
     if (value.isNull()) {
@@ -298,7 +298,7 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 4:
             return cleanNullQVariant(QVariant::fromValue(name(index.row())));
         case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(profile_picture(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
         }
         break;
     }
@@ -323,7 +323,7 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     names.insert(Qt::UserRole + 2, "contactId");
     names.insert(Qt::UserRole + 3, "matched");
     names.insert(Qt::UserRole + 4, "name");
-    names.insert(Qt::UserRole + 5, "profile_picture");
+    names.insert(Qt::UserRole + 5, "profilePicture");
     return names;
 }
 QVariant Contacts::headerData(int section, Qt::Orientation orientation, int role) const
@@ -368,7 +368,7 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
         }
         if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setProfile_picture(index.row(), value.value<QString>());
+                return setProfilePicture(index.row(), value.value<QString>());
             }
         }
     }
@@ -658,7 +658,7 @@ Config::Config(QObject *parent):
         configColorschemeChanged,
         configConfigIdChanged,
         configNameChanged,
-        configProfile_pictureChanged)),
+        configProfilePictureChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -704,13 +704,13 @@ void Config::setName(const QString& v) {
     config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
 }
-QString Config::profile_picture() const
+QString Config::profilePicture() const
 {
     QString v;
     config_profile_picture_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setProfile_picture(const QString& v) {
+void Config::setProfilePicture(const QString& v) {
     if (v.isNull()) {
         config_profile_picture_set_none(m_d);
     } else {
