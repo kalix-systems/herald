@@ -54,13 +54,12 @@ Row {
         }
     }
 
-
-   Text {
-      visible: labeled
-      text: displayName
-      font.bold: true
-      anchors.verticalCenter: parent.verticalCenter
-     }
+    Text {
+        visible: labeled
+        text: displayName
+        font.bold: true
+        anchors.verticalCenter: parent.verticalCenter
+    }
 
     ///--- potential avatar components
     /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do

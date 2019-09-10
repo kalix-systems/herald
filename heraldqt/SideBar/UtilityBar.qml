@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
 import "../common" as Common
+
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -14,7 +15,6 @@ import "../common" as Common
 // FS: Fix scoping
 
 // General Note : Baeo
-
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
@@ -68,13 +68,12 @@ ToolBar {
         }
         source: "qrc:///icons/search.png"
         onClicked: if (searchRegex) {
-                    source = "qrc:///icons/search.png"
-                    searchRegex = false
-                } else {
-                    source = "qrc:///icons/searchRegexTemp.png"
-                    searchRegex = true
-                }
-
+                       source = "qrc:///icons/search.png"
+                       searchRegex = false
+                   } else {
+                       source = "qrc:///icons/searchRegexTemp.png"
+                       searchRegex = true
+                   }
     }
 
     ///--- Add contact button

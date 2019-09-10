@@ -3,7 +3,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 
-
 Button {
     property string source
     height: 25

@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.mjs" as Utils
-import "ChatTextAreaUtils.js" as CTUtils
+import "ChatTextAreaUtils.mjs" as CTUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -42,47 +42,52 @@ Rectangle {
 
         //TS: put this logic in a seperate file
         onEntered: {
-            replyButton.visible =! replyButton.visible
+            replyButton.visible = !replyButton.visible
         }
 
         //TS: ""
         onExited: {
-            replyButton.visible =! replyButton.visible
+            replyButton.visible = !replyButton.visible
         }
 
-      anchors {
-        left: if(!outbound) parent.left
-        right: if(outbound) parent.right
-        bottom: parent.bottom
-        top: parent.top
-      }
-      // Emoji button proper
-      // FC: more button reuse
-      Button {
-         id: replyButton
-         onClicked: {
-              CTUtils.activateReplyPopup();
-              print("kaavya! put some business logic here.")
-          }
-          visible: false
-          anchors.margins: QmlCfg.margin
-          anchors.verticalCenter: chatBubbleHitbox.verticalCenter
-          height: 25
-          width: height
-          background: Image {
-              //FC: replace all icons with constant sources, save on typo hell // refactors
-              source: "qrc:///icons/reply.png"
-              height: width
-              scale: 0.9
-              mipmap: true
-          }
-          z: 10
-      }
+        anchors {
+            left: if (!outbound)
+                      parent.left
+            right: if (outbound)
+                       parent.right
+            bottom: parent.bottom
+            top: parent.top
+        }
+        // Emoji button proper
+        // FC: more button reuse
+        Button {
+            id: replyButton
+            onClicked: {
+                CTUtils.activateReplyPopup()
+                print("kaavya! put some business logic here.")
+            }
+            visible: false
+            anchors.margins: QmlCfg.margin
+            anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+            height: 25
+            width: height
+            background: Image {
+                //FC: replace all icons with constant sources, save on typo hell // refactors
+                source: "qrc:///icons/reply.png"
+                height: width
+                scale: 0.9
+                mipmap: true
+            }
+            z: 10
+        }
     }
 
-   //TS: also a massive anti-pattern
-   // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
-   Component.onCompleted: { contentArgs.uiContainer =  bubbleText; attachmentLoader.setSource(additionalContent, contentArgs) }
+    //TS: also a massive anti-pattern
+    // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
+    Component.onCompleted: {
+        contentArgs.uiContainer = bubbleText
+        attachmentLoader.setSource(additionalContent, contentArgs)
+    }
 
     width: bubble.width
     height: bubble.height
@@ -98,16 +103,16 @@ Rectangle {
 
         /// NBP: find a better way to generically load content
         Loader {
-             id: attachmentLoader
-             source: additionalContent
+            id: attachmentLoader
+            source: additionalContent
         }
-
 
         TextEdit {
             id: bubbleText
             text: messageText
             //TS: NPB: that extra margin is bad, also this is a recipe for a binding loop
-            width: Math.min(2*chatPane.width / 3, messageMetrics.width) + QmlCfg.margin
+            width: Math.min(2 * chatPane.width / 3,
+                            messageMetrics.width) + QmlCfg.margin
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
@@ -124,7 +129,3 @@ Rectangle {
         }
     }
 }
-
-
-
-

@@ -50,7 +50,8 @@ Item {
             }
         }
 
-        MenuSeparator {}
+        MenuSeparator {
+        }
 
         MenuItem {
             text: 'Rename Contact'
@@ -59,7 +60,8 @@ Item {
             onTriggered: renameContactDialogue.open()
         }
 
-        MenuSeparator {}
+        MenuSeparator {
+        }
 
         MenuItem {
             // Note: remove , because this is a testing feature

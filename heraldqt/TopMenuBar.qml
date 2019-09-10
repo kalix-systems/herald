@@ -4,10 +4,10 @@ import Qt.labs.platform 1.1
 // note: this will not work on windows
 MenuBar {
     Menu {
-       MenuItem {
+        MenuItem {
             text: "Preferences..."
             shortcut: StandardKey.Preferences
-             onTriggered: preferencesPopup.open()
+            onTriggered: preferencesPopup.open()
         }
     }
     // TODO: when we have memory for chatTextAreas bind these events to them

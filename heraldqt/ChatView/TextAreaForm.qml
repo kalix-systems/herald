@@ -2,8 +2,9 @@ import QtQuick 2.4
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
-import "ChatTextAreaUtils.js" as CTUtils
+import "ChatTextAreaUtils.mjs" as CTUtils
 import "../common" as Common
+
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -28,7 +29,7 @@ Rectangle {
     // the text area
     property alias chatText: chatText
     // clippy file Dialog
-    property alias attacmentsDialog : attachmentsDialogue
+    property alias attacmentsDialog: attachmentsDialogue
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -82,10 +83,10 @@ Rectangle {
     }
 
     FileDialog {
-         id: attachmentsDialogue
-         folder: shortcuts.home
-         onSelectionAccepted: {
-             print("todo: attachments api")
-         }
-     }
-   }
+        id: attachmentsDialogue
+        folder: shortcuts.home
+        onSelectionAccepted: {
+            print("todo: attachments api")
+        }
+    }
+}

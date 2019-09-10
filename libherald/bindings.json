@@ -9,7 +9,7 @@
         "NetworkHandle": {
             "type": "Object",
             "functions": {
-                "send_message": {
+                "sendMessage": {
                     "return": "bool",
                     "arguments": [
                         {
@@ -152,7 +152,7 @@
                 }
             },
             "functions": {
-                "insert_message": {
+                "insertMessage": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
