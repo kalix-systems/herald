@@ -29,5 +29,6 @@
         <file>ChatView/ChatBubbleForm.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
         <file>icons/reply.png</file>
+        <file>TopMenuBar.qml</file>
     </qresource>
 </RCC>

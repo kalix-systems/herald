@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
+import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
@@ -14,7 +15,6 @@ import "../../common/utils.mjs" as Utils
 // RS: Rusts job
 // Factor Component: FC
 
-/// NOTE: this is trying to be native looking, as per previous comments
 
 /// --- displays a list of contacts
 Item {
@@ -38,7 +38,7 @@ Item {
 
     Menu {
         id: optionsMenu
-        closePolicy: Popup.CloseOnPressOutside
+
         MenuItem {
             text: 'Delete Contact'
             //TS: this should be in typescript
@@ -50,12 +50,17 @@ Item {
                 messageModel.clear_conversation_view()
             }
         }
+
+        MenuSeparator {}
+
         MenuItem {
             text: 'Rename Contact'
             // Note: remove , because this is a testing feature.
             // instead networking needs to know...
             onTriggered: renameContactDialogue.open()
         }
+
+        MenuSeparator {}
 
         MenuItem {
             // Note: remove , because this is a testing feature

@@ -92,8 +92,8 @@ ListView {
                     } else {
                         // NPB: this should not *really* be a popup, I wish we had a native widgets solution.
                         // import Qt.labs.platform 1.1 !??!?!?
-                        popupManager.optionsMenu.x = mouse.x
-                        popupManager.optionsMenu.y = mouse.y
+//                        popupManager.optionsMenu.x = mouse.x
+//                        popupManager.optionsMenu.y = mouse.y
                         popupManager.optionsMenu.open()
                     }
                 }

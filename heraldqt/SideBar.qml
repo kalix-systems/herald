@@ -71,8 +71,3 @@ Pane {
     }
 }
 
-/*##^## Designer {
-    D{i:10;anchors_height:1}
-}
- ##^##*/
-
