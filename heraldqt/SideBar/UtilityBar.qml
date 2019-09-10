@@ -53,6 +53,7 @@ ToolBar {
                     event.accepted = true
                 }
             }
+            selectionColor: QmlCfg.palette.tertiaryColor
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
             font.pointSize: 12

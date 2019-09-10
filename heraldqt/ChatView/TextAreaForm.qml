@@ -52,6 +52,7 @@ Rectangle {
         source: "qrc:///icons/emoji.png"
     }
 
+
     // wrapper column so replies load
     Column {
       id: containerCol
@@ -68,7 +69,7 @@ Rectangle {
     ScrollView {
         id: scrollView
         height: scrollHeight
-        width: parent.width
+        width: containerCol.width
         focus: true
 
         TextArea {
@@ -82,14 +83,14 @@ Rectangle {
                 }
                 radius: QmlCfg.radius
             }
+            selectionColor: QmlCfg.palette.tertiaryColor
             selectByMouse: true
             wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
             placeholderText: "Send a Message ..."
             Keys.forwardTo: keysProxy
         }
     }
-
-    }
+  }
 
     FileDialog {
         id: attachmentsDialogue

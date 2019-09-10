@@ -78,6 +78,7 @@ Window {
                     enabled: !config.config_id
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.config_id
+                    selectionColor: QmlCfg.palette.tertiaryColor
                 }
 
                 TextField {
@@ -85,6 +86,7 @@ Window {
                     maximumLength: 256
                     property bool usernameValid: true
                     placeholderText: "Enter Username"
+                    selectionColor: QmlCfg.palette.tertiaryColor
                 }
             }
 
