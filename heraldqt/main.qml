@@ -76,6 +76,8 @@ ApplicationWindow {
                 }
                 PropertyChanges {
                     target: root
+                    minimumWidth: 250
+                    minimumHeight: 300
                     height: 500
                     width: 700
                 }
@@ -89,8 +91,6 @@ ApplicationWindow {
                 }
                 PropertyChanges {
                     target: root
-                    minimumWidth: 250
-                    minimumHeight: 300
                     width: 900
                     height: 640
                 }
