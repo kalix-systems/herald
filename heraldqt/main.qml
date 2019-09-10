@@ -46,7 +46,7 @@ ApplicationWindow {
         id: config
         Component.onCompleted: {
             if (!config.exists()) {
-                preferencesPopup.open()
+                preferencesPopup.show()
                 print("placeholder for a popup which forces first time config.")
             }
         }
