@@ -54,7 +54,6 @@ Column {
        anchors.horizontalCenter: parent.horizontalCenter
        width: 80
        height: 25
-       focus: true
        Text {
            anchors.centerIn: parent
            color: "white"
