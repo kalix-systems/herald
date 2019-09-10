@@ -8,6 +8,7 @@
         "common/utils.ts",
         "common/utils.ts",
         "ChatView/ChatTextAreaUtils.ts",
+        "SideBar/popups/ConfigPopupSubmission.ts",
         "common/QtTypes.d.ts",
         "common/HeraldTypes.d.ts",
         "common/Avatar.ts"

@@ -209,7 +209,7 @@
         "Config": {
             "type": "Object",
             "properties": {
-                "config_id": {
+                "configId": {
                     "type": "QString",
                     "write": true
                 },

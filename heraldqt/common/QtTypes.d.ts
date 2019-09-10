@@ -31,6 +31,10 @@ declare class TextArea {
   clear(): void;
 }
 
+declare class TextField {
+  text: string;
+}
+
 declare class QKeyEvent {
   modifiers: Qt.KeyboardModifers;
 }

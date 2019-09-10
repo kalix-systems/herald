@@ -49,9 +49,9 @@ namespace {
     {
         Q_EMIT o->colorschemeChanged();
     }
-    inline void configConfig_idChanged(Config* o)
+    inline void configConfigIdChanged(Config* o)
     {
-        Q_EMIT o->config_idChanged();
+        Q_EMIT o->configIdChanged();
     }
     inline void configNameChanged(Config* o)
     {
@@ -656,7 +656,7 @@ Config::Config(QObject *parent):
     m_d(config_new(this,
         configColorChanged,
         configColorschemeChanged,
-        configConfig_idChanged,
+        configConfigIdChanged,
         configNameChanged,
         configProfile_pictureChanged)),
     m_ownsPrivate(true)
@@ -682,13 +682,13 @@ quint32 Config::colorscheme() const
 void Config::setColorscheme(quint32 v) {
     config_colorscheme_set(m_d, v);
 }
-QString Config::config_id() const
+QString Config::configId() const
 {
     QString v;
     config_config_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setConfig_id(const QString& v) {
+void Config::setConfigId(const QString& v) {
     config_config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
 }
 QString Config::name() const

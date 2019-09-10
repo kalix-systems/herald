@@ -10,3 +10,10 @@ declare class Messages {
   conversationId: ConversationID;
   insertMessage(text: string, success: boolean): boolean;
 }
+
+declare class Config {
+  name: string;
+  configId: string;
+
+  exists(): boolean;
+}
