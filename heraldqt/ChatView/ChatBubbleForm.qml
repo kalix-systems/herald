@@ -22,7 +22,7 @@ Rectangle {
     // the reply button shown on hover
     property alias replyButton: replyButton
     // a mouse area to handle hover events
-    property alias chatBubbleHitbox: chatBubbleHitbox
+    property alias chatBubbleHitBox: chatBubbleHitbox
     // the width the text sits at without wrapping
     readonly property int naturalTextWidth: messageMetrics.width
     // a component to use if there is additional content to spawn inside the chat bubble

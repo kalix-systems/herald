@@ -7,7 +7,7 @@ MenuBar {
         MenuItem {
             text: "Preferences..."
             shortcut: StandardKey.Preferences
-            onTriggered: preferencesPopup.open()
+            onTriggered: preferencesPopup.show()
         }
     }
     // TODO: when we have memory for chatTextAreas bind these events to them
