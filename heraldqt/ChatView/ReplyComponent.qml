@@ -29,7 +29,7 @@ Rectangle {
     color: bubbleColor
     height: col.height
     //NPB: same weird margin fudging
-    width: Math.max(naturalWidth , uiContainer.width) + QmlCfg.margin / 2
+    width: Math.max(naturalWidth , uiContainer.width) + QmlCfg.smallMargin
 
     TextMetrics {
         id: messageMetrics

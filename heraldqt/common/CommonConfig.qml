@@ -20,6 +20,10 @@ Item {
     readonly property int radius: 10
     /// standard margin size used to interior objects
     readonly property int margin: 10
+    /// standard half margin
+    readonly property int smallMargin: 5
+    /// standard padding unit
+    readonly property int padding: 10
     /// standard toolbar height
     readonly property int toolbarHeight: 40
     /// palette :

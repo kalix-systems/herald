@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>common/CommonConfig.qml</file>
+        <file>common/ButtonForm.qml</file>
         <file>common/Theme.qml</file>
         <file>common/Avatar.qml</file>
         <file>common/utils.mjs</file>

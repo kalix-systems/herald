@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "ChatTextAreaUtils.js" as CTUtils
-
+import "../common" as Common
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -36,36 +36,18 @@ Rectangle {
     /// NPB : why does this need a margin added ?! put in a column.
     height: scrollHeight + QmlCfg.margin
 
-    // FC: this is a common button pattern
-    // attatchments button proper
-    Button {
+    Common.ButtonForm {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/paperclip.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-        }
+        source: "qrc:///icons/paperclip.png"
     }
 
-    // FC: this is a common button pattern
-    // Emoji button proper
-    Button {
+    Common.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/emoji.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-        }
+        source: "qrc:///icons/emoji.png"
     }
 
     ScrollView {
@@ -77,9 +59,8 @@ Rectangle {
             left: emojiButton.right
             right: attachmentsButton.left
             bottom: parent.bottom
-            // FC: small margin vs large margin, /2 is an anti pattern
-            leftMargin: QmlCfg.margin/2
-            rightMargin: QmlCfg.margin/2
+            leftMargin: QmlCfg.smallMargin
+            rightMargin: QmlCfg.smallMargin
         }
 
         TextArea {

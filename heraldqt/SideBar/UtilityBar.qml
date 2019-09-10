@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
-
+import "../common" as Common
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -34,8 +34,8 @@ ToolBar {
         anchors {
             left: parent.left
             right: searchButton.left
-            leftMargin: 10
-            rightMargin: 10
+            leftMargin: QmlCfg.margin
+            rightMargin: QmlCfg.margin
             verticalCenter: parent.verticalCenter
         }
 
@@ -50,7 +50,7 @@ ToolBar {
             Keys.onReturnPressed: text = text
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
-            font.pointSize: 10
+            font.pointSize: 12
             onTextChanged: {
                 // NOTE: we should probably wrap calls to libherald in call later.
                 // this prevents double calls, and is basically a debounce
@@ -59,43 +59,27 @@ ToolBar {
         }
     }
 
-    Button {
+    Common.ButtonForm {
         id: searchButton
         anchors {
             right: addContactButton.left
             verticalCenter: parent.verticalCenter
             rightMargin: QmlCfg.margin
         }
-        height: utilityBar.height - 15
-        width: height
-        background: Image {
-            source: "qrc:///icons/search.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-        }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-            //NOTE: This should be coupled to the afforementioned state*
-            onClicked: {
-                if (searchRegex) {
-                    searchButton.background.source = "qrc:///icons/search.png"
+        source: "qrc:///icons/search.png"
+        onClicked: if (searchRegex) {
+                    source = "qrc:///icons/search.png"
                     searchRegex = false
                 } else {
-                    searchButton.background.source = "qrc:///icons/searchRegexTemp.png"
+                    source = "qrc:///icons/searchRegexTemp.png"
                     searchRegex = true
                 }
-            }
-        }
+
     }
 
     ///--- Add contact button
-    Button {
+    Common.ButtonForm {
         id: addContactButton
-        height: QmlCfg.toolbarHeight - QmlCfg.margin
-        width: height
-
         anchors {
             rightMargin: QmlCfg.margin
             verticalCenterOffset: 0
@@ -110,7 +94,7 @@ ToolBar {
             Image {
                 source: "qrc:///icons/plus.png"
                 anchors.fill: parent
-                scale: 0.7
+                scale: 0.9
                 mipmap: true
             }
         }

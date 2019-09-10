@@ -15,7 +15,6 @@ import "../../common/utils.mjs" as Utils
 // RS: Rusts job
 // Factor Component: FC
 
-
 /// --- displays a list of contacts
 Item {
     property alias optionsMenu: optionsMenu

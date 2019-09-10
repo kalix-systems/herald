@@ -23,9 +23,7 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
-    TopMenuBar {
-
-    }
+    TopMenuBar {}
 
     NetworkHandle {
         id: networkHandle
