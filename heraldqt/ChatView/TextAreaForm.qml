@@ -2,6 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
+import QtQuick.Layouts 1.13
 import "ChatTextAreaUtils.mjs" as CTUtils
 import "../common" as Common
 
@@ -34,8 +35,7 @@ Rectangle {
     color: QmlCfg.palette.mainColor
     clip: true
 
-    /// NPB : why does this need a margin added ?! put in a column.
-    height: scrollHeight + QmlCfg.margin
+    height: containerCol.height
 
     Common.ButtonForm {
         id: attachmentsButton
@@ -51,18 +51,24 @@ Rectangle {
         source: "qrc:///icons/emoji.png"
     }
 
+    ColumnLayout {
+      id: containerCol
+
+      anchors {
+          left: emojiButton.right
+          right: attachmentsButton.left
+          leftMargin: QmlCfg.smallMargin
+          rightMargin: QmlCfg.smallMargin
+      }
+
+
     ScrollView {
         id: scrollView
         height: scrollHeight
+        implicitWidth: parent.width
         focus: true
+        topPadding: QmlCfg.smallMargin
 
-        anchors {
-            left: emojiButton.right
-            right: attachmentsButton.left
-            bottom: parent.bottom
-            leftMargin: QmlCfg.smallMargin
-            rightMargin: QmlCfg.smallMargin
-        }
 
         TextArea {
             id: chatText
@@ -71,7 +77,7 @@ Rectangle {
                 anchors {
                     fill: parent
                     horizontalCenter: parent.horizontalCenter
-                    verticalCenter: parent.verticalCenter
+                    bottom: parent.bottom
                 }
                 radius: QmlCfg.radius
             }
@@ -80,6 +86,8 @@ Rectangle {
             placeholderText: "Send a Message ..."
             Keys.forwardTo: keysProxy
         }
+    }
+
     }
 
     FileDialog {
