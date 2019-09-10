@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
-import Qt.labs.platform 1.0
+import Qt.labs.platform 1.1
 import QtQml 2.13
 
 // Reveiw Key
@@ -22,22 +22,7 @@ ApplicationWindow {
     minimumWidth: 250
     minimumHeight: 300
 
-    // OSD
-    MenuBar {
-        Menu {
-            title: "Herald"
-            MenuItem {
-                text: "Preferences"
-                onTriggered: preferencesPopup.open()
-            }
-        }
-        Menu {
-            title: "Window"
-            MenuItem {
-                text: "Minimize"
-                onTriggered: root.showMinimized()
-            }
-        }
+    TopMenuBar {
     }
 
     NetworkHandle {
@@ -84,7 +69,6 @@ ApplicationWindow {
 
         handle: Rectangle {
             implicitWidth: 2
-            implicitHeight: 4
             color: QmlCfg.palette.secondaryColor
         }
     }

@@ -32,7 +32,7 @@ ToolBar {
     Common.Avatar {
         id: configAvatar
         displayName: Utils.unwrapOr(config.name, config.config_id)
-        colorHash: 0
+        colorHash: config.color
         // Note: use specific fallback value or implicit one from typescript! TS
         pfpUrl: Utils.unwrapOr(config.profile_picture, "")
         anchors.horizontalCenter: parent.horizontalCenter
@@ -45,17 +45,13 @@ ToolBar {
         id: configPopup
     }
 
-    Button {
-        height: parent.height
-        width: height
-        anchors.right: parent.right
-        background: Image {
-            source: "qrc:///icons/gear.png"
-            width: parent.height
-            height: width
-            scale: 0.7
-            mipmap: true
+    Common.ButtonForm {
+        anchors {
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
+            right: parent.right
         }
+        source: "qrc:///icons/gear.png"
         onClicked: {
             /// NPB this should bring up a new window (impossible from QML) ,
             /// I want an actual config pop up so it feels like i'm using a native app.
