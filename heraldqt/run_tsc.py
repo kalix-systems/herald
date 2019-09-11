@@ -9,7 +9,7 @@ import re
 with open("tsconfig.json") as f:
     tsconfig = json.load(f)
 
-subprocess.run(["tsc"])
+subprocess.run(["./node_modules/typescript/bin/tsc"], shell=True, check=True)
 
 files = map(
     lambda parts: parts[0],
