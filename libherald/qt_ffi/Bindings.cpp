@@ -3,19 +3,6 @@
 
 namespace {
 
-    struct option_qint64 {
-    public:
-        qint64 value;
-        bool some;
-        operator QVariant() const {
-            if (some) {
-                return QVariant::fromValue(value);
-            }
-            return QVariant();
-        }
-    };
-    static_assert(std::is_pod<option_qint64>::value, "option_qint64 must be a POD type.");
-
     struct option_quintptr {
     public:
         quintptr value;
@@ -32,6 +19,16 @@ namespace {
     typedef void (*qstring_set)(QString* val, const char* utf8, int nbytes);
     void set_qstring(QString* val, const char* utf8, int nbytes) {
         *val = QString::fromUtf8(utf8, nbytes);
+    }
+
+    typedef void (*qbytearray_set)(QByteArray* val, const char* bytes, int nbytes);
+    void set_qbytearray(QByteArray* v, const char* bytes, int nbytes) {
+        if (v->isNull() && nbytes == 0) {
+            *v = QByteArray(bytes, nbytes);
+        } else {
+            v->truncate(0);
+            v->append(bytes, nbytes);
+        }
     }
 
     struct qmodelindex_t {
@@ -393,21 +390,14 @@ extern "C" {
     bool contacts_add(Contacts::Private*, const ushort*, int);
     void contacts_clear_filter(Contacts::Private*);
     bool contacts_filter(Contacts::Private*, const ushort*, int, bool);
-    bool contacts_remove(Contacts::Private*, quint64);
-    void contacts_remove_all(Contacts::Private*);
 };
 
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
-    bool messages_data_error_sending(const Messages::Private*, int);
-    qint64 messages_data_message_id(const Messages::Private*, int);
-    option_qint64 messages_data_op(const Messages::Private*, int);
-    bool messages_data_reached_recipient(const Messages::Private*, int);
-    bool messages_data_reached_server(const Messages::Private*, int);
-    void messages_data_recipient(const Messages::Private*, int, QString*, qstring_set);
-    qint64 messages_data_uuid(const Messages::Private*, int);
+    void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
+    void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -491,48 +481,23 @@ QString Messages::body(int row) const
     return s;
 }
 
-qint64 Messages::epoch_timestamp_ms(int row) const
+qint64 Messages::epochTimestampMs(int row) const
 {
     return messages_data_epoch_timestamp_ms(m_d, row);
 }
 
-bool Messages::error_sending(int row) const
+QByteArray Messages::message_id(int row) const
 {
-    return messages_data_error_sending(m_d, row);
+    QByteArray b;
+    messages_data_message_id(m_d, row, &b, set_qbytearray);
+    return b;
 }
 
-qint64 Messages::message_id(int row) const
+QByteArray Messages::op(int row) const
 {
-    return messages_data_message_id(m_d, row);
-}
-
-QVariant Messages::op(int row) const
-{
-    QVariant v;
-    v = messages_data_op(m_d, row);
-    return v;
-}
-
-bool Messages::reached_recipient(int row) const
-{
-    return messages_data_reached_recipient(m_d, row);
-}
-
-bool Messages::reached_server(int row) const
-{
-    return messages_data_reached_server(m_d, row);
-}
-
-QString Messages::recipient(int row) const
-{
-    QString s;
-    messages_data_recipient(m_d, row, &s, set_qstring);
-    return s;
-}
-
-qint64 Messages::uuid(int row) const
-{
-    return messages_data_uuid(m_d, row);
+    QByteArray b;
+    messages_data_op(m_d, row, &b, set_qbytearray);
+    return b;
 }
 
 QVariant Messages::data(const QModelIndex &index, int role) const
@@ -546,21 +511,11 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(epoch_timestamp_ms(index.row()));
+            return QVariant::fromValue(epochTimestampMs(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(error_sending(index.row()));
-        case Qt::UserRole + 4:
             return QVariant::fromValue(message_id(index.row()));
-        case Qt::UserRole + 5:
-            return op(index.row());
-        case Qt::UserRole + 6:
-            return QVariant::fromValue(reached_recipient(index.row()));
-        case Qt::UserRole + 7:
-            return QVariant::fromValue(reached_server(index.row()));
-        case Qt::UserRole + 8:
-            return QVariant::fromValue(recipient(index.row()));
-        case Qt::UserRole + 9:
-            return QVariant::fromValue(uuid(index.row()));
+        case Qt::UserRole + 4:
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
         }
         break;
     }
@@ -582,14 +537,9 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "epoch_timestamp_ms");
-    names.insert(Qt::UserRole + 3, "error_sending");
-    names.insert(Qt::UserRole + 4, "message_id");
-    names.insert(Qt::UserRole + 5, "op");
-    names.insert(Qt::UserRole + 6, "reached_recipient");
-    names.insert(Qt::UserRole + 7, "reached_server");
-    names.insert(Qt::UserRole + 8, "recipient");
-    names.insert(Qt::UserRole + 9, "uuid");
+    names.insert(Qt::UserRole + 2, "epochTimestampMs");
+    names.insert(Qt::UserRole + 3, "message_id");
+    names.insert(Qt::UserRole + 4, "op");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -624,15 +574,15 @@ extern "C" {
         void (*)(Messages*, int, int),
         void (*)(Messages*));
     void messages_free(Messages::Private*);
-    void messages_conversation_id_get(const Messages::Private*, QString*, qstring_set);
-    void messages_conversation_id_set(Messages::Private*, const ushort *str, int len);
+    void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
+    void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_conversation(Messages::Private*);
-    bool messages_delete_conversation_by_id(Messages::Private*, const ushort*, int);
+    bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     bool messages_insert_message(Messages::Private*, const ushort*, int);
-    bool messages_reply(Messages::Private*, const ushort*, int, qint64);
+    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
 };
 
 extern "C" {
@@ -798,14 +748,6 @@ bool Contacts::filter(const QString& pattern, bool regex)
 {
     return contacts_filter(m_d, pattern.utf16(), pattern.size(), regex);
 }
-bool Contacts::remove(quint64 row_index)
-{
-    return contacts_remove(m_d, row_index);
-}
-void Contacts::remove_all()
-{
-    return contacts_remove_all(m_d);
-}
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -872,17 +814,17 @@ Messages::~Messages() {
 }
 void Messages::initHeaderData() {
 }
-QString Messages::conversationId() const
+QByteArray Messages::conversationId() const
 {
-    QString v;
-    messages_conversation_id_get(m_d, &v, set_qstring);
+    QByteArray v;
+    messages_conversation_id_get(m_d, &v, set_qbytearray);
     return v;
 }
-void Messages::setConversationId(const QString& v) {
+void Messages::setConversationId(const QByteArray& v) {
     if (v.isNull()) {
         messages_conversation_id_set_none(m_d);
     } else {
-    messages_conversation_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+    messages_conversation_id_set(m_d, v.data(), v.size());
     }
 }
 void Messages::clear_conversation_view()
@@ -893,9 +835,9 @@ bool Messages::delete_conversation()
 {
     return messages_delete_conversation(m_d);
 }
-bool Messages::delete_conversation_by_id(const QString& conversation_id)
+bool Messages::delete_conversation_by_id(const QByteArray& conversation_id)
 {
-    return messages_delete_conversation_by_id(m_d, conversation_id.utf16(), conversation_id.size());
+    return messages_delete_conversation_by_id(m_d, conversation_id.data(), conversation_id.size());
 }
 bool Messages::delete_message(quint64 row_index)
 {
@@ -905,9 +847,9 @@ bool Messages::insert_message(const QString& body)
 {
     return messages_insert_message(m_d, body.utf16(), body.size());
 }
-bool Messages::reply(const QString& body, qint64 op)
+bool Messages::reply(const QString& body, const QByteArray& op)
 {
-    return messages_reply(m_d, body.utf16(), body.size(), op);
+    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),

@@ -59,6 +59,9 @@ fn set_string_from_utf16(s: &mut String, str: *const c_ushort, len: c_int) {
 
 
 
+pub enum QByteArray {}
+
+
 #[repr(C)]
 #[derive(PartialEq, Eq, Debug)]
 pub enum SortOrder {
@@ -392,8 +395,6 @@ pub trait ContactsTrait {
     fn add(&mut self, id: String) -> bool;
     fn clear_filter(&mut self) -> ();
     fn filter(&mut self, pattern: String, regex: bool) -> bool;
-    fn remove(&mut self, row_index: u64) -> bool;
-    fn remove_all(&mut self) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -480,20 +481,6 @@ pub unsafe extern "C" fn contacts_filter(ptr: *mut Contacts, pattern_str: *const
     set_string_from_utf16(&mut pattern, pattern_str, pattern_len);
     let o = &mut *ptr;
     let r = o.filter(pattern, regex);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_remove(ptr: *mut Contacts, row_index: u64) -> bool {
-    let o = &mut *ptr;
-    let r = o.remove(row_index);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_remove_all(ptr: *mut Contacts) -> () {
-    let o = &mut *ptr;
-    let r = o.remove_all();
     r
 }
 
@@ -737,14 +724,14 @@ impl MessagesList {
 pub trait MessagesTrait {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Self;
     fn emit(&mut self) -> &mut MessagesEmitter;
-    fn conversation_id(&self) -> Option<&str>;
-    fn set_conversation_id(&mut self, value: Option<String>);
+    fn conversation_id(&self) -> Option<&[u8]>;
+    fn set_conversation_id(&mut self, value: Option<&[u8]>);
     fn clear_conversation_view(&mut self) -> ();
     fn delete_conversation(&mut self) -> bool;
-    fn delete_conversation_by_id(&mut self, conversation_id: String) -> bool;
+    fn delete_conversation_by_id(&mut self, conversation_id: &[u8]) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn insert_message(&mut self, body: String) -> bool;
-    fn reply(&mut self, body: String, op: i64) -> bool;
+    fn reply(&mut self, body: String, op: &[u8]) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -756,13 +743,8 @@ pub trait MessagesTrait {
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> &str;
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
-    fn error_sending(&self, index: usize) -> bool;
-    fn message_id(&self, index: usize) -> i64;
-    fn op(&self, index: usize) -> Option<i64>;
-    fn reached_recipient(&self, index: usize) -> bool;
-    fn reached_server(&self, index: usize) -> bool;
-    fn recipient(&self, index: usize) -> &str;
-    fn uuid(&self, index: usize) -> i64;
+    fn message_id(&self, index: usize) -> &[u8];
+    fn op(&self, index: usize) -> Option<&[u8]>;
 }
 
 #[no_mangle]
@@ -813,8 +795,8 @@ pub unsafe extern "C" fn messages_free(ptr: *mut Messages) {
 #[no_mangle]
 pub unsafe extern "C" fn messages_conversation_id_get(
     ptr: *const Messages,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
 ) {
     let o = &*ptr;
     let v = o.conversation_id();
@@ -825,11 +807,10 @@ pub unsafe extern "C" fn messages_conversation_id_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_conversation_id_set(ptr: *mut Messages, v: *const c_ushort, len: c_int) {
+pub unsafe extern "C" fn messages_conversation_id_set(ptr: *mut Messages, v: *const c_char, len: c_int) {
     let o = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, v, len);
-    o.set_conversation_id(Some(s));
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_conversation_id(Some(v.into()));
 }
 
 #[no_mangle]
@@ -853,9 +834,8 @@ pub unsafe extern "C" fn messages_delete_conversation(ptr: *mut Messages) -> boo
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_delete_conversation_by_id(ptr: *mut Messages, conversation_id_str: *const c_ushort, conversation_id_len: c_int) -> bool {
-    let mut conversation_id = String::new();
-    set_string_from_utf16(&mut conversation_id, conversation_id_str, conversation_id_len);
+pub unsafe extern "C" fn messages_delete_conversation_by_id(ptr: *mut Messages, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
+    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
     let o = &mut *ptr;
     let r = o.delete_conversation_by_id(conversation_id);
     r
@@ -878,9 +858,10 @@ pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op: i64) -> bool {
+pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op_str: *const c_char, op_len: c_int) -> bool {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
+    let op = { slice::from_raw_parts(op_str as *const u8, to_usize(op_len)) };
     let o = &mut *ptr;
     let r = o.reply(body, op);
     r
@@ -946,51 +927,29 @@ pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_error_sending(ptr: *const Messages, row: c_int) -> bool {
-    let o = &*ptr;
-    o.error_sending(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_message_id(ptr: *const Messages, row: c_int) -> i64 {
-    let o = &*ptr;
-    o.message_id(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_op(ptr: *const Messages, row: c_int) -> COption<i64> {
-    let o = &*ptr;
-    o.op(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_reached_recipient(ptr: *const Messages, row: c_int) -> bool {
-    let o = &*ptr;
-    o.reached_recipient(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_reached_server(ptr: *const Messages, row: c_int) -> bool {
-    let o = &*ptr;
-    o.reached_server(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_recipient(
+pub unsafe extern "C" fn messages_data_message_id(
     ptr: *const Messages, row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
-    let data = o.recipient(to_usize(row));
+    let data = o.message_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_uuid(ptr: *const Messages, row: c_int) -> i64 {
+pub unsafe extern "C" fn messages_data_op(
+    ptr: *const Messages, row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
     let o = &*ptr;
-    o.uuid(to_usize(row)).into()
+    let data = o.op(to_usize(row));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 pub struct NetworkHandleQObject {}

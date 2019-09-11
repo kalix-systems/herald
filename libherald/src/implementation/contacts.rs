@@ -37,21 +37,6 @@ impl ContactsTrait for Contacts {
         Contacts { emit, model, list }
     }
 
-    fn remove_all(&mut self) {
-        self.model.begin_reset_model();
-
-        if let Err(e) = Core::drop_table() {
-            eprintln!("{}", e);
-        }
-        if let Err(e) = Core::create_table() {
-            eprintln!("{}", e);
-        }
-
-        self.list = Vec::new();
-
-        self.model.end_reset_model();
-    }
-
     /// Adds a contact by their `id`
     ///
     /// Returns `false` on failure.
@@ -175,25 +160,6 @@ impl ContactsTrait for Contacts {
     fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
         self.list[row_index].matched = value;
         true
-    }
-
-    /// Removes a contact, returns a boolean to indicate success.
-    fn remove(&mut self, row_index: u64) -> bool {
-        let row_index = row_index as usize;
-
-        let id = self.list[row_index].inner.id.as_str();
-        match Core::delete(id) {
-            Ok(_) => {
-                self.model.begin_remove_rows(row_index, row_index);
-                self.list.remove(row_index);
-                self.model.end_remove_rows();
-                true
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                false
-            }
-        }
     }
 
     fn filter(&mut self, pattern: String, regex: bool) -> bool {

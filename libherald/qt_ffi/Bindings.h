@@ -61,8 +61,6 @@ public:
     Q_INVOKABLE bool add(const QString& id);
     Q_INVOKABLE void clear_filter();
     Q_INVOKABLE bool filter(const QString& pattern, bool regex);
-    Q_INVOKABLE bool remove(quint64 row_index);
-    Q_INVOKABLE void remove_all();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -111,19 +109,19 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
     ~Messages();
-    QString conversationId() const;
-    void setConversationId(const QString& v);
+    QByteArray conversationId() const;
+    void setConversationId(const QByteArray& v);
     Q_INVOKABLE void clear_conversation_view();
     Q_INVOKABLE bool delete_conversation();
-    Q_INVOKABLE bool delete_conversation_by_id(const QString& conversation_id);
+    Q_INVOKABLE bool delete_conversation_by_id(const QByteArray& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
     Q_INVOKABLE bool insert_message(const QString& body);
-    Q_INVOKABLE bool reply(const QString& body, qint64 op);
+    Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -143,14 +141,9 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE qint64 epoch_timestamp_ms(int row) const;
-    Q_INVOKABLE bool error_sending(int row) const;
-    Q_INVOKABLE qint64 message_id(int row) const;
-    Q_INVOKABLE QVariant op(int row) const;
-    Q_INVOKABLE bool reached_recipient(int row) const;
-    Q_INVOKABLE bool reached_server(int row) const;
-    Q_INVOKABLE QString recipient(int row) const;
-    Q_INVOKABLE qint64 uuid(int row) const;
+    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
+    Q_INVOKABLE QByteArray message_id(int row) const;
+    Q_INVOKABLE QByteArray op(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
