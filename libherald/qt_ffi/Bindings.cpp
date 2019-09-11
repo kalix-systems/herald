@@ -192,12 +192,12 @@ Qt::ItemFlags Contacts::flags(const QModelIndex &i) const
     return flags;
 }
 
-bool Contacts::archive_status(int row) const
+bool Contacts::archiveStatus(int row) const
 {
     return contacts_data_archive_status(m_d, row);
 }
 
-bool Contacts::setArchive_status(int row, bool value)
+bool Contacts::setArchiveStatus(int row, bool value)
 {
     bool set = false;
     set = contacts_set_data_archive_status(m_d, row, value);
@@ -298,7 +298,7 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(archive_status(index.row()));
+            return QVariant::fromValue(archiveStatus(index.row()));
         case Qt::UserRole + 1:
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 2:
@@ -328,7 +328,7 @@ int Contacts::role(const char* name) const {
 }
 QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "archive_status");
+    names.insert(Qt::UserRole + 0, "archiveStatus");
     names.insert(Qt::UserRole + 1, "color");
     names.insert(Qt::UserRole + 2, "contactId");
     names.insert(Qt::UserRole + 3, "matched");
@@ -358,7 +358,7 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
     if (index.column() == 0) {
         if (role == Qt::UserRole + 0) {
             if (value.canConvert(qMetaTypeId<bool>())) {
-                return setArchive_status(index.row(), value.value<bool>());
+                return setArchiveStatus(index.row(), value.value<bool>());
             }
         }
         if (role == Qt::UserRole + 1) {
@@ -497,12 +497,12 @@ QString Messages::body(int row) const
     return s;
 }
 
-qint64 Messages::epoch_timestamp_ms(int row) const
+qint64 Messages::epochTimestampMs(int row) const
 {
     return messages_data_epoch_timestamp_ms(m_d, row);
 }
 
-QByteArray Messages::message_id(int row) const
+QByteArray Messages::messageId(int row) const
 {
     QByteArray b;
     messages_data_message_id(m_d, row, &b, set_qbytearray);
@@ -527,9 +527,9 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(epoch_timestamp_ms(index.row()));
+            return QVariant::fromValue(epochTimestampMs(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(message_id(index.row()));
+            return QVariant::fromValue(messageId(index.row()));
         case Qt::UserRole + 4:
             return cleanNullQVariant(QVariant::fromValue(op(index.row())));
         }
@@ -553,8 +553,8 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "epoch_timestamp_ms");
-    names.insert(Qt::UserRole + 3, "message_id");
+    names.insert(Qt::UserRole + 2, "epochTimestampMs");
+    names.insert(Qt::UserRole + 3, "messageId");
     names.insert(Qt::UserRole + 4, "op");
     return names;
 }
@@ -594,9 +594,9 @@ extern "C" {
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
-    bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
+    bool messages_delete_conversation(Messages::Private*);
     bool messages_insert_message(Messages::Private*, const ushort*, int);
     bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
 };
@@ -862,21 +862,21 @@ void Messages::setConversationId(const QByteArray& v) {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
 }
-void Messages::clear_conversation_view()
+void Messages::clearConversationView()
 {
     return messages_clear_conversation_view(m_d);
+}
+bool Messages::deleteConversationById(const QByteArray& conversation_id)
+{
+    return messages_delete_conversation_by_id(m_d, conversation_id.data(), conversation_id.size());
+}
+bool Messages::deleteMessage(quint64 row_index)
+{
+    return messages_delete_message(m_d, row_index);
 }
 bool Messages::delete_conversation()
 {
     return messages_delete_conversation(m_d);
-}
-bool Messages::delete_conversation_by_id(const QByteArray& conversation_id)
-{
-    return messages_delete_conversation_by_id(m_d, conversation_id.data(), conversation_id.size());
-}
-bool Messages::delete_message(quint64 row_index)
-{
-    return messages_delete_message(m_d, row_index);
 }
 bool Messages::insertMessage(const QString& body)
 {

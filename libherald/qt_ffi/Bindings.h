@@ -87,8 +87,8 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE bool archive_status(int row) const;
-    Q_INVOKABLE bool setArchive_status(int row, bool value);
+    Q_INVOKABLE bool archiveStatus(int row) const;
+    Q_INVOKABLE bool setArchiveStatus(int row, bool value);
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QString contactId(int row) const;
@@ -126,10 +126,10 @@ public:
     ~Messages();
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
-    Q_INVOKABLE void clear_conversation_view();
+    Q_INVOKABLE void clearConversationView();
+    Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
+    Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE bool delete_conversation();
-    Q_INVOKABLE bool delete_conversation_by_id(const QByteArray& conversation_id);
-    Q_INVOKABLE bool delete_message(quint64 row_index);
     Q_INVOKABLE bool insertMessage(const QString& body);
     Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
 
@@ -151,8 +151,8 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE qint64 epoch_timestamp_ms(int row) const;
-    Q_INVOKABLE QByteArray message_id(int row) const;
+    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
+    Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
 
 Q_SIGNALS:
