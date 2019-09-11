@@ -1,0 +1,3 @@
+[tasks.docs]
+command = "cargo"
+args = ["rustdoc", "--open", "--", "--document-private-items"]

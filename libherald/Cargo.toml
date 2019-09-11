@@ -20,3 +20,6 @@ crate-type = ["cdylib", "staticlib"]
 [dev-dependencies]
 serial_test = "0.2.0"
 serial_test_derive = "0.2.0"
+
+[profile.release]
+panic = "abort"
