@@ -25,7 +25,6 @@ Pane {
         }
     }
 
-
     ///--- chat view, shows messages
     CVUtils.ConversationWindowForm {
         id: convWindow

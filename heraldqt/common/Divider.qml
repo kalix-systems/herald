@@ -5,8 +5,7 @@ import LibHerald 1.0
 Rectangle {
     property var anchor
     anchors.bottom: anchor
-  //  color: QmlCfg.palette.secondaryColor
+    //  color: QmlCfg.palette.secondaryColor
     width: parent.width
     height: 1
-
 }

@@ -41,7 +41,6 @@ Pane {
         anchors.top: toolBar.bottom
     }
 
-
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
