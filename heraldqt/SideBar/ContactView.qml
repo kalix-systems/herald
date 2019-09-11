@@ -4,42 +4,53 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "../common/utils.mjs" as Utils
+import "./ContactView.mjs" as JS
 import "popups" as Popups
+
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
 
 /// --- displays a list of contacts
 ListView {
     id: contactList
-    boundsBehavior: Flickable.StopAtBounds
+
     clip: true
     currentIndex: -1
+    boundsBehavior: Flickable.StopAtBounds
 
     ScrollBar.vertical: ScrollBar {
     }
+
     delegate: Item {
         id: contactItem
-        height: {
-            if (visible)
-                60
-        }
 
+        //GS : rexporting the contact avatar to global state is a backwards ref!
+        property Item contactAvatar: contactAvatar
+
+        height: JS.contactItemHeight(visible)
         width: parent.width
         visible: matched
 
+        /// NPB : THis ought to be a mouse area with a hovered handler
         Rectangle {
             id: bgBox
-            property color focusColor: QmlCfg.palette.tertiaryColor
-            property color hoverColor: QmlCfg.palette.secondaryColor
-            property color defaultColor: QmlCfg.palette.mainColor
+            readonly property color focusColor: QmlCfg.palette.tertiaryColor
+            readonly property color hoverColor: QmlCfg.palette.secondaryColor
+            readonly property color defaultColor: QmlCfg.palette.mainColor
 
-            Rectangle {
-                anchors.verticalCenter: parent.bottom
+            Common.Divider {
                 color: QmlCfg.palette.secondaryColor
-                width: parent.width
-                height: 1.5
+                anchor: parent.bottom
             }
 
             anchors.fill: parent
 
+            /// Note: can we use the highlight property here
             states: [
                 State {
                     name: "hovering"
@@ -62,57 +73,36 @@ ListView {
                 z: 10
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onEntered: {
-                    parent.state = "hovering"
-                }
-                onExited: {
-                    parent.state = ""
-                }
-                // Note : this is really imperative, we should do this somehow else.
-                onClicked: {
-                    if (mouse.button === Qt.LeftButton) {
-                        contactItem.focus = true
-                        chatView.messageModel.conversationId = contact_id
-                        chatView.messageBar.chatBarAvatar.displayName = contactAvatar.displayName
-                        chatView.messageBar.chatBarAvatar.pfpUrl = contactAvatar.pfpUrl
-                        chatView.messageBar.chatBarAvatar.colorHash = contactAvatar.colorHash
-                        chatView.state = "visibleview"
-                    } else {
+                onEntered: parent.state = "hovering"
+                onExited: parent.state = ""
 
-                        popupManager.optionsMenu.x = mouse.x
-                        popupManager.optionsMenu.y = mouse.y
-                        popupManager.optionsMenu.open()
-                    }
-                }
+                onClicked: JS.contactClickHandler(mouse, contactList, index,
+                                                  contactId, contactItem,
+                                                  popupManager.optionsMenu,
+                                                  messageModel, chatView)
 
-                onReleased: {
-                    if (containsMouse) {
-                        parent.state = "hovering"
-                    } else {
-                        parent.state = ""
-                    }
-                }
+                onReleased: parent.state = Utils.safeSwitch(containsMouse,
+                                                            "hovering", "")
             }
 
+            ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
             Popups.ContactClickedPopup {
                 id: popupManager
             }
-
-            color: {
-                if (contactItem.focus) {
-                    return focusColor
-                } else {
-                    return defaultColor
-                }
-            }
+            color: Utils.safeSwitch(contactItem.focus, focusColor, defaultColor)
         }
 
+        /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
+        /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
+        /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
         Common.Avatar {
             size: 50
             id: contactAvatar
-            displayName: Utils.unwrapOr(name, contact_id)
+            /// NPB: use camel case in libherald please
+            displayName: Utils.unwrapOr(name, contactId)
             colorHash: color
-            pfpUrl: Utils.unwrapOr(profile_picture, null)
+            /// NPB: use camel case in libherald please
+            pfpUrl: Utils.unwrapOr(profilePicture, null)
         }
     }
 }

@@ -9,7 +9,7 @@
         "NetworkHandle": {
             "type": "Object",
             "functions": {
-                "send_message": {
+                "sendMessage": {
                     "return": "bool",
                     "arguments": [
                         {
@@ -37,8 +37,18 @@
         },
         "Contacts": {
             "type": "List",
+            "properties": {
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
             "itemProperties": {
-                "contact_id": {
+                "contactId": {
                     "type": "QString"
                 },
                 "name": {
@@ -46,7 +56,7 @@
                     "type": "QString",
                     "optional": true
                 },
-                "profile_picture": {
+                "profilePicture": {
                     "write": true,
                     "type": "QString",
                     "optional": true
@@ -75,23 +85,9 @@
                         }
                     ]
                 },
-                "filter": {
+                "toggleFilterRegex": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "pattern",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "regex",
-                            "type": "bool"
-                        }
-                    ]
-                },
-                "clear_filter": {
-                    "mut": true,
-                    "return": "void"
+                    "return": "bool"
                 }
             }
         },
@@ -114,7 +110,7 @@
                 "body": {
                     "type": "QString"
                 },
-                "epochTimestampMs": {
+                "epoch_timestamp_ms": {
                     "type": "qint64"
                 },
                 "op": {
@@ -123,7 +119,7 @@
                 }
             },
             "functions": {
-                "insert_message": {
+                "insertMessage": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
@@ -180,16 +176,19 @@
         "Config": {
             "type": "Object",
             "properties": {
-                "config_id": {
+                "configId": {
                     "type": "QString",
                     "write": true
+                },
+                "init": {
+                    "type": "bool"
                 },
                 "name": {
                     "type": "QString",
                     "write": true,
                     "optional": true
                 },
-                "profile_picture": {
+                "profilePicture": {
                     "type": "QString",
                     "write": true,
                     "optional": true

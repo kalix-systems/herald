@@ -1,16 +1,28 @@
 pragma Singleton
 import QtQuick 2.13
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
+// FS: Fix scoping
 Item {
+    //TS: This should be an enum defined from typscript.
     Theme {
         id: themeEnum
     }
     property int theme: themeEnum.light /// user settable
-
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
     readonly property int margin: 10
+    /// standard half margin
+    readonly property int smallMargin: 5
+    /// standard padding unit
+    readonly property int padding: 10
     /// standard toolbar height
     readonly property int toolbarHeight: 40
     /// palette :

@@ -46,17 +46,29 @@ namespace {
     {
         Q_EMIT o->colorschemeChanged();
     }
-    inline void configConfig_idChanged(Config* o)
+    inline void configConfigIdChanged(Config* o)
     {
-        Q_EMIT o->config_idChanged();
+        Q_EMIT o->configIdChanged();
+    }
+    inline void configInitChanged(Config* o)
+    {
+        Q_EMIT o->initChanged();
     }
     inline void configNameChanged(Config* o)
     {
         Q_EMIT o->nameChanged();
     }
-    inline void configProfile_pictureChanged(Config* o)
+    inline void configProfilePictureChanged(Config* o)
     {
-        Q_EMIT o->profile_pictureChanged();
+        Q_EMIT o->profilePictureChanged();
+    }
+    inline void contactsFilterChanged(Contacts* o)
+    {
+        Q_EMIT o->filterChanged();
+    }
+    inline void contactsFilterRegexChanged(Contacts* o)
+    {
+        Q_EMIT o->filterRegexChanged();
     }
     inline void messagesConversationIdChanged(Messages* o)
     {
@@ -76,7 +88,7 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     quint32 config_color_get(const Config::Private*);
     void config_color_set(Config::Private*, quint32);
@@ -84,6 +96,7 @@ extern "C" {
     void config_colorscheme_set(Config::Private*, quint32);
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
     void config_config_id_set(Config::Private*, const ushort *str, int len);
+    bool config_init_get(const Config::Private*);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
@@ -211,7 +224,7 @@ bool Contacts::setColor(int row, quint32 value)
     return set;
 }
 
-QString Contacts::contact_id(int row) const
+QString Contacts::contactId(int row) const
 {
     QString s;
     contacts_data_contact_id(m_d, row, &s, set_qstring);
@@ -256,14 +269,14 @@ bool Contacts::setName(int row, const QString& value)
     return set;
 }
 
-QString Contacts::profile_picture(int row) const
+QString Contacts::profilePicture(int row) const
 {
     QString s;
     contacts_data_profile_picture(m_d, row, &s, set_qstring);
     return s;
 }
 
-bool Contacts::setProfile_picture(int row, const QString& value)
+bool Contacts::setProfilePicture(int row, const QString& value)
 {
     bool set = false;
     if (value.isNull()) {
@@ -289,13 +302,13 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(contact_id(index.row()));
+            return QVariant::fromValue(contactId(index.row()));
         case Qt::UserRole + 3:
             return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
             return cleanNullQVariant(QVariant::fromValue(name(index.row())));
         case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(profile_picture(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
         }
         break;
     }
@@ -317,10 +330,10 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "archive_status");
     names.insert(Qt::UserRole + 1, "color");
-    names.insert(Qt::UserRole + 2, "contact_id");
+    names.insert(Qt::UserRole + 2, "contactId");
     names.insert(Qt::UserRole + 3, "matched");
     names.insert(Qt::UserRole + 4, "name");
-    names.insert(Qt::UserRole + 5, "profile_picture");
+    names.insert(Qt::UserRole + 5, "profilePicture");
     return names;
 }
 QVariant Contacts::headerData(int section, Qt::Orientation orientation, int role) const
@@ -365,7 +378,7 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
         }
         if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setProfile_picture(index.row(), value.value<QString>());
+                return setProfilePicture(index.row(), value.value<QString>());
             }
         }
     }
@@ -373,7 +386,7 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
 }
 
 extern "C" {
-    Contacts::Private* contacts_new(Contacts*,
+    Contacts::Private* contacts_new(Contacts*, void (*)(Contacts*), void (*)(Contacts*),
         void (*)(const Contacts*),
         void (*)(Contacts*),
         void (*)(Contacts*),
@@ -387,9 +400,12 @@ extern "C" {
         void (*)(Contacts*, int, int),
         void (*)(Contacts*));
     void contacts_free(Contacts::Private*);
+    void contacts_filter_get(const Contacts::Private*, QString*, qstring_set);
+    void contacts_filter_set(Contacts::Private*, const ushort *str, int len);
+    bool contacts_filter_regex_get(const Contacts::Private*);
+    void contacts_filter_regex_set(Contacts::Private*, bool);
     bool contacts_add(Contacts::Private*, const ushort*, int);
-    void contacts_clear_filter(Contacts::Private*);
-    bool contacts_filter(Contacts::Private*, const ushort*, int, bool);
+    bool contacts_toggle_filter_regex(Contacts::Private*);
 };
 
 extern "C" {
@@ -481,7 +497,7 @@ QString Messages::body(int row) const
     return s;
 }
 
-qint64 Messages::epochTimestampMs(int row) const
+qint64 Messages::epoch_timestamp_ms(int row) const
 {
     return messages_data_epoch_timestamp_ms(m_d, row);
 }
@@ -511,7 +527,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(body(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(epochTimestampMs(index.row()));
+            return QVariant::fromValue(epoch_timestamp_ms(index.row()));
         case Qt::UserRole + 3:
             return QVariant::fromValue(message_id(index.row()));
         case Qt::UserRole + 4:
@@ -537,7 +553,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "epochTimestampMs");
+    names.insert(Qt::UserRole + 2, "epoch_timestamp_ms");
     names.insert(Qt::UserRole + 3, "message_id");
     names.insert(Qt::UserRole + 4, "op");
     return names;
@@ -606,9 +622,10 @@ Config::Config(QObject *parent):
     m_d(config_new(this,
         configColorChanged,
         configColorschemeChanged,
-        configConfig_idChanged,
+        configConfigIdChanged,
+        configInitChanged,
         configNameChanged,
-        configProfile_pictureChanged)),
+        configProfilePictureChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -632,14 +649,18 @@ quint32 Config::colorscheme() const
 void Config::setColorscheme(quint32 v) {
     config_colorscheme_set(m_d, v);
 }
-QString Config::config_id() const
+QString Config::configId() const
 {
     QString v;
     config_config_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setConfig_id(const QString& v) {
+void Config::setConfigId(const QString& v) {
     config_config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Config::init() const
+{
+    return config_init_get(m_d);
 }
 QString Config::name() const
 {
@@ -654,13 +675,13 @@ void Config::setName(const QString& v) {
     config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
 }
-QString Config::profile_picture() const
+QString Config::profilePicture() const
 {
     QString v;
     config_profile_picture_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setProfile_picture(const QString& v) {
+void Config::setProfilePicture(const QString& v) {
     if (v.isNull()) {
         config_profile_picture_set_none(m_d);
     } else {
@@ -682,6 +703,8 @@ Contacts::Contacts(bool /*owned*/, QObject *parent):
 Contacts::Contacts(QObject *parent):
     QAbstractItemModel(parent),
     m_d(contacts_new(this,
+        contactsFilterChanged,
+        contactsFilterRegexChanged,
         [](const Contacts* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -736,17 +759,29 @@ Contacts::~Contacts() {
 }
 void Contacts::initHeaderData() {
 }
+QString Contacts::filter() const
+{
+    QString v;
+    contacts_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void Contacts::setFilter(const QString& v) {
+    contacts_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Contacts::filterRegex() const
+{
+    return contacts_filter_regex_get(m_d);
+}
+void Contacts::setFilterRegex(bool v) {
+    contacts_filter_regex_set(m_d, v);
+}
 bool Contacts::add(const QString& id)
 {
     return contacts_add(m_d, id.utf16(), id.size());
 }
-void Contacts::clear_filter()
+bool Contacts::toggleFilterRegex()
 {
-    return contacts_clear_filter(m_d);
-}
-bool Contacts::filter(const QString& pattern, bool regex)
-{
-    return contacts_filter(m_d, pattern.utf16(), pattern.size(), regex);
+    return contacts_toggle_filter_regex(m_d);
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -843,7 +878,7 @@ bool Messages::delete_message(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::insert_message(const QString& body)
+bool Messages::insertMessage(const QString& body)
 {
     return messages_insert_message(m_d, body.utf16(), body.size());
 }
@@ -885,7 +920,7 @@ bool NetworkHandle::newMessage() const
 {
     return network_handle_new_message_get(m_d);
 }
-bool NetworkHandle::send_message(const QString& message_body, const QString& to) const
+bool NetworkHandle::sendMessage(const QString& message_body, const QString& to) const
 {
     return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.utf16(), to.size());
 }

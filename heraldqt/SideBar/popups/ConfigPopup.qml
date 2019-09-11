@@ -1,62 +1,107 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
+import QtQuick.Layouts 1.13
+import QtQuick.Window 2.2
 import LibHerald 1.0
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
+import "./ConfigPopupSubmission.mjs" as JS
 
-Popup {
+Window {
     id: configPopup
-    modal: true
-    focus: true
-    width: 300
-    height: 300
-    x: (root.width - width) / 2
-    y: (root.height - height) / 2
 
-    Column {
-        ///  TODO : This field should really not exist but it had to be here
-        /// until a hero fixes the server
-        ///  TODO : Also write a validator object which sanitizes all input
-        TextField {
-            id: cfgUid
-            enabled: !config.config_id
-            property bool userIdValid: true
-            placeholderText: enabled ? "Enter UID " : config.config_id
-        }
+    width: 600
+    height: 200
+    maximumHeight: height
+    minimumHeight: height
+    maximumWidth: width
+    minimumWidth: width
 
-        TextField {
-            id: cfgUname
-            property bool usernameValid: true
-            placeholderText: "Enter Username"
-        }
+    Component.onCompleted: {
+        x = root.x + root.width / 3
+        y = root.y + 100
+    }
 
-        FileDialog {
-            id: cfgPfp
-            folder: shortcuts.home
-            property bool pfpValid: true
-            onSelectionAccepted: {
-                config.profile_picture = fileUrl
-                print("set to", fileUrl)
-            }
-        }
-
-        Button {
-            text: "select profile picture"
-            onClicked: {
-                cfgPfp.open()
-            }
+    FileDialog {
+        id: cfgPfp
+        property bool pfpValid: true
+        folder: shortcuts.desktop
+        nameFilters: ["(*.jpg *.png *.jpeg)"]
+        onSelectionAccepted: {
+            config.profilePicture = fileUrl
+            print("set to", fileUrl)
         }
     }
-    Button {
-        anchors.bottom: parent.bottom
-        text: "Submit"
-        onClicked: {
-            if (!config.config_id) {
-                config.config_id = cfgUid.text.trim()
+
+    TabBar {
+        width: parent.width
+        height: 50
+        id: bar
+        TabButton {
+            text: qsTr("Account")
+        }
+        TabButton {
+            text: qsTr("UI")
+        }
+        TabButton {
+            text: qsTr("Authentication")
+        }
+        TabButton {
+            text: qsTr("Notifications")
+        }
+    }
+
+    StackLayout {
+        width: parent.width
+        currentIndex: bar.currentIndex
+        anchors.top: bar.bottom
+        ColumnLayout {
+            id: accountPreferences
+            Layout.alignment: Qt.AlignCenter
+            Layout.fillWidth: true
+            /// RS: check with the server to prevent duplicate ID's
+            RowLayout {
+                TextField {
+                    id: cfgUid
+                    enabled: !config.configId
+                    property bool userIdValid: true
+                    placeholderText: enabled ? "Enter UID " : config.configId
+                    selectionColor: QmlCfg.palette.tertiaryColor
+                }
+
+                TextField {
+                    id: cfgUname
+                    maximumLength: 256
+                    property bool usernameValid: true
+                    placeholderText: "Enter Username"
+                    selectionColor: QmlCfg.palette.tertiaryColor
+                }
             }
-            config.name = cfgUname.text.trim()
-            close()
+
+            Button {
+                text: "select profile picture"
+                onClicked: {
+                    cfgPfp.open()
+                }
+            }
+
+            Button {
+                text: "Submit"
+                onClicked: {
+                    JS.submit(config, cfgUid, cfgUname)
+                    close()
+                }
+            }
+        }
+        Item {
+            id: uiPreferences
+        }
+        Item {
+            id: authenticationPreferences
+        }
+        Item {
+            id: notificationPreferences
         }
     }
 }

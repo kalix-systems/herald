@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>common/CommonConfig.qml</file>
+        <file>common/ButtonForm.qml</file>
         <file>common/Theme.qml</file>
         <file>common/Avatar.qml</file>
         <file>common/utils.mjs</file>
@@ -10,8 +11,8 @@
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/UtilityBar.qml</file>
         <file>ChatView.qml</file>
-        <file>ChatView/ChatBubble.qml</file>
         <file>ChatView/ChatBar.qml</file>
+        <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>icons/plus.png</file>
         <file>icons/gear.svg</file>
         <file>icons/gear.png</file>
@@ -23,5 +24,20 @@
         <file>icons/paperclip.png</file>
         <file>icons/searchRegex.png</file>
         <file>icons/searchRegexTemp.png</file>
+        <file>ChatView/TextAreaForm.qml</file>
+        <file>ChatView/ConversationWindowForm.qml</file>
+        <file>icons/emoji.png</file>
+        <file>ChatView/ChatBubbleForm.qml</file>
+        <file>ChatView/ReplyComponent.qml</file>
+        <file>icons/reply.png</file>
+        <file>TopMenuBar.qml</file>
+        <file>LoginPage.qml</file>
+        <file>common/Avatar.mjs</file>
+        <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
+        <file>SideBar/popups/NewContactDialogue.mjs</file>
+        <file>SideBar/ContactView.mjs</file>
+        <file>SideBar/ConfigBar.mjs</file>
+        <file>ChatView/ReplyComponent.mjs</file>
+        <file>common/Divider.qml</file>
     </qresource>
 </RCC>

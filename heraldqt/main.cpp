@@ -1,13 +1,13 @@
 #include "Bindings.h"
 
 #include <QtQml/qqml.h>
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     qmlRegisterType<Contacts>("LibHerald", 1, 0, "Contacts");
     qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
     app.setOrganizationName("Kalix Systems");
     app.setOrganizationDomain("kalix.io");
     app.setApplicationName("Herald");
+
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

@@ -20,9 +20,10 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
-    Q_PROPERTY(QString config_id READ config_id WRITE setConfig_id NOTIFY config_idChanged FINAL)
+    Q_PROPERTY(QString configId READ configId WRITE setConfigId NOTIFY configIdChanged FINAL)
+    Q_PROPERTY(bool init READ init NOTIFY initChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
-    Q_PROPERTY(QString profile_picture READ profile_picture WRITE setProfile_picture NOTIFY profile_pictureChanged FINAL)
+    Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture NOTIFY profilePictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
 public:
     explicit Config(QObject *parent = nullptr);
@@ -31,19 +32,21 @@ public:
     void setColor(quint32 v);
     quint32 colorscheme() const;
     void setColorscheme(quint32 v);
-    QString config_id() const;
-    void setConfig_id(const QString& v);
+    QString configId() const;
+    void setConfigId(const QString& v);
+    bool init() const;
     QString name() const;
     void setName(const QString& v);
-    QString profile_picture() const;
-    void setProfile_picture(const QString& v);
+    QString profilePicture() const;
+    void setProfilePicture(const QString& v);
     Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void colorChanged();
     void colorschemeChanged();
-    void config_idChanged();
+    void configIdChanged();
+    void initChanged();
     void nameChanged();
-    void profile_pictureChanged();
+    void profilePictureChanged();
 };
 
 class Contacts : public QAbstractItemModel
@@ -54,13 +57,18 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Contacts(bool owned, QObject *parent);
 public:
     explicit Contacts(QObject *parent = nullptr);
     ~Contacts();
+    QString filter() const;
+    void setFilter(const QString& v);
+    bool filterRegex() const;
+    void setFilterRegex(bool v);
     Q_INVOKABLE bool add(const QString& id);
-    Q_INVOKABLE void clear_filter();
-    Q_INVOKABLE bool filter(const QString& pattern, bool regex);
+    Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -83,13 +91,13 @@ public:
     Q_INVOKABLE bool setArchive_status(int row, bool value);
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
-    Q_INVOKABLE QString contact_id(int row) const;
+    Q_INVOKABLE QString contactId(int row) const;
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
-    Q_INVOKABLE QString profile_picture(int row) const;
-    Q_INVOKABLE bool setProfile_picture(int row, const QString& value);
+    Q_INVOKABLE QString profilePicture(int row) const;
+    Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -99,6 +107,8 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void filterChanged();
+    void filterRegexChanged();
 };
 
 class Messages : public QAbstractItemModel
@@ -120,7 +130,7 @@ public:
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE bool delete_conversation_by_id(const QByteArray& conversation_id);
     Q_INVOKABLE bool delete_message(quint64 row_index);
-    Q_INVOKABLE bool insert_message(const QString& body);
+    Q_INVOKABLE bool insertMessage(const QString& body);
     Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -141,7 +151,7 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
+    Q_INVOKABLE qint64 epoch_timestamp_ms(int row) const;
     Q_INVOKABLE QByteArray message_id(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
 
@@ -174,7 +184,7 @@ public:
     bool connectionPending() const;
     bool connectionUp() const;
     bool newMessage() const;
-    Q_INVOKABLE bool send_message(const QString& message_body, const QString& to) const;
+    Q_INVOKABLE bool sendMessage(const QString& message_body, const QString& to) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();

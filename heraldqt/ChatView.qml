@@ -5,6 +5,8 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
 import "common/utils.mjs" as Utils
+import "ChatView/ChatTextAreaUtils.mjs" as CTUtils
+import "common" as Common
 
 Pane {
     id: chatPane
@@ -12,206 +14,58 @@ Pane {
     opacity: 0
     padding: 0
     property alias messageBar: messageBar
-    property Messages messageModel: Messages {
-    }
 
+    /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
-    }
 
-    ///--- border between messageBar and main chat view
-    Rectangle {
-        height: 1
-        color: QmlCfg.palette.secondaryColor
-        anchors {
-            top: messageBar.bottom
-            left: parent.left
-            right: parent.right
+        Common.Divider {
+            color: QmlCfg.palette.secondaryColor
+            anchor: parent.bottom
         }
     }
 
     ///--- chat view, shows messages
-    ScrollView {
-        bottomPadding: QmlCfg.margin * 2
-        clip: true
+    CVUtils.ConversationWindowForm {
+        id: convWindow
+        focus: true
         anchors {
             top: messageBar.bottom
-            bottom: chatTextAreaScroll.top
+            bottom: chatTextArea.top
             left: parent.left
             right: parent.right
         }
-
-        ///--- scrollbar for chat messages
-        ScrollBar.vertical: ScrollBar {
-            id: chatScrollBar
-            Component.onCompleted: position = 1.0
-            height: parent.height
-            anchors.right: parent.right
-        }
-
-        Column {
-            width: chatPane.width
-            spacing: QmlCfg.margin
-
-            Repeater {
-                anchors.fill: parent
-                id: chatListView
-                Component.onCompleted: forceActiveFocus()
-                model: messageModel
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: forceActiveFocus()
-                }
-
-                Keys.onUpPressed: chatScrollBar.decrease()
-                Keys.onDownPressed: chatScrollBar.increase()
-
-                delegate: Column {
-                    readonly property bool outbound: author === config.config_id
-
-                    anchors {
-                        right: if (outbound) {
-                                   return parent.right
-                               }
-                        rightMargin: chatScrollBar.width * 1.5
-                    }
-
-                    CVUtils.ChatBubble {
-                        topPadding: if (index === 0) {
-                                        return QmlCfg.margin
-                                    } else {
-                                        return 0
-                                    }
-                        text: body
-                    }
-                    Component.onCompleted: chatScrollBar.position = 1.0
-                } /// Delegate column
-            } /// Repeater
-        } /// Column
-    } /// ScrollView
-
-    /// Attachments
-    FileDialog {
-        id: attachmentsDialogue
-        folder: shortcuts.home
-        onSelectionAccepted: {
-            print("todo: attachments api")
+        Component.onCompleted: forceActiveFocus()
+        Keys.onUpPressed: chatScrollBar.decrease()
+        Keys.onDownPressed: chatScrollBar.increase()
+        Connections {
+            target: messageModel
+            onRowsInserted: {
+                convWindow.contentY = convWindow.contentHeight
+            }
         }
     }
 
-    Button {
-        id: attachmentsButton
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: QmlCfg.margin / 2
-        anchors.rightMargin: QmlCfg.margin / 2
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/paperclip.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-            z: -100
-        }
-        onClicked: {
-            attachmentsDialogue.open()
-        }
-        z: -1
-    }
-
-    Button {
-        id: emojiMenuButton
+    ///--- Text entry area, for typing
+    CVUtils.TextAreaForm {
+        id: chatTextArea
         anchors {
-            right: parent.left
-            left: parent.right
-        }
-
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: QmlCfg.margin / 2
-        anchors.rightMargin: QmlCfg.margin / 2
-        height: 25
-        width: height
-        background: Image {
-            source: "qrc:///icons/paperclip.png"
-            height: width
-            scale: 0.9
-            mipmap: true
-        }
-        onClicked: {
-            attachmentsDialogue.open()
-        }
-    }
-
-    ///--- Text entry area
-    ScrollView {
-        clip: true
-        id: chatTextAreaScroll
-
-        anchors {
-            bottom: parent.bottom
             left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: QmlCfg.margin
         }
 
-        background: Rectangle {
-            color: QmlCfg.palette.mainColor
+        keysProxy: Item {
+            Keys.onReturnPressed: CTUtils.enterKeyHandler(
+                                      event, chatTextArea.chatText,
+                                      networkHandle, messageModel)
+            // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
-        height: Math.min(contentHeight, 100)
-        width: chatPane.width - attachmentsButton.width - QmlCfg.margin
-
-        //highlight border
-        onFocusChanged: {
-            if (focus) {
-                chatText.background.border.width = 2
-            } else {
-                chatText.background.border.width = 0
-            }
-        }
-
-        TextArea {
-            id: chatText
-
-            background: Rectangle {
-                color: QmlCfg.palette.secondaryColor
-                border.color: QmlCfg.palette.tertiaryColor
-                border.width: 0
-
-                anchors {
-                    fill: parent
-                    margins: QmlCfg.margin / 2
-                }
-                radius: QmlCfg.radius
-            }
-
-            selectByKeyboard: true
-            selectByMouse: true
-            padding: QmlCfg.margin
-            wrapMode: TextEdit.WrapAtWordBoundaryOrAnywhere
-            placeholderText: "Send a Message ..."
-            Keys.onReturnPressed: {
-                if (event.modifiers & Qt.ShiftModifier) {
-                    chatText.text = chatText.text + "\n"
-                    chatText.cursorPosition = chatText.text.length
-                } else {
-                    if (text.length <= 0) {
-                        return
-                    }
-                    if (text.trim().length === 0) {
-                        return
-                    }
-                    var result = networkHandle.send_message(
-                                text, messageModel.conversationId)
-                    messageModel.insert_message(text, result)
-                    chatScrollBar.position = 1.0
-                    clear()
-                }
-            }
-            Keys.onEscapePressed: {
-                chatListView.forceActiveFocus()
-            }
-        } /// Chat entry field
-    } /// scroll area
+        emojiButton.onClicked: print("placeholder until emoji pop up")
+        atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
+        scrollHeight: Math.min(contentHeight, 100)
+    }
 
     states: State {
         name: "visibleview"

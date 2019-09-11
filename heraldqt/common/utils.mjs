@@ -28,3 +28,47 @@ export function friendlyTimestamp(msEpochTime) {
     }
     return dt.toDateString();
 }
+function isBoolean(maybeBool) {
+    return typeof maybeBool === "boolean";
+}
+function isObject(maybeObject) {
+    return typeof maybeObject === "object";
+}
+function sameType(first, second) {
+    if (typeof first !== typeof second) {
+        throw new Error("parameters differ in type");
+    }
+}
+function sameConstructor(first, second) {
+    if (!(second instanceof first.constructor)) {
+        throw new Error("parameters differ in constructor");
+    }
+}
+export function safeSwitch(cond, first, second) {
+    if (!isBoolean(cond)) {
+        throw new Error("condition was not of type boolean");
+    }
+    // throw exception if type differs
+    sameType(first, second);
+    if (isObject(first)) {
+        const firstObj = first;
+        const secondObj = second;
+        // throw exception if constructor differs
+        sameConstructor(firstObj, secondObj);
+    }
+    if (cond) {
+        return first;
+    }
+    else {
+        return second;
+    }
+}
+/*
+ * Generates qrc URI from file path
+ */
+export function safeToQrcURI(url) {
+    if (typeof url !== "string") {
+        throw new Error("Expected url to be string");
+    }
+    return "file:" + url;
+}

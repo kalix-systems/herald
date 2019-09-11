@@ -2,7 +2,20 @@
     "compilerOptions": {
         "declaration": true,
         "strict": true,
-        "noEmitOnError": true,
-        "target": "ES2019"
-    }
+        "target": "ES2017"
+    },
+    "files": [
+        "common/utils.ts",
+        "ChatView/ChatTextAreaUtils.ts",
+        "SideBar/popups/ConfigPopupSubmission.ts",
+        "SideBar/popups/NewContactDialogue.ts",
+        "SideBar/ContactViewTypes.d.ts",
+        "SideBar/ContactView.ts",
+        "SideBar/ConfigBar.ts",
+        "ChatView/ChatViewTypes.d.ts",
+        "ChatView/ReplyComponent.ts",
+        "common/QtTypes.d.ts",
+        "common/HeraldTypes.d.ts",
+        "common/Avatar.ts"
+    ]
 }

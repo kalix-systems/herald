@@ -47,10 +47,8 @@ impl Database {
                     let pattern = ctx.get::<String>(0)?;
                     let value = ctx.get::<String>(1)?;
 
-                    let re = match SearchPattern::new_normal(pattern) {
-                        Ok(SearchPattern::Normal(re)) => re,
-                        _ => return Ok(false),
-                    };
+                    let re = SearchPattern::new_normal(pattern)
+                        .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
 
                     Ok(re.is_match(value.as_str()))
                 })?;
@@ -60,10 +58,8 @@ impl Database {
                     let pattern = ctx.get::<String>(0)?;
                     let value = ctx.get::<String>(1)?;
 
-                    let re = match SearchPattern::new_regex(pattern) {
-                        Ok(SearchPattern::Regex(re)) => re,
-                        _ => return Ok(false),
-                    };
+                    let re = SearchPattern::new_regex(pattern)
+                        .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
 
                     Ok(re.is_match(value.as_str()))
                 })?;

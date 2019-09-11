@@ -22,18 +22,26 @@ generate corresponding declaration files.
 An `eslint` configuration for TypeScript is also included in the file
 `.eslintrc.js`.
 
+## Naming conventions
+
+When possible, include type guards to verifying that the types are correct a
+runtime. Functions with type guards should be prefixed by `safe`. For example,
+if `myFunction` has type guards, it should be called `safeMyFunction`.
+
 ## Compiling TypeScript files
 
-This is currently a two step process because the TypeScript compiler
+This is currently requires running a custom build script because TypeScript
 [currently cannot emit `.mjs` files](https://github.com/microsoft/TypeScript/issues/18442).
 
-To compile the file, run:
+You will need to explicitly add new TypeScript and TypeScript declaration files
+by modifying `tsconfig.json`.
+
+To compile the files, rename them, and add new files to `qml.qrc` run:
 
 ```bash
-$ tsc file.ts
+$ ./run_tsc.py
 ```
 
-where `file.ts` is the TypeScript file to be compiled.
+from the `heraldqt` root directory.
 
-This will produce a file named `file.js`. Now simply rename this to `file.mjs`
-and [import the module into the QML document](https://doc.qt.io/qt-5/qtqml-javascript-imports.html).
+Now simply [import the modules into QML](https://doc.qt.io/qt-5/qtqml-javascript-imports.html).

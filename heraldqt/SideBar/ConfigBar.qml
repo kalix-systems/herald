@@ -6,13 +6,22 @@ import "popups" as Popups
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
 ToolBar {
     id: toolBar
+
     anchors {
         left: parent.left
         right: parent.right
         top: parent.top
     }
+
     height: QmlCfg.toolbarHeight
 
     background: Rectangle {
@@ -22,31 +31,28 @@ ToolBar {
 
     Common.Avatar {
         id: configAvatar
-        displayName: Utils.unwrapOr(config.name, config.config_id)
-        colorHash: 0
-        pfpUrl: Utils.unwrapOr(config.profile_picture, "")
+        displayName: Utils.unwrapOr(config.name, config.configId)
+        colorHash: config.color
+        // Note: use specific fallback value or implicit one from typescript! TS
+        pfpUrl: Utils.unwrapOr(config.profilePicture, "")
         anchors.horizontalCenter: parent.horizontalCenter
         size: parent.height - QmlCfg.margin
     }
 
-    /// unpolished temporary Popup
     Popups.ConfigPopup {
         id: configPopup
     }
 
-    Button {
-        height: parent.height
-        width: height
-        anchors.right: parent.right
-        background: Image {
-            source: "qrc:///icons/gear.png"
-            width: parent.height
-            height: width
-            scale: 0.7
-            mipmap: true
+    Common.ButtonForm {
+        anchors {
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
+            right: parent.right
         }
+        source: "qrc:///icons/gear.png"
         onClicked: {
-            configPopup.open()
+            /// Note: this needs to pay attention to root state
+            configPopup.show()
         }
     }
 }

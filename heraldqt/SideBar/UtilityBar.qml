@@ -3,6 +3,17 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
+import "../common" as Common
+import "../common/utils.mjs" as Utils
+
+// Reveiw Key
+// OS Dependent: OSD
+// Global State: GS
+// Just Hacky: JH
+// Type Script: TS
+// Needs polish badly: NPB
+// Factor Component: FC
+// FS: Fix scoping
 
 ToolBar {
     id: utilityBar
@@ -14,69 +25,64 @@ ToolBar {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
-    property bool searchRegex: false
 
+    // FS: this should be in a lower more specific scope, or maybe a state.*
+    // It is coupled with what Icon we use for searching!
+    // property bool searchRegex: false
     ScrollView {
         id: searchScroll
         anchors {
             left: parent.left
             right: searchButton.left
-            leftMargin: 10
-            rightMargin: 10
+            leftMargin: QmlCfg.margin
+            rightMargin: QmlCfg.margin
             verticalCenter: parent.verticalCenter
         }
 
         TextArea {
+            id: searchText
             background: Rectangle {
                 anchors.fill: parent
                 color: QmlCfg.palette.mainColor
                 radius: QmlCfg.radius
             }
-            Keys.onReturnPressed: text = text
-            id: searchText
+            Keys.onPressed: {
+                if (event.key === Qt.Key_Return) {
+                    event.accepted = true
+                } else if (event.key === Qt.Key_Tab) {
+                    event.accepted = true
+                }
+            }
+            selectionColor: QmlCfg.palette.tertiaryColor
             placeholderText: qsTr("Search...")
             Layout.fillWidth: true
-            font.pointSize: 10
+            font.pointSize: 12
             onTextChanged: {
-                contacts.filter(searchText.text, searchRegex)
+                // NOTE: we should probably wrap calls to libherald in call later.
+                // this prevents double calls, and is basically a debounce
+                // TS
+                Qt.callLater((text) => {contactsModel.filter = text}, searchText.text)
             }
         }
     }
 
-    Button {
+    Common.ButtonForm {
         id: searchButton
-        anchors.right: addContactButton.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.rightMargin: QmlCfg.margin
-        implicitHeight: utilityBar.height - 15
-        implicitWidth: height
-        background: Image {
-            source: "qrc:///icons/search.png"
-            height: width
-            scale: 0.9
-            mipmap: true
+        property bool searchRegex: false
+        anchors {
+            right: addContactButton.left
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
         }
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-            onClicked: {
-                if (searchRegex) {
-                    searchButton.background.source = "qrc:///icons/search.png"
-                    searchRegex = false
-                } else {
-                    searchButton.background.source = "qrc:///icons/searchRegexTemp.png"
-                    searchRegex = true
-                }
-            }
-        }
+        source: Utils.safeSwitch(searchRegex,
+                                 "qrc:///icons/searchRegexTemp.png",
+                                 "qrc:///icons/search.png")
+        onClicked: searchRegex = contactsModel.toggleFilterRegex()
     }
 
     ///--- Add contact button
-    Button {
+    Common.ButtonForm {
         id: addContactButton
-        height: QmlCfg.toolbarHeight - QmlCfg.margin
-        width: height
-
         anchors {
             rightMargin: QmlCfg.margin
             verticalCenterOffset: 0
@@ -91,11 +97,12 @@ ToolBar {
             Image {
                 source: "qrc:///icons/plus.png"
                 anchors.fill: parent
-                scale: 0.7
+                scale: 0.9
                 mipmap: true
             }
         }
 
+        // NPB: States
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
@@ -117,6 +124,7 @@ ToolBar {
         }
     }
 
+    //NOTE: see previous notes about using native dialogs
     Popups.NewContactDialogue {
         id: newContactDialogue
     }
