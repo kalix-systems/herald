@@ -24,6 +24,8 @@ Item {
     readonly property int padding: 10
     /// standard toolbar height
     readonly property int toolbarHeight: 40
+    /// standard chat text size
+    property int chatTextSize: 10
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme

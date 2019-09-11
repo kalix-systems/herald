@@ -35,6 +35,7 @@ Rectangle {
     radius: QmlCfg.radius
 
     // NPB: this flickers a lot, pause on scroll also
+    // handles chatbubble hovering
     MouseArea {
         propagateComposedEvents: true
         id: chatBubbleHitbox
@@ -81,6 +82,7 @@ Rectangle {
         text: messageText
     }
 
+    // column that loads each chat bubble + additional content
     Column {
         id: bubble
         padding: QmlCfg.margin / 2
@@ -96,7 +98,7 @@ Rectangle {
             text: messageText
             //NPB: that extra margin is bad, also this is a recipe for a binding loop
             width: JS.naturalWidth(chatPane.width,
-                                   messageMetrics.width) + QmlCfg.margin
+                                   messageMetrics.width) + QmlCfg.margin / 2
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
@@ -108,8 +110,7 @@ Rectangle {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendlyTimestamp(epochTimestampMs)
-            /// NPB: all font sizes should be settable, for visual stuff
-            font.pointSize: 10
+            font.pointSize: QmlCfg.chatTextSize
         }
     }
 }
