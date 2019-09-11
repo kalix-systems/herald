@@ -22,6 +22,8 @@ Item {
     // by the Contacts model functions.
     FileDialog {
         id: pfpDialog
+        nameFilters: ["(*.jpg *.png *.jpeg)"]
+        folder: shortcuts.desktop
         onSelectionAccepted: {
             // TS:
             var retCode = contactsModel.setProfilePicture(index, fileUrl)
