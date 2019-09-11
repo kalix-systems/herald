@@ -22,8 +22,7 @@ Rectangle {
     property string from: ""
     // the width the text sits at without wrapping
     //TS: NPB: same weird margin fuding
-    readonly property int naturalWidth: Math.min(
-                                            2 * chatPane.width / 3,
+    readonly property int naturalWidth: Math.min( 2 * chatPane.width / 3,
                                             messageMetrics.width) + QmlCfg.margin
     // the width of the parent object that we either match or override
     property var uiContainer: {

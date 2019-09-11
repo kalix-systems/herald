@@ -30,5 +30,10 @@ MenuBar {
             text: "Minimize"
             onTriggered: root.showMinimized()
         }
+        MenuItem {
+            text: "Fullscreen"
+            shortcut: StandardKey.FullScreen
+            onTriggered: root.showFullScreen()
+        }
     }
 }

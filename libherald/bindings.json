@@ -213,6 +213,9 @@
                     "type": "QString",
                     "write": true
                 },
+                "init": {
+                    "type": "bool"
+                },
                 "name": {
                     "type": "QString",
                     "write": true,

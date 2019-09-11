@@ -44,6 +44,8 @@ impl ConfigTrait for Config {
             self.inner = match Core::new(id, None, None, None, None) {
                 Ok(c) => {
                     self.init = true;
+                    self.emit.config_id_changed();
+                    self.emit.init_changed();
                     c
                 }
                 Err(e) => {
@@ -99,6 +101,9 @@ impl ConfigTrait for Config {
             Ok(()) => self.emit.colorscheme_changed(),
             Err(e) => eprintln!("Error: {}", e),
         }
+    }
+    fn init(&self) -> bool {
+        self.init
     }
 
     fn exists(&self) -> bool {
