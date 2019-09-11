@@ -46,7 +46,7 @@ Item {
                     chatView.state = "" //TODO clearview should be less imperative
                 contactsModel.remove(index)
                 print("index try delete AGAIN: ", index)
-                messageModel.clear_conversation_view()
+                messageModel.clearConversationView()
             }
         }
 
@@ -76,7 +76,7 @@ Item {
             text: 'Clear Avatar'
             onTriggered: {
                 contactAvatar.pfpUrl = ""
-                contactsModel.setProfile_picture(index, "")
+                contactsModel.setProfilePicture(index, "")
             }
         }
     }

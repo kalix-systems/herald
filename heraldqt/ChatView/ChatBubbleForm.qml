@@ -114,7 +114,7 @@ Rectangle {
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
-            text: Utils.friendlyTimestamp(epoch_timestamp_ms)
+            text: Utils.friendlyTimestamp(epochTimestampMs)
             /// NPB: all font sizes should be settable, for visual stuff
             font.pointSize: 10
         }

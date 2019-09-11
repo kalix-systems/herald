@@ -65,7 +65,7 @@
                     "write": true,
                     "type": "quint32"
                 },
-                "archive_status": {
+                "archiveStatus": {
                     "write": true,
                     "type": "bool"
                 },
@@ -95,10 +95,6 @@
                         }
                     ]
                 },
-                "remove_all": {
-                    "mut": true,
-                    "return": "void"
-                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
@@ -115,7 +111,7 @@
                 }
             },
             "itemProperties": {
-                "message_id": {
+                "messageId": {
                     "type": "qint64"
                 },
                 "author": {
@@ -127,7 +123,7 @@
                 "body": {
                     "type": "QString"
                 },
-                "epoch_timestamp_ms": {
+                "epochTimestampMs": {
                     "type": "qint64"
                 },
                 "op": {
@@ -137,13 +133,13 @@
                 "uuid": {
                     "type": "qint64"
                 },
-                "reached_server": {
+                "reachedServer": {
                     "type": "bool"
                 },
-                "reached_recipient": {
+                "reachedRecipient": {
                     "type": "bool"
                 },
-                "error_sending": {
+                "errorSending": {
                     "type": "bool"
                 }
             },
@@ -172,7 +168,7 @@
                         }
                     ]
                 },
-                "delete_message": {
+                "deleteMessage": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
@@ -182,7 +178,7 @@
                         }
                     ]
                 },
-                "clear_conversation_view": {
+                "clearConversationView": {
                     "mut": true,
                     "return": "void"
                 },
@@ -190,7 +186,7 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "delete_conversation_by_id": {
+                "deleteConversationById": {
                     "mut": true,
                     "arguments": [
                         {

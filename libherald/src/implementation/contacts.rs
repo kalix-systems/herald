@@ -54,21 +54,6 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    fn remove_all(&mut self) {
-        self.model.begin_reset_model();
-
-        if let Err(e) = Core::drop_table() {
-            eprintln!("{}", e);
-        }
-        if let Err(e) = Core::create_table() {
-            eprintln!("{}", e);
-        }
-
-        self.list = Vec::new();
-
-        self.model.end_reset_model();
-    }
-
     /// Adds a contact by their `id`
     ///
     /// Returns `false` on failure.

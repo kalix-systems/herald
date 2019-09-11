@@ -63,9 +63,9 @@ Item {
             break
             case (themeEnum.dark):
             break
-            case (themeEnum.solarized_dark):
+            case (themeEnum.solarizedDark):
             break
-            case (themeEnum.solarized_light):
+            case (themeEnum.solarizedLight):
             break
         }
     }

@@ -4,6 +4,6 @@ import QtQuick 2.13
 QtObject {
     readonly property int dark: 0
     readonly property int light: 1
-    readonly property int solarized_dark: 2
-    readonly property int solarized_light: 3
+    readonly property int solarizedDark: 2
+    readonly property int solarizedLight: 3
 }
