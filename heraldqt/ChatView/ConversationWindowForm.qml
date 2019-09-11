@@ -49,9 +49,8 @@ Flickable {
                 //NPB: possibly not a column and just fix anchors
                 // column is most correct to resize for extra content
                 anchors {
-                    right: if (outbound) {
-                               parent.right
-                           }
+                    // This is okay as a ternary, the types are enforced by QML.
+                    right: outbound ? parent.right : undefined
                     rightMargin: chatScrollBar.width + QmlCfg.margin
                     leftMargin: rightMargin
                 }
@@ -65,11 +64,8 @@ Flickable {
 
                         }
                     }
-                    bubbleColor: if (outbound) {
-                                     QmlCfg.palette.tertiaryColor
-                                 } else {
-                                     QmlCfg.palette.secondaryColor
-                                 }
+                    // This is okay as a ternary, the types are enforced by QML.
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
                 } //bubble
             } //bubble wrapper
         } // Repeater
