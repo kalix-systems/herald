@@ -102,7 +102,7 @@ Item {
             focus: true
             placeholderText: qsTr("Enter new name")
             Keys.onReturnPressed: renameContact()
-            width: parent.width
+            anchors.fill: parent
             wrapMode: TextEdit.WrapAnywhere
         }
 
