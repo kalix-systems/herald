@@ -24,10 +24,8 @@ Item {
         id: pfpDialog
         onSelectionAccepted: {
             // TS:
-            // NPB: please use camel case in libherald
             var retCode = contactsModel.setProfilePicture(index, fileUrl)
             if (retCode) {
-                // NPB: please use camel case in libherald
                 contactAvatar.pfpUrl = profilePicture
             } else
                 print("TODO: Native Error popup here...")

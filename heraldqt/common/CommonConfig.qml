@@ -10,7 +10,6 @@ import QtQuick 2.13
 // Factor Component: FC
 // FS: Fix scoping
 Item {
-    //TS: This should be an enum defined from typscript.
     Theme {
         id: themeEnum
     }

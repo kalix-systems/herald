@@ -55,7 +55,7 @@ Flickable {
                     leftMargin: rightMargin
                 }
 
-                //NOTE: see chat bubble form. maybe handle this in TS:
+                //NOTE: see chat bubble form
                 CVUtils.ChatBubbleForm {
                     messageText: body
                     additionalContent: ""

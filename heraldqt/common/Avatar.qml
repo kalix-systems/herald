@@ -19,11 +19,9 @@ import "utils.mjs" as Utils
 
 /// --- displays a list of contacts
 Row {
-    // Note: empty string or undefined? whatever leads to less coercions
     property string displayName: ""
     property string pfpUrl: ""
     property int colorHash: 0
-    // TS: this enum should be defined in TS
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
     // TS: Note: This should be a path or border element in the future,
