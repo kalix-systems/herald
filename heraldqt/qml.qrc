@@ -38,5 +38,6 @@
         <file>SideBar/ContactView.mjs</file>
         <file>SideBar/ConfigBar.mjs</file>
         <file>ChatView/ReplyComponent.mjs</file>
+        <file>common/Divider.qml</file>
     </qresource>
 </RCC>

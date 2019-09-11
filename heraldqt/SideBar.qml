@@ -3,6 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "SideBar" as SBUtils
+import "common" as Common
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -40,14 +41,12 @@ Pane {
         anchors.top: toolBar.bottom
     }
 
-    // FC: WE use this border pattern in a few places and it is redundant DRY
+
     ///--- Border between SearchBar and the Pane Contents (contacts)
-    Rectangle {
+    Common.Divider {
         id: searchBarBorder
-        anchors.top: utilityBar.bottom
+        anchor: utilityBar.bottom
         color: QmlCfg.palette.secondaryColor
-        width: parent.width
-        height: 1
     }
 
     ///--- Contacts View Actual
