@@ -43,12 +43,9 @@ ListView {
             readonly property color hoverColor: QmlCfg.palette.secondaryColor
             readonly property color defaultColor: QmlCfg.palette.mainColor
 
-            /// FC: ANOTHER BORDER!
-            Rectangle {
-                anchors.verticalCenter: parent.bottom
+            Common.Divider {
                 color: QmlCfg.palette.secondaryColor
-                width: parent.width
-                height: 1.5
+                anchor: parent.bottom
             }
 
             anchors.fill: parent

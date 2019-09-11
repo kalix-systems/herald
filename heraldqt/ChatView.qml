@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.3
 import "ChatView" as CVUtils
 import "common/utils.mjs" as Utils
 import "ChatView/ChatTextAreaUtils.mjs" as CTUtils
+import "common" as Common
 
 Pane {
     id: chatPane
@@ -17,18 +18,13 @@ Pane {
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
-    }
 
-    ///--- border between messageBar and main chat view
-    Rectangle {
-        height: 1
-        color: QmlCfg.palette.secondaryColor
-        anchors {
-            top: messageBar.bottom
-            left: parent.left
-            right: parent.right
+        Common.Divider {
+            color: QmlCfg.palette.secondaryColor
+            anchor: parent.bottom
         }
     }
+
 
     ///--- chat view, shows messages
     CVUtils.ConversationWindowForm {
