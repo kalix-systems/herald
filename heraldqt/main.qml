@@ -74,13 +74,6 @@ ApplicationWindow {
                     target: rootSplitView
                     visible: false
                 }
-                PropertyChanges {
-                    target: root
-                    minimumWidth: 250
-                    minimumHeight: 300
-                    height: 500
-                    width: 700
-                }
             },
             State {
                 when: config.init
@@ -88,11 +81,6 @@ ApplicationWindow {
                 PropertyChanges {
                     target: rootSplitView
                     visible: true
-                }
-                PropertyChanges {
-                    target: root
-                    width: 900
-                    height: 640
                 }
             }
         ]
