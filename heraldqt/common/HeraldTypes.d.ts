@@ -19,7 +19,7 @@ declare class Contacts {
 declare class Config {
   name: UserId;
   configId: string;
-  pfpUrl: string | null;
+  pfpUrl?: string;
 
   exists(): boolean;
 }

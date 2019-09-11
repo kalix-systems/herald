@@ -1,7 +1,6 @@
 declare class Avatar {
   displayName: string;
-  pfpUrl: string | null;
-  objectType: "Avatar";
+  pfpUrl: string;
 }
 
 declare enum AvatarShape {

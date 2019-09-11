@@ -26,9 +26,6 @@ ToolBar {
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
 
-    // FS: this should be in a lower more specific scope, or maybe a state.*
-    // It is coupled with what Icon we use for searching!
-    // property bool searchRegex: false
     ScrollView {
         id: searchScroll
         anchors {
@@ -47,6 +44,7 @@ ToolBar {
                 radius: QmlCfg.radius
             }
             Keys.onPressed: {
+                // NOTE: What is the first comparison doing?
                 if (event.key === Qt.Key_Return) {
                     event.accepted = true
                 } else if (event.key === Qt.Key_Tab) {
@@ -58,10 +56,7 @@ ToolBar {
             Layout.fillWidth: true
             font.pointSize: 12
             onTextChanged: {
-                // NOTE: we should probably wrap calls to libherald in call later.
-                // this prevents double calls, and is basically a debounce
-                // TS
-                Qt.callLater((text) => {contactsModel.filter = text}, searchText.text)
+                Qt.callLater((text) => { contactsModel.filter = text }, searchText.text)
             }
         }
     }

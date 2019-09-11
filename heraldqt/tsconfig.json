@@ -11,7 +11,6 @@
         "SideBar/popups/NewContactDialogue.ts",
         "SideBar/ContactViewTypes.d.ts",
         "SideBar/ContactView.ts",
-        "SideBar/ConfigBar.ts",
         "ChatView/ChatViewTypes.d.ts",
         "ChatView/ChatView.ts",
         "common/QtTypes.d.ts",
