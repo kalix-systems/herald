@@ -9,3 +9,11 @@ export function avatarSource(displayName, pfpUrl, imageAvatar, initialAvatar) {
         return initialAvatar;
     }
 }
+export function avatarShape(shape, avatar) {
+    switch (shape) {
+        case 0 /* Circle */:
+            return avatar.size;
+        default:
+            throw new Error(String(shape) + " is not a shape variant");
+    }
+}

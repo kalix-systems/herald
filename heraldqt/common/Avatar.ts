@@ -12,3 +12,12 @@ export function avatarSource(
     return initialAvatar;
   }
 }
+
+export function avatarShape(shape: AvatarShape, avatar: Avatar): number {
+  switch (shape) {
+    case AvatarShape.Circle:
+      return avatar.size;
+    default:
+      throw new Error(String(shape) + " is not a shape variant");
+  }
+}

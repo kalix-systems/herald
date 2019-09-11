@@ -14,9 +14,6 @@ import "utils.mjs" as Utils
 // Factor Component: FC
 // FS: Fix scoping
 
-/// TS: All propertyies should be set at once inside typescript,
-/// it should receive reference to the contact item. and handle it from there
-
 /// --- displays a list of contacts
 Row {
     property string displayName: ""
@@ -24,14 +21,7 @@ Row {
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
-    // TS: Note: This should be a path or border element in the future,
-    // Selected by a TS function that knows about shapeEnum
-    property int shape: if (shapeEnum === 0) {
-                            size
-                        } else {
-                            0
-                        }
-
+    property int shape: JS.avatarShape(shapeEnum, this)
     property bool labeled: true /// whether or not to show the name
     // NOTE: make a property in QMLCFG call padding. it is probably just 10
     spacing: QmlCfg.margin
