@@ -39,3 +39,12 @@ export function safeSwitch(cond, first, second) {
         return second;
     }
 }
+/*
+ * Generates qrc URI from file path
+ */
+export function safeToQrcURI(url) {
+    if (typeof url !== "string") {
+        throw new Error("Expected url to be string");
+    }
+    return "file:" + url;
+}

@@ -60,6 +60,7 @@ ToolBar {
             onTextChanged: {
                 // NOTE: we should probably wrap calls to libherald in call later.
                 // this prevents double calls, and is basically a debounce
+                // TS
                 Qt.callLater((text) => {contactsModel.filter = text}, searchText.text)
             }
         }

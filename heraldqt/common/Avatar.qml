@@ -3,6 +3,7 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
 import "Avatar.mjs" as JS
+import "utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -90,8 +91,7 @@ Row {
                 id: mask
             }
             Image {
-                // TS : this URI-ification should be in TS or rust
-                source: "file:" + pfpUrl
+                source: Utils.safeToQrcURI(pfpUrl)
                 anchors.fill: mask
                 layer.enabled: true
                 layer.effect: OpacityMask {
