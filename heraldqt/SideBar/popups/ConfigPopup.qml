@@ -103,7 +103,5 @@ Window {
         Item {
             id: notificationPreferences
         }
-
-
     }
 }

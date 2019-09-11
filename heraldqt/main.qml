@@ -42,9 +42,9 @@ ApplicationWindow {
         anchors.fill: parent
         id: loginLoader
         active: !!!config.init
-        sourceComponent: LoginPage {}
+        sourceComponent: LoginPage {
+        }
     }
-
 
     SplitView {
         id: rootSplitView
@@ -72,7 +72,7 @@ ApplicationWindow {
                 name: "loginPage"
                 PropertyChanges {
                     target: rootSplitView
-                    visible : false
+                    visible: false
                 }
                 PropertyChanges {
                     target: root
@@ -87,7 +87,7 @@ ApplicationWindow {
                 name: "loggedIn"
                 PropertyChanges {
                     target: rootSplitView
-                    visible : true
+                    visible: true
                 }
                 PropertyChanges {
                     target: root
@@ -98,7 +98,10 @@ ApplicationWindow {
         ]
 
         transitions: Transition {
-             NumberAnimation { properties: "width, height"; easing.type: Easing.InOutQuad }
-         }
+            NumberAnimation {
+                properties: "width, height"
+                easing.type: Easing.InOutQuad
+            }
+        }
     }
 }
