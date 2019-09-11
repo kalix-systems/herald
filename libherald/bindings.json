@@ -37,6 +37,16 @@
         },
         "Contacts": {
             "type": "List",
+            "properties": {
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
             "itemProperties": {
                 "contactId": {
                     "type": "QString"
@@ -89,23 +99,9 @@
                     "mut": true,
                     "return": "void"
                 },
-                "filter": {
+                "toggleFilterRegex": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "pattern",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "regex",
-                            "type": "bool"
-                        }
-                    ]
-                },
-                "clear_filter": {
-                    "mut": true,
-                    "return": "void"
+                    "return": "bool"
                 }
             }
         },

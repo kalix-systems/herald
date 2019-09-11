@@ -14,6 +14,8 @@ struct ContactsItem {
 pub struct Contacts {
     emit: ContactsEmitter,
     model: ContactsList,
+    filter: SearchPattern,
+    filter_regex: bool,
     list: Vec<ContactsItem>,
 }
 
@@ -34,7 +36,22 @@ impl ContactsTrait for Contacts {
                 .collect(),
             Err(_) => Vec::new(),
         };
-        Contacts { emit, model, list }
+
+        let filter = match SearchPattern::new_normal("".into()) {
+            Ok(p) => p,
+            Err(e) => {
+                eprintln!("{}, process aborting", e);
+                std::process::abort();
+            }
+        };
+
+        Contacts {
+            emit,
+            model,
+            list,
+            filter,
+            filter_regex: false,
+        }
     }
 
     fn remove_all(&mut self) {
@@ -74,6 +91,7 @@ impl ContactsTrait for Contacts {
             },
         );
         self.model.end_insert_rows();
+        self.inner_filter();
         true
     }
 
@@ -196,18 +214,22 @@ impl ContactsTrait for Contacts {
         }
     }
 
-    fn filter(&mut self, pattern: String, regex: bool) -> bool {
+    fn filter(&self) -> &str {
+        self.filter.raw()
+    }
+
+    fn set_filter(&mut self, pattern: String) {
         if pattern.is_empty() {
             self.clear_filter();
-            return true;
+            return;
         }
 
-        let pattern = if regex {
+        let pattern = if self.filter_regex() {
             match SearchPattern::new_regex(pattern) {
                 Ok(pat) => pat,
                 Err(e) => {
                     eprintln!("{}", e);
-                    return false;
+                    return;
                 }
             }
         } else {
@@ -215,30 +237,47 @@ impl ContactsTrait for Contacts {
                 Ok(pat) => pat,
                 Err(e) => {
                     eprintln!("{}", e);
-                    return false;
+                    return;
                 }
             }
         };
 
-        for contact in self.list.iter_mut() {
-            let name = match contact.inner.name.as_ref() {
-                Some(name) => name,
-                None => return false,
-            };
+        self.filter = pattern;
+        self.emit.filter_changed();
 
-            contact.matched = pattern.is_match(name) || pattern.is_match(contact.inner.id.as_str());
-        }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
-        false
+        self.inner_filter();
     }
 
-    fn clear_filter(&mut self) {
-        for contact in self.list.iter_mut() {
-            contact.matched = true;
+    /// Indicates whether regex search is activated
+    fn filter_regex(&self) -> bool {
+        self.filter_regex
+    }
+
+    /// Sets filter mode
+    fn set_filter_regex(&mut self, use_regex: bool) {
+        if use_regex {
+            if let Err(e) = self.filter.regex_mode() {
+                eprintln!("{}", e);
+                return;
+            }
+        } else {
+            if let Err(e) = self.filter.normal_mode() {
+                eprintln!("{}", e);
+                return;
+            }
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
+        self.filter_regex = use_regex;
+        self.emit.filter_regex_changed();
+        self.inner_filter();
+    }
+
+    /// Toggles filter mode
+    ///
+    /// Returns new value.
+    fn toggle_filter_regex(&mut self) -> bool {
+        let toggled = !self.filter_regex;
+        self.set_filter_regex(toggled);
+        toggled
     }
 
     fn emit(&mut self) -> &mut ContactsEmitter {
@@ -247,5 +286,49 @@ impl ContactsTrait for Contacts {
 
     fn row_count(&self) -> usize {
         self.list.len()
+    }
+}
+
+impl Contacts {
+    fn clear_filter(&mut self) {
+        for contact in self.list.iter_mut() {
+            contact.matched = true;
+        }
+        self.model
+            .data_changed(0, self.list.len().saturating_sub(1));
+
+        if self.filter_regex {
+            self.filter = match SearchPattern::new_regex("".to_owned()) {
+                Ok(filter) => filter,
+                Err(e) => {
+                    eprintln!("This should be impossible: {}", e);
+                    return;
+                }
+            };
+        } else {
+            self.filter = match SearchPattern::new_normal("".to_owned()) {
+                Ok(filter) => filter,
+                Err(e) => {
+                    eprintln!("This should be impossible: {}", e);
+                    return;
+                }
+            };
+        }
+
+        self.emit.filter_changed();
+    }
+
+    fn inner_filter(&mut self) {
+        for contact in self.list.iter_mut() {
+            match contact.inner.name.as_ref() {
+                Some(name) => {
+                    contact.matched = self.filter.is_match(name);
+                }
+                None => {}
+            }
+            contact.matched |= self.filter.is_match(contact.inner.id.as_str());
+        }
+        self.model
+            .data_changed(0, self.list.len().saturating_sub(1));
     }
 }

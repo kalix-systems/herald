@@ -61,6 +61,14 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
+    inline void contactsFilterChanged(Contacts* o)
+    {
+        Q_EMIT o->filterChanged();
+    }
+    inline void contactsFilterRegexChanged(Contacts* o)
+    {
+        Q_EMIT o->filterRegexChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -376,7 +384,7 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
 }
 
 extern "C" {
-    Contacts::Private* contacts_new(Contacts*,
+    Contacts::Private* contacts_new(Contacts*, void (*)(Contacts*), void (*)(Contacts*),
         void (*)(const Contacts*),
         void (*)(Contacts*),
         void (*)(Contacts*),
@@ -390,11 +398,14 @@ extern "C" {
         void (*)(Contacts*, int, int),
         void (*)(Contacts*));
     void contacts_free(Contacts::Private*);
+    void contacts_filter_get(const Contacts::Private*, QString*, qstring_set);
+    void contacts_filter_set(Contacts::Private*, const ushort *str, int len);
+    bool contacts_filter_regex_get(const Contacts::Private*);
+    void contacts_filter_regex_set(Contacts::Private*, bool);
     bool contacts_add(Contacts::Private*, const ushort*, int);
-    void contacts_clear_filter(Contacts::Private*);
-    bool contacts_filter(Contacts::Private*, const ushort*, int, bool);
     bool contacts_remove(Contacts::Private*, quint64);
     void contacts_remove_all(Contacts::Private*);
+    bool contacts_toggle_filter_regex(Contacts::Private*);
 };
 
 extern "C" {
@@ -732,6 +743,8 @@ Contacts::Contacts(bool /*owned*/, QObject *parent):
 Contacts::Contacts(QObject *parent):
     QAbstractItemModel(parent),
     m_d(contacts_new(this,
+        contactsFilterChanged,
+        contactsFilterRegexChanged,
         [](const Contacts* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -786,17 +799,25 @@ Contacts::~Contacts() {
 }
 void Contacts::initHeaderData() {
 }
+QString Contacts::filter() const
+{
+    QString v;
+    contacts_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void Contacts::setFilter(const QString& v) {
+    contacts_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Contacts::filterRegex() const
+{
+    return contacts_filter_regex_get(m_d);
+}
+void Contacts::setFilterRegex(bool v) {
+    contacts_filter_regex_set(m_d, v);
+}
 bool Contacts::add(const QString& id)
 {
     return contacts_add(m_d, id.utf16(), id.size());
-}
-void Contacts::clear_filter()
-{
-    return contacts_clear_filter(m_d);
-}
-bool Contacts::filter(const QString& pattern, bool regex)
-{
-    return contacts_filter(m_d, pattern.utf16(), pattern.size(), regex);
 }
 bool Contacts::remove(quint64 row_index)
 {
@@ -805,6 +826,10 @@ bool Contacts::remove(quint64 row_index)
 void Contacts::remove_all()
 {
     return contacts_remove_all(m_d);
+}
+bool Contacts::toggleFilterRegex()
+{
+    return contacts_toggle_filter_regex(m_d);
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

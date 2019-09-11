@@ -54,15 +54,20 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Contacts(bool owned, QObject *parent);
 public:
     explicit Contacts(QObject *parent = nullptr);
     ~Contacts();
+    QString filter() const;
+    void setFilter(const QString& v);
+    bool filterRegex() const;
+    void setFilterRegex(bool v);
     Q_INVOKABLE bool add(const QString& id);
-    Q_INVOKABLE void clear_filter();
-    Q_INVOKABLE bool filter(const QString& pattern, bool regex);
     Q_INVOKABLE bool remove(quint64 row_index);
     Q_INVOKABLE void remove_all();
+    Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -101,6 +106,8 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void filterChanged();
+    void filterRegexChanged();
 };
 
 class Messages : public QAbstractItemModel

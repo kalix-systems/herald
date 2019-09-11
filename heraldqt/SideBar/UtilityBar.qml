@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
 import "../common" as Common
+import "../common/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -14,7 +15,6 @@ import "../common" as Common
 // Factor Component: FC
 // FS: Fix scoping
 
-// General Note : Baeo
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
@@ -25,10 +25,10 @@ ToolBar {
         anchors.fill: parent
         color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
     }
+
     // FS: this should be in a lower more specific scope, or maybe a state.*
     // It is coupled with what Icon we use for searching!
-    property bool searchRegex: false
-
+    // property bool searchRegex: false
     ScrollView {
         id: searchScroll
         anchors {
@@ -60,26 +60,23 @@ ToolBar {
             onTextChanged: {
                 // NOTE: we should probably wrap calls to libherald in call later.
                 // this prevents double calls, and is basically a debounce
-                Qt.callLater(contactsModel.filter, searchText.text, searchRegex)
+                Qt.callLater((text) => {contactsModel.filter = text}, searchText.text)
             }
         }
     }
 
     Common.ButtonForm {
         id: searchButton
+        property bool searchRegex: false
         anchors {
             right: addContactButton.left
             verticalCenter: parent.verticalCenter
             rightMargin: QmlCfg.margin
         }
-        source: "qrc:///icons/search.png"
-        onClicked: if (searchRegex) {
-                       source = "qrc:///icons/search.png"
-                       searchRegex = false
-                   } else {
-                       source = "qrc:///icons/searchRegexTemp.png"
-                       searchRegex = true
-                   }
+        source: Utils.safeSwitch(searchRegex,
+                                 "qrc:///icons/searchRegexTemp.png",
+                                 "qrc:///icons/search.png")
+        onClicked: searchRegex = contactsModel.toggleFilterRegex()
     }
 
     ///--- Add contact button
