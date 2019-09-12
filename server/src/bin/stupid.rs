@@ -50,6 +50,10 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             from,
             body,
             time: Utc::now(),
+            // this needs to be fixed, but won't be before the server is rewritten
+            msg_id: [0u8; 32].into(),
+            conversation_id: [0u8; 32].into(),
+            op_msg_id: None,
         };
         let u = self
             .meta
@@ -130,7 +134,7 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             if let Some(mut w) = self.open.async_get_mut(gid.clone()).await {
                 while !p.is_empty() {
                     let msg = p.pop()?;
-                    send_datagram(w.deref_mut(), &msg).await?;
+                    send_cbor(w.deref_mut(), &msg).await?;
                 }
             }
         }
@@ -156,7 +160,7 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
                 query: msg.clone(),
             };
             if let Some(mut w) = self.open.async_get_mut(gid.clone()).await {
-                send_datagram(w.deref_mut(), &wrapped).await?;
+                send_cbor(w.deref_mut(), &wrapped).await?;
             }
         }
         Ok(())
@@ -168,22 +172,24 @@ const PORT: u16 = 8000;
 #[tokio::main]
 async fn main() {
     let state: AppState<net::tcp::split::TcpStreamWriteHalf> = AppState::new();
-    let addr = format!("0.0.0.0:{}", PORT).parse().unwrap();
+    let addr: std::net::SocketAddr = format!("0.0.0.0:{}", PORT).parse().unwrap();
 
     println!("Listening on: {}", addr);
-    let mut listener = net::TcpListener::bind(&addr).expect("unable to bind TCP listener");
+    let mut listener = net::TcpListener::bind(&addr)
+        .await
+        .expect("unable to bind TCP listener");
     while let Ok((stream, addr)) = listener.accept().await {
         let state = state.clone();
         // todo: factor this into functions rather than the main from hell
         tokio::spawn(async move {
             let comp: Result<(), Error> = try {
                 let (mut reader, writer) = stream.split();
-                let gid: GlobalId = read_datagram(&mut reader).await?;
+                let gid: GlobalId = read_cbor(&mut reader).await?;
                 state.login(&gid, writer).await?;
                 loop {
-                    let d = read_datagram(&mut reader).await;
+                    let d = read_cbor(&mut reader).await;
                     if let Err(e) = d {
-                        dbg!("invalid msg", addr, e);
+                        eprintln!("invalid msg from {}, error was {}", addr, e);
                         break;
                     };
                     state.handle_msg(&gid, d.unwrap()).await?;

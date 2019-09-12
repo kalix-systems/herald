@@ -10,7 +10,6 @@ edition = "2018"
 libc = "0.2.60"
 heraldcore = {path="./heraldcore"}
 herald_common = {path="../common"}
-tokio         = "0.2.0-alpha.4"
 
 
 

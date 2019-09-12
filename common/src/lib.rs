@@ -53,11 +53,7 @@ impl<'de> Deserialize<'de> for MessageSendStatus {
         u.try_into().map_err(|u| {
             Error::invalid_value(
                 Unexpected::Unsigned(u as u64),
-                &format!(
-                    "expected a value between {} and {}",
-                    0, 2
-                )
-                .as_str(),
+                &format!("expected a value between {} and {}", 0, 2).as_str(),
             )
         })
     }
@@ -104,11 +100,7 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
         u.try_into().map_err(|u| {
             Error::invalid_value(
                 Unexpected::Unsigned(u as u64),
-                &format!(
-                    "expected a value between {} and {}",
-                    0, 3
-                )
-                .as_str(),
+                &format!("expected a value between {} and {}", 0, 3).as_str(),
             )
         })
     }
@@ -238,6 +230,7 @@ pub async fn send_cbor<S: AsyncWrite + Unpin, T: Serialize>(
 ) -> Result<(), TransportError> {
     let vec = serde_cbor::to_vec(t).map_err(TransportError::Se)?;
     let len = u64::to_le_bytes(vec.len() as u64);
+    eprintln!("length is {:x?}", len);
     s.write_all(&len).await?;
     s.write_all(&vec).await?;
     Ok(())
@@ -247,11 +240,14 @@ pub async fn read_cbor<S: AsyncRead + Unpin, T: for<'a> Deserialize<'a>>(
     s: &mut S,
 ) -> Result<T, TransportError> {
     let mut buf = [0u8; 8];
+    eprintln!("reading length");
     s.read_exact(&mut buf).await?;
     let len = u64::from_le_bytes(buf) as usize;
+    eprintln!("length read, was {}", len);
+    eprintln!("now reading data");
     let mut buf = vec![0u8; len];
     s.read_exact(&mut buf).await?;
-    dbg!(&buf);
+    eprintln!("read data, bytes were {:x?}", &buf);
     let res = serde_cbor::from_slice(&buf).map_err(TransportError::De)?;
     Ok(res)
 }

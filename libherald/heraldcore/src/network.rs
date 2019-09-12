@@ -129,6 +129,7 @@ struct Event {
     reply: Option<MessageToServer>,
     notification: Option<Notification>,
 }
+
 fn form_ack(update_code: MessageReceiptStatus, message_id: MsgId) -> MessageToPeer {
     let ack = ClientMessageAck {
         update_code,

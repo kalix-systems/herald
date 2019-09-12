@@ -1,29 +1,27 @@
 use crate::interface::*;
 use herald_common::*;
 use heraldcore::network::*;
-
+use heraldcore::tokio::{
+    self,
+    sync::mpsc::*,
+    sync::{mpsc, oneshot},
+};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
 };
-use tokio::{
-    net::{tcp::split::TcpStreamWriteHalf, *},
-    prelude::*,
-    sync::mpsc::UnboundedReceiver,
-    sync::{mpsc, oneshot},
-};
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
 
-pub struct NetworkFlags {
+pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
     net_new_message: AtomicBool,
 }
 
-impl NetworkFlags {
+impl EffectsFlags {
     pub fn new() -> Self {
-        NetworkFlags {
+        EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
             net_new_message: AtomicBool::new(false),
@@ -57,26 +55,34 @@ impl NetworkFlags {
     }
 }
 
+/// map to function calls from the herald core session api
+pub enum FuncCall {
+    SendMsg { to: UserId, msg: MessageToPeer },
+    RequestMeta(UserId),
+    RegisterDevice,
+}
+
 pub enum HandleMessages {
     ToServer(MessageToServer),
 }
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
-    status_flags: Arc<NetworkFlags>,
+    status_flags: Arc<EffectsFlags>,
+    tx: UnboundedSender<FuncCall>,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
     fn new(mut emit: NetworkHandleEmitter) -> Self {
         let emitter_clone = emit.clone();
+        let (tx, rx) = unbounded_channel();
 
-        let handle = NetworkHandle {
+        let mut handle = NetworkHandle {
             emit,
-            status_flags: Arc::new(NetworkFlags::new()),
+            status_flags: Arc::new(EffectsFlags::new()),
+            tx,
         };
-
-        let flags = handle.status_flags.clone();
-        handle.start_session(emitter_clone, flags);
+        start_worker(handle.emit.clone(), handle.status_flags.clone(), rx);
         handle
     }
 
@@ -101,11 +107,47 @@ impl NetworkHandleTrait for NetworkHandle {
         &mut self.emit
     }
 }
-impl NetworkHandle {
-    pub fn start_session(&self, emit: Emitter, flags: Arc<NetworkFlags>) {
-        tokio::spawn(async move {
-            let rx = Session::init();
-            print!("fantastic")
+
+// qtrx: receive from qt
+fn start_worker(
+    emit: NetworkHandleEmitter,
+    status_flags: Arc<EffectsFlags>,
+    qtrx: UnboundedReceiver<FuncCall>,
+) {
+    std::thread::spawn(move || {
+        let mut rt =
+            tokio::runtime::current_thread::Runtime::new().expect("could not spawn runtime");
+        rt.block_on(async move {
+            let (nwrx, sess) = match Session::init().await {
+                Ok((nwrx, sess)) => (nwrx, sess),
+                Err(e) => {
+                    eprintln!("failed to init session! : {}", e);
+                    std::process::abort();
+                }
+            };
+            tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
+            tokio::spawn(handle_nw_channel(nwrx, sess));
         });
+    });
+}
+
+async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
+    loop {
+        match rx.recv().await {
+            Some(call) => match call {
+                _ => unimplemented!(),
+            },
+            None => print!("maybe backoff expo here?"),
+        };
+    }
+}
+async fn handle_nw_channel(mut rx: UnboundedReceiver<Notification>, sess: Session) {
+    loop {
+        match rx.recv().await {
+            Some(notif) => match notif {
+                _ => unimplemented!(),
+            },
+            None => print!("maybe backoff expo here?"),
+        };
     }
 }
