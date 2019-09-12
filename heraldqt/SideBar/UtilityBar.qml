@@ -95,6 +95,7 @@ ToolBar {
                 scale: 0.9
                 mipmap: true
             }
+
         }
 
         // NPB: States
@@ -114,7 +115,7 @@ ToolBar {
                 bg.color = Qt.lighter(bg.color, 2.5)
             }
             onClicked: {
-                newContactDialogue.open()
+                newContactDialogue.show()
             }
         }
     }
