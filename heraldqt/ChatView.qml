@@ -68,6 +68,7 @@ Pane {
     }
 
     states: State {
+        when: root.gsContactId !== undefined
         name: "visibleview"
         PropertyChanges {
             target: chatPane

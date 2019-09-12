@@ -76,10 +76,12 @@ ListView {
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
 
-                onClicked: JS.contactClickHandler(mouse, contactList, index,
+                onClicked: { JS.contactClickHandler(mouse, contactList, index,
                                                   contactId, contactItem,
                                                   popupManager.optionsMenu,
                                                   messageModel, chatView)
+                    root.gsContactId = contactId
+                }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""

@@ -15,6 +15,8 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
+    property var gsContactId
+
     TopMenuBar {
     }
 
