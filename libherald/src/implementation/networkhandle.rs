@@ -140,21 +140,24 @@ impl NetworkHandleTrait for NetworkHandle {
 
 // qtrx: receive from qt
 fn start_worker(
-    emit: NetworkHandleEmitter,
-    status_flags: Arc<EffectsFlags>,
+    mut emit: NetworkHandleEmitter,
+    mut status_flags: Arc<EffectsFlags>,
     qtrx: UnboundedReceiver<FuncCall>,
 ) {
     std::thread::spawn(move || {
         let mut rt =
             tokio::runtime::current_thread::Runtime::new().expect("could not spawn runtime");
         rt.block_on(async move {
+            status_flags.emit_net_pending(&mut emit);
             let (nwrx, sess) = match Session::init().await {
                 Ok((nwrx, sess)) => (nwrx, sess),
                 Err(e) => {
                     eprintln!("failed to init session! : {}", e);
+                    status_flags.emit_net_down(&mut emit);
                     std::process::abort();
                 }
             };
+            status_flags.emit_net_up(&mut emit);
             tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
             tokio::spawn(handle_nw_channel(nwrx, sess));
         });
@@ -182,8 +185,9 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
                         .expect("failed to send message");
                 }
             },
-            None => print!("maybe backoff expo here?"),
+            None => {}
         };
+        // tokio delay here on return of none
     }
 }
 async fn handle_nw_channel(mut rx: UnboundedReceiver<Notification>, sess: Session) {
@@ -193,7 +197,8 @@ async fn handle_nw_channel(mut rx: UnboundedReceiver<Notification>, sess: Sessio
                 Notification::Ack(_) => {}
                 Notification::NewMsg(_) => {}
             },
-            None => print!("maybe backoff expo here?"),
+            None => {}
         };
+        // tokio delay here on return of none
     }
 }
