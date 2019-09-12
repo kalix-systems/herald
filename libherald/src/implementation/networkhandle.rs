@@ -158,6 +158,7 @@ fn start_worker(
             tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
             tokio::spawn(handle_nw_channel(nwrx, sess));
         });
+        rt.run().expect("opops");
     });
 }
 
