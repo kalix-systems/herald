@@ -159,7 +159,7 @@ fn start_worker(
             };
             status_flags.emit_net_up(&mut emit);
             tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
-            tokio::spawn(handle_nw_channel(nwrx, sess));
+            tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
         });
         rt.run().expect("opops");
     });
@@ -190,15 +190,27 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
         // tokio delay here on return of none
     }
 }
-async fn handle_nw_channel(mut rx: UnboundedReceiver<Notification>, sess: Session) {
+async fn handle_nw_channel(
+    mut rx: UnboundedReceiver<Notification>,
+    sess: Session,
+    mut emit: NetworkHandleEmitter,
+    status_flags: Arc<EffectsFlags>,
+) {
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                Notification::Ack(_) => {}
-                Notification::NewMsg(_) => {}
+                Notification::Ack(ClientMessageAck {
+                    update_code,
+                    message_id,
+                }) => {
+                    // update the UI here.
+                }
+                Notification::NewMsg(UserId) => {
+                    status_flags.emit_new_msg(&mut emit);
+                    println!("NEW MESSAGE FROM : {}", UserId);
+                }
             },
             None => {}
         };
-        // tokio delay here on return of none
     }
 }
