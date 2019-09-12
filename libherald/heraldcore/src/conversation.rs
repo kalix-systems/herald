@@ -258,10 +258,10 @@ mod tests {
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        Messages::add_message(None, author, &conversation, "1", None, None)
+        Messages::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        Messages::add_message(None, author, &conversation, "2", None, None)
+        Messages::add_message(None, author, &conversation, "2", None, &None)
             .expect(womp!("Failed to add second message"));
 
         let msgs = Conversations::get_conversation(&conversation)
@@ -282,7 +282,7 @@ mod tests {
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        let (msg_id, _) = Messages::add_message(None, author, &conversation, "1", None, None)
+        let (msg_id, _) = Messages::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
         Messages::delete_message(&msg_id).expect(womp!());
@@ -304,9 +304,9 @@ mod tests {
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        Messages::add_message(None, author, &conversation, "1", None, None)
+        Messages::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
-        Messages::add_message(None, author, &conversation, "1", None, None)
+        Messages::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add second message"));
 
         Conversations::delete_conversation(&conversation).expect(womp!());
