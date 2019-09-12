@@ -10,6 +10,7 @@
             "type": "Object",
             "functions": {
                 "sendMessage": {
+                    "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
@@ -21,6 +22,21 @@
                             "type": "QString"
                         }
                     ]
+                },
+                "requestMetaData": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "of",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "registerDevice": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": []
                 }
             },
             "properties": {

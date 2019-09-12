@@ -184,7 +184,9 @@ public:
     bool connectionPending() const;
     bool connectionUp() const;
     bool newMessage() const;
-    Q_INVOKABLE bool sendMessage(const QString& message_body, const QString& to) const;
+    Q_INVOKABLE bool registerDevice();
+    Q_INVOKABLE bool requestMetaData(const QString& of);
+    Q_INVOKABLE bool sendMessage(const QString& message_body, const QString& to);
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();

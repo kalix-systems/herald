@@ -607,7 +607,9 @@ extern "C" {
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
-    bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const ushort*, int);
+    bool network_handle_register_device(NetworkHandle::Private*);
+    bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
+    bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const ushort*, int);
 };
 
 Config::Config(bool /*owned*/, QObject *parent):
@@ -920,7 +922,15 @@ bool NetworkHandle::newMessage() const
 {
     return network_handle_new_message_get(m_d);
 }
-bool NetworkHandle::sendMessage(const QString& message_body, const QString& to) const
+bool NetworkHandle::registerDevice()
+{
+    return network_handle_register_device(m_d);
+}
+bool NetworkHandle::requestMetaData(const QString& of)
+{
+    return network_handle_request_meta_data(m_d, of.utf16(), of.size());
+}
+bool NetworkHandle::sendMessage(const QString& message_body, const QString& to)
 {
     return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.utf16(), to.size());
 }

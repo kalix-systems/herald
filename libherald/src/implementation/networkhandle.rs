@@ -87,8 +87,38 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn send_message(&self, message_body: String, to: String) -> bool {
-        false
+    fn send_message(&mut self, message_body: String, to: String) -> bool {
+        match self.tx.try_send(FuncCall::SendMsg {
+            msg: MessageToPeer::Message(message_body),
+            to,
+        }) {
+            Ok(_) => true,
+            Err(_e) => {
+                eprintln!("could not send message, error unrpintable");
+                false
+            }
+        }
+    }
+
+    fn register_device(&mut self) -> bool {
+        match self.tx.try_send(FuncCall::RegisterDevice) {
+            Ok(_) => true,
+            Err(_e) => {
+                eprintln!("could not register device, error unrpintable");
+                false
+            }
+        }
+    }
+
+    /// this is the API exposed to QML
+    fn request_meta_data(&mut self, of: String) -> bool {
+        match self.tx.try_send(FuncCall::RequestMeta(of)) {
+            Ok(_) => true,
+            Err(_e) => {
+                eprintln!("could not get meta data, error unrpintable");
+                false
+            }
+        }
     }
 
     fn new_message(&self) -> bool {
@@ -135,7 +165,21 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
     loop {
         match rx.recv().await {
             Some(call) => match call {
-                _ => unimplemented!(),
+                FuncCall::RegisterDevice => {
+                    sess.register_device()
+                        .await
+                        .expect("could not register device");
+                }
+                FuncCall::RequestMeta(id) => {
+                    sess.request_meta(id)
+                        .await
+                        .expect("could not retrieve meta data");
+                }
+                FuncCall::SendMsg { to, msg } => {
+                    sess.send_msg(to, msg)
+                        .await
+                        .expect("failed to send message");
+                }
             },
             None => print!("maybe backoff expo here?"),
         };
@@ -145,7 +189,8 @@ async fn handle_nw_channel(mut rx: UnboundedReceiver<Notification>, sess: Sessio
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                _ => unimplemented!(),
+                Notification::Ack(_) => {}
+                Notification::NewMsg(_) => {}
             },
             None => print!("maybe backoff expo here?"),
         };
