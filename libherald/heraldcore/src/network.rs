@@ -1,13 +1,13 @@
 use crate::{
     config::Config,
-    message_status,
     errors::HErr::{self, *},
-    message,
+    message, message_status,
 };
 use chrono::prelude::*;
 use herald_common::{
-    read_cbor, send_cbor, ClientMessageAck, DeviceId, GlobalId,  MessageToClient,
-    MessageToPeer, MessageToServer, Response, User, UserId, MsgId, ConversationId, MessageReceiptStatus
+    read_cbor, send_cbor, ClientMessageAck, ConversationId, DeviceId, GlobalId,
+    MessageReceiptStatus, MessageToClient, MessageToPeer, MessageToServer, MsgId, Response, User,
+    UserId,
 };
 use lazy_static::*;
 use qutex::Qutex;
@@ -41,7 +41,6 @@ pub struct Session {
     pending: Qutex<HashMap<MessageToServer, oneshot::Sender<Response>>>,
     notifications: mpsc::UnboundedSender<Notification>,
 }
-
 
 impl Session {
     /// Initalizes connection with the server and login.
@@ -146,17 +145,27 @@ fn form_push(to: UserId, msg: MessageToPeer) -> Result<MessageToServer, HErr> {
     })
 }
 
-fn handle_msg(msg_id: MsgId, author: UserId, conversation_id: ConversationId, body: String, time: DateTime<Utc>, op_msg_id: Option<MsgId>) -> Result<Event, HErr> {
+fn handle_msg(
+    msg_id: MsgId,
+    author: UserId,
+    conversation_id: ConversationId,
+    body: String,
+    time: DateTime<Utc>,
+    op_msg_id: Option<MsgId>,
+) -> Result<Event, HErr> {
     message::Messages::add_message(
         Some(msg_id.clone()),
         &author,
         &conversation_id,
         &body,
         Some(time),
-        op_msg_id,
+        &op_msg_id,
     )?;
 
-    let reply = form_push(author.clone(), form_ack(MessageReceiptStatus::Received, msg_id))?;
+    let reply = form_push(
+        author.clone(),
+        form_ack(MessageReceiptStatus::Received, msg_id),
+    )?;
     let notification = Notification::NewMsg(author);
     Ok(Event {
         reply: Some(reply),
@@ -176,10 +185,17 @@ fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
     })
 }
 
-fn handle_push(msg_id: MsgId, author: GlobalId, conversation_id: ConversationId, body: MessageToPeer, time: DateTime<Utc>, op_msg_id: Option<MsgId>) -> Result<Event, HErr> {
+fn handle_push(
+    msg_id: MsgId,
+    author: GlobalId,
+    conversation_id: ConversationId,
+    body: MessageToPeer,
+    time: DateTime<Utc>,
+    op_msg_id: Option<MsgId>,
+) -> Result<Event, HErr> {
     use MessageToPeer::*;
     match body {
-        Message(s) => handle_msg(msg_id, author.uid, conversation_id,  s, time, op_msg_id),
+        Message(s) => handle_msg(msg_id, author.uid, conversation_id, s, time, op_msg_id),
         Ack(a) => handle_ack(author.uid, a),
     }
 }
@@ -248,13 +264,19 @@ impl Session {
     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
         use MessageToClient::*;
         match msg {
-            Push { msg_id, from, conversation_id, body, time, op_msg_id } => {
+            Push {
+                msg_id,
+                from,
+                conversation_id,
+                body,
+                time,
+                op_msg_id,
+            } => {
                 let push = serde_cbor::from_slice(&body)?;
                 let Event {
                     reply,
                     notification,
-                } = handle_push(msg_id, from, conversation_id, push, time,
-                    op_msg_id)?;
+                } = handle_push(msg_id, from, conversation_id, push, time, op_msg_id)?;
                 if let Some(n) = notification {
                     drop(self.notifications.clone().try_send(n));
                 }

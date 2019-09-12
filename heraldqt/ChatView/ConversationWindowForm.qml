@@ -46,7 +46,7 @@ Flickable {
             delegate: Column {
                 readonly property bool outbound: author === config.configId
 
-                //NPB: possibly not a column and just fix anchors
+                // NPB: possibly not a column and just fix anchors
                 // column is most correct to resize for extra content
                 anchors {
                     right: if (outbound) {

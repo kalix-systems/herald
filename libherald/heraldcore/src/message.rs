@@ -80,7 +80,7 @@ impl Messages {
         conversation_id: &ConversationId,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
-        op: Option<MsgId>,
+        op: &Option<MsgId>,
     ) -> Result<(MsgId, DateTime<Utc>), HErr> {
         let timestamp = timestamp.unwrap_or_else(Utc::now);
         let timestamp_param = timestamp.format(utils::DATE_FMT).to_string();
@@ -88,6 +88,7 @@ impl Messages {
         let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
 
         let db = Database::get()?;
+
         db.execute(
             include_str!("sql/message/add.sql"),
             params![
@@ -96,7 +97,7 @@ impl Messages {
                 conversation_id.as_slice(),
                 body,
                 timestamp_param,
-                op.map(|x| x.to_vec()),
+                op.as_ref().map(|x| x.to_vec()),
             ],
         )?;
         Ok((msg_id, timestamp))

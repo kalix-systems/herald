@@ -31,7 +31,7 @@ impl Messages {
             }
         };
 
-        match Core::add_message(None, id.as_str(), conversation_id, body.as_str(), None, op) {
+        match Core::add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op) {
             Ok((msg_id, timestamp)) => {
                 let msg = MessagesItem {
                     inner: Message {
@@ -123,14 +123,14 @@ impl MessagesTrait for Messages {
     }
 
     fn op(&self, row_index: usize) -> Option<&[u8]> {
-        match self.list[row_index].inner.op {
+        match &self.list[row_index].inner.op {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
     }
 
     fn conversation_id(&self) -> Option<&[u8]> {
-        match self.conversation_id {
+        match &self.conversation_id {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
@@ -146,7 +146,7 @@ impl MessagesTrait for Messages {
 
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
-        let id = self.list[row_index].inner.message_id;
+        let id = &self.list[row_index].inner.message_id;
         match Core::delete_message(&id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);

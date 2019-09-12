@@ -1,5 +1,5 @@
 //! Client logic for herald.
-
+#![feature(async_closure)]
 #![warn(missing_docs)]
 #![allow(clippy::all)]
 mod implementation;

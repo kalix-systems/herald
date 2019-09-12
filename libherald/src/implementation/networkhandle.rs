@@ -1,15 +1,19 @@
 use crate::interface::*;
 use herald_common::*;
 use heraldcore::network::*;
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        mpsc::{channel, Receiver, Sender},
-        Arc,
-    },
-    thread,
-    time::Duration,
+
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
 };
+use tokio::{
+    net::{tcp::split::TcpStreamWriteHalf, *},
+    prelude::*,
+    sync::mpsc::UnboundedReceiver,
+    sync::{mpsc, oneshot},
+};
+// short type aliases for cleanliness
+type Emitter = NetworkHandleEmitter;
 
 pub struct NetworkFlags {
     net_online: AtomicBool,
@@ -60,40 +64,25 @@ pub enum HandleMessages {
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<NetworkFlags>,
-    tx: Sender<HandleMessages>,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
     fn new(mut emit: NetworkHandleEmitter) -> Self {
-        let (tx, rx) = channel::<HandleMessages>();
         let emitter_clone = emit.clone();
 
         let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(NetworkFlags::new()),
-            tx,
         };
 
-        let flag = handle.status_flags.clone();
-        NetworkHandle::connect_to_server(flag, rx, emitter_clone);
+        let flags = handle.status_flags.clone();
+        handle.start_session(emitter_clone, flags);
         handle
     }
 
-    /// TRIGGERS the sending of a message
-    /// this is called over FFI by the JS
+    /// this is the API exposed to QML
     fn send_message(&self, message_body: String, to: String) -> bool {
-        if let Ok(msg) = form_text_message(to, message_body) {
-            match self.tx.send(HandleMessages::ToServer(msg)) {
-                Ok(_) => true,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    false
-                }
-            }
-        } else {
-            eprintln!("error converting message to bytes");
-            false
-        }
+        false
     }
 
     fn new_message(&self) -> bool {
@@ -108,76 +97,15 @@ impl NetworkHandleTrait for NetworkHandle {
         self.status_flags.net_pending.load(Ordering::Relaxed)
     }
 
-    fn emit(&mut self) -> &mut NetworkHandleEmitter {
+    fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 }
-
 impl NetworkHandle {
-    pub fn connect_to_server(
-        flag: Arc<NetworkFlags>,
-        rx: Receiver<HandleMessages>,
-        mut emit: NetworkHandleEmitter,
-    ) {
-        thread::spawn(move || {
-            flag.emit_net_pending(&mut emit);
-            let mut stream = match open_connection() {
-                Ok(stream) => {
-                    flag.emit_net_up(&mut emit);
-                    stream
-                }
-                Err(e) => {
-                    flag.emit_net_down(&mut emit);
-                    eprintln!("{}", e);
-                    return;
-                }
-            };
-
-            loop {
-                use MessageToServer::*;
-                match rx.try_recv() {
-                    Ok(HandleMessages::ToServer(message)) => match message {
-                        // request from Qt to send a message
-                        SendMsg { to, body } => {
-                            println!("Sending from rust!");
-                            send_text_message(to, body, &mut stream).unwrap();
-                        }
-                        // request from Qt to register a device
-                        RegisterDevice => unimplemented!(),
-                        UpdateBlob { .. } => unimplemented!(),
-                        RequestMeta { .. } => unimplemented!(),
-                        // request from the network thread to
-                        // ack that a message has been received and or read
-                    },
-                    //Ok(HandleMessages::Shutdown) => unimplemented!(),
-                    Err(_e) => {}
-                }
-
-                // check os queue for tcp messages, they are inserted into db
-                if let Ok(()) = read_from_server(&mut stream) {
-                    flag.emit_new_msg(&mut emit);
-                }
-
-                thread::sleep(Duration::from_micros(10));
-                // check and repair dead connection
-                // retry logic should go here, this should infinite
-                // loop until the net comes back
-                let mut buf = [0; 8];
-                if let Ok(0) = stream.peek(&mut buf) {
-                    flag.emit_net_pending(&mut emit);
-                    stream = match open_connection() {
-                        Ok(stream) => {
-                            flag.emit_net_up(&mut emit);
-                            stream
-                        }
-                        Err(e) => {
-                            flag.emit_net_down(&mut emit);
-                            eprintln!("{}", e);
-                            return;
-                        }
-                    };
-                }
-            }
+    pub fn start_session(&self, emit: Emitter, flags: Arc<NetworkFlags>) {
+        tokio::spawn(async move {
+            let rx = Session::init();
+            print!("fantastic")
         });
     }
 }
