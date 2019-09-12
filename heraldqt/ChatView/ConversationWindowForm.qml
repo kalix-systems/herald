@@ -18,6 +18,7 @@ Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
 
+
     clip: true
     interactive: true
     boundsBehavior: Flickable.StopAtBounds
@@ -38,25 +39,28 @@ Flickable {
             left: parent.left
         }
 
+
         Repeater {
             id: chatListView
             anchors.fill: parent
             model: messageModel
 
+
             delegate: Column {
                 readonly property bool outbound: author === config.configId
+                // this is where scroll bar position needs to be set to instantiate in the right location
+                Component.onCompleted: chatScrollBar.position = 1.0
 
                 // NPB: possibly not a column and just fix anchors
                 // column is most correct to resize for extra content
                 anchors {
-                    right: if (outbound) {
-                               parent.right
-                           }
+                    // This is okay as a ternary, the types are enforced by QML.
+                    right: outbound ? parent.right : undefined
                     rightMargin: chatScrollBar.width + QmlCfg.margin
                     leftMargin: rightMargin
                 }
 
-                //NOTE: see chat bubble form. maybe handle this in TS:
+                //NOTE: see chat bubble form
                 CVUtils.ChatBubbleForm {
                     messageText: body
                     additionalContent: ""
@@ -65,11 +69,8 @@ Flickable {
 
                         }
                     }
-                    bubbleColor: if (outbound) {
-                                     QmlCfg.palette.tertiaryColor
-                                 } else {
-                                     QmlCfg.palette.secondaryColor
-                                 }
+                    // This is okay as a ternary, the types are enforced by QML.
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
                 } //bubble
             } //bubble wrapper
         } // Repeater

@@ -5,6 +5,7 @@ import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 import "ChatTextAreaUtils.mjs" as CTUtils
+import "./ChatView.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -34,27 +35,21 @@ Rectangle {
     radius: QmlCfg.radius
 
     // NPB: this flickers a lot, pause on scroll also
+    // handles chatbubble hovering
     MouseArea {
         propagateComposedEvents: true
         id: chatBubbleHitbox
         hoverEnabled: true
         width: parent.width + 50
 
-        //TS: put this logic in a seperate file
-        onEntered: {
-            replyButton.visible = !replyButton.visible
-        }
+        onEntered: replyButton.visible = !replyButton.visible
 
-        //TS: ""
-        onExited: {
-            replyButton.visible = !replyButton.visible
-        }
+        onExited: replyButton.visible = !replyButton.visible
 
         anchors {
-            left: if (!outbound)
-                      parent.left
-            right: if (outbound)
-                       parent.right
+            // Ternary is okay, types are enforced, cases are explicit.
+            left: !outbound ? parent.left : undefined
+            right: outbound ? parent.right : undefined
             bottom: parent.bottom
             top: parent.top
         }
@@ -73,7 +68,6 @@ Rectangle {
         }
     }
 
-    //TS: also a massive anti-pattern
     // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
     Component.onCompleted: {
         contentArgs.uiContainer = bubbleText
@@ -88,6 +82,7 @@ Rectangle {
         text: messageText
     }
 
+    // column that loads each chat bubble + additional content
     Column {
         id: bubble
         padding: QmlCfg.margin / 2
@@ -101,9 +96,9 @@ Rectangle {
         TextEdit {
             id: bubbleText
             text: messageText
-            //TS: NPB: that extra margin is bad, also this is a recipe for a binding loop
-            width: Math.min(2 * chatPane.width / 3,
-                            messageMetrics.width) + QmlCfg.margin
+            //NPB: that extra margin is bad, also this is a recipe for a binding loop
+            width: JS.naturalWidth(chatPane.width,
+                                   messageMetrics.width) + QmlCfg.margin / 2
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
@@ -115,8 +110,7 @@ Rectangle {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor
             text: Utils.friendlyTimestamp(epochTimestampMs)
-            /// NPB: all font sizes should be settable, for visual stuff
-            font.pointSize: 10
+            font.pointSize: QmlCfg.chatTextSize
         }
     }
 }

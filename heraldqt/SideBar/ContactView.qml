@@ -36,7 +36,7 @@ ListView {
         width: parent.width
         visible: matched
 
-        /// NPB : THis ought to be a mouse area with a hovered handler
+        /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
             id: bgBox
             readonly property color focusColor: QmlCfg.palette.tertiaryColor
@@ -81,15 +81,16 @@ ListView {
                                                   popupManager.optionsMenu,
                                                   messageModel, chatView)
 
-                onReleased: parent.state = Utils.safeSwitch(containsMouse,
-                                                            "hovering", "")
+                // ternary is okay here, type enforced by QML
+                onReleased: parent.state = containsMouse ? "hovering" : ""
             }
 
             ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
             Popups.ContactClickedPopup {
                 id: popupManager
             }
-            color: Utils.safeSwitch(contactItem.focus, focusColor, defaultColor)
+            // ternary is okay here, type enforced by QML
+            color: contactItem.focus ? focusColor : defaultColor
         }
 
         /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
@@ -98,11 +99,9 @@ ListView {
         Common.Avatar {
             size: 50
             id: contactAvatar
-            /// NPB: use camel case in libherald please
             displayName: Utils.unwrapOr(name, contactId)
             colorHash: color
-            /// NPB: use camel case in libherald please
-            pfpUrl: Utils.unwrapOr(profilePicture, null)
+            pfpUrl: Utils.safeStringOrDefault(profilePicture)
         }
     }
 }

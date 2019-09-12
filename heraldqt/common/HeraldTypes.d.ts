@@ -1,11 +1,6 @@
 declare type ConversationID = number;
 declare type UserId = string;
 
-declare class Avatar {
-  displayName: string;
-  pfpUrl: string | null;
-}
-
 declare class NetworkHandle {
   sendMessage(text: string, conversationID: ConversationID): boolean;
 }
@@ -24,9 +19,7 @@ declare class Contacts {
 declare class Config {
   name: UserId;
   configId: string;
-  pfpUrl: string | null;
+  pfpUrl?: string;
 
   exists(): boolean;
 }
-
-declare class ContactView extends ListView<ContactItem> {}

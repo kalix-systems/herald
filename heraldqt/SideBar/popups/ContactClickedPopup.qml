@@ -22,12 +22,12 @@ Item {
     // by the Contacts model functions.
     FileDialog {
         id: pfpDialog
+        nameFilters: ["(*.jpg *.png *.jpeg)"]
+        folder: shortcuts.desktop
         onSelectionAccepted: {
             // TS:
-            // NPB: please use camel case in libherald
             var retCode = contactsModel.setProfilePicture(index, fileUrl)
             if (retCode) {
-                // NPB: please use camel case in libherald
                 contactAvatar.pfpUrl = profilePicture
             } else
                 print("TODO: Native Error popup here...")
@@ -102,6 +102,8 @@ Item {
             focus: true
             placeholderText: qsTr("Enter new name")
             Keys.onReturnPressed: renameContact()
+            anchors.fill: parent
+            wrapMode: TextEdit.WrapAnywhere
         }
 
         Button {

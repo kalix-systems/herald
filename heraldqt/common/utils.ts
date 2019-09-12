@@ -38,6 +38,10 @@ function isBoolean(maybeBool: unknown): boolean {
   return typeof maybeBool === "boolean";
 }
 
+function isString(maybeString: unknown): boolean {
+  return typeof maybeString === "string";
+}
+
 function isObject(maybeObject: unknown): boolean {
   return typeof maybeObject === "object";
 }
@@ -89,4 +93,25 @@ export function safeToQrcURI(url: string): string {
     throw new Error("Expected url to be string");
   }
   return "file:" + url;
+}
+
+/*
+ * If `maybeString` is a valid string, it will be returned.
+ * If `maybeString` is not and a valid fallback is provided, it will be used.
+ * Finally, if neither of the previous conditions hold, an empty string will be
+ * returned.
+ * */
+export function safeStringOrDefault(
+  maybeString: unknown,
+  fallback?: unknown
+): string {
+  if (isString(maybeString)) {
+    return maybeString as string;
+  }
+
+  if (isString(fallback)) {
+    return fallback as string;
+  }
+
+  return "";
 }

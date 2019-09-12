@@ -10,7 +10,6 @@ import QtQuick 2.13
 // Factor Component: FC
 // FS: Fix scoping
 Item {
-    //TS: This should be an enum defined from typscript.
     Theme {
         id: themeEnum
     }
@@ -25,6 +24,8 @@ Item {
     readonly property int padding: 10
     /// standard toolbar height
     readonly property int toolbarHeight: 40
+    /// standard chat text size
+    property int chatTextSize: 10
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme

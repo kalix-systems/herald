@@ -31,6 +31,9 @@ export function friendlyTimestamp(msEpochTime) {
 function isBoolean(maybeBool) {
     return typeof maybeBool === "boolean";
 }
+function isString(maybeString) {
+    return typeof maybeString === "string";
+}
 function isObject(maybeObject) {
     return typeof maybeObject === "object";
 }
@@ -71,4 +74,19 @@ export function safeToQrcURI(url) {
         throw new Error("Expected url to be string");
     }
     return "file:" + url;
+}
+/*
+ * If `maybeString` is a valid string, it will be returned.
+ * If `maybeString` is not and a valid fallback is provided, it will be used.
+ * Finally, if neither of the previous conditions hold, an empty string will be
+ * returned.
+ * */
+export function safeStringOrDefault(maybeString, fallback) {
+    if (isString(maybeString)) {
+        return maybeString;
+    }
+    if (isString(fallback)) {
+        return fallback;
+    }
+    return "";
 }

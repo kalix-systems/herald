@@ -11,11 +11,11 @@
         "SideBar/popups/NewContactDialogue.ts",
         "SideBar/ContactViewTypes.d.ts",
         "SideBar/ContactView.ts",
-        "SideBar/ConfigBar.ts",
         "ChatView/ChatViewTypes.d.ts",
-        "ChatView/ReplyComponent.ts",
+        "ChatView/ChatView.ts",
         "common/QtTypes.d.ts",
         "common/HeraldTypes.d.ts",
+        "common/HeraldUITypes.d.ts",
         "common/Avatar.ts"
     ]
 }
