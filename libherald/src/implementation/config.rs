@@ -12,6 +12,19 @@ impl ConfigTrait for Config {
         if let Err(e) = Core::create_table() {
             eprintln!("{}", e);
         }
+        if let Err(e) = heraldcore::message::Messages::create_table() {
+            eprintln!("{}", e);
+        }
+        if let Err(e) = heraldcore::contact::Contacts::create_table() {
+            eprintln!("{}", e);
+        }
+        if let Err(e) = heraldcore::members::Members::create_table() {
+            eprintln!("{}", e);
+        }
+        if let Err(e) = heraldcore::conversation::Conversations::create_table() {
+            eprintln!("{}", e);
+        }
+
         let (inner, init) = match Core::get() {
             Ok(c) => (c, true),
             Err(e) => {

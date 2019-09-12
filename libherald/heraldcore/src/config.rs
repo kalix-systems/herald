@@ -11,12 +11,6 @@ use rusqlite::{params, NO_PARAMS};
 pub struct Config {
     /// ID of the current user
     pub id: Option<UserId>,
-    /// Display name for the current user
-    pub name: Option<String>,
-    /// Path to profile picture for the current user
-    pub profile_picture: Option<String>,
-    /// Color of the current user
-    pub color: Option<u32>,
     /// Colorscheme
     pub colorscheme: u32,
 }
@@ -79,19 +73,26 @@ impl Config {
     ) -> Result<Config, HErr> {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let config = Config {
-            id: Some(id.clone()),
-            name: name.map(|n| n.to_owned()),
-            profile_picture: profile_picture.map(|p| p.to_owned()),
+            id: Some(id.to_string()),
+            name: name.map(|n| n.to_string()),
+            profile_picture: profile_picture.map(|p| p.to_string()),
             color: Some(color),
             colorscheme: colorscheme.unwrap_or(1),
         };
 
-        let db = Database::get()?;
-        db.execute(
+        let mut db = Database::get()?;
+        let tx = db.transaction()?;
+        tx.execute(
             include_str!("sql/config/add_config.sql"),
             params![id, name, profile_picture, color],
         )?;
-
+        // TODO This is denormalizing the data, it's an easy fix but the
+        // changes will propagate.
+        tx.execute(
+            include_str!("sql/contact/add.sql"),
+            params![id, Some("Note to self"), profile_picture, color],
+        )?;
+        tx.commit()?;
         Ok(config)
     }
 
@@ -196,7 +197,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get_config() {
-        Config::reset().expect(womp!());
+        Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
 
@@ -206,7 +207,7 @@ mod tests {
             "HelloWorld"
         );
 
-        Config::reset().expect(womp!());
+        Database::reset_all().expect(womp!());
 
         let name = "stuff";
         let profile_picture = "stuff";
@@ -229,7 +230,7 @@ mod tests {
     #[test]
     #[serial]
     fn get_id() {
-        Config::reset().expect(womp!());
+        Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
         let config = Config::new(id.into(), None, None, None, None).expect(womp!());

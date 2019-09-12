@@ -18,8 +18,13 @@ ApplicationWindow {
     TopMenuBar {
     }
 
-    NetworkHandle {
-        id: networkHandle
+    property alias networkHandle: networkHandleLoader.item
+
+    Loader {
+        id: networkHandleLoader
+        active: !!config.init
+        sourceComponent: NetworkHandle {
+        }
     }
 
     Messages {

@@ -3,7 +3,7 @@ use crate::{
     errors::HErr,
     image_utils,
 };
-use herald_common::{UserId, UserIdRef};
+use herald_common::{ConversationId, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
@@ -170,7 +170,7 @@ impl Contacts {
         Ok(names)
     }
 
-    /// Returns all active contacts excluding archived Contacts::
+    /// Returns all active contacts excluding archived contacts
     pub fn active() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
@@ -187,29 +187,33 @@ impl Contacts {
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-/// Whether or not the the contact is archived
-pub enum ArchiveStatus {
+#[repr(u8)]
+/// Status of the contact
+pub enum ContactStatus {
+    /// The contact is the local user.
+    Local = 0,
     /// The contact is active
-    Active,
+    Active = 1,
     /// The contact is archived
-    Archived,
+    Archived = 2,
+    /// The contact is deleted
+    Deleted = 3,
 }
 
-impl From<bool> for ArchiveStatus {
-    fn from(archived: bool) -> Self {
-        if archived {
-            ArchiveStatus::Archived
-        } else {
-            ArchiveStatus::Active
-        }
-    }
-}
+impl std::convert::TryFrom<u8> for ContactStatus {
+    type Error = HErr;
 
-impl From<ArchiveStatus> for bool {
-    fn from(archived: ArchiveStatus) -> Self {
-        match archived {
-            ArchiveStatus::Archived => true,
-            ArchiveStatus::Active => false,
+    fn try_from(n: u8) -> Result<Self, HErr> {
+        use ContactStatus::*;
+        match n {
+            0 => Ok(Local),
+            1 => Ok(Active),
+            2 => Ok(Archived),
+            3 => Ok(Deleted),
+            unknown => Err(HErr::HeraldError(format!(
+                "Unknown contact status {}",
+                unknown
+            ))),
         }
     }
 }
@@ -225,8 +229,10 @@ pub struct Contact {
     pub profile_picture: Option<String>,
     /// User set color for user
     pub color: u32,
-    /// Indicates wheter user is archived
-    pub archive_status: ArchiveStatus,
+    /// Indicates whether user is archived
+    pub status: ContactStatus,
+    /// Pairwise conversation corresponding to contact
+    pub pairwise_conversation: ConversationId,
 }
 
 impl Contact {
@@ -236,7 +242,7 @@ impl Contact {
         name: Option<String>,
         profile_picture: Option<String>,
         color: Option<u32>,
-        archive_status: ArchiveStatus,
+        status: ContactStatus,
     ) -> Self {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         Contact {
@@ -244,7 +250,7 @@ impl Contact {
             id,
             profile_picture,
             color,
-            archive_status,
+            status,
         }
     }
 
@@ -291,14 +297,14 @@ impl Contact {
     /// Archives the contact if it is active.
     pub fn archive(&mut self) -> Result<(), HErr> {
         Contacts::archive(self.id.as_str())?;
-        self.archive_status = ArchiveStatus::Archived;
+        self.archive_status = Status::Archived;
         Ok(())
     }
 
     /// Activates the contact if it is archived.
     pub fn activate(&mut self) -> Result<(), HErr> {
         Contacts::activate(self.id.as_str())?;
-        self.archive_status = ArchiveStatus::Active;
+        self.archive_status = Status::Active;
         Ok(())
     }
 

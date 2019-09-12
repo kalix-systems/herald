@@ -3,7 +3,6 @@ use herald_common::{ConversationId, MsgId};
 use heraldcore::{
     config::Config,
     conversation::Conversations,
-    db::DBTable,
     message::{Message, Messages as Core},
 };
 
@@ -61,9 +60,6 @@ impl Messages {
 
 impl MessagesTrait for Messages {
     fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
-        if let Err(e) = Core::create_table() {
-            eprintln!("{}", e);
-        }
         Messages {
             conversation_id: None,
             list: Vec::new(),

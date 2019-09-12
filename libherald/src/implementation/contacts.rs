@@ -21,11 +21,6 @@ pub struct Contacts {
 
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
-        // create table if it does not already exist
-        if let Err(e) = Core::create_table() {
-            eprintln!("{}", e);
-        }
-
         let list = match Core::all() {
             Ok(v) => v
                 .into_iter()
