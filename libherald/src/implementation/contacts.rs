@@ -1,7 +1,6 @@
 use crate::interface::*;
 use heraldcore::{
-    contact::{self, Contacts as Core},
-    db::DBTable,
+    contact::{self, ContactStatus, Contacts as Core},
     utils::SearchPattern,
 };
 
@@ -57,16 +56,20 @@ impl ContactsTrait for Contacts {
             return false;
         }
 
-        if let Err(e) = Core::add(id.as_str(), None, None, None) {
-            eprintln!("Error: {}", e);
-            return false;
-        }
+        let contact =
+            match Core::add_contact(id.as_str(), None, None, None, ContactStatus::Active, None) {
+                Ok(contact) => contact,
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    return false;
+                }
+            };
 
         self.model.begin_insert_rows(0, 0);
         self.list.insert(
             0,
             ContactsItem {
-                inner: contact::Contact::new(id, None, None, None, contact::ArchiveStatus::Active),
+                inner: contact,
                 matched: true,
             },
         );
@@ -143,26 +146,23 @@ impl ContactsTrait for Contacts {
     ///
     /// User is archived => true,
     /// User is active => false
-    fn archive_status(&self, row_index: usize) -> bool {
-        self.list[row_index].inner.archive_status.into()
+    fn status(&self, row_index: usize) -> u8 {
+        self.list[row_index].inner.status as u8
     }
 
     /// Updates archive status.
-    ///
-    /// true => archives,
-    /// false => activates
-    fn set_archive_status(&mut self, row_index: usize, archive_status: bool) -> bool {
-        if archive_status {
-            if let Err(e) = self.list[row_index].inner.archive() {
+    fn set_status(&mut self, row_index: usize, status: u8) -> bool {
+        use std::convert::TryFrom;
+        let status = match ContactStatus::try_from(status) {
+            Ok(status) => status,
+            Err(e) => {
                 eprintln!("{}", e);
                 return false;
             }
-        } else {
-            if let Err(e) = self.list[row_index].inner.activate() {
-                eprintln!("{}", e);
-                return false;
-            }
-        }
+        };
+
+        self.list[row_index].inner.set_status(status);
+
         true
     }
 

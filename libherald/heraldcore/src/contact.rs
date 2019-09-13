@@ -52,7 +52,7 @@ impl Contacts {
         color: Option<u32>,
         status: ContactStatus,
         pairwise_conversation: Option<ConversationId>,
-    ) -> Result<(), HErr> {
+    ) -> Result<Contact, HErr> {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id));
 
         let pairwise_conversation = match pairwise_conversation {
@@ -82,7 +82,14 @@ impl Contacts {
         )?;
         tx.commit()?;
 
-        Ok(())
+        Ok(Contact {
+            id: id.to_string(),
+            name: name.map(|s| s.to_string()),
+            profile_picture: profile_picture.map(|s| s.to_string()),
+            color,
+            status,
+            pairwise_conversation,
+        })
     }
 
     /// Gets a contact's name by their `id`.
@@ -288,26 +295,25 @@ pub struct Contact {
 }
 
 impl Contact {
-    /// Create new contact.
-    pub fn new(
-        id: String,
-        name: Option<String>,
-        profile_picture: Option<String>,
-        color: Option<u32>,
-        status: ContactStatus,
-        pairwise_conversation: ConversationId,
-    ) -> Self {
-        let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-
-        Contact {
-            name,
-            id,
-            profile_picture,
-            color,
-            status,
-            pairwise_conversation,
-        }
-    }
+    //    fn new(
+    //        id: String,
+    //        name: Option<String>,
+    //        profile_picture: Option<String>,
+    //        color: Option<u32>,
+    //        status: ContactStatus,
+    //        pairwise_conversation: ConversationId,
+    //    ) -> Self {
+    //        let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
+    //
+    //        Contact {
+    //            name,
+    //            id,
+    //            profile_picture,
+    //            color,
+    //            status,
+    //            pairwise_conversation,
+    //        }
+    //    }
 
     /// Returns name
     pub fn name(&self) -> Option<&str> {
@@ -346,6 +352,18 @@ impl Contact {
     pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
         Contacts::set_color(self.id.as_str(), color)?;
         self.color = color;
+        Ok(())
+    }
+
+    /// Returns contact's status
+    pub fn status(&self) -> ContactStatus {
+        self.status
+    }
+
+    /// Sets status
+    pub fn set_status(&mut self, status: ContactStatus) -> Result<(), HErr> {
+        Contacts::set_status(self.id.as_str(), status)?;
+        self.status = status;
         Ok(())
     }
 

@@ -438,8 +438,6 @@ pub trait ContactsTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn archive_status(&self, index: usize) -> bool;
-    fn set_archive_status(&mut self, index: usize, _: bool) -> bool;
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn contact_id(&self, index: usize) -> &str;
@@ -449,6 +447,8 @@ pub trait ContactsTrait {
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
     fn profile_picture(&self, index: usize) -> Option<&str>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
+    fn status(&self, index: usize) -> u8;
+    fn set_status(&mut self, index: usize, _: u8) -> bool;
 }
 
 #[no_mangle]
@@ -574,20 +574,6 @@ pub unsafe extern "C" fn contacts_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn contacts_data_archive_status(ptr: *const Contacts, row: c_int) -> bool {
-    let o = &*ptr;
-    o.archive_status(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn contacts_set_data_archive_status(
-    ptr: *mut Contacts, row: c_int,
-    v: bool,
-) -> bool {
-    (&mut *ptr).set_archive_status(to_usize(row), v)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn contacts_data_color(ptr: *const Contacts, row: c_int) -> u32 {
     let o = &*ptr;
     o.color(to_usize(row)).into()
@@ -685,6 +671,20 @@ pub unsafe extern "C" fn contacts_set_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_profile_picture_none(ptr: *mut Contacts, row: c_int) -> bool {
     (&mut *ptr).set_profile_picture(to_usize(row), None)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_status(ptr: *const Contacts, row: c_int) -> u8 {
+    let o = &*ptr;
+    o.status(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_set_data_status(
+    ptr: *mut Contacts, row: c_int,
+    v: u8,
+) -> bool {
+    (&mut *ptr).set_status(to_usize(row), v)
 }
 
 pub struct MessagesQObject {}

@@ -33,7 +33,7 @@ impl ConfigTrait for Config {
                     id: None,
                     name: None,
                     profile_picture: None,
-                    color: None,
+                    color: 0,
                     colorscheme: 0,
                 };
                 (uninit_inner, false)
@@ -95,7 +95,7 @@ impl ConfigTrait for Config {
     }
 
     fn color(&self) -> u32 {
-        self.inner.color.unwrap_or(0)
+        self.inner.color
     }
 
     fn set_color(&mut self, color: u32) {

@@ -87,8 +87,6 @@ public:
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE bool archiveStatus(int row) const;
-    Q_INVOKABLE bool setArchiveStatus(int row, bool value);
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QString contactId(int row) const;
@@ -98,6 +96,8 @@ public:
     Q_INVOKABLE bool setName(int row, const QString& value);
     Q_INVOKABLE QString profilePicture(int row) const;
     Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
+    Q_INVOKABLE quint8 status(int row) const;
+    Q_INVOKABLE bool setStatus(int row, quint8 value);
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

@@ -81,9 +81,9 @@
                     "write": true,
                     "type": "quint32"
                 },
-                "archiveStatus": {
+                "status": {
                     "write": true,
-                    "type": "bool"
+                    "type": "quint8"
                 },
                 "matched": {
                     "write": true,
