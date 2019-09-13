@@ -161,7 +161,10 @@ impl ContactsTrait for Contacts {
             }
         };
 
-        self.list[row_index].inner.set_status(status);
+        if let Err(e) = self.list[row_index].inner.set_status(status) {
+            eprintln!("{}", e);
+            return false;
+        }
 
         true
     }
