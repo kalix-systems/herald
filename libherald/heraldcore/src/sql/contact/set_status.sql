@@ -1,6 +1,6 @@
 UPDATE
   contacts
 SET
-  archived = 0
+  status = @1
 WHERE
-  user_id = ?
+  user_id = @2

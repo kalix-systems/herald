@@ -1,6 +1,6 @@
-UPDATE
+SELECT
+  status
+FROM
   contacts
-SET
-  archived = 1
 WHERE
   user_id = ?

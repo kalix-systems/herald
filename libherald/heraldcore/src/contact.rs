@@ -158,8 +158,20 @@ impl Contacts {
 
     /// Sets contact status
     pub fn set_status(id: &str, status: ContactStatus) -> Result<(), HErr> {
-        // TODO
+        let db = Database::get()?;
+        db.execute(
+            include_str!("sql/contact/set_status.sql"),
+            params![status as u8, id],
+        )?;
         Ok(())
+    }
+
+    pub fn get_status(id: &str) -> Result<ContactStatus, HErr> {
+        let db = Database::get()?;
+
+        let mut stmt = db.prepare(include_str!("sql/contact/get_status.sql"))?;
+
+        Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
 
     /// Returns all contacts, including archived contacts
@@ -460,33 +472,18 @@ mod tests {
         assert_eq!(contacts[1].id, id2);
     }
 
-    //#[test]
-    //#[serial]
-    //fn archive_contact() {
-    //    Database::reset_all().expect(womp!());
+    #[test]
+    #[serial]
+    fn set_status() {
+        Database::reset_all().expect(womp!());
 
-    //    let id = "Hello World";
-    //    Contacts::add_contact(id, None, None, None, ContactStatus::Active).expect(womp!());
-    //    Contacts::archive(id).expect(womp!());
+        let id = "Hello World";
+        Contacts::add_contact(id, None, None, None, ContactStatus::Active, None).expect(womp!());
+        Contacts::set_status(id, ContactStatus::Archived).expect(womp!());
 
-    //    assert!(Contacts::is_archived(id).expect("Failed to determine if contact was archived"));
-    //}
-
-    //#[test]
-    //#[serial]
-    //fn get_active_contacts() {
-    //    Database::reset_all().expect(womp!());
-
-    //    let id1 = "Hello";
-    //    let id2 = "World";
-
-    //    Contacts::add_contact(id1, None, None, None, ContactStatus::Active).expect(womp!());
-    //    Contacts::add_contact(id2, None, None, None, ContactStatus::Active).expect(womp!());
-
-    //    // Contacts::archive(id2).expect(womp!());
-
-    //    let contacts = Contacts::active().expect(womp!());
-    //    assert_eq!(contacts.len(), 1);
-    //    assert_eq!(contacts[0].id, id1);
-    //}
+        assert_eq!(
+            Contacts::get_status(id).expect("Failed to determine contact status"),
+            ContactStatus::Archived
+        );
+    }
 }
