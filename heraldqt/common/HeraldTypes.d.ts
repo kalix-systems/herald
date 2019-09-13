@@ -16,6 +16,12 @@ declare class Contacts {
   add(userid: UserId): boolean;
 }
 
+declare const enum ContactStatus {
+  Active = 0,
+  Archved = 1,
+  Deleted = 2
+}
+
 declare class Config {
   name: UserId;
   configId: string;

@@ -4,7 +4,6 @@ use heraldcore::network::*;
 use heraldcore::tokio::{
     self,
     sync::mpsc::*,
-    sync::{mpsc, oneshot},
 };
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -62,10 +61,6 @@ pub enum FuncCall {
     RegisterDevice,
 }
 
-pub enum HandleMessages {
-    ToServer(MessageToServer),
-}
-
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
@@ -73,8 +68,7 @@ pub struct NetworkHandle {
 }
 
 impl NetworkHandleTrait for NetworkHandle {
-    fn new(mut emit: NetworkHandleEmitter) -> Self {
-        let emitter_clone = emit.clone();
+    fn new(emit: NetworkHandleEmitter) -> Self {
         let (tx, rx) = unbounded_channel();
 
         let mut handle = NetworkHandle {
@@ -141,7 +135,7 @@ impl NetworkHandleTrait for NetworkHandle {
 // qtrx: receive from qt
 fn start_worker(
     mut emit: NetworkHandleEmitter,
-    mut status_flags: Arc<EffectsFlags>,
+    status_flags: Arc<EffectsFlags>,
     qtrx: UnboundedReceiver<FuncCall>,
 ) {
     std::thread::spawn(move || {
@@ -192,7 +186,7 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
 }
 async fn handle_nw_channel(
     mut rx: UnboundedReceiver<Notification>,
-    sess: Session,
+    _sess: Session,
     mut emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
 ) {
@@ -203,11 +197,12 @@ async fn handle_nw_channel(
                     update_code,
                     message_id,
                 }) => {
-                    // update the UI here.
+                    println!("Receiving notification: {:?}, {:?}", update_code, message_id);
+                    // TODO update the UI here.
                 }
-                Notification::NewMsg(UserId) => {
+                Notification::NewMsg(user_id) => {
                     status_flags.emit_new_msg(&mut emit);
-                    println!("NEW MESSAGE FROM : {}", UserId);
+                    println!("NEW MESSAGE FROM : {}", user_id);
                 }
             },
             None => {}
