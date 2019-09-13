@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS conversations (
   -- ID of the conversation. Approximately unique.
-  conversation_id BLOB PRIMARY KEY NOT NULL,
+  conversation_id BLOB PRIMARY KEY NOT NULL CHECK (length(conversation_id) = 32),
   -- Group title, optional
   title TEXT DEFAULT NULL,
   -- Group picture, optional
