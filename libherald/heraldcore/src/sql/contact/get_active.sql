@@ -3,8 +3,9 @@ SELECT
   name,
   profile_picture,
   color,
-  archived
+  status
 FROM
   contacts
 WHERE
-  archived = 0
+  --- Contact not yet deleted
+  status < 2

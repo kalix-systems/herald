@@ -5,6 +5,7 @@ use crate::{
 };
 use herald_common::{ConversationId, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
+use std::convert::TryInto;
 
 #[derive(Default)]
 /// Wrapper around contacts table.
@@ -44,19 +45,44 @@ impl DBTable for Contacts {
 
 impl Contacts {
     /// Inserts contact into contacts table.
-    pub fn add(
+    /// TODO AHH MUTEX
+    pub fn add_contact(
         id: UserIdRef,
         name: Option<&str>,
         profile_picture: Option<&str>,
         color: Option<u32>,
+        status: ContactStatus,
+        pairwise_conversation: Option<ConversationId>,
     ) -> Result<(), HErr> {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id));
 
-        let db = Database::get()?;
-        db.execute(
+        let pairwise_conversation = match pairwise_conversation {
+            Some(conv_id) => {
+                crate::conversation::Conversations::add_conversation(Some(&conv_id), name)?
+            }
+            None => crate::conversation::Conversations::add_conversation(None, name)?,
+        };
+
+        let mut db = Database::get()?;
+
+        let tx = db.transaction()?;
+        tx.execute(
             include_str!("sql/contact/add.sql"),
-            params![id, name, profile_picture, color],
+            params![
+                id,
+                name,
+                profile_picture,
+                color,
+                status as u8,
+                pairwise_conversation.as_slice()
+            ],
         )?;
+        tx.execute(
+            include_str!("sql/members/add_member.sql"),
+            params![pairwise_conversation.as_slice(), id],
+        )?;
+        tx.commit()?;
+
         Ok(())
     }
 
@@ -130,32 +156,13 @@ impl Contacts {
         Ok(stmt.exists(&[id])?)
     }
 
-    /// Archives a contact if it is not already archived.
-    pub fn archive(id: &str) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("sql/contact/archive_contact.sql"), &[id])?;
+    /// Sets contact status
+    pub fn set_status(id: &str, status: ContactStatus) -> Result<(), HErr> {
+        // TODO
         Ok(())
     }
 
-    /// Activates contact if it is not already activated.
-    pub fn activate(id: &str) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("sql/contact/activate_contact.sql"), &[id])?;
-        Ok(())
-    }
-
-    /// Indicates whether a contact is archived.
-    pub fn is_archived(id: &str) -> Result<bool, HErr> {
-        let db = Database::get()?;
-
-        let val: i64 = db.query_row(include_str!("sql/contact/is_archived.sql"), &[id], |row| {
-            Ok(row.get(0)?)
-        })?;
-
-        Ok(val == 1)
-    }
-
-    /// Returns all contact, including archived contacts
+    /// Returns all contacts, including archived contacts
     pub fn all() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
@@ -190,14 +197,31 @@ impl Contacts {
 #[repr(u8)]
 /// Status of the contact
 pub enum ContactStatus {
-    /// The contact is the local user.
-    Local = 0,
     /// The contact is active
-    Active = 1,
+    Active = 0,
     /// The contact is archived
-    Archived = 2,
+    Archived = 1,
     /// The contact is deleted
-    Deleted = 3,
+    Deleted = 2,
+}
+
+#[derive(Clone, Copy, PartialEq, Debug)]
+#[repr(u8)]
+/// Type of the contact
+pub enum ContactType {
+    /// The contact is local
+    Local = 0,
+    /// The contact is remote
+    Remote = 1,
+}
+
+impl rusqlite::types::FromSql for ContactStatus {
+    fn column_result(value: rusqlite::types::ValueRef) -> rusqlite::types::FromSqlResult<Self> {
+        value
+            .as_i64()?
+            .try_into()
+            .map_err(|_| rusqlite::types::FromSqlError::InvalidType)
+    }
 }
 
 impl std::convert::TryFrom<u8> for ContactStatus {
@@ -206,14 +230,24 @@ impl std::convert::TryFrom<u8> for ContactStatus {
     fn try_from(n: u8) -> Result<Self, HErr> {
         use ContactStatus::*;
         match n {
-            0 => Ok(Local),
-            1 => Ok(Active),
-            2 => Ok(Archived),
-            3 => Ok(Deleted),
+            0 => Ok(Active),
+            1 => Ok(Archived),
+            2 => Ok(Deleted),
             unknown => Err(HErr::HeraldError(format!(
                 "Unknown contact status {}",
                 unknown
             ))),
+        }
+    }
+}
+
+impl std::convert::TryFrom<i64> for ContactStatus {
+    type Error = HErr;
+
+    fn try_from(n: i64) -> Result<Self, HErr> {
+        match u8::try_from(n) {
+            Ok(n) => n.try_into(),
+            Err(_) => Err(HErr::HeraldError(format!("Unknown contact status {}", n))),
         }
     }
 }
@@ -243,14 +277,17 @@ impl Contact {
         profile_picture: Option<String>,
         color: Option<u32>,
         status: ContactStatus,
+        pairwise_conversation: ConversationId,
     ) -> Self {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
+
         Contact {
             name,
             id,
             profile_picture,
             color,
             status,
+            pairwise_conversation,
         }
     }
 
@@ -294,29 +331,14 @@ impl Contact {
         Ok(())
     }
 
-    /// Archives the contact if it is active.
-    pub fn archive(&mut self) -> Result<(), HErr> {
-        Contacts::archive(self.id.as_str())?;
-        self.archive_status = Status::Archived;
-        Ok(())
-    }
-
-    /// Activates the contact if it is archived.
-    pub fn activate(&mut self) -> Result<(), HErr> {
-        Contacts::activate(self.id.as_str())?;
-        self.archive_status = Status::Active;
-        Ok(())
-    }
-
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let archive_status: bool = row.get(4)?;
-
         Ok(Contact {
             id: row.get(0)?,
             name: row.get(1)?,
             profile_picture: row.get(2)?,
             color: row.get(3)?,
-            archive_status: archive_status.into(),
+            status: row.get(4)?,
+            pairwise_conversation: row.get::<_, Vec<u8>>(5)?.into_iter().collect(),
         })
     }
 }
@@ -352,8 +374,10 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, Some("name"), None, None).expect("Failed to add contact");
-        Contacts::add(id2, None, None, Some(1)).expect("Failed to add contact");
+        Contacts::add_contact(id1, Some("name"), None, None, ContactStatus::Active, None)
+            .expect("Failed to add contact");
+        Contacts::add_contact(id2, None, None, Some(1), ContactStatus::Active, None)
+            .expect("Failed to add contact");
     }
 
     #[test]
@@ -363,7 +387,8 @@ mod tests {
 
         let id = "Hello World";
 
-        Contacts::add(id, Some("name"), None, None).expect("Failed to add contact");
+        Contacts::add_contact(id, Some("name"), None, None, ContactStatus::Active, None)
+            .expect("Failed to add contact");
         assert_eq!(
             Contacts::name(id)
                 .expect("Failed to get name")
@@ -379,7 +404,15 @@ mod tests {
 
         let id = "Hello World";
         let profile_picture = "picture";
-        Contacts::add(id, None, Some(profile_picture), None).expect("Failed to add contact");
+        Contacts::add_contact(
+            id,
+            None,
+            Some(profile_picture),
+            None,
+            ContactStatus::Active,
+            None,
+        )
+        .expect("Failed to add contact");
         assert_eq!(
             Contacts::profile_picture(id.into())
                 .expect("Failed to get profile picture")
@@ -396,7 +429,8 @@ mod tests {
 
         let id = "userid";
 
-        Contacts::add(id, Some("Hello"), None, None).expect(womp!());
+        Contacts::add_contact(id, Some("Hello"), None, None, ContactStatus::Active, None)
+            .expect(womp!());
         Contacts::set_name(id, Some("World")).expect("Failed to update name");
 
         assert_eq!(
@@ -415,8 +449,10 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add(id1, None, None, None).expect("Failed to add id1");
-        Contacts::add(id2, None, None, None).expect("Failed to add id2");
+        Contacts::add_contact(id1, None, None, None, ContactStatus::Active, None)
+            .expect("Failed to add id1");
+        Contacts::add_contact(id2, None, None, None, ContactStatus::Active, None)
+            .expect("Failed to add id2");
 
         let contacts = Contacts::all().expect(womp!());
         assert_eq!(contacts.len(), 2);
@@ -424,33 +460,33 @@ mod tests {
         assert_eq!(contacts[1].id, id2);
     }
 
-    #[test]
-    #[serial]
-    fn archive_contact() {
-        Database::reset_all().expect(womp!());
+    //#[test]
+    //#[serial]
+    //fn archive_contact() {
+    //    Database::reset_all().expect(womp!());
 
-        let id = "Hello World";
-        Contacts::add(id, None, None, None).expect(womp!());
-        Contacts::archive(id).expect(womp!());
+    //    let id = "Hello World";
+    //    Contacts::add_contact(id, None, None, None, ContactStatus::Active).expect(womp!());
+    //    Contacts::archive(id).expect(womp!());
 
-        assert!(Contacts::is_archived(id).expect("Failed to determine if contact was archived"));
-    }
+    //    assert!(Contacts::is_archived(id).expect("Failed to determine if contact was archived"));
+    //}
 
-    #[test]
-    #[serial]
-    fn get_active_contacts() {
-        Database::reset_all().expect(womp!());
+    //#[test]
+    //#[serial]
+    //fn get_active_contacts() {
+    //    Database::reset_all().expect(womp!());
 
-        let id1 = "Hello";
-        let id2 = "World";
+    //    let id1 = "Hello";
+    //    let id2 = "World";
 
-        Contacts::add(id1, None, None, None).expect(womp!());
-        Contacts::add(id2, None, None, None).expect(womp!());
+    //    Contacts::add_contact(id1, None, None, None, ContactStatus::Active).expect(womp!());
+    //    Contacts::add_contact(id2, None, None, None, ContactStatus::Active).expect(womp!());
 
-        Contacts::archive(id2).expect(womp!());
+    //    // Contacts::archive(id2).expect(womp!());
 
-        let contacts = Contacts::active().expect(womp!());
-        assert_eq!(contacts.len(), 1);
-        assert_eq!(contacts[0].id, id1);
-    }
+    //    let contacts = Contacts::active().expect(womp!());
+    //    assert_eq!(contacts.len(), 1);
+    //    assert_eq!(contacts[0].id, id1);
+    //}
 }

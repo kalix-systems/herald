@@ -6,14 +6,31 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- profile picture
   profile_picture TEXT,
   -- Conversation id of the pairwise conversation with the user
-  pairwise_conversation BLOB,
+  pairwise_conversation BLOB NOT NULL,
   -- user color
   color INTEGER NOT NULL,
-  -- Indicates whether contact is archived, defaults to false
-  archived INTEGER DEFAULT(0),
-  -- Indicates whether a contact is deleted, defaults to false
-  deleted INTEGER DEFAULT(0),
-  -- Indicates whether the contact is the local user, defaults to false
+  -- contact status
+  status INTEGER,
+  -- indicates whether the contact is local, defaults to false
   local INTEGER DEFAULT(0),
-  FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
+  FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id),
+  -- check status bounds
+  CHECK (
+    (
+      status >= 0
+      AND status <= 2
+    )
+    OR status = NULL
+  ),
+  -- check that local contact doesn't have status
+  CHECK (
+    (
+      local = 1
+      AND status = NULL
+    )
+    OR (
+      local != 1
+      AND status != NULL
+    )
+  )
 )

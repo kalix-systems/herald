@@ -6,13 +6,21 @@ use crate::{
 use herald_common::UserId;
 use rusqlite::{params, NO_PARAMS};
 
+// static LOCAL_CONVERSATION_NAME: &str = "Note to Self";
+
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
-    /// ID of the current user
+    /// ID of the local user
     pub id: Option<UserId>,
     /// Colorscheme
     pub colorscheme: u32,
+    /// Name of the local user
+    pub name: Option<String>,
+    /// Profile picture of the local user
+    pub profile_picture: Option<String>,
+    /// Color of the local user
+    pub color: u32,
 }
 
 impl DBTable for Config {
@@ -72,27 +80,30 @@ impl Config {
         colorscheme: Option<u32>,
     ) -> Result<Config, HErr> {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
+        let colorscheme = colorscheme.unwrap_or(0);
         let config = Config {
             id: Some(id.to_string()),
             name: name.map(|n| n.to_string()),
             profile_picture: profile_picture.map(|p| p.to_string()),
-            color: Some(color),
-            colorscheme: colorscheme.unwrap_or(1),
+            color: color,
+            colorscheme,
         };
 
-        let mut db = Database::get()?;
-        let tx = db.transaction()?;
-        tx.execute(
-            include_str!("sql/config/add_config.sql"),
-            params![id, name, profile_picture, color],
+        {
+            let db = Database::get()?;
+            db.execute(
+                include_str!("sql/config/add_config.sql"),
+                params![id, colorscheme],
+            )?;
+        }
+        crate::contact::Contacts::add_contact(
+            id.as_str(),
+            name,
+            profile_picture,
+            Some(color),
+            crate::contact::ContactStatus::Active,
+            None,
         )?;
-        // TODO This is denormalizing the data, it's an easy fix but the
-        // changes will propagate.
-        tx.execute(
-            include_str!("sql/contact/add.sql"),
-            params![id, Some("Note to self"), profile_picture, color],
-        )?;
-        tx.commit()?;
         Ok(config)
     }
 
@@ -142,8 +153,6 @@ impl Config {
         };
 
         let path = self.profile_picture.as_ref().map(|s| s.as_str());
-
-        println!("setting path {:?}", path);
 
         let db = Database::get()?;
         db.execute(
