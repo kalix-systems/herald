@@ -204,11 +204,7 @@ impl DBTable for Conversations {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        contact::{ContactStatus, Contacts},
-        db::Database,
-        message::Messages,
-    };
+    use crate::{contact::ContactBuilder, db::Database, message::Messages};
     use serial_test_derive::serial;
     use womp::*;
 
@@ -256,8 +252,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        Contacts::add_contact(author, None, None, None, ContactStatus::Active, None)
-            .expect(womp!());
+        ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
         Conversations::add_conversation(Some(&conversation), None)
@@ -281,8 +276,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        Contacts::add_contact(author, None, None, None, ContactStatus::Active, None)
-            .expect(womp!());
+        ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
         Conversations::add_conversation(Some(&conversation), None)
@@ -304,8 +298,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let author = "Hello";
-        Contacts::add_contact(author, None, None, None, ContactStatus::Active, None)
-            .expect(womp!());
+        ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = [0; 32].into();
         Conversations::add_conversation(Some(&conversation), None)

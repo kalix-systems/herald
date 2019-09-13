@@ -169,7 +169,7 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{contact::ContactStatus, conversation::Conversations};
+    use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     use womp::*;
@@ -200,15 +200,9 @@ mod tests {
             .expect(womp!());
 
         let author = "Hello";
-        crate::contact::Contacts::add_contact(
-            author,
-            None,
-            None,
-            None,
-            ContactStatus::Active,
-            None,
-        )
-        .expect(womp!());
+        crate::contact::ContactBuilder::new(author.into())
+            .add()
+            .expect(womp!());
         crate::members::Members::add_member(&conversation_id, author).expect(womp!());
 
         let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, &None)

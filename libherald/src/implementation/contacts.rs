@@ -1,6 +1,6 @@
 use crate::interface::*;
 use heraldcore::{
-    contact::{self, ContactStatus, Contacts as Core},
+    contact::{self, ContactBuilder, ContactStatus, Contacts as Core},
     utils::SearchPattern,
 };
 
@@ -56,14 +56,13 @@ impl ContactsTrait for Contacts {
             return false;
         }
 
-        let contact =
-            match Core::add_contact(id.as_str(), None, None, None, ContactStatus::Active, None) {
-                Ok(contact) => contact,
-                Err(e) => {
-                    eprintln!("Error: {}", e);
-                    return false;
-                }
-            };
+        let contact = match ContactBuilder::new(id).add() {
+            Ok(contact) => contact,
+            Err(e) => {
+                eprintln!("Error: {}", e);
+                return false;
+            }
+        };
 
         self.model.begin_insert_rows(0, 0);
         self.list.insert(

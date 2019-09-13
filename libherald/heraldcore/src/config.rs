@@ -88,14 +88,17 @@ impl ConfigBuilder {
                 params![config.id(), colorscheme],
             )?;
         }
-        crate::contact::Contacts::add_contact(
-            config.id(),
-            config.name.as_ref().map(|s| s.as_str()),
-            config.profile_picture.as_ref().map(|s| s.as_str()),
-            Some(color),
-            crate::contact::ContactStatus::Active,
-            None,
-        )?;
+        let mut builder = crate::contact::ContactBuilder::new(config.id.clone());
+
+        if let Some(name) = &config.name {
+            builder = builder.with_name(name.to_string());
+        }
+
+        if let Some(picture) = &config.profile_picture {
+            builder = builder.with_profile_picture(picture.to_string());
+        }
+
+        builder.with_color(config.color).add()?;
         Ok(config)
     }
 }

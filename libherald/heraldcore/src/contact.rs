@@ -44,54 +44,6 @@ impl DBTable for Contacts {
 }
 
 impl Contacts {
-    /// Inserts contact into contacts table.
-    pub fn add_contact(
-        id: UserIdRef,
-        name: Option<&str>,
-        profile_picture: Option<&str>,
-        color: Option<u32>,
-        status: ContactStatus,
-        pairwise_conversation: Option<ConversationId>,
-    ) -> Result<Contact, HErr> {
-        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id));
-
-        let pairwise_conversation = match pairwise_conversation {
-            Some(conv_id) => {
-                crate::conversation::Conversations::add_conversation(Some(&conv_id), name)?
-            }
-            None => crate::conversation::Conversations::add_conversation(None, name)?,
-        };
-
-        let mut db = Database::get()?;
-
-        let tx = db.transaction()?;
-        tx.execute(
-            include_str!("sql/contact/add.sql"),
-            params![
-                id,
-                name,
-                profile_picture,
-                color,
-                status,
-                pairwise_conversation.as_slice()
-            ],
-        )?;
-        tx.execute(
-            include_str!("sql/members/add_member.sql"),
-            params![pairwise_conversation.as_slice(), id],
-        )?;
-        tx.commit()?;
-
-        Ok(Contact {
-            id: id.to_string(),
-            name: name.map(|s| s.to_string()),
-            profile_picture: profile_picture.map(|s| s.to_string()),
-            color,
-            status,
-            pairwise_conversation,
-        })
-    }
-
     /// Gets a contact's name by their `id`.
     pub fn name(id: UserIdRef) -> Result<Option<String>, HErr> {
         let db = Database::get()?;
@@ -277,6 +229,107 @@ impl std::convert::TryFrom<i64> for ContactStatus {
     }
 }
 
+pub struct ContactBuilder {
+    /// Contact id
+    id: UserId,
+    /// Contact name
+    name: Option<String>,
+    /// Path of profile picture
+    profile_picture: Option<String>,
+    /// User set color for user
+    color: Option<u32>,
+    /// Indicates whether user is archived
+    status: Option<ContactStatus>,
+    /// Pairwise conversation corresponding to contact
+    pairwise_conversation: Option<ConversationId>,
+}
+
+impl ContactBuilder {
+    pub fn new(id: UserId) -> Self {
+        Self {
+            id,
+            profile_picture: None,
+            name: None,
+            color: None,
+            status: None,
+            pairwise_conversation: None,
+        }
+    }
+
+    pub fn with_name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
+    }
+
+    pub fn with_profile_picture(mut self, profile_picture: String) -> Self {
+        self.profile_picture = Some(profile_picture);
+        self
+    }
+
+    pub fn with_color(mut self, color: u32) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn with_status(mut self, status: ContactStatus) -> Self {
+        self.status = Some(status);
+        self
+    }
+
+    pub fn with_pairwise_conversation(mut self, pairwise_conversation: ConversationId) -> Self {
+        self.pairwise_conversation = Some(pairwise_conversation);
+        self
+    }
+
+    pub fn add(self) -> Result<Contact, HErr> {
+        let color = self
+            .color
+            .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
+
+        let pairwise_conversation = match self.pairwise_conversation {
+            Some(conv_id) => crate::conversation::Conversations::add_conversation(
+                Some(&conv_id),
+                self.name.as_ref().map(|s| s.as_str()),
+            )?,
+            None => crate::conversation::Conversations::add_conversation(
+                None,
+                self.name.as_ref().map(|s| s.as_str()),
+            )?,
+        };
+
+        let contact = Contact {
+            id: self.id,
+            name: self.name,
+            profile_picture: self.profile_picture,
+            color,
+            status: self.status.unwrap_or(ContactStatus::Active),
+            pairwise_conversation,
+        };
+
+        let mut db = Database::get()?;
+
+        let tx = db.transaction()?;
+        tx.execute(
+            include_str!("sql/contact/add.sql"),
+            params![
+                contact.id,
+                contact.name,
+                contact.profile_picture,
+                contact.color,
+                contact.status,
+                contact.pairwise_conversation.as_slice()
+            ],
+        )?;
+        tx.execute(
+            include_str!("sql/members/add_member.sql"),
+            params![contact.pairwise_conversation.as_slice(), contact.id],
+        )?;
+        tx.commit()?;
+
+        Ok(contact)
+    }
+}
+
 #[derive(Debug, PartialEq, Clone)]
 /// A Herald contact.
 pub struct Contact {
@@ -410,9 +463,13 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add_contact(id1, Some("name"), None, None, ContactStatus::Active, None)
+        ContactBuilder::new(id1.into())
+            .with_name("name".into())
+            .add()
             .expect("Failed to add contact");
-        Contacts::add_contact(id2, None, None, Some(1), ContactStatus::Active, None)
+        ContactBuilder::new(id2.into())
+            .with_color(1)
+            .add()
             .expect("Failed to add contact");
     }
 
@@ -423,7 +480,9 @@ mod tests {
 
         let id = "Hello World";
 
-        Contacts::add_contact(id, Some("name"), None, None, ContactStatus::Active, None)
+        ContactBuilder::new(id.into())
+            .with_name("name".into())
+            .add()
             .expect("Failed to add contact");
         assert_eq!(
             Contacts::name(id)
@@ -440,15 +499,10 @@ mod tests {
 
         let id = "Hello World";
         let profile_picture = "picture";
-        Contacts::add_contact(
-            id,
-            None,
-            Some(profile_picture),
-            None,
-            ContactStatus::Active,
-            None,
-        )
-        .expect("Failed to add contact");
+        ContactBuilder::new(id.into())
+            .with_profile_picture(profile_picture.into())
+            .add()
+            .expect("Failed to add contact");
         assert_eq!(
             Contacts::profile_picture(id.into())
                 .expect("Failed to get profile picture")
@@ -465,7 +519,9 @@ mod tests {
 
         let id = "userid";
 
-        Contacts::add_contact(id, Some("Hello"), None, None, ContactStatus::Active, None)
+        ContactBuilder::new(id.into())
+            .with_name("Hello".into())
+            .add()
             .expect(womp!());
         Contacts::set_name(id, Some("World")).expect("Failed to update name");
 
@@ -485,9 +541,11 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add_contact(id1, None, None, None, ContactStatus::Active, None)
+        ContactBuilder::new(id1.into())
+            .add()
             .expect("Failed to add id1");
-        Contacts::add_contact(id2, None, None, None, ContactStatus::Archived, None)
+        ContactBuilder::new(id2.into())
+            .add()
             .expect("Failed to add id2");
 
         let contacts = Contacts::all().expect(womp!());
@@ -502,7 +560,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "Hello World";
-        Contacts::add_contact(id, None, None, None, ContactStatus::Active, None).expect(womp!());
+        ContactBuilder::new(id.into()).add().expect(womp!());
         Contacts::set_status(id, ContactStatus::Archived).expect(womp!());
 
         assert_eq!(
@@ -519,9 +577,12 @@ mod tests {
         let id1 = "Hello";
         let id2 = "World";
 
-        Contacts::add_contact(id1, None, None, None, ContactStatus::Active, None)
+        ContactBuilder::new(id1.into())
+            .add()
             .expect("Failed to add id1");
-        Contacts::add_contact(id2, None, None, None, ContactStatus::Archived, None)
+        ContactBuilder::new(id2.into())
+            .with_status(ContactStatus::Archived)
+            .add()
             .expect("Failed to add id2");
 
         let contacts = Contacts::get_by_status(ContactStatus::Active).expect(womp!());
