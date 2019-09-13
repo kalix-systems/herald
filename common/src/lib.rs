@@ -8,23 +8,56 @@ pub use bytes::Bytes;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
 pub use serde::*;
+pub use std::collections::HashMap;
 pub use std::convert::{TryFrom, TryInto};
 pub use tokio::prelude::*;
 
 pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
-pub type DeviceId = u32;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct GlobalId {
     uid: UserId,
-    did: DeviceId,
+    did: sign::PublicKey,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct User {
     uid: UserId,
-    devices: Vec<sig::PublicKey>,
+    keys: HashMap<sig::PublicKey, sig::PKMeta>,
+}
+
+impl User {
+    pub fn key_is_valid(&self, key: sig::PublicKey) -> bool {
+        let maybe_kmeta = self.keys.get(&key);
+        if maybe_kmeta.is_none() {
+            return false;
+        }
+        maybe_kmeta.unwrap().key_is_valid(key)
+    }
+
+    pub fn verify_sig<T: AsRef<[u8]>>(&self, data: &Signed<T>) -> bool {
+        self.key_is_valid(*data.signed_by()) && data.verify_sig()
+    }
+
+    pub fn add_new_key(&mut self, new: Signed<sig::PublicKey>) -> bool {
+        if !self.verify_sig(&new) {
+            return false;
+        }
+        let (pk, sig) = new.split();
+        self.keys.insert(pk, sig.into());
+        true
+    }
+
+    pub fn deprecate_key(&mut self, dep: Signed<sig::PublicKey>) -> bool {
+        // cannot have a key deprecate itself
+        if !self.verify_sig(&dep) || *dep.signed_by() == *dep.data() {
+            return false;
+        }
+        let (pk, sig) = dep.split();
+        self.keys.get_mut(&pk).unwrap().deprecated = Some(sig);
+        true
+    }
 }
 
 pub type Blob = Bytes;
@@ -37,12 +70,12 @@ pub type ConversationId = [u8; 32];
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
     SendBlock { to: Vec<UserId>, msg: Block },
-    SendBlob { to: Vec<DeviceId>, msg: Blob },
+    SendBlob { to: Vec<GlobalId>, msg: Blob },
     RequestMeta(UserId),
     RegisterDevice(sig::PublicKey),
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
     NewBlock {
         from: GlobalId,
@@ -60,10 +93,10 @@ pub enum MessageToClient {
     },
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Response {
     Meta(User),
-    DeviceRegistered(DeviceId),
+    DeviceRegistered(sig::PublicKey),
     DataNotFound,
 }
 
