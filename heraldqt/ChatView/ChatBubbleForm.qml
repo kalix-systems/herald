@@ -25,7 +25,7 @@ Rectangle {
     // a mouse area to handle hover events
     property alias chatBubbleHitBox: chatBubbleHitbox
     // the width the text sits at without wrapping
-    readonly property int naturalTextWidth: testText.width
+    readonly property int naturalTextWidth: bubbleText.width
     // a component to use if there is additional content to spawn inside the chat bubble
     property string additionalContent: ""
     // the args to pass into the content spawner
@@ -88,26 +88,17 @@ Rectangle {
             source: additionalContent
         }
 
-        //invisible text object because textmetrics is broken
-
-        Text {
-            id: testText
-            text: messageText
-            visible: false
-        }
-
-        TextEdit {
+        Common.CorrectText {
             id: bubbleText
             text: messageText
-            width: JS.naturalWidth(chatPane.width,
-                                   testText.width)
+            width: JS.naturalWidth(chatPane.width, correctWidth)
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-
         }
+
 
         Label {
             id: timeStamp
