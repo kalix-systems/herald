@@ -71,7 +71,7 @@ pub mod sig {
     }
 
     impl KeyPair {
-        pub fn new() -> Self {
+        pub fn gen_new() -> Self {
             sodiumoxide::init().expect("failed to init libsodium");
             let (public, secret) = sign::gen_keypair();
             KeyPair { public, secret }
@@ -97,20 +97,48 @@ pub mod sig {
 
 pub mod pk {
     use super::*;
+    use std::ops::Deref;
 
+    #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PublicKey(Signed<box_::PublicKey>);
 
+    impl Deref for PublicKey {
+        type Target = Signed<box_::PublicKey>;
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
+    }
+
     impl PublicKey {
-        pub fn signed_by(&self) -> &sign::PublicKey {
-            self.0.signed_by()
+        pub fn seal(&self, msg: &[u8]) -> Vec<u8> {
+            sealedbox::seal(msg, &self.0.data)
+        }
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone)]
+    pub struct KeyPair {
+        pk: box_::PublicKey,
+        sk: box_::SecretKey,
+    }
+
+    impl KeyPair {
+        pub fn gen_new() -> Self {
+            sodiumoxide::init().expect("failed to init libsodium");
+            let (pk, sk) = box_::gen_keypair();
+            KeyPair { pk, sk }
         }
 
-        pub fn timestamp(&self) -> &DateTime<Utc> {
-            self.0.timestamp()
+        pub fn public_key(&self) -> &box_::PublicKey {
+            &self.pk
         }
 
-        pub fn check_sig(&self) -> Result<bool, serde_cbor::Error> {
-            self.0.verify_sig()
+        // TODO: figure out if this will ever fail
+        pub fn sign_pub(&self, pair: &sig::KeyPair) -> Result<PublicKey, serde_cbor::Error> {
+            pair.sign(self.pk).map(PublicKey)
+        }
+
+        pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
+            sealedbox::open(msg, &self.pk, &self.sk).ok()
         }
     }
 }
