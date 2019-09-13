@@ -43,7 +43,7 @@ Item {
             //TS: this should be in typescript
             onTriggered: {
                 if (contactId === messageModel.conversationId)
-                    chatView.state = "" //TODO clearview should be less imperative
+                    root.gsContactId = undefined
                 contactsModel.remove(index)
                 print("index try delete AGAIN: ", index)
                 messageModel.clearConversationView()

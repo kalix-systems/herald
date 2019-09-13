@@ -50,7 +50,9 @@ ListView {
 
             anchors.fill: parent
 
+
             /// Note: can we use the highlight property here
+            /// we can do this once contact deletion updates current item for listview properly
             states: [
                 State {
                     name: "hovering"
@@ -76,10 +78,12 @@ ListView {
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
 
-                onClicked: JS.contactClickHandler(mouse, contactList, index,
+                onClicked: { JS.contactClickHandler(mouse, contactList, index,
                                                   contactId, contactItem,
                                                   popupManager.optionsMenu,
                                                   messageModel, chatView)
+                    root.gsContactId = contactId
+                }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""

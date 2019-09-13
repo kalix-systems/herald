@@ -12,7 +12,6 @@ export function contactClickHandler(mouse, contactView, index, contactId, contac
         console.log(contactView.currentIndex, contactView.currentItem.contactAvatar.displayName);
         contactItem.focus = true;
         messageModel.conversationId = contactId;
-        chatView.state = "visibleview";
     }
     else {
         optionsMenu.open();

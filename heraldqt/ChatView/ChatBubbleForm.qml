@@ -25,7 +25,7 @@ Rectangle {
     // a mouse area to handle hover events
     property alias chatBubbleHitBox: chatBubbleHitbox
     // the width the text sits at without wrapping
-    readonly property int naturalTextWidth: messageMetrics.width
+    readonly property int naturalTextWidth: bubbleText.width
     // a component to use if there is additional content to spawn inside the chat bubble
     property string additionalContent: ""
     // the args to pass into the content spawner
@@ -77,11 +77,6 @@ Rectangle {
     width: bubble.width
     height: bubble.height
 
-    TextMetrics {
-        id: messageMetrics
-        text: messageText
-    }
-
     // column that loads each chat bubble + additional content
     Column {
         id: bubble
@@ -93,18 +88,17 @@ Rectangle {
             source: additionalContent
         }
 
-        TextEdit {
+        Common.CorrectText {
             id: bubbleText
             text: messageText
-            //NPB: that extra margin is bad, also this is a recipe for a binding loop
-            width: JS.naturalWidth(chatPane.width,
-                                   messageMetrics.width) + QmlCfg.margin / 2
+            width: JS.naturalWidth(chatPane.width, correctWidth)
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
         }
+
 
         Label {
             id: timeStamp
