@@ -27,7 +27,6 @@ export function contactClickHandler(
     contactItem.focus = true;
     messageModel.conversationId = contactId;
 
-    chatView.state = "visibleview";
   } else {
     optionsMenu.open();
   }
