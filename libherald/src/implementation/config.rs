@@ -1,10 +1,12 @@
 use crate::interface::*;
-use heraldcore::{config::Config as Core, db::DBTable};
+use heraldcore::{
+    config::{Config as Core, ConfigBuilder},
+    db::DBTable,
+};
 
 pub struct Config {
     emit: ConfigEmitter,
-    inner: Core,
-    init: bool,
+    inner: Option<Core>,
 }
 
 impl ConfigTrait for Config {
@@ -25,41 +27,33 @@ impl ConfigTrait for Config {
             eprintln!("{}", e);
         }
 
-        let (inner, init) = match Core::get() {
-            Ok(c) => (c, true),
+        let inner = match Core::get() {
+            Ok(c) => Some(c),
             Err(e) => {
                 eprintln!("{}", e);
-                let uninit_inner = Core {
-                    id: None,
-                    name: None,
-                    profile_picture: None,
-                    color: 0,
-                    colorscheme: 0,
-                };
-                (uninit_inner, false)
+                None
             }
         };
-        Config { emit, inner, init }
+        Config { emit, inner }
     }
 
     fn config_id(&self) -> &str {
-        match self.inner.id() {
-            Ok(s) => s,
-            Err(e) => {
-                eprintln!("{}", e);
+        match &self.inner {
+            Some(s) => s.id(),
+            None => {
+                eprintln!("Config id not set");
                 ""
             }
         }
     }
 
     fn set_config_id(&mut self, id: String) {
-        if !self.init {
-            self.inner = match Core::new(id, None, None, None, None) {
+        if self.inner.is_none() {
+            self.inner = match ConfigBuilder::new(id).build() {
                 Ok(c) => {
-                    self.init = true;
                     self.emit.config_id_changed();
                     self.emit.init_changed();
-                    c
+                    Some(c)
                 }
                 Err(e) => {
                     eprintln!("{}", e);
@@ -70,57 +64,86 @@ impl ConfigTrait for Config {
     }
 
     fn name(&self) -> Option<&str> {
-        self.inner.name.as_ref().map(|s| s.as_str())
+        match &self.inner {
+            Some(inner) => inner.name.as_ref().map(|s| s.as_str()),
+            None => None,
+        }
     }
 
     fn set_name(&mut self, name: Option<String>) {
-        match self.inner.set_name(name) {
-            Ok(()) => self.emit.name_changed(),
-            Err(e) => eprintln!("Error: {}", e),
+        match &mut self.inner {
+            Some(inner) => match inner.set_name(name) {
+                Ok(()) => self.emit.name_changed(),
+                Err(e) => eprintln!("{}", e),
+            },
+            None => {
+                eprintln!("Config id not set");
+            }
         }
     }
 
     fn profile_picture(&self) -> Option<&str> {
-        self.inner.profile_picture.as_ref().map(|p| p.as_str())
+        match &self.inner {
+            Some(inner) => inner.profile_picture.as_ref().map(|s| s.as_str()),
+            None => None,
+        }
     }
 
     fn set_profile_picture(&mut self, picture: Option<String>) {
-        match self
-            .inner
-            .set_profile_picture(crate::utils::strip_qrc(picture))
-        {
-            Ok(()) => self.emit.profile_picture_changed(),
-            Err(e) => eprintln!("Error: {}", e),
+        match &mut self.inner {
+            Some(inner) => match inner.set_profile_picture(picture) {
+                Ok(()) => self.emit.profile_picture_changed(),
+                Err(e) => eprintln!("{}", e),
+            },
+            None => {
+                eprintln!("Config id not set");
+            }
         }
     }
 
     fn color(&self) -> u32 {
-        self.inner.color
+        match &self.inner {
+            Some(inner) => inner.color,
+            None => 0,
+        }
     }
 
     fn set_color(&mut self, color: u32) {
-        match self.inner.set_color(color) {
-            Ok(()) => self.emit.color_changed(),
-            Err(e) => eprintln!("Error: {}", e),
+        match &mut self.inner {
+            Some(inner) => match inner.set_color(color) {
+                Ok(()) => self.emit.color_changed(),
+                Err(e) => eprintln!("{}", e),
+            },
+            None => {
+                eprintln!("Config id not set");
+            }
         }
     }
 
     fn colorscheme(&self) -> u32 {
-        self.inner.colorscheme
+        match &self.inner {
+            Some(inner) => inner.colorscheme,
+            None => 0,
+        }
     }
 
     fn set_colorscheme(&mut self, colorscheme: u32) {
-        match self.inner.set_colorscheme(colorscheme) {
-            Ok(()) => self.emit.colorscheme_changed(),
-            Err(e) => eprintln!("Error: {}", e),
+        match &mut self.inner {
+            Some(inner) => match inner.set_color(colorscheme) {
+                Ok(()) => self.emit.color_changed(),
+                Err(e) => eprintln!("{}", e),
+            },
+            None => {
+                eprintln!("Config id not set");
+            }
         }
     }
     fn init(&self) -> bool {
-        self.init
+        self.inner.is_some()
     }
 
     fn exists(&self) -> bool {
-        self.init
+        self.inner.is_some()
     }
 
     fn emit(&mut self) -> &mut ConfigEmitter {

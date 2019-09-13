@@ -3,7 +3,7 @@ use crate::{
     errors::*,
     image_utils,
 };
-use herald_common::UserId;
+use herald_common::{UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 // static LOCAL_CONVERSATION_NAME: &str = "Note to Self";
@@ -12,7 +12,7 @@ use rusqlite::{params, NO_PARAMS};
 #[derive(Clone, Default)]
 pub struct Config {
     /// ID of the local user
-    pub id: Option<UserId>,
+    pub id: UserId,
     /// Colorscheme
     pub colorscheme: u32,
     /// Name of the local user
@@ -21,6 +21,83 @@ pub struct Config {
     pub profile_picture: Option<String>,
     /// Color of the local user
     pub color: u32,
+}
+
+pub struct ConfigBuilder {
+    /// ID of the local user
+    id: UserId,
+    /// Colorscheme
+    colorscheme: Option<u32>,
+    /// Name of the local user
+    name: Option<String>,
+    /// Profile picture of the local user
+    profile_picture: Option<String>,
+    /// Color of the local user
+    color: Option<u32>,
+}
+
+impl ConfigBuilder {
+    pub fn new(id: UserId) -> Self {
+        Self {
+            id,
+            name: None,
+            color: None,
+            colorscheme: None,
+            profile_picture: None,
+        }
+    }
+
+    pub fn with_colorscheme(mut self, colorscheme: u32) -> Self {
+        self.colorscheme = Some(colorscheme);
+        self
+    }
+
+    pub fn with_color(mut self, color: u32) -> Self {
+        self.color = Some(color);
+        self
+    }
+
+    pub fn with_name(mut self, name: String) -> Self {
+        self.name = Some(name);
+        self
+    }
+
+    pub fn with_profile_picture(mut self, profile_picture: String) -> Self {
+        self.profile_picture = Some(profile_picture);
+        self
+    }
+
+    pub fn build(self) -> Result<Config, HErr> {
+        let color = self
+            .color
+            .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
+        let colorscheme = self.colorscheme.unwrap_or(0);
+
+        let config = Config {
+            id: self.id,
+            name: self.name,
+            profile_picture: self.profile_picture,
+            color,
+            colorscheme,
+        };
+
+        {
+            let db = Database::get()?;
+            db.execute(
+                include_str!("sql/config/add_config.sql"),
+                params![config.id(), colorscheme],
+            )?;
+        }
+        crate::contact::Contacts::add_contact(
+            config.id(),
+            config.name.as_ref().map(|s| s.as_str()),
+            config.profile_picture.as_ref().map(|s| s.as_str()),
+            Some(color),
+            crate::contact::ContactStatus::Active,
+            None,
+        )?;
+        Ok(config)
+    }
 }
 
 impl DBTable for Config {
@@ -71,48 +148,9 @@ impl Config {
         )?)
     }
 
-    /// Creates user configuration.
-    pub fn new(
-        id: UserId,
-        name: Option<&str>,
-        profile_picture: Option<&str>,
-        color: Option<u32>,
-        colorscheme: Option<u32>,
-    ) -> Result<Config, HErr> {
-        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
-        let colorscheme = colorscheme.unwrap_or(0);
-        let config = Config {
-            id: Some(id.to_string()),
-            name: name.map(|n| n.to_string()),
-            profile_picture: profile_picture.map(|p| p.to_string()),
-            color: color,
-            colorscheme,
-        };
-
-        {
-            let db = Database::get()?;
-            db.execute(
-                include_str!("sql/config/add_config.sql"),
-                params![id, colorscheme],
-            )?;
-        }
-        crate::contact::Contacts::add_contact(
-            id.as_str(),
-            name,
-            profile_picture,
-            Some(color),
-            crate::contact::ContactStatus::Active,
-            None,
-        )?;
-        Ok(config)
-    }
-
     /// Gets user id
-    pub fn id(&self) -> Result<&UserId, HErr> {
-        match &self.id {
-            Some(id) => Ok(id),
-            None => Err(HErr::HeraldError("User id has not been set".into())),
-        }
+    pub fn id(&self) -> UserIdRef {
+        self.id.as_str()
     }
 
     /// Gets user id directly from database.
@@ -136,13 +174,15 @@ impl Config {
 
     /// Updates user's profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-        let id = self.id()?;
-
         self.profile_picture = match profile_picture {
             Some(path) => Some(
-                image_utils::save_profile_picture(id, path, self.profile_picture.clone())?
-                    .into_os_string()
-                    .into_string()?,
+                image_utils::save_profile_picture(
+                    self.id.as_str(),
+                    path,
+                    self.profile_picture.clone(),
+                )?
+                .into_os_string()
+                .into_string()?,
             ),
             None => {
                 if let Some(old_pic) = &self.profile_picture {
@@ -210,21 +250,19 @@ mod tests {
 
         let id = "HelloWorld";
 
-        Config::new(id.into(), None, None, None, None).expect(womp!());
-        assert_eq!(
-            Config::get().expect(womp!()).id().expect(womp!()),
-            "HelloWorld"
-        );
+        ConfigBuilder::new(id.into()).build().expect(womp!());
+        assert_eq!(Config::get().expect(womp!()).id(), id);
 
         Database::reset_all().expect(womp!());
 
         let name = "stuff";
         let profile_picture = "stuff";
-        Config::new(id.into(), Some(name), Some(profile_picture), None, None).expect(womp!());
-        assert_eq!(
-            Config::get().expect(womp!()).id().expect(womp!()),
-            "HelloWorld"
-        );
+        ConfigBuilder::new(id.into())
+            .with_name(name.into())
+            .with_profile_picture(profile_picture.into())
+            .build()
+            .expect(womp!());
+        assert_eq!(Config::get().expect(womp!()).id, "HelloWorld");
         assert_eq!(Config::get().expect(womp!()).name.expect(womp!()), name);
         assert_eq!(Config::get().expect(womp!()).colorscheme, 0);
         assert_eq!(
@@ -242,8 +280,8 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
-        let config = Config::new(id.into(), None, None, None, None).expect(womp!());
+        let config = ConfigBuilder::new(id.into()).build().expect(womp!());
 
-        assert_eq!(config.id().expect(womp!()), id);
+        assert_eq!(config.id, id);
     }
 }
