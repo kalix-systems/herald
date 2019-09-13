@@ -45,7 +45,6 @@ impl DBTable for Contacts {
 
 impl Contacts {
     /// Inserts contact into contacts table.
-    /// TODO AHH MUTEX
     pub fn add_contact(
         id: UserIdRef,
         name: Option<&str>,
@@ -73,7 +72,7 @@ impl Contacts {
                 name,
                 profile_picture,
                 color,
-                status as u8,
+                status,
                 pairwise_conversation.as_slice()
             ],
         )?;
@@ -161,7 +160,7 @@ impl Contacts {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/contact/set_status.sql"),
-            params![status as u8, id],
+            params![status, id],
         )?;
         Ok(())
     }
@@ -174,7 +173,7 @@ impl Contacts {
         Ok(stmt.query_row(&[id], |row| row.get(0))?)
     }
 
-    /// Returns all contacts, including archived contacts
+    /// Returns all contacts
     pub fn all() -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
         let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
@@ -189,12 +188,12 @@ impl Contacts {
         Ok(names)
     }
 
-    /// Returns all active contacts excluding archived contacts
-    pub fn active() -> Result<Vec<Contact>, HErr> {
+    /// Returns all contacts with the specified `status`
+    pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
         let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("sql/contact/get_active.sql"))?;
+        let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
 
-        let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
+        let rows = stmt.query_map(params![status], Contact::from_db)?;
 
         let mut names: Vec<Contact> = Vec::new();
         for name_res in rows {
@@ -233,6 +232,13 @@ impl rusqlite::types::FromSql for ContactStatus {
             .as_i64()?
             .try_into()
             .map_err(|_| rusqlite::types::FromSqlError::InvalidType)
+    }
+}
+
+impl rusqlite::ToSql for ContactStatus {
+    fn to_sql(&self) -> Result<rusqlite::types::ToSqlOutput, rusqlite::Error> {
+        use rusqlite::types::*;
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
     }
 }
 
@@ -463,7 +469,7 @@ mod tests {
 
         Contacts::add_contact(id1, None, None, None, ContactStatus::Active, None)
             .expect("Failed to add id1");
-        Contacts::add_contact(id2, None, None, None, ContactStatus::Active, None)
+        Contacts::add_contact(id2, None, None, None, ContactStatus::Archived, None)
             .expect("Failed to add id2");
 
         let contacts = Contacts::all().expect(womp!());
@@ -485,5 +491,23 @@ mod tests {
             Contacts::get_status(id).expect("Failed to determine contact status"),
             ContactStatus::Archived
         );
+    }
+
+    #[test]
+    #[serial]
+    fn by_status_contacts() {
+        Database::reset_all().expect(womp!());
+
+        let id1 = "Hello";
+        let id2 = "World";
+
+        Contacts::add_contact(id1, None, None, None, ContactStatus::Active, None)
+            .expect("Failed to add id1");
+        Contacts::add_contact(id2, None, None, None, ContactStatus::Archived, None)
+            .expect("Failed to add id2");
+
+        let contacts = Contacts::get_by_status(ContactStatus::Active).expect(womp!());
+        assert_eq!(contacts.len(), 1);
+        assert_eq!(contacts[0].id, id1);
     }
 }

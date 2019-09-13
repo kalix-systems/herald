@@ -3,9 +3,9 @@ SELECT
   name,
   profile_picture,
   color,
-  status
+  status,
+  pairwise_conversation
 FROM
   contacts
 WHERE
-  --- Contact not yet deleted
-  status < 2
+  status = ?
