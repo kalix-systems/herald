@@ -67,6 +67,9 @@
                 "contactId": {
                     "type": "QString"
                 },
+                "pairwiseConversationId": {
+                    "type": "QByteArray"
+                },
                 "name": {
                     "write": true,
                     "type": "QString",

@@ -445,6 +445,7 @@ pub trait ContactsTrait {
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> Option<&str>;
     fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
+    fn pairwise_conversation_id(&self, index: usize) -> &[u8];
     fn profile_picture(&self, index: usize) -> Option<&str>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
     fn status(&self, index: usize) -> u8;
@@ -641,6 +642,18 @@ pub unsafe extern "C" fn contacts_set_data_name(
 #[no_mangle]
 pub unsafe extern "C" fn contacts_set_data_name_none(ptr: *mut Contacts, row: c_int) -> bool {
     (&mut *ptr).set_name(to_usize(row), None)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_data_pairwise_conversation_id(
+    ptr: *const Contacts, row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.pairwise_conversation_id(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]

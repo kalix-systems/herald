@@ -94,6 +94,7 @@ public:
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
+    Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
     Q_INVOKABLE QString profilePicture(int row) const;
     Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
     Q_INVOKABLE quint8 status(int row) const;

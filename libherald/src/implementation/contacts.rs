@@ -83,6 +83,11 @@ impl ContactsTrait for Contacts {
         self.list[row_index].inner.id.as_str()
     }
 
+    /// Returns contact id.
+    fn pairwise_conversation_id(&self, row_index: usize) -> &[u8] {
+        self.list[row_index].inner.pairwise_conversation.as_slice()
+    }
+
     /// Returns contacts name
     fn name(&self, row_index: usize) -> Option<&str> {
         self.list[row_index].inner.name.as_ref().map(|n| n.as_str())

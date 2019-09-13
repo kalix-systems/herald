@@ -115,6 +115,7 @@ extern "C" {
     void contacts_data_name(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_name(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_name_none(Contacts::Private*, int);
+    void contacts_data_pairwise_conversation_id(const Contacts::Private*, int, QByteArray*, qbytearray_set);
     void contacts_data_profile_picture(const Contacts::Private*, int, QString*, qstring_set);
     bool contacts_set_data_profile_picture(Contacts::Private*, int, const ushort* s, int len);
     bool contacts_set_data_profile_picture_none(Contacts::Private*, int);
@@ -253,6 +254,13 @@ bool Contacts::setName(int row, const QString& value)
     return set;
 }
 
+QByteArray Contacts::pairwiseConversationId(int row) const
+{
+    QByteArray b;
+    contacts_data_pairwise_conversation_id(m_d, row, &b, set_qbytearray);
+    return b;
+}
+
 QString Contacts::profilePicture(int row) const
 {
     QString s;
@@ -306,8 +314,10 @@ QVariant Contacts::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 3:
             return cleanNullQVariant(QVariant::fromValue(name(index.row())));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
+            return QVariant::fromValue(pairwiseConversationId(index.row()));
         case Qt::UserRole + 5:
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
+        case Qt::UserRole + 6:
             return QVariant::fromValue(status(index.row()));
         }
         break;
@@ -332,8 +342,9 @@ QHash<int, QByteArray> Contacts::roleNames() const {
     names.insert(Qt::UserRole + 1, "contactId");
     names.insert(Qt::UserRole + 2, "matched");
     names.insert(Qt::UserRole + 3, "name");
-    names.insert(Qt::UserRole + 4, "profilePicture");
-    names.insert(Qt::UserRole + 5, "status");
+    names.insert(Qt::UserRole + 4, "pairwiseConversationId");
+    names.insert(Qt::UserRole + 5, "profilePicture");
+    names.insert(Qt::UserRole + 6, "status");
     return names;
 }
 QVariant Contacts::headerData(int section, Qt::Orientation orientation, int role) const
@@ -371,12 +382,12 @@ bool Contacts::setData(const QModelIndex &index, const QVariant &value, int role
                 return setName(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 4) {
+        if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setProfilePicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (value.canConvert(qMetaTypeId<quint8>())) {
                 return setStatus(index.row(), value.value<quint8>());
             }
