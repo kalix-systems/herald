@@ -1,20 +1,36 @@
 #![feature(try_blocks)]
+#![allow(warnings)]
 
-use arrayvec::ArrayVec;
-pub use arrayvec::CapacityError;
-use bytes::Bytes;
-use chrono::prelude::*;
-use serde::*;
-use std::convert::{TryFrom, TryInto};
-use tokio::prelude::*;
+mod crypto;
+pub use crypto::*;
+
+pub use bytes::Bytes;
+pub use chrono::prelude::*;
+pub use serde::*;
+pub use std::convert::{TryFrom, TryInto};
+pub use tokio::prelude::*;
 
 pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
 pub type DeviceId = u32;
-pub type RawMsg = Bytes;
 
-pub type MsgId = ArrayVec<[u8; 32]>;
-pub type ConversationId = ArrayVec<[u8; 32]>;
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct GlobalId {
+    uid: UserId,
+    did: DeviceId,
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct User {
+    uid: UserId,
+    devices: Vec<sig::PublicKey>,
+}
+
+pub type RawMsg = Bytes;
+pub type RawMsgRef<'a> = &'a [u8];
+
+pub type MsgId = [u8; 32];
+pub type ConversationId = [u8; 32];
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -104,18 +120,6 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
             )
         })
     }
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct User {
-    pub num_devices: usize,
-    pub blob: Bytes,
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct GlobalId {
-    pub uid: UserId,
-    pub did: DeviceId,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]

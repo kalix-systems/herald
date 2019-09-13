@@ -7,26 +7,6 @@ use serde_cbor::{from_slice as deserialize, to_vec as serialize};
 use untrusted::Input;
 
 pub type UserId = arrayvec::ArrayString<[u8; 256]>;
-pub type RawKey = Bytes;
-pub type RawSig = Bytes;
-pub type RawMsg = Bytes;
-
-#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
-pub enum DeviceId {
-    Original,
-    Verified(u64),
-}
-
-/// A signed and dated piece of data.
-/// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
-/// the device with id `signer` of `(timestamp, data)` serialized with `CBOR`.
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct Signed<T: Serialize> {
-    pub data: T,
-    pub timestamp: DateTime<Utc>,
-    pub signer: DeviceId,
-    pub sig: RawSig,
-}
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct CreatedKey {
