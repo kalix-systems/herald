@@ -223,7 +223,7 @@
                     "mut": true,
                     "return": "void"
                 },
-                "delete_conversation": {
+                "deleteConversation": {
                     "mut": true,
                     "return": "bool"
                 },
