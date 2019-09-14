@@ -137,6 +137,10 @@ impl Messages {
 impl DBTable for Messages {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message_status/create_table.sql"),
+            NO_PARAMS,
+        )?;
         db.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
