@@ -53,8 +53,9 @@ Flickable {
                 anchors {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
+                    left: !outbound ? parent.left : undefined
                     rightMargin: chatScrollBar.width + QmlCfg.margin
-                    leftMargin: rightMargin
+                    leftMargin:  QmlCfg.margin
                 }
 
                 //NOTE: see chat bubble form

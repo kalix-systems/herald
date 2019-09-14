@@ -17,6 +17,7 @@ Item {
 
     NetworkHandle {
         id: networkHandle
+
     }
 
     Messages {
