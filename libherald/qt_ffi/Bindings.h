@@ -7,6 +7,7 @@
 
 class Config;
 class Contacts;
+class HeraldState;
 class Messages;
 class NetworkHandle;
 
@@ -110,6 +111,25 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+};
+
+class HeraldState : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
+    explicit HeraldState(bool owned, QObject *parent);
+public:
+    explicit HeraldState(QObject *parent = nullptr);
+    ~HeraldState();
+    bool configInit() const;
+    Q_INVOKABLE bool setConfigId(const QString& config_id);
+Q_SIGNALS:
+    void configInitChanged();
 };
 
 class Messages : public QAbstractItemModel

@@ -70,6 +70,10 @@ namespace {
     {
         Q_EMIT o->filterRegexChanged();
     }
+    inline void heraldStateConfigInitChanged(HeraldState* o)
+    {
+        Q_EMIT o->configInitChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -417,6 +421,13 @@ extern "C" {
     void contacts_filter_regex_set(Contacts::Private*, bool);
     void contacts_add(Contacts::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool contacts_toggle_filter_regex(Contacts::Private*);
+};
+
+extern "C" {
+    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
+    void herald_state_free(HeraldState::Private*);
+    bool herald_state_config_init_get(const HeraldState::Private*);
+    bool herald_state_set_config_id(HeraldState::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -798,6 +809,34 @@ QByteArray Contacts::add(const QString& id)
 bool Contacts::toggleFilterRegex()
 {
     return contacts_toggle_filter_regex(m_d);
+}
+HeraldState::HeraldState(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+HeraldState::HeraldState(QObject *parent):
+    QObject(parent),
+    m_d(herald_state_new(this,
+        heraldStateConfigInitChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+HeraldState::~HeraldState() {
+    if (m_ownsPrivate) {
+        herald_state_free(m_d);
+    }
+}
+bool HeraldState::configInit() const
+{
+    return herald_state_config_init_get(m_d);
+}
+bool HeraldState::setConfigId(const QString& config_id)
+{
+    return herald_state_set_config_id(m_d, config_id.utf16(), config_id.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

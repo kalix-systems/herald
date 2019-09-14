@@ -3,7 +3,7 @@ export function submit(
   useridField: TextField,
   usernameField: TextField
 ): void {
-  if (!config.exists()) {
+  if (config.init) {
     config.configId = useridField.text.trim();
   }
   config.name = usernameField.text.trim();

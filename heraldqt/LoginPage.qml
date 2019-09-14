@@ -69,8 +69,8 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                config.configId = entryField.text.trim()
-                config.name = entryField.text.trim()
+                // TODO check length of id
+                heraldState.setConfigId(entryField.text.trim())
             }
         }
     }

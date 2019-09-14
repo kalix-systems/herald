@@ -721,6 +721,84 @@ pub unsafe extern "C" fn contacts_set_data_status(ptr: *mut Contacts, row: c_int
     (&mut *ptr).set_status(to_usize(row), v)
 }
 
+pub struct HeraldStateQObject {}
+
+pub struct HeraldStateEmitter {
+    qobject: Arc<AtomicPtr<HeraldStateQObject>>,
+    config_init_changed: fn(*mut HeraldStateQObject),
+}
+
+unsafe impl Send for HeraldStateEmitter {}
+
+impl HeraldStateEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> HeraldStateEmitter {
+        HeraldStateEmitter {
+            qobject: self.qobject.clone(),
+            config_init_changed: self.config_init_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const HeraldStateQObject = null();
+        self.qobject
+            .store(n as *mut HeraldStateQObject, Ordering::SeqCst);
+    }
+    pub fn config_init_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.config_init_changed)(ptr);
+        }
+    }
+}
+
+pub trait HeraldStateTrait {
+    fn new(emit: HeraldStateEmitter) -> Self;
+    fn emit(&mut self) -> &mut HeraldStateEmitter;
+    fn config_init(&self) -> bool;
+    fn set_config_id(&mut self, config_id: String) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn herald_state_new(
+    herald_state: *mut HeraldStateQObject,
+    herald_state_config_init_changed: fn(*mut HeraldStateQObject),
+) -> *mut HeraldState {
+    let herald_state_emit = HeraldStateEmitter {
+        qobject: Arc::new(AtomicPtr::new(herald_state)),
+        config_init_changed: herald_state_config_init_changed,
+    };
+    let d_herald_state = HeraldState::new(herald_state_emit);
+    Box::into_raw(Box::new(d_herald_state))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_free(ptr: *mut HeraldState) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).config_init()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_set_config_id(
+    ptr: *mut HeraldState,
+    config_id_str: *const c_ushort,
+    config_id_len: c_int,
+) -> bool {
+    let mut config_id = String::new();
+    set_string_from_utf16(&mut config_id, config_id_str, config_id_len);
+    let o = &mut *ptr;
+    let r = o.set_config_id(config_id);
+    r
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {

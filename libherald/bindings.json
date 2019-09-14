@@ -6,6 +6,26 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "HeraldState": {
+            "type": "Object",
+            "properties": {
+                "configInit": {
+                    "type": "bool"
+                }
+            },
+            "functions": {
+                "setConfigId": {
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "config_id",
+                            "type": "QString"
+                        }
+                    ],
+                    "return": "bool"
+                }
+            }
+        },
         "NetworkHandle": {
             "type": "Object",
             "functions": {

@@ -15,88 +15,33 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    property var gsContactId
-
     TopMenuBar {
     }
 
-    property alias networkHandle: networkHandleLoader.item
+    HeraldState {
+        id: heraldState
 
-    Loader {
-        id: networkHandleLoader
-        active: !!config.init
-        sourceComponent: NetworkHandle {
+        onConfigInitChanged: {
+            appLoader.active = !appLoader.active
+            loginLoader.active = !loginLoader.active
         }
     }
 
-    Messages {
-        id: messageModel
-    }
-
-    Contacts {
-        id: contactsModel
-    }
-
-    Popups.ConfigPopup {
-        id: preferencesPopup
-    }
-
-    Config {
-        id: config
+    Loader {
+        id: appLoader
+        active: heraldState.configInit
+        anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        sourceComponent: App {
+        }
     }
 
     Loader {
         anchors.fill: parent
         id: loginLoader
-        active: !!!config.init
+        active: !heraldState.configInit
         sourceComponent: LoginPage {
-        }
-    }
-
-    SplitView {
-        id: rootSplitView
-        anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        orientation: Qt.Horizontal
-
-        SideBar {
-            id: sideBar
-        }
-
-        ChatView {
-            id: chatView
-        }
-
-        handle: Rectangle {
-            implicitWidth: 2
-            color: QmlCfg.palette.secondaryColor
-        }
-
-        states: [
-            State {
-                when: !!!config.init
-                name: "loginPage"
-                PropertyChanges {
-                    target: rootSplitView
-                    visible: false
-                }
-            },
-            State {
-                when: config.init
-                name: "loggedIn"
-                PropertyChanges {
-                    target: rootSplitView
-                    visible: true
-                }
-            }
-        ]
-
-        transitions: Transition {
-            NumberAnimation {
-                properties: "width, height"
-                easing.type: Easing.InOutQuad
-            }
         }
     }
 }

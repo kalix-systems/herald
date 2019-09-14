@@ -81,7 +81,7 @@ ListView {
                                            pairwiseConversationId,
                                            popupManager.optionsMenu,
                                            messageModel)
-                    root.gsContactId = contactId
+                    appRoot.gsContactId = contactId
                 }
 
                 // ternary is okay here, type enforced by QML
