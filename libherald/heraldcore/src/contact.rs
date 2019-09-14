@@ -185,6 +185,49 @@ pub enum ContactType {
     Remote = 1,
 }
 
+impl rusqlite::types::FromSql for ContactType {
+    fn column_result(value: rusqlite::types::ValueRef) -> rusqlite::types::FromSqlResult<Self> {
+        value
+            .as_i64()?
+            .try_into()
+            .map_err(|_| rusqlite::types::FromSqlError::InvalidType)
+    }
+}
+
+impl rusqlite::ToSql for ContactType {
+    fn to_sql(&self) -> Result<rusqlite::types::ToSqlOutput, rusqlite::Error> {
+        use rusqlite::types::*;
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
+    }
+}
+
+impl std::convert::TryFrom<u8> for ContactType {
+    type Error = HErr;
+
+    fn try_from(n: u8) -> Result<Self, HErr> {
+        use ContactType::*;
+        match n {
+            0 => Ok(Local),
+            1 => Ok(Remote),
+            unknown => Err(HErr::HeraldError(format!(
+                "Unknown contact status {}",
+                unknown
+            ))),
+        }
+    }
+}
+
+impl std::convert::TryFrom<i64> for ContactType {
+    type Error = HErr;
+
+    fn try_from(n: i64) -> Result<Self, HErr> {
+        match u8::try_from(n) {
+            Ok(n) => n.try_into(),
+            Err(_) => Err(HErr::HeraldError(format!("Unknown contact status {}", n))),
+        }
+    }
+}
+
 impl rusqlite::types::FromSql for ContactStatus {
     fn column_result(value: rusqlite::types::ValueRef) -> rusqlite::types::FromSqlResult<Self> {
         value
@@ -242,6 +285,8 @@ pub struct ContactBuilder {
     status: Option<ContactStatus>,
     /// Pairwise conversation corresponding to contact
     pairwise_conversation: Option<ConversationId>,
+    /// Indicates that the contact is the local contact
+    contact_type: Option<ContactType>,
 }
 
 impl ContactBuilder {
@@ -253,31 +298,37 @@ impl ContactBuilder {
             color: None,
             status: None,
             pairwise_conversation: None,
+            contact_type: None,
         }
     }
 
-    pub fn with_name(mut self, name: String) -> Self {
+    pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
         self
     }
 
-    pub fn with_profile_picture(mut self, profile_picture: String) -> Self {
+    pub fn profile_picture(mut self, profile_picture: String) -> Self {
         self.profile_picture = Some(profile_picture);
         self
     }
 
-    pub fn with_color(mut self, color: u32) -> Self {
+    pub fn color(mut self, color: u32) -> Self {
         self.color = Some(color);
         self
     }
 
-    pub fn with_status(mut self, status: ContactStatus) -> Self {
+    pub fn status(mut self, status: ContactStatus) -> Self {
         self.status = Some(status);
         self
     }
 
-    pub fn with_pairwise_conversation(mut self, pairwise_conversation: ConversationId) -> Self {
+    pub fn pairwise_conversation(mut self, pairwise_conversation: ConversationId) -> Self {
         self.pairwise_conversation = Some(pairwise_conversation);
+        self
+    }
+
+    pub(crate) fn local(mut self) -> Self {
+        self.contact_type = Some(ContactType::Local);
         self
     }
 
@@ -285,18 +336,27 @@ impl ContactBuilder {
         let mut db = Database::get()?;
 
         let tx = db.transaction()?;
-        Self::add_with_tx(self, tx)
+        Self::add_tx(self, tx)
     }
 
-    pub(crate) fn add_with_tx(self, tx: rusqlite::Transaction) -> Result<Contact, HErr> {
+    pub(crate) fn add_tx(self, tx: rusqlite::Transaction) -> Result<Contact, HErr> {
         let color = self
             .color
             .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
+
         let name = self.name.as_ref().map(|s| s.as_str());
 
+        let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
+
+        let title = if let ContactType::Local = contact_type {
+            Some(crate::config::LOCAL_CONVERSATION_NAME)
+        } else {
+            name
+        };
+
         let pairwise_conversation = match self.pairwise_conversation {
-            Some(conv_id) => crate::conversation::add_conversation(&tx, Some(&conv_id), name)?,
-            None => crate::conversation::add_conversation(&tx, None, name)?,
+            Some(conv_id) => crate::conversation::add_conversation(&tx, Some(&conv_id), title)?,
+            None => crate::conversation::add_conversation(&tx, None, title)?,
         };
 
         let contact = Contact {
@@ -306,6 +366,7 @@ impl ContactBuilder {
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,
+            contact_type,
         };
 
         tx.execute(
@@ -316,7 +377,8 @@ impl ContactBuilder {
                 contact.profile_picture,
                 contact.color,
                 contact.status,
-                contact.pairwise_conversation.as_slice()
+                contact.pairwise_conversation.as_slice(),
+                contact.contact_type as u8
             ],
         )?;
         tx.execute(
@@ -344,6 +406,8 @@ pub struct Contact {
     pub status: ContactStatus,
     /// Pairwise conversation corresponding to contact
     pub pairwise_conversation: ConversationId,
+    /// Contact type, local or remote
+    pub contact_type: ContactType,
 }
 
 impl Contact {
@@ -427,6 +491,7 @@ impl Contact {
             color: row.get(3)?,
             status: row.get(4)?,
             pairwise_conversation: row.get::<_, Vec<u8>>(5)?.into_iter().collect(),
+            contact_type: row.get(6)?,
         })
     }
 }
@@ -463,11 +528,11 @@ mod tests {
         let id2 = "World";
 
         ContactBuilder::new(id1.into())
-            .with_name("name".into())
+            .name("name".into())
             .add()
             .expect("Failed to add contact");
         ContactBuilder::new(id2.into())
-            .with_color(1)
+            .color(1)
             .add()
             .expect("Failed to add contact");
     }
@@ -480,7 +545,7 @@ mod tests {
         let id = "Hello World";
 
         ContactBuilder::new(id.into())
-            .with_name("name".into())
+            .name("name".into())
             .add()
             .expect("Failed to add contact");
         assert_eq!(
@@ -499,7 +564,7 @@ mod tests {
         let id = "Hello World";
         let profile_picture = "picture";
         ContactBuilder::new(id.into())
-            .with_profile_picture(profile_picture.into())
+            .profile_picture(profile_picture.into())
             .add()
             .expect("Failed to add contact");
         assert_eq!(
@@ -519,7 +584,7 @@ mod tests {
         let id = "userid";
 
         ContactBuilder::new(id.into())
-            .with_name("Hello".into())
+            .name("Hello".into())
             .add()
             .expect(womp!());
         Contacts::set_name(id, Some("World")).expect("Failed to update name");
@@ -580,7 +645,7 @@ mod tests {
             .add()
             .expect("Failed to add id1");
         ContactBuilder::new(id2.into())
-            .with_status(ContactStatus::Archived)
+            .status(ContactStatus::Archived)
             .add()
             .expect("Failed to add id2");
 
