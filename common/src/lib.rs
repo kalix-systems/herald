@@ -52,7 +52,7 @@ impl<'de> Deserialize<'de> for MessageSendStatus {
         let u = u8::deserialize(d)?;
         u.try_into().map_err(|u| {
             Error::invalid_value(
-                Unexpected::Unsigned(u as u64),
+                Unexpected::Unsigned(u64::from(u)),
                 &format!("expected a value between {} and {}", 0, 2).as_str(),
             )
         })
@@ -99,7 +99,7 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
         let u = u8::deserialize(d)?;
         u.try_into().map_err(|u| {
             Error::invalid_value(
-                Unexpected::Unsigned(u as u64),
+                Unexpected::Unsigned(u64::from(u)),
                 &format!("expected a value between {} and {}", 0, 3).as_str(),
             )
         })
