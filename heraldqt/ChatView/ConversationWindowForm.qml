@@ -55,7 +55,7 @@ Flickable {
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
                     rightMargin: chatScrollBar.width + QmlCfg.margin
-                    leftMargin:  QmlCfg.margin
+                    leftMargin: QmlCfg.margin
                 }
 
                 //NOTE: see chat bubble form

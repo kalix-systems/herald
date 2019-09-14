@@ -66,7 +66,6 @@ Rectangle {
             source: "qrc:///icons/reply.png"
             z: 10
 
-
             onClicked: {
                 CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
