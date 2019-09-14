@@ -413,6 +413,7 @@ extern "C" {
     bool contacts_filter_regex_get(const Contacts::Private*);
     void contacts_filter_regex_set(Contacts::Private*, bool);
     void contacts_add(Contacts::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    qint64 contacts_index_from_conversation_id(const Contacts::Private*, const char*, int);
     bool contacts_toggle_filter_regex(Contacts::Private*);
 };
 
@@ -786,6 +787,10 @@ QByteArray Contacts::add(const QString& id)
     QByteArray s;
     contacts_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
+}
+qint64 Contacts::indexFromConversationId(const QByteArray& conversation_id) const
+{
+    return contacts_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
 }
 bool Contacts::toggleFilterRegex()
 {

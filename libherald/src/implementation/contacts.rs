@@ -1,4 +1,5 @@
 use crate::interface::*;
+use herald_common::ConversationId;
 use heraldcore::{
     abort_err,
     contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
@@ -186,6 +187,17 @@ impl ContactsTrait for Contacts {
                 false
             }
         }
+    }
+
+    fn index_from_conversation_id(&self, conv_id: &[u8]) -> i64 {
+        let conv_id: ConversationId = conv_id.iter().copied().collect();
+
+        self.list
+            .iter()
+            .enumerate()
+            .find(|(_ix, contact)| contact.inner.pairwise_conversation == conv_id)
+            .map(|(ix, _contact)| ix as i64)
+            .unwrap_or(-1)
     }
 
     fn matched(&self, row_index: usize) -> bool {

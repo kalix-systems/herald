@@ -64,6 +64,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
+    Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

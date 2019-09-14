@@ -396,6 +396,7 @@ pub trait ContactsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
@@ -514,6 +515,23 @@ pub unsafe extern "C" fn contacts_add(
     let r = o.add(id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_index_from_conversation_id(
+    ptr: *const Contacts,
+    conversation_id_str: *const c_char,
+    conversation_id_len: c_int,
+) -> i64 {
+    let conversation_id = {
+        slice::from_raw_parts(
+            conversation_id_str as *const u8,
+            to_usize(conversation_id_len),
+        )
+    };
+    let o = &*ptr;
+    let r = o.index_from_conversation_id(conversation_id);
+    r
 }
 
 #[no_mangle]
