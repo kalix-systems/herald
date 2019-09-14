@@ -166,6 +166,16 @@
                         }
                     ]
                 },
+                "pollDataBase": {
+                    "mut": true,
+                    "return": "void",
+                    "arguments": [
+                        {
+                            "name": "curr_conv_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "reply": {
                     "return": "QByteArray",
                     "mut": true,

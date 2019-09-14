@@ -26,6 +26,9 @@ ApplicationWindow {
         id: networkHandleLoader
         active: !!config.init
         sourceComponent: NetworkHandle {
+            onNewMessageChanged: {
+                messageModel.pollDataBase(messageModel.conversationId)
+            }
         }
     }
 

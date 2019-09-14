@@ -132,6 +132,7 @@ public:
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE void pollDataBase(const QByteArray& curr_conv_id);
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
