@@ -52,7 +52,7 @@ Item {
         }
 
         handle: Rectangle {
-            implicitWidth: 2
+            implicitWidth: 3
             color: QmlCfg.palette.secondaryColor
         }
     }
