@@ -93,7 +93,6 @@ pub struct ConfigEmitter {
     color_changed: fn(*mut ConfigQObject),
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
-    init_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
 }
@@ -113,7 +112,6 @@ impl ConfigEmitter {
             color_changed: self.color_changed,
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
-            init_changed: self.init_changed,
             name_changed: self.name_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
@@ -141,12 +139,6 @@ impl ConfigEmitter {
             (self.config_id_changed)(ptr);
         }
     }
-    pub fn init_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.init_changed)(ptr);
-        }
-    }
     pub fn name_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -169,13 +161,10 @@ pub trait ConfigTrait {
     fn colorscheme(&self) -> u32;
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
-    fn set_config_id(&mut self, value: String);
-    fn init(&self) -> bool;
     fn name(&self) -> Option<&str>;
     fn set_name(&mut self, value: Option<String>);
     fn profile_picture(&self) -> Option<&str>;
     fn set_profile_picture(&mut self, value: Option<String>);
-    fn exists(&self) -> bool;
 }
 
 #[no_mangle]
@@ -184,7 +173,6 @@ pub extern "C" fn config_new(
     config_color_changed: fn(*mut ConfigQObject),
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
-    config_init_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
@@ -193,7 +181,6 @@ pub extern "C" fn config_new(
         color_changed: config_color_changed,
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
-        init_changed: config_init_changed,
         name_changed: config_name_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
@@ -236,19 +223,6 @@ pub unsafe extern "C" fn config_config_id_get(
     let v = o.config_id();
     let s: *const c_char = v.as_ptr() as (*const c_char);
     set(p, s, to_c_int(v.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_config_id_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
-    let o = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, v, len);
-    o.set_config_id(s);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_init_get(ptr: *const Config) -> bool {
-    (&*ptr).init()
 }
 
 #[no_mangle]
@@ -309,13 +283,6 @@ pub unsafe extern "C" fn config_profile_picture_set(
 pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
     let o = &mut *ptr;
     o.set_profile_picture(None);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_exists(ptr: *const Config) -> bool {
-    let o = &*ptr;
-    let r = o.exists();
-    r
 }
 
 pub struct ContactsQObject {}

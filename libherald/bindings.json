@@ -234,11 +234,7 @@
             "type": "Object",
             "properties": {
                 "configId": {
-                    "type": "QString",
-                    "write": true
-                },
-                "init": {
-                    "type": "bool"
+                    "type": "QString"
                 },
                 "name": {
                     "type": "QString",
@@ -257,11 +253,6 @@
                 "colorscheme": {
                     "type": "quint32",
                     "write": true
-                }
-            },
-            "functions": {
-                "exists": {
-                    "return": "bool"
                 }
             }
         }
