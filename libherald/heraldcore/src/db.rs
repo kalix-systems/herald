@@ -1,15 +1,9 @@
-use crate::{errors::*, utils::SearchPattern};
-use lazy_static::*;
+use crate::{abort_err, errors::*, utils::SearchPattern};
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
     ops::{Deref, DerefMut},
     path::Path,
-    sync::{Mutex, MutexGuard},
 };
-
-lazy_static! {
-    pub(crate) static ref DB: Mutex<Database> = Mutex::new(Database::default());
-}
 
 /// Canonical database path.
 static DB_PATH: &str = "store.sqlite3";
@@ -17,9 +11,15 @@ static DB_PATH: &str = "store.sqlite3";
 /// Thin wrapper around sqlite3 database connection.
 pub(crate) struct Database(Connection);
 
+impl Clone for Database {
+    fn clone(&self) -> Database {
+        abort_err!(Database::new(DB_PATH))
+    }
+}
+
 impl Database {
-    pub(crate) fn get() -> Result<MutexGuard<'static, Database>, HErr> {
-        Ok(DB.lock()?)
+    pub(crate) fn get() -> Result<Database, HErr> {
+        Database::new(DB_PATH)
     }
 }
 
@@ -106,13 +106,7 @@ impl Database {
 impl Default for Database {
     /// Establish connection with canonical database.
     fn default() -> Self {
-        match Self::new(DB_PATH) {
-            Ok(db) => db,
-            Err(e) => {
-                eprintln!("Failed to open database, aborting: {}", e);
-                std::process::abort();
-            }
-        }
+        abort_err!(Self::new(DB_PATH))
     }
 }
 

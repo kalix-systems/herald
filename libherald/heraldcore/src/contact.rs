@@ -7,7 +7,7 @@ use herald_common::{ConversationId, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
 
-#[derive(Default)]
+#[derive(Default, Copy, Clone)]
 /// Wrapper around contacts table.
 /// TODO This will be stateful when we have caching logic.
 pub struct Contacts {}
@@ -96,7 +96,7 @@ impl Contacts {
     }
 
     /// Sets a contact's color
-    pub fn set_color(id: &str, color: u32) -> Result<(), HErr> {
+    pub fn set_color(id: UserIdRef, color: u32) -> Result<(), HErr> {
         let db = Database::get()?;
 
         db.execute(
@@ -107,7 +107,7 @@ impl Contacts {
     }
 
     /// Indicates whether contact exists
-    pub fn contact_exists(id: &str) -> Result<bool, HErr> {
+    pub fn contact_exists(id: UserIdRef) -> Result<bool, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
@@ -115,7 +115,7 @@ impl Contacts {
     }
 
     /// Sets contact status
-    pub fn set_status(id: &str, status: ContactStatus) -> Result<(), HErr> {
+    pub fn set_status(id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/contact/set_status.sql"),
@@ -124,7 +124,8 @@ impl Contacts {
         Ok(())
     }
 
-    pub fn get_status(id: &str) -> Result<ContactStatus, HErr> {
+    /// Gets contact status
+    pub fn status(id: UserIdRef) -> Result<ContactStatus, HErr> {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/contact/get_status.sql"))?;
@@ -272,6 +273,7 @@ impl std::convert::TryFrom<i64> for ContactStatus {
     }
 }
 
+/// Builder for `Contact`
 pub struct ContactBuilder {
     /// Contact id
     id: UserId,
@@ -290,6 +292,7 @@ pub struct ContactBuilder {
 }
 
 impl ContactBuilder {
+    /// Creates new `ContactBuilder`
     pub fn new(id: UserId) -> Self {
         Self {
             id,
@@ -302,26 +305,31 @@ impl ContactBuilder {
         }
     }
 
+    /// Sets the name of the contact being built.
     pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
         self
     }
 
+    /// Sets the profile picture of the contact being built.
     pub fn profile_picture(mut self, profile_picture: String) -> Self {
         self.profile_picture = Some(profile_picture);
         self
     }
 
+    /// Sets the color of the contact being built.
     pub fn color(mut self, color: u32) -> Self {
         self.color = Some(color);
         self
     }
 
+    /// Sets the status of the contact being built.
     pub fn status(mut self, status: ContactStatus) -> Self {
         self.status = Some(status);
         self
     }
 
+    /// Sets the pairwise conversation id of the contact being built.
     pub fn pairwise_conversation(mut self, pairwise_conversation: ConversationId) -> Self {
         self.pairwise_conversation = Some(pairwise_conversation);
         self
@@ -332,14 +340,17 @@ impl ContactBuilder {
         self
     }
 
+    /// Adds contact to database
     pub fn add(self) -> Result<Contact, HErr> {
         let mut db = Database::get()?;
 
         let tx = db.transaction()?;
-        Self::add_tx(self, tx)
+        let contact = Self::add_with_tx(self, &tx);
+        tx.commit()?;
+        contact
     }
 
-    pub(crate) fn add_tx(self, tx: rusqlite::Transaction) -> Result<Contact, HErr> {
+    pub(crate) fn add_with_tx(self, conn: &rusqlite::Transaction) -> Result<Contact, HErr> {
         let color = self
             .color
             .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
@@ -349,14 +360,14 @@ impl ContactBuilder {
         let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
 
         let title = if let ContactType::Local = contact_type {
-            Some(crate::config::LOCAL_CONVERSATION_NAME)
+            Some(crate::config::NTS_CONVERSATION_NAME)
         } else {
             name
         };
 
         let pairwise_conversation = match self.pairwise_conversation {
-            Some(conv_id) => crate::conversation::add_conversation(&tx, Some(&conv_id), title)?,
-            None => crate::conversation::add_conversation(&tx, None, title)?,
+            Some(conv_id) => crate::conversation::add_conversation(&conn, Some(&conv_id), title)?,
+            None => crate::conversation::add_conversation(&conn, None, title)?,
         };
 
         let contact = Contact {
@@ -369,7 +380,7 @@ impl ContactBuilder {
             contact_type,
         };
 
-        tx.execute(
+        conn.execute(
             include_str!("sql/contact/add.sql"),
             params![
                 contact.id,
@@ -381,11 +392,10 @@ impl ContactBuilder {
                 contact.contact_type as u8
             ],
         )?;
-        tx.execute(
+        conn.execute(
             include_str!("sql/members/add_member.sql"),
             params![contact.pairwise_conversation.as_slice(), contact.id],
         )?;
-        tx.commit()?;
 
         Ok(contact)
     }
@@ -411,26 +421,6 @@ pub struct Contact {
 }
 
 impl Contact {
-    //    fn new(
-    //        id: String,
-    //        name: Option<String>,
-    //        profile_picture: Option<String>,
-    //        color: Option<u32>,
-    //        status: ContactStatus,
-    //        pairwise_conversation: ConversationId,
-    //    ) -> Self {
-    //        let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-    //
-    //        Contact {
-    //            name,
-    //            id,
-    //            profile_picture,
-    //            color,
-    //            status,
-    //            pairwise_conversation,
-    //        }
-    //    }
-
     /// Returns name
     pub fn name(&self) -> Option<&str> {
         self.name.as_ref().map(|s| s.as_str())
@@ -628,7 +618,7 @@ mod tests {
         Contacts::set_status(id, ContactStatus::Archived).expect(womp!());
 
         assert_eq!(
-            Contacts::get_status(id).expect("Failed to determine contact status"),
+            Contacts::status(id).expect("Failed to determine contact status"),
             ContactStatus::Archived
         );
     }
