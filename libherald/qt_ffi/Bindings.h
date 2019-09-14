@@ -144,9 +144,9 @@ public:
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
     Q_INVOKABLE void clearConversationView();
+    Q_INVOKABLE bool deleteConversation();
     Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
-    Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 

@@ -610,9 +610,9 @@ extern "C" {
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
+    bool messages_delete_conversation(Messages::Private*);
     bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_delete_conversation(Messages::Private*);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
@@ -907,6 +907,10 @@ void Messages::clearConversationView()
 {
     return messages_clear_conversation_view(m_d);
 }
+bool Messages::deleteConversation()
+{
+    return messages_delete_conversation(m_d);
+}
 bool Messages::deleteConversationById(const QByteArray& conversation_id)
 {
     return messages_delete_conversation_by_id(m_d, conversation_id.data(), conversation_id.size());
@@ -914,10 +918,6 @@ bool Messages::deleteConversationById(const QByteArray& conversation_id)
 bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
-}
-bool Messages::delete_conversation()
-{
-    return messages_delete_conversation(m_d);
 }
 QByteArray Messages::insertMessage(const QString& body)
 {

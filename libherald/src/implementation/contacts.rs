@@ -177,16 +177,26 @@ impl ContactsTrait for Contacts {
             }
         };
 
-        match self.handle.set_status(self.contact_id(row_index), status) {
+        match self
+            .handle
+            .set_status(self.list[row_index].inner.id.as_str(), status)
+        {
             Ok(()) => {
                 self.list[row_index].inner.status = status;
-                true
             }
             Err(e) => {
                 eprintln!("{}", e);
-                false
+                return false;
             }
         }
+
+        if status == ContactStatus::Deleted {
+            self.model.begin_remove_rows(row_index, row_index);
+            self.list.remove(row_index);
+            self.model.end_remove_rows();
+        }
+
+        true
     }
 
     fn index_from_conversation_id(&self, conv_id: &[u8]) -> i64 {

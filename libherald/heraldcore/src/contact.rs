@@ -108,11 +108,28 @@ fn contact_exists(db: &Database, id: UserIdRef) -> Result<bool, HErr> {
 }
 
 /// Sets contact status
-fn set_status(db: &Database, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
-    db.execute(
-        include_str!("sql/contact/set_status.sql"),
-        params![status, id],
-    )?;
+fn set_status(db: &mut Database, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
+    use ContactStatus::*;
+    match status {
+        Deleted => {
+            let tx = db.transaction()?;
+            tx.execute(
+                include_str!("sql/contact/delete_contact_meta.sql"),
+                params![id],
+            )?;
+            tx.execute(
+                include_str!("sql/message/delete_pairwise_conversation.sql"),
+                params![id],
+            )?;
+            tx.commit()?;
+        }
+        _ => {
+            db.execute(
+                include_str!("sql/contact/set_status.sql"),
+                params![status, id],
+            )?;
+        }
+    }
     Ok(())
 }
 
@@ -195,8 +212,8 @@ impl ContactsHandle {
     }
 
     /// Sets contact status
-    pub fn set_status(&self, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
-        set_status(&self.db, id, status)
+    pub fn set_status(&mut self, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
+        set_status(&mut self.db, id, status)
     }
 
     /// Gets contact status
@@ -477,52 +494,20 @@ impl Contact {
         self.name.as_ref().map(|s| s.as_str())
     }
 
-    ///// Sets contact name
-    //pub fn set_name(&mut self, name: Option<&str>) -> Result<(), HErr> {
-    //    ContactsHandle::set_name(&self.id, name)?;
-    //    self.name = name.map(|s| s.to_owned());
-    //    Ok(())
-    //}
-
     /// Returns path to profile picture
     pub fn profile_picture(&self) -> Option<&str> {
         self.profile_picture.as_ref().map(|s| s.as_ref())
     }
-
-    ///// Sets profile picture
-    //pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-    //    let path = ContactsHandle::set_profile_picture(
-    //        self.id.as_str(),
-    //        profile_picture,
-    //        self.profile_picture.as_ref().map(|p| p.as_str()),
-    //    )?;
-    //    self.profile_picture = path;
-    //    Ok(())
-    //}
 
     /// Returns contact's color
     pub fn color(&self) -> u32 {
         self.color
     }
 
-    ///// Sets color
-    //pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-    //    ContactsHandle::set_color(self.id.as_str(), color)?;
-    //    self.color = color;
-    //    Ok(())
-    //}
-
     /// Returns contact's status
     pub fn status(&self) -> ContactStatus {
         self.status
     }
-
-    ///// Sets status
-    //pub fn set_status(&mut self, status: ContactStatus) -> Result<(), HErr> {
-    //    ContactsHandle::set_status(self.id.as_str(), status)?;
-    //    self.status = status;
-    //    Ok(())
-    //}
 
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         Ok(Contact {
@@ -675,11 +660,12 @@ mod tests {
     #[test]
     #[serial]
     fn set_status() {
+        use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
 
-        let handle = ContactsHandle::new().expect(womp!());
+        let mut handle = ContactsHandle::new().expect(womp!());
         let id = "Hello World";
-        ContactBuilder::new(id.into()).add().expect(womp!());
+        let contact = ContactBuilder::new(id.into()).add().expect(womp!());
         handle
             .set_status(id, ContactStatus::Archived)
             .expect(womp!());
@@ -689,6 +675,22 @@ mod tests {
                 .status(id)
                 .expect("Failed to determine contact status"),
             ContactStatus::Archived
+        );
+
+        handle
+            .set_status(id, ContactStatus::Deleted)
+            .expect(womp!());
+
+        assert_eq!(
+            handle
+                .status(id)
+                .expect("Failed to determine contact status"),
+            ContactStatus::Deleted
+        );
+        assert!(
+            Conversations::get_conversation_messages(&contact.pairwise_conversation)
+                .expect(womp!())
+                .is_empty()
         );
     }
 
