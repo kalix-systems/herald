@@ -99,7 +99,6 @@ Rectangle {
             readOnly: true
         }
 
-
         Label {
             id: timeStamp
             color: QmlCfg.palette.secondaryTextColor

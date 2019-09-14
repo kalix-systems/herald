@@ -1,9 +1,14 @@
-declare class ConversationID { }
-declare class MessageId { }
+declare class ConversationID {}
+declare class MessageId {}
 declare type UserId = string;
 
 declare class NetworkHandle {
-  sendMessage(text: string, conversationID: ConversationID, messageId: MessageId): boolean;
+  sendMessage(
+    text: string,
+    conversationID: ConversationID,
+    messageId: MessageId
+  ): boolean;
+  sendAddRequest(userid: UserId, conversationID: ConversationID): boolean;
 }
 
 declare class Messages {
@@ -11,10 +16,10 @@ declare class Messages {
   insertMessage(text: string, success: boolean): MessageId;
 }
 
-declare class Message extends Item { }
+declare class Message extends Item {}
 
 declare class Contacts {
-  add(userid: UserId): boolean;
+  add(userid: UserId): ConversationID;
 }
 
 declare const enum ContactStatus {

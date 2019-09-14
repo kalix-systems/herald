@@ -1,7 +1,9 @@
 use crate::interface::*;
 use herald_common::*;
-use heraldcore::network::*;
-use heraldcore::tokio::{self, sync::mpsc::*};
+use heraldcore::{
+    network::*,
+    tokio::{self, sync::mpsc::*},
+};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -54,6 +56,7 @@ impl EffectsFlags {
 /// map to function calls from the herald core session api
 pub enum FuncCall {
     SendMsg { to: UserId, msg: MessageToPeer },
+    AddRequest(ConversationId, UserId),
     RequestMeta(UserId),
     RegisterDevice,
 }
@@ -117,6 +120,25 @@ impl NetworkHandleTrait for NetworkHandle {
             }
         }
         true
+    }
+
+    fn send_add_request(&mut self, user_id: String, conversation_id: &[u8]) -> bool {
+        if conversation_id.len() != 32 {
+            eprintln!("Invalid conversation_id");
+            return false;
+        }
+        let conversation_id = conversation_id.iter().copied().collect();
+
+        match self
+            .tx
+            .try_send(FuncCall::AddRequest(conversation_id, user_id))
+        {
+            Ok(_) => return true,
+            Err(_) => {
+                eprintln!("failed to send");
+                return false;
+            }
+        }
     }
 
     fn register_device(&mut self) -> bool {
@@ -199,6 +221,11 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
                     sess.send_msg(to, msg)
                         .await
                         .expect("failed to send message");
+                }
+                FuncCall::AddRequest(conversation_id, user_id) => {
+                    sess.send_msg(user_id, MessageToPeer::AddRequest(conversation_id))
+                        .await
+                        .expect("failed to send add request");
                 }
             },
             None => {}

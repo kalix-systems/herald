@@ -415,7 +415,7 @@ extern "C" {
     void contacts_filter_set(Contacts::Private*, const ushort *str, int len);
     bool contacts_filter_regex_get(const Contacts::Private*);
     void contacts_filter_regex_set(Contacts::Private*, bool);
-    bool contacts_add(Contacts::Private*, const ushort*, int);
+    void contacts_add(Contacts::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool contacts_toggle_filter_regex(Contacts::Private*);
 };
 
@@ -620,6 +620,7 @@ extern "C" {
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*);
     bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
+    bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
@@ -788,9 +789,11 @@ bool Contacts::filterRegex() const
 void Contacts::setFilterRegex(bool v) {
     contacts_filter_regex_set(m_d, v);
 }
-bool Contacts::add(const QString& id)
+QByteArray Contacts::add(const QString& id)
 {
-    return contacts_add(m_d, id.utf16(), id.size());
+    QByteArray s;
+    contacts_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
+    return s;
 }
 bool Contacts::toggleFilterRegex()
 {
@@ -944,6 +947,10 @@ bool NetworkHandle::registerDevice()
 bool NetworkHandle::requestMetaData(const QString& of)
 {
     return network_handle_request_meta_data(m_d, of.utf16(), of.size());
+}
+bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id)
+{
+    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id)
 {

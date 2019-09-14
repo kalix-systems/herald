@@ -18,7 +18,6 @@ Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
 
-
     clip: true
     interactive: true
     boundsBehavior: Flickable.StopAtBounds
@@ -39,12 +38,10 @@ Flickable {
             left: parent.left
         }
 
-
         Repeater {
             id: chatListView
             anchors.fill: parent
             model: messageModel
-
 
             delegate: Column {
                 readonly property bool outbound: author === config.configId

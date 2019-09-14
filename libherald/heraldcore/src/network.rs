@@ -174,6 +174,27 @@ fn handle_msg(
     })
 }
 
+fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<Event, HErr> {
+   use crate::contact::ContactBuilder;
+
+   let contact = ContactBuilder::new((&from).clone()).pairwise_conversation(conversation_id).add()?;
+
+   let reply = Some(form_push(from.clone(), MessageToPeer::AddResponse(contact.pairwise_conversation, true))?);
+
+   Ok(Event {
+    reply,
+    notification: None
+   })
+}
+
+// TODO should this do something?
+fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
+    Ok(Event{
+        reply: None,
+        notification: None,
+    })
+}
+
 fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
     let ClientMessageAck {
         message_id,
@@ -199,6 +220,8 @@ fn handle_push(
             msg_id,
             conversation_id,
         } => handle_msg(msg_id, author.uid, conversation_id, body, time, op_msg_id),
+        AddRequest(conversation_id) => handle_add_request(author.uid, conversation_id),
+        AddResponse(_conversation_id, _accepted) => handle_add_response(_conversation_id, _accepted),
         Ack(a) => handle_ack(author.uid, a),
     }
 }

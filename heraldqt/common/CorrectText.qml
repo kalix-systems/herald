@@ -13,4 +13,3 @@ TextEdit {
         visible: false
     }
 }
-

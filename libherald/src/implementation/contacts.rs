@@ -51,16 +51,16 @@ impl ContactsTrait for Contacts {
     /// Adds a contact by their `id`
     ///
     /// Returns `false` on failure.
-    fn add(&mut self, id: String) -> bool {
-        if id.len() > 256 {
-            return false;
+    fn add(&mut self, id: String) -> Vec<u8> {
+        if id.len() > 255 {
+            return vec![];
         }
 
         let contact = match ContactBuilder::new(id).add() {
             Ok(contact) => contact,
             Err(e) => {
                 eprintln!("Error: {}", e);
-                return false;
+                return vec![];
             }
         };
 
@@ -74,7 +74,8 @@ impl ContactsTrait for Contacts {
         );
         self.model.end_insert_rows();
         self.inner_filter();
-        true
+
+        self.list[0].inner.pairwise_conversation.to_vec()
     }
 
     /// Returns contact id.

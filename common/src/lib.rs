@@ -144,6 +144,8 @@ pub enum MessageToPeer {
         msg_id: MsgId,
         conversation_id: ConversationId,
     },
+    AddRequest(ConversationId),
+    AddResponse(ConversationId, bool),
     Ack(ClientMessageAck),
 }
 

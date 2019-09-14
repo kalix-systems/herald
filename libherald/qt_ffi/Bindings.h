@@ -67,7 +67,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE bool add(const QString& id);
+    Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -187,6 +187,7 @@ public:
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice();
     Q_INVOKABLE bool requestMetaData(const QString& of);
+    Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id);
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id);
 Q_SIGNALS:
     void connectionPendingChanged();

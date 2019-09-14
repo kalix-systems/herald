@@ -49,7 +49,6 @@ ListView {
 
             anchors.fill: parent
 
-
             /// Note: can we use the highlight property here
             /// we can do this once contact deletion updates current item for listview properly
             states: [
@@ -77,10 +76,11 @@ ListView {
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
 
-                onClicked: { JS.contactClickHandler(mouse, contactList, index,
-                                                  pairwiseConversationId,
-                                                  popupManager.optionsMenu,
-                                                  messageModel)
+                onClicked: {
+                    JS.contactClickHandler(mouse, contactList, index,
+                                           pairwiseConversationId,
+                                           popupManager.optionsMenu,
+                                           messageModel)
                     root.gsContactId = contactId
                 }
 

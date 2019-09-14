@@ -27,6 +27,20 @@
                         }
                     ]
                 },
+                "sendAddRequest": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "requestMetaData": {
                     "mut": true,
                     "return": "bool",
@@ -99,7 +113,7 @@
             },
             "functions": {
                 "add": {
-                    "return": "bool",
+                    "return": "QByteArray",
                     "mut": true,
                     "arguments": [
                         {
