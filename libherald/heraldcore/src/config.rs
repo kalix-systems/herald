@@ -67,7 +67,7 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn build(self) -> Result<Config, HErr> {
+    pub fn add(self) -> Result<Config, HErr> {
         let color = self
             .color
             .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
@@ -81,24 +81,28 @@ impl ConfigBuilder {
             colorscheme,
         };
 
-        {
-            let db = Database::get()?;
-            db.execute(
-                include_str!("sql/config/add_config.sql"),
-                params![config.id(), colorscheme],
-            )?;
-        }
-        let mut builder = crate::contact::ContactBuilder::new(config.id.clone());
+        let mut contact_builder = crate::contact::ContactBuilder::new(config.id.clone());
 
         if let Some(name) = &config.name {
-            builder = builder.with_name(name.to_string());
+            contact_builder = contact_builder.with_name(name.to_string());
         }
 
         if let Some(picture) = &config.profile_picture {
-            builder = builder.with_profile_picture(picture.to_string());
+            contact_builder = contact_builder.with_profile_picture(picture.to_string());
         }
 
-        builder.with_color(config.color).add()?;
+        contact_builder = contact_builder.with_color(config.color);
+
+        let mut db = Database::get()?;
+
+        let tx = db.transaction()?;
+        tx.execute(
+            include_str!("sql/config/add_config.sql"),
+            params![config.id(), colorscheme],
+        )?;
+
+        contact_builder.add_with_tx(tx)?;
+
         Ok(config)
     }
 }
@@ -253,7 +257,7 @@ mod tests {
 
         let id = "HelloWorld";
 
-        ConfigBuilder::new(id.into()).build().expect(womp!());
+        ConfigBuilder::new(id.into()).add().expect(womp!());
         assert_eq!(Config::get().expect(womp!()).id(), id);
 
         Database::reset_all().expect(womp!());
@@ -263,7 +267,7 @@ mod tests {
         ConfigBuilder::new(id.into())
             .with_name(name.into())
             .with_profile_picture(profile_picture.into())
-            .build()
+            .add()
             .expect(womp!());
         assert_eq!(Config::get().expect(womp!()).id, "HelloWorld");
         assert_eq!(Config::get().expect(womp!()).name.expect(womp!()), name);
@@ -283,7 +287,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
-        let config = ConfigBuilder::new(id.into()).build().expect(womp!());
+        let config = ConfigBuilder::new(id.into()).add().expect(womp!());
 
         assert_eq!(config.id, id);
     }

@@ -49,7 +49,7 @@ impl ConfigTrait for Config {
 
     fn set_config_id(&mut self, id: String) {
         if self.inner.is_none() {
-            self.inner = match ConfigBuilder::new(id).build() {
+            self.inner = match ConfigBuilder::new(id).add() {
                 Ok(c) => {
                     self.emit.config_id_changed();
                     self.emit.init_changed();

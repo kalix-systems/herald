@@ -282,19 +282,21 @@ impl ContactBuilder {
     }
 
     pub fn add(self) -> Result<Contact, HErr> {
+        let mut db = Database::get()?;
+
+        let tx = db.transaction()?;
+        Self::add_with_tx(self, tx)
+    }
+
+    pub(crate) fn add_with_tx(self, tx: rusqlite::Transaction) -> Result<Contact, HErr> {
         let color = self
             .color
             .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
+        let name = self.name.as_ref().map(|s| s.as_str());
 
         let pairwise_conversation = match self.pairwise_conversation {
-            Some(conv_id) => crate::conversation::Conversations::add_conversation(
-                Some(&conv_id),
-                self.name.as_ref().map(|s| s.as_str()),
-            )?,
-            None => crate::conversation::Conversations::add_conversation(
-                None,
-                self.name.as_ref().map(|s| s.as_str()),
-            )?,
+            Some(conv_id) => crate::conversation::add_conversation(&tx, Some(&conv_id), name)?,
+            None => crate::conversation::add_conversation(&tx, None, name)?,
         };
 
         let contact = Contact {
@@ -306,9 +308,6 @@ impl ContactBuilder {
             pairwise_conversation,
         };
 
-        let mut db = Database::get()?;
-
-        let tx = db.transaction()?;
         tx.execute(
             include_str!("sql/contact/add.sql"),
             params![

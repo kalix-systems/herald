@@ -61,29 +61,38 @@ impl Conversation {
     }
 }
 
+/// Adds a conversation to the database
+pub(crate) fn add_conversation(
+    db: &rusqlite::Connection,
+    conversation_id: Option<&ConversationId>,
+    title: Option<&str>,
+) -> Result<ConversationId, HErr> {
+    let id = match conversation_id {
+        Some(id) => id.to_owned(),
+        None => {
+            let rand_array = utils::rand_id();
+            ConversationId::from(rand_array)
+        }
+    };
+
+    let color = crate::utils::id_to_color(&id);
+
+    db.execute(
+        include_str!("sql/conversation/add_conversation.sql"),
+        params![id.as_slice(), title, color],
+    )?;
+
+    Ok(id)
+}
+
 impl Conversations {
     /// Adds a conversation to the database
     pub fn add_conversation(
         conversation_id: Option<&ConversationId>,
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
-        let id = match conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = crate::utils::id_to_color(&id);
         let db = Database::get()?;
-
-        db.execute(
-            include_str!("sql/conversation/add_conversation.sql"),
-            params![id.as_slice(), title, color],
-        )?;
-
-        Ok(id)
+        add_conversation(&db, conversation_id, title)
     }
 
     /// Deletes all messages in a conversation.
