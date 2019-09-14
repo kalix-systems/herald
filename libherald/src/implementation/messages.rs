@@ -84,10 +84,8 @@ impl MessagesTrait for Messages {
                     return;
                 }
 
-                self.model.begin_insert_rows(
-                    messages.len().saturating_sub(1),
-                    messages.len().saturating_sub(1),
-                );
+                self.model
+                    .begin_insert_rows(self.list.len(), messages.len().saturating_sub(1));
                 self.list = messages;
                 self.model.end_insert_rows();
             }
