@@ -608,8 +608,8 @@ extern "C" {
     bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     bool messages_delete_conversation(Messages::Private*);
-    bool messages_insert_message(Messages::Private*, const ushort*, int);
-    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
+    void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
 
 extern "C" {
@@ -620,7 +620,7 @@ extern "C" {
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*);
     bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const ushort*, int);
+    bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
 Config::Config(bool /*owned*/, QObject *parent):
@@ -891,13 +891,17 @@ bool Messages::delete_conversation()
 {
     return messages_delete_conversation(m_d);
 }
-bool Messages::insertMessage(const QString& body)
+QByteArray Messages::insertMessage(const QString& body)
 {
-    return messages_insert_message(m_d, body.utf16(), body.size());
+    QByteArray s;
+    messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
+    return s;
 }
-bool Messages::reply(const QString& body, const QByteArray& op)
+QByteArray Messages::reply(const QString& body, const QByteArray& op)
 {
-    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
+    QByteArray s;
+    messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size(), &s, set_qbytearray);
+    return s;
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -941,7 +945,7 @@ bool NetworkHandle::requestMetaData(const QString& of)
 {
     return network_handle_request_meta_data(m_d, of.utf16(), of.size());
 }
-bool NetworkHandle::sendMessage(const QString& message_body, const QString& to)
+bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id)
 {
-    return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.utf16(), to.size());
+    return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.data(), to.size(), msg_id.data(), msg_id.size());
 }

@@ -803,8 +803,8 @@ pub trait MessagesTrait {
     fn delete_conversation_by_id(&mut self, conversation_id: &[u8]) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn delete_conversation(&mut self) -> bool;
-    fn insert_message(&mut self, body: String) -> bool;
-    fn reply(&mut self, body: String, op: &[u8]) -> bool;
+    fn insert_message(&mut self, body: String) -> Vec<u8>;
+    fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -922,22 +922,24 @@ pub unsafe extern "C" fn messages_delete_conversation(ptr: *mut Messages) -> boo
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
+pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
     let o = &mut *ptr;
     let r = o.insert_message(body);
-    r
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op_str: *const c_char, op_len: c_int) -> bool {
+pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op_str: *const c_char, op_len: c_int, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
     let op = { slice::from_raw_parts(op_str as *const u8, to_usize(op_len)) };
     let o = &mut *ptr;
     let r = o.reply(body, op);
-    r
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
@@ -1083,7 +1085,7 @@ pub trait NetworkHandleTrait {
     fn new_message(&self) -> bool;
     fn register_device(&mut self) -> bool;
     fn request_meta_data(&mut self, of: String) -> bool;
-    fn send_message(&mut self, message_body: String, to: String) -> bool;
+    fn send_message(&mut self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
 
 #[no_mangle]
@@ -1140,12 +1142,12 @@ pub unsafe extern "C" fn network_handle_request_meta_data(ptr: *mut NetworkHandl
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_message(ptr: *mut NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_ushort, to_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_send_message(ptr: *mut NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_char, to_len: c_int, msg_id_str: *const c_char, msg_id_len: c_int) -> bool {
     let mut message_body = String::new();
     set_string_from_utf16(&mut message_body, message_body_str, message_body_len);
-    let mut to = String::new();
-    set_string_from_utf16(&mut to, to_str, to_len);
+    let to = { slice::from_raw_parts(to_str as *const u8, to_usize(to_len)) };
+    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
     let o = &mut *ptr;
-    let r = o.send_message(message_body, to);
+    let r = o.send_message(message_body, to, msg_id);
     r
 }

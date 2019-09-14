@@ -131,8 +131,8 @@ public:
     Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE bool delete_conversation();
-    Q_INVOKABLE bool insertMessage(const QString& body);
-    Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
+    Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -187,7 +187,7 @@ public:
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice();
     Q_INVOKABLE bool requestMetaData(const QString& of);
-    Q_INVOKABLE bool sendMessage(const QString& message_body, const QString& to);
+    Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id);
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();

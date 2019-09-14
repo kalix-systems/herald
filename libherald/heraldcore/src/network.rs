@@ -187,16 +187,18 @@ fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
 }
 
 fn handle_push(
-    msg_id: MsgId,
     author: GlobalId,
-    conversation_id: ConversationId,
     body: MessageToPeer,
     time: DateTime<Utc>,
     op_msg_id: Option<MsgId>,
 ) -> Result<Event, HErr> {
     use MessageToPeer::*;
     match body {
-        Message(s) => handle_msg(msg_id, author.uid, conversation_id, s, time, op_msg_id),
+        Message {
+            body,
+            msg_id,
+            conversation_id,
+        } => handle_msg(msg_id, author.uid, conversation_id, body, time, op_msg_id),
         Ack(a) => handle_ack(author.uid, a),
     }
 }
@@ -266,9 +268,7 @@ impl Session {
         use MessageToClient::*;
         match msg {
             Push {
-                msg_id,
                 from,
-                conversation_id,
                 body,
                 time,
                 op_msg_id,
@@ -277,7 +277,7 @@ impl Session {
                 let Event {
                     reply,
                     notification,
-                } = handle_push(msg_id, from, conversation_id, push, time, op_msg_id)?;
+                } = handle_push(from, push, time, op_msg_id)?;
                 if let Some(n) = notification {
                     drop(self.notifications.clone().try_send(n));
                 }

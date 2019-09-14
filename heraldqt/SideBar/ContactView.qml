@@ -28,7 +28,6 @@ ListView {
 
     delegate: Item {
         id: contactItem
-
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
 
@@ -79,9 +78,9 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: { JS.contactClickHandler(mouse, contactList, index,
-                                                  contactId, contactItem,
+                                                  pairwiseConversationId,
                                                   popupManager.optionsMenu,
-                                                  messageModel, chatView)
+                                                  messageModel)
                     root.gsContactId = contactId
                 }
 

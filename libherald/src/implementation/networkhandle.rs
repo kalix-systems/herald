@@ -1,10 +1,7 @@
 use crate::interface::*;
 use herald_common::*;
 use heraldcore::network::*;
-use heraldcore::tokio::{
-    self,
-    sync::mpsc::*,
-};
+use heraldcore::tokio::{self, sync::mpsc::*};
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -81,17 +78,45 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn send_message(&mut self, message_body: String, to: String) -> bool {
-        match self.tx.try_send(FuncCall::SendMsg {
-            msg: MessageToPeer::Message(message_body),
-            to,
-        }) {
-            Ok(_) => true,
-            Err(_e) => {
-                eprintln!("could not send message, error unrpintable");
-                false
+    /// note, currently this function has all together too much copying.
+    /// this will be rectified when stupid hanfles fan out.
+    fn send_message(&mut self, body: String, to: &[u8], msg_id: &[u8]) -> bool {
+        if to.len() != 32 {
+            eprintln!("");
+            return false;
+        }
+
+        // we copy this repeatedly, if this gets slow, put it in an arc.
+        let conv_id = to.iter().copied().collect();
+
+        let members = match heraldcore::conversation::Conversations::get_members(&conv_id) {
+            Ok(vec) => vec.into_iter(),
+            Err(e) => {
+                eprintln!("Could not get members of conversation {}", e);
+                return false;
+            }
+        };
+
+        let msg_id: MsgId = msg_id.iter().copied().collect();
+
+        for member in members {
+            println!("attempting to send to {}", &member);
+            match self.tx.try_send(FuncCall::SendMsg {
+                msg: MessageToPeer::Message {
+                    body: body.clone(),
+                    msg_id: msg_id.clone(),
+                    conversation_id: conv_id.clone(),
+                },
+                to: member,
+            }) {
+                Ok(_) => println!("message queued for send"),
+                Err(_e) => {
+                    eprintln!("could not send message, error unrpintable");
+                    return false;
+                }
             }
         }
+        true
     }
 
     fn register_device(&mut self) -> bool {
@@ -143,17 +168,14 @@ fn start_worker(
             tokio::runtime::current_thread::Runtime::new().expect("could not spawn runtime");
         rt.block_on(async move {
             status_flags.emit_net_pending(&mut emit);
-            let (nwrx, sess) = match Session::init().await {
-                Ok((nwrx, sess)) => (nwrx, sess),
-                Err(e) => {
-                    eprintln!("failed to init session! : {}", e);
-                    status_flags.emit_net_down(&mut emit);
-                    std::process::abort();
-                }
-            };
-            status_flags.emit_net_up(&mut emit);
-            tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
-            tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
+            if let Ok((nwrx, sess)) = Session::init().await {
+                status_flags.emit_net_up(&mut emit);
+                tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
+                tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
+            } else {
+                println!("could not connect to server");
+                status_flags.emit_net_down(&mut emit);
+            }
         });
         rt.run().expect("opops");
     });
@@ -197,15 +219,18 @@ async fn handle_nw_channel(
                     update_code,
                     message_id,
                 }) => {
-                    println!("Receiving notification: {:?}, {:?}", update_code, message_id);
+                    println!(
+                        "Receiving notification: {:?}, {:?}",
+                        update_code, message_id
+                    );
                     // TODO update the UI here.
                 }
                 Notification::NewMsg(user_id) => {
-                    status_flags.emit_new_msg(&mut emit);
                     println!("NEW MESSAGE FROM : {}", user_id);
+                    status_flags.emit_new_msg(&mut emit);
                 }
             },
-            None => {}
+            None => println!("print nope"),
         };
     }
 }

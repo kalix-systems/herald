@@ -1,6 +1,6 @@
 #![feature(try_blocks)]
 
-use arrayvec::ArrayVec;
+pub use arrayvec::ArrayVec;
 pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
@@ -139,7 +139,11 @@ pub struct MessageReceipt {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToPeer {
     // TODO: replace this with an &str
-    Message(String),
+    Message {
+        body: String,
+        msg_id: MsgId,
+        conversation_id: ConversationId,
+    },
     Ack(ClientMessageAck),
 }
 
@@ -162,9 +166,7 @@ pub enum MessageToServer {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
     Push {
-        msg_id: MsgId,
         from: GlobalId,
-        conversation_id: ConversationId,
         op_msg_id: Option<MsgId>,
         body: RawMsg,
         time: DateTime<Utc>,
@@ -240,11 +242,11 @@ pub async fn read_cbor<S: AsyncRead + Unpin, T: for<'a> Deserialize<'a>>(
     s: &mut S,
 ) -> Result<T, TransportError> {
     let mut buf = [0u8; 8];
-    eprintln!("reading length");
+    eprintln!("waiting to read length");
     s.read_exact(&mut buf).await?;
     let len = u64::from_le_bytes(buf) as usize;
     eprintln!("length read, was {}", len);
-    eprintln!("now reading data");
+    eprintln!("waiting to read data");
     let mut buf = vec![0u8; len];
     s.read_exact(&mut buf).await?;
     eprintln!("read data, bytes were {:x?}", &buf);

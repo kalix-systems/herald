@@ -88,7 +88,13 @@ impl Messages {
         let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
 
         let db = Database::get()?;
-
+        println!(
+            "ADDING MESSAGE BEFORE BREAK: AUTHOR: {}, BODY: {}, \n MSG ID: {:x?}, CONV_ID: {:x?}",
+            &author,
+            &body,
+            msg_id.as_slice(),
+            conversation_id.as_slice(),
+        );
         db.execute(
             include_str!("sql/message/add.sql"),
             params![

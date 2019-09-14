@@ -1,16 +1,17 @@
-declare type ConversationID = number;
+declare class ConversationID { }
+declare class MessageId { }
 declare type UserId = string;
 
 declare class NetworkHandle {
-  sendMessage(text: string, conversationID: ConversationID): boolean;
+  sendMessage(text: string, conversationID: ConversationID, messageId: MessageId): boolean;
 }
 
 declare class Messages {
   conversationId: ConversationID;
-  insertMessage(text: string, success: boolean): boolean;
+  insertMessage(text: string, success: boolean): MessageId;
 }
 
-declare class Message extends Item {}
+declare class Message extends Item { }
 
 declare class Contacts {
   add(userid: UserId): boolean;
@@ -26,6 +27,5 @@ declare class Config {
   name: UserId;
   configId: string;
   pfpUrl?: string;
-
   exists(): boolean;
 }

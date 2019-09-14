@@ -50,9 +50,6 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             from,
             body,
             time: Utc::now(),
-            // this needs to be fixed, but won't be before the server is rewritten
-            msg_id: [0u8; 32].into(),
-            conversation_id: [0u8; 32].into(),
             op_msg_id: None,
         };
         let u = self

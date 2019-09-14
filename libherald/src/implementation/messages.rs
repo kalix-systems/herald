@@ -19,14 +19,14 @@ pub struct Messages {
 }
 
 impl Messages {
-    fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> bool {
+    fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
         let id = Config::static_id().unwrap();
 
         let conversation_id = match &self.conversation_id {
             Some(conv) => conv,
             None => {
                 eprintln!("Error: conversation_id not set.");
-                return false;
+                return None;
             }
         };
 
@@ -37,7 +37,7 @@ impl Messages {
                         author: id,
                         body: body,
                         conversation: conversation_id.clone(),
-                        message_id: msg_id,
+                        message_id: msg_id.clone(),
                         op,
                         timestamp,
                         receipts: None,
@@ -48,11 +48,11 @@ impl Messages {
                     .begin_insert_rows(self.row_count(), self.row_count());
                 self.list.push(msg);
                 self.model.end_insert_rows();
-                true
+                Some(msg_id)
             }
             Err(e) => {
                 eprintln!("Error: {}", e);
-                false
+                None
             }
         }
     }
@@ -132,12 +132,18 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn insert_message(&mut self, body: String) -> bool {
-        self.raw_insert(body, None)
+    fn insert_message(&mut self, body: String) -> Vec<u8> {
+        match self.raw_insert(body, None) {
+            Some(message_id) => message_id.to_vec(),
+            None => vec![],
+        }
     }
 
-    fn reply(&mut self, body: String, op: &[u8]) -> bool {
-        self.raw_insert(body, Some(op.iter().copied().collect()))
+    fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8> {
+        match self.raw_insert(body, Some(op.iter().copied().collect())) {
+            Some(message_id) => message_id.to_vec(),
+            None => vec![],
+        }
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {

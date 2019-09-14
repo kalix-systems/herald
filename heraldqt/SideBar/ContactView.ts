@@ -10,23 +10,13 @@ export function contactClickHandler(
   mouse: Qt.MouseEvent,
   contactView: ContactView,
   index: number,
-  contactId: number,
-  contactItem: ContactItem,
+  convId: ConversationID,
   optionsMenu: Menu,
   messageModel: Messages,
-  chatView: ChatView
 ): void {
   if (mouse.button === Qt.LeftButton) {
     contactView.currentIndex = index;
-
-    console.log(
-      contactView.currentIndex,
-      contactView.currentItem.contactAvatar.displayName
-    );
-
-    contactItem.focus = true;
-    messageModel.conversationId = contactId;
-
+    messageModel.conversationId = convId;
   } else {
     optionsMenu.open();
   }
