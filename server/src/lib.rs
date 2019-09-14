@@ -2,7 +2,7 @@
 #![allow(warnings)]
 
 // pub mod protocol;
-// pub mod store;
+pub mod store;
 
 mod prelude {
     pub use herald_common::*;

@@ -18,16 +18,15 @@ pub type UserIdRef<'a> = &'a str;
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct GlobalId {
     uid: UserId,
-    did: sign::PublicKey,
+    did: sig::PublicKey,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct User {
-    uid: UserId,
+pub struct UserMeta {
     keys: HashMap<sig::PublicKey, sig::PKMeta>,
 }
 
-impl User {
+impl UserMeta {
     pub fn key_is_valid(&self, key: sig::PublicKey) -> bool {
         let maybe_kmeta = self.keys.get(&key);
         if maybe_kmeta.is_none() {
@@ -55,7 +54,7 @@ impl User {
             return false;
         }
         let (pk, sig) = dep.split();
-        self.keys.get_mut(&pk).unwrap().deprecated = Some(sig);
+        self.keys.get_mut(&pk).unwrap().deprecate(sig);
         true
     }
 }
@@ -95,7 +94,7 @@ pub enum MessageToClient {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Response {
-    Meta(User),
+    Meta(UserMeta),
     DeviceRegistered(sig::PublicKey),
     DataNotFound,
 }

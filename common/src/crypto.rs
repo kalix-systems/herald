@@ -1,8 +1,6 @@
 use crate::*;
 
-pub(crate) use sodiumoxide::crypto::{
-    aead::xchacha20poly1305_ietf as aead, box_, generichash as hash, sealedbox, sign,
-};
+use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
 
 /// How far in the future a signature can be stamped and still considered valid, in seconds.
 pub const TIMESTAMP_FUZZ: i64 = 3600;
@@ -123,7 +121,7 @@ pub mod sig {
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
         sig: SigMeta,
-        pub(crate) deprecated: Option<SigMeta>,
+        deprecated: Option<SigMeta>,
     }
 
     impl From<SigMeta> for PKMeta {
@@ -144,6 +142,15 @@ pub mod sig {
             }
 
             self.sig.verify_sig(key.as_ref())
+        }
+
+        pub fn deprecate(&mut self, deprecation: SigMeta) -> bool {
+            if self.deprecated.is_some() {
+                false
+            } else {
+                self.deprecated = Some(deprecation);
+                true
+            }
         }
     }
 
@@ -189,7 +196,7 @@ pub mod sig {
     }
 }
 
-pub mod pk {
+pub mod sealed {
     use super::*;
     use std::ops::Deref;
 
@@ -211,28 +218,44 @@ pub mod pk {
 
     #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct KeyPair {
-        pk: box_::PublicKey,
+        sealed: box_::PublicKey,
         sk: box_::SecretKey,
     }
 
     impl KeyPair {
         pub fn gen_new() -> Self {
             sodiumoxide::init().expect("failed to init libsodium");
-            let (pk, sk) = box_::gen_keypair();
-            KeyPair { pk, sk }
+            let (sealed, sk) = box_::gen_keypair();
+            KeyPair { sealed, sk }
         }
 
         pub fn public_key(&self) -> &box_::PublicKey {
-            &self.pk
+            &self.sealed
         }
 
         // TODO: figure out if this will ever fail
         pub fn sign_pub(&self, pair: &sig::KeyPair) -> PublicKey {
-            PublicKey(pair.sign(self.pk))
+            PublicKey(pair.sign(self.sealed))
         }
 
         pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
-            sealedbox::open(msg, &self.pk, &self.sk).ok()
+            sealedbox::open(msg, &self.sealed, &self.sk).ok()
         }
     }
+}
+
+pub fn hash_slice(slice: &[u8]) -> Option<[u8; 32]> {
+    let mut state = hash::State::new(32, None).ok()?;
+    state.update(slice).ok()?;
+    let digest = state.finalize().ok()?;
+    if digest.as_ref().len() != 32 {
+        return None;
+    }
+    let mut out = [0u8; 32];
+    out.copy_from_slice(digest.as_ref());
+    Some(out)
+}
+
+pub fn hash_and_hex(slice: &[u8]) -> Option<String> {
+    hash_slice(slice).map(|h| format!("{:x?}", h))
 }
