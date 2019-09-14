@@ -17,7 +17,7 @@ impl ConfigTrait for Config {
         if let Err(e) = heraldcore::message::Messages::create_table() {
             eprintln!("{}", e);
         }
-        if let Err(e) = heraldcore::contact::Contacts::create_table() {
+        if let Err(e) = heraldcore::contact::ContactsHandle::create_table() {
             eprintln!("{}", e);
         }
         if let Err(e) = heraldcore::members::Members::create_table() {

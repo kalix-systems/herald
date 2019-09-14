@@ -118,7 +118,29 @@ macro_rules! abort_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                eprintln!("{}", e);
+                eprintln!(
+                    "{error} at {file}:{line}:{column}, aborting",
+                    error = e,
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                std::process::abort();
+            }
+        }
+    };
+    ($maybe: expr, $msg: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                eprintln!(
+                    "{error} at {file}:{line}:{column}, message was {msg}, aborting",
+                    error = e,
+                    file = file!(),
+                    line = line!(),
+                    column = column!(),
+                    msg = $msg
+                );
                 std::process::abort();
             }
         }

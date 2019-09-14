@@ -1,6 +1,7 @@
 use crate::interface::*;
 use heraldcore::{
-    contact::{self, ContactBuilder, ContactStatus, Contacts as Core},
+    abort_err,
+    contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
     utils::SearchPattern,
 };
 
@@ -16,11 +17,14 @@ pub struct Contacts {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<ContactsItem>,
+    handle: ContactsHandle,
 }
 
 impl ContactsTrait for Contacts {
     fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
-        let list = match Core::all() {
+        let handle = abort_err!(ContactsHandle::new());
+
+        let list = match handle.all() {
             Ok(v) => v
                 .into_iter()
                 .map(|c| ContactsItem {
@@ -31,13 +35,7 @@ impl ContactsTrait for Contacts {
             Err(_) => Vec::new(),
         };
 
-        let filter = match SearchPattern::new_normal("".into()) {
-            Ok(p) => p,
-            Err(e) => {
-                eprintln!("{}, process aborting", e);
-                std::process::abort();
-            }
-        };
+        let filter = abort_err!(SearchPattern::new_normal("".into()));
 
         Contacts {
             emit,
@@ -45,6 +43,7 @@ impl ContactsTrait for Contacts {
             list,
             filter,
             filter_regex: false,
+            handle,
         }
     }
 
@@ -95,15 +94,19 @@ impl ContactsTrait for Contacts {
 
     /// Updates a contact's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
-        if self.list[row_index]
-            .inner
-            .set_name((&name).as_ref().map(|n| n.as_str()))
-            .is_err()
-        {
-            return false;
+        match self.handle.set_name(
+            self.contact_id(row_index),
+            name.as_ref().map(|s| s.as_str()),
+        ) {
+            Ok(()) => {
+                self.list[row_index].inner.name = name;
+                true
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
         }
-
-        true
     }
 
     /// Returns profile picture given the contact's id.
@@ -119,11 +122,15 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
-        match self.list[row_index]
-            .inner
-            .set_profile_picture(crate::utils::strip_qrc(picture))
-        {
-            Ok(_) => true,
+        match self.handle.set_profile_picture(
+            self.contact_id(row_index),
+            crate::utils::strip_qrc(picture),
+            self.profile_picture(row_index),
+        ) {
+            Ok(path) => {
+                self.list[row_index].inner.profile_picture = path;
+                true
+            }
             Err(e) => {
                 eprintln!("{}", e);
                 false
@@ -138,8 +145,11 @@ impl ContactsTrait for Contacts {
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
-        match self.list[row_index].inner.set_color(color) {
-            Ok(_) => true,
+        match self.handle.set_color(self.contact_id(row_index), color) {
+            Ok(()) => {
+                self.list[row_index].inner.color = color;
+                true
+            }
             Err(e) => {
                 eprintln!("{}", e);
                 false
@@ -166,12 +176,16 @@ impl ContactsTrait for Contacts {
             }
         };
 
-        if let Err(e) = self.list[row_index].inner.set_status(status) {
-            eprintln!("{}", e);
-            return false;
+        match self.handle.set_status(self.contact_id(row_index), status) {
+            Ok(()) => {
+                self.list[row_index].inner.status = status;
+                true
+            }
+            Err(e) => {
+                eprintln!("{}", e);
+                false
+            }
         }
-
-        true
     }
 
     fn matched(&self, row_index: usize) -> bool {
