@@ -10,27 +10,8 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- user color
   color INTEGER NOT NULL,
   -- contact status
-  status INTEGER,
-  -- indicates whether the contact is local, defaults to false
-  local INTEGER DEFAULT(0),
-  FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id),
-  -- check status bounds
-  CHECK (
-    (
-      status >= 0
-      AND status <= 2
-    )
-    OR status = NULL
-  ),
-  -- check that local contact doesn't have status
-  CHECK (
-    (
-      local = 1
-      AND status = NULL
-    )
-    OR (
-      local != 1
-      AND status != NULL
-    )
-  )
+  status INTEGER NOT NULL,
+  -- contact type, defaults to false
+  contact_type INTEGER NOT NULL,
+  FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 )

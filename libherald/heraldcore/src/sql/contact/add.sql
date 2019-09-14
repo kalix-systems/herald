@@ -5,6 +5,7 @@ INSERT INTO
     profile_picture,
     color,
     status,
-    pairwise_conversation
+    pairwise_conversation,
+    contact_type
   )
-VALUES(@1, @2, @3, @4, @5, @6)
+VALUES(@1, @2, @3, @4, @5, @6, @7)

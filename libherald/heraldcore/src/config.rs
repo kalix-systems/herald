@@ -3,10 +3,10 @@ use crate::{
     errors::*,
     image_utils,
 };
-use herald_common::{UserId, UserIdRef};
+use herald_common::{ConversationId, UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
-// static LOCAL_CONVERSATION_NAME: &str = "Note to Self";
+pub static LOCAL_CONVERSATION_NAME: &str = "Note to Self";
 
 /// User configuration
 #[derive(Clone, Default)]
@@ -21,6 +21,7 @@ pub struct Config {
     pub profile_picture: Option<String>,
     /// Color of the local user
     pub color: u32,
+    pub nts_conversation: ConversationId,
 }
 
 pub struct ConfigBuilder {
@@ -34,6 +35,7 @@ pub struct ConfigBuilder {
     profile_picture: Option<String>,
     /// Color of the local user
     color: Option<u32>,
+    nts_conversation: Option<ConversationId>,
 }
 
 impl ConfigBuilder {
@@ -44,64 +46,82 @@ impl ConfigBuilder {
             color: None,
             colorscheme: None,
             profile_picture: None,
+            nts_conversation: None,
         }
     }
 
-    pub fn with_colorscheme(mut self, colorscheme: u32) -> Self {
+    pub fn colorscheme(mut self, colorscheme: u32) -> Self {
         self.colorscheme = Some(colorscheme);
         self
     }
 
-    pub fn with_color(mut self, color: u32) -> Self {
+    pub fn color(mut self, color: u32) -> Self {
         self.color = Some(color);
         self
     }
 
-    pub fn with_name(mut self, name: String) -> Self {
+    pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
         self
     }
 
-    pub fn with_profile_picture(mut self, profile_picture: String) -> Self {
+    pub fn profile_picture(mut self, profile_picture: String) -> Self {
         self.profile_picture = Some(profile_picture);
         self
     }
 
-    pub fn add(self) -> Result<Config, HErr> {
-        let color = self
-            .color
-            .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
-        let colorscheme = self.colorscheme.unwrap_or(0);
+    pub fn nts_conversation(mut self, conv_id: ConversationId) -> Self {
+        self.nts_conversation = Some(conv_id);
+        self
+    }
 
-        let config = Config {
-            id: self.id,
-            name: self.name,
-            profile_picture: self.profile_picture,
+    pub fn add(self) -> Result<Config, HErr> {
+        let Self {
             color,
             colorscheme,
-        };
+            id,
+            name,
+            nts_conversation,
+            profile_picture,
+        } = self;
 
-        let mut contact_builder = crate::contact::ContactBuilder::new(config.id.clone());
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
+        let colorscheme = colorscheme.unwrap_or(0);
 
-        if let Some(name) = &config.name {
-            contact_builder = contact_builder.with_name(name.to_string());
+        let mut contact_builder = crate::contact::ContactBuilder::new(id.clone()).local();
+
+        if let Some(name) = name {
+            contact_builder = contact_builder.name(name);
         }
 
-        if let Some(picture) = &config.profile_picture {
-            contact_builder = contact_builder.with_profile_picture(picture.to_string());
+        if let Some(pairwise_conversation) = nts_conversation {
+            contact_builder = contact_builder.pairwise_conversation(pairwise_conversation);
         }
 
-        contact_builder = contact_builder.with_color(config.color);
+        if let Some(picture) = profile_picture {
+            contact_builder = contact_builder.profile_picture(picture);
+        }
+
+        contact_builder = contact_builder.color(color);
 
         let mut db = Database::get()?;
 
         let tx = db.transaction()?;
         tx.execute(
             include_str!("sql/config/add_config.sql"),
-            params![config.id(), colorscheme],
+            params![id, colorscheme],
         )?;
 
-        contact_builder.add_with_tx(tx)?;
+        let contact = contact_builder.add_tx(tx)?;
+
+        let config = Config {
+            id: contact.id,
+            name: contact.name,
+            profile_picture: contact.profile_picture,
+            color,
+            colorscheme,
+            nts_conversation: contact.pairwise_conversation,
+        };
 
         Ok(config)
     }
@@ -150,6 +170,7 @@ impl Config {
                     profile_picture: row.get(2)?,
                     color: row.get(3)?,
                     colorscheme: row.get(4)?,
+                    nts_conversation: row.get::<_, Vec<u8>>(5)?.into_iter().collect(),
                 })
             },
         )?)
@@ -253,6 +274,8 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get_config() {
+        use crate::conversation::Conversations;
+
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
@@ -264,11 +287,23 @@ mod tests {
 
         let name = "stuff";
         let profile_picture = "stuff";
-        ConfigBuilder::new(id.into())
-            .with_name(name.into())
-            .with_profile_picture(profile_picture.into())
+        let config = ConfigBuilder::new(id.into())
+            .name(name.into())
+            .profile_picture(profile_picture.into())
             .add()
             .expect(womp!());
+
+        assert_eq!(
+            Conversations::get_meta(&config.nts_conversation)
+                .expect(womp!())
+                .title
+                .expect(womp!()),
+            LOCAL_CONVERSATION_NAME
+        );
+        assert_eq!(
+            config.nts_conversation,
+            Config::get().expect(womp!()).nts_conversation
+        );
         assert_eq!(Config::get().expect(womp!()).id, "HelloWorld");
         assert_eq!(Config::get().expect(womp!()).name.expect(womp!()), name);
         assert_eq!(Config::get().expect(womp!()).colorscheme, 0);

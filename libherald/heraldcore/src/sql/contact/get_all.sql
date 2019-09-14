@@ -4,7 +4,8 @@ SELECT
   profile_picture,
   color,
   status,
-  pairwise_conversation
+  pairwise_conversation,
+  contact_type
 FROM
   contacts
 WHERE
