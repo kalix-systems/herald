@@ -5,6 +5,7 @@ import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
+import "./ContactClickedPopup.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -41,13 +42,8 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             //TS: this should be in typescript
-            onTriggered: {
-                if (contactId === messageModel.conversationId)
-                    appRoot.gsContactId = undefined
-                contactsModel.remove(index)
-                print("index try delete AGAIN: ", index)
-                messageModel.clearConversationView()
-            }
+            onTriggered: JS.deleteContact(pairwiseConversationId, index,
+                                          contactsModel, messageModel, appRoot)
         }
 
         MenuSeparator {

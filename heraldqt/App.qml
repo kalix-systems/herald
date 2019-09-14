@@ -9,7 +9,7 @@ import QtQml 2.13
 Item {
     id: appRoot
 
-    property var gsContactId
+    property var gsConversationId
 
     anchors.fill: parent.fill
     Layout.fillWidth: true

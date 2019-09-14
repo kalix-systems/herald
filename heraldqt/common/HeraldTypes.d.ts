@@ -37,8 +37,20 @@ declare class Message extends Item {}
 
 declare class Contacts {
   add(userid: UserId): ConversationID;
+  setStatus(rowIndex: number, status: ContactStatus): boolean;
   indexFromConversationId(conversationID: ConversationID): number;
   toggleFilterRegexFilterRegex(): boolean;
+}
+
+declare class Contact {
+  contactId: UserId;
+  pairwiseConversationId: ConversationID;
+  name?: string;
+  profilePicture?: string;
+  // TODO const enum for colors
+  color: number;
+  status: ContactStatus;
+  matched: boolean;
 }
 
 declare const enum ContactStatus {
