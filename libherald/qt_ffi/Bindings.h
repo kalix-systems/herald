@@ -7,6 +7,7 @@
 
 class Config;
 class Contacts;
+class HeraldState;
 class Messages;
 class NetworkHandle;
 
@@ -20,8 +21,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
-    Q_PROPERTY(QString configId READ configId WRITE setConfigId NOTIFY configIdChanged FINAL)
-    Q_PROPERTY(bool init READ init NOTIFY initChanged FINAL)
+    Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture NOTIFY profilePictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
@@ -33,18 +33,14 @@ public:
     quint32 colorscheme() const;
     void setColorscheme(quint32 v);
     QString configId() const;
-    void setConfigId(const QString& v);
-    bool init() const;
     QString name() const;
     void setName(const QString& v);
     QString profilePicture() const;
     void setProfilePicture(const QString& v);
-    Q_INVOKABLE bool exists() const;
 Q_SIGNALS:
     void colorChanged();
     void colorschemeChanged();
     void configIdChanged();
-    void initChanged();
     void nameChanged();
     void profilePictureChanged();
 };
@@ -68,6 +64,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
+    Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -112,6 +109,25 @@ Q_SIGNALS:
     void filterRegexChanged();
 };
 
+class HeraldState : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
+    explicit HeraldState(bool owned, QObject *parent);
+public:
+    explicit HeraldState(QObject *parent = nullptr);
+    ~HeraldState();
+    bool configInit() const;
+    Q_INVOKABLE bool setConfigId(const QString& config_id);
+Q_SIGNALS:
+    void configInitChanged();
+};
+
 class Messages : public QAbstractItemModel
 {
     Q_OBJECT
@@ -132,7 +148,6 @@ public:
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE bool delete_conversation();
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
-    Q_INVOKABLE void pollDataBase(const QByteArray& curr_conv_id);
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

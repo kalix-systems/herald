@@ -6,6 +6,26 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "HeraldState": {
+            "type": "Object",
+            "properties": {
+                "configInit": {
+                    "type": "bool"
+                }
+            },
+            "functions": {
+                "setConfigId": {
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "config_id",
+                            "type": "QString"
+                        }
+                    ],
+                    "return": "bool"
+                }
+            }
+        },
         "NetworkHandle": {
             "type": "Object",
             "functions": {
@@ -122,6 +142,15 @@
                         }
                     ]
                 },
+                "indexFromConversationId": {
+                    "arguments": [
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ],
+                    "return": "qint64"
+                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
@@ -163,16 +192,6 @@
                         {
                             "name": "body",
                             "type": "QString"
-                        }
-                    ]
-                },
-                "pollDataBase": {
-                    "mut": true,
-                    "return": "void",
-                    "arguments": [
-                        {
-                            "name": "curr_conv_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },
@@ -224,11 +243,7 @@
             "type": "Object",
             "properties": {
                 "configId": {
-                    "type": "QString",
-                    "write": true
-                },
-                "init": {
-                    "type": "bool"
+                    "type": "QString"
                 },
                 "name": {
                     "type": "QString",
@@ -247,11 +262,6 @@
                 "colorscheme": {
                     "type": "quint32",
                     "write": true
-                }
-            },
-            "functions": {
-                "exists": {
-                    "return": "bool"
                 }
             }
         }

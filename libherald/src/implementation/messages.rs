@@ -68,30 +68,6 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn poll_data_base(&mut self, curr_conv_id: &[u8]) {
-        if let Some(id) = &self.conversation_id {
-            if id == &curr_conv_id.iter().copied().collect::<ConversationId>() {
-                let messages: Vec<MessagesItem> = match Conversations::get_conversation_messages(id)
-                {
-                    Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
-                    Err(e) => {
-                        eprintln!("Error: {}", e);
-                        return;
-                    }
-                };
-
-                if messages.is_empty() {
-                    return;
-                }
-
-                self.model
-                    .begin_insert_rows(self.list.len(), messages.len().saturating_sub(1));
-                self.list = messages;
-                self.model.end_insert_rows();
-            }
-        }
-    }
-
     fn set_conversation_id(&mut self, conversation_id: Option<&[u8]>) {
         let conversation_id = conversation_id.map(|id| id.iter().copied().collect());
         if self.conversation_id == conversation_id {

@@ -50,10 +50,6 @@ namespace {
     {
         Q_EMIT o->configIdChanged();
     }
-    inline void configInitChanged(Config* o)
-    {
-        Q_EMIT o->initChanged();
-    }
     inline void configNameChanged(Config* o)
     {
         Q_EMIT o->nameChanged();
@@ -69,6 +65,10 @@ namespace {
     inline void contactsFilterRegexChanged(Contacts* o)
     {
         Q_EMIT o->filterRegexChanged();
+    }
+    inline void heraldStateConfigInitChanged(HeraldState* o)
+    {
+        Q_EMIT o->configInitChanged();
     }
     inline void messagesConversationIdChanged(Messages* o)
     {
@@ -88,22 +88,19 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     quint32 config_color_get(const Config::Private*);
     void config_color_set(Config::Private*, quint32);
     quint32 config_colorscheme_get(const Config::Private*);
     void config_colorscheme_set(Config::Private*, quint32);
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
-    void config_config_id_set(Config::Private*, const ushort *str, int len);
-    bool config_init_get(const Config::Private*);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
     void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
     void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
-    bool config_exists(const Config::Private*);
 };
 
 extern "C" {
@@ -416,7 +413,15 @@ extern "C" {
     bool contacts_filter_regex_get(const Contacts::Private*);
     void contacts_filter_regex_set(Contacts::Private*, bool);
     void contacts_add(Contacts::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    qint64 contacts_index_from_conversation_id(const Contacts::Private*, const char*, int);
     bool contacts_toggle_filter_regex(Contacts::Private*);
+};
+
+extern "C" {
+    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
+    void herald_state_free(HeraldState::Private*);
+    bool herald_state_config_init_get(const HeraldState::Private*);
+    bool herald_state_set_config_id(HeraldState::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -609,7 +614,6 @@ extern "C" {
     bool messages_delete_message(Messages::Private*, quint64);
     bool messages_delete_conversation(Messages::Private*);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    void messages_poll_data_base(Messages::Private*, const char*, int);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
 
@@ -638,7 +642,6 @@ Config::Config(QObject *parent):
         configColorChanged,
         configColorschemeChanged,
         configConfigIdChanged,
-        configInitChanged,
         configNameChanged,
         configProfilePictureChanged)),
     m_ownsPrivate(true)
@@ -670,13 +673,6 @@ QString Config::configId() const
     config_config_id_get(m_d, &v, set_qstring);
     return v;
 }
-void Config::setConfigId(const QString& v) {
-    config_config_id_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
-}
-bool Config::init() const
-{
-    return config_init_get(m_d);
-}
 QString Config::name() const
 {
     QString v;
@@ -702,10 +698,6 @@ void Config::setProfilePicture(const QString& v) {
     } else {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
-}
-bool Config::exists() const
-{
-    return config_exists(m_d);
 }
 Contacts::Contacts(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -796,9 +788,41 @@ QByteArray Contacts::add(const QString& id)
     contacts_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
+qint64 Contacts::indexFromConversationId(const QByteArray& conversation_id) const
+{
+    return contacts_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
+}
 bool Contacts::toggleFilterRegex()
 {
     return contacts_toggle_filter_regex(m_d);
+}
+HeraldState::HeraldState(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+HeraldState::HeraldState(QObject *parent):
+    QObject(parent),
+    m_d(herald_state_new(this,
+        heraldStateConfigInitChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+HeraldState::~HeraldState() {
+    if (m_ownsPrivate) {
+        herald_state_free(m_d);
+    }
+}
+bool HeraldState::configInit() const
+{
+    return herald_state_config_init_get(m_d);
+}
+bool HeraldState::setConfigId(const QString& config_id)
+{
+    return herald_state_set_config_id(m_d, config_id.utf16(), config_id.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -900,10 +924,6 @@ QByteArray Messages::insertMessage(const QString& body)
     QByteArray s;
     messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
     return s;
-}
-void Messages::pollDataBase(const QByteArray& curr_conv_id)
-{
-    return messages_poll_data_base(m_d, curr_conv_id.data(), curr_conv_id.size());
 }
 QByteArray Messages::reply(const QString& body, const QByteArray& op)
 {

@@ -99,7 +99,6 @@ pub struct ConfigEmitter {
     color_changed: fn(*mut ConfigQObject),
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
-    init_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
 }
@@ -119,7 +118,6 @@ impl ConfigEmitter {
             color_changed: self.color_changed,
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
-            init_changed: self.init_changed,
             name_changed: self.name_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
@@ -146,12 +144,6 @@ impl ConfigEmitter {
             (self.config_id_changed)(ptr);
         }
     }
-    pub fn init_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.init_changed)(ptr);
-        }
-    }
     pub fn name_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -174,13 +166,10 @@ pub trait ConfigTrait {
     fn colorscheme(&self) -> u32;
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
-    fn set_config_id(&mut self, value: String);
-    fn init(&self) -> bool;
     fn name(&self) -> Option<&str>;
     fn set_name(&mut self, value: Option<String>);
     fn profile_picture(&self) -> Option<&str>;
     fn set_profile_picture(&mut self, value: Option<String>);
-    fn exists(&self) -> bool;
 }
 
 #[no_mangle]
@@ -189,7 +178,6 @@ pub extern "C" fn config_new(
     config_color_changed: fn(*mut ConfigQObject),
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
-    config_init_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
@@ -198,7 +186,6 @@ pub extern "C" fn config_new(
         color_changed: config_color_changed,
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
-        init_changed: config_init_changed,
         name_changed: config_name_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
@@ -241,19 +228,6 @@ pub unsafe extern "C" fn config_config_id_get(
     let v = o.config_id();
     let s: *const c_char = v.as_ptr() as (*const c_char);
     set(p, s, to_c_int(v.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_config_id_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
-    let o = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, v, len);
-    o.set_config_id(s);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_init_get(ptr: *const Config) -> bool {
-    (&*ptr).init()
 }
 
 #[no_mangle]
@@ -310,13 +284,6 @@ pub unsafe extern "C" fn config_profile_picture_set(ptr: *mut Config, v: *const 
 pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
     let o = &mut *ptr;
     o.set_profile_picture(None);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_exists(ptr: *const Config) -> bool {
-    let o = &*ptr;
-    let r = o.exists();
-    r
 }
 
 pub struct ContactsQObject {}
@@ -429,6 +396,7 @@ pub trait ContactsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -537,6 +505,14 @@ pub unsafe extern "C" fn contacts_add(ptr: *mut Contacts, id_str: *const c_ushor
     let r = o.add(id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn contacts_index_from_conversation_id(ptr: *const Contacts, conversation_id_str: *const c_char, conversation_id_len: c_int) -> i64 {
+    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
+    let o = &*ptr;
+    let r = o.index_from_conversation_id(conversation_id);
+    r
 }
 
 #[no_mangle]
@@ -701,6 +677,79 @@ pub unsafe extern "C" fn contacts_set_data_status(
     (&mut *ptr).set_status(to_usize(row), v)
 }
 
+pub struct HeraldStateQObject {}
+
+pub struct HeraldStateEmitter {
+    qobject: Arc<AtomicPtr<HeraldStateQObject>>,
+    config_init_changed: fn(*mut HeraldStateQObject),
+}
+
+unsafe impl Send for HeraldStateEmitter {}
+
+impl HeraldStateEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> HeraldStateEmitter {
+        HeraldStateEmitter {
+            qobject: self.qobject.clone(),
+            config_init_changed: self.config_init_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const HeraldStateQObject = null();
+        self.qobject.store(n as *mut HeraldStateQObject, Ordering::SeqCst);
+    }
+    pub fn config_init_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.config_init_changed)(ptr);
+        }
+    }
+}
+
+pub trait HeraldStateTrait {
+    fn new(emit: HeraldStateEmitter) -> Self;
+    fn emit(&mut self) -> &mut HeraldStateEmitter;
+    fn config_init(&self) -> bool;
+    fn set_config_id(&mut self, config_id: String) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn herald_state_new(
+    herald_state: *mut HeraldStateQObject,
+    herald_state_config_init_changed: fn(*mut HeraldStateQObject),
+) -> *mut HeraldState {
+    let herald_state_emit = HeraldStateEmitter {
+        qobject: Arc::new(AtomicPtr::new(herald_state)),
+        config_init_changed: herald_state_config_init_changed,
+    };
+    let d_herald_state = HeraldState::new(herald_state_emit);
+    Box::into_raw(Box::new(d_herald_state))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_free(ptr: *mut HeraldState) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).config_init()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_set_config_id(ptr: *mut HeraldState, config_id_str: *const c_ushort, config_id_len: c_int) -> bool {
+    let mut config_id = String::new();
+    set_string_from_utf16(&mut config_id, config_id_str, config_id_len);
+    let o = &mut *ptr;
+    let r = o.set_config_id(config_id);
+    r
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {
@@ -805,7 +854,6 @@ pub trait MessagesTrait {
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn delete_conversation(&mut self) -> bool;
     fn insert_message(&mut self, body: String) -> Vec<u8>;
-    fn poll_data_base(&mut self, curr_conv_id: &[u8]) -> ();
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -931,14 +979,6 @@ pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *
     let r = o.insert_message(body);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_poll_data_base(ptr: *mut Messages, curr_conv_id_str: *const c_char, curr_conv_id_len: c_int) -> () {
-    let curr_conv_id = { slice::from_raw_parts(curr_conv_id_str as *const u8, to_usize(curr_conv_id_len)) };
-    let o = &mut *ptr;
-    let r = o.poll_data_base(curr_conv_id);
-    r
 }
 
 #[no_mangle]

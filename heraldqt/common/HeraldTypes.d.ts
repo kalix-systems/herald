@@ -29,8 +29,8 @@ declare const enum ContactStatus {
 }
 
 declare class Config {
-  name: UserId;
-  configId: string;
+  configId: UserId;
+  name: string;
   pfpUrl?: string;
-  exists(): boolean;
+  init: boolean;
 }

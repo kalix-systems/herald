@@ -1,7 +1,7 @@
 //! Core logic for herald client.
 
 #![feature(try_blocks)]
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
 
 /// User configuration
 pub mod config;

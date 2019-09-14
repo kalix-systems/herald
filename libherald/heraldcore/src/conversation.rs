@@ -122,7 +122,7 @@ impl Conversations {
         Ok(messages)
     }
 
-    /// Get conversation meta data
+    /// Get conversation metadata
     pub fn get_meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
         let db = Database::get()?;
 
@@ -133,6 +133,7 @@ impl Conversations {
         )?)
     }
 
+    /// Gets the members of a conversation.
     pub fn get_members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
         let db = Database::get()?;
 

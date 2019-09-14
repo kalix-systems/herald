@@ -43,7 +43,7 @@ Item {
             //TS: this should be in typescript
             onTriggered: {
                 if (contactId === messageModel.conversationId)
-                    root.gsContactId = undefined
+                    appRoot.gsContactId = undefined
                 contactsModel.remove(index)
                 print("index try delete AGAIN: ", index)
                 messageModel.clearConversationView()

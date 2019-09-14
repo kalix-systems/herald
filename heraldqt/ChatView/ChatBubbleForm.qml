@@ -43,7 +43,6 @@ Rectangle {
         width: parent.width + 50
 
         onEntered: replyButton.visible = !replyButton.visible
-
         onExited: replyButton.visible = !replyButton.visible
 
         anchors {
@@ -57,10 +56,17 @@ Rectangle {
         Common.ButtonForm {
             id: replyButton
             visible: false
-            anchors.margins: QmlCfg.margin
-            anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+            anchors {
+                // Ternary is okay, types are enforced, cases are explicit.
+                left: outbound ? parent.left : undefined
+                right: !outbound ? parent.right : undefined
+                margins: QmlCfg.margin
+                verticalCenter: chatBubbleHitbox.verticalCenter
+            }
             source: "qrc:///icons/reply.png"
             z: 10
+
+
             onClicked: {
                 CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
