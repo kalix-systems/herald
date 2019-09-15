@@ -10,7 +10,6 @@ use std::convert::TryInto;
 
 #[derive(Default)]
 /// Wrapper around contacts table.
-/// TODO This will be stateful when we have caching logic.
 pub struct ContactsHandle {
     db: Database,
 }
@@ -511,16 +510,13 @@ impl Contact {
     }
 
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        use crate::abort_err;
-        use std::convert::TryFrom;
-
         Ok(Contact {
             id: row.get(0)?,
             name: row.get(1)?,
             profile_picture: row.get(2)?,
             color: row.get(3)?,
             status: row.get(4)?,
-            pairwise_conversation: abort_err!(ConversationId::try_from(row.get::<_, Vec<u8>>(5)?)),
+            pairwise_conversation: row.get(5)?,
             contact_type: row.get(6)?,
         })
     }

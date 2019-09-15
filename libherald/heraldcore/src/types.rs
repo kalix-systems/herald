@@ -1,5 +1,6 @@
 use crate::errors::HErr;
 use herald_common::{serde::*, *};
+use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult};
 use std::convert::{TryFrom, TryInto};
 
 /// Lenght of randomly generated unique ids
@@ -23,6 +24,12 @@ impl MsgId {
     /// [`MsgId`] as a byte slice.
     pub fn as_slice(&self) -> &[u8] {
         &self.0 as &[u8]
+    }
+}
+
+impl FromSql for MsgId {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        MsgId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
     }
 }
 
@@ -175,7 +182,6 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
 /// control flow for the frontend.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToPeer {
-    // TODO: replace this with an &str
     /// A message
     Message {
         /// Body of the message
@@ -198,12 +204,9 @@ pub enum MessageToPeer {
 /// Conversation ID
 pub struct ConversationId([u8; UID_LEN]);
 
-/// Conversation
-pub struct InvalidConversationId;
-
-impl std::fmt::Display for InvalidConversationId {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(formatter, "InvalidMessageId")
+impl FromSql for ConversationId {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        ConversationId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
     }
 }
 
@@ -231,11 +234,11 @@ impl From<[u8; UID_LEN]> for ConversationId {
 }
 
 impl TryFrom<Vec<u8>> for ConversationId {
-    type Error = InvalidConversationId;
+    type Error = HErr;
 
     fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(InvalidConversationId)
+            Err(HErr::InvalidConversationId)
         } else {
             let mut buf = [0u8; UID_LEN];
 

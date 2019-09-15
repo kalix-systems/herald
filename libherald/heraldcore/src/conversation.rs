@@ -28,11 +28,8 @@ pub struct ConversationMeta {
 
 impl ConversationMeta {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        use crate::abort_err;
-        use std::convert::TryFrom;
-
         Ok(ConversationMeta {
-            conversation_id: abort_err!(ConversationId::try_from(row.get::<_, Vec<u8>>(0)?)),
+            conversation_id: row.get(0)?,
             title: row.get(1)?,
             picture: row.get(2)?,
             color: row.get(3)?,

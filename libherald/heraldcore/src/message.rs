@@ -36,14 +36,6 @@ pub struct Message {
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        use crate::abort_err;
-        use std::convert::TryFrom;
-
-        let message_id: Vec<u8> = row.get(0)?;
-        let author: UserId = row.get(1)?;
-        let conversation_id: Vec<u8> = row.get(2)?;
-        let body: String = row.get(3)?;
-        let op: Option<Vec<u8>> = row.get(4)?;
         let timestamp =
             match NaiveDateTime::parse_from_str(row.get::<_, String>(5)?.as_str(), utils::DATE_FMT)
             {
@@ -60,22 +52,20 @@ impl Message {
         };
 
         Ok(Message {
-            message_id: abort_err!(MsgId::try_from(message_id)),
-            author,
-            conversation: abort_err!(ConversationId::try_from(conversation_id)),
-            body,
-            op: op.map(|op| abort_err!(MsgId::try_from(op))),
+            message_id: row.get(0)?,
+            author: row.get(1)?,
+            conversation: row.get(2)?,
+            body: row.get(3)?,
+            op: row.get(4)?,
             timestamp,
             receipts: None,
-            send_status,
+            send_status, // TODO FromSql impl
         })
     }
 }
 
 impl Messages {
     /// Adds a message to the database.
-    // TODO should this take statuses? I don't see a case where that makes sense aside from syncing
-    // between devices. Shouldn't server messages just reproduce that though?
     pub fn add_message(
         msg_id: Option<MsgId>,
         author: UserIdRef,

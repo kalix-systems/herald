@@ -23,8 +23,6 @@ use tokio::{
 #[derive(Debug)]
 /// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
-    // TODO: include conversation id's here
-    // issue: #15
     /// A new message has been received.
     NewMsg(UserId),
     /// An ack has been received.
