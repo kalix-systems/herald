@@ -1,4 +1,5 @@
 use crate::{
+    abort_err,
     config::Config,
     errors::HErr::{self, *},
     message, message_status,
@@ -236,22 +237,9 @@ async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> 
     Ok(gid)
 }
 
-// TODO: replace this with a macro?
-fn impossible_error<E: std::fmt::Display, T>(e: E) -> T {
-    eprintln!("an impossible error happened");
-    eprintln!("message was: {}", e);
-    eprintln!("what have you done?");
-    std::process::abort()
-}
-
 impl Session {
     async fn send_to_server(&self, msg: &MessageToServer) -> Result<(), HErr> {
-        let mut writer = self
-            .writer
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(impossible_error);
+        let mut writer = abort_err!(self.writer.clone().lock_async().await);
         send_cbor(writer.deref_mut(), msg).await?;
         Ok(())
     }
@@ -262,21 +250,11 @@ impl Session {
         // insert before send so that we don't have to worry about what happens if a query is
         // responded to before this future is executed again
         {
-            let mut p = self
-                .pending
-                .clone()
-                .lock_async()
-                .await
-                .unwrap_or_else(impossible_error);
+            let mut p = abort_err!(self.pending.clone().lock_async().await);
             p.insert(query.clone(), sender);
         }
         {
-            let mut w = self
-                .writer
-                .clone()
-                .lock_async()
-                .await
-                .unwrap_or_else(impossible_error);
+            let mut w = abort_err!(self.writer.clone().lock_async().await);
             send_cbor(w.deref_mut(), &query).await?;
         }
         receiver.await.map_err(|e| {
@@ -309,14 +287,7 @@ impl Session {
     }
 
     async fn handle_response(&self, res: Response, query: &MessageToServer) {
-        if let Some(s) = self
-            .pending
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(impossible_error)
-            .remove(query)
-        {
+        if let Some(s) = abort_err!(self.pending.clone().lock_async().await).remove(query) {
             drop(s.send(res));
         }
     }
