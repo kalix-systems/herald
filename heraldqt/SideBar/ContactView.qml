@@ -23,6 +23,15 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
+    Connections {
+        target: appRoot
+        onGsConversationIdChanged: {
+            if (gsConversationId === undefined) {
+                contactList.currentIndex = -1
+            }
+        }
+    }
+
     ScrollBar.vertical: ScrollBar {
     }
 

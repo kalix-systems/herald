@@ -42,8 +42,8 @@ Item {
         MenuItem {
             text: 'Delete Contact'
             //TS: this should be in typescript
-            onTriggered: JS.deleteContact(pairwiseConversationId, index,
-                                          contactsModel, messageModel, appRoot)
+            onTriggered: JS.deleteContact(index, contactsModel,
+                                          messageModel, appRoot)
         }
 
         MenuSeparator {
