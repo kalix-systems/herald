@@ -784,6 +784,68 @@ pub unsafe extern "C" fn herald_state_set_config_id(
     r
 }
 
+pub struct HeraldUtilsQObject {}
+
+pub struct HeraldUtilsEmitter {
+    qobject: Arc<AtomicPtr<HeraldUtilsQObject>>,
+}
+
+unsafe impl Send for HeraldUtilsEmitter {}
+
+impl HeraldUtilsEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> HeraldUtilsEmitter {
+        HeraldUtilsEmitter {
+            qobject: self.qobject.clone(),
+        }
+    }
+    fn clear(&self) {
+        let n: *const HeraldUtilsQObject = null();
+        self.qobject
+            .store(n as *mut HeraldUtilsQObject, Ordering::SeqCst);
+    }
+}
+
+pub trait HeraldUtilsTrait {
+    fn new(emit: HeraldUtilsEmitter) -> Self;
+    fn emit(&mut self) -> &mut HeraldUtilsEmitter;
+    fn compare_byte_array(&self, bs1: &[u8], bs2: &[u8]) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn herald_utils_new(herald_utils: *mut HeraldUtilsQObject) -> *mut HeraldUtils {
+    let herald_utils_emit = HeraldUtilsEmitter {
+        qobject: Arc::new(AtomicPtr::new(herald_utils)),
+    };
+    let d_herald_utils = HeraldUtils::new(herald_utils_emit);
+    Box::into_raw(Box::new(d_herald_utils))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_utils_free(ptr: *mut HeraldUtils) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_utils_compare_byte_array(
+    ptr: *const HeraldUtils,
+    bs1_str: *const c_char,
+    bs1_len: c_int,
+    bs2_str: *const c_char,
+    bs2_len: c_int,
+) -> bool {
+    let bs1 = { slice::from_raw_parts(bs1_str as *const u8, to_usize(bs1_len)) };
+    let bs2 = { slice::from_raw_parts(bs2_str as *const u8, to_usize(bs2_len)) };
+    let o = &*ptr;
+    let r = o.compare_byte_array(bs1, bs2);
+    r
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {

@@ -26,6 +26,24 @@
                 }
             }
         },
+        "HeraldUtils": {
+            "type": "Object",
+            "functions": {
+                "compareByteArray": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "bs1",
+                            "type": "QByteArray"
+                        },
+                        {
+                            "name": "bs2",
+                            "type": "QByteArray"
+                        }
+                    ]
+                }
+            }
+        },
         "NetworkHandle": {
             "type": "Object",
             "functions": {

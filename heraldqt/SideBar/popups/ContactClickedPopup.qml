@@ -41,8 +41,8 @@ Item {
 
         MenuItem {
             text: 'Delete Contact'
-            onTriggered: JS.deleteContact(index, contactsModel,
-                                          messageModel, appRoot)
+            onTriggered: JS.deleteContact(index, contactsModel, messageModel,
+                                          appRoot, heraldUtils)
         }
 
         MenuSeparator {

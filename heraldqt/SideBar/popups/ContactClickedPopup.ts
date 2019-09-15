@@ -2,11 +2,15 @@ export function deleteContact(
   index: number,
   contactsModel: Contacts,
   messageModel: Messages,
-  appRoot: GlobalState
+  appRoot: GlobalState,
+  heraldUtils: HeraldUtils
 ): void {
-  if (
-    messageModel.conversationId === contactsModel.pairwiseConversationId(index)
-  ) {
+  const sameId = heraldUtils.compareByteArray(
+    messageModel.conversationId,
+    contactsModel.pairwiseConversationId(index)
+  );
+
+  if (sameId) {
     appRoot.gsConversationId = undefined;
   }
 

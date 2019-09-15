@@ -18,6 +18,11 @@ ApplicationWindow {
     TopMenuBar {
     }
 
+    // This provides a few purely functional helper methods
+    HeraldUtils {
+        id: heraldUtils
+    }
+
     HeraldState {
         id: heraldState
 

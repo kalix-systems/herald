@@ -425,6 +425,12 @@ extern "C" {
 };
 
 extern "C" {
+    HeraldUtils::Private* herald_utils_new(HeraldUtils*);
+    void herald_utils_free(HeraldUtils::Private*);
+    bool herald_utils_compare_byte_array(const HeraldUtils::Private*, const char*, int, const char*, int);
+};
+
+extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
@@ -823,6 +829,29 @@ bool HeraldState::configInit() const
 bool HeraldState::setConfigId(const QString& config_id)
 {
     return herald_state_set_config_id(m_d, config_id.utf16(), config_id.size());
+}
+HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+HeraldUtils::HeraldUtils(QObject *parent):
+    QObject(parent),
+    m_d(herald_utils_new(this)),
+    m_ownsPrivate(true)
+{
+}
+
+HeraldUtils::~HeraldUtils() {
+    if (m_ownsPrivate) {
+        herald_utils_free(m_d);
+    }
+}
+bool HeraldUtils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const
+{
+    return herald_utils_compare_byte_array(m_d, bs1.data(), bs1.size(), bs2.data(), bs2.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

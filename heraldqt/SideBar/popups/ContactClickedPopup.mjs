@@ -1,5 +1,6 @@
-export function deleteContact(index, contactsModel, messageModel, appRoot) {
-    if (messageModel.conversationId === contactsModel.pairwiseConversationId(index)) {
+export function deleteContact(index, contactsModel, messageModel, appRoot, heraldUtils) {
+    const sameId = heraldUtils.compareByteArray(messageModel.conversationId, contactsModel.pairwiseConversationId(index));
+    if (sameId) {
         appRoot.gsConversationId = undefined;
     }
     contactsModel.setStatus(index, 2 /* Deleted */);

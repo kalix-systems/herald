@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
     qmlRegisterType<NetworkHandle>("LibHerald", 1, 0, "NetworkHandle");
     qmlRegisterType<HeraldState>("LibHerald", 1, 0, "HeraldState");
+    qmlRegisterType<HeraldUtils>("LibHerald", 1, 0, "HeraldUtils");
     qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "QmlCfg");
 
     app.setOrganizationName("Kalix Systems");

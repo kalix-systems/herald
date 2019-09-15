@@ -8,6 +8,7 @@
 class Config;
 class Contacts;
 class HeraldState;
+class HeraldUtils;
 class Messages;
 class NetworkHandle;
 
@@ -126,6 +127,22 @@ public:
     Q_INVOKABLE bool setConfigId(const QString& config_id);
 Q_SIGNALS:
     void configInitChanged();
+};
+
+class HeraldUtils : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    explicit HeraldUtils(bool owned, QObject *parent);
+public:
+    explicit HeraldUtils(QObject *parent = nullptr);
+    ~HeraldUtils();
+    Q_INVOKABLE bool compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const;
+Q_SIGNALS:
 };
 
 class Messages : public QAbstractItemModel

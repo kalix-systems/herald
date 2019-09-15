@@ -1,5 +1,8 @@
-declare class ConversationID {}
-declare class MessageId {}
+declare class ByteArray {}
+
+declare class ConversationID extends ByteArray {}
+declare class MessageId extends ByteArray {}
+
 declare type UserId = string;
 
 declare class HeraldState {
@@ -68,4 +71,8 @@ declare class Config {
   // TODO replace this number with a const enum
   color: number;
   colorscheme: ColorScheme;
+}
+
+declare class HeraldUtils {
+  compareByteArray(bs1: ByteArray, bs2: ByteArray): boolean;
 }
