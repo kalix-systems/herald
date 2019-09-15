@@ -15,3 +15,10 @@ export function renameContact(index, entryField, renameContactDialogue, contacts
     renameContactDialogue.close();
     return ret;
 }
+export function changeProfilePicture(index, contactsModel, fileUrl, fileDialog) {
+    const retCode = contactsModel.setProfilePicture(index, fileUrl);
+    if (!retCode) {
+        console.log("TODO: Native Error popup here...");
+    }
+    fileDialog.close();
+}

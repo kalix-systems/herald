@@ -25,15 +25,8 @@ Item {
         id: pfpDialog
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         folder: shortcuts.desktop
-        onSelectionAccepted: {
-            // TS:
-            var retCode = contactsModel.setProfilePicture(index, fileUrl)
-            if (retCode) {
-                contactAvatar.pfpUrl = profilePicture
-            } else
-                print("TODO: Native Error popup here...")
-            close()
-        }
+        onSelectionAccepted: JS.changeProfilePicture(index, contactsModel,
+                                                     fileUrl, this)
     }
 
     Menu {

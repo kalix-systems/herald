@@ -33,3 +33,18 @@ export function renameContact(
   renameContactDialogue.close();
   return ret;
 }
+
+export function changeProfilePicture(
+  index: number,
+  contactsModel: Contacts,
+  fileUrl: string,
+  fileDialog: Popup
+): void {
+  const retCode = contactsModel.setProfilePicture(index, fileUrl);
+
+  if (!retCode) {
+    console.log("TODO: Native Error popup here...");
+  }
+
+  fileDialog.close();
+}

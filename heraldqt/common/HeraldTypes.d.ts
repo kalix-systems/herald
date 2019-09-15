@@ -42,6 +42,7 @@ declare class Contacts {
   add(userid: UserId): ConversationID;
   setStatus(rowIndex: number, status: ContactStatus): boolean;
   setName(rowIndex: number, name: string): boolean;
+  setProfilePicture(rowIndex: number, profilePicture: string): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
   indexFromConversationId(conversationID: ConversationID): number;
   toggleFilterRegexFilterRegex(): boolean;
