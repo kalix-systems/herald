@@ -96,7 +96,7 @@ impl Messages {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/update_send_status.sql"),
-            params![status as u8, msg_id], // TODO ToSql for MessageSendStatus
+            params![status, msg_id],
         )?;
         Ok(())
     }

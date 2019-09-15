@@ -101,7 +101,7 @@ impl Conversations {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/delete_conversation.sql"),
-            &[conversation_id.as_slice()],
+            &[conversation_id],
         )?;
         Ok(())
     }
@@ -113,7 +113,7 @@ impl Conversations {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[conversation_id.as_slice()], Message::from_db)?;
+        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
 
         let mut messages = Vec::new();
         for msg in res {
@@ -154,7 +154,7 @@ impl Conversations {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[conversation_id.as_slice()], Message::from_db)?;
+        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
 
         let mut messages = Vec::new();
         for msg in res {

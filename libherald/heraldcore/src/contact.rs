@@ -456,13 +456,13 @@ impl ContactBuilder {
                 contact.profile_picture,
                 contact.color,
                 contact.status,
-                contact.pairwise_conversation.as_slice(),
-                contact.contact_type as u8
+                contact.pairwise_conversation,
+                contact.contact_type
             ],
         )?;
         conn.execute(
             include_str!("sql/members/add_member.sql"),
-            params![contact.pairwise_conversation.as_slice(), contact.id],
+            params![contact.pairwise_conversation, contact.id],
         )?;
 
         Ok(contact)

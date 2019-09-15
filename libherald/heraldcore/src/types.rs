@@ -118,6 +118,14 @@ impl TryFrom<u8> for MessageSendStatus {
     }
 }
 
+impl ToSql for MessageSendStatus {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
+    }
+}
+
 impl FromSql for MessageSendStatus {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         value
@@ -184,6 +192,14 @@ impl TryFrom<u8> for MessageReceiptStatus {
             3 => Ok(Self::AckTerminal),
             i => Err(i),
         }
+    }
+}
+
+impl ToSql for MessageReceiptStatus {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
     }
 }
 
