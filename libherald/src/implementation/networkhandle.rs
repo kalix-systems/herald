@@ -255,7 +255,7 @@ async fn handle_nw_channel(
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                Notification::Ack(ClientMessageAck {
+                Notification::Ack(MessageReceipt {
                     update_code,
                     message_id,
                 }) => {

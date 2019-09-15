@@ -28,7 +28,7 @@ pub enum Notification {
     /// A new message has been received.
     NewMsg(UserId),
     /// An ack has been received.
-    Ack(ClientMessageAck),
+    Ack(MessageReceipt),
 }
 
 #[derive(Clone)]
@@ -130,7 +130,7 @@ struct Event {
 }
 
 fn form_ack(update_code: MessageReceiptStatus, message_id: MsgId) -> MessageToPeer {
-    let ack = ClientMessageAck {
+    let ack = MessageReceipt {
         update_code,
         message_id,
     };
@@ -199,8 +199,8 @@ fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
     })
 }
 
-fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
-    let ClientMessageAck {
+fn handle_ack(from: UserId, ack: MessageReceipt) -> Result<Event, HErr> {
+    let MessageReceipt {
         message_id,
         update_code,
     } = ack;

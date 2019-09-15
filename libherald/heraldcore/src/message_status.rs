@@ -1,8 +1,9 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
 };
-use herald_common::{MessageReceiptStatus, MsgId, UserIdRef};
+use herald_common::{MsgId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
