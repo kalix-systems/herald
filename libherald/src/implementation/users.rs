@@ -7,28 +7,29 @@ use heraldcore::{
 };
 
 #[derive(Clone)]
-struct ContactsItem {
+struct User {
     inner: contact::Contact,
     matched: bool,
 }
 
-pub struct Contacts {
-    emit: ContactsEmitter,
-    model: ContactsList,
+pub struct Users {
+    emit: UsersEmitter,
+    model: UsersList,
     filter: SearchPattern,
     filter_regex: bool,
-    list: Vec<ContactsItem>,
+    list: Vec<User>,
     handle: ContactsHandle,
+    conversation_id: Option<ConversationId>,
 }
 
-impl ContactsTrait for Contacts {
-    fn new(emit: ContactsEmitter, model: ContactsList) -> Contacts {
+impl UsersTrait for Users {
+    fn new(emit: UsersEmitter, model: UsersList) -> Users {
         let handle = abort_err!(ContactsHandle::new());
 
         let list = match handle.all() {
             Ok(v) => v
                 .into_iter()
-                .map(|c| ContactsItem {
+                .map(|c| User {
                     inner: c,
                     matched: true,
                 })
@@ -38,13 +39,14 @@ impl ContactsTrait for Contacts {
 
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
-        Contacts {
+        Users {
             emit,
             model,
             list,
             filter,
             filter_regex: false,
             handle,
+            conversation_id: None,
         }
     }
 
@@ -59,7 +61,7 @@ impl ContactsTrait for Contacts {
         self.model.begin_insert_rows(0, 0);
         self.list.insert(
             0,
-            ContactsItem {
+            User {
                 inner: contact,
                 matched: true,
             },
@@ -70,28 +72,30 @@ impl ContactsTrait for Contacts {
         self.list[0].inner.pairwise_conversation.to_vec()
     }
 
-    /// Returns contact id.
-    fn contact_id(&self, row_index: usize) -> &str {
+    fn conversation_id(&self) -> Option<&[u8]> {
+        self.conversation_id.as_ref().map(|id| id.as_slice())
+    }
+
+    /// Returns user id.
+    fn user_id(&self, row_index: usize) -> &str {
         self.list[row_index].inner.id.as_str()
     }
 
-    /// Returns contact id.
+    /// Returns user id.
     fn pairwise_conversation_id(&self, row_index: usize) -> &[u8] {
         self.list[row_index].inner.pairwise_conversation.as_slice()
     }
 
-    /// Returns contacts name
+    /// Returns users name
     fn name(&self, row_index: usize) -> Option<&str> {
         self.list[row_index].inner.name.as_ref().map(|n| n.as_str())
     }
 
-    /// Updates a contact's name, returns a boolean to indicate success.
+    /// Updates a user's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
         ret_err!(
-            self.handle.set_name(
-                self.contact_id(row_index),
-                name.as_ref().map(|s| s.as_str())
-            ),
+            self.handle
+                .set_name(self.user_id(row_index), name.as_ref().map(|s| s.as_str())),
             false
         );
 
@@ -99,7 +103,7 @@ impl ContactsTrait for Contacts {
         true
     }
 
-    /// Returns profile picture given the contact's id.
+    /// Returns profile picture given the user's id.
     fn profile_picture(&self, row_index: usize) -> Option<&str> {
         self.list[row_index]
             .inner
@@ -114,7 +118,7 @@ impl ContactsTrait for Contacts {
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let path = ret_err!(
             self.handle.set_profile_picture(
-                self.contact_id(row_index),
+                self.user_id(row_index),
                 crate::utils::strip_qrc(picture),
                 self.profile_picture(row_index),
             ),
@@ -125,17 +129,14 @@ impl ContactsTrait for Contacts {
         true
     }
 
-    /// Returns contact's color
+    /// Returns user's color
     fn color(&self, row_index: usize) -> u32 {
         self.list[row_index].inner.color
     }
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
-        ret_err!(
-            self.handle.set_color(self.contact_id(row_index), color),
-            false
-        );
+        ret_err!(self.handle.set_color(self.user_id(row_index), color), false);
         self.list[row_index].inner.color = color;
         true
     }
@@ -240,7 +241,7 @@ impl ContactsTrait for Contacts {
         toggled
     }
 
-    fn emit(&mut self) -> &mut ContactsEmitter {
+    fn emit(&mut self) -> &mut UsersEmitter {
         &mut self.emit
     }
 
@@ -249,7 +250,7 @@ impl ContactsTrait for Contacts {
     }
 }
 
-impl Contacts {
+impl Users {
     fn clear_filter(&mut self) {
         for contact in self.list.iter_mut() {
             contact.matched = true;

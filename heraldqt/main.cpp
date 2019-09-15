@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
 
-    qmlRegisterType<Contacts>("LibHerald", 1, 0, "Contacts");
+    qmlRegisterType<Users>("LibHerald", 1, 0, "Users");
     qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
     qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
     qmlRegisterType<NetworkHandle>("LibHerald", 1, 0, "NetworkHandle");

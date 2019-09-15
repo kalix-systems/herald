@@ -32,7 +32,7 @@ pub struct ConversationMeta {
     /// Conversation picture
     pub picture: Option<String>,
     /// Conversation color,
-    pub color: Option<u32>,
+    pub color: u32,
     /// Indicates whether the conversation is muted
     pub muted: bool,
 }

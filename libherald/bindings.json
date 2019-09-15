@@ -44,6 +44,38 @@
                 }
             }
         },
+        "Conversations": {
+            "type": "List",
+            "itemProperties": {
+                "conversationId": "QByteArray"
+            }
+        },
+        "Conversation": {
+            "type": "Object",
+            "properties": {
+                "conversationId": {
+                    "type": "QByteArray"
+                },
+                "title": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "picture": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "color": {
+                    "type": "quint32",
+                    "write": true
+                },
+                "muted": {
+                    "type": "bool",
+                    "write": true
+                }
+            }
+        },
         "NetworkHandle": {
             "type": "Object",
             "functions": {
@@ -107,9 +139,13 @@
                 }
             }
         },
-        "Contacts": {
+        "Users": {
             "type": "List",
             "properties": {
+                "conversationId": {
+                    "type": "QByteArray",
+                    "optional": true
+                },
                 "filter": {
                     "write": true,
                     "type": "QString"
@@ -120,7 +156,7 @@
                 }
             },
             "itemProperties": {
-                "contactId": {
+                "userId": {
                     "type": "QString"
                 },
                 "pairwiseConversationId": {
