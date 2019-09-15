@@ -248,7 +248,7 @@ impl Config {
 
         self.db.execute(
             include_str!("sql/config/update_profile_picture.sql"),
-            params![&path],
+            params![path],
         )?;
 
         self.profile_picture = path;

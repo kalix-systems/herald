@@ -80,7 +80,7 @@ pub(crate) fn add_conversation(
 
     db.execute(
         include_str!("sql/conversation/add_conversation.sql"),
-        params![id.as_slice(), title, color],
+        params![id, title, color],
     )?;
 
     Ok(id)
@@ -129,7 +129,7 @@ impl Conversations {
 
         Ok(db.query_row(
             include_str!("sql/conversation/get_conversation_meta.sql"),
-            params![conversation_id.as_slice()],
+            params![conversation_id],
             ConversationMeta::from_db,
         )?)
     }
@@ -139,7 +139,7 @@ impl Conversations {
         let db = Database::get()?;
 
         let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
-        let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
+        let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
 
         let mut members = Vec::new();
         for member in res {
@@ -162,11 +162,11 @@ impl Conversations {
         }
 
         let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
-        let res = stmt.query_map(params![conversation_id.as_slice()], |row| row.get(0))?;
+        let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
 
         let meta = db.query_row(
             include_str!("sql/conversation/get_conversation_meta.sql"),
-            params![conversation_id.as_slice()],
+            params![conversation_id],
             ConversationMeta::from_db,
         )?;
 

@@ -75,14 +75,7 @@ impl Messages {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/add.sql"),
-            params![
-                msg_id.as_slice(),
-                author,
-                conversation_id.as_slice(),
-                body,
-                timestamp_param,
-                op.as_ref().map(|x| x.as_slice()),
-            ],
+            params![msg_id, author, conversation_id, body, timestamp_param, op,],
         )?;
         Ok((msg_id, timestamp))
     }
@@ -93,7 +86,7 @@ impl Messages {
 
         Ok(db.query_row(
             include_str!("sql/message/get_message.sql"),
-            params![msg_id.as_slice()],
+            params![msg_id],
             Message::from_db,
         )?)
     }
@@ -103,7 +96,7 @@ impl Messages {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message/update_send_status.sql"),
-            params![status as u8, msg_id.as_slice()],
+            params![status as u8, msg_id], // TODO ToSql for MessageSendStatus
         )?;
         Ok(())
     }
@@ -112,10 +105,7 @@ impl Messages {
     pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
         let db = Database::get()?;
 
-        db.execute(
-            include_str!("sql/message/delete_message.sql"),
-            params![id.as_slice()],
-        )?;
+        db.execute(include_str!("sql/message/delete_message.sql"), params![id])?;
         Ok(())
     }
 }

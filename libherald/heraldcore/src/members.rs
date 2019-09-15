@@ -16,7 +16,7 @@ impl Members {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/members/add_member.sql"),
-            params![conversation_id.as_slice(), member_id],
+            params![conversation_id, member_id],
         )?;
         Ok(())
     }
@@ -29,7 +29,7 @@ impl Members {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/members/remove_member.sql"),
-            params![conversation_id.as_slice(), member_id],
+            params![conversation_id, member_id],
         )?;
         Ok(())
     }

@@ -18,7 +18,7 @@ impl MessageStatus {
         let db = Database::get()?;
         db.execute(
             include_str!("sql/message_status/set_message_status.sql"),
-            params![msg_id.as_slice(), user_id, receipt_status as u8],
+            params![msg_id, user_id, receipt_status as u8], // TODO ToSql for MessageReceiptStatus
         )?;
         Ok(())
     }

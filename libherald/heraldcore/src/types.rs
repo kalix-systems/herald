@@ -1,6 +1,6 @@
 use crate::errors::HErr;
 use herald_common::{serde::*, *};
-use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult};
+use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 use std::convert::{TryFrom, TryInto};
 
 /// Lenght of randomly generated unique ids
@@ -30,6 +30,13 @@ impl MsgId {
 impl FromSql for MsgId {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         MsgId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for MsgId {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+        Ok(ToSqlOutput::Borrowed(ValueRef::Blob(self.as_slice())))
     }
 }
 
@@ -229,6 +236,13 @@ pub struct ConversationId([u8; UID_LEN]);
 impl FromSql for ConversationId {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
         ConversationId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for ConversationId {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+        Ok(ToSqlOutput::Borrowed(ValueRef::Blob(self.as_slice())))
     }
 }
 
