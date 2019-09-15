@@ -4,9 +4,12 @@ use heraldcore::{
     network::*,
     tokio::{self, sync::mpsc::*},
 };
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
+use std::{
+    convert::TryFrom,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
 };
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
@@ -90,7 +93,13 @@ impl NetworkHandleTrait for NetworkHandle {
         }
 
         // we copy this repeatedly, if this gets slow, put it in an arc.
-        let conv_id = to.iter().copied().collect();
+        let conv_id = match ConversationId::try_from(to) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
 
         let members = match heraldcore::conversation::Conversations::get_members(&conv_id) {
             Ok(vec) => vec.into_iter(),
@@ -100,7 +109,13 @@ impl NetworkHandleTrait for NetworkHandle {
             }
         };
 
-        let msg_id: MsgId = msg_id.iter().copied().collect();
+        let msg_id = match MsgId::try_from(msg_id) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
 
         for member in members {
             println!("attempting to send to {}", &member);
@@ -127,7 +142,14 @@ impl NetworkHandleTrait for NetworkHandle {
             eprintln!("Invalid conversation_id");
             return false;
         }
-        let conversation_id = conversation_id.iter().copied().collect();
+
+        let conversation_id = match ConversationId::try_from(conversation_id) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
 
         match self
             .tx

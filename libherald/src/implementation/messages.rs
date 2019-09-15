@@ -5,6 +5,7 @@ use heraldcore::{
     conversation::Conversations,
     message::{Message, Messages as Core},
 };
+use std::convert::TryFrom;
 
 #[derive(Clone)]
 struct MessagesItem {
@@ -69,10 +70,21 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<&[u8]>) {
-        let conversation_id = conversation_id.map(|id| id.iter().copied().collect());
+        let conversation_id = match conversation_id {
+            Some(id) => match ConversationId::try_from(id) {
+                Ok(id) => Some(id),
+                Err(e) => {
+                    eprintln!("{}", e);
+                    return;
+                }
+            },
+            None => None,
+        };
+
         if self.conversation_id == conversation_id {
             return;
         }
+
         println!("Setting conversation_id to: {:?}", conversation_id);
         self.conversation_id = conversation_id;
 
@@ -140,7 +152,15 @@ impl MessagesTrait for Messages {
     }
 
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8> {
-        match self.raw_insert(body, Some(op.iter().copied().collect())) {
+        let op = match MsgId::try_from(op) {
+            Ok(op) => op,
+            Err(e) => {
+                eprintln!("{}", e);
+                return vec![];
+            }
+        };
+
+        match self.raw_insert(body, Some(op)) {
             Some(message_id) => message_id.to_vec(),
             None => vec![],
         }
@@ -194,7 +214,13 @@ impl MessagesTrait for Messages {
 
     /// Deletes all messages in a conversation.
     fn delete_conversation_by_id(&mut self, id: &[u8]) -> bool {
-        let id = id.iter().copied().collect();
+        let id = match ConversationId::try_from(id) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
         match Conversations::delete_conversation(&id) {
             Ok(_) => {
                 if Some(id) == self.conversation_id {

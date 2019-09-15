@@ -37,6 +37,9 @@ pub struct Message {
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        use crate::abort_err;
+        use std::convert::TryFrom;
+
         let message_id: Vec<u8> = row.get(0)?;
         let author: UserId = row.get(1)?;
         let conversation_id: Vec<u8> = row.get(2)?;
@@ -58,11 +61,11 @@ impl Message {
         };
 
         Ok(Message {
-            message_id: message_id.into_iter().collect(),
+            message_id: abort_err!(MsgId::try_from(message_id)),
             author,
-            conversation: conversation_id.into_iter().collect(),
+            conversation: abort_err!(ConversationId::try_from(conversation_id)),
             body,
-            op: op.map(|op| op.into_iter().collect()),
+            op: op.map(|op| abort_err!(MsgId::try_from(op))),
             timestamp,
             receipts: None,
             send_status,
@@ -95,7 +98,7 @@ impl Messages {
                 conversation_id.as_slice(),
                 body,
                 timestamp_param,
-                op.as_ref().map(|x| x.to_vec()),
+                op.as_ref().map(|x| x.as_slice()),
             ],
         )?;
         Ok((msg_id, timestamp))

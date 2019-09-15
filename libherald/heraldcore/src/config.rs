@@ -173,6 +173,9 @@ impl DBTable for Config {
 impl Config {
     /// Gets the user's configuration
     pub fn get() -> Result<Config, HErr> {
+        use crate::abort_err;
+        use std::convert::TryFrom;
+
         let db = Database::get()?;
 
         let (id, name, profile_picture, color, colorscheme, nts_conversation) = db.query_row(
@@ -185,7 +188,7 @@ impl Config {
                     row.get(2)?,
                     row.get(3)?,
                     row.get(4)?,
-                    row.get::<_, Vec<u8>>(5)?.into_iter().collect(),
+                    abort_err!(ConversationId::try_from(row.get::<_, Vec<u8>>(5)?)), // TODO FromSql impl
                 ))
             },
         )?;

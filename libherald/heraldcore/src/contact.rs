@@ -510,13 +510,16 @@ impl Contact {
     }
 
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        use crate::abort_err;
+        use std::convert::TryFrom;
+
         Ok(Contact {
             id: row.get(0)?,
             name: row.get(1)?,
             profile_picture: row.get(2)?,
             color: row.get(3)?,
             status: row.get(4)?,
-            pairwise_conversation: row.get::<_, Vec<u8>>(5)?.into_iter().collect(),
+            pairwise_conversation: abort_err!(ConversationId::try_from(row.get::<_, Vec<u8>>(5)?)),
             contact_type: row.get(6)?,
         })
     }

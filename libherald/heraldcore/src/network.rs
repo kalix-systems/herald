@@ -157,7 +157,7 @@ fn handle_msg(
     op_msg_id: Option<MsgId>,
 ) -> Result<Event, HErr> {
     message::Messages::add_message(
-        Some(msg_id.clone()),
+        Some(msg_id),
         &author,
         &conversation_id,
         &body,

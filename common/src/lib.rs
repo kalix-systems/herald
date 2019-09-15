@@ -1,20 +1,152 @@
 #![feature(try_blocks)]
 
 pub use arrayvec::ArrayVec;
-pub use arrayvec::CapacityError;
 use bytes::Bytes;
 use chrono::prelude::*;
 use serde::*;
 use std::convert::{TryFrom, TryInto};
 use tokio::prelude::*;
 
+const UID_LEN: usize = 32;
+
 pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
 pub type DeviceId = u32;
 pub type RawMsg = Bytes;
 
-pub type MsgId = ArrayVec<[u8; 32]>;
-pub type ConversationId = ArrayVec<[u8; 32]>;
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+pub struct MsgId([u8; UID_LEN]);
+
+pub struct MsgIdCapacityError;
+
+impl std::fmt::Display for MsgIdCapacityError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(formatter, "MsgIdCapacityError")
+    }
+}
+
+impl MsgId {
+    pub fn to_vec(self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    pub fn into_array(self) -> [u8; UID_LEN] {
+        self.0
+    }
+
+    pub fn as_slice(&self) -> &[u8] {
+        &self.0 as &[u8]
+    }
+}
+
+impl From<[u8; UID_LEN]> for MsgId {
+    fn from(arr: [u8; UID_LEN]) -> Self {
+        Self(arr)
+    }
+}
+
+impl TryFrom<Vec<u8>> for MsgId {
+    type Error = MsgIdCapacityError;
+
+    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(MsgIdCapacityError)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.into_iter().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for MsgId {
+    type Error = MsgIdCapacityError;
+
+    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(MsgIdCapacityError)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.iter().copied().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+#[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+pub struct ConversationId([u8; UID_LEN]);
+
+pub struct ConversationIdCapacityError;
+
+impl std::fmt::Display for ConversationIdCapacityError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
+        write!(formatter, "MsgIdCapacityError")
+    }
+}
+
+impl ConversationId {
+    pub fn to_vec(self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    pub fn into_array(self) -> [u8; UID_LEN] {
+        self.0
+    }
+
+    pub fn as_slice(&self) -> &[u8] {
+        &self.0 as &[u8]
+    }
+}
+
+impl From<[u8; UID_LEN]> for ConversationId {
+    fn from(arr: [u8; UID_LEN]) -> Self {
+        Self(arr)
+    }
+}
+
+impl TryFrom<Vec<u8>> for ConversationId {
+    type Error = ConversationIdCapacityError;
+
+    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(ConversationIdCapacityError)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.into_iter().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for ConversationId {
+    type Error = MsgIdCapacityError;
+
+    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(MsgIdCapacityError)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.iter().copied().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]

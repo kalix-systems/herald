@@ -49,8 +49,6 @@ impl ContactsTrait for Contacts {
     }
 
     /// Adds a contact by their `id`
-    ///
-    /// Returns `false` on failure.
     fn add(&mut self, id: String) -> Vec<u8> {
         if id.len() > 255 {
             return vec![];
@@ -200,7 +198,15 @@ impl ContactsTrait for Contacts {
     }
 
     fn index_from_conversation_id(&self, conv_id: &[u8]) -> i64 {
-        let conv_id: ConversationId = conv_id.iter().copied().collect();
+        use std::convert::TryFrom;
+
+        let conv_id: ConversationId = match ConversationId::try_from(conv_id) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return -1;
+            }
+        };
 
         self.list
             .iter()
