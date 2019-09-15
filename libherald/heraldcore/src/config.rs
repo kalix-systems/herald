@@ -3,7 +3,7 @@ use crate::{
     errors::*,
     image_utils,
 };
-use herald_common::{ConversationId, UserId, UserIdRef};
+use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation

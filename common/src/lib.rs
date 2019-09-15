@@ -1,18 +1,13 @@
 #![feature(try_blocks)]
 
-pub use arrayvec::ArrayVec;
 use bytes::Bytes;
-use chrono::prelude::*;
+pub use ::serde;
+use chrono::*;
 use serde::*;
 use std::convert::{TryFrom, TryInto};
 use tokio::prelude::*;
 
 const UID_LEN: usize = 32;
-
-pub type UserId = String;
-pub type UserIdRef<'a> = &'a str;
-pub type DeviceId = u32;
-pub type RawMsg = Bytes;
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
 pub struct MsgId([u8; UID_LEN]);
@@ -148,6 +143,67 @@ impl TryFrom<&[u8]> for ConversationId {
     }
 }
 
+// TODO: lifetime parameters so these are zerocopy
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum MessageToServer {
+    SendMsg { to: UserId, body: RawMsg },
+    RequestMeta { of: UserId },
+    UpdateBlob { blob: Bytes },
+    RegisterDevice,
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum MessageToClient {
+    Push {
+        from: GlobalId,
+        op_msg_id: Option<MsgId>,
+        body: RawMsg,
+        time: DateTime<Utc>,
+    },
+
+    QueryResponse {
+        res: Response,
+        query: MessageToServer,
+    },
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct ClientMessageAck {
+    pub update_code: MessageReceiptStatus,
+    pub message_id: MsgId,
+}
+
+/// This type gets serialized into raw bytes and sent to the server
+/// Then it is deserialized again on the client side to implement
+/// control flow for the frontend.
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct MessageReceipt {
+    pub update_code: MessageReceiptStatus,
+    pub message_id: MsgId,
+}
+
+/// This type gets serialized into raw bytes and sent to the server
+/// Then it is deserialized again on the client side to implement
+/// control flow for the frontend.
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum MessageToPeer {
+    // TODO: replace this with an &str
+    Message {
+        body: String,
+        msg_id: MsgId,
+        conversation_id: ConversationId,
+    },
+    AddRequest(ConversationId),
+    AddResponse(ConversationId, bool),
+    Ack(ClientMessageAck),
+}
+
+pub type UserId = String;
+pub type UserIdRef<'a> = &'a str;
+pub type DeviceId = u32;
+pub type RawMsg = Bytes;
+
+
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
 pub enum MessageSendStatus {
@@ -250,67 +306,6 @@ pub struct GlobalId {
     pub did: DeviceId,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct ClientMessageAck {
-    pub update_code: MessageReceiptStatus,
-    pub message_id: MsgId,
-}
-
-/// This type gets serialized into raw bytes and sent to the server
-/// Then it is deserialized again on the client side to implement
-/// control flow for the frontend.
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct MessageReceipt {
-    pub update_code: MessageReceiptStatus,
-    pub message_id: MsgId,
-}
-
-/// This type gets serialized into raw bytes and sent to the server
-/// Then it is deserialized again on the client side to implement
-/// control flow for the frontend.
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToPeer {
-    // TODO: replace this with an &str
-    Message {
-        body: String,
-        msg_id: MsgId,
-        conversation_id: ConversationId,
-    },
-    AddRequest(ConversationId),
-    AddResponse(ConversationId, bool),
-    Ack(ClientMessageAck),
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum Body {
-    Message(String),
-    Ack(ClientMessageAck),
-    Receipt(MessageReceiptStatus),
-}
-
-// TODO: lifetime parameters so these are zerocopy
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToServer {
-    SendMsg { to: UserId, body: RawMsg },
-    RequestMeta { of: UserId },
-    UpdateBlob { blob: Bytes },
-    RegisterDevice,
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToClient {
-    Push {
-        from: GlobalId,
-        op_msg_id: Option<MsgId>,
-        body: RawMsg,
-        time: DateTime<Utc>,
-    },
-
-    QueryResponse {
-        res: Response,
-        query: MessageToServer,
-    },
-}
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum Response {

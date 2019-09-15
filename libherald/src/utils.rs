@@ -10,6 +10,41 @@ pub fn strip_qrc(path: Option<String>) -> Option<String> {
     }
 }
 
+#[macro_export]
+/// Early return on error
+macro_rules! ret_err {
+    ($maybe: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                eprintln!(
+                    "{error} at {file}:{line}:{column}, aborting",
+                    error = e,
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return;
+            }
+        }
+    };
+    ($maybe: expr, $retval: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                eprintln!(
+                    "{error} at {file}:{line}:{column}, aborting",
+                    error = e,
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return $retval;
+            }
+        }
+    };
+}
+
 #[cfg(tests)]
 mod tests {
     #[test]

@@ -4,7 +4,7 @@ use crate::{
     message::Message,
     utils,
 };
-use herald_common::{ConversationId, UserId};
+use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]

@@ -1,6 +1,7 @@
-use crate::interface::*;
+use crate::{interface::*, ret_err};
 use herald_common::*;
 use heraldcore::{
+    abort_err,
     network::*,
     tokio::{self, sync::mpsc::*},
 };
@@ -57,6 +58,7 @@ impl EffectsFlags {
 }
 
 /// map to function calls from the herald core session api
+#[derive(Debug)]
 pub enum FuncCall {
     SendMsg { to: UserId, msg: MessageToPeer },
     AddRequest(ConversationId, UserId),
@@ -93,46 +95,31 @@ impl NetworkHandleTrait for NetworkHandle {
         }
 
         // we copy this repeatedly, if this gets slow, put it in an arc.
-        let conv_id = match ConversationId::try_from(to) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
+        let conv_id = ret_err!(ConversationId::try_from(to), false);
 
-        let members = match heraldcore::conversation::Conversations::get_members(&conv_id) {
-            Ok(vec) => vec.into_iter(),
-            Err(e) => {
-                eprintln!("Could not get members of conversation {}", e);
-                return false;
-            }
-        };
+        let members = ret_err!(
+            heraldcore::conversation::Conversations::get_members(&conv_id),
+            false
+        );
 
-        let msg_id = match MsgId::try_from(msg_id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
+        let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
         for member in members {
             println!("attempting to send to {}", &member);
-            match self.tx.try_send(FuncCall::SendMsg {
-                msg: MessageToPeer::Message {
-                    body: body.clone(),
-                    msg_id: msg_id.clone(),
-                    conversation_id: conv_id.clone(),
-                },
-                to: member,
-            }) {
-                Ok(_) => println!("message queued for send"),
-                Err(_e) => {
-                    eprintln!("could not send message, error unrpintable");
-                    return false;
-                }
-            }
+
+            ret_err!(
+                self.tx.try_send(FuncCall::SendMsg {
+                    msg: MessageToPeer::Message {
+                        body: body.clone(),
+                        msg_id: msg_id.clone(),
+                        conversation_id: conv_id.clone(),
+                    },
+                    to: member,
+                }),
+                false
+            );
+
+            println!("message queued for send");
         }
         true
     }
@@ -208,20 +195,27 @@ fn start_worker(
     qtrx: UnboundedReceiver<FuncCall>,
 ) {
     std::thread::spawn(move || {
-        let mut rt =
-            tokio::runtime::current_thread::Runtime::new().expect("could not spawn runtime");
+        let mut rt = abort_err!(
+            tokio::runtime::current_thread::Runtime::new(),
+            "could not spawn runtime"
+        );
+
         rt.block_on(async move {
             status_flags.emit_net_pending(&mut emit);
+
             if let Ok((nwrx, sess)) = Session::init().await {
                 status_flags.emit_net_up(&mut emit);
+
                 tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
                 tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
             } else {
                 println!("could not connect to server");
+
                 status_flags.emit_net_down(&mut emit);
             }
         });
-        rt.run().expect("opops");
+
+        abort_err!(rt.run());
     });
 }
 
@@ -230,24 +224,20 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
         match rx.recv().await {
             Some(call) => match call {
                 FuncCall::RegisterDevice => {
-                    sess.register_device()
-                        .await
-                        .expect("could not register device");
+                    abort_err!(sess.register_device().await, "could not register device");
                 }
                 FuncCall::RequestMeta(id) => {
-                    sess.request_meta(id)
-                        .await
-                        .expect("could not retrieve meta data");
+                    abort_err!(sess.request_meta(id).await, "could not retrieve meta data");
                 }
                 FuncCall::SendMsg { to, msg } => {
-                    sess.send_msg(to, msg)
-                        .await
-                        .expect("failed to send message");
+                    abort_err!(sess.send_msg(to, msg).await, "failed to send message");
                 }
                 FuncCall::AddRequest(conversation_id, user_id) => {
-                    sess.send_msg(user_id, MessageToPeer::AddRequest(conversation_id))
-                        .await
-                        .expect("failed to send add request");
+                    abort_err!(
+                        sess.send_msg(user_id, MessageToPeer::AddRequest(conversation_id))
+                            .await,
+                        "failed to send add request"
+                    );
                 }
             },
             None => {}

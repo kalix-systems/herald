@@ -1,4 +1,4 @@
-use crate::interface::*;
+use crate::{interface::*, ret_err};
 use herald_common::{ConversationId, MsgId};
 use heraldcore::{
     config::Config,
@@ -31,31 +31,28 @@ impl Messages {
             }
         };
 
-        match Core::add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op) {
-            Ok((msg_id, timestamp)) => {
-                let msg = MessagesItem {
-                    inner: Message {
-                        author: id,
-                        body: body,
-                        conversation: conversation_id.clone(),
-                        message_id: msg_id.clone(),
-                        op,
-                        timestamp,
-                        receipts: None,
-                        send_status: None,
-                    },
-                };
-                self.model
-                    .begin_insert_rows(self.row_count(), self.row_count());
-                self.list.push(msg);
-                self.model.end_insert_rows();
-                Some(msg_id)
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                None
-            }
-        }
+        let (msg_id, timestamp) = ret_err!(
+            Core::add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op),
+            None
+        );
+
+        let msg = MessagesItem {
+            inner: Message {
+                author: id,
+                body: body,
+                conversation: conversation_id.clone(),
+                message_id: msg_id.clone(),
+                op,
+                timestamp,
+                receipts: None,
+                send_status: None,
+            },
+        };
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(msg);
+        self.model.end_insert_rows();
+        Some(msg_id)
     }
 }
 
@@ -71,13 +68,7 @@ impl MessagesTrait for Messages {
 
     fn set_conversation_id(&mut self, conversation_id: Option<&[u8]>) {
         let conversation_id = match conversation_id {
-            Some(id) => match ConversationId::try_from(id) {
-                Ok(id) => Some(id),
-                Err(e) => {
-                    eprintln!("{}", e);
-                    return;
-                }
-            },
+            Some(id) => Some(ret_err!(ConversationId::try_from(id))),
             None => None,
         };
 
@@ -214,27 +205,17 @@ impl MessagesTrait for Messages {
 
     /// Deletes all messages in a conversation.
     fn delete_conversation_by_id(&mut self, id: &[u8]) -> bool {
-        let id = match ConversationId::try_from(id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
-        match Conversations::delete_conversation(&id) {
-            Ok(_) => {
-                if Some(id) == self.conversation_id {
-                    self.model.begin_reset_model();
-                    self.list = Vec::new();
-                    self.model.end_reset_model();
-                }
-                true
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                false
-            }
+        let id = ret_err!(ConversationId::try_from(id), false);
+
+        ret_err!(Conversations::delete_conversation(&id), false);
+
+        if Some(id) == self.conversation_id {
+            self.model.begin_reset_model();
+            self.list = Vec::new();
+            self.model.end_reset_model();
         }
+
+        true
     }
 
     /// Clears the current view without modifying the underlying data

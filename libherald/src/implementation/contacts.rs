@@ -1,4 +1,4 @@
-use crate::interface::*;
+use crate::{interface::*, ret_err};
 use herald_common::ConversationId;
 use heraldcore::{
     abort_err,
@@ -54,13 +54,7 @@ impl ContactsTrait for Contacts {
             return vec![];
         }
 
-        let contact = match ContactBuilder::new(id).add() {
-            Ok(contact) => contact,
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                return vec![];
-            }
-        };
+        let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
         self.model.begin_insert_rows(0, 0);
         self.list.insert(
@@ -93,19 +87,16 @@ impl ContactsTrait for Contacts {
 
     /// Updates a contact's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
-        match self.handle.set_name(
-            self.contact_id(row_index),
-            name.as_ref().map(|s| s.as_str()),
-        ) {
-            Ok(()) => {
-                self.list[row_index].inner.name = name;
-                true
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        }
+        ret_err!(
+            self.handle.set_name(
+                self.contact_id(row_index),
+                name.as_ref().map(|s| s.as_str())
+            ),
+            false
+        );
+
+        self.list[row_index].inner.name = name;
+        true
     }
 
     /// Returns profile picture given the contact's id.
@@ -121,20 +112,17 @@ impl ContactsTrait for Contacts {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
-        match self.handle.set_profile_picture(
-            self.contact_id(row_index),
-            crate::utils::strip_qrc(picture),
-            self.profile_picture(row_index),
-        ) {
-            Ok(path) => {
-                self.list[row_index].inner.profile_picture = path;
-                true
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                false
-            }
-        }
+        let path = ret_err!(
+            self.handle.set_profile_picture(
+                self.contact_id(row_index),
+                crate::utils::strip_qrc(picture),
+                self.profile_picture(row_index),
+            ),
+            false
+        );
+
+        self.list[row_index].inner.profile_picture = path;
+        true
     }
 
     /// Returns contact's color
@@ -144,16 +132,12 @@ impl ContactsTrait for Contacts {
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
-        match self.handle.set_color(self.contact_id(row_index), color) {
-            Ok(()) => {
-                self.list[row_index].inner.color = color;
-                true
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                false
-            }
-        }
+        ret_err!(
+            self.handle.set_color(self.contact_id(row_index), color),
+            false
+        );
+        self.list[row_index].inner.color = color;
+        true
     }
 
     /// Indicates whether user is archived.
@@ -167,26 +151,15 @@ impl ContactsTrait for Contacts {
     /// Updates archive status.
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         use std::convert::TryFrom;
-        let status = match ContactStatus::try_from(status) {
-            Ok(status) => status,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
+        let status = ret_err!(ContactStatus::try_from(status), false);
 
-        match self
-            .handle
-            .set_status(self.list[row_index].inner.id.as_str(), status)
-        {
-            Ok(()) => {
-                self.list[row_index].inner.status = status;
-            }
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        }
+        ret_err!(
+            self.handle
+                .set_status(self.list[row_index].inner.id.as_str(), status),
+            false
+        );
+
+        self.list[row_index].inner.status = status;
 
         if status == ContactStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);
@@ -200,13 +173,7 @@ impl ContactsTrait for Contacts {
     fn index_from_conversation_id(&self, conv_id: &[u8]) -> i64 {
         use std::convert::TryFrom;
 
-        let conv_id: ConversationId = match ConversationId::try_from(conv_id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return -1;
-            }
-        };
+        let conv_id = ret_err!(ConversationId::try_from(conv_id), -1);
 
         self.list
             .iter()
@@ -236,21 +203,9 @@ impl ContactsTrait for Contacts {
         }
 
         let pattern = if self.filter_regex() {
-            match SearchPattern::new_regex(pattern) {
-                Ok(pat) => pat,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    return;
-                }
-            }
+            ret_err!(SearchPattern::new_regex(pattern))
         } else {
-            match SearchPattern::new_normal(pattern) {
-                Ok(pat) => pat,
-                Err(e) => {
-                    eprintln!("{}", e);
-                    return;
-                }
-            }
+            ret_err!(SearchPattern::new_normal(pattern))
         };
 
         self.filter = pattern;
@@ -267,15 +222,9 @@ impl ContactsTrait for Contacts {
     /// Sets filter mode
     fn set_filter_regex(&mut self, use_regex: bool) {
         if use_regex {
-            if let Err(e) = self.filter.regex_mode() {
-                eprintln!("{}", e);
-                return;
-            }
+            ret_err!(self.filter.regex_mode());
         } else {
-            if let Err(e) = self.filter.normal_mode() {
-                eprintln!("{}", e);
-                return;
-            }
+            ret_err!(self.filter.normal_mode());
         }
         self.filter_regex = use_regex;
         self.emit.filter_regex_changed();
@@ -309,21 +258,9 @@ impl Contacts {
             .data_changed(0, self.list.len().saturating_sub(1));
 
         if self.filter_regex {
-            self.filter = match SearchPattern::new_regex("".to_owned()) {
-                Ok(filter) => filter,
-                Err(e) => {
-                    eprintln!("This should be impossible: {}", e);
-                    return;
-                }
-            };
+            self.filter = ret_err!(SearchPattern::new_regex("".to_owned()));
         } else {
-            self.filter = match SearchPattern::new_normal("".to_owned()) {
-                Ok(filter) => filter,
-                Err(e) => {
-                    eprintln!("This should be impossible: {}", e);
-                    return;
-                }
-            };
+            self.filter = ret_err!(SearchPattern::new_normal("".to_owned()));
         }
 
         self.emit.filter_changed();

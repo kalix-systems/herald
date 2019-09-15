@@ -1,4 +1,4 @@
-use crate::interface::*;
+use crate::{interface::*, ret_err};
 use herald_common::UserId;
 use heraldcore::{
     config::{Config, ConfigBuilder},
@@ -23,27 +23,13 @@ impl HeraldStateTrait for HeraldState {
     }
 
     fn set_config_id(&mut self, id: UserId) -> bool {
-        if let Err(e) = Config::create_table() {
-            eprintln!("{}", e);
-            return false;
-        }
-        if let Err(e) = heraldcore::message::Messages::create_table() {
-            eprintln!("{}", e);
-        }
-        if let Err(e) = heraldcore::contact::ContactsHandle::create_table() {
-            eprintln!("{}", e);
-        }
-        if let Err(e) = heraldcore::members::Members::create_table() {
-            eprintln!("{}", e);
-        }
-        if let Err(e) = heraldcore::conversation::Conversations::create_table() {
-            eprintln!("{}", e);
-        }
-
-        if let Err(e) = ConfigBuilder::new(id).add() {
-            eprintln!("{}", e);
-            return false;
-        }
+        use heraldcore::*;
+        ret_err!(Config::create_table(), false);
+        ret_err!(message::Messages::create_table(), false);
+        ret_err!(contact::ContactsHandle::create_table(), false);
+        ret_err!(members::Members::create_table(), false);
+        ret_err!(conversation::Conversations::create_table(), false);
+        ret_err!(ConfigBuilder::new(id).add(), false);
 
         self.emit.config_init_changed();
 
