@@ -61,7 +61,7 @@ impl Message {
 }
 
 /// Adds a message to the database.
-fn add_message(
+pub(crate) fn add_message(
     db: &Database,
     msg_id: Option<MsgId>,
     author: UserIdRef,
@@ -81,7 +81,7 @@ fn add_message(
     Ok((msg_id, timestamp))
 }
 /// Get message by message id
-fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
+pub(crate) fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
     Ok(db.query_row(
         include_str!("sql/message/get_message.sql"),
         params![msg_id],
@@ -89,7 +89,11 @@ fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
     )?)
 }
 /// Sets the message status of an item in the database
-fn update_send_status(db: &Database, msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+pub(crate) fn update_send_status(
+    db: &Database,
+    msg_id: MsgId,
+    status: MessageSendStatus,
+) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/message/update_send_status.sql"),
         params![status, msg_id],
@@ -98,7 +102,7 @@ fn update_send_status(db: &Database, msg_id: MsgId, status: MessageSendStatus) -
 }
 
 /// Deletes a message
-fn delete_message(db: &Database, id: &MsgId) -> Result<(), HErr> {
+pub(crate) fn delete_message(db: &Database, id: &MsgId) -> Result<(), HErr> {
     db.execute(include_str!("sql/message/delete_message.sql"), params![id])?;
     Ok(())
 }

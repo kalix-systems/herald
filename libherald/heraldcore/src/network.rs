@@ -152,7 +152,9 @@ fn handle_msg(
     time: DateTime<Utc>,
     op_msg_id: Option<MsgId>,
 ) -> Result<Event, HErr> {
-    message::Messages::default().add_message(
+    let db = crate::db::Database::get()?;
+    message::add_message(
+        &db,
         Some(msg_id),
         &author,
         &conversation_id,
@@ -203,7 +205,8 @@ fn handle_ack(from: UserId, ack: MessageReceipt) -> Result<Event, HErr> {
         message_id,
         update_code,
     } = ack;
-    message_status::MessageStatus::set_message_status(message_id, from.as_str(), update_code)?;
+    let db = crate::db::Database::get()?;
+    message_status::set_message_status(&db, message_id, from.as_str(), update_code)?;
     Ok(Event {
         reply: None,
         notification: None,
