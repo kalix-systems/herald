@@ -266,13 +266,16 @@ mod tests {
         ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
+        let msg_handle = Messages::new().expect(womp!());
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        Messages::add_message(None, author, &conversation, "1", None, &None)
+        msg_handle
+            .add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        Messages::add_message(None, author, &conversation, "2", None, &None)
+        msg_handle
+            .add_message(None, author, &conversation, "2", None, &None)
             .expect(womp!("Failed to add second message"));
 
         let msgs = Conversations::get_conversation(&conversation)
@@ -293,10 +296,12 @@ mod tests {
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        let (msg_id, _) = Messages::add_message(None, author, &conversation, "1", None, &None)
+        let msg_handle = Messages::new().expect(womp!());
+        let (msg_id, _) = msg_handle
+            .add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        Messages::delete_message(&msg_id).expect(womp!());
+        msg_handle.delete_message(&msg_id).expect(womp!());
 
         assert!(Conversations::get_conversation(&conversation)
             .expect(womp!())
@@ -315,9 +320,14 @@ mod tests {
         Conversations::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        Messages::add_message(None, author, &conversation, "1", None, &None)
+        let msg_handle = Messages::new().expect(womp!());
+
+        msg_handle
+            .add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
-        Messages::add_message(None, author, &conversation, "1", None, &None)
+
+        msg_handle
+            .add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add second message"));
 
         Conversations::delete_conversation(&conversation).expect(womp!());

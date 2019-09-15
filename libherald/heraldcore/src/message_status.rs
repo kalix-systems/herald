@@ -97,7 +97,10 @@ mod tests {
             .expect(womp!());
         crate::members::Members::add_member(&conversation_id, author).expect(womp!());
 
-        let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, &None)
+        let msg_handle = Messages::new().expect(womp!());
+
+        let (msg_id, _) = msg_handle
+            .add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
         MessageStatus::set_message_status(msg_id, author, MessageReceiptStatus::Read)

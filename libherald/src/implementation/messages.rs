@@ -1,5 +1,6 @@
 use crate::{interface::*, ret_err};
 use heraldcore::{
+    abort_err,
     config::Config,
     conversation::Conversations,
     message::{Message, Messages as Core},
@@ -17,6 +18,7 @@ pub struct Messages {
     emit: MessagesEmitter,
     model: MessagesList,
     list: Vec<MessagesItem>,
+    handle: Core,
 }
 
 impl Messages {
@@ -32,7 +34,8 @@ impl Messages {
         };
 
         let (msg_id, timestamp) = ret_err!(
-            Core::add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op),
+            self.handle
+                .add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op),
             None
         );
 
@@ -63,6 +66,7 @@ impl MessagesTrait for Messages {
             list: Vec::new(),
             model,
             emit,
+            handle: abort_err!(Core::new()),
         }
     }
 
@@ -160,7 +164,7 @@ impl MessagesTrait for Messages {
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
         let id = &self.list[row_index].inner.message_id;
-        match Core::delete_message(&id) {
+        match self.handle.delete_message(&id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
                 self.list.remove(row_index);
