@@ -3,7 +3,7 @@ use crate::{
     errors::HErr,
     types::*,
 };
-use herald_common::{MsgId, UserIdRef};
+use herald_common::UserIdRef;
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]

@@ -211,17 +211,13 @@ fn handle_ack(from: UserId, ack: MessageReceipt) -> Result<Event, HErr> {
     })
 }
 
-fn handle_push(
-    author: GlobalId,
-    body: MessageToPeer,
-    time: DateTime<Utc>,
-    op_msg_id: Option<MsgId>,
-) -> Result<Event, HErr> {
+fn handle_push(author: GlobalId, body: MessageToPeer, time: DateTime<Utc>) -> Result<Event, HErr> {
     use MessageToPeer::*;
     match body {
         Message {
             body,
             msg_id,
+            op_msg_id,
             conversation_id,
         } => handle_msg(msg_id, author.uid, conversation_id, body, time, op_msg_id),
         AddRequest(conversation_id) => handle_add_request(author.uid, conversation_id),
@@ -296,17 +292,12 @@ impl Session {
     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
         use MessageToClient::*;
         match msg {
-            Push {
-                from,
-                body,
-                time,
-                op_msg_id,
-            } => {
+            Push { from, body, time } => {
                 let push = serde_cbor::from_slice(&body)?;
                 let Event {
                     reply,
                     notification,
-                } = handle_push(from, push, time, op_msg_id)?;
+                } = handle_push(from, push, time)?;
                 if let Some(n) = notification {
                     drop(self.notifications.clone().try_send(n));
                 }

@@ -50,7 +50,6 @@ impl<Sock: AsyncWrite + Unpin> AppState<Sock> {
             from,
             body,
             time: Utc::now(),
-            op_msg_id: None,
         };
         let u = self
             .meta

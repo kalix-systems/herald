@@ -114,6 +114,7 @@ impl NetworkHandleTrait for NetworkHandle {
                         body: body.clone(),
                         msg_id: msg_id.clone(),
                         conversation_id: conv_id.clone(),
+                        op_msg_id: None
                     },
                     to: member,
                 }),

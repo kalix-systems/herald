@@ -1,5 +1,4 @@
 use crate::{interface::*, ret_err};
-use herald_common::MsgId;
 use heraldcore::{
     config::Config,
     conversation::Conversations,

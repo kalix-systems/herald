@@ -1,14 +1,72 @@
+use crate::errors::HErr;
 use herald_common::{serde::*, *};
 use std::convert::{TryFrom, TryInto};
 
-//#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-///// An acknowledgement of message receipt.
-//pub struct ClientMessageAck {
-//    /// The receipt status of the message
-//    pub update_code: MessageReceiptStatus,
-//    /// The message id
-//    pub message_id: MsgId,
-//}
+/// Lenght of randomly generated unique ids
+pub const UID_LEN: usize = 32;
+
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+/// Message ID
+pub struct MsgId([u8; UID_LEN]);
+
+impl MsgId {
+    /// Converts [`MsgId`] to `Vec<u8>`
+    pub fn to_vec(self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    /// Converts [`MsgId`] into a fixed length array.
+    pub fn into_array(self) -> [u8; UID_LEN] {
+        self.0
+    }
+
+    /// [`MsgId`] as a byte slice.
+    pub fn as_slice(&self) -> &[u8] {
+        &self.0 as &[u8]
+    }
+}
+
+impl From<[u8; UID_LEN]> for MsgId {
+    fn from(arr: [u8; UID_LEN]) -> Self {
+        Self(arr)
+    }
+}
+
+impl TryFrom<Vec<u8>> for MsgId {
+    type Error = HErr;
+
+    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidMessageId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.into_iter().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for MsgId {
+    type Error = HErr;
+
+    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidMessageId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.iter().copied().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
 
 /// This type gets serialized into raw bytes and sent to the server
 /// Then it is deserialized again on the client side to implement
@@ -126,6 +184,8 @@ pub enum MessageToPeer {
         msg_id: MsgId,
         /// Conversation the message is associated with
         conversation_id: ConversationId,
+        /// [`MsgId`] of the message being replied to
+        op_msg_id: Option<MsgId>,
     },
     /// A request to start a conversation.
     AddRequest(ConversationId),
@@ -143,22 +203,22 @@ pub struct InvalidConversationId;
 
 impl std::fmt::Display for InvalidConversationId {
     fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(formatter, "MsgIdCapacityError")
+        write!(formatter, "InvalidMessageId")
     }
 }
 
 impl ConversationId {
-    /// Converts `ConversationId` to `Vec<u8>`
+    /// Converts [`ConversationId`] to `Vec<u8>`
     pub fn to_vec(&self) -> Vec<u8> {
         self.0.to_vec()
     }
 
-    /// Converts `ConversationId` into a fixed length array.
+    /// Converts [`ConversationId`] into a fixed length array.
     pub fn into_array(self) -> [u8; UID_LEN] {
         self.0
     }
 
-    /// `ConversationId` as a byte slice.
+    /// [`ConversationId`] as a byte slice.
     pub fn as_slice(&self) -> &[u8] {
         &self.0 as &[u8]
     }
@@ -189,11 +249,11 @@ impl TryFrom<Vec<u8>> for ConversationId {
 }
 
 impl TryFrom<&[u8]> for ConversationId {
-    type Error = MsgIdCapacityError;
+    type Error = HErr;
 
     fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(MsgIdCapacityError)
+            Err(HErr::InvalidConversationId)
         } else {
             let mut buf = [0u8; UID_LEN];
 

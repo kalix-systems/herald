@@ -4,77 +4,8 @@ pub use ::serde;
 use bytes::Bytes;
 use chrono::*;
 use serde::*;
-use std::convert::TryFrom;
 use tokio::prelude::*;
 
-pub const UID_LEN: usize = 32;
-
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
-pub struct MsgId([u8; UID_LEN]);
-
-pub struct MsgIdCapacityError;
-
-impl std::fmt::Display for MsgIdCapacityError {
-    fn fmt(&self, formatter: &mut std::fmt::Formatter) -> Result<(), std::fmt::Error> {
-        write!(formatter, "MsgIdCapacityError")
-    }
-}
-
-impl MsgId {
-    pub fn to_vec(self) -> Vec<u8> {
-        self.0.to_vec()
-    }
-
-    pub fn into_array(self) -> [u8; UID_LEN] {
-        self.0
-    }
-
-    pub fn as_slice(&self) -> &[u8] {
-        &self.0 as &[u8]
-    }
-}
-
-impl From<[u8; UID_LEN]> for MsgId {
-    fn from(arr: [u8; UID_LEN]) -> Self {
-        Self(arr)
-    }
-}
-
-impl TryFrom<Vec<u8>> for MsgId {
-    type Error = MsgIdCapacityError;
-
-    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(MsgIdCapacityError)
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.into_iter().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
-    }
-}
-
-impl TryFrom<&[u8]> for MsgId {
-    type Error = MsgIdCapacityError;
-
-    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(MsgIdCapacityError)
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.iter().copied().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
-    }
-}
 
 // TODO: lifetime parameters so these are zerocopy
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
@@ -89,7 +20,6 @@ pub enum MessageToServer {
 pub enum MessageToClient {
     Push {
         from: GlobalId,
-        op_msg_id: Option<MsgId>,
         body: RawMsg,
         time: DateTime<Utc>,
     },
