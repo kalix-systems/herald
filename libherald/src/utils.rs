@@ -18,7 +18,7 @@ macro_rules! ret_err {
             Ok(val) => val,
             Err(e) => {
                 eprintln!(
-                    "{error} at {file}:{line}:{column}, aborting",
+                    "{error} at {file}:{line}:{column}",
                     error = e,
                     file = file!(),
                     line = line!(),
@@ -33,7 +33,7 @@ macro_rules! ret_err {
             Ok(val) => val,
             Err(e) => {
                 eprintln!(
-                    "{error} at {file}:{line}:{column}, aborting",
+                    "{error} at {file}:{line}:{column}",
                     error = e,
                     file = file!(),
                     line = line!(),
