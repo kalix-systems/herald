@@ -2,6 +2,7 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
     message::Message,
+    types::*,
     utils,
 };
 use herald_common::*;

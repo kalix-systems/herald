@@ -1,8 +1,9 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
 };
-use herald_common::{ConversationId, UserIdRef};
+use herald_common::UserIdRef;
 use rusqlite::{params, NO_PARAMS};
 
 /// Conversation members

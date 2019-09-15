@@ -1,8 +1,8 @@
 use crate::{interface::*, ret_err};
-use herald_common::ConversationId;
 use heraldcore::{
     abort_err,
     contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
+    types::*,
     utils::SearchPattern,
 };
 

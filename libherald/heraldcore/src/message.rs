@@ -1,6 +1,7 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};

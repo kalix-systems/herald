@@ -29,3 +29,5 @@ pub mod network;
 pub mod utils;
 /// Tokio re-export
 pub use tokio;
+/// Types
+pub mod types;

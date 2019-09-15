@@ -2,6 +2,7 @@ use crate::{
     config::Config,
     errors::HErr::{self, *},
     message, message_status,
+    types::*,
 };
 use chrono::prelude::*;
 use herald_common::*;

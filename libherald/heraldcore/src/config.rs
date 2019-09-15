@@ -2,6 +2,7 @@ use crate::{
     db::{DBTable, Database},
     errors::*,
     image_utils,
+    types::*,
 };
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
