@@ -7,7 +7,6 @@ use crate::{
 use chrono::{DateTime, NaiveDateTime, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
-use std::convert::TryInto;
 
 #[derive(Default, Clone)]
 /// Messages
@@ -46,11 +45,6 @@ impl Message {
                 }
             };
 
-        let send_status = match row.get::<_, Option<u8>>(6)? {
-            Some(n) => n.try_into().ok(),
-            None => None,
-        };
-
         Ok(Message {
             message_id: row.get(0)?,
             author: row.get(1)?,
@@ -59,7 +53,7 @@ impl Message {
             op: row.get(4)?,
             timestamp,
             receipts: None,
-            send_status, // TODO FromSql impl
+            send_status: row.get(6)?,
         })
     }
 }

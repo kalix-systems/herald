@@ -111,6 +111,28 @@ impl TryFrom<u8> for MessageSendStatus {
     }
 }
 
+impl FromSql for MessageSendStatus {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        value
+            .as_i64()?
+            .try_into()
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl std::convert::TryFrom<i64> for MessageSendStatus {
+    type Error = HErr;
+
+    fn try_from(n: i64) -> Result<Self, HErr> {
+        match u8::try_from(n) {
+            Ok(n) => n
+                .try_into()
+                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
+            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
+        }
+    }
+}
+
 impl Serialize for MessageSendStatus {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.serialize_u8(*self as u8)
