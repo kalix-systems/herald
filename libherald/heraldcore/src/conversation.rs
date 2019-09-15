@@ -10,7 +10,18 @@ use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
 /// Conversations
-pub struct Conversations;
+pub struct Conversations {
+    db: Database,
+}
+
+impl Conversations {
+    /// Creates `Conversations`
+    pub fn new() -> Result<Self, HErr> {
+        Ok(Self {
+            db: Database::get()?,
+        })
+    }
+}
 
 /// Conversation metadata.
 pub struct ConversationMeta {
@@ -86,100 +97,130 @@ pub(crate) fn add_conversation(
     Ok(id)
 }
 
+/// Deletes all messages in a conversation.
+pub(crate) fn delete_conversation(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/message/delete_conversation.sql"),
+        &[conversation_id],
+    )?;
+    Ok(())
+}
+/// Get all messages in a conversation.
+pub(crate) fn conversation_messages(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Vec<Message>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
+    let res = stmt.query_map(&[conversation_id], Message::from_db)?;
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(msg?);
+    }
+
+    Ok(messages)
+}
+/// Get conversation metadata
+pub(crate) fn meta(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<ConversationMeta, HErr> {
+    Ok(db.query_row(
+        include_str!("sql/conversation/get_conversation_meta.sql"),
+        params![conversation_id],
+        ConversationMeta::from_db,
+    )?)
+}
+
+/// Gets the members of a conversation.
+pub(crate) fn members(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Vec<UserId>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
+    let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
+
+    let mut members = Vec::new();
+    for member in res {
+        members.push(member?);
+    }
+
+    Ok(members)
+}
+
+/// Get conversation
+pub(crate) fn conversation(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Conversation, HErr> {
+    let messages = conversation_messages(&db, conversation_id)?;
+    let meta = meta(&db, conversation_id)?;
+    let members = members(&db, conversation_id)?;
+
+    Ok(Conversation {
+        meta,
+        members,
+        messages,
+    })
+}
+
 impl Conversations {
     /// Adds a conversation to the database
     pub fn add_conversation(
+        &self,
         conversation_id: Option<&ConversationId>,
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
-        let db = Database::get()?;
-        add_conversation(&db, conversation_id, title)
+        add_conversation(&self.db, conversation_id, title)
     }
 
     /// Deletes all messages in a conversation.
-    pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/message/delete_conversation.sql"),
-            &[conversation_id],
-        )?;
-        Ok(())
+    pub fn delete_conversation(&self, conversation_id: &ConversationId) -> Result<(), HErr> {
+        delete_conversation(&self.db, conversation_id)
     }
 
     /// Get all messages in a conversation.
-    pub fn get_conversation_messages(
+    pub fn conversation_messages(
+        &self,
         conversation_id: &ConversationId,
     ) -> Result<Vec<Message>, HErr> {
-        let db = Database::get()?;
-
-        let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
-
-        let mut messages = Vec::new();
-        for msg in res {
-            messages.push(msg?);
-        }
-
-        Ok(messages)
+        conversation_messages(&self.db, conversation_id)
     }
 
     /// Get conversation metadata
-    pub fn get_meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
-        let db = Database::get()?;
+    pub fn meta(&self, conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
+        meta(&self.db, conversation_id)
+    }
 
-        Ok(db.query_row(
-            include_str!("sql/conversation/get_conversation_meta.sql"),
-            params![conversation_id],
-            ConversationMeta::from_db,
-        )?)
+    /// Adds member to conversation.
+    pub fn add_member(
+        &self,
+        conversation_id: &ConversationId,
+        member_id: UserIdRef,
+    ) -> Result<(), HErr> {
+        crate::members::add_member(&self.db, conversation_id, member_id)
+    }
+
+    /// Removes member from conversation.
+    pub fn remove_member(
+        &self,
+        conversation_id: &ConversationId,
+        member_id: UserIdRef,
+    ) -> Result<(), HErr> {
+        crate::members::remove_member(&self.db, conversation_id, member_id)
     }
 
     /// Gets the members of a conversation.
-    pub fn get_members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
-        let db = Database::get()?;
-
-        let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
-        let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
-
-        let mut members = Vec::new();
-        for member in res {
-            members.push(member?);
-        }
-
-        Ok(members)
+    pub fn members(&self, conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
+        members(&self.db, conversation_id)
     }
 
     /// Get conversation
-    pub fn get_conversation(conversation_id: &ConversationId) -> Result<Conversation, HErr> {
-        let db = Database::get()?;
-
-        let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
-        let res = stmt.query_map(&[conversation_id], Message::from_db)?;
-
-        let mut messages = Vec::new();
-        for msg in res {
-            messages.push(msg?);
-        }
-
-        let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
-        let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
-
-        let meta = db.query_row(
-            include_str!("sql/conversation/get_conversation_meta.sql"),
-            params![conversation_id],
-            ConversationMeta::from_db,
-        )?;
-
-        let mut members = Vec::new();
-        for member in res {
-            members.push(member?);
-        }
-
-        Ok(Conversation {
-            meta,
-            members,
-            messages,
-        })
+    pub fn conversation(&self, conversation_id: &ConversationId) -> Result<Conversation, HErr> {
+        conversation(&self.db, conversation_id)
     }
 }
 
@@ -239,21 +280,27 @@ mod tests {
     fn add_conversation() {
         Database::reset_all().expect(womp!());
 
+        let handle = Conversations::new().expect(womp!());
         // test without id
-        Conversations::add_conversation(None, None).expect(womp!("failed to create conversation"));
+        handle
+            .add_conversation(None, None)
+            .expect(womp!("failed to create conversation"));
 
         let conversation_id = ConversationId::from([0; 32]);
         // test with id
         assert_eq!(
             conversation_id,
-            Conversations::add_conversation(Some(&conversation_id), None)
+            handle
+                .add_conversation(Some(&conversation_id), None)
                 .expect(womp!("failed to create conversation"))
         );
 
-        Conversations::add_conversation(Some(&[1; 32].into()), Some("el groupo"))
+        handle
+            .add_conversation(Some(&[1; 32].into()), Some("el groupo"))
             .expect(womp!("failed to create conversation"));
 
-        Conversations::add_conversation(Some(&[2; 32].into()), Some("el groupo"))
+        handle
+            .add_conversation(Some(&[2; 32].into()), Some("el groupo"))
             .expect(womp!("failed to create conversation"));
     }
 
@@ -267,7 +314,10 @@ mod tests {
 
         let conversation = ConversationId::from([0; 32]);
         let msg_handle = Messages::new().expect(womp!());
-        Conversations::add_conversation(Some(&conversation), None)
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
         msg_handle
@@ -278,7 +328,8 @@ mod tests {
             .add_message(None, author, &conversation, "2", None, &None)
             .expect(womp!("Failed to add second message"));
 
-        let msgs = Conversations::get_conversation(&conversation)
+        let msgs = conv_handle
+            .conversation(&conversation)
             .expect(womp!("Failed to get conversation"));
 
         assert_eq!(msgs.len(), 2);
@@ -293,7 +344,10 @@ mod tests {
         ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
-        Conversations::add_conversation(Some(&conversation), None)
+        let handle = Conversations::new().expect(womp!());
+
+        handle
+            .add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
         let msg_handle = Messages::new().expect(womp!());
@@ -303,7 +357,8 @@ mod tests {
 
         msg_handle.delete_message(&msg_id).expect(womp!());
 
-        assert!(Conversations::get_conversation(&conversation)
+        assert!(handle
+            .conversation(&conversation)
             .expect(womp!())
             .is_empty());
     }
@@ -317,7 +372,10 @@ mod tests {
         ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = [0; 32].into();
-        Conversations::add_conversation(Some(&conversation), None)
+
+        let handle = Conversations::new().expect(womp!());
+        handle
+            .add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
         let msg_handle = Messages::new().expect(womp!());
@@ -330,9 +388,10 @@ mod tests {
             .add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add second message"));
 
-        Conversations::delete_conversation(&conversation).expect(womp!());
+        handle.delete_conversation(&conversation).expect(womp!());
 
-        assert!(Conversations::get_conversation(&conversation)
+        assert!(handle
+            .conversation(&conversation)
             .expect(womp!())
             .is_empty());
     }

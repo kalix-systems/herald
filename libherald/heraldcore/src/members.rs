@@ -10,29 +10,30 @@ use rusqlite::{params, NO_PARAMS};
 #[derive(Default)]
 pub struct Members;
 
-impl Members {
-    /// Add a user with `member_id` to the conversation with `conversation_id`.
-    pub fn add_member(conversation_id: &ConversationId, member_id: UserIdRef) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/members/add_member.sql"),
-            params![conversation_id, member_id],
-        )?;
-        Ok(())
-    }
+/// Add a user with `member_id` to the conversation with `conversation_id`.
+pub(crate) fn add_member(
+    db: &Database,
+    conversation_id: &ConversationId,
+    member_id: UserIdRef,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/members/add_member.sql"),
+        params![conversation_id, member_id],
+    )?;
+    Ok(())
+}
 
-    /// Remove a user with `member_id` to the conversation with `conversation_id`.
-    pub fn remove_member(
-        conversation_id: &ConversationId,
-        member_id: UserIdRef,
-    ) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/members/remove_member.sql"),
-            params![conversation_id, member_id],
-        )?;
-        Ok(())
-    }
+/// Remove a user with `member_id` to the conversation with `conversation_id`.
+pub(crate) fn remove_member(
+    db: &Database,
+    conversation_id: &ConversationId,
+    member_id: UserIdRef,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/members/remove_member.sql"),
+        params![conversation_id, member_id],
+    )?;
+    Ok(())
 }
 
 impl DBTable for Members {

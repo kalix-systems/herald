@@ -687,11 +687,13 @@ mod tests {
                 .expect("Failed to determine contact status"),
             ContactStatus::Deleted
         );
-        assert!(
-            Conversations::get_conversation_messages(&contact.pairwise_conversation)
-                .expect(womp!())
-                .is_empty()
-        );
+
+        let conv_handle = Conversations::new().expect(womp!());
+
+        assert!(conv_handle
+            .conversation_messages(&contact.pairwise_conversation)
+            .expect(womp!())
+            .is_empty());
     }
 
     #[test]

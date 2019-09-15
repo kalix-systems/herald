@@ -91,11 +91,18 @@ mod tests {
         let author = "Hello";
         let conversation_id = [0; 32].into();
 
-        Conversations::add_conversation(Some(&conversation_id), None).expect(womp!());
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conversation_id), None)
+            .expect(womp!());
+
         crate::contact::ContactBuilder::new(author.into())
             .add()
             .expect(womp!());
-        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
+        conv_handle
+            .add_member(&conversation_id, author)
+            .expect(womp!());
 
         let (msg_id, _) = add_message(&db, None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));

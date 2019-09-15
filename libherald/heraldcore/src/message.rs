@@ -216,14 +216,21 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conversation_id = [0; 32].into();
-        crate::conversation::Conversations::add_conversation(Some(&conversation_id), None)
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conversation_id), None)
             .expect(womp!());
 
         let author = "Hello";
+
         crate::contact::ContactBuilder::new(author.into())
             .add()
             .expect(womp!());
-        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
+
+        conv_handle
+            .add_member(&conversation_id, author)
+            .expect(womp!());
 
         let handle = Messages::new().expect(womp!());
 
@@ -244,7 +251,8 @@ mod tests {
             .expect(womp!());
 
         assert_eq!(
-            Conversations::get_conversation_messages(&conversation_id)
+            conv_handle
+                .conversation_messages(&conversation_id)
                 .expect(womp!("failed to get conversation by author"))[0]
                 .send_status,
             Some(MessageSendStatus::Ack)

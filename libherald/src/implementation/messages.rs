@@ -88,14 +88,14 @@ impl MessagesTrait for Messages {
             self.list = Vec::new();
             self.model.end_reset_model();
 
-            let messages: Vec<MessagesItem> =
-                match Conversations::get_conversation_messages(&conversation_id) {
-                    Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
-                    Err(e) => {
-                        eprintln!("Error: {}", e);
-                        return;
-                    }
-                };
+            let handle = ret_err!(Conversations::new());
+            let messages: Vec<MessagesItem> = match handle.conversation_messages(&conversation_id) {
+                Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
+                Err(e) => {
+                    eprintln!("Error: {}", e);
+                    return;
+                }
+            };
 
             if messages.is_empty() {
                 return;
@@ -188,19 +188,15 @@ impl MessagesTrait for Messages {
             }
         };
 
-        match Conversations::delete_conversation(id) {
-            Ok(_) => {
-                self.model.begin_reset_model();
-                self.list = Vec::new();
-                self.conversation_id = None;
-                self.model.end_reset_model();
-                true
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                false
-            }
-        }
+        let handle = ret_err!(Conversations::new(), false);
+
+        ret_err!(handle.delete_conversation(id), false);
+
+        self.model.begin_reset_model();
+        self.list = Vec::new();
+        self.conversation_id = None;
+        self.model.end_reset_model();
+        true
     }
 
     fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
@@ -211,7 +207,9 @@ impl MessagesTrait for Messages {
     fn delete_conversation_by_id(&mut self, id: &[u8]) -> bool {
         let id = ret_err!(ConversationId::try_from(id), false);
 
-        ret_err!(Conversations::delete_conversation(&id), false);
+        let handle = ret_err!(Conversations::new(), false);
+
+        ret_err!(handle.delete_conversation(&id), false);
 
         if Some(id) == self.conversation_id {
             self.model.begin_reset_model();

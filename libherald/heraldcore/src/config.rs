@@ -321,8 +321,10 @@ mod tests {
             .add()
             .expect(womp!());
 
+        let handle = Conversations::new().expect(womp!());
         assert_eq!(
-            Conversations::get_meta(&config.nts_conversation)
+            handle
+                .meta(&config.nts_conversation)
                 .expect(womp!())
                 .title
                 .expect(womp!()),
