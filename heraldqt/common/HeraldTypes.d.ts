@@ -38,6 +38,7 @@ declare class Message extends Item {}
 declare class Contacts {
   add(userid: UserId): ConversationID;
   setStatus(rowIndex: number, status: ContactStatus): boolean;
+  setName(rowIndex: number, name: string): boolean;
   pairwiseConversationId(rowIndex: number): ConversationID;
   indexFromConversationId(conversationID: ConversationID): number;
   toggleFilterRegexFilterRegex(): boolean;

@@ -41,7 +41,6 @@ Item {
 
         MenuItem {
             text: 'Delete Contact'
-            //TS: this should be in typescript
             onTriggered: JS.deleteContact(index, contactsModel,
                                           messageModel, appRoot)
         }
@@ -77,16 +76,6 @@ Item {
         }
     }
 
-    // TS: but also try to make disallowed keys work
-    function renameContact() {
-        if (entryField.text.trim() === "") {
-            return
-        }
-        name = entryField.text.trim()
-        entryField.clear()
-        renameContactDialogue.close()
-    }
-
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
@@ -97,7 +86,9 @@ Item {
             id: entryField
             focus: true
             placeholderText: qsTr("Enter new name")
-            Keys.onReturnPressed: renameContact()
+            Keys.onReturnPressed: JS.renameContact(index, entryField,
+                                                   renameContactDialogue,
+                                                   contactsModel)
             anchors.fill: parent
             wrapMode: TextEdit.WrapAnywhere
         }
@@ -109,8 +100,8 @@ Item {
                 bottom: parent.bottom
                 right: parent.right
             }
-            //again TS:
-            onClicked: renameContact()
+            onClicked: JS.renameContact(index, entryField,
+                                        renameContactDialogue, contactsModel)
         }
     }
 }
