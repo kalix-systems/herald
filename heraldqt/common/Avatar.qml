@@ -26,7 +26,6 @@ Row {
     property bool labeled: true /// whether or not to show the name
     // NOTE: make a property in QMLCFG call padding. it is probably just 10
     spacing: QmlCfg.margin
-    property string avatarColor
 
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
@@ -65,7 +64,7 @@ Row {
                 font.bold: true
                 color: "white"
                 anchors.centerIn: parent
-                font.pixelSize: size
+                font.pixelSize: size * 2 / 3
             }
         }
     }
