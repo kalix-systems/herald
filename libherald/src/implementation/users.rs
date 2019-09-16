@@ -348,13 +348,14 @@ impl Users {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
+            let mut acc = false;
             match contact.inner.name.as_ref() {
                 Some(name) => {
-                    contact.matched = self.filter.is_match(name);
+                    acc = self.filter.is_match(name);
                 }
                 None => {}
             }
-            contact.matched |= self.filter.is_match(contact.inner.id.as_str());
+            contact.matched = self.filter.is_match(contact.inner.id.as_str()) || acc;
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
