@@ -31,6 +31,10 @@ Item {
         id: contactsModel
     }
 
+    Conversations {
+        id: conversationsModel
+    }
+
     Popups.ConfigPopup {
         id: preferencesPopup
     }
