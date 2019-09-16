@@ -6,6 +6,7 @@ import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
 import "./ContactClickedPopup.mjs" as JS
+import "../popups" as Popups
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -67,6 +68,26 @@ Item {
                 contactsModel.setProfilePicture(index, "")
             }
         }
+
+        MenuItem {
+            text: 'Choose Color'
+            visible: {
+                if (contactAvatar.pfpUrl === "")
+                   { true }
+                else { false}
+            }
+
+
+
+            onTriggered: {
+                avatarColorPicker.show()
+            }
+        }
+    }
+
+    Popups.ColorPicker {
+        id: avatarColorPicker
+
     }
 
     Popup {
