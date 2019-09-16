@@ -13,7 +13,6 @@ Window {
     maximumWidth: width
     minimumWidth: width
     title: "Choose Color"
-    property string chosenColor
     property var colorIndex
 
     GridLayout {
@@ -32,12 +31,12 @@ Window {
                 color: modelData
                 radius: width * 0.5
                 border.color: QmlCfg.palette.tertiaryColor
-                border.width: 0
+                border.width: if (focus) { 2 } else { 0 }
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        parent.border.width = 2
+                        parent.focus = true
                         colorIndex = index
                     }
                 }
