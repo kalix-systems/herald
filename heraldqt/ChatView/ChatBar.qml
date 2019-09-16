@@ -18,9 +18,9 @@ ToolBar {
     property alias chatBarAvatar: chatBarAvatar
     // NPB: wat.
     property var currentAvatar: Utils.unwrapOr(
-                                    sideBar.contactsListView.currentItem, {
-                                        "contactAvatar": undefined
-                                    }).contactAvatar
+                                    sideBar.conversationsListView.currentItem, {
+                                        "conversationAvatar": undefined
+                                    }).conversationAvatar
     clip: true
     height: QmlCfg.toolbarHeight
     anchors {

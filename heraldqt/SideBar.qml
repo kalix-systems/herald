@@ -16,6 +16,7 @@ Pane {
     id: contactPane
     // GS : we do this to get the current Item, BAD.
     property alias contactsListView: contactsListView
+    property alias conversationsListView: conversationsListView
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
@@ -62,6 +63,12 @@ Pane {
             id: contactsListView
             anchors.fill: parent
             model: contactsModel
+        }
+
+        SBUtils.ConversationView {
+            id: conversationsListView
+            anchors.fill: parent
+            model: conversationsModel
         }
     }
 }

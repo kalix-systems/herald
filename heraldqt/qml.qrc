@@ -41,5 +41,6 @@
         <file>icons/searchRegexTemp.png</file>
         <file>main.cpp</file>
         <file>main.qml</file>
+        <file>SideBar/ConversationView.qml</file>
     </qresource>
 </RCC>

@@ -15,10 +15,9 @@ import "popups" as Popups
 // Needs polish badly: NPB
 // Factor Component: FC
 
-/// --- displays a list of contacts
+/// --- displays a list of conversations
 ListView {
-    visible: false
-    id: contactList
+    id: conversationList
 
     clip: true
     currentIndex: -1
@@ -28,7 +27,7 @@ ListView {
         target: appRoot
         onGsConversationIdChanged: {
             if (gsConversationId === undefined) {
-                contactList.currentIndex = -1
+                conversationList.currentIndex = -1
             }
         }
     }
@@ -37,14 +36,14 @@ ListView {
     }
 
     delegate: Item {
-        id: contactItem
+        id: conversationItem
         //GS : rexporting the contact avatar to global state is a backwards ref!
-        property Item contactAvatar: contactAvatar
+        property Item conversationAvatar: conversationAvatar
 
         // This ternary is okay, types are enforced by QML
         height: visible ? 60 : 0
         width: parent.width
-        visible: matched
+      //  visible: matched
 
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
@@ -83,39 +82,33 @@ ListView {
                 hoverEnabled: true
                 z: 10
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
 
                 onClicked: {
-                    JS.contactClickHandler(mouse, contactList, index,
-                                           pairwiseConversationId,
-                                           popupManager.optionsMenu,
-                                           messageModel, appRoot)
+                    conversationList.currentIndex = index;
+                    messageModel.conversationId = conversationId;
+                    appRoot.gsConversationId = conversationId;
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                 }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""
             }
-
-            ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
-            Popups.ContactClickedPopup {
-                id: popupManager
-            }
             // ternary is okay here, type enforced by QML
-            color: contactItem.focus ? focusColor : defaultColor
+            color: conversationItem.focus ? focusColor : defaultColor
         }
+
 
         /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
         /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
         /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
         Common.Avatar {
             size: 50
-            id: contactAvatar
-            displayName: Utils.unwrapOr(name, userId)
+            id: conversationAvatar
+            displayName: Utils.unwrapOr(title, conversationMembers.userId(1))
             colorHash: color
-            pfpUrl: Utils.safeStringOrDefault(profilePicture)
+            pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }
 }

@@ -35,6 +35,11 @@ Item {
         id: conversationsModel
     }
 
+    Users {
+        id: conversationMembers
+        conversationId: gsConversationId
+    }
+
     Popups.ConfigPopup {
         id: preferencesPopup
     }
