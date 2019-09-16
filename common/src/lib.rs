@@ -27,6 +27,11 @@ pub struct UserMeta {
 }
 
 impl UserMeta {
+    pub fn new() -> Self {
+        UserMeta {
+            keys: HashMap::new(),
+        }
+    }
     pub fn key_is_valid(&self, key: sig::PublicKey) -> bool {
         let maybe_kmeta = self.keys.get(&key);
         if maybe_kmeta.is_none() {
@@ -46,6 +51,10 @@ impl UserMeta {
         let (pk, sig) = new.split();
         self.keys.insert(pk, sig.into());
         true
+    }
+
+    pub fn add_key_unchecked(&mut self, key: sig::PublicKey, meta: sig::PKMeta) {
+        self.keys.insert(key, meta);
     }
 
     pub fn deprecate_key(&mut self, dep: Signed<sig::PublicKey>) -> bool {

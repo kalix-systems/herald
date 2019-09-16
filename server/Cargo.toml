@@ -12,12 +12,11 @@ untrusted   = "0.7"
 serde_cbor  = "0.10"
 failure     = "0.1"
 ccl         = "5.0"
-queue-file  = "1.0"
+redis       = "0.12"
 serde       = { version       = "1.0", features = ["derive"] }
 chrono      = { version       = "0.4", features = ["serde"] }
 bytes       = { version       = "0.4", features = ["serde"] }
 tokio       = "0.2.0-alpha.4"
 
 herald_common = { path = "../common"}
-semalock = {git = "https://github.com/kalix-systems/semalock.git"}
 
