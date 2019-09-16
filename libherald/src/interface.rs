@@ -289,6 +289,8 @@ pub struct ConversationsQObject {}
 
 pub struct ConversationsEmitter {
     qobject: Arc<AtomicPtr<ConversationsQObject>>,
+    filter_changed: fn(*mut ConversationsQObject),
+    filter_regex_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
 
@@ -304,6 +306,8 @@ impl ConversationsEmitter {
     pub fn clone(&mut self) -> ConversationsEmitter {
         ConversationsEmitter {
             qobject: self.qobject.clone(),
+            filter_changed: self.filter_changed,
+            filter_regex_changed: self.filter_regex_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -311,6 +315,18 @@ impl ConversationsEmitter {
         let n: *const ConversationsQObject = null();
         self.qobject
             .store(n as *mut ConversationsQObject, Ordering::SeqCst);
+    }
+    pub fn filter_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.filter_changed)(ptr);
+        }
+    }
+    pub fn filter_regex_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.filter_regex_changed)(ptr);
+        }
     }
     pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -375,8 +391,13 @@ impl ConversationsList {
 pub trait ConversationsTrait {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
     fn emit(&mut self) -> &mut ConversationsEmitter;
+    fn filter(&self) -> &str;
+    fn set_filter(&mut self, value: String);
+    fn filter_regex(&self) -> bool;
+    fn set_filter_regex(&mut self, value: bool);
     fn add_conversation(&mut self) -> Vec<u8>;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
+    fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
@@ -392,6 +413,8 @@ pub trait ConversationsTrait {
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn conversation_id(&self, index: usize) -> &[u8];
+    fn matched(&self, index: usize) -> bool;
+    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn muted(&self, index: usize) -> bool;
     fn set_muted(&mut self, index: usize, _: bool) -> bool;
     fn pairwise(&self, index: usize) -> bool;
@@ -404,6 +427,8 @@ pub trait ConversationsTrait {
 #[no_mangle]
 pub extern "C" fn conversations_new(
     conversations: *mut ConversationsQObject,
+    conversations_filter_changed: fn(*mut ConversationsQObject),
+    conversations_filter_regex_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),
     conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
     conversations_layout_changed: fn(*mut ConversationsQObject),
@@ -419,6 +444,8 @@ pub extern "C" fn conversations_new(
 ) -> *mut Conversations {
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
+        filter_changed: conversations_filter_changed,
+        filter_regex_changed: conversations_filter_regex_changed,
         new_data_ready: conversations_new_data_ready,
     };
     let model = ConversationsList {
@@ -445,6 +472,40 @@ pub unsafe extern "C" fn conversations_free(ptr: *mut Conversations) {
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn conversations_filter_get(
+    ptr: *const Conversations,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.filter();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_set(
+    ptr: *mut Conversations,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_filter(s);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversations) -> bool {
+    (&*ptr).filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
+    (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn conversations_add_conversation(
     ptr: *mut Conversations,
     d: *mut QByteArray,
@@ -463,6 +524,13 @@ pub unsafe extern "C" fn conversations_remove_conversation(
 ) -> bool {
     let o = &mut *ptr;
     let r = o.remove_conversation(row_index);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_toggle_filter_regex(ptr: *mut Conversations) -> bool {
+    let o = &mut *ptr;
+    let r = o.toggle_filter_regex();
     r
 }
 
@@ -525,6 +593,21 @@ pub unsafe extern "C" fn conversations_data_conversation_id(
     let data = o.conversation_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_matched(ptr: *const Conversations, row: c_int) -> bool {
+    let o = &*ptr;
+    o.matched(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_matched(
+    ptr: *mut Conversations,
+    row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_matched(to_usize(row), v)
 }
 
 #[no_mangle]

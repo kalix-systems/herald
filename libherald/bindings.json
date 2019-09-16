@@ -59,6 +59,16 @@
         },
         "Conversations": {
             "type": "List",
+            "properties": {
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
             "itemProperties": {
                 "conversationId": {
                     "type": "QByteArray"
@@ -83,6 +93,10 @@
                 },
                 "pairwise": {
                     "type": "bool"
+                },
+                "matched": {
+                    "write": true,
+                    "type": "bool"
                 }
             },
             "functions": {
@@ -99,6 +113,10 @@
                             "type": "quint64"
                         }
                     ]
+                },
+                "toggleFilterRegex": {
+                    "mut": true,
+                    "return": "bool"
                 }
             }
         },

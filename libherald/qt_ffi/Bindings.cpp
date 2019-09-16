@@ -58,6 +58,14 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
+    inline void conversationsFilterChanged(Conversations* o)
+    {
+        Q_EMIT o->filterChanged();
+    }
+    inline void conversationsFilterRegexChanged(Conversations* o)
+    {
+        Q_EMIT o->filterRegexChanged();
+    }
     inline void heraldStateConfigInitChanged(HeraldState* o)
     {
         Q_EMIT o->configInitChanged();
@@ -115,6 +123,8 @@ extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
+    bool conversations_data_matched(const Conversations::Private*, int);
+    bool conversations_set_data_matched(Conversations::Private*, int, bool);
     bool conversations_data_muted(const Conversations::Private*, int);
     bool conversations_set_data_muted(Conversations::Private*, int, bool);
     bool conversations_data_pairwise(const Conversations::Private*, int);
@@ -219,6 +229,22 @@ QByteArray Conversations::conversationId(int row) const
     return b;
 }
 
+bool Conversations::matched(int row) const
+{
+    return conversations_data_matched(m_d, row);
+}
+
+bool Conversations::setMatched(int row, bool value)
+{
+    bool set = false;
+    set = conversations_set_data_matched(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 bool Conversations::muted(int row) const
 {
     return conversations_data_muted(m_d, row);
@@ -295,12 +321,14 @@ QVariant Conversations::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(conversationId(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(muted(index.row()));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(pairwise(index.row()));
+            return QVariant::fromValue(muted(index.row()));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+            return QVariant::fromValue(pairwise(index.row()));
         case Qt::UserRole + 5:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 6:
             return cleanNullQVariant(QVariant::fromValue(title(index.row())));
         }
         break;
@@ -323,10 +351,11 @@ QHash<int, QByteArray> Conversations::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "conversationId");
-    names.insert(Qt::UserRole + 2, "muted");
-    names.insert(Qt::UserRole + 3, "pairwise");
-    names.insert(Qt::UserRole + 4, "picture");
-    names.insert(Qt::UserRole + 5, "title");
+    names.insert(Qt::UserRole + 2, "matched");
+    names.insert(Qt::UserRole + 3, "muted");
+    names.insert(Qt::UserRole + 4, "pairwise");
+    names.insert(Qt::UserRole + 5, "picture");
+    names.insert(Qt::UserRole + 6, "title");
     return names;
 }
 QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
@@ -356,15 +385,20 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
         }
         if (role == Qt::UserRole + 2) {
             if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 3) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMuted(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 4) {
+        if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setPicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setTitle(index.row(), value.value<QString>());
             }
@@ -374,7 +408,7 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 extern "C" {
-    Conversations::Private* conversations_new(Conversations*,
+    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*),
         void (*)(const Conversations*),
         void (*)(Conversations*),
         void (*)(Conversations*),
@@ -388,8 +422,13 @@ extern "C" {
         void (*)(Conversations*, int, int),
         void (*)(Conversations*));
     void conversations_free(Conversations::Private*);
+    void conversations_filter_get(const Conversations::Private*, QString*, qstring_set);
+    void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
+    bool conversations_filter_regex_get(const Conversations::Private*);
+    void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
+    bool conversations_toggle_filter_regex(Conversations::Private*);
 };
 
 extern "C" {
@@ -1014,6 +1053,8 @@ Conversations::Conversations(bool /*owned*/, QObject *parent):
 Conversations::Conversations(QObject *parent):
     QAbstractItemModel(parent),
     m_d(conversations_new(this,
+        conversationsFilterChanged,
+        conversationsFilterRegexChanged,
         [](const Conversations* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1068,6 +1109,22 @@ Conversations::~Conversations() {
 }
 void Conversations::initHeaderData() {
 }
+QString Conversations::filter() const
+{
+    QString v;
+    conversations_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void Conversations::setFilter(const QString& v) {
+    conversations_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Conversations::filterRegex() const
+{
+    return conversations_filter_regex_get(m_d);
+}
+void Conversations::setFilterRegex(bool v) {
+    conversations_filter_regex_set(m_d, v);
+}
 QByteArray Conversations::addConversation()
 {
     QByteArray s;
@@ -1077,6 +1134,10 @@ QByteArray Conversations::addConversation()
 bool Conversations::removeConversation(quint64 row_index)
 {
     return conversations_remove_conversation(m_d, row_index);
+}
+bool Conversations::toggleFilterRegex()
+{
+    return conversations_toggle_filter_regex(m_d);
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent):
     QObject(parent),

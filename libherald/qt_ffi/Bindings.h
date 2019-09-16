@@ -55,12 +55,19 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
     ~Conversations();
+    QString filter() const;
+    void setFilter(const QString& v);
+    bool filterRegex() const;
+    void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray addConversation();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
+    Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -82,6 +89,8 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QByteArray conversationId(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE bool muted(int row) const;
     Q_INVOKABLE bool setMuted(int row, bool value);
     Q_INVOKABLE bool pairwise(int row) const;
@@ -98,6 +107,8 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void filterChanged();
+    void filterRegexChanged();
 };
 
 class HeraldState : public QObject

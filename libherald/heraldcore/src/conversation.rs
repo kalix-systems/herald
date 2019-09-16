@@ -51,6 +51,14 @@ impl ConversationMeta {
             pairwise: row.get(5)?,
         })
     }
+
+    /// Matches contact's text fields against a [`SearchPattern`]
+    pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
+        match self.title.as_ref() {
+            Some(name) => pattern.is_match(name),
+            None => false,
+        }
+    }
 }
 
 /// Conversation
