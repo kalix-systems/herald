@@ -97,9 +97,9 @@ ListView {
                     JS.contactClickHandler(mouse, contactList, index,
                                            pairwiseConversationId,
                                            popupManager.optionsMenu,
-                                           messageModel)
-                    appRoot.gsConversationId = pairwiseConversationId
+                                           messageModel, appRoot)
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+
                 }
 
                 // ternary is okay here, type enforced by QML
