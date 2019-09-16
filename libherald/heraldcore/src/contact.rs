@@ -72,9 +72,18 @@ fn conversation_members(
     db: &Database,
     conversation_id: &ConversationId,
 ) -> Result<Vec<Contact>, HErr> {
+    conversation_members_since(&db, conversation_id, std::i64::MIN)
+}
+
+/// Returns all members of a conversation.
+fn conversation_members_since(
+    db: &Database,
+    conversation_id: &ConversationId,
+    since: i64,
+) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(params![conversation_id], Contact::from_db)?;
+    let rows = stmt.query_map(params![conversation_id, since], Contact::from_db)?;
 
     let mut contacts: Vec<Contact> = Vec::new();
     for contact in rows {
@@ -159,9 +168,14 @@ fn status(db: &Database, id: UserIdRef) -> Result<ContactStatus, HErr> {
 
 /// Returns all contacts
 fn all(db: &Database) -> Result<Vec<Contact>, HErr> {
+    all_since(db, std::i64::MIN)
+}
+
+/// Returns all contacts
+fn all_since(db: &Database, since: i64) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
-    let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
+    let rows = stmt.query_map(params![since], Contact::from_db)?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {
@@ -175,7 +189,7 @@ fn all(db: &Database) -> Result<Vec<Contact>, HErr> {
 fn get_by_status(db: &Database, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(params![status], Contact::from_db)?;
+    let rows = stmt.query_map(params![status, std::i64::MIN], Contact::from_db)?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {
@@ -243,6 +257,11 @@ impl ContactsHandle {
         all(&self.db)
     }
 
+    /// Returns all contacts added after a given UNIX epoch time
+    pub fn all_since(&self, since: i64) -> Result<Vec<Contact>, HErr> {
+        all_since(&self.db, since)
+    }
+
     /// Returns all contacts with the specified `status`
     pub fn get_by_status(&self, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
         get_by_status(&self.db, status)
@@ -254,6 +273,15 @@ impl ContactsHandle {
         conversation_id: &ConversationId,
     ) -> Result<Vec<Contact>, HErr> {
         conversation_members(&self.db, conversation_id)
+    }
+
+    /// Returns all conversation members added after a given UNIX epoch time
+    pub fn conversation_members_since(
+        &self,
+        conversation_id: &ConversationId,
+        since: i64,
+    ) -> Result<Vec<Contact>, HErr> {
+        conversation_members_since(&self.db, conversation_id, since)
     }
 
     /// Adds member to conversation.
@@ -491,6 +519,7 @@ impl ContactBuilder {
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,
             contact_type,
+            added: chrono::Utc::now().timestamp(),
         };
 
         conn.execute(
@@ -531,6 +560,8 @@ pub struct Contact {
     pub pairwise_conversation: ConversationId,
     /// Contact type, local or remote
     pub contact_type: ContactType,
+    /// when was the contact added?
+    pub added: i64,
 }
 
 impl Contact {
@@ -563,6 +594,7 @@ impl Contact {
             status: row.get(4)?,
             pairwise_conversation: row.get(5)?,
             contact_type: row.get(6)?,
+            added: row.get(7)?,
         })
     }
 }

@@ -224,7 +224,7 @@
                 },
                 "refresh": {
                     "mut": true,
-                    "return": "void"
+                    "return": "bool"
                 },
                 "toggleFilterRegex": {
                     "mut": true,

@@ -1,7 +1,7 @@
 use crate::{interface::*, ret_err, types::*};
 use herald_common::{UserId, UserIdRef};
 use heraldcore::{
-    abort_err,
+    abort_err, chrono,
     contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
     types::*,
     utils::SearchPattern,
@@ -22,6 +22,7 @@ pub struct Users {
     list: Vec<User>,
     handle: ContactsHandle,
     conversation_id: Option<ConversationId>,
+    updated: i64,
 }
 
 impl UsersTrait for Users {
@@ -49,6 +50,7 @@ impl UsersTrait for Users {
             filter_regex: false,
             handle,
             conversation_id: None,
+            updated: chrono::Utc::now().timestamp(),
         }
     }
 
@@ -292,9 +294,38 @@ impl UsersTrait for Users {
         true
     }
 
-    // TODO this is terrible and doesn't work in general
-    fn refresh(&mut self) {
-        self.set_conversation_id(None)
+    // TODO handle removals
+    fn refresh(&mut self) -> bool {
+        let new = match self.conversation_id {
+            Some(id) => ret_err!(
+                self.handle.conversation_members_since(&id, self.updated),
+                false
+            ),
+            None => {
+                println!("refreshing main contact view");
+                ret_err!(self.handle.all_since(self.updated), false)
+            }
+        };
+
+        println!("inserted {} new contacts", new.len());
+        self.updated = chrono::Utc::now().timestamp();
+
+        if new.is_empty() {
+            return true;
+        }
+
+        self.model.begin_insert_rows(
+            self.list.len(),
+            (self.list.len() + new.len()).saturating_sub(1),
+        );
+        self.list.extend(new.into_iter().map(|inner| User {
+            inner,
+            matched: true,
+        }));
+        self.model.end_insert_rows();
+
+        println!("length is now {}", self.list.len());
+        true
     }
 }
 

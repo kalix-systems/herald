@@ -13,5 +13,6 @@ CREATE TABLE IF NOT EXISTS contacts (
   status INTEGER NOT NULL,
   -- contact type
   contact_type INTEGER NOT NULL,
+  added INTEGER DEFAULT (strftime('%s', 'now')),
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 )

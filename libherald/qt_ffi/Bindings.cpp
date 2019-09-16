@@ -926,7 +926,7 @@ extern "C" {
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool users_add_to_conversation(Users::Private*, quint64, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
-    void users_refresh(Users::Private*);
+    bool users_refresh(Users::Private*);
     bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
     bool users_toggle_filter_regex(Users::Private*);
 };
@@ -1398,7 +1398,7 @@ qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
 {
     return users_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
 }
-void Users::refresh()
+bool Users::refresh()
 {
     return users_refresh(m_d);
 }
