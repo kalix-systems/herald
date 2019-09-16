@@ -44,7 +44,7 @@ ToolBar {
         colorHash: Utils.unwrapOr(currentAvatar, {
                                       "colorHash": 0
                                   }).colorHash
-        isChatBar: true
+        isDefault: false
     }
 
     background: Rectangle {

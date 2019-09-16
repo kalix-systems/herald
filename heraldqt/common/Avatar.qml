@@ -26,7 +26,7 @@ Row {
     property bool labeled: true /// whether or not to show the name
     // NOTE: make a property in QMLCFG call padding. it is probably just 10
     spacing: QmlCfg.margin
-    property bool isChatBar: false
+    property bool isDefault: true
 
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
@@ -44,7 +44,8 @@ Row {
         text: displayName
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
-        color: if (isChatBar) "white"
+        //is white instead of palette maincolor bc shld be white regardless of theme
+        color: if (!isDefault) { "white"  } else {"black" }
     }
 
     ///--- potential avatar components
@@ -57,14 +58,15 @@ Row {
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter
-            color: if  (isChatBar) {"white" } else { QmlCfg.avatarColors[colorHash] }
+            //is white instead of palette maincolor bc shld be white regardless of theme
+            color: if  (!isDefault) {"white" } else { QmlCfg.avatarColors[colorHash] }
             // Note:
             radius: shape
             ///---- initial
             Text {
                 text: qsTr(displayName[0].toUpperCase())
                 font.bold: true
-                color: if (isChatBar) {QmlCfg.avatarColors[colorHash]} else {"white"}
+                color: if (!isDefault) {QmlCfg.avatarColors[colorHash]} else {"white"}
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3
             }
