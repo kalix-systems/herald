@@ -22,7 +22,7 @@ pub struct Users {
     list: Vec<User>,
     handle: ContactsHandle,
     conversation_id: Option<ConversationId>,
-    updated: i64,
+    updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
@@ -50,7 +50,7 @@ impl UsersTrait for Users {
             filter_regex: false,
             handle,
             conversation_id: None,
-            updated: chrono::Utc::now().timestamp(),
+            updated: chrono::Utc::now(),
         }
     }
 
@@ -304,7 +304,7 @@ impl UsersTrait for Users {
             None => ret_err!(self.handle.all_since(self.updated), false),
         };
 
-        self.updated = chrono::Utc::now().timestamp();
+        self.updated = chrono::Utc::now();
 
         if new.is_empty() {
             return true;
