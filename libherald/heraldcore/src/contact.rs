@@ -230,6 +230,24 @@ impl ContactsHandle {
     pub fn get_by_status(&self, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
         get_by_status(&self.db, status)
     }
+
+    /// Adds member to conversation.
+    pub fn add_member(
+        &self,
+        conversation_id: &ConversationId,
+        member_id: UserIdRef,
+    ) -> Result<(), HErr> {
+        crate::members::add_member(&self.db, conversation_id, member_id)
+    }
+
+    /// Removes member from conversation.
+    pub fn remove_member(
+        &self,
+        conversation_id: &ConversationId,
+        member_id: UserIdRef,
+    ) -> Result<(), HErr> {
+        crate::members::remove_member(&self.db, conversation_id, member_id)
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]

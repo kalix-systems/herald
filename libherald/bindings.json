@@ -222,7 +222,7 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "addMember": {
+                "addToConversation": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
@@ -236,7 +236,7 @@
                         }
                     ]
                 },
-                "removeMember": {
+                "removeFromConversation": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [

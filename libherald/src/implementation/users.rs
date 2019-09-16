@@ -6,6 +6,7 @@ use heraldcore::{
     types::*,
     utils::SearchPattern,
 };
+use std::convert::TryFrom;
 
 #[derive(Clone)]
 struct User {
@@ -147,7 +148,6 @@ impl UsersTrait for Users {
     }
 
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
-        use std::convert::TryFrom;
         let status = ret_err!(ContactStatus::try_from(status), false);
 
         ret_err!(
@@ -168,8 +168,6 @@ impl UsersTrait for Users {
     }
 
     fn index_from_conversation_id(&self, conv_id: FfiConversationIdRef) -> i64 {
-        use std::convert::TryFrom;
-
         let conv_id = ret_err!(ConversationId::try_from(conv_id), -1);
 
         self.list
@@ -245,12 +243,25 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn add_member(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
-        unimplemented!()
+    fn add_to_conversation(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
+        let index = index as usize;
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
+        true
     }
 
-    fn remove_member(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
-        unimplemented!()
+    fn remove_from_conversation(
+        &mut self,
+        index: u64,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let index = index as usize;
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        ret_err!(
+            self.handle.remove_member(&conv_id, self.user_id(index)),
+            false
+        );
+        true
     }
 }
 
