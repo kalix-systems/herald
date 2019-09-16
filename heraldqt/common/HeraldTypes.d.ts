@@ -38,7 +38,7 @@ declare class Messages {
 
 declare class Message extends Item {}
 
-declare class Contacts {
+declare class Users {
   add(userid: UserId): ConversationID;
   setStatus(rowIndex: number, status: ContactStatus): boolean;
   setName(rowIndex: number, name: string): boolean;
@@ -48,8 +48,8 @@ declare class Contacts {
   toggleFilterRegexFilterRegex(): boolean;
 }
 
-declare class Contact {
-  contactId: UserId;
+declare class User {
+  userId: UserId;
   pairwiseConversationId: ConversationID;
   name?: string;
   profilePicture?: string;

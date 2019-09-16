@@ -1,6 +1,6 @@
 export function deleteContact(
   index: number,
-  contactsModel: Contacts,
+  contactsModel: Users,
   messageModel: Messages,
   appRoot: GlobalState,
   heraldUtils: HeraldUtils
@@ -21,7 +21,7 @@ export function renameContact(
   index: number,
   entryField: TextArea,
   renameContactDialogue: Popup,
-  contactsModel: Contacts
+  contactsModel: Users
 ): boolean {
   const trimmedText = entryField.text.trim();
   if (trimmedText === "") {
@@ -36,7 +36,7 @@ export function renameContact(
 
 export function changeProfilePicture(
   index: number,
-  contactsModel: Contacts,
+  contactsModel: Users,
   fileUrl: string,
   fileDialog: Popup
 ): void {

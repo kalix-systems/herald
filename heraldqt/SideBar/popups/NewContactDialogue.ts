@@ -1,7 +1,7 @@
 export function insertContact(
   dialogue: Popup,
   entryArea: TextArea,
-  contactsModel: Contacts,
+  contactsModel: Users,
   networkHandle: NetworkHandle
 ): void {
   const trimmedText = entryArea.text.trim();
