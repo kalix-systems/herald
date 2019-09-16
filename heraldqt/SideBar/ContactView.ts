@@ -5,10 +5,12 @@ export function contactClickHandler(
   convId: ConversationID,
   optionsMenu: Menu,
   messageModel: Messages,
+  appRoot: GlobalState
 ): void {
   if (mouse.button === Qt.LeftButton) {
     contactView.currentIndex = index;
     messageModel.conversationId = convId;
+    appRoot.gsConversationId = convId;
   } else {
     optionsMenu.open();
   }
