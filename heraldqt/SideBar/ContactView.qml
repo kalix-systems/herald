@@ -47,7 +47,8 @@ ListView {
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
 
-        height: JS.contactItemHeight(visible)
+        // This ternary is okay, types are enforced by QML
+        height: visible ? 60 : 0
         width: parent.width
         visible: matched
 
