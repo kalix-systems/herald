@@ -18,6 +18,8 @@ Item {
 
     NetworkHandle {
         id: networkHandle
+        onNewMessageChanged: messageModel.refresh()
+        onNewContactChanged: contactsModel.refresh()
     }
 
     Messages {

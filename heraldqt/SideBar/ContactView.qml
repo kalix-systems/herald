@@ -32,12 +32,6 @@ ListView {
         }
     }
 
-    Connections {
-        target: networkHandle
-        onNewContactChanged: {
-            contactsModel.refresh()
-        }
-    }
 
     ScrollBar.vertical: ScrollBar {
     }

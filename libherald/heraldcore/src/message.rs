@@ -4,7 +4,7 @@ use crate::{
     types::*,
     utils,
 };
-use chrono::{DateTime, NaiveDateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
@@ -37,23 +37,16 @@ pub struct Message {
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let timestamp =
-            match NaiveDateTime::parse_from_str(row.get::<_, String>(5)?.as_str(), utils::DATE_FMT)
-            {
-                Ok(ts) => DateTime::from_utc(ts, Utc),
-                Err(e) => {
-                    eprintln!("Error: {}", e);
-                    Utc::now()
-                }
-            };
-
         Ok(Message {
             message_id: row.get(0)?,
             author: row.get(1)?,
             conversation: row.get(2)?,
             body: row.get(3)?,
             op: row.get(4)?,
-            timestamp,
+            timestamp: Utc
+                .timestamp_opt(row.get(5)?, 0)
+                .single()
+                .unwrap_or_else(Utc::now),
             receipts: None,
             send_status: row.get(6)?,
         })
@@ -71,12 +64,18 @@ pub(crate) fn add_message(
     op: &Option<MsgId>,
 ) -> Result<(MsgId, DateTime<Utc>), HErr> {
     let timestamp = timestamp.unwrap_or_else(Utc::now);
-    let timestamp_param = timestamp.format(utils::DATE_FMT).to_string();
 
     let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
     db.execute(
         include_str!("sql/message/add.sql"),
-        params![msg_id, author, conversation_id, body, timestamp_param, op,],
+        params![
+            msg_id,
+            author,
+            conversation_id,
+            body,
+            timestamp.timestamp(),
+            op,
+        ],
     )?;
     Ok((msg_id, timestamp))
 }
@@ -114,6 +113,15 @@ impl Messages {
         Ok(Self {
             db: Database::get()?,
         })
+    }
+
+    /// Get all messages in a conversation since a given time.
+    pub fn conversation_messages_since(
+        &self,
+        conversation_id: &ConversationId,
+        since: DateTime<Utc>,
+    ) -> Result<Vec<Message>, HErr> {
+        crate::conversation::conversation_messages_since(&self.db, conversation_id, since)
     }
 
     /// Adds a message to the database.

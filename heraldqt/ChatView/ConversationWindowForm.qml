@@ -28,6 +28,7 @@ Flickable {
         width: QmlCfg.margin
     }
 
+
     Column {
         id: textMessageCol
         focus: true

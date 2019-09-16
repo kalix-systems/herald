@@ -596,6 +596,7 @@ extern "C" {
     bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    bool messages_refresh(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
 
@@ -1230,6 +1231,10 @@ QByteArray Messages::insertMessage(const QString& body)
     QByteArray s;
     messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
     return s;
+}
+bool Messages::refresh()
+{
+    return messages_refresh(m_d);
 }
 QByteArray Messages::reply(const QString& body, const QByteArray& op)
 {
