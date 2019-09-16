@@ -243,7 +243,7 @@ pub enum MessageToPeer {
     /// A response to a request to start conversation
     AddResponse(ConversationId, bool),
     /// An acknowledgement of a previous message
-    Ack(MessageReceipt),
+    Ack(ConversationId, MessageReceipt),
 }
 #[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
 /// Conversation ID

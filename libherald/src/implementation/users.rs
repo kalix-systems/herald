@@ -84,9 +84,19 @@ impl UsersTrait for Users {
         let new_list = match conversation_id {
             Some(conv_id) => {
                 let conv_id = ret_err!(ConversationId::try_from(conv_id));
+
+                if Some(conv_id) == self.conversation_id {
+                    return;
+                }
+
                 ret_err!(self.handle.conversation_members(&conv_id))
             }
-            None => ret_err!(self.handle.all()),
+            None => {
+                if self.conversation_id.is_none() {
+                    return;
+                }
+                ret_err!(self.handle.all())
+            }
         };
 
         self.model
@@ -180,9 +190,10 @@ impl UsersTrait for Users {
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         let status = ret_err!(ContactStatus::try_from(status), false);
 
+        let meta = &self.list[row_index].inner;
         ret_err!(
             self.handle
-                .set_status(self.list[row_index].inner.id.as_str(), status),
+                .set_status(meta.id.as_str(), meta.pairwise_conversation, status),
             false
         );
 

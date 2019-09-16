@@ -130,12 +130,16 @@ struct Event {
     notification: Option<Notification>,
 }
 
-fn form_ack(update_code: MessageReceiptStatus, message_id: MsgId) -> MessageToPeer {
+fn form_ack(
+    update_code: MessageReceiptStatus,
+    conv_id: ConversationId,
+    message_id: MsgId,
+) -> MessageToPeer {
     let ack = MessageReceipt {
         update_code,
         message_id,
     };
-    MessageToPeer::Ack(ack)
+    MessageToPeer::Ack(conv_id, ack)
 }
 
 // note: this should never fail, but I'm returning a result until I read `serde_cbor` more closely
@@ -167,7 +171,7 @@ fn handle_msg(
 
     let reply = form_push(
         author.clone(),
-        form_ack(MessageReceiptStatus::Received, msg_id),
+        form_ack(MessageReceiptStatus::Received, conversation_id, msg_id),
     )?;
     let notification = Notification::NewMsg(author);
     Ok(Event {
@@ -202,13 +206,13 @@ fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
     })
 }
 
-fn handle_ack(from: UserId, ack: MessageReceipt) -> Result<Event, HErr> {
+fn handle_ack(conv_id: ConversationId, ack: MessageReceipt) -> Result<Event, HErr> {
     let MessageReceipt {
         message_id,
         update_code,
     } = ack;
     let db = crate::db::Database::get()?;
-    message_status::set_message_status(&db, message_id, from.as_str(), update_code)?;
+    message_status::set_message_status(&db, message_id, conv_id, update_code)?;
     Ok(Event {
         reply: None,
         notification: None,
@@ -228,7 +232,7 @@ fn handle_push(author: GlobalId, body: MessageToPeer, time: DateTime<Utc>) -> Re
         AddResponse(_conversation_id, _accepted) => {
             handle_add_response(_conversation_id, _accepted)
         }
-        Ack(a) => handle_ack(author.uid, a),
+        Ack(conv_id, a) => handle_ack(conv_id, a),
     }
 }
 

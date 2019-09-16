@@ -1,4 +1,5 @@
 use crate::{
+    abort_err,
     db::{DBTable, Database},
     errors::HErr,
     image_utils,
@@ -138,20 +139,26 @@ fn contact_exists(db: &Database, id: UserIdRef) -> Result<bool, HErr> {
 }
 
 /// Sets contact status
-fn set_status(db: &mut Database, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
+fn set_status(
+    db: &mut Database,
+    id: UserIdRef,
+    pairwise_conv: ConversationId,
+    status: ContactStatus,
+) -> Result<(), HErr> {
     use ContactStatus::*;
     match status {
         Deleted => {
             let tx = db.transaction()?;
-            tx.execute(
+            abort_err!(tx.execute(
                 include_str!("sql/contact/delete_contact_meta.sql"),
                 params![id],
-            )?;
-            tx.execute(
+            ));
+            crate::message_status::delete_by_conversation(&tx, pairwise_conv)?;
+            abort_err!(tx.execute(
                 include_str!("sql/message/delete_pairwise_conversation.sql"),
                 params![id],
-            )?;
-            tx.commit()?;
+            ));
+            abort_err!(tx.commit());
         }
         _ => {
             db.execute(
@@ -250,8 +257,13 @@ impl ContactsHandle {
     }
 
     /// Sets contact status
-    pub fn set_status(&mut self, id: UserIdRef, status: ContactStatus) -> Result<(), HErr> {
-        set_status(&mut self.db, id, status)
+    pub fn set_status(
+        &mut self,
+        id: UserIdRef,
+        pairwise_conv: ConversationId,
+        status: ContactStatus,
+    ) -> Result<(), HErr> {
+        set_status(&mut self.db, id, pairwise_conv, status)
     }
 
     /// Gets contact status
@@ -763,7 +775,7 @@ mod tests {
         let id = "Hello World";
         let contact = ContactBuilder::new(id.into()).add().expect(womp!());
         handle
-            .set_status(id, ContactStatus::Archived)
+            .set_status(id, contact.pairwise_conversation, ContactStatus::Archived)
             .expect(womp!());
 
         assert_eq!(
@@ -774,7 +786,7 @@ mod tests {
         );
 
         handle
-            .set_status(id, ContactStatus::Deleted)
+            .set_status(id, contact.pairwise_conversation, ContactStatus::Deleted)
             .expect(womp!());
 
         assert_eq!(
