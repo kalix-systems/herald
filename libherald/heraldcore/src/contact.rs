@@ -610,7 +610,10 @@ impl Contact {
             status: row.get(4)?,
             pairwise_conversation: row.get(5)?,
             contact_type: row.get(6)?,
-            added: Utc.timestamp(row.get(7)?, 0),
+            added: Utc
+                .timestamp_opt(row.get(7)?, 0)
+                .single()
+                .unwrap_or_else(Utc::now),
         })
     }
 }
