@@ -98,4 +98,35 @@ impl ConversationsTrait for Conversations {
     fn pairwise(&self, index: usize) -> bool {
         self.list[index].pairwise
     }
+
+    fn add_conversation(&mut self) -> bool {
+        let conv_id = ret_err!(self.handle.add_conversation(None, None), false);
+        let meta = ret_err!(self.handle.meta(&conv_id), false);
+
+        self.model.begin_insert_rows(0, 0);
+        self.list.insert(0, meta);
+        self.model.end_insert_rows();
+        true
+    }
+
+    fn remove_conversation(&mut self, index: u64) -> bool {
+        let index = index as usize;
+        let meta = &mut self.list[index];
+
+        // cannot remove pairwise conversation!
+        if meta.pairwise {
+            return false;
+        }
+
+        ret_err!(
+            self.handle.delete_conversation(&meta.conversation_id),
+            false
+        );
+
+        self.model.begin_remove_rows(index, index);
+        self.list.remove(index);
+        self.model.end_remove_rows();
+
+        true
+    }
 }

@@ -384,6 +384,8 @@ extern "C" {
         void (*)(Conversations*, int, int),
         void (*)(Conversations*));
     void conversations_free(Conversations::Private*);
+    bool conversations_add_conversation(Conversations::Private*);
+    bool conversations_remove_conversation(Conversations::Private*, quint64);
 };
 
 extern "C" {
@@ -1053,6 +1055,14 @@ Conversations::~Conversations() {
     }
 }
 void Conversations::initHeaderData() {
+}
+bool Conversations::addConversation()
+{
+    return conversations_add_conversation(m_d);
+}
+bool Conversations::removeConversation(quint64 row_index)
+{
+    return conversations_remove_conversation(m_d, row_index);
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent):
     QObject(parent),

@@ -375,6 +375,8 @@ impl ConversationsList {
 pub trait ConversationsTrait {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
     fn emit(&mut self) -> &mut ConversationsEmitter;
+    fn add_conversation(&mut self) -> bool;
+    fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -436,6 +438,20 @@ pub extern "C" fn conversations_new(
 #[no_mangle]
 pub unsafe extern "C" fn conversations_free(ptr: *mut Conversations) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations) -> bool {
+    let o = &mut *ptr;
+    let r = o.add_conversation();
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_remove_conversation(ptr: *mut Conversations, row_index: u64) -> bool {
+    let o = &mut *ptr;
+    let r = o.remove_conversation(row_index);
+    r
 }
 
 #[no_mangle]

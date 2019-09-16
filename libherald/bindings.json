@@ -71,6 +71,22 @@
                 "pairwise": {
                     "type": "bool"
                 }
+            },
+            "functions": {
+                "addConversation": {
+                    "mut": true,
+                    "return": "bool"
+                },
+                "removeConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        }
+                    ]
+                }
             }
         },
         "NetworkHandle": {

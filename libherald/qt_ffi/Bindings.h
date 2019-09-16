@@ -59,6 +59,8 @@ private:
 public:
     explicit Conversations(QObject *parent = nullptr);
     ~Conversations();
+    Q_INVOKABLE bool addConversation();
+    Q_INVOKABLE bool removeConversation(quint64 row_index);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
