@@ -53,7 +53,7 @@ fn name(db: &Database, id: UserIdRef) -> Result<Option<String>, HErr> {
 }
 
 /// Change name of contact by their `id`
-fn set_name(db: &Database, id: UserIdRef, name: Option<&str>) -> Result<(), HErr> {
+pub(crate) fn set_name(db: &Database, id: UserIdRef, name: Option<&str>) -> Result<(), HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
     stmt.execute(params![name, id])?;

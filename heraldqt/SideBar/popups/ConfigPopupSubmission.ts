@@ -4,7 +4,7 @@ export function submit(
   useridField: TextField,
   usernameField: TextField
 ): void {
-  if (configInit) {
+  if (!configInit) {
     config.configId = useridField.text.trim();
   }
   config.name = usernameField.text.trim();

@@ -219,8 +219,7 @@ impl Config {
 
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
-        self.db
-            .execute(include_str!("sql/config/update_name.sql"), params![name])?;
+        crate::contact::set_name(&self.db, &self.id, name.as_ref().map(|s| s.as_str()))?;
 
         self.name = name;
         Ok(())

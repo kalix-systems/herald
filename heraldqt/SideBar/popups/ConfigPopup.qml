@@ -89,7 +89,7 @@ Window {
             Button {
                 text: "Submit"
                 onClicked: {
-                    JS.submit(config, cfgUid, cfgUname)
+                    JS.submit(config, heraldState.configInit, cfgUid, cfgUname)
                     close()
                 }
             }
