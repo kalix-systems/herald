@@ -102,11 +102,12 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
+            color: outbound ? "black" : "white"
         }
 
         Label {
             id: timeStamp
-            color: QmlCfg.palette.secondaryTextColor
+            color: outbound ? QmlCfg.palette.secondaryTextColor : "white"
             text: Utils.friendlyTimestamp(epochTimestampMs)
             font.pointSize: QmlCfg.chatTextSize
         }

@@ -68,7 +68,7 @@ Flickable {
                         }
                     }
                     // This is okay as a ternary, the types are enforced by QML.
-                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : appRoot.gsConvoColor
                 } //bubble
             } //bubble wrapper
         } // Repeater

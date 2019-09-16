@@ -94,6 +94,7 @@ Item {
 
             onClicked: {
                 contactsModel.setColor(index, avatarColorPicker.colorIndex)
+                appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                 avatarColorPicker.close()
             }
         }
