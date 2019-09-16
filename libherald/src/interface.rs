@@ -1301,7 +1301,9 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn add_member(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
+    fn remove_member(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -1429,10 +1431,26 @@ pub unsafe extern "C" fn users_add(ptr: *mut Users, id_str: *const c_ushort, id_
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn users_add_member(ptr: *mut Users, row_index: u64, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
+    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
+    let o = &mut *ptr;
+    let r = o.add_member(row_index, conversation_id);
+    r
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn users_index_from_conversation_id(ptr: *const Users, conversation_id_str: *const c_char, conversation_id_len: c_int) -> i64 {
     let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
     let o = &*ptr;
     let r = o.index_from_conversation_id(conversation_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_remove_member(ptr: *mut Users, row_index: u64, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
+    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
+    let o = &mut *ptr;
+    let r = o.remove_member(row_index, conversation_id);
     r
 }
 

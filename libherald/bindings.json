@@ -221,6 +221,34 @@
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
+                },
+                "addMember": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "removeMember": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
                 }
             }
         },

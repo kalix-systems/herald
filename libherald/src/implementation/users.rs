@@ -248,6 +248,14 @@ impl UsersTrait for Users {
     fn row_count(&self) -> usize {
         self.list.len()
     }
+
+    fn add_member(&mut self, index: u64, conversation_id: &[u8]) -> bool {
+        unimplemented!()
+    }
+
+    fn remove_member(&mut self, index: u64, conversation_id: &[u8]) -> bool {
+        unimplemented!()
+    }
 }
 
 impl Users {
