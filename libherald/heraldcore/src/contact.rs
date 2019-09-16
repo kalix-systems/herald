@@ -585,6 +585,15 @@ impl Contact {
         self.status
     }
 
+    /// Matches contact's text fields against a [`SearchPattern`]
+    pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
+        pattern.is_match(self.id.as_str())
+            || match self.name.as_ref() {
+                Some(name) => pattern.is_match(name),
+                None => false,
+            }
+    }
+
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         Ok(Contact {
             id: row.get(0)?,

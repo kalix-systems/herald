@@ -66,8 +66,8 @@ impl UsersTrait for Users {
         self.list.insert(
             0,
             User {
+                matched: contact.matches(&self.filter),
                 inner: contact,
-                matched: true,
             },
         );
         self.model.end_insert_rows();
@@ -99,8 +99,8 @@ impl UsersTrait for Users {
         self.list = new_list
             .into_iter()
             .map(|inner| User {
+                matched: inner.matches(&self.filter),
                 inner,
-                matched: true,
             })
             .collect();
         self.model.end_insert_rows();
@@ -301,30 +301,27 @@ impl UsersTrait for Users {
                 self.handle.conversation_members_since(&id, self.updated),
                 false
             ),
-            None => {
-                println!("refreshing main contact view");
-                ret_err!(self.handle.all_since(self.updated), false)
-            }
+            None => ret_err!(self.handle.all_since(self.updated), false),
         };
 
-        println!("inserted {} new contacts", new.len());
         self.updated = chrono::Utc::now().timestamp();
 
         if new.is_empty() {
             return true;
         }
 
+        let filter = &self.filter;
+
         self.model.begin_insert_rows(
             self.list.len(),
             (self.list.len() + new.len()).saturating_sub(1),
         );
         self.list.extend(new.into_iter().map(|inner| User {
+            matched: inner.matches(&filter),
             inner,
-            matched: true,
         }));
         self.model.end_insert_rows();
 
-        println!("length is now {}", self.list.len());
         true
     }
 }
@@ -348,14 +345,7 @@ impl Users {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            let mut acc = false;
-            match contact.inner.name.as_ref() {
-                Some(name) => {
-                    acc = self.filter.is_match(name);
-                }
-                None => {}
-            }
-            contact.matched = self.filter.is_match(contact.inner.id.as_str()) || acc;
+            contact.matched = contact.inner.matches(&self.filter);
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
