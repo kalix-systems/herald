@@ -137,6 +137,50 @@ pub(crate) fn meta(
     )?)
 }
 
+pub(crate) fn set_color(
+    db: &Database,
+    conversation_id: &ConversationId,
+    color: u32,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/conversation/update_color.sql"),
+        params![color, conversation_id],
+    )?;
+    Ok(())
+}
+
+pub(crate) fn set_muted(
+    db: &Database,
+    conversation_id: &ConversationId,
+    muted: bool,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/conversation/update_muted.sql"),
+        params![muted, conversation_id],
+    )?;
+    Ok(())
+}
+
+pub(crate) fn set_title(
+    db: &Database,
+    conversation_id: &ConversationId,
+    title: Option<&str>,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/conversation/update_title.sql"),
+        params![title, conversation_id],
+    )?;
+    Ok(())
+}
+
+pub(crate) fn set_picture(
+    _db: &Database,
+    _conversation_id: &ConversationId,
+    _picture: Option<&str>,
+) -> Result<(), HErr> {
+    unimplemented!()
+}
+
 /// Get metadata of all conversations
 pub(crate) fn all_meta(db: &Database) -> Result<Vec<ConversationMeta>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/conversation/all_meta.sql"))?;
@@ -190,6 +234,34 @@ impl Conversations {
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
         add_conversation(&self.db, conversation_id, title)
+    }
+
+    /// Sets color for a conversation
+    pub fn set_color(&self, conversation_id: &ConversationId, color: u32) -> Result<(), HErr> {
+        set_color(&self.db, conversation_id, color)
+    }
+
+    /// Sets title for a conversation
+    pub fn set_title(
+        &self,
+        conversation_id: &ConversationId,
+        title: Option<&str>,
+    ) -> Result<(), HErr> {
+        set_title(&self.db, conversation_id, title)
+    }
+
+    /// Sets picture for a conversation
+    pub fn set_picture(
+        &self,
+        conversation_id: &ConversationId,
+        picture: Option<&str>,
+    ) -> Result<(), HErr> {
+        set_picture(&self.db, conversation_id, picture)
+    }
+
+    /// Sets muted status of a conversation
+    pub fn set_muted(&self, conversation_id: &ConversationId, muted: bool) -> Result<(), HErr> {
+        set_muted(&self.db, conversation_id, muted)
     }
 
     /// Returns metadata of all conversations

@@ -8,5 +8,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   -- Group color, default set using hash of id.
   color INTEGER NOT NULL,
   -- Indicates whether conversation is muted, defaults to false
-  muted INTEGER DEFAULT(0)
+  muted INTEGER DEFAULT(0) CHECK (
+    (muted = 1)
+    OR (muted = 0)
+  )
 )

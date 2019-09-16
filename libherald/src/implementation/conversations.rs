@@ -2,7 +2,6 @@ use crate::{interface::*, ret_err};
 use heraldcore::{
     abort_err,
     conversation::{ConversationMeta, Conversations as Core},
-    types::*,
 };
 
 pub struct Conversations {
@@ -38,7 +37,11 @@ impl ConversationsTrait for Conversations {
     }
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
-        unimplemented!()
+        let meta = &mut self.list[index];
+        ret_err!(self.handle.set_color(&meta.conversation_id, color), false);
+
+        meta.color = color;
+        true
     }
 
     fn conversation_id(&self, index: usize) -> &[u8] {
@@ -50,7 +53,11 @@ impl ConversationsTrait for Conversations {
     }
 
     fn set_muted(&mut self, index: usize, muted: bool) -> bool {
-        unimplemented!()
+        let meta = &mut self.list[index];
+        ret_err!(self.handle.set_muted(&meta.conversation_id, muted), false);
+
+        meta.muted = muted;
+        true
     }
 
     fn picture(&self, index: usize) -> Option<&str> {
@@ -66,6 +73,14 @@ impl ConversationsTrait for Conversations {
     }
 
     fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
-        unimplemented!()
+        let meta = &mut self.list[index];
+        ret_err!(
+            self.handle
+                .set_title(&meta.conversation_id, title.as_ref().map(|t| t.as_str())),
+            false
+        );
+
+        meta.title = title;
+        true
     }
 }
