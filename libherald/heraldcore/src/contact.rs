@@ -67,6 +67,23 @@ fn profile_picture(db: &Database, id: UserIdRef) -> Result<Option<String>, HErr>
     Ok(stmt.query_row(&[id], |row| row.get(0))?)
 }
 
+/// Returns all members of a conversation.
+fn conversation_members(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Vec<Contact>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/contact/get_by_conversation.sql"))?;
+
+    let rows = stmt.query_map(params![conversation_id], Contact::from_db)?;
+
+    let mut contacts: Vec<Contact> = Vec::new();
+    for contact in rows {
+        contacts.push(contact?);
+    }
+
+    Ok(contacts)
+}
+
 /// Updates a contact's profile picture.
 fn set_profile_picture(
     db: &Database,
@@ -229,6 +246,14 @@ impl ContactsHandle {
     /// Returns all contacts with the specified `status`
     pub fn get_by_status(&self, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
         get_by_status(&self.db, status)
+    }
+
+    /// Returns all members of a conversation.
+    pub fn conversation_members(
+        &self,
+        conversation_id: &ConversationId,
+    ) -> Result<Vec<Contact>, HErr> {
+        conversation_members(&self.db, conversation_id)
     }
 
     /// Adds member to conversation.

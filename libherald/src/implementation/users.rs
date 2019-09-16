@@ -78,6 +78,32 @@ impl UsersTrait for Users {
         self.conversation_id.as_ref().map(|id| id.as_slice())
     }
 
+    fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
+        let new_list = match conversation_id {
+            Some(conv_id) => {
+                let conv_id = ret_err!(ConversationId::try_from(conv_id));
+                ret_err!(self.handle.conversation_members(&conv_id))
+            }
+            None => ret_err!(self.handle.all()),
+        };
+
+        self.model
+            .begin_remove_rows(0, self.row_count().saturating_sub(1));
+        self.list = vec![];
+        self.model.end_remove_rows();
+
+        self.model
+            .begin_insert_rows(0, new_list.len().saturating_sub(1));
+        self.list = new_list
+            .into_iter()
+            .map(|inner| User {
+                inner,
+                matched: true,
+            })
+            .collect();
+        self.model.end_insert_rows();
+    }
+
     /// Returns user id.
     fn user_id(&self, row_index: usize) -> UserIdRef {
         self.list[row_index].inner.id.as_str()

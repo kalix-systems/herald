@@ -3,7 +3,7 @@ use crate::{
     errors::HErr,
     types::*,
 };
-use herald_common::UserIdRef;
+use herald_common::{UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 /// Conversation members
@@ -34,6 +34,22 @@ pub(crate) fn remove_member(
         params![conversation_id, member_id],
     )?;
     Ok(())
+}
+
+/// Gets the members of a conversation.
+pub(crate) fn members(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Vec<UserId>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
+    let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
+
+    let mut members = Vec::new();
+    for member in res {
+        members.push(member?);
+    }
+
+    Ok(members)
 }
 
 impl DBTable for Members {

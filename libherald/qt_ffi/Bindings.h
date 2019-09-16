@@ -226,7 +226,7 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QByteArray conversationId READ conversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Users(bool owned, QObject *parent);
@@ -234,6 +234,7 @@ public:
     explicit Users(QObject *parent = nullptr);
     ~Users();
     QByteArray conversationId() const;
+    void setConversationId(const QByteArray& v);
     QString filter() const;
     void setFilter(const QString& v);
     bool filterRegex() const;

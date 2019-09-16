@@ -1296,6 +1296,7 @@ pub trait UsersTrait {
     fn new(emit: UsersEmitter, model: UsersList) -> Self;
     fn emit(&mut self) -> &mut UsersEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
+    fn set_conversation_id(&mut self, value: Option<&[u8]>);
     fn filter(&self) -> &str;
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
@@ -1388,6 +1389,19 @@ pub unsafe extern "C" fn users_conversation_id_get(
         let s: *const c_char = v.as_ptr() as (*const c_char);
         set(p, s, to_c_int(v.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_conversation_id_set(ptr: *mut Users, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_conversation_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_conversation_id_set_none(ptr: *mut Users) {
+    let o = &mut *ptr;
+    o.set_conversation_id(None);
 }
 
 #[no_mangle]

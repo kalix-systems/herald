@@ -223,22 +223,6 @@ pub(crate) fn all_meta(db: &Database) -> Result<Vec<ConversationMeta>, HErr> {
     Ok(meta)
 }
 
-/// Gets the members of a conversation.
-pub(crate) fn members(
-    db: &Database,
-    conversation_id: &ConversationId,
-) -> Result<Vec<UserId>, HErr> {
-    let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
-    let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
-
-    let mut members = Vec::new();
-    for member in res {
-        members.push(member?);
-    }
-
-    Ok(members)
-}
-
 /// Get conversation
 pub(crate) fn conversation(
     db: &Database,
@@ -246,7 +230,7 @@ pub(crate) fn conversation(
 ) -> Result<Conversation, HErr> {
     let messages = conversation_messages(&db, conversation_id)?;
     let meta = meta(&db, conversation_id)?;
-    let members = members(&db, conversation_id)?;
+    let members = crate::members::members(&db, conversation_id)?;
 
     Ok(Conversation {
         meta,
@@ -346,7 +330,7 @@ impl Conversations {
 
     /// Gets the members of a conversation.
     pub fn members(&self, conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
-        members(&self.db, conversation_id)
+        crate::members::members(&self.db, conversation_id)
     }
 
     /// Get conversation

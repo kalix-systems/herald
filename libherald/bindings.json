@@ -157,6 +157,7 @@
             "properties": {
                 "conversationId": {
                     "type": "QByteArray",
+                    "write": true,
                     "optional": true
                 },
                 "filter": {

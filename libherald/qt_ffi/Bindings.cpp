@@ -912,6 +912,8 @@ extern "C" {
         void (*)(Users*));
     void users_free(Users::Private*);
     void users_conversation_id_get(const Users::Private*, QByteArray*, qbytearray_set);
+    void users_conversation_id_set(Users::Private*, const char* bytes, int len);
+    void users_conversation_id_set_none(Users::Private*);
     void users_filter_get(const Users::Private*, QString*, qstring_set);
     void users_filter_set(Users::Private*, const ushort *str, int len);
     bool users_filter_regex_get(const Users::Private*);
@@ -1347,6 +1349,13 @@ QByteArray Users::conversationId() const
     QByteArray v;
     users_conversation_id_get(m_d, &v, set_qbytearray);
     return v;
+}
+void Users::setConversationId(const QByteArray& v) {
+    if (v.isNull()) {
+        users_conversation_id_set_none(m_d);
+    } else {
+    users_conversation_id_set(m_d, v.data(), v.size());
+    }
 }
 QString Users::filter() const
 {

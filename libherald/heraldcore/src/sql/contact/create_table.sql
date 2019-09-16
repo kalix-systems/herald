@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   color INTEGER NOT NULL,
   -- contact status
   status INTEGER NOT NULL,
-  -- contact type, defaults to false
+  -- contact type
   contact_type INTEGER NOT NULL,
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 )
