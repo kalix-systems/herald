@@ -44,10 +44,11 @@ ToolBar {
         colorHash: Utils.unwrapOr(currentAvatar, {
                                       "colorHash": 0
                                   }).colorHash
+        isChatBar: true
     }
 
     background: Rectangle {
-        color: QmlCfg.palette.mainColor
+        color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
         anchors.fill: parent
     }
 }
