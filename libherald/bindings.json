@@ -41,6 +41,19 @@
                             "type": "QByteArray"
                         }
                     ]
+                },
+                "chatBubbleNaturalWidth": {
+                    "return": "double",
+                    "arguments": [
+                        {
+                            "name": "chat_pane_width",
+                            "type": "double"
+                        },
+                        {
+                            "name": "text_width",
+                            "type": "double"
+                        }
+                    ]
                 }
             }
         },

@@ -45,7 +45,11 @@ Row {
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
         //is white instead of palette maincolor bc shld be white regardless of theme
-        color: if (!isDefault) { "white"  } else {"black" }
+        color: if (!isDefault) {
+                   "white"
+               } else {
+                   "black"
+               }
     }
 
     ///--- potential avatar components
@@ -59,14 +63,22 @@ Row {
             height: size
             anchors.verticalCenter: parent.verticalCenter
             //is white instead of palette maincolor bc shld be white regardless of theme
-            color: if  (!isDefault) {"white" } else { QmlCfg.avatarColors[colorHash] }
+            color: if (!isDefault) {
+                       "white"
+                   } else {
+                       QmlCfg.avatarColors[colorHash]
+                   }
             // Note:
             radius: shape
             ///---- initial
             Text {
                 text: qsTr(displayName[0].toUpperCase())
                 font.bold: true
-                color: if (!isDefault) {QmlCfg.avatarColors[colorHash]} else {"white"}
+                color: if (!isDefault) {
+                           QmlCfg.avatarColors[colorHash]
+                       } else {
+                           "white"
+                       }
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3
             }

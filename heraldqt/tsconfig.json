@@ -13,7 +13,6 @@
         "SideBar/ContactViewTypes.d.ts",
         "SideBar/ContactView.ts",
         "ChatView/ChatViewTypes.d.ts",
-        "ChatView/ChatView.ts",
         "common/QtTypes.d.ts",
         "common/HeraldTypes.d.ts",
         "common/HeraldUITypes.d.ts",
