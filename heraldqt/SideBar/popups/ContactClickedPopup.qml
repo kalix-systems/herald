@@ -72,13 +72,6 @@ Item {
 
         MenuItem {
             text: 'Choose Color'
-            visible: {
-                if (contactAvatar.pfpUrl === "") {
-                    true
-                } else {
-                    false
-                }
-            }
 
             onTriggered: {
                 avatarColorPicker.show()
@@ -86,9 +79,11 @@ Item {
         }
     }
 
+    //color picker window
     Popups.ColorPicker {
         id: avatarColorPicker
 
+        // button is here to know index of contact clicked
         Button {
             id: colorSubmissionButton
             text: "Submit"
