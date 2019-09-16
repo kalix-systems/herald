@@ -6,16 +6,16 @@
     },
     "files": [
         "common/utils.ts",
-        "ChatView/ChatTextAreaUtils.ts",
+        "common/QtTypes.d.ts",
+        "common/HeraldTypes.d.ts",
+        "common/HeraldUITypes.d.ts",
+        "common/Avatar.ts",
         "SideBar/popups/ConfigPopupSubmission.ts",
         "SideBar/popups/ContactClickedPopup.ts",
         "SideBar/popups/NewContactDialogue.ts",
         "SideBar/ContactViewTypes.d.ts",
         "SideBar/ContactView.ts",
         "ChatView/ChatViewTypes.d.ts",
-        "common/QtTypes.d.ts",
-        "common/HeraldTypes.d.ts",
-        "common/HeraldUITypes.d.ts",
-        "common/Avatar.ts"
+        "ChatView/ChatTextAreaUtils.ts"
     ]
 }
