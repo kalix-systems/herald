@@ -28,6 +28,8 @@ pub enum Notification {
     NewMsg(UserId),
     /// An ack has been received.
     Ack(MessageReceipt),
+    /// A new contact has been added
+    NewContact
 }
 
 #[derive(Clone)]
@@ -188,11 +190,11 @@ fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<E
 
     Ok(Event {
         reply,
-        notification: None,
+        notification: Some(Notification::NewContact),
     })
 }
 
-// TODO should this do something?
+// TODO this should do something
 fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
     Ok(Event {
         reply: None,

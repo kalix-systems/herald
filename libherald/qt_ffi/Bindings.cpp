@@ -74,6 +74,10 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
+    inline void networkHandleNewContactChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->newContactChanged();
+    }
     inline void networkHandleNewMessageChanged(NetworkHandle* o)
     {
         Q_EMIT o->newMessageChanged();
@@ -595,10 +599,11 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
+    bool network_handle_new_contact_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*);
     bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
@@ -1238,6 +1243,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
+        networkHandleNewContactChanged,
         networkHandleNewMessageChanged)),
     m_ownsPrivate(true)
 {
@@ -1255,6 +1261,10 @@ bool NetworkHandle::connectionPending() const
 bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
+}
+bool NetworkHandle::newContact() const
+{
+    return network_handle_new_contact_get(m_d);
 }
 bool NetworkHandle::newMessage() const
 {

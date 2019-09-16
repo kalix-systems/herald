@@ -53,6 +53,10 @@ Rectangle {
                 color: "white"
                 radius: 2
             }
+
+            Keys.onReturnPressed: {
+                heraldState.setConfigId(entryField.text.trim())
+            }
         }
 
         Button {

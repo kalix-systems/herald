@@ -149,6 +149,9 @@
                 },
                 "connectionPending": {
                     "type": "bool"
+                },
+                "newContact": {
+                    "type": "bool"
                 }
             }
         },

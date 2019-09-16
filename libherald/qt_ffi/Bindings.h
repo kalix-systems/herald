@@ -200,6 +200,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
+    Q_PROPERTY(bool newContact READ newContact NOTIFY newContactChanged FINAL)
     Q_PROPERTY(bool newMessage READ newMessage NOTIFY newMessageChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
@@ -207,6 +208,7 @@ public:
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
+    bool newContact() const;
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice();
     Q_INVOKABLE bool requestMetaData(const QString& of);
@@ -215,6 +217,7 @@ public:
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
+    void newContactChanged();
     void newMessageChanged();
 };
 

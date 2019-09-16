@@ -20,6 +20,7 @@ pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
     net_new_message: AtomicBool,
+    net_new_contact: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -28,6 +29,7 @@ impl EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
             net_new_message: AtomicBool::new(false),
+            net_new_contact: AtomicBool::new(false),
         }
     }
     pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
@@ -55,6 +57,10 @@ impl EffectsFlags {
     pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
         self.net_new_message.fetch_and(true, Ordering::Relaxed);
         emit.new_message_changed();
+    }
+    pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_new_contact.fetch_and(true, Ordering::Relaxed);
+        emit.new_contact_changed();
     }
 }
 
@@ -180,6 +186,10 @@ impl NetworkHandleTrait for NetworkHandle {
         self.status_flags.net_new_message.load(Ordering::Relaxed)
     }
 
+    fn new_contact(&self) -> bool {
+        self.status_flags.net_new_contact.load(Ordering::Relaxed)
+    }
+
     fn connection_up(&self) -> bool {
         self.status_flags.net_online.load(Ordering::Relaxed)
     }
@@ -256,10 +266,11 @@ async fn handle_nw_channel(
     mut emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
 ) {
+    use Notification::*;
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                Notification::Ack(MessageReceipt {
+                Ack(MessageReceipt {
                     update_code,
                     message_id,
                 }) => {
@@ -269,9 +280,13 @@ async fn handle_nw_channel(
                     );
                     // TODO update the UI here.
                 }
-                Notification::NewMsg(user_id) => {
+                NewMsg(user_id) => {
                     println!("NEW MESSAGE FROM : {}", user_id);
                     status_flags.emit_new_msg(&mut emit);
+                }
+                NewContact => {
+                    println!("NEW CONTACT ADDED");
+                    status_flags.emit_new_contact(&mut emit);
                 }
             },
             None => println!("print nope"),

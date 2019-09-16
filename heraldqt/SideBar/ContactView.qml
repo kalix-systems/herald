@@ -32,6 +32,16 @@ ListView {
         }
     }
 
+    Connections {
+        target: networkHandle
+        onNewContactChanged: {
+            // JH, TODO this is bad
+            contactsModel.conversationId = ""
+            contactsModel.conversationId = null
+            contactList.forceLayout()
+        }
+    }
+
     ScrollBar.vertical: ScrollBar {
     }
 
