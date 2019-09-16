@@ -29,7 +29,7 @@ pub enum Notification {
     /// An ack has been received.
     Ack(MessageReceipt),
     /// A new contact has been added
-    NewContact
+    NewContact,
 }
 
 #[derive(Clone)]

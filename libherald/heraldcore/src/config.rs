@@ -1,7 +1,6 @@
 use crate::{
     db::{DBTable, Database},
     errors::*,
-    image_utils,
     types::*,
 };
 use herald_common::*;
@@ -227,27 +226,11 @@ impl Config {
 
     /// Updates user's profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-        let path = match profile_picture {
-            Some(path) => Some(
-                image_utils::save_profile_picture(
-                    self.id.as_str(),
-                    path,
-                    self.profile_picture.clone(),
-                )?
-                .into_os_string()
-                .into_string()?,
-            ),
-            None => {
-                if let Some(old_pic) = &self.profile_picture {
-                    std::fs::remove_file(old_pic)?;
-                }
-                None
-            }
-        };
-
-        self.db.execute(
-            include_str!("sql/config/update_profile_picture.sql"),
-            params![path],
+        let path = crate::contact::set_profile_picture(
+            &self.db,
+            &self.id,
+            profile_picture,
+            self.profile_picture.as_ref().map(|s| s.as_str()),
         )?;
 
         self.profile_picture = path;
@@ -257,8 +240,7 @@ impl Config {
 
     /// Update user's color
     pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-        self.db
-            .execute(include_str!("sql/config/update_color.sql"), &[color])?;
+        crate::contact::set_color(&self.db, &self.id, color)?;
         self.color = color;
 
         Ok(())
