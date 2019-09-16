@@ -96,7 +96,7 @@ fn set_profile_picture(
 fn set_color(db: &Database, id: UserIdRef, color: u32) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/contact/update_color.sql"),
-        params![id, color],
+        params![color, id],
     )?;
     Ok(())
 }
