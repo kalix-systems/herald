@@ -18,6 +18,7 @@ import "popups" as Popups
 /// --- displays a list of conversations
 ListView {
     id: conversationList
+    visible: true
 
     clip: true
     currentIndex: -1
@@ -43,7 +44,7 @@ ListView {
         // This ternary is okay, types are enforced by QML
         height: visible ? 60 : 0
         width: parent.width
-      //  visible: matched
+
 
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
@@ -106,7 +107,7 @@ ListView {
         Common.Avatar {
             size: 50
             id: conversationAvatar
-            displayName: Utils.unwrapOr(title, conversationMembers.userId(1))
+            displayName: Utils.unwrapOr(title, index)
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
