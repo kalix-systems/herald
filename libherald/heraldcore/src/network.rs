@@ -1,14 +1,12 @@
 use crate::{
+    abort_err,
     config::Config,
     errors::HErr::{self, *},
     message, message_status,
+    types::*,
 };
 use chrono::prelude::*;
-use herald_common::{
-    read_cbor, send_cbor, ClientMessageAck, ConversationId, DeviceId, GlobalId,
-    MessageReceiptStatus, MessageToClient, MessageToPeer, MessageToServer, MsgId, Response, User,
-    UserId,
-};
+use herald_common::*;
 use lazy_static::*;
 use qutex::Qutex;
 use std::{
@@ -26,10 +24,12 @@ use tokio::{
 #[derive(Debug)]
 /// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
-    // TODO: include conversation id's here
-    // issue: #15
+    /// A new message has been received.
     NewMsg(UserId),
-    Ack(ClientMessageAck),
+    /// An ack has been received.
+    Ack(MessageReceipt),
+    /// A new contact has been added
+    NewContact,
 }
 
 #[derive(Clone)]
@@ -131,7 +131,7 @@ struct Event {
 }
 
 fn form_ack(update_code: MessageReceiptStatus, message_id: MsgId) -> MessageToPeer {
-    let ack = ClientMessageAck {
+    let ack = MessageReceipt {
         update_code,
         message_id,
     };
@@ -154,8 +154,10 @@ fn handle_msg(
     time: DateTime<Utc>,
     op_msg_id: Option<MsgId>,
 ) -> Result<Event, HErr> {
-    message::Messages::add_message(
-        Some(msg_id.clone()),
+    let db = crate::db::Database::get()?;
+    message::add_message(
+        &db,
+        Some(msg_id),
         &author,
         &conversation_id,
         &body,
@@ -174,29 +176,58 @@ fn handle_msg(
     })
 }
 
-fn handle_ack(from: UserId, ack: ClientMessageAck) -> Result<Event, HErr> {
-    let ClientMessageAck {
-        message_id,
-        update_code,
-    } = ack;
-    message_status::MessageStatus::set_message_status(message_id, from.as_str(), update_code)?;
+fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<Event, HErr> {
+    use crate::contact::ContactBuilder;
+
+    let contact = ContactBuilder::new((&from).clone())
+        .pairwise_conversation(conversation_id)
+        .add()?;
+
+    let reply = Some(form_push(
+        from.clone(),
+        MessageToPeer::AddResponse(contact.pairwise_conversation, true),
+    )?);
+
+    Ok(Event {
+        reply,
+        notification: Some(Notification::NewContact),
+    })
+}
+
+// TODO this should do something
+fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
     Ok(Event {
         reply: None,
         notification: None,
     })
 }
 
-fn handle_push(
-    msg_id: MsgId,
-    author: GlobalId,
-    conversation_id: ConversationId,
-    body: MessageToPeer,
-    time: DateTime<Utc>,
-    op_msg_id: Option<MsgId>,
-) -> Result<Event, HErr> {
+fn handle_ack(from: UserId, ack: MessageReceipt) -> Result<Event, HErr> {
+    let MessageReceipt {
+        message_id,
+        update_code,
+    } = ack;
+    let db = crate::db::Database::get()?;
+    message_status::set_message_status(&db, message_id, from.as_str(), update_code)?;
+    Ok(Event {
+        reply: None,
+        notification: None,
+    })
+}
+
+fn handle_push(author: GlobalId, body: MessageToPeer, time: DateTime<Utc>) -> Result<Event, HErr> {
     use MessageToPeer::*;
     match body {
-        Message(s) => handle_msg(msg_id, author.uid, conversation_id, s, time, op_msg_id),
+        Message {
+            body,
+            msg_id,
+            op_msg_id,
+            conversation_id,
+        } => handle_msg(msg_id, author.uid, conversation_id, body, time, op_msg_id),
+        AddRequest(conversation_id) => handle_add_request(author.uid, conversation_id),
+        AddResponse(_conversation_id, _accepted) => {
+            handle_add_response(_conversation_id, _accepted)
+        }
         Ack(a) => handle_ack(author.uid, a),
     }
 }
@@ -211,22 +242,9 @@ async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> 
     Ok(gid)
 }
 
-// TODO: replace this with a macro?
-fn impossible_error<E: std::fmt::Display, T>(e: E) -> T {
-    eprintln!("an impossible error happened");
-    eprintln!("message was: {}", e);
-    eprintln!("what have you done?");
-    std::process::abort()
-}
-
 impl Session {
     async fn send_to_server(&self, msg: &MessageToServer) -> Result<(), HErr> {
-        let mut writer = self
-            .writer
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(impossible_error);
+        let mut writer = abort_err!(self.writer.clone().lock_async().await);
         send_cbor(writer.deref_mut(), msg).await?;
         Ok(())
     }
@@ -237,21 +255,11 @@ impl Session {
         // insert before send so that we don't have to worry about what happens if a query is
         // responded to before this future is executed again
         {
-            let mut p = self
-                .pending
-                .clone()
-                .lock_async()
-                .await
-                .unwrap_or_else(impossible_error);
+            let mut p = abort_err!(self.pending.clone().lock_async().await);
             p.insert(query.clone(), sender);
         }
         {
-            let mut w = self
-                .writer
-                .clone()
-                .lock_async()
-                .await
-                .unwrap_or_else(impossible_error);
+            let mut w = abort_err!(self.writer.clone().lock_async().await);
             send_cbor(w.deref_mut(), &query).await?;
         }
         receiver.await.map_err(|e| {
@@ -265,19 +273,12 @@ impl Session {
     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
         use MessageToClient::*;
         match msg {
-            Push {
-                msg_id,
-                from,
-                conversation_id,
-                body,
-                time,
-                op_msg_id,
-            } => {
+            Push { from, body, time } => {
                 let push = serde_cbor::from_slice(&body)?;
                 let Event {
                     reply,
                     notification,
-                } = handle_push(msg_id, from, conversation_id, push, time, op_msg_id)?;
+                } = handle_push(from, push, time)?;
                 if let Some(n) = notification {
                     drop(self.notifications.clone().try_send(n));
                 }
@@ -291,14 +292,7 @@ impl Session {
     }
 
     async fn handle_response(&self, res: Response, query: &MessageToServer) {
-        if let Some(s) = self
-            .pending
-            .clone()
-            .lock_async()
-            .await
-            .unwrap_or_else(impossible_error)
-            .remove(query)
-        {
+        if let Some(s) = abort_err!(self.pending.clone().lock_async().await).remove(query) {
             drop(s.send(res));
         }
     }

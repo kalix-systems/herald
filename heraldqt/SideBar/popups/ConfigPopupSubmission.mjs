@@ -1,5 +1,5 @@
-export function submit(config, useridField, usernameField) {
-    if (!config.exists()) {
+export function submit(config, configInit, useridField, usernameField) {
+    if (!configInit) {
         config.configId = useridField.text.trim();
     }
     config.name = usernameField.text.trim();

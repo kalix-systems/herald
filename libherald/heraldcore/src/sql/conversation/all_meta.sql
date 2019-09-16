@@ -1,0 +1,9 @@
+SELECT
+  conversation_id,
+  title,
+  picture,
+  color,
+  muted,
+  pairwise
+FROM
+  conversations

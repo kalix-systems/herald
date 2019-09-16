@@ -86,6 +86,7 @@ Rectangle {
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Send a Message ..."
                 Keys.forwardTo: keysProxy
+                Keys.onEscapePressed: focus = false
             }
         }
     }

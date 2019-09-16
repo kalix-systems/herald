@@ -1,14 +1,17 @@
-use crate::interface::*;
+use crate::{interface::*, ret_err, types::*};
 use herald_common::*;
-use heraldcore::network::*;
-use heraldcore::tokio::{
-    self,
-    sync::mpsc::*,
-    sync::{mpsc, oneshot},
+use heraldcore::{
+    abort_err,
+    network::*,
+    tokio::{self, sync::mpsc::*},
+    types::*,
 };
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
+use std::{
+    convert::TryFrom,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
 };
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
@@ -17,6 +20,7 @@ pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
     net_new_message: AtomicBool,
+    net_new_contact: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -25,6 +29,7 @@ impl EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
             net_new_message: AtomicBool::new(false),
+            net_new_contact: AtomicBool::new(false),
         }
     }
     pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
@@ -53,17 +58,19 @@ impl EffectsFlags {
         self.net_new_message.fetch_and(true, Ordering::Relaxed);
         emit.new_message_changed();
     }
+    pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
+        self.net_new_contact.fetch_and(true, Ordering::Relaxed);
+        emit.new_contact_changed();
+    }
 }
 
 /// map to function calls from the herald core session api
+#[derive(Debug)]
 pub enum FuncCall {
     SendMsg { to: UserId, msg: MessageToPeer },
+    AddRequest(ConversationId, UserId),
     RequestMeta(UserId),
     RegisterDevice,
-}
-
-pub enum HandleMessages {
-    ToServer(MessageToServer),
 }
 
 pub struct NetworkHandle {
@@ -73,8 +80,7 @@ pub struct NetworkHandle {
 }
 
 impl NetworkHandleTrait for NetworkHandle {
-    fn new(mut emit: NetworkHandleEmitter) -> Self {
-        let emitter_clone = emit.clone();
+    fn new(emit: NetworkHandleEmitter) -> Self {
         let (tx, rx) = unbounded_channel();
 
         let mut handle = NetworkHandle {
@@ -87,15 +93,70 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn send_message(&mut self, message_body: String, to: String) -> bool {
-        match self.tx.try_send(FuncCall::SendMsg {
-            msg: MessageToPeer::Message(message_body),
-            to,
-        }) {
-            Ok(_) => true,
-            Err(_e) => {
-                eprintln!("could not send message, error unrpintable");
+    /// note, currently this function has all together too much copying.
+    /// this will be rectified when stupid hanfles fan out.
+    fn send_message(
+        &mut self,
+        body: String,
+        to: FfiConversationIdRef,
+        msg_id: FfiMsgIdRef,
+    ) -> bool {
+        if to.len() != 32 {
+            eprintln!("");
+            return false;
+        }
+
+        // we copy this repeatedly, if this gets slow, put it in an arc.
+        let conv_id = ret_err!(ConversationId::try_from(to), false);
+
+        let handle = ret_err!(heraldcore::conversation::Conversations::new(), false);
+        let members = ret_err!(handle.members(&conv_id), false);
+
+        let msg_id = ret_err!(MsgId::try_from(msg_id), false);
+
+        for member in members {
+            println!("attempting to send to {}", &member);
+
+            ret_err!(
+                self.tx.try_send(FuncCall::SendMsg {
+                    msg: MessageToPeer::Message {
+                        body: body.clone(),
+                        msg_id: msg_id.clone(),
+                        conversation_id: conv_id.clone(),
+                        op_msg_id: None
+                    },
+                    to: member,
+                }),
                 false
+            );
+
+            println!("message queued for send");
+        }
+        true
+    }
+
+    fn send_add_request(&mut self, user_id: UserId, conversation_id: FfiConversationIdRef) -> bool {
+        if conversation_id.len() != 32 {
+            eprintln!("Invalid conversation_id");
+            return false;
+        }
+
+        let conversation_id = match ConversationId::try_from(conversation_id) {
+            Ok(id) => id,
+            Err(e) => {
+                eprintln!("{}", e);
+                return false;
+            }
+        };
+
+        match self
+            .tx
+            .try_send(FuncCall::AddRequest(conversation_id, user_id))
+        {
+            Ok(_) => return true,
+            Err(_) => {
+                eprintln!("failed to send");
+                return false;
             }
         }
     }
@@ -111,7 +172,7 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn request_meta_data(&mut self, of: String) -> bool {
+    fn request_meta_data(&mut self, of: UserId) -> bool {
         match self.tx.try_send(FuncCall::RequestMeta(of)) {
             Ok(_) => true,
             Err(_e) => {
@@ -123,6 +184,10 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn new_message(&self) -> bool {
         self.status_flags.net_new_message.load(Ordering::Relaxed)
+    }
+
+    fn new_contact(&self) -> bool {
+        self.status_flags.net_new_contact.load(Ordering::Relaxed)
     }
 
     fn connection_up(&self) -> bool {
@@ -141,27 +206,31 @@ impl NetworkHandleTrait for NetworkHandle {
 // qtrx: receive from qt
 fn start_worker(
     mut emit: NetworkHandleEmitter,
-    mut status_flags: Arc<EffectsFlags>,
+    status_flags: Arc<EffectsFlags>,
     qtrx: UnboundedReceiver<FuncCall>,
 ) {
     std::thread::spawn(move || {
-        let mut rt =
-            tokio::runtime::current_thread::Runtime::new().expect("could not spawn runtime");
+        let mut rt = abort_err!(
+            tokio::runtime::current_thread::Runtime::new(),
+            "could not spawn runtime"
+        );
+
         rt.block_on(async move {
             status_flags.emit_net_pending(&mut emit);
-            let (nwrx, sess) = match Session::init().await {
-                Ok((nwrx, sess)) => (nwrx, sess),
-                Err(e) => {
-                    eprintln!("failed to init session! : {}", e);
-                    status_flags.emit_net_down(&mut emit);
-                    std::process::abort();
-                }
-            };
-            status_flags.emit_net_up(&mut emit);
-            tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
-            tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
+
+            if let Ok((nwrx, sess)) = Session::init().await {
+                status_flags.emit_net_up(&mut emit);
+
+                tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
+                tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
+            } else {
+                println!("could not connect to server");
+
+                status_flags.emit_net_down(&mut emit);
+            }
         });
-        rt.run().expect("opops");
+
+        abort_err!(rt.run());
     });
 }
 
@@ -170,19 +239,20 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
         match rx.recv().await {
             Some(call) => match call {
                 FuncCall::RegisterDevice => {
-                    sess.register_device()
-                        .await
-                        .expect("could not register device");
+                    abort_err!(sess.register_device().await, "could not register device");
                 }
                 FuncCall::RequestMeta(id) => {
-                    sess.request_meta(id)
-                        .await
-                        .expect("could not retrieve meta data");
+                    abort_err!(sess.request_meta(id).await, "could not retrieve meta data");
                 }
                 FuncCall::SendMsg { to, msg } => {
-                    sess.send_msg(to, msg)
-                        .await
-                        .expect("failed to send message");
+                    abort_err!(sess.send_msg(to, msg).await, "failed to send message");
+                }
+                FuncCall::AddRequest(conversation_id, user_id) => {
+                    abort_err!(
+                        sess.send_msg(user_id, MessageToPeer::AddRequest(conversation_id))
+                            .await,
+                        "failed to send add request"
+                    );
                 }
             },
             None => {}
@@ -192,25 +262,34 @@ async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
 }
 async fn handle_nw_channel(
     mut rx: UnboundedReceiver<Notification>,
-    sess: Session,
+    _sess: Session,
     mut emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
 ) {
+    use Notification::*;
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                Notification::Ack(ClientMessageAck {
+                Ack(MessageReceipt {
                     update_code,
                     message_id,
                 }) => {
-                    // update the UI here.
+                    println!(
+                        "Receiving notification: {:?}, {:?}",
+                        update_code, message_id
+                    );
+                    // TODO update the UI here.
                 }
-                Notification::NewMsg(UserId) => {
+                NewMsg(user_id) => {
+                    println!("NEW MESSAGE FROM : {}", user_id);
                     status_flags.emit_new_msg(&mut emit);
-                    println!("NEW MESSAGE FROM : {}", UserId);
+                }
+                NewContact => {
+                    println!("NEW CONTACT ADDED");
+                    status_flags.emit_new_contact(&mut emit);
                 }
             },
-            None => {}
+            None => println!("print nope"),
         };
     }
 }

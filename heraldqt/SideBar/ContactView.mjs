@@ -6,13 +6,10 @@ export function contactItemHeight(visible) {
         return 0;
     }
 }
-export function contactClickHandler(mouse, contactView, index, contactId, contactItem, optionsMenu, messageModel, chatView) {
+export function contactClickHandler(mouse, contactView, index, convId, optionsMenu, messageModel) {
     if (mouse.button === Qt.LeftButton) {
         contactView.currentIndex = index;
-        console.log(contactView.currentIndex, contactView.currentItem.contactAvatar.displayName);
-        contactItem.focus = true;
-        messageModel.conversationId = contactId;
-        chatView.state = "visibleview";
+        messageModel.conversationId = convId;
     }
     else {
         optionsMenu.open();

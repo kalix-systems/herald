@@ -1,5 +1,4 @@
 #![feature(try_blocks)]
-#![allow(warnings)]
 
 mod crypto;
 pub use crypto::*;
@@ -165,11 +164,11 @@ pub async fn read_cbor<S: AsyncRead + Unpin, T: for<'a> Deserialize<'a>>(
     s: &mut S,
 ) -> Result<T, TransportError> {
     let mut buf = [0u8; 8];
-    eprintln!("reading length");
+    eprintln!("waiting to read length");
     s.read_exact(&mut buf).await?;
     let len = u64::from_le_bytes(buf) as usize;
     eprintln!("length read, was {}", len);
-    eprintln!("now reading data");
+    eprintln!("waiting to read data");
     let mut buf = vec![0u8; len];
     s.read_exact(&mut buf).await?;
     eprintln!("read data, bytes were {:x?}", &buf);

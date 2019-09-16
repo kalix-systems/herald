@@ -1,7 +1,8 @@
 export function insertContact(
   dialogue: Popup,
   entryArea: TextArea,
-  contactsModel: Contacts
+  contactsModel: Users,
+  networkHandle: NetworkHandle
 ): void {
   const trimmedText = entryArea.text.trim();
 
@@ -9,7 +10,8 @@ export function insertContact(
     return;
   }
 
-  contactsModel.add(trimmedText);
+  const conversationId = contactsModel.add(trimmedText);
+  networkHandle.sendAddRequest(trimmedText, conversationId);
   entryArea.clear();
   dialogue.close();
 }

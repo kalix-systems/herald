@@ -25,7 +25,7 @@ Rectangle {
     // a mouse area to handle hover events
     property alias chatBubbleHitBox: chatBubbleHitbox
     // the width the text sits at without wrapping
-    readonly property int naturalTextWidth: messageMetrics.width
+    readonly property int naturalTextWidth: bubbleText.width
     // a component to use if there is additional content to spawn inside the chat bubble
     property string additionalContent: ""
     // the args to pass into the content spawner
@@ -43,7 +43,6 @@ Rectangle {
         width: parent.width + 50
 
         onEntered: replyButton.visible = !replyButton.visible
-
         onExited: replyButton.visible = !replyButton.visible
 
         anchors {
@@ -57,10 +56,16 @@ Rectangle {
         Common.ButtonForm {
             id: replyButton
             visible: false
-            anchors.margins: QmlCfg.margin
-            anchors.verticalCenter: chatBubbleHitbox.verticalCenter
+            anchors {
+                // Ternary is okay, types are enforced, cases are explicit.
+                left: outbound ? parent.left : undefined
+                right: !outbound ? parent.right : undefined
+                margins: QmlCfg.margin
+                verticalCenter: chatBubbleHitbox.verticalCenter
+            }
             source: "qrc:///icons/reply.png"
             z: 10
+
             onClicked: {
                 CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
@@ -77,11 +82,6 @@ Rectangle {
     width: bubble.width
     height: bubble.height
 
-    TextMetrics {
-        id: messageMetrics
-        text: messageText
-    }
-
     // column that loads each chat bubble + additional content
     Column {
         id: bubble
@@ -93,22 +93,21 @@ Rectangle {
             source: additionalContent
         }
 
-        TextEdit {
+        Common.CorrectText {
             id: bubbleText
             text: messageText
-            //NPB: that extra margin is bad, also this is a recipe for a binding loop
-            width: JS.naturalWidth(chatPane.width,
-                                   messageMetrics.width) + QmlCfg.margin / 2
+            width: JS.naturalWidth(chatPane.width, correctWidth)
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
+            color: outbound ? "black" : "white"
         }
 
         Label {
             id: timeStamp
-            color: QmlCfg.palette.secondaryTextColor
+            color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
             font.pointSize: QmlCfg.chatTextSize
         }

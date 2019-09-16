@@ -9,10 +9,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QApplication app(argc, argv);
 
-    qmlRegisterType<Contacts>("LibHerald", 1, 0, "Contacts");
+    qmlRegisterType<Users>("LibHerald", 1, 0, "Users");
     qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
     qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
     qmlRegisterType<NetworkHandle>("LibHerald", 1, 0, "NetworkHandle");
+    qmlRegisterType<HeraldState>("LibHerald", 1, 0, "HeraldState");
+    qmlRegisterType<HeraldUtils>("LibHerald", 1, 0, "HeraldUtils");
     qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "QmlCfg");
 
     app.setOrganizationName("Kalix Systems");

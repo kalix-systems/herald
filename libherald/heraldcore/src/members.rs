@@ -1,37 +1,55 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
 };
-use herald_common::{ConversationId, UserIdRef};
+use herald_common::{UserId, UserIdRef};
 use rusqlite::{params, NO_PARAMS};
 
 /// Conversation members
 #[derive(Default)]
 pub struct Members;
 
-impl Members {
-    /// Add a user with `member_id` to the conversation with `conversation_id`.
-    pub fn add_member(conversation_id: &ConversationId, member_id: UserIdRef) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/members/add_member.sql"),
-            params![conversation_id.as_slice(), member_id],
-        )?;
-        Ok(())
+/// Add a user with `member_id` to the conversation with `conversation_id`.
+pub(crate) fn add_member(
+    db: &Database,
+    conversation_id: &ConversationId,
+    member_id: UserIdRef,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/members/add_member.sql"),
+        params![conversation_id, member_id],
+    )?;
+    Ok(())
+}
+
+/// Remove a user with `member_id` to the conversation with `conversation_id`.
+pub(crate) fn remove_member(
+    db: &Database,
+    conversation_id: &ConversationId,
+    member_id: UserIdRef,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/members/remove_member.sql"),
+        params![conversation_id, member_id],
+    )?;
+    Ok(())
+}
+
+/// Gets the members of a conversation.
+pub(crate) fn members(
+    db: &Database,
+    conversation_id: &ConversationId,
+) -> Result<Vec<UserId>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
+    let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
+
+    let mut members = Vec::new();
+    for member in res {
+        members.push(member?);
     }
 
-    /// Remove a user with `member_id` to the conversation with `conversation_id`.
-    pub fn remove_member(
-        conversation_id: &ConversationId,
-        member_id: UserIdRef,
-    ) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/members/remove_member.sql"),
-            params![conversation_id.as_slice(), member_id],
-        )?;
-        Ok(())
-    }
+    Ok(members)
 }
 
 impl DBTable for Members {

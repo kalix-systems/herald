@@ -3,7 +3,8 @@ SELECT
   title,
   picture,
   color,
-  muted
+  muted,
+  pairwise
 FROM
   conversations
 WHERE

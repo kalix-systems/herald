@@ -1,26 +1,25 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
 };
-use herald_common::{MessageReceiptStatus, MsgId, UserIdRef};
+use herald_common::UserIdRef;
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
-pub(crate) struct MessageStatus;
+pub(crate) struct MessageStatus {}
 
-impl MessageStatus {
-    pub fn set_message_status(
-        msg_id: MsgId,
-        user_id: UserIdRef,
-        receipt_status: MessageReceiptStatus,
-    ) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/message_status/set_message_status.sql"),
-            params![msg_id.as_slice(), user_id, receipt_status as u8],
-        )?;
-        Ok(())
-    }
+pub(crate) fn set_message_status(
+    db: &Database,
+    msg_id: MsgId,
+    user_id: UserIdRef,
+    receipt_status: MessageReceiptStatus,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/message_status/set_message_status.sql"),
+        params![msg_id, user_id, receipt_status],
+    )?;
+    Ok(())
 }
 
 impl DBTable for MessageStatus {
@@ -61,7 +60,7 @@ impl DBTable for MessageStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{conversation::Conversations, message::Messages};
+    use crate::{conversation::Conversations, message::add_message};
     use serial_test_derive::serial;
 
     use womp::*;
@@ -87,17 +86,27 @@ mod tests {
     fn message_send_status_updates() {
         Database::reset_all().expect(womp!());
 
+        let db = Database::get().expect(womp!());
+
         let author = "Hello";
         let conversation_id = [0; 32].into();
 
-        Conversations::add_conversation(Some(&conversation_id), None).expect(womp!());
-        crate::contact::Contacts::add(author, None, None, None).expect(womp!());
-        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
+        let conv_handle = Conversations::new().expect(womp!());
 
-        let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, &None)
+        conv_handle
+            .add_conversation(Some(&conversation_id), None)
+            .expect(womp!());
+
+        crate::contact::ContactBuilder::new(author.into())
+            .add()
+            .expect(womp!());
+        conv_handle
+            .add_member(&conversation_id, author)
+            .expect(womp!());
+
+        let (msg_id, _) = add_message(&db, None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        MessageStatus::set_message_status(msg_id, author, MessageReceiptStatus::Read)
-            .expect(womp!());
+        set_message_status(&db, msg_id, author, MessageReceiptStatus::Read).expect(womp!());
     }
 }

@@ -1,18 +1,18 @@
 use crate::{
     db::{DBTable, Database},
     errors::HErr,
+    types::*,
     utils,
 };
 use chrono::{DateTime, NaiveDateTime, Utc};
-use herald_common::{
-    ConversationId, MessageReceiptStatus, MessageSendStatus, MsgId, UserId, UserIdRef,
-};
+use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
-use std::convert::TryInto;
 
 #[derive(Default, Clone)]
 /// Messages
-pub struct Messages {}
+pub struct Messages {
+    db: Database,
+}
 
 /// Message
 #[derive(Clone)]
@@ -37,11 +37,6 @@ pub struct Message {
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let message_id: Vec<u8> = row.get(0)?;
-        let author: UserId = row.get(1)?;
-        let conversation_id: Vec<u8> = row.get(2)?;
-        let body: String = row.get(3)?;
-        let op: Option<Vec<u8>> = row.get(4)?;
         let timestamp =
             match NaiveDateTime::parse_from_str(row.get::<_, String>(5)?.as_str(), utils::DATE_FMT)
             {
@@ -52,29 +47,78 @@ impl Message {
                 }
             };
 
-        let send_status = match row.get::<_, Option<u8>>(6)? {
-            Some(n) => n.try_into().ok(),
-            None => None,
-        };
-
         Ok(Message {
-            message_id: message_id.into_iter().collect(),
-            author,
-            conversation: conversation_id.into_iter().collect(),
-            body,
-            op: op.map(|op| op.into_iter().collect()),
+            message_id: row.get(0)?,
+            author: row.get(1)?,
+            conversation: row.get(2)?,
+            body: row.get(3)?,
+            op: row.get(4)?,
             timestamp,
             receipts: None,
-            send_status,
+            send_status: row.get(6)?,
         })
     }
 }
 
+/// Adds a message to the database.
+pub(crate) fn add_message(
+    db: &Database,
+    msg_id: Option<MsgId>,
+    author: UserIdRef,
+    conversation_id: &ConversationId,
+    body: &str,
+    timestamp: Option<DateTime<Utc>>,
+    op: &Option<MsgId>,
+) -> Result<(MsgId, DateTime<Utc>), HErr> {
+    let timestamp = timestamp.unwrap_or_else(Utc::now);
+    let timestamp_param = timestamp.format(utils::DATE_FMT).to_string();
+
+    let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
+    db.execute(
+        include_str!("sql/message/add.sql"),
+        params![msg_id, author, conversation_id, body, timestamp_param, op,],
+    )?;
+    Ok((msg_id, timestamp))
+}
+
+/// Get message by message id
+pub(crate) fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
+    Ok(db.query_row(
+        include_str!("sql/message/get_message.sql"),
+        params![msg_id],
+        Message::from_db,
+    )?)
+}
+/// Sets the message status of an item in the database
+pub(crate) fn update_send_status(
+    db: &Database,
+    msg_id: MsgId,
+    status: MessageSendStatus,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/message/update_send_status.sql"),
+        params![status, msg_id],
+    )?;
+    Ok(())
+}
+
+/// Deletes a message
+pub(crate) fn delete_message(db: &Database, id: &MsgId) -> Result<(), HErr> {
+    db.execute(include_str!("sql/message/delete_message.sql"), params![id])?;
+    Ok(())
+}
+
 impl Messages {
+    /// Create new `Messages`
+    pub fn new() -> Result<Self, HErr> {
+        Ok(Self {
+            db: Database::get()?,
+        })
+    }
+
     /// Adds a message to the database.
-    // TODO should this take statuses? I don't see a case where that makes sense aside from syncing
-    // between devices. Shouldn't server messages just reproduce that though?
     pub fn add_message(
+        &self,
         msg_id: Option<MsgId>,
         author: UserIdRef,
         conversation_id: &ConversationId,
@@ -82,63 +126,53 @@ impl Messages {
         timestamp: Option<DateTime<Utc>>,
         op: &Option<MsgId>,
     ) -> Result<(MsgId, DateTime<Utc>), HErr> {
-        let timestamp = timestamp.unwrap_or_else(Utc::now);
-        let timestamp_param = timestamp.format(utils::DATE_FMT).to_string();
+        add_message(
+            &self.db,
+            msg_id,
+            author,
+            conversation_id,
+            body,
+            timestamp,
+            op,
+        )
+    }
 
-        let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
+    /// Get all messages in a conversation.
+    pub fn conversation_messages(
+        &self,
+        conversation_id: &ConversationId,
+    ) -> Result<Vec<Message>, HErr> {
+        crate::conversation::conversation_messages(&self.db, conversation_id)
+    }
 
-        let db = Database::get()?;
-
-        db.execute(
-            include_str!("sql/message/add.sql"),
-            params![
-                msg_id.as_slice(),
-                author,
-                conversation_id.as_slice(),
-                body,
-                timestamp_param,
-                op.as_ref().map(|x| x.to_vec()),
-            ],
-        )?;
-        Ok((msg_id, timestamp))
+    /// Deletes all messages in a conversation.
+    pub fn delete_conversation(&self, conversation_id: &ConversationId) -> Result<(), HErr> {
+        crate::conversation::delete_conversation(&self.db, conversation_id)
     }
 
     /// Get message by message id
-    pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
-        let db = Database::get()?;
-
-        Ok(db.query_row(
-            include_str!("sql/message/get_message.sql"),
-            params![msg_id.as_slice()],
-            Message::from_db,
-        )?)
+    pub fn get_message(&self, msg_id: &MsgId) -> Result<Message, HErr> {
+        get_message(&self.db, msg_id)
     }
 
     /// Sets the message status of an item in the database
-    pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("sql/message/update_send_status.sql"),
-            params![status as u8, msg_id.as_slice()],
-        )?;
-        Ok(())
+    pub fn update_send_status(&self, msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+        update_send_status(&self.db, msg_id, status)
     }
 
     /// Deletes a message
-    pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
-        let db = Database::get()?;
-
-        db.execute(
-            include_str!("sql/message/delete_message.sql"),
-            params![id.as_slice()],
-        )?;
-        Ok(())
+    pub fn delete_message(&self, id: &MsgId) -> Result<(), HErr> {
+        delete_message(&self.db, id)
     }
 }
 
 impl DBTable for Messages {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
+        db.execute(
+            include_str!("sql/message_status/create_table.sql"),
+            NO_PARAMS,
+        )?;
         db.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
 
         Ok(())
@@ -196,27 +230,43 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conversation_id = [0; 32].into();
-        crate::conversation::Conversations::add_conversation(Some(&conversation_id), None)
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conversation_id), None)
             .expect(womp!());
 
         let author = "Hello";
-        crate::contact::Contacts::add(author, None, None, None).expect(womp!());
-        crate::members::Members::add_member(&conversation_id, author).expect(womp!());
 
-        let (msg_id, _) = Messages::add_message(None, author, &conversation_id, "1", None, &None)
+        crate::contact::ContactBuilder::new(author.into())
+            .add()
+            .expect(womp!());
+
+        conv_handle
+            .add_member(&conversation_id, author)
+            .expect(womp!());
+
+        let handle = Messages::new().expect(womp!());
+
+        let (msg_id, _) = handle
+            .add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
         assert_eq!(
-            Messages::get_message(&msg_id)
+            handle
+                .get_message(&msg_id)
                 .expect(womp!("failed to get conversation by author"))
                 .send_status,
             None,
         );
 
-        Messages::update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
+        handle
+            .update_send_status(msg_id, MessageSendStatus::Ack)
+            .expect(womp!());
 
         assert_eq!(
-            Conversations::get_conversation_messages(&conversation_id)
+            conv_handle
+                .conversation_messages(&conversation_id)
                 .expect(womp!("failed to get conversation by author"))[0]
                 .send_status,
             Some(MessageSendStatus::Ack)

@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
+        <file>App.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/ButtonForm.qml</file>
         <file>common/Theme.qml</file>
@@ -38,5 +39,8 @@
         <file>SideBar/ContactView.mjs</file>
         <file>common/Divider.qml</file>
         <file>ChatView/ChatView.mjs</file>
+        <file>common/CorrectText.qml</file>
+        <file>SideBar/popups/ContactClickedPopup.mjs</file>
+        <file>SideBar/popups/ColorPicker.qml</file>
     </qresource>
 </RCC>

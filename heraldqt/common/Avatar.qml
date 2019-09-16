@@ -16,6 +16,7 @@ import "utils.mjs" as Utils
 
 /// --- displays a list of contacts
 Row {
+    id: wrapperRow
     property string displayName: ""
     property string pfpUrl: ""
     property int colorHash: 0
@@ -25,6 +26,7 @@ Row {
     property bool labeled: true /// whether or not to show the name
     // NOTE: make a property in QMLCFG call padding. it is probably just 10
     spacing: QmlCfg.margin
+    property bool isDefault: true
 
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
@@ -42,6 +44,8 @@ Row {
         text: displayName
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
+        //is white instead of palette maincolor bc shld be white regardless of theme
+        color: if (!isDefault) { "white"  } else {"black" }
     }
 
     ///--- potential avatar components
@@ -50,19 +54,21 @@ Row {
     Component {
         id: initialAvatar
         Rectangle {
+            id: avatarRect
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter
-            color: QmlCfg.avatarColors[colorHash]
+            //is white instead of palette maincolor bc shld be white regardless of theme
+            color: if  (!isDefault) {"white" } else { QmlCfg.avatarColors[colorHash] }
             // Note:
             radius: shape
             ///---- initial
             Text {
                 text: qsTr(displayName[0].toUpperCase())
                 font.bold: true
-                color: "white"
+                color: if (!isDefault) {QmlCfg.avatarColors[colorHash]} else {"white"}
                 anchors.centerIn: parent
-                font.pixelSize: size
+                font.pixelSize: size * 2 / 3
             }
         }
     }

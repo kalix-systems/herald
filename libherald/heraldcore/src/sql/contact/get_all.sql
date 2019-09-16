@@ -3,6 +3,12 @@ SELECT
   name,
   profile_picture,
   color,
-  archived
+  status,
+  pairwise_conversation,
+  contact_type,
+  added
 FROM
-  contacts;
+  contacts
+WHERE
+  status < 2
+  AND added > ?

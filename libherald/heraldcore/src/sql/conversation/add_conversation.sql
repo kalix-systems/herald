@@ -1,3 +1,3 @@
 INSERT INTO
-  conversations(conversation_id, title, color)
-VALUES(@1, @2, @3)
+  conversations(conversation_id, title, color, pairwise)
+VALUES(@1, @2, @3, @4)

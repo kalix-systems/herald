@@ -9,6 +9,8 @@ pub enum HErr {
     DatabaseError(rusqlite::Error),
     MutexError(String),
     InvalidUserId(String),
+    InvalidMessageId,
+    InvalidConversationId,
     Utf8Error(std::str::Utf8Error),
     IoError(std::io::Error),
     ImageError(image::ImageError),
@@ -31,6 +33,8 @@ impl fmt::Display for HErr {
             CborError(e) => write!(f, "CborError error: {}", e),
             TransportError(s) => write!(f, "TransportError: {}", s),
             RegexError(e) => write!(f, "RegexError: {}", e),
+            InvalidMessageId => write!(f, "InvalidMessageId"),
+            InvalidConversationId => write!(f, "InvalidConversationId"),
         }
     }
 }
@@ -49,6 +53,8 @@ impl std::error::Error for HErr {
             CborError(e) => e,
             TransportError(s) => s,
             RegexError(e) => e,
+            InvalidConversationId => return None,
+            InvalidMessageId => return None,
         })
     }
 }

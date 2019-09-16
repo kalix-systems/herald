@@ -1,7 +1,7 @@
 //! Core logic for herald client.
 
 #![feature(try_blocks)]
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
 
 /// User configuration
 pub mod config;
@@ -29,3 +29,6 @@ pub mod network;
 pub mod utils;
 /// Tokio re-export
 pub use tokio;
+/// Types
+pub mod types;
+pub use chrono;

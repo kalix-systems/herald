@@ -1,5 +1,101 @@
+use crate::errors::HErr;
+use herald_common::{serde::*, *};
+use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
+use std::convert::{TryFrom, TryInto};
+
+/// Lenght of randomly generated unique ids
+pub const UID_LEN: usize = 32;
+
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+/// Message ID
+pub struct MsgId([u8; UID_LEN]);
+
+impl MsgId {
+    /// Converts [`MsgId`] to `Vec<u8>`
+    pub fn to_vec(self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    /// Converts [`MsgId`] into a fixed length array.
+    pub fn into_array(self) -> [u8; UID_LEN] {
+        self.0
+    }
+
+    /// [`MsgId`] as a byte slice.
+    pub fn as_slice(&self) -> &[u8] {
+        &self.0 as &[u8]
+    }
+}
+
+impl FromSql for MsgId {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        MsgId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for MsgId {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+        Ok(ToSqlOutput::Borrowed(ValueRef::Blob(self.as_slice())))
+    }
+}
+
+impl From<[u8; UID_LEN]> for MsgId {
+    fn from(arr: [u8; UID_LEN]) -> Self {
+        Self(arr)
+    }
+}
+
+impl TryFrom<Vec<u8>> for MsgId {
+    type Error = HErr;
+
+    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidMessageId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.into_iter().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for MsgId {
+    type Error = HErr;
+
+    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidMessageId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.iter().copied().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+/// This type gets serialized into raw bytes and sent to the server
+/// Then it is deserialized again on the client side to implement
+/// control flow for the frontend.
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct MessageReceipt {
+    /// The receipt status of the message
+    pub update_code: MessageReceiptStatus,
+    /// The message id
+    pub message_id: MsgId,
+}
+
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
+/// Send status of a message
 pub enum MessageSendStatus {
     /// No ack from server
     NoAck = 0,
@@ -22,6 +118,36 @@ impl TryFrom<u8> for MessageSendStatus {
     }
 }
 
+impl ToSql for MessageSendStatus {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
+    }
+}
+
+impl FromSql for MessageSendStatus {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        value
+            .as_i64()?
+            .try_into()
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl std::convert::TryFrom<i64> for MessageSendStatus {
+    type Error = HErr;
+
+    fn try_from(n: i64) -> Result<Self, HErr> {
+        match u8::try_from(n) {
+            Ok(n) => n
+                .try_into()
+                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
+            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
+        }
+    }
+}
+
 impl Serialize for MessageSendStatus {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.serialize_u8(*self as u8)
@@ -34,16 +160,16 @@ impl<'de> Deserialize<'de> for MessageSendStatus {
         let u = u8::deserialize(d)?;
         u.try_into().map_err(|u| {
             Error::invalid_value(
-                Unexpected::Unsigned(u as u64),
+                Unexpected::Unsigned(u64::from(u)),
                 &format!("expected a value between {} and {}", 0, 2).as_str(),
             )
         })
     }
 }
 
-// the network status of a message
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
+/// Receipt status of a message
 pub enum MessageReceiptStatus {
     /// Not acknowledged
     NoAck = 0,
@@ -69,6 +195,14 @@ impl TryFrom<u8> for MessageReceiptStatus {
     }
 }
 
+impl ToSql for MessageReceiptStatus {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
+    }
+}
+
 impl Serialize for MessageReceiptStatus {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         s.serialize_u8(*self as u8)
@@ -81,26 +215,11 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
         let u = u8::deserialize(d)?;
         u.try_into().map_err(|u| {
             Error::invalid_value(
-                Unexpected::Unsigned(u as u64),
+                Unexpected::Unsigned(u64::from(u)),
                 &format!("expected a value between {} and {}", 0, 3).as_str(),
             )
         })
     }
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct ClientMessageAck {
-    pub update_code: MessageReceiptStatus,
-    pub message_id: MsgId,
-}
-
-/// This type gets serialized into raw bytes and sent to the server
-/// Then it is deserialized again on the client side to implement
-/// control flow for the frontend.
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct MessageReceipt {
-    pub update_code: MessageReceiptStatus,
-    pub message_id: MsgId,
 }
 
 /// This type gets serialized into raw bytes and sent to the server
@@ -108,14 +227,96 @@ pub struct MessageReceipt {
 /// control flow for the frontend.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToPeer {
-    // TODO: replace this with an &str
-    Message(String),
-    Ack(ClientMessageAck),
+    /// A message
+    Message {
+        /// Body of the message
+        body: String,
+        /// Message id
+        msg_id: MsgId,
+        /// Conversation the message is associated with
+        conversation_id: ConversationId,
+        /// [`MsgId`] of the message being replied to
+        op_msg_id: Option<MsgId>,
+    },
+    /// A request to start a conversation.
+    AddRequest(ConversationId),
+    /// A response to a request to start conversation
+    AddResponse(ConversationId, bool),
+    /// An acknowledgement of a previous message
+    Ack(MessageReceipt),
+}
+#[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+/// Conversation ID
+pub struct ConversationId([u8; UID_LEN]);
+
+impl FromSql for ConversationId {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        ConversationId::try_from(value.as_blob()?).map_err(|_| FromSqlError::InvalidType)
+    }
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum Body {
-    Message(String),
-    Ack(ClientMessageAck),
-    Receipt(MessageReceiptStatus),
+impl ToSql for ConversationId {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+        Ok(ToSqlOutput::Borrowed(ValueRef::Blob(self.as_slice())))
+    }
+}
+
+impl ConversationId {
+    /// Converts [`ConversationId`] to `Vec<u8>`
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+
+    /// Converts [`ConversationId`] into a fixed length array.
+    pub fn into_array(self) -> [u8; UID_LEN] {
+        self.0
+    }
+
+    /// [`ConversationId`] as a byte slice.
+    pub fn as_slice(&self) -> &[u8] {
+        &self.0 as &[u8]
+    }
+}
+
+impl From<[u8; UID_LEN]> for ConversationId {
+    fn from(arr: [u8; UID_LEN]) -> Self {
+        Self(arr)
+    }
+}
+
+impl TryFrom<Vec<u8>> for ConversationId {
+    type Error = HErr;
+
+    fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidConversationId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.into_iter().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
+}
+
+impl TryFrom<&[u8]> for ConversationId {
+    type Error = HErr;
+
+    fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
+        if val.len() != UID_LEN {
+            Err(HErr::InvalidConversationId)
+        } else {
+            let mut buf = [0u8; UID_LEN];
+
+            for (ix, n) in val.iter().copied().enumerate() {
+                buf[ix] = n;
+            }
+
+            Ok(Self(buf))
+        }
+    }
 }

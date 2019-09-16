@@ -18,7 +18,6 @@ Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
 
-
     clip: true
     interactive: true
     boundsBehavior: Flickable.StopAtBounds
@@ -39,12 +38,10 @@ Flickable {
             left: parent.left
         }
 
-
         Repeater {
             id: chatListView
             anchors.fill: parent
             model: messageModel
-
 
             delegate: Column {
                 readonly property bool outbound: author === config.configId
@@ -56,8 +53,9 @@ Flickable {
                 anchors {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
+                    left: !outbound ? parent.left : undefined
                     rightMargin: chatScrollBar.width + QmlCfg.margin
-                    leftMargin: rightMargin
+                    leftMargin: QmlCfg.margin
                 }
 
                 //NOTE: see chat bubble form
@@ -70,7 +68,7 @@ Flickable {
                         }
                     }
                     // This is okay as a ternary, the types are enforced by QML.
-                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.palette.secondaryColor
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : appRoot.gsConvoColor
                 } //bubble
             } //bubble wrapper
         } // Repeater

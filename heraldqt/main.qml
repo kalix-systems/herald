@@ -18,78 +18,35 @@ ApplicationWindow {
     TopMenuBar {
     }
 
-    NetworkHandle {
-        id: networkHandle
+    // This provides a few purely functional helper methods
+    HeraldUtils {
+        id: heraldUtils
     }
 
-    Messages {
-        id: messageModel
+    HeraldState {
+        id: heraldState
+
+        onConfigInitChanged: {
+            appLoader.active = !appLoader.active
+            loginLoader.active = !loginLoader.active
+        }
     }
 
-    Contacts {
-        id: contactsModel
-    }
-
-    Popups.ConfigPopup {
-        id: preferencesPopup
-    }
-
-    Config {
-        id: config
+    Loader {
+        id: appLoader
+        active: heraldState.configInit
+        anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+        sourceComponent: App {
+        }
     }
 
     Loader {
         anchors.fill: parent
         id: loginLoader
-        active: !!!config.init
+        active: !heraldState.configInit
         sourceComponent: LoginPage {
-        }
-    }
-
-    SplitView {
-        id: rootSplitView
-        anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        orientation: Qt.Horizontal
-
-        SideBar {
-            id: sideBar
-        }
-
-        ChatView {
-            id: chatView
-        }
-
-        handle: Rectangle {
-            implicitWidth: 2
-            color: QmlCfg.palette.secondaryColor
-        }
-
-        states: [
-            State {
-                when: !!!config.init
-                name: "loginPage"
-                PropertyChanges {
-                    target: rootSplitView
-                    visible: false
-                }
-            },
-            State {
-                when: config.init
-                name: "loggedIn"
-                PropertyChanges {
-                    target: rootSplitView
-                    visible: true
-                }
-            }
-        ]
-
-        transitions: Transition {
-            NumberAnimation {
-                properties: "width, height"
-                easing.type: Easing.InOutQuad
-            }
         }
     }
 }

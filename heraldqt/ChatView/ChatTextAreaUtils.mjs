@@ -35,6 +35,6 @@ export function enterKeyHandler(event, target, networkHandle, messageModel) {
     // clear before positional reset
     const text = target.text;
     target.clear();
-    const result = networkHandle.sendMessage(text, messageModel.conversationId);
-    messageModel.insertMessage(text, result);
+    const messageId = messageModel.insertMessage(text);
+    networkHandle.sendMessage(text, messageModel.conversationId, messageId);
 }

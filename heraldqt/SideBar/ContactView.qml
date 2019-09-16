@@ -23,12 +23,27 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
+    Connections {
+        target: appRoot
+        onGsConversationIdChanged: {
+            if (gsConversationId === undefined) {
+                contactList.currentIndex = -1
+            }
+        }
+    }
+
+    Connections {
+        target: networkHandle
+        onNewContactChanged: {
+            contactsModel.refresh()
+        }
+    }
+
     ScrollBar.vertical: ScrollBar {
     }
 
     delegate: Item {
         id: contactItem
-
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
 
@@ -51,6 +66,7 @@ ListView {
             anchors.fill: parent
 
             /// Note: can we use the highlight property here
+            /// we can do this once contact deletion updates current item for listview properly
             states: [
                 State {
                     name: "hovering"
@@ -76,10 +92,14 @@ ListView {
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
 
-                onClicked: JS.contactClickHandler(mouse, contactList, index,
-                                                  contactId, contactItem,
-                                                  popupManager.optionsMenu,
-                                                  messageModel, chatView)
+                onClicked: {
+                    JS.contactClickHandler(mouse, contactList, index,
+                                           pairwiseConversationId,
+                                           popupManager.optionsMenu,
+                                           messageModel)
+                    appRoot.gsConversationId = pairwiseConversationId
+                    appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""
@@ -99,7 +119,7 @@ ListView {
         Common.Avatar {
             size: 50
             id: contactAvatar
-            displayName: Utils.unwrapOr(name, contactId)
+            displayName: Utils.unwrapOr(name, userId)
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(profilePicture)
         }

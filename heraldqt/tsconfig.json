@@ -8,6 +8,7 @@
         "common/utils.ts",
         "ChatView/ChatTextAreaUtils.ts",
         "SideBar/popups/ConfigPopupSubmission.ts",
+        "SideBar/popups/ContactClickedPopup.ts",
         "SideBar/popups/NewContactDialogue.ts",
         "SideBar/ContactViewTypes.d.ts",
         "SideBar/ContactView.ts",

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "./NewContactDialogue.mjs" as JS
+import QtQuick.Window 2.13
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -16,30 +17,38 @@ import "./NewContactDialogue.mjs" as JS
 // NPB: this should maybe be a new
 // window or popup that feels more robust.
 // adding someone should feel kinda rewarding.
-Popup {
+Window {
     id: newContactDialogue
-    modal: true
-    focus: true
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    width: 300
+    width: 400
     height: 200
+    maximumHeight: height
+    minimumHeight: height
+    maximumWidth: width
+    minimumWidth: width
 
-    TextArea {
+    Component.onCompleted: {
+        x = root.x + root.width / 3
+        y = root.y + 100
+    }
+
+    //eventually more stuff should be added here
+    TextField {
         id: entryArea
+        anchors.horizontalCenter: parent.horizontalCenter
         focus: true
-        placeholderText: qsTr("Enter contact name")
+        placeholderText: qsTr("Enter contact ID")
         Keys.onReturnPressed: JS.insertContact(newContactDialogue, entryArea,
-                                               contactsModel)
+                                               contactsModel, networkHandle)
     }
 
     Button {
         id: submissionButton
-        text: "submit"
+        text: "Submit"
         anchors {
             bottom: parent.bottom
             right: parent.right
         }
         onClicked: JS.insertContact(newContactDialogue, entryArea,
-                                    contactsModel)
+                                    contactsModel, networkHandle)
     }
 }

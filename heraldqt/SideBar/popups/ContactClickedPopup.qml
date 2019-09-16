@@ -1,10 +1,13 @@
 import QtQuick 2.13
 import LibHerald 1.0
+import QtQuick 2.0
 import QtQuick.Controls 2.13
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
 import "../../common/utils.mjs" as Utils
+import "./ContactClickedPopup.mjs" as JS
+import "../popups" as Popups
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -24,15 +27,8 @@ Item {
         id: pfpDialog
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         folder: shortcuts.desktop
-        onSelectionAccepted: {
-            // TS:
-            var retCode = contactsModel.setProfilePicture(index, fileUrl)
-            if (retCode) {
-                contactAvatar.pfpUrl = profilePicture
-            } else
-                print("TODO: Native Error popup here...")
-            close()
-        }
+        onSelectionAccepted: JS.changeProfilePicture(index, contactsModel,
+                                                     fileUrl, this)
     }
 
     Menu {
@@ -40,14 +36,8 @@ Item {
 
         MenuItem {
             text: 'Delete Contact'
-            //TS: this should be in typescript
-            onTriggered: {
-                if (contactId === messageModel.conversationId)
-                    chatView.state = "" //TODO clearview should be less imperative
-                contactsModel.remove(index)
-                print("index try delete AGAIN: ", index)
-                messageModel.clearConversationView()
-            }
+            onTriggered: JS.deleteContact(index, contactsModel, messageModel,
+                                          appRoot, heraldUtils)
         }
 
         MenuSeparator {
@@ -79,16 +69,35 @@ Item {
                 contactsModel.setProfilePicture(index, "")
             }
         }
+
+        MenuItem {
+            text: 'Choose Color'
+
+            onTriggered: {
+                avatarColorPicker.show()
+            }
+        }
     }
 
-    // TS: but also try to make disallowed keys work
-    function renameContact() {
-        if (entryField.text.trim() === "") {
-            return
+    //color picker window
+    Popups.ColorPicker {
+        id: avatarColorPicker
+
+        // button is here to know index of contact clicked
+        Button {
+            id: colorSubmissionButton
+            text: "Submit"
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+            onClicked: {
+                contactsModel.setColor(index, avatarColorPicker.colorIndex)
+                appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                avatarColorPicker.close()
+            }
         }
-        name = entryField.text.trim()
-        entryField.clear()
-        renameContactDialogue.close()
     }
 
     Popup {
@@ -101,7 +110,9 @@ Item {
             id: entryField
             focus: true
             placeholderText: qsTr("Enter new name")
-            Keys.onReturnPressed: renameContact()
+            Keys.onReturnPressed: JS.renameContact(index, entryField,
+                                                   renameContactDialogue,
+                                                   contactsModel)
             anchors.fill: parent
             wrapMode: TextEdit.WrapAnywhere
         }
@@ -113,8 +124,8 @@ Item {
                 bottom: parent.bottom
                 right: parent.right
             }
-            //again TS:
-            onClicked: renameContact()
+            onClicked: JS.renameContact(index, entryField,
+                                        renameContactDialogue, contactsModel)
         }
     }
 }

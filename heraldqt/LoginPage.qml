@@ -53,6 +53,10 @@ Rectangle {
                 color: "white"
                 radius: 2
             }
+
+            Keys.onReturnPressed: {
+                heraldState.setConfigId(entryField.text.trim())
+            }
         }
 
         Button {
@@ -69,8 +73,8 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                config.configId = entryField.text.trim()
-                config.name = entryField.text.trim()
+                // TODO check length of id
+                heraldState.setConfigId(entryField.text.trim())
             }
         }
     }

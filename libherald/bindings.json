@@ -6,6 +6,89 @@
         "implementationModule": "implementation"
     },
     "objects": {
+        "HeraldState": {
+            "type": "Object",
+            "properties": {
+                "configInit": {
+                    "type": "bool"
+                }
+            },
+            "functions": {
+                "setConfigId": {
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "config_id",
+                            "type": "QString"
+                        }
+                    ],
+                    "return": "bool"
+                }
+            }
+        },
+        "HeraldUtils": {
+            "type": "Object",
+            "functions": {
+                "compareByteArray": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "bs1",
+                            "type": "QByteArray"
+                        },
+                        {
+                            "name": "bs2",
+                            "type": "QByteArray"
+                        }
+                    ]
+                }
+            }
+        },
+        "Conversations": {
+            "type": "List",
+            "itemProperties": {
+                "conversationId": {
+                    "type": "QByteArray"
+                },
+                "title": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "picture": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "color": {
+                    "type": "quint32",
+                    "write": true
+                },
+                "muted": {
+                    "type": "bool",
+                    "write": true
+                },
+                "pairwise": {
+                    "type": "bool"
+                }
+            },
+            "functions": {
+                "addConversation": {
+                    "mut": true,
+                    "return": "bool"
+                },
+                "removeConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        }
+                    ]
+                }
+            }
+        },
         "NetworkHandle": {
             "type": "Object",
             "functions": {
@@ -19,7 +102,25 @@
                         },
                         {
                             "name": "to",
+                            "type": "QByteArray"
+                        },
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "sendAddRequest": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
                             "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
                         }
                     ]
                 },
@@ -48,12 +149,20 @@
                 },
                 "connectionPending": {
                     "type": "bool"
+                },
+                "newContact": {
+                    "type": "bool"
                 }
             }
         },
-        "Contacts": {
+        "Users": {
             "type": "List",
             "properties": {
+                "conversationId": {
+                    "type": "QByteArray",
+                    "write": true,
+                    "optional": true
+                },
                 "filter": {
                     "write": true,
                     "type": "QString"
@@ -64,8 +173,11 @@
                 }
             },
             "itemProperties": {
-                "contactId": {
+                "userId": {
                     "type": "QString"
+                },
+                "pairwiseConversationId": {
+                    "type": "QByteArray"
                 },
                 "name": {
                     "write": true,
@@ -81,9 +193,9 @@
                     "write": true,
                     "type": "quint32"
                 },
-                "archiveStatus": {
+                "status": {
                     "write": true,
-                    "type": "bool"
+                    "type": "quint8"
                 },
                 "matched": {
                     "write": true,
@@ -92,7 +204,7 @@
             },
             "functions": {
                 "add": {
-                    "return": "bool",
+                    "return": "QByteArray",
                     "mut": true,
                     "arguments": [
                         {
@@ -101,9 +213,50 @@
                         }
                     ]
                 },
+                "indexFromConversationId": {
+                    "arguments": [
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ],
+                    "return": "qint64"
+                },
+                "refresh": {
+                    "mut": true,
+                    "return": "bool"
+                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
+                },
+                "addToConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "removeFromConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "row_index",
+                            "type": "quint64"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
                 }
             }
         },
@@ -136,7 +289,7 @@
             },
             "functions": {
                 "insertMessage": {
-                    "return": "bool",
+                    "return": "QByteArray",
                     "mut": true,
                     "arguments": [
                         {
@@ -146,7 +299,7 @@
                     ]
                 },
                 "reply": {
-                    "return": "bool",
+                    "return": "QByteArray",
                     "mut": true,
                     "arguments": [
                         {
@@ -173,7 +326,7 @@
                     "mut": true,
                     "return": "void"
                 },
-                "delete_conversation": {
+                "deleteConversation": {
                     "mut": true,
                     "return": "bool"
                 },
@@ -193,11 +346,7 @@
             "type": "Object",
             "properties": {
                 "configId": {
-                    "type": "QString",
-                    "write": true
-                },
-                "init": {
-                    "type": "bool"
+                    "type": "QString"
                 },
                 "name": {
                     "type": "QString",
@@ -216,11 +365,6 @@
                 "colorscheme": {
                     "type": "quint32",
                     "write": true
-                }
-            },
-            "functions": {
-                "exists": {
-                    "return": "bool"
                 }
             }
         }
