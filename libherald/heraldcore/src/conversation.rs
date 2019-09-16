@@ -174,11 +174,36 @@ pub(crate) fn set_title(
 }
 
 pub(crate) fn set_picture(
-    _db: &Database,
-    _conversation_id: &ConversationId,
-    _picture: Option<&str>,
+    db: &Database,
+    conversation_id: &ConversationId,
+    picture: Option<&str>,
+    old_pic: Option<&str>,
 ) -> Result<(), HErr> {
-    unimplemented!()
+    use crate::image_utils;
+    let path = match picture {
+        Some(path) => Some(
+            image_utils::save_profile_picture(
+                format!("{:x?}", conversation_id.as_slice()).as_str(),
+                path,
+                old_pic,
+            )?
+            .into_os_string()
+            .into_string()?,
+        ),
+        None => {
+            if let Some(old) = old_pic {
+                std::fs::remove_file(old).ok();
+            }
+            None
+        }
+    };
+
+    db.execute(
+        include_str!("sql/conversation/update_picture.sql"),
+        params![path],
+    )?;
+
+    Ok(())
 }
 
 /// Get metadata of all conversations
@@ -255,8 +280,9 @@ impl Conversations {
         &self,
         conversation_id: &ConversationId,
         picture: Option<&str>,
+        old_pic: Option<&str>,
     ) -> Result<(), HErr> {
-        set_picture(&self.db, conversation_id, picture)
+        set_picture(&self.db, conversation_id, picture, old_pic)
     }
 
     /// Sets muted status of a conversation

@@ -65,7 +65,18 @@ impl ConversationsTrait for Conversations {
     }
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
-        unimplemented!()
+        let meta = &mut self.list[index];
+        ret_err!(
+            self.handle.set_picture(
+                &meta.conversation_id,
+                picture.as_ref().map(|p| p.as_str()),
+                meta.picture.as_ref().map(|p| p.as_str())
+            ),
+            false
+        );
+
+        meta.picture = picture;
+        true
     }
 
     fn title(&self, index: usize) -> Option<&str> {
