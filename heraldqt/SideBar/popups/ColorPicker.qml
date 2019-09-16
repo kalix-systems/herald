@@ -7,7 +7,7 @@ import QtQuick.Window 2.13
 Window {
     id: colorWindow
     width: 200
-    height: colorWrapperCol.height
+    height: 250
     maximumHeight: height
     minimumHeight: height
     maximumWidth: width
@@ -16,8 +16,6 @@ Window {
     property string chosenColor
     property var colorIndex
 
-    Column {
-        id: colorWrapperCol
 
     GridLayout {
         width: 200
@@ -51,21 +49,9 @@ Window {
         }
 
     }
-    Button {
-        id: colorSubmissionButton
-        text: "Submit"
-        anchors {
-            right: parent.right
-        }
 
-        onClicked: {
-            contactsModel.setColor(currentIndex, avatarColorPicker.colorIndex)
-            print(contactsModel.setColor(currentIndex, avatarColorPicker.colorIndex))
-            print(contactsModel.color(currentIndex))
-            avatarColorPicker.close()
-        }
-    }
     }
 
-  }
+
+
 

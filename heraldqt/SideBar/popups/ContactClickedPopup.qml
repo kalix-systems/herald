@@ -1,5 +1,6 @@
 import QtQuick 2.13
 import LibHerald 1.0
+import QtQuick 2.0
 import QtQuick.Controls 2.13
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
@@ -81,12 +82,27 @@ Item {
 
             onTriggered: {
                 avatarColorPicker.show()
+
             }
         }
     }
 
     Popups.ColorPicker {
         id: avatarColorPicker
+
+        Button {
+            id: colorSubmissionButton
+            text: "Submit"
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+            onClicked: {
+                contactsModel.setColor(index, avatarColorPicker.colorIndex)
+                avatarColorPicker.close()
+            }
+        }
 
     }
 
