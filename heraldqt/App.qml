@@ -23,7 +23,7 @@ Item {
         id: messageModel
     }
 
-    Contacts {
+    Users {
         id: contactsModel
     }
 
