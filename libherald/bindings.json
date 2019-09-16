@@ -47,12 +47,6 @@
         "Conversations": {
             "type": "List",
             "itemProperties": {
-                "conversationId": "QByteArray"
-            }
-        },
-        "Conversation": {
-            "type": "Object",
-            "properties": {
                 "conversationId": {
                     "type": "QByteArray"
                 },

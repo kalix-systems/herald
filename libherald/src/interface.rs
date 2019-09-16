@@ -286,6 +286,286 @@ pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
     o.set_profile_picture(None);
 }
 
+pub struct ConversationsQObject {}
+
+pub struct ConversationsEmitter {
+    qobject: Arc<AtomicPtr<ConversationsQObject>>,
+    new_data_ready: fn(*mut ConversationsQObject),
+}
+
+unsafe impl Send for ConversationsEmitter {}
+
+impl ConversationsEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> ConversationsEmitter {
+        ConversationsEmitter {
+            qobject: self.qobject.clone(),
+            new_data_ready: self.new_data_ready,
+        }
+    }
+    fn clear(&self) {
+        let n: *const ConversationsQObject = null();
+        self.qobject.store(n as *mut ConversationsQObject, Ordering::SeqCst);
+    }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ConversationsList {
+    qobject: *mut ConversationsQObject,
+    layout_about_to_be_changed: fn(*mut ConversationsQObject),
+    layout_changed: fn(*mut ConversationsQObject),
+    data_changed: fn(*mut ConversationsQObject, usize, usize),
+    begin_reset_model: fn(*mut ConversationsQObject),
+    end_reset_model: fn(*mut ConversationsQObject),
+    begin_insert_rows: fn(*mut ConversationsQObject, usize, usize),
+    end_insert_rows: fn(*mut ConversationsQObject),
+    begin_move_rows: fn(*mut ConversationsQObject, usize, usize, usize),
+    end_move_rows: fn(*mut ConversationsQObject),
+    begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
+    end_remove_rows: fn(*mut ConversationsQObject),
+}
+
+impl ConversationsList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait ConversationsTrait {
+    fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
+    fn emit(&mut self) -> &mut ConversationsEmitter;
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn color(&self, index: usize) -> u32;
+    fn set_color(&mut self, index: usize, _: u32) -> bool;
+    fn conversation_id(&self, index: usize) -> &[u8];
+    fn muted(&self, index: usize) -> bool;
+    fn set_muted(&mut self, index: usize, _: bool) -> bool;
+    fn picture(&self, index: usize) -> Option<&str>;
+    fn set_picture(&mut self, index: usize, _: Option<String>) -> bool;
+    fn title(&self, index: usize) -> Option<&str>;
+    fn set_title(&mut self, index: usize, _: Option<String>) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn conversations_new(
+    conversations: *mut ConversationsQObject,
+    conversations_new_data_ready: fn(*mut ConversationsQObject),
+    conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
+    conversations_layout_changed: fn(*mut ConversationsQObject),
+    conversations_data_changed: fn(*mut ConversationsQObject, usize, usize),
+    conversations_begin_reset_model: fn(*mut ConversationsQObject),
+    conversations_end_reset_model: fn(*mut ConversationsQObject),
+    conversations_begin_insert_rows: fn(*mut ConversationsQObject, usize, usize),
+    conversations_end_insert_rows: fn(*mut ConversationsQObject),
+    conversations_begin_move_rows: fn(*mut ConversationsQObject, usize, usize, usize),
+    conversations_end_move_rows: fn(*mut ConversationsQObject),
+    conversations_begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
+    conversations_end_remove_rows: fn(*mut ConversationsQObject),
+) -> *mut Conversations {
+    let conversations_emit = ConversationsEmitter {
+        qobject: Arc::new(AtomicPtr::new(conversations)),
+        new_data_ready: conversations_new_data_ready,
+    };
+    let model = ConversationsList {
+        qobject: conversations,
+        layout_about_to_be_changed: conversations_layout_about_to_be_changed,
+        layout_changed: conversations_layout_changed,
+        data_changed: conversations_data_changed,
+        begin_reset_model: conversations_begin_reset_model,
+        end_reset_model: conversations_end_reset_model,
+        begin_insert_rows: conversations_begin_insert_rows,
+        end_insert_rows: conversations_end_insert_rows,
+        begin_move_rows: conversations_begin_move_rows,
+        end_move_rows: conversations_end_move_rows,
+        begin_remove_rows: conversations_begin_remove_rows,
+        end_remove_rows: conversations_end_remove_rows,
+    };
+    let d_conversations = Conversations::new(conversations_emit, model);
+    Box::into_raw(Box::new(d_conversations))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_free(ptr: *mut Conversations) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_row_count(ptr: *const Conversations) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversations_insert_rows(ptr: *mut Conversations, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).insert_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversations_remove_rows(ptr: *mut Conversations, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).remove_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversations_can_fetch_more(ptr: *const Conversations) -> bool {
+    (&*ptr).can_fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversations_fetch_more(ptr: *mut Conversations) {
+    (&mut *ptr).fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversations_sort(
+    ptr: *mut Conversations,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_color(ptr: *const Conversations, row: c_int) -> u32 {
+    let o = &*ptr;
+    o.color(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_color(
+    ptr: *mut Conversations, row: c_int,
+    v: u32,
+) -> bool {
+    (&mut *ptr).set_color(to_usize(row), v)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_conversation_id(
+    ptr: *const Conversations, row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.conversation_id(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_muted(ptr: *const Conversations, row: c_int) -> bool {
+    let o = &*ptr;
+    o.muted(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_muted(
+    ptr: *mut Conversations, row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_muted(to_usize(row), v)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_picture(
+    ptr: *const Conversations, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.picture(to_usize(row));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_picture(
+    ptr: *mut Conversations, row: c_int,
+    s: *const c_ushort, len: c_int,
+) -> bool {
+    let o = &mut *ptr;
+    let mut v = String::new();
+    set_string_from_utf16(&mut v, s, len);
+    o.set_picture(to_usize(row), Some(v))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_picture_none(ptr: *mut Conversations, row: c_int) -> bool {
+    (&mut *ptr).set_picture(to_usize(row), None)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_title(
+    ptr: *const Conversations, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.title(to_usize(row));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_title(
+    ptr: *mut Conversations, row: c_int,
+    s: *const c_ushort, len: c_int,
+) -> bool {
+    let o = &mut *ptr;
+    let mut v = String::new();
+    set_string_from_utf16(&mut v, s, len);
+    o.set_title(to_usize(row), Some(v))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_title_none(ptr: *mut Conversations, row: c_int) -> bool {
+    (&mut *ptr).set_title(to_usize(row), None)
+}
+
 pub struct HeraldStateQObject {}
 
 pub struct HeraldStateEmitter {

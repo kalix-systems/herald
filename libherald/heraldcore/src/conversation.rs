@@ -108,6 +108,7 @@ pub(crate) fn delete_conversation(
     )?;
     Ok(())
 }
+
 /// Get all messages in a conversation.
 pub(crate) fn conversation_messages(
     db: &Database,
@@ -123,6 +124,7 @@ pub(crate) fn conversation_messages(
 
     Ok(messages)
 }
+
 /// Get conversation metadata
 pub(crate) fn meta(
     db: &Database,
@@ -133,6 +135,19 @@ pub(crate) fn meta(
         params![conversation_id],
         ConversationMeta::from_db,
     )?)
+}
+
+/// Get metadata of all conversations
+pub(crate) fn all_meta(db: &Database) -> Result<Vec<ConversationMeta>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/conversation/all_meta.sql"))?;
+    let res = stmt.query_map(NO_PARAMS, ConversationMeta::from_db)?;
+
+    let mut meta = Vec::new();
+    for data in res {
+        meta.push(data?);
+    }
+
+    Ok(meta)
 }
 
 /// Gets the members of a conversation.
@@ -175,6 +190,11 @@ impl Conversations {
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
         add_conversation(&self.db, conversation_id, title)
+    }
+
+    /// Returns metadata of all conversations
+    pub fn all_meta(&self) -> Result<Vec<ConversationMeta>, HErr> {
+        all_meta(&self.db)
     }
 
     /// Deletes all messages in a conversation.

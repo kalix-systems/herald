@@ -108,6 +108,276 @@ extern "C" {
 };
 
 extern "C" {
+    quint32 conversations_data_color(const Conversations::Private*, int);
+    bool conversations_set_data_color(Conversations::Private*, int, quint32);
+    void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
+    bool conversations_data_muted(const Conversations::Private*, int);
+    bool conversations_set_data_muted(Conversations::Private*, int, bool);
+    void conversations_data_picture(const Conversations::Private*, int, QString*, qstring_set);
+    bool conversations_set_data_picture(Conversations::Private*, int, const ushort* s, int len);
+    bool conversations_set_data_picture_none(Conversations::Private*, int);
+    void conversations_data_title(const Conversations::Private*, int, QString*, qstring_set);
+    bool conversations_set_data_title(Conversations::Private*, int, const ushort* s, int len);
+    bool conversations_set_data_title_none(Conversations::Private*, int);
+    void conversations_sort(Conversations::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int conversations_row_count(const Conversations::Private*);
+    bool conversations_insert_rows(Conversations::Private*, int, int);
+    bool conversations_remove_rows(Conversations::Private*, int, int);
+    bool conversations_can_fetch_more(const Conversations::Private*);
+    void conversations_fetch_more(Conversations::Private*);
+}
+int Conversations::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool Conversations::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int Conversations::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : conversations_row_count(m_d);
+}
+
+bool Conversations::insertRows(int row, int count, const QModelIndex &)
+{
+    return conversations_insert_rows(m_d, row, count);
+}
+
+bool Conversations::removeRows(int row, int count, const QModelIndex &)
+{
+    return conversations_remove_rows(m_d, row, count);
+}
+
+QModelIndex Conversations::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex Conversations::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool Conversations::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : conversations_can_fetch_more(m_d);
+}
+
+void Conversations::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        conversations_fetch_more(m_d);
+    }
+}
+void Conversations::updatePersistentIndexes() {}
+
+void Conversations::sort(int column, Qt::SortOrder order)
+{
+    conversations_sort(m_d, column, order);
+}
+Qt::ItemFlags Conversations::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    if (i.column() == 0) {
+        flags |= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
+quint32 Conversations::color(int row) const
+{
+    return conversations_data_color(m_d, row);
+}
+
+bool Conversations::setColor(int row, quint32 value)
+{
+    bool set = false;
+    set = conversations_set_data_color(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QByteArray Conversations::conversationId(int row) const
+{
+    QByteArray b;
+    conversations_data_conversation_id(m_d, row, &b, set_qbytearray);
+    return b;
+}
+
+bool Conversations::muted(int row) const
+{
+    return conversations_data_muted(m_d, row);
+}
+
+bool Conversations::setMuted(int row, bool value)
+{
+    bool set = false;
+    set = conversations_set_data_muted(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString Conversations::picture(int row) const
+{
+    QString s;
+    conversations_data_picture(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool Conversations::setPicture(int row, const QString& value)
+{
+    bool set = false;
+    if (value.isNull()) {
+        set = conversations_set_data_picture_none(m_d, row);
+    } else {
+    set = conversations_set_data_picture(m_d, row, value.utf16(), value.length());
+    }
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString Conversations::title(int row) const
+{
+    QString s;
+    conversations_data_title(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool Conversations::setTitle(int row, const QString& value)
+{
+    bool set = false;
+    if (value.isNull()) {
+        set = conversations_set_data_title_none(m_d, row);
+    } else {
+    set = conversations_set_data_title(m_d, row, value.utf16(), value.length());
+    }
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QVariant Conversations::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return QVariant::fromValue(color(index.row()));
+        case Qt::UserRole + 1:
+            return QVariant::fromValue(conversationId(index.row()));
+        case Qt::UserRole + 2:
+            return QVariant::fromValue(muted(index.row()));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 4:
+            return cleanNullQVariant(QVariant::fromValue(title(index.row())));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int Conversations::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> Conversations::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "color");
+    names.insert(Qt::UserRole + 1, "conversationId");
+    names.insert(Qt::UserRole + 2, "muted");
+    names.insert(Qt::UserRole + 3, "picture");
+    names.insert(Qt::UserRole + 4, "title");
+    return names;
+}
+QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool Conversations::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+bool Conversations::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.column() == 0) {
+        if (role == Qt::UserRole + 0) {
+            if (value.canConvert(qMetaTypeId<quint32>())) {
+                return setColor(index.row(), value.value<quint32>());
+            }
+        }
+        if (role == Qt::UserRole + 2) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMuted(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 3) {
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setPicture(index.row(), value.value<QString>());
+            }
+        }
+        if (role == Qt::UserRole + 4) {
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setTitle(index.row(), value.value<QString>());
+            }
+        }
+    }
+    return false;
+}
+
+extern "C" {
+    Conversations::Private* conversations_new(Conversations*,
+        void (*)(const Conversations*),
+        void (*)(Conversations*),
+        void (*)(Conversations*),
+        void (*)(Conversations*, quintptr, quintptr),
+        void (*)(Conversations*),
+        void (*)(Conversations*),
+        void (*)(Conversations*, int, int),
+        void (*)(Conversations*),
+        void (*)(Conversations*, int, int, int),
+        void (*)(Conversations*),
+        void (*)(Conversations*, int, int),
+        void (*)(Conversations*));
+    void conversations_free(Conversations::Private*);
+};
+
+extern "C" {
     HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
@@ -709,6 +979,71 @@ void Config::setProfilePicture(const QString& v) {
     } else {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
+}
+Conversations::Conversations(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+Conversations::Conversations(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(conversations_new(this,
+        [](const Conversations* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](Conversations* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](Conversations* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](Conversations* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](Conversations* o) {
+            o->beginResetModel();
+        },
+        [](Conversations* o) {
+            o->endResetModel();
+        },
+        [](Conversations* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](Conversations* o) {
+            o->endInsertRows();
+        },
+        [](Conversations* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](Conversations* o) {
+            o->endMoveRows();
+        },
+        [](Conversations* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](Conversations* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &Conversations::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+Conversations::~Conversations() {
+    if (m_ownsPrivate) {
+        conversations_free(m_d);
+    }
+}
+void Conversations::initHeaderData() {
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent):
     QObject(parent),
