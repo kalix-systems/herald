@@ -4,6 +4,7 @@ use crate::{
     image_utils,
     types::*,
 };
+use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
@@ -72,18 +73,21 @@ fn conversation_members(
     db: &Database,
     conversation_id: &ConversationId,
 ) -> Result<Vec<Contact>, HErr> {
-    conversation_members_since(&db, conversation_id, std::i64::MIN)
+    conversation_members_since(&db, conversation_id, chrono::MIN_DATE.and_hms(0, 0, 0))
 }
 
 /// Returns all members of a conversation.
 fn conversation_members_since(
     db: &Database,
     conversation_id: &ConversationId,
-    since: i64,
+    since: DateTime<Utc>,
 ) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(params![conversation_id, since], Contact::from_db)?;
+    let rows = stmt.query_map(
+        params![conversation_id, since.timestamp()],
+        Contact::from_db,
+    )?;
 
     let mut contacts: Vec<Contact> = Vec::new();
     for contact in rows {
@@ -168,14 +172,14 @@ fn status(db: &Database, id: UserIdRef) -> Result<ContactStatus, HErr> {
 
 /// Returns all contacts
 fn all(db: &Database) -> Result<Vec<Contact>, HErr> {
-    all_since(db, std::i64::MIN)
+    all_since(db, chrono::MIN_DATE.and_hms(0, 0, 0))
 }
 
 /// Returns all contacts
-fn all_since(db: &Database, since: i64) -> Result<Vec<Contact>, HErr> {
+fn all_since(db: &Database, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
-    let rows = stmt.query_map(params![since], Contact::from_db)?;
+    let rows = stmt.query_map(params![since.timestamp()], Contact::from_db)?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {
@@ -189,7 +193,10 @@ fn all_since(db: &Database, since: i64) -> Result<Vec<Contact>, HErr> {
 fn get_by_status(db: &Database, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(params![status, std::i64::MIN], Contact::from_db)?;
+    let rows = stmt.query_map(
+        params![status, chrono::MIN_DATE.and_hms(0, 0, 0).timestamp()],
+        Contact::from_db,
+    )?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {
@@ -258,7 +265,7 @@ impl ContactsHandle {
     }
 
     /// Returns all contacts added after a given UNIX epoch time
-    pub fn all_since(&self, since: i64) -> Result<Vec<Contact>, HErr> {
+    pub fn all_since(&self, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
         all_since(&self.db, since)
     }
 
@@ -279,7 +286,7 @@ impl ContactsHandle {
     pub fn conversation_members_since(
         &self,
         conversation_id: &ConversationId,
-        since: i64,
+        since: DateTime<Utc>,
     ) -> Result<Vec<Contact>, HErr> {
         conversation_members_since(&self.db, conversation_id, since)
     }
@@ -519,7 +526,7 @@ impl ContactBuilder {
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,
             contact_type,
-            added: chrono::Utc::now().timestamp(),
+            added: chrono::Utc::now(),
         };
 
         conn.execute(
@@ -561,7 +568,7 @@ pub struct Contact {
     /// Contact type, local or remote
     pub contact_type: ContactType,
     /// when was the contact added?
-    pub added: i64,
+    pub added: DateTime<Utc>,
 }
 
 impl Contact {
@@ -603,7 +610,7 @@ impl Contact {
             status: row.get(4)?,
             pairwise_conversation: row.get(5)?,
             contact_type: row.get(6)?,
-            added: row.get(7)?,
+            added: Utc.timestamp(row.get(7)?, 0),
         })
     }
 }
