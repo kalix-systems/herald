@@ -5,6 +5,7 @@ use crate::{
     types::*,
     utils,
 };
+use chrono::{DateTime, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
@@ -118,8 +119,28 @@ pub(crate) fn conversation_messages(
     db: &Database,
     conversation_id: &ConversationId,
 ) -> Result<Vec<Message>, HErr> {
-    let mut stmt = db.prepare(include_str!("sql/message/get_conversation_messages.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/message/conversation_messages.sql"))?;
     let res = stmt.query_map(&[conversation_id], Message::from_db)?;
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(msg?);
+    }
+
+    Ok(messages)
+}
+
+/// Get all messages in a conversation.
+pub(crate) fn conversation_messages_since(
+    db: &Database,
+    conversation_id: &ConversationId,
+    since: DateTime<Utc>,
+) -> Result<Vec<Message>, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/message/conversation_messages_since.sql"))?;
+    let res = stmt.query_map(
+        params![conversation_id, since.timestamp()],
+        Message::from_db,
+    )?;
 
     let mut messages = Vec::new();
     for msg in res {
@@ -303,6 +324,15 @@ impl Conversations {
         conversation_id: &ConversationId,
     ) -> Result<Vec<Message>, HErr> {
         conversation_messages(&self.db, conversation_id)
+    }
+
+    /// Get all messages in a conversation since a given time.
+    pub fn conversation_messages_since(
+        &self,
+        conversation_id: &ConversationId,
+        since: DateTime<Utc>,
+    ) -> Result<Vec<Message>, HErr> {
+        conversation_messages_since(&self.db, conversation_id, since)
     }
 
     /// Get conversation metadata

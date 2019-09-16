@@ -156,6 +156,7 @@ public:
     Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE bool refresh();
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

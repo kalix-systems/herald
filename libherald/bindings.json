@@ -325,6 +325,10 @@
                         }
                     ]
                 },
+                "refresh": {
+                    "return": "bool",
+                    "mut": true
+                },
                 "deleteMessage": {
                     "return": "bool",
                     "mut": true,

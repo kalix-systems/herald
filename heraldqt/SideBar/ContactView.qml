@@ -32,13 +32,6 @@ ListView {
         }
     }
 
-    Connections {
-        target: networkHandle
-        onNewContactChanged: {
-            contactsModel.refresh()
-        }
-    }
-
     ScrollBar.vertical: ScrollBar {
     }
 
@@ -99,7 +92,6 @@ ListView {
                                            popupManager.optionsMenu,
                                            messageModel, appRoot)
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
-
                 }
 
                 // ternary is okay here, type enforced by QML

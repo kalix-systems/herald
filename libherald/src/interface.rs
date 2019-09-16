@@ -875,6 +875,7 @@ pub trait MessagesTrait {
     fn delete_conversation_by_id(&mut self, conversation_id: &[u8]) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn insert_message(&mut self, body: String) -> Vec<u8>;
+    fn refresh(&mut self) -> bool;
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
@@ -1023,6 +1024,13 @@ pub unsafe extern "C" fn messages_insert_message(
     let r = o.insert_message(body);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_refresh(ptr: *mut Messages) -> bool {
+    let o = &mut *ptr;
+    let r = o.refresh();
+    r
 }
 
 #[no_mangle]
