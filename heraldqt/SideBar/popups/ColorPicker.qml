@@ -16,7 +16,6 @@ Window {
     property string chosenColor
     property var colorIndex
 
-
     GridLayout {
         width: 200
         height: width
@@ -28,30 +27,21 @@ Window {
             model: QmlCfg.avatarColors
 
             Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: modelData
-            radius: width * 0.5
-            border.color: QmlCfg.palette.tertiaryColor
-            border.width: 0
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: modelData
+                radius: width * 0.5
+                border.color: QmlCfg.palette.tertiaryColor
+                border.width: 0
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
                         parent.border.width = 2
                         colorIndex = index
-
                     }
-
                 }
             }
-
         }
-
     }
-
-    }
-
-
-
-
+}

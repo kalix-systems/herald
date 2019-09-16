@@ -73,16 +73,15 @@ Item {
         MenuItem {
             text: 'Choose Color'
             visible: {
-                if (contactAvatar.pfpUrl === "")
-                   { true }
-                else { false}
+                if (contactAvatar.pfpUrl === "") {
+                    true
+                } else {
+                    false
+                }
             }
-
-
 
             onTriggered: {
                 avatarColorPicker.show()
-
             }
         }
     }
@@ -103,7 +102,6 @@ Item {
                 avatarColorPicker.close()
             }
         }
-
     }
 
     Popup {
