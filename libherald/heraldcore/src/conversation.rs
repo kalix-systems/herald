@@ -35,6 +35,8 @@ pub struct ConversationMeta {
     pub color: u32,
     /// Indicates whether the conversation is muted
     pub muted: bool,
+    /// Indicates whether the conversation is a canonical pairwise conversation
+    pub pairwise: bool,
 }
 
 impl ConversationMeta {
@@ -45,6 +47,7 @@ impl ConversationMeta {
             picture: row.get(2)?,
             color: row.get(3)?,
             muted: row.get(4)?,
+            pairwise: row.get(5)?,
         })
     }
 }
@@ -78,6 +81,7 @@ pub(crate) fn add_conversation(
     db: &rusqlite::Connection,
     conversation_id: Option<&ConversationId>,
     title: Option<&str>,
+    pairwise: bool,
 ) -> Result<ConversationId, HErr> {
     let id = match conversation_id {
         Some(id) => id.to_owned(),
@@ -91,7 +95,7 @@ pub(crate) fn add_conversation(
 
     db.execute(
         include_str!("sql/conversation/add_conversation.sql"),
-        params![id, title, color],
+        params![id, title, color, pairwise],
     )?;
 
     Ok(id)
@@ -251,6 +255,15 @@ pub(crate) fn conversation(
     })
 }
 
+/// Adds a conversation to the database
+pub(crate) fn add_pairwise_conversation(
+    db: &rusqlite::Connection,
+    conversation_id: Option<&ConversationId>,
+    title: Option<&str>,
+) -> Result<ConversationId, HErr> {
+    add_conversation(db, conversation_id, title, false)
+}
+
 impl Conversations {
     /// Adds a conversation to the database
     pub fn add_conversation(
@@ -258,7 +271,7 @@ impl Conversations {
         conversation_id: Option<&ConversationId>,
         title: Option<&str>,
     ) -> Result<ConversationId, HErr> {
-        add_conversation(&self.db, conversation_id, title)
+        add_conversation(&self.db, conversation_id, title, false)
     }
 
     /// Sets color for a conversation

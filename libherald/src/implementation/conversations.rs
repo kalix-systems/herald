@@ -94,4 +94,8 @@ impl ConversationsTrait for Conversations {
         meta.title = title;
         true
     }
+
+    fn pairwise(&self, index: usize) -> bool {
+        self.list[index].pairwise
+    }
 }

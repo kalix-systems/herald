@@ -67,6 +67,9 @@
                 "muted": {
                     "type": "bool",
                     "write": true
+                },
+                "pairwise": {
+                    "type": "bool"
                 }
             }
         },

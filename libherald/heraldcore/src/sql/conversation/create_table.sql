@@ -11,5 +11,10 @@ CREATE TABLE IF NOT EXISTS conversations (
   muted INTEGER DEFAULT(0) CHECK (
     (muted = 1)
     OR (muted = 0)
+  ),
+  -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
+  pairwise INTEGER DEFAULT(0) CHECK (
+    (muted = 1)
+    OR (muted = 0)
   )
 )

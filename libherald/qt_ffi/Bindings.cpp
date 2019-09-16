@@ -113,6 +113,7 @@ extern "C" {
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
     bool conversations_data_muted(const Conversations::Private*, int);
     bool conversations_set_data_muted(Conversations::Private*, int, bool);
+    bool conversations_data_pairwise(const Conversations::Private*, int);
     void conversations_data_picture(const Conversations::Private*, int, QString*, qstring_set);
     bool conversations_set_data_picture(Conversations::Private*, int, const ushort* s, int len);
     bool conversations_set_data_picture_none(Conversations::Private*, int);
@@ -230,6 +231,11 @@ bool Conversations::setMuted(int row, bool value)
     return set;
 }
 
+bool Conversations::pairwise(int row) const
+{
+    return conversations_data_pairwise(m_d, row);
+}
+
 QString Conversations::picture(int row) const
 {
     QString s;
@@ -287,8 +293,10 @@ QVariant Conversations::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 2:
             return QVariant::fromValue(muted(index.row()));
         case Qt::UserRole + 3:
-            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+            return QVariant::fromValue(pairwise(index.row()));
         case Qt::UserRole + 4:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 5:
             return cleanNullQVariant(QVariant::fromValue(title(index.row())));
         }
         break;
@@ -312,8 +320,9 @@ QHash<int, QByteArray> Conversations::roleNames() const {
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "conversationId");
     names.insert(Qt::UserRole + 2, "muted");
-    names.insert(Qt::UserRole + 3, "picture");
-    names.insert(Qt::UserRole + 4, "title");
+    names.insert(Qt::UserRole + 3, "pairwise");
+    names.insert(Qt::UserRole + 4, "picture");
+    names.insert(Qt::UserRole + 5, "title");
     return names;
 }
 QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
@@ -346,12 +355,12 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
                 return setMuted(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 3) {
+        if (role == Qt::UserRole + 4) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setPicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 4) {
+        if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setTitle(index.row(), value.value<QString>());
             }

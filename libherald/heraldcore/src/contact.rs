@@ -434,8 +434,10 @@ impl ContactBuilder {
         };
 
         let pairwise_conversation = match self.pairwise_conversation {
-            Some(conv_id) => crate::conversation::add_conversation(&conn, Some(&conv_id), title)?,
-            None => crate::conversation::add_conversation(&conn, None, title)?,
+            Some(conv_id) => {
+                crate::conversation::add_pairwise_conversation(&conn, Some(&conv_id), title)?
+            }
+            None => crate::conversation::add_pairwise_conversation(&conn, None, title)?,
         };
 
         let contact = Contact {

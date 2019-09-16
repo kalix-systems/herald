@@ -82,6 +82,7 @@ public:
     Q_INVOKABLE QByteArray conversationId(int row) const;
     Q_INVOKABLE bool muted(int row) const;
     Q_INVOKABLE bool setMuted(int row, bool value);
+    Q_INVOKABLE bool pairwise(int row) const;
     Q_INVOKABLE QString picture(int row) const;
     Q_INVOKABLE bool setPicture(int row, const QString& value);
     Q_INVOKABLE QString title(int row) const;

@@ -388,6 +388,7 @@ pub trait ConversationsTrait {
     fn conversation_id(&self, index: usize) -> &[u8];
     fn muted(&self, index: usize) -> bool;
     fn set_muted(&mut self, index: usize, _: bool) -> bool;
+    fn pairwise(&self, index: usize) -> bool;
     fn picture(&self, index: usize) -> Option<&str>;
     fn set_picture(&mut self, index: usize, _: Option<String>) -> bool;
     fn title(&self, index: usize) -> Option<&str>;
@@ -504,6 +505,12 @@ pub unsafe extern "C" fn conversations_set_data_muted(
     v: bool,
 ) -> bool {
     (&mut *ptr).set_muted(to_usize(row), v)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_pairwise(ptr: *const Conversations, row: c_int) -> bool {
+    let o = &*ptr;
+    o.pairwise(to_usize(row)).into()
 }
 
 #[no_mangle]
