@@ -1,4 +1,5 @@
-use crate::{interface::*, ret_err};
+use crate::{interface::*, ret_err, types::*};
+use herald_common::{UserId, UserIdRef};
 use heraldcore::{
     abort_err,
     contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
@@ -51,7 +52,7 @@ impl UsersTrait for Users {
     }
 
     /// Adds a contact by their `id`
-    fn add(&mut self, id: String) -> Vec<u8> {
+    fn add(&mut self, id: UserId) -> FfiConversationId {
         if id.len() > 255 {
             return vec![];
         }
@@ -72,17 +73,17 @@ impl UsersTrait for Users {
         self.list[0].inner.pairwise_conversation.to_vec()
     }
 
-    fn conversation_id(&self) -> Option<&[u8]> {
+    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
         self.conversation_id.as_ref().map(|id| id.as_slice())
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> &str {
+    fn user_id(&self, row_index: usize) -> UserIdRef {
         self.list[row_index].inner.id.as_str()
     }
 
-    /// Returns user id.
-    fn pairwise_conversation_id(&self, row_index: usize) -> &[u8] {
+    /// Returns conversation id.
+    fn pairwise_conversation_id(&self, row_index: usize) -> FfiConversationIdRef {
         self.list[row_index].inner.pairwise_conversation.as_slice()
     }
 
@@ -103,7 +104,7 @@ impl UsersTrait for Users {
         true
     }
 
-    /// Returns profile picture given the user's id.
+    /// Returns profile picture
     fn profile_picture(&self, row_index: usize) -> Option<&str> {
         self.list[row_index]
             .inner
@@ -141,15 +142,10 @@ impl UsersTrait for Users {
         true
     }
 
-    /// Indicates whether user is archived.
-    ///
-    /// User is archived => true,
-    /// User is active => false
     fn status(&self, row_index: usize) -> u8 {
         self.list[row_index].inner.status as u8
     }
 
-    /// Updates archive status.
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         use std::convert::TryFrom;
         let status = ret_err!(ContactStatus::try_from(status), false);
@@ -171,7 +167,7 @@ impl UsersTrait for Users {
         true
     }
 
-    fn index_from_conversation_id(&self, conv_id: &[u8]) -> i64 {
+    fn index_from_conversation_id(&self, conv_id: FfiConversationIdRef) -> i64 {
         use std::convert::TryFrom;
 
         let conv_id = ret_err!(ConversationId::try_from(conv_id), -1);
@@ -249,11 +245,11 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn add_member(&mut self, index: u64, conversation_id: &[u8]) -> bool {
+    fn add_member(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
         unimplemented!()
     }
 
-    fn remove_member(&mut self, index: u64, conversation_id: &[u8]) -> bool {
+    fn remove_member(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
         unimplemented!()
     }
 }

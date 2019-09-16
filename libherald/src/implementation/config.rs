@@ -1,4 +1,5 @@
 use crate::interface::*;
+use herald_common::UserIdRef;
 use heraldcore::{abort_err, config::Config as Core};
 
 pub struct Config {
@@ -12,7 +13,7 @@ impl ConfigTrait for Config {
         Config { emit, inner }
     }
 
-    fn config_id(&self) -> &str {
+    fn config_id(&self) -> UserIdRef {
         self.inner.id()
     }
 

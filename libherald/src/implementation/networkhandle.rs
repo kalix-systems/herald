@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err};
+use crate::{interface::*, ret_err, types::*};
 use herald_common::*;
 use heraldcore::{
     abort_err,
@@ -89,7 +89,12 @@ impl NetworkHandleTrait for NetworkHandle {
     /// this is the API exposed to QML
     /// note, currently this function has all together too much copying.
     /// this will be rectified when stupid hanfles fan out.
-    fn send_message(&mut self, body: String, to: &[u8], msg_id: &[u8]) -> bool {
+    fn send_message(
+        &mut self,
+        body: String,
+        to: FfiConversationIdRef,
+        msg_id: FfiMsgIdRef,
+    ) -> bool {
         if to.len() != 32 {
             eprintln!("");
             return false;
@@ -124,7 +129,7 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(&mut self, user_id: String, conversation_id: &[u8]) -> bool {
+    fn send_add_request(&mut self, user_id: UserId, conversation_id: FfiConversationIdRef) -> bool {
         if conversation_id.len() != 32 {
             eprintln!("Invalid conversation_id");
             return false;
@@ -161,7 +166,7 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn request_meta_data(&mut self, of: String) -> bool {
+    fn request_meta_data(&mut self, of: UserId) -> bool {
         match self.tx.try_send(FuncCall::RequestMeta(of)) {
             Ok(_) => true,
             Err(_e) => {

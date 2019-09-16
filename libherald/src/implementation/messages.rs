@@ -1,8 +1,8 @@
-use crate::{interface::*, ret_err};
+use crate::{interface::*, ret_err, types::*};
+use herald_common::UserIdRef;
 use heraldcore::{
     abort_err,
     config::Config,
-    conversation::Conversations,
     message::{Message, Messages as Core},
     types::*,
 };
@@ -70,7 +70,7 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn set_conversation_id(&mut self, conversation_id: Option<&[u8]>) {
+    fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
         let conversation_id = match conversation_id {
             Some(id) => Some(ret_err!(ConversationId::try_from(id))),
             None => None,
@@ -88,14 +88,11 @@ impl MessagesTrait for Messages {
             self.list = Vec::new();
             self.model.end_reset_model();
 
-            let handle = ret_err!(Conversations::new());
-            let messages: Vec<MessagesItem> = match handle.conversation_messages(&conversation_id) {
-                Ok(ms) => ms.into_iter().map(|m| MessagesItem { inner: m }).collect(),
-                Err(e) => {
-                    eprintln!("Error: {}", e);
-                    return;
-                }
-            };
+            let messages: Vec<MessagesItem> =
+                ret_err!(self.handle.conversation_messages(&conversation_id))
+                    .into_iter()
+                    .map(|m| MessagesItem { inner: m })
+                    .collect();
 
             if messages.is_empty() {
                 return;
@@ -104,16 +101,11 @@ impl MessagesTrait for Messages {
             self.model.begin_insert_rows(0, messages.len() - 1);
             self.list = messages;
             self.model.end_insert_rows();
-            println!(
-                "Inserted {} messages with {:?}",
-                self.list.len(),
-                conversation_id
-            );
             self.emit.conversation_id_changed();
         }
     }
 
-    fn author(&self, row_index: usize) -> &str {
+    fn author(&self, row_index: usize) -> UserIdRef {
         self.list[row_index].inner.author.as_str()
     }
 
@@ -121,32 +113,32 @@ impl MessagesTrait for Messages {
         self.list[row_index].inner.body.as_str()
     }
 
-    fn message_id(&self, row_index: usize) -> &[u8] {
+    fn message_id(&self, row_index: usize) -> FfiMsgIdRef {
         self.list[row_index].inner.message_id.as_slice()
     }
 
-    fn op(&self, row_index: usize) -> Option<&[u8]> {
+    fn op(&self, row_index: usize) -> Option<FfiMsgIdRef> {
         match &self.list[row_index].inner.op {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
     }
 
-    fn conversation_id(&self) -> Option<&[u8]> {
+    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
         match &self.conversation_id {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
     }
 
-    fn insert_message(&mut self, body: String) -> Vec<u8> {
+    fn insert_message(&mut self, body: String) -> FfiMsgId {
         match self.raw_insert(body, None) {
             Some(message_id) => message_id.to_vec(),
             None => vec![],
         }
     }
 
-    fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8> {
+    fn reply(&mut self, body: String, op: FfiMsgIdRef) -> FfiMsgId {
         let op = match MsgId::try_from(op) {
             Ok(op) => op,
             Err(e) => {
@@ -188,9 +180,7 @@ impl MessagesTrait for Messages {
             }
         };
 
-        let handle = ret_err!(Conversations::new(), false);
-
-        ret_err!(handle.delete_conversation(id), false);
+        ret_err!(self.handle.delete_conversation(id), false);
 
         self.model.begin_reset_model();
         self.list = Vec::new();
@@ -204,12 +194,10 @@ impl MessagesTrait for Messages {
     }
 
     /// Deletes all messages in a conversation.
-    fn delete_conversation_by_id(&mut self, id: &[u8]) -> bool {
+    fn delete_conversation_by_id(&mut self, id: FfiConversationIdRef) -> bool {
         let id = ret_err!(ConversationId::try_from(id), false);
 
-        let handle = ret_err!(Conversations::new(), false);
-
-        ret_err!(handle.delete_conversation(&id), false);
+        ret_err!(self.handle.delete_conversation(&id), false);
 
         if Some(id) == self.conversation_id {
             self.model.begin_reset_model();

@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err};
+use crate::{interface::*, ret_err, types::*};
 use heraldcore::{
     abort_err,
     conversation::{ConversationMeta, Conversations as Core},
@@ -44,7 +44,7 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn conversation_id(&self, index: usize) -> &[u8] {
+    fn conversation_id(&self, index: usize) -> FfiConversationIdRef {
         self.list[index].conversation_id.as_slice()
     }
 

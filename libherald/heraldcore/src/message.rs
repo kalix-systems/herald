@@ -80,6 +80,7 @@ pub(crate) fn add_message(
     )?;
     Ok((msg_id, timestamp))
 }
+
 /// Get message by message id
 pub(crate) fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
     Ok(db.query_row(
@@ -134,6 +135,19 @@ impl Messages {
             timestamp,
             op,
         )
+    }
+
+    /// Get all messages in a conversation.
+    pub fn conversation_messages(
+        &self,
+        conversation_id: &ConversationId,
+    ) -> Result<Vec<Message>, HErr> {
+        crate::conversation::conversation_messages(&self.db, conversation_id)
+    }
+
+    /// Deletes all messages in a conversation.
+    pub fn delete_conversation(&self, conversation_id: &ConversationId) -> Result<(), HErr> {
+        crate::conversation::delete_conversation(&self.db, conversation_id)
     }
 
     /// Get message by message id
