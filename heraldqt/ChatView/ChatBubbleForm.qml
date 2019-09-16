@@ -107,7 +107,7 @@ Rectangle {
 
         Label {
             id: timeStamp
-            color: outbound ? QmlCfg.palette.secondaryTextColor : "white"
+            color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
             font.pointSize: QmlCfg.chatTextSize
         }
