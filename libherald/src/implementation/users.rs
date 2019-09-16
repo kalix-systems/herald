@@ -291,6 +291,11 @@ impl UsersTrait for Users {
         );
         true
     }
+
+    // TODO this is terrible and doesn't work in general
+    fn refresh(&mut self) {
+        self.set_conversation_id(None)
+    }
 }
 
 impl Users {

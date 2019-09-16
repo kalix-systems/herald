@@ -245,6 +245,7 @@ public:
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE bool addToConversation(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
+    Q_INVOKABLE void refresh();
     Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE bool toggleFilterRegex();
 

@@ -222,6 +222,10 @@
                     ],
                     "return": "qint64"
                 },
+                "refresh": {
+                    "mut": true,
+                    "return": "void"
+                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
