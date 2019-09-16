@@ -375,7 +375,7 @@ impl ConversationsList {
 pub trait ConversationsTrait {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
     fn emit(&mut self) -> &mut ConversationsEmitter;
-    fn add_conversation(&mut self) -> bool;
+    fn add_conversation(&mut self) -> Vec<u8>;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
@@ -445,10 +445,15 @@ pub unsafe extern "C" fn conversations_free(ptr: *mut Conversations) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations) -> bool {
+pub unsafe extern "C" fn conversations_add_conversation(
+    ptr: *mut Conversations,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, str: *const c_char, len: c_int),
+) {
     let o = &mut *ptr;
     let r = o.add_conversation();
-    r
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]

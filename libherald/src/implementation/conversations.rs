@@ -99,14 +99,14 @@ impl ConversationsTrait for Conversations {
         self.list[index].pairwise
     }
 
-    fn add_conversation(&mut self) -> bool {
-        let conv_id = ret_err!(self.handle.add_conversation(None, None), false);
-        let meta = ret_err!(self.handle.meta(&conv_id), false);
+    fn add_conversation(&mut self) -> Vec<u8> {
+        let conv_id = ret_err!(self.handle.add_conversation(None, None), vec![]);
+        let meta = ret_err!(self.handle.meta(&conv_id), vec![]);
 
         self.model.begin_insert_rows(0, 0);
         self.list.insert(0, meta);
         self.model.end_insert_rows();
-        true
+        conv_id.to_vec()
     }
 
     fn remove_conversation(&mut self, index: u64) -> bool {

@@ -88,7 +88,7 @@
             "functions": {
                 "addConversation": {
                     "mut": true,
-                    "return": "bool"
+                    "return": "QByteArray"
                 },
                 "removeConversation": {
                     "mut": true,

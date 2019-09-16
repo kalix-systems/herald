@@ -388,7 +388,7 @@ extern "C" {
         void (*)(Conversations*, int, int),
         void (*)(Conversations*));
     void conversations_free(Conversations::Private*);
-    bool conversations_add_conversation(Conversations::Private*);
+    void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
 };
 
@@ -1068,9 +1068,11 @@ Conversations::~Conversations() {
 }
 void Conversations::initHeaderData() {
 }
-bool Conversations::addConversation()
+QByteArray Conversations::addConversation()
 {
-    return conversations_add_conversation(m_d);
+    QByteArray s;
+    conversations_add_conversation(m_d, &s, set_qbytearray);
+    return s;
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
