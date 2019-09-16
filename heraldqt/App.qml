@@ -10,6 +10,7 @@ Item {
     id: appRoot
 
     property var gsConversationId
+    property color gsConvoColor
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
