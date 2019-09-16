@@ -85,7 +85,7 @@ fn conversation_members(
 }
 
 /// Updates a contact's profile picture.
-fn set_profile_picture(
+pub(crate) fn set_profile_picture(
     db: &Database,
     id: UserIdRef,
     profile_picture: Option<String>,
@@ -110,7 +110,7 @@ fn set_profile_picture(
 }
 
 /// Sets a contact's color
-fn set_color(db: &Database, id: UserIdRef, color: u32) -> Result<(), HErr> {
+pub(crate) fn set_color(db: &Database, id: UserIdRef, color: u32) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/contact/update_color.sql"),
         params![color, id],
