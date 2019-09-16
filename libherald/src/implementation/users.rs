@@ -102,6 +102,8 @@ impl UsersTrait for Users {
             })
             .collect();
         self.model.end_insert_rows();
+
+        self.emit.conversation_id_changed();
     }
 
     /// Returns user id.
