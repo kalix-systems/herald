@@ -16,6 +16,7 @@ import "utils.mjs" as Utils
 
 /// --- displays a list of contacts
 Row {
+    id: wrapperRow
     property string displayName: ""
     property string pfpUrl: ""
     property int colorHash: 0
@@ -25,6 +26,7 @@ Row {
     property bool labeled: true /// whether or not to show the name
     // NOTE: make a property in QMLCFG call padding. it is probably just 10
     spacing: QmlCfg.margin
+    property string avatarColor
 
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
@@ -50,6 +52,7 @@ Row {
     Component {
         id: initialAvatar
         Rectangle {
+            id: avatarRect
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter

@@ -41,5 +41,6 @@
         <file>ChatView/ChatView.mjs</file>
         <file>common/CorrectText.qml</file>
         <file>SideBar/popups/ContactClickedPopup.mjs</file>
+        <file>SideBar/popups/ColorPicker.qml</file>
     </qresource>
 </RCC>
