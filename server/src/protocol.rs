@@ -22,37 +22,77 @@ impl Streams {
         Ok(self.redis.get_connection()?)
     }
 
-    fn with_db_tx<K, T, F>(&self, keys: &[K], f: F) -> Result<T, Error>
-    where
-        K: redis::ToRedisArgs,
-        T: redis::FromRedisValue,
-        F: FnMut(&mut redis::Connection, &mut redis::Pipeline) -> redis::RedisResult<Option<T>>,
-    {
-        Ok(redis::transaction(&mut self.new_connection()?, keys, f)?)
-    }
-
     pub async fn send_message(
         &self,
+        con: &mut redis::Connection,
         to: sig::PublicKey,
         msg: MessageToClient,
     ) -> Result<(), Error> {
         if let Some(a) = self.active.async_get(to).await {
             let mut sender = a.clone();
             if let Err(m) = sender.try_send(msg) {
-                self.new_connection()?.add_pending(to, m.into_inner())?;
+                con.add_pending(to, m.into_inner())?;
             }
         } else {
-            self.new_connection()?.add_pending(to, msg)?;
+            con.add_pending(to, msg)?;
         }
         Ok(())
     }
 
     pub async fn handle_stream(&'static self, mut stream: TcpStream) -> Result<(), Error> {
+        let mut buf = [0u8; 1];
+        stream.read_exact(&mut buf).await?;
+        match buf[0].try_into() {
+            Ok(SessionType::Register) => self.registration_session(stream).await,
+            Ok(SessionType::Login) => self.login_session(stream).await,
+            Err(_) => {
+                stream
+                    .write_all(b"invalid session type - expected 0 or 1")
+                    .await?;
+                Ok(())
+            }
+        }
+    }
+
+    async fn registration_session(&'static self, mut stream: TcpStream) -> Result<(), Error> {
+        let mut con = self.new_connection()?;
+        let mut done = false;
+        let gid = {
+            let mut gid: Option<GlobalId> = None;
+            let mut comp: Result<(), Error> = Ok(());
+            while !done && comp.is_ok() {
+                let uid: UserId = read_cbor(&mut stream).await?;
+                redis::cmd("watch").arg(&uid).query(&mut con)?;
+                comp = try {
+                    if con.user_exists(&uid)? {
+                        stream.write_all(b"ERR").await?;
+                    } else {
+                        stream.write_all(b"YES").await?;
+                        let s: Signed<sig::PublicKey> = read_cbor(&mut stream).await?;
+                        if s.verify_sig() {
+                            let p = *s.data();
+                            con.add_key(&uid, s)?;
+                            done = true;
+                            gid = Some(GlobalId { uid, did: p });
+                        }
+                    }
+                };
+                redis::cmd("unwatch").query(&mut con)?;
+            }
+            gid.ok_or(CommandFailed)?
+        };
+        stream.write_all(b"YES").await?;
+        self.authenticated_session(gid, stream).await
+    }
+
+    async fn login_session(&'static self, mut stream: TcpStream) -> Result<(), Error> {
         use sodiumoxide::crypto::sign;
 
-        let mut buf = [0u8; sign::PUBLICKEYBYTES];
-        stream.read_exact(&mut buf).await?;
-        let pk = sign::PublicKey(buf);
+        let gid: GlobalId = read_cbor(&mut stream).await?;
+        if !self.new_connection()?.key_is_valid(&gid.uid, gid.did)? {
+            stream.write_all(b"ERR").await?;
+            return Err(InvalidKey);
+        }
 
         let mut dat = [0u8; 32];
         sodiumoxide::randombytes::randombytes_into(&mut dat);
@@ -62,19 +102,24 @@ impl Streams {
         stream.read_exact(&mut buf).await?;
         let sig = sign::Signature(buf);
 
-        if !sign::verify_detached(&sig, &dat, &pk) {
-            stream
-                .write_all(b"invalid signature - closing connection")
-                .await?;
+        if !sign::verify_detached(&sig, &dat, &gid.did) {
+            stream.write_all(b"ERR").await?;
             return Err(InvalidSig);
         }
 
-        let (sender, receiver) = mpsc::unbounded_channel();
-        self.active.insert(pk, sender);
-        let (reader, writer) = stream.split();
-        self.spawn_msg_sender(pk, writer, receiver);
-        self.recv_messages(pk, reader).await?;
+        self.authenticated_session(gid, stream).await
+    }
 
+    async fn authenticated_session(
+        &'static self,
+        gid: GlobalId,
+        stream: TcpStream,
+    ) -> Result<(), Error> {
+        let (sender, receiver) = mpsc::unbounded_channel();
+        self.active.insert(gid.did, sender);
+        let (reader, writer) = stream.split();
+        self.spawn_msg_sender(gid.did, writer, receiver);
+        self.recv_messages(gid, reader).await?;
         Ok(())
     }
 
@@ -84,6 +129,7 @@ impl Streams {
         mut writer: W,
         mut input: mpsc::UnboundedReceiver<MessageToClient>,
     ) {
+        // TODO: send offline message packet
         tokio::spawn(async move {
             while let Some(msg) = input.recv().await {
                 if let Err(e) = send_cbor(&mut writer, &msg).await {
@@ -101,12 +147,58 @@ impl Streams {
         });
     }
 
-    // TODO: this
     pub async fn recv_messages<R: AsyncRead + Unpin>(
         &self,
-        pk: sig::PublicKey,
-        reader: R,
+        from: GlobalId,
+        mut reader: R,
     ) -> Result<(), Error> {
+        use MessageToServer::*;
+
+        let mut con = self.new_connection()?;
+        loop {
+            match read_cbor(&mut reader).await? {
+                SendBlock { to, msg } => {
+                    let push = MessageToClient::NewBlock {
+                        from: from.clone(),
+                        time: Utc::now(),
+                        body: msg,
+                    };
+                    for uid in to.iter() {
+                        let meta = con.read_meta(uid)?;
+                        for key in meta.valid_keys() {
+                            self.send_message(&mut con, key, push.clone()).await?;
+                        }
+                    }
+                }
+                SendBlob { to, msg } => {
+                    let push = MessageToClient::NewBlob {
+                        from: from.clone(),
+                        time: Utc::now(),
+                        body: msg,
+                    };
+                    for key in to {
+                        self.send_message(&mut con, key, push.clone()).await?;
+                    }
+                }
+                RequestMeta { qid, of } => {
+                    let res = Response::Meta(con.read_meta(&of)?);
+                    let push = MessageToClient::QueryResponse { qid, res };
+                    self.send_message(&mut con, from.did, push).await?;
+                }
+                RegisterDevice { qid, key } => {
+                    let res = if key.verify_sig() && *key.signed_by() == from.did {
+                        let k = *key.data();
+                        con.add_key(&from.uid, key)?;
+                        Response::DeviceRegistered(k)
+                    } else {
+                        Response::InvalidRequest
+                    };
+                    let push = MessageToClient::QueryResponse { qid, res };
+                    self.send_message(&mut con, from.did, push).await?;
+                }
+                Quit => break,
+            }
+        }
         Ok(())
     }
 }

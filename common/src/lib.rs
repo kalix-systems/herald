@@ -14,10 +14,28 @@ pub use tokio::prelude::*;
 pub type UserId = String;
 pub type UserIdRef<'a> = &'a str;
 
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[repr(u8)]
+pub enum SessionType {
+    Register = 0,
+    Login = 1,
+}
+impl TryFrom<u8> for SessionType {
+    type Error = u8;
+
+    fn try_from(val: u8) -> Result<Self, Self::Error> {
+        match val {
+            0 => Ok(Self::Register),
+            1 => Ok(Self::Login),
+            i => Err(i),
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct GlobalId {
-    uid: UserId,
-    did: sig::PublicKey,
+    pub uid: UserId,
+    pub did: sig::PublicKey,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -31,6 +49,7 @@ impl UserMeta {
             keys: HashMap::new(),
         }
     }
+
     pub fn key_is_valid(&self, key: sig::PublicKey) -> bool {
         let maybe_kmeta = self.keys.get(&key);
         if maybe_kmeta.is_none() {
@@ -65,6 +84,13 @@ impl UserMeta {
         self.keys.get_mut(&pk).unwrap().deprecate(sig);
         true
     }
+
+    pub fn valid_keys(&self) -> impl Iterator<Item = sig::PublicKey> + '_ {
+        self.keys
+            .iter()
+            .filter(|(k, m)| m.key_is_valid(**k))
+            .map(|(k, _)| *k)
+    }
 }
 
 pub type Blob = Bytes;
@@ -76,10 +102,22 @@ pub type ConversationId = [u8; 32];
 // TODO: lifetime parameters so these are zerocopy
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
-    SendBlock { to: Vec<UserId>, msg: Block },
-    SendBlob { to: Vec<GlobalId>, msg: Blob },
-    RequestMeta(UserId),
-    RegisterDevice(Signed<sig::PublicKey>),
+    SendBlock {
+        to: Vec<UserId>,
+        msg: Block,
+    },
+    SendBlob {
+        to: Vec<sig::PublicKey>,
+        msg: Blob,
+    },
+    RequestMeta {
+        qid: u64,
+        of: UserId,
+    },
+    RegisterDevice {
+        qid: u64,
+        key: Signed<sig::PublicKey>,
+    },
     Quit,
 }
 
@@ -97,7 +135,7 @@ pub enum MessageToClient {
     },
     QueryResponse {
         res: Response,
-        query: MessageToServer,
+        qid: u64,
     },
 }
 
@@ -106,6 +144,7 @@ pub enum Response {
     Meta(UserMeta),
     DeviceRegistered(sig::PublicKey),
     DataNotFound,
+    InvalidRequest,
 }
 
 #[derive(Debug)]

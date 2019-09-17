@@ -9,6 +9,7 @@ pub trait Store {
     fn deprecate_key(&mut self, uid: UserIdRef, key: Signed<sig::PublicKey>)
         -> Result<bool, Error>;
 
+    fn user_exists(&mut self, uid: UserIdRef) -> Result<bool, Error>;
     fn key_is_valid(&mut self, uid: UserIdRef, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: UserIdRef) -> Result<UserMeta, Error>;
 
@@ -62,6 +63,10 @@ impl<C: redis::ConnectionLike> Store for C {
         let res = pkm.deprecate(sigmeta);
         self.hset(uid, key.as_ref(), serde_cbor::to_vec(&pkm)?.as_slice())?;
         Ok(res)
+    }
+
+    fn user_exists(&mut self, uid: UserIdRef) -> Result<bool, Error> {
+        Ok(self.exists(uid)?)
     }
 
     fn key_is_valid(&mut self, uid: UserIdRef, key: sig::PublicKey) -> Result<bool, Error> {

@@ -5,9 +5,9 @@ pub enum Error {
     Cbor(serde_cbor::Error),
     TransportError(herald_common::TransportError),
     InvalidSig,
+    InvalidKey,
     MissingData,
     CommandFailed,
-    DeadKey,
     BadData,
 }
 
