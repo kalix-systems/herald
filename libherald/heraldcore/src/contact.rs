@@ -809,6 +809,26 @@ mod tests {
 
     #[test]
     #[serial]
+
+    fn test_by_user_id() {
+        Database::reset_all().expect(womp!());
+
+        let id1 = "id1";
+        let id2 = "id2";
+
+        let handle = ContactsHandle::new().expect(womp!());
+
+        ContactBuilder::new(id1.into()).add().expect(womp!());
+
+        let contact = handle
+            .by_user_id(id1)
+            .expect("Unable to get contact from userid");
+
+        assert_eq!(contact.id, id1);
+    }
+
+    #[test]
+    #[serial]
     fn all_contacts() {
         Database::reset_all().expect(womp!());
 
