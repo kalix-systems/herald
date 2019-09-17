@@ -493,27 +493,17 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let handle = Conversations::new().expect(womp!());
+
         // test without id
-        handle
-            .add_conversation(None, None)
+        let conv_id = handle
+            .add_conversation(None, Some("title"))
             .expect(womp!("failed to create conversation"));
 
-        let conversation_id = ConversationId::from([0; 32]);
-        // test with id
-        assert_eq!(
-            conversation_id,
-            handle
-                .add_conversation(Some(&conversation_id), None)
-                .expect(womp!("failed to create conversation"))
-        );
+        let conv = handle.meta(&conv_id).expect(womp!());
 
-        handle
-            .add_conversation(Some(&[1; 32].into()), Some("el groupo"))
-            .expect(womp!("failed to create conversation"));
+        let pattern = utils::SearchPattern::new_normal("titl".into()).expect(womp!());
 
-        handle
-            .add_conversation(Some(&[2; 32].into()), Some("el groupo"))
-            .expect(womp!("failed to create conversation"));
+        conv.matches(&pattern);
     }
 
     #[test]
