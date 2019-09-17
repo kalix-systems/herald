@@ -196,6 +196,12 @@ fn all_since(db: &Database, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> 
     Ok(names)
 }
 
+pub(crate) fn by_user_id(db: &Database, user_id: UserIdRef) -> Result<Contact, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/contact/get_by_id.sql"))?;
+
+    Ok(stmt.query_row(params![user_id], Contact::from_db)?)
+}
+
 /// Returns all contacts with the specified `status`
 fn get_by_status(db: &Database, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
@@ -279,6 +285,11 @@ impl ContactsHandle {
     /// Returns all contacts added after a given UNIX epoch time
     pub fn all_since(&self, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
         all_since(&self.db, since)
+    }
+
+    /// Fetches contact by their user id
+    pub fn by_user_id(&self, user_id: UserIdRef) -> Result<Contact, HErr> {
+        by_user_id(&self.db, user_id)
     }
 
     /// Returns all contacts with the specified `status`

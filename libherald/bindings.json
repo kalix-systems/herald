@@ -175,6 +175,9 @@
                 "newMessage": {
                     "type": "bool"
                 },
+                "newConversation": {
+                    "type": "bool"
+                },
                 "connectionUp": {
                     "type": "bool"
                 },
