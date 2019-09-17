@@ -871,14 +871,6 @@ mod tests {
 
     #[test]
     #[serial]
-    fn contact_handle_reset() {
-        Database::reset_all().expect(womp!());
-
-        let id = "Hello";
-    }
-
-    #[test]
-    #[serial]
     fn set_status() {
         use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
