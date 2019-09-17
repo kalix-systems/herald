@@ -215,7 +215,7 @@ fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<E
 
     Ok(Event {
         reply,
-        notification: notification,
+        notification,
     })
 }
 

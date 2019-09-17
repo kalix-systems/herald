@@ -911,7 +911,6 @@ mod tests {
     #[test]
     #[serial]
     fn add_member() {
-        use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
 
         let id1 = "id1";
