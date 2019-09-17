@@ -240,11 +240,11 @@ impl MessagesTrait for Messages {
             false
         );
 
+        self.updated = chrono::Utc::now();
+
         if new.is_empty() {
             return true;
         }
-
-        self.updated = chrono::Utc::now();
 
         self.model.begin_insert_rows(
             self.list.len(),

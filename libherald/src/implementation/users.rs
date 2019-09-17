@@ -71,7 +71,7 @@ impl UsersTrait for Users {
             },
         );
         self.model.end_insert_rows();
-        self.inner_filter();
+        //self.inner_filter();
 
         self.list[0].inner.pairwise_conversation.to_vec()
     }

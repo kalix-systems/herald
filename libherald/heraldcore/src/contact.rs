@@ -687,6 +687,24 @@ mod tests {
 
     #[test]
     #[serial]
+    fn all_contact_since() {
+        Database::reset_all().expect(womp!());
+
+        let id1 = "test1";
+        let handle = ContactsHandle::new().expect(womp!());
+        let timestamp = chrono::Utc::now();
+
+        ContactBuilder::new(id1.into())
+            .add()
+            .expect("failed to add contact");
+
+        let contactlist = handle.all_since(timestamp).expect("Failed to get contacts");
+
+        assert_eq!(contactlist.len(), 0);
+    }
+
+    #[test]
+    #[serial]
     fn get_contact_name() {
         Database::reset_all().expect(womp!());
 
@@ -809,22 +827,23 @@ mod tests {
 
     #[test]
     #[serial]
-
     fn test_by_user_id() {
         Database::reset_all().expect(womp!());
 
-        let id1 = "id1";
-        let id2 = "id2";
-
+        let id = "id";
         let handle = ContactsHandle::new().expect(womp!());
 
-        ContactBuilder::new(id1.into()).add().expect(womp!());
+        ContactBuilder::new(id.into())
+            .name("name".into())
+            .add()
+            .expect(womp!());
 
         let contact = handle
-            .by_user_id(id1)
+            .by_user_id(id)
             .expect("Unable to get contact from userid");
 
-        assert_eq!(contact.id, id1);
+        assert_eq!(contact.id, id);
+        assert_eq!(contact.name.unwrap(), "name");
     }
 
     #[test]
@@ -848,6 +867,14 @@ mod tests {
         assert_eq!(contacts.len(), 2);
         assert_eq!(contacts[0].id, id1);
         assert_eq!(contacts[1].id, id2);
+    }
+
+    #[test]
+    #[serial]
+    fn contact_handle_reset() {
+        Database::reset_all().expect(womp!());
+
+        let id = "Hello";
     }
 
     #[test]
