@@ -54,6 +54,8 @@ ToolBar {
             }
 
         anchors.centerIn: parent
-        checked: gsContactsSearch
+        onCheckedChanged:  {
+            gsContactsSearch = !!!gsContactsSearch
+        }
     }
 }
