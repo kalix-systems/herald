@@ -921,7 +921,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn add_member() {
+    fn add_remove_member() {
         Database::reset_all().expect(womp!());
 
         let id1 = "id1";
@@ -951,6 +951,16 @@ mod tests {
         assert_eq!(members.len(), 2);
 
         assert_eq!(members[0].id, id1);
+
+        handle
+            .remove_member(&conv_id, &contacts[0].id)
+            .expect("failed to remove member");
+
+        let members_new = handle
+            .conversation_members(&conv_id)
+            .expect("failed to get members");
+
+        assert_eq!(members_new.len(), 1);
     }
 
     #[test]
