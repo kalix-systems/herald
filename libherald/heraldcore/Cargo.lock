@@ -336,6 +336,7 @@ dependencies = [
 name = "heraldcore"
 version = "0.1.0"
 dependencies = [
+ "chainmail 0.1.0 (git+https://github.com/kalix-systems/chainmail.git)",
  "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "image 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",

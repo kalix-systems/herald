@@ -7,19 +7,20 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
+chainmail     = { git = "https://github.com/kalix-systems/chainmail" }
 chrono        = { version = "0.4.7", default_features  = false}
 herald_common = { path    = "../../common" }
-lazy_static   = "1.3.0"
 image         = "0.22.1"
+lazy_static   = "1.3.0"
+# TODO: set revision to 7bdfb91 since that's the one I've reviewed
+# pinned to git until c0gent pushes commit 7bdfb91 to crates
+qutex         = { git = "https://github.com/cogciprocate/qutex", features = ["async_await"] }
+rand          = "0.7.0"
+regex         = "1.2.1"
+rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
+serde         = "1.0.99"
 serde_cbor    = "0.10.1"
 tokio         = "0.2.0-alpha.4"
-serde         = "1.0.99"
-regex         = "1.2.1"
-rand          = "0.7.0"
-# pinned to git until c0gent pushes commit 7bdfb91 to crates
-# TODO: set revision to 7bdfb91 since that's the one I've reviewed
-qutex         = { git = "https://github.com/cogciprocate/qutex", features = ["async_await"] }
 
 [dev-dependencies]
 womp               = { git   = "https://github.com/kalix-systems/womp" }
