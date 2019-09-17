@@ -137,6 +137,7 @@ pub enum MessageToClient {
         res: Response,
         qid: u64,
     },
+    // TODO: consider doing something smarter here to allow this to work incrementally
     Catchup(Vec<MessageToClient>),
 }
 
