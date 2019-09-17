@@ -955,12 +955,10 @@ mod tests {
 
         assert_eq!(members[0].id, id1);
 
-        println!("event1");
         handle
             .remove_member(&conv_id, &contacts[0].id)
             .expect(womp!("failed to remove member"));
 
-        println!("event2");
         let members_new = handle
             .conversation_members(&conv_id)
             .expect(womp!("failed to get members"));
