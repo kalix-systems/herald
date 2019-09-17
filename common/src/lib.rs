@@ -118,6 +118,10 @@ pub enum MessageToServer {
         qid: u64,
         key: Signed<sig::PublicKey>,
     },
+    RequestPrekey {
+        qid: u64,
+        did: sig::PublicKey,
+    },
     Quit,
 }
 
@@ -144,6 +148,7 @@ pub enum MessageToClient {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Response {
     Meta(UserMeta),
+    Prekey(sealed::PublicKey),
     DeviceRegistered(sig::PublicKey),
     DataNotFound,
     InvalidRequest,

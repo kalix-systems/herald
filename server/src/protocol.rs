@@ -202,6 +202,11 @@ impl State {
                     let push = MessageToClient::QueryResponse { qid, res };
                     self.send_message(&mut con, from.did, push).await?;
                 }
+                RequestPrekey { qid, did } => {
+                    let res = Response::Prekey(con.get_prekey(did)?);
+                    let push = MessageToClient::QueryResponse { qid, res };
+                    self.send_message(&mut con, from.did, push).await?;
+                }
                 Quit => break,
             }
         }
