@@ -284,10 +284,24 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn add_to_conversation(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
+    fn add_to_conversation_by_index(
+        &mut self,
+        index: u64,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
         let index = index as usize;
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
+        true
+    }
+
+    fn add_to_conversation(
+        &mut self,
+        user_id: UserId,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        ret_err!(self.handle.add_member(&conv_id, user_id.as_str()), false);
         true
     }
 
