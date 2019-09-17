@@ -4,15 +4,15 @@ use dashmap::DashMap;
 use tokio::{net::TcpStream, prelude::*, sync::mpsc};
 use womp::womp;
 
-pub struct Streams {
+pub struct State {
     active: DashMap<sig::PublicKey, mpsc::UnboundedSender<MessageToClient>>,
     redis: redis::Client,
 }
 
-impl Streams {
+impl State {
     pub fn new<T: redis::IntoConnectionInfo>(redisparams: T) -> Result<Self, Error> {
         sodiumoxide::init().expect("failed to init libsodium");
-        Ok(Streams {
+        Ok(State {
             active: DashMap::default(),
             redis: redis::Client::open(redisparams)?,
         })

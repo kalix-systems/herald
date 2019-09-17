@@ -10,7 +10,7 @@ use tokio::net::TcpListener;
 const REDISURL: &'static str = "redis://127.0.0.1/";
 
 lazy_static! {
-    static ref HANDLER: Streams = Streams::new(REDISURL).expect("failed to connect to redis");
+    static ref HANDLER: State = State::new(REDISURL).expect("failed to connect to redis");
 }
 
 #[tokio::main]
