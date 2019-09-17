@@ -351,6 +351,7 @@ mod tests {
 
     #[test]
     fn two_configs() {
+        Database::reset_all().expect(womp!());
         ConfigBuilder::new("1".into()).add().expect(womp!());
         assert!(ConfigBuilder::new("2".into()).add().is_err());
     }
