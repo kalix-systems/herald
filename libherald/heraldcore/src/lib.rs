@@ -24,7 +24,7 @@ pub mod message;
 /// message status
 mod message_status;
 /// Networking
-pub mod network;
+// pub mod network;
 /// Utils
 pub mod utils;
 /// Tokio re-export

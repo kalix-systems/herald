@@ -1,5 +1,5 @@
 use crate::errors::HErr;
-use herald_common::{serde::*, *};
+use herald_common::*;
 use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 use std::convert::{TryFrom, TryInto};
 

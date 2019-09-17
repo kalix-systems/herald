@@ -96,9 +96,6 @@ impl UserMeta {
 pub type Blob = Bytes;
 pub type BlobRef<'a> = &'a [u8];
 
-pub type MsgId = [u8; 32];
-pub type ConversationId = [u8; 32];
-
 // TODO: lifetime parameters so these are zerocopy
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToServer {
