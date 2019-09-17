@@ -278,11 +278,12 @@ mod tests {
         assert!(Config::exists().expect(womp!()));
         Config::drop_table().expect(womp!());
         assert!(!Config::exists().expect(womp!()));
+        Config::reset().expect(womp!());
     }
 
     #[test]
     #[serial]
-    fn add_and_get_config() {
+    fn add_get_set_config() {
         use crate::conversation::Conversations;
 
         Database::reset_all().expect(womp!());
@@ -290,41 +291,69 @@ mod tests {
         let id = "HelloWorld";
 
         ConfigBuilder::new(id.into()).add().expect(womp!());
-        assert_eq!(Config::get().expect(womp!()).id(), id);
+
+        let config = Config::get().expect(womp!());
+        assert_eq!(config.id(), id);
+        assert_eq!(config.colorscheme, 0);
+        assert_eq!(config.color, crate::utils::id_to_color(id));
+        assert_eq!(config.color, crate::utils::id_to_color(id));
+        assert!(config.name.is_none());
+        assert!(config.profile_picture.is_none());
 
         Database::reset_all().expect(womp!());
 
         let name = "stuff";
         let profile_picture = "stuff";
+        let nts_id = [0u8; 32].into();
         let config = ConfigBuilder::new(id.into())
             .name(name.into())
+            .colorscheme(1)
+            .color(2)
             .profile_picture(profile_picture.into())
+            .nts_conversation(nts_id)
             .add()
             .expect(womp!());
 
-        let handle = Conversations::new().expect(womp!());
+        let meta = Conversations::new()
+            .expect(womp!())
+            .meta(&config.nts_conversation)
+            .expect(womp!());
+
+        assert_eq!(meta.title.expect(womp!()), NTS_CONVERSATION_NAME);
+
+        let db_config = Config::get().expect(womp!());
+
+        assert_eq!(config.nts_conversation, db_config.nts_conversation);
+        assert_eq!(db_config.id(), "HelloWorld");
+        assert_eq!(db_config.name.as_ref().expect(womp!()), name);
+        assert_eq!(db_config.nts_conversation, nts_id);
+        assert_eq!(db_config.colorscheme, 1);
+        assert_eq!(db_config.color, 2);
         assert_eq!(
-            handle
-                .meta(&config.nts_conversation)
-                .expect(womp!())
-                .title
-                .expect(womp!()),
-            NTS_CONVERSATION_NAME
-        );
-        assert_eq!(
-            config.nts_conversation,
-            Config::get().expect(womp!()).nts_conversation
-        );
-        assert_eq!(Config::get().expect(womp!()).id, "HelloWorld");
-        assert_eq!(Config::get().expect(womp!()).name.expect(womp!()), name);
-        assert_eq!(Config::get().expect(womp!()).colorscheme, 0);
-        assert_eq!(
-            Config::get()
-                .expect(womp!())
-                .profile_picture
-                .expect(womp!()),
+            db_config.profile_picture.as_ref().expect(womp!()),
             profile_picture
         );
+
+        let mut db_config = Config::get().expect(womp!());
+        db_config.set_name(None).expect(womp!());
+        assert_eq!(db_config.name, None);
+
+        db_config.set_name(Some("hello".into())).expect(womp!());
+
+        let mut db_config = Config::get().expect(womp!());
+        assert_eq!(db_config.name, Some("hello".into()));
+
+        db_config.set_colorscheme(0).expect(womp!());
+        db_config.set_color(0).expect(womp!());
+        assert_eq!(db_config.color, 0);
+        assert_eq!(db_config.colorscheme, 0);
+    }
+
+    #[test]
+    #[should_panic]
+    fn two_configs() {
+        ConfigBuilder::new("1".into()).add().expect(womp!());
+        ConfigBuilder::new("2".into()).add().expect(womp!());
     }
 
     #[test]
@@ -335,6 +364,8 @@ mod tests {
         let id = "HelloWorld";
         let config = ConfigBuilder::new(id.into()).add().expect(womp!());
 
+        let static_id = Config::static_id().expect(womp!());
         assert_eq!(config.id, id);
+        assert_eq!(config.id, static_id);
     }
 }
