@@ -67,6 +67,8 @@ Pane {
         scrollHeight: Math.min(contentHeight, 100)
     }
 
+
+
     states: State {
         when: appRoot.gsConversationId !== undefined
         name: "visibleview"

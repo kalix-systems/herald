@@ -47,6 +47,36 @@ ToolBar {
         isDefault: false
     }
 
+    Button {
+        text: "New member"
+        anchors.right: parent.right
+        onClicked: { newMemberPopup.open()
+        }
+
+    }
+
+    Popup {
+        width: 200
+        height: 150
+        id: newMemberPopup
+        TextArea {
+            id: userIdText
+            placeholderText: "Enter user ID"
+        }
+        Button {
+            height: 50
+            text: "Submit"
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            onClicked: {
+                gsConvoItemMembers.addToConversation(userIdText.text, gsConversationId)
+                newMemberPopup.close()
+            }
+        }
+    }
+
+
+
     background: Rectangle {
         color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
         anchors.fill: parent

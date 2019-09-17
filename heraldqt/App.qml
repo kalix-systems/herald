@@ -12,6 +12,7 @@ Item {
     property var gsConversationId
     property int  gsSelectedIndex: -1
     property color gsConvoColor
+    property var gsConvoItemMembers
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
@@ -83,6 +84,7 @@ Item {
 
         ChatView {
             id: chatView
+
         }
 
         handle: Rectangle {

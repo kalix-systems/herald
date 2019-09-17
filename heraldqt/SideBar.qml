@@ -71,12 +71,6 @@ Pane {
             model: conversationsModel
         }
 
-        Button {
-            text: "New conversation"
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            onClicked: {
-            }
-        }
+
     }
 }

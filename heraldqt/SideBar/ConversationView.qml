@@ -45,6 +45,11 @@ ListView {
         height: visible ? 60 : 0
         width: parent.width
 
+        Users {
+            id: convoItemMembers
+            conversationId: conversationsModel.conversationId(index)
+        }
+
 
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
@@ -91,6 +96,7 @@ ListView {
                     messageModel.conversationId = conversationId;
                     appRoot.gsConversationId = conversationId;
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                    appRoot.gsConvoItemMembers = convoItemMembers
                 }
 
                 // ternary is okay here, type enforced by QML
@@ -100,16 +106,13 @@ ListView {
             color: conversationItem.focus ? focusColor : defaultColor
         }
 
-
-        /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
-        /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
-        /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
         Common.Avatar {
             size: 50
             id: conversationAvatar
-            displayName: Utils.unwrapOr(title, index)
+            displayName: Utils.unwrapOr(title, "unknown")
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }
+
 }
