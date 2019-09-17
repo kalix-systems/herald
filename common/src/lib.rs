@@ -79,7 +79,8 @@ pub enum MessageToServer {
     SendBlock { to: Vec<UserId>, msg: Block },
     SendBlob { to: Vec<GlobalId>, msg: Blob },
     RequestMeta(UserId),
-    RegisterDevice(sig::PublicKey),
+    RegisterDevice(Signed<sig::PublicKey>),
+    Quit,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]

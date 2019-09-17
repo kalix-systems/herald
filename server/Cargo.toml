@@ -19,5 +19,6 @@ chrono      = { version       = "0.4", features = ["serde"] }
 bytes       = { version       = "0.4", features = ["serde"] }
 tokio       = "0.2.0-alpha.4"
 
+womp = {git = "https://github.com/kalix-systems/womp"}
 herald_common = { path = "../common"}
 

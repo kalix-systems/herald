@@ -115,8 +115,10 @@ impl SigMeta {
 
 pub mod sig {
     use super::*;
+    pub use sign::{PublicKey, Signature};
 
-    pub type PublicKey = sign::PublicKey;
+    pub const PUBLIC_KEY_BYTES: usize = sign::PUBLICKEYBYTES;
+    pub const SIGNATURE_BYTES: usize = sign::SIGNATUREBYTES;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
