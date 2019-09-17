@@ -1,5 +1,4 @@
 use crate::{
-    abort_err,
     db::{DBTable, Database},
     errors::HErr,
     image_utils,
