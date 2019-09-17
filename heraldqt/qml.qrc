@@ -41,5 +41,13 @@
         <file>icons/searchRegexTemp.png</file>
         <file>main.cpp</file>
         <file>main.qml</file>
+        <file>SideBar/ConversationView.qml</file>
+        <file>SideBar/ContactsToggle.qml</file>
+        <file>icons/mary.png</file>
+        <file>icons/land.png</file>
+        <file>icons/speech_hollow.png</file>
+        <file>icons/speech_filled.png</file>
+        <file>icons/cont_filled.png</file>
+        <file>icons/cont_hollow.png</file>
     </qresource>
 </RCC>

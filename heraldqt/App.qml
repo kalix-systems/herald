@@ -12,6 +12,8 @@ Item {
     property var gsConversationId
     property int  gsSelectedIndex: -1
     property color gsConvoColor
+    property var gsConvoItemMembers
+    property bool gsContactsSearch: true
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
@@ -33,6 +35,11 @@ Item {
 
     Conversations {
         id: conversationsModel
+    }
+
+    Users {
+        id: conversationMembers
+        conversationId: gsConversationId
     }
 
     Popups.ConfigPopup {
@@ -78,6 +85,7 @@ Item {
 
         ChatView {
             id: chatView
+
         }
 
         handle: Rectangle {

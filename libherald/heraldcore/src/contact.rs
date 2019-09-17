@@ -51,7 +51,7 @@ impl DBTable for ContactsHandle {
 fn name(db: &Database, id: UserIdRef) -> Result<Option<String>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
-    Ok(stmt.query_row(&[id], |row| row.get(0))?)
+    Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
 
 /// Change name of contact by their `id`
@@ -66,7 +66,7 @@ pub(crate) fn set_name(db: &Database, id: UserIdRef, name: Option<&str>) -> Resu
 fn profile_picture(db: &Database, id: UserIdRef) -> Result<Option<String>, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
-    Ok(stmt.query_row(&[id], |row| row.get(0))?)
+    Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
 
 /// Returns all members of a conversation.
@@ -149,16 +149,16 @@ fn set_status(
     match status {
         Deleted => {
             let tx = db.transaction()?;
-            abort_err!(tx.execute(
+            tx.execute(
                 include_str!("sql/contact/delete_contact_meta.sql"),
                 params![id],
-            ));
+            )?;
             crate::message_status::delete_by_conversation(&tx, pairwise_conv)?;
-            abort_err!(tx.execute(
+            tx.execute(
                 include_str!("sql/message/delete_pairwise_conversation.sql"),
                 params![id],
-            ));
-            abort_err!(tx.commit());
+            )?;
+            tx.commit()?;
         }
         _ => {
             db.execute(
@@ -196,6 +196,7 @@ fn all_since(db: &Database, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> 
     Ok(names)
 }
 
+// returns a single contact by userid
 pub(crate) fn by_user_id(db: &Database, user_id: UserIdRef) -> Result<Contact, HErr> {
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_id.sql"))?;
 
@@ -349,7 +350,7 @@ pub enum ContactStatus {
 #[repr(u8)]
 /// Type of the contact
 pub enum ContactType {
-    /// The contact is local
+    /// The contact is local (ie it is you)
     Local = 0,
     /// The contact is remote
     Remote = 1,
@@ -707,7 +708,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn get_contact_profile_picture() {
+    fn get_set_contact_profile_picture() {
         Database::reset_all().expect(womp!());
 
         let id = "Hello World";
@@ -728,6 +729,57 @@ mod tests {
                 .as_str(),
             profile_picture
         );
+
+        Database::reset_all().expect(womp!());
+
+        let handle = ContactsHandle::new().expect(womp!());
+
+        let test_picture = "test_resources/maryland.png";
+
+        ContactBuilder::new(id.into())
+            .add()
+            .expect("Failed to add contact");
+        handle
+            .set_profile_picture(id, Some(test_picture.into()), None)
+            .expect("Failed to set profile picture");
+    }
+
+    #[test]
+    #[serial]
+    fn get_set_color() {
+        Database::reset_all().expect(womp!());
+        let id = "userid";
+        let handle = ContactsHandle::new().expect(womp!());
+
+        ContactBuilder::new(id.into())
+            .name("Hello".into())
+            .add()
+            .expect(womp!());
+
+        handle.set_color(id, 1).expect("Failed to set color");
+
+        let contacts = handle.all().expect(womp!());
+
+        assert_eq!(contacts[0].color, 1);
+    }
+
+    #[test]
+    #[serial]
+    fn check_contact_exists() {
+        Database::reset_all().expect(womp!());
+        let id = "userid";
+        let handle = ContactsHandle::new().expect(womp!());
+
+        ContactBuilder::new(id.into())
+            .name("Hello".into())
+            .add()
+            .expect(womp!());
+
+        assert_eq!(handle.contact_exists(id).unwrap(), true);
+
+        Database::reset_all().expect(womp!());
+
+        assert_eq!(handle.contact_exists(id).unwrap(), false)
     }
 
     #[test]
