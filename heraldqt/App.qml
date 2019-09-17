@@ -12,6 +12,7 @@ Item {
     property var gsConversationId
     property int  gsSelectedIndex: -1
     property color gsConvoColor
+    property bool gsContactsSearch: true // contacts search vs conversations search
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
