@@ -910,6 +910,41 @@ mod tests {
 
     #[test]
     #[serial]
+    fn add_member() {
+        use crate::conversation::Conversations;
+        Database::reset_all().expect(womp!());
+
+        let id1 = "id1";
+        let id2 = "id2";
+
+        let handle = ContactsHandle::new().expect(womp!());
+        let conv_id = ConversationId::from([0; 32]);
+
+        ContactBuilder::new(id1.into())
+            .add()
+            .expect("Failed to add id1");
+        ContactBuilder::new(id2.into())
+            .pairwise_conversation(conv_id)
+            .add()
+            .expect("Failed to add id2");
+
+        let contacts = handle.all().expect(womp!());
+
+        handle
+            .add_member(&conv_id, &contacts[0].id)
+            .expect("failed to add member");
+
+        let members = handle
+            .conversation_members(&conv_id)
+            .expect("failed to get members");
+
+        assert_eq!(members.len(), 2);
+
+        assert_eq!(members[0].id, id1);
+    }
+
+    #[test]
+    #[serial]
     fn by_status_contacts() {
         Database::reset_all().expect(womp!());
 
