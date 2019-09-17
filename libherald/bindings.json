@@ -269,6 +269,20 @@
                     "return": "bool",
                     "arguments": [
                         {
+                            "name": "user_id",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "addToConversationByIndex": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
                             "name": "row_index",
                             "type": "quint64"
                         },
