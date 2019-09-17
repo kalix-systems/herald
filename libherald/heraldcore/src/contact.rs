@@ -871,10 +871,10 @@ mod tests {
 
         ContactBuilder::new(id1.into())
             .add()
-            .expect("Failed to add id1");
+            .expect(womp!("Failed to add id1"));
         ContactBuilder::new(id2.into())
             .add()
-            .expect("Failed to add id2");
+            .expect(womp!("Failed to add id2"));
 
         let contacts = handle.all().expect(womp!());
         assert_eq!(contacts.len(), 2);
@@ -964,6 +964,8 @@ mod tests {
             .expect(womp!("failed to get members"));
 
         assert_eq!(members_new.len(), 1);
+        //is the correct member remaining?
+        assert_eq!(members_new[0].id, id2);
     }
 
     #[test]
