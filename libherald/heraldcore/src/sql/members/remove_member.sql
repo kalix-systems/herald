@@ -1,4 +1,5 @@
 DELETE FROM
   conversation_members
 WHERE
-  member_id = ?
+  conversation_id = @1
+  AND member_id = @2

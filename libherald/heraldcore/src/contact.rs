@@ -770,6 +770,8 @@ mod tests {
         handle
             .set_profile_picture(id, Some(test_picture.into()), None)
             .expect("Failed to set profile picture");
+
+        std::fs::remove_dir_all("profile_pictures").expect(womp!());
     }
 
     #[test]
@@ -932,33 +934,36 @@ mod tests {
 
         ContactBuilder::new(id1.into())
             .add()
-            .expect("Failed to add id1");
+            .expect(womp!("Failed to add id1"));
+
         ContactBuilder::new(id2.into())
             .pairwise_conversation(conv_id)
             .add()
-            .expect("Failed to add id2");
+            .expect(womp!("Failed to add id2"));
 
         let contacts = handle.all().expect(womp!());
 
         handle
             .add_member(&conv_id, &contacts[0].id)
-            .expect("failed to add member");
+            .expect(womp!("failed to add member"));
 
         let members = handle
             .conversation_members(&conv_id)
-            .expect("failed to get members");
+            .expect(womp!("failed to get members"));
 
         assert_eq!(members.len(), 2);
 
         assert_eq!(members[0].id, id1);
 
+        println!("event1");
         handle
             .remove_member(&conv_id, &contacts[0].id)
-            .expect("failed to remove member");
+            .expect(womp!("failed to remove member"));
 
+        println!("event2");
         let members_new = handle
             .conversation_members(&conv_id)
-            .expect("failed to get members");
+            .expect(womp!("failed to get members"));
 
         assert_eq!(members_new.len(), 1);
     }
