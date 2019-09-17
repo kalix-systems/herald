@@ -10,14 +10,25 @@ pub trait Store {
         -> Result<bool, Error>;
 
     fn key_is_valid(&mut self, uid: UserIdRef, key: sig::PublicKey) -> Result<bool, Error>;
+    fn read_meta(&mut self, uid: UserIdRef) -> Result<UserMeta, Error>;
+
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
-    fn read_meta(&mut self, uid: UserIdRef) -> Result<UserMeta, Error>;
+    fn add_pending(&mut self, key: sig::PublicKey, msg: MessageToClient) -> Result<(), Error>;
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<MessageToClient>, Error>;
 }
 
 fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
     let suffix = b":prekeys";
+    let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
+    out.extend_from_slice(key.as_ref());
+    out.extend_from_slice(suffix);
+    out
+}
+
+fn pending_of(key: sig::PublicKey) -> Vec<u8> {
+    let suffix = b":pending";
     let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
     out.extend_from_slice(key.as_ref());
     out.extend_from_slice(suffix);
@@ -54,7 +65,8 @@ impl<C: redis::ConnectionLike> Store for C {
     }
 
     fn key_is_valid(&mut self, uid: UserIdRef, key: sig::PublicKey) -> Result<bool, Error> {
-        Ok(self.read_key(uid, key)?.key_is_valid(key))
+        let meta = self.read_key(uid, key)?;
+        Ok(meta.key_is_valid(key) && self.hexists(uid, key.as_ref())?)
     }
 
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error> {
@@ -78,6 +90,20 @@ impl<C: redis::ConnectionLike> Store for C {
             let pk = sig::PublicKey::from_slice(&key).ok_or(BadData)?;
             let meta = self.read_key(uid, pk)?;
             out.add_key_unchecked(pk, meta);
+        }
+        Ok(out)
+    }
+
+    fn add_pending(&mut self, to: sig::PublicKey, msg: MessageToClient) -> Result<(), Error> {
+        self.rpush(pending_of(to), serde_cbor::to_vec(&msg)?.as_slice())?;
+        Ok(())
+    }
+
+    fn get_pending(&mut self, to: sig::PublicKey) -> Result<Vec<MessageToClient>, Error> {
+        let msg_bs: Vec<Vec<u8>> = self.lrange(to.as_ref(), 0, -1)?;
+        let mut out = Vec::with_capacity(msg_bs.len());
+        for bs in msg_bs.iter().map(Vec::as_slice) {
+            out.push(serde_cbor::from_slice(bs)?);
         }
         Ok(out)
     }
