@@ -13,6 +13,8 @@
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.mjs</file>
         <file>SideBar/ContactView.qml</file>
+        <file>SideBar/ContactsToggle.qml</file>
+        <file>SideBar/ConversationView.qml</file>
         <file>SideBar/UtilityBar.qml</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
@@ -30,24 +32,22 @@
         <file>common/Divider.qml</file>
         <file>common/Theme.qml</file>
         <file>common/utils.mjs</file>
+        <file>icons/cont_filled.png</file>
+        <file>icons/cont_hollow.png</file>
         <file>icons/emoji.png</file>
         <file>icons/gear.png</file>
         <file>icons/gear.svg</file>
+        <file>icons/land.png</file>
+        <file>icons/mary.png</file>
         <file>icons/paperclip.png</file>
         <file>icons/plus.png</file>
         <file>icons/reply.png</file>
         <file>icons/search.png</file>
         <file>icons/searchRegex.png</file>
         <file>icons/searchRegexTemp.png</file>
+        <file>icons/speech_filled.png</file>
+        <file>icons/speech_hollow.png</file>
         <file>main.cpp</file>
         <file>main.qml</file>
-        <file>SideBar/ConversationView.qml</file>
-        <file>SideBar/ContactsToggle.qml</file>
-        <file>icons/mary.png</file>
-        <file>icons/land.png</file>
-        <file>icons/speech_hollow.png</file>
-        <file>icons/speech_filled.png</file>
-        <file>icons/cont_filled.png</file>
-        <file>icons/cont_hollow.png</file>
     </qresource>
 </RCC>
