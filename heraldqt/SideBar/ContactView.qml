@@ -17,7 +17,7 @@ import "popups" as Popups
 
 /// --- displays a list of contacts
 ListView {
-    visible: false
+    visible: gsContactsSearch
     id: contactList
 
     clip: true

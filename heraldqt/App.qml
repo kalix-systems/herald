@@ -13,6 +13,7 @@ Item {
     property int  gsSelectedIndex: -1
     property color gsConvoColor
     property var gsConvoItemMembers
+    property bool gsContactsSearch: true
 
     anchors.fill: parent.fill
     Layout.fillWidth: true

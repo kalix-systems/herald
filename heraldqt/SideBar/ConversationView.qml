@@ -18,7 +18,7 @@ import "popups" as Popups
 /// --- displays a list of conversations
 ListView {
     id: conversationList
-    visible: true
+    visible: !gsContactsSearch
 
     clip: true
     currentIndex: -1
