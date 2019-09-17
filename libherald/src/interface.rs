@@ -1240,6 +1240,7 @@ pub struct NetworkHandleEmitter {
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
     new_contact_changed: fn(*mut NetworkHandleQObject),
+    new_conversation_changed: fn(*mut NetworkHandleQObject),
     new_message_changed: fn(*mut NetworkHandleQObject),
 }
 
@@ -1258,6 +1259,7 @@ impl NetworkHandleEmitter {
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
             new_contact_changed: self.new_contact_changed,
+            new_conversation_changed: self.new_conversation_changed,
             new_message_changed: self.new_message_changed,
         }
     }
@@ -1284,6 +1286,12 @@ impl NetworkHandleEmitter {
             (self.new_contact_changed)(ptr);
         }
     }
+    pub fn new_conversation_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_conversation_changed)(ptr);
+        }
+    }
     pub fn new_message_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -1298,6 +1306,7 @@ pub trait NetworkHandleTrait {
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
     fn new_contact(&self) -> bool;
+    fn new_conversation(&self) -> bool;
     fn new_message(&self) -> bool;
     fn register_device(&mut self) -> bool;
     fn request_meta_data(&mut self, of: String) -> bool;
@@ -1311,6 +1320,7 @@ pub extern "C" fn network_handle_new(
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_contact_changed: fn(*mut NetworkHandleQObject),
+    network_handle_new_conversation_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
@@ -1318,6 +1328,7 @@ pub extern "C" fn network_handle_new(
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
         new_contact_changed: network_handle_new_contact_changed,
+        new_conversation_changed: network_handle_new_conversation_changed,
         new_message_changed: network_handle_new_message_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
@@ -1342,6 +1353,11 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_new_contact_get(ptr: *const NetworkHandle) -> bool {
     (&*ptr).new_contact()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).new_conversation()
 }
 
 #[no_mangle]
