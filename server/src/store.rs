@@ -18,6 +18,8 @@ pub trait Store {
 
     fn add_pending(&mut self, key: sig::PublicKey, msg: MessageToClient) -> Result<(), Error>;
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<MessageToClient>, Error>;
+    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
+    fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error>;
 }
 
 pub(crate) fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
@@ -105,11 +107,21 @@ impl<C: redis::ConnectionLike> Store for C {
     }
 
     fn get_pending(&mut self, to: sig::PublicKey) -> Result<Vec<MessageToClient>, Error> {
-        let msg_bs: Vec<Vec<u8>> = self.lrange(to.as_ref(), 0, -1)?;
+        let msg_bs: Vec<Vec<u8>> = self.lrange(pending_of(to), 0, -1)?;
         let mut out = Vec::with_capacity(msg_bs.len());
         for bs in msg_bs.iter().map(Vec::as_slice) {
             out.push(serde_cbor::from_slice(bs)?);
         }
         Ok(out)
+    }
+
+    fn expire_pending(&mut self, to: sig::PublicKey) -> Result<(), Error> {
+        self.expire(pending_of(to), 10)?;
+        Ok(())
+    }
+
+    fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error> {
+        self.persist(pending_of(to))?;
+        Ok(())
     }
 }

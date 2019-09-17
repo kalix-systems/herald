@@ -137,6 +137,7 @@ pub enum MessageToClient {
         res: Response,
         qid: u64,
     },
+    Catchup(Vec<MessageToClient>),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]

@@ -22,6 +22,16 @@ impl Streams {
         Ok(self.redis.get_connection()?)
     }
 
+    // fn with_db_tx<K, T, F>(&self, keys: &[K], f: F) -> Result<T, Error>
+    // where
+    //     K: redis::ToRedisArgs,
+    //     T: redis::FromRedisValue,
+    //     F: FnMut(&mut redis::Connection, &mut redis::Pipeline) -> redis::RedisResult<Option<T>>,
+    // {
+    //     Ok(redis::transaction(&mut self.new_connection()?, keys, f)?)
+    // }
+    //
+
     pub async fn send_message(
         &self,
         con: &mut redis::Connection,
@@ -113,13 +123,20 @@ impl Streams {
     async fn authenticated_session(
         &'static self,
         gid: GlobalId,
-        stream: TcpStream,
+        mut stream: TcpStream,
     ) -> Result<(), Error> {
         let (sender, receiver) = mpsc::unbounded_channel();
         self.active.insert(gid.did, sender);
+
+        let mut con = self.new_connection()?;
+        let pending = con.get_pending(gid.did)?;
+        let push = MessageToClient::Catchup(pending);
+        send_cbor(&mut stream, &push).await?;
+        con.expire_pending(gid.did)?;
+
         let (reader, writer) = stream.split();
         self.spawn_msg_sender(gid.did, writer, receiver);
-        self.recv_messages(gid, reader).await?;
+        self.recv_messages(con, gid, reader).await?;
         Ok(())
     }
 
@@ -129,7 +146,6 @@ impl Streams {
         mut writer: W,
         mut input: mpsc::UnboundedReceiver<MessageToClient>,
     ) {
-        // TODO: send offline message packet
         tokio::spawn(async move {
             while let Some(msg) = input.recv().await {
                 if let Err(e) = send_cbor(&mut writer, &msg).await {
@@ -149,12 +165,12 @@ impl Streams {
 
     pub async fn recv_messages<R: AsyncRead + Unpin>(
         &self,
+        mut con: redis::Connection,
         from: GlobalId,
         mut reader: R,
     ) -> Result<(), Error> {
         use MessageToServer::*;
 
-        let mut con = self.new_connection()?;
         loop {
             match read_cbor(&mut reader).await? {
                 SendBlock { to, msg } => {
