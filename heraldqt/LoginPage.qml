@@ -29,18 +29,25 @@ Rectangle {
 
         /// --- crow emblem place holder
         Rectangle {
+            id: rect
             anchors.horizontalCenter: parent.horizontalCenter
             width: heightUnit
             height: heightUnit
-            color: Qt.darker("lightblue", 1.8)
             radius: heightUnit
-            Text {
-                anchors.centerIn: parent
-                color: "white"
-                text: "CROW"
+
+            Image {
+                id: crow
+                anchors.centerIn: rect
+                height: rect.height
+                width: rect.width
+                source: "icons/land.png"
+                fillMode: Image.PreserveAspectCrop
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: rect
+                }
             }
         }
-
         /// username entry field
         TextArea {
             id: entryField

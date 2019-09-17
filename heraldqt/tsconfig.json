@@ -5,18 +5,17 @@
         "target": "ES2017"
     },
     "files": [
-        "common/utils.ts",
         "ChatView/ChatTextAreaUtils.ts",
+        "ChatView/ChatViewTypes.d.ts",
+        "SideBar/ContactView.ts",
+        "SideBar/ContactViewTypes.d.ts",
         "SideBar/popups/ConfigPopupSubmission.ts",
         "SideBar/popups/ContactClickedPopup.ts",
         "SideBar/popups/NewContactDialogue.ts",
-        "SideBar/ContactViewTypes.d.ts",
-        "SideBar/ContactView.ts",
-        "ChatView/ChatViewTypes.d.ts",
-        "ChatView/ChatView.ts",
-        "common/QtTypes.d.ts",
+        "common/Avatar.ts",
         "common/HeraldTypes.d.ts",
         "common/HeraldUITypes.d.ts",
-        "common/Avatar.ts"
+        "common/QtTypes.d.ts",
+        "common/utils.ts"
     ]
 }

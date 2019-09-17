@@ -55,12 +55,19 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
     ~Conversations();
-    Q_INVOKABLE bool addConversation();
+    QString filter() const;
+    void setFilter(const QString& v);
+    bool filterRegex() const;
+    void setFilterRegex(bool v);
+    Q_INVOKABLE QByteArray addConversation();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
+    Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -82,6 +89,8 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QByteArray conversationId(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE bool muted(int row) const;
     Q_INVOKABLE bool setMuted(int row, bool value);
     Q_INVOKABLE bool pairwise(int row) const;
@@ -98,6 +107,8 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void filterChanged();
+    void filterRegexChanged();
 };
 
 class HeraldState : public QObject
@@ -131,6 +142,7 @@ private:
 public:
     explicit HeraldUtils(QObject *parent = nullptr);
     ~HeraldUtils();
+    Q_INVOKABLE double chatBubbleNaturalWidth(double chat_pane_width, double text_width) const;
     Q_INVOKABLE bool compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const;
 Q_SIGNALS:
 };
@@ -155,6 +167,7 @@ public:
     Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE bool refresh();
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -201,6 +214,7 @@ private:
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     Q_PROPERTY(bool newContact READ newContact NOTIFY newContactChanged FINAL)
+    Q_PROPERTY(bool newConversation READ newConversation NOTIFY newConversationChanged FINAL)
     Q_PROPERTY(bool newMessage READ newMessage NOTIFY newMessageChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
@@ -209,6 +223,7 @@ public:
     bool connectionPending() const;
     bool connectionUp() const;
     bool newContact() const;
+    bool newConversation() const;
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice();
     Q_INVOKABLE bool requestMetaData(const QString& of);
@@ -218,6 +233,7 @@ Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
     void newContactChanged();
+    void newConversationChanged();
     void newMessageChanged();
 };
 
@@ -243,7 +259,8 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
-    Q_INVOKABLE bool addToConversation(quint64 row_index, const QByteArray& conversation_id);
+    Q_INVOKABLE bool addToConversation(const QString& user_id, const QByteArray& conversation_id);
+    Q_INVOKABLE bool addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
     Q_INVOKABLE bool refresh();
     Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);

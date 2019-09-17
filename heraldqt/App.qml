@@ -10,7 +10,10 @@ Item {
     id: appRoot
 
     property var gsConversationId
+    property int gsSelectedIndex: -1
     property color gsConvoColor
+    property var gsConvoItemMembers
+    property bool gsContactsSearch: true
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
@@ -18,6 +21,8 @@ Item {
 
     NetworkHandle {
         id: networkHandle
+        onNewMessageChanged: messageModel.refresh()
+        onNewContactChanged: contactsModel.refresh()
     }
 
     Messages {
@@ -28,8 +33,38 @@ Item {
         id: contactsModel
     }
 
+    Conversations {
+        id: conversationsModel
+    }
+
+    Users {
+        id: conversationMembers
+        conversationId: gsConversationId
+    }
+
     Popups.ConfigPopup {
         id: preferencesPopup
+    }
+
+    Popups.ColorPicker {
+        id: avatarColorPicker
+
+        // button is here to know index of contact clicked
+        Button {
+            id: colorSubmissionButton
+            text: "Submit"
+            anchors {
+                right: parent.right
+                bottom: parent.bottom
+            }
+
+            onClicked: {
+                contactsModel.setColor(gsSelectedIndex,
+                                       avatarColorPicker.colorIndex)
+                appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
+                avatarColorPicker.close()
+            }
+        }
     }
 
     Config {

@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- message id of message being replied to
   op_msg_id INT,
   -- timestamp associated with message
-  timestamp TEXT NOT NULL,
+  timestamp INT NOT NULL,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message

@@ -289,6 +289,8 @@ pub struct ConversationsQObject {}
 
 pub struct ConversationsEmitter {
     qobject: Arc<AtomicPtr<ConversationsQObject>>,
+    filter_changed: fn(*mut ConversationsQObject),
+    filter_regex_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
 
@@ -304,6 +306,8 @@ impl ConversationsEmitter {
     pub fn clone(&mut self) -> ConversationsEmitter {
         ConversationsEmitter {
             qobject: self.qobject.clone(),
+            filter_changed: self.filter_changed,
+            filter_regex_changed: self.filter_regex_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -311,6 +315,18 @@ impl ConversationsEmitter {
         let n: *const ConversationsQObject = null();
         self.qobject
             .store(n as *mut ConversationsQObject, Ordering::SeqCst);
+    }
+    pub fn filter_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.filter_changed)(ptr);
+        }
+    }
+    pub fn filter_regex_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.filter_regex_changed)(ptr);
+        }
     }
     pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -375,8 +391,13 @@ impl ConversationsList {
 pub trait ConversationsTrait {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
     fn emit(&mut self) -> &mut ConversationsEmitter;
-    fn add_conversation(&mut self) -> bool;
+    fn filter(&self) -> &str;
+    fn set_filter(&mut self, value: String);
+    fn filter_regex(&self) -> bool;
+    fn set_filter_regex(&mut self, value: bool);
+    fn add_conversation(&mut self) -> Vec<u8>;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
+    fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
@@ -392,6 +413,8 @@ pub trait ConversationsTrait {
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn conversation_id(&self, index: usize) -> &[u8];
+    fn matched(&self, index: usize) -> bool;
+    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn muted(&self, index: usize) -> bool;
     fn set_muted(&mut self, index: usize, _: bool) -> bool;
     fn pairwise(&self, index: usize) -> bool;
@@ -404,6 +427,8 @@ pub trait ConversationsTrait {
 #[no_mangle]
 pub extern "C" fn conversations_new(
     conversations: *mut ConversationsQObject,
+    conversations_filter_changed: fn(*mut ConversationsQObject),
+    conversations_filter_regex_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),
     conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
     conversations_layout_changed: fn(*mut ConversationsQObject),
@@ -419,6 +444,8 @@ pub extern "C" fn conversations_new(
 ) -> *mut Conversations {
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
+        filter_changed: conversations_filter_changed,
+        filter_regex_changed: conversations_filter_regex_changed,
         new_data_ready: conversations_new_data_ready,
     };
     let model = ConversationsList {
@@ -445,10 +472,49 @@ pub unsafe extern "C" fn conversations_free(ptr: *mut Conversations) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations) -> bool {
+pub unsafe extern "C" fn conversations_filter_get(
+    ptr: *const Conversations,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.filter();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_set(
+    ptr: *mut Conversations,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_filter(s);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversations) -> bool {
+    (&*ptr).filter_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
+    (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_add_conversation(
+    ptr: *mut Conversations,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, str: *const c_char, len: c_int),
+) {
     let o = &mut *ptr;
     let r = o.add_conversation();
-    r
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
@@ -458,6 +524,13 @@ pub unsafe extern "C" fn conversations_remove_conversation(
 ) -> bool {
     let o = &mut *ptr;
     let r = o.remove_conversation(row_index);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_toggle_filter_regex(ptr: *mut Conversations) -> bool {
+    let o = &mut *ptr;
+    let r = o.toggle_filter_regex();
     r
 }
 
@@ -520,6 +593,21 @@ pub unsafe extern "C" fn conversations_data_conversation_id(
     let data = o.conversation_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_matched(ptr: *const Conversations, row: c_int) -> bool {
+    let o = &*ptr;
+    o.matched(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_matched(
+    ptr: *mut Conversations,
+    row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_matched(to_usize(row), v)
 }
 
 #[no_mangle]
@@ -726,6 +814,7 @@ impl HeraldUtilsEmitter {
 pub trait HeraldUtilsTrait {
     fn new(emit: HeraldUtilsEmitter) -> Self;
     fn emit(&mut self) -> &mut HeraldUtilsEmitter;
+    fn chat_bubble_natural_width(&self, chat_pane_width: f64, text_width: f64) -> f64;
     fn compare_byte_array(&self, bs1: &[u8], bs2: &[u8]) -> bool;
 }
 
@@ -741,6 +830,17 @@ pub extern "C" fn herald_utils_new(herald_utils: *mut HeraldUtilsQObject) -> *mu
 #[no_mangle]
 pub unsafe extern "C" fn herald_utils_free(ptr: *mut HeraldUtils) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_utils_chat_bubble_natural_width(
+    ptr: *const HeraldUtils,
+    chat_pane_width: f64,
+    text_width: f64,
+) -> f64 {
+    let o = &*ptr;
+    let r = o.chat_bubble_natural_width(chat_pane_width, text_width);
+    r
 }
 
 #[no_mangle]
@@ -863,6 +963,7 @@ pub trait MessagesTrait {
     fn delete_conversation_by_id(&mut self, conversation_id: &[u8]) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn insert_message(&mut self, body: String) -> Vec<u8>;
+    fn refresh(&mut self) -> bool;
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
@@ -1014,6 +1115,13 @@ pub unsafe extern "C" fn messages_insert_message(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_refresh(ptr: *mut Messages) -> bool {
+    let o = &mut *ptr;
+    let r = o.refresh();
+    r
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_reply(
     ptr: *mut Messages,
     body_str: *const c_ushort,
@@ -1132,6 +1240,7 @@ pub struct NetworkHandleEmitter {
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
     new_contact_changed: fn(*mut NetworkHandleQObject),
+    new_conversation_changed: fn(*mut NetworkHandleQObject),
     new_message_changed: fn(*mut NetworkHandleQObject),
 }
 
@@ -1150,6 +1259,7 @@ impl NetworkHandleEmitter {
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
             new_contact_changed: self.new_contact_changed,
+            new_conversation_changed: self.new_conversation_changed,
             new_message_changed: self.new_message_changed,
         }
     }
@@ -1176,6 +1286,12 @@ impl NetworkHandleEmitter {
             (self.new_contact_changed)(ptr);
         }
     }
+    pub fn new_conversation_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_conversation_changed)(ptr);
+        }
+    }
     pub fn new_message_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -1190,6 +1306,7 @@ pub trait NetworkHandleTrait {
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
     fn new_contact(&self) -> bool;
+    fn new_conversation(&self) -> bool;
     fn new_message(&self) -> bool;
     fn register_device(&mut self) -> bool;
     fn request_meta_data(&mut self, of: String) -> bool;
@@ -1203,6 +1320,7 @@ pub extern "C" fn network_handle_new(
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_contact_changed: fn(*mut NetworkHandleQObject),
+    network_handle_new_conversation_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
@@ -1210,6 +1328,7 @@ pub extern "C" fn network_handle_new(
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
         new_contact_changed: network_handle_new_contact_changed,
+        new_conversation_changed: network_handle_new_conversation_changed,
         new_message_changed: network_handle_new_message_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
@@ -1234,6 +1353,11 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_new_contact_get(ptr: *const NetworkHandle) -> bool {
     (&*ptr).new_contact()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).new_conversation()
 }
 
 #[no_mangle]
@@ -1421,7 +1545,8 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
-    fn add_to_conversation(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
+    fn add_to_conversation(&mut self, user_id: String, conversation_id: &[u8]) -> bool;
+    fn add_to_conversation_by_index(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
     fn refresh(&mut self) -> bool;
     fn remove_from_conversation(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
@@ -1577,6 +1702,27 @@ pub unsafe extern "C" fn users_add(
 #[no_mangle]
 pub unsafe extern "C" fn users_add_to_conversation(
     ptr: *mut Users,
+    user_id_str: *const c_ushort,
+    user_id_len: c_int,
+    conversation_id_str: *const c_char,
+    conversation_id_len: c_int,
+) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let conversation_id = {
+        slice::from_raw_parts(
+            conversation_id_str as *const u8,
+            to_usize(conversation_id_len),
+        )
+    };
+    let o = &mut *ptr;
+    let r = o.add_to_conversation(user_id, conversation_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_add_to_conversation_by_index(
+    ptr: *mut Users,
     row_index: u64,
     conversation_id_str: *const c_char,
     conversation_id_len: c_int,
@@ -1588,7 +1734,7 @@ pub unsafe extern "C" fn users_add_to_conversation(
         )
     };
     let o = &mut *ptr;
-    let r = o.add_to_conversation(row_index, conversation_id);
+    let r = o.add_to_conversation_by_index(row_index, conversation_id);
     r
 }
 

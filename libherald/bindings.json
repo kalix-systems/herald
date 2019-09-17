@@ -41,11 +41,34 @@
                             "type": "QByteArray"
                         }
                     ]
+                },
+                "chatBubbleNaturalWidth": {
+                    "return": "double",
+                    "arguments": [
+                        {
+                            "name": "chat_pane_width",
+                            "type": "double"
+                        },
+                        {
+                            "name": "text_width",
+                            "type": "double"
+                        }
+                    ]
                 }
             }
         },
         "Conversations": {
             "type": "List",
+            "properties": {
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
             "itemProperties": {
                 "conversationId": {
                     "type": "QByteArray"
@@ -70,12 +93,16 @@
                 },
                 "pairwise": {
                     "type": "bool"
+                },
+                "matched": {
+                    "write": true,
+                    "type": "bool"
                 }
             },
             "functions": {
                 "addConversation": {
                     "mut": true,
-                    "return": "bool"
+                    "return": "QByteArray"
                 },
                 "removeConversation": {
                     "mut": true,
@@ -86,6 +113,10 @@
                             "type": "quint64"
                         }
                     ]
+                },
+                "toggleFilterRegex": {
+                    "mut": true,
+                    "return": "bool"
                 }
             }
         },
@@ -142,6 +173,9 @@
             },
             "properties": {
                 "newMessage": {
+                    "type": "bool"
+                },
+                "newConversation": {
                     "type": "bool"
                 },
                 "connectionUp": {
@@ -235,6 +269,20 @@
                     "return": "bool",
                     "arguments": [
                         {
+                            "name": "user_id",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "addToConversationByIndex": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
                             "name": "row_index",
                             "type": "quint64"
                         },
@@ -311,6 +359,10 @@
                             "type": "QByteArray"
                         }
                     ]
+                },
+                "refresh": {
+                    "return": "bool",
+                    "mut": true
                 },
                 "deleteMessage": {
                     "return": "bool",

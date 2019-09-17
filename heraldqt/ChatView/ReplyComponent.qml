@@ -2,7 +2,6 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
-import "./ChatView.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -23,7 +22,7 @@ Rectangle {
     property string from: ""
     // the width the text sits at without wrapping
     //NPB: same weird margin fuding
-    readonly property int naturalWidth: JS.naturalWidth(
+    readonly property int naturalWidth: heraldUtils.chatBubbleNaturalWidth(
                                             chatPane.width,
                                             messageMetrics.width) + QmlCfg.margin
     // the width of the parent object that we either match or override

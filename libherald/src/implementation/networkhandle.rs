@@ -21,6 +21,7 @@ pub struct EffectsFlags {
     net_pending: AtomicBool,
     net_new_message: AtomicBool,
     net_new_contact: AtomicBool,
+    net_new_conversation: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -30,6 +31,7 @@ impl EffectsFlags {
             net_pending: AtomicBool::new(false),
             net_new_message: AtomicBool::new(false),
             net_new_contact: AtomicBool::new(false),
+            net_new_conversation: AtomicBool::new(false),
         }
     }
     pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
@@ -55,12 +57,19 @@ impl EffectsFlags {
         println!("Net Pending!")
     }
     pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_new_message.fetch_and(true, Ordering::Relaxed);
+        let old = self.net_new_message.load(Ordering::Relaxed);
+        self.net_new_message.fetch_xor(old, Ordering::Relaxed);
         emit.new_message_changed();
     }
     pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_new_contact.fetch_and(true, Ordering::Relaxed);
+        let old = self.net_new_message.load(Ordering::Relaxed);
+        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
         emit.new_contact_changed();
+    }
+    pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
+        let old = self.net_new_message.load(Ordering::Relaxed);
+        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
+        emit.new_conversation_changed();
     }
 }
 
@@ -190,6 +199,12 @@ impl NetworkHandleTrait for NetworkHandle {
         self.status_flags.net_new_contact.load(Ordering::Relaxed)
     }
 
+    fn new_conversation(&self) -> bool {
+        self.status_flags
+            .net_new_conversation
+            .load(Ordering::Relaxed)
+    }
+
     fn connection_up(&self) -> bool {
         self.status_flags.net_online.load(Ordering::Relaxed)
     }
@@ -287,6 +302,10 @@ async fn handle_nw_channel(
                 NewContact => {
                     println!("NEW CONTACT ADDED");
                     status_flags.emit_new_contact(&mut emit);
+                }
+                NewConversation => {
+                    println!("NEW CONVERSATION ADDED");
+                    status_flags.emit_new_conversation(&mut emit);
                 }
             },
             None => println!("print nope"),

@@ -3,21 +3,31 @@ use crate::{
     errors::HErr,
     types::*,
 };
-use herald_common::UserIdRef;
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
 pub(crate) struct MessageStatus {}
 
+pub(crate) fn delete_by_conversation(
+    db: &rusqlite::Connection,
+    conversation: ConversationId,
+) -> Result<(), HErr> {
+    db.execute(
+        include_str!("sql/message_status/delete_by_conversation.sql"),
+        params![conversation],
+    )?;
+    Ok(())
+}
+
 pub(crate) fn set_message_status(
     db: &Database,
     msg_id: MsgId,
-    user_id: UserIdRef,
+    conversation: ConversationId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/message_status/set_message_status.sql"),
-        params![msg_id, user_id, receipt_status],
+        params![msg_id, conversation, receipt_status],
     )?;
     Ok(())
 }
@@ -107,6 +117,7 @@ mod tests {
         let (msg_id, _) = add_message(&db, None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        set_message_status(&db, msg_id, author, MessageReceiptStatus::Read).expect(womp!());
+        set_message_status(&db, msg_id, conversation_id, MessageReceiptStatus::Read)
+            .expect(womp!());
     }
 }

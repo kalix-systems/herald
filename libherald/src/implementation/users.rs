@@ -22,7 +22,7 @@ pub struct Users {
     list: Vec<User>,
     handle: ContactsHandle,
     conversation_id: Option<ConversationId>,
-    updated: i64,
+    updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
@@ -50,7 +50,7 @@ impl UsersTrait for Users {
             filter_regex: false,
             handle,
             conversation_id: None,
-            updated: chrono::Utc::now().timestamp(),
+            updated: chrono::Utc::now(),
         }
     }
 
@@ -66,12 +66,12 @@ impl UsersTrait for Users {
         self.list.insert(
             0,
             User {
+                matched: contact.matches(&self.filter),
                 inner: contact,
-                matched: true,
             },
         );
         self.model.end_insert_rows();
-        self.inner_filter();
+        //self.inner_filter();
 
         self.list[0].inner.pairwise_conversation.to_vec()
     }
@@ -84,9 +84,19 @@ impl UsersTrait for Users {
         let new_list = match conversation_id {
             Some(conv_id) => {
                 let conv_id = ret_err!(ConversationId::try_from(conv_id));
+
+                if Some(conv_id) == self.conversation_id {
+                    return;
+                }
+
                 ret_err!(self.handle.conversation_members(&conv_id))
             }
-            None => ret_err!(self.handle.all()),
+            None => {
+                if self.conversation_id.is_none() {
+                    return;
+                }
+                ret_err!(self.handle.all())
+            }
         };
 
         self.model
@@ -99,8 +109,8 @@ impl UsersTrait for Users {
         self.list = new_list
             .into_iter()
             .map(|inner| User {
+                matched: inner.matches(&self.filter),
                 inner,
-                matched: true,
             })
             .collect();
         self.model.end_insert_rows();
@@ -180,9 +190,10 @@ impl UsersTrait for Users {
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         let status = ret_err!(ContactStatus::try_from(status), false);
 
+        let meta = &self.list[row_index].inner;
         ret_err!(
             self.handle
-                .set_status(self.list[row_index].inner.id.as_str(), status),
+                .set_status(meta.id.as_str(), meta.pairwise_conversation, status),
             false
         );
 
@@ -273,10 +284,24 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn add_to_conversation(&mut self, index: u64, conversation_id: FfiConversationIdRef) -> bool {
+    fn add_to_conversation_by_index(
+        &mut self,
+        index: u64,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
         let index = index as usize;
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
+        true
+    }
+
+    fn add_to_conversation(
+        &mut self,
+        user_id: UserId,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        ret_err!(self.handle.add_member(&conv_id, user_id.as_str()), false);
         true
     }
 
@@ -301,30 +326,27 @@ impl UsersTrait for Users {
                 self.handle.conversation_members_since(&id, self.updated),
                 false
             ),
-            None => {
-                println!("refreshing main contact view");
-                ret_err!(self.handle.all_since(self.updated), false)
-            }
+            None => ret_err!(self.handle.all_since(self.updated), false),
         };
 
-        println!("inserted {} new contacts", new.len());
-        self.updated = chrono::Utc::now().timestamp();
+        self.updated = chrono::Utc::now();
 
         if new.is_empty() {
             return true;
         }
+
+        let filter = &self.filter;
 
         self.model.begin_insert_rows(
             self.list.len(),
             (self.list.len() + new.len()).saturating_sub(1),
         );
         self.list.extend(new.into_iter().map(|inner| User {
+            matched: inner.matches(&filter),
             inner,
-            matched: true,
         }));
         self.model.end_insert_rows();
 
-        println!("length is now {}", self.list.len());
         true
     }
 }
@@ -348,14 +370,7 @@ impl Users {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            let mut acc = false;
-            match contact.inner.name.as_ref() {
-                Some(name) => {
-                    acc = self.filter.is_match(name);
-                }
-                None => {}
-            }
-            contact.matched = self.filter.is_match(contact.inner.id.as_str()) || acc;
+            contact.matched = contact.inner.matches(&self.filter);
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));

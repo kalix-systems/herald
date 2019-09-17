@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 import "ChatTextAreaUtils.mjs" as CTUtils
-import "./ChatView.mjs" as JS
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -96,7 +95,8 @@ Rectangle {
         Common.CorrectText {
             id: bubbleText
             text: messageText
-            width: JS.naturalWidth(chatPane.width, correctWidth)
+            width: heraldUtils.chatBubbleNaturalWidth(chatPane.width,
+                                                      correctWidth)
             Layout.alignment: Qt.AlignLeft
             wrapMode: TextEdit.Wrap
             selectByMouse: true
@@ -107,7 +107,8 @@ Rectangle {
 
         Label {
             id: timeStamp
-            color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(QmlCfg.palette.secondaryTextColor, 1.5)
+            color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(
+                                  QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
             font.pointSize: QmlCfg.chatTextSize
         }

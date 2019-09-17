@@ -16,6 +16,7 @@ Pane {
     id: contactPane
     // GS : we do this to get the current Item, BAD.
     property alias contactsListView: contactsListView
+    property alias conversationsListView: conversationsListView
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
@@ -44,8 +45,13 @@ Pane {
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
-        anchor: utilityBar.bottom
+        anchors.top: utilityBar.bottom
         color: QmlCfg.palette.secondaryColor
+    }
+
+    SBUtils.ContactsToggle {
+        id: contactsToggleBar
+        anchors.top: searchBarBorder.bottom
     }
 
     ///--- Contacts View Actual
@@ -54,7 +60,7 @@ Pane {
         anchors {
             right: parent.right
             left: parent.left
-            top: searchBarBorder.bottom
+            top: contactsToggleBar.bottom
             bottom: parent.bottom
         }
 
@@ -62,6 +68,12 @@ Pane {
             id: contactsListView
             anchors.fill: parent
             model: contactsModel
+        }
+
+        SBUtils.ConversationView {
+            id: conversationsListView
+            anchors.fill: parent
+            model: conversationsModel
         }
     }
 }

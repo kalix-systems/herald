@@ -56,7 +56,7 @@ impl ConfigTrait for Config {
 
     fn set_colorscheme(&mut self, colorscheme: u32) {
         match self.inner.set_color(colorscheme) {
-            Ok(()) => self.emit.color_changed(),
+            Ok(()) => self.emit.colorscheme_changed(),
             Err(e) => eprintln!("{}", e),
         }
     }

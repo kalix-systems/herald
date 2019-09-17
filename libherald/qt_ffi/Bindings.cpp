@@ -58,6 +58,14 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
+    inline void conversationsFilterChanged(Conversations* o)
+    {
+        Q_EMIT o->filterChanged();
+    }
+    inline void conversationsFilterRegexChanged(Conversations* o)
+    {
+        Q_EMIT o->filterRegexChanged();
+    }
     inline void heraldStateConfigInitChanged(HeraldState* o)
     {
         Q_EMIT o->configInitChanged();
@@ -77,6 +85,10 @@ namespace {
     inline void networkHandleNewContactChanged(NetworkHandle* o)
     {
         Q_EMIT o->newContactChanged();
+    }
+    inline void networkHandleNewConversationChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->newConversationChanged();
     }
     inline void networkHandleNewMessageChanged(NetworkHandle* o)
     {
@@ -115,6 +127,8 @@ extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
+    bool conversations_data_matched(const Conversations::Private*, int);
+    bool conversations_set_data_matched(Conversations::Private*, int, bool);
     bool conversations_data_muted(const Conversations::Private*, int);
     bool conversations_set_data_muted(Conversations::Private*, int, bool);
     bool conversations_data_pairwise(const Conversations::Private*, int);
@@ -219,6 +233,22 @@ QByteArray Conversations::conversationId(int row) const
     return b;
 }
 
+bool Conversations::matched(int row) const
+{
+    return conversations_data_matched(m_d, row);
+}
+
+bool Conversations::setMatched(int row, bool value)
+{
+    bool set = false;
+    set = conversations_set_data_matched(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 bool Conversations::muted(int row) const
 {
     return conversations_data_muted(m_d, row);
@@ -295,12 +325,14 @@ QVariant Conversations::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(conversationId(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(muted(index.row()));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(pairwise(index.row()));
+            return QVariant::fromValue(muted(index.row()));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+            return QVariant::fromValue(pairwise(index.row()));
         case Qt::UserRole + 5:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 6:
             return cleanNullQVariant(QVariant::fromValue(title(index.row())));
         }
         break;
@@ -323,10 +355,11 @@ QHash<int, QByteArray> Conversations::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "conversationId");
-    names.insert(Qt::UserRole + 2, "muted");
-    names.insert(Qt::UserRole + 3, "pairwise");
-    names.insert(Qt::UserRole + 4, "picture");
-    names.insert(Qt::UserRole + 5, "title");
+    names.insert(Qt::UserRole + 2, "matched");
+    names.insert(Qt::UserRole + 3, "muted");
+    names.insert(Qt::UserRole + 4, "pairwise");
+    names.insert(Qt::UserRole + 5, "picture");
+    names.insert(Qt::UserRole + 6, "title");
     return names;
 }
 QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
@@ -356,15 +389,20 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
         }
         if (role == Qt::UserRole + 2) {
             if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 3) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMuted(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 4) {
+        if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setPicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setTitle(index.row(), value.value<QString>());
             }
@@ -374,7 +412,7 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 extern "C" {
-    Conversations::Private* conversations_new(Conversations*,
+    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*),
         void (*)(const Conversations*),
         void (*)(Conversations*),
         void (*)(Conversations*),
@@ -388,8 +426,13 @@ extern "C" {
         void (*)(Conversations*, int, int),
         void (*)(Conversations*));
     void conversations_free(Conversations::Private*);
-    bool conversations_add_conversation(Conversations::Private*);
+    void conversations_filter_get(const Conversations::Private*, QString*, qstring_set);
+    void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
+    bool conversations_filter_regex_get(const Conversations::Private*);
+    void conversations_filter_regex_set(Conversations::Private*, bool);
+    void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
+    bool conversations_toggle_filter_regex(Conversations::Private*);
 };
 
 extern "C" {
@@ -402,6 +445,7 @@ extern "C" {
 extern "C" {
     HeraldUtils::Private* herald_utils_new(HeraldUtils*);
     void herald_utils_free(HeraldUtils::Private*);
+    double herald_utils_chat_bubble_natural_width(const HeraldUtils::Private*, double, double);
     bool herald_utils_compare_byte_array(const HeraldUtils::Private*, const char*, int, const char*, int);
 };
 
@@ -595,15 +639,17 @@ extern "C" {
     bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    bool messages_refresh(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     bool network_handle_new_contact_get(const NetworkHandle::Private*);
+    bool network_handle_new_conversation_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*);
     bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
@@ -924,7 +970,8 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    bool users_add_to_conversation(Users::Private*, quint64, const char*, int);
+    bool users_add_to_conversation(Users::Private*, const ushort*, int, const char*, int);
+    bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
     bool users_refresh(Users::Private*);
     bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
@@ -1012,6 +1059,8 @@ Conversations::Conversations(bool /*owned*/, QObject *parent):
 Conversations::Conversations(QObject *parent):
     QAbstractItemModel(parent),
     m_d(conversations_new(this,
+        conversationsFilterChanged,
+        conversationsFilterRegexChanged,
         [](const Conversations* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1066,13 +1115,35 @@ Conversations::~Conversations() {
 }
 void Conversations::initHeaderData() {
 }
-bool Conversations::addConversation()
+QString Conversations::filter() const
 {
-    return conversations_add_conversation(m_d);
+    QString v;
+    conversations_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void Conversations::setFilter(const QString& v) {
+    conversations_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Conversations::filterRegex() const
+{
+    return conversations_filter_regex_get(m_d);
+}
+void Conversations::setFilterRegex(bool v) {
+    conversations_filter_regex_set(m_d, v);
+}
+QByteArray Conversations::addConversation()
+{
+    QByteArray s;
+    conversations_add_conversation(m_d, &s, set_qbytearray);
+    return s;
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
     return conversations_remove_conversation(m_d, row_index);
+}
+bool Conversations::toggleFilterRegex()
+{
+    return conversations_toggle_filter_regex(m_d);
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -1120,6 +1191,10 @@ HeraldUtils::~HeraldUtils() {
     if (m_ownsPrivate) {
         herald_utils_free(m_d);
     }
+}
+double HeraldUtils::chatBubbleNaturalWidth(double chat_pane_width, double text_width) const
+{
+    return herald_utils_chat_bubble_natural_width(m_d, chat_pane_width, text_width);
 }
 bool HeraldUtils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const
 {
@@ -1226,6 +1301,10 @@ QByteArray Messages::insertMessage(const QString& body)
     messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
     return s;
 }
+bool Messages::refresh()
+{
+    return messages_refresh(m_d);
+}
 QByteArray Messages::reply(const QString& body, const QByteArray& op)
 {
     QByteArray s;
@@ -1245,6 +1324,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
         networkHandleNewContactChanged,
+        networkHandleNewConversationChanged,
         networkHandleNewMessageChanged)),
     m_ownsPrivate(true)
 {
@@ -1266,6 +1346,10 @@ bool NetworkHandle::connectionUp() const
 bool NetworkHandle::newContact() const
 {
     return network_handle_new_contact_get(m_d);
+}
+bool NetworkHandle::newConversation() const
+{
+    return network_handle_new_conversation_get(m_d);
 }
 bool NetworkHandle::newMessage() const
 {
@@ -1390,9 +1474,13 @@ QByteArray Users::add(const QString& id)
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
-bool Users::addToConversation(quint64 row_index, const QByteArray& conversation_id)
+bool Users::addToConversation(const QString& user_id, const QByteArray& conversation_id)
 {
-    return users_add_to_conversation(m_d, row_index, conversation_id.data(), conversation_id.size());
+    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
+}
+bool Users::addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id)
+{
+    return users_add_to_conversation_by_index(m_d, row_index, conversation_id.data(), conversation_id.size());
 }
 qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
 {

@@ -74,32 +74,13 @@ Item {
             text: 'Choose Color'
 
             onTriggered: {
+                gsSelectedIndex = index
                 avatarColorPicker.show()
             }
         }
     }
 
     //color picker window
-    Popups.ColorPicker {
-        id: avatarColorPicker
-
-        // button is here to know index of contact clicked
-        Button {
-            id: colorSubmissionButton
-            text: "Submit"
-            anchors {
-                right: parent.right
-                bottom: parent.bottom
-            }
-
-            onClicked: {
-                contactsModel.setColor(index, avatarColorPicker.colorIndex)
-                appRoot.gsConvoColor = QmlCfg.avatarColors[color]
-                avatarColorPicker.close()
-            }
-        }
-    }
-
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside

@@ -1,7 +1,6 @@
 use crate::errors::HErr;
 use regex::{escape, Regex, RegexBuilder};
 
-pub(crate) static DATE_FMT: &str = "%Y-%m-%d %H:%M:%S";
 pub(crate) const RAND_ID_LEN: usize = 32;
 const NUM_COLORS: u64 = 9;
 

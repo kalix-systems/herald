@@ -1,7 +1,7 @@
 use crate::{interface::*, ret_err, types::*};
 use herald_common::UserIdRef;
 use heraldcore::{
-    abort_err,
+    abort_err, chrono,
     config::Config,
     message::{Message, Messages as Core},
     types::*,
@@ -19,11 +19,13 @@ pub struct Messages {
     model: MessagesList,
     list: Vec<MessagesItem>,
     handle: Core,
+    local_id: String,
+    updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl Messages {
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
-        let id = Config::static_id().unwrap();
+        self.updated = chrono::Utc::now();
 
         let conversation_id = match &self.conversation_id {
             Some(conv) => conv,
@@ -34,14 +36,20 @@ impl Messages {
         };
 
         let (msg_id, timestamp) = ret_err!(
-            self.handle
-                .add_message(None, id.as_str(), conversation_id, body.as_str(), None, &op),
+            self.handle.add_message(
+                None,
+                self.local_id.as_str(),
+                conversation_id,
+                body.as_str(),
+                None,
+                &op
+            ),
             None
         );
 
         let msg = MessagesItem {
             inner: Message {
-                author: id,
+                author: self.local_id.clone(),
                 body: body,
                 conversation: conversation_id.clone(),
                 message_id: msg_id.clone(),
@@ -66,7 +74,9 @@ impl MessagesTrait for Messages {
             list: Vec::new(),
             model,
             emit,
+            local_id: abort_err!(Config::static_id()),
             handle: abort_err!(Core::new()),
+            updated: chrono::Utc::now(),
         }
     }
 
@@ -214,6 +224,37 @@ impl MessagesTrait for Messages {
         self.list = Vec::new();
         self.conversation_id = None;
         self.model.end_reset_model();
+    }
+
+    fn refresh(&mut self) -> bool {
+        let conv_id = match self.conversation_id {
+            Some(id) => id,
+            None => {
+                return true;
+            }
+        };
+
+        let new = ret_err!(
+            self.handle
+                .conversation_messages_since(&conv_id, self.updated),
+            false
+        );
+
+        self.updated = chrono::Utc::now();
+
+        if new.is_empty() {
+            return true;
+        }
+
+        self.model.begin_insert_rows(
+            self.list.len(),
+            (self.list.len() + new.len()).saturating_sub(1),
+        );
+        self.list
+            .extend(new.into_iter().map(|inner| MessagesItem { inner }));
+        self.model.end_insert_rows();
+
+        true
     }
 
     fn emit(&mut self) -> &mut MessagesEmitter {

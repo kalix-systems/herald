@@ -18,9 +18,9 @@ ToolBar {
     property alias chatBarAvatar: chatBarAvatar
     // NPB: wat.
     property var currentAvatar: Utils.unwrapOr(
-                                    sideBar.contactsListView.currentItem, {
-                                        "contactAvatar": undefined
-                                    }).contactAvatar
+                                    sideBar.conversationsListView.currentItem, {
+                                        "conversationAvatar": undefined
+                                    }).conversationAvatar
     clip: true
     height: QmlCfg.toolbarHeight
     anchors {
@@ -45,6 +45,35 @@ ToolBar {
                                       "colorHash": 0
                                   }).colorHash
         isDefault: false
+    }
+
+    Button {
+        text: "New member"
+        anchors.right: parent.right
+        onClicked: {
+            newMemberPopup.open()
+        }
+    }
+
+    Popup {
+        width: 200
+        height: 150
+        id: newMemberPopup
+        TextArea {
+            id: userIdText
+            placeholderText: "Enter user ID"
+        }
+        Button {
+            height: 50
+            text: "Submit"
+            anchors.bottom: parent.bottom
+            anchors.right: parent.right
+            onClicked: {
+                gsConvoItemMembers.addToConversation(userIdText.text,
+                                                     gsConversationId)
+                newMemberPopup.close()
+            }
+        }
     }
 
     background: Rectangle {

@@ -1,15 +1,8 @@
-export function contactItemHeight(visible) {
-    if (visible) {
-        return 60;
-    }
-    else {
-        return 0;
-    }
-}
-export function contactClickHandler(mouse, contactView, index, convId, optionsMenu, messageModel) {
+export function contactClickHandler(mouse, contactView, index, convId, optionsMenu, messageModel, appRoot) {
     if (mouse.button === Qt.LeftButton) {
         contactView.currentIndex = index;
         messageModel.conversationId = convId;
+        appRoot.gsConversationId = convId;
     }
     else {
         optionsMenu.open();
