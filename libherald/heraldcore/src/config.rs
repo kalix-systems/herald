@@ -350,6 +350,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn two_configs() {
         Database::reset_all().expect(womp!());
         ConfigBuilder::new("1".into()).add().expect(womp!());
@@ -357,7 +358,9 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn invalid_id() {
+        Database::reset_all().expect(womp!());
         assert!(ConfigBuilder::new(format!("{:?}", vec![0; 256]))
             .add()
             .is_err());

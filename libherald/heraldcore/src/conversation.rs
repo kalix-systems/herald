@@ -489,6 +489,7 @@ mod tests {
     }
 
     #[test]
+    #[serial]
     fn matches() {
         Database::reset_all().expect(womp!());
 
