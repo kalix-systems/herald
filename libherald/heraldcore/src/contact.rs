@@ -653,7 +653,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn create_drop_exists() {
+    fn create_drop_exists_reset() {
         Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         ContactsHandle::drop_table().expect(womp!());
@@ -665,6 +665,17 @@ mod tests {
         assert!(ContactsHandle::exists().expect(womp!()));
         ContactsHandle::drop_table().expect(womp!());
         assert!(!ContactsHandle::exists().expect(womp!()));
+
+        Database::reset_all().expect(womp!());
+
+        ContactsHandle::new().expect(womp!());
+
+        let id = "Hello";
+        ContactBuilder::new(id.into())
+            .add()
+            .expect("Failed to add contact");
+        //this should be a foreign key constraint error
+        assert!(ContactsHandle::reset().is_err());
     }
 
     #[test]
