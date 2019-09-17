@@ -19,7 +19,7 @@ pub trait Store {
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<MessageToClient>, Error>;
 }
 
-fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
+pub(crate) fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
     let suffix = b":prekeys";
     let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
     out.extend_from_slice(key.as_ref());
@@ -27,7 +27,7 @@ fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
     out
 }
 
-fn pending_of(key: sig::PublicKey) -> Vec<u8> {
+pub(crate) fn pending_of(key: sig::PublicKey) -> Vec<u8> {
     let suffix = b":pending";
     let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
     out.extend_from_slice(key.as_ref());

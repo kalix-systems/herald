@@ -1,53 +1,51 @@
-use crate::store::*;
-use crate::user::*;
-use ccl::dashmap::DashMap;
-use crossbeam_queue::*;
-use failure::*;
-use serde::{Deserialize, Serialize};
-use std::net::SocketAddr;
+use crate::{prelude::*, store::*};
+
+use dashmap::DashMap;
 use tokio::prelude::*;
+use tokio::sync::mpsc;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Copy, Clone, PartialEq, Eq)]
-pub struct GlobalId {
-    uid: UserId,
-    did: DeviceId,
+pub struct Streams {
+    active: DashMap<sig::PublicKey, mpsc::Sender<MessageToClient>>,
+    redis: redis::Client,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToDevice {
-    NewKey {
-        index: GlobalId,
-        sig: Signed<RawKey>,
-    },
-    DeprecateKey {
-        from: UserId,
-        sig: Signed<DeviceId>,
-    },
-    Message {
-        from: UserId,
-        msg: Signed<RawMsg>,
-    },
-}
+impl Streams {
+    pub fn new<T: redis::IntoConnectionInfo>(redisparams: T) -> Result<Self, Error> {
+        Ok(Streams {
+            active: DashMap::default(),
+            redis: redis::Client::open(redisparams)?,
+        })
+    }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToServer {
-    RegisterKey(Signed<RawKey>),
-    DeprecateKey(Signed<RawKey>),
-    SendMessage { to: UserId, msg: Signed<RawMsg> },
-}
+    fn new_connection(&self) -> Result<redis::Connection, Error> {
+        Ok(self.redis.get_connection()?)
+    }
 
-pub struct AppState<Sock: AsyncWrite + AsyncRead> {
-    open: DashMap<GlobalId, Sock>,
-    pending: DashMap<GlobalId, SegQueue<MessageToDevice>>,
-    meta: Store,
-}
+    fn with_db_tx<K, T, F>(&self, keys: &[K], f: F) -> Result<T, Error>
+    where
+        K: redis::ToRedisArgs,
+        T: redis::FromRedisValue,
+        F: FnMut(&mut redis::Connection, &mut redis::Pipeline) -> redis::RedisResult<Option<T>>,
+    {
+        Ok(redis::transaction(&mut self.new_connection()?, keys, f)?)
+    }
 
-impl<S: AsyncWrite + AsyncRead + Unpin> AppState<S> {
-    pub async fn handle_incoming(&self, mut incoming: S) -> Result<(), Error> {
-        let mut buf = [0u8; 8];
-        incoming.read_exact(&mut buf).await?;
-        let len = u64::from_le_bytes(buf) as usize;
-
+    pub async fn send_message(
+        &self,
+        to: sig::PublicKey,
+        msg: MessageToClient,
+    ) -> Result<(), Error> {
+        let mut pending = true;
+        if let Some(a) = self.active.async_get(to).await {
+            pending = false;
+            let mut sender = a.clone();
+            if let Err(_) = sender.send(msg.clone()).await {
+                pending = true;
+            }
+        }
+        if pending {
+            self.new_connection()?.add_pending(to, msg)?;
+        }
         Ok(())
     }
 }
