@@ -350,10 +350,16 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn two_configs() {
         ConfigBuilder::new("1".into()).add().expect(womp!());
-        ConfigBuilder::new("2".into()).add().expect(womp!());
+        assert!(ConfigBuilder::new("2".into()).add().is_err());
+    }
+
+    #[test]
+    fn invalid_id() {
+        assert!(ConfigBuilder::new(format!("{:?}", vec![0; 256]))
+            .add()
+            .is_err());
     }
 
     #[test]
