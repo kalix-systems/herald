@@ -531,7 +531,10 @@ impl ContactBuilder {
         let title = if let ContactType::Local = contact_type {
             Some(crate::config::NTS_CONVERSATION_NAME)
         } else {
-            name
+            match name {
+                Some(name) => Some(name),
+                None => Some(self.id.as_str()),
+            }
         };
 
         let pairwise_conversation = match self.pairwise_conversation {
