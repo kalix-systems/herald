@@ -1,7 +1,7 @@
 SELECT
   EXISTS (
     SELECT
-      1
+      user_id
     FROM
       contacts
     WHERE
