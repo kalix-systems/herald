@@ -22,16 +22,6 @@ impl Streams {
         Ok(self.redis.get_connection()?)
     }
 
-    // fn with_db_tx<K, T, F>(&self, keys: &[K], f: F) -> Result<T, Error>
-    // where
-    //     K: redis::ToRedisArgs,
-    //     T: redis::FromRedisValue,
-    //     F: FnMut(&mut redis::Connection, &mut redis::Pipeline) -> redis::RedisResult<Option<T>>,
-    // {
-    //     Ok(redis::transaction(&mut self.new_connection()?, keys, f)?)
-    // }
-    //
-
     pub async fn send_message(
         &self,
         con: &mut redis::Connection,

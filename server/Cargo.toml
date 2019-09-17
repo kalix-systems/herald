@@ -13,7 +13,7 @@ serde_cbor  = "0.10"
 failure     = "0.1"
 redis       = "0.12"
 dashmap     = "1.0"
-# lazy_static = "1.4"
+lazy_static = "1.4"
 serde       = { version       = "1.0", features = ["derive"] }
 chrono      = { version       = "0.4", features = ["serde"] }
 bytes       = { version       = "0.4", features = ["serde"] }
