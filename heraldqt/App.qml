@@ -10,7 +10,7 @@ Item {
     id: appRoot
 
     property var gsConversationId
-    property int  gsSelectedIndex: -1
+    property int gsSelectedIndex: -1
     property color gsConvoColor
     property var gsConvoItemMembers
     property bool gsContactsSearch: true
@@ -58,15 +58,14 @@ Item {
                 bottom: parent.bottom
             }
 
-
             onClicked: {
-                contactsModel.setColor(gsSelectedIndex, avatarColorPicker.colorIndex)
+                contactsModel.setColor(gsSelectedIndex,
+                                       avatarColorPicker.colorIndex)
                 appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
                 avatarColorPicker.close()
             }
         }
     }
-
 
     Config {
         id: config
@@ -85,7 +84,6 @@ Item {
 
         ChatView {
             id: chatView
-
         }
 
         handle: Rectangle {

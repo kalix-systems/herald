@@ -70,7 +70,6 @@ Item {
             }
         }
 
-
         MenuItem {
             text: 'Choose Color'
 
@@ -79,13 +78,9 @@ Item {
                 avatarColorPicker.show()
             }
         }
-
     }
 
-
     //color picker window
-
-
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside

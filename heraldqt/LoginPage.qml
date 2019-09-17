@@ -46,8 +46,7 @@ Rectangle {
                 layer.effect: OpacityMask {
                     maskSource: rect
                 }
-        }
-
+            }
         }
         /// username entry field
         TextArea {

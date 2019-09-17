@@ -31,7 +31,6 @@ Pane {
         border.color: QmlCfg.palette.secondaryColor
     }
 
-
     ///--- Username and Settings gear button
     SBUtils.ConfigBar {
         id: toolBar
@@ -50,15 +49,10 @@ Pane {
         color: QmlCfg.palette.secondaryColor
     }
 
-
     SBUtils.ContactsToggle {
         id: contactsToggleBar
         anchors.top: searchBarBorder.bottom
     }
-
-
-
-
 
     ///--- Contacts View Actual
     Pane {
@@ -81,7 +75,5 @@ Pane {
             anchors.fill: parent
             model: conversationsModel
         }
-
-
     }
 }

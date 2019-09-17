@@ -50,7 +50,6 @@ ListView {
             conversationId: conversationsModel.conversationId(index)
         }
 
-
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
             id: bgBox
@@ -92,9 +91,9 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
-                    conversationList.currentIndex = index;
-                    messageModel.conversationId = conversationId;
-                    appRoot.gsConversationId = conversationId;
+                    conversationList.currentIndex = index
+                    messageModel.conversationId = conversationId
+                    appRoot.gsConversationId = conversationId
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                     appRoot.gsConvoItemMembers = convoItemMembers
                 }
@@ -114,5 +113,4 @@ ListView {
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }
-
 }

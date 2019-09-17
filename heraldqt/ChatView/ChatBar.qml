@@ -50,9 +50,9 @@ ToolBar {
     Button {
         text: "New member"
         anchors.right: parent.right
-        onClicked: { newMemberPopup.open()
+        onClicked: {
+            newMemberPopup.open()
         }
-
     }
 
     Popup {
@@ -69,13 +69,12 @@ ToolBar {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
-                gsConvoItemMembers.addToConversation(userIdText.text, gsConversationId)
+                gsConvoItemMembers.addToConversation(userIdText.text,
+                                                     gsConversationId)
                 newMemberPopup.close()
             }
         }
     }
-
-
 
     background: Rectangle {
         color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
