@@ -175,6 +175,9 @@
                 "newMessage": {
                     "type": "bool"
                 },
+                "newConversation": {
+                    "type": "bool"
+                },
                 "connectionUp": {
                     "type": "bool"
                 },
@@ -262,6 +265,20 @@
                     "return": "bool"
                 },
                 "addToConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "addToConversationByIndex": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [

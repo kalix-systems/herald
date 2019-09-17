@@ -214,6 +214,7 @@ private:
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     Q_PROPERTY(bool newContact READ newContact NOTIFY newContactChanged FINAL)
+    Q_PROPERTY(bool newConversation READ newConversation NOTIFY newConversationChanged FINAL)
     Q_PROPERTY(bool newMessage READ newMessage NOTIFY newMessageChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
@@ -222,6 +223,7 @@ public:
     bool connectionPending() const;
     bool connectionUp() const;
     bool newContact() const;
+    bool newConversation() const;
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice();
     Q_INVOKABLE bool requestMetaData(const QString& of);
@@ -231,6 +233,7 @@ Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
     void newContactChanged();
+    void newConversationChanged();
     void newMessageChanged();
 };
 
@@ -256,7 +259,8 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
-    Q_INVOKABLE bool addToConversation(quint64 row_index, const QByteArray& conversation_id);
+    Q_INVOKABLE bool addToConversation(const QString& user_id, const QByteArray& conversation_id);
+    Q_INVOKABLE bool addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
     Q_INVOKABLE bool refresh();
     Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);
