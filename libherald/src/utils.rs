@@ -78,6 +78,21 @@ macro_rules! ret_none {
     };
 }
 
+#[macro_export]
+/// Performs a bounds check
+macro_rules! bounds_chk {
+    ($ix: expr) => {
+        if self.list.len().saturating_sub(1) < $ix {
+            return;
+        }
+    };
+    ($ix: expr, $retval: expr) => {
+        if self.list.len().saturating_sub(1) < $ix {
+            return;
+        }
+    };
+}
+
 #[cfg(tests)]
 mod tests {
     #[test]
