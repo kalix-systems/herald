@@ -415,7 +415,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn create_drop_exists() {
+    fn create_drop_exists_reset() {
         Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         Conversations::drop_table().expect(womp!());
@@ -427,6 +427,12 @@ mod tests {
         assert!(Conversations::exists().expect(womp!()));
         Conversations::drop_table().expect(womp!());
         assert!(!Conversations::exists().expect(womp!()));
+
+        Database::reset_all().expect(womp!());
+
+        Conversations::create_table().expect(womp!());
+        Conversations::reset().expect(womp!());
+        assert!(Conversations::exists().expect(womp!()));
     }
 
     #[test]
