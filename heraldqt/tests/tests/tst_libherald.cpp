@@ -2,9 +2,11 @@
 #include <QSignalSpy>
 #include <pthread.h>
 #include "Bindings.h"
+
 // spawns server in a pthread for the duration of the tests.
 pid_t spawn_server() {
-
+  // build server, wait.
+  // spawn server in thread, return pid or -1
 }
 
 // kills the server at process ID pid,
@@ -36,9 +38,27 @@ public:
   ~LibHerald();
 
 private slots:
-  void test_config_set();
-  void test_messages_insertion();
-
+  void test_config_set_name();
+  void test_config_set_color();
+  void test_config_set_pfp();
+  void test_config_set_color_scheme();
+// conversation testing slots
+  void test_filter();
+  void test_setFilter();
+  void test_filterRegex();
+  void test_setFilterRegex();
+  void test_addConversation();
+  void test_removeConversation();
+  void test_toggleFilterRegex();
+// message testing slots
+  void test_insertMessage();
+  void test_clearConversationView();
+  void test_deleteConversation();
+  void test_deleteConversationById();
+  void test_deleteMessage();
+  void test_refresh();
+  void test_reply();
+//
 
 };
 
@@ -49,11 +69,69 @@ LibHerald::LibHerald()
 {
   h_state = new HeraldState();
   h_state->setConfigId("Alice");
+  server_pid = spawn_server();
 }
 
 LibHerald::~LibHerald()
 {
   kill_server(server_pid);
+}
+
+
+
+/* run input tests single output
+ *
+ * for generically running tests that return one value
+ * as opposed to a vector or map.
+ *
+ * T: the tested class
+ * I: the input type
+ * O: the output type, often the same as I
+ *
+ * these tests assume that input must match output.
+ * and that all signals must be emitted. they are super generic.
+ *
+ * platform: The object to init and test
+ * input: the input, and expected output, vectors
+ * setter: the setter function pointer
+ * getter: the getter function pointer
+ * signal: a signal that should be listened for and spied on after each insertion
+ *
+ * */
+template <class T, typename I, typename O>
+void run_input_tests_single_output
+(T *platform, std::vector<O> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
+{
+  platform = new T;
+  QSignalSpy spy(platform, sig_name);
+  int ct = 0;
+  for (auto input_row : input) {
+    ct++;
+    (*platform.*setter)(input_row);
+    QCOMPARE((*platform.*getter)(),input_row);
+    QCOMPARE(spy.count(), ct);
+  }
+  delete platform;
+}
+
+/*
+ * identical to the above function, except it checks if the vector output is
+ * the same as the vector input.
+ * */
+template <class T, typename I, typename O>
+void run_input_tests_vector_output
+(T *platform, std::vector<O> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
+{
+  platform = new T;
+  QSignalSpy spy(platform, sig_name);
+  int ct = 0;
+  for (auto input_row : input) {
+    ct++;
+    (*platform.*setter)(input_row);
+    QCOMPARE((*platform.*getter)(),input_row);
+    QCOMPARE(spy.count(), ct);
+  }
+  delete platform;
 }
 
 
@@ -64,39 +142,76 @@ LibHerald::~LibHerald()
  *  unfortunately coupled to another set of functions.
 **/
 
-/*
- * arrangement: all properties of the config are set
- * methods : insert_message, get_message,
- * expected behavior:
- *      set properties should emit data changed
- *      retrieved properties should emit nothing
- *      the retrieved values should be identical
- *      to the stored ones.
-**/
-void LibHerald::test_config_set()
+void LibHerald::test_config_set_name()
 {
+  typedef const QString& input_t;
+  typedef QString output_t;
+
+  // cannot pass double reference type
+  std::vector<output_t> input = {"Nano Nacuno", "Frank Stoyvesson", "ЁЂЃЄЅІЇшщъыьэюя"};
+  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+                                  input,
+                                  &Config::setName,
+                                  &Config::name,
+                                  SIGNAL(nameChanged()));
 
 }
+
+void LibHerald::test_config_set_color()
+{
+  typedef quint32 input_t;
+  typedef quint32 output_t;
+  std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
+  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+                                   input,
+                                   &Config::setColor,
+                                   &Config::color,
+                                   SIGNAL(colorChanged()));
+
+}
+
+void LibHerald::test_config_set_pfp()
+{
+  typedef const QString& input_t;
+  typedef QString output_t;
+
+  // cannot pass double reference type. grr.
+  std::vector<output_t> input = {"some_pfp.url", "some_other_pfp.url", "ЁЂЃЄЅІЇшщъыьэюя"};
+  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+                                             input,
+                                             &Config::setProfilePicture,
+                                             &Config::profilePicture,
+                                             SIGNAL(profilePictureChanged()));
+}
+
+
+void LibHerald::test_config_set_color_scheme(){
+
+  typedef quint32 input_t;
+  typedef quint32 output_t;
+
+  std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
+  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+                                             input,
+                                             &Config::setColorscheme,
+                                             &Config::colorscheme,
+                                             SIGNAL(colorschemeChanged()));
+
+}
+
 
 /*
  *  MESSAGES TEST CASES:
  *  these are tests for the messages database.
  *  They do not rely on the server for operation.
 **/
-
-/*
- * arrangement: messages are inserted into the database
- * methods : insert_message, get_message,
- * expected behavior:
- *      inserted messages should emit data changed
- *      retrieved mesages should emit nothing
- *      the retrieved messages should be identical
- *      to the inserted messages.
-**/
-void LibHerald::test_messages_insertion()
+void LibHerald::test_insertMessage()
 {
 
 }
+
+
+
 
 QTEST_APPLESS_MAIN(LibHerald)
 
