@@ -86,7 +86,7 @@ LibHerald::~LibHerald()
  *
  * T: the tested class
  * I: the input type
- * O: the output type, often the same as I
+ * S: the setter type, usually matches the Input type, not always
  *
  * these tests assume that input must match output.
  * and that all signals must be emitted. they are super generic.
@@ -98,9 +98,9 @@ LibHerald::~LibHerald()
  * signal: a signal that should be listened for and spied on after each insertion
  *
  * */
-template <class T, typename I, typename O>
+template <class T, typename I, typename S>
 void run_input_tests_single_output
-(T *platform, std::vector<O> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
+(T *platform, std::vector<I> input, void(T::*setter)(S),  I(T::*getter)() const, const char* sig_name)
 {
   platform = new T;
   QSignalSpy spy(platform, sig_name);
@@ -120,7 +120,7 @@ void run_input_tests_single_output
  * */
 template <class T, typename I, typename O>
 void run_input_tests_vector_output
-(T *platform, std::vector<O> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
+(T *platform, std::vector<I> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
 {
   platform = new T;
   QSignalSpy spy(platform, sig_name);
@@ -128,9 +128,9 @@ void run_input_tests_vector_output
   for (auto input_row : input) {
     ct++;
     (*platform.*setter)(input_row);
-    QCOMPARE((*platform.*getter)(),input_row);
     QCOMPARE(spy.count(), ct);
   }
+  QCOMPARE((*platform.*getter)(),input);
   delete platform;
 }
 
@@ -144,12 +144,12 @@ void run_input_tests_vector_output
 
 void LibHerald::test_config_set_name()
 {
-  typedef const QString& input_t;
-  typedef QString output_t;
+  typedef const QString& setter_t;
+  typedef QString input_t;
 
   // cannot pass double reference type
-  std::vector<output_t> input = {"Nano Nacuno", "Frank Stoyvesson", "ЁЂЃЄЅІЇшщъыьэюя"};
-  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+  std::vector<input_t> input = {"Nano Nacuno", "Frank Stoyvesson", "ЁЂЃЄЅІЇшщъыьэюя"};
+  run_input_tests_single_output<Config, input_t, setter_t>(cfg,
                                   input,
                                   &Config::setName,
                                   &Config::name,
@@ -160,9 +160,8 @@ void LibHerald::test_config_set_name()
 void LibHerald::test_config_set_color()
 {
   typedef quint32 input_t;
-  typedef quint32 output_t;
   std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
-  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+  run_input_tests_single_output<Config, input_t, input_t>(cfg,
                                    input,
                                    &Config::setColor,
                                    &Config::color,
@@ -172,12 +171,12 @@ void LibHerald::test_config_set_color()
 
 void LibHerald::test_config_set_pfp()
 {
-  typedef const QString& input_t;
-  typedef QString output_t;
+  typedef const QString& setter_t;
+  typedef QString input_t;
 
   // cannot pass double reference type. grr.
-  std::vector<output_t> input = {"some_pfp.url", "some_other_pfp.url", "ЁЂЃЄЅІЇшщъыьэюя"};
-  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+  std::vector<input_t> input = {"some_pfp.url", "some_other_pfp.url", "ЁЂЃЄЅІЇшщъыьэюя"};
+  run_input_tests_single_output<Config, input_t, setter_t>(cfg,
                                              input,
                                              &Config::setProfilePicture,
                                              &Config::profilePicture,
@@ -188,10 +187,9 @@ void LibHerald::test_config_set_pfp()
 void LibHerald::test_config_set_color_scheme(){
 
   typedef quint32 input_t;
-  typedef quint32 output_t;
 
   std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
-  run_input_tests_single_output<Config, input_t, output_t>(cfg,
+  run_input_tests_single_output<Config, input_t, input_t>(cfg,
                                              input,
                                              &Config::setColorscheme,
                                              &Config::colorscheme,
