@@ -58,7 +58,7 @@ private slots:
   void test_deleteMessage();
   void test_refresh();
   void test_reply();
-//
+// networking dependant tests
 
 };
 
@@ -200,18 +200,31 @@ void LibHerald::test_config_set_color_scheme(){
 }
 
 
+
+/*
+ *  CONVERSATION TEST CASES:
+ *  these are tests for the messages database.
+ *  They do not rely on the server for operation.
+**/
+void LibHerald::test_filter() {}
+void LibHerald::test_setFilter() {}
+void LibHerald::test_filterRegex() {}
+void LibHerald::test_setFilterRegex() {}
+void LibHerald::test_addConversation() {}
+void LibHerald::test_removeConversation() {}
+void LibHerald::test_toggleFilterRegex() {}
 /*
  *  MESSAGES TEST CASES:
  *  these are tests for the messages database.
  *  They do not rely on the server for operation.
 **/
-void LibHerald::test_insertMessage()
-{
-
-}
-
-
-
+void LibHerald::test_insertMessage() {}
+void LibHerald::test_clearConversationView() {}
+void LibHerald::test_deleteConversation() {}
+void LibHerald::test_deleteConversationById() {}
+void LibHerald::test_deleteMessage() {}
+void LibHerald::test_refresh() {}
+void LibHerald::test_reply() {}
 
 QTEST_APPLESS_MAIN(LibHerald)
 
