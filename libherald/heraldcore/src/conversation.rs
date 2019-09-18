@@ -519,7 +519,11 @@ mod tests {
 
         let pattern = utils::SearchPattern::new_normal("titl".into()).expect(womp!());
 
-        conv.matches(&pattern);
+        let bad_pattern = utils::SearchPattern::new_normal("tilt".into()).expect(womp!());
+
+        assert_eq!(conv.matches(&pattern), true);
+
+        assert_eq!(conv.matches(&bad_pattern), false);
     }
 
     #[test]
