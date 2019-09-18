@@ -3,8 +3,6 @@
 #![feature(try_blocks)]
 #![warn(missing_docs)]
 
-/// Chainmail blocks
-mod blocks;
 /// User configuration
 pub mod config;
 /// Functions and data structures related to contacts.
@@ -17,6 +15,8 @@ pub mod db;
 mod errors;
 /// Image processing
 pub(crate) mod image_utils;
+/// Chainmail support
+mod keys;
 /// Members of conversations
 pub mod members;
 /// Functions and data structures related to messages.
