@@ -36,12 +36,22 @@ public:
   pid_t server_pid;
   LibHerald();
   ~LibHerald();
+  void messages_set_up();
+  void messages_tear_down();
 
 private slots:
   void test_config_set_name();
+  void test_config_set_name_data();
+
   void test_config_set_color();
+  void test_config_set_color_data();
+
   void test_config_set_pfp();
+  void test_config_set_pfp_data();
+
   void test_config_set_color_scheme();
+  void test_config_set_color_scheme_data();
+
 // conversation testing slots
   void test_filter();
   void test_setFilter();
@@ -79,61 +89,6 @@ LibHerald::~LibHerald()
 
 
 
-/* run input tests single output
- *
- * for generically running tests that return one value
- * as opposed to a vector or map.
- *
- * T: the tested class
- * I: the input type
- * S: the setter type, usually matches the Input type, not always
- *
- * these tests assume that input must match output.
- * and that all signals must be emitted. they are super generic.
- *
- * platform: The object to init and test
- * input: the input, and expected output, vectors
- * setter: the setter function pointer
- * getter: the getter function pointer
- * signal: a signal that should be listened for and spied on after each insertion
- *
- * */
-template <class T, typename I, typename S>
-void run_input_tests_single_output
-(T *platform, std::vector<I> input, void(T::*setter)(S),  I(T::*getter)() const, const char* sig_name)
-{
-  platform = new T;
-  QSignalSpy spy(platform, sig_name);
-  int ct = 0;
-  for (auto input_row : input) {
-    ct++;
-    (*platform.*setter)(input_row);
-    QCOMPARE((*platform.*getter)(),input_row);
-    QCOMPARE(spy.count(), ct);
-  }
-  delete platform;
-}
-
-/*
- * identical to the above function, except it checks if the vector output is
- * the same as the vector input.
- * */
-template <class T, typename I, typename O>
-void run_input_tests_vector_output
-(T *platform, std::vector<I> input, void(T::*setter)(I),  O(T::*getter)() const, const char* sig_name)
-{
-  platform = new T;
-  QSignalSpy spy(platform, sig_name);
-  int ct = 0;
-  for (auto input_row : input) {
-    ct++;
-    (*platform.*setter)(input_row);
-    QCOMPARE(spy.count(), ct);
-  }
-  QCOMPARE((*platform.*getter)(),input);
-  delete platform;
-}
-
 
 /*
  *  CONFIG TEST CASES:
@@ -141,64 +96,123 @@ void run_input_tests_vector_output
  *  they require that heraldState already. which means they are
  *  unfortunately coupled to another set of functions.
 **/
+void LibHerald::test_config_set_name_data(){
+  QTest::addColumn<QString>("name");
+
+  QTest::newRow("standard case 1")  <<  "Nano Nacuno";
+  QTest::newRow("standard case 2")  <<  "Frank Stoyvesson";
+  QTest::newRow("naughty string 1") <<  "ЁЂЃЄЅІЇшщъыьэюя";
+  QTest::newRow("naughty string 2") <<  "社會科學院語學研究所";
+  QTest::newRow("naughty string 3") <<  "❤️ 💔 💌 💕 💞 💓 💗 💖 💘 💝 💟 💜 💛 💚 💙";
+
+}
 
 void LibHerald::test_config_set_name()
 {
-  typedef const QString& setter_t;
-  typedef QString input_t;
+  cfg = new Config();
+  QSignalSpy spy(cfg, SIGNAL(nameChanged()));
 
-  // cannot pass double reference type
-  std::vector<input_t> input = {"Nano Nacuno", "Frank Stoyvesson", "ЁЂЃЄЅІЇшщъыьэюя"};
-  run_input_tests_single_output<Config, input_t, setter_t>(cfg,
-                                  input,
-                                  &Config::setName,
-                                  &Config::name,
-                                  SIGNAL(nameChanged()));
+  QFETCH(QString, name);
+
+  cfg->setName(name);
+  QCOMPARE(cfg->name(), name);
+  QCOMPARE(spy.count(), 1);
+  delete cfg;
+}
+void LibHerald::test_config_set_color_data()
+{
+  QTest::addColumn<quint32>("color");
+
+  QTest::newRow("0") << 0u;
+  QTest::newRow("1") << 1u;
+  QTest::newRow("2") << 2u;
+  QTest::newRow("3") << 3u;
+  QTest::newRow("4") << 4u;
 
 }
-
 void LibHerald::test_config_set_color()
 {
-  typedef quint32 input_t;
-  std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
-  run_input_tests_single_output<Config, input_t, input_t>(cfg,
-                                   input,
-                                   &Config::setColor,
-                                   &Config::color,
-                                   SIGNAL(colorChanged()));
+  cfg = new Config();
+  QSignalSpy spy(cfg, SIGNAL(colorChanged()));
 
+  QFETCH(quint32, color);
+
+  cfg->setColor(color);
+  QCOMPARE(cfg->color(), color);
+  QCOMPARE(spy.count(), 1);
+  delete cfg;
 }
+
+void LibHerald::test_config_set_pfp_data(){
+  QTest::addColumn<QString>("url");
+  QTest::newRow("standard case 1")  <<  "NanoNacuno.png";
+  QTest::newRow("standard case 2")  <<  "FrankStoyvesson.png";
+  QTest::newRow("naughty string 1") <<  "ЁЂЃЄЅІЇшщъыьэюя.jpeg";
+  QTest::newRow("naughty string 2") <<  "社會科學院語學研究所.jpg";
+  QTest::newRow("naughty string 3") <<  "❤️ 💔 💌 💕 💞 💓 💗 💖 💘 💝 💟 💜 💛 💚 💙.png";
+}
+
 
 void LibHerald::test_config_set_pfp()
 {
-  typedef const QString& setter_t;
-  typedef QString input_t;
+  cfg = new Config();
+  QSignalSpy spy(cfg, SIGNAL(profilePictureChanged()));
 
-  // cannot pass double reference type. grr.
-  std::vector<input_t> input = {"some_pfp.url", "some_other_pfp.url", "ЁЂЃЄЅІЇшщъыьэюя"};
-  run_input_tests_single_output<Config, input_t, setter_t>(cfg,
-                                             input,
-                                             &Config::setProfilePicture,
-                                             &Config::profilePicture,
-                                             SIGNAL(profilePictureChanged()));
+  QFETCH(QString, url);
+
+  cfg->setProfilePicture(url);
+  QCOMPARE(cfg->profilePicture(), ""); // all of these should fail none of the paths exist
+  QCOMPARE(spy.count(), 0);
+  delete cfg;
+}
+
+void LibHerald::test_config_set_color_scheme_data()
+{
+  QTest::addColumn<quint32>("color_scheme");
+
+  QTest::newRow("0") << 0u;
+  QTest::newRow("1") << 1u;
+  QTest::newRow("2") << 2u;
+  QTest::newRow("3") << 3u;
+  QTest::newRow("4") << 4u;
 }
 
 
 void LibHerald::test_config_set_color_scheme(){
+  cfg = new Config();
+  QSignalSpy spy(cfg, SIGNAL(colorschemeChanged()));
 
-  typedef quint32 input_t;
+  QFETCH(quint32, color_scheme);
 
-  std::vector<input_t> input = {0, 1, 2, 3, 4, 0, 1, 2, 3, 4};
-  run_input_tests_single_output<Config, input_t, input_t>(cfg,
-                                             input,
-                                             &Config::setColorscheme,
-                                             &Config::colorscheme,
-                                             SIGNAL(colorschemeChanged()));
-
+  cfg->setColorscheme(color_scheme);
+  QCOMPARE(cfg->colorscheme(), color_scheme);
+  QCOMPARE(spy.count(), 1);
+  delete cfg;
 }
 
 
+/*
+ *  MESSAGES TEST CASES:
+ *  these are tests for the messages database.
+ *  They do not rely on the server for operation.
+**/
+void LibHerald::messages_set_up() {
+  cfg = new Config();
+  convos = new Conversations();
+}
 
+void LibHerald::messages_tear_down() {
+
+}
+void LibHerald::test_insertMessage() {}
+void LibHerald::test_clearConversationView() {}
+void LibHerald::test_deleteConversation() {}
+void LibHerald::test_deleteConversationById() {}
+void LibHerald::test_deleteMessage() {}
+void LibHerald::test_refresh() {}
+void LibHerald::test_reply() {}
+
+// network dependant tests
 /*
  *  CONVERSATION TEST CASES:
  *  these are tests for the messages database.
@@ -211,18 +225,6 @@ void LibHerald::test_setFilterRegex() {}
 void LibHerald::test_addConversation() {}
 void LibHerald::test_removeConversation() {}
 void LibHerald::test_toggleFilterRegex() {}
-/*
- *  MESSAGES TEST CASES:
- *  these are tests for the messages database.
- *  They do not rely on the server for operation.
-**/
-void LibHerald::test_insertMessage() {}
-void LibHerald::test_clearConversationView() {}
-void LibHerald::test_deleteConversation() {}
-void LibHerald::test_deleteConversationById() {}
-void LibHerald::test_deleteMessage() {}
-void LibHerald::test_refresh() {}
-void LibHerald::test_reply() {}
 
 QTEST_APPLESS_MAIN(LibHerald)
 
