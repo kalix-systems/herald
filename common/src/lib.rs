@@ -4,6 +4,7 @@ mod crypto;
 pub use crypto::*;
 
 pub use bytes::Bytes;
+pub use serde_cbor;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
 pub use serde::*;

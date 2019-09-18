@@ -1,4 +1,4 @@
-use herald_common::TransportError;
+use herald_common::{serde_cbor, TransportError};
 use image;
 use regex;
 use std::{fmt, sync::PoisonError};

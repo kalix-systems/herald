@@ -19,7 +19,6 @@ rand          = "0.7.0"
 regex         = "1.2.1"
 rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
 serde         = "1.0.99"
-serde_cbor    = "0.10.1"
 tokio         = "0.2.0-alpha.4"
 
 [dev-dependencies]
