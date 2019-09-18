@@ -653,7 +653,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn create_drop_exists() {
+    fn create_drop_exists_reset() {
         Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         ContactsHandle::drop_table().expect(womp!());
@@ -665,6 +665,17 @@ mod tests {
         assert!(ContactsHandle::exists().expect(womp!()));
         ContactsHandle::drop_table().expect(womp!());
         assert!(!ContactsHandle::exists().expect(womp!()));
+
+        Database::reset_all().expect(womp!());
+
+        ContactsHandle::new().expect(womp!());
+
+        let id = "Hello";
+        ContactBuilder::new(id.into())
+            .add()
+            .expect("Failed to add contact");
+        //this should be a foreign key constraint error
+        assert!(ContactsHandle::reset().is_err());
     }
 
     #[test]
@@ -759,6 +770,8 @@ mod tests {
         handle
             .set_profile_picture(id, Some(test_picture.into()), None)
             .expect("Failed to set profile picture");
+
+        std::fs::remove_dir_all("profile_pictures").expect(womp!());
     }
 
     #[test]
@@ -858,10 +871,10 @@ mod tests {
 
         ContactBuilder::new(id1.into())
             .add()
-            .expect("Failed to add id1");
+            .expect(womp!("Failed to add id1"));
         ContactBuilder::new(id2.into())
             .add()
-            .expect("Failed to add id2");
+            .expect(womp!("Failed to add id2"));
 
         let contacts = handle.all().expect(womp!());
         assert_eq!(contacts.len(), 2);
@@ -910,7 +923,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn add_member() {
+    fn add_remove_member() {
         Database::reset_all().expect(womp!());
 
         let id1 = "id1";
@@ -921,25 +934,38 @@ mod tests {
 
         ContactBuilder::new(id1.into())
             .add()
-            .expect("Failed to add id1");
+            .expect(womp!("Failed to add id1"));
+
         ContactBuilder::new(id2.into())
             .pairwise_conversation(conv_id)
             .add()
-            .expect("Failed to add id2");
+            .expect(womp!("Failed to add id2"));
 
         let contacts = handle.all().expect(womp!());
 
         handle
             .add_member(&conv_id, &contacts[0].id)
-            .expect("failed to add member");
+            .expect(womp!("failed to add member"));
 
         let members = handle
             .conversation_members(&conv_id)
-            .expect("failed to get members");
+            .expect(womp!("failed to get members"));
 
         assert_eq!(members.len(), 2);
 
         assert_eq!(members[0].id, id1);
+
+        handle
+            .remove_member(&conv_id, &contacts[0].id)
+            .expect(womp!("failed to remove member"));
+
+        let members_new = handle
+            .conversation_members(&conv_id)
+            .expect(womp!("failed to get members"));
+
+        assert_eq!(members_new.len(), 1);
+        //is the correct member remaining?
+        assert_eq!(members_new[0].id, id2);
     }
 
     #[test]
