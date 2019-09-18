@@ -3,6 +3,8 @@
 #![feature(try_blocks)]
 #![warn(missing_docs)]
 
+/// Chainmail blocks
+mod blocks;
 /// User configuration
 pub mod config;
 /// Functions and data structures related to contacts.
@@ -11,8 +13,6 @@ pub mod contact;
 pub mod conversation;
 /// Wrapper around database.
 pub mod db;
-/// Devices
-mod devices;
 /// Errors
 mod errors;
 /// Image processing
