@@ -89,6 +89,12 @@ mod tests {
         assert!(MessageStatus::exists().expect(womp!()));
         MessageStatus::drop_table().expect(womp!());
         assert!(!MessageStatus::exists().expect(womp!()));
+
+        Database::reset_all().expect(womp!());
+
+        MessageStatus::create_table().expect(womp!());
+
+        MessageStatus::reset().expect(womp!());
     }
 
     #[test]
