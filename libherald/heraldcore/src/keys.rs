@@ -3,7 +3,7 @@ use crate::{
     db::{DBTable, Database},
     errors::HErr,
 };
-use chainmail::block::*;
+use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
@@ -43,24 +43,35 @@ impl DBTable for Keys {
 
 impl BlockStore for Keys {
     // stores a key, does not mark key as used
-    fn store_key(&mut self, hash: BlockHash, key: ChainKey) {
+    fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<(), ChainError> {
         self.db
             .execute(
                 include_str!("sql/keys/store_key.sql"),
                 params![hash.as_ref(), key.as_ref()],
             )
-            .expect("failed to store key");
+            .map_err(|_| ChainError::BlockStoreSaveError)?;
+
+        Ok(())
     }
 
     // we'll want to implement some kind of gc strategy to collect keys marked used
     // if they're less than an hour old we should keep them, otherwise delete
     // could run on a schedule, or every time we call get_unused, or something else
-    fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(&self, blocks: I) {
-        let mut stmt = abort_err!(self.db.prepare(include_str!("sql/keys/mark_used.sql")));
+    fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+        &self,
+        blocks: I,
+    ) -> Result<(), ChainError> {
+        let mut stmt = self
+            .db
+            .prepare(include_str!("sql/keys/mark_used.sql"))
+            .map_err(|_| ChainError::BlockStoreMarkError)?;
 
         for block in blocks {
-            abort_err!(stmt.execute(params![block.as_ref()]));
+            stmt.execute(params![block.as_ref()])
+                .map_err(|_| ChainError::BlockStoreMarkError)?;
         }
+
+        Ok(())
     }
 
     // this should *not* mark keys as used
@@ -84,7 +95,7 @@ impl BlockStore for Keys {
     }
 
     // this should *not* mark keys as used
-    fn get_unused(&self) -> Vec<(BlockHash, ChainKey)> {
+    fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
         let mut stmt = abort_err!(self.db.prepare(include_str!("sql/keys/get_unused.sql")));
 
         let results = stmt
@@ -96,14 +107,14 @@ impl BlockStore for Keys {
         let mut pairs = vec![];
 
         for res in results {
-            let (raw_hash, raw_key) = res.unwrap();
+            let (raw_hash, raw_key) = res.map_err(|_| ChainError::MissingKeys)?;
             pairs.push((
                 BlockHash::from_slice(raw_hash.as_slice()).unwrap(),
                 ChainKey::from_slice(raw_key.as_slice()).unwrap(),
             ));
         }
 
-        pairs
+        Ok(pairs)
     }
 }
 
@@ -141,8 +152,12 @@ mod tests {
         let chainkey1 = ChainKey::from_slice(vec![1; CHAINKEY_BYTES].as_slice()).expect(womp!());
         let chainkey2 = ChainKey::from_slice(vec![2; CHAINKEY_BYTES].as_slice()).expect(womp!());
 
-        handle.store_key(blockhash1, (&chainkey1).clone());
-        handle.store_key(blockhash2, (&chainkey2).clone());
+        handle
+            .store_key(blockhash1, (&chainkey1).clone())
+            .expect(womp!());
+        handle
+            .store_key(blockhash2, (&chainkey2).clone())
+            .expect(womp!());
 
         let known_keys: BTreeSet<ChainKey> = vec![(&chainkey1).clone(), (&chainkey2).clone()]
             .into_iter()
@@ -155,9 +170,9 @@ mod tests {
         assert_eq!(keys.len(), 2);
         assert_eq!(known_keys, keys);
 
-        handle.mark_used(vec![blockhash1].iter());
+        handle.mark_used(vec![blockhash1].iter()).expect(womp!());
 
-        let unused: Vec<_> = handle.get_unused().into_iter().collect();
+        let unused: Vec<_> = handle.get_unused().expect(womp!()).into_iter().collect();
         assert_eq!(unused.len(), 1);
         assert_eq!(unused, vec![(blockhash2, chainkey2)]);
     }
