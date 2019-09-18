@@ -145,7 +145,7 @@ impl UsersTrait for Users {
 
     /// Updates a user's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
-        bounds_chk!(row_index, false);
+        bounds_chk!(self, row_index, false);
 
         ret_err!(
             self.handle
@@ -171,7 +171,7 @@ impl UsersTrait for Users {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
-        bounds_chk!(row_index, false);
+        bounds_chk!(self, row_index, false);
 
         let path = ret_err!(
             self.handle.set_profile_picture(
@@ -194,7 +194,7 @@ impl UsersTrait for Users {
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
-        bounds_chk!(row_index);
+        bounds_chk!(self, row_index, false);
 
         ret_err!(self.handle.set_color(self.user_id(row_index), color), false);
 
@@ -311,7 +311,7 @@ impl UsersTrait for Users {
         conversation_id: FfiConversationIdRef,
     ) -> bool {
         let index = index as usize;
-        bounds_chk!(index, false);
+        bounds_chk!(self, index, false);
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
@@ -334,7 +334,7 @@ impl UsersTrait for Users {
         conversation_id: FfiConversationIdRef,
     ) -> bool {
         let index = index as usize;
-        bounds_chk!(index, false);
+        bounds_chk!(self, index, false);
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(

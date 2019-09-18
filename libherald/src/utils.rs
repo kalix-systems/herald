@@ -81,14 +81,14 @@ macro_rules! ret_none {
 #[macro_export]
 /// Performs a bounds check
 macro_rules! bounds_chk {
-    ($ix: expr) => {
-        if self.list.len().saturating_sub(1) < $ix {
+    ($slf: expr, $ix: expr) => {
+        if $slf.list.len().saturating_sub(1) < $ix {
             return;
         }
     };
-    ($ix: expr, $retval: expr) => {
-        if self.list.len().saturating_sub(1) < $ix {
-            return;
+    ($slf: expr, $ix: expr, $retval: expr) => {
+        if $slf.list.len().saturating_sub(1) < $ix {
+            return $retval;
         }
     };
 }
