@@ -23,6 +23,5 @@ serde_cbor    = "0.10.1"
 tokio         = "0.2.0-alpha.4"
 
 [dev-dependencies]
-womp               = { git   = "https://github.com/kalix-systems/womp" }
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"

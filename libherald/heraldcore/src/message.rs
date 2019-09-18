@@ -214,7 +214,7 @@ mod tests {
     use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
-    use womp::*;
+    use crate::womp;
 
     #[test]
     #[serial]
