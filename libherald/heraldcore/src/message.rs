@@ -218,7 +218,7 @@ mod tests {
 
     #[test]
     #[serial]
-    fn create_drop_exists() {
+    fn create_drop_exists_reset() {
         Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         Messages::drop_table().expect(womp!());
@@ -230,6 +230,50 @@ mod tests {
         assert!(Messages::exists().expect(womp!()));
         Messages::drop_table().expect(womp!());
         assert!(!Messages::exists().expect(womp!()));
+
+        Database::reset_all().expect(womp!());
+
+        Messages::create_table().expect(womp!());
+        Messages::reset().expect(womp!());
+    }
+
+    #[test]
+    #[serial]
+    fn delete_get_message() {
+        Database::reset_all().expect(womp!());
+
+        let conv_id = [0; 32].into();
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conv_id), None)
+            .expect(womp!());
+
+        let contact = "contact";
+
+        crate::contact::ContactBuilder::new(contact.into())
+            .add()
+            .expect(womp!());
+
+        conv_handle.add_member(&conv_id, contact).expect(womp!());
+
+        let handle = Messages::new().expect(womp!());
+
+        let (msg_id, _) = handle
+            .add_message(None, contact, &conv_id, "test", None, &None)
+            .expect(womp!("Failed to add message"));
+
+        let message = handle
+            .get_message(&msg_id)
+            .expect(womp!("unable to get message"));
+
+        assert_eq!(message.body, "test");
+
+        handle
+            .delete_message(&msg_id)
+            .expect(womp!("failed to delete message"));
+
+        assert!(handle.get_message(&msg_id).is_err());
     }
 
     #[test]
@@ -259,6 +303,10 @@ mod tests {
         let (msg_id, _) = handle
             .add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
+
+        //check message id length
+
+        assert_eq!(msg_id.into_array().len(), 32);
 
         assert_eq!(
             handle
