@@ -49,7 +49,7 @@ impl BlockStore for Keys {
                 include_str!("sql/keys/store_key.sql"),
                 params![hash.as_ref(), key.as_ref()],
             )
-            .map_err(|_| ChainError::BlockStoreSaveError)?;
+            .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         Ok(())
     }
@@ -61,34 +61,40 @@ impl BlockStore for Keys {
         &mut self,
         blocks: I,
     ) -> Result<(), ChainError> {
+        // do this all in a transaction
         let tx = self
             .db
             .transaction()
-            .map_err(|_| ChainError::BlockStoreMarkError)?;
+            .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
+        // references to transaction needs to be dropped before committing
         {
             let mut mark_stmt = tx
                 .prepare(include_str!("sql/keys/mark_used.sql"))
-                .expect("bad mark stmt");
+                .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
-            let mut exists_stmt = tx
-                .prepare(include_str!("sql/keys/key_exists.sql"))
-                .expect("bad exists stmt");
+            let mut key_used_stmt = tx
+                .prepare(include_str!("sql/keys/get_key_used_status.sql"))
+                .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
             for block in blocks {
-                if !exists_stmt
-                    .exists(params![block.as_ref()])
-                    .expect("didn't exist")
+                if key_used_stmt
+                    .query_row(params![block.as_ref()], |row| Ok(row.get::<_, bool>(0)?))
+                    // return a `MissingKeys` error if the query result is empty
+                    .map_err(|_| ChainError::MissingKeys)?
                 {
-                    return Err(ChainError::MissingKeys);
+                    // if the key is already marked used, return a `RedundantMark` error
+                    return Err(ChainError::RedundantMark);
                 }
+
+                // otherwise we can mark the key as unused
                 mark_stmt
                     .execute(params![block.as_ref()])
-                    .map_err(|_| ChainError::BlockStoreMarkError)?;
+                    .map_err(|_| ChainError::BlockStoreUnavailable)?;
             }
         }
 
-        tx.commit().expect("tx failed");
+        tx.commit().map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         Ok(())
     }
