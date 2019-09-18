@@ -417,10 +417,15 @@ mod tests {
     #[serial]
     fn conv_id_length() {
         Database::reset_all().expect(womp!());
+        let handle = Conversations::new().expect(womp!());
 
-        let conv_id = ConversationId::from([0; 32]);
+        handle
+            .add_conversation(None, None)
+            .expect(womp!("failed to create conversation"));
 
-        assert_eq!(conv_id.into_array().len(), 32);
+        let all_meta = handle.all_meta().expect(womp!("failed to get data"));
+
+        assert_eq!(all_meta[0].conversation_id.into_array().len(), 32);
     }
 
     #[test]
