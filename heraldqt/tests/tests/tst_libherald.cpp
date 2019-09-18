@@ -33,13 +33,14 @@ public:
   Messages      *msgs       = nullptr;
   NetworkHandle *nwk_handle = nullptr;
   Users         *users      = nullptr;
-  pid_t server_pid;
-  LibHerald();
+  pid_t server_pid = -1;
+  LibHerald(bool spawn_server_flag = true);
   ~LibHerald();
   void messages_set_up();
   void messages_tear_down();
 
 private slots:
+// config test slots
   void test_config_set_name();
   void test_config_set_name_data();
 
@@ -62,7 +63,6 @@ private slots:
   void test_toggleFilterRegex();
 // message testing slots
   void test_insertMessage();
-  void test_clearConversationView();
   void test_deleteConversation();
   void test_deleteConversationById();
   void test_deleteMessage();
@@ -75,19 +75,20 @@ private slots:
 /*
  * If this creation sequence aborts. you have failed test number 0.
  * */
-LibHerald::LibHerald()
+LibHerald::LibHerald(bool spawn_server_flag)
 {
   h_state = new HeraldState();
   h_state->setConfigId("Alice");
-  server_pid = spawn_server();
+
+  if (spawn_server_flag)
+        server_pid = spawn_server();
 }
 
 LibHerald::~LibHerald()
 {
-  kill_server(server_pid);
+  if (server_pid != -1)
+    kill_server(server_pid);
 }
-
-
 
 
 /*
@@ -197,18 +198,103 @@ void LibHerald::test_config_set_color_scheme(){
  *  They do not rely on the server for operation.
 **/
 void LibHerald::messages_set_up() {
+
   cfg = new Config();
+
   convos = new Conversations();
+
+  while (convos->rowCount() > 0 ){
+    convos->removeConversation(0);
+  }
+
+  auto bs = convos->addConversation();
+  msgs = new Messages();
+  msgs->setConversationId(bs);
 }
 
 void LibHerald::messages_tear_down() {
 
+  while (convos->rowCount() > 0 ){
+    convos->removeConversation(0);
+  }
+
+  delete cfg;
+  delete convos;
+  delete msgs;
 }
-void LibHerald::test_insertMessage() {}
-void LibHerald::test_clearConversationView() {}
-void LibHerald::test_deleteConversation() {}
+
+void LibHerald::test_insertMessage() {
+  messages_set_up();
+
+  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
+
+  msgs->insertMessage("simple case 1");
+
+  auto args = spy.at(0);
+  QCOMPARE(spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
+
+  msgs->insertMessage("simple case 2");
+
+  args = spy.at(1);
+  QCOMPARE(spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
+
+  msgs->insertMessage("naughty string 社會科學院語學研究所");
+
+  args = spy.at(2);
+  QCOMPARE(spy.count(), 3);
+  QCOMPARE(args.at(1), QVariant(2));
+  QCOMPARE(args.at(2), QVariant(2));
+
+  messages_tear_down();
+}
+
+void LibHerald::test_deleteMessage() {
+  messages_set_up();
+
+  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
+  QSignalSpy rem_spy(msgs, SIGNAL(rowsRemoved(QModelIndex, int, int)));
+
+  msgs->insertMessage("simple case 1");
+
+  auto args = spy.at(0);
+  QCOMPARE(spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
+
+  msgs->insertMessage("simple case 2");
+
+  args = spy.at(1);
+  QCOMPARE(spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
+
+  msgs->deleteMessage(1);
+
+  args = rem_spy.at(0);
+  QCOMPARE(rem_spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
+
+  msgs->deleteMessage(0);
+
+  args = rem_spy.at(1);
+  QCOMPARE(rem_spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
+
+  messages_tear_down();
+}
+
+
+void LibHerald::test_deleteConversation() {
+
+}
+
 void LibHerald::test_deleteConversationById() {}
-void LibHerald::test_deleteMessage() {}
 void LibHerald::test_refresh() {}
 void LibHerald::test_reply() {}
 
