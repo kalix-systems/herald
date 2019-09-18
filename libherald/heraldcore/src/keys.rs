@@ -58,18 +58,37 @@ impl BlockStore for Keys {
     // if they're less than an hour old we should keep them, otherwise delete
     // could run on a schedule, or every time we call get_unused, or something else
     fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-        &self,
+        &mut self,
         blocks: I,
     ) -> Result<(), ChainError> {
-        let mut stmt = self
+        let tx = self
             .db
-            .prepare(include_str!("sql/keys/mark_used.sql"))
+            .transaction()
             .map_err(|_| ChainError::BlockStoreMarkError)?;
 
-        for block in blocks {
-            stmt.execute(params![block.as_ref()])
-                .map_err(|_| ChainError::BlockStoreMarkError)?;
+        {
+            let mut mark_stmt = tx
+                .prepare(include_str!("sql/keys/mark_used.sql"))
+                .expect("bad mark stmt");
+
+            let mut exists_stmt = tx
+                .prepare(include_str!("sql/keys/key_exists.sql"))
+                .expect("bad exists stmt");
+
+            for block in blocks {
+                if !exists_stmt
+                    .exists(params![block.as_ref()])
+                    .expect("didn't exist")
+                {
+                    return Err(ChainError::MissingKeys);
+                }
+                mark_stmt
+                    .execute(params![block.as_ref()])
+                    .map_err(|_| ChainError::BlockStoreMarkError)?;
+            }
         }
+
+        tx.commit().expect("tx failed");
 
         Ok(())
     }
@@ -175,5 +194,7 @@ mod tests {
         let unused: Vec<_> = handle.get_unused().expect(womp!()).into_iter().collect();
         assert_eq!(unused.len(), 1);
         assert_eq!(unused, vec![(blockhash2, chainkey2)]);
+
+        assert!(handle.mark_used(vec![blockhash1].iter()).is_err());
     }
 }
