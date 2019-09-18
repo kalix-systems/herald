@@ -1,18 +1,30 @@
 #include <QtTest>
 #include <QSignalSpy>
-#include <pthread.h>
+#include <QProcess>
 #include "Bindings.h"
 
 // spawns server in a pthread for the duration of the tests.
-pid_t spawn_server() {
+void spawn_server(QProcess *cargo_run) {
   // build server, wait.
   // spawn server in thread, return pid or -1
+  QString cargo = "cargo";
+  QStringList build_args = { "build", "--c", "some args i need to look up"};
+  QStringList server_args = { "run", "--bin", "stupid"};
+
+  QProcess cargo_build;
+  cargo_build.start(cargo, build_args);
+  cargo_build.waitForFinished(300000);
+
+  cargo_run = new QProcess;
+  cargo_run->setProgram(cargo);
+  cargo_run->setArguments(build_args);
+  cargo_run->start();
 }
 
 // kills the server at process ID pid,
 // returns 0 on sucess, otherwise an error code
-int kill_server(pid_t pid) {
-
+int kill_server(QProcess *cargo_run) {
+  cargo_run->kill();
 }
 
 // add necessary includes here
@@ -33,7 +45,7 @@ public:
   Messages      *msgs       = nullptr;
   NetworkHandle *nwk_handle = nullptr;
   Users         *users      = nullptr;
-  pid_t server_pid = -1;
+  QProcess *server = nullptr;
   LibHerald(bool spawn_server_flag = true);
   ~LibHerald();
   void messages_set_up();
@@ -81,13 +93,13 @@ LibHerald::LibHerald(bool spawn_server_flag)
   h_state->setConfigId("Alice");
 
   if (spawn_server_flag)
-        server_pid = spawn_server();
+        spawn_server(server);
 }
 
 LibHerald::~LibHerald()
 {
-  if (server_pid != -1)
-    kill_server(server_pid);
+  if (server != nullptr)
+    kill_server(server);
 }
 
 
@@ -292,13 +304,13 @@ void LibHerald::test_deleteMessage() {
 
 void LibHerald::test_deleteConversation() {
 
+
 }
 
 void LibHerald::test_deleteConversationById() {}
 void LibHerald::test_refresh() {}
 void LibHerald::test_reply() {}
 
-// network dependant tests
 /*
  *  CONVERSATION TEST CASES:
  *  these are tests for the messages database.
@@ -311,6 +323,8 @@ void LibHerald::test_setFilterRegex() {}
 void LibHerald::test_addConversation() {}
 void LibHerald::test_removeConversation() {}
 void LibHerald::test_toggleFilterRegex() {}
+
+// tests that need the server
 
 QTEST_APPLESS_MAIN(LibHerald)
 
