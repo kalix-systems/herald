@@ -1,30 +1,37 @@
 #include <QtTest>
 #include <QSignalSpy>
 #include <QProcess>
+#include<QDebug>
 #include "Bindings.h"
 
 // spawns server in a pthread for the duration of the tests.
 void spawn_server(QProcess *cargo_run) {
   // build server, wait.
   // spawn server in thread, return pid or -1
+  QString wd = "../../../server";
   QString cargo = "cargo";
-  QStringList build_args = { "build", "--c", "some args i need to look up"};
+  QStringList build_args = {"build"};
   QStringList server_args = { "run", "--bin", "stupid"};
 
   QProcess cargo_build;
-  cargo_build.start(cargo, build_args);
+  cargo_build.setWorkingDirectory(wd);
+  cargo_build.setProgram(cargo);
+  cargo_build.setArguments(build_args);
+  cargo_build.start();
   cargo_build.waitForFinished(300000);
 
+
+
   cargo_run = new QProcess;
+  cargo_run->setWorkingDirectory(wd);
   cargo_run->setProgram(cargo);
-  cargo_run->setArguments(build_args);
+  cargo_run->setArguments(server_args);
   cargo_run->start();
 }
 
 // kills the server at process ID pid,
 // returns 0 on sucess, otherwise an error code
 void kill_server(QProcess *cargo_run) {
-  cargo_run->kill();
 }
 
 // add necessary includes here
@@ -66,14 +73,12 @@ private slots:
   void test_config_set_color_scheme_data();
 
 // conversation testing slots
-  void test_filter();
-  void test_addConversation();
-  void test_removeConversation();
-  void test_toggleFilterRegex();
+// this tests virtually everything
+// in the conversation model
+  void test_modifyConversation();
 // message testing slots
   void test_insertMessage();
   void test_deleteMessage();
-  void test_modifyConversation();
   void test_reply();
 // networking dependant tests
   void test_networkHandleConnects();
@@ -88,13 +93,11 @@ LibHerald::LibHerald(bool spawn_server_flag)
   h_state = new HeraldState();
   h_state->setConfigId("Alice");
 
-  if (spawn_server_flag)
     spawn_server(server);
 }
 
 LibHerald::~LibHerald()
 {
-  if (server != nullptr)
      kill_server(server);
 }
 
@@ -297,7 +300,13 @@ void LibHerald::test_deleteMessage() {
   messages_tear_down();
 }
 
+void LibHerald::test_reply() {}
 
+/*
+ *  CONVERSATION TEST CASE:
+ *  these are tests for the messages database.
+ *  They do not rely on the server for operation.
+**/
 void LibHerald::test_modifyConversation() {
   convos = new Conversations;
   QSignalSpy data_changed_spy(convos, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)));
@@ -357,18 +366,6 @@ void LibHerald::test_modifyConversation() {
   QCOMPARE(convos->rowCount(),0);
   delete convos;
 }
-
-void LibHerald::test_reply() {}
-
-/*
- *  CONVERSATION TEST CASES:
- *  these are tests for the messages database.
- *  They do not rely on the server for operation.
-**/
-void LibHerald::test_filter() {}
-void LibHerald::test_addConversation() {}
-void LibHerald::test_removeConversation() {}
-void LibHerald::test_toggleFilterRegex() {}
 
 // tests that need the server
 void LibHerald::test_networkHandleConnects() {};
