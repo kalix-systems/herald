@@ -23,7 +23,7 @@ void spawn_server(QProcess *cargo_run) {
 
 // kills the server at process ID pid,
 // returns 0 on sucess, otherwise an error code
-int kill_server(QProcess *cargo_run) {
+void kill_server(QProcess *cargo_run) {
   cargo_run->kill();
 }
 
@@ -67,21 +67,17 @@ private slots:
 
 // conversation testing slots
   void test_filter();
-  void test_setFilter();
-  void test_filterRegex();
-  void test_setFilterRegex();
   void test_addConversation();
   void test_removeConversation();
   void test_toggleFilterRegex();
 // message testing slots
   void test_insertMessage();
-  void test_deleteConversation();
-  void test_deleteConversationById();
   void test_deleteMessage();
-  void test_refresh();
+  void test_modifyConversation();
   void test_reply();
 // networking dependant tests
-
+  void test_networkHandleConnects();
+  void test_intraclientMessage();
 };
 
 /*
@@ -93,13 +89,13 @@ LibHerald::LibHerald(bool spawn_server_flag)
   h_state->setConfigId("Alice");
 
   if (spawn_server_flag)
-        spawn_server(server);
+    spawn_server(server);
 }
 
 LibHerald::~LibHerald()
 {
   if (server != nullptr)
-    kill_server(server);
+     kill_server(server);
 }
 
 
@@ -302,13 +298,66 @@ void LibHerald::test_deleteMessage() {
 }
 
 
-void LibHerald::test_deleteConversation() {
+void LibHerald::test_modifyConversation() {
+  convos = new Conversations;
+  QSignalSpy data_changed_spy(convos, SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)));
+
+  // add some dummy conversations
+  convos->addConversation();
+  convos->addConversation();
+  convos->addConversation();
+
+  // these force changes to happen over (3,0) - (3,0)
+  auto bs = convos->addConversation();
+
+  convos->setColor(3, 100);
+  auto changed_index = convos->index(3,0);
+  auto base_index = convos->index(0,0);
+  auto args = data_changed_spy.at(0);
+
+  QCOMPARE(data_changed_spy.count(), 1);
+  QCOMPARE(args.at(0),changed_index);
+  QCOMPARE(args.at(1),changed_index);
+  QCOMPARE(convos->color(3), 100);
 
 
+  convos->setTitle(3, "The Trapezoid Of Discovery");
+  args = data_changed_spy.at(1);
+
+  QCOMPARE(data_changed_spy.count(), 2);
+  QCOMPARE(args.at(0),changed_index);
+  QCOMPARE(args.at(1),changed_index);
+  QCOMPARE(convos->title(3), "The Trapezoid Of Discovery");
+
+
+  convos->setMuted(3, true);
+  args = data_changed_spy.at(2);
+
+  QCOMPARE(data_changed_spy.count(), 3);
+  QCOMPARE(args.at(0),changed_index);
+  QCOMPARE(args.at(1),changed_index);
+  QCOMPARE(convos->muted(3), true);
+
+  convos->setFilter("The Trap");
+  args = data_changed_spy.at(3);
+
+  QCOMPARE(data_changed_spy.count(), 4);
+  QCOMPARE(convos->filter(), "The Trap");
+  QCOMPARE(convos->matched(3), true);
+
+  convos->setFilter(".*");
+  convos->setFilterRegex(true);
+  QCOMPARE(convos->matched(3), true);
+
+  // dump convos from the DB
+  while (convos->rowCount() > 0 ){
+    convos->removeConversation(0);
+  }
+
+  QCOMPARE(convos->rowCount(),0);
+  delete convos;
 }
 
-void LibHerald::test_deleteConversationById() {}
-void LibHerald::test_refresh() {}
 void LibHerald::test_reply() {}
 
 /*
@@ -317,14 +366,13 @@ void LibHerald::test_reply() {}
  *  They do not rely on the server for operation.
 **/
 void LibHerald::test_filter() {}
-void LibHerald::test_setFilter() {}
-void LibHerald::test_filterRegex() {}
-void LibHerald::test_setFilterRegex() {}
 void LibHerald::test_addConversation() {}
 void LibHerald::test_removeConversation() {}
 void LibHerald::test_toggleFilterRegex() {}
 
 // tests that need the server
+void LibHerald::test_networkHandleConnects() {};
+void LibHerald::test_intraclientMessage() {};
 
 QTEST_APPLESS_MAIN(LibHerald)
 
