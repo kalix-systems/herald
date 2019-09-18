@@ -45,6 +45,39 @@ macro_rules! ret_err {
     };
 }
 
+#[macro_export]
+/// Early return on unexpected `None`
+macro_rules! ret_none {
+    ($maybe: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                eprintln!(
+                    "Unexpected `None` at {file}:{line}:{column}",
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return;
+            }
+        }
+    };
+    ($maybe: expr, $retval: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                eprintln!(
+                    "Unexpected `None` at {file}:{line}:{column}",
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return $retval;
+            }
+        }
+    };
+}
+
 #[cfg(tests)]
 mod tests {
     #[test]
