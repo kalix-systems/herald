@@ -233,7 +233,7 @@ pub(crate) fn set_picture(
 
     db.execute(
         include_str!("sql/conversation/update_picture.sql"),
-        params![path],
+        params![path, conversation_id],
     )?;
 
     Ok(())
@@ -415,21 +415,6 @@ mod tests {
 
     #[test]
     #[serial]
-    fn conv_id_length() {
-        Database::reset_all().expect(womp!());
-        let handle = Conversations::new().expect(womp!());
-
-        handle
-            .add_conversation(None, None)
-            .expect(womp!("failed to create conversation"));
-
-        let all_meta = handle.all_meta().expect(womp!("failed to get data"));
-
-        assert_eq!(all_meta[0].conversation_id.into_array().len(), 32);
-    }
-
-    #[test]
-    #[serial]
     fn create_drop_exists() {
         // drop twice, it shouldn't panic on multiple drops
         Conversations::drop_table().expect(womp!());
@@ -441,6 +426,21 @@ mod tests {
         assert!(Conversations::exists().expect(womp!()));
         Conversations::drop_table().expect(womp!());
         assert!(!Conversations::exists().expect(womp!()));
+    }
+
+    #[test]
+    #[serial]
+    fn conv_id_length() {
+        Database::reset_all().expect(womp!());
+        let handle = Conversations::new().expect(womp!());
+
+        handle
+            .add_conversation(None, None)
+            .expect(womp!("failed to create conversation"));
+
+        let all_meta = handle.all_meta().expect(womp!("failed to get data"));
+
+        assert_eq!(all_meta[0].conversation_id.into_array().len(), 32);
     }
 
     #[test]
@@ -520,6 +520,27 @@ mod tests {
         let pattern = utils::SearchPattern::new_normal("titl".into()).expect(womp!());
 
         conv.matches(&pattern);
+    }
+
+    #[test]
+    #[serial]
+    fn set_prof_pic() {
+        Database::reset_all().expect(womp!());
+        let conv_id = ConversationId::from([0; 32]);
+
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conv_id), None)
+            .expect(womp!("Failed to create conversation"));
+
+        let test_picture = "test_resources/maryland.png";
+
+        conv_handle
+            .set_picture(&conv_id, Some(&test_picture), None)
+            .expect(womp!("failed to set picture"));
+
+        std::fs::remove_dir_all("profile_pictures").expect(womp!());
     }
 
     #[test]
