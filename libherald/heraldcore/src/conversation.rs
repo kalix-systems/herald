@@ -415,6 +415,16 @@ mod tests {
 
     #[test]
     #[serial]
+    fn conv_id_length() {
+        Database::reset_all().expect(womp!());
+
+        let conv_id = ConversationId::from([0; 32]);
+
+        assert_eq!(conv_id.into_array().len(), 32);
+    }
+
+    #[test]
+    #[serial]
     fn create_drop_exists() {
         // drop twice, it shouldn't panic on multiple drops
         Conversations::drop_table().expect(womp!());
@@ -505,6 +515,46 @@ mod tests {
         let pattern = utils::SearchPattern::new_normal("titl".into()).expect(womp!());
 
         conv.matches(&pattern);
+    }
+
+    #[test]
+    #[serial]
+    fn set_get_meta() {
+        Database::reset_all().expect(womp!());
+
+        let conv_id = ConversationId::from([0; 32]);
+
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conv_id), Some("title"))
+            .expect(womp!("Failed to create conversation"));
+
+        conv_handle
+            .set_color(&conv_id, 1)
+            .expect(womp!("Failed to set color"));
+
+        let conv_meta = conv_handle
+            .meta(&conv_id)
+            .expect(womp!("Failed to get metadata"));
+
+        assert_eq!(conv_meta.conversation_id, conv_id);
+        assert_eq!(conv_meta.title.expect("failed to get title"), "title");
+        assert_eq!(conv_meta.color, 1);
+
+        let conv_id2 = ConversationId::from([1; 32]);
+
+        conv_handle
+            .add_conversation(Some(&conv_id2), Some("hello"))
+            .expect(womp!("Failed to create conversation"));
+
+        let all_meta = conv_handle
+            .all_meta()
+            .expect(womp!("Failed to get all metadata"));
+
+        assert_eq!(all_meta.len(), 2);
+
+        assert_eq!(all_meta[1].conversation_id, conv_id2);
     }
 
     #[test]
