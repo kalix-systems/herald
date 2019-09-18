@@ -73,7 +73,7 @@ mod tests {
     use crate::{conversation::Conversations, message::add_message};
     use serial_test_derive::serial;
 
-    use womp::*;
+    use crate::womp;
 
     #[test]
     #[serial]

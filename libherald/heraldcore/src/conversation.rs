@@ -409,9 +409,8 @@ impl DBTable for Conversations {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{contact::ContactBuilder, db::Database, message::Messages};
+    use crate::{contact::ContactBuilder, db::Database, message::Messages, womp};
     use serial_test_derive::serial;
-    use womp::*;
 
     #[test]
     #[serial]

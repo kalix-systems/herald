@@ -262,8 +262,8 @@ impl Config {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::womp;
     use serial_test_derive::serial;
-    use womp::*;
 
     #[test]
     #[serial]

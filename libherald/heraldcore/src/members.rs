@@ -84,9 +84,8 @@ impl DBTable for Members {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::db::Database;
+    use crate::{db::Database, womp};
     use serial_test_derive::serial;
-    use womp::*;
 
     #[test]
     #[serial]
@@ -108,5 +107,4 @@ mod tests {
         Members::create_table().expect(womp!());
         Members::reset().expect(womp!());
     }
-
 }

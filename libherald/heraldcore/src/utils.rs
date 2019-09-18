@@ -145,3 +145,14 @@ macro_rules! abort_err {
         }
     };
 }
+
+#[macro_export]
+/// Convenience macro for printing location of error.
+macro_rules! womp {
+    () => {
+        &format!("{}:{}:{}", file!(), line!(), column!())
+    };
+    ($msg: expr) => {
+        &format!("{} {}:{}:{}", $msg, file!(), line!(), column!())
+    };
+}
