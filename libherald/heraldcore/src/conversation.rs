@@ -416,6 +416,7 @@ mod tests {
     #[test]
     #[serial]
     fn create_drop_exists() {
+        Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
         Conversations::drop_table().expect(womp!());
         Conversations::drop_table().expect(womp!());
@@ -549,6 +550,39 @@ mod tests {
 
     #[test]
     #[serial]
+    fn set_muted_test() {
+        Database::reset_all().expect(womp!());
+        let conv_id = ConversationId::from([0; 32]);
+
+        let conv_handle = Conversations::new().expect(womp!());
+
+        conv_handle
+            .add_conversation(Some(&conv_id), None)
+            .expect(womp!("Failed to create conversation"));
+
+        conv_handle
+            .set_muted(&conv_id, true)
+            .expect(womp!("Unable to set mute"));
+
+        let meta = conv_handle
+            .meta(&conv_id)
+            .expect(womp!("failed to get meta"));
+
+        assert_eq!(meta.muted, true);
+
+        conv_handle
+            .set_muted(&conv_id, false)
+            .expect(womp!("Unable to set mute"));
+
+        let meta = conv_handle
+            .meta(&conv_id)
+            .expect(womp!("failed to get meta"));
+
+        assert_eq!(meta.muted, false);
+    }
+
+    #[test]
+    #[serial]
     fn set_get_meta() {
         Database::reset_all().expect(womp!());
 
@@ -557,12 +591,16 @@ mod tests {
         let conv_handle = Conversations::new().expect(womp!());
 
         conv_handle
-            .add_conversation(Some(&conv_id), Some("title"))
+            .add_conversation(Some(&conv_id), None)
             .expect(womp!("Failed to create conversation"));
 
         conv_handle
             .set_color(&conv_id, 1)
             .expect(womp!("Failed to set color"));
+
+        conv_handle
+            .set_title(&conv_id, Some("title"))
+            .expect(womp!("Failed to set title"));
 
         let conv_meta = conv_handle
             .meta(&conv_id)
@@ -585,6 +623,81 @@ mod tests {
         assert_eq!(all_meta.len(), 2);
 
         assert_eq!(all_meta[1].conversation_id, conv_id2);
+    }
+
+    #[test]
+    #[serial]
+    fn conv_messages_since() {
+        Database::reset_all().expect(womp!());
+
+        let contact = "contact";
+        ContactBuilder::new(contact.into()).add().expect(womp!());
+
+        let conv_id = ConversationId::from([0; 32]);
+        let handle = Conversations::new().expect(womp!());
+
+        handle
+            .add_conversation(Some(&conv_id), None)
+            .expect(womp!("Failed to make conversation"));
+
+        let msg_handle = Messages::new().expect(womp!());
+        msg_handle
+            .add_message(None, contact, &conv_id, "1", None, &None)
+            .expect(womp!("Failed to make message"));
+        let timestamp = chrono::Utc::now();
+
+        assert!(handle
+            .conversation_messages_since(&conv_id, timestamp)
+            .expect(womp!())
+            .is_empty());
+    }
+
+    #[test]
+    #[serial]
+    fn add_remove_member() {
+        Database::reset_all().expect(womp!());
+
+        let id1 = "id1";
+        let id2 = "id2";
+
+        let conv_id = ConversationId::from([0; 32]);
+        let handle = Conversations::new().expect(womp!());
+
+        ContactBuilder::new(id1.into())
+            .add()
+            .expect(womp!("Failed to add id1"));
+
+        ContactBuilder::new(id2.into())
+            .add()
+            .expect(womp!("Failed to add id2"));
+
+        handle
+            .add_conversation(Some(&conv_id), None)
+            .expect(womp!("Failed to create conversation"));
+
+        handle
+            .add_member(&conv_id, &id1)
+            .expect(womp!("failed to add member"));
+
+        handle
+            .add_member(&conv_id, &id2)
+            .expect(womp!("failed to add member"));
+
+        let members = handle
+            .members(&conv_id)
+            .expect(womp!("failed to get members"));
+
+        assert_eq!(members.len(), 2);
+
+        handle
+            .remove_member(&conv_id, &id2)
+            .expect(womp!("failed to remove member"));
+
+        let members = handle
+            .members(&conv_id)
+            .expect(womp!("failed to get members"));
+
+        assert_eq!(members.len(), 1);
     }
 
     #[test]
