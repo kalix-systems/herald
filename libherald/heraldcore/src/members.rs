@@ -108,5 +108,4 @@ mod tests {
         Members::create_table().expect(womp!());
         Members::reset().expect(womp!());
     }
-
 }
