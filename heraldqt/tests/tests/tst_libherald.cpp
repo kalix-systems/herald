@@ -25,7 +25,7 @@ public:
   Users         *users      = nullptr;
   QProcess      *server     = nullptr;
   QThread       *bob_thread = nullptr;
-
+  LibHerald*     bob        = nullptr;
   LibHerald(bool spawn_server_flag = true);
   ~LibHerald();
 
@@ -44,8 +44,8 @@ private slots:
     // create a new database for bob
     qputenv("HERALD_DB_PATH", "bob.sqlite3");
     // bobs parent is the thread. when the thread dies so does he.
-    auto bob = new LibHerald(bob_thread);
     bob_thread = new QThread;
+    bob        = new LibHerald(bob_thread);
     bob->moveToThread(bob_thread);
     connect(bob_thread, SIGNAL(started()), bob, SLOT(listen_for_messages()));
     bob_thread->start();
@@ -71,9 +71,9 @@ private slots:
   void test_insertMessage();
   void test_deleteMessage();
   void test_reply();
-// networking dependant tests
+  // networking dependant tests
   void test_networkHandleConnects();
-  void test_intraclientMessage();
+  //  void test_intraclientMessage();
 };
 
 
@@ -99,8 +99,6 @@ LibHerald::~LibHerald()
 
 // spawns server in a pthread for the duration of the tests.
 void LibHerald::initTestCase() {
-
-  spawn_bob();
 
   QString wd = "./../../../server";
   QString cargo = QDir::homePath() + "/.cargo/bin/cargo";
@@ -134,7 +132,7 @@ void LibHerald::initTestCase() {
 }
 
 void LibHerald::cleanupTestCase() {
-  bob_thread->terminate();
+  if (bob_thread != nullptr) bob_thread->quit();
   //get rid of env variabel
   qunsetenv("HERALD_DB_PATH");
   // remove bobs database
@@ -435,29 +433,27 @@ void LibHerald::test_networkHandleConnects() {
   QCOMPARE(net_up_spy.count(), 2);
   QCOMPARE(net_pending_spy.count(), 2);
 
-  delete nwk_handle;
 };
 
-void LibHerald::test_intraclientMessage() {
+// void LibHerald::test_intraclientMessage() {
 
-  convos = new Conversations();
-  users = new Users;
-  nwk_handle = new NetworkHandle();
-  msgs = new Messages();
-  this->thread()->sleep(1);
+//  convos = new Conversations();
+//  users = new Users;
+//  msgs = new Messages();
+//  this->thread()->sleep(1);
 
-  auto bs = convos->addConversation();
-  msgs->setConversationId(bs);
-  auto msg_bs = msgs->insertMessage("Hello Bob!");
-  QCOMPARE(bs.length(),32);
-  QCOMPARE(msg_bs.length(),32);
-  QCOMPARE(nwk_handle->sendAddRequest("Bob", bs), true);
-  QCOMPARE(nwk_handle->sendMessage("Hello Bob!", bs, msg_bs), true);
+//  auto bs = convos->addConversation();
+//  msgs->setConversationId(bs);
+//  auto msg_bs = msgs->insertMessage("Hello Bob!");
+//  QCOMPARE(bs.length(),32);
+//  QCOMPARE(msg_bs.length(),32);
+//  QCOMPARE(nwk_handle->sendAddRequest("Bob", bs), true);
+//  QCOMPARE(nwk_handle->sendMessage("Hello Bob!", bs, msg_bs), true);
 
-  // todo: give bob a running spy and some methods to count how many
-  // messages he receives.
+//  // todo: give bob a running spy and some methods to count how many
+//  // messages he receives.
 
-};
+//};
 
 QTEST_APPLESS_MAIN(LibHerald)
 
