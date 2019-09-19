@@ -210,13 +210,13 @@
                 "userId": {
                     "type": "QString"
                 },
-                "pairwiseConversationId": {
-                    "type": "QByteArray"
-                },
                 "name": {
                     "write": true,
                     "type": "QString",
                     "optional": true
+                },
+                "pairwiseConversationId": {
+                    "type": "QByteArray"
                 },
                 "profilePicture": {
                     "write": true,
@@ -234,6 +234,9 @@
                 "matched": {
                     "write": true,
                     "type": "bool"
+                },
+                "displayName": {
+                    "type": "QString"
                 }
             },
             "functions": {
@@ -404,6 +407,9 @@
                     "type": "QString",
                     "write": true,
                     "optional": true
+                },
+                "displayName": {
+                    "type": "QString"
                 },
                 "profilePicture": {
                     "type": "QString",

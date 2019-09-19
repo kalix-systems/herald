@@ -93,6 +93,7 @@ pub struct ConfigEmitter {
     color_changed: fn(*mut ConfigQObject),
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
+    display_name_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
 }
@@ -112,6 +113,7 @@ impl ConfigEmitter {
             color_changed: self.color_changed,
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
+            display_name_changed: self.display_name_changed,
             name_changed: self.name_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
@@ -139,6 +141,12 @@ impl ConfigEmitter {
             (self.config_id_changed)(ptr);
         }
     }
+    pub fn display_name_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.display_name_changed)(ptr);
+        }
+    }
     pub fn name_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -161,6 +169,7 @@ pub trait ConfigTrait {
     fn colorscheme(&self) -> u32;
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
+    fn display_name(&self) -> &str;
     fn name(&self) -> Option<&str>;
     fn set_name(&mut self, value: Option<String>);
     fn profile_picture(&self) -> Option<&str>;
@@ -173,6 +182,7 @@ pub extern "C" fn config_new(
     config_color_changed: fn(*mut ConfigQObject),
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
+    config_display_name_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
@@ -181,6 +191,7 @@ pub extern "C" fn config_new(
         color_changed: config_color_changed,
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
+        display_name_changed: config_display_name_changed,
         name_changed: config_name_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
@@ -221,6 +232,18 @@ pub unsafe extern "C" fn config_config_id_get(
 ) {
     let o = &*ptr;
     let v = o.config_id();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_display_name_get(
+    ptr: *const Config,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.display_name();
     let s: *const c_char = v.as_ptr() as (*const c_char);
     set(p, s, to_c_int(v.len()));
 }
@@ -1565,6 +1588,7 @@ pub trait UsersTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
+    fn display_name(&self, index: usize) -> &str;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> Option<&str>;
@@ -1821,6 +1845,19 @@ pub unsafe extern "C" fn users_data_color(ptr: *const Users, row: c_int) -> u32 
 #[no_mangle]
 pub unsafe extern "C" fn users_set_data_color(ptr: *mut Users, row: c_int, v: u32) -> bool {
     (&mut *ptr).set_color(to_usize(row), v)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_data_display_name(
+    ptr: *const Users,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.display_name(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
