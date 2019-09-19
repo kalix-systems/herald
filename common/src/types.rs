@@ -1,7 +1,11 @@
 use crate::crypto::*;
+use arrayvec::ArrayString;
 use serde::*;
 use sodiumoxide::crypto::{box_, sign};
 use std::collections::HashMap;
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+pub struct UserId(ArrayString<[u8; 32]>);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
