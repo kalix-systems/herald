@@ -1,5 +1,6 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
+use rusqlite::{types as sql_types, ToSql};
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
@@ -10,6 +11,21 @@ type UserIdInner = [u8; 32];
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
 pub struct UserId(ArrayString<UserIdInner>);
 
+impl ToSql for UserId {
+    fn to_sql(&self) -> Result<sql_types::ToSqlOutput, rusqlite::Error> {
+        use sql_types::*;
+        Ok(ToSqlOutput::Borrowed(ValueRef::Text(
+            self.as_str().as_bytes(),
+        )))
+    }
+}
+
+impl sql_types::FromSql for UserId {
+    fn column_result(value: sql_types::ValueRef) -> sql_types::FromSqlResult<Self> {
+        UserId::try_from(value.as_str()?).map_err(|_| sql_types::FromSqlError::InvalidType)
+    }
+}
+
 impl std::ops::Deref for UserId {
     type Target = ArrayString<UserIdInner>;
 
@@ -18,6 +34,7 @@ impl std::ops::Deref for UserId {
     }
 }
 
+#[derive(Debug)]
 pub enum InvalidUserId {
     NonAlphaNumeric,
     CapacityError,

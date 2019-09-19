@@ -57,7 +57,7 @@ impl Message {
 pub(crate) fn add_message(
     db: &Database,
     msg_id: Option<MsgId>,
-    author: UserIdRef,
+    author: UserId,
     conversation_id: &ConversationId,
     body: &str,
     timestamp: Option<DateTime<Utc>>,
@@ -128,7 +128,7 @@ impl Messages {
     pub fn add_message(
         &self,
         msg_id: Option<MsgId>,
-        author: UserIdRef,
+        author: UserId,
         conversation_id: &ConversationId,
         body: &str,
         timestamp: Option<DateTime<Utc>>,
@@ -213,6 +213,7 @@ mod tests {
     use super::*;
     use crate::conversation::Conversations;
     use serial_test_derive::serial;
+    use std::convert::TryInto;
 
     use crate::womp;
 
@@ -249,9 +250,9 @@ mod tests {
             .add_conversation(Some(&conv_id), None)
             .expect(womp!());
 
-        let contact = "contact";
+        let contact = "contact".try_into().unwrap();
 
-        crate::contact::ContactBuilder::new(contact.into())
+        crate::contact::ContactBuilder::new(contact)
             .add()
             .expect(womp!());
 
@@ -288,9 +289,9 @@ mod tests {
             .add_conversation(Some(&conversation_id), None)
             .expect(womp!());
 
-        let author = "Hello";
+        let author = "Hello".try_into().unwrap();
 
-        crate::contact::ContactBuilder::new(author.into())
+        crate::contact::ContactBuilder::new(author)
             .add()
             .expect(womp!());
 

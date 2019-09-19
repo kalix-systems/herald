@@ -3,7 +3,7 @@ use crate::{
     errors::HErr,
     types::*,
 };
-use herald_common::{UserId, UserIdRef};
+use herald_common::UserId;
 use rusqlite::{params, NO_PARAMS};
 
 /// Conversation members
@@ -14,7 +14,7 @@ pub struct Members;
 pub(crate) fn add_member(
     db: &Database,
     conversation_id: &ConversationId,
-    member_id: UserIdRef,
+    member_id: UserId,
 ) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/members/add_member.sql"),
@@ -27,7 +27,7 @@ pub(crate) fn add_member(
 pub(crate) fn remove_member(
     db: &Database,
     conversation_id: &ConversationId,
-    member_id: UserIdRef,
+    member_id: UserId,
 ) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/members/remove_member.sql"),

@@ -221,8 +221,8 @@ impl Config {
     }
 
     /// Gets user id
-    pub fn id(&self) -> &UserId {
-        &self.id
+    pub fn id(&self) -> UserId {
+        self.id
     }
 
     /// Gets user id directly from database.
@@ -245,7 +245,7 @@ impl Config {
 
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
-        crate::contact::set_name(&self.db, &self.id, name.as_ref().map(|s| s.as_str()))?;
+        crate::contact::set_name(&self.db, self.id, name.as_ref().map(|s| s.as_str()))?;
 
         self.name = name;
         Ok(())
@@ -255,7 +255,7 @@ impl Config {
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
         let path = crate::contact::set_profile_picture(
             &self.db,
-            &self.id,
+            self.id,
             profile_picture,
             self.profile_picture.as_ref().map(|s| s.as_str()),
         )?;
@@ -267,7 +267,7 @@ impl Config {
 
     /// Update user's color
     pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-        crate::contact::set_color(&self.db, &self.id, color)?;
+        crate::contact::set_color(&self.db, self.id, color)?;
         self.color = color;
 
         Ok(())
@@ -291,6 +291,7 @@ mod tests {
     use super::*;
     use crate::womp;
     use serial_test_derive::serial;
+    use std::convert::TryInto;
 
     #[test]
     #[serial]
@@ -315,9 +316,9 @@ mod tests {
 
         Database::reset_all().expect(womp!());
 
-        let id = "HelloWorld";
+        let id: UserId = "HelloWorld".try_into().expect(womp!());
 
-        ConfigBuilder::new().id(id.into()).add().expect(womp!());
+        ConfigBuilder::new().id(id).add().expect(womp!());
 
         let config = Config::get().expect(womp!());
         assert_eq!(config.id(), id);
@@ -381,8 +382,8 @@ mod tests {
     #[serial]
     fn two_configs() {
         Database::reset_all().expect(womp!());
-        let id1 = UserId::from("1").unwrap();
-        let id2 = UserId::from("2").unwrap();
+        let id1 = UserId::try_from("1").unwrap();
+        let id2 = UserId::try_from("2").unwrap();
         ConfigBuilder::new().id(id1).add().expect(womp!());
         assert!(ConfigBuilder::new().id(id2).add().is_err());
     }
@@ -392,8 +393,8 @@ mod tests {
     fn get_id() {
         Database::reset_all().expect(womp!());
 
-        let id = "HelloWorld";
-        let config = ConfigBuilder::new().id(id.into()).add().expect(womp!());
+        let id = "HelloWorld".try_into().expect(womp!());
+        let config = ConfigBuilder::new().id(id).add().expect(womp!());
 
         let static_id = Config::static_id().expect(womp!());
         assert_eq!(config.id, id);
