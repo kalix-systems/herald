@@ -320,3 +320,5 @@ impl TryFrom<&[u8]> for ConversationId {
         }
     }
 }
+
+pub enum Reply {}

@@ -1,6 +1,7 @@
 use crate::{prelude::*, store::*};
 
 use dashmap::DashMap;
+use sodiumoxide::crypto::sign;
 use tokio::{net::TcpStream, prelude::*, sync::mpsc};
 use womp::womp;
 
@@ -25,16 +26,25 @@ impl State {
     pub async fn send_message(
         &self,
         con: &mut redis::Connection,
-        to: sig::PublicKey,
+        to: &GlobalId,
         msg: MessageToClient,
     ) -> Result<(), Error> {
-        if let Some(a) = self.active.async_get(to).await {
+        use MessageToClient::*;
+        if let Some(a) = self.active.async_get(to.did).await {
             let mut sender = a.clone();
             if let Err(m) = sender.try_send(msg) {
-                con.add_pending(to, m.into_inner())?;
+                if let Push(p) = m.into_inner() {
+                    con.add_pending(to.did, p)?;
+                }
+            }
+        } else if con.user_exists(&to.uid)? {
+            if let Push(p) = msg {
+                con.add_pending(to.did, p)?;
+            } else if let Catchup(_) = msg {
+                return Err(CatchupFailed);
             }
         } else {
-            con.add_pending(to, msg)?;
+            return Err(UnknownUser(to.uid.clone()));
         }
         Ok(())
     }
@@ -62,7 +72,7 @@ impl State {
             let mut comp: Result<(), Error> = Ok(());
             while !done && comp.is_ok() {
                 let uid: UserId = read_cbor(&mut stream).await?;
-                redis::cmd("watch").arg(&uid).query(&mut con)?;
+                // TODO: actually make this transactional
                 comp = try {
                     if con.user_exists(&uid)? {
                         stream.write_all(b"ERR").await?;
@@ -77,21 +87,21 @@ impl State {
                         }
                     }
                 };
-                redis::cmd("unwatch").query(&mut con)?;
             }
             gid.ok_or(CommandFailed)?
         };
         stream.write_all(b"YES").await?;
-        self.authenticated_session(gid, stream).await
+
+        self.authenticated_session(con, gid, stream).await
     }
 
     async fn login_session(&'static self, mut stream: TcpStream) -> Result<(), Error> {
-        use sodiumoxide::crypto::sign;
-
         let gid: GlobalId = read_cbor(&mut stream).await?;
         if !self.new_connection()?.key_is_valid(&gid.uid, gid.did)? {
             stream.write_all(b"ERR").await?;
             return Err(InvalidKey);
+        } else {
+            stream.write_all(b"YES").await?;
         }
 
         let mut dat = [0u8; 32];
@@ -105,24 +115,30 @@ impl State {
         if !sign::verify_detached(&sig, &dat, &gid.did) {
             stream.write_all(b"ERR").await?;
             return Err(InvalidSig);
+        } else {
+            stream.write_all(b"YES").await?;
         }
-
-        self.authenticated_session(gid, stream).await
-    }
-
-    async fn authenticated_session(
-        &'static self,
-        gid: GlobalId,
-        mut stream: TcpStream,
-    ) -> Result<(), Error> {
-        let (sender, receiver) = mpsc::unbounded_channel();
-        self.active.insert(gid.did, sender);
 
         let mut con = self.new_connection()?;
         let pending = con.get_pending(gid.did)?;
         let push = MessageToClient::Catchup(pending);
         send_cbor(&mut stream, &push).await?;
+        if MessageToServer::CaughtUp != read_cbor(&mut stream).await? {
+            return Err(CatchupFailed);
+        }
         con.expire_pending(gid.did)?;
+
+        self.authenticated_session(con, gid, stream).await
+    }
+
+    async fn authenticated_session(
+        &'static self,
+        con: redis::Connection,
+        gid: GlobalId,
+        stream: TcpStream,
+    ) -> Result<(), Error> {
+        let (sender, receiver) = mpsc::unbounded_channel();
+        self.active.insert(gid.did, sender);
 
         let (reader, writer) = stream.split();
         self.spawn_msg_sender(gid.did, writer, receiver);
@@ -147,7 +163,7 @@ impl State {
             }
 
             let mut con = self.new_connection().expect(womp!());
-            while let Some(msg) = input.recv().await {
+            while let Some(MessageToClient::Push(msg)) = input.recv().await {
                 con.add_pending(pk, msg).expect(womp!());
             }
         });
@@ -164,32 +180,37 @@ impl State {
         loop {
             match read_cbor(&mut reader).await? {
                 SendBlock { to, msg } => {
-                    let push = MessageToClient::NewBlock {
+                    let push = MessageToClient::Push(Push::NewBlock {
                         from: from.clone(),
                         time: Utc::now(),
                         body: msg,
-                    };
-                    for uid in to.iter() {
-                        let meta = con.read_meta(uid)?;
+                    });
+                    for uid in to.into_iter() {
+                        let meta = con.read_meta(&uid)?;
+                        let mut to = GlobalId {
+                            uid,
+                            did: sign::PublicKey([0u8; 32]),
+                        };
                         for key in meta.valid_keys() {
-                            self.send_message(&mut con, key, push.clone()).await?;
+                            to.did = key;
+                            self.send_message(&mut con, &to, push.clone()).await?;
                         }
                     }
                 }
                 SendBlob { to, msg } => {
-                    let push = MessageToClient::NewBlob {
+                    let push = MessageToClient::Push(Push::NewBlob {
                         from: from.clone(),
                         time: Utc::now(),
                         body: msg,
-                    };
-                    for key in to {
-                        self.send_message(&mut con, key, push.clone()).await?;
+                    });
+                    for gid in to.iter() {
+                        self.send_message(&mut con, gid, push.clone()).await?;
                     }
                 }
                 RequestMeta { qid, of } => {
                     let res = Response::Meta(con.read_meta(&of)?);
                     let push = MessageToClient::QueryResponse { qid, res };
-                    self.send_message(&mut con, from.did, push).await?;
+                    self.send_message(&mut con, &from, push).await?;
                 }
                 RegisterDevice { qid, key } => {
                     let res = if key.verify_sig() && *key.signed_by() == from.did {
@@ -200,13 +221,14 @@ impl State {
                         Response::InvalidRequest
                     };
                     let push = MessageToClient::QueryResponse { qid, res };
-                    self.send_message(&mut con, from.did, push).await?;
+                    self.send_message(&mut con, &from, push).await?;
                 }
                 RequestPrekey { qid, did } => {
                     let res = Response::Prekey(con.get_prekey(did)?);
                     let push = MessageToClient::QueryResponse { qid, res };
-                    self.send_message(&mut con, from.did, push).await?;
+                    self.send_message(&mut con, &from, push).await?;
                 }
+                CaughtUp => {}
                 Quit => break,
             }
         }

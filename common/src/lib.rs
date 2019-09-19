@@ -4,10 +4,10 @@ mod crypto;
 pub use crypto::*;
 
 pub use bytes::Bytes;
-pub use serde_cbor;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
 pub use serde::*;
+pub use serde_cbor;
 pub use std::collections::HashMap;
 pub use std::convert::{TryFrom, TryInto};
 pub use tokio::prelude::*;
@@ -21,6 +21,7 @@ pub enum SessionType {
     Register = 0,
     Login = 1,
 }
+
 impl TryFrom<u8> for SessionType {
     type Error = u8;
 
@@ -30,6 +31,25 @@ impl TryFrom<u8> for SessionType {
             1 => Ok(Self::Login),
             i => Err(i),
         }
+    }
+}
+
+impl Serialize for SessionType {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_u8(*self as u8)
+    }
+}
+
+impl<'de> Deserialize<'de> for SessionType {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        use serde::de::*;
+        let u = u8::deserialize(d)?;
+        u.try_into().map_err(|u| {
+            Error::invalid_value(
+                Unexpected::Unsigned(u64::from(u)),
+                &format!("expected a value between {} and {}", 0, 2).as_str(),
+            )
+        })
     }
 }
 
@@ -105,26 +125,27 @@ pub enum MessageToServer {
         msg: Block,
     },
     SendBlob {
-        to: Vec<sig::PublicKey>,
+        to: Vec<GlobalId>,
         msg: Blob,
     },
     RequestMeta {
-        qid: u64,
+        qid: [u8; 32],
         of: UserId,
     },
     RegisterDevice {
-        qid: u64,
+        qid: [u8; 32],
         key: Signed<sig::PublicKey>,
     },
     RequestPrekey {
-        qid: u64,
+        qid: [u8; 32],
         did: sig::PublicKey,
     },
+    CaughtUp,
     Quit,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToClient {
+pub enum Push {
     NewBlock {
         from: GlobalId,
         time: DateTime<Utc>,
@@ -135,12 +156,14 @@ pub enum MessageToClient {
         time: DateTime<Utc>,
         body: Blob,
     },
-    QueryResponse {
-        res: Response,
-        qid: u64,
-    },
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub enum MessageToClient {
+    Push(Push),
+    QueryResponse { res: Response, qid: [u8; 32] },
     // TODO: consider doing something smarter here to allow this to work incrementally
-    Catchup(Vec<MessageToClient>),
+    Catchup(Vec<Push>),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]

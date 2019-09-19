@@ -169,6 +169,7 @@ pub mod sig {
             KeyPair { public, secret }
         }
 
+        // TODO: make this copy public key instead of referencing it
         pub fn public_key(&self) -> &sign::PublicKey {
             &self.public
         }

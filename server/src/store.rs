@@ -16,8 +16,8 @@ pub trait Store {
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
-    fn add_pending(&mut self, key: sig::PublicKey, msg: MessageToClient) -> Result<(), Error>;
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<MessageToClient>, Error>;
+    fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Error>;
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
     fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error>;
 }
@@ -64,6 +64,7 @@ impl<C: redis::ConnectionLike> Store for C {
         let mut pkm = self.read_key(uid, key)?;
         let res = pkm.deprecate(sigmeta);
         self.hset(uid, key.as_ref(), serde_cbor::to_vec(&pkm)?.as_slice())?;
+
         Ok(res)
     }
 
@@ -101,13 +102,14 @@ impl<C: redis::ConnectionLike> Store for C {
         Ok(out)
     }
 
-    fn add_pending(&mut self, to: sig::PublicKey, msg: MessageToClient) -> Result<(), Error> {
+    fn add_pending(&mut self, to: sig::PublicKey, msg: Push) -> Result<(), Error> {
         self.rpush(pending_of(to), serde_cbor::to_vec(&msg)?.as_slice())?;
         Ok(())
     }
 
-    fn get_pending(&mut self, to: sig::PublicKey) -> Result<Vec<MessageToClient>, Error> {
-        let msg_bs: Vec<Vec<u8>> = self.lrange(pending_of(to), 0, -1)?;
+    fn get_pending(&mut self, to: sig::PublicKey) -> Result<Vec<Push>, Error> {
+        let msg_bs: Option<Vec<Vec<u8>>> = self.lrange(pending_of(to), 0, -1)?;
+        let msg_bs = msg_bs.unwrap_or(Vec::new());
         let mut out = Vec::with_capacity(msg_bs.len());
         for bs in msg_bs.iter().map(Vec::as_slice) {
             out.push(serde_cbor::from_slice(bs)?);

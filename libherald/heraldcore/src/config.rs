@@ -5,6 +5,7 @@ use crate::{
 };
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
+use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
 
 /// Default name for the "Note to Self" conversation
 pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
@@ -30,7 +31,8 @@ pub struct Config {
 /// Builder for `Config`
 pub struct ConfigBuilder {
     /// ID of the local user
-    id: UserId,
+    id: Option<UserId>,
+    keypair: Option<sig::KeyPair>,
     /// Colorscheme
     colorscheme: Option<u32>,
     /// Name of the local user
@@ -44,15 +46,26 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     /// Creates new `ConfigBuilder`
-    pub fn new(id: UserId) -> Self {
+    pub fn new() -> Self {
         Self {
-            id,
+            id: None,
+            keypair: None,
             name: None,
             color: None,
             colorscheme: None,
             profile_picture: None,
             nts_conversation: None,
         }
+    }
+
+    pub fn id(mut self, id: UserId) -> Self {
+        self.id = Some(id);
+        self
+    }
+
+    pub fn keypair(mut self, pair: sig::KeyPair) -> Self {
+        self.keypair = Some(pair);
+        self
     }
 
     /// Sets colorscheme, defaults to 0 if not set.
@@ -89,13 +102,18 @@ impl ConfigBuilder {
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
         let Self {
+            id,
+            keypair,
             color,
             colorscheme,
-            id,
             name,
             nts_conversation,
             profile_picture,
         } = self;
+
+        let id = id.ok_or(HErr::MissingFields)?;
+        // TODO: use this
+        let keypair = keypair.ok_or(HErr::MissingFields)?;
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
@@ -214,6 +232,14 @@ impl Config {
                 row.get(0)
             })?,
         )
+    }
+
+    pub fn static_secretkey() -> Result<sign::SecretKey, HErr> {
+        unimplemented!()
+    }
+
+    pub fn static_publickey() -> Result<sign::PublicKey, HErr> {
+        unimplemented!()
     }
 
     /// Updates user's display name

@@ -2,6 +2,7 @@
 
 #![feature(try_blocks)]
 #![warn(missing_docs)]
+#![allow(warnings)]
 
 /// User configuration
 pub mod config;
@@ -24,7 +25,7 @@ pub mod message;
 /// message status
 mod message_status;
 /// Networking
-// pub mod network;
+pub mod network;
 /// Utils
 pub mod utils;
 /// Tokio re-export

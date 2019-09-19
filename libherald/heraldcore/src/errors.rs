@@ -17,6 +17,9 @@ pub enum HErr {
     RegexError(regex::Error),
     CborError(serde_cbor::Error),
     TransportError(TransportError),
+    LoginError,
+    RegistrationError,
+    MissingFields,
 }
 
 impl fmt::Display for HErr {
@@ -35,6 +38,9 @@ impl fmt::Display for HErr {
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
+            LoginError => write!(f, "LoginError"),
+            RegistrationError => write!(f, "RegistrationError"),
+            MissingFields => write!(f, "MissingFields"),
         }
     }
 }
@@ -44,17 +50,13 @@ impl std::error::Error for HErr {
         use HErr::*;
         Some(match self {
             DatabaseError(e) => e,
-            HeraldError(_) => return None,
-            MutexError(_) => return None,
-            InvalidUserId(_) => return None,
             IoError(e) => e,
             ImageError(s) => s,
             Utf8Error(s) => s,
             CborError(e) => e,
             TransportError(s) => s,
             RegexError(e) => e,
-            InvalidConversationId => return None,
-            InvalidMessageId => return None,
+            _ => return None,
         })
     }
 }

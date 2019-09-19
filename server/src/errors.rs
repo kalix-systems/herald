@@ -1,3 +1,5 @@
+use herald_common::UserId;
+
 #[derive(Debug)]
 pub enum Error {
     IO(std::io::Error),
@@ -9,6 +11,8 @@ pub enum Error {
     MissingData,
     CommandFailed,
     BadData,
+    UnknownUser(UserId),
+    CatchupFailed,
 }
 
 pub use Error::*;
