@@ -45,6 +45,54 @@ macro_rules! ret_err {
     };
 }
 
+#[macro_export]
+/// Early return on unexpected `None`
+macro_rules! ret_none {
+    ($maybe: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                eprintln!(
+                    "Unexpected `None` at {file}:{line}:{column}",
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return;
+            }
+        }
+    };
+    ($maybe: expr, $retval: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                eprintln!(
+                    "Unexpected `None` at {file}:{line}:{column}",
+                    file = file!(),
+                    line = line!(),
+                    column = column!()
+                );
+                return $retval;
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Performs a bounds check
+macro_rules! bounds_chk {
+    ($slf: expr, $ix: expr) => {
+        if $slf.list.len().saturating_sub(1) < $ix {
+            return;
+        }
+    };
+    ($slf: expr, $ix: expr, $retval: expr) => {
+        if $slf.list.len().saturating_sub(1) < $ix {
+            return $retval;
+        }
+    };
+}
+
 #[cfg(tests)]
 mod tests {
     #[test]

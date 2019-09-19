@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err, types::*};
+use crate::{bounds_chk, interface::*, ret_err, ret_none, types::*};
 use herald_common::{UserId, UserIdRef};
 use heraldcore::{
     abort_err, chrono,
@@ -37,7 +37,10 @@ impl UsersTrait for Users {
                     matched: true,
                 })
                 .collect(),
-            Err(_) => Vec::new(),
+            Err(e) => {
+                eprintln!("{}", e);
+                Vec::new()
+            }
         };
 
         let filter = abort_err!(SearchPattern::new_normal("".into()));
@@ -71,8 +74,8 @@ impl UsersTrait for Users {
             },
         );
         self.model.end_insert_rows();
-        //self.inner_filter();
 
+        // this is okay, we just performed an insertion
         self.list[0].inner.pairwise_conversation.to_vec()
     }
 
@@ -120,34 +123,44 @@ impl UsersTrait for Users {
 
     /// Returns user id.
     fn user_id(&self, row_index: usize) -> UserIdRef {
-        self.list[row_index].inner.id.as_str()
+        ret_none!(self.list.get(row_index), "").inner.id.as_str()
     }
 
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> FfiConversationIdRef {
-        self.list[row_index].inner.pairwise_conversation.as_slice()
+        ret_none!(self.list.get(row_index), &[])
+            .inner
+            .pairwise_conversation
+            .as_slice()
     }
 
     /// Returns users name
     fn name(&self, row_index: usize) -> Option<&str> {
-        self.list[row_index].inner.name.as_ref().map(|n| n.as_str())
+        ret_none!(self.list.get(row_index), None)
+            .inner
+            .name
+            .as_ref()
+            .map(|n| n.as_str())
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+        bounds_chk!(self, row_index, false);
+
         ret_err!(
             self.handle
                 .set_name(self.user_id(row_index), name.as_ref().map(|s| s.as_str())),
             false
         );
 
+        // already checked
         self.list[row_index].inner.name = name;
         true
     }
 
     /// Returns profile picture
     fn profile_picture(&self, row_index: usize) -> Option<&str> {
-        self.list[row_index]
+        ret_none!(self.list.get(row_index), None)
             .inner
             .profile_picture
             .as_ref()
@@ -158,6 +171,8 @@ impl UsersTrait for Users {
     ///
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
+        bounds_chk!(self, row_index, false);
+
         let path = ret_err!(
             self.handle.set_profile_picture(
                 self.user_id(row_index),
@@ -167,36 +182,42 @@ impl UsersTrait for Users {
             false
         );
 
+        // already checked
         self.list[row_index].inner.profile_picture = path;
         true
     }
 
     /// Returns user's color
     fn color(&self, row_index: usize) -> u32 {
-        self.list[row_index].inner.color
+        ret_none!(self.list.get(row_index), 0).inner.color
     }
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
+        bounds_chk!(self, row_index, false);
+
         ret_err!(self.handle.set_color(self.user_id(row_index), color), false);
+
+        // already checked
         self.list[row_index].inner.color = color;
         true
     }
 
     fn status(&self, row_index: usize) -> u8 {
-        self.list[row_index].inner.status as u8
+        ret_none!(self.list.get(row_index), 0).inner.status as u8
     }
 
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         let status = ret_err!(ContactStatus::try_from(status), false);
 
-        let meta = &self.list[row_index].inner;
+        let meta = &ret_none!(self.list.get(row_index), false).inner;
         ret_err!(
             self.handle
                 .set_status(meta.id.as_str(), meta.pairwise_conversation, status),
             false
         );
 
+        // checked by previous call
         self.list[row_index].inner.status = status;
 
         if status == ContactStatus::Deleted {
@@ -220,11 +241,11 @@ impl UsersTrait for Users {
     }
 
     fn matched(&self, row_index: usize) -> bool {
-        self.list[row_index].matched
+        ret_none!(self.list.get(row_index), true).matched
     }
 
     fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
-        self.list[row_index].matched = value;
+        ret_none!(self.list.get_mut(row_index), false).matched = value;
         true
     }
 
@@ -290,6 +311,8 @@ impl UsersTrait for Users {
         conversation_id: FfiConversationIdRef,
     ) -> bool {
         let index = index as usize;
+        bounds_chk!(self, index, false);
+
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
         true
@@ -311,6 +334,8 @@ impl UsersTrait for Users {
         conversation_id: FfiConversationIdRef,
     ) -> bool {
         let index = index as usize;
+        bounds_chk!(self, index, false);
+
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(
             self.handle.remove_member(&conv_id, self.user_id(index)),

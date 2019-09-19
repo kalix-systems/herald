@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err, types::*};
+use crate::{interface::*, ret_err, ret_none, types::*};
 use herald_common::UserIdRef;
 use heraldcore::{
     abort_err, chrono,
@@ -116,19 +116,25 @@ impl MessagesTrait for Messages {
     }
 
     fn author(&self, row_index: usize) -> UserIdRef {
-        self.list[row_index].inner.author.as_str()
+        ret_none!(self.list.get(row_index), "")
+            .inner
+            .author
+            .as_str()
     }
 
     fn body(&self, row_index: usize) -> &str {
-        self.list[row_index].inner.body.as_str()
+        ret_none!(self.list.get(row_index), "").inner.body.as_str()
     }
 
     fn message_id(&self, row_index: usize) -> FfiMsgIdRef {
-        self.list[row_index].inner.message_id.as_slice()
+        ret_none!(self.list.get(row_index), &[])
+            .inner
+            .message_id
+            .as_slice()
     }
 
     fn op(&self, row_index: usize) -> Option<FfiMsgIdRef> {
-        match &self.list[row_index].inner.op {
+        match &ret_none!(self.list.get(row_index), None).inner.op {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
@@ -200,7 +206,10 @@ impl MessagesTrait for Messages {
     }
 
     fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
-        self.list[row_index].inner.timestamp.timestamp_millis()
+        ret_none!(self.list.get(row_index), 0)
+            .inner
+            .timestamp
+            .timestamp_millis()
     }
 
     /// Deletes all messages in a conversation.

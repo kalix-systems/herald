@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err, types::*};
+use crate::{interface::*, ret_err, ret_none, types::*};
 use heraldcore::{
     abort_err,
     conversation::{ConversationMeta, Conversations as Core},
@@ -51,11 +51,11 @@ impl ConversationsTrait for Conversations {
     }
 
     fn color(&self, index: usize) -> u32 {
-        self.list[index].inner.color
+        ret_none!(self.list.get(index), 0).inner.color
     }
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
-        let meta = &mut self.list[index].inner;
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(self.handle.set_color(&meta.conversation_id, color), false);
 
         meta.color = color;
@@ -63,15 +63,18 @@ impl ConversationsTrait for Conversations {
     }
 
     fn conversation_id(&self, index: usize) -> FfiConversationIdRef {
-        self.list[index].inner.conversation_id.as_slice()
+        ret_none!(self.list.get(index), &[])
+            .inner
+            .conversation_id
+            .as_slice()
     }
 
     fn muted(&self, index: usize) -> bool {
-        self.list[index].inner.muted
+        ret_none!(self.list.get(index), true).inner.muted
     }
 
     fn set_muted(&mut self, index: usize, muted: bool) -> bool {
-        let meta = &mut self.list[index].inner;
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(self.handle.set_muted(&meta.conversation_id, muted), false);
 
         meta.muted = muted;
@@ -79,11 +82,16 @@ impl ConversationsTrait for Conversations {
     }
 
     fn picture(&self, index: usize) -> Option<&str> {
-        self.list[index].inner.picture.as_ref().map(|p| p.as_str())
+        // Note: this should not be using the `?` operator
+        ret_none!(self.list.get(index), None)
+            .inner
+            .picture
+            .as_ref()
+            .map(|p| p.as_str())
     }
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
-        let meta = &mut self.list[index].inner;
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(
             self.handle.set_picture(
                 &meta.conversation_id,
@@ -98,11 +106,16 @@ impl ConversationsTrait for Conversations {
     }
 
     fn title(&self, index: usize) -> Option<&str> {
-        self.list[index].inner.title.as_ref().map(|t| t.as_str())
+        self.list
+            .get(index)?
+            .inner
+            .title
+            .as_ref()
+            .map(|t| t.as_str())
     }
 
     fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
-        let meta = &mut self.list[index].inner;
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(
             self.handle
                 .set_title(&meta.conversation_id, title.as_ref().map(|t| t.as_str())),
@@ -114,7 +127,7 @@ impl ConversationsTrait for Conversations {
     }
 
     fn pairwise(&self, index: usize) -> bool {
-        self.list[index].inner.pairwise
+        ret_none!(self.list.get(index), false).inner.pairwise
     }
 
     fn add_conversation(&mut self) -> Vec<u8> {
@@ -134,7 +147,7 @@ impl ConversationsTrait for Conversations {
 
     fn remove_conversation(&mut self, index: u64) -> bool {
         let index = index as usize;
-        let meta = &mut self.list[index].inner;
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
 
         // cannot remove pairwise conversation!
         if meta.pairwise {
@@ -154,11 +167,11 @@ impl ConversationsTrait for Conversations {
     }
 
     fn matched(&self, row_index: usize) -> bool {
-        self.list[row_index].matched
+        ret_none!(self.list.get(row_index), true).matched
     }
 
     fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
-        self.list[row_index].matched = value;
+        ret_none!(self.list.get_mut(row_index), false).matched = value;
         true
     }
 
