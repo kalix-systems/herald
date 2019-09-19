@@ -335,7 +335,6 @@ void LibHerald::test_reply() {
   messages_set_up();
 
   QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
-
   msgs->insertMessage("simple case 1");
 
   auto args = spy.at(0);
@@ -427,24 +426,36 @@ void LibHerald::test_modifyConversation() {
 // tests that need the server
 void LibHerald::test_networkHandleConnects() {
 
-  cfg = new Config();
   nwk_handle = new NetworkHandle();
-  QSignalSpy data_changed_spy(nwk_handle, SIGNAL(connectionUpChanged()));
+  QSignalSpy net_up_spy(nwk_handle, SIGNAL(connectionUpChanged()));
+  QSignalSpy net_pending_spy(nwk_handle, SIGNAL(connectionPendingChanged()));
+
   this->thread()->sleep(1);
   QCOMPARE(nwk_handle->connectionUp(), true);
+  QCOMPARE(net_up_spy.count(), 2);
+  QCOMPARE(net_pending_spy.count(), 2);
 
+  delete nwk_handle;
 };
 
 void LibHerald::test_intraclientMessage() {
-//  cfg = new Config();
-//  convos = new Conversations();
-//  users = new Users;
-//  nwk_handle = new NetworkHandle();
 
+  convos = new Conversations();
+  users = new Users;
+  nwk_handle = new NetworkHandle();
+  msgs = new Messages();
+  this->thread()->sleep(1);
 
-//  auto bs = convos->addConversation();
-//  nwk_handle->sendAddRequest("Bob",bs);
-//  nwk_handle->sendMessage("Hello Bob!",,);
+  auto bs = convos->addConversation();
+  msgs->setConversationId(bs);
+  auto msg_bs = msgs->insertMessage("Hello Bob!");
+  QCOMPARE(bs.length(),32);
+  QCOMPARE(msg_bs.length(),32);
+  QCOMPARE(nwk_handle->sendAddRequest("Bob", bs), true);
+  QCOMPARE(nwk_handle->sendMessage("Hello Bob!", bs, msg_bs), true);
+
+  // todo: give bob a running spy and some methods to count how many
+  // messages he receives.
 
 };
 
