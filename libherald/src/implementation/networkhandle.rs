@@ -37,13 +37,13 @@ impl EffectsFlags {
     pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
         // drop the pending and online flags, we are in a fail state
         self.net_online.fetch_and(false, Ordering::Relaxed);
-        self.net_pending.fetch_and(true, Ordering::Relaxed);
+        self.net_pending.fetch_or(true, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
         println!("Net Down!");
     }
     pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_online.fetch_and(true, Ordering::Relaxed);
+        self.net_online.fetch_or(true, Ordering::Relaxed);
         self.net_pending.fetch_and(false, Ordering::Relaxed);
         emit.connection_up_changed();
         emit.connection_pending_changed();
@@ -232,7 +232,6 @@ fn start_worker(
 
         rt.block_on(async move {
             status_flags.emit_net_pending(&mut emit);
-
             if let Ok((nwrx, sess)) = Session::init().await {
                 status_flags.emit_net_up(&mut emit);
 
