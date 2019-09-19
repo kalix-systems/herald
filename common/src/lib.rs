@@ -4,6 +4,8 @@ mod crypto;
 pub use crypto::*;
 mod types;
 pub use types::*;
+mod traits;
+pub use traits::*;
 
 pub use bytes::Bytes;
 pub use chainmail::block::*;
@@ -11,46 +13,7 @@ pub use chrono::prelude::*;
 pub use serde::*;
 pub use serde_cbor;
 pub use std::collections::HashMap;
-pub use std::convert::{TryFrom, TryInto};
 pub use tokio::prelude::*;
-
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
-#[repr(u8)]
-pub enum SessionType {
-    Register = 0,
-    Login = 1,
-}
-
-impl TryFrom<u8> for SessionType {
-    type Error = u8;
-
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
-            0 => Ok(Self::Register),
-            1 => Ok(Self::Login),
-            i => Err(i),
-        }
-    }
-}
-
-impl Serialize for SessionType {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
-    }
-}
-
-impl<'de> Deserialize<'de> for SessionType {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
-        u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 2).as_str(),
-            )
-        })
-    }
-}
 
 impl UserMeta {
     pub fn new() -> Self {
@@ -100,72 +63,6 @@ impl UserMeta {
             .filter(|(k, m)| m.key_is_valid(**k))
             .map(|(k, _)| *k)
     }
-}
-
-pub type Blob = Bytes;
-pub type BlobRef<'a> = &'a [u8];
-
-// TODO: lifetime parameters so these are zerocopy
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToServer {
-    SendBlock {
-        to: Vec<UserId>,
-        msg: Block,
-    },
-    SendBlob {
-        to: Vec<GlobalId>,
-        msg: Blob,
-    },
-    RequestMeta {
-        qid: [u8; 32],
-        of: UserId,
-    },
-    RegisterDevice {
-        qid: [u8; 32],
-        key: Signed<sig::PublicKey>,
-    },
-    RequestPrekey {
-        qid: [u8; 32],
-        did: sig::PublicKey,
-    },
-    UserExists {
-        qid: [u8; 32],
-        of: UserId,
-    },
-    CaughtUp,
-    Quit,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum Push {
-    NewBlock {
-        from: GlobalId,
-        time: DateTime<Utc>,
-        body: Block,
-    },
-    NewBlob {
-        from: GlobalId,
-        time: DateTime<Utc>,
-        body: Blob,
-    },
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToClient {
-    Push(Push),
-    QueryResponse { res: Response, qid: [u8; 32] },
-    // TODO: consider doing something smarter here to allow this to work incrementally
-    Catchup(Vec<Push>),
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum Response {
-    Exists(bool),
-    Meta(UserMeta),
-    Prekey(sealed::PublicKey),
-    DeviceRegistered(sig::PublicKey),
-    DataNotFound,
-    InvalidRequest,
 }
 
 #[derive(Debug)]
