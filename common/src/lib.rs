@@ -7,10 +7,9 @@ pub use types::*;
 mod traits;
 pub use traits::*;
 
-pub use bytes::Bytes;
+pub use async_trait::*;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
-pub use serde::*;
 pub use serde_cbor;
 pub use std::collections::HashMap;
 pub use tokio::prelude::*;

@@ -12,6 +12,7 @@ rusqlite    = "0.20.0"
 serde_cbor  = "0.10"
 sodiumoxide = "0.2"
 redis       = "0.12"
+async-trait = "0.1"
 bytes       = { version = "0.4", features = ["serde"] }
 serde       = { version = "1.0", features = ["derive"] }
 chrono      = { version = "0.4", features = ["serde"] }

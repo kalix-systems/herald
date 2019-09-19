@@ -1,7 +1,5 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
-use serde::*;
-use sodiumoxide::crypto::{box_, sign};
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
