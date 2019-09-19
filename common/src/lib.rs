@@ -52,17 +52,6 @@ impl<'de> Deserialize<'de> for SessionType {
     }
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct GlobalId {
-    pub uid: UserId,
-    pub did: sig::PublicKey,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct UserMeta {
-    keys: HashMap<sig::PublicKey, sig::PKMeta>,
-}
-
 impl UserMeta {
     pub fn new() -> Self {
         UserMeta {

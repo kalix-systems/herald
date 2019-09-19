@@ -9,10 +9,10 @@ pub struct UserId(ArrayString<[u8; 32]>);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct UserMeta {
-    keys: HashMap<sig::PublicKey, sig::PKMeta>,
+    pub keys: HashMap<sig::PublicKey, sig::PKMeta>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GlobalId {
     pub uid: UserId,
     pub did: sig::PublicKey,
@@ -44,7 +44,7 @@ pub mod fanout {
 pub mod pubkey {
     use super::*;
 
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum ToServer {
         RegisterKey(Signed<sign::PublicKey>),
         DeprecateKey(Signed<sign::PublicKey>),
@@ -63,7 +63,7 @@ pub mod pubkey {
 pub mod query {
     use super::*;
 
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum ToServer {
         UserExists(UserId),
         UserKeys(UserId),
@@ -71,17 +71,17 @@ pub mod query {
         KeyMeta(UserId, sign::PublicKey),
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub enum ServerResponse {
         Exists(bool),
-        // Keys(UserMeta),
-        // KeyMeta(sig::PKMeta),
-        // PreKey(Signed<box_::PublicKey>),
+        Keys(UserMeta),
+        KeyMeta(sig::PKMeta),
+        PreKey(Signed<box_::PublicKey>),
         MissingData,
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Push<'a> {
     KeyRegistered(Signed<sign::PublicKey>),
     KeyDeprecated(Signed<sign::PublicKey>),

@@ -9,7 +9,7 @@ pub const TIMESTAMP_FUZZ: i64 = 3600;
 /// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
 /// the device with id `signer` of a bytestring consisting of `data` followed by
 /// `timestamp.timestamp`
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Signed<T: AsRef<[u8]>> {
     data: T,
     timestamp: DateTime<Utc>,
