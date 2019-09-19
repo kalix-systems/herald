@@ -81,7 +81,7 @@ impl Database {
         let tx = db.transaction()?;
 
         // drop
-        tx.execute(include_str!("sql/keys/drop_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/message_status/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
         tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
@@ -90,7 +90,7 @@ impl Database {
         tx.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
 
         // create
-        tx.execute(include_str!("sql/keys/create_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
         tx.execute(
             include_str!("sql/message_status/create_table.sql"),
             NO_PARAMS,

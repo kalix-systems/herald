@@ -4,4 +4,4 @@ FROM
   sqlite_master
 WHERE
   type = 'table'
-  AND name = 'keys'
+  AND name = 'contact_keys'

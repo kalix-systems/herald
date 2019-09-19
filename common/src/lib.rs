@@ -12,10 +12,11 @@ pub use serde::*;
 pub use serde_cbor;
 pub use std::collections::HashMap;
 pub use std::convert::{TryFrom, TryInto};
+use arrayvec::ArrayString;
 pub use tokio::prelude::*;
 
-pub type UserId = String;
-pub type UserIdRef<'a> = &'a str;
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+pub struct UserId(ArrayString<[u8; 32]>);
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]

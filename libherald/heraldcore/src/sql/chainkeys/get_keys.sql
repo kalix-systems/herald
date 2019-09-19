@@ -1,6 +1,6 @@
 SELECT
   chainkey
 FROM
-  keys
+  chainkeys
 WHERE
   hash = ?

@@ -7,34 +7,34 @@ use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 #[derive(Default)]
-pub(crate) struct Keys {
+pub(crate) struct ChainKeys {
     db: Database,
 }
 
-impl DBTable for Keys {
+impl DBTable for ChainKeys {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/keys/create_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
     fn drop_table() -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/keys/drop_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
     fn exists() -> Result<bool, HErr> {
         let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("sql/keys/table_exists.sql"))?;
+        let mut stmt = db.prepare(include_str!("sql/chainkeys/table_exists.sql"))?;
         Ok(stmt.exists(NO_PARAMS)?)
     }
 
     fn reset() -> Result<(), HErr> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
-        tx.execute(include_str!("sql/keys/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/keys/create_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
         tx.commit()?;
         Ok(())
     }
@@ -42,7 +42,7 @@ impl DBTable for Keys {
 
 fn store_key(db: &rusqlite::Connection, hash: BlockHash, key: ChainKey) -> Result<(), HErr> {
     db.execute(
-        include_str!("sql/keys/store_key.sql"),
+        include_str!("sql/chainkeys/store_key.sql"),
         params![hash.as_ref(), key.as_ref()],
     )?;
 
@@ -56,11 +56,11 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     // references to transaction needs to be dropped before committing
     {
         let mut mark_stmt = tx
-            .prepare(include_str!("sql/keys/mark_used.sql"))
+            .prepare(include_str!("sql/chainkeys/mark_used.sql"))
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         let mut key_used_stmt = tx
-            .prepare(include_str!("sql/keys/get_key_used_status.sql"))
+            .prepare(include_str!("sql/chainkeys/get_key_used_status.sql"))
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         for block in blocks {
@@ -89,7 +89,9 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     db: &rusqlite::Connection,
     blocks: I,
 ) -> Option<BTreeSet<ChainKey>> {
-    let mut stmt = db.prepare(include_str!("sql/keys/get_keys.sql")).ok()?;
+    let mut stmt = db
+        .prepare(include_str!("sql/chainkeys/get_keys.sql"))
+        .ok()?;
 
     let mut keys: BTreeSet<ChainKey> = BTreeSet::new();
 
@@ -104,7 +106,7 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
 // this should *not* mark keys as used
 fn get_unused(db: &rusqlite::Connection) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
     let mut stmt = db
-        .prepare(include_str!("sql/keys/get_unused.sql"))
+        .prepare(include_str!("sql/chainkeys/get_unused.sql"))
         .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
     let results = stmt
@@ -126,7 +128,7 @@ fn get_unused(db: &rusqlite::Connection) -> Result<Vec<(BlockHash, ChainKey)>, C
     Ok(pairs)
 }
 
-impl BlockStore for Keys {
+impl BlockStore for ChainKeys {
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<(), ChainError> {
         store_key(&self.db, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
@@ -173,23 +175,23 @@ mod tests {
     fn create_drop_exists() {
         Database::reset_all().expect(womp!());
         // drop twice, it shouldn't panic on multiple drops
-        Keys::drop_table().expect(womp!());
-        Keys::drop_table().expect(womp!());
+        ChainKeys::drop_table().expect(womp!());
+        ChainKeys::drop_table().expect(womp!());
 
-        Keys::create_table().expect(womp!());
-        assert!(Keys::exists().expect(womp!()));
-        Keys::create_table().expect(womp!());
-        assert!(Keys::exists().expect(womp!()));
-        Keys::drop_table().expect(womp!());
-        assert!(!Keys::exists().expect(womp!()));
-        Keys::reset().expect(womp!());
+        ChainKeys::create_table().expect(womp!());
+        assert!(ChainKeys::exists().expect(womp!()));
+        ChainKeys::create_table().expect(womp!());
+        assert!(ChainKeys::exists().expect(womp!()));
+        ChainKeys::drop_table().expect(womp!());
+        assert!(!ChainKeys::exists().expect(womp!()));
+        ChainKeys::reset().expect(womp!());
     }
 
     #[test]
     #[serial]
     fn blockstore() {
         Database::reset_all().expect(womp!());
-        let mut handle = Keys::default();
+        let mut handle = ChainKeys::default();
 
         let blockhash1 = BlockHash::from_slice(vec![1; BLOCKHASH_BYTES].as_slice()).expect(womp!());
         let blockhash2 = BlockHash::from_slice(vec![2; BLOCKHASH_BYTES].as_slice()).expect(womp!());

@@ -316,7 +316,7 @@ mod tests {
 
         let id = "HelloWorld";
 
-        ConfigBuilder::new(id.into()).add().expect(womp!());
+        ConfigBuilder::new().id(id.into()).add().expect(womp!());
 
         let config = Config::get().expect(womp!());
         assert_eq!(config.id(), id);
@@ -331,7 +331,8 @@ mod tests {
         let name = "stuff";
         let profile_picture = "stuff";
         let nts_id = [0u8; 32].into();
-        let config = ConfigBuilder::new(id.into())
+        let config = ConfigBuilder::new()
+            .id(id.into())
             .name(name.into())
             .colorscheme(1)
             .color(2)
@@ -379,15 +380,16 @@ mod tests {
     #[serial]
     fn two_configs() {
         Database::reset_all().expect(womp!());
-        ConfigBuilder::new("1".into()).add().expect(womp!());
-        assert!(ConfigBuilder::new("2".into()).add().is_err());
+        ConfigBuilder::new().id("1".into()).add().expect(womp!());
+        assert!(ConfigBuilder::new().id("2".into()).add().is_err());
     }
 
     #[test]
     #[serial]
     fn invalid_id() {
         Database::reset_all().expect(womp!());
-        assert!(ConfigBuilder::new(format!("{:?}", vec![0; 256]))
+        assert!(ConfigBuilder::new()
+            .id(format!("{:?}", vec![0; 256]))
             .add()
             .is_err());
     }
@@ -398,7 +400,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
-        let config = ConfigBuilder::new(id.into()).add().expect(womp!());
+        let config = ConfigBuilder::new().id(id.into()).add().expect(womp!());
 
         let static_id = Config::static_id().expect(womp!());
         assert_eq!(config.id, id);

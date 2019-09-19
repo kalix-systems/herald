@@ -2,6 +2,6 @@ SELECT
   hash,
   chainkey
 FROM
-  keys
+  chainkeys
 WHERE
   used = 0

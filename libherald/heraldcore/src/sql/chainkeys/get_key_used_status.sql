@@ -1,7 +1,7 @@
 SELECT
   used
 FROM
-  keys
+  chainkeys
 WHERE
   hash = @1
 LIMIT
