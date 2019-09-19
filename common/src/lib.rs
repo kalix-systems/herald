@@ -2,6 +2,8 @@
 
 mod crypto;
 pub use crypto::*;
+mod types;
+pub use types::*;
 
 pub use bytes::Bytes;
 pub use chainmail::block::*;
