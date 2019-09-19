@@ -5,24 +5,7 @@
 #include <QDir>
 #include "Bindings.h"
 
-
-
-
-// kills the server at process ID pid,
-// returns 0 on sucess, otherwise an error code
-void kill_server(QProcess *cargo_run) {
-  if (cargo_run == nullptr) {
-    qDebug("server process was null! Network Tests not accurate");
-    return;
-  }
-  if (cargo_run->state() != QProcess::Running) {
-    qDebug("server process was not running! Network Tests not accurate");
-    return;
-  }
-  cargo_run->terminate();
-}
-
-// add necessary includes here
+void kill_server(QProcess *server);
 
 class LibHerald : public QObject
 {
@@ -117,6 +100,8 @@ LibHerald::~LibHerald()
 // spawns server in a pthread for the duration of the tests.
 void LibHerald::initTestCase() {
 
+  spawn_bob();
+
   QString wd = "./../../../server";
   QString cargo = QDir::homePath() + "/.cargo/bin/cargo";
   QStringList build_args; build_args << "build";
@@ -144,6 +129,8 @@ void LibHerald::initTestCase() {
   if (!status) {
     QFAIL("server failed to run");
   }
+  this->thread()->sleep(1);
+  qDebug() << "server start output: " << server->readAll();
 }
 
 void LibHerald::cleanupTestCase() {
@@ -153,6 +140,19 @@ void LibHerald::cleanupTestCase() {
   // remove bobs database
   QFile file("bob.sqlite3");
   file.remove();
+}
+
+
+void kill_server(QProcess *cargo_run) {
+  if (cargo_run == nullptr) {
+    qDebug("server process was null! Network Tests not accurate");
+    return;
+  }
+  if (cargo_run->state() != QProcess::Running) {
+    qDebug("server process was not running! Network Tests not accurate");
+    return;
+  }
+  cargo_run->terminate();
 }
 
 /*
@@ -425,8 +425,28 @@ void LibHerald::test_modifyConversation() {
 }
 
 // tests that need the server
-void LibHerald::test_networkHandleConnects() {};
-void LibHerald::test_intraclientMessage() {};
+void LibHerald::test_networkHandleConnects() {
+
+  cfg = new Config();
+  nwk_handle = new NetworkHandle();
+  QSignalSpy data_changed_spy(nwk_handle, SIGNAL(connectionUpChanged()));
+  this->thread()->sleep(1);
+  QCOMPARE(nwk_handle->connectionUp(), true);
+
+};
+
+void LibHerald::test_intraclientMessage() {
+//  cfg = new Config();
+//  convos = new Conversations();
+//  users = new Users;
+//  nwk_handle = new NetworkHandle();
+
+
+//  auto bs = convos->addConversation();
+//  nwk_handle->sendAddRequest("Bob",bs);
+//  nwk_handle->sendMessage("Hello Bob!",,);
+
+};
 
 QTEST_APPLESS_MAIN(LibHerald)
 
