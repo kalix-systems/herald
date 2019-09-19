@@ -2,6 +2,8 @@
 
 mod crypto;
 pub use crypto::*;
+mod types;
+pub use types::*;
 
 pub use bytes::Bytes;
 pub use chainmail::block::*;
@@ -10,40 +12,7 @@ pub use serde::*;
 pub use serde_cbor;
 pub use std::collections::HashMap;
 pub use std::convert::{TryFrom, TryInto};
-use arrayvec::ArrayString;
 pub use tokio::prelude::*;
-
-
-type UserIdInner = [u8; 32];
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
-pub struct UserId(ArrayString<UserIdInner>);
-
-impl std::ops::Deref for UserId {
-    type Target = ArrayString<UserIdInner>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-pub enum InvalidUserId {
-    NonAlphaNumeric,
-    CapacityError,
-}
-
-impl TryFrom<&str> for UserId {
-    type Error = InvalidUserId;
-
-    fn try_from(val: &str) -> Result<Self, Self::Error> {
-       if !val.bytes().all(|c| c.is_ascii_alphanumeric()) {
-        return Err(InvalidUserId::NonAlphaNumeric)  
-       } else {
-        Ok(Self(ArrayString::from(val).map_err(|_| InvalidUserId::CapacityError)?))
-       }
-    }
-}
-
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -81,17 +50,6 @@ impl<'de> Deserialize<'de> for SessionType {
             )
         })
     }
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub struct GlobalId {
-    pub uid: UserId,
-    pub did: sig::PublicKey,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct UserMeta {
-    keys: HashMap<sig::PublicKey, sig::PKMeta>,
 }
 
 impl UserMeta {
