@@ -140,6 +140,10 @@ pub enum MessageToServer {
         qid: [u8; 32],
         did: sig::PublicKey,
     },
+    UserExists {
+        qid: [u8; 32],
+        of: UserId,
+    },
     CaughtUp,
     Quit,
 }
@@ -168,6 +172,7 @@ pub enum MessageToClient {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Response {
+    Exists(bool),
     Meta(UserMeta),
     Prekey(sealed::PublicKey),
     DeviceRegistered(sig::PublicKey),

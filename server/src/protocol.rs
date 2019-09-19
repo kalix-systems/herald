@@ -228,6 +228,11 @@ impl State {
                     let push = MessageToClient::QueryResponse { qid, res };
                     self.send_message(&mut con, &from, push).await?;
                 }
+                UserExists { qid, of } => {
+                    let res = Response::Exists(con.user_exists(&of)?);
+                    let push = MessageToClient::QueryResponse { qid, res };
+                    self.send_message(&mut con, &from, push).await?;
+                }
                 CaughtUp => {}
                 Quit => break,
             }
