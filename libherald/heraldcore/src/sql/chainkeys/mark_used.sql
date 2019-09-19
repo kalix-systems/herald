@@ -1,5 +1,5 @@
 UPDATE
-  keys
+  chainkeys
 SET
   used = 1
 WHERE
