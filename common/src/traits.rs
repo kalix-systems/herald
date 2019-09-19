@@ -1,31 +1,5 @@
 use crate::*;
 
-// TODO: implement this for client-side db?
-/// A store for keys
-/// Is not assumed to do any checking of signatures
-pub trait Store {
-    type Error;
-
-    fn add_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Self::Error>;
-    fn read_key(&mut self, uid: UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Self::Error>;
-    fn deprecate_key(
-        &mut self,
-        uid: UserId,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<bool, Self::Error>;
-
-    fn user_exists(&mut self, uid: UserId) -> Result<bool, Self::Error>;
-    fn key_is_valid(&mut self, uid: UserId, key: sig::PublicKey) -> Result<bool, Self::Error>;
-    fn read_meta(&mut self, uid: UserId) -> Result<UserMeta, Self::Error>;
-
-    fn add_prekey(&mut self, pre: sealed::PublicKey) -> Result<bool, Self::Error>;
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Self::Error>;
-
-    fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Self::Error>;
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Self::Error>;
-    fn remove_pending(&mut self, key: sig::PublicKey) -> Result<(), Self::Error>;
-}
-
 #[async_trait]
 /// Handles protocol messages.
 /// For the client, this will tag each message and send it to the server.
@@ -50,6 +24,32 @@ pub trait ProtocolHandler {
 /// `Client`s must also be able to handle incoming `Push` messages.
 pub trait Client: ProtocolHandler {
     async fn handle_push<'a>(&mut self, push: Push<'a>) -> Result<(), Self::Error>;
+}
+
+// TODO: implement this for client-side db?
+/// A store for keys
+/// Is not assumed to do any checking of signatures
+pub trait Store {
+    type Error;
+
+    fn add_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Self::Error>;
+    fn read_key(&mut self, uid: UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Self::Error>;
+    fn deprecate_key(
+        &mut self,
+        uid: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<bool, Self::Error>;
+
+    fn user_exists(&mut self, uid: UserId) -> Result<bool, Self::Error>;
+    fn key_is_valid(&mut self, uid: UserId, key: sig::PublicKey) -> Result<bool, Self::Error>;
+    fn read_meta(&mut self, uid: UserId) -> Result<UserMeta, Self::Error>;
+
+    fn add_prekey(&mut self, pre: sealed::PublicKey) -> Result<bool, Self::Error>;
+    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Self::Error>;
+
+    fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Self::Error>;
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Self::Error>;
+    fn remove_pending(&mut self, key: sig::PublicKey) -> Result<(), Self::Error>;
 }
 
 // TODO: replace RedisError with a real error type, uncomment relevant code in each method
