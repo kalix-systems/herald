@@ -6,12 +6,13 @@ use crate::{
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
+use std::convert::TryFrom;
 
 /// Default name for the "Note to Self" conversation
 pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
 
 /// User configuration
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub struct Config {
     /// ID of the local user
     pub id: UserId,
@@ -139,7 +140,7 @@ impl ConfigBuilder {
         let tx = db.transaction()?;
         tx.execute(
             include_str!("sql/config/add_config.sql"),
-            params![id, colorscheme],
+            params![id.as_str(), colorscheme],
         )?;
 
         let contact = contact_builder.add_with_tx(&tx)?;
@@ -198,7 +199,7 @@ impl Config {
             NO_PARAMS,
             |row| {
                 Ok((
-                    row.get(0)?,
+                    row.get::<_, String>(0)?,
                     row.get(1)?,
                     row.get(2)?,
                     row.get(3)?,
@@ -209,7 +210,7 @@ impl Config {
         )?;
 
         Ok(Config {
-            id,
+            id: UserId::try_from(id.as_str())?,
             name,
             profile_picture,
             color,
@@ -220,8 +221,8 @@ impl Config {
     }
 
     /// Gets user id
-    pub fn id(&self) -> UserIdRef {
-        self.id.as_str()
+    pub fn id(&self) -> &UserId {
+        &self.id
     }
 
     /// Gets user id directly from database.
@@ -351,7 +352,7 @@ mod tests {
         let db_config = Config::get().expect(womp!());
 
         assert_eq!(config.nts_conversation, db_config.nts_conversation);
-        assert_eq!(db_config.id(), "HelloWorld");
+        assert_eq!(db_config.id().as_str(), "HelloWorld");
         assert_eq!(db_config.name.as_ref().expect(womp!()), name);
         assert_eq!(db_config.nts_conversation, nts_id);
         assert_eq!(db_config.colorscheme, 1);
@@ -380,18 +381,10 @@ mod tests {
     #[serial]
     fn two_configs() {
         Database::reset_all().expect(womp!());
-        ConfigBuilder::new().id("1".into()).add().expect(womp!());
-        assert!(ConfigBuilder::new().id("2".into()).add().is_err());
-    }
-
-    #[test]
-    #[serial]
-    fn invalid_id() {
-        Database::reset_all().expect(womp!());
-        assert!(ConfigBuilder::new()
-            .id(format!("{:?}", vec![0; 256]))
-            .add()
-            .is_err());
+        let id1 = UserId::from("1").unwrap();
+        let id2 = UserId::from("2").unwrap();
+        ConfigBuilder::new().id(id1).add().expect(womp!());
+        assert!(ConfigBuilder::new().id(id2).add().is_err());
     }
 
     #[test]
