@@ -8,7 +8,7 @@ pub enum HErr {
     HeraldError(String),
     DatabaseError(rusqlite::Error),
     MutexError(String),
-    InvalidUserId(String),
+    InvalidUserId,
     InvalidMessageId,
     InvalidConversationId,
     Utf8Error(std::str::Utf8Error),
@@ -29,7 +29,7 @@ impl fmt::Display for HErr {
             DatabaseError(e) => write!(f, "Database Error: {}", e),
             HeraldError(s) => write!(f, "Herald Error: {}", s),
             MutexError(s) => write!(f, "Mutex Error: {}", s),
-            InvalidUserId(s) => write!(f, "InvalidUserId: {}", s),
+            InvalidUserId => write!(f, "InvalidUserId"),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
             Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
@@ -116,5 +116,11 @@ impl From<TransportError> for HErr {
 impl From<std::str::Utf8Error> for HErr {
     fn from(e: std::str::Utf8Error) -> Self {
         HErr::Utf8Error(e)
+    }
+}
+
+impl From<herald_common::InvalidUserId> for HErr {
+    fn from(_: herald_common::InvalidUserId) -> Self {
+        HErr::InvalidUserId
     }
 }

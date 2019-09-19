@@ -113,7 +113,7 @@ impl Default for Database {
 }
 
 /// Types that are wrappers around database tables.
-pub trait DBTable: Default {
+pub trait DBTable {
     /// Drops table if it exists.
     fn drop_table() -> Result<(), HErr>;
 

@@ -13,8 +13,37 @@ pub use std::convert::{TryFrom, TryInto};
 use arrayvec::ArrayString;
 pub use tokio::prelude::*;
 
+
+type UserIdInner = [u8; 32];
+
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
-pub struct UserId(ArrayString<[u8; 32]>);
+pub struct UserId(ArrayString<UserIdInner>);
+
+impl std::ops::Deref for UserId {
+    type Target = ArrayString<UserIdInner>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+pub enum InvalidUserId {
+    NonAlphaNumeric,
+    CapacityError,
+}
+
+impl TryFrom<&str> for UserId {
+    type Error = InvalidUserId;
+
+    fn try_from(val: &str) -> Result<Self, Self::Error> {
+       if !val.bytes().all(|c| c.is_ascii_alphanumeric()) {
+        return Err(InvalidUserId::NonAlphaNumeric)  
+       } else {
+        Ok(Self(ArrayString::from(val).map_err(|_| InvalidUserId::CapacityError)?))
+       }
+    }
+}
+
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
