@@ -97,10 +97,9 @@ impl Session {
         stream: &mut S,
     ) -> Result<(), HErr> {
         send_cbor(stream, &SessionType::Login).await?;
-        let sk = Config::static_secretkey()?;
         let uid = Config::static_id()?;
-        let did = Config::static_publickey()?;
-        let gid = GlobalId { uid, did };
+        let kp = Config::static_keypair()?;
+        let gid = GlobalId { uid, did: *kp.public_key() };
         send_cbor(stream, &gid).await?;
 
         let mut buf = [0u8; 3];
