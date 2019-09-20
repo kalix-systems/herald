@@ -1,5 +1,5 @@
 use crate::{interface::*, ret_err, ret_none, types::*};
-use herald_common::UserIdRef;
+use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
     config::Config,
@@ -19,7 +19,7 @@ pub struct Messages {
     model: MessagesList,
     list: Vec<MessagesItem>,
     handle: Core,
-    local_id: String,
+    local_id: UserId,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
@@ -38,7 +38,7 @@ impl Messages {
         let (msg_id, timestamp) = ret_err!(
             self.handle.add_message(
                 None,
-                self.local_id.as_str(),
+                self.local_id,
                 conversation_id,
                 body.as_str(),
                 None,
@@ -49,7 +49,7 @@ impl Messages {
 
         let msg = MessagesItem {
             inner: Message {
-                author: self.local_id.clone(),
+                author: self.local_id,
                 body: body,
                 conversation: conversation_id.clone(),
                 message_id: msg_id.clone(),
@@ -115,7 +115,7 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn author(&self, row_index: usize) -> UserIdRef {
+    fn author(&self, row_index: usize) -> FfiUserIdRef {
         ret_none!(self.list.get(row_index), "")
             .inner
             .author
