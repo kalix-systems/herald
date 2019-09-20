@@ -38,7 +38,6 @@ else {
 # Only for simulator right now
 android {
 
-    $$QT_FILE_SELECTORS += mobile
     QMAKE_LFLAGS += -nostdlib++
     LIBS +=  $${PWD}/../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }
@@ -48,7 +47,6 @@ iphonesimulator {
     # important IOS build Notes
     # IOS will not work because of code signing, but it would with this...?
     # IOS simulator and IOS builds must be completed from XCode. There is a bug in qmake.
-    #$$QT_FILE_SELECTORS += mobile
     LIBS +=  $${PWD}/../libherald/target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -lsqlite3
 }
