@@ -160,9 +160,7 @@ fn handle_msg(
     time: DateTime<Utc>,
     op_msg_id: Option<MsgId>,
 ) -> Result<Event, HErr> {
-    let db = crate::db::Database::get()?;
     message::add_message(
-        &db,
         Some(msg_id),
         &author,
         &conversation_id,
@@ -187,12 +185,12 @@ fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<E
         contact::{ContactBuilder, ContactsHandle},
         conversation::Conversations,
     };
-    let handle = ContactsHandle::new()?;
+    let handle = ContactsHandle::new();
 
     let notification = match handle.by_user_id(from.as_str()) {
         Ok(contact) => {
             if conversation_id != contact.pairwise_conversation {
-                let conv_handle = Conversations::new()?;
+                let conv_handle = Conversations::new();
                 conv_handle.add_conversation(Some(&conversation_id), None)?;
                 conv_handle.add_member(&conversation_id, from.as_str())?;
                 Some(Notification::NewConversation)
@@ -232,8 +230,7 @@ fn handle_ack(conv_id: ConversationId, ack: MessageReceipt) -> Result<Event, HEr
         message_id,
         update_code,
     } = ack;
-    let db = crate::db::Database::get()?;
-    message_status::set_message_status(&db, message_id, conv_id, update_code)?;
+    message_status::set_message_status(message_id, conv_id, update_code)?;
     Ok(Event {
         reply: None,
         notification: None,

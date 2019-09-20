@@ -311,6 +311,7 @@ dependencies = [
  "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "image 0.22.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_pond 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "qutex 0.2.3 (git+https://github.com/cogciprocate/qutex)",
  "rand 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -373,6 +374,10 @@ dependencies = [
  "winapi 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "winapi-build 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
+
+[[package]]
+name = "lazy_pond"
+version = "0.1.0"
 
 [[package]]
 name = "lazy_static"

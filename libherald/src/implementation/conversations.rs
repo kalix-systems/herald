@@ -21,7 +21,7 @@ pub struct Conversations {
 
 impl ConversationsTrait for Conversations {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self {
-        let handle = abort_err!(Core::new());
+        let handle = Core::new();
         let list = abort_err!(handle.all_meta())
             .into_iter()
             .map(|inner| Conversation {
