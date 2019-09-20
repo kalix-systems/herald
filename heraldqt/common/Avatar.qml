@@ -24,10 +24,9 @@ Row {
     property int size: 0 /// the size of the avatar, width and height
     property int shape: JS.avatarShape(shapeEnum, this)
     property bool labeled: true /// whether or not to show the name
-    // NOTE: make a property in QMLCFG call padding. it is probably just 10
-    spacing: QmlCfg.margin
     property bool isDefault: true
 
+    spacing: QmlCfg.padding
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
     anchors.verticalCenter: parent.verticalCenter
