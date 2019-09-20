@@ -420,7 +420,6 @@ dependencies = [
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "chainmail 0.1.0 (git+https://github.com/kalix-systems/chainmail.git)",
  "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "redis 0.12.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_cbor 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",

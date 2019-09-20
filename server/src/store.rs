@@ -20,13 +20,14 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 }
 
 pub trait Store {
-    fn add_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
-    fn read_key(&mut self, uid: UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
+    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+    fn add_key(&mut self, uid: &UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
+    fn read_key(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+    fn deprecate_key(&mut self, uid: &UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
 
-    fn user_exists(&mut self, uid: UserId) -> Result<bool, Error>;
-    fn key_is_valid(&mut self, uid: UserId, key: sig::PublicKey) -> Result<bool, Error>;
-    fn read_meta(&mut self, uid: UserId) -> Result<UserMeta, Error>;
+    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+    fn key_is_valid(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<bool, Error>;
+    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
@@ -40,7 +41,11 @@ pub trait Store {
 // note: not transactional by default
 // can call transactionally by wrapping calls where appropriate
 impl<C: redis::ConnectionLike> Store for C {
-    fn add_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error> {
+    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+        unimplemented!()
+    }
+
+    fn add_key(&mut self, uid: &UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error> {
         let (key, meta) = key.split();
         Ok(self.hset_nx(
             uid.as_str(),
@@ -49,12 +54,12 @@ impl<C: redis::ConnectionLike> Store for C {
         )?)
     }
 
-    fn read_key(&mut self, uid: UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+    fn read_key(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let maybe_key: Option<Vec<u8>> = self.hget(uid.as_str(), key.as_ref())?;
         Ok(serde_cbor::from_slice(&maybe_key.ok_or(MissingData)?)?)
     }
 
-    fn deprecate_key(&mut self, uid: UserId, skey: Signed<sig::PublicKey>) -> Result<bool, Error> {
+    fn deprecate_key(&mut self, uid: &UserId, skey: Signed<sig::PublicKey>) -> Result<bool, Error> {
         if !skey.verify_sig() {
             return Err(InvalidSig);
         }
@@ -71,11 +76,11 @@ impl<C: redis::ConnectionLike> Store for C {
         Ok(res)
     }
 
-    fn user_exists(&mut self, uid: UserId) -> Result<bool, Error> {
+    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
         Ok(self.exists(uid.as_str())?)
     }
 
-    fn key_is_valid(&mut self, uid: UserId, key: sig::PublicKey) -> Result<bool, Error> {
+    fn key_is_valid(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<bool, Error> {
         let meta = self.read_key(uid, key)?;
         Ok(meta.key_is_valid(key) && self.hexists(uid.as_str(), key.as_ref())?)
     }
@@ -94,7 +99,7 @@ impl<C: redis::ConnectionLike> Store for C {
         Ok(serde_cbor::from_slice(&maybe_key.ok_or(MissingData)?)?)
     }
 
-    fn read_meta(&mut self, uid: UserId) -> Result<UserMeta, Error> {
+    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
         let keys: Vec<Vec<u8>> = self
             .hkeys::<_, Option<_>>(uid.as_str())?
             .ok_or(MissingData)?;

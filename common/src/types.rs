@@ -129,6 +129,7 @@ pub mod pubkey {
 pub mod query {
     use super::*;
 
+    // TODO: consider making these batchable?
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum ToServer {
         UserExists(UserId),
