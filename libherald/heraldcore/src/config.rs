@@ -23,7 +23,6 @@ pub struct Config {
     pub color: u32,
     /// The *Note to Self* conversation id.
     pub nts_conversation: ConversationId,
-    db: Database,
 }
 
 /// Builder for `Config`
@@ -116,7 +115,6 @@ impl ConfigBuilder {
         contact_builder = contact_builder.color(color);
 
         let mut db = Database::get()?;
-
         let tx = db.transaction()?;
         tx.execute(
             include_str!("sql/config/add_config.sql"),
@@ -133,7 +131,6 @@ impl ConfigBuilder {
             color,
             colorscheme,
             nts_conversation: contact.pairwise_conversation,
-            db,
         };
 
         Ok(config)
@@ -196,7 +193,6 @@ impl Config {
             color,
             colorscheme,
             nts_conversation,
-            db,
         })
     }
 
@@ -217,7 +213,7 @@ impl Config {
 
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
-        crate::contact::set_name(&self.db, &self.id, name.as_ref().map(|s| s.as_str()))?;
+        crate::contact::set_name(&self.id, name.as_ref().map(|s| s.as_str()))?;
 
         self.name = name;
         Ok(())
@@ -226,7 +222,6 @@ impl Config {
     /// Updates user's profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
         let path = crate::contact::set_profile_picture(
-            &self.db,
             &self.id,
             profile_picture,
             self.profile_picture.as_ref().map(|s| s.as_str()),
@@ -239,7 +234,7 @@ impl Config {
 
     /// Update user's color
     pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-        crate::contact::set_color(&self.db, &self.id, color)?;
+        crate::contact::set_color(&self.id, color)?;
         self.color = color;
 
         Ok(())
@@ -247,7 +242,8 @@ impl Config {
 
     /// Update user's colorscheme
     pub fn set_colorscheme(&mut self, colorscheme: u32) -> Result<(), HErr> {
-        self.db.execute(
+        let db = Database::get()?;
+        db.execute(
             include_str!("sql/config/update_colorscheme.sql"),
             &[colorscheme],
         )?;
@@ -314,7 +310,6 @@ mod tests {
             .expect(womp!());
 
         let meta = Conversations::new()
-            .expect(womp!())
             .meta(&config.nts_conversation)
             .expect(womp!());
 

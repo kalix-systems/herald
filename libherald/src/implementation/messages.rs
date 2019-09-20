@@ -75,7 +75,7 @@ impl MessagesTrait for Messages {
             model,
             emit,
             local_id: abort_err!(Config::static_id()),
-            handle: abort_err!(Core::new()),
+            handle: Core::new(),
             updated: chrono::Utc::now(),
         }
     }

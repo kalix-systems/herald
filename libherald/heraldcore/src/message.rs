@@ -10,9 +10,7 @@ use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default, Clone)]
 /// Messages
-pub struct Messages {
-    db: Database,
-}
+pub struct Messages {}
 
 /// Message
 #[derive(Clone)]
@@ -55,7 +53,6 @@ impl Message {
 
 /// Adds a message to the database.
 pub(crate) fn add_message(
-    db: &Database,
     msg_id: Option<MsgId>,
     author: UserIdRef,
     conversation_id: &ConversationId,
@@ -66,6 +63,7 @@ pub(crate) fn add_message(
     let timestamp = timestamp.unwrap_or_else(Utc::now);
 
     let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
+    let db = Database::get()?;
     db.execute(
         include_str!("sql/message/add.sql"),
         params![
@@ -81,7 +79,8 @@ pub(crate) fn add_message(
 }
 
 /// Get message by message id
-pub(crate) fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr> {
+pub(crate) fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
+    let db = Database::get()?;
     Ok(db.query_row(
         include_str!("sql/message/get_message.sql"),
         params![msg_id],
@@ -89,11 +88,8 @@ pub(crate) fn get_message(db: &Database, msg_id: &MsgId) -> Result<Message, HErr
     )?)
 }
 /// Sets the message status of an item in the database
-pub(crate) fn update_send_status(
-    db: &Database,
-    msg_id: MsgId,
-    status: MessageSendStatus,
-) -> Result<(), HErr> {
+pub(crate) fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+    let db = Database::get()?;
     db.execute(
         include_str!("sql/message/update_send_status.sql"),
         params![status, msg_id],
@@ -102,17 +98,16 @@ pub(crate) fn update_send_status(
 }
 
 /// Deletes a message
-pub(crate) fn delete_message(db: &Database, id: &MsgId) -> Result<(), HErr> {
+pub(crate) fn delete_message(id: &MsgId) -> Result<(), HErr> {
+    let db = Database::get()?;
     db.execute(include_str!("sql/message/delete_message.sql"), params![id])?;
     Ok(())
 }
 
 impl Messages {
     /// Create new `Messages`
-    pub fn new() -> Result<Self, HErr> {
-        Ok(Self {
-            db: Database::get()?,
-        })
+    pub fn new() -> Self {
+        Self {}
     }
 
     /// Get all messages in a conversation since a given time.
@@ -121,7 +116,7 @@ impl Messages {
         conversation_id: &ConversationId,
         since: DateTime<Utc>,
     ) -> Result<Vec<Message>, HErr> {
-        crate::conversation::conversation_messages_since(&self.db, conversation_id, since)
+        crate::conversation::conversation_messages_since(conversation_id, since)
     }
 
     /// Adds a message to the database.
@@ -134,15 +129,7 @@ impl Messages {
         timestamp: Option<DateTime<Utc>>,
         op: &Option<MsgId>,
     ) -> Result<(MsgId, DateTime<Utc>), HErr> {
-        add_message(
-            &self.db,
-            msg_id,
-            author,
-            conversation_id,
-            body,
-            timestamp,
-            op,
-        )
+        add_message(msg_id, author, conversation_id, body, timestamp, op)
     }
 
     /// Get all messages in a conversation.
@@ -150,27 +137,27 @@ impl Messages {
         &self,
         conversation_id: &ConversationId,
     ) -> Result<Vec<Message>, HErr> {
-        crate::conversation::conversation_messages(&self.db, conversation_id)
+        crate::conversation::conversation_messages(conversation_id)
     }
 
     /// Deletes all messages in a conversation.
     pub fn delete_conversation(&self, conversation_id: &ConversationId) -> Result<(), HErr> {
-        crate::conversation::delete_conversation(&self.db, conversation_id)
+        crate::conversation::delete_conversation(conversation_id)
     }
 
     /// Get message by message id
     pub fn get_message(&self, msg_id: &MsgId) -> Result<Message, HErr> {
-        get_message(&self.db, msg_id)
+        get_message(msg_id)
     }
 
     /// Sets the message status of an item in the database
     pub fn update_send_status(&self, msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
-        update_send_status(&self.db, msg_id, status)
+        update_send_status(msg_id, status)
     }
 
     /// Deletes a message
     pub fn delete_message(&self, id: &MsgId) -> Result<(), HErr> {
-        delete_message(&self.db, id)
+        delete_message(id)
     }
 }
 
@@ -243,7 +230,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conv_id = [0; 32].into();
-        let conv_handle = Conversations::new().expect(womp!());
+        let conv_handle = Conversations::new();
 
         conv_handle
             .add_conversation(Some(&conv_id), None)
@@ -257,7 +244,7 @@ mod tests {
 
         conv_handle.add_member(&conv_id, contact).expect(womp!());
 
-        let handle = Messages::new().expect(womp!());
+        let handle = Messages::new();
 
         let (msg_id, _) = handle
             .add_message(None, contact, &conv_id, "test", None, &None)
@@ -282,7 +269,7 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conversation_id = [0; 32].into();
-        let conv_handle = Conversations::new().expect(womp!());
+        let conv_handle = Conversations::new();
 
         conv_handle
             .add_conversation(Some(&conversation_id), None)
@@ -298,7 +285,7 @@ mod tests {
             .add_member(&conversation_id, author)
             .expect(womp!());
 
-        let handle = Messages::new().expect(womp!());
+        let handle = Messages::new();
 
         let (msg_id, _) = handle
             .add_message(None, author, &conversation_id, "1", None, &None)
