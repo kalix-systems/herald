@@ -22,7 +22,7 @@ use std::{
     sync::Arc,
 };
 use tokio::{
-    net::{tcp::split::TcpStreamWriteHalf, *},
+    net::{tcp::split::WriteHalf, *},
     prelude::*,
     sync::{
         mpsc::{self, UnboundedReceiver as Receiver, UnboundedSender as Sender},
@@ -66,31 +66,31 @@ impl Session {
         Ok((notif_receiver, server_receiver, sess))
     }
 
-    pub fn setup_streams(self, mut outgoing: Receiver<MessageToServer>, stream: TcpStream) {
-        let (mut reader, mut writer) = stream.split();
-        tokio::spawn({
-            async move {
-                let comp: Result<(), HErr> = try {
-                    let mut res = Ok(());
-                    while res.is_ok() {
-                        res = self.handle_server_msg(read_cbor(&mut reader).await?).await;
-                    }
-                    res?;
-                };
-                if let Err(e) = comp {
-                    eprintln!("session ended, code {}", e);
-                }
-            }
-        });
-        tokio::spawn(async move {
-            while let Some(msg) = outgoing.recv().await {
-                if let Err(e) = send_cbor(&mut writer, &msg).await {
-                    eprintln!("failed to write data - assuming connection is closed");
-                    eprintln!("error was: {}", e);
-                }
-            }
-        });
-    }
+    //pub fn setup_streams(self, mut outgoing: Receiver<MessageToServer>, stream: TcpStream) {
+    //    let (mut reader, mut writer) = stream.split();
+    //    tokio::spawn({
+    //        async move {
+    //            let comp: Result<(), HErr> = try {
+    //                let mut res = Ok(());
+    //                while res.is_ok() {
+    //                    res = self.handle_server_msg(read_cbor(&mut reader).await?).await;
+    //                }
+    //                res?;
+    //            };
+    //            if let Err(e) = comp {
+    //                eprintln!("session ended, code {}", e);
+    //            }
+    //        }
+    //    });
+    //    tokio::spawn(async move {
+    //        while let Some(msg) = outgoing.recv().await {
+    //            if let Err(e) = send_cbor(&mut writer, &msg).await {
+    //                eprintln!("failed to write data - assuming connection is closed");
+    //                eprintln!("error was: {}", e);
+    //            }
+    //        }
+    //    });
+    //}
 
     pub async fn login<S: AsyncWrite + AsyncRead + Unpin>(
         &self,
@@ -99,7 +99,10 @@ impl Session {
         send_cbor(stream, &SessionType::Login).await?;
         let uid = Config::static_id()?;
         let kp = Config::static_keypair()?;
-        let gid = GlobalId { uid, did: *kp.public_key() };
+        let gid = GlobalId {
+            uid,
+            did: *kp.public_key(),
+        };
         send_cbor(stream, &gid).await?;
 
         let mut buf = [0u8; 3];
@@ -110,7 +113,7 @@ impl Session {
 
         let mut buf = [0u8; 32];
         stream.read_exact(&mut buf).await?;
-        let sig = sign::sign_detached(&buf, &sk);
+        let sig = kp.raw_sign_detached(&buf);
         stream.write_all(sig.as_ref()).await?;
 
         let mut buf = [0u8; 3];
@@ -119,20 +122,20 @@ impl Session {
             return Err(LoginError);
         }
 
-        // TODO: this should probably be a single db transaction
-        if let MessageToClient::Catchup(p) = read_cbor(stream).await? {
-            let mut replies = Vec::new();
-            for push in p {
-                replies.append(&mut self.handle_push(push).await?);
-            }
-            self.send_to_server(MessageToServer::CaughtUp).await?;
-            for reply in replies {
-                let msg = self.reply_to_server_msg(&reply).await?;
-                self.send_to_server(msg).await?;
-            }
-        } else {
-            return Err(HeraldError("missing catchup".into()));
-        }
+        //// TODO: this should probably be a single db transaction
+        //if let MessageToClient::Catchup(p) = read_cbor(stream).await? {
+        //    let mut replies = Vec::new();
+        //    for push in p {
+        //        replies.append(&mut self.handle_push(push).await?);
+        //    }
+        //    self.send_to_server(MessageToServer::CaughtUp).await?;
+        //    for reply in replies {
+        //        let msg = self.reply_to_server_msg(&reply).await?;
+        //        self.send_to_server(msg).await?;
+        //    }
+        //} else {
+        //    return Err(HeraldError("missing catchup".into()));
+        //}
 
         Ok(())
     }
@@ -164,45 +167,45 @@ impl Session {
         self.send_to_server(push).await
     }
 
-    /// Requests the metadata of a user, asynchronously returns the response.
-    pub async fn request_meta(&self, of: UserId) -> Result<UserMeta, HErr> {
-        let qid = utils::rand_id();
-        match self
-            .send_query(
-                qid,
-                MessageToServer::RequestMeta {
-                    qid,
-                    of: of.clone(),
-                },
-            )
-            .await?
-        {
-            Response::Meta(u) => Ok(u),
-            Response::DataNotFound => Err(InvalidUserId(of)),
-            r => Err(HeraldError(format!(
-                "bad response to metadata request from server - response was {:?}",
-                r
-            ))),
-        }
-    }
+    ///// Requests the metadata of a user, asynchronously returns the response.
+    //pub async fn request_meta(&self, of: UserId) -> Result<UserMeta, HErr> {
+    //    let qid = utils::rand_id();
+    //    match self
+    //        .send_query(
+    //            qid,
+    //            MessageToServer::RequestMeta {
+    //                qid,
+    //                of: of.clone(),
+    //            },
+    //        )
+    //        .await?
+    //    {
+    //        Response::Meta(u) => Ok(u),
+    //        Response::DataNotFound => Err(InvalidUserId(of)),
+    //        r => Err(HeraldError(format!(
+    //            "bad response to metadata request from server - response was {:?}",
+    //            r
+    //        ))),
+    //    }
+    //}
 
-    /// Registers a new device and returns a future which will contain the new `DeviceId`.
-    pub async fn register_device(
-        &self,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<sign::PublicKey, HErr> {
-        let qid = utils::rand_id();
-        match self
-            .send_query(qid, MessageToServer::RegisterDevice { qid, key })
-            .await?
-        {
-            Response::DeviceRegistered(d) => Ok(d),
-            r => Err(HeraldError(format!(
-                "bad response to device registry request from server - respones was {:?}",
-                r
-            ))),
-        }
-    }
+    ///// Registers a new device and returns a future which will contain the new `DeviceId`.
+    //pub async fn register_device(
+    //    &self,
+    //    key: Signed<sig::PublicKey>,
+    //) -> Result<sign::PublicKey, HErr> {
+    //    let qid = utils::rand_id();
+    //    match self
+    //        .send_query(qid, MessageToServer::RegisterDevice { qid, key })
+    //        .await?
+    //    {
+    //        Response::DeviceRegistered(d) => Ok(d),
+    //        r => Err(HeraldError(format!(
+    //            "bad response to device registry request from server - respones was {:?}",
+    //            r
+    //        ))),
+    //    }
+    //}
 }
 
 const DEFAULT_PORT: u16 = 8000;
