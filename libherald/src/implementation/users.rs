@@ -1,12 +1,11 @@
 use crate::{bounds_chk, interface::*, ret_err, ret_none, types::*};
-use herald_common::{UserId, UserIdRef};
 use heraldcore::{
     abort_err, chrono,
     contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
     types::*,
     utils::SearchPattern,
 };
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone)]
 struct User {
@@ -58,10 +57,8 @@ impl UsersTrait for Users {
     }
 
     /// Adds a contact by their `id`
-    fn add(&mut self, id: UserId) -> FfiConversationId {
-        if id.len() > 255 {
-            return vec![];
-        }
+    fn add(&mut self, id: FfiUserId) -> FfiConversationId {
+        let id = ret_err!(id.as_str().try_into(), vec![]);
 
         let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
@@ -122,7 +119,7 @@ impl UsersTrait for Users {
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> UserIdRef {
+    fn user_id(&self, row_index: usize) -> FfiUserIdRef {
         ret_none!(self.list.get(row_index), "").inner.id.as_str()
     }
 
@@ -148,8 +145,10 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         ret_err!(
-            self.handle
-                .set_name(self.user_id(row_index), name.as_ref().map(|s| s.as_str())),
+            self.handle.set_name(
+                self.list[row_index].inner.id,
+                name.as_ref().map(|s| s.as_str())
+            ),
             false
         );
 
@@ -175,7 +174,7 @@ impl UsersTrait for Users {
 
         let path = ret_err!(
             self.handle.set_profile_picture(
-                self.user_id(row_index),
+                self.list[row_index].inner.id,
                 crate::utils::strip_qrc(picture),
                 self.profile_picture(row_index),
             ),
@@ -196,7 +195,10 @@ impl UsersTrait for Users {
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
         bounds_chk!(self, row_index, false);
 
-        ret_err!(self.handle.set_color(self.user_id(row_index), color), false);
+        ret_err!(
+            self.handle.set_color(self.list[row_index].inner.id, color),
+            false
+        );
 
         // already checked
         self.list[row_index].inner.color = color;
@@ -213,7 +215,7 @@ impl UsersTrait for Users {
         let meta = &ret_none!(self.list.get(row_index), false).inner;
         ret_err!(
             self.handle
-                .set_status(meta.id.as_str(), meta.pairwise_conversation, status),
+                .set_status(meta.id, meta.pairwise_conversation, status),
             false
         );
 
@@ -314,17 +316,21 @@ impl UsersTrait for Users {
         bounds_chk!(self, index, false);
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
+        ret_err!(
+            self.handle.add_member(&conv_id, self.list[index].inner.id),
+            false
+        );
         true
     }
 
     fn add_to_conversation(
         &mut self,
-        user_id: UserId,
+        user_id: FfiUserId,
         conversation_id: FfiConversationIdRef,
     ) -> bool {
+        let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        ret_err!(self.handle.add_member(&conv_id, user_id.as_str()), false);
+        ret_err!(self.handle.add_member(&conv_id, user_id), false);
         true
     }
 
@@ -338,7 +344,8 @@ impl UsersTrait for Users {
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(
-            self.handle.remove_member(&conv_id, self.user_id(index)),
+            self.handle
+                .remove_member(&conv_id, self.list[index].inner.id),
             false
         );
         true
