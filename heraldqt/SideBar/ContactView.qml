@@ -113,7 +113,7 @@ ListView {
         Common.Avatar {
             size: 50
             id: contactAvatar
-            displayName: Utils.unwrapOr(name, userId)
+            displayName: contactsModel.displayName(index)
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(profilePicture)
         }

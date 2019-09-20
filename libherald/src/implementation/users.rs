@@ -126,6 +126,15 @@ impl UsersTrait for Users {
         ret_none!(self.list.get(row_index), "").inner.id.as_str()
     }
 
+    /// Returns name if it is set, otherwise returns the user's id.
+    fn display_name(&self, row_index: usize) -> &str {
+        let inner = &ret_none!(self.list.get(row_index), "").inner;
+        match inner.name.as_ref() {
+            Some(name) => name.as_str(),
+            None => inner.id.as_str(),
+        }
+    }
+
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> FfiConversationIdRef {
         ret_none!(self.list.get(row_index), &[])
@@ -155,6 +164,7 @@ impl UsersTrait for Users {
 
         // already checked
         self.list[row_index].inner.name = name;
+        self.model.data_changed(row_index, row_index);
         true
     }
 

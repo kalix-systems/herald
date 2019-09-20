@@ -16,6 +16,10 @@ Item {
     property var gsConvoItemMembers
     property bool gsContactsSearch: true
 
+    onGsContactsSearchChanged: {
+        gsConversationId = undefined
+    }
+
     anchors.fill: parent.fill
     Layout.fillWidth: true
     Layout.fillHeight: true
