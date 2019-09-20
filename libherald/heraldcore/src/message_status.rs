@@ -72,6 +72,7 @@ mod tests {
     use super::*;
     use crate::{conversation::Conversations, message::add_message};
     use serial_test_derive::serial;
+    use std::convert::TryInto;
 
     use crate::womp;
 
@@ -104,7 +105,7 @@ mod tests {
 
         let db = Database::get().expect(womp!());
 
-        let author = "Hello";
+        let author = "Hello".try_into().unwrap();
         let conversation_id = [0; 32].into();
 
         let conv_handle = Conversations::new().expect(womp!());
@@ -113,7 +114,7 @@ mod tests {
             .add_conversation(Some(&conversation_id), None)
             .expect(womp!());
 
-        crate::contact::ContactBuilder::new(author.into())
+        crate::contact::ContactBuilder::new(author)
             .add()
             .expect(womp!());
         conv_handle

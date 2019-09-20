@@ -8,6 +8,7 @@ use crate::{
 use chrono::{DateTime, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
+use std::convert::TryInto;
 
 #[derive(Default)]
 /// Conversations
@@ -352,7 +353,7 @@ impl Conversations {
     pub fn add_member(
         &self,
         conversation_id: &ConversationId,
-        member_id: UserIdRef,
+        member_id: UserId,
     ) -> Result<(), HErr> {
         crate::members::add_member(&self.db, conversation_id, member_id)
     }
@@ -361,7 +362,7 @@ impl Conversations {
     pub fn remove_member(
         &self,
         conversation_id: &ConversationId,
-        member_id: UserIdRef,
+        member_id: UserId,
     ) -> Result<(), HErr> {
         crate::members::remove_member(&self.db, conversation_id, member_id)
     }
@@ -483,8 +484,8 @@ mod tests {
     fn add_and_get() {
         Database::reset_all().expect(womp!());
 
-        let author = "Hello";
-        ContactBuilder::new(author.into()).add().expect(womp!());
+        let author = "Hello".try_into().unwrap();
+        ContactBuilder::new(author).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
         let msg_handle = Messages::new().expect(womp!());
@@ -635,8 +636,8 @@ mod tests {
     fn conv_messages_since() {
         Database::reset_all().expect(womp!());
 
-        let contact = "contact";
-        ContactBuilder::new(contact.into()).add().expect(womp!());
+        let contact = "contact".try_into().unwrap();
+        ContactBuilder::new(contact).add().expect(womp!());
 
         let conv_id = ConversationId::from([0; 32]);
         let handle = Conversations::new().expect(womp!());
@@ -662,17 +663,17 @@ mod tests {
     fn add_remove_member() {
         Database::reset_all().expect(womp!());
 
-        let id1 = "id1";
-        let id2 = "id2";
+        let id1 = "id1".try_into().unwrap();
+        let id2 = "id2".try_into().unwrap();
 
         let conv_id = ConversationId::from([0; 32]);
         let handle = Conversations::new().expect(womp!());
 
-        ContactBuilder::new(id1.into())
+        ContactBuilder::new(id1)
             .add()
             .expect(womp!("Failed to add id1"));
 
-        ContactBuilder::new(id2.into())
+        ContactBuilder::new(id2)
             .add()
             .expect(womp!("Failed to add id2"));
 
@@ -681,11 +682,11 @@ mod tests {
             .expect(womp!("Failed to create conversation"));
 
         handle
-            .add_member(&conv_id, &id1)
+            .add_member(&conv_id, id1)
             .expect(womp!("failed to add member"));
 
         handle
-            .add_member(&conv_id, &id2)
+            .add_member(&conv_id, id2)
             .expect(womp!("failed to add member"));
 
         let members = handle
@@ -695,7 +696,7 @@ mod tests {
         assert_eq!(members.len(), 2);
 
         handle
-            .remove_member(&conv_id, &id2)
+            .remove_member(&conv_id, id2)
             .expect(womp!("failed to remove member"));
 
         let members = handle
@@ -710,8 +711,8 @@ mod tests {
     fn delete_message() {
         Database::reset_all().expect(womp!());
 
-        let author = "Hello";
-        ContactBuilder::new(author.into()).add().expect(womp!());
+        let author = "Hello".try_into().unwrap();
+        ContactBuilder::new(author).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
         let handle = Conversations::new().expect(womp!());
@@ -738,8 +739,8 @@ mod tests {
     fn delete_conversation() {
         Database::reset_all().expect(womp!());
 
-        let author = "Hello";
-        ContactBuilder::new(author.into()).add().expect(womp!());
+        let author = "Hello".try_into().unwrap();
+        ContactBuilder::new(author).add().expect(womp!());
 
         let conversation = [0; 32].into();
 

@@ -1,4 +1,5 @@
 use crate::errors::HErr;
+use herald_common::UserId;
 use image::{self, FilterType, ImageFormat};
 use lazy_static::*;
 use std::path::{Path, PathBuf};
