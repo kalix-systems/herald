@@ -2,17 +2,18 @@ use crate::{interface::*, ret_err, types::*};
 use herald_common::*;
 use heraldcore::{
     abort_err,
-    // network::*,
+    network::*,
     tokio::{self, sync::mpsc::*},
     types::*,
 };
 use std::{
-    convert::TryFrom,
+    convert::{TryFrom, TryInto},
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
 };
+
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
 
@@ -144,11 +145,9 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(&mut self, user_id: UserId, conversation_id: FfiConversationIdRef) -> bool {
-        if conversation_id.len() != 32 {
-            eprintln!("Invalid conversation_id");
-            return false;
-        }
+    fn send_add_request(&mut self, user_id: FfiUserId, conversation_id: FfiConversationIdRef) -> bool {
+
+        let user_id = ret_err!(user_id.as_str().try_into(), false); 
 
         let conversation_id = match ConversationId::try_from(conversation_id) {
             Ok(id) => id,
@@ -181,7 +180,9 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     /// this is the API exposed to QML
-    fn request_meta_data(&mut self, of: UserId) -> bool {
+    fn request_meta_data(&mut self, of: FfiUserId) -> bool {
+        let of = ret_err!(of.as_str().try_into(), false);
+
         match self.tx.try_send(FuncCall::RequestMeta(of)) {
             Ok(_) => true,
             Err(_e) => {
