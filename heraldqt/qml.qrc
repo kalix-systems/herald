@@ -49,5 +49,65 @@
         <file>icons/speech_hollow.png</file>
         <file>main.cpp</file>
         <file>main.qml</file>
+        <file>+mobile/App.qml</file>
+        <file>+mobile/ChatView.qml</file>
+        <file>+mobile/herald.pro</file>
+        <file>+mobile/heraldqt.pro</file>
+        <file>+mobile/LoginPage.qml</file>
+        <file>+mobile/main.qml</file>
+        <file>+mobile/package.json</file>
+        <file>+mobile/qml.qrc</file>
+        <file>+mobile/README.md</file>
+        <file>+mobile/run_tsc.py</file>
+        <file>+mobile/SideBar.qml</file>
+        <file>+mobile/TopMenuBar.qml</file>
+        <file>+mobile/ChatView/ChatBar.qml</file>
+        <file>+mobile/ChatView/ChatBubbleForm.qml</file>
+        <file>+mobile/ChatView/ChatTextAreaKeys.qml</file>
+        <file>+mobile/ChatView/ChatTextAreaUtils.d.ts</file>
+        <file>+mobile/ChatView/ChatTextAreaUtils.mjs</file>
+        <file>+mobile/ChatView/ChatTextAreaUtils.ts</file>
+        <file>+mobile/ChatView/ChatViewTypes.d.ts</file>
+        <file>+mobile/ChatView/ConversationWindowForm.qml</file>
+        <file>+mobile/ChatView/ReplyComponent.qml</file>
+        <file>+mobile/ChatView/TextAreaForm.qml</file>
+        <file>+mobile/common/Avatar.d.ts</file>
+        <file>+mobile/common/Avatar.mjs</file>
+        <file>+mobile/common/Avatar.qml</file>
+        <file>+mobile/common/Avatar.ts</file>
+        <file>+mobile/common/ButtonForm.qml</file>
+        <file>+mobile/common/CommonConfig.qml</file>
+        <file>+mobile/common/CorrectText.qml</file>
+        <file>+mobile/common/Divider.qml</file>
+        <file>+mobile/common/HeraldTypes.d.ts</file>
+        <file>+mobile/common/HeraldUITypes.d.ts</file>
+        <file>+mobile/common/ImageAvatar.qml</file>
+        <file>+mobile/common/QtTypes.d.ts</file>
+        <file>+mobile/common/Theme.qml</file>
+        <file>+mobile/common/utils.d.ts</file>
+        <file>+mobile/common/utils.mjs</file>
+        <file>+mobile/common/utils.ts</file>
+        <file>+mobile/SideBar/UtilityBar.qml</file>
+        <file>+mobile/SideBar/ConfigBar.qml</file>
+        <file>+mobile/SideBar/ContactsToggle.qml</file>
+        <file>+mobile/SideBar/ContactView.d.ts</file>
+        <file>+mobile/SideBar/ContactView.mjs</file>
+        <file>+mobile/SideBar/ContactView.qml</file>
+        <file>+mobile/SideBar/ContactView.ts</file>
+        <file>+mobile/SideBar/ContactViewTypes.d.ts</file>
+        <file>+mobile/SideBar/ConversationView.qml</file>
+        <file>+mobile/SideBar/popups/NewContactDialogue.ts</file>
+        <file>+mobile/SideBar/popups/ColorPicker.qml</file>
+        <file>+mobile/SideBar/popups/ConfigPopup.qml</file>
+        <file>+mobile/SideBar/popups/ConfigPopupSubmission.d.ts</file>
+        <file>+mobile/SideBar/popups/ConfigPopupSubmission.mjs</file>
+        <file>+mobile/SideBar/popups/ConfigPopupSubmission.ts</file>
+        <file>+mobile/SideBar/popups/ContactClickedPopup.d.ts</file>
+        <file>+mobile/SideBar/popups/ContactClickedPopup.mjs</file>
+        <file>+mobile/SideBar/popups/ContactClickedPopup.qml</file>
+        <file>+mobile/SideBar/popups/ContactClickedPopup.ts</file>
+        <file>+mobile/SideBar/popups/NewContactDialogue.d.ts</file>
+        <file>+mobile/SideBar/popups/NewContactDialogue.mjs</file>
+        <file>+mobile/SideBar/popups/NewContactDialogue.qml</file>
     </qresource>
 </RCC>
