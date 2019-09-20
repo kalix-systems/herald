@@ -40,6 +40,12 @@ pub enum InvalidUserId {
     CapacityError,
 }
 
+impl std::fmt::Display for UserId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.as_str())
+    }
+}
+
 impl std::fmt::Display for InvalidUserId {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         use InvalidUserId::*;
