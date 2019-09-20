@@ -241,7 +241,7 @@ impl Config {
         )
     }
 
-    pub fn static_keypair() -> Result<sign::PublicKey, HErr> {
+    pub fn static_keypair() -> Result<sig::KeyPair, HErr> {
         unimplemented!()
     }
 
