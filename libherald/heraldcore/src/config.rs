@@ -18,6 +18,8 @@ pub struct Config {
     pub id: UserId,
     /// Colorscheme
     pub colorscheme: u32,
+    /// Key pair
+    keypair: sig::KeyPair,
     /// Name of the local user
     pub name: Option<String>,
     /// Profile picture of the local user
@@ -140,7 +142,7 @@ impl ConfigBuilder {
         let tx = db.transaction()?;
         tx.execute(
             include_str!("sql/config/add_config.sql"),
-            params![id.as_str(), colorscheme],
+            params![id, keypair, colorscheme],
         )?;
 
         let contact = contact_builder.add_with_tx(&tx)?;
@@ -149,6 +151,7 @@ impl ConfigBuilder {
         let config = Config {
             id: contact.id,
             name: contact.name,
+            keypair,
             profile_picture: contact.profile_picture,
             color,
             colorscheme,
@@ -194,29 +197,32 @@ impl Config {
     pub fn get() -> Result<Config, HErr> {
         let db = Database::get()?;
 
-        let (id, name, profile_picture, color, colorscheme, nts_conversation) = db.query_row(
-            include_str!("sql/config/get_config.sql"),
-            NO_PARAMS,
-            |row| {
-                Ok((
-                    row.get::<_, String>(0)?,
-                    row.get(1)?,
-                    row.get(2)?,
-                    row.get(3)?,
-                    row.get(4)?,
-                    row.get(5)?,
-                ))
-            },
-        )?;
+        let (id, name, profile_picture, color, colorscheme, nts_conversation, keypair) = db
+            .query_row(
+                include_str!("sql/config/get_config.sql"),
+                NO_PARAMS,
+                |row| {
+                    Ok((
+                        row.get(0)?,
+                        row.get(1)?,
+                        row.get(2)?,
+                        row.get(3)?,
+                        row.get(4)?,
+                        row.get(5)?,
+                        row.get(6)?,
+                    ))
+                },
+            )?;
 
         Ok(Config {
-            id: UserId::try_from(id.as_str())?,
+            id,
             name,
             profile_picture,
             color,
             colorscheme,
             nts_conversation,
             db,
+            keypair,
         })
     }
 
@@ -235,11 +241,7 @@ impl Config {
         )
     }
 
-    pub fn static_secretkey() -> Result<sign::SecretKey, HErr> {
-        unimplemented!()
-    }
-
-    pub fn static_publickey() -> Result<sign::PublicKey, HErr> {
+    pub fn static_keypair() -> Result<sign::PublicKey, HErr> {
         unimplemented!()
     }
 
@@ -290,6 +292,7 @@ impl Config {
 mod tests {
     use super::*;
     use crate::womp;
+    use herald_common::sig::KeyPair;
     use serial_test_derive::serial;
     use std::convert::TryInto;
 
@@ -317,8 +320,13 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id: UserId = "HelloWorld".try_into().expect(womp!());
+        let kp = KeyPair::gen_new();
 
-        ConfigBuilder::new().id(id).add().expect(womp!());
+        ConfigBuilder::new()
+            .id(id)
+            .keypair(kp)
+            .add()
+            .expect(womp!());
 
         let config = Config::get().expect(womp!());
         assert_eq!(config.id(), id);
@@ -333,8 +341,11 @@ mod tests {
         let name = "stuff";
         let profile_picture = "stuff";
         let nts_id = [0u8; 32].into();
+
+        let kp = KeyPair::gen_new();
         let config = ConfigBuilder::new()
             .id(id.into())
+            .keypair(kp)
             .name(name.into())
             .colorscheme(1)
             .color(2)
@@ -382,10 +393,16 @@ mod tests {
     #[serial]
     fn two_configs() {
         Database::reset_all().expect(womp!());
-        let id1 = UserId::try_from("1").unwrap();
-        let id2 = UserId::try_from("2").unwrap();
-        ConfigBuilder::new().id(id1).add().expect(womp!());
-        assert!(ConfigBuilder::new().id(id2).add().is_err());
+        let id1 = UserId::try_from("1").expect(womp!());
+        let id2 = UserId::try_from("2").expect(womp!());
+        let kp1 = KeyPair::gen_new();
+        let kp2 = KeyPair::gen_new();
+        ConfigBuilder::new()
+            .id(id1)
+            .keypair(kp1)
+            .add()
+            .expect(womp!());
+        assert!(ConfigBuilder::new().id(id2).keypair(kp2).add().is_err());
     }
 
     #[test]
@@ -394,7 +411,12 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld".try_into().expect(womp!());
-        let config = ConfigBuilder::new().id(id).add().expect(womp!());
+        let kp = KeyPair::gen_new();
+        let config = ConfigBuilder::new()
+            .id(id)
+            .keypair(kp)
+            .add()
+            .expect(womp!());
 
         let static_id = Config::static_id().expect(womp!());
         assert_eq!(config.id, id);
