@@ -5,7 +5,7 @@ use crate::*;
 /// For the client, this will tag each message and send it to the server.
 /// For the server, this will receive the message, process it, and send the response to the client.
 pub trait ProtocolHandler {
-    type Error;
+    type Error: From<std::io::Error>;
     async fn handle_fanout<'a>(
         &mut self,
         fanout: fanout::ToServer<'a>,
@@ -21,8 +21,8 @@ pub trait ProtocolHandler {
 }
 
 #[async_trait]
-/// `Client`s must also be able to handle incoming `Push` messages.
-pub trait Client: ProtocolHandler {
+/// `PushHandler`s must also be able to handle incoming `Push` messages.
+pub trait PushHandler: ProtocolHandler {
     async fn handle_push<'a>(&mut self, push: Push<'a>) -> Result<(), Self::Error>;
 }
 
