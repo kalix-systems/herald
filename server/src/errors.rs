@@ -6,6 +6,7 @@ pub enum Error {
     Redis(redis::RedisError),
     Cbor(serde_cbor::Error),
     TransportError(herald_common::TransportError),
+    MutexError(futures::sync::oneshot::Canceled),
     InvalidSig,
     InvalidKey,
     MissingData,
@@ -31,3 +32,4 @@ from_fn!(Error, std::io::Error, Error::IO);
 from_fn!(Error, redis::RedisError, Error::Redis);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
 from_fn!(Error, herald_common::TransportError, Error::TransportError);
+from_fn!(Error, futures::sync::oneshot::Canceled, Error::MutexError);

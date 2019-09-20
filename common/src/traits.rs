@@ -7,15 +7,15 @@ use crate::*;
 pub trait ProtocolHandler {
     type Error: From<std::io::Error>;
     async fn handle_fanout(
-        &mut self,
+        &self,
         fanout: fanout::ToServer,
     ) -> Result<fanout::ServerResponse, Self::Error>;
     async fn handle_pki(
-        &mut self,
+        &self,
         msg: pubkey::ToServer,
     ) -> Result<pubkey::ServerResponse, Self::Error>;
     async fn handle_query(
-        &mut self,
+        &self,
         query: query::ToServer,
     ) -> Result<query::ServerResponse, Self::Error>;
 }
@@ -23,7 +23,7 @@ pub trait ProtocolHandler {
 #[async_trait]
 /// `PushHandler`s must also be able to handle incoming `Push` messages.
 pub trait PushHandler: ProtocolHandler {
-    async fn handle_push<'a>(&mut self, push: Push<'a>) -> Result<(), Self::Error>;
+    async fn handle_push(&self, push: Push) -> Result<(), Self::Error>;
 }
 
 // TODO: implement this for client-side db?
