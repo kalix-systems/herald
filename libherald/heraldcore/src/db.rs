@@ -1,25 +1,34 @@
 use crate::{abort_err, errors::*, utils::SearchPattern};
+use lazy_static::*;
 use rusqlite::{Connection, NO_PARAMS};
+
 use std::{
     ops::{Deref, DerefMut},
     path::Path,
 };
 
-/// Canonical database path.
-static DB_PATH: &str = "store.sqlite3";
-
+lazy_static! {
+    /// this can be set by the user so
+    /// that during testing, two instances of
+    /// herald may have different databases.
+    static ref DB_PATH: String = match std::env::var("HERALD_DB_PATH") {
+        Ok(path) =>  if cfg!(debug_assertions) { path }
+                     else { "store.sqlite3".to_owned() },
+        Err(_) => "store.sqlite3".to_owned(),
+    };
+}
 /// Thin wrapper around sqlite3 database connection.
 pub(crate) struct Database(Connection);
 
 impl Clone for Database {
     fn clone(&self) -> Database {
-        abort_err!(Database::new(DB_PATH))
+        abort_err!(Database::new(DB_PATH.as_str()))
     }
 }
 
 impl Database {
     pub(crate) fn get() -> Result<Database, HErr> {
-        Database::new(DB_PATH)
+        Database::new(DB_PATH.as_str())
     }
 }
 
@@ -39,6 +48,7 @@ impl DerefMut for Database {
 
 impl Database {
     /// Connect to database at path `P`.
+    /// Creates a database if one does not exist.
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
             Ok(conn) => {
@@ -108,7 +118,7 @@ impl Database {
 impl Default for Database {
     /// Establish connection with canonical database.
     fn default() -> Self {
-        abort_err!(Self::new(DB_PATH))
+        abort_err!(Self::new(DB_PATH.as_str()))
     }
 }
 

@@ -20,6 +20,8 @@ Item {
     readonly property int margin: 10
     /// standard half margin
     readonly property int smallMargin: 5
+    /// standard half padding unit
+    readonly property int smallPadding: 5
     /// standard padding unit
     readonly property int padding: 10
     /// standard toolbar height

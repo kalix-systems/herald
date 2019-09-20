@@ -10,7 +10,6 @@ use std::convert::TryFrom;
 
 /// Default name for the "Note to Self" conversation
 pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
-
 /// User configuration
 #[derive(Clone)]
 pub struct Config {

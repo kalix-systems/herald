@@ -31,7 +31,7 @@ ToolBar {
 
     Common.Avatar {
         id: configAvatar
-        displayName: Utils.unwrapOr(config.name, config.configId)
+        displayName: config.displayName
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
         anchors.horizontalCenter: parent.horizontalCenter

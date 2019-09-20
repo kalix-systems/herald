@@ -20,7 +20,7 @@ Window {
         height: width
         columns: 3
         rows: 3
-        anchors.margins: QmlCfg.margin / 2
+        anchors.margins: QmlCfg.smallMargin
 
         Repeater {
             model: QmlCfg.avatarColors
@@ -29,13 +29,9 @@ Window {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: modelData
-                radius: width * 0.5
+                radius: width / 2
                 border.color: QmlCfg.palette.tertiaryColor
-                border.width: if (focus) {
-                                  2
-                              } else {
-                                  0
-                              }
+                border.width: focus : 2 ? 0
 
                 MouseArea {
                     anchors.fill: parent

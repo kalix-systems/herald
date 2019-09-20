@@ -50,6 +50,10 @@ namespace {
     {
         Q_EMIT o->configIdChanged();
     }
+    inline void configDisplayNameChanged(Config* o)
+    {
+        Q_EMIT o->displayNameChanged();
+    }
     inline void configNameChanged(Config* o)
     {
         Q_EMIT o->nameChanged();
@@ -108,13 +112,14 @@ namespace {
     }
 }
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     quint32 config_color_get(const Config::Private*);
     void config_color_set(Config::Private*, quint32);
     quint32 config_colorscheme_get(const Config::Private*);
     void config_colorscheme_set(Config::Private*, quint32);
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
+    void config_display_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
     void config_name_set_none(Config::Private*);
@@ -660,6 +665,7 @@ extern "C" {
 extern "C" {
     quint32 users_data_color(const Users::Private*, int);
     bool users_set_data_color(Users::Private*, int, quint32);
+    void users_data_display_name(const Users::Private*, int, QString*, qstring_set);
     bool users_data_matched(const Users::Private*, int);
     bool users_set_data_matched(Users::Private*, int, bool);
     void users_data_name(const Users::Private*, int, QString*, qstring_set);
@@ -758,6 +764,13 @@ bool Users::setColor(int row, quint32 value)
         Q_EMIT dataChanged(index, index);
     }
     return set;
+}
+
+QString Users::displayName(int row) const
+{
+    QString s;
+    users_data_display_name(m_d, row, &s, set_qstring);
+    return s;
 }
 
 bool Users::matched(int row) const
@@ -859,16 +872,18 @@ QVariant Users::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 0:
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 1:
-            return QVariant::fromValue(matched(index.row()));
+            return QVariant::fromValue(displayName(index.row()));
         case Qt::UserRole + 2:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(pairwiseConversationId(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
+            return QVariant::fromValue(pairwiseConversationId(index.row()));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(status(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
         case Qt::UserRole + 6:
+            return QVariant::fromValue(status(index.row()));
+        case Qt::UserRole + 7:
             return QVariant::fromValue(userId(index.row()));
         }
         break;
@@ -890,12 +905,13 @@ int Users::role(const char* name) const {
 QHash<int, QByteArray> Users::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
-    names.insert(Qt::UserRole + 1, "matched");
-    names.insert(Qt::UserRole + 2, "name");
-    names.insert(Qt::UserRole + 3, "pairwiseConversationId");
-    names.insert(Qt::UserRole + 4, "profilePicture");
-    names.insert(Qt::UserRole + 5, "status");
-    names.insert(Qt::UserRole + 6, "userId");
+    names.insert(Qt::UserRole + 1, "displayName");
+    names.insert(Qt::UserRole + 2, "matched");
+    names.insert(Qt::UserRole + 3, "name");
+    names.insert(Qt::UserRole + 4, "pairwiseConversationId");
+    names.insert(Qt::UserRole + 5, "profilePicture");
+    names.insert(Qt::UserRole + 6, "status");
+    names.insert(Qt::UserRole + 7, "userId");
     return names;
 }
 QVariant Users::headerData(int section, Qt::Orientation orientation, int role) const
@@ -923,22 +939,22 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
                 return setColor(index.row(), value.value<quint32>());
             }
         }
-        if (role == Qt::UserRole + 1) {
+        if (role == Qt::UserRole + 2) {
             if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMatched(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 2) {
+        if (role == Qt::UserRole + 3) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setName(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 4) {
+        if (role == Qt::UserRole + 5) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setProfilePicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (value.canConvert(qMetaTypeId<quint8>())) {
                 return setStatus(index.row(), value.value<quint8>());
             }
@@ -991,6 +1007,7 @@ Config::Config(QObject *parent):
         configColorChanged,
         configColorschemeChanged,
         configConfigIdChanged,
+        configDisplayNameChanged,
         configNameChanged,
         configProfilePictureChanged)),
     m_ownsPrivate(true)
@@ -1020,6 +1037,12 @@ QString Config::configId() const
 {
     QString v;
     config_config_id_get(m_d, &v, set_qstring);
+    return v;
+}
+QString Config::displayName() const
+{
+    QString v;
+    config_display_name_get(m_d, &v, set_qstring);
     return v;
 }
 QString Config::name() const

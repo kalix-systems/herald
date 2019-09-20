@@ -25,6 +25,15 @@ impl ConfigTrait for Config {
             Ok(()) => self.emit.name_changed(),
             Err(e) => eprintln!("{}", e),
         }
+        self.emit.display_name_changed();
+    }
+
+    /// Returns name if it is set, otherwise returns the user's id.
+    fn display_name(&self) -> &str {
+        match self.inner.name.as_ref() {
+            Some(name) => name.as_str(),
+            None => self.inner.id.as_str(),
+        }
     }
 
     fn profile_picture(&self) -> Option<&str> {
