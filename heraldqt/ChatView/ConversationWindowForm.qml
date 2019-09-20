@@ -25,14 +25,14 @@ Flickable {
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
-        width: QmlCfg.margin
+        width: QmlCfg.padding
     }
 
     Column {
         id: textMessageCol
         focus: true
-        spacing: QmlCfg.margin
-        topPadding: QmlCfg.margin
+        spacing: QmlCfg.padding
+        topPadding: QmlCfg.padding
         anchors {
             right: parent.right
             left: parent.left
@@ -48,12 +48,12 @@ Flickable {
                 // this is where scroll bar position needs to be set to instantiate in the right location
                 Component.onCompleted: chatScrollBar.position = 1.0
 
-                // NPB: possibly not a column and just fix anchors
                 // column is most correct to resize for extra content
                 anchors {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
+                    // JH? Weird margin tweak
                     rightMargin: chatScrollBar.width + QmlCfg.margin
                     leftMargin: QmlCfg.margin
                 }

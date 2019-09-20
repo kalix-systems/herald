@@ -84,7 +84,7 @@ Rectangle {
     // column that loads each chat bubble + additional content
     Column {
         id: bubble
-        padding: QmlCfg.margin / 2
+        padding: QmlCfg.smallPadding
 
         /// NBP: find a better way to generically load content
         Loader {

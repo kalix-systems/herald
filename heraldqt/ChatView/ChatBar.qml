@@ -32,6 +32,7 @@ ToolBar {
     Common.Avatar {
         id: chatBarAvatar
         anchors.centerIn: parent
+        // JH: Margin fudging
         size: QmlCfg.toolbarHeight - QmlCfg.margin
         // NPB: more wat. this is why unwrap or needs to do more things
         // perhaps write something like map_err here
