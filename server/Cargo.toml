@@ -17,8 +17,12 @@ lazy_static = "1.4"
 serde       = { version       = "1.0", features = ["derive"] }
 chrono      = { version       = "0.4", features = ["serde"] }
 bytes       = { version       = "0.4", features = ["serde"] }
-tokio       = "0.2.0-alpha.4"
+tokio       = "0.2.0-alpha.5"
+tokio-io    = "0.2.0-alpha.5"
 
-womp = {git = "https://github.com/kalix-systems/womp"}
+qutex         = { git  = "https://github.com/cogciprocate/qutex.git"}
+futures       = "0.1"
+
+womp          = { git  = "https://github.com/kalix-systems/womp"}
 herald_common = { path = "../common"}
 

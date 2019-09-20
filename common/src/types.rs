@@ -1,5 +1,6 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
+use bytes::Bytes;
 use rusqlite::{types as sql_types, ToSql};
 use std::{
     collections::HashMap,
@@ -87,14 +88,14 @@ pub mod fanout {
     use super::*;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub enum ToServer<'a> {
+    pub enum ToServer {
         UID {
             to: Vec<UserId>,
-            msg: &'a [u8],
+            msg: Bytes,
         },
         DID {
             to: Vec<sign::PublicKey>,
-            msg: &'a [u8],
+            msg: Bytes,
         },
     }
 
@@ -146,12 +147,12 @@ pub mod query {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Push<'a> {
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub enum Push {
     KeyRegistered(Signed<sign::PublicKey>),
     KeyDeprecated(Signed<sign::PublicKey>),
-    NewUMessage { from: GlobalId, msg: &'a [u8] },
-    NewDMessage { from: GlobalId, msg: &'a [u8] },
+    NewUMessage { from: GlobalId, msg: Bytes },
+    NewDMessage { from: GlobalId, msg: Bytes },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -162,14 +163,14 @@ pub enum Response {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToClient<'a> {
-    Push(#[serde(borrow)] Push<'a>),
+pub enum MessageToClient {
+    Push(Push),
     Response(Response),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToServer<'a> {
-    Fanout(#[serde(borrow)] fanout::ToServer<'a>),
+pub enum MessageToServer {
+    Fanout(fanout::ToServer),
     PKI(pubkey::ToServer),
     Query(query::ToServer),
 }

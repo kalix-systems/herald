@@ -15,21 +15,21 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    let mut child = Command::new("redis-server")
-        .spawn()
-        .expect("failed to start redis");
+    // let mut child = Command::new("redis-server")
+    //     .spawn()
+    //     .expect("failed to start redis");
 
-    let mut listener = TcpListener::bind("0.0.0.0:8000")
-        .await
-        .expect("failed to bind tcp listener");
+    // let mut listener = TcpListener::bind("0.0.0.0:8000")
+    //     .await
+    //     .expect("failed to bind tcp listener");
 
-    while let Ok((stream, addr)) = listener.accept().await {
-        tokio::spawn(async move {
-            if let Err(e) = HANDLER.handle_stream(stream).await {
-                eprintln!("connection to {} closed - error was {:?}", addr, e);
-            }
-        });
-    }
+    // while let Ok((stream, addr)) = listener.accept().await {
+    //     tokio::spawn(async move {
+    //         if let Err(e) = HANDLER.handle_stream(stream).await {
+    //             eprintln!("connection to {} closed - error was {:?}", addr, e);
+    //         }
+    //     });
+    // }
 
-    child.kill().expect("failed to kill redis");
+    // child.kill().expect("failed to kill redis");
 }
