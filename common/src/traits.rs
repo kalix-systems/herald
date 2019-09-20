@@ -6,9 +6,9 @@ use crate::*;
 /// For the server, this will receive the message, process it, and send the response to the client.
 pub trait ProtocolHandler {
     type Error: From<std::io::Error>;
-    async fn handle_fanout<'a>(
+    async fn handle_fanout(
         &mut self,
-        fanout: fanout::ToServer<'a>,
+        fanout: fanout::ToServer,
     ) -> Result<fanout::ServerResponse, Self::Error>;
     async fn handle_pki(
         &mut self,
