@@ -3,12 +3,16 @@ use crate::{prelude::*, store::*};
 use dashmap::DashMap;
 use qutex::Qutex;
 use sodiumoxide::crypto::sign;
-use tokio::{net::TcpStream, prelude::*, sync::mpsc};
-use tokio_io::split::{split, WriteHalf};
+use tokio::{
+    net::TcpStream,
+    prelude::*,
+    sync::mpsc::{UnboundedReceiver as Receiver, UnboundedSender as Sender},
+};
+// use tokio_io::split::{split, WriteHalf};
 use womp::womp;
 
 pub struct State {
-    active: DashMap<sig::PublicKey, Qutex<WriteHalf<TcpStream>>>,
+    active: DashMap<sig::PublicKey, Sender<MessageToClient>>,
     redis: redis::Client,
 }
 
@@ -27,9 +31,29 @@ impl State {
 
     async fn send_push<C: redis::ConnectionLike>(
         &self,
-        _con: &mut C,
-        _to: &sign::PublicKey,
-        _msg: &Push,
+        con: &mut C,
+        to: sign::PublicKey,
+        msg: Push,
+    ) -> Result<(), Error> {
+        if let Some(a) = self.active.async_get(to).await {
+            let mut sender = a.clone();
+            if let Err(m) = sender.try_send(MessageToClient::Push(msg)) {
+                if let MessageToClient::Push(p) = m.into_inner() {
+                    con.add_pending(to, p)?;
+                }
+            }
+        } else {
+            con.add_pending(to, msg)?;
+        }
+        Ok(())
+    }
+}
+
+impl State {
+    async fn authenticated_session<S: AsyncRead + Unpin>(
+        &self,
+        gid: GlobalId,
+        stream: S,
     ) -> Result<(), Error> {
         unimplemented!()
     }
@@ -60,7 +84,7 @@ impl ProtocolHandler for State {
                     for uid in to {
                         for did in con.read_meta(&uid)?.valid_keys() {
                             // TODO: replace this w/a tokio spawn for reliability reasons
-                            self.send_push(&mut con, &did, &data).await?;
+                            self.send_push(&mut con, did, data.clone()).await?;
                         }
                     }
                     Ok(ServerResponse::Success)
@@ -81,7 +105,7 @@ impl ProtocolHandler for State {
                             msg: msg.clone(),
                         };
                         // TODO: replace this w/a tokio spawn for reliability reasons
-                        self.send_push(&mut con, &did, &data).await?;
+                        self.send_push(&mut con, did, data).await?;
                     }
                     Ok(ServerResponse::Success)
                 }

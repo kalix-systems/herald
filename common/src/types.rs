@@ -166,7 +166,7 @@ pub enum Response {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
     Push(Push),
-    Response(Response),
+    Response([u8; 32], Response),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
