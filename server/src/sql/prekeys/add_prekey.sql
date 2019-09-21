@@ -1,0 +1,3 @@
+INSERT INTO
+  prekeys(
+    sing

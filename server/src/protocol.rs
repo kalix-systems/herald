@@ -35,115 +35,115 @@ impl State {
     }
 }
 
-#[async_trait]
-impl ProtocolHandler for State {
-    type Error = Error;
-    type From = GlobalId;
-    async fn handle_fanout(
-        &self,
-        from: Self::From,
-        fanout: fanout::ToServer,
-    ) -> Result<fanout::ServerResponse, Error> {
-        use fanout::*;
-        let mut con = self.new_connection()?;
-        match fanout {
-            ToServer::UID { to, msg } => {
-                let missing: Vec<UserId> = to
-                    .iter()
-                    .filter(|u| con.user_exists(u).unwrap_or(false))
-                    .map(|u| *u)
-                    .collect();
-                if missing.is_empty() {
-                    Ok(ServerResponse::MissingUIDs(missing))
-                } else {
-                    for uid in to {
-                        for did in con.read_meta(&uid)?.valid_keys() {
-                            let data = Push::NewUMessage {
-                                from,
-                                msg: msg.clone(),
-                            };
-                            // TODO: replace this w/a tokio spawn for reliability reasons
-                            self.send_push(&mut con, &did, &data).await?;
-                        }
-                    }
-                    Ok(ServerResponse::Success)
-                }
-            }
-            ToServer::DID { to, msg } => {
-                let missing: Vec<sign::PublicKey> = to
-                    .iter()
-                    .filter(|d| con.device_exists(d).unwrap_or(false))
-                    .map(|d| *d)
-                    .collect();
-                if missing.is_empty() {
-                    Ok(ServerResponse::MissingDIDs(missing))
-                } else {
-                    for did in to {
-                        let data = Push::NewDMessage {
-                            from,
-                            msg: msg.clone(),
-                        };
-                        // TODO: replace this w/a tokio spawn for reliability reasons
-                        self.send_push(&mut con, &did, &data).await?;
-                    }
-                    Ok(ServerResponse::Success)
-                }
-            }
-        }
-    }
-
-    async fn handle_pki(
-        &self,
-        from: Self::From,
-        msg: pubkey::ToServer,
-    ) -> Result<pubkey::ServerResponse, Error> {
-        use pubkey::{ServerResponse::*, ToServer::*};
-        let mut con = self.new_connection()?;
-        match msg {
-            RegisterKey(spk) => {
-                if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.add_key(&from.uid, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
-                } else {
-                    Ok(BadSignature)
-                }
-            }
-            DeprecateKey(spk) => {
-                if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.deprecate_key(&from.uid, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
-                } else {
-                    Ok(BadSignature)
-                }
-            }
-            RegisterPrekey(spk) => {
-                if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.add_prekey(from.did, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
-                } else {
-                    Ok(BadSignature)
-                }
-            }
-        }
-    }
-
-    async fn handle_query(
-        &self,
-        from: Self::From,
-        query: query::ToServer,
-    ) -> Result<query::ServerResponse, Error> {
-        unimplemented!()
-    }
-}
+//#[async_trait]
+//impl ProtocolHandler for State {
+//    type Error = Error;
+//    type From = GlobalId;
+//    async fn handle_fanout(
+//        &self,
+//        from: Self::From,
+//        fanout: fanout::ToServer,
+//    ) -> Result<fanout::ServerResponse, Error> {
+//        use fanout::*;
+//        let mut con = self.new_connection()?;
+//        match fanout {
+//            ToServer::UID { to, msg } => {
+//                let missing: Vec<UserId> = to
+//                    .iter()
+//                    .filter(|u| con.user_exists(u).unwrap_or(false))
+//                    .map(|u| *u)
+//                    .collect();
+//                if missing.is_empty() {
+//                    Ok(ServerResponse::MissingUIDs(missing))
+//                } else {
+//                    for uid in to {
+//                        for did in con.read_meta(&uid)?.valid_keys() {
+//                            let data = Push::NewUMessage {
+//                                from,
+//                                msg: msg.clone(),
+//                            };
+//                            // TODO: replace this w/a tokio spawn for reliability reasons
+//                            self.send_push(&mut con, &did, &data).await?;
+//                        }
+//                    }
+//                    Ok(ServerResponse::Success)
+//                }
+//            }
+//            ToServer::DID { to, msg } => {
+//                let missing: Vec<sign::PublicKey> = to
+//                    .iter()
+//                    .filter(|d| con.device_exists(d).unwrap_or(false))
+//                    .map(|d| *d)
+//                    .collect();
+//                if missing.is_empty() {
+//                    Ok(ServerResponse::MissingDIDs(missing))
+//                } else {
+//                    for did in to {
+//                        let data = Push::NewDMessage {
+//                            from,
+//                            msg: msg.clone(),
+//                        };
+//                        // TODO: replace this w/a tokio spawn for reliability reasons
+//                        self.send_push(&mut con, &did, &data).await?;
+//                    }
+//                    Ok(ServerResponse::Success)
+//                }
+//            }
+//        }
+//    }
+//
+//    async fn handle_pki(
+//        &self,
+//        from: Self::From,
+//        msg: pubkey::ToServer,
+//    ) -> Result<pubkey::ServerResponse, Error> {
+//        use pubkey::{ServerResponse::*, ToServer::*};
+//        let mut con = self.new_connection()?;
+//        match msg {
+//            RegisterKey(spk) => {
+//                if from.did == *spk.signed_by() && spk.verify_sig() {
+//                    if con.add_key(&from.uid, spk)? {
+//                        Ok(Success)
+//                    } else {
+//                        Ok(Redundant)
+//                    }
+//                } else {
+//                    Ok(BadSignature)
+//                }
+//            }
+//            DeprecateKey(spk) => {
+//                if from.did == *spk.signed_by() && spk.verify_sig() {
+//                    if con.deprecate_key(&from.uid, spk)? {
+//                        Ok(Success)
+//                    } else {
+//                        Ok(Redundant)
+//                    }
+//                } else {
+//                    Ok(BadSignature)
+//                }
+//            }
+//            RegisterPrekey(spk) => {
+//                if from.did == *spk.signed_by() && spk.verify_sig() {
+//                    if con.add_prekey(from.did, spk)? {
+//                        Ok(Success)
+//                    } else {
+//                        Ok(Redundant)
+//                    }
+//                } else {
+//                    Ok(BadSignature)
+//                }
+//            }
+//        }
+//    }
+//
+//    async fn handle_query(
+//        &self,
+//        from: Self::From,
+//        query: query::ToServer,
+//    ) -> Result<query::ServerResponse, Error> {
+//        unimplemented!()
+//    }
+//}
 
 // impl State {
 // pub async fn send_message(

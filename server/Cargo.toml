@@ -7,18 +7,19 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sodiumoxide = "0.2"
-untrusted   = "0.7"
-serde_cbor  = "0.10"
-failure     = "0.1"
-redis       = "0.12"
-dashmap     = "1.0"
-lazy_static = "1.4"
-serde       = { version       = "1.0", features = ["derive"] }
-chrono      = { version       = "0.4", features = ["serde"] }
 bytes       = { version       = "0.4", features = ["serde"] }
+chrono      = { version       = "0.4", features = ["serde"] }
+dashmap     = "1.0"
+failure     = "0.1"
+lazy_static = "1.4"
+postgres    = "0.16.0-rc.2"
+redis       = "0.12"
+serde       = { version       = "1.0", features = ["derive"] }
+serde_cbor  = "0.10"
+sodiumoxide = "0.2"
 tokio       = "0.2.0-alpha.5"
 tokio-io    = "0.2.0-alpha.5"
+untrusted   = "0.7"
 
 qutex         = { git  = "https://github.com/cogciprocate/qutex.git"}
 futures       = "0.1"
