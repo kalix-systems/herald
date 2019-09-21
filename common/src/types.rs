@@ -114,7 +114,7 @@ pub mod pubkey {
     pub enum ToServer {
         RegisterKey(Signed<sign::PublicKey>),
         DeprecateKey(Signed<sign::PublicKey>),
-        RegisterPrekey(Signed<box_::PublicKey>),
+        RegisterPrekey(sealed::PublicKey),
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]

@@ -21,16 +21,17 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 pub trait Store {
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
+    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
+
     fn add_key(&mut self, uid: &UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
     fn read_key(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
     fn deprecate_key(&mut self, uid: &UserId, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+    // TODO: make this not require uid when we switch to postgres
     fn key_is_valid(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
-
-    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Error>;
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
@@ -72,6 +73,7 @@ impl<C: redis::ConnectionLike> Store for C {
             key.as_ref(),
             serde_cbor::to_vec(&pkm)?.as_slice(),
         )?;
+        self.expire_pending(key)?;
 
         Ok(res)
     }
