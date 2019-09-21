@@ -134,8 +134,8 @@ pub mod query {
     pub enum ToServer {
         UserExists(UserId),
         UserKeys(UserId),
+        GetKeyMeta(UserId, sign::PublicKey),
         GetPrekey(sign::PublicKey),
-        KeyMeta(UserId, sign::PublicKey),
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -143,7 +143,7 @@ pub mod query {
         Exists(bool),
         Keys(UserMeta),
         KeyMeta(sig::PKMeta),
-        PreKey(Signed<box_::PublicKey>),
+        PreKey(sealed::PublicKey),
         MissingData,
     }
 }

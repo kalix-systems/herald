@@ -27,9 +27,9 @@ impl State {
 
     async fn send_push<C: redis::ConnectionLike>(
         &self,
-        con: &mut C,
-        to: &sign::PublicKey,
-        msg: &Push,
+        _con: &mut C,
+        _to: &sign::PublicKey,
+        _msg: &Push,
     ) -> Result<(), Error> {
         unimplemented!()
     }
@@ -56,12 +56,9 @@ impl ProtocolHandler for State {
                 if missing.is_empty() {
                     Ok(ServerResponse::MissingUIDs(missing))
                 } else {
+                    let data = Push::NewUMessage { from, msg: msg };
                     for uid in to {
                         for did in con.read_meta(&uid)?.valid_keys() {
-                            let data = Push::NewUMessage {
-                                from,
-                                msg: msg.clone(),
-                            };
                             // TODO: replace this w/a tokio spawn for reliability reasons
                             self.send_push(&mut con, &did, &data).await?;
                         }
@@ -141,7 +138,14 @@ impl ProtocolHandler for State {
         from: Self::From,
         query: query::ToServer,
     ) -> Result<query::ServerResponse, Error> {
-        unimplemented!()
+        use query::{ServerResponse::*, ToServer::*};
+        let mut con = self.new_connection()?;
+        match query {
+            UserExists(uid) => con.user_exists(&uid).map(Exists),
+            UserKeys(uid) => Ok(con.read_meta(&uid).map(Keys).unwrap_or(MissingData)),
+            GetKeyMeta(uid, pk) => Ok(con.read_key(&uid, pk).map(KeyMeta).unwrap_or(MissingData)),
+            GetPrekey(pk) => Ok(con.get_prekey(pk).map(PreKey).unwrap_or(MissingData)),
+        }
     }
 }
 

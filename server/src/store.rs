@@ -42,7 +42,7 @@ pub trait Store {
 // note: not transactional by default
 // can call transactionally by wrapping calls where appropriate
 impl<C: redis::ConnectionLike> Store for C {
-    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+    fn device_exists(&mut self, _pk: &sign::PublicKey) -> Result<bool, Error> {
         unimplemented!()
     }
 
