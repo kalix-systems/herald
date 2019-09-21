@@ -22,7 +22,7 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 pub trait Store {
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
-    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error>;
+    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
@@ -150,8 +150,12 @@ impl<'a> Store for postgres::Transaction<'a> {
             .try_get(0)?)
     }
 
-    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<bool, Error> {
-        unimplemented!()
+    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error> {
+        self.execute(
+            include_str!("sql/prekeys/add_prekey.sql"),
+            &[&key.as_ref(), &serde_cbor::to_vec(&pre)?.as_slice()],
+        )?;
+        Ok(())
     }
 
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
