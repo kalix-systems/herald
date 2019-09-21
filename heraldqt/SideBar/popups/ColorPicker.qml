@@ -31,7 +31,7 @@ Window {
                 color: modelData
                 radius: width / 2
                 border.color: QmlCfg.palette.tertiaryColor
-                border.width: focus : 2 ? 0
+                border.width: focus ? 2 : 0
 
                 MouseArea {
                     anchors.fill: parent

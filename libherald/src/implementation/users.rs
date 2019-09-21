@@ -26,7 +26,7 @@ pub struct Users {
 
 impl UsersTrait for Users {
     fn new(emit: UsersEmitter, model: UsersList) -> Users {
-        let handle = abort_err!(ContactsHandle::new());
+        let handle = ContactsHandle::new();
 
         let list = match handle.all() {
             Ok(v) => v

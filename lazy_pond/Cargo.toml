@@ -1,0 +1,5 @@
+[package]
+name = "lazy_pond"
+version = "0.1.0"
+authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
+edition = "2018"

@@ -8,11 +8,20 @@ use rusqlite::{params, NO_PARAMS};
 #[derive(Default)]
 pub(crate) struct MessageStatus {}
 
-pub(crate) fn delete_by_conversation(
-    db: &rusqlite::Connection,
+//pub(crate) fn delete_by_conversation(conversation: ConversationId) -> Result<(), HErr> {
+//    let db = Database::get()?;
+//    db.execute(
+//        include_str!("sql/message_status/delete_by_conversation.sql"),
+//        params![conversation],
+//    )?;
+//    Ok(())
+//}
+
+pub(crate) fn delete_by_conversation_tx(
+    tx: &rusqlite::Transaction,
     conversation: ConversationId,
 ) -> Result<(), HErr> {
-    db.execute(
+    tx.execute(
         include_str!("sql/message_status/delete_by_conversation.sql"),
         params![conversation],
     )?;
@@ -20,11 +29,11 @@ pub(crate) fn delete_by_conversation(
 }
 
 pub(crate) fn set_message_status(
-    db: &Database,
     msg_id: MsgId,
     conversation: ConversationId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
+    let db = Database::get()?;
     db.execute(
         include_str!("sql/message_status/set_message_status.sql"),
         params![msg_id, conversation, receipt_status],
@@ -103,12 +112,10 @@ mod tests {
     fn message_send_status_updates() {
         Database::reset_all().expect(womp!());
 
-        let db = Database::get().expect(womp!());
-
-        let author = "Hello".try_into().unwrap();
+        let author = "Hello".try_into().expect(womp!());
         let conversation_id = [0; 32].into();
 
-        let conv_handle = Conversations::new().expect(womp!());
+        let conv_handle = Conversations::new();
 
         conv_handle
             .add_conversation(Some(&conversation_id), None)
@@ -121,10 +128,9 @@ mod tests {
             .add_member(&conversation_id, author)
             .expect(womp!());
 
-        let (msg_id, _) = add_message(&db, None, author, &conversation_id, "1", None, &None)
+        let (msg_id, _) = add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        set_message_status(&db, msg_id, conversation_id, MessageReceiptStatus::Read)
-            .expect(womp!());
+        set_message_status(msg_id, conversation_id, MessageReceiptStatus::Read).expect(womp!());
     }
 }

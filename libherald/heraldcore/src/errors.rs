@@ -1,5 +1,6 @@
 use herald_common::{serde_cbor, TransportError};
 use image;
+use lazy_pond::LazyError;
 use regex;
 use std::{fmt, sync::PoisonError};
 
@@ -7,6 +8,7 @@ use std::{fmt, sync::PoisonError};
 pub enum HErr {
     HeraldError(String),
     DatabaseError(rusqlite::Error),
+    LazyPondError,
     MutexError(String),
     InvalidUserId,
     InvalidMessageId,
@@ -38,6 +40,7 @@ impl fmt::Display for HErr {
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
+            LazyPondError => write!(f, "LazyPondError"),
             LoginError => write!(f, "LoginError"),
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
@@ -50,6 +53,9 @@ impl std::error::Error for HErr {
         use HErr::*;
         Some(match self {
             DatabaseError(e) => e,
+            HeraldError(_) => return None,
+            MutexError(_) => return None,
+            InvalidUserId => return None,
             IoError(e) => e,
             ImageError(s) => s,
             Utf8Error(s) => s,
@@ -119,8 +125,8 @@ impl From<std::str::Utf8Error> for HErr {
     }
 }
 
-impl From<herald_common::InvalidUserId> for HErr {
-    fn from(_: herald_common::InvalidUserId) -> Self {
-        HErr::InvalidUserId
+impl From<LazyError> for HErr {
+    fn from(_: LazyError) -> Self {
+        HErr::LazyPondError
     }
 }
