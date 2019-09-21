@@ -3,64 +3,11 @@ use crate::{
     errors::HErr,
 };
 use chainmail::{block::*, errors::Error as ChainError};
-use herald_common::{sealed, sig, Push, Signed, Store, UserId, UserMeta};
+use herald_common::{sealed, sig, Push, Signed, UserId, UserMeta};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
-pub(crate) struct ContactKeys {
-    db: Database,
-}
-
-impl Store for ContactKeys {
-    type Error = HErr;
-
-    fn add_key(&mut self, uid: UserId, key: Signed<sig::PublicKey>) -> Result<bool, Self::Error> {
-        unimplemented!()
-    }
-
-    fn read_key(&mut self, uid: UserId, key: sig::PublicKey) -> Result<sig::PKMeta, Self::Error> {
-        unimplemented!()
-    }
-    fn deprecate_key(
-        &mut self,
-        uid: UserId,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<bool, Self::Error> {
-        unimplemented!()
-    }
-
-    fn user_exists(&mut self, uid: UserId) -> Result<bool, Self::Error> {
-        unimplemented!()
-    }
-
-    fn key_is_valid(&mut self, uid: UserId, key: sig::PublicKey) -> Result<bool, Self::Error> {
-        unimplemented!()
-    }
-
-    fn read_meta(&mut self, uid: UserId) -> Result<UserMeta, Self::Error> {
-        unimplemented!()
-    }
-
-    fn add_prekey(&mut self, pre: sealed::PublicKey) -> Result<bool, Self::Error> {
-        unimplemented!()
-    }
-
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Self::Error> {
-        unimplemented!()
-    }
-
-    fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Self::Error> {
-        unimplemented!()
-    }
-
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Self::Error> {
-        unimplemented!()
-    }
-
-    fn remove_pending(&mut self, key: sig::PublicKey) -> Result<(), Self::Error> {
-        unimplemented!()
-    }
-}
+pub(crate) struct ContactKeys {}
 
 impl DBTable for ContactKeys {
     fn create_table() -> Result<(), HErr> {

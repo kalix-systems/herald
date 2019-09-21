@@ -1,11 +1,15 @@
 use crate::{abort_err, errors::*, utils::SearchPattern};
+use lazy_pond::*;
 use lazy_static::*;
 use rusqlite::{Connection, NO_PARAMS};
-
 use std::{
     ops::{Deref, DerefMut},
     path::Path,
 };
+
+lazy_static! {
+    static ref DB_POOL: LazyPond<Database> = LazyPond::new(Some(32));
+}
 
 lazy_static! {
     /// this can be set by the user so
@@ -27,8 +31,8 @@ impl Clone for Database {
 }
 
 impl Database {
-    pub(crate) fn get() -> Result<Database, HErr> {
-        Database::new(DB_PATH.as_str())
+    pub(crate) fn get<'a>() -> Result<Wrapper<'a, Database>, HErr> {
+        DB_POOL.get().map_err(|_| HErr::LazyPondError)
     }
 }
 
@@ -52,6 +56,8 @@ impl Database {
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
             Ok(conn) => {
+                conn.busy_timeout(std::time::Duration::from_secs(60))?;
+
                 // `NormalPattern`
                 conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
                     let pattern = ctx.get::<String>(0)?;
