@@ -23,6 +23,23 @@ pub trait ProtocolHandler {
         from: Self::From,
         query: query::ToServer,
     ) -> Result<query::ServerResponse, Self::Error>;
+
+    async fn handle_message_to_server(
+        &self,
+        from: Self::From,
+        msg: MessageToServer,
+    ) -> Result<Response, Self::Error>
+    where
+        Self::From: Send,
+        Self::Error: Send,
+    {
+        use MessageToServer::*;
+        Ok(match msg {
+            Fanout(f) => Response::Fanout(self.handle_fanout(from, f).await?),
+            PKI(p) => Response::PKI(self.handle_pki(from, p).await?),
+            Query(q) => Response::Query(self.handle_query(from, q).await?),
+        })
+    }
 }
 
 #[async_trait]

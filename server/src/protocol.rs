@@ -6,7 +6,9 @@ use sodiumoxide::crypto::sign;
 use tokio::{
     net::TcpStream,
     prelude::*,
-    sync::mpsc::{UnboundedReceiver as Receiver, UnboundedSender as Sender},
+    sync::mpsc::{
+        unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
+    },
 };
 // use tokio_io::split::{split, WriteHalf};
 use womp::womp;
@@ -47,15 +49,87 @@ impl State {
         }
         Ok(())
     }
+
+    async fn send_response(
+        &self,
+        to: sign::PublicKey,
+        mid: [u8; 32],
+        res: Response,
+    ) -> Result<(), Error> {
+        if let Some(a) = self.active.async_get(to).await {
+            a.clone()
+                .try_send(MessageToClient::Response(mid, res))
+                .map_err(|_| MissingData)
+        } else {
+            Err(MissingData)
+        }
+    }
 }
 
 impl State {
-    async fn authenticated_session<S: AsyncRead + Unpin>(
-        &self,
+    fn authenticated_session<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(
+        &'static self,
         gid: GlobalId,
         stream: S,
-    ) -> Result<(), Error> {
-        unimplemented!()
+    ) {
+        let (sender, receiver) = channel();
+        self.active.insert(gid.did, sender);
+
+        let (reader, writer) = tokio::io::split(stream);
+        self.spawn_msg_sender(gid.did, writer, receiver);
+        self.recv_messages(gid, reader);
+    }
+
+    fn spawn_msg_sender<W: AsyncWrite + Unpin + Send + 'static>(
+        &'static self,
+        pk: sig::PublicKey,
+        mut writer: W,
+        mut input: Receiver<MessageToClient>,
+    ) {
+        tokio::spawn(async move {
+            while let Some(msg) = input.recv().await {
+                if let Err(e) = send_cbor(&mut writer, &msg).await {
+                    eprintln!("failed to write data - assuming connection is closed");
+                    eprintln!("error was: {}", e);
+                    self.active.remove(&pk);
+                    break;
+                }
+            }
+
+            let mut con = self.new_connection().expect(womp!());
+            while let Some(MessageToClient::Push(msg)) = input.recv().await {
+                // TODO (HIGH PRIORITY): handle retry logic here
+                con.add_pending(pk, msg)
+                    .expect("MAJOR ERROR: failed to add pending message");
+            }
+        });
+    }
+
+    fn recv_messages<R: AsyncRead + Unpin + Send + 'static>(
+        &'static self,
+        gid: GlobalId,
+        mut reader: R,
+    ) {
+        tokio::spawn(async move {
+            loop {
+                let mut mid = [0u8; 32];
+                reader
+                    .read_exact(&mut mid)
+                    .await
+                    .expect("failed to read message id");
+                let m = read_cbor(&mut reader)
+                    .await
+                    .expect("failed to read cbor data");
+                let res = self
+                    .handle_message_to_server(gid, m)
+                    .await
+                    .expect(&format!("failed to handle message from gid {:?}", gid));
+                self.send_response(gid.did, mid, res).await.expect(&format!(
+                    "failed to send response to gid {:?}, though this may not be a problem",
+                    gid
+                ));
+            }
+        });
     }
 }
 
@@ -295,29 +369,6 @@ impl ProtocolHandler for State {
 //     self.spawn_msg_sender(gid.did, writer, receiver);
 //     self.recv_messages(con, gid, reader).await?;
 //     Ok(())
-// }
-
-// pub fn spawn_msg_sender<W: AsyncWrite + Unpin + Send + 'static>(
-//     &'static self,
-//     pk: sig::PublicKey,
-//     mut writer: W,
-//     mut input: mpsc::UnboundedReceiver<MessageToClient>,
-// ) {
-//     tokio::spawn(async move {
-//         while let Some(msg) = input.recv().await {
-//             if let Err(e) = send_cbor(&mut writer, &msg).await {
-//                 eprintln!("failed to write data - assuming connection is closed");
-//                 eprintln!("error was: {}", e);
-//                 self.active.remove(&pk);
-//                 break;
-//             }
-//         }
-
-//         let mut con = self.new_connection().expect(womp!());
-//         while let Some(MessageToClient::Push(msg)) = input.recv().await {
-//             con.add_pending(pk, msg).expect(womp!());
-//         }
-//     });
 // }
 
 // pub async fn recv_messages<R: AsyncRead + Unpin>(
