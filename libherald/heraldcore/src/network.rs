@@ -49,13 +49,85 @@ pub enum Notification {
 /// `Session` is the main struct for managing networking. Think of it as the sending handle for
 /// interacting with the server. It can make queries and it can send messages.
 pub struct Session {
-    out: Sender<MessageToServer>,
+    out: Sender<(QID, MessageToServer)>,
     pending: Arc<DashMap<QID, oneshot::Sender<Response>>>,
     notifications: Sender<Notification>,
 }
 
+#[async_trait]
+impl ProtocolHandler for Session {
+    type Error = HErr;
+    type From = ();
+
+    async fn handle_message_to_server(
+        &self,
+        _: Self::From,
+        msg: MessageToServer,
+    ) -> Result<Response, Self::Error> {
+        let qid = utils::rand_id();
+        let (sender, receiver) = oneshot::channel();
+        self.pending.insert(qid, sender);
+        if let Err(_) = self.out.clone().try_send((qid, msg)) {
+            self.pending.remove(&qid);
+            return Err(RequestDropped);
+        }
+        receiver.await.map_err(|_| RequestDropped)
+    }
+
+    async fn handle_fanout(
+        &self,
+        from: Self::From,
+        fanout: fanout::ToServer,
+    ) -> Result<fanout::ServerResponse, Self::Error> {
+        let msg = MessageToServer::Fanout(fanout);
+        match self.handle_message_to_server(from, msg).await? {
+            Response::Fanout(f) => Ok(f),
+            r => Err(BadResponse {
+                expected: "fanout",
+                found: r,
+            }),
+        }
+    }
+
+    async fn handle_pki(
+        &self,
+        from: Self::From,
+        pki: pubkey::ToServer,
+    ) -> Result<pubkey::ServerResponse, Self::Error> {
+        let msg = MessageToServer::PKI(pki);
+        match self.handle_message_to_server(from, msg).await? {
+            Response::PKI(f) => Ok(f),
+            r => Err(BadResponse {
+                expected: "pki",
+                found: r,
+            }),
+        }
+    }
+    async fn handle_query(
+        &self,
+        from: Self::From,
+        query: query::ToServer,
+    ) -> Result<query::ServerResponse, Self::Error> {
+        let msg = MessageToServer::Query(query);
+        match self.handle_message_to_server(from, msg).await? {
+            Response::Query(f) => Ok(f),
+            r => Err(BadResponse {
+                expected: "query",
+                found: r,
+            }),
+        }
+    }
+}
+
 impl Session {
-    pub async fn new() -> Result<(Receiver<Notification>, Receiver<MessageToServer>, Self), HErr> {
+    async fn new() -> Result<
+        (
+            Receiver<Notification>,
+            Receiver<(QID, MessageToServer)>,
+            Self,
+        ),
+        HErr,
+    > {
         let (server_sender, server_receiver) = mpsc::unbounded_channel();
         let (notif_sender, notif_receiver) = mpsc::unbounded_channel();
         let sess = Session {
@@ -65,6 +137,13 @@ impl Session {
         };
         Ok((notif_receiver, server_receiver, sess))
     }
+
+    // fn spawn_server_sender(&self, mut msgs: Receiver<(QID, MessageToServer)>) {
+    //     tokio::spawn({
+    //         let sess = self.clone();
+    //         async move { while let Some((q, msg)) = msgs.recv().await {} }
+    //     });
+    // }
 
     //pub fn setup_streams(self, mut outgoing: Receiver<MessageToServer>, stream: TcpStream) {
     //    let (mut reader, mut writer) = stream.split();
@@ -92,80 +171,80 @@ impl Session {
     //    });
     //}
 
-    pub async fn login<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        stream: &mut S,
-    ) -> Result<(), HErr> {
-        send_cbor(stream, &SessionType::Login).await?;
-        let uid = Config::static_id()?;
-        let kp = Config::static_keypair()?;
-        let gid = GlobalId {
-            uid,
-            did: *kp.public_key(),
-        };
-        send_cbor(stream, &gid).await?;
+    //pub async fn login<S: AsyncWrite + AsyncRead + Unpin>(
+    //    &self,
+    //    stream: &mut S,
+    //) -> Result<(), HErr> {
+    //    send_cbor(stream, &SessionType::Login).await?;
+    //    let uid = Config::static_id()?;
+    //    let kp = Config::static_keypair()?;
+    //    let gid = GlobalId {
+    //        uid,
+    //        did: *kp.public_key(),
+    //    };
+    //    send_cbor(stream, &gid).await?;
 
-        let mut buf = [0u8; 3];
-        stream.read_exact(&mut buf).await?;
-        if buf != *b"YES" {
-            return Err(LoginError);
-        }
+    //    let mut buf = [0u8; 3];
+    //    stream.read_exact(&mut buf).await?;
+    //    if buf != *b"YES" {
+    //        return Err(LoginError);
+    //    }
 
-        let mut buf = [0u8; 32];
-        stream.read_exact(&mut buf).await?;
-        let sig = kp.raw_sign_detached(&buf);
-        stream.write_all(sig.as_ref()).await?;
+    //    let mut buf = [0u8; 32];
+    //    stream.read_exact(&mut buf).await?;
+    //    let sig = kp.raw_sign_detached(&buf);
+    //    stream.write_all(sig.as_ref()).await?;
 
-        let mut buf = [0u8; 3];
-        stream.read_exact(&mut buf).await?;
-        if buf != *b"YES" {
-            return Err(LoginError);
-        }
+    //    let mut buf = [0u8; 3];
+    //    stream.read_exact(&mut buf).await?;
+    //    if buf != *b"YES" {
+    //        return Err(LoginError);
+    //    }
 
-        //// TODO: this should probably be a single db transaction
-        //if let MessageToClient::Catchup(p) = read_cbor(stream).await? {
-        //    let mut replies = Vec::new();
-        //    for push in p {
-        //        replies.append(&mut self.handle_push(push).await?);
-        //    }
-        //    self.send_to_server(MessageToServer::CaughtUp).await?;
-        //    for reply in replies {
-        //        let msg = self.reply_to_server_msg(&reply).await?;
-        //        self.send_to_server(msg).await?;
-        //    }
-        //} else {
-        //    return Err(HeraldError("missing catchup".into()));
-        //}
+    //    //// TODO: this should probably be a single db transaction
+    //    //if let MessageToClient::Catchup(p) = read_cbor(stream).await? {
+    //    //    let mut replies = Vec::new();
+    //    //    for push in p {
+    //    //        replies.append(&mut self.handle_push(push).await?);
+    //    //    }
+    //    //    self.send_to_server(MessageToServer::CaughtUp).await?;
+    //    //    for reply in replies {
+    //    //        let msg = self.reply_to_server_msg(&reply).await?;
+    //    //        self.send_to_server(msg).await?;
+    //    //    }
+    //    //} else {
+    //    //    return Err(HeraldError("missing catchup".into()));
+    //    //}
 
-        Ok(())
-    }
+    //    Ok(())
+    //}
 
-    pub async fn try_register<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        stream: &mut S,
-        uid: UserId,
-        pair: sig::KeyPair,
-    ) -> Result<bool, HErr> {
-        send_cbor(stream, &uid).await?;
-        let mut buf = [0u8; 3];
-        stream.read_exact(&mut buf).await?;
-        if buf != *b"YES" {
-            return Ok(false);
-        }
-        let signed = pair.sign(*pair.public_key());
-        send_cbor(stream, &signed).await?;
-        if buf != *b"YES" {
-            return Ok(false);
-        }
-        ConfigBuilder::new().id(uid).keypair(pair).add()?;
-        Ok(true)
-    }
+    //pub async fn try_register<S: AsyncWrite + AsyncRead + Unpin>(
+    //    &self,
+    //    stream: &mut S,
+    //    uid: UserId,
+    //    pair: sig::KeyPair,
+    //) -> Result<bool, HErr> {
+    //    send_cbor(stream, &uid).await?;
+    //    let mut buf = [0u8; 3];
+    //    stream.read_exact(&mut buf).await?;
+    //    if buf != *b"YES" {
+    //        return Ok(false);
+    //    }
+    //    let signed = pair.sign(*pair.public_key());
+    //    send_cbor(stream, &signed).await?;
+    //    if buf != *b"YES" {
+    //        return Ok(false);
+    //    }
+    //    ConfigBuilder::new().id(uid).keypair(pair).add()?;
+    //    Ok(true)
+    //}
 
-    /// Sends a `MessageToPeer` through the server.
-    pub async fn send_msg(&self, to: UserId, msg: MessageToPeer) -> Result<(), HErr> {
-        let push = unimplemented!();
-        self.send_to_server(push).await
-    }
+    ///// Sends a `MessageToPeer` through the server.
+    //pub async fn send_msg(&self, to: UserId, msg: MessageToPeer) -> Result<(), HErr> {
+    //    let push = unimplemented!();
+    //    self.send_to_server(push).await
+    //}
 
     ///// Requests the metadata of a user, asynchronously returns the response.
     //pub async fn request_meta(&self, of: UserId) -> Result<UserMeta, HErr> {
@@ -354,62 +433,62 @@ lazy_static! {
 //     }
 // }
 
-impl Session {
-    async fn handle_push(&self, push: Push) -> Result<Vec<Reply>, HErr> {
-        unimplemented!()
-    }
+// impl Session {
+//     async fn handle_push(&self, push: Push) -> Result<Vec<Reply>, HErr> {
+//         unimplemented!()
+//     }
 
-    /// Encrypts `msg` as a `Block` or `Blob`, depending on the value of `msg`.
-    async fn reply_to_server_msg(&self, msg: &Reply) -> Result<MessageToServer, HErr> {
-        unimplemented!()
-    }
+//     /// Encrypts `msg` as a `Block` or `Blob`, depending on the value of `msg`.
+//     async fn reply_to_server_msg(&self, msg: &Reply) -> Result<MessageToServer, HErr> {
+//         unimplemented!()
+//     }
 
-    async fn send_to_server(&self, msg: MessageToServer) -> Result<(), HErr> {
-        self.out
-            .clone()
-            .try_send(msg)
-            // TODO: more sensible error here???
-            .map_err(|_| HeraldError("network closed".into()))?;
-        Ok(())
-    }
+//     async fn send_to_server(&self, msg: MessageToServer) -> Result<(), HErr> {
+//         self.out
+//             .clone()
+//             .try_send(msg)
+//             // TODO: more sensible error here???
+//             .map_err(|_| HeraldError("network closed".into()))?;
+//         Ok(())
+//     }
 
-    async fn send_query(&self, qid: QID, query: MessageToServer) -> Result<Response, HErr> {
-        let (sender, receiver) = oneshot::channel();
-        // this clone looks unnecessary - it's not!
-        // insert before send so that we don't have to worry about what happens if a query is
-        // responded to before this future is executed again
-        self.pending.insert(qid, sender);
-        self.send_to_server(query).await?;
-        receiver
-            .await
-            .map_err(|e| HeraldError(format!("query sender was dropped, error was {}", e,)))
-    }
+//     async fn send_query(&self, qid: QID, query: MessageToServer) -> Result<Response, HErr> {
+//         let (sender, receiver) = oneshot::channel();
+//         // this clone looks unnecessary - it's not!
+//         // insert before send so that we don't have to worry about what happens if a query is
+//         // responded to before this future is executed again
+//         self.pending.insert(qid, sender);
+//         self.send_to_server(query).await?;
+//         receiver
+//             .await
+//             .map_err(|e| HeraldError(format!("query sender was dropped, error was {}", e,)))
+//     }
 
-    async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
-        unimplemented!()
-        // use MessageToClient::*;
-        // match msg {
-        //     Push { from, body, time } => {
-        //         let push = serde_cbor::from_slice(&body)?;
-        //         let Event {
-        //             reply,
-        //             notification,
-        //         } = handle_push(from, push, time)?;
-        //         if let Some(n) = notification {
-        //             drop(self.notifications.clone().try_send(n));
-        //         }
-        //         if let Some(r) = reply {
-        //             self.send_to_server(&r).await?;
-        //         }
-        //     }
-        //     QueryResponse { res, query } => self.handle_response(res, &query).await,
-        // }
-        // Ok(())
-    }
+//     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
+//         unimplemented!()
+//         // use MessageToClient::*;
+//         // match msg {
+//         //     Push { from, body, time } => {
+//         //         let push = serde_cbor::from_slice(&body)?;
+//         //         let Event {
+//         //             reply,
+//         //             notification,
+//         //         } = handle_push(from, push, time)?;
+//         //         if let Some(n) = notification {
+//         //             drop(self.notifications.clone().try_send(n));
+//         //         }
+//         //         if let Some(r) = reply {
+//         //             self.send_to_server(&r).await?;
+//         //         }
+//         //     }
+//         //     QueryResponse { res, query } => self.handle_response(res, &query).await,
+//         // }
+//         // Ok(())
+//     }
 
-    async fn handle_response(&self, qid: QID, res: Response, query: &MessageToServer) {
-        if let Some(s) = self.pending.remove(&qid) {
-            drop(s.1.send(res));
-        }
-    }
-}
+//     async fn handle_response(&self, qid: QID, res: Response, query: &MessageToServer) {
+//         if let Some(s) = self.pending.remove(&qid) {
+//             drop(s.1.send(res));
+//         }
+//     }
+// }

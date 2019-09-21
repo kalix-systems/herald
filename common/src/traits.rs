@@ -13,6 +13,7 @@ pub trait ProtocolHandler {
         from: Self::From,
         fanout: fanout::ToServer,
     ) -> Result<fanout::ServerResponse, Self::Error>;
+
     async fn handle_pki(
         &self,
         from: Self::From,
