@@ -17,8 +17,7 @@ import "../common/utils.mjs" as Utils
 
 ToolBar {
     id: utilityBar
-    anchors.left: parent.left
-    anchors.right: parent.right
+    Layout.fillWidth: true
     height: QmlCfg.toolbarHeight
 
     background: Rectangle {

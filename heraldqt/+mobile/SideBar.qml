@@ -12,7 +12,7 @@ import "common" as Common
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
-Pane {
+ColumnLayout {
     id: contactPane
     // GS : we do this to get the current Item, BAD.
     property alias contactsListView: contactsListView
@@ -24,55 +24,40 @@ Pane {
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
 
-    padding: 0 // All Interior Elements span the entire pane
     height: parent.height
-
-    background: Rectangle {
-        border.color: QmlCfg.palette.secondaryColor
-    }
-
-    ///--- Username and Settings gear button
-    SBUtils.ConfigBar {
-        id: toolBar
-    }
 
     ///--- SearchBar for contacts, add contact button
     SBUtils.UtilityBar {
         id: utilityBar
-        anchors.top: toolBar.bottom
+        Layout.alignment: Qt.AlignTop
     }
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
-        anchors.top: utilityBar.bottom
+        Layout.alignment: Qt.AlignTop
         color: QmlCfg.palette.secondaryColor
     }
 
-    SBUtils.ContactsToggle {
-        id: contactsToggleBar
-        anchors.top: searchBarBorder.bottom
-    }
 
     ///--- Contacts View Actual
     Pane {
         padding: 0
-        anchors {
-            right: parent.right
-            left: parent.left
-            top: contactsToggleBar.bottom
-            bottom: parent.bottom
-        }
+        Layout.alignment: Qt.AlignTop
+        Layout.fillHeight: true
+        Layout.fillWidth:  true
 
         SBUtils.ContactView {
             id: contactsListView
-            anchors.fill: parent
+            Layout.fillHeight: true
+            Layout.fillWidth:  true
             model: contactsModel
         }
 
         SBUtils.ConversationView {
             id: conversationsListView
-            anchors.fill: parent
+            Layout.fillHeight: true
+            Layout.fillWidth:  true
             model: conversationsModel
         }
     }

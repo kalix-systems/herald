@@ -1,6 +1,6 @@
 QT += quick
 QT += widgets
-
+VERSION = 0.0.1
 CONFIG += c++11
 
 # The following define makes your compiler emit warnings if you use
@@ -37,7 +37,6 @@ else {
 
 # Only for simulator right now
 android {
-
     QMAKE_LFLAGS += -nostdlib++
     LIBS +=  $${PWD}/../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }

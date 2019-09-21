@@ -4,8 +4,9 @@ import QtGraphicalEffects 1.13
 import LibHerald 1.0
 
 Rectangle {
-    readonly property int heightUnit: root.minimumHeight / 3
     id: loginPage
+
+    readonly property int heightUnit: root.height / 3
     anchors.fill: parent
 
     LinearGradient {
@@ -89,11 +90,21 @@ Rectangle {
     Rectangle {
         color: Qt.darker("lightblue", 1.9)
         height: 60
+        radius: QmlCfg.radius
 
         anchors {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
+            rightMargin: root.width / 8
+            leftMargin: root.width / 8
+            verticalCenter: root.verticalCenter
+            verticalCenterOffset: root.height / 4
+        }
+
+
+        MouseArea {
+            anchors.fill: parent
         }
 
         Text {

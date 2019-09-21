@@ -72,24 +72,23 @@ Item {
         id: config
     }
 
-    SplitView {
+
+
+    StackView {
+        // ToDo: rename to root stackView
         id: rootSplitView
         anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        orientation: Qt.Horizontal
 
-        SideBar {
-            id: sideBar
+        Component {
+            id: contacts
+            // ToDo: rename to contacts view
+            SideBar {
+
+            }
         }
 
-        ChatView {
-            id: chatView
-        }
-
-        handle: Rectangle {
-            implicitWidth: 3
-            color: QmlCfg.palette.secondaryColor
+        Component.onCompleted: {
+           rootSplitView.push(contacts)
         }
     }
 }

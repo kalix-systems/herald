@@ -9,10 +9,6 @@ import QtQml 2.13
 ApplicationWindow {
     id: root
     visible: true
-    width: 900
-    height: 640
-    title: qsTr("Herald")
-
 
     // This provides a few purely functional helper methods
     HeraldUtils {

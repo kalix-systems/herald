@@ -19,10 +19,10 @@ import "popups" as Popups
 ListView {
     visible: gsContactsSearch
     id: contactList
-
-    clip: true
+    Layout.fill
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
+    Layout.
 
     Connections {
         target: appRoot
