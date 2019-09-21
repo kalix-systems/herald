@@ -97,7 +97,43 @@ impl ProtocolHandler for State {
         from: Self::From,
         msg: pubkey::ToServer,
     ) -> Result<pubkey::ServerResponse, Error> {
-        unimplemented!()
+        use pubkey::{ServerResponse::*, ToServer::*};
+        let mut con = self.new_connection()?;
+        match msg {
+            RegisterKey(spk) => {
+                if from.did == *spk.signed_by() && spk.verify_sig() {
+                    if con.add_key(&from.uid, spk)? {
+                        Ok(Success)
+                    } else {
+                        Ok(Redundant)
+                    }
+                } else {
+                    Ok(BadSignature)
+                }
+            }
+            DeprecateKey(spk) => {
+                if from.did == *spk.signed_by() && spk.verify_sig() {
+                    if con.deprecate_key(&from.uid, spk)? {
+                        Ok(Success)
+                    } else {
+                        Ok(Redundant)
+                    }
+                } else {
+                    Ok(BadSignature)
+                }
+            }
+            RegisterPrekey(spk) => {
+                if from.did == *spk.signed_by() && spk.verify_sig() {
+                    if con.add_prekey(from.did, spk)? {
+                        Ok(Success)
+                    } else {
+                        Ok(Redundant)
+                    }
+                } else {
+                    Ok(BadSignature)
+                }
+            }
+        }
     }
 
     async fn handle_query(

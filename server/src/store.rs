@@ -30,7 +30,7 @@ pub trait Store {
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
     // TODO: make this not require uid when we switch to postgres
-    fn key_is_valid(&mut self, &UserId, key: sig::PublicKey) -> Result<bool, Error>;
+    fn key_is_valid(&mut self, uid: &UserId, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
     fn add_pending(&mut self, key: sig::PublicKey, msg: Push) -> Result<(), Error>;
@@ -73,6 +73,7 @@ impl<C: redis::ConnectionLike> Store for C {
             key.as_ref(),
             serde_cbor::to_vec(&pkm)?.as_slice(),
         )?;
+        self.expire_pending(key)?;
 
         Ok(res)
     }

@@ -224,7 +224,7 @@ pub mod sealed {
     use super::*;
     use std::ops::Deref;
 
-    #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
     pub struct PublicKey(Signed<box_::PublicKey>);
 
     impl Deref for PublicKey {
