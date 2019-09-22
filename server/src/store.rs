@@ -103,8 +103,7 @@ mod pgstore {
         }
 
         fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-            let (_key, signed_by, creation_ts, sig, dep_ts, dep_signed_by, dep_signature): (
-                Vec<u8>,
+            let (signed_by, creation_ts, sig, dep_ts, dep_signed_by, dep_signature): (
                 Vec<u8>,
                 chrono::NaiveDateTime,
                 Vec<u8>,
@@ -113,6 +112,14 @@ mod pgstore {
                 Option<Vec<u8>>,
             ) = creations::table
                 .filter(creations::key.eq(key_arg.as_ref()))
+                .select((
+                    creations::signed_by,
+                    creations::creation_ts,
+                    creations::signature,
+                    creations::deprecation_ts,
+                    creations::dep_signed_by,
+                    creations::dep_signature,
+                ))
                 .get_result(self)?;
 
             let sig_meta = SigMeta::new(

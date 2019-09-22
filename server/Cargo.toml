@@ -26,5 +26,5 @@ qutex         = { git  = "https://github.com/cogciprocate/qutex.git"}
 futures       = "0.1"
 
 womp          = { git  = "https://github.com/kalix-systems/womp"}
-herald_common = { path = "../common"}
+herald_common = { path = "../common", features = ["diesel_pg"] }
 

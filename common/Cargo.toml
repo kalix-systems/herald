@@ -7,16 +7,38 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-tokio       = "0.2.0-alpha.4"
-rusqlite    = "0.20.0"
+async-trait = "0.1"
+chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
 serde_cbor  = "0.10"
 sodiumoxide = "0.2"
-async-trait = "0.1"
-bytes       = { version = "0.4", features = ["serde"] }
-serde       = { version = "1.0", features = ["derive"] }
-chrono      = { version = "0.4", features = ["serde"] }
-arrayvec    = { version = "0.4", features = ["serde-1"] }
-chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
-diesel = { version = "1.4.2", features = ["postgres"] }
+tokio       = "0.2.0-alpha.4"
+
+[dependencies.arrayvec]
+version = "0.4"
+features = ["serde-1"]
+
+[dependencies.bytes]
+version = "0.4"
+features = ["serde"]
 
 
+[dependencies.chrono]
+version = "0.4"
+features = ["serde"]
+
+[dependencies.diesel]
+version = "1.4.2"
+features = ["postgres"]
+optional = true
+
+[dependencies.rusqlite]
+version = "0.20.0"
+optional = true
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+
+[features]
+diesel_pg = ["diesel/postgres"]
+rusqlite_ = ["rusqlite"]

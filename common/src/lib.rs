@@ -3,7 +3,9 @@
 mod crypto;
 pub use crypto::*;
 mod types;
+#[cfg(feature = "rusqlite_")]
 mod rusqlite_impls;
+#[cfg(feature = "diesel_pg")]
 mod diesel_impls;
 pub use types::*;
 mod traits;
