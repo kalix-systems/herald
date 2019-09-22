@@ -8,9 +8,7 @@ Project {
     QmlFiles {
         directory: "."
     }
-    JavaScriptFiles {
-        directory: "."
-    }
+
     ImageFiles {
         directory: "../heraldqt/icons"
     }

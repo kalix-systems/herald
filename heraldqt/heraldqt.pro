@@ -1,5 +1,6 @@
 QT += quick
 QT += widgets
+QT += svg xml
 VERSION = 0.0.1
 CONFIG += c++11
 
