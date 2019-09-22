@@ -14,6 +14,9 @@ pub enum Error {
     BadData,
     UnknownUser(UserId),
     CatchupFailed,
+    LoginFailed,
+    RegistrationFailed,
+    BadSessionType(u8),
 }
 
 pub use Error::*;

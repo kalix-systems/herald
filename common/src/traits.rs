@@ -17,7 +17,7 @@ pub trait ProtocolHandler {
     async fn handle_pki(
         &self,
         from: Self::From,
-        msg: pubkey::ToServer,
+        pki: pubkey::ToServer,
     ) -> Result<pubkey::ServerResponse, Self::Error>;
     async fn handle_query(
         &self,
@@ -47,19 +47,4 @@ pub trait ProtocolHandler {
 /// `PushHandler`s must also be able to handle incoming `Push` messages.
 pub trait PushHandler: ProtocolHandler {
     async fn handle_push(&self, push: Push) -> Result<(), Self::Error>;
-}
-
-#[async_trait]
-pub trait Server: ProtocolHandler {
-    async fn try_login<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        pk: sign::PublicKey,
-        stream: &mut S,
-    ) -> Result<bool, Self::Error>;
-    async fn try_register<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        uid: UserId,
-        pk: sign::PublicKey,
-        stream: &mut S,
-    ) -> Result<bool, Self::Error>;
 }

@@ -236,3 +236,41 @@ impl<'de> Deserialize<'de> for SessionType {
         })
     }
 }
+
+pub mod login {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToServer {
+        As(GlobalId),
+        Sig(sign::Signature),
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToClient {
+        BadGID,
+        Sign([u8; 32]),
+        BadSig,
+        Success,
+    }
+}
+
+pub mod register {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToServer {
+        RequestUID(UserId),
+        UseKey(Signed<sign::PublicKey>),
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToClient {
+        UIDTaken,
+        UIDReady,
+        KeyTaken,
+        BadSig,
+        KeyReady,
+        Success,
+    }
+}

@@ -103,6 +103,7 @@ impl ProtocolHandler for Session {
             }),
         }
     }
+
     async fn handle_query(
         &self,
         from: Self::From,
