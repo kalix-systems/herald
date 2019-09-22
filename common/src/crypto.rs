@@ -57,6 +57,10 @@ impl<T: AsRef<[u8]>> Signed<T> {
         self.split().0
     }
 
+    pub fn sig(&self) -> sign::Signature {
+        self.sig
+    }
+
     pub fn split(self) -> (T, SigMeta) {
         let Signed {
             data,
@@ -96,8 +100,20 @@ impl<T: AsRef<[u8]>> Signed<T> {
 }
 
 impl SigMeta {
+    pub fn new(sig: sign::Signature, signed_by: sign::PublicKey, timestamp: DateTime<Utc>) -> Self {
+        Self {
+            sig,
+            signed_by,
+            timestamp,
+        }
+    }
+
     pub fn timestamp(&self) -> &DateTime<Utc> {
         &self.timestamp
+    }
+
+    pub fn sig(&self) -> sign::Signature {
+        self.sig
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> bool {
@@ -138,6 +154,10 @@ pub mod sig {
     }
 
     impl PKMeta {
+        pub fn new(sig: SigMeta, deprecated: Option<SigMeta>) -> Self {
+            Self { sig, deprecated }
+        }
+
         pub fn key_is_valid(&self, key: PublicKey) -> bool {
             if let Some(d) = self.deprecated {
                 if d.verify_sig(key.as_ref()) {

@@ -1,6 +1,9 @@
+use diesel::{pg::PgConnection, prelude::*};
+use dotenv::dotenv;
+use std::env;
+
 use herald_common::*;
-use postgres;
-use redis::Commands;
+// use redis::Commands;
 
 use crate::prelude::*;
 
@@ -25,9 +28,9 @@ pub trait Store {
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
-    fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
+    fn add_key(&mut self, user_id: UserId, key: Signed<sig::PublicKey>) -> Result<(), Error>;
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<bool, Error>;
+    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<(), Error>;
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
     // TODO: make this not require uid when we switch to postgres
@@ -37,7 +40,7 @@ pub trait Store {
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
-    fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error>;
+    // fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error>;
 }
 
 // note: not transactional by default
@@ -140,54 +143,174 @@ pub trait Store {
 //        Ok(())
 //    }
 //}
+//
 
-impl<'a> Store for postgres::Transaction<'a> {
+impl Store for PgConnection {
+    // TODO implement the appropriate traits for this
+    // TODO read about postgres performance
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
-        Ok(self.query(
-            include_str!("sql/userkeys/device_exists.sql"),
-            &[&pk.as_ref()],
-        )?[0]
-            .try_get(0)?)
+        use crate::schema::userkeys::dsl::*;
+        use diesel::dsl::*;
+
+        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self)?)
     }
 
     fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error> {
-        self.execute(
-            include_str!("sql/prekeys/add_prekey.sql"),
-            &[&key.as_ref(), &serde_cbor::to_vec(&pre)?.as_slice()],
-        )?;
+        use crate::schema::prekeys::dsl::*;
+
+        diesel::insert_into(prekeys)
+            .values((
+                signing_key.eq(key.as_ref()),
+                sealing_key.eq(serde_cbor::to_vec(&pre)?),
+            ))
+            .execute(self)?;
         Ok(())
     }
 
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
-        unimplemented!()
+        use crate::schema::prekeys::dsl::*;
+
+        let raw_pk: Vec<u8> = prekeys
+            .filter(signing_key.eq(key.as_ref()))
+            .select(sealing_key)
+            .limit(1)
+            .get_result(self)?;
+
+        Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
-    fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<bool, Error> {
-        unimplemented!()
+    fn add_key(
+        &mut self,
+        user_id_arg: UserId,
+        new_key: Signed<sig::PublicKey>,
+    ) -> Result<(), Error> {
+        use crate::schema::*;
+        diesel::insert_into(creations::table)
+            .values((
+                creations::key.eq(new_key.data().as_ref()),
+                creations::signed_by.eq(new_key.signed_by().as_ref()),
+                creations::creation_ts.eq(new_key.timestamp().naive_utc()),
+                creations::signature.eq(new_key.sig().as_ref()),
+            ))
+            .execute(self)?;
+        diesel::insert_into(userkeys::table)
+            .values((
+                userkeys::user_id.eq(user_id_arg.as_str()),
+                userkeys::key.eq(new_key.data().as_ref()),
+            ))
+            .execute(self)?;
+
+        Ok(())
     }
 
-    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-        unimplemented!()
+    fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+        use crate::schema::*;
+
+        let (_key, signed_by, creation_ts, sig, dep_ts, dep_signed_by, dep_signature): (
+            Vec<u8>,
+            Vec<u8>,
+            chrono::NaiveDateTime,
+            Vec<u8>,
+            Option<chrono::NaiveDateTime>,
+            Option<Vec<u8>>,
+            Option<Vec<u8>>,
+        ) = creations::table
+            .filter(creations::key.eq(key_arg.as_ref()))
+            .get_result(self)?;
+
+        let sig_meta = SigMeta::new(
+            serde_cbor::from_slice(&sig)?,
+            serde_cbor::from_slice(&signed_by)?,
+            DateTime::from_utc(creation_ts, Utc),
+        );
+
+        let dep_sig_meta = if dep_signature.is_some() || dep_ts.is_some() || dep_signed_by.is_some()
+        {
+            let dep_ts = chrono::DateTime::from_utc(dep_ts.ok_or(MissingData)?, Utc);
+            let dep_signed_by = serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?;
+            let dep_signature = serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?;
+            Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
+        } else {
+            None
+        };
+
+        Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
     }
 
-    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<bool, Error> {
-        unimplemented!()
+    fn deprecate_key(&mut self, signed_key: Signed<sig::PublicKey>) -> Result<(), Error> {
+        use crate::schema::creations::dsl::*;
+        use diesel::dsl::*;
+
+        let (data, meta) = signed_key.split();
+        let filter = creations
+            .filter(key.eq(data.as_ref()))
+            .filter(deprecation_ts.is_null())
+            .filter(dep_signature.is_null())
+            .filter(dep_signed_by.is_null());
+
+        // note: this should
+        let num_updated = update(filter)
+            .set((
+                deprecation_ts.eq(meta.timestamp().naive_utc()),
+                dep_signed_by.eq(meta.signed_by().as_ref()),
+                dep_signature.eq(meta.sig().as_ref()),
+            ))
+            .execute(self)?;
+
+        if num_updated != 1 {
+            return Err(Error::RedundantDeprecation);
+        }
+
+        Ok(())
     }
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
-        unimplemented!()
+        use crate::schema::userkeys::dsl::*;
+        use diesel::dsl::*;
+
+        let query = userkeys.filter(user_id.eq(uid.as_str()));
+
+        Ok(select(exists(query)).get_result(self)?)
     }
 
-    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
-        unimplemented!()
+    fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
+        use crate::schema::userkeys::dsl::*;
+        use diesel::dsl::*;
+
+        let query = userkeys
+            .filter(key.eq(key_arg.as_ref()))
+            .filter(deprecation.is_null());
+
+        Ok(select(exists(query)).get_result(self)?)
     }
 
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
         unimplemented!()
     }
 
-    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
-        unimplemented!()
+    fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
+        use diesel::dsl::*;
+
+        let push_row_id: i64 = {
+            use crate::schema::pushes::dsl::*;
+
+            let push_vec = serde_cbor::to_vec(&msg)?;
+            insert_into(pushes)
+                .values(push_data.eq(push_vec))
+                .returning(push_id)
+                .get_result(self)?
+        };
+
+        use crate::schema::pending::dsl::*;
+
+        let keys: Vec<_> = key_arg
+            .into_iter()
+            .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
+            .collect();
+
+        insert_into(pending).values(keys).execute(self)?;
+
+        Ok(())
     }
 
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
@@ -195,10 +318,6 @@ impl<'a> Store for postgres::Transaction<'a> {
     }
 
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
-        unimplemented!()
-    }
-
-    fn persist_pending(&mut self, to: sig::PublicKey) -> Result<(), Error> {
         unimplemented!()
     }
 }

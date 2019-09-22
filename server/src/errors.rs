@@ -1,5 +1,4 @@
 use herald_common::UserId;
-use postgres::Error as PGError;
 
 #[derive(Debug)]
 pub enum Error {
@@ -13,9 +12,10 @@ pub enum Error {
     MissingData,
     CommandFailed,
     BadData,
+    RedundantDeprecation,
+    DieselError(diesel::result::Error),
     UnknownUser(UserId),
     CatchupFailed,
-    PGErr(PGError),
 }
 
 pub use Error::*;
@@ -31,7 +31,7 @@ macro_rules! from_fn {
 }
 
 from_fn!(Error, std::io::Error, Error::IO);
-from_fn!(Error, PGError, PGErr);
+from_fn!(Error, diesel::result::Error, Error::DieselError);
 from_fn!(Error, redis::RedisError, Error::Redis);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
 from_fn!(Error, herald_common::TransportError, Error::TransportError);

@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS creations (
-  -- signing key, 32 bytes
-  signing_key BIT(256) PRIMARY KEY,
+  -- key, 32 bytes
+  key BIT(256) PRIMARY KEY,
   -- signed by, 32 bytes
   signed_by BIT(256) NOT NULL,
   -- timestamp of creation
