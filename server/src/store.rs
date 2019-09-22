@@ -60,7 +60,7 @@ mod pgstore {
             diesel::insert_into(prekeys)
                 .values((
                     signing_key.eq(key.as_ref()),
-                    sealing_key.eq(serde_cbor::to_vec(&pre)?),
+                    sealed_key.eq(serde_cbor::to_vec(&pre)?),
                 ))
                 .execute(self)?;
             Ok(())
@@ -71,7 +71,7 @@ mod pgstore {
 
             let raw_pk: Vec<u8> = prekeys
                 .filter(signing_key.eq(key.as_ref()))
-                .select(sealing_key)
+                .select(sealed_key)
                 .limit(1)
                 .get_result(self)?;
 
@@ -83,12 +83,12 @@ mod pgstore {
             user_id_arg: UserId,
             new_key: Signed<sig::PublicKey>,
         ) -> Result<(), Error> {
-            diesel::insert_into(creations::table)
+            diesel::insert_into(keys::table)
                 .values((
-                    creations::key.eq(new_key.data().as_ref()),
-                    creations::signed_by.eq(new_key.signed_by().as_ref()),
-                    creations::creation_ts.eq(new_key.timestamp().naive_utc()),
-                    creations::signature.eq(new_key.sig().as_ref()),
+                    keys::key.eq(new_key.data().as_ref()),
+                    keys::signed_by.eq(new_key.signed_by().as_ref()),
+                    keys::creation_ts.eq(new_key.timestamp().naive_utc()),
+                    keys::signature.eq(new_key.sig().as_ref()),
                 ))
                 .execute(self)?;
 
@@ -110,15 +110,15 @@ mod pgstore {
                 Option<chrono::NaiveDateTime>,
                 Option<Vec<u8>>,
                 Option<Vec<u8>>,
-            ) = creations::table
-                .filter(creations::key.eq(key_arg.as_ref()))
+            ) = keys::table
+                .filter(keys::key.eq(key_arg.as_ref()))
                 .select((
-                    creations::signed_by,
-                    creations::creation_ts,
-                    creations::signature,
-                    creations::deprecation_ts,
-                    creations::dep_signed_by,
-                    creations::dep_signature,
+                    keys::signed_by,
+                    keys::creation_ts,
+                    keys::signature,
+                    keys::deprecation_ts,
+                    keys::dep_signed_by,
+                    keys::dep_signature,
                 ))
                 .get_result(self)?;
 
@@ -142,10 +142,10 @@ mod pgstore {
         }
 
         fn deprecate_key(&mut self, signed_key: Signed<sig::PublicKey>) -> Result<(), Error> {
-            use crate::schema::creations::dsl::*;
+            use crate::schema::keys::dsl::*;
 
             let (data, meta) = signed_key.split();
-            let filter = creations
+            let filter = keys
                 .filter(key.eq(data.as_ref()))
                 .filter(deprecation_ts.is_null())
                 .filter(dep_signature.is_null())
@@ -179,10 +179,10 @@ mod pgstore {
 
             let query = userkeys
                 .filter(key.eq(key_arg.as_ref()))
-                .inner_join(creations::table)
-                .filter(creations::deprecation_ts.is_null())
-                .filter(creations::dep_signed_by.is_null())
-                .filter(creations::dep_signature.is_null());
+                .inner_join(keys::table)
+                .filter(keys::deprecation_ts.is_null())
+                .filter(keys::dep_signed_by.is_null())
+                .filter(keys::dep_signature.is_null());
 
             Ok(select(exists(query)).get_result(self)?)
         }
@@ -198,15 +198,15 @@ mod pgstore {
                 Option<Vec<u8>>,
             )> = userkeys::table
                 .filter(userkeys::user_id.eq(uid.as_str()))
-                .inner_join(creations::table)
+                .inner_join(keys::table)
                 .select((
-                    creations::key,
-                    creations::signed_by,
-                    creations::creation_ts,
-                    creations::signature,
-                    creations::deprecation_ts,
-                    creations::dep_signed_by,
-                    creations::dep_signature,
+                    keys::key,
+                    keys::signed_by,
+                    keys::creation_ts,
+                    keys::signature,
+                    keys::deprecation_ts,
+                    keys::dep_signed_by,
+                    keys::dep_signature,
                 ))
                 .get_results(self)?;
 

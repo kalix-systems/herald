@@ -1,5 +1,5 @@
 table! {
-    creations (key) {
+    keys (key) {
         key -> Bit,
         signed_by -> Bit,
         creation_ts -> Timestamp,
@@ -20,7 +20,7 @@ table! {
 table! {
     prekeys (signing_key) {
         signing_key -> Bit,
-        sealing_key -> Bit,
+        sealed_key -> Bytea,
     }
 }
 
@@ -38,13 +38,13 @@ table! {
     }
 }
 
-joinable!(pending -> creations (key));
+joinable!(pending -> keys (key));
 joinable!(pending -> pushes (push_id));
-joinable!(prekeys -> creations (signing_key));
-joinable!(userkeys -> creations (key));
+joinable!(prekeys -> keys (signing_key));
+joinable!(userkeys -> keys (key));
 
 allow_tables_to_appear_in_same_query!(
-    creations,
+    keys,
     pending,
     prekeys,
     pushes,
