@@ -105,9 +105,9 @@ mod pgstore {
         fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
             let (signed_by, creation_ts, sig, dep_ts, dep_signed_by, dep_signature): (
                 Vec<u8>,
-                chrono::NaiveDateTime,
+                DateTime<Utc>,
                 Vec<u8>,
-                Option<chrono::NaiveDateTime>,
+                Option<DateTime<Utc>>,
                 Option<Vec<u8>>,
                 Option<Vec<u8>>,
             ) = keys::table
@@ -125,12 +125,12 @@ mod pgstore {
             let sig_meta = SigMeta::new(
                 serde_cbor::from_slice(&sig)?,
                 serde_cbor::from_slice(&signed_by)?,
-                DateTime::from_utc(creation_ts, Utc),
+                creation_ts,
             );
 
             let dep_sig_meta =
                 if dep_signature.is_some() || dep_ts.is_some() || dep_signed_by.is_some() {
-                    let dep_ts = chrono::DateTime::from_utc(dep_ts.ok_or(MissingData)?, Utc);
+                    let dep_ts = dep_ts.ok_or(MissingData)?;
                     let dep_signed_by = serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?;
                     let dep_signature = serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?;
                     Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
@@ -191,9 +191,9 @@ mod pgstore {
             let keys: Vec<(
                 Vec<u8>,
                 Vec<u8>,
-                chrono::NaiveDateTime,
+                DateTime<Utc>,
                 Vec<u8>,
-                Option<chrono::NaiveDateTime>,
+                Option<DateTime<Utc>>,
                 Option<Vec<u8>>,
                 Option<Vec<u8>>,
             )> = userkeys::table
@@ -224,7 +224,7 @@ mod pgstore {
                     )| {
                         let key: sig::PublicKey = serde_cbor::from_slice(&key)?;
                         let signed_by = serde_cbor::from_slice(&signed_by)?;
-                        let timestamp = DateTime::from_utc(creation_ts, Utc);
+                        let timestamp = creation_ts;
                         let signature = serde_cbor::from_slice(&signature)?;
 
                         let dep_sig_meta = if deprecation_ts.is_some()
@@ -234,7 +234,7 @@ mod pgstore {
                             Some(SigMeta::new(
                                 serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?,
                                 serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?,
-                                DateTime::from_utc(deprecation_ts.ok_or(MissingData)?, Utc),
+                                deprecation_ts.ok_or(MissingData)?,
                             ))
                         } else {
                             None

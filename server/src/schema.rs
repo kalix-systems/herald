@@ -2,9 +2,9 @@ table! {
     keys (key) {
         key -> Bit,
         signed_by -> Bit,
-        creation_ts -> Timestamp,
+        creation_ts -> Timestamptz,
         signature -> Bit,
-        deprecation_ts -> Nullable<Timestamp>,
+        deprecation_ts -> Nullable<Timestamptz>,
         dep_signed_by -> Nullable<Bit>,
         dep_signature -> Nullable<Bit>,
     }
