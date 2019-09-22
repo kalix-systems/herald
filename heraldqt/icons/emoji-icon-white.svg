@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>emoji-icon-white</title>
+    <desc>Created with Sketch.</desc>
+    <g id="emoji-icon-white" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g>
+            <g id="Bounding_Box">
+                <rect id="Rectangle-path" x="0" y="0" width="24" height="24"></rect>
+            </g>
+            <g id="Flat" transform="translate(2.000000, 2.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                <path d="M9.99,0 C4.47,0 0,4.48 0,10 C0,15.52 4.47,20 9.99,20 C15.52,20 20,15.52 20,10 C20,4.48 15.52,0 9.99,0 Z M6.5,6 C7.33,6 8,6.67 8,7.5 C8,8.33 7.33,9 6.5,9 C5.67,9 5,8.33 5,7.5 C5,6.67 5.67,6 6.5,6 Z M10,16 C7.72,16 5.78,14.34 5,12 L15,12 C14.22,14.34 12.28,16 10,16 Z M13.5,9 C12.67,9 12,8.33 12,7.5 C12,6.67 12.67,6 13.5,6 C14.33,6 15,6.67 15,7.5 C15,8.33 14.33,9 13.5,9 Z" id="Shape"></path>
+            </g>
+        </g>
+    </g>
+</svg>
