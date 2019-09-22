@@ -759,7 +759,6 @@ mod tests {
     #[test]
     #[serial]
     fn set_status() {
-        use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
 
         let id = "Hello World";
@@ -781,12 +780,11 @@ mod tests {
             ContactStatus::Deleted
         );
 
-        let conv_handle = Conversations::new();
-
-        assert!(conv_handle
-            .conversation_messages(&contact.pairwise_conversation)
-            .expect(womp!())
-            .is_empty());
+        assert!(
+            crate::conversation::conversation_messages(&contact.pairwise_conversation)
+                .expect(womp!())
+                .is_empty()
+        );
     }
 
     #[test]

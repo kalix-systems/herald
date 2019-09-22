@@ -198,7 +198,6 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     use crate::womp;
@@ -230,11 +229,8 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conv_id = [0; 32].into();
-        let conv_handle = Conversations::new();
 
-        conv_handle
-            .add_conversation(Some(&conv_id), None)
-            .expect(womp!());
+        crate::conversation::add_conversation(Some(&conv_id), None).expect(womp!());
 
         let contact = "contact";
 
@@ -242,7 +238,7 @@ mod tests {
             .add()
             .expect(womp!());
 
-        conv_handle.add_member(&conv_id, contact).expect(womp!());
+        crate::members::add_member(&conv_id, contact).expect(womp!());
 
         let handle = Messages::new();
 
@@ -269,11 +265,8 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conversation_id = [0; 32].into();
-        let conv_handle = Conversations::new();
 
-        conv_handle
-            .add_conversation(Some(&conversation_id), None)
-            .expect(womp!());
+        crate::conversation::add_conversation(Some(&conversation_id), None).expect(womp!());
 
         let author = "Hello";
 
@@ -281,9 +274,7 @@ mod tests {
             .add()
             .expect(womp!());
 
-        conv_handle
-            .add_member(&conversation_id, author)
-            .expect(womp!());
+        crate::members::add_member(&conversation_id, author).expect(womp!());
 
         let handle = Messages::new();
 
@@ -308,8 +299,7 @@ mod tests {
             .expect(womp!());
 
         assert_eq!(
-            conv_handle
-                .conversation_messages(&conversation_id)
+            crate::conversation::conversation_messages(&conversation_id)
                 .expect(womp!("failed to get conversation by author"))[0]
                 .send_status,
             Some(MessageSendStatus::Ack)
