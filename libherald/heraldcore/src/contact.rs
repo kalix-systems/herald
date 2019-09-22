@@ -223,13 +223,6 @@ pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     Ok(names)
 }
 
-impl ContactsHandle {
-    /// Creates new `ContactsHandle`
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[repr(u8)]
 /// Status of the contact
@@ -563,8 +556,6 @@ mod tests {
         assert!(!ContactsHandle::exists().expect(womp!()));
 
         Database::reset_all().expect(womp!());
-
-        ContactsHandle::new();
 
         let id = "Hello";
         ContactBuilder::new(id.into())

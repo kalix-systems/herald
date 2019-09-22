@@ -13,13 +13,6 @@ use rusqlite::{params, NO_PARAMS};
 /// Conversations
 pub struct Conversations {}
 
-impl Conversations {
-    /// Creates `Conversations`
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 /// Conversation metadata.
 pub struct ConversationMeta {
     /// Conversation id
@@ -325,7 +318,7 @@ impl DBTable for Conversations {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{contact::ContactBuilder, db::Database, message::Messages, womp};
+    use crate::{contact::ContactBuilder, db::Database, womp};
     use serial_test_derive::serial;
 
     #[test]
@@ -393,17 +386,14 @@ mod tests {
         ContactBuilder::new(author.into()).add().expect(womp!());
 
         let conversation = ConversationId::from([0; 32]);
-        let msg_handle = Messages::new();
 
         super::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        msg_handle
-            .add_message(None, author, &conversation, "1", None, &None)
+        crate::message::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        msg_handle
-            .add_message(None, author, &conversation, "2", None, &None)
+        crate::message::add_message(None, author, &conversation, "2", None, &None)
             .expect(womp!("Failed to add second message"));
 
         let msgs = super::conversation(&conversation).expect(womp!("Failed to get conversation"));
@@ -514,9 +504,7 @@ mod tests {
 
         super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to make conversation"));
 
-        let msg_handle = Messages::new();
-        msg_handle
-            .add_message(None, contact, &conv_id, "1", None, &None)
+        crate::message::add_message(None, contact, &conv_id, "1", None, &None)
             .expect(womp!("Failed to make message"));
         let timestamp = chrono::Utc::now();
 
@@ -574,12 +562,11 @@ mod tests {
         super::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        let msg_handle = Messages::new();
-        let (msg_id, _) = msg_handle
-            .add_message(None, author, &conversation, "1", None, &None)
-            .expect(womp!("Failed to add first message"));
+        let (msg_id, _) =
+            crate::message::add_message(None, author, &conversation, "1", None, &None)
+                .expect(womp!("Failed to add first message"));
 
-        msg_handle.delete_message(&msg_id).expect(womp!());
+        crate::message::delete_message(&msg_id).expect(womp!());
 
         assert!(super::conversation(&conversation)
             .expect(womp!())
@@ -599,14 +586,10 @@ mod tests {
         super::add_conversation(Some(&conversation), None)
             .expect(womp!("Failed to create conversation"));
 
-        let msg_handle = Messages::new();
-
-        msg_handle
-            .add_message(None, author, &conversation, "1", None, &None)
+        crate::message::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
-        msg_handle
-            .add_message(None, author, &conversation, "1", None, &None)
+        crate::message::add_message(None, author, &conversation, "1", None, &None)
             .expect(womp!("Failed to add second message"));
 
         super::delete_conversation(&conversation).expect(womp!());
