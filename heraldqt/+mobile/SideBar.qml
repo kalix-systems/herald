@@ -42,7 +42,6 @@ Page {
     }
 
 
-
 ColumnLayout {
     id: contactPane
 
