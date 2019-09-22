@@ -128,6 +128,7 @@ impl ProtocolHandler for State {
         }
     }
 }
+
 impl State {
     pub fn new<T: redis::IntoConnectionInfo>(redisparams: T) -> Result<Self, Error> {
         sodiumoxide::init().expect("failed to init libsodium");
@@ -151,7 +152,7 @@ impl State {
         Ok(())
     }
 
-    // TODO: make these loops timeout?
+    // TODO #18: make these loops timeout?
     async fn register<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(
         &self,
         stream: &mut S,
@@ -193,7 +194,7 @@ impl State {
         })
     }
 
-    // TODO: make these loops timeout?
+    // TODO #18: make these loops timeout?
     async fn login<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(
         &self,
         stream: &mut S,
