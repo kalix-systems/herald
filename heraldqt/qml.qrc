@@ -55,27 +55,24 @@
         <file>+mobile/main.qml</file>
         <file>+mobile/SideBar.qml</file>
         <file>+mobile/TopMenuBar.qml</file>
-        <file>+mobile/ChatView/ChatBar.qml</file>
-        <file>+mobile/ChatView/ChatBubbleForm.qml</file>
-        <file>+mobile/ChatView/ChatTextAreaKeys.qml</file>
-        <file>+mobile/ChatView/ConversationWindowForm.qml</file>
-        <file>+mobile/ChatView/ReplyComponent.qml</file>
-        <file>+mobile/ChatView/TextAreaForm.qml</file>
-        <file>+mobile/common/Avatar.qml</file>
-        <file>+mobile/common/ButtonForm.qml</file>
-        <file>+mobile/common/CommonConfig.qml</file>
-        <file>+mobile/common/CorrectText.qml</file>
-        <file>+mobile/common/Divider.qml</file>
-        <file>+mobile/common/ImageAvatar.qml</file>
-        <file>+mobile/common/Theme.qml</file>
-        <file>+mobile/SideBar/UtilityBar.qml</file>
-        <file>+mobile/SideBar/ConfigBar.qml</file>
-        <file>+mobile/SideBar/ContactsToggle.qml</file>
-        <file>+mobile/SideBar/ContactView.qml</file>
-        <file>+mobile/SideBar/ConversationView.qml</file>
-        <file>+mobile/SideBar/popups/ColorPicker.qml</file>
-        <file>+mobile/SideBar/popups/ConfigPopup.qml</file>
-        <file>+mobile/SideBar/popups/ContactClickedPopup.qml</file>
-        <file>+mobile/SideBar/popups/NewContactDialogue.qml</file>
+        <file>ChatView/+mobile/ChatBar.qml</file>
+        <file>ChatView/+mobile/ChatBubbleForm.qml</file>
+        <file>ChatView/+mobile/ChatTextAreaKeys.qml</file>
+        <file>ChatView/+mobile/ConversationWindowForm.qml</file>
+        <file>ChatView/+mobile/ReplyComponent.qml</file>
+        <file>ChatView/+mobile/TextAreaForm.qml</file>
+        <file>common/+mobile/Avatar.qml</file>
+        <file>common/+mobile/ButtonForm.qml</file>
+        <file>common/+mobile/CommonConfig.qml</file>
+        <file>common/+mobile/CorrectText.qml</file>
+        <file>common/+mobile/Divider.qml</file>
+        <file>common/+mobile/ImageAvatar.qml</file>
+        <file>common/+mobile/Theme.qml</file>
+        <file>SideBar/UtilityBar.qml</file>
+        <file>SideBar/+mobile/ConfigBar.qml</file>
+        <file>SideBar/+mobile/ContactsToggle.qml</file>
+        <file>SideBar/+mobile/ContactView.qml</file>
+        <file>SideBar/+mobile/ConversationView.qml</file>
+        <file>SideBar/+mobile/UtilityBar.qml</file>
     </qresource>
 </RCC>

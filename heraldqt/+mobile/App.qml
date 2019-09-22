@@ -16,10 +16,6 @@ Item {
     property var gsConvoItemMembers
     property bool gsContactsSearch: true
 
-    anchors.fill: parent.fill
-    Layout.fillWidth: true
-    Layout.fillHeight: true
-
     NetworkHandle {
         id: networkHandle
         onNewMessageChanged: messageModel.refresh()
@@ -72,19 +68,15 @@ Item {
         id: config
     }
 
-
-
     StackView {
         // ToDo: rename to root stackView
         id: rootSplitView
-        anchors.fill: parent
-
+        width: root.width
+        height: root.height
         Component {
             id: contacts
             // ToDo: rename to contacts view
-            SideBar {
-
-            }
+            SideBar {}
         }
 
         Component.onCompleted: {

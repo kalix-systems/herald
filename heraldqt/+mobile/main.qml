@@ -8,6 +8,8 @@ import QtQml 2.13
 
 ApplicationWindow {
     id: root
+    width: 350
+    height: 550
     visible: true
 
     // This provides a few purely functional helper methods
@@ -17,7 +19,6 @@ ApplicationWindow {
 
     HeraldState {
         id: heraldState
-
         onConfigInitChanged: {
             appLoader.active = !appLoader.active
             loginLoader.active = !loginLoader.active
@@ -28,15 +29,13 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
         sourceComponent: App {
         }
     }
 
     Loader {
-        anchors.fill: parent
         id: loginLoader
+        anchors.fill: parent
         active: !heraldState.configInit
         sourceComponent: LoginPage {
         }

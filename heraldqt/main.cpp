@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-#if defined(Q_OS_ANDROID) | defined(Q_OS_IOS)
+#if defined(Q_OS_ANDROID) | defined(Q_OS_IOS) | true
     QQmlFileSelector* selector = new QQmlFileSelector(&engine);
     selector->setExtraSelectors({"mobile"});
 #endif
