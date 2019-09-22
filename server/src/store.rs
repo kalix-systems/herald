@@ -1,6 +1,4 @@
 use diesel::{pg::PgConnection, prelude::*};
-use dotenv::dotenv;
-use std::env;
 
 use herald_common::*;
 // use redis::Commands;
@@ -248,7 +246,6 @@ impl Store for PgConnection {
             .filter(dep_signature.is_null())
             .filter(dep_signed_by.is_null());
 
-        // note: this should
         let num_updated = update(filter)
             .set((
                 deprecation_ts.eq(meta.timestamp().naive_utc()),
@@ -274,18 +271,82 @@ impl Store for PgConnection {
     }
 
     fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
-        use crate::schema::userkeys::dsl::*;
+        use crate::schema::{creations, userkeys::dsl::*};
         use diesel::dsl::*;
 
         let query = userkeys
             .filter(key.eq(key_arg.as_ref()))
-            .filter(deprecation.is_null());
+            .inner_join(creations::table)
+            .filter(creations::deprecation_ts.is_null())
+            .filter(creations::dep_signed_by.is_null())
+            .filter(creations::dep_signature.is_null());
 
         Ok(select(exists(query)).get_result(self)?)
     }
 
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
-        unimplemented!()
+        use crate::schema::*;
+
+        let keys: Vec<(
+            Vec<u8>,
+            Vec<u8>,
+            chrono::NaiveDateTime,
+            Vec<u8>,
+            Option<chrono::NaiveDateTime>,
+            Option<Vec<u8>>,
+            Option<Vec<u8>>,
+        )> = userkeys::table
+            .filter(userkeys::user_id.eq(uid.as_str()))
+            .inner_join(creations::table)
+            .select((
+                creations::key,
+                creations::signed_by,
+                creations::creation_ts,
+                creations::signature,
+                creations::deprecation_ts,
+                creations::dep_signed_by,
+                creations::dep_signature,
+            ))
+            .get_results(self)?;
+
+        let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
+            .into_iter()
+            .map(
+                |(
+                    key,
+                    signed_by,
+                    creation_ts,
+                    signature,
+                    deprecation_ts,
+                    dep_signed_by,
+                    dep_signature,
+                )| {
+                    let key: sig::PublicKey = serde_cbor::from_slice(&key)?;
+                    let signed_by = serde_cbor::from_slice(&signed_by)?;
+                    let timestamp = DateTime::from_utc(creation_ts, Utc);
+                    let signature = serde_cbor::from_slice(&signature)?;
+
+                    let dep_sig_meta = if deprecation_ts.is_some()
+                        || dep_signed_by.is_some()
+                        || dep_signature.is_some()
+                    {
+                        Some(SigMeta::new(
+                            serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?,
+                            serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?,
+                            DateTime::from_utc(deprecation_ts.ok_or(MissingData)?, Utc),
+                        ))
+                    } else {
+                        None
+                    };
+
+                    let sig_meta = SigMeta::new(signature, signed_by, timestamp);
+                    let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
+                    Ok((key, pkmeta))
+                },
+            )
+            .collect();
+
+        Ok(UserMeta { keys: meta_inner? })
     }
 
     fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
@@ -314,10 +375,34 @@ impl Store for PgConnection {
     }
 
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
-        unimplemented!()
+        use crate::schema::*;
+
+        let pushes: Vec<Vec<u8>> = pending::table
+            .inner_join(pushes::table)
+            .filter(pending::key.eq(key.as_ref()))
+            .select(pushes::push_data)
+            .get_results(self)?;
+
+        let mut out = Vec::with_capacity(pushes.len());
+
+        for p in pushes.into_iter() {
+            out.push(serde_cbor::from_slice(&p)?);
+        }
+
+        Ok(out)
     }
 
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
-        unimplemented!()
+        use crate::schema::*;
+        use diesel::dsl::*;
+
+        let push_ids = pending::table
+            .inner_join(pushes::table)
+            .filter(pending::key.eq(key.as_ref()))
+            .select(pushes::push_id);
+
+        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self)?;
+
+        Ok(())
     }
 }
