@@ -1,16 +1,16 @@
 CREATE TABLE keys (
   -- key, 32 bytes
-  key BIT(256) PRIMARY KEY,
+  key BYTEA PRIMARY KEY,
   -- signed by, 32 bytes
-  signed_by BIT(256) NOT NULL,
+  signed_by BYTEA NOT NULL,
   -- timestamp of creation
   ts TIMESTAMPTZ NOT NULL,
   -- signature, 64 bytes
-  signature BIT(512) NOT NULL,
+  signature BYTEA NOT NULL,
   -- timestamp of the deprecation
   dep_ts TIMESTAMPTZ DEFAULT NULL,
-  dep_signed_by BIT(256) DEFAULT NULL,
-  dep_signature BIT(512) DEFAULT NULL
+  dep_signed_by BYTEA DEFAULT NULL,
+  dep_signature BYTEA DEFAULT NULL
 );
 
 CREATE TABLE pushes (
@@ -19,7 +19,7 @@ CREATE TABLE pushes (
 );
 
 CREATE TABLE pending (
-  key BIT(256) NOT NULL,
+  key BYTEA NOT NULL,
   push_id BIGINT NOT NULL,
   PRIMARY KEY(key, push_id),
   FOREIGN KEY(key) REFERENCES keys(key),
@@ -28,7 +28,7 @@ CREATE TABLE pending (
 
 CREATE TABLE prekeys (
   -- signing_key, 32 bytes
-  signing_key BIT(256) PRIMARY KEY,
+  signing_key BYTEA PRIMARY KEY,
   -- sealing_key, 32 bytes
   sealed_key BYTEA NOT NULL,
   FOREIGN KEY(signing_key) REFERENCES keys(key)
@@ -36,7 +36,7 @@ CREATE TABLE prekeys (
 
 CREATE TABLE userkeys (
   user_id CHAR(32) NOT NULL,
-  key BIT(256) NOT NULL,
+  key BYTEA NOT NULL,
   PRIMARY KEY(user_id, key),
   FOREIGN KEY(key) REFERENCES keys(key)
 );

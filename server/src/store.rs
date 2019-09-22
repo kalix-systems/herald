@@ -31,7 +31,6 @@ pub trait Store {
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<(), Error>;
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
-    // TODO: make this not require uid when we switch to postgres
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
@@ -299,5 +298,97 @@ mod pgstore {
 
             Ok(())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use diesel::pg::PgConnection;
+    use dotenv::dotenv;
+    use serial_test_derive::serial;
+    use std::{convert::TryInto, env};
+
+    fn open_conn() -> PgConnection {
+        dotenv().ok();
+
+        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        let conn = PgConnection::establish(&database_url)
+            .expect(&format!("Error connecting to {}", database_url));
+
+        // so none of the changes are committed
+        conn.begin_test_transaction()
+            .expect("Couldn't start test transaction");
+        conn
+    }
+
+    #[test]
+    #[serial]
+    fn device_exists() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!conn.device_exists(kp.public_key()).unwrap());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        assert!(conn.device_exists(kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn user_exists() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!conn.user_exists(&user_id).unwrap());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        assert!(conn.user_exists(&user_id).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn key_is_valid() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        assert!(conn.key_is_valid(*kp.public_key()).unwrap());
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.deprecate_key(signed_pk).unwrap();
+
+        assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn double_deprecation() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        conn.deprecate_key(signed_pk).unwrap();
+        assert!(conn.deprecate_key(signed_pk).is_err());
     }
 }

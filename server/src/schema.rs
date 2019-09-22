@@ -1,25 +1,25 @@
 table! {
     keys (key) {
-        key -> Bit,
-        signed_by -> Bit,
+        key -> Bytea,
+        signed_by -> Bytea,
         ts -> Timestamptz,
-        signature -> Bit,
+        signature -> Bytea,
         dep_ts -> Nullable<Timestamptz>,
-        dep_signed_by -> Nullable<Bit>,
-        dep_signature -> Nullable<Bit>,
+        dep_signed_by -> Nullable<Bytea>,
+        dep_signature -> Nullable<Bytea>,
     }
 }
 
 table! {
     pending (key, push_id) {
-        key -> Bit,
+        key -> Bytea,
         push_id -> Int8,
     }
 }
 
 table! {
     prekeys (signing_key) {
-        signing_key -> Bit,
+        signing_key -> Bytea,
         sealed_key -> Bytea,
     }
 }
@@ -34,7 +34,7 @@ table! {
 table! {
     userkeys (user_id, key) {
         user_id -> Bpchar,
-        key -> Bit,
+        key -> Bytea,
     }
 }
 
