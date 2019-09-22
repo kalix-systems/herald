@@ -11,10 +11,7 @@ use rusqlite::{params, NO_PARAMS};
 pub struct Members;
 
 /// Add a user with `member_id` to the conversation with `conversation_id`.
-pub(crate) fn add_member(
-    conversation_id: &ConversationId,
-    member_id: UserIdRef,
-) -> Result<(), HErr> {
+pub fn add_member(conversation_id: &ConversationId, member_id: UserIdRef) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
         include_str!("sql/members/add_member.sql"),
@@ -24,10 +21,7 @@ pub(crate) fn add_member(
 }
 
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
-pub(crate) fn remove_member(
-    conversation_id: &ConversationId,
-    member_id: UserIdRef,
-) -> Result<(), HErr> {
+pub fn remove_member(conversation_id: &ConversationId, member_id: UserIdRef) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
         include_str!("sql/members/remove_member.sql"),
@@ -37,7 +31,7 @@ pub(crate) fn remove_member(
 }
 
 /// Gets the members of a conversation.
-pub(crate) fn members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
+pub fn members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/members/get_conversation_members.sql"))?;
     let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;

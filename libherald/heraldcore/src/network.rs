@@ -182,12 +182,11 @@ fn handle_msg(
 
 fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<Event, HErr> {
     use crate::{
-        contact::{ContactBuilder, ContactsHandle},
+        contact::{ContactBuilder},
         conversation::Conversations,
     };
-    let handle = ContactsHandle::new();
 
-    let notification = match handle.by_user_id(from.as_str()) {
+    let notification = match crate::contact::by_user_id(from.as_str()) {
         Ok(contact) => {
             if conversation_id != contact.pairwise_conversation {
                 let conv_handle = Conversations::new();
