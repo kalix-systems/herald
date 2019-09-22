@@ -1,5 +1,4 @@
 pub use chrono::prelude::*;
-use rusqlite::{types as sql_types, ToSql};
 pub use serde::*;
 
 pub use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
@@ -182,21 +181,6 @@ pub mod sig {
     pub struct KeyPair {
         public: sign::PublicKey,
         secret: sign::SecretKey,
-    }
-
-    impl ToSql for KeyPair {
-        fn to_sql(&self) -> Result<sql_types::ToSqlOutput, rusqlite::Error> {
-            use sql_types::*;
-            let kp_vec = serde_cbor::to_vec(self).unwrap();
-            Ok(ToSqlOutput::Owned(Value::Blob(kp_vec)))
-        }
-    }
-
-    impl sql_types::FromSql for KeyPair {
-        fn column_result(value: sql_types::ValueRef) -> sql_types::FromSqlResult<Self> {
-            serde_cbor::from_slice(value.as_blob()?)
-                .map_err(|_| sql_types::FromSqlError::InvalidType)
-        }
     }
 
     impl KeyPair {

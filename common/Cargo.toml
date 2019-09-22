@@ -17,5 +17,6 @@ serde       = { version = "1.0", features = ["derive"] }
 chrono      = { version = "0.4", features = ["serde"] }
 arrayvec    = { version = "0.4", features = ["serde-1"] }
 chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
+diesel = { version = "1.4.2", features = ["postgres"] }
 
 

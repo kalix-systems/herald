@@ -3,6 +3,8 @@
 mod crypto;
 pub use crypto::*;
 mod types;
+mod rusqlite_impls;
+mod diesel_impls;
 pub use types::*;
 mod traits;
 pub use traits::*;
