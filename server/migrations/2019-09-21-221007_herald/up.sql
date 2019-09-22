@@ -4,11 +4,11 @@ CREATE TABLE keys (
   -- signed by, 32 bytes
   signed_by BIT(256) NOT NULL,
   -- timestamp of creation
-  creation_ts TIMESTAMPTZ NOT NULL,
+  ts TIMESTAMPTZ NOT NULL,
   -- signature, 64 bytes
   signature BIT(512) NOT NULL,
   -- timestamp of the deprecation
-  deprecation_ts TIMESTAMPTZ DEFAULT NULL,
+  dep_ts TIMESTAMPTZ DEFAULT NULL,
   dep_signed_by BIT(256) DEFAULT NULL,
   dep_signature BIT(512) DEFAULT NULL
 );

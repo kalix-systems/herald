@@ -87,7 +87,7 @@ mod pgstore {
                 .values((
                     keys::key.eq(new_key.data().as_ref()),
                     keys::signed_by.eq(new_key.signed_by().as_ref()),
-                    keys::creation_ts.eq(new_key.timestamp().naive_utc()),
+                    keys::ts.eq(new_key.timestamp()),
                     keys::signature.eq(new_key.sig().as_ref()),
                 ))
                 .execute(self)?;
@@ -114,9 +114,9 @@ mod pgstore {
                 .filter(keys::key.eq(key_arg.as_ref()))
                 .select((
                     keys::signed_by,
-                    keys::creation_ts,
+                    keys::ts,
                     keys::signature,
-                    keys::deprecation_ts,
+                    keys::dep_ts,
                     keys::dep_signed_by,
                     keys::dep_signature,
                 ))
@@ -147,13 +147,13 @@ mod pgstore {
             let (data, meta) = signed_key.split();
             let filter = keys
                 .filter(key.eq(data.as_ref()))
-                .filter(deprecation_ts.is_null())
+                .filter(dep_ts.is_null())
                 .filter(dep_signature.is_null())
                 .filter(dep_signed_by.is_null());
 
             let num_updated = update(filter)
                 .set((
-                    deprecation_ts.eq(meta.timestamp().naive_utc()),
+                    dep_ts.eq(meta.timestamp().naive_utc()),
                     dep_signed_by.eq(meta.signed_by().as_ref()),
                     dep_signature.eq(meta.sig().as_ref()),
                 ))
@@ -180,7 +180,7 @@ mod pgstore {
             let query = userkeys
                 .filter(key.eq(key_arg.as_ref()))
                 .inner_join(keys::table)
-                .filter(keys::deprecation_ts.is_null())
+                .filter(keys::dep_ts.is_null())
                 .filter(keys::dep_signed_by.is_null())
                 .filter(keys::dep_signature.is_null());
 
@@ -202,9 +202,9 @@ mod pgstore {
                 .select((
                     keys::key,
                     keys::signed_by,
-                    keys::creation_ts,
+                    keys::ts,
                     keys::signature,
-                    keys::deprecation_ts,
+                    keys::dep_ts,
                     keys::dep_signed_by,
                     keys::dep_signature,
                 ))
