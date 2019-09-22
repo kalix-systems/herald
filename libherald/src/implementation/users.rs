@@ -2,7 +2,7 @@ use crate::{bounds_chk, interface::*, ret_err, ret_none, types::*};
 use herald_common::{UserId, UserIdRef};
 use heraldcore::{
     abort_err, chrono,
-    contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
+    contact::{self, ContactBuilder, ContactStatus},
     types::*,
     utils::SearchPattern,
 };
@@ -20,16 +20,13 @@ pub struct Users {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<User>,
-    handle: ContactsHandle,
     conversation_id: Option<ConversationId>,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
     fn new(emit: UsersEmitter, model: UsersList) -> Users {
-        let handle = ContactsHandle::new();
-
-        let list = match handle.all() {
+        let list = match contact::all() {
             Ok(v) => v
                 .into_iter()
                 .map(|c| User {
@@ -51,7 +48,6 @@ impl UsersTrait for Users {
             list,
             filter,
             filter_regex: false,
-            handle,
             conversation_id: None,
             updated: chrono::Utc::now(),
         }
@@ -92,13 +88,13 @@ impl UsersTrait for Users {
                     return;
                 }
 
-                ret_err!(self.handle.conversation_members(&conv_id))
+                ret_err!(contact::conversation_members(&conv_id))
             }
             None => {
                 if self.conversation_id.is_none() {
                     return;
                 }
-                ret_err!(self.handle.all())
+                ret_err!(contact::all())
             }
         };
 
@@ -157,8 +153,7 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         ret_err!(
-            self.handle
-                .set_name(self.user_id(row_index), name.as_ref().map(|s| s.as_str())),
+            contact::set_name(self.user_id(row_index), name.as_ref().map(|s| s.as_str())),
             false
         );
 
@@ -184,7 +179,7 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         let path = ret_err!(
-            self.handle.set_profile_picture(
+            contact::set_profile_picture(
                 self.user_id(row_index),
                 crate::utils::strip_qrc(picture),
                 self.profile_picture(row_index),
@@ -206,7 +201,7 @@ impl UsersTrait for Users {
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
         bounds_chk!(self, row_index, false);
 
-        ret_err!(self.handle.set_color(self.user_id(row_index), color), false);
+        ret_err!(contact::set_color(self.user_id(row_index), color), false);
 
         // already checked
         self.list[row_index].inner.color = color;
@@ -222,8 +217,7 @@ impl UsersTrait for Users {
 
         let meta = &ret_none!(self.list.get(row_index), false).inner;
         ret_err!(
-            self.handle
-                .set_status(meta.id.as_str(), meta.pairwise_conversation, status),
+            contact::set_status(meta.id.as_str(), meta.pairwise_conversation, status),
             false
         );
 
@@ -324,7 +318,10 @@ impl UsersTrait for Users {
         bounds_chk!(self, index, false);
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        ret_err!(self.handle.add_member(&conv_id, self.user_id(index)), false);
+        ret_err!(
+            heraldcore::members::add_member(&conv_id, self.user_id(index)),
+            false
+        );
         true
     }
 
@@ -334,7 +331,10 @@ impl UsersTrait for Users {
         conversation_id: FfiConversationIdRef,
     ) -> bool {
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        ret_err!(self.handle.add_member(&conv_id, user_id.as_str()), false);
+        ret_err!(
+            heraldcore::members::add_member(&conv_id, user_id.as_str()),
+            false
+        );
         true
     }
 
@@ -348,7 +348,7 @@ impl UsersTrait for Users {
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(
-            self.handle.remove_member(&conv_id, self.user_id(index)),
+            heraldcore::members::remove_member(&conv_id, self.user_id(index)),
             false
         );
         true
@@ -358,10 +358,10 @@ impl UsersTrait for Users {
     fn refresh(&mut self) -> bool {
         let new = match self.conversation_id {
             Some(id) => ret_err!(
-                self.handle.conversation_members_since(&id, self.updated),
+                contact::conversation_members_since(&id, self.updated),
                 false
             ),
-            None => ret_err!(self.handle.all_since(self.updated), false),
+            None => ret_err!(contact::all_since(self.updated), false),
         };
 
         self.updated = chrono::Utc::now();
