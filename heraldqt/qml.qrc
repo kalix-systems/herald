@@ -49,8 +49,7 @@
         <file>icons/searchRegexTemp.png</file>
         <file>icons/speech_filled.png</file>
         <file>icons/speech_hollow.png</file>
-        <file>main.qml</file>
         <file>main.cpp</file>
-        <file>SideBar/UtilityBar.qml</file>
+        <file>main.qml</file>
     </qresource>
 </RCC>
