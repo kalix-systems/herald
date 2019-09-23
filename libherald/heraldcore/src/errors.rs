@@ -1,4 +1,4 @@
-use herald_common::{serde_cbor, TransportError};
+use herald_common::{serde_cbor, Response, TransportError};
 use image;
 use lazy_pond::LazyError;
 use regex;
@@ -22,6 +22,11 @@ pub enum HErr {
     LoginError,
     RegistrationError,
     MissingFields,
+    RequestDropped,
+    BadResponse {
+        expected: &'static str,
+        found: Response,
+    },
 }
 
 impl fmt::Display for HErr {
@@ -44,6 +49,10 @@ impl fmt::Display for HErr {
             LoginError => write!(f, "LoginError"),
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
+            RequestDropped => write!(f, "RequestDropped"),
+            BadResponse { expected, found } => {
+                write!(f, "BadResponse, expected {}, found {:?}", expected, found)
+            }
         }
     }
 }

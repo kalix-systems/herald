@@ -118,8 +118,8 @@ pub mod query {
     pub enum ToServer {
         UserExists(UserId),
         UserKeys(UserId),
+        GetKeyMeta(UserId, sign::PublicKey),
         GetPrekey(sign::PublicKey),
-        KeyMeta(UserId, sign::PublicKey),
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -127,7 +127,7 @@ pub mod query {
         Exists(bool),
         Keys(UserMeta),
         KeyMeta(sig::PKMeta),
-        PreKey(Signed<box_::PublicKey>),
+        PreKey(sealed::PublicKey),
         MissingData,
     }
 }
@@ -150,7 +150,7 @@ pub enum Response {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum MessageToClient {
     Push(Push),
-    Response(Response),
+    Response([u8; 32], Response),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -218,5 +218,43 @@ impl<'de> Deserialize<'de> for SessionType {
                 &format!("expected a value between {} and {}", 0, 2).as_str(),
             )
         })
+    }
+}
+
+pub mod login {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToServer {
+        As(GlobalId),
+        Sig(sign::Signature),
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToClient {
+        BadGID,
+        Sign([u8; 32]),
+        BadSig,
+        Success,
+    }
+}
+
+pub mod register {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToServer {
+        RequestUID(UserId),
+        UseKey(Signed<sign::PublicKey>),
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToClient {
+        UIDTaken,
+        UIDReady,
+        KeyTaken,
+        BadSig,
+        KeyReady,
+        Success,
     }
 }

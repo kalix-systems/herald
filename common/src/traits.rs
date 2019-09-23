@@ -13,35 +13,38 @@ pub trait ProtocolHandler {
         from: Self::From,
         fanout: fanout::ToServer,
     ) -> Result<fanout::ServerResponse, Self::Error>;
+
     async fn handle_pki(
         &self,
         from: Self::From,
-        msg: pubkey::ToServer,
+        pki: pubkey::ToServer,
     ) -> Result<pubkey::ServerResponse, Self::Error>;
     async fn handle_query(
         &self,
         from: Self::From,
         query: query::ToServer,
     ) -> Result<query::ServerResponse, Self::Error>;
+
+    async fn handle_message_to_server(
+        &self,
+        from: Self::From,
+        msg: MessageToServer,
+    ) -> Result<Response, Self::Error>
+    where
+        Self::From: Send,
+        Self::Error: Send,
+    {
+        use MessageToServer::*;
+        Ok(match msg {
+            Fanout(f) => Response::Fanout(self.handle_fanout(from, f).await?),
+            PKI(p) => Response::PKI(self.handle_pki(from, p).await?),
+            Query(q) => Response::Query(self.handle_query(from, q).await?),
+        })
+    }
 }
 
 #[async_trait]
 /// `PushHandler`s must also be able to handle incoming `Push` messages.
 pub trait PushHandler: ProtocolHandler {
     async fn handle_push(&self, push: Push) -> Result<(), Self::Error>;
-}
-
-#[async_trait]
-pub trait Server: ProtocolHandler {
-    async fn try_login<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        pk: sign::PublicKey,
-        stream: &mut S,
-    ) -> Result<bool, Self::Error>;
-    async fn try_register<S: AsyncWrite + AsyncRead + Unpin>(
-        &self,
-        uid: UserId,
-        pk: sign::PublicKey,
-        stream: &mut S,
-    ) -> Result<bool, Self::Error>;
 }

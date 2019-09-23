@@ -11,7 +11,7 @@ async-trait = "0.1"
 chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
 serde_cbor  = "0.10"
 sodiumoxide = "0.2"
-tokio       = "0.2.0-alpha.4"
+tokio       = "0.2.0-alpha.5"
 
 [dependencies.arrayvec]
 version = "0.4"

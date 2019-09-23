@@ -16,6 +16,9 @@ pub enum Error {
     DieselError(diesel::result::Error),
     UnknownUser(UserId),
     CatchupFailed,
+    LoginFailed,
+    RegistrationFailed,
+    BadSessionType(u8),
 }
 
 pub use Error::*;

@@ -1,8 +1,8 @@
 #include "Bindings.h"
-
-#include <QtQml/qqml.h>
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlFileSelector>
+#include <QtQml/qqml.h>
 
 int main(int argc, char *argv[])
 {
@@ -22,8 +22,13 @@ int main(int argc, char *argv[])
     app.setOrganizationDomain("kalix.io");
     app.setApplicationName("Herald");
 
-
     QQmlApplicationEngine engine;
+
+#if defined(Q_OS_ANDROID) | defined(Q_OS_IOS)
+    QQmlFileSelector* selector = new QQmlFileSelector(&engine);
+    selector->setExtraSelectors({"mobile"});
+#endif
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;

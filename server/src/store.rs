@@ -1,7 +1,6 @@
 use diesel::{pg::PgConnection, prelude::*};
 
 use herald_common::*;
-// use redis::Commands;
 
 use crate::prelude::*;
 
