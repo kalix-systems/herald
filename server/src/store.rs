@@ -102,40 +102,49 @@ mod pgstore {
         }
 
         fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-            let (signed_by, creation_ts, sig, dep_ts, dep_signed_by, dep_signature): (
+            let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
+                Vec<u8>,
                 Vec<u8>,
                 DateTime<Utc>,
-                Vec<u8>,
+                Option<Vec<u8>>,
+                Option<Vec<u8>>,
                 Option<DateTime<Utc>>,
-                Option<Vec<u8>>,
-                Option<Vec<u8>>,
             ) = keys::table
                 .filter(keys::key.eq(key_arg.as_ref()))
                 .select((
                     keys::signed_by,
-                    keys::ts,
                     keys::signature,
-                    keys::dep_ts,
+                    keys::ts,
                     keys::dep_signed_by,
                     keys::dep_signature,
+                    keys::dep_ts,
                 ))
                 .get_result(self)?;
 
-            let sig_meta = SigMeta::new(
-                serde_cbor::from_slice(&sig)?,
-                serde_cbor::from_slice(&signed_by)?,
-                creation_ts,
-            );
+            dbg!(sig.len());
+            dbg!(signed_by.len());
 
-            let dep_sig_meta =
-                if dep_signature.is_some() || dep_ts.is_some() || dep_signed_by.is_some() {
-                    let dep_ts = dep_ts.ok_or(MissingData)?;
-                    let dep_signed_by = serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?;
-                    let dep_signature = serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?;
-                    Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
-                } else {
-                    None
-                };
+            let sig = sig::Signature::from_slice(sig.as_slice()).expect(&format!("{}", line!()));
+            let signed_by =
+                sig::PublicKey::from_slice(signed_by.as_slice()).expect(&format!("{}", line!()));
+            let sig_meta = SigMeta::new(sig, signed_by, ts);
+
+            let dep_sig_meta = if dep_signature.is_some()
+                || dep_ts.is_some()
+                || dep_signed_by.is_some()
+            {
+                let dep_ts = dep_ts.ok_or(MissingData)?;
+
+                let dep_signed_by = sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
+                    .ok_or(InvalidKey)?;
+
+                let dep_signature = sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
+                    .ok_or(InvalidSig)?;
+
+                Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
+            } else {
+                None
+            };
 
             Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
         }
@@ -336,6 +345,26 @@ mod tests {
         conn.add_key(user_id, signed_pk).unwrap();
 
         assert!(conn.device_exists(kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn read_key() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        assert!(conn.read_key(*kp.public_key()).is_err());
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        assert!(conn.key_is_valid(*kp.public_key()).unwrap());
+
+        conn.read_key(*kp.public_key())
+            .expect("Couldn't read key meta");
     }
 
     #[test]
