@@ -52,5 +52,6 @@
         <file>common/CommonConfig.qml</file>
         <file>ConversationsHome.qml</file>
         <file>LoginPage/LoginLandingPage.qml</file>
+        <file>LoginPage/LoginNewDevice.qml</file>
     </qresource>
 </RCC>
