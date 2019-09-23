@@ -8,7 +8,6 @@ ApplicationWindow {
     width: 350
     height: 550
 
-
     HeraldState {
         id: heraldState
 
@@ -32,8 +31,5 @@ ApplicationWindow {
         sourceComponent: LoginPage {
         }
     }
-
-
-
 
 }

@@ -1,14 +1,37 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:///../heraldqtCommon" as HeraldQtCommon
+import "qrc:///../heraldqtCommon"
 Page {
-  header: HeraldQtCommon.UtilityBar {
-   buttonSpacing: 45
+
+ header: UtilityBar {
+   buttonSpacing: 30
    marginWidth: QmlCfg.margin
    iconDimLarge: 45
    iconDimSmall: 30
    toolBarHeight: 70
-   secondary: "light blue"
+   secondary: QmlCfg.palette.secondaryColor
   }
+
+  Button {
+      id: composeButton
+       height: 60
+       width: height
+      anchors {
+          right: parent.right
+          bottom: parent.bottom
+          margins: 20
+      }
+      background: Rectangle {
+        radius: composeButton.height
+        color: QmlCfg.palette.secondaryColor
+        anchors.fill: parent
+        Image {
+            source: "../heraldqt/icons/plus-icon.svg"
+            sourceSize: Qt.size(48,48)
+            anchors.fill: parent
+        }
+     }
+  }
+
 }

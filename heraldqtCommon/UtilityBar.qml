@@ -12,9 +12,7 @@ import QtQuick.Layouts 1.13
 // FS: Fix scoping
 
 ToolBar {
-
-    id: utilityBar
-
+   id: utilityBar
     property int buttonSpacing: 30
     property int marginWidth: 10
     property int iconDimLarge: 25
