@@ -1,19 +1,10 @@
-use std::{
-    ops::{Deref, DerefMut, Drop},
-    sync::{Mutex, PoisonError},
-};
+use parking_lot::Mutex;
+use std::ops::{Deref, DerefMut, Drop};
 
 const DEFAULT_SIZE: usize = 32;
 
 pub enum LazyError {
-    MutexError,
     UnexpectedNone,
-}
-
-impl<T> From<PoisonError<T>> for LazyError {
-    fn from(_: PoisonError<T>) -> Self {
-        LazyError::MutexError
-    }
 }
 
 pub struct LazyPond<T: Default> {
@@ -52,12 +43,10 @@ impl<'a, T: Default> Drop for Wrapper<'a, T> {
             }
         };
 
-        let maybe_conns = &mut self.pond.connections.lock();
+        let connections = &mut self.pond.connections.lock();
 
-        if let Ok(connections) = maybe_conns {
-            if connections.len() <= self.pond.max_size {
-                connections.push(conn);
-            }
+        if connections.len() <= self.pond.max_size {
+            connections.push(conn);
         }
     }
 }
@@ -72,7 +61,7 @@ impl<T: Default> LazyPond<T> {
     }
 
     pub fn get(&self) -> Result<Wrapper<T>, LazyError> {
-        let conns = &mut self.connections.lock()?;
+        let conns = &mut self.connections.lock();
         let conn = if !conns.is_empty() {
             conns.pop().ok_or(LazyError::UnexpectedNone)?
         } else {

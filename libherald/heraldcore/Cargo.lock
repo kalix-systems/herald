@@ -355,6 +355,9 @@ dependencies = [
 [[package]]
 name = "lazy_pond"
 version = "0.1.0"
+dependencies = [
+ "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "lazy_static"
