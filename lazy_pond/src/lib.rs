@@ -1,11 +1,20 @@
 use std::{
     ops::{Deref, DerefMut, Drop},
-    sync::Mutex,
+    sync::{Mutex, PoisonError},
 };
 
 const DEFAULT_SIZE: usize = 32;
 
-pub type LazyError = ();
+pub enum LazyError {
+    MutexError,
+    UnexpectedNone,
+}
+
+impl<T> From<PoisonError<T>> for LazyError {
+    fn from(_: PoisonError<T>) -> Self {
+        LazyError::MutexError
+    }
+}
 
 pub struct LazyPond<T: Default> {
     connections: Mutex<Vec<T>>,
@@ -21,12 +30,14 @@ impl<'a, T: Default> Deref for Wrapper<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
+        // this should not fail
         self.conn.as_ref().expect("Deref failed, unexpected `None`")
     }
 }
 
 impl<'a, T: Default> DerefMut for Wrapper<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
+        // this should not fail
         self.conn.as_mut().expect("Deref failed, unexpected `None`")
     }
 }
@@ -61,9 +72,9 @@ impl<T: Default> LazyPond<T> {
     }
 
     pub fn get(&self) -> Result<Wrapper<T>, LazyError> {
-        let conns = &mut self.connections.lock().map_err(|_| ())?;
+        let conns = &mut self.connections.lock()?;
         let conn = if !conns.is_empty() {
-            conns.pop().ok_or(())?
+            conns.pop().ok_or(LazyError::UnexpectedNone)?
         } else {
             T::default()
         };
