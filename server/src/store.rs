@@ -128,10 +128,9 @@ mod pgstore {
             let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
             let sig_meta = SigMeta::new(sig, signed_by, ts);
 
-            let dep_sig_meta = if dep_signature.is_some()
-                || dep_ts.is_some()
-                || dep_signed_by.is_some()
-            {
+            let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
+
+            let dep_sig_meta = if dep_is_some {
                 let dep_ts = dep_ts.ok_or(MissingData)?;
 
                 let dep_signed_by = sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
@@ -229,20 +228,27 @@ mod pgstore {
                         dep_signed_by,
                         dep_signature,
                     )| {
-                        let key: sig::PublicKey = serde_cbor::from_slice(&key)?;
-                        let signed_by = serde_cbor::from_slice(&signed_by)?;
+                        let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
+                        let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
                         let timestamp = creation_ts;
-                        let signature = serde_cbor::from_slice(&signature)?;
+                        let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
 
-                        let dep_sig_meta = if deprecation_ts.is_some()
+                        let dep_is_some = deprecation_ts.is_some()
                             || dep_signed_by.is_some()
-                            || dep_signature.is_some()
-                        {
-                            Some(SigMeta::new(
-                                serde_cbor::from_slice(&dep_signature.ok_or(MissingData)?)?,
-                                serde_cbor::from_slice(&dep_signed_by.ok_or(MissingData)?)?,
-                                deprecation_ts.ok_or(MissingData)?,
-                            ))
+                            || dep_signature.is_some();
+
+                        let dep_sig_meta = if dep_is_some {
+                            let dep_sig =
+                                sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
+                                    .ok_or(InvalidSig)?;
+
+                            let dep_signed_by =
+                                sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
+                                    .ok_or(InvalidKey)?;
+
+                            let dep_ts = deprecation_ts.ok_or(MissingData)?;
+
+                            Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
                         } else {
                             None
                         };
@@ -362,8 +368,19 @@ mod tests {
 
         assert!(conn.key_is_valid(*kp.public_key()).unwrap());
 
-        conn.read_key(*kp.public_key())
+        let meta = conn
+            .read_key(*kp.public_key())
             .expect("Couldn't read key meta");
+
+        assert!(meta.key_is_valid(*kp.public_key()));
+
+        conn.deprecate_key(signed_pk).unwrap();
+
+        let meta = conn
+            .read_key(*kp.public_key())
+            .expect("Couldn't read key meta");
+
+        assert!(!meta.key_is_valid(*kp.public_key()));
     }
 
     #[test]
@@ -380,6 +397,75 @@ mod tests {
         conn.add_key(user_id, signed_pk).unwrap();
 
         assert!(conn.user_exists(&user_id).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn read_meta() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        let keys = conn.read_meta(&user_id).unwrap().keys;
+        assert_eq!(keys.len(), 1);
+    }
+
+    #[test]
+    #[serial]
+    fn add_get_expire_pending() {
+        let mut conn = open_conn();
+
+        let kp_other = sig::KeyPair::gen_new();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        let from = GlobalId {
+            did: *kp_other.public_key(),
+            uid: "World".try_into().unwrap(),
+        };
+
+        let push = Push::NewUMessage {
+            from,
+            msg: bytes::Bytes::new(),
+        };
+
+        assert!(conn.add_pending(vec![*kp.public_key()], push).is_ok());
+
+        let pending = conn.get_pending(*kp.public_key()).unwrap();
+        assert_eq!(pending.len(), 1);
+
+        assert!(conn.expire_pending(*kp.public_key()).is_ok());
+
+        let pending = conn.get_pending(*kp.public_key()).unwrap();
+        assert!(pending.is_empty());
+    }
+
+    #[test]
+    #[serial]
+    fn add_and_get_prekey() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
+        let user_id = "Hello".try_into().unwrap();
+        conn.add_key(user_id, signed_pk).unwrap();
+
+        let sealed_kp = sealed::KeyPair::gen_new();
+
+        let sealed_pk = sealed_kp.sign_pub(&kp);
+
+        conn.add_prekey(*kp.public_key(), sealed_pk).unwrap();
+        let retrieved = conn.get_prekey(*kp.public_key()).unwrap();
+        assert_eq!(retrieved, sealed_pk);
     }
 
     #[test]
