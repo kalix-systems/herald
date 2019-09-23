@@ -25,7 +25,6 @@
         <file>../heraldqt/icons/gear.png</file>
         <file>../heraldqt/icons/gear.svg</file>
         <file>../heraldqt/icons/hamburger-icon.svg</file>
-        <file>../heraldqt/icons/hamburger.png</file>
         <file>../heraldqt/icons/help-icon.svg</file>
         <file>../heraldqt/icons/info-icon-white.svg</file>
         <file>../heraldqt/icons/land.png</file>
@@ -53,5 +52,7 @@
         <file>ConversationsHome.qml</file>
         <file>LoginPage/LoginLandingPage.qml</file>
         <file>LoginPage/LoginNewDevice.qml</file>
+        <file>../heraldqtCommon/qmldir</file>
+        <file>../heraldqtCommon/UtilityBar.qml</file>
     </qresource>
 </RCC>

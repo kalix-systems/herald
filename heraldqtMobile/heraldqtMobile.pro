@@ -4,8 +4,7 @@ QT += widgets
 QT += svg xml
 
 VERSION = 0.0.1
-
-CONFIG += c++11
+CONFIG += c++11 qtquickcompiler
 # The following define makes your compiler emit warnings if you use
 # any Qt feature that has been marked deprecated (the exact warnings
 # depend on your compiler). Refer to the documentation for the
@@ -70,3 +69,6 @@ linux {
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES += \
+    ../heraldqtCommon/UtilityBarHarness.qml

@@ -43,8 +43,9 @@ ToolBar {
             Layout.preferredWidth: iconDimLarge
             property bool searchRegex: false
             background: Image {
-                source: "../heraldqt/icons/Hamburger.png"
+                source: "../heraldqt/icons/hamburger-icon.svg"
                 mipmap: true
+                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
         }
 
@@ -55,11 +56,12 @@ ToolBar {
             id: searchButton
             Layout.alignment: Qt.AlignRight
             implicitHeight: iconDimLarge
-            implicitWidth: iconDimSmall
+            implicitWidth: iconDimLarge
             property bool searchRegex: false
             background: Image {
-                source: "../heraldqt/icons/searchRegexTemp.png"
+                source: "../heraldqt/icons/search-icon.svg"
                 mipmap: true
+                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
         }
 
@@ -72,23 +74,21 @@ ToolBar {
             property bool teamView: false
             background: Image {
                 source: "../heraldqt/icons/ToggleConv.png"
-                mipmap: true
+                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
         }
 
         ToolButton {
             id: menuButton
             Layout.alignment: Qt.AlignRight
-            Layout.rightMargin: marginWidth
-            Layout.leftMargin: -marginWidth
             implicitHeight: iconDimSmall
             implicitWidth: iconDimLarge
-            text: qsTr("<b>⋮</b>")
+            Layout.bottomMargin: marginWidth
             font.bold: true
-            font.pointSize: 24
-            background: Rectangle {
-                anchors.fill: parent
-                color: Qt.darker(secondary, 1.2)
+            background: Image {
+                source: "../heraldqt/icons/options-icon.svg"
+                height: iconDimLarge
+                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
         }
 
