@@ -124,9 +124,8 @@ mod pgstore {
             dbg!(sig.len());
             dbg!(signed_by.len());
 
-            let sig = sig::Signature::from_slice(sig.as_slice()).expect(&format!("{}", line!()));
-            let signed_by =
-                sig::PublicKey::from_slice(signed_by.as_slice()).expect(&format!("{}", line!()));
+            let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
+            let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
             let sig_meta = SigMeta::new(sig, signed_by, ts);
 
             let dep_sig_meta = if dep_signature.is_some()
