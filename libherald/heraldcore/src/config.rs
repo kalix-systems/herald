@@ -8,6 +8,7 @@ use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation
 pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
+
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
