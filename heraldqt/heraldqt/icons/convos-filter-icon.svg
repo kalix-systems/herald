@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="26px" height="24px" viewBox="0 0 26 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>convos-filter-icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="convos-filter-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="24px-(3)" transform="translate(5.000000, 1.000000)">
+            <polygon id="Shape" points="0 0 16 0 16 16 0 16"></polygon>
+            <path d="M13.3333333,4 L12.6666667,4 L12.6666667,9.33333333 C12.6666667,9.7 12.3666667,10 12,10 L4,10 L4,10.6666667 C4,11.4 4.6,12 5.33333333,12 L12,12 L14.6666667,14.6666667 L14.6666667,5.33333333 C14.6666667,4.6 14.0666667,4 13.3333333,4 Z M11.3333333,7.33333333 L11.3333333,2.66666667 C11.3333333,1.93333333 10.7333333,1.33333333 10,1.33333333 L2.66666667,1.33333333 C1.93333333,1.33333333 1.33333333,1.93333333 1.33333333,2.66666667 L1.33333333,11.3333333 L4,8.66666667 L10,8.66666667 C10.7333333,8.66666667 11.3333333,8.06666667 11.3333333,7.33333333 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+        </g>
+        <circle id="Oval-3" stroke="#000000" fill="#000000" cx="18.5" cy="20.5" r="2"></circle>
+        <circle id="Oval-3" fill="#9B9B9B" cx="7.5" cy="20.5" r="2.5"></circle>
+    </g>
+</svg>

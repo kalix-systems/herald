@@ -5,7 +5,6 @@
 #include <QDir>
 #include "Bindings.h"
 
-// forward declaration of server kill command
 void kill_server(QProcess *server);
 
 class LibHerald : public QObject
@@ -25,14 +24,36 @@ public:
   NetworkHandle *nwk_handle = nullptr;
   Users         *users      = nullptr;
   QProcess      *server     = nullptr;
-  LibHerald();
+  QThread       *bob_thread = nullptr;
+  LibHerald*     bob        = nullptr;
+  LibHerald(bool spawn_server_flag = true);
   ~LibHerald();
 
 private slots:
-  //  // set up
+// set up
+  void initTestCase();
+  void cleanupTestCase();
+  // set up uniform config for receiving messages
   void messages_set_up();
   // destroy everything messages related
   void messages_tear_down();
+
+  // makes a seperate instance of libherald to talk to over the spawned
+  // loopback server
+  void spawn_bob() {
+    // create a new database for bob
+    qputenv("HERALD_DB_PATH", "bob.sqlite3");
+    // bobs parent is the thread. when the thread dies so does he.
+    bob_thread = new QThread;
+    bob        = new LibHerald(bob_thread);
+    bob->moveToThread(bob_thread);
+    connect(bob_thread, SIGNAL(started()), bob, SLOT(listen_for_messages()));
+    bob_thread->start();
+  }
+
+  // called by bob on startup
+  // just sits and spins waiting for messages
+  void listen_for_messages() {}
 
   // config test slots
   void test_config_set_name();
@@ -59,7 +80,7 @@ private slots:
 /*
  * If this creation sequence aborts. you have failed test number 0.
  * */
-LibHerald::LibHerald()
+LibHerald::LibHerald(bool spawn_server_flag)
 {
   //clear db
   QFile file("store.sqlite3");
@@ -67,12 +88,69 @@ LibHerald::LibHerald()
 
   h_state = new HeraldState();
   // Bob never spawns a server, only Alice does, Alice is static.
-  h_state->setConfigId("Alice");
+  h_state->setConfigId(spawn_server_flag ? "Bob" : "Alice");
 }
 
 LibHerald::~LibHerald()
 {
+  if (server != nullptr)
+     kill_server(server);
+}
 
+// spawns server in a pthread for the duration of the tests.
+void LibHerald::initTestCase() {
+
+  QString wd = "./../../../server";
+  QString cargo = QDir::homePath() + "/.cargo/bin/cargo";
+  QStringList build_args; build_args << "build";
+  QStringList server_args; server_args << "run" << "--bin" << "stupid";
+  QProcess cargo_build(this);
+
+  cargo_build.setProcessChannelMode(QProcess::MergedChannels);
+  cargo_build.setWorkingDirectory(wd);
+  cargo_build.setProgram(cargo);
+  cargo_build.setArguments(build_args);
+  cargo_build.start();
+  bool status = cargo_build.waitForFinished(-1);
+  qDebug() << "cargo output:" << cargo_build.readAll();
+  if (!status) {
+    QFAIL("server failed to build");
+  }
+
+  server = new QProcess(this);
+  server->setProcessChannelMode(QProcess::MergedChannels);
+  server->setWorkingDirectory(wd);
+  server->setProgram(cargo);
+  server->setArguments(server_args);
+  server->start();
+  status = server->waitForStarted(-1);
+  if (!status) {
+    QFAIL("server failed to run");
+  }
+  this->thread()->sleep(1);
+  qDebug() << "server start output: " << server->readAll();
+}
+
+void LibHerald::cleanupTestCase() {
+  if (bob_thread != nullptr) bob_thread->quit();
+  //get rid of env variabel
+  qunsetenv("HERALD_DB_PATH");
+  // remove bobs database
+  QFile file("bob.sqlite3");
+  file.remove();
+}
+
+
+void kill_server(QProcess *cargo_run) {
+  if (cargo_run == nullptr) {
+    qDebug("server process was null! Network Tests not accurate");
+    return;
+  }
+  if (cargo_run->state() != QProcess::Running) {
+    qDebug("server process was not running! Network Tests not accurate");
+    return;
+  }
+  cargo_run->terminate();
 }
 
 /*
@@ -80,7 +158,7 @@ LibHerald::~LibHerald()
  *  these tests prove that config will not bork upon being created
  *  they require that heraldState already. which means they are
  *  unfortunately coupled to another set of functions.
- **/
+**/
 void LibHerald::test_config_set_name_data(){
   QTest::addColumn<QString>("name");
 
@@ -354,8 +432,28 @@ void LibHerald::test_networkHandleConnects() {
   QCOMPARE(nwk_handle->connectionUp(), true);
   QCOMPARE(net_up_spy.count(), 2);
   QCOMPARE(net_pending_spy.count(), 2);
-  delete nwk_handle;
+
 };
+
+// void LibHerald::test_intraclientMessage() {
+
+//  convos = new Conversations();
+//  users = new Users;
+//  msgs = new Messages();
+//  this->thread()->sleep(1);
+
+//  auto bs = convos->addConversation();
+//  msgs->setConversationId(bs);
+//  auto msg_bs = msgs->insertMessage("Hello Bob!");
+//  QCOMPARE(bs.length(),32);
+//  QCOMPARE(msg_bs.length(),32);
+//  QCOMPARE(nwk_handle->sendAddRequest("Bob", bs), true);
+//  QCOMPARE(nwk_handle->sendMessage("Hello Bob!", bs, msg_bs), true);
+
+//  // todo: give bob a running spy and some methods to count how many
+//  // messages he receives.
+
+//};
 
 QTEST_APPLESS_MAIN(LibHerald)
 
