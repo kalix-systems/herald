@@ -31,12 +31,12 @@ impl ProtocolHandler for State {
                 let missing: Vec<UserId> = to
                     .iter()
                     .filter(|u| con.user_exists(u).unwrap_or(false))
-                    .map(|u| *u)
+                    .copied()
                     .collect();
                 if missing.is_empty() {
                     Ok(ServerResponse::MissingUIDs(missing))
                 } else {
-                    let data = Push::NewUMessage { from, msg: msg };
+                    let data = Push::NewUMessage { from, msg };
                     for uid in to {
                         for did in con.read_meta(&uid)?.valid_keys() {
                             // TODO: replace this w/a tokio spawn for reliability reasons
@@ -50,7 +50,7 @@ impl ProtocolHandler for State {
                 let missing: Vec<sign::PublicKey> = to
                     .iter()
                     .filter(|d| con.device_exists(d).unwrap_or(false))
-                    .map(|d| *d)
+                    .copied()
                     .collect();
                 if missing.is_empty() {
                     Ok(ServerResponse::MissingDIDs(missing))

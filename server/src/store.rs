@@ -1,8 +1,17 @@
-use diesel::{pg::PgConnection, prelude::*};
-
+use crate::{prelude::*, schema::*};
+use diesel::{
+    dsl::*,
+    pg::PgConnection,
+    prelude::*,
+    r2d2::{self, ConnectionManager},
+    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
+};
+use dotenv::dotenv;
 use herald_common::*;
-
-use crate::prelude::*;
+use std::{
+    env,
+    ops::{Deref, DerefMut},
+};
 
 pub fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
     let suffix = b":prekeys";
@@ -49,19 +58,6 @@ pub trait Store {
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
-use super::*;
-use crate::schema::*;
-use diesel::{
-    dsl::*,
-    r2d2::{self, ConnectionManager},
-    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
-};
-use dotenv::dotenv;
-use std::{
-    env,
-    ops::{Deref, DerefMut},
-};
-
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {
@@ -101,6 +97,25 @@ fn unique_violation_to_redundant<T>(
         }
     }
 }
+
+type RawPkMeta = (
+    Vec<u8>,
+    Vec<u8>,
+    DateTime<Utc>,
+    Option<Vec<u8>>,
+    Option<Vec<u8>>,
+    Option<DateTime<Utc>>,
+);
+
+type RawKeyAndMeta = (
+    Vec<u8>,
+    Vec<u8>,
+    DateTime<Utc>,
+    Vec<u8>,
+    Option<DateTime<Utc>>,
+    Option<Vec<u8>>,
+    Option<Vec<u8>>,
+);
 
 impl Store for Conn {
     // TODO implement the appropriate traits for this
@@ -167,14 +182,7 @@ impl Store for Conn {
     }
 
     fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
-            Vec<u8>,
-            Vec<u8>,
-            DateTime<Utc>,
-            Option<Vec<u8>>,
-            Option<Vec<u8>>,
-            Option<DateTime<Utc>>,
-        ) = keys::table
+        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = keys::table
             .filter(keys::key.eq(key_arg.as_ref()))
             .select((
                 keys::signed_by,
@@ -259,15 +267,7 @@ impl Store for Conn {
     }
 
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
-        let keys: Vec<(
-            Vec<u8>,
-            Vec<u8>,
-            DateTime<Utc>,
-            Vec<u8>,
-            Option<DateTime<Utc>>,
-            Option<Vec<u8>>,
-            Option<Vec<u8>>,
-        )> = userkeys::table
+        let keys: Vec<RawKeyAndMeta> = userkeys::table
             .filter(userkeys::user_id.eq(uid.as_str()))
             .inner_join(keys::table)
             .select((
