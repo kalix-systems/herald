@@ -70,8 +70,8 @@ ToolBar {
             rightMargin: QmlCfg.margin
         }
         source: Utils.safeSwitch(searchRegex,
-                                 "qrc:///icons/searchRegexTemp.png",
-                                 "qrc:///icons/search.png")
+                                 "qrc:/searchRegexTemp.png",
+                                 "qrc:/search.png")
         onClicked: searchRegex = contactsModel.toggleFilterRegex()
     }
 
@@ -90,7 +90,7 @@ ToolBar {
             color: Qt.darker(QmlCfg.palette.tertiaryColor, 1.3)
             radius: 100
             Image {
-                source: "qrc:///icons/plus.png"
+                source: "qrc:/plus.png"
                 anchors.fill: parent
                 scale: 0.9
                 mipmap: true

@@ -29,7 +29,7 @@ ToolBar {
             border.color: QmlCfg.palette.secondaryColor
             border.width: 0.5
             Image {
-                source: control.checked ? "qrc:icons/speech_hollow.png" : "qrc:icons/speech_filled.png"
+                source: control.checked ? "qrc:/speech_hollow.png" : "qrc:/speech_filled.png"
                 mipmap: true
                 anchors {
                     top: parent.top
@@ -41,7 +41,7 @@ ToolBar {
                 }
             }
             Image {
-                source: control.checked ? "qrc:icons/cont_filled.png" : "qrc:icons/cont_hollow.png"
+                source: control.checked ? "qrc:/cont_filled.png" : "qrc:/cont_hollow.png"
                 mipmap: true
                 anchors {
                     top: parent.top

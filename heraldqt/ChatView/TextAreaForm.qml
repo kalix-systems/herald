@@ -42,14 +42,14 @@ Rectangle {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        source: "qrc:///icons/paperclip.png"
+        source: "qrc:/paperclip.png"
     }
 
     Common.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        source: "qrc:///icons/emoji.png"
+        source: "qrc:/emoji.png"
     }
 
     // wrapper column so replies load
