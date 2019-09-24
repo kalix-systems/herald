@@ -498,6 +498,7 @@ mod tests {
         let push = Push::NewUMessage {
             from,
             msg: bytes::Bytes::new(),
+            timestamp: Utc::now(),
         };
 
         assert!(conn.add_pending(vec![*kp.public_key()], push).is_ok());
