@@ -988,6 +988,7 @@ extern "C" {
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool users_add_to_conversation(Users::Private*, const ushort*, int, const char*, int);
     bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
+    bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
     bool users_refresh(Users::Private*);
     bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
@@ -1504,6 +1505,10 @@ bool Users::addToConversation(const QString& user_id, const QByteArray& conversa
 bool Users::addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id)
 {
     return users_add_to_conversation_by_index(m_d, row_index, conversation_id.data(), conversation_id.size());
+}
+bool Users::bulkAddToConversation(const QByteArray& user_id_array, const QByteArray& conversation_id)
+{
+    return users_bulk_add_to_conversation(m_d, user_id_array.data(), user_id_array.size(), conversation_id.data(), conversation_id.size());
 }
 qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
 {

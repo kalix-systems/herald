@@ -3,7 +3,8 @@ use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
     config::Config,
-    message::{Message, Messages as Core},
+    conversation,
+    message::{self, Message},
     types::*,
 };
 use std::convert::TryFrom;
@@ -18,7 +19,6 @@ pub struct Messages {
     emit: MessagesEmitter,
     model: MessagesList,
     list: Vec<MessagesItem>,
-    handle: Core,
     local_id: UserId,
     updated: chrono::DateTime<chrono::Utc>,
 }
@@ -36,7 +36,7 @@ impl Messages {
         };
 
         let (msg_id, timestamp) = ret_err!(
-            self.handle.add_message(
+            message::add_message(
                 None,
                 self.local_id,
                 conversation_id,
@@ -75,7 +75,6 @@ impl MessagesTrait for Messages {
             model,
             emit,
             local_id: abort_err!(Config::static_id()),
-            handle: Core::new(),
             updated: chrono::Utc::now(),
         }
     }
@@ -99,7 +98,7 @@ impl MessagesTrait for Messages {
             self.model.end_reset_model();
 
             let messages: Vec<MessagesItem> =
-                ret_err!(self.handle.conversation_messages(&conversation_id))
+                ret_err!(conversation::conversation_messages(&conversation_id))
                     .into_iter()
                     .map(|m| MessagesItem { inner: m })
                     .collect();
@@ -172,7 +171,7 @@ impl MessagesTrait for Messages {
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
         let id = &self.list[row_index].inner.message_id;
-        match self.handle.delete_message(&id) {
+        match message::delete_message(&id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
                 self.list.remove(row_index);
@@ -196,7 +195,7 @@ impl MessagesTrait for Messages {
             }
         };
 
-        ret_err!(self.handle.delete_conversation(id), false);
+        ret_err!(conversation::delete_conversation(id), false);
 
         self.model.begin_reset_model();
         self.list = Vec::new();
@@ -216,7 +215,7 @@ impl MessagesTrait for Messages {
     fn delete_conversation_by_id(&mut self, id: FfiConversationIdRef) -> bool {
         let id = ret_err!(ConversationId::try_from(id), false);
 
-        ret_err!(self.handle.delete_conversation(&id), false);
+        ret_err!(conversation::delete_conversation(&id), false);
 
         if Some(id) == self.conversation_id {
             self.model.begin_reset_model();
@@ -244,8 +243,7 @@ impl MessagesTrait for Messages {
         };
 
         let new = ret_err!(
-            self.handle
-                .conversation_messages_since(&conv_id, self.updated),
+            conversation::conversation_messages_since(&conv_id, self.updated),
             false
         );
 

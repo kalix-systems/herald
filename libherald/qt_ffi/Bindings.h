@@ -264,6 +264,7 @@ public:
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE bool addToConversation(const QString& user_id, const QByteArray& conversation_id);
     Q_INVOKABLE bool addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id);
+    Q_INVOKABLE bool bulkAddToConversation(const QByteArray& user_id_array, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
     Q_INVOKABLE bool refresh();
     Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);

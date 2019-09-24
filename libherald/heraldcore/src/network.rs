@@ -339,7 +339,7 @@ impl Session {
                 event.notification = match contact::by_user_id(from.uid) {
                     Ok(contact) => {
                         if cid != contact.pairwise_conversation {
-                            crate::conversation::add_conversation(Some(&cid), None, false)?;
+                            crate::conversation::add_conversation_db(Some(&cid), None, false)?;
                             crate::members::add_member(&cid, from.uid)?;
                             Some(Notification::NewConversation)
                         } else {

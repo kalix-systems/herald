@@ -1,7 +1,7 @@
 use crate::{interface::*, ret_err, ret_none, types::*};
 use heraldcore::{
     abort_err,
-    conversation::{ConversationMeta, Conversations as Core},
+    conversation::{self, ConversationMeta},
     utils::SearchPattern,
 };
 
@@ -16,13 +16,11 @@ pub struct Conversations {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<Conversation>,
-    handle: Core,
 }
 
 impl ConversationsTrait for Conversations {
     fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self {
-        let handle = Core::new();
-        let list = abort_err!(handle.all_meta())
+        let list = abort_err!(conversation::all_meta())
             .into_iter()
             .map(|inner| Conversation {
                 inner,
@@ -37,7 +35,6 @@ impl ConversationsTrait for Conversations {
             filter,
             filter_regex: false,
             model,
-            handle,
             list,
         }
     }
@@ -56,7 +53,7 @@ impl ConversationsTrait for Conversations {
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(self.handle.set_color(&meta.conversation_id, color), false);
+        ret_err!(conversation::set_color(&meta.conversation_id, color), false);
 
         meta.color = color;
         true
@@ -75,7 +72,7 @@ impl ConversationsTrait for Conversations {
 
     fn set_muted(&mut self, index: usize, muted: bool) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(self.handle.set_muted(&meta.conversation_id, muted), false);
+        ret_err!(conversation::set_muted(&meta.conversation_id, muted), false);
 
         meta.muted = muted;
         true
@@ -93,7 +90,7 @@ impl ConversationsTrait for Conversations {
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(
-            self.handle.set_picture(
+            conversation::set_picture(
                 &meta.conversation_id,
                 picture.as_ref().map(|p| p.as_str()),
                 meta.picture.as_ref().map(|p| p.as_str())
@@ -117,8 +114,7 @@ impl ConversationsTrait for Conversations {
     fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         ret_err!(
-            self.handle
-                .set_title(&meta.conversation_id, title.as_ref().map(|t| t.as_str())),
+            conversation::set_title(&meta.conversation_id, title.as_ref().map(|t| t.as_str())),
             false
         );
 
@@ -131,8 +127,8 @@ impl ConversationsTrait for Conversations {
     }
 
     fn add_conversation(&mut self) -> Vec<u8> {
-        let conv_id = ret_err!(self.handle.add_conversation(None, None), vec![]);
-        let inner = ret_err!(self.handle.meta(&conv_id), vec![]);
+        let conv_id = ret_err!(conversation::add_conversation(None, None), vec![]);
+        let inner = ret_err!(conversation::meta(&conv_id), vec![]);
 
         let meta = Conversation {
             matched: inner.matches(&self.filter),
@@ -155,7 +151,7 @@ impl ConversationsTrait for Conversations {
         }
 
         ret_err!(
-            self.handle.delete_conversation(&meta.conversation_id),
+            conversation::delete_conversation(&meta.conversation_id),
             false
         );
 

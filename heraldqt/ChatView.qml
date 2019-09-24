@@ -18,11 +18,6 @@ Pane {
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
-
-        Common.Divider {
-            color: QmlCfg.palette.secondaryColor
-            anchor: parent.bottom
-        }
     }
 
     ///--- chat view, shows messages
