@@ -2,7 +2,7 @@ use crate::{
     abort_err,
     config::{Config, ConfigBuilder},
     errors::HErr::{self, *},
-    message as mdb, message_status,
+    members, message, message_status,
     types::*,
     utils,
 };
@@ -153,7 +153,7 @@ impl PushHandler for Session {
         }
 
         if let Some(reply) = reply {
-            let msg = self.seal_umessage(reply)?;
+            let msg = self.seal_umessage(&reply)?;
             // TODO: handle non-success responses here?
             self.handle_fanout((), msg).await?;
         }
@@ -163,14 +163,90 @@ impl PushHandler for Session {
 }
 
 impl Session {
-    fn new() -> Result<
-        (
-            Receiver<Notification>,
-            Receiver<(QID, MessageToServer)>,
-            Self,
-        ),
-        HErr,
-    > {
+    pub async fn login() -> Result<(Receiver<Notification>, Self), HErr> {
+        use login::*;
+        let mut stream = connect_to_server().await?;
+        send_cbor(&mut stream, &SessionType::Login).await?;
+
+        let uid = Config::static_id()?;
+        let kp = Config::static_keypair()?;
+        let gid = GlobalId {
+            uid,
+            did: *kp.public_key(),
+        };
+
+        let to = ToServer::As(gid);
+        send_cbor(&mut stream, &to).await?;
+
+        if let ToClient::Sign(bytes) = read_cbor(&mut stream).await? {
+            let sig = kp.raw_sign_detached(&bytes);
+            let to = ToServer::Sig(sig);
+            send_cbor(&mut stream, &to).await?;
+
+            if ToClient::Success != read_cbor(&mut stream).await? {
+                return Err(LoginError);
+            }
+        } else {
+            return Err(LoginError);
+        }
+
+        let (notifier, output, this) = Self::new();
+
+        let (reader, writer) = tokio::io::split(stream);
+        tokio::spawn(async move {
+            server_sender(output, writer)
+                .await
+                .expect("connection died")
+        });
+        tokio::spawn({
+            let this = this.clone();
+            async move { this.recv_messages(reader).await.expect("connection died") }
+        });
+
+        Ok((notifier, this))
+    }
+
+    pub async fn register(
+        uid: UserId,
+        key: Signed<sign::PublicKey>,
+    ) -> Result<(Receiver<Notification>, Self), HErr> {
+        use register::*;
+        let mut stream = connect_to_server().await?;
+        send_cbor(&mut stream, &SessionType::Register).await?;
+
+        let to = ToServer::RequestUID(uid);
+        send_cbor(&mut stream, &to).await?;
+        if ToClient::UIDReady != read_cbor(&mut stream).await? {
+            return Err(RegistrationError);
+        }
+
+        let to = ToServer::UseKey(key);
+        send_cbor(&mut stream, &to).await?;
+        if ToClient::Success != read_cbor(&mut stream).await? {
+            return Err(RegistrationError);
+        }
+
+        let (notifier, output, this) = Self::new();
+
+        let (reader, writer) = tokio::io::split(stream);
+        tokio::spawn(async move {
+            server_sender(output, writer)
+                .await
+                .expect("connection died")
+        });
+        tokio::spawn({
+            let this = this.clone();
+            async move { this.recv_messages(reader).await.expect("connection died") }
+        });
+
+        Ok((notifier, this))
+    }
+
+    fn new() -> (
+        Receiver<Notification>,
+        Receiver<(QID, MessageToServer)>,
+        Self,
+    ) {
         let (server_sender, server_receiver) = mpsc::unbounded_channel();
         let (notif_sender, notif_receiver) = mpsc::unbounded_channel();
         let sess = Session {
@@ -178,15 +254,17 @@ impl Session {
             pending: Arc::new(DashMap::default()),
             notifications: notif_sender,
         };
-        Ok((notif_receiver, server_receiver, sess))
+        (notif_receiver, server_receiver, sess)
     }
 
     fn open_umessage(&self, _: &GlobalId, msg: &[u8]) -> Result<ConversationMessage, HErr> {
         Ok(serde_cbor::from_slice(msg)?)
     }
 
-    fn seal_umessage(&self, msg: ConversationMessage) -> Result<fanout::ToServer, HErr> {
-        unimplemented!()
+    fn seal_umessage(&self, msg: &ConversationMessage) -> Result<fanout::ToServer, HErr> {
+        let to = members::members(&msg.cid)?;
+        let msg = Bytes::from(serde_cbor::to_vec(msg)?);
+        Ok(fanout::ToServer::UID { to, msg })
     }
 
     fn open_dmessage(&self, _: &GlobalId, msg: &[u8]) -> Result<MessageToDevice, HErr> {
@@ -212,7 +290,7 @@ impl Session {
                 msg_id,
                 op_msg_id,
             } => {
-                mdb::add_message(Some(msg_id), from.uid, &cid, &body, Some(t), &op_msg_id)?;
+                message::add_message(Some(msg_id), from.uid, &cid, &body, Some(t), &op_msg_id)?;
                 event.reply.replace(ConversationMessage {
                     cid,
                     body: Ack(MessageReceipt {
@@ -261,6 +339,32 @@ impl Session {
     ) -> Result<Event, HErr> {
         match msg {}
     }
+
+    async fn recv_messages<R: AsyncRead + Unpin>(&self, mut reader: R) -> Result<(), HErr> {
+        loop {
+            match read_cbor(&mut reader).await? {
+                MessageToClient::Push(p) => self.handle_push(p).await?,
+                MessageToClient::Response(mid, res) => {
+                    if let Some((_, sender)) = self.pending.remove(&mid) {
+                        sender.send(res);
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+async fn server_sender<W: AsyncWrite + Unpin>(
+    mut to_send: Receiver<(QID, MessageToServer)>,
+    mut writer: W,
+) -> Result<(), HErr> {
+    while let Some((q, msg)) = to_send.recv().await {
+        writer.write_all(&q).await?;
+        let out = serde_cbor::to_vec(&msg)?;
+        writer.write_all(&out).await?;
+    }
+    Ok(())
 }
 
 const DEFAULT_PORT: u16 = 8000;

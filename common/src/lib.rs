@@ -8,6 +8,7 @@ mod traits;
 pub use traits::*;
 
 pub use async_trait::*;
+pub use bytes::Bytes;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
 pub use serde_cbor;

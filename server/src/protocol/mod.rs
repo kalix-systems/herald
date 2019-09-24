@@ -266,10 +266,15 @@ impl State {
             let mut con = self
                 .new_connection()
                 .expect("MAJOR ERROR: failed to connect to database - messages may have dropped");
-            while let Some(MessageToClient::Push(msg)) = input.recv().await {
+            while let Some(msg) = input.recv().await {
                 // TODO (HIGH PRIORITY): handle retry logic here
-                con.add_pending(pk, msg)
-                    .expect("MAJOR ERROR: failed to add pending message");
+                match msg {
+                    MessageToClient::Push(msg) => {
+                        con.add_pending(pk, msg)
+                            .expect("MAJOR ERROR: failed to add pending message");
+                    }
+                    _ => {}
+                }
             }
         });
     }
