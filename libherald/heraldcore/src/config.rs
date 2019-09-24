@@ -334,10 +334,12 @@ mod tests {
         let mut db_config = Config::get().expect(womp!());
         assert_eq!(db_config.name, Some("hello".into()));
 
-        db_config.set_colorscheme(0).expect(womp!());
+        db_config.set_colorscheme(1).expect(womp!());
         db_config.set_color(0).expect(womp!());
+
+        let db_config = Config::get().expect(womp!());
         assert_eq!(db_config.color, 0);
-        assert_eq!(db_config.colorscheme, 0);
+        assert_eq!(db_config.colorscheme, 1);
     }
 
     #[test]
