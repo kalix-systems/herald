@@ -2,7 +2,7 @@ use crate::{
     abort_err,
     config::{Config, ConfigBuilder},
     errors::HErr::{self, *},
-    message, message_status,
+    message as mdb, message_status,
     types::*,
     utils,
 };
@@ -36,9 +36,9 @@ pub type QID = [u8; 32];
 /// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
     /// A new message has been received.
-    NewMsg(UserId),
+    NewMsg(ConversationId),
     /// An ack has been received.
-    Ack(MessageReceipt),
+    Ack(MsgId),
     /// A new contact has been added
     NewContact,
     /// A new conversation has been added
@@ -120,6 +120,48 @@ impl ProtocolHandler for Session {
     }
 }
 
+#[async_trait]
+impl PushHandler for Session {
+    async fn handle_push(&self, push: Push) -> Result<(), HErr> {
+        use Push::*;
+        let Event {
+            reply,
+            notification,
+        } = match push {
+            KeyRegistered(k) => unimplemented!(),
+            KeyDeprecated(k) => unimplemented!(),
+            NewUMessage {
+                timestamp,
+                from,
+                msg,
+            } => {
+                let ConversationMessage { cid, body } = self.open_umessage(&from, &msg)?;
+                self.handle_umessage(timestamp, from, cid, body)?
+            }
+            NewDMessage {
+                timestamp,
+                from,
+                msg,
+            } => {
+                self.handle_dmessage(timestamp, from, self.open_dmessage(&from, &msg)?)
+                    .await?
+            }
+        };
+
+        if let Some(notif) = notification {
+            self.notifications.clone().try_send(notif);
+        }
+
+        if let Some(reply) = reply {
+            let msg = self.seal_umessage(reply)?;
+            // TODO: handle non-success responses here?
+            self.handle_fanout((), msg).await?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Session {
     fn new() -> Result<
         (
@@ -137,6 +179,87 @@ impl Session {
             notifications: notif_sender,
         };
         Ok((notif_receiver, server_receiver, sess))
+    }
+
+    fn open_umessage(&self, _: &GlobalId, msg: &[u8]) -> Result<ConversationMessage, HErr> {
+        Ok(serde_cbor::from_slice(msg)?)
+    }
+
+    fn seal_umessage(&self, msg: ConversationMessage) -> Result<fanout::ToServer, HErr> {
+        unimplemented!()
+    }
+
+    fn open_dmessage(&self, _: &GlobalId, msg: &[u8]) -> Result<MessageToDevice, HErr> {
+        Ok(serde_cbor::from_slice(msg)?)
+    }
+
+    fn handle_umessage(
+        &self,
+        t: DateTime<Utc>,
+        from: GlobalId,
+        cid: ConversationId,
+        body: ConversationMessageBody,
+    ) -> Result<Event, HErr> {
+        use ConversationMessageBody::*;
+        let mut event = Event {
+            reply: None,
+            notification: None,
+        };
+
+        match body {
+            Message {
+                body,
+                msg_id,
+                op_msg_id,
+            } => {
+                mdb::add_message(Some(msg_id), from.uid, &cid, &body, Some(t), &op_msg_id)?;
+                event.reply.replace(ConversationMessage {
+                    cid,
+                    body: Ack(MessageReceipt {
+                        update_code: MessageReceiptStatus::Received,
+                        message_id: msg_id,
+                    }),
+                });
+            }
+            AddRequest => {
+                use crate::contact::{self, ContactBuilder};
+                event.notification = match contact::by_user_id(from.uid) {
+                    Ok(contact) => {
+                        if cid != contact.pairwise_conversation {
+                            crate::conversation::add_conversation(Some(&cid), None, false)?;
+                            crate::members::add_member(&cid, from.uid)?;
+                            Some(Notification::NewConversation)
+                        } else {
+                            None
+                        }
+                    }
+                    Err(_) => {
+                        ContactBuilder::new(from.uid)
+                            .pairwise_conversation(cid)
+                            .add()?;
+                        Some(Notification::NewContact)
+                    }
+                };
+            }
+            AddResponse(accepted) => unimplemented!(),
+            Ack(receipt) => {
+                message_status::set_message_status(receipt.message_id, cid, receipt.update_code)?;
+                event
+                    .notification
+                    .replace(Notification::Ack(receipt.message_id));
+            }
+        }
+
+        Ok(event)
+    }
+
+    async fn handle_dmessage(
+        &self,
+        t: DateTime<Utc>,
+        from: GlobalId,
+        msg: MessageToDevice,
+    ) -> Result<Event, HErr> {
+        match msg {}
     }
 }
 
@@ -159,3 +282,191 @@ lazy_static! {
 async fn connect_to_server() -> Result<TcpStream, HErr> {
     Ok(TcpStream::connect(*SERVER_ADDR).await?)
 }
+
+struct Event {
+    reply: Option<ConversationMessage>,
+    notification: Option<Notification>,
+}
+
+// fn form_ack(
+//     update_code: MessageReceiptStatus,
+//     conv_id: ConversationId,
+//     message_id: MsgId,
+// ) -> MessageToPeer {
+//     let ack = MessageReceipt {
+//         update_code,
+//         message_id,
+//     };
+//     MessageToPeer::Ack(conv_id, ack)
+// }
+
+// // note: this should never fail, but I'm returning a result until I read `serde_cbor` more closely
+// fn form_push(to: UserId, msg: MessageToPeer) -> Result<MessageToServer, HErr> {
+//     Ok(MessageToServer::SendMsg {
+//         to,
+//         body: serde_cbor::to_vec(&msg)?.into(),
+//     })
+// }
+
+// fn handle_msg(
+//     msg_id: MsgId,
+//     author: UserId,
+//     conversation_id: ConversationId,
+//     body: String,
+//     time: DateTime<Utc>,
+//     op_msg_id: Option<MsgId>,
+// ) -> Result<Event, HErr> {
+//     message::add_message(
+//         Some(msg_id),
+//         &author,
+//         &conversation_id,
+//         &body,
+//         Some(time),
+//         &op_msg_id,
+//     )?;
+
+//     let reply = form_push(
+//         author.clone(),
+//         form_ack(MessageReceiptStatus::Received, conversation_id, msg_id),
+//     )?;
+//     let notification = Notification::NewMsg(author);
+//     Ok(Event {
+//         reply: Some(reply),
+//         notification: Some(notification),
+//     })
+// }
+
+// fn handle_add_request(from: UserId, conversation_id: ConversationId) -> Result<Event, HErr> {
+//     use crate::contact::ContactBuilder;
+
+//     let notification = match crate::contact::by_user_id(from.as_str()) {
+//         Ok(contact) => {
+//             if conversation_id != contact.pairwise_conversation {
+//                 crate::conversation::add_conversation(Some(&conversation_id), None)?;
+//                 crate::members::add_member(&conversation_id, from.as_str())?;
+//                 Some(Notification::NewConversation)
+//             } else {
+//                 None
+//             }
+//         }
+//         Err(_) => {
+//             ContactBuilder::new((&from).clone())
+//                 .pairwise_conversation(conversation_id)
+//                 .add()?;
+//             Some(Notification::NewContact)
+//         }
+//     };
+
+//     let reply = Some(form_push(
+//         from.clone(),
+//         MessageToPeer::AddResponse(conversation_id, true),
+//     )?);
+
+//     Ok(Event {
+//         reply,
+//         notification,
+//     })
+// }
+
+// // TODO this should do something
+// fn handle_add_response(_: ConversationId, _: bool) -> Result<Event, HErr> {
+//     Ok(Event {
+//         reply: None,
+//         notification: None,
+//     })
+// }
+
+// fn handle_ack(conv_id: ConversationId, ack: MessageReceipt) -> Result<Event, HErr> {
+//     let MessageReceipt {
+//         message_id,
+//         update_code,
+//     } = ack;
+//     message_status::set_message_status(message_id, conv_id, update_code)?;
+//     Ok(Event {
+//         reply: None,
+//         notification: None,
+//     })
+// }
+
+// fn handle_push(author: GlobalId, body: MessageToPeer, time: DateTime<Utc>) -> Result<Event, HErr> {
+//     use MessageToPeer::*;
+//     match body {
+//         Message {
+//             body,
+//             msg_id,
+//             op_msg_id,
+//             conversation_id,
+//         } => handle_msg(msg_id, author.uid, conversation_id, body, time, op_msg_id),
+//         AddRequest(conversation_id) => handle_add_request(author.uid, conversation_id),
+//         AddResponse(_conversation_id, _accepted) => {
+//             handle_add_response(_conversation_id, _accepted)
+//         }
+//         Ack(conv_id, a) => handle_ack(conv_id, a),
+//     }
+// }
+
+// async fn login<S: AsyncWrite + Unpin>(stream: &mut S) -> Result<GlobalId, HErr> {
+//     // TODO: replace this with a static global_id instead
+//     let gid = GlobalId {
+//         did: 0,
+//         uid: Config::static_id()?,
+//     };
+//     send_cbor(stream, &gid).await?;
+//     Ok(gid)
+// }
+
+// impl Session {
+//     async fn send_to_server(&self, msg: &MessageToServer) -> Result<(), HErr> {
+//         let mut writer = abort_err!(self.writer.clone().lock_async().await);
+//         send_cbor(writer.deref_mut(), msg).await?;
+//         Ok(())
+//     }
+
+//     async fn send_query(&self, query: MessageToServer) -> Result<Response, HErr> {
+//         let (sender, receiver) = oneshot::channel();
+//         // this clone looks unnecessary - it's not!
+//         // insert before send so that we don't have to worry about what happens if a query is
+//         // responded to before this future is executed again
+//         {
+//             let mut p = abort_err!(self.pending.clone().lock_async().await);
+//             p.insert(query.clone(), sender);
+//         }
+//         {
+//             let mut w = abort_err!(self.writer.clone().lock_async().await);
+//             send_cbor(w.deref_mut(), &query).await?;
+//         }
+//         receiver.await.map_err(|e| {
+//             HeraldError(format!(
+//                 "query sender was dropped, query was {:?}, error was {}",
+//                 query, e,
+//             ))
+//         })
+//     }
+
+//     async fn handle_server_msg(&self, msg: MessageToClient) -> Result<(), HErr> {
+//         use MessageToClient::*;
+//         match msg {
+//             Push { from, body, time } => {
+//                 let push = serde_cbor::from_slice(&body)?;
+//                 let Event {
+//                     reply,
+//                     notification,
+//                 } = handle_push(from, push, time)?;
+//                 if let Some(n) = notification {
+//                     drop(self.notifications.clone().try_send(n));
+//                 }
+//                 if let Some(r) = reply {
+//                     self.send_to_server(&r).await?;
+//                 }
+//             }
+//             QueryResponse { res, query } => self.handle_response(res, &query).await,
+//         }
+//         Ok(())
+//     }
+
+//     async fn handle_response(&self, res: Response, query: &MessageToServer) {
+//         if let Some(s) = abort_err!(self.pending.clone().lock_async().await).remove(query) {
+//             drop(s.send(res));
+//         }
+//     }
+// }

@@ -226,25 +226,35 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
 /// Then it is deserialized again on the client side to implement
 /// control flow for the frontend.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToPeer {
+pub enum ConversationMessageBody {
     /// A message
     Message {
         /// Body of the message
         body: String,
         /// Message id
         msg_id: MsgId,
-        /// Conversation the message is associated with
-        conversation_id: ConversationId,
         /// [`MsgId`] of the message being replied to
         op_msg_id: Option<MsgId>,
     },
     /// A request to start a conversation.
-    AddRequest(ConversationId),
+    AddRequest,
     /// A response to a request to start conversation
-    AddResponse(ConversationId, bool),
+    AddResponse(bool),
     /// An acknowledgement of a previous message
-    Ack(ConversationId, MessageReceipt),
+    Ack(MessageReceipt),
 }
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct ConversationMessage {
+    pub body: ConversationMessageBody,
+    /// Conversation the message is associated with
+    pub cid: ConversationId,
+}
+
+// TODO: aux messages go here
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub enum MessageToDevice {}
+
 #[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
 /// Conversation ID
 pub struct ConversationId([u8; UID_LEN]);
