@@ -5,7 +5,7 @@ extern crate diesel;
 extern crate dotenv;
 
 pub mod errors;
-// pub mod protocol;
+pub mod protocol;
 pub(crate) mod schema;
 pub mod store;
 

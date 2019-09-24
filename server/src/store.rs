@@ -21,29 +21,32 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 }
 
 pub trait Store {
-    fn device_exists(&self, pk: &sign::PublicKey) -> Result<bool, Error>;
+    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
     fn add_prekey(
-        &self,
+        &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<pubkey::ServerResponse, Error>;
-    fn get_prekey(&self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
+    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(
-        &self,
+        &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error>;
-    fn read_key(&self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(&self, key: Signed<sig::PublicKey>) -> Result<pubkey::ServerResponse, Error>;
+    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+    fn deprecate_key(
+        &mut self,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<pubkey::ServerResponse, Error>;
 
-    fn user_exists(&self, uid: &UserId) -> Result<bool, Error>;
-    fn key_is_valid(&self, key: sig::PublicKey) -> Result<bool, Error>;
-    fn read_meta(&self, uid: &UserId) -> Result<UserMeta, Error>;
+    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
+    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
-    fn add_pending(&self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
-    fn get_pending(&self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
-    fn expire_pending(&self, key: sig::PublicKey) -> Result<(), Error>;
+    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
+    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
 use super::*;
@@ -54,13 +57,16 @@ use diesel::{
     result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
 };
 use dotenv::dotenv;
-use std::{env, ops::Deref};
+use std::{
+    env,
+    ops::{Deref, DerefMut},
+};
 
-type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {
     let manager = ConnectionManager::<PgConnection>::new(database_url());
-    Pool::new(manager).expect("db pool")
+    r2d2::Pool::new(manager).expect("db pool")
 }
 
 fn database_url() -> String {
@@ -75,6 +81,12 @@ impl Deref for Conn {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Conn {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
@@ -93,14 +105,14 @@ fn unique_violation_to_redundant<T>(
 impl Store for Conn {
     // TODO implement the appropriate traits for this
     // TODO read about postgres performance
-    fn device_exists(&self, pk: &sign::PublicKey) -> Result<bool, Error> {
+    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
-        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref())?)
+        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref_mut())?)
     }
 
     fn add_prekey(
-        &self,
+        &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<pubkey::ServerResponse, Error> {
@@ -111,25 +123,25 @@ impl Store for Conn {
                 signing_key.eq(key.as_ref()),
                 sealed_key.eq(serde_cbor::to_vec(&pre)?),
             ))
-            .execute(self.deref());
+            .execute(self.deref_mut());
 
         unique_violation_to_redundant(res)
     }
 
-    fn get_prekey(&self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
+    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
         use crate::schema::prekeys::dsl::*;
 
         let raw_pk: Vec<u8> = prekeys
             .filter(signing_key.eq(key.as_ref()))
             .select(sealed_key)
             .limit(1)
-            .get_result(self.deref())?;
+            .get_result(self.deref_mut())?;
 
         Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
     fn add_key(
-        &self,
+        &mut self,
         user_id_arg: UserId,
         new_key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error> {
@@ -140,7 +152,7 @@ impl Store for Conn {
                 keys::ts.eq(new_key.timestamp()),
                 keys::signature.eq(new_key.sig().as_ref()),
             ))
-            .execute(self.deref());
+            .execute(self.deref_mut());
 
         unique_violation_to_redundant(res)?;
 
@@ -149,12 +161,12 @@ impl Store for Conn {
                 userkeys::user_id.eq(user_id_arg.as_str()),
                 userkeys::key.eq(new_key.data().as_ref()),
             ))
-            .execute(self.deref());
+            .execute(self.deref_mut());
 
         unique_violation_to_redundant(res)
     }
 
-    fn read_key(&self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+    fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
             Vec<u8>,
             Vec<u8>,
@@ -172,10 +184,7 @@ impl Store for Conn {
                 keys::dep_signature,
                 keys::dep_ts,
             ))
-            .get_result(self.deref())?;
-
-        dbg!(sig.len());
-        dbg!(signed_by.len());
+            .get_result(self.deref_mut())?;
 
         let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
         let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
@@ -201,7 +210,7 @@ impl Store for Conn {
     }
 
     fn deprecate_key(
-        &self,
+        &mut self,
         signed_key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error> {
         use crate::schema::keys::dsl::*;
@@ -219,7 +228,7 @@ impl Store for Conn {
                 dep_signed_by.eq(meta.signed_by().as_ref()),
                 dep_signature.eq(meta.sig().as_ref()),
             ))
-            .execute(self.deref())?;
+            .execute(self.deref_mut())?;
 
         if num_updated != 1 {
             return Ok(pubkey::ServerResponse::Redundant);
@@ -228,15 +237,15 @@ impl Store for Conn {
         Ok(pubkey::ServerResponse::Success)
     }
 
-    fn user_exists(&self, uid: &UserId) -> Result<bool, Error> {
+    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         let query = userkeys.filter(user_id.eq(uid.as_str()));
 
-        Ok(select(exists(query)).get_result(self.deref())?)
+        Ok(select(exists(query)).get_result(self.deref_mut())?)
     }
 
-    fn key_is_valid(&self, key_arg: sig::PublicKey) -> Result<bool, Error> {
+    fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         let query = userkeys
@@ -246,10 +255,10 @@ impl Store for Conn {
             .filter(keys::dep_signed_by.is_null())
             .filter(keys::dep_signature.is_null());
 
-        Ok(select(exists(query)).get_result(self.deref())?)
+        Ok(select(exists(query)).get_result(self.deref_mut())?)
     }
 
-    fn read_meta(&self, uid: &UserId) -> Result<UserMeta, Error> {
+    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
         let keys: Vec<(
             Vec<u8>,
             Vec<u8>,
@@ -270,7 +279,7 @@ impl Store for Conn {
                 keys::dep_signed_by,
                 keys::dep_signature,
             ))
-            .get_results(self.deref())?;
+            .get_results(self.deref_mut())?;
 
         let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
             .into_iter()
@@ -319,7 +328,7 @@ impl Store for Conn {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    fn add_pending(&self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
+    fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
         let push_row_id: i64 = {
             use crate::schema::pushes::dsl::*;
 
@@ -327,7 +336,7 @@ impl Store for Conn {
             insert_into(pushes)
                 .values(push_data.eq(push_vec))
                 .returning(push_id)
-                .get_result(self.deref())?
+                .get_result(self.deref_mut())?
         };
 
         use crate::schema::pending::dsl::*;
@@ -337,17 +346,19 @@ impl Store for Conn {
             .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
             .collect();
 
-        insert_into(pending).values(keys).execute(self.deref())?;
+        insert_into(pending)
+            .values(keys)
+            .execute(self.deref_mut())?;
 
         Ok(())
     }
 
-    fn get_pending(&self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
         let pushes: Vec<Vec<u8>> = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_data)
-            .get_results(self.deref())?;
+            .get_results(self.deref_mut())?;
 
         let mut out = Vec::with_capacity(pushes.len());
 
@@ -358,13 +369,13 @@ impl Store for Conn {
         Ok(out)
     }
 
-    fn expire_pending(&self, key: sig::PublicKey) -> Result<(), Error> {
+    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
         let push_ids = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_id);
 
-        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref())?;
+        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref_mut())?;
 
         Ok(())
     }
@@ -390,7 +401,7 @@ mod tests {
     #[test]
     #[serial]
     fn device_exists() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -406,7 +417,7 @@ mod tests {
     #[test]
     #[serial]
     fn read_key() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -437,7 +448,7 @@ mod tests {
     #[test]
     #[serial]
     fn user_exists() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -453,7 +464,7 @@ mod tests {
     #[test]
     #[serial]
     fn read_meta() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -469,7 +480,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_get_expire_pending() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp_other = sig::KeyPair::gen_new();
 
@@ -503,7 +514,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get_prekey() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let signed_pk = kp.sign(*kp.public_key());
@@ -522,7 +533,7 @@ mod tests {
     #[test]
     #[serial]
     fn key_is_valid() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -544,7 +555,7 @@ mod tests {
     #[test]
     #[serial]
     fn double_deprecation() {
-        let conn = open_conn();
+        let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();

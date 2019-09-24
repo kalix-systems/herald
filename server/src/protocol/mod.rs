@@ -1,5 +1,4 @@
 use crate::{prelude::*, store::*};
-
 use dashmap::DashMap;
 use sodiumoxide::{crypto::sign, randombytes::randombytes_into};
 use std::convert::TryInto;
@@ -12,13 +11,14 @@ use tokio::{
 
 pub struct State {
     active: DashMap<sig::PublicKey, Sender<MessageToClient>>,
-    redis: redis::Client,
+    pool: Pool,
 }
 
 #[async_trait]
 impl ProtocolHandler for State {
     type Error = Error;
     type From = GlobalId;
+
     async fn handle_fanout(
         &self,
         from: Self::From,
@@ -40,7 +40,7 @@ impl ProtocolHandler for State {
                     for uid in to {
                         for did in con.read_meta(&uid)?.valid_keys() {
                             // TODO: replace this w/a tokio spawn for reliability reasons
-                            self.send_push(&mut con, did, data.clone()).await?;
+                            self.send_push(did, data.clone()).await?;
                         }
                     }
                     Ok(ServerResponse::Success)
@@ -61,7 +61,7 @@ impl ProtocolHandler for State {
                             msg: msg.clone(),
                         };
                         // TODO: replace this w/a tokio spawn for reliability reasons
-                        self.send_push(&mut con, did, data).await?;
+                        self.send_push(did, data).await?;
                     }
                     Ok(ServerResponse::Success)
                 }
@@ -79,33 +79,21 @@ impl ProtocolHandler for State {
         match msg {
             RegisterKey(spk) => {
                 if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.add_key(&from.uid, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
+                    con.add_key(from.uid, spk)
                 } else {
                     Ok(BadSignature)
                 }
             }
             DeprecateKey(spk) => {
                 if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.deprecate_key(&from.uid, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
+                    con.deprecate_key(spk)
                 } else {
                     Ok(BadSignature)
                 }
             }
             RegisterPrekey(spk) => {
                 if from.did == *spk.signed_by() && spk.verify_sig() {
-                    if con.add_prekey(from.did, spk)? {
-                        Ok(Success)
-                    } else {
-                        Ok(Redundant)
-                    }
+                    con.add_prekey(from.did, spk)
                 } else {
                     Ok(BadSignature)
                 }
@@ -123,18 +111,19 @@ impl ProtocolHandler for State {
         match query {
             UserExists(uid) => con.user_exists(&uid).map(Exists),
             UserKeys(uid) => Ok(con.read_meta(&uid).map(Keys).unwrap_or(MissingData)),
-            GetKeyMeta(uid, pk) => Ok(con.read_key(&uid, pk).map(KeyMeta).unwrap_or(MissingData)),
+            GetKeyMeta(_uid, pk) => Ok(con.read_key(pk).map(KeyMeta).unwrap_or(MissingData)),
             GetPrekey(pk) => Ok(con.get_prekey(pk).map(PreKey).unwrap_or(MissingData)),
         }
     }
 }
 
 impl State {
-    pub fn new<T: redis::IntoConnectionInfo>(redisparams: T) -> Result<Self, Error> {
+    pub fn new() -> Result<Self, Error> {
         sodiumoxide::init().expect("failed to init libsodium");
+        let pool = init_pool();
         Ok(State {
             active: DashMap::default(),
-            redis: redis::Client::open(redisparams)?,
+            pool,
         })
     }
 
@@ -187,7 +176,7 @@ impl State {
         }
         let uid = uid.unwrap();
         let key = key.unwrap();
-        con.add_key(&uid, key)?;
+        con.add_key(uid, key)?;
         Ok(GlobalId {
             uid,
             did: *key.data(),
@@ -206,7 +195,7 @@ impl State {
         loop {
             match read_cbor(stream).await? {
                 ToServer::As(g) => {
-                    let msg = if con.key_is_valid(&g.uid, g.did)? {
+                    let msg = if con.key_is_valid(g.did)? {
                         gid = Some(g);
 
                         let mut bytes = [0u8; 32];
@@ -268,7 +257,8 @@ impl State {
                 .expect("MAJOR ERROR: failed to connect to database - messages may have dropped");
             while let Some(MessageToClient::Push(msg)) = input.recv().await {
                 // TODO (HIGH PRIORITY): handle retry logic here
-                con.add_pending(pk, msg)
+                // TODO take advantage of batching
+                con.add_pending(vec![pk], msg)
                     .expect("MAJOR ERROR: failed to add pending message");
             }
         });
@@ -286,7 +276,7 @@ impl State {
                     .read_exact(&mut mid)
                     .await
                     .expect("failed to read message id");
-                let m = read_cbor(&mut reader)
+                let m: MessageToServer = read_cbor(&mut reader)
                     .await
                     .expect("failed to read cbor data");
                 let res = self
@@ -300,25 +290,25 @@ impl State {
             }
         });
     }
-    fn new_connection(&self) -> Result<redis::Connection, Error> {
-        Ok(self.redis.get_connection()?)
+
+    fn new_connection(&self) -> Result<Conn, Error> {
+        // TODO add error type
+        Ok(Conn(self.pool.get().unwrap()))
     }
 
-    async fn send_push<C: redis::ConnectionLike>(
-        &self,
-        con: &mut C,
-        to: sign::PublicKey,
-        msg: Push,
-    ) -> Result<(), Error> {
+    async fn send_push(&self, to: sign::PublicKey, msg: Push) -> Result<(), Error> {
+        let mut conn = self.new_connection()?;
         if let Some(a) = self.active.async_get(to).await {
             let mut sender = a.clone();
             if let Err(m) = sender.try_send(MessageToClient::Push(msg)) {
                 if let MessageToClient::Push(p) = m.into_inner() {
-                    con.add_pending(to, p)?;
+                    // TODO take advantage of batching
+                    conn.add_pending(vec![to], p)?;
                 }
             }
         } else {
-            con.add_pending(to, msg)?;
+            // TODO take advantage of batching
+            conn.add_pending(vec![to], msg)?;
         }
         Ok(())
     }
