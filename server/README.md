@@ -11,16 +11,14 @@ Specifically, you will need `libpq`. You can find platform specific instructions
 
 # Setting up the development Postgres server
 
-Install the docker image:
+Install docker, and the main file will handle the rest.
 
+# Setting up the Postgres client
+
+If you're on Fedora, you'll need to symlink the library.
+You'll have to run
 ```bash
-$ docker pull postgres
-```
-
-Start the container by running this from the `server` root directory:
-
-```bash
-$ docker run --rm   --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 -v $PWD/postgres_volume:/var/lib/postgresql/data  postgres
+$ sudo ln -s /usr/lib64/libpq.so.5 /usr/lib/libpq.so
 ```
 
 # Setting the environment variables
