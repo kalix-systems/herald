@@ -195,12 +195,12 @@ impl State {
         stream: &mut S,
     ) -> Result<GlobalId, Error> {
         use login::*;
-        let mut con = self.new_connection()?;
         let mut gid = None;
         let mut to_sign = None;
         loop {
             match read_cbor(stream).await? {
                 ToServer::As(g) => {
+                    let mut con = self.new_connection()?;
                     let msg = if con.key_is_valid(g.did)? {
                         gid = Some(g);
 
@@ -226,7 +226,44 @@ impl State {
                 }
             }
         }
-        gid.ok_or(LoginFailed)
+
+        let gid = gid.ok_or(LoginFailed)?;
+
+        self.catchup(gid.did, stream).await?;
+
+        Ok(gid)
+    }
+
+    async fn catchup<S: AsyncRead + AsyncWrite + Unpin>(
+        &self,
+        did: sig::PublicKey,
+        stream: &mut S,
+    ) -> Result<(), Error> {
+        use catchup::*;
+
+        loop {
+            match read_cbor(stream).await? {
+                ToServer::CatchMeUp => {
+                    let mut con = self.new_connection()?;
+                    let pending = con.get_pending(did)?;
+                    for pend in pending {
+                        send_cbor(stream, &pend).await?;
+                    }
+                    con.expire_pending(did)?;
+                }
+                ToServer::Done => break,
+                ToServer::Retry => {
+                    let mut con = self.new_connection()?;
+                    let pending = con.get_pending(did)?;
+                    for pend in pending {
+                        send_cbor(stream, &pend).await?;
+                    }
+                    con.expire_pending(did)?;
+                }
+            }
+        }
+
+        Ok(())
     }
 
     fn authenticated_session<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(

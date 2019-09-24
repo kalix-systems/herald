@@ -192,12 +192,16 @@ impl Session {
 
         let (notifier, output, this) = Self::new();
 
+        this.catchup(&mut stream).await?;
+
         let (reader, writer) = tokio::io::split(stream);
+
         tokio::spawn(async move {
             server_sender(output, writer)
                 .await
                 .expect("connection died")
         });
+
         tokio::spawn({
             let this = this.clone();
             async move { this.recv_messages(reader).await.expect("connection died") }
@@ -257,6 +261,20 @@ impl Session {
         unimplemented!()
         // let fout = self.seal_dmessage(msg)?;
         // self.handle_fanout((), fout).await
+    }
+
+    async fn catchup<S: AsyncWrite + AsyncRead + Unpin>(&self, s: &mut S) -> Result<(), HErr> {
+        use catchup::*;
+
+        send_cbor(s, &ToServer::CatchMeUp).await?;
+
+        let ToClient::Catchup(ps) = read_cbor(s).await?;
+
+        for push in ps {
+            self.handle_push(push).await?;
+        }
+
+        Ok(())
     }
 
     fn new() -> (

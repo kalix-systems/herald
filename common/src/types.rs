@@ -266,3 +266,19 @@ pub mod register {
         Success,
     }
 }
+
+pub mod catchup {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    pub enum ToServer {
+        CatchMeUp,
+        Done,
+        Retry,
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum ToClient {
+        Catchup(Vec<Push>),
+    }
+}
