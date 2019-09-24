@@ -15,6 +15,7 @@ Item {
     property color gsConvoColor
     property var gsConvoItemMembers
     property bool gsContactsSearch: true
+    property int gsConvoIndex: -1
 
     onGsContactsSearchChanged: {
         gsConversationId = undefined

@@ -2,6 +2,8 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import QtQuick.Dialogs 1.3
+import Qt.labs.platform 1.1
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 
@@ -42,9 +44,31 @@ ToolBar {
         isDefault: false
     }
 
+    Menu {
+        id: convOptionsMenu
+
+        MenuItem {
+            text: "Archive"
+        }
+
+        MenuItem {
+            text: "Clear History"
+            onTriggered: messageModel.deleteConversation(gsConvoIndex)
+        }
+
+    }
+
+    Common.ButtonForm {
+        id: convOptionsButton
+        source: "qrc:/options-icon.svg"
+        anchors.right: parent.right
+        anchors.verticalCenter: parent.verticalCenter
+        onClicked: convOptionsMenu.open()
+    }
+
     Button {
         text: "New member"
-        anchors.right: parent.right
+        anchors.right: convOptionsButton.left
         onClicked: {
             newMemberPopup.open()
         }
