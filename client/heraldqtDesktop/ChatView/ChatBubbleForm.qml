@@ -19,8 +19,8 @@ Rectangle {
     property string messageText: ""
     //color of the bubble proper
     property color bubbleColor
-    // the reply button shown on hover
-    property alias replyButton: replyButton
+    // the message options button shown on hover
+    property alias messageOptionsButton: messageOptionsButton
     // a mouse area to handle hover events
     property alias chatBubbleHitBox: chatBubbleHitbox
     // the width the text sits at without wrapping
@@ -41,8 +41,10 @@ Rectangle {
         hoverEnabled: true
         width: parent.width + 50
 
-        onEntered: replyButton.visible = !replyButton.visible
-        onExited: replyButton.visible = !replyButton.visible
+        onEntered: { messageOptionsButton.visible = !messageOptionsButton.visible
+        replyButton.visible = !replyButton.visible}
+        onExited: { messageOptionsButton.visible = !messageOptionsButton.visible
+            replyButton.visible = !replyButton.visible}
 
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
@@ -53,12 +55,31 @@ Rectangle {
         }
 
         Common.ButtonForm {
-            id: replyButton
+            id: messageOptionsButton
             visible: false
             anchors {
                 // Ternary is okay, types are enforced, cases are explicit.
                 left: outbound ? parent.left : undefined
                 right: !outbound ? parent.right : undefined
+                margins: QmlCfg.margin
+                verticalCenter: chatBubbleHitbox.verticalCenter
+            }
+            source: "qrc:/options-icon.svg"
+            z: 10
+
+            onClicked: {
+                CTUtils.activateReplyPopup()
+                print("kaavya! put some business logic here.")
+            }
+        }
+
+        Common.ButtonForm {
+            id: replyButton
+            visible: false
+            anchors {
+                // Ternary is okay, types are enforced, cases are explicit.
+                right: outbound ? messageOptionsButton.left : undefined
+                left: !outbound ? messageOptionsButton.right : undefined
                 margins: QmlCfg.margin
                 verticalCenter: chatBubbleHitbox.verticalCenter
             }
@@ -71,6 +92,8 @@ Rectangle {
             }
         }
     }
+
+
 
     // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
     Component.onCompleted: {
