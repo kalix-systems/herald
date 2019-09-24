@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import Qt.labs.platform 1.1
 import "../common" as Common
 import "../common/utils.mjs" as Utils
 import "ChatTextAreaUtils.mjs" as CTUtils
@@ -68,8 +69,7 @@ Rectangle {
             z: 10
 
             onClicked: {
-                CTUtils.activateReplyPopup()
-                print("kaavya! put some business logic here.")
+                messageOptionsMenu.open()
             }
         }
 
@@ -87,9 +87,19 @@ Rectangle {
             z: 10
 
             onClicked: {
-                CTUtils.activateReplyPopup()
                 print("kaavya! put some business logic here.")
             }
+        }
+    }
+
+    Menu {
+        id: messageOptionsMenu
+        MenuItem {
+            text: "Delete Message"
+            onTriggered: messageModel.deleteMessage(index)
+        }
+        MenuItem {
+            text: "More Info..."
         }
     }
 
