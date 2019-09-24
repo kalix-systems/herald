@@ -108,7 +108,7 @@ ListView {
         Common.Avatar {
             size: 50
             id: conversationAvatar
-            displayName: Utils.unwrapOr(title, "unknown")
+            avatarLabel: Utils.unwrapOr(title, "unknown")
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(picture)
         }

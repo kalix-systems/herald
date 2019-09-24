@@ -1,5 +1,5 @@
 declare class Avatar {
-  displayName: string;
+  avatarLabel: string;
   pfpUrl: string;
   size: number;
 }

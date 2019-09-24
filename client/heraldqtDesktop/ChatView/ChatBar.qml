@@ -17,10 +17,13 @@ ToolBar {
     /// GS: this should be bound to global state
     property alias chatBarAvatar: chatBarAvatar
     // NPB: wat.
-    property var currentAvatar: Utils.unwrapOr(
-                                    sideBar.conversationsListView.currentItem, {
-                                        "conversationAvatar": undefined
-                                    }).conversationAvatar
+    property var currentAvatar: {
+        Utils.unwrapOr(sideBar.conversationsListView.currentItem, {
+                           "conversationAvatar": Qt.createComponent(
+                                                     "qrc:common/Avatar.qml").createObject(
+                                                     parent)
+                       }).conversationAvatar
+    }
     clip: true
     height: QmlCfg.toolbarHeight
     anchors {
@@ -34,17 +37,9 @@ ToolBar {
         anchors.centerIn: parent
         // JH: Margin fudging
         size: QmlCfg.toolbarHeight - QmlCfg.margin
-        // NPB: more wat. this is why unwrap or needs to do more things
-        // perhaps write something like map_err here
-        pfpUrl: Utils.unwrapOr(currentAvatar, {
-                                   "pfpUrl": ""
-                               }).pfpUrl
-        displayName: Utils.unwrapOr(currentAvatar, {
-                                        "displayName": ""
-                                    }).displayName
-        colorHash: Utils.unwrapOr(currentAvatar, {
-                                      "colorHash": 0
-                                  }).colorHash
+        pfpUrl: currentAvatar.pfpUrl
+        avatarLabel: currentAvatar.avatarLabel
+        colorHash: currentAvatar.colorHash
         isDefault: false
     }
 

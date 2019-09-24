@@ -17,7 +17,7 @@ import "utils.mjs" as Utils
 /// --- displays a list of contacts
 Row {
     id: wrapperRow
-    property string displayName: ""
+    property string avatarLabel: ""
     property string pfpUrl: ""
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
@@ -34,13 +34,13 @@ Row {
     Loader {
         width: size
         height: size
-        sourceComponent: JS.avatarSource(displayName, pfpUrl, imageAvatar,
+        sourceComponent: JS.avatarSource(avatarLabel, pfpUrl, imageAvatar,
                                          initialAvatar)
     }
 
     Text {
         visible: labeled
-        text: displayName
+        text: avatarLabel
         font.bold: true
         anchors.verticalCenter: parent.verticalCenter
         //is white instead of palette maincolor bc shld be white regardless of theme
@@ -71,7 +71,7 @@ Row {
             radius: shape
             ///---- initial
             Text {
-                text: qsTr(displayName[0].toUpperCase())
+                text: qsTr(avatarLabel[0].toUpperCase())
                 font.bold: true
                 color: if (!isDefault) {
                            QmlCfg.avatarColors[colorHash]
