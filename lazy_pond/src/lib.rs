@@ -1,11 +1,11 @@
-use std::{
-    ops::{Deref, DerefMut, Drop},
-    sync::Mutex,
-};
+use parking_lot::Mutex;
+use std::ops::{Deref, DerefMut, Drop};
 
 const DEFAULT_SIZE: usize = 32;
 
-pub type LazyError = ();
+pub enum LazyError {
+    UnexpectedNone,
+}
 
 pub struct LazyPond<T: Default> {
     connections: Mutex<Vec<T>>,
@@ -21,12 +21,14 @@ impl<'a, T: Default> Deref for Wrapper<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
+        // this should not fail
         self.conn.as_ref().expect("Deref failed, unexpected `None`")
     }
 }
 
 impl<'a, T: Default> DerefMut for Wrapper<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
+        // this should not fail
         self.conn.as_mut().expect("Deref failed, unexpected `None`")
     }
 }
@@ -41,12 +43,10 @@ impl<'a, T: Default> Drop for Wrapper<'a, T> {
             }
         };
 
-        let maybe_conns = &mut self.pond.connections.lock();
+        let connections = &mut self.pond.connections.lock();
 
-        if let Ok(connections) = maybe_conns {
-            if connections.len() <= self.pond.max_size {
-                connections.push(conn);
-            }
+        if connections.len() <= self.pond.max_size {
+            connections.push(conn);
         }
     }
 }
@@ -61,9 +61,9 @@ impl<T: Default> LazyPond<T> {
     }
 
     pub fn get(&self) -> Result<Wrapper<T>, LazyError> {
-        let conns = &mut self.connections.lock().map_err(|_| ())?;
+        let conns = &mut self.connections.lock();
         let conn = if !conns.is_empty() {
-            conns.pop().ok_or(())?
+            conns.pop().ok_or(LazyError::UnexpectedNone)?
         } else {
             T::default()
         };

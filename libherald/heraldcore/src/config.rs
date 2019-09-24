@@ -8,6 +8,7 @@ use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation
 pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
+
 /// User configuration
 #[derive(Clone, Default)]
 pub struct Config {
@@ -279,8 +280,6 @@ mod tests {
     #[test]
     #[serial]
     fn add_get_set_config() {
-        use crate::conversation::Conversations;
-
         Database::reset_all().expect(womp!());
 
         let id = "HelloWorld";
@@ -309,9 +308,7 @@ mod tests {
             .add()
             .expect(womp!());
 
-        let meta = Conversations::new()
-            .meta(&config.nts_conversation)
-            .expect(womp!());
+        let meta = crate::conversation::meta(&config.nts_conversation).expect(womp!());
 
         assert_eq!(meta.title.expect(womp!()), NTS_CONVERSATION_NAME);
 

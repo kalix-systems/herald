@@ -25,8 +25,8 @@ ToolBar {
     height: QmlCfg.toolbarHeight
 
     background: Rectangle {
-        color: QmlCfg.palette.mainColor
-        border.color: QmlCfg.palette.secondaryColor
+        color: QmlCfg.avatarColors[configAvatar.colorHash]
+        // border.color: QmlCfg.palette.secondaryColor
     }
 
     Common.Avatar {
@@ -37,6 +37,7 @@ ToolBar {
         anchors.horizontalCenter: parent.horizontalCenter
         // JH: Bad margin semantics
         size: parent.height - QmlCfg.margin
+        isDefault: false
     }
 
     Popups.ConfigPopup {

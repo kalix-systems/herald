@@ -52,7 +52,7 @@ impl Message {
 }
 
 /// Adds a message to the database.
-pub(crate) fn add_message(
+pub fn add_message(
     msg_id: Option<MsgId>,
     author: UserIdRef,
     conversation_id: &ConversationId,
@@ -79,7 +79,7 @@ pub(crate) fn add_message(
 }
 
 /// Get message by message id
-pub(crate) fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
+pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     let db = Database::get()?;
     Ok(db.query_row(
         include_str!("sql/message/get_message.sql"),
@@ -88,7 +88,7 @@ pub(crate) fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     )?)
 }
 /// Sets the message status of an item in the database
-pub(crate) fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
         include_str!("sql/message/update_send_status.sql"),
@@ -98,69 +98,11 @@ pub(crate) fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Re
 }
 
 /// Deletes a message
-pub(crate) fn delete_message(id: &MsgId) -> Result<(), HErr> {
+pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(include_str!("sql/message/delete_message.sql"), params![id])?;
     Ok(())
 }
-
-impl Messages {
-    /// Create new `Messages`
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    /// Get all messages in a conversation since a given time.
-    pub fn conversation_messages_since(
-        &self,
-        conversation_id: &ConversationId,
-        since: DateTime<Utc>,
-    ) -> Result<Vec<Message>, HErr> {
-        crate::conversation::conversation_messages_since(conversation_id, since)
-    }
-
-    /// Adds a message to the database.
-    pub fn add_message(
-        &self,
-        msg_id: Option<MsgId>,
-        author: UserIdRef,
-        conversation_id: &ConversationId,
-        body: &str,
-        timestamp: Option<DateTime<Utc>>,
-        op: &Option<MsgId>,
-    ) -> Result<(MsgId, DateTime<Utc>), HErr> {
-        add_message(msg_id, author, conversation_id, body, timestamp, op)
-    }
-
-    /// Get all messages in a conversation.
-    pub fn conversation_messages(
-        &self,
-        conversation_id: &ConversationId,
-    ) -> Result<Vec<Message>, HErr> {
-        crate::conversation::conversation_messages(conversation_id)
-    }
-
-    /// Deletes all messages in a conversation.
-    pub fn delete_conversation(&self, conversation_id: &ConversationId) -> Result<(), HErr> {
-        crate::conversation::delete_conversation(conversation_id)
-    }
-
-    /// Get message by message id
-    pub fn get_message(&self, msg_id: &MsgId) -> Result<Message, HErr> {
-        get_message(msg_id)
-    }
-
-    /// Sets the message status of an item in the database
-    pub fn update_send_status(&self, msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
-        update_send_status(msg_id, status)
-    }
-
-    /// Deletes a message
-    pub fn delete_message(&self, id: &MsgId) -> Result<(), HErr> {
-        delete_message(id)
-    }
-}
-
 impl DBTable for Messages {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
@@ -198,7 +140,6 @@ impl DBTable for Messages {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::conversation::Conversations;
     use serial_test_derive::serial;
 
     use crate::womp;
@@ -230,11 +171,8 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conv_id = [0; 32].into();
-        let conv_handle = Conversations::new();
 
-        conv_handle
-            .add_conversation(Some(&conv_id), None)
-            .expect(womp!());
+        crate::conversation::add_conversation(Some(&conv_id), None).expect(womp!());
 
         let contact = "contact";
 
@@ -242,25 +180,18 @@ mod tests {
             .add()
             .expect(womp!());
 
-        conv_handle.add_member(&conv_id, contact).expect(womp!());
+        crate::members::add_member(&conv_id, contact).expect(womp!());
 
-        let handle = Messages::new();
-
-        let (msg_id, _) = handle
-            .add_message(None, contact, &conv_id, "test", None, &None)
+        let (msg_id, _) = super::add_message(None, contact, &conv_id, "test", None, &None)
             .expect(womp!("Failed to add message"));
 
-        let message = handle
-            .get_message(&msg_id)
-            .expect(womp!("unable to get message"));
+        let message = super::get_message(&msg_id).expect(womp!("unable to get message"));
 
         assert_eq!(message.body, "test");
 
-        handle
-            .delete_message(&msg_id)
-            .expect(womp!("failed to delete message"));
+        super::delete_message(&msg_id).expect(womp!("failed to delete message"));
 
-        assert!(handle.get_message(&msg_id).is_err());
+        assert!(super::get_message(&msg_id).is_err());
     }
 
     #[test]
@@ -269,11 +200,8 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let conversation_id = [0; 32].into();
-        let conv_handle = Conversations::new();
 
-        conv_handle
-            .add_conversation(Some(&conversation_id), None)
-            .expect(womp!());
+        crate::conversation::add_conversation(Some(&conversation_id), None).expect(womp!());
 
         let author = "Hello";
 
@@ -281,14 +209,9 @@ mod tests {
             .add()
             .expect(womp!());
 
-        conv_handle
-            .add_member(&conversation_id, author)
-            .expect(womp!());
+        crate::members::add_member(&conversation_id, author).expect(womp!());
 
-        let handle = Messages::new();
-
-        let (msg_id, _) = handle
-            .add_message(None, author, &conversation_id, "1", None, &None)
+        let (msg_id, _) = super::add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));
 
         //check message id length
@@ -296,20 +219,16 @@ mod tests {
         assert_eq!(msg_id.into_array().len(), 32);
 
         assert_eq!(
-            handle
-                .get_message(&msg_id)
+            super::get_message(&msg_id)
                 .expect(womp!("failed to get conversation by author"))
                 .send_status,
             None,
         );
 
-        handle
-            .update_send_status(msg_id, MessageSendStatus::Ack)
-            .expect(womp!());
+        update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
 
         assert_eq!(
-            conv_handle
-                .conversation_messages(&conversation_id)
+            crate::conversation::conversation_messages(&conversation_id)
                 .expect(womp!("failed to get conversation by author"))[0]
                 .send_status,
             Some(MessageSendStatus::Ack)

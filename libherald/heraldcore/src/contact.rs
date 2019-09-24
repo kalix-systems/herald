@@ -223,13 +223,6 @@ pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     Ok(names)
 }
 
-impl ContactsHandle {
-    /// Creates new `ContactsHandle`
-    pub fn new() -> Self {
-        Self {}
-    }
-}
-
 #[derive(Clone, Copy, PartialEq, Debug)]
 #[repr(u8)]
 /// Status of the contact
@@ -564,8 +557,6 @@ mod tests {
 
         Database::reset_all().expect(womp!());
 
-        ContactsHandle::new();
-
         let id = "Hello";
         ContactBuilder::new(id.into())
             .add()
@@ -759,7 +750,6 @@ mod tests {
     #[test]
     #[serial]
     fn set_status() {
-        use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
 
         let id = "Hello World";
@@ -781,12 +771,11 @@ mod tests {
             ContactStatus::Deleted
         );
 
-        let conv_handle = Conversations::new();
-
-        assert!(conv_handle
-            .conversation_messages(&contact.pairwise_conversation)
-            .expect(womp!())
-            .is_empty());
+        assert!(
+            crate::conversation::conversation_messages(&contact.pairwise_conversation)
+                .expect(womp!())
+                .is_empty()
+        );
     }
 
     #[test]

@@ -338,6 +338,25 @@ impl UsersTrait for Users {
         true
     }
 
+    /// Takes an array of UserId's, encoded as CBOR
+    fn bulk_add_to_conversation(
+        &mut self,
+        user_id_array: &[u8],
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        let user_ids: Vec<UserId> = ret_err!(serde_cbor::from_slice(user_id_array), false);
+
+        // TODO bulk insert API in heraldcore
+        for id in user_ids {
+            ret_err!(
+                heraldcore::members::add_member(&conv_id, id.as_str()),
+                false
+            );
+        }
+        true
+    }
+
     fn remove_from_conversation(
         &mut self,
         index: u64,

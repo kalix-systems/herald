@@ -8,15 +8,6 @@ use rusqlite::{params, NO_PARAMS};
 #[derive(Default)]
 pub(crate) struct MessageStatus {}
 
-//pub(crate) fn delete_by_conversation(conversation: ConversationId) -> Result<(), HErr> {
-//    let db = Database::get()?;
-//    db.execute(
-//        include_str!("sql/message_status/delete_by_conversation.sql"),
-//        params![conversation],
-//    )?;
-//    Ok(())
-//}
-
 pub(crate) fn delete_by_conversation_tx(
     tx: &rusqlite::Transaction,
     conversation: ConversationId,
@@ -79,7 +70,7 @@ impl DBTable for MessageStatus {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{conversation::Conversations, message::add_message};
+    use crate::message::add_message;
     use serial_test_derive::serial;
 
     use crate::womp;
@@ -114,18 +105,12 @@ mod tests {
         let author = "Hello";
         let conversation_id = [0; 32].into();
 
-        let conv_handle = Conversations::new();
-
-        conv_handle
-            .add_conversation(Some(&conversation_id), None)
-            .expect(womp!());
+        crate::conversation::add_conversation(Some(&conversation_id), None).expect(womp!());
 
         crate::contact::ContactBuilder::new(author.into())
             .add()
             .expect(womp!());
-        conv_handle
-            .add_member(&conversation_id, author)
-            .expect(womp!());
+        crate::members::add_member(&conversation_id, author).expect(womp!());
 
         let (msg_id, _) = add_message(None, author, &conversation_id, "1", None, &None)
             .expect(womp!("Failed to add first message"));

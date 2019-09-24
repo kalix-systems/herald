@@ -281,6 +281,20 @@
                         }
                     ]
                 },
+                "bulkAddToConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id_array",
+                            "type": "QByteArray"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "addToConversationByIndex": {
                     "mut": true,
                     "return": "bool",

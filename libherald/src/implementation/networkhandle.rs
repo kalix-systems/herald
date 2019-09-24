@@ -118,8 +118,7 @@ impl NetworkHandleTrait for NetworkHandle {
         // we copy this repeatedly, if this gets slow, put it in an arc.
         let conv_id = ret_err!(ConversationId::try_from(to), false);
 
-        let handle = heraldcore::conversation::Conversations::new();
-        let members = ret_err!(handle.members(&conv_id), false);
+        let members = ret_err!(heraldcore::members::members(&conv_id), false);
 
         let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
