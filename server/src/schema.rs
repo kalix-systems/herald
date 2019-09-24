@@ -43,10 +43,4 @@ joinable!(pending -> pushes (push_id));
 joinable!(prekeys -> keys (signing_key));
 joinable!(userkeys -> keys (key));
 
-allow_tables_to_appear_in_same_query!(
-    keys,
-    pending,
-    prekeys,
-    pushes,
-    userkeys,
-);
+allow_tables_to_appear_in_same_query!(keys, pending, prekeys, pushes, userkeys,);

@@ -36,7 +36,11 @@ impl ProtocolHandler for State {
                 if missing.is_empty() {
                     Ok(ServerResponse::MissingUIDs(missing))
                 } else {
-                    let data = Push::NewUMessage { from, msg, timestamp: Utc::now() };
+                    let data = Push::NewUMessage {
+                        from,
+                        msg,
+                        timestamp: Utc::now(),
+                    };
                     for uid in to {
                         for did in con.read_meta(&uid)?.valid_keys() {
                             // TODO: replace this w/a tokio spawn for reliability reasons
@@ -60,7 +64,7 @@ impl ProtocolHandler for State {
                         let data = Push::NewDMessage {
                             from,
                             msg: msg.clone(),
-                            timestamp
+                            timestamp,
                         };
                         // TODO: replace this w/a tokio spawn for reliability reasons
                         self.send_push(did, data).await?;
