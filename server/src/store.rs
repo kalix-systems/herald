@@ -22,12 +22,23 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 pub trait Store {
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
-    fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error>;
+    fn add_prekey(
+        &mut self,
+        key: sig::PublicKey,
+        pre: sealed::PublicKey,
+    ) -> Result<pubkey::ServerResponse, Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
-    fn add_key(&mut self, user_id: UserId, key: Signed<sig::PublicKey>) -> Result<(), Error>;
+    fn add_key(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<pubkey::ServerResponse, Error>;
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<(), Error>;
+    fn deprecate_key(
+        &mut self,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<pubkey::ServerResponse, Error>;
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
@@ -41,7 +52,22 @@ pub trait Store {
 mod pgstore {
     use super::*;
     use crate::schema::*;
-    use diesel::dsl::*;
+    use diesel::{
+        dsl::*,
+        result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
+    };
+
+    fn unique_violation_to_redundant<T>(
+        query_res: QueryResult<T>,
+    ) -> Result<pubkey::ServerResponse, Error> {
+        match query_res {
+            Err(DatabaseError(UniqueViolation, _)) => Ok(pubkey::ServerResponse::Redundant),
+            a => {
+                a?;
+                Ok(pubkey::ServerResponse::Success)
+            }
+        }
+    }
 
     impl Store for PgConnection {
         // TODO implement the appropriate traits for this
@@ -52,16 +78,21 @@ mod pgstore {
             Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self)?)
         }
 
-        fn add_prekey(&mut self, key: sig::PublicKey, pre: sealed::PublicKey) -> Result<(), Error> {
+        fn add_prekey(
+            &mut self,
+            key: sig::PublicKey,
+            pre: sealed::PublicKey,
+        ) -> Result<pubkey::ServerResponse, Error> {
             use crate::schema::prekeys::dsl::*;
 
-            diesel::insert_into(prekeys)
+            let res = diesel::insert_into(prekeys)
                 .values((
                     signing_key.eq(key.as_ref()),
                     sealed_key.eq(serde_cbor::to_vec(&pre)?),
                 ))
-                .execute(self)?;
-            Ok(())
+                .execute(self);
+
+            unique_violation_to_redundant(res)
         }
 
         fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
@@ -80,24 +111,26 @@ mod pgstore {
             &mut self,
             user_id_arg: UserId,
             new_key: Signed<sig::PublicKey>,
-        ) -> Result<(), Error> {
-            diesel::insert_into(keys::table)
+        ) -> Result<pubkey::ServerResponse, Error> {
+            let res = diesel::insert_into(keys::table)
                 .values((
                     keys::key.eq(new_key.data().as_ref()),
                     keys::signed_by.eq(new_key.signed_by().as_ref()),
                     keys::ts.eq(new_key.timestamp()),
                     keys::signature.eq(new_key.sig().as_ref()),
                 ))
-                .execute(self)?;
+                .execute(self);
 
-            diesel::insert_into(userkeys::table)
+            unique_violation_to_redundant(res)?;
+
+            let res = diesel::insert_into(userkeys::table)
                 .values((
                     userkeys::user_id.eq(user_id_arg.as_str()),
                     userkeys::key.eq(new_key.data().as_ref()),
                 ))
-                .execute(self)?;
+                .execute(self);
 
-            Ok(())
+            unique_violation_to_redundant(res)
         }
 
         fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
@@ -146,7 +179,10 @@ mod pgstore {
             Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
         }
 
-        fn deprecate_key(&mut self, signed_key: Signed<sig::PublicKey>) -> Result<(), Error> {
+        fn deprecate_key(
+            &mut self,
+            signed_key: Signed<sig::PublicKey>,
+        ) -> Result<pubkey::ServerResponse, Error> {
             use crate::schema::keys::dsl::*;
 
             let (data, meta) = signed_key.split();
@@ -165,10 +201,10 @@ mod pgstore {
                 .execute(self)?;
 
             if num_updated != 1 {
-                return Err(Error::RedundantDeprecation);
+                return Ok(pubkey::ServerResponse::Redundant);
             }
 
-            Ok(())
+            Ok(pubkey::ServerResponse::Success)
         }
 
         fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
@@ -502,6 +538,10 @@ mod tests {
         conn.add_key(user_id, signed_pk).unwrap();
 
         conn.deprecate_key(signed_pk).unwrap();
-        assert!(conn.deprecate_key(signed_pk).is_err());
+
+        match conn.deprecate_key(signed_pk) {
+            Ok(pubkey::ServerResponse::Redundant) => {}
+            _ => panic!(),
+        }
     }
 }
