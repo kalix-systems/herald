@@ -77,7 +77,10 @@ impl EffectsFlags {
 /// map to function calls from the herald core session api
 #[derive(Debug)]
 pub enum FuncCall {
-    SendMsg { to: UserId, msg: MessageToPeer },
+    SendMsg {
+        to: UserId,
+        msg: ConversationMessage,
+    },
     AddRequest(ConversationId, UserId),
     RequestMeta(UserId),
     RegisterDevice,
@@ -128,13 +131,14 @@ impl NetworkHandleTrait for NetworkHandle {
 
             ret_err!(
                 self.tx.try_send(FuncCall::SendMsg {
-                    msg: MessageToPeer::Message {
-                        body: body.clone(),
-                        msg_id: msg_id.clone(),
-                        conversation_id: conv_id.clone(),
-                        op_msg_id: None
-                    },
-                    to: member,
+                    msg: ConversationMessage {
+                        body: ConversationMessageBody::Message {
+                            body: body.clone(), 
+                            msg_id: msg_id.clone(),
+                            op_msg_id: None
+                        },
+                        cid: conv_id.clone(),
+                        }
                 }),
                 false
             );
@@ -144,9 +148,12 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(&mut self, user_id: FfiUserId, conversation_id: FfiConversationIdRef) -> bool {
-
-        let user_id = ret_err!(user_id.as_str().try_into(), false); 
+    fn send_add_request(
+        &mut self,
+        user_id: FfiUserId,
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let user_id = ret_err!(user_id.as_str().try_into(), false);
 
         let conversation_id = match ConversationId::try_from(conversation_id) {
             Ok(id) => id,
@@ -284,18 +291,15 @@ async fn handle_nw_channel(
     loop {
         match rx.recv().await {
             Some(notif) => match notif {
-                Ack(MessageReceipt {
-                    update_code,
-                    message_id,
-                }) => {
+                Ack(message_id) => {
                     println!(
-                        "Receiving notification: {:?}, {:?}",
-                        update_code, message_id
+                        "Receiving notification: {:?}",
+                        message_id
                     );
                     // TODO update the UI here.
                 }
-                NewMsg(user_id) => {
-                    println!("NEW MESSAGE FROM : {}", user_id);
+                NewMsg(cid) => {
+                    println!("NEW MESSAGE FROM : {:?}", cid);
                     status_flags.emit_new_msg(&mut emit);
                 }
                 NewContact => {
