@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS config (
   -- current user id
-  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) <= 255),
+  id TEXT PRIMARY KEY NOT NULL,
   -- colorscheme
   colorscheme INTEGER NOT NULL,
   kp BLOB NOT NULL,

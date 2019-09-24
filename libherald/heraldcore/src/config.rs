@@ -236,7 +236,12 @@ impl Config {
     }
 
     pub fn static_keypair() -> Result<sig::KeyPair, HErr> {
-        unimplemented!()
+        let db = Database::get()?;
+        Ok(db.query_row(
+            include_str!("sql/config/get_keypair.sql"),
+            NO_PARAMS,
+            |row| row.get(0),
+        )?)
     }
 
     /// Updates user's display name
@@ -413,5 +418,23 @@ mod tests {
         let static_id = Config::static_id().expect(womp!());
         assert_eq!(config.id, id);
         assert_eq!(config.id, static_id);
+    }
+
+    #[test]
+    #[serial]
+    fn get_kp() {
+        Database::reset_all().expect(womp!());
+
+        let id = "HelloWorld".try_into().expect(womp!());
+        let kp = KeyPair::gen_new();
+        let config = ConfigBuilder::new()
+            .id(id)
+            .keypair(kp.clone())
+            .add()
+            .expect(womp!());
+
+        let static_keypair = Config::static_keypair().expect(womp!());
+        assert_eq!(config.keypair, kp);
+        assert_eq!(config.keypair, static_keypair);
     }
 }
