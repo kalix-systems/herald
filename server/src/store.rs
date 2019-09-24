@@ -21,40 +21,62 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 }
 
 pub trait Store {
-    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+    fn device_exists(&self, pk: &sign::PublicKey) -> Result<bool, Error>;
     fn add_prekey(
-        &mut self,
+        &self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<pubkey::ServerResponse, Error>;
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
+    fn get_prekey(&self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(
-        &mut self,
+        &self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error>;
-    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(
-        &mut self,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<pubkey::ServerResponse, Error>;
+    fn read_key(&self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+    fn deprecate_key(&self, key: Signed<sig::PublicKey>) -> Result<pubkey::ServerResponse, Error>;
 
-    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
-    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
-    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
+    fn user_exists(&self, uid: &UserId) -> Result<bool, Error>;
+    fn key_is_valid(&self, key: sig::PublicKey) -> Result<bool, Error>;
+    fn read_meta(&self, uid: &UserId) -> Result<UserMeta, Error>;
 
-    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
-    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
+    fn add_pending(&self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+    fn get_pending(&self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
+    fn expire_pending(&self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
 use super::*;
 use crate::schema::*;
 use diesel::{
     dsl::*,
+    r2d2::{self, ConnectionManager},
     result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
 };
+use dotenv::dotenv;
+use std::{env, ops::Deref};
+
+type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
+
+pub fn init_pool() -> Pool {
+    let manager = ConnectionManager::<PgConnection>::new(database_url());
+    Pool::new(manager).expect("db pool")
+}
+
+fn database_url() -> String {
+    dotenv().expect("Invalid dotenv");
+    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+}
+
+pub struct Conn(pub r2d2::PooledConnection<ConnectionManager<PgConnection>>);
+
+impl Deref for Conn {
+    type Target = PgConnection;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 fn unique_violation_to_redundant<T>(
     query_res: QueryResult<T>,
@@ -68,17 +90,17 @@ fn unique_violation_to_redundant<T>(
     }
 }
 
-impl Store for PgConnection {
+impl Store for Conn {
     // TODO implement the appropriate traits for this
     // TODO read about postgres performance
-    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+    fn device_exists(&self, pk: &sign::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
-        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self)?)
+        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref())?)
     }
 
     fn add_prekey(
-        &mut self,
+        &self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<pubkey::ServerResponse, Error> {
@@ -89,25 +111,25 @@ impl Store for PgConnection {
                 signing_key.eq(key.as_ref()),
                 sealed_key.eq(serde_cbor::to_vec(&pre)?),
             ))
-            .execute(self);
+            .execute(self.deref());
 
         unique_violation_to_redundant(res)
     }
 
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
+    fn get_prekey(&self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
         use crate::schema::prekeys::dsl::*;
 
         let raw_pk: Vec<u8> = prekeys
             .filter(signing_key.eq(key.as_ref()))
             .select(sealed_key)
             .limit(1)
-            .get_result(self)?;
+            .get_result(self.deref())?;
 
         Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
     fn add_key(
-        &mut self,
+        &self,
         user_id_arg: UserId,
         new_key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error> {
@@ -118,7 +140,7 @@ impl Store for PgConnection {
                 keys::ts.eq(new_key.timestamp()),
                 keys::signature.eq(new_key.sig().as_ref()),
             ))
-            .execute(self);
+            .execute(self.deref());
 
         unique_violation_to_redundant(res)?;
 
@@ -127,12 +149,12 @@ impl Store for PgConnection {
                 userkeys::user_id.eq(user_id_arg.as_str()),
                 userkeys::key.eq(new_key.data().as_ref()),
             ))
-            .execute(self);
+            .execute(self.deref());
 
         unique_violation_to_redundant(res)
     }
 
-    fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+    fn read_key(&self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
             Vec<u8>,
             Vec<u8>,
@@ -150,7 +172,7 @@ impl Store for PgConnection {
                 keys::dep_signature,
                 keys::dep_ts,
             ))
-            .get_result(self)?;
+            .get_result(self.deref())?;
 
         dbg!(sig.len());
         dbg!(signed_by.len());
@@ -179,7 +201,7 @@ impl Store for PgConnection {
     }
 
     fn deprecate_key(
-        &mut self,
+        &self,
         signed_key: Signed<sig::PublicKey>,
     ) -> Result<pubkey::ServerResponse, Error> {
         use crate::schema::keys::dsl::*;
@@ -197,7 +219,7 @@ impl Store for PgConnection {
                 dep_signed_by.eq(meta.signed_by().as_ref()),
                 dep_signature.eq(meta.sig().as_ref()),
             ))
-            .execute(self)?;
+            .execute(self.deref())?;
 
         if num_updated != 1 {
             return Ok(pubkey::ServerResponse::Redundant);
@@ -206,15 +228,15 @@ impl Store for PgConnection {
         Ok(pubkey::ServerResponse::Success)
     }
 
-    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
+    fn user_exists(&self, uid: &UserId) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         let query = userkeys.filter(user_id.eq(uid.as_str()));
 
-        Ok(select(exists(query)).get_result(self)?)
+        Ok(select(exists(query)).get_result(self.deref())?)
     }
 
-    fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
+    fn key_is_valid(&self, key_arg: sig::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         let query = userkeys
@@ -224,10 +246,10 @@ impl Store for PgConnection {
             .filter(keys::dep_signed_by.is_null())
             .filter(keys::dep_signature.is_null());
 
-        Ok(select(exists(query)).get_result(self)?)
+        Ok(select(exists(query)).get_result(self.deref())?)
     }
 
-    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
+    fn read_meta(&self, uid: &UserId) -> Result<UserMeta, Error> {
         let keys: Vec<(
             Vec<u8>,
             Vec<u8>,
@@ -248,7 +270,7 @@ impl Store for PgConnection {
                 keys::dep_signed_by,
                 keys::dep_signature,
             ))
-            .get_results(self)?;
+            .get_results(self.deref())?;
 
         let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
             .into_iter()
@@ -297,7 +319,7 @@ impl Store for PgConnection {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
+    fn add_pending(&self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
         let push_row_id: i64 = {
             use crate::schema::pushes::dsl::*;
 
@@ -305,7 +327,7 @@ impl Store for PgConnection {
             insert_into(pushes)
                 .values(push_data.eq(push_vec))
                 .returning(push_id)
-                .get_result(self)?
+                .get_result(self.deref())?
         };
 
         use crate::schema::pending::dsl::*;
@@ -315,17 +337,17 @@ impl Store for PgConnection {
             .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
             .collect();
 
-        insert_into(pending).values(keys).execute(self)?;
+        insert_into(pending).values(keys).execute(self.deref())?;
 
         Ok(())
     }
 
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
+    fn get_pending(&self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
         let pushes: Vec<Vec<u8>> = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_data)
-            .get_results(self)?;
+            .get_results(self.deref())?;
 
         let mut out = Vec::with_capacity(pushes.len());
 
@@ -336,13 +358,13 @@ impl Store for PgConnection {
         Ok(out)
     }
 
-    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
+    fn expire_pending(&self, key: sig::PublicKey) -> Result<(), Error> {
         let push_ids = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_id);
 
-        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self)?;
+        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref())?;
 
         Ok(())
     }
@@ -351,28 +373,24 @@ impl Store for PgConnection {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use diesel::pg::PgConnection;
-    use dotenv::dotenv;
     use serial_test_derive::serial;
-    use std::{convert::TryInto, env};
+    use std::convert::TryInto;
 
-    fn open_conn() -> PgConnection {
-        dotenv().ok();
+    fn open_conn() -> Conn {
+        let pool = init_pool();
 
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-        let conn = PgConnection::establish(&database_url)
-            .expect(&format!("Error connecting to {}", database_url));
+        let conn = pool.get().expect("Failed to get connection");
 
         // so none of the changes are committed
         conn.begin_test_transaction()
             .expect("Couldn't start test transaction");
-        conn
+        Conn(conn)
     }
 
     #[test]
     #[serial]
     fn device_exists() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -388,7 +406,7 @@ mod tests {
     #[test]
     #[serial]
     fn read_key() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -419,7 +437,7 @@ mod tests {
     #[test]
     #[serial]
     fn user_exists() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -435,7 +453,7 @@ mod tests {
     #[test]
     #[serial]
     fn read_meta() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -451,7 +469,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_get_expire_pending() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp_other = sig::KeyPair::gen_new();
 
@@ -485,7 +503,7 @@ mod tests {
     #[test]
     #[serial]
     fn add_and_get_prekey() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let signed_pk = kp.sign(*kp.public_key());
@@ -504,7 +522,7 @@ mod tests {
     #[test]
     #[serial]
     fn key_is_valid() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
@@ -526,7 +544,7 @@ mod tests {
     #[test]
     #[serial]
     fn double_deprecation() {
-        let mut conn = open_conn();
+        let conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
