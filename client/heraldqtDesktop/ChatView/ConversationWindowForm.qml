@@ -53,10 +53,11 @@ Flickable {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
-                    // JH? Weird margin tweak
-                    rightMargin: chatScrollBar.width + QmlCfg.margin
+                    rightMargin: QmlCfg.margin
                     leftMargin: QmlCfg.margin
                 }
+                rightPadding: QmlCfg.margin
+
 
                 //NOTE: see chat bubble form
                 CVUtils.ChatBubbleForm {
