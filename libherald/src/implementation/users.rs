@@ -1,7 +1,8 @@
 use crate::{bounds_chk, interface::*, ret_err, ret_none, types::*};
+use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
-    contact::{self, ContactBuilder, ContactStatus, ContactsHandle},
+    contact::{self, ContactBuilder, ContactStatus},
     types::*,
     utils::SearchPattern,
 };
@@ -19,16 +20,13 @@ pub struct Users {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<User>,
-    handle: ContactsHandle,
     conversation_id: Option<ConversationId>,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
     fn new(emit: UsersEmitter, model: UsersList) -> Users {
-        let handle = ContactsHandle::new();
-
-        let list = match handle.all() {
+        let list = match contact::all() {
             Ok(v) => v
                 .into_iter()
                 .map(|c| User {
@@ -50,7 +48,6 @@ impl UsersTrait for Users {
             list,
             filter,
             filter_regex: false,
-            handle,
             conversation_id: None,
             updated: chrono::Utc::now(),
         }
@@ -89,13 +86,13 @@ impl UsersTrait for Users {
                     return;
                 }
 
-                ret_err!(self.handle.conversation_members(&conv_id))
+                ret_err!(contact::conversation_members(&conv_id))
             }
             None => {
                 if self.conversation_id.is_none() {
                     return;
                 }
-                ret_err!(self.handle.all())
+                ret_err!(contact::all())
             }
         };
 
@@ -154,7 +151,7 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         ret_err!(
-            self.handle.set_name(
+            contact::set_name(
                 self.list[row_index].inner.id,
                 name.as_ref().map(|s| s.as_str())
             ),
@@ -183,7 +180,7 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         let path = ret_err!(
-            self.handle.set_profile_picture(
+            contact::set_profile_picture(
                 self.list[row_index].inner.id,
                 crate::utils::strip_qrc(picture),
                 self.profile_picture(row_index),
@@ -206,7 +203,7 @@ impl UsersTrait for Users {
         bounds_chk!(self, row_index, false);
 
         ret_err!(
-            self.handle.set_color(self.list[row_index].inner.id, color),
+            contact::set_color(self.list[row_index].inner.id, color),
             false
         );
 
@@ -224,8 +221,7 @@ impl UsersTrait for Users {
 
         let meta = &ret_none!(self.list.get(row_index), false).inner;
         ret_err!(
-            self.handle
-                .set_status(meta.id, meta.pairwise_conversation, status),
+            contact::set_status(meta.id, meta.pairwise_conversation, status),
             false
         );
 
@@ -327,7 +323,7 @@ impl UsersTrait for Users {
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(
-            self.handle.add_member(&conv_id, self.list[index].inner.id),
+            heraldcore::members::add_member(&conv_id, self.list[index].inner.id),
             false
         );
         true
@@ -338,9 +334,25 @@ impl UsersTrait for Users {
         user_id: FfiUserId,
         conversation_id: FfiConversationIdRef,
     ) -> bool {
-        let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        ret_err!(self.handle.add_member(&conv_id, user_id), false);
+        let user_id = ret_err!(user_id.as_str().try_into());
+        ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
+        true
+    }
+
+    /// Takes an array of UserId's, encoded as CBOR
+    fn bulk_add_to_conversation(
+        &mut self,
+        user_id_array: &[u8],
+        conversation_id: FfiConversationIdRef,
+    ) -> bool {
+        let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
+        let user_ids: Vec<UserId> = ret_err!(serde_cbor::from_slice(user_id_array), false);
+
+        // TODO bulk insert API in heraldcore
+        for id in user_ids {
+            ret_err!(heraldcore::members::add_member(&conv_id, id), false);
+        }
         true
     }
 
@@ -354,8 +366,7 @@ impl UsersTrait for Users {
 
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         ret_err!(
-            self.handle
-                .remove_member(&conv_id, self.list[index].inner.id),
+            heraldcore::members::remove_member(&conv_id, self.list[index].inner.id),
             false
         );
         true
@@ -365,10 +376,10 @@ impl UsersTrait for Users {
     fn refresh(&mut self) -> bool {
         let new = match self.conversation_id {
             Some(id) => ret_err!(
-                self.handle.conversation_members_since(&id, self.updated),
+                contact::conversation_members_since(&id, self.updated),
                 false
             ),
-            None => ret_err!(self.handle.all_since(self.updated), false),
+            None => ret_err!(contact::all_since(self.updated), false),
         };
 
         self.updated = chrono::Utc::now();

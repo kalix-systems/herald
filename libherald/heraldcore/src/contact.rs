@@ -45,7 +45,7 @@ impl DBTable for ContactsHandle {
 }
 
 /// Gets a contact's name by their `id`.
-fn name(id: UserId) -> Result<Option<String>, HErr> {
+pub fn name(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
 
@@ -53,7 +53,7 @@ fn name(id: UserId) -> Result<Option<String>, HErr> {
 }
 
 /// Change name of contact by their `id`
-pub(crate) fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
+pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
 
@@ -62,7 +62,7 @@ pub(crate) fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
 }
 
 /// Gets a contact's profile picture by their `id`.
-fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
+pub fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
 
@@ -70,12 +70,12 @@ fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
 }
 
 /// Returns all members of a conversation.
-fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<Contact>, HErr> {
+pub fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<Contact>, HErr> {
     conversation_members_since(conversation_id, chrono::MIN_DATE.and_hms(0, 0, 0))
 }
 
 /// Returns all members of a conversation.
-fn conversation_members_since(
+pub fn conversation_members_since(
     conversation_id: &ConversationId,
     since: DateTime<Utc>,
 ) -> Result<Vec<Contact>, HErr> {
@@ -96,7 +96,7 @@ fn conversation_members_since(
 }
 
 /// Updates a contact's profile picture.
-pub(crate) fn set_profile_picture(
+pub fn set_profile_picture(
     id: UserId,
     profile_picture: Option<String>,
     old_path: Option<&str>,
@@ -121,7 +121,7 @@ pub(crate) fn set_profile_picture(
 }
 
 /// Sets a contact's color
-pub(crate) fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
+pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
         include_str!("sql/contact/update_color.sql"),
@@ -131,14 +131,14 @@ pub(crate) fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
 }
 
 /// Indicates whether contact exists
-fn contact_exists(id: UserId) -> Result<bool, HErr> {
+pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
     Ok(stmt.exists(&[id])?)
 }
 
 /// Sets contact status
-fn set_status(
+pub fn set_status(
     id: UserId,
     pairwise_conv: ConversationId,
     status: ContactStatus,
@@ -170,7 +170,7 @@ fn set_status(
 }
 
 /// Gets contact status
-fn status(id: UserId) -> Result<ContactStatus, HErr> {
+pub fn status(id: UserId) -> Result<ContactStatus, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_status.sql"))?;
 
@@ -178,12 +178,12 @@ fn status(id: UserId) -> Result<ContactStatus, HErr> {
 }
 
 /// Returns all contacts
-fn all() -> Result<Vec<Contact>, HErr> {
+pub fn all() -> Result<Vec<Contact>, HErr> {
     all_since(chrono::MIN_DATE.and_hms(0, 0, 0))
 }
 
 /// Returns all contacts
-fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
+pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
 
@@ -197,8 +197,8 @@ fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     Ok(names)
 }
 
-// returns a single contact by userid
-pub(crate) fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
+/// Returns a single contact by `user_id`
+pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_id.sql"))?;
 
@@ -206,7 +206,7 @@ pub(crate) fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
 }
 
 /// Returns all contacts with the specified `status`
-fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
+pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
 
@@ -221,118 +221,6 @@ fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     }
 
     Ok(names)
-}
-
-impl ContactsHandle {
-    /// Creates new `ContactsHandle`
-    pub fn new() -> Self {
-        Self {}
-    }
-
-    /// Gets a contact's name by their `id`.
-    pub fn name(&self, id: UserId) -> Result<Option<String>, HErr> {
-        name(id)
-    }
-
-    /// Change name of contact by their `id`
-    pub fn set_name(&self, id: UserId, name: Option<&str>) -> Result<(), HErr> {
-        set_name(id, name)
-    }
-
-    /// Gets a contact's profile picture by their `id`.
-    pub fn profile_picture(&self, id: UserId) -> Result<Option<String>, HErr> {
-        profile_picture(id)
-    }
-
-    /// Updates a contact's profile picture.
-    pub fn set_profile_picture(
-        &self,
-        id: UserId,
-        profile_picture: Option<String>,
-        old_path: Option<&str>,
-    ) -> Result<Option<String>, HErr> {
-        set_profile_picture(id, profile_picture, old_path)
-    }
-
-    /// Sets a contact's color
-    pub fn set_color(&self, id: UserId, color: u32) -> Result<(), HErr> {
-        set_color(id, color)
-    }
-
-    /// Indicates whether contact exists
-    pub fn contact_exists(&self, id: UserId) -> Result<bool, HErr> {
-        contact_exists(id)
-    }
-
-    /// Sets contact status
-    pub fn set_status(
-        &mut self,
-        id: UserId,
-        pairwise_conv: ConversationId,
-        status: ContactStatus,
-    ) -> Result<(), HErr> {
-        set_status(id, pairwise_conv, status)
-    }
-
-    /// Gets contact status
-    pub fn status(&self, id: UserId) -> Result<ContactStatus, HErr> {
-        status(id)
-    }
-
-    /// Returns all contacts
-    pub fn all(&self) -> Result<Vec<Contact>, HErr> {
-        all()
-    }
-
-    /// Returns all contacts added after a given UNIX epoch time
-    pub fn all_since(&self, since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
-        all_since(since)
-    }
-
-    /// Fetches contact by their user id
-    pub fn by_user_id(&self, user_id: UserId) -> Result<Contact, HErr> {
-        by_user_id(user_id)
-    }
-
-    /// Returns all contacts with the specified `status`
-    pub fn get_by_status(&self, status: ContactStatus) -> Result<Vec<Contact>, HErr> {
-        get_by_status(status)
-    }
-
-    /// Returns all members of a conversation.
-    pub fn conversation_members(
-        &self,
-        conversation_id: &ConversationId,
-    ) -> Result<Vec<Contact>, HErr> {
-        conversation_members(conversation_id)
-    }
-
-    /// Returns all conversation members added after a given UNIX epoch time
-    pub fn conversation_members_since(
-        &self,
-        conversation_id: &ConversationId,
-        since: DateTime<Utc>,
-    ) -> Result<Vec<Contact>, HErr> {
-        conversation_members_since(conversation_id, since)
-    }
-
-    /// Adds member to conversation.
-    pub fn add_member(
-        &self,
-        conversation_id: &ConversationId,
-        member_id: UserId,
-    ) -> Result<(), HErr> {
-        crate::members::add_member(conversation_id, member_id)
-    }
-
-    /// Removes member from conversation.
-    pub fn remove_member(
-        &self,
-        conversation_id: &ConversationId,
-        member_id: UserId,
-    ) -> Result<(), HErr> {
-        crate::members::remove_member(conversation_id, member_id)
-    }
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -651,7 +539,6 @@ mod tests {
     use super::*;
     use crate::{db::Database, womp};
     use serial_test_derive::serial;
-    use std::convert::TryInto;
 
     #[test]
     #[serial]
@@ -669,8 +556,6 @@ mod tests {
         assert!(!ContactsHandle::exists().expect(womp!()));
 
         Database::reset_all().expect(womp!());
-
-        ContactsHandle::new();
 
         let id = "Hello".try_into().expect(womp!());
         ContactBuilder::new(id)
@@ -704,14 +589,13 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id1 = "test1".try_into().expect(womp!());
-        let handle = ContactsHandle::new();
         let timestamp = chrono::Utc::now();
 
         ContactBuilder::new(id1)
             .add()
             .expect("failed to add contact");
 
-        let contactlist = handle.all_since(timestamp).expect("Failed to get contacts");
+        let contactlist = all_since(timestamp).expect("Failed to get contacts");
 
         assert_eq!(contactlist.len(), 0);
     }
@@ -723,15 +607,13 @@ mod tests {
 
         let id = "HelloWorld".try_into().expect(womp!());
 
-        let handle = ContactsHandle::new();
-
         ContactBuilder::new(id)
             .name("name".into())
             .add()
             .expect("Failed to add contact");
 
         assert_eq!(
-            handle.name(id).expect("Failed to get name").expect(womp!()),
+            name(id).expect("Failed to get name").expect(womp!()),
             "name"
         );
     }
@@ -744,16 +626,13 @@ mod tests {
         let id = "HelloWorld".try_into().expect(womp!());
         let profile_picture = "picture";
 
-        let handle = ContactsHandle::new();
-
         ContactBuilder::new(id)
             .profile_picture(profile_picture.into())
             .add()
             .expect("Failed to add contact");
 
         assert_eq!(
-            handle
-                .profile_picture(id.into())
+            super::profile_picture(id)
                 .expect("Failed to get profile picture")
                 .expect(womp!())
                 .as_str(),
@@ -762,15 +641,13 @@ mod tests {
 
         Database::reset_all().expect(womp!());
 
-        let handle = ContactsHandle::new();
-
         let test_picture = "test_resources/maryland.png";
 
         ContactBuilder::new(id)
             .add()
             .expect("Failed to add contact");
-        handle
-            .set_profile_picture(id, Some(test_picture.into()), None)
+
+        set_profile_picture(id, Some(test_picture.into()), None)
             .expect("Failed to set profile picture");
 
         std::fs::remove_dir_all("profile_pictures").expect(womp!());
@@ -781,16 +658,15 @@ mod tests {
     fn get_set_color() {
         Database::reset_all().expect(womp!());
         let id = "userid".try_into().expect(womp!());
-        let handle = ContactsHandle::new();
 
         ContactBuilder::new(id)
             .name("Hello".into())
             .add()
             .expect(womp!());
 
-        handle.set_color(id, 1).expect("Failed to set color");
+        set_color(id, 1).expect("Failed to set color");
 
-        let contacts = handle.all().expect(womp!());
+        let contacts = all().expect(womp!());
 
         assert_eq!(contacts[0].color, 1);
     }
@@ -800,18 +676,17 @@ mod tests {
     fn check_contact_exists() {
         Database::reset_all().expect(womp!());
         let id = "userid".try_into().expect(womp!());
-        let handle = ContactsHandle::new();
 
         ContactBuilder::new(id)
             .name("Hello".into())
             .add()
             .expect(womp!());
 
-        assert_eq!(handle.contact_exists(id).expect(womp!()), true);
+        assert_eq!(contact_exists(id).unwrap(), true);
 
         Database::reset_all().expect(womp!());
 
-        assert_eq!(handle.contact_exists(id).expect(womp!()), false)
+        assert_eq!(contact_exists(id).unwrap(), false)
     }
 
     #[test]
@@ -821,21 +696,15 @@ mod tests {
 
         let id = "userid".try_into().expect(womp!());
 
-        let handle = ContactsHandle::new();
-
         ContactBuilder::new(id)
             .name("Hello".into())
             .add()
             .expect(womp!());
-        handle
-            .set_name(id, Some("World"))
-            .expect("Failed to update name");
+
+        set_name(id, Some("World")).expect("Failed to update name");
 
         assert_eq!(
-            handle
-                .name(id)
-                .expect("Failed to get contact")
-                .expect(womp!()),
+            name(id).expect("Failed to get contact").expect(womp!()),
             "World"
         );
     }
@@ -846,16 +715,13 @@ mod tests {
         Database::reset_all().expect(womp!());
 
         let id = "id".try_into().expect(womp!());
-        let handle = ContactsHandle::new();
 
         ContactBuilder::new(id)
             .name("name".into())
             .add()
             .expect(womp!());
 
-        let contact = handle
-            .by_user_id(id)
-            .expect("Unable to get contact from userid");
+        let contact = by_user_id(id).expect("Unable to get contact from userid");
 
         assert_eq!(contact.id, id);
         assert_eq!(contact.name.expect(womp!()), "name");
@@ -869,8 +735,6 @@ mod tests {
         let id1 = "Hello".try_into().expect(womp!());
         let id2 = "World".try_into().expect(womp!());
 
-        let handle = ContactsHandle::new();
-
         ContactBuilder::new(id1)
             .add()
             .expect(womp!("Failed to add id1"));
@@ -879,7 +743,7 @@ mod tests {
             .add()
             .expect(womp!("Failed to add id2"));
 
-        let contacts = handle.all().expect(womp!());
+        let contacts = all().expect(womp!());
         assert_eq!(contacts.len(), 2);
         assert_eq!(contacts[0].id, id1);
         assert_eq!(contacts[1].id, id2);
@@ -891,37 +755,30 @@ mod tests {
         use crate::conversation::Conversations;
         Database::reset_all().expect(womp!());
 
-        let mut handle = ContactsHandle::new();
         let id = "HelloWorld".try_into().expect(womp!());
         let contact = ContactBuilder::new(id).add().expect(womp!());
-        handle
-            .set_status(id, contact.pairwise_conversation, ContactStatus::Archived)
+
+        super::set_status(id, contact.pairwise_conversation, ContactStatus::Archived)
             .expect(womp!());
 
         assert_eq!(
-            handle
-                .status(id)
-                .expect("Failed to determine contact status"),
+            status(id).expect("Failed to determine contact status"),
             ContactStatus::Archived
         );
 
-        handle
-            .set_status(id, contact.pairwise_conversation, ContactStatus::Deleted)
+        super::set_status(id, contact.pairwise_conversation, ContactStatus::Deleted)
             .expect(womp!());
 
         assert_eq!(
-            handle
-                .status(id)
-                .expect("Failed to determine contact status"),
+            super::status(id).expect("Failed to determine contact status"),
             ContactStatus::Deleted
         );
 
-        let conv_handle = Conversations::new();
-
-        assert!(conv_handle
-            .conversation_messages(&contact.pairwise_conversation)
-            .expect(womp!())
-            .is_empty());
+        assert!(
+            crate::conversation::conversation_messages(&contact.pairwise_conversation)
+                .expect(womp!())
+                .is_empty()
+        );
     }
 
     #[test]
@@ -932,7 +789,6 @@ mod tests {
         let id1 = "id1".try_into().expect(womp!());
         let id2 = "id2".try_into().expect(womp!());
 
-        let handle = ContactsHandle::new();
         let conv_id = ConversationId::from([0; 32]);
 
         ContactBuilder::new(id1)
@@ -944,27 +800,20 @@ mod tests {
             .add()
             .expect(womp!("Failed to add id2"));
 
-        let contacts = handle.all().expect(womp!());
+        let contacts = all().expect(womp!());
 
-        handle
-            .add_member(&conv_id, contacts[0].id)
-            .expect(womp!("failed to add member"));
+        crate::members::add_member(&conv_id, contacts[0].id).expect(womp!("failed to add member"));
 
-        let members = handle
-            .conversation_members(&conv_id)
-            .expect(womp!("failed to get members"));
+        let members = conversation_members(&conv_id).expect(womp!("failed to get members"));
 
         assert_eq!(members.len(), 2);
 
         assert_eq!(members[0].id, id1);
 
-        handle
-            .remove_member(&conv_id, contacts[0].id)
+        crate::members::remove_member(&conv_id, contacts[0].id)
             .expect(womp!("failed to remove member"));
 
-        let members_new = handle
-            .conversation_members(&conv_id)
-            .expect(womp!("failed to get members"));
+        let members_new = conversation_members(&conv_id).expect(womp!("failed to get members"));
 
         assert_eq!(members_new.len(), 1);
         //is the correct member remaining?
@@ -979,15 +828,13 @@ mod tests {
         let id1 = "Hello".try_into().expect(womp!());
         let id2 = "World".try_into().expect(womp!());
 
-        let handle = ContactsHandle::new();
-
         ContactBuilder::new(id1).add().expect("Failed to add id1");
         ContactBuilder::new(id2)
             .status(ContactStatus::Archived)
             .add()
             .expect("Failed to add id2");
 
-        let contacts = handle.get_by_status(ContactStatus::Active).expect(womp!());
+        let contacts = get_by_status(ContactStatus::Active).expect(womp!());
         assert_eq!(contacts.len(), 1);
         assert_eq!(contacts[0].id, id1);
     }

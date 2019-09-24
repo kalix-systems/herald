@@ -9,6 +9,8 @@ edition = "2018"
 [dependencies]
 libc = "0.2.60"
 heraldcore = {path="./heraldcore"}
+serde_cbor    = "0.10.1"
+serde         = "1.0.99"
 herald_common = {path="../common"}
 
 

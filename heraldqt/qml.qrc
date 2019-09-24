@@ -32,6 +32,8 @@
         <file>common/Divider.qml</file>
         <file>common/Theme.qml</file>
         <file>common/utils.mjs</file>
+        <file>icons/ToggleConv.png</file>
+        <file>icons/ToggleTeam.png</file>
         <file>icons/cont_filled.png</file>
         <file>icons/cont_hollow.png</file>
         <file>icons/emoji.png</file>
@@ -49,33 +51,5 @@
         <file>icons/speech_hollow.png</file>
         <file>main.cpp</file>
         <file>main.qml</file>
-        <file>+mobile/App.qml</file>
-        <file>+mobile/ChatView.qml</file>
-        <file>+mobile/LoginPage.qml</file>
-        <file>+mobile/main.qml</file>
-        <file>+mobile/SideBar.qml</file>
-        <file>+mobile/TopMenuBar.qml</file>
-        <file>+mobile/ChatView/ChatBar.qml</file>
-        <file>+mobile/ChatView/ChatBubbleForm.qml</file>
-        <file>+mobile/ChatView/ChatTextAreaKeys.qml</file>
-        <file>+mobile/ChatView/ConversationWindowForm.qml</file>
-        <file>+mobile/ChatView/ReplyComponent.qml</file>
-        <file>+mobile/ChatView/TextAreaForm.qml</file>
-        <file>+mobile/common/Avatar.qml</file>
-        <file>+mobile/common/ButtonForm.qml</file>
-        <file>+mobile/common/CommonConfig.qml</file>
-        <file>+mobile/common/CorrectText.qml</file>
-        <file>+mobile/common/Divider.qml</file>
-        <file>+mobile/common/ImageAvatar.qml</file>
-        <file>+mobile/common/Theme.qml</file>
-        <file>+mobile/SideBar/UtilityBar.qml</file>
-        <file>+mobile/SideBar/ConfigBar.qml</file>
-        <file>+mobile/SideBar/ContactsToggle.qml</file>
-        <file>+mobile/SideBar/ContactView.qml</file>
-        <file>+mobile/SideBar/ConversationView.qml</file>
-        <file>+mobile/SideBar/popups/ColorPicker.qml</file>
-        <file>+mobile/SideBar/popups/ConfigPopup.qml</file>
-        <file>+mobile/SideBar/popups/ContactClickedPopup.qml</file>
-        <file>+mobile/SideBar/popups/NewContactDialogue.qml</file>
     </qresource>
 </RCC>

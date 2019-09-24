@@ -19,7 +19,7 @@ rusqlite      = { version = "0.20.0", default_features = false, features = ["fun
 serde         = "1.0.99"
 serde_cbor    = "0.10.1"
 sodiumoxide   = "0.2"
-tokio         = "0.2.0-alpha.4"
+tokio         = "0.2.0-alpha.5"
 
 [dev-dependencies]
 serial_test        = "0.2.0"
