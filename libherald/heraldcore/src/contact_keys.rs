@@ -3,11 +3,19 @@ use crate::{
     errors::HErr,
 };
 use chainmail::{block::*, errors::Error as ChainError};
-use herald_common::{sealed, sig, Push, Signed, UserId, UserMeta};
+use herald_common::{sealed, sig, sign, Push, Signed, UserId, UserMeta};
 use rusqlite::{params, NO_PARAMS};
 
 #[derive(Default)]
 pub(crate) struct ContactKeys {}
+
+pub(crate) fn key_deprecated(k: Signed<sign::PublicKey>) -> Result<(), HErr> {
+    Ok(())
+}
+
+pub(crate) fn key_registered(k: Signed<sign::PublicKey>) -> Result<(), HErr> {
+    Ok(())
+}
 
 impl DBTable for ContactKeys {
     fn create_table() -> Result<(), HErr> {

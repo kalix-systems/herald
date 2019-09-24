@@ -43,6 +43,8 @@ pub enum Notification {
     NewContact,
     /// A new conversation has been added
     NewConversation,
+    AddContactReponse(bool),
+    AddConversationReponse(bool),
 }
 
 #[derive(Clone)]
@@ -128,8 +130,14 @@ impl PushHandler for Session {
             reply,
             notification,
         } = match push {
-            KeyRegistered(k) => unimplemented!(),
-            KeyDeprecated(k) => unimplemented!(),
+            KeyRegistered(k) => {
+                crate::contact_keys::key_registered(k);
+                Event::default()
+            }
+            KeyDeprecated(k) => {
+                crate::contact_keys::key_deprecated(k);
+                Event::default()
+            }
             NewUMessage {
                 timestamp,
                 from,
@@ -258,6 +266,7 @@ impl Session {
         &self,
         msg: &MessageToDevice,
     ) -> Result<fanout::ServerResponse, HErr> {
+        // NOTE: This currently cannot be called
         unimplemented!()
         // let fout = self.seal_dmessage(msg)?;
         // self.handle_fanout((), fout).await
@@ -354,7 +363,11 @@ impl Session {
                     }
                 };
             }
-            AddResponse(accepted) => unimplemented!(),
+            AddResponse(accepted) => {
+                event
+                    .notification
+                    .replace(Notification::AddContactReponse(accepted));
+            }
             Ack(receipt) => {
                 message_status::set_message_status(receipt.message_id, cid, receipt.update_code)?;
                 event
@@ -422,6 +435,7 @@ async fn connect_to_server() -> Result<TcpStream, HErr> {
     Ok(TcpStream::connect(*SERVER_ADDR).await?)
 }
 
+#[derive(Default)]
 struct Event {
     reply: Option<ConversationMessage>,
     notification: Option<Notification>,
