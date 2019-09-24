@@ -10,9 +10,8 @@ import QtQuick.Layouts 1.13
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
-
 ToolBar {
-   id: utilityBar
+    id: utilityBar
     property int buttonSpacing: 30
     property int marginWidth: 10
     property int iconDimLarge: 25
@@ -43,12 +42,14 @@ ToolBar {
             background: Image {
                 source: "qrc:/hamburger-icon.svg"
                 mipmap: true
-                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
+                sourceSize: Qt.size(iconDimLarge, iconDimLarge)
             }
         }
 
         // spacer
-        Item { Layout.fillWidth: true }
+        Item {
+            Layout.fillWidth: true
+        }
 
         ToolButton {
             id: searchButton
@@ -59,10 +60,9 @@ ToolBar {
             background: Image {
                 source: "qrc:/search-icon.svg"
                 mipmap: true
-                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
+                sourceSize: Qt.size(iconDimLarge, iconDimLarge)
             }
         }
-
 
         ToolButton {
             id: toggleButton
@@ -72,7 +72,7 @@ ToolBar {
             property bool teamView: false
             background: Image {
                 source: "qrc:/ToggleConv.png"
-                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
+                sourceSize: Qt.size(iconDimLarge, iconDimLarge)
             }
         }
 
@@ -86,9 +86,8 @@ ToolBar {
             background: Image {
                 source: "qrc:/options-icon.svg"
                 height: iconDimLarge
-                sourceSize: Qt.size(iconDimLarge,iconDimLarge)
+                sourceSize: Qt.size(iconDimLarge, iconDimLarge)
             }
         }
-
     }
 }

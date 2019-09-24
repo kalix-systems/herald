@@ -26,19 +26,19 @@ Page {
         }
     }
 
-   header:
-       Item {
-         height: 0
-       Button {
-        id: backButton
-        text: "◄"
-        font.pixelSize: 50
-        background: Item {}
-        anchors {
-            left: parent.left
+    header: Item {
+        height: 0
+        Button {
+            id: backButton
+            text: "◄"
+            font.pixelSize: 50
+            background: Item {
+            }
+            anchors {
+                left: parent.left
+            }
         }
-      }
-   }
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -95,7 +95,6 @@ Page {
                     Label {
                         anchors.margins: QmlCfg.margin
                         text: "3 - 250 characters in length."
-
                     }
                 }
 
@@ -121,7 +120,7 @@ Page {
                     Label {
                         text: "Only alphanumeric and punctuation characters."
                         wrapMode: Label.WordWrap
-                        width:  widthUnit * 75
+                        width: widthUnit * 75
                     }
                 }
             }
@@ -137,8 +136,10 @@ Page {
                 height: 50
                 background: Rectangle {
                     radius: QmlCfg.radius
-                    anchors.fill:parent
-                    color: submitButton.pressed ?  Qt.darker("lightblue", 1.4) : Qt.darker("lightblue", 1.9)
+                    anchors.fill: parent
+                    color: submitButton.pressed ? Qt.darker("lightblue",
+                                                            1.4) : Qt.darker(
+                                                      "lightblue", 1.9)
                     Text {
                         anchors.centerIn: parent
                         color: "white"

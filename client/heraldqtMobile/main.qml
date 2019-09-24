@@ -21,7 +21,8 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        sourceComponent: App {}
+        sourceComponent: App {
+        }
     }
 
     Loader {
@@ -31,5 +32,4 @@ ApplicationWindow {
         sourceComponent: LoginPage {
         }
     }
-
 }

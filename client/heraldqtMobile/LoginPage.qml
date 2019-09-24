@@ -6,36 +6,36 @@ import LibHerald 1.0
 import "LoginPage" as LP
 
 Page {
-   id: loginPage
+    id: loginPage
 
-   LP.LoginLandingPage {
+    LP.LoginLandingPage {
         id: llp
         // button of the same name
         registerThisDevice {
             onClicked: {
-                loginStackView.push(lnd);
+                loginStackView.push(lnd)
             }
         }
         // button of the same name
         registerWithExistingDevice {
             onClicked: {
-                loginStackView.push(lnd);
+                loginStackView.push(lnd)
             }
         }
-   }
+    }
 
-  LP.LoginNewDevice {
-       id: lnd
-       backButton {
-         onClicked: loginStackView.pop();
-       }
-       submitButton {
-         onClicked: {
-               //todo: ease a transition in here
-               heraldState.setConfigId(entryFieldText.trim())
-           }
-       }
-   }
+    LP.LoginNewDevice {
+        id: lnd
+        backButton {
+            onClicked: loginStackView.pop()
+        }
+        submitButton {
+            onClicked: {
+                //todo: ease a transition in here
+                heraldState.setConfigId(entryFieldText.trim())
+            }
+        }
+    }
 
     StackView {
         id: loginStackView
@@ -50,18 +50,17 @@ Page {
         initialItem: llp
     }
 
-
-    footer : Button {
-            id: footerLink
-            implicitHeight: 50
-            background: Rectangle {
-                height: parent.height
-                color: Qt.darker("lightblue", 2.5)
-                Text {
-                    color: "white"
-                    text: "Terms of Service ➤"
-                    anchors.centerIn: parent
+    footer: Button {
+        id: footerLink
+        implicitHeight: 50
+        background: Rectangle {
+            height: parent.height
+            color: Qt.darker("lightblue", 2.5)
+            Text {
+                color: "white"
+                text: "Terms of Service ➤"
+                anchors.centerIn: parent
             }
-         }
-      }
+        }
+    }
 }

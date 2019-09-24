@@ -3,7 +3,6 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
 
-
 // Reveiw Key
 // OS Dependent: OSD
 // Global State: GS
@@ -21,7 +20,7 @@ Row {
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
-    property int shape : 0
+    property int shape: 0
     property bool labeled: true /// whether or not to show the name
     property bool isDefault: true /// should be isInverted
 
