@@ -41,7 +41,7 @@ ToolBar {
             Layout.preferredWidth: iconDimLarge
             property bool searchRegex: false
             background: Image {
-                source: "../heraldqt/icons/hamburger-icon.svg"
+                source: "qrc:/hamburger-icon.svg"
                 mipmap: true
                 sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
@@ -57,7 +57,7 @@ ToolBar {
             implicitWidth: iconDimLarge
             property bool searchRegex: false
             background: Image {
-                source: "../heraldqt/icons/search-icon.svg"
+                source: "qrc:/search-icon.svg"
                 mipmap: true
                 sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
@@ -71,7 +71,7 @@ ToolBar {
             implicitWidth: iconDimLarge
             property bool teamView: false
             background: Image {
-                source: "../heraldqt/icons/ToggleConv.png"
+                source: "qrc:/ToggleConv.png"
                 sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }
         }
@@ -84,7 +84,7 @@ ToolBar {
             Layout.bottomMargin: marginWidth
             font.bold: true
             background: Image {
-                source: "../heraldqt/icons/options-icon.svg"
+                source: "qrc:/options-icon.svg"
                 height: iconDimLarge
                 sourceSize: Qt.size(iconDimLarge,iconDimLarge)
             }

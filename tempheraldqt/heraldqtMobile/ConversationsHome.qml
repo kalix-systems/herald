@@ -1,9 +1,8 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
-import "qrc:///../heraldqtCommon"
-Page {
 
+Page {
  header: UtilityBar {
    buttonSpacing: 30
    marginWidth: QmlCfg.margin
@@ -27,7 +26,7 @@ Page {
         color: QmlCfg.palette.secondaryColor
         anchors.fill: parent
         Image {
-            source: "../heraldqt/icons/plus-icon.svg"
+            source: "plus-icon.svg"
             sourceSize: Qt.size(48,48)
             anchors.fill: parent
         }

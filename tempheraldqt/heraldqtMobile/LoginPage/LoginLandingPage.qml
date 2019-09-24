@@ -48,7 +48,7 @@ Page {
            Image {
                Layout.alignment: Qt.AlignTop
                id: image
-               source: "qrc:///../heraldqt/icons/mary.png"
+               source: "qrc:/mary.png"
                width: heightUnit * 20
                height: width
            }

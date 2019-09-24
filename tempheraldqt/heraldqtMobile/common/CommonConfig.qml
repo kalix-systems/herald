@@ -10,10 +10,7 @@ import QtQuick 2.13
 // Factor Component: FC
 // FS: Fix scoping
 Item {
-    Theme {
-        id: themeEnum
-    }
-    property int theme: themeEnum.light /// user settable
+    property int theme: 0 /// user settable
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
@@ -61,14 +58,14 @@ Item {
     Component.onCompleted: {
         switch (theme) {
             /// none of these besides Light implemented ATM
-            case (themeEnum.light):
+            case (0):
             avatarColors = ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
             break
-            case (themeEnum.dark):
+            case (1):
             break
-            case (themeEnum.solarizedDark):
+            case (2):
             break
-            case (themeEnum.solarizedLight):
+            case (3):
             break
         }
     }

@@ -88,7 +88,7 @@ Page {
                 Row {
                     spacing: QmlCfg.margin
                     Image {
-                        source: "qrc:///../heraldqt/icons/mary.png"
+                        source: "qrc:/mary.png"
                         width: 20
                         height: width
                     }
@@ -102,7 +102,7 @@ Page {
                 Row {
                     spacing: QmlCfg.margin
                     Image {
-                        source: "qrc:///../heraldqt/icons/mary.png"
+                        source: "qrc:mary.png"
                         width: 20
                         height: width
                     }
@@ -114,7 +114,7 @@ Page {
                 Row {
                     spacing: QmlCfg.margin
                     Image {
-                        source: "qrc:///../heraldqt/icons/mary.png"
+                        source: "qrc:/mary.png"
                         width: 20
                         height: width
                     }
