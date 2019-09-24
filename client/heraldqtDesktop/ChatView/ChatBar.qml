@@ -16,7 +16,6 @@ import "../common/utils.mjs" as Utils
 ToolBar {
     /// GS: this should be bound to global state
     property alias chatBarAvatar: chatBarAvatar
-    // NPB: wat.
     property var currentAvatar: {
         Utils.unwrapOr(sideBar.conversationsListView.currentItem, {
                            "conversationAvatar": Qt.createComponent(
