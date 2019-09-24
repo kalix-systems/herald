@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Avatar.qml</file>
+        <file>CommonConfig.qml</file>
+        <file>ConversationList.qml</file>
+        <file>qmldir</file>
+        <file>UtilityBar.qml</file>
+    </qresource>
+</RCC>
