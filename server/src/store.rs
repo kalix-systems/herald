@@ -49,304 +49,302 @@ pub trait Store {
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
-mod pgstore {
-    use super::*;
-    use crate::schema::*;
-    use diesel::{
-        dsl::*,
-        result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
-    };
+use super::*;
+use crate::schema::*;
+use diesel::{
+    dsl::*,
+    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
+};
 
-    fn unique_violation_to_redundant<T>(
-        query_res: QueryResult<T>,
-    ) -> Result<pubkey::ServerResponse, Error> {
-        match query_res {
-            Err(DatabaseError(UniqueViolation, _)) => Ok(pubkey::ServerResponse::Redundant),
-            a => {
-                a?;
-                Ok(pubkey::ServerResponse::Success)
-            }
-        }
-    }
-
-    impl Store for PgConnection {
-        // TODO implement the appropriate traits for this
-        // TODO read about postgres performance
-        fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
-            use crate::schema::userkeys::dsl::*;
-
-            Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self)?)
-        }
-
-        fn add_prekey(
-            &mut self,
-            key: sig::PublicKey,
-            pre: sealed::PublicKey,
-        ) -> Result<pubkey::ServerResponse, Error> {
-            use crate::schema::prekeys::dsl::*;
-
-            let res = diesel::insert_into(prekeys)
-                .values((
-                    signing_key.eq(key.as_ref()),
-                    sealed_key.eq(serde_cbor::to_vec(&pre)?),
-                ))
-                .execute(self);
-
-            unique_violation_to_redundant(res)
-        }
-
-        fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
-            use crate::schema::prekeys::dsl::*;
-
-            let raw_pk: Vec<u8> = prekeys
-                .filter(signing_key.eq(key.as_ref()))
-                .select(sealed_key)
-                .limit(1)
-                .get_result(self)?;
-
-            Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
-        }
-
-        fn add_key(
-            &mut self,
-            user_id_arg: UserId,
-            new_key: Signed<sig::PublicKey>,
-        ) -> Result<pubkey::ServerResponse, Error> {
-            let res = diesel::insert_into(keys::table)
-                .values((
-                    keys::key.eq(new_key.data().as_ref()),
-                    keys::signed_by.eq(new_key.signed_by().as_ref()),
-                    keys::ts.eq(new_key.timestamp()),
-                    keys::signature.eq(new_key.sig().as_ref()),
-                ))
-                .execute(self);
-
-            unique_violation_to_redundant(res)?;
-
-            let res = diesel::insert_into(userkeys::table)
-                .values((
-                    userkeys::user_id.eq(user_id_arg.as_str()),
-                    userkeys::key.eq(new_key.data().as_ref()),
-                ))
-                .execute(self);
-
-            unique_violation_to_redundant(res)
-        }
-
-        fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-            let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
-                Vec<u8>,
-                Vec<u8>,
-                DateTime<Utc>,
-                Option<Vec<u8>>,
-                Option<Vec<u8>>,
-                Option<DateTime<Utc>>,
-            ) = keys::table
-                .filter(keys::key.eq(key_arg.as_ref()))
-                .select((
-                    keys::signed_by,
-                    keys::signature,
-                    keys::ts,
-                    keys::dep_signed_by,
-                    keys::dep_signature,
-                    keys::dep_ts,
-                ))
-                .get_result(self)?;
-
-            dbg!(sig.len());
-            dbg!(signed_by.len());
-
-            let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
-            let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
-            let sig_meta = SigMeta::new(sig, signed_by, ts);
-
-            let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
-
-            let dep_sig_meta = if dep_is_some {
-                let dep_ts = dep_ts.ok_or(MissingData)?;
-
-                let dep_signed_by = sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
-                    .ok_or(InvalidKey)?;
-
-                let dep_signature = sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
-                    .ok_or(InvalidSig)?;
-
-                Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
-            } else {
-                None
-            };
-
-            Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
-        }
-
-        fn deprecate_key(
-            &mut self,
-            signed_key: Signed<sig::PublicKey>,
-        ) -> Result<pubkey::ServerResponse, Error> {
-            use crate::schema::keys::dsl::*;
-
-            let (data, meta) = signed_key.split();
-            let filter = keys
-                .filter(key.eq(data.as_ref()))
-                .filter(dep_ts.is_null())
-                .filter(dep_signature.is_null())
-                .filter(dep_signed_by.is_null());
-
-            let num_updated = update(filter)
-                .set((
-                    dep_ts.eq(meta.timestamp().naive_utc()),
-                    dep_signed_by.eq(meta.signed_by().as_ref()),
-                    dep_signature.eq(meta.sig().as_ref()),
-                ))
-                .execute(self)?;
-
-            if num_updated != 1 {
-                return Ok(pubkey::ServerResponse::Redundant);
-            }
-
+fn unique_violation_to_redundant<T>(
+    query_res: QueryResult<T>,
+) -> Result<pubkey::ServerResponse, Error> {
+    match query_res {
+        Err(DatabaseError(UniqueViolation, _)) => Ok(pubkey::ServerResponse::Redundant),
+        a => {
+            a?;
             Ok(pubkey::ServerResponse::Success)
         }
+    }
+}
 
-        fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
-            use crate::schema::userkeys::dsl::*;
+impl Store for PgConnection {
+    // TODO implement the appropriate traits for this
+    // TODO read about postgres performance
+    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+        use crate::schema::userkeys::dsl::*;
 
-            let query = userkeys.filter(user_id.eq(uid.as_str()));
+        Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self)?)
+    }
 
-            Ok(select(exists(query)).get_result(self)?)
+    fn add_prekey(
+        &mut self,
+        key: sig::PublicKey,
+        pre: sealed::PublicKey,
+    ) -> Result<pubkey::ServerResponse, Error> {
+        use crate::schema::prekeys::dsl::*;
+
+        let res = diesel::insert_into(prekeys)
+            .values((
+                signing_key.eq(key.as_ref()),
+                sealed_key.eq(serde_cbor::to_vec(&pre)?),
+            ))
+            .execute(self);
+
+        unique_violation_to_redundant(res)
+    }
+
+    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
+        use crate::schema::prekeys::dsl::*;
+
+        let raw_pk: Vec<u8> = prekeys
+            .filter(signing_key.eq(key.as_ref()))
+            .select(sealed_key)
+            .limit(1)
+            .get_result(self)?;
+
+        Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
+    }
+
+    fn add_key(
+        &mut self,
+        user_id_arg: UserId,
+        new_key: Signed<sig::PublicKey>,
+    ) -> Result<pubkey::ServerResponse, Error> {
+        let res = diesel::insert_into(keys::table)
+            .values((
+                keys::key.eq(new_key.data().as_ref()),
+                keys::signed_by.eq(new_key.signed_by().as_ref()),
+                keys::ts.eq(new_key.timestamp()),
+                keys::signature.eq(new_key.sig().as_ref()),
+            ))
+            .execute(self);
+
+        unique_violation_to_redundant(res)?;
+
+        let res = diesel::insert_into(userkeys::table)
+            .values((
+                userkeys::user_id.eq(user_id_arg.as_str()),
+                userkeys::key.eq(new_key.data().as_ref()),
+            ))
+            .execute(self);
+
+        unique_violation_to_redundant(res)
+    }
+
+    fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): (
+            Vec<u8>,
+            Vec<u8>,
+            DateTime<Utc>,
+            Option<Vec<u8>>,
+            Option<Vec<u8>>,
+            Option<DateTime<Utc>>,
+        ) = keys::table
+            .filter(keys::key.eq(key_arg.as_ref()))
+            .select((
+                keys::signed_by,
+                keys::signature,
+                keys::ts,
+                keys::dep_signed_by,
+                keys::dep_signature,
+                keys::dep_ts,
+            ))
+            .get_result(self)?;
+
+        dbg!(sig.len());
+        dbg!(signed_by.len());
+
+        let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
+        let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
+        let sig_meta = SigMeta::new(sig, signed_by, ts);
+
+        let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
+
+        let dep_sig_meta = if dep_is_some {
+            let dep_ts = dep_ts.ok_or(MissingData)?;
+
+            let dep_signed_by =
+                sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
+
+            let dep_signature =
+                sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
+
+            Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
+        } else {
+            None
+        };
+
+        Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
+    }
+
+    fn deprecate_key(
+        &mut self,
+        signed_key: Signed<sig::PublicKey>,
+    ) -> Result<pubkey::ServerResponse, Error> {
+        use crate::schema::keys::dsl::*;
+
+        let (data, meta) = signed_key.split();
+        let filter = keys
+            .filter(key.eq(data.as_ref()))
+            .filter(dep_ts.is_null())
+            .filter(dep_signature.is_null())
+            .filter(dep_signed_by.is_null());
+
+        let num_updated = update(filter)
+            .set((
+                dep_ts.eq(meta.timestamp().naive_utc()),
+                dep_signed_by.eq(meta.signed_by().as_ref()),
+                dep_signature.eq(meta.sig().as_ref()),
+            ))
+            .execute(self)?;
+
+        if num_updated != 1 {
+            return Ok(pubkey::ServerResponse::Redundant);
         }
 
-        fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
-            use crate::schema::userkeys::dsl::*;
+        Ok(pubkey::ServerResponse::Success)
+    }
 
-            let query = userkeys
-                .filter(key.eq(key_arg.as_ref()))
-                .inner_join(keys::table)
-                .filter(keys::dep_ts.is_null())
-                .filter(keys::dep_signed_by.is_null())
-                .filter(keys::dep_signature.is_null());
+    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
+        use crate::schema::userkeys::dsl::*;
 
-            Ok(select(exists(query)).get_result(self)?)
+        let query = userkeys.filter(user_id.eq(uid.as_str()));
+
+        Ok(select(exists(query)).get_result(self)?)
+    }
+
+    fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
+        use crate::schema::userkeys::dsl::*;
+
+        let query = userkeys
+            .filter(key.eq(key_arg.as_ref()))
+            .inner_join(keys::table)
+            .filter(keys::dep_ts.is_null())
+            .filter(keys::dep_signed_by.is_null())
+            .filter(keys::dep_signature.is_null());
+
+        Ok(select(exists(query)).get_result(self)?)
+    }
+
+    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
+        let keys: Vec<(
+            Vec<u8>,
+            Vec<u8>,
+            DateTime<Utc>,
+            Vec<u8>,
+            Option<DateTime<Utc>>,
+            Option<Vec<u8>>,
+            Option<Vec<u8>>,
+        )> = userkeys::table
+            .filter(userkeys::user_id.eq(uid.as_str()))
+            .inner_join(keys::table)
+            .select((
+                keys::key,
+                keys::signed_by,
+                keys::ts,
+                keys::signature,
+                keys::dep_ts,
+                keys::dep_signed_by,
+                keys::dep_signature,
+            ))
+            .get_results(self)?;
+
+        let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
+            .into_iter()
+            .map(
+                |(
+                    key,
+                    signed_by,
+                    creation_ts,
+                    signature,
+                    deprecation_ts,
+                    dep_signed_by,
+                    dep_signature,
+                )| {
+                    let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
+                    let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
+                    let timestamp = creation_ts;
+                    let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
+
+                    let dep_is_some = deprecation_ts.is_some()
+                        || dep_signed_by.is_some()
+                        || dep_signature.is_some();
+
+                    let dep_sig_meta = if dep_is_some {
+                        let dep_sig =
+                            sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
+                                .ok_or(InvalidSig)?;
+
+                        let dep_signed_by =
+                            sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
+                                .ok_or(InvalidKey)?;
+
+                        let dep_ts = deprecation_ts.ok_or(MissingData)?;
+
+                        Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
+                    } else {
+                        None
+                    };
+
+                    let sig_meta = SigMeta::new(signature, signed_by, timestamp);
+                    let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
+                    Ok((key, pkmeta))
+                },
+            )
+            .collect();
+
+        Ok(UserMeta { keys: meta_inner? })
+    }
+
+    fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
+        let push_row_id: i64 = {
+            use crate::schema::pushes::dsl::*;
+
+            let push_vec = serde_cbor::to_vec(&msg)?;
+            insert_into(pushes)
+                .values(push_data.eq(push_vec))
+                .returning(push_id)
+                .get_result(self)?
+        };
+
+        use crate::schema::pending::dsl::*;
+
+        let keys: Vec<_> = key_arg
+            .into_iter()
+            .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
+            .collect();
+
+        insert_into(pending).values(keys).execute(self)?;
+
+        Ok(())
+    }
+
+    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
+        let pushes: Vec<Vec<u8>> = pending::table
+            .inner_join(pushes::table)
+            .filter(pending::key.eq(key.as_ref()))
+            .select(pushes::push_data)
+            .get_results(self)?;
+
+        let mut out = Vec::with_capacity(pushes.len());
+
+        for p in pushes.into_iter() {
+            out.push(serde_cbor::from_slice(&p)?);
         }
 
-        fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
-            let keys: Vec<(
-                Vec<u8>,
-                Vec<u8>,
-                DateTime<Utc>,
-                Vec<u8>,
-                Option<DateTime<Utc>>,
-                Option<Vec<u8>>,
-                Option<Vec<u8>>,
-            )> = userkeys::table
-                .filter(userkeys::user_id.eq(uid.as_str()))
-                .inner_join(keys::table)
-                .select((
-                    keys::key,
-                    keys::signed_by,
-                    keys::ts,
-                    keys::signature,
-                    keys::dep_ts,
-                    keys::dep_signed_by,
-                    keys::dep_signature,
-                ))
-                .get_results(self)?;
+        Ok(out)
+    }
 
-            let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
-                .into_iter()
-                .map(
-                    |(
-                        key,
-                        signed_by,
-                        creation_ts,
-                        signature,
-                        deprecation_ts,
-                        dep_signed_by,
-                        dep_signature,
-                    )| {
-                        let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
-                        let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
-                        let timestamp = creation_ts;
-                        let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
+    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
+        let push_ids = pending::table
+            .inner_join(pushes::table)
+            .filter(pending::key.eq(key.as_ref()))
+            .select(pushes::push_id);
 
-                        let dep_is_some = deprecation_ts.is_some()
-                            || dep_signed_by.is_some()
-                            || dep_signature.is_some();
+        delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self)?;
 
-                        let dep_sig_meta = if dep_is_some {
-                            let dep_sig =
-                                sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
-                                    .ok_or(InvalidSig)?;
-
-                            let dep_signed_by =
-                                sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
-                                    .ok_or(InvalidKey)?;
-
-                            let dep_ts = deprecation_ts.ok_or(MissingData)?;
-
-                            Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
-                        } else {
-                            None
-                        };
-
-                        let sig_meta = SigMeta::new(signature, signed_by, timestamp);
-                        let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
-                        Ok((key, pkmeta))
-                    },
-                )
-                .collect();
-
-            Ok(UserMeta { keys: meta_inner? })
-        }
-
-        fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
-            let push_row_id: i64 = {
-                use crate::schema::pushes::dsl::*;
-
-                let push_vec = serde_cbor::to_vec(&msg)?;
-                insert_into(pushes)
-                    .values(push_data.eq(push_vec))
-                    .returning(push_id)
-                    .get_result(self)?
-            };
-
-            use crate::schema::pending::dsl::*;
-
-            let keys: Vec<_> = key_arg
-                .into_iter()
-                .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
-                .collect();
-
-            insert_into(pending).values(keys).execute(self)?;
-
-            Ok(())
-        }
-
-        fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
-            let pushes: Vec<Vec<u8>> = pending::table
-                .inner_join(pushes::table)
-                .filter(pending::key.eq(key.as_ref()))
-                .select(pushes::push_data)
-                .get_results(self)?;
-
-            let mut out = Vec::with_capacity(pushes.len());
-
-            for p in pushes.into_iter() {
-                out.push(serde_cbor::from_slice(&p)?);
-            }
-
-            Ok(out)
-        }
-
-        fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
-            let push_ids = pending::table
-                .inner_join(pushes::table)
-                .filter(pending::key.eq(key.as_ref()))
-                .select(pushes::push_id);
-
-            delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self)?;
-
-            Ok(())
-        }
+        Ok(())
     }
 }
 
