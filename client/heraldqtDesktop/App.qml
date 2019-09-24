@@ -14,7 +14,9 @@ Item {
     property int gsSelectedIndex: -1
     property color gsConvoColor
     property var gsConvoItemMembers
+    //get rid of this
     property bool gsContactsSearch: true
+    property var gsCurrentConvo
 
     onGsContactsSearchChanged: {
         gsConversationId = undefined
