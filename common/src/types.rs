@@ -152,8 +152,16 @@ pub mod query {
 pub enum Push {
     KeyRegistered(Signed<sign::PublicKey>),
     KeyDeprecated(Signed<sign::PublicKey>),
-    NewUMessage { from: GlobalId, msg: Bytes },
-    NewDMessage { from: GlobalId, msg: Bytes },
+    NewUMessage {
+        timestamp: DateTime<Utc>,
+        from: GlobalId,
+        msg: Bytes,
+    },
+    NewDMessage {
+        timestamp: DateTime<Utc>,
+        from: GlobalId,
+        msg: Bytes,
+    },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
