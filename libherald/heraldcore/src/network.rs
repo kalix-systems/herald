@@ -242,6 +242,16 @@ impl Session {
         Ok((notifier, this))
     }
 
+    pub async fn send_umessage(&self, msg: &ConversationMessage) -> Result<fanout::Response, HErr> {
+        let fout = self.seal_umessage(msg)?;
+        self.handle_fanout(fout).await
+    }
+
+    pub async fn send_dmessage(&self, msg: &MessageToDevice) -> Result<fanout::Response, HErr> {
+        let fout = self.seal_dmessage(msg)?;
+        self.handle_fanout(fout).await
+    }
+
     fn new() -> (
         Receiver<Notification>,
         Receiver<(QID, MessageToServer)>,
