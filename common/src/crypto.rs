@@ -1,7 +1,23 @@
+use crate::*;
 pub use chrono::prelude::*;
 pub use serde::*;
-
 pub use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
+
+new_type! {
+    /// A unique identifier
+    public UQ(32)
+}
+
+impl UQ {
+    /// Generate a new `[UQ]`. Guaranteed never to collide with another instance.
+    pub fn new() -> Self {
+        use sodiumoxide::randombytes::randombytes_into;
+        sodiumoxide::init().expect("failed to init libsodium - what have you done");
+        let mut buf = [0u8; 32];
+        randombytes_into(&mut buf);
+        UQ(buf)
+    }
+}
 
 /// How far in the future a signature can be stamped and still considered valid, in seconds.
 pub const TIMESTAMP_FUZZ: i64 = 3600;

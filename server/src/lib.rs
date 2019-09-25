@@ -1,4 +1,6 @@
 #![feature(try_blocks)]
+// #![allow(warnings)]
+#![allow(unused_imports)]
 
 #[macro_use]
 extern crate diesel;

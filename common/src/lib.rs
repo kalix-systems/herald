@@ -1,15 +1,16 @@
 #![feature(try_blocks)]
+#![allow(warnings)]
 
 mod crypto;
 pub use crypto::*;
-mod types;
-#[cfg(feature = "rusqlite_")]
-mod rusqlite_impls;
 #[cfg(feature = "diesel_pg")]
 mod diesel_impls;
+#[cfg(feature = "rusqlite_")]
+mod rusqlite_impls;
+mod types;
 pub use types::*;
-mod traits;
-pub use traits::*;
+#[macro_use]
+mod newtype_macros;
 
 pub use async_trait::*;
 pub use bytes::Bytes;

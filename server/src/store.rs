@@ -35,25 +35,23 @@ pub trait Store {
         &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
-    ) -> Result<pubkey::ServerResponse, Error>;
+    ) -> Result<PKIResponse, Error>;
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
-    ) -> Result<pubkey::ServerResponse, Error>;
+    ) -> Result<PKIResponse, Error>;
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-    fn deprecate_key(
-        &mut self,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<pubkey::ServerResponse, Error>;
+    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+    // TODO: replace these w/methods that get first n, remove first n, in insertion order
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
@@ -86,14 +84,12 @@ impl DerefMut for Conn {
     }
 }
 
-fn unique_violation_to_redundant<T>(
-    query_res: QueryResult<T>,
-) -> Result<pubkey::ServerResponse, Error> {
+fn unique_violation_to_redundant<T>(query_res: QueryResult<T>) -> Result<PKIResponse, Error> {
     match query_res {
-        Err(DatabaseError(UniqueViolation, _)) => Ok(pubkey::ServerResponse::Redundant),
+        Err(DatabaseError(UniqueViolation, _)) => Ok(PKIResponse::Redundant),
         a => {
             a?;
-            Ok(pubkey::ServerResponse::Success)
+            Ok(PKIResponse::Success)
         }
     }
 }
@@ -130,7 +126,7 @@ impl Store for Conn {
         &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
-    ) -> Result<pubkey::ServerResponse, Error> {
+    ) -> Result<PKIResponse, Error> {
         use crate::schema::prekeys::dsl::*;
 
         let res = diesel::insert_into(prekeys)
@@ -159,7 +155,7 @@ impl Store for Conn {
         &mut self,
         user_id_arg: UserId,
         new_key: Signed<sig::PublicKey>,
-    ) -> Result<pubkey::ServerResponse, Error> {
+    ) -> Result<PKIResponse, Error> {
         let res = diesel::insert_into(keys::table)
             .values((
                 keys::key.eq(new_key.data().as_ref()),
@@ -217,10 +213,7 @@ impl Store for Conn {
         Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
     }
 
-    fn deprecate_key(
-        &mut self,
-        signed_key: Signed<sig::PublicKey>,
-    ) -> Result<pubkey::ServerResponse, Error> {
+    fn deprecate_key(&mut self, signed_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
         use crate::schema::keys::dsl::*;
 
         let (data, meta) = signed_key.split();
@@ -239,10 +232,10 @@ impl Store for Conn {
             .execute(self.deref_mut())?;
 
         if num_updated != 1 {
-            return Ok(pubkey::ServerResponse::Redundant);
+            return Ok(PKIResponse::Redundant);
         }
 
-        Ok(pubkey::ServerResponse::Success)
+        Ok(PKIResponse::Success)
     }
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
@@ -568,7 +561,7 @@ mod tests {
         conn.deprecate_key(signed_pk).unwrap();
 
         match conn.deprecate_key(signed_pk) {
-            Ok(pubkey::ServerResponse::Redundant) => {}
+            Ok(PKIResponse::Redundant) => {}
             _ => panic!(),
         }
     }
