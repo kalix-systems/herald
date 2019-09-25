@@ -10,14 +10,15 @@ use tokio::sync::mpsc::{
 use warp::filters::ws;
 use warp::{Future as WFut, Stream as WStream};
 
-pub const CHUNK_SIZE: usize = 256;
-
 impl State {
-    pub async fn login(&self, ws: ws::WebSocket) -> Result<(), Error> {
+    pub async fn login<W, E>(&self, mut ws: W) -> Result<(), Error>
+    where
+        W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
+        Error: From<E>,
+    {
         use login::*;
 
         let mut store = self.new_connection()?;
-        let mut ws = ws.sink_compat();
 
         let bytes = UQ::new();
 
@@ -62,16 +63,15 @@ impl State {
         Ok(())
     }
 
-    pub async fn catchup<S, Ws, E>(
+    async fn catchup<S, W, E>(
         &self,
         did: sign::PublicKey,
         s: &mut S,
-        ws: &mut Ws,
+        ws: &mut W,
     ) -> Result<(), Error>
     where
         S: Store,
-        Ws: Stream<Item = Result<ws::Message, warp::Error>> + Unpin,
-        Ws: Sink<ws::Message, Error = E> + Unpin,
+        W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
         Error: From<E>,
     {
         use catchup::*;
