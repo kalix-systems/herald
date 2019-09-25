@@ -61,13 +61,9 @@ Page {
         height: parent.height
         dragMargin: QmlCfg.margin * 2
 
-        Column {
+        TeamColumn {
             id: teamColumn
-            width: homeDrawer.width * 0.33
-            anchors.left: parent.left
             height: parent.height
-
-
         }
 
         Rectangle {

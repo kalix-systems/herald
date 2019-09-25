@@ -1,3 +1,4 @@
 module HeraldQtCommon
 UtilityBar 1.0 UtilityBar.qml
+TeamColumn 1.0 TeamColumn.qml
 ConversationList 1.0 ConversationList.qml
