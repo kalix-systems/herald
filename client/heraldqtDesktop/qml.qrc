@@ -35,5 +35,6 @@
         <file>common/Theme.qml</file>
         <file>common/utils.mjs</file>
         <file>main.qml</file>
+        <file>SideBar/SearchComponent.qml</file>
     </qresource>
 </RCC>

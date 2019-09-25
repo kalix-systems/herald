@@ -205,7 +205,7 @@ impl ConversationsTrait for Conversations {
                 matched: true,
             })
             .collect();
-        self.model.begin_insert_rows(0, list.len());
+        self.model.begin_insert_rows(0, list.len().saturating_sub(1));
         self.list = list;
         self.model.end_insert_rows();
 

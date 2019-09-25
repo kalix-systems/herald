@@ -18,7 +18,6 @@ import "popups" as Popups
 /// --- displays a list of conversations
 ListView {
     id: conversationList
-    visible: !gsContactsSearch
 
     clip: true
     currentIndex: -1
@@ -61,6 +60,7 @@ ListView {
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
+                height: 2
             }
 
             anchors.fill: parent

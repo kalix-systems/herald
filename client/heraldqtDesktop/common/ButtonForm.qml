@@ -5,6 +5,7 @@ import LibHerald 1.0
 
 Button {
     property string source
+    property alias scale: background.scale
     height: 25
     width: height
     background: Image {

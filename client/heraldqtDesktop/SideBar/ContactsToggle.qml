@@ -5,13 +5,14 @@ import QtGraphicalEffects 1.13
 import LibHerald 1.0
 
 ToolBar {
+    visible: false
     anchors {
         left: parent.left
         right: parent.right
         top: parent.top
     }
 
-    height: QmlCfg.toolbarHeight
+    height: 0 //QmlCfg.toolbarHeight
 
     background: Rectangle {
         color: QmlCfg.palette.mainColor

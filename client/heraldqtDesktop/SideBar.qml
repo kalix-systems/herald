@@ -36,26 +36,49 @@ Pane {
         id: toolBar
     }
 
+    Common.Divider {
+        id: configBarBorder
+        anchors.bottom: utilityBar.top
+        color: "black"
+        height: 2
+    }
+
     ///--- SearchBar for contacts, add contact button
     SBUtils.UtilityBar {
         id: utilityBar
         anchors.top: toolBar.bottom
+
+        Loader {
+            property string searchPlaceholder: ""
+            property bool contactsSearch: false
+            anchors.fill: parent
+            id: searchLoader
+        }
+    }
+
+    SBUtils.SearchComponent {
+        id: searchBarComponent
     }
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
         anchors.top: utilityBar.bottom
-        color: QmlCfg.palette.secondaryColor
+        color: "black"
+        height: 1.5
     }
+
+
 
     SBUtils.ContactsToggle {
         id: contactsToggleBar
         anchors.top: searchBarBorder.bottom
     }
 
+
     ///--- Contacts View Actual
     Pane {
+        id: convoPane
         padding: 0
         anchors {
             right: parent.right
@@ -66,6 +89,7 @@ Pane {
 
         SBUtils.ContactView {
             id: contactsListView
+            visible: false
             anchors.fill: parent
             model: contactsModel
         }
@@ -75,5 +99,54 @@ Pane {
             anchors.fill: parent
             model: conversationsModel
         }
+
+        states: [ State {name: "newContactState"
+                PropertyChanges {
+                    target: convoPane
+                    visible: false
+                }
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: searchBarComponent
+                    searchPlaceholder: "Enter full name or username"
+                }
+
+        },
+
+            State {name: "conversationSearch"
+                PropertyChanges {
+                    target: conversationsListView
+                    visible: true
+                }
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: searchBarComponent
+                    searchPlaceholder: "Search your conversations"
+                }
+
+            },
+
+            State {name: "newConversationState"
+                PropertyChanges {
+                    target: contactsListView
+                    visible: true
+
+                }
+                PropertyChanges {
+                    target: conversationsListView
+                    visible: false
+                }
+
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: searchBarComponent
+                    searchPlaceholder: "Enter contact name"
+                    contactsSearch: true
+                }
+
+            }
+
+
+        ]
     }
 }

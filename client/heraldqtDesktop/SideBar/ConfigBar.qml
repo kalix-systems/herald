@@ -34,7 +34,8 @@ ToolBar {
         avatarLabel: config.displayName
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.left: parent.left
+        anchors.margins: QmlCfg.margin
         // JH: Bad margin semantics
         size: parent.height - QmlCfg.margin
         isDefault: false
@@ -45,6 +46,20 @@ ToolBar {
     }
 
     Common.ButtonForm {
+        anchors {
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
+            right: configButton.left
+        }
+        source: "qrc:/add-contact-icon.svg"
+        onClicked: {
+            convoPane.state = "newContactState"
+            searchLoader.sourceComponent = searchBarComponent
+        }
+    }
+
+    Common.ButtonForm {
+        id: configButton
         anchors {
             verticalCenter: parent.verticalCenter
             rightMargin: QmlCfg.margin

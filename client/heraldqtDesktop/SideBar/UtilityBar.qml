@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.12
 import "popups" as Popups
 import "../common" as Common
 import "../common/utils.mjs" as Utils
+import "../SideBar" as SideBar
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -23,47 +24,18 @@ ToolBar {
 
     background: Rectangle {
         anchors.fill: parent
-        color: Qt.darker(QmlCfg.palette.secondaryColor, 1.2)
+        color: QmlCfg.palette.secondaryColor
     }
 
-    ScrollView {
-        id: searchScroll
-        anchors {
-            left: parent.left
-            right: searchButton.left
-            leftMargin: QmlCfg.margin
-            rightMargin: QmlCfg.margin
-            verticalCenter: parent.verticalCenter
-        }
-
-        TextArea {
-            id: searchText
-            background: Rectangle {
-                anchors.fill: parent
-                color: QmlCfg.palette.mainColor
-                radius: QmlCfg.radius
-            }
-            Keys.onPressed: {
-                // NOTE: What is the first comparison doing?
-                if (event.key === Qt.Key_Return) {
-                    event.accepted = true
-                } else if (event.key === Qt.Key_Tab) {
-                    event.accepted = true
-                }
-            }
-            selectionColor: QmlCfg.palette.tertiaryColor
-            placeholderText: qsTr("Search...")
-            Layout.fillWidth: true
-            font.pointSize: 12
-            onTextChanged: {
-                if (gsContactsSearch) {
-                Qt.callLater((text) => { contactsModel.filter = text }, searchText.text) }
-                else {
-                    Qt.callLater((text) => { conversationsModel.filter = text }, searchText.text)
-                }
-            }
-        }
+    Text {
+        text: "Conversations"
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.margins: QmlCfg.margin
     }
+
+
+
 
     Common.ButtonForm {
         id: searchButton
@@ -72,18 +44,25 @@ ToolBar {
             right: addContactButton.left
             verticalCenter: parent.verticalCenter
             rightMargin: QmlCfg.margin
+            verticalCenterOffset: 1
         }
-        source: Utils.safeSwitch(searchRegex,
-                                 "qrc:/searchRegexTemp.png",
-                                 "qrc:/search.png")
-        onClicked: { if (gsContactsSearch) {
+        source: "qrc:/search-icon.svg"
+        scale: 1.0
+        //todo : add back in regex logic once ui is known
+        onClicked: /** { if (gsContactsSearch) {
 
                 searchRegex = contactsModel.toggleFilterRegex() }
             else {
                 searchRegex = conversationsModel.toggleFilterRegex()
-            }
+            } **/
+            {
+        convoPane.state  = "conversationSearch"
+        }
     }
-    }
+
+
+
+
 
     ///--- Add contact button
     Common.ButtonForm {
@@ -94,38 +73,15 @@ ToolBar {
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
+        source: "qrc:/plus-icon.svg"
+        z: -1
 
-        background: Rectangle {
-            id: bg
-            color: Qt.darker(QmlCfg.palette.tertiaryColor, 1.3)
-            radius: 100
-            Image {
-                source: "qrc:/plus.png"
-                anchors.fill: parent
-                scale: 0.9
-                mipmap: true
-            }
 
-        }
-
-        // NPB: States
         MouseArea {
             anchors.fill: parent
-            hoverEnabled: true
-            onEntered: {
-                bg.color = Qt.darker(bg.color, 1.5)
-            }
-            onExited: {
-                bg.color = Qt.lighter(bg.color, 1.5)
-            }
-            onPressed: {
-                bg.color = Qt.darker(bg.color, 2.5)
-            }
-            onReleased: {
-                bg.color = Qt.lighter(bg.color, 2.5)
-            }
+
             onClicked: {
-                newContactDialogue.show()
+                convoPane.state = "newConversationState"
             }
         }
     }
