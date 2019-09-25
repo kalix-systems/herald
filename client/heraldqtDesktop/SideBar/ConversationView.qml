@@ -42,6 +42,7 @@ ListView {
         property Item conversationAvatar: conversationAvatar
 
         // This ternary is okay, types are enforced by QML
+        visible: matched
         height: visible ? 60 : 0
         width: parent.width
 

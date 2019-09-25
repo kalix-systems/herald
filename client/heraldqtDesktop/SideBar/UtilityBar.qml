@@ -56,7 +56,11 @@ ToolBar {
             Layout.fillWidth: true
             font.pointSize: 12
             onTextChanged: {
-                Qt.callLater((text) => { contactsModel.filter = text }, searchText.text)
+                if (gsContactsSearch) {
+                Qt.callLater((text) => { contactsModel.filter = text }, searchText.text) }
+                else {
+                    Qt.callLater((text) => { conversationsModel.filter = text }, searchText.text)
+                }
             }
         }
     }
@@ -72,7 +76,13 @@ ToolBar {
         source: Utils.safeSwitch(searchRegex,
                                  "qrc:/searchRegexTemp.png",
                                  "qrc:/search.png")
-        onClicked: searchRegex = contactsModel.toggleFilterRegex()
+        onClicked: { if (gsContactsSearch) {
+
+                searchRegex = contactsModel.toggleFilterRegex() }
+            else {
+                searchRegex = conversationsModel.toggleFilterRegex()
+            }
+    }
     }
 
     ///--- Add contact button
