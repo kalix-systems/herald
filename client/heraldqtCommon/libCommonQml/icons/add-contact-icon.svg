@@ -4,12 +4,13 @@
     <title>add-contact-icon</title>
     <desc>Created with Sketch.</desc>
     <g id="add-contact-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g transform="translate(1.000000, 0.000000)">
-            <path d="M16,15 C18.21,15 20,13.21 20,11 C20,8.79 18.21,7 16,7 C13.79,7 12,8.79 12,11 C12,13.21 13.79,15 16,15 Z M16,17 C13.33,17 8,18.34 8,21 L8,23 L24,23 L24,21 C24,18.34 18.67,17 16,17 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
-            <polygon id="Shape" points="0 1 24 1 24 25 0 25"></polygon>
-            <text id="+" font-family="Helvetica" font-size="18" font-weight="normal" fill="#000000">
-                <tspan x="0" y="18">+</tspan>
-            </text>
+        <g transform="translate(1.000000, 1.000000)" id="Shape">
+            <path d="M16,14 C18.21,14 20,12.21 20,10 C20,7.79 18.21,6 16,6 C13.79,6 12,7.79 12,10 C12,12.21 13.79,14 16,14 Z M16,16 C13.33,16 8,17.34 8,20 L8,22 L24,22 L24,20 C24,17.34 18.67,16 16,16 Z" fill="#000000" fill-rule="nonzero"></path>
+            <polygon points="0 0 24 0 24 24 0 24"></polygon>
+        </g>
+        <g id="+-icon" transform="translate(1.000000, 8.000000)">
+            <polygon id="Shape" fill="#000000" fill-rule="nonzero" points="9.16666667 5.5952381 5.5952381 5.5952381 5.5952381 9.16666667 4.4047619 9.16666667 4.4047619 5.5952381 0.833333333 5.5952381 0.833333333 4.4047619 4.4047619 4.4047619 4.4047619 0.833333333 5.5952381 0.833333333 5.5952381 4.4047619 9.16666667 4.4047619"></polygon>
+            <polygon id="Shape" points="0 0 10 0 10 10 0 10"></polygon>
         </g>
     </g>
 </svg>
