@@ -87,7 +87,7 @@ Rectangle {
                 margins: QmlCfg.margin
                 verticalCenter: chatBubbleHitbox.verticalCenter
             }
-            source: "qrc:/reply.png"
+            source: "qrc:/reply-icon.svg"
             z: 10
 
             onClicked: {

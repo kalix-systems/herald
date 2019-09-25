@@ -18,8 +18,11 @@ import "utils.mjs" as Utils
 Row {
     id: wrapperRow
     property string avatarLabel: ""
+    property string username: ""
+    property string secondaryText:""
     property string pfpUrl: ""
     property int colorHash: 0
+    property int labelGap: 10.0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
     property int shape: JS.avatarShape(shapeEnum, this)
@@ -27,29 +30,56 @@ Row {
     property bool isDefault: true
 
     spacing: QmlCfg.padding
+
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
     anchors.verticalCenter: parent.verticalCenter
-
+    anchors.top: parent.top
     Loader {
+        id: avatarLoader
         width: size
         height: size
         sourceComponent: JS.avatarSource(avatarLabel, pfpUrl, imageAvatar,
-                                         initialAvatar)
+                           initialAvatar)
+        anchors.verticalCenter: parent.verticalCenter
     }
 
+Column {
+
+    anchors {
+        topMargin: QmlCfg.margin
+        verticalCenter: parent.verticalCenter
+        top: labelGap === 0 ? undefined : wrapperRow.top
+    }
+
+    spacing: labelGap
+
     Text {
+        id: displayName
         visible: labeled
         text: avatarLabel
         font.bold: true
-        anchors.verticalCenter: parent.verticalCenter
         //is white instead of palette maincolor bc shld be white regardless of theme
-        color: if (!isDefault) {
+        color: if (!!!isDefault) {
                    "white"
                } else {
-                   "black"
+                   QmlCfg.palette.mainTextColor
                }
     }
+
+    Text {
+        id: userName
+        visible: secondaryText !== ""
+        text: secondaryText
+        // is white instead of palette maincolor bc shld be white regardless of theme
+        color: if (!!!isDefault) {
+                 "white"
+               } else {
+                   QmlCfg.palette.secondaryTextColor
+               }
+    }
+}
+
 
     ///--- potential avatar components
     /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do
