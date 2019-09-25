@@ -87,8 +87,8 @@ Item {
         }
 
        handle: Rectangle {
-                        implicitWidth: 1
+                        implicitWidth: 1.1
                         color: "black"
-                    }
+               }
     }
 }
