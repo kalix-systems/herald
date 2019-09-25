@@ -11,11 +11,7 @@ use tokio::sync::mpsc::{
 use warp::filters::ws;
 use warp::{Future as WFut, Stream as WStream};
 
-pub async fn login<S, W, E>(
-    active: &DashMap<sig::PublicKey, Sender<Push>>,
-    mut store: S,
-    mut ws: W,
-) -> Result<(), Error>
+pub async fn login<S, W, E>(store: &mut S, ws: &mut W) -> Result<GlobalId, Error>
 where
     S: Store,
     W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
@@ -49,73 +45,8 @@ where
     ws.send(ws::Message::binary(serde_cbor::to_vec(&res)?))
         .await?;
 
-    if res == LoginTokenResponse::Success {
-        let (sender, mut receiver) = channel();
-        active.insert(g.did, sender);
-        // TODO: handle this error somehow?
-        // for now we're just dropping it
-        if catchup(g.did, &mut store, &mut ws).await.is_ok() {
-            // TODO: maybe handle this one too?
-            // again just dropping it since the flow must go on
-            drop(send_pushes(ws, &mut receiver).await);
-        }
-        active.remove(&g.did);
-        archive_pushes(&mut store, receiver, g.did).await?;
+    match res {
+        LoginTokenResponse::Success => Ok(g),
+        LoginTokenResponse::BadSig => Err(LoginFailed),
     }
-
-    Ok(())
-}
-
-async fn send_pushes<Tx, E, Rx>(mut tx: Tx, rx: &mut Rx) -> Result<(), Error>
-where
-    Tx: Sink<ws::Message, Error = E> + Unpin,
-    Error: From<E>,
-    Rx: Stream<Item = Push> + Unpin,
-{
-    while let Some(p) = rx.next().await {
-        tx.send(ws::Message::binary(serde_cbor::to_vec(&p)?))
-            .await?;
-    }
-    Ok(())
-}
-
-async fn archive_pushes<S, Rx>(store: &mut S, mut rx: Rx, to: sig::PublicKey) -> Result<(), Error>
-where
-    S: Store,
-    Rx: Stream<Item = Push> + Unpin,
-{
-    while let Some(p) = rx.next().await {
-        store.add_pending(vec![to], p)?;
-    }
-    Ok(())
-}
-
-async fn catchup<S, W, E>(did: sign::PublicKey, s: &mut S, ws: &mut W) -> Result<(), Error>
-where
-    S: Store,
-    W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
-    Error: From<E>,
-{
-    use catchup::*;
-    let pending = s.get_pending(did)?;
-
-    // TCP over TCP...
-    for chunk in pending.chunks(CHUNK_SIZE) {
-        // TODO: remove unnecessary memcpy here by using a draining chunk iterator?
-        let msg = Catchup(Vec::from(chunk));
-        loop {
-            ws.send(ws::Message::binary(serde_cbor::to_vec(&msg)?))
-                .await?;
-
-            let m = ws.next().await.ok_or(CatchupFailed)??;
-
-            if CatchupAck(chunk.len() as u64) == serde_cbor::from_slice(m.as_bytes())? {
-                break;
-            }
-        }
-    }
-
-    s.expire_pending(did)?;
-
-    Ok(())
 }
