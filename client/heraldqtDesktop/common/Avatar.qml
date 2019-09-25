@@ -19,7 +19,7 @@ Row {
     id: wrapperRow
     property string avatarLabel: ""
     property string username: ""
-    property string secondaryText:""
+    property string secondaryText: ""
     property string pfpUrl: ""
     property int colorHash: 0
     property int labelGap: 10.0
@@ -40,46 +40,45 @@ Row {
         width: size
         height: size
         sourceComponent: JS.avatarSource(avatarLabel, pfpUrl, imageAvatar,
-                           initialAvatar)
+                                         initialAvatar)
         anchors.verticalCenter: parent.verticalCenter
     }
 
-Column {
+    Column {
 
-    anchors {
-        topMargin: QmlCfg.margin
-        verticalCenter: parent.verticalCenter
-        top: labelGap === 0 ? undefined : wrapperRow.top
+        anchors {
+            topMargin: QmlCfg.margin
+            verticalCenter: parent.verticalCenter
+            top: labelGap === 0 ? undefined : wrapperRow.top
+        }
+
+        spacing: labelGap
+
+        Text {
+            id: displayName
+            visible: labeled
+            text: avatarLabel
+            font.bold: true
+            //is white instead of palette maincolor bc shld be white regardless of theme
+            color: if (!!!isDefault) {
+                       "white"
+                   } else {
+                       QmlCfg.palette.mainTextColor
+                   }
+        }
+
+        Text {
+            id: userName
+            visible: secondaryText !== ""
+            text: secondaryText
+            // is white instead of palette maincolor bc shld be white regardless of theme
+            color: if (!!!isDefault) {
+                       "white"
+                   } else {
+                       QmlCfg.palette.secondaryTextColor
+                   }
+        }
     }
-
-    spacing: labelGap
-
-    Text {
-        id: displayName
-        visible: labeled
-        text: avatarLabel
-        font.bold: true
-        //is white instead of palette maincolor bc shld be white regardless of theme
-        color: if (!!!isDefault) {
-                   "white"
-               } else {
-                   QmlCfg.palette.mainTextColor
-               }
-    }
-
-    Text {
-        id: userName
-        visible: secondaryText !== ""
-        text: secondaryText
-        // is white instead of palette maincolor bc shld be white regardless of theme
-        color: if (!!!isDefault) {
-                 "white"
-               } else {
-                   QmlCfg.palette.secondaryTextColor
-               }
-    }
-}
-
 
     ///--- potential avatar components
     /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do
