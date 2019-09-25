@@ -1,5 +1,6 @@
 use crate::{prelude::*, store::*};
 use dashmap::DashMap;
+use futures::compat::*;
 use sodiumoxide::{crypto::sign, randombytes::randombytes_into};
 use std::convert::TryInto;
 use tokio::sync::mpsc::{
@@ -19,6 +20,11 @@ impl State {
     fn new_connection(&self) -> Result<Conn, Error> {
         // TODO add error type
         Ok(Conn(self.pool.get().unwrap()))
+    }
+
+    pub async fn handle_login(&self, ws: warp::filters::ws::WebSocket) -> Result<(), Error> {
+        login::login(&self.active, self.new_connection()?, ws.sink_compat()).await?;
+        Ok(())
     }
 }
 
