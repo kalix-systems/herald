@@ -59,7 +59,7 @@ ToolBar {
             right: parent.right
             verticalCenter: parent.verticalCenter
         }
-        source: "qrc:/plus-icon.svg"
+        source: "qrc:/pencil-icon-black.svg"
         z: -1
 
         MouseArea {
