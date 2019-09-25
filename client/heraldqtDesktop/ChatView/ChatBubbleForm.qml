@@ -42,10 +42,14 @@ Rectangle {
         hoverEnabled: true
         width: parent.width + 50
 
-        onEntered: { messageOptionsButton.visible = !messageOptionsButton.visible
-        replyButton.visible = !replyButton.visible}
-        onExited: { messageOptionsButton.visible = !messageOptionsButton.visible
-            replyButton.visible = !replyButton.visible}
+        onEntered: {
+            messageOptionsButton.visible = !messageOptionsButton.visible
+            replyButton.visible = !replyButton.visible
+        }
+        onExited: {
+            messageOptionsButton.visible = !messageOptionsButton.visible
+            replyButton.visible = !replyButton.visible
+        }
 
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
@@ -83,7 +87,7 @@ Rectangle {
                 margins: QmlCfg.margin
                 verticalCenter: chatBubbleHitbox.verticalCenter
             }
-            source: "qrc:/reply.png"
+            source: "qrc:/reply-icon.svg"
             z: 10
 
             onClicked: {
@@ -96,14 +100,12 @@ Rectangle {
         id: messageOptionsMenu
         MenuItem {
             text: "Delete Message"
-            onTriggered: messageModel.deleteMessage(index)
+            onTriggered: ownedConversation.deleteMessage(index)
         }
         MenuItem {
             text: "More Info..."
         }
     }
-
-
 
     // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
     Component.onCompleted: {
@@ -143,7 +145,7 @@ Rectangle {
             color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(
                                   QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
-            font.pointSize: QmlCfg.chatTextSize
+            font.pixelSize: QmlCfg.chatTextSize
         }
     }
 }

@@ -56,7 +56,6 @@ impl UsersTrait for Users {
     /// Adds a contact by their `id`
     fn add(&mut self, id: FfiUserId) -> FfiConversationId {
         let id = ret_err!(id.as_str().try_into(), vec![]);
-
         let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
         self.model.begin_insert_rows(0, 0);
@@ -329,13 +328,31 @@ impl UsersTrait for Users {
         true
     }
 
-    fn add_to_conversation(
+    fn add_to_conversation(&mut self, user_id: FfiUserId) -> bool {
+        let user_id = ret_err!(user_id.as_str().try_into(), false);
+        let conv_id = ret_none!(self.conversation_id, false);
+        ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
+
+        let contact = ret_err!(heraldcore::contact::by_user_id(user_id), false);
+        self.model.begin_insert_rows(0, 0);
+        self.list.insert(
+            0,
+            User {
+                matched: contact.matches(&self.filter),
+                inner: contact,
+            },
+        );
+        self.model.end_insert_rows();
+        true
+    }
+
+    fn add_to_conversation_by_id(
         &mut self,
         user_id: FfiUserId,
         conversation_id: FfiConversationIdRef,
     ) -> bool {
+        let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
-        let user_id = ret_err!(user_id.as_str().try_into());
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
         true
     }

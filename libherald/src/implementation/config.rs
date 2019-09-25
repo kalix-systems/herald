@@ -13,7 +13,7 @@ impl ConfigTrait for Config {
     }
 
     fn config_id(&self) -> FfiUserIdRef {
-        self.inner.id().as_str()
+        self.inner.id.as_str()
     }
 
     fn name(&self) -> Option<&str> {

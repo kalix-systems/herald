@@ -34,12 +34,11 @@ Item {
     Menu {
         id: optionsMenu
 
-        MenuItem {
-            text: 'Delete Contact'
-            onTriggered: JS.deleteContact(index, contactsModel, messageModel,
-                                          appRoot, heraldUtils)
-        }
-
+        //MenuItem {
+        //    text: 'Delete Contact'
+        //    onTriggered: JS.deleteContact(index, contactsModel, convModel,
+        //                                  appRoot, heraldUtils)
+        //}
         MenuSeparator {
         }
 
@@ -74,6 +73,7 @@ Item {
             text: 'Choose Color'
 
             onTriggered: {
+                // TODO pass an argument
                 gsSelectedIndex = index
                 avatarColorPicker.show()
             }
