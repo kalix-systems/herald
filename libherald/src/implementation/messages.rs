@@ -30,7 +30,7 @@ impl Messages {
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
         self.updated = chrono::Utc::now();
 
-        let conversation_id = self.conversation_id?;
+        let conversation_id = ret_none!(self.conversation_id, None);
 
         let (msg_id, timestamp) = ret_err!(
             message::add_message(
@@ -56,10 +56,12 @@ impl Messages {
                 send_status: None,
             },
         };
+
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(msg);
         self.model.end_insert_rows();
+
         Some(msg_id)
     }
 }
@@ -85,6 +87,7 @@ impl MessagesTrait for Messages {
                     return;
                 }
 
+                self.conversation_id = Some(conversation_id);
                 self.emit.conversation_id_changed();
 
                 self.model.begin_reset_model();
@@ -109,6 +112,9 @@ impl MessagesTrait for Messages {
                 if self.conversation_id.is_none() {
                     return;
                 }
+
+                self.conversation_id = None;
+                self.emit.conversation_id_changed();
                 self.emit.conversation_id_changed();
 
                 self.model.begin_reset_model();

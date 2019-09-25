@@ -986,7 +986,8 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    bool users_add_to_conversation(Users::Private*, const ushort*, int, const char*, int);
+    bool users_add_to_conversation(Users::Private*, const ushort*, int);
+    bool users_add_to_conversation_by_id(Users::Private*, const ushort*, int, const char*, int);
     bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
     bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
@@ -1498,9 +1499,13 @@ QByteArray Users::add(const QString& id)
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
-bool Users::addToConversation(const QString& user_id, const QByteArray& conversation_id)
+bool Users::addToConversation(const QString& user_id)
 {
-    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
+    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+}
+bool Users::addToConversationById(const QString& user_id, const QByteArray& conversation_id)
+{
+    return users_add_to_conversation_by_id(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 bool Users::addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id)
 {

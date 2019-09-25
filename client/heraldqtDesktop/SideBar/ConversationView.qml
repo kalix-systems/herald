@@ -43,6 +43,11 @@ ListView {
         property Item conversationAvatar: conversationAvatar
         property var conversationIdProxy: conversationId
 
+        Component.onCompleted:  {
+            print(conversationId)
+            print(conversationIdProxy)
+        }
+
         property var childChatView: Component {
             CV.ChatView {
               ownedConversation: Messages {

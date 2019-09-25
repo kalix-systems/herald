@@ -1451,7 +1451,8 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
-    fn add_to_conversation(&mut self, user_id: String, conversation_id: &[u8]) -> bool;
+    fn add_to_conversation(&mut self, user_id: String) -> bool;
+    fn add_to_conversation_by_id(&mut self, user_id: String, conversation_id: &[u8]) -> bool;
     fn add_to_conversation_by_index(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn bulk_add_to_conversation(&mut self, user_id_array: &[u8], conversation_id: &[u8]) -> bool;
     fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
@@ -1598,12 +1599,21 @@ pub unsafe extern "C" fn users_add(ptr: *mut Users, id_str: *const c_ushort, id_
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_add_to_conversation(ptr: *mut Users, user_id_str: *const c_ushort, user_id_len: c_int, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
+pub unsafe extern "C" fn users_add_to_conversation(ptr: *mut Users, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let o = &mut *ptr;
+    let r = o.add_to_conversation(user_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_add_to_conversation_by_id(ptr: *mut Users, user_id_str: *const c_ushort, user_id_len: c_int, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
     let o = &mut *ptr;
-    let r = o.add_to_conversation(user_id, conversation_id);
+    let r = o.add_to_conversation_by_id(user_id, conversation_id);
     r
 }
 

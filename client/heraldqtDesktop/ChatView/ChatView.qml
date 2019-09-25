@@ -14,6 +14,9 @@ Pane {
     property alias messageBar: messageBar
     property Messages ownedConversation
 
+    Component.onCompleted:  {
+        print(ownedConversation.conversationId)
+    }
 
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
@@ -40,7 +43,7 @@ Pane {
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
         Connections {
-            target:ownedConversation
+            target: ownedConversation
             onRowsInserted: {
                 convWindow.contentY = convWindow.contentHeight
             }
@@ -59,7 +62,7 @@ Pane {
 
         keysProxy: Item {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
-                                      event, chatTextArea.chatText,
+                                      event, chatTextArea.chatText, // this is actually a text area TODO rename
                                       networkHandle, ownedConversation)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }

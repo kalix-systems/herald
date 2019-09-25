@@ -87,8 +87,7 @@ ToolBar {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
-                //gsConvoItemMembers.addToConversation(userIdText.text,
-                //                                     convModel.conversationId)
+                convoItemMembers.addToConversation(userIdText.text)
                 newMemberPopup.close()
             }
         }
