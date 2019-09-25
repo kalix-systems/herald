@@ -20,6 +20,12 @@ Pane {
         id: messageBar
     }
 
+    Common.Divider {
+        height: 1
+        anchors.bottom: messageBar.bottom
+        color: "black"
+    }
+
     ///--- chat view, shows messages
     CVUtils.ConversationWindowForm {
         id: convWindow
