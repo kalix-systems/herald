@@ -12,8 +12,8 @@ pub struct State {
 }
 
 pub mod get;
+pub mod login;
 pub mod post;
-pub mod ws;
 
 impl State {
     fn new_connection(&self) -> Result<Conn, Error> {
