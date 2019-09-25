@@ -29,6 +29,7 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
     out
 }
 
+// TODO: consider having this take slices instead of vec's
 pub trait Store {
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
     fn add_prekey(
@@ -50,6 +51,7 @@ pub trait Store {
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
+    // TODO: make this take a vec of messages
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
     // TODO: replace these w/methods that get first n, remove first n, in insertion order
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
