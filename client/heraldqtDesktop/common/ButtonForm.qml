@@ -11,7 +11,7 @@ Button {
     background: Image {
         id: background
         source: parent.source
-        sourceSize: Qt.size(48,48)
+        sourceSize: Qt.size(48, 48)
         height: width
         scale: 0.9
         mipmap: true

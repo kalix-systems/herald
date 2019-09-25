@@ -13,7 +13,6 @@ import "../common/utils.mjs" as Utils
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
-
 ToolBar {
     id: toolBar
 

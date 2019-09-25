@@ -50,7 +50,7 @@ Rectangle {
 
     Common.ButtonForm {
         id: emojiButton
-        anchors.left:  parent.left
+        anchors.left: parent.left
         anchors.bottom: parent.bottom
         source: "qrc:/emoji-icon.svg"
     }

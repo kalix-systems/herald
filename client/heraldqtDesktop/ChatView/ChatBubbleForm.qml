@@ -145,7 +145,7 @@ Rectangle {
             color: outbound ? QmlCfg.palette.secondaryTextColor : Qt.lighter(
                                   QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
-            font.pointSize: QmlCfg.chatTextSize
+            font.pixelSize: QmlCfg.chatTextSize
         }
     }
 }
