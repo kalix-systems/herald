@@ -42,10 +42,14 @@ Rectangle {
         hoverEnabled: true
         width: parent.width + 50
 
-        onEntered: { messageOptionsButton.visible = !messageOptionsButton.visible
-        replyButton.visible = !replyButton.visible}
-        onExited: { messageOptionsButton.visible = !messageOptionsButton.visible
-            replyButton.visible = !replyButton.visible}
+        onEntered: {
+            messageOptionsButton.visible = !messageOptionsButton.visible
+            replyButton.visible = !replyButton.visible
+        }
+        onExited: {
+            messageOptionsButton.visible = !messageOptionsButton.visible
+            replyButton.visible = !replyButton.visible
+        }
 
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
@@ -102,8 +106,6 @@ Rectangle {
             text: "More Info..."
         }
     }
-
-
 
     // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
     Component.onCompleted: {

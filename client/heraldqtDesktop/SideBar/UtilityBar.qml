@@ -15,7 +15,6 @@ import "../SideBar" as SideBar
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
-
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
@@ -34,9 +33,6 @@ ToolBar {
         anchors.margins: QmlCfg.margin
     }
 
-
-
-
     Common.ButtonForm {
         id: searchButton
         property bool searchRegex: false
@@ -49,20 +45,10 @@ ToolBar {
         source: "qrc:/search-icon.svg"
         scale: 1.0
         //todo : add back in regex logic once ui is known
-        onClicked: /** { if (gsContactsSearch) {
-
-                searchRegex = contactsModel.toggleFilterRegex() }
-            else {
-                searchRegex = conversationsModel.toggleFilterRegex()
-            } **/
-            {
-        convoPane.state  = "conversationSearch"
+        onClicked: {
+            convoPane.state = "conversationSearch"
         }
     }
-
-
-
-
 
     ///--- Add contact button
     Common.ButtonForm {
@@ -75,7 +61,6 @@ ToolBar {
         }
         source: "qrc:/plus-icon.svg"
         z: -1
-
 
         MouseArea {
             anchors.fill: parent

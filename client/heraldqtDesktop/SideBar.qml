@@ -65,16 +65,12 @@ Pane {
         id: searchBarBorder
         anchors.top: utilityBar.bottom
         color: "black"
-        height: 1.5
     }
-
-
 
     SBUtils.ContactsToggle {
         id: contactsToggleBar
         anchors.top: searchBarBorder.bottom
     }
-
 
     ///--- Contacts View Actual
     Pane {
@@ -83,7 +79,7 @@ Pane {
         anchors {
             right: parent.right
             left: parent.left
-            top: contactsToggleBar.bottom
+            top: searchBarBorder.bottom
             bottom: parent.bottom
         }
 
@@ -100,7 +96,9 @@ Pane {
             model: conversationsModel
         }
 
-        states: [ State {name: "newContactState"
+        states: [
+            State {
+                name: "newContactState"
                 PropertyChanges {
                     target: convoPane
                     visible: false
@@ -110,10 +108,10 @@ Pane {
                     sourceComponent: searchBarComponent
                     searchPlaceholder: "Enter full name or username"
                 }
+            },
 
-        },
-
-            State {name: "conversationSearch"
+            State {
+                name: "conversationSearch"
                 PropertyChanges {
                     target: conversationsListView
                     visible: true
@@ -123,14 +121,13 @@ Pane {
                     sourceComponent: searchBarComponent
                     searchPlaceholder: "Search your conversations"
                 }
-
             },
 
-            State {name: "newConversationState"
+            State {
+                name: "newConversationState"
                 PropertyChanges {
                     target: contactsListView
                     visible: true
-
                 }
                 PropertyChanges {
                     target: conversationsListView
@@ -143,10 +140,7 @@ Pane {
                     searchPlaceholder: "Enter contact name"
                     contactsSearch: true
                 }
-
             }
-
-
         ]
     }
 }

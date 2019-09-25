@@ -53,9 +53,8 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: convModel.deleteConversation(appRoot.gsCurrentConvo.index)
+            onTriggered: convModel.deleteConversation()
         }
-
     }
 
     Common.ButtonForm {
@@ -89,7 +88,7 @@ ToolBar {
             anchors.right: parent.right
             onClicked: {
                 gsConvoItemMembers.addToConversation(userIdText.text,
-                                                     gsConversationId)
+                                                     convModel.conversationId)
                 newMemberPopup.close()
             }
         }

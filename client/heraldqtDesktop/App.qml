@@ -10,17 +10,10 @@ import QtQml 2.13
 Item {
     id: appRoot
 
-    property var gsConversationId
+    // TODO this can be passed as an argument wherever it's needed
     property int gsSelectedIndex: -1
-    property color gsConvoColor
+    // TODO why does this need to be global?
     property var gsConvoItemMembers
-    //get rid of this
-    property bool gsContactsSearch: false
-    property var gsCurrentConvo
-
-    onGsContactsSearchChanged: {
-        gsConversationId = undefined
-    }
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
@@ -47,7 +40,7 @@ Item {
 
     Users {
         id: conversationMembers
-        conversationId: Utils.unwrapOr(gsConversationId, "")
+        conversationId: Utils.unwrapOr(convModel.conversationId, "")
     }
 
     Popups.ConfigPopup {
@@ -69,7 +62,6 @@ Item {
             onClicked: {
                 contactsModel.setColor(gsSelectedIndex,
                                        avatarColorPicker.colorIndex)
-                appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
                 avatarColorPicker.close()
             }
         }

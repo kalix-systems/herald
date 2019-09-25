@@ -17,6 +17,4 @@ declare enum ColorScheme {
   SolarizedLight = 3
 }
 
-declare class GlobalState {
-  gsConversationId?: ConversationID;
-}
+declare class GlobalState {}

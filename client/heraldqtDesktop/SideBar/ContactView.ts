@@ -10,7 +10,6 @@ export function contactClickHandler(
   if (mouse.button === Qt.LeftButton) {
     contactView.currentIndex = index;
     messageModel.conversationId = convId;
-    appRoot.gsConversationId = convId;
   } else {
     optionsMenu.open();
   }
