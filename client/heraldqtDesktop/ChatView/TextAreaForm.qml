@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
+import QtMultimedia 5.13
 import "ChatTextAreaUtils.mjs" as CTUtils
 import "../common" as Common
 
@@ -30,8 +31,10 @@ Rectangle {
     property alias emojiButton: emojiButton
     // the text area
     property alias chatText: chatText
-    // clippy file Dialog
+    // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
+    // camera button
+    property alias cameraButton: cameraButton
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -40,16 +43,24 @@ Rectangle {
 
     Common.ButtonForm {
         id: attachmentsButton
-        anchors.right: parent.right
+        anchors.right: cameraButton.left
         anchors.bottom: parent.bottom
-        source: "qrc:/paperclip.png"
+        source: "qrc:/plus-icon.svg"
     }
 
     Common.ButtonForm {
         id: emojiButton
-        anchors.left: parent.left
+        anchors.left:  parent.left
         anchors.bottom: parent.bottom
-        source: "qrc:/emoji.png"
+        source: "qrc:/emoji-icon.svg"
+    }
+
+    Common.ButtonForm {
+        id: cameraButton
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.leftMargin: QmlCfg.margin
+        source: "qrc:/camera-icon.svg"
     }
 
     // wrapper column so replies load

@@ -22,6 +22,7 @@ Row {
     property string secondaryText:""
     property string pfpUrl: ""
     property int colorHash: 0
+    property int labelGap: 10.0
     property int shapeEnum: 0 /// { individual, group ... }
     property int size: 0 /// the size of the avatar, width and height
     property int shape: JS.avatarShape(shapeEnum, this)
@@ -29,24 +30,30 @@ Row {
     property bool isDefault: true
 
     spacing: QmlCfg.padding
+
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
     anchors.verticalCenter: parent.verticalCenter
-
+    anchors.top: parent.top
     Loader {
         id: avatarLoader
         width: size
         height: size
         sourceComponent: JS.avatarSource(avatarLabel, pfpUrl, imageAvatar,
-                                initialAvatar)
+                           initialAvatar)
+        anchors.verticalCenter: parent.verticalCenter
     }
+
 Column {
+
     anchors {
-        top: avatarLoader.top
-        topMargin: QmlCfg.smallMargin
+        topMargin: QmlCfg.margin
         verticalCenter: parent.verticalCenter
+        top: labelGap === 0 ? undefined : wrapperRow.top
     }
-    spacing: QmlCfg.smallMargin
+
+    spacing: labelGap
+
     Text {
         id: displayName
         visible: labeled

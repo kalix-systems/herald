@@ -13,6 +13,7 @@ import "../common/utils.mjs" as Utils
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
+
 ToolBar {
     id: toolBar
 
@@ -32,11 +33,12 @@ ToolBar {
     Common.Avatar {
         id: configAvatar
         avatarLabel: config.displayName
+        secondaryText: "@" + config.configId
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-        anchors.left: parent.left
-        anchors.margins: QmlCfg.margin
+        labelGap: 0
         // JH: Bad margin semantics
+        anchors.verticalCenter: parent.verticalCenter
         size: parent.height - QmlCfg.margin
         isDefault: false
     }
