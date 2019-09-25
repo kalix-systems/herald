@@ -95,7 +95,7 @@ ListView {
                     conversationList.currentIndex = index
                     convModel.conversationId = conversationId
                     appRoot.gsConversationId = conversationId
-                    appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                    // appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                     appRoot.gsConvoItemMembers = convoItemMembers
                     appRoot.gsCurrentConvo = conversationItem
                 }

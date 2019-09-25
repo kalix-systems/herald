@@ -12,7 +12,7 @@ Item {
 
     property var gsConversationId
     property int gsSelectedIndex: -1
-    property color gsConvoColor
+    // property color gsConvoColor
     property var gsConvoItemMembers
     //get rid of this
     property bool gsContactsSearch: false
@@ -69,7 +69,7 @@ Item {
             onClicked: {
                 contactsModel.setColor(gsSelectedIndex,
                                        avatarColorPicker.colorIndex)
-                appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
+                // appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
                 avatarColorPicker.close()
             }
         }

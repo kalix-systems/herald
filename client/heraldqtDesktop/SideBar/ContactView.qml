@@ -91,7 +91,7 @@ ListView {
                                            pairwiseConversationId,
                                            popupManager.optionsMenu,
                                            convModel, appRoot)
-                    appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                    // appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                 }
 
                 // ternary is okay here, type enforced by QML
