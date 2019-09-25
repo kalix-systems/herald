@@ -74,6 +74,14 @@ declare class Config {
   colorscheme: ColorScheme;
 }
 
+declare class Conversations {
+  filter: string;
+  filterRegex: string;
+  removeConversation(rowIndex: number): boolean;
+  hardRefresh(): boolean;
+
+}
+
 declare class HeraldUtils {
   compareByteArray(bs1: ByteArray, bs2: ByteArray): boolean;
 }

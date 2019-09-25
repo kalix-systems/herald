@@ -30,6 +30,7 @@ Item {
         id: networkHandle
         onNewMessageChanged: messageModel.refresh()
         onNewContactChanged: contactsModel.refresh()
+        onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
     Messages {

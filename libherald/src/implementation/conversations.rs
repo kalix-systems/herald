@@ -193,6 +193,25 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
+    fn hard_refresh(&mut self) -> bool {
+        self.model.begin_reset_model();
+        self.list = Vec::new();
+        self.model.end_reset_model();
+
+        let list: Vec<Conversation> = abort_err!(conversation::all_meta())
+            .into_iter()
+            .map(|inner| Conversation {
+                inner,
+                matched: true,
+            })
+            .collect();
+        self.model.begin_insert_rows(0, list.len());
+        self.list = list;
+        self.model.end_insert_rows();
+
+        true
+    }
+
     /// Indicates whether regex search is activated
     fn filter_regex(&self) -> bool {
         self.filter_regex

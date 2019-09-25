@@ -110,7 +110,7 @@ ListView {
             size: 50
             id: conversationAvatar
             avatarLabel: Utils.unwrapOr(title, "unknown")
-            colorHash: color
+            colorHash: Utils.unwrapOr(color, 0)
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }

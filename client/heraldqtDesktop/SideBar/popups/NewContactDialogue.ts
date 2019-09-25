@@ -1,17 +1,13 @@
 export function insertContact(
-  dialogue: Popup,
-  entryArea: TextArea,
-  contactsModel: Users,
-  networkHandle: NetworkHandle
+dialogue: Popup, entryArea: TextArea, contactsModel: Users, networkHandle: NetworkHandle, conversationsModel: Conversations,
 ): void {
   const trimmedText = entryArea.text.trim();
-
-  if (trimmedText.length === 0) {
-    return;
-  }
-
-  const conversationId = contactsModel.add(trimmedText);
-  networkHandle.sendAddRequest(trimmedText, conversationId);
-  entryArea.clear();
-  dialogue.close();
+    if (trimmedText.length === 0) {
+        return;
+    }
+    const conversationId = contactsModel.add(trimmedText);
+    networkHandle.sendAddRequest(trimmedText, conversationId);
+    entryArea.clear();
+    dialogue.close();
+    conversationsModel.hardRefresh();
 }
