@@ -42,7 +42,7 @@ ListView {
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item conversationAvatar: conversationAvatar
         property var conversationIdProxy: conversationId
-
+        property bool isPairwise: pairwise
         property var childChatView: Component {
             CV.ChatView {
               conversationId: conversationIdProxy

@@ -66,6 +66,7 @@ ToolBar {
     }
 
     Button {
+        visible: isPairwise
         text: "New member"
         anchors.right: convOptionsButton.left
         onClicked: {
