@@ -53,7 +53,7 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: ownedConversation.deleteConversation()
+            onTriggered: ownedConversation.clearConversationHistory()
         }
     }
 

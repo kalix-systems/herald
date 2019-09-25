@@ -13,7 +13,6 @@ Pane {
     padding: 0
     property alias messageBar: messageBar
     property Messages ownedConversation
-    property var conversationId : null
 
 
     /// bar at the top that displays the avatar
@@ -40,12 +39,12 @@ Pane {
         Component.onCompleted: forceActiveFocus()
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
-        //Connections {
-        //    target:convModel
-        //    onRowsInserted: {
-        //        convWindow.contentY = convWindow.contentHeight
-        //    }
-        //}
+        Connections {
+            target:ownedConversation
+            onRowsInserted: {
+                convWindow.contentY = convWindow.contentHeight
+            }
+        }
     }
 
     ///--- Text entry area, for typing

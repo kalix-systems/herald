@@ -27,9 +27,6 @@ Item {
         onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
-    //Conversation {
-    //    id: convModel
-    //}
     Users {
         id: contactsModel
     }
@@ -38,10 +35,6 @@ Item {
         id: conversationsModel
     }
 
-    //Users {
-    //    id: conversationMembers
-    //    conversationId: Utils.unwrapOr(convModel.conversationId, "")
-    //}
     Popups.ConfigPopup {
         id: preferencesPopup
     }
