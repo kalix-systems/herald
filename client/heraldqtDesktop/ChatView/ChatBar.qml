@@ -55,6 +55,12 @@ ToolBar {
             text: "Clear History"
             onTriggered: convModel.deleteConversation()
         }
+
+        MenuItem {
+            text: "Add Member"
+
+            onTriggered: newMemberPopup.open()
+        }
     }
 
     Common.ButtonForm {
@@ -63,14 +69,6 @@ ToolBar {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
-    }
-
-    Button {
-        text: "New member"
-        anchors.right: convOptionsButton.left
-        onClicked: {
-            newMemberPopup.open()
-        }
     }
 
     Popup {
