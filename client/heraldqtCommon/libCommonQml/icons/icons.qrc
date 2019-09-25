@@ -5,8 +5,6 @@
         <file>camera-icon.svg</file>
         <file>chats-icon.svg</file>
         <file>check-icon-white.svg</file>
-        <file>cont_filled.png</file>
-        <file>cont_hollow.png</file>
         <file>contacts-icon.svg</file>
         <file>content-copy-icon-white.svg</file>
         <file>convos-filter-icon.svg</file>
@@ -31,18 +29,16 @@
         <file>plus-icon.svg</file>
         <file>plus.png</file>
         <file>reply-icon-white.svg</file>
-        <file>reply.png</file>
         <file>search-icon.svg</file>
         <file>search.png</file>
         <file>searchRegex.png</file>
         <file>searchRegexTemp.png</file>
         <file>send-icon.svg</file>
         <file>single-check-receipt-icon.svg</file>
-        <file>speech_filled.png</file>
-        <file>speech_hollow.png</file>
         <file>ToggleConv.png</file>
         <file>ToggleTeam.png</file>
         <file>x-icon-white.svg</file>
         <file>x-icon.svg</file>
+        <file>reply-icon.svg</file>
     </qresource>
 </RCC>
