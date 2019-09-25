@@ -86,13 +86,9 @@ Item {
             id: chatView
         }
 
-        handle: Item {
-            implicitWidth: 10
-            Rectangle {
+       handle: Rectangle {
                         implicitWidth: 1
-                        height: parent.height
                         color: "black"
                     }
-        }
     }
 }
