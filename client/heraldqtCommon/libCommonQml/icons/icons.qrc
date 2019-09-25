@@ -11,8 +11,6 @@
         <file>content-copy-icon-white.svg</file>
         <file>convos-filter-icon.svg</file>
         <file>convos-teams-filter-icon.svg</file>
-        <file>d.cpp</file>
-        <file>d.h</file>
         <file>dashboard-icon.svg</file>
         <file>double-check-receipt-icon.svg</file>
         <file>emoji-icon-white.svg</file>
@@ -24,7 +22,6 @@
         <file>gear.svg</file>
         <file>hamburger-icon.svg</file>
         <file>help-icon.svg</file>
-        <file>icons.qrc</file>
         <file>info-icon-white.svg</file>
         <file>land.png</file>
         <file>mary.png</file>

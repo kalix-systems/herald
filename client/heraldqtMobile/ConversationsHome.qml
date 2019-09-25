@@ -66,6 +66,8 @@ Page {
             width: homeDrawer.width * 0.33
             anchors.left: parent.left
             height: parent.height
+
+
         }
 
         Rectangle {
