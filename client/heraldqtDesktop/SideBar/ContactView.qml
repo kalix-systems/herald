@@ -24,9 +24,9 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     Connections {
-        target: appRoot
-        onGsConversationIdChanged: {
-            if (gsConversationId === undefined) {
+        target: convModel
+        onConversationIdChanged: {
+            if (convModel.conversationId === undefined) {
                 contactList.currentIndex = -1
             }
         }
@@ -91,7 +91,6 @@ ListView {
                                            pairwiseConversationId,
                                            popupManager.optionsMenu,
                                            convModel, appRoot)
-                    // appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                 }
 
                 // ternary is okay here, type enforced by QML

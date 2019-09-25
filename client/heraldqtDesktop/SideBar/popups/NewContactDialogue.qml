@@ -38,7 +38,8 @@ Window {
         focus: true
         placeholderText: qsTr("Enter contact ID")
         Keys.onReturnPressed: JS.insertContact(newContactDialogue, entryArea,
-                                               contactsModel, networkHandle, conversationsModel)
+                                               contactsModel, networkHandle,
+                                               conversationsModel)
     }
 
     Button {
@@ -48,7 +49,8 @@ Window {
             bottom: parent.bottom
             right: parent.right
         }
-       onClicked: JS.insertContact(newContactDialogue, entryArea,
-                                    contactsModel, networkHandle, conversationsModel)
+        onClicked: JS.insertContact(newContactDialogue, entryArea,
+                                    contactsModel, networkHandle,
+                                    conversationsModel)
     }
 }

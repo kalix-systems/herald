@@ -24,9 +24,9 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     Connections {
-        target: appRoot
-        onGsConversationIdChanged: {
-            if (gsConversationId === undefined) {
+        target: convModel
+        onConversationIdChanged: {
+            if (convModel.conversationId === undefined) {
                 conversationList.currentIndex = -1
             }
         }
@@ -94,8 +94,6 @@ ListView {
                 onClicked: {
                     conversationList.currentIndex = index
                     convModel.conversationId = conversationId
-                    appRoot.gsConversationId = conversationId
-                    // appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                     appRoot.gsConvoItemMembers = convoItemMembers
                     appRoot.gsCurrentConvo = conversationItem
                 }

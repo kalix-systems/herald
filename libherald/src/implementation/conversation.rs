@@ -154,6 +154,7 @@ impl ConversationTrait for Conversation {
                 }
 
                 self.meta = Some(ret_err!(conversation::meta(&conversation_id)));
+                self.emit.conversation_id_changed();
 
                 self.model.begin_reset_model();
                 self.list = Vec::new();
@@ -172,12 +173,12 @@ impl ConversationTrait for Conversation {
                 self.model.begin_insert_rows(0, messages.len() - 1);
                 self.list = messages;
                 self.model.end_insert_rows();
-                self.emit.conversation_id_changed();
             }
             None => {
                 if self.meta.is_none() {
                     return;
                 }
+                self.emit.conversation_id_changed();
 
                 self.model.begin_reset_model();
                 self.list = Vec::new();
@@ -226,13 +227,7 @@ impl ConversationTrait for Conversation {
     }
 
     fn reply(&mut self, body: String, op: FfiMsgIdRef) -> FfiMsgId {
-        let op = match MsgId::try_from(op) {
-            Ok(op) => op,
-            Err(e) => {
-                eprintln!("{}", e);
-                return vec![];
-            }
-        };
+        let op = ret_err!(MsgId::try_from(op), vec![]);
 
         match self.raw_insert(body, Some(op)) {
             Some(message_id) => message_id.to_vec(),

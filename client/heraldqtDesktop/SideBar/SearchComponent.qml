@@ -50,7 +50,6 @@ Component {
           if (convoPane.state == "newContactState") {
               JS.insertContact(searchText, contactsModel, networkHandle, conversationsModel)
               convoPane.state = ""
-              //gsConversationId = undefined
           }
       }
 

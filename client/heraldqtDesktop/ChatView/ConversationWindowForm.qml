@@ -58,7 +58,6 @@ Flickable {
                 }
                 rightPadding: QmlCfg.margin
 
-
                 //NOTE: see chat bubble form
                 CVUtils.ChatBubbleForm {
                     messageText: body

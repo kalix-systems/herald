@@ -10,16 +10,14 @@ import QtQml 2.13
 Item {
     id: appRoot
 
-    property var gsConversationId
     property int gsSelectedIndex: -1
-    // property color gsConvoColor
     property var gsConvoItemMembers
-    //get rid of this
+    // TODO get rid of this
     property bool gsContactsSearch: false
     property var gsCurrentConvo
 
     onGsContactsSearchChanged: {
-        gsConversationId = undefined
+        convModel.conversationId = undefined
     }
 
     anchors.fill: parent.fill
@@ -47,7 +45,7 @@ Item {
 
     Users {
         id: conversationMembers
-        conversationId: Utils.unwrapOr(gsConversationId, "")
+        conversationId: Utils.unwrapOr(convModel.conversationId, "")
     }
 
     Popups.ConfigPopup {
@@ -69,7 +67,6 @@ Item {
             onClicked: {
                 contactsModel.setColor(gsSelectedIndex,
                                        avatarColorPicker.colorIndex)
-                // appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
                 avatarColorPicker.close()
             }
         }
