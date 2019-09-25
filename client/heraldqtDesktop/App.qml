@@ -86,6 +86,7 @@ Item {
             id: chatView
         }
 
+
        handle: Rectangle {
                         implicitWidth: 1
                         color: "black"
