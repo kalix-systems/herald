@@ -89,10 +89,10 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
-                    JS.contactClickHandler(mouse, contactList, index,
-                                           pairwiseConversationId,
-                                           popupManager.optionsMenu,
-                                           convModel, appRoot)
+                    //JS.contactClickHandler(mouse, contactList, index,
+                    //                       pairwiseConversationId,
+                    //                       popupManager.optionsMenu,
+                    //                       convModel, appRoot)
                 }
 
                 // ternary is okay here, type enforced by QML
