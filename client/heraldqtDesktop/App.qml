@@ -10,14 +10,10 @@ import QtQml 2.13
 Item {
     id: appRoot
 
+    // TODO this can be passed as an argument wherever it's needed
     property int gsSelectedIndex: -1
+    // TODO why does this need to be global?
     property var gsConvoItemMembers
-    // TODO get rid of this
-    property bool gsContactsSearch: false
-
-    onGsContactsSearchChanged: {
-        convModel.conversationId = undefined
-    }
 
     anchors.fill: parent.fill
     Layout.fillWidth: true

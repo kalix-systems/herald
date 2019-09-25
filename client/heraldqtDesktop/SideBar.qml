@@ -65,7 +65,6 @@ Pane {
         id: searchBarBorder
         anchors.top: utilityBar.bottom
         color: "black"
-        height: 1.5
     }
 
     SBUtils.ContactsToggle {
@@ -80,7 +79,7 @@ Pane {
         anchors {
             right: parent.right
             left: parent.left
-            top: contactsToggleBar.bottom
+            top: searchBarBorder.bottom
             bottom: parent.bottom
         }
 

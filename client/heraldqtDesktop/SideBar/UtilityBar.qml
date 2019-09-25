@@ -45,14 +45,7 @@ ToolBar {
         source: "qrc:/search-icon.svg"
         scale: 1.0
         //todo : add back in regex logic once ui is known
-        onClicked:
-            /** { if (gsContactsSearch) {
-
-                searchRegex = contactsModel.toggleFilterRegex() }
-            else {
-                searchRegex = conversationsModel.toggleFilterRegex()
-            } **/
-        {
+        onClicked: {
             convoPane.state = "conversationSearch"
         }
     }

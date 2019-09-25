@@ -74,6 +74,7 @@ Item {
             text: 'Choose Color'
 
             onTriggered: {
+                // TODO pass an argument
                 gsSelectedIndex = index
                 avatarColorPicker.show()
             }
