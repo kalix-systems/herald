@@ -35,7 +35,7 @@ ToolBar {
 
     Common.Avatar {
         id: chatBarAvatar
-        anchors.centerIn: parent
+        anchors.left: parent.left
         // JH: Margin fudging
         size: QmlCfg.toolbarHeight - QmlCfg.margin
         pfpUrl: currentAvatar.pfpUrl
