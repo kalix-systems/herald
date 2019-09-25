@@ -95,7 +95,6 @@ ListView {
                     conversationList.currentIndex = index
                     convModel.conversationId = conversationId
                     appRoot.gsConvoItemMembers = convoItemMembers
-                    appRoot.gsCurrentConvo = conversationItem
                 }
 
                 // ternary is okay here, type enforced by QML

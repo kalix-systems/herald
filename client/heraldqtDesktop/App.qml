@@ -14,7 +14,6 @@ Item {
     property var gsConvoItemMembers
     // TODO get rid of this
     property bool gsContactsSearch: false
-    property var gsCurrentConvo
 
     onGsContactsSearchChanged: {
         convModel.conversationId = undefined

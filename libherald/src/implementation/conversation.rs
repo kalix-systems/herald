@@ -266,7 +266,6 @@ impl ConversationTrait for Conversation {
 
         self.model.begin_reset_model();
         self.list = Vec::new();
-        self.meta = None;
         self.model.end_reset_model();
         true
     }
