@@ -485,6 +485,9 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         conn.add_key(user_id, signed_pk).unwrap();
 
+        let pending = conn.get_pending(*kp.public_key()).unwrap();
+        assert_eq!(pending.len(), 0);
+
         let from = GlobalId {
             did: *kp_other.public_key(),
             uid: "World".try_into().unwrap(),
