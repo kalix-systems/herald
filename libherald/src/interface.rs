@@ -419,6 +419,7 @@ pub trait ConversationsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add_conversation(&mut self) -> Vec<u8>;
+    fn hard_refresh(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -526,6 +527,13 @@ pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations,
     let r = o.add_conversation();
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_hard_refresh(ptr: *mut Conversations) -> bool {
+    let o = &mut *ptr;
+    let r = o.hard_refresh();
+    r
 }
 
 #[no_mangle]

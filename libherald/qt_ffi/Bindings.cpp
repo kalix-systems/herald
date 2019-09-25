@@ -436,6 +436,7 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
+    bool conversations_hard_refresh(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -1160,6 +1161,10 @@ QByteArray Conversations::addConversation()
     QByteArray s;
     conversations_add_conversation(m_d, &s, set_qbytearray);
     return s;
+}
+bool Conversations::hardRefresh()
+{
+    return conversations_hard_refresh(m_d);
 }
 bool Conversations::removeConversation(quint64 row_index)
 {

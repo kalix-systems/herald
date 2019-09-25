@@ -96,6 +96,7 @@ ListView {
                     appRoot.gsConversationId = conversationId
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                     appRoot.gsConvoItemMembers = convoItemMembers
+                    appRoot.gsCurrentConvo = conversationItem
                 }
 
                 // ternary is okay here, type enforced by QML
@@ -109,7 +110,7 @@ ListView {
             size: 50
             id: conversationAvatar
             avatarLabel: Utils.unwrapOr(title, "unknown")
-            colorHash: color
+            colorHash: Utils.unwrapOr(color, 0)
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }
