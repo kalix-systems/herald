@@ -16,7 +16,7 @@ impl State {
         W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
         Error: From<E>,
     {
-        use login::*;
+        use herald_common::login::*;
 
         let mut store = self.new_connection()?;
 
@@ -56,7 +56,7 @@ impl State {
                 // again just dropping it since the flow must go on
                 drop(send_pushes(ws, &mut receiver).await);
             }
-            active.remove(&g.did);
+            self.active.remove(&g.did);
             archive_pushes(&mut store, receiver, g.did).await?;
         }
 
