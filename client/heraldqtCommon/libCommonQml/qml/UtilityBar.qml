@@ -19,6 +19,7 @@ ToolBar {
     property int toolBarHeight: 50
 
     property alias searchButton: searchButton
+    property alias drawerButton: drawerButton
     property alias toggleButton: toggleButton
     property alias menuButton: menuButton
     property color secondary: "light gray"
@@ -34,6 +35,7 @@ ToolBar {
         anchors.fill: parent
         spacing: buttonSpacing
         ToolButton {
+            id: drawerButton
             Layout.alignment: Qt.AlignLeft
             Layout.margins: marginWidth
             Layout.preferredHeight: iconDimLarge
@@ -82,6 +84,7 @@ ToolBar {
             implicitHeight: iconDimSmall
             implicitWidth: iconDimLarge
             Layout.bottomMargin: marginWidth
+            Layout.rightMargin: marginWidth
             font.bold: true
             background: Image {
                 source: "qrc:/options-icon.svg"

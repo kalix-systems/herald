@@ -299,7 +299,7 @@ void LibHerald::test_modifyConversation()
   QCOMPARE(data_changed_spy.count(), 1);
   QCOMPARE(args.at(0), changed_index);
   QCOMPARE(args.at(1), changed_index);
-  QCOMPARE(convos->color(3), 100);
+  QCOMPARE(convos->color(3), 100u);
 
   convos->setTitle(3, "The Trapezoid Of Discovery");
   args = data_changed_spy.at(1);
@@ -342,6 +342,7 @@ void LibHerald::test_modifyConversation()
 // and not at Loop back
 void LibHerald::test_networkHandleConnects()
 {
+  QSKIP("Testing network handle skipped until automated server launch.");
   nwk_handle = new NetworkHandle();
   QSignalSpy net_up_spy(nwk_handle, SIGNAL(connectionUpChanged()));
   QSignalSpy net_pending_spy(nwk_handle, SIGNAL(connectionPendingChanged()));
