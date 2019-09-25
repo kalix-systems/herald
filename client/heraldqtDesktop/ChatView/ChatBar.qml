@@ -58,6 +58,7 @@ ToolBar {
 
         MenuItem {
             text: "Add Member"
+            visible: isPairwise
 
             onTriggered: newMemberPopup.open()
         }
