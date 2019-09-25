@@ -97,7 +97,6 @@ ListView {
                 onReleased: parent.state = containsMouse ? "hovering" : ""
             }
 
-            ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
             Popups.ContactClickedPopup {
                 id: popupManager
             }
