@@ -12,7 +12,7 @@ Pane {
     id: chatPane
     padding: 0
     property alias messageBar: messageBar
-    property Conversation ownedConversation
+    property Messages ownedConversation
     property var conversationId : null
 
 

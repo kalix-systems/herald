@@ -46,7 +46,7 @@ ListView {
         property var childChatView: Component {
             CV.ChatView {
               conversationId: conversationIdProxy
-              ownedConversation: Conversation {
+              ownedConversation: Messages {
                 conversationId: conversationIdProxy
               }
            }

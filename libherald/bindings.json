@@ -329,34 +329,13 @@
                 }
             }
         },
-        "Conversation": {
+        "Messages": {
             "type": "List",
             "properties": {
                 "conversationId": {
                     "type": "QByteArray",
-                    "optional": true,
-                    "write": true
-                },
-                "title": {
-                    "type": "QString",
-                    "optional": true,
-                    "write": true
-                },
-                "picture": {
-                    "type": "QString",
-                    "optional": true,
-                    "write": true
-                },
-                "color": {
-                    "type": "quint32",
-                    "write": true
-                },
-                "muted": {
-                    "type": "bool",
-                    "write": true
-                },
-                "pairwise": {
-                    "type": "bool"
+                    "write": true,
+                    "optional": true
                 }
             },
             "itemProperties": {
@@ -420,18 +399,8 @@
                     "mut": true,
                     "return": "void"
                 },
-                "deleteConversation": {
+                "clearConversationHistory": {
                     "mut": true,
-                    "return": "bool"
-                },
-                "deleteConversationById": {
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ],
                     "return": "bool"
                 }
             }

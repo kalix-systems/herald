@@ -1,37 +1,36 @@
 use crate::{interface::*, ret_err, ret_none, types::*};
-use herald_common::UserIdRef;
+use herald_common::{UserId, UserIdRef};
 use heraldcore::{
     abort_err, chrono,
     config::Config,
-    conversation::{self, ConversationMeta},
+    conversation,
     message::{self, Message as Msg},
     types::*,
 };
 use std::convert::TryFrom;
+
+type Emitter = MessagesEmitter;
+type List = MessagesList;
 
 #[derive(Clone)]
 struct Message {
     inner: Msg,
 }
 
-pub struct Conversation {
-    emit: ConversationEmitter,
-    model: ConversationList,
+pub struct Messages {
+    emit: Emitter,
+    model: List,
     list: Vec<Message>,
-    meta: Option<ConversationMeta>,
-    local_id: String,
+    local_id: UserId,
+    conversation_id: Option<ConversationId>,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
-impl Conversation {
-    fn current_cid(&self) -> Option<ConversationId> {
-        Some(self.meta.as_ref()?.conversation_id)
-    }
-
+impl Messages {
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
         self.updated = chrono::Utc::now();
 
-        let conversation_id = ret_none!(&self.meta, None).conversation_id;
+        let conversation_id = self.conversation_id?;
 
         let (msg_id, timestamp) = ret_err!(
             message::add_message(
@@ -65,83 +64,16 @@ impl Conversation {
     }
 }
 
-impl ConversationTrait for Conversation {
-    fn new(emit: ConversationEmitter, model: ConversationList) -> Self {
-        Conversation {
+impl MessagesTrait for Messages {
+    fn new(emit: Emitter, model: List) -> Self {
+        Messages {
             list: Vec::new(),
             model,
-            meta: None,
             emit,
+            conversation_id: None,
             local_id: abort_err!(Config::static_id()),
             updated: chrono::Utc::now(),
         }
-    }
-
-    fn pairwise(&self) -> bool {
-        ret_none!(&self.meta, false).pairwise
-    }
-
-    fn color(&self) -> u32 {
-        ret_none!(&self.meta, 0).color
-    }
-
-    fn set_color(&mut self, color: u32) {
-        let meta = ret_none!(&mut self.meta);
-        ret_err!(conversation::set_color(&meta.conversation_id, color));
-
-        meta.color = color;
-        self.emit.color_changed();
-    }
-
-    fn muted(&self) -> bool {
-        ret_none!(&self.meta, false).muted
-    }
-
-    fn set_muted(&mut self, muted: bool) {
-        let meta = ret_none!(&mut self.meta);
-        ret_err!(conversation::set_muted(&meta.conversation_id, muted));
-
-        meta.muted = muted;
-        self.emit.muted_changed();
-    }
-
-    fn title(&self) -> Option<&str> {
-        ret_none!(&self.meta, None)
-            .title
-            .as_ref()
-            .map(|t| t.as_str())
-    }
-
-    fn set_title(&mut self, title: Option<String>) {
-        let meta = ret_none!(&mut self.meta);
-
-        ret_err!(conversation::set_title(
-            &meta.conversation_id,
-            title.as_ref().map(|t| t.as_str())
-        ));
-
-        meta.title = title;
-    }
-
-    fn picture(&self) -> Option<&str> {
-        // Note: this should not be using the `?` operator
-        ret_none!(&self.meta, None)
-            .picture
-            .as_ref()
-            .map(|p| p.as_str())
-    }
-
-    fn set_picture(&mut self, picture: Option<String>) {
-        let meta = &mut ret_none!(&mut self.meta);
-
-        ret_err!(conversation::set_picture(
-            &meta.conversation_id,
-            picture.as_ref().map(|p| p.as_str()),
-            meta.picture.as_ref().map(|p| p.as_str())
-        ));
-
-        meta.picture = picture;
-        self.emit.picture_changed();
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
@@ -149,11 +81,10 @@ impl ConversationTrait for Conversation {
             Some(id) => {
                 let conversation_id = ret_err!(ConversationId::try_from(id));
 
-                if self.current_cid() == Some(conversation_id) {
+                if self.conversation_id == Some(conversation_id) {
                     return;
                 }
 
-                self.meta = Some(ret_err!(conversation::meta(&conversation_id)));
                 self.emit.conversation_id_changed();
 
                 self.model.begin_reset_model();
@@ -175,7 +106,7 @@ impl ConversationTrait for Conversation {
                 self.model.end_insert_rows();
             }
             None => {
-                if self.meta.is_none() {
+                if self.conversation_id.is_none() {
                     return;
                 }
                 self.emit.conversation_id_changed();
@@ -185,6 +116,10 @@ impl ConversationTrait for Conversation {
                 self.model.end_reset_model();
             }
         }
+    }
+
+    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
+        self.conversation_id.as_ref().map(|c| c.as_slice())
     }
 
     fn author(&self, row_index: usize) -> UserIdRef {
@@ -208,13 +143,6 @@ impl ConversationTrait for Conversation {
     fn op(&self, row_index: usize) -> Option<FfiMsgIdRef> {
         match &ret_none!(self.list.get(row_index), None).inner.op {
             Some(id) => Some(id.as_slice()),
-            None => None,
-        }
-    }
-
-    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
-        match &self.meta {
-            Some(meta) => Some(meta.conversation_id.as_slice()),
             None => None,
         }
     }
@@ -253,14 +181,8 @@ impl ConversationTrait for Conversation {
     }
 
     /// Deletes all messages in the current conversation.
-    fn delete_conversation(&mut self) -> bool {
-        let id = match self.meta.as_mut() {
-            Some(meta) => meta.conversation_id,
-            None => {
-                eprintln!("Warning: Conversation id not set");
-                return false;
-            }
-        };
+    fn clear_conversation_history(&mut self) -> bool {
+        let id = ret_none!(self.conversation_id, false);
 
         ret_err!(conversation::delete_conversation(&id), false);
 
@@ -277,22 +199,6 @@ impl ConversationTrait for Conversation {
             .timestamp_millis()
     }
 
-    /// Deletes all messages in a conversation.
-    fn delete_conversation_by_id(&mut self, id: FfiConversationIdRef) -> bool {
-        let id = ret_err!(ConversationId::try_from(id), false);
-
-        ret_err!(conversation::delete_conversation(&id), false);
-
-        // TODO: delete this API?
-        //if Some(id) == self.conversation_id {
-        //    self.model.begin_reset_model();
-        //    self.list = Vec::new();
-        //    self.model.end_reset_model();
-        //}
-
-        true
-    }
-
     /// Clears the current view without modifying the underlying data
     fn clear_conversation_view(&mut self) {
         self.model.begin_reset_model();
@@ -301,12 +207,7 @@ impl ConversationTrait for Conversation {
     }
 
     fn refresh(&mut self) -> bool {
-        let conv_id = match self.meta.as_mut() {
-            Some(meta) => meta.conversation_id,
-            None => {
-                return true;
-            }
-        };
+        let conv_id = ret_none!(self.conversation_id, false);
 
         let new = ret_err!(
             conversation::conversation_messages_since(&conv_id, self.updated),
@@ -330,7 +231,7 @@ impl ConversationTrait for Conversation {
         true
     }
 
-    fn emit(&mut self) -> &mut ConversationEmitter {
+    fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 

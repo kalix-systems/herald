@@ -6,10 +6,10 @@
 #include <QtCore/QAbstractItemModel>
 
 class Config;
-class Conversation;
 class Conversations;
 class HeraldState;
 class HeraldUtils;
+class Messages;
 class NetworkHandle;
 class Users;
 
@@ -48,81 +48,6 @@ Q_SIGNALS:
     void displayNameChanged();
     void nameChanged();
     void profilePictureChanged();
-};
-
-class Conversation : public QAbstractItemModel
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
-    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
-    Q_PROPERTY(bool muted READ muted WRITE setMuted NOTIFY mutedChanged FINAL)
-    Q_PROPERTY(bool pairwise READ pairwise NOTIFY pairwiseChanged FINAL)
-    Q_PROPERTY(QString picture READ picture WRITE setPicture NOTIFY pictureChanged FINAL)
-    Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged FINAL)
-    explicit Conversation(bool owned, QObject *parent);
-public:
-    explicit Conversation(QObject *parent = nullptr);
-    ~Conversation();
-    quint32 color() const;
-    void setColor(quint32 v);
-    QByteArray conversationId() const;
-    void setConversationId(const QByteArray& v);
-    bool muted() const;
-    void setMuted(bool v);
-    bool pairwise() const;
-    QString picture() const;
-    void setPicture(const QString& v);
-    QString title() const;
-    void setTitle(const QString& v);
-    Q_INVOKABLE void clearConversationView();
-    Q_INVOKABLE bool deleteConversation();
-    Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
-    Q_INVOKABLE bool deleteMessage(quint64 row_index);
-    Q_INVOKABLE QByteArray insertMessage(const QString& body);
-    Q_INVOKABLE bool refresh();
-    Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
-
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
-    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    bool canFetchMore(const QModelIndex &parent) const override;
-    void fetchMore(const QModelIndex &parent) override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-    int role(const char* name) const;
-    QHash<int, QByteArray> roleNames() const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE QString author(int row) const;
-    Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
-    Q_INVOKABLE QByteArray messageId(int row) const;
-    Q_INVOKABLE QByteArray op(int row) const;
-
-Q_SIGNALS:
-    // new data is ready to be made available to the model with fetchMore()
-    void newDataReady(const QModelIndex &parent) const;
-private:
-    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
-    void initHeaderData();
-    void updatePersistentIndexes();
-Q_SIGNALS:
-    void colorChanged();
-    void conversationIdChanged();
-    void mutedChanged();
-    void pairwiseChanged();
-    void pictureChanged();
-    void titleChanged();
 };
 
 class Conversations : public QAbstractItemModel
@@ -224,6 +149,61 @@ public:
     Q_INVOKABLE double chatBubbleNaturalWidth(double chat_pane_width, double text_width) const;
     Q_INVOKABLE bool compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const;
 Q_SIGNALS:
+};
+
+class Messages : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    explicit Messages(bool owned, QObject *parent);
+public:
+    explicit Messages(QObject *parent = nullptr);
+    ~Messages();
+    QByteArray conversationId() const;
+    void setConversationId(const QByteArray& v);
+    Q_INVOKABLE bool clearConversationHistory();
+    Q_INVOKABLE void clearConversationView();
+    Q_INVOKABLE bool deleteMessage(quint64 row_index);
+    Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE bool refresh();
+    Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE QString author(int row) const;
+    Q_INVOKABLE QString body(int row) const;
+    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
+    Q_INVOKABLE QByteArray messageId(int row) const;
+    Q_INVOKABLE QByteArray op(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void conversationIdChanged();
 };
 
 class NetworkHandle : public QObject
