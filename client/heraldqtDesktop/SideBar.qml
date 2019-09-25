@@ -69,6 +69,7 @@ Pane {
     }
 
 
+
     SBUtils.ContactsToggle {
         id: contactsToggleBar
         anchors.top: searchBarBorder.bottom

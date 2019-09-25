@@ -17,6 +17,7 @@ public:
   Conversations* convos     = nullptr;
   HeraldState*   h_state    = nullptr;
   HeraldUtils*   h_utils    = nullptr;
+  Messages*      msgs       = nullptr;
   NetworkHandle* nwk_handle = nullptr;
   Users*         users      = nullptr;
   LibHerald();
@@ -24,9 +25,9 @@ public:
 
 private slots:
   //  // set up
-  //  void messages_set_up();
+  void messages_set_up();
   // destroy everything messages related
-  //  void messages_tear_down();
+  void messages_tear_down();
 
   // config test slots
   void test_config_set_name();
@@ -41,9 +42,9 @@ private slots:
   // conversation testing slot
   void test_modifyConversation();
   // message testing slots
-  //  void test_insertMessage();
-  //  void test_deleteMessage();
-  //  void test_reply();
+  void test_insertMessage();
+  void test_deleteMessage();
+  void test_reply();
   // networking dependant tests
   void test_networkHandleConnects();
   //  void test_intraclientMessage();
@@ -147,102 +148,130 @@ void LibHerald::test_config_set_color_scheme()
  *  these are tests for the messages database.
  *  They do not rely on the server for operation.
  **/
-// void LibHerald::test_insertMessage()
-//{
-//  messages_set_up();
+void LibHerald::messages_set_up()
+{
 
-//  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
+  cfg = new Config();
 
-//  msgs->insertMessage("simple case 1");
+  convos = new Conversations();
 
-//  auto args = spy.at(0);
-//  QCOMPARE(spy.count(), 1);
-//  QCOMPARE(args.at(1), QVariant(0));
-//  QCOMPARE(args.at(2), QVariant(0));
+  while (convos->rowCount() > 0) {
+    convos->removeConversation(0);
+  }
 
-//  msgs->insertMessage("simple case 2");
+  auto bs = convos->addConversation();
+  msgs    = new Messages();
+  msgs->setConversationId(bs);
+}
 
-//  args = spy.at(1);
-//  QCOMPARE(spy.count(), 2);
-//  QCOMPARE(args.at(1), QVariant(1));
-//  QCOMPARE(args.at(2), QVariant(1));
+void LibHerald::messages_tear_down()
+{
 
-//  msgs->insertMessage("naughty string 社會科學院語學研究所");
+  while (convos->rowCount() > 0) {
+    convos->removeConversation(0);
+  }
 
-//  args = spy.at(2);
-//  QCOMPARE(spy.count(), 3);
-//  QCOMPARE(args.at(1), QVariant(2));
-//  QCOMPARE(args.at(2), QVariant(2));
+  delete cfg;
+  delete convos;
+  delete msgs;
+}
 
-//  messages_tear_down();
-//}
+void LibHerald::test_insertMessage()
+{
+  messages_set_up();
 
-// void LibHerald::test_deleteMessage()
-//{
-//  messages_set_up();
+  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
 
-//  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
-//  QSignalSpy rem_spy(msgs, SIGNAL(rowsRemoved(QModelIndex, int, int)));
+  msgs->insertMessage("simple case 1");
 
-//  msgs->insertMessage("simple case 1");
+  auto args = spy.at(0);
+  QCOMPARE(spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
 
-//  auto args = spy.at(0);
-//  QCOMPARE(spy.count(), 1);
-//  QCOMPARE(args.at(1), QVariant(0));
-//  QCOMPARE(args.at(2), QVariant(0));
+  msgs->insertMessage("simple case 2");
 
-//  msgs->insertMessage("simple case 2");
+  args = spy.at(1);
+  QCOMPARE(spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
 
-//  args = spy.at(1);
-//  QCOMPARE(spy.count(), 2);
-//  QCOMPARE(args.at(1), QVariant(1));
-//  QCOMPARE(args.at(2), QVariant(1));
+  msgs->insertMessage("naughty string 社會科學院語學研究所");
 
-//  msgs->deleteMessage(1);
+  args = spy.at(2);
+  QCOMPARE(spy.count(), 3);
+  QCOMPARE(args.at(1), QVariant(2));
+  QCOMPARE(args.at(2), QVariant(2));
 
-//  args = rem_spy.at(0);
-//  QCOMPARE(rem_spy.count(), 1);
-//  QCOMPARE(args.at(1), QVariant(1));
-//  QCOMPARE(args.at(2), QVariant(1));
+  messages_tear_down();
+}
 
-//  msgs->deleteMessage(0);
+void LibHerald::test_deleteMessage()
+{
+  messages_set_up();
 
-//  args = rem_spy.at(1);
-//  QCOMPARE(rem_spy.count(), 2);
-//  QCOMPARE(args.at(1), QVariant(0));
-//  QCOMPARE(args.at(2), QVariant(0));
+  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
+  QSignalSpy rem_spy(msgs, SIGNAL(rowsRemoved(QModelIndex, int, int)));
 
-//  messages_tear_down();
-//}
+  msgs->insertMessage("simple case 1");
 
-// void LibHerald::test_reply()
-//{
-//  messages_set_up();
+  auto args = spy.at(0);
+  QCOMPARE(spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
 
-//  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
-//  msgs->insertMessage("simple case 1");
+  msgs->insertMessage("simple case 2");
 
-//  auto args = spy.at(0);
-//  QCOMPARE(spy.count(), 1);
-//  QCOMPARE(args.at(1), QVariant(0));
-//  QCOMPARE(args.at(2), QVariant(0));
+  args = spy.at(1);
+  QCOMPARE(spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
 
-//  auto bs = msgs->insertMessage("simple case 2");
+  msgs->deleteMessage(1);
 
-//  args = spy.at(1);
-//  QCOMPARE(spy.count(), 2);
-//  QCOMPARE(args.at(1), QVariant(1));
-//  QCOMPARE(args.at(2), QVariant(1));
+  args = rem_spy.at(0);
+  QCOMPARE(rem_spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
 
-//  msgs->reply("simple case 2 reply", bs);
+  msgs->deleteMessage(0);
 
-//  args = spy.at(2);
-//  QCOMPARE(spy.count(), 3);
-//  QCOMPARE(args.at(1), QVariant(2));
-//  QCOMPARE(args.at(2), QVariant(2));
+  args = rem_spy.at(1);
+  QCOMPARE(rem_spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
 
-//  messages_tear_down();
-//}
+  messages_tear_down();
+}
+
+void LibHerald::test_reply()
+{
+  messages_set_up();
+
+  QSignalSpy spy(msgs, SIGNAL(rowsInserted(QModelIndex, int, int)));
+  msgs->insertMessage("simple case 1");
+
+  auto args = spy.at(0);
+  QCOMPARE(spy.count(), 1);
+  QCOMPARE(args.at(1), QVariant(0));
+  QCOMPARE(args.at(2), QVariant(0));
+
+  auto bs = msgs->insertMessage("simple case 2");
+
+  args = spy.at(1);
+  QCOMPARE(spy.count(), 2);
+  QCOMPARE(args.at(1), QVariant(1));
+  QCOMPARE(args.at(2), QVariant(1));
+
+  msgs->reply("simple case 2 reply", bs);
+
+  args = spy.at(2);
+  QCOMPARE(spy.count(), 3);
+  QCOMPARE(args.at(1), QVariant(2));
+  QCOMPARE(args.at(2), QVariant(2));
+
+  messages_tear_down();
+}
 
 /*
  *  CONVERSATION TEST CASE:

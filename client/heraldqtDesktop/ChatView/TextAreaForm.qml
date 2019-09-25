@@ -49,7 +49,7 @@ Rectangle {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        source: "qrc:/emoji-icon.svg"
+        source: "qrc:/emoji.png"
     }
 
     // wrapper column so replies load

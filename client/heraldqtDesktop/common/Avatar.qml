@@ -18,8 +18,6 @@ import "utils.mjs" as Utils
 Row {
     id: wrapperRow
     property string avatarLabel: ""
-    property string username: ""
-    property string secondaryText: ""
     property string pfpUrl: ""
     property int colorHash: 0
     property int shapeEnum: 0 /// { individual, group ... }
@@ -34,47 +32,24 @@ Row {
     anchors.verticalCenter: parent.verticalCenter
 
     Loader {
-        id: avatarLoader
         width: size
         height: size
         sourceComponent: JS.avatarSource(avatarLabel, pfpUrl, imageAvatar,
-                                initialAvatar)
+                                         initialAvatar)
     }
-Column {
-    anchors {
-        top: avatarLoader.top
-        topMargin: QmlCfg.smallMargin
-        verticalCenter: parent.verticalCenter
-    }
+
     Text {
-        id: displayName
         visible: labeled
         text: avatarLabel
         font.bold: true
+        anchors.verticalCenter: parent.verticalCenter
         //is white instead of palette maincolor bc shld be white regardless of theme
         color: if (!isDefault) {
-                   QmlCfg.palette.primaryColor
+                   "white"
                } else {
-                   QmlCfg.mainTextColor
+                   "black"
                }
     }
-
-    Text {
-        id: userName
-        visible: secondaryText !== ""
-        text: secondaryText
-        anchors {
-            topMargin: QmlCfg.margin
-        }
-        //is white instead of palette maincolor bc shld be white regardless of theme
-        color: if (!isDefault) {
-                   QmlCfg.palette.primaryColor
-               } else {
-                   QmlCfg.palette.secondaryColor
-               }
-    }
-}
-
 
     ///--- potential avatar components
     /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do

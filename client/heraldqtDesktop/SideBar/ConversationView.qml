@@ -42,7 +42,7 @@ ListView {
 
         // This ternary is okay, types are enforced by QML
         visible: matched
-        height: visible ? 55 : 0
+        height: visible ? 60 : 0
         width: parent.width
 
         Users {
@@ -108,7 +108,7 @@ ListView {
         }
 
         Common.Avatar {
-            size: 45
+            size: 50
             id: conversationAvatar
             avatarLabel: Utils.unwrapOr(title, "unknown")
             colorHash: Utils.unwrapOr(color, 0)

@@ -65,7 +65,7 @@ ToolBar {
             rightMargin: QmlCfg.margin
             right: parent.right
         }
-        source: "qrc:/gear-icon.svg"
+        source: "qrc:/gear.png"
         onClicked: {
             /// Note: this needs to pay attention to root state
             configPopup.show()

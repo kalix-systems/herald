@@ -14,6 +14,7 @@
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.mjs</file>
         <file>SideBar/ContactView.qml</file>
+        <file>SideBar/ContactsToggle.qml</file>
         <file>SideBar/ConversationView.qml</file>
         <file>SideBar/UtilityBar.qml</file>
         <file>SideBar/popups/ColorPicker.qml</file>

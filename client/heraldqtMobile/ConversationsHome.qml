@@ -57,21 +57,21 @@ Page {
 
     Drawer {
         id: homeDrawer
-        width: 0.80 * parent.width
+        width: 0.66 * parent.width
         height: parent.height
+        dragMargin: QmlCfg.margin * 2
 
+        TeamColumn {
+            id: teamColumn
+            height: parent.height
+        }
 
-//        TeamColumn {
-//            id: teamColumn
-//            height: parent.height
-//        }
-
-//        Rectangle {
-//            anchors.left : teamColumn.right
-//            color: "black"
-//            height: parent.height
-//            width: 1
-//        }
+        Rectangle {
+            anchors.left : teamColumn.right
+            color: "black"
+            height: parent.height
+            width: 1
+        }
 
       }
 
