@@ -40,7 +40,7 @@ Pane {
         id: configBarBorder
         anchors.bottom: utilityBar.top
         color: "black"
-        height: 2
+        height: 1
     }
 
     ///--- SearchBar for contacts, add contact button
