@@ -53,7 +53,7 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: convModel.deleteConversation()
+            onTriggered: ownedConversation.deleteConversation()
         }
     }
 
@@ -87,8 +87,8 @@ ToolBar {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
-                gsConvoItemMembers.addToConversation(userIdText.text,
-                                                     convModel.conversationId)
+                //gsConvoItemMembers.addToConversation(userIdText.text,
+                //                                     convModel.conversationId)
                 newMemberPopup.close()
             }
         }

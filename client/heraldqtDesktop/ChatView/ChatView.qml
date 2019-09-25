@@ -40,12 +40,12 @@ Pane {
         Component.onCompleted: forceActiveFocus()
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
-        Connections {
-            target:convModel
-            onRowsInserted: {
-                convWindow.contentY = convWindow.contentHeight
-            }
-        }
+        //Connections {
+        //    target:convModel
+        //    onRowsInserted: {
+        //        convWindow.contentY = convWindow.contentHeight
+        //    }
+        //}
     }
 
     ///--- Text entry area, for typing
@@ -61,7 +61,7 @@ Pane {
         keysProxy: Item {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
                                       event, chatTextArea.chatText,
-                                      networkHandle, convModel)
+                                      networkHandle, ownedConversation)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: print("placeholder until emoji pop up")

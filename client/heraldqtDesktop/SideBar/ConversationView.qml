@@ -24,14 +24,14 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    Connections {
-        target: convModel
-        onConversationIdChanged: {
-            if (convModel.conversationId === undefined) {
-                conversationList.currentIndex = -1
-            }
-        }
-    }
+    //Connections {
+    //    target: convModel
+    //    onConversationIdChanged: {
+    //        if (convModel.conversationId === undefined) {
+    //            conversationList.currentIndex = -1
+    //        }
+    //    }
+    //}
 
     ScrollBar.vertical: ScrollBar {
     }

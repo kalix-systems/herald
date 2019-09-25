@@ -21,16 +21,15 @@ Item {
 
     NetworkHandle {
         id: networkHandle
-          // every conversation has it's own refresh signal. guards
-//        onNewMessageChanged: convModel.refresh()
+        // every conversation has it's own refresh signal. guards
+        //        onNewMessageChanged: convModel.refresh()
         onNewContactChanged: contactsModel.refresh()
         onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
-    Conversation {
-        id: convModel
-    }
-
+    //Conversation {
+    //    id: convModel
+    //}
     Users {
         id: contactsModel
     }
@@ -39,11 +38,10 @@ Item {
         id: conversationsModel
     }
 
-    Users {
-        id: conversationMembers
-        conversationId: Utils.unwrapOr(convModel.conversationId, "")
-    }
-
+    //Users {
+    //    id: conversationMembers
+    //    conversationId: Utils.unwrapOr(convModel.conversationId, "")
+    //}
     Popups.ConfigPopup {
         id: preferencesPopup
     }
@@ -88,17 +86,14 @@ Item {
         Layout.fillHeight: true
         orientation: Qt.Horizontal
 
-
         SideBar {
             id: sideBar
         }
-
 
         Loader {
             id: chatView
             sourceComponent: splash
         }
-
 
         handle: Rectangle {
             implicitWidth: 1.1
