@@ -15,7 +15,7 @@ Item {
     property color gsConvoColor
     property var gsConvoItemMembers
     //get rid of this
-    property bool gsContactsSearch: true
+    property bool gsContactsSearch: false
     property var gsCurrentConvo
 
     onGsContactsSearchChanged: {
@@ -95,8 +95,8 @@ Item {
         }
 
         handle: Rectangle {
-            implicitWidth: 3
-            color: QmlCfg.palette.secondaryColor
+            implicitWidth: 1
+            color: "black"
         }
     }
 }

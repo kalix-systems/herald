@@ -48,7 +48,7 @@ Window {
             bottom: parent.bottom
             right: parent.right
         }
-        onClicked: JS.insertContact(newContactDialogue, entryArea,
+       onClicked: JS.insertContact(newContactDialogue, entryArea,
                                     contactsModel, networkHandle, conversationsModel)
     }
 }

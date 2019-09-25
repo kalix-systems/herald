@@ -18,7 +18,6 @@ import "popups" as Popups
 /// --- displays a list of conversations
 ListView {
     id: conversationList
-    visible: !gsContactsSearch
 
     clip: true
     currentIndex: -1
@@ -42,6 +41,7 @@ ListView {
         property Item conversationAvatar: conversationAvatar
 
         // This ternary is okay, types are enforced by QML
+        visible: matched
         height: visible ? 60 : 0
         width: parent.width
 
@@ -60,6 +60,7 @@ ListView {
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
+                height: 2
             }
 
             anchors.fill: parent
