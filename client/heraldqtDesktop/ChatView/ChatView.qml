@@ -14,10 +14,6 @@ Pane {
     property alias messageBar: messageBar
     property Messages ownedConversation
 
-    Component.onCompleted:  {
-        print(ownedConversation.conversationId)
-    }
-
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
@@ -62,7 +58,8 @@ Pane {
 
         keysProxy: Item {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
-                                      event, chatTextArea.chatText, // this is actually a text area TODO rename
+                                      event, chatTextArea.chatText,
+                                      // this is actually a text area TODO rename
                                       networkHandle, ownedConversation)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }

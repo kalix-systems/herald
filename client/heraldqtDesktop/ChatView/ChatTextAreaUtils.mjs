@@ -31,23 +31,17 @@
 //  }
 //}
 export function enterKeyHandler(event, target, networkHandle, messageModel) {
-    console.log("called");
     if (event.modifiers & Qt.ShiftModifier) {
-        console.log("shift mod");
         target.text = target.text + "\n";
         target.cursorPosition = target.text.length;
         return;
     }
     if (target.text.trim().length <= 0) {
-        console.log("early return, no text");
         return;
     }
     // clear before positional reset
     const text = target.text;
     target.clear();
-    console.log("cleared");
     const messageId = messageModel.insertMessage(text);
-    console.log("inserted");
     networkHandle.sendMessage(text, messageModel.conversationId, messageId);
-    console.log("sent");
 }

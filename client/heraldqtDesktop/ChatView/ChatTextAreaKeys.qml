@@ -4,7 +4,6 @@ Keys {
     // TS
     // DEAD CODE
     onReturnPressed: {
-        print("oyo")
         if (event.modifiers & Qt.ShiftModifier) {
             chatText.text = chatText.text + "\n"
             chatText.cursorPosition = chatText.text.length
