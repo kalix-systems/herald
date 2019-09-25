@@ -41,7 +41,7 @@ ListView {
         property Item contactAvatar: contactAvatar
 
         // This ternary is okay, types are enforced by QML
-        height: visible ? 60 : 0
+        height: visible ? 55 : 0
         width: parent.width
         visible: matched
 
@@ -110,7 +110,7 @@ ListView {
         /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
         /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
         Common.Avatar {
-            size: 50
+            size: 45
             id: contactAvatar
             avatarLabel: displayName
             colorHash: color

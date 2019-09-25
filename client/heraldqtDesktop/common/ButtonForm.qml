@@ -14,5 +14,6 @@ Button {
         height: width
         scale: 0.9
         mipmap: true
+        sourceSize: Qt.size(24,24);
     }
 }
