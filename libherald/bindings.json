@@ -119,8 +119,8 @@
                     "return": "bool"
                 },
                 "hardRefresh": {
-                	"mut": true,
-                	"return": "bool"
+                    "mut": true,
+                    "return": "bool"
                 }
             }
         },
@@ -329,13 +329,34 @@
                 }
             }
         },
-        "Messages": {
+        "Conversation": {
             "type": "List",
             "properties": {
                 "conversationId": {
                     "type": "QByteArray",
                     "optional": true,
                     "write": true
+                },
+                "title": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "picture": {
+                    "type": "QString",
+                    "optional": true,
+                    "write": true
+                },
+                "color": {
+                    "type": "quint32",
+                    "write": true
+                },
+                "muted": {
+                    "type": "bool",
+                    "write": true
+                },
+                "pairwise": {
+                    "type": "bool"
                 }
             },
             "itemProperties": {
