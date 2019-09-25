@@ -5,6 +5,9 @@ _build/
 .direnv
 stats/
 
+## qtcreator
+*.user.pro*
+
 ## profiling data
 callgrind.out*
 cachegrind.out*

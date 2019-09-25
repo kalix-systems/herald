@@ -10,17 +10,10 @@ import QtQml 2.13
 Item {
     id: appRoot
 
-    property var gsConversationId
+    // TODO this can be passed as an argument wherever it's needed
     property int gsSelectedIndex: -1
-    property color gsConvoColor
+    // TODO why does this need to be global?
     property var gsConvoItemMembers
-    //get rid of this
-    property bool gsContactsSearch: true
-    property var gsCurrentConvo
-
-    onGsContactsSearchChanged: {
-        gsConversationId = undefined
-    }
 
     anchors.fill: parent.fill
     Layout.fillWidth: true
@@ -28,12 +21,10 @@ Item {
 
     NetworkHandle {
         id: networkHandle
-        onNewMessageChanged: messageModel.refresh()
+        // every conversation has it's own refresh signal. guards
+        //        onNewMessageChanged: convModel.refresh()
         onNewContactChanged: contactsModel.refresh()
-    }
-
-    Messages {
-        id: messageModel
+        onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
     Users {
@@ -42,11 +33,6 @@ Item {
 
     Conversations {
         id: conversationsModel
-    }
-
-    Users {
-        id: conversationMembers
-        conversationId: Utils.unwrapOr(gsConversationId, "")
     }
 
     Popups.ConfigPopup {
@@ -68,7 +54,6 @@ Item {
             onClicked: {
                 contactsModel.setColor(gsSelectedIndex,
                                        avatarColorPicker.colorIndex)
-                appRoot.gsConvoColor = QmlCfg.avatarColors[avatarColorPicker.colorIndex]
                 avatarColorPicker.close()
             }
         }
@@ -76,6 +61,15 @@ Item {
 
     Config {
         id: config
+    }
+
+    Component {
+        id: splash
+        Image {
+            anchors.fill: parent
+            source: "qrc:/land.png"
+            mipmap: true
+        }
     }
 
     SplitView {
@@ -89,13 +83,14 @@ Item {
             id: sideBar
         }
 
-        ChatView {
+        Loader {
             id: chatView
+            sourceComponent: splash
         }
 
         handle: Rectangle {
-            implicitWidth: 3
-            color: QmlCfg.palette.secondaryColor
+            implicitWidth: 1.1
+            color: "black"
         }
     }
 }

@@ -1,4 +1,4 @@
-export function insertContact(dialogue, entryArea, contactsModel, networkHandle) {
+export function insertContact(entryArea, contactsModel, networkHandle, conversationsModel) {
     const trimmedText = entryArea.text.trim();
     if (trimmedText.length === 0) {
         return;
@@ -6,5 +6,5 @@ export function insertContact(dialogue, entryArea, contactsModel, networkHandle)
     const conversationId = contactsModel.add(trimmedText);
     networkHandle.sendAddRequest(trimmedText, conversationId);
     entryArea.clear();
-    dialogue.close();
+    conversationsModel.hardRefresh();
 }

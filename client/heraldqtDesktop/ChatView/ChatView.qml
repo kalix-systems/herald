@@ -3,21 +3,26 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
-import "ChatView" as CVUtils
-import "common/utils.mjs" as Utils
-import "ChatView/ChatTextAreaUtils.mjs" as CTUtils
-import "common" as Common
+import "." as CVUtils
+import "../common/utils.mjs" as Utils
+import "./ChatTextAreaUtils.mjs" as CTUtils
+import "../common" as Common
 
 Pane {
     id: chatPane
-    enabled: false
-    opacity: 0
     padding: 0
     property alias messageBar: messageBar
+    property Messages ownedConversation
 
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
+    }
+
+    Common.Divider {
+        height: 1
+        anchors.bottom: messageBar.bottom
+        color: "black"
     }
 
     ///--- chat view, shows messages
@@ -34,7 +39,7 @@ Pane {
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
         Connections {
-            target: messageModel
+            target: ownedConversation
             onRowsInserted: {
                 convWindow.contentY = convWindow.contentHeight
             }
@@ -54,21 +59,12 @@ Pane {
         keysProxy: Item {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
                                       event, chatTextArea.chatText,
-                                      networkHandle, messageModel)
+                                      // this is actually a text area TODO rename
+                                      networkHandle, ownedConversation)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: print("placeholder until emoji pop up")
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
         scrollHeight: Math.min(contentHeight, 100)
-    }
-
-    states: State {
-        when: appRoot.gsConversationId !== undefined && !gsContactsSearch
-        name: "visibleview"
-        PropertyChanges {
-            target: chatPane
-            opacity: 100
-            enabled: true
-        }
     }
 }

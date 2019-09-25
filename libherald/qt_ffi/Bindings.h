@@ -69,6 +69,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray addConversation();
+    Q_INVOKABLE bool hardRefresh();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -165,9 +166,8 @@ public:
     ~Messages();
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
+    Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE void clearConversationView();
-    Q_INVOKABLE bool deleteConversation();
-    Q_INVOKABLE bool deleteConversationById(const QByteArray& conversation_id);
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
     Q_INVOKABLE bool refresh();
@@ -262,7 +262,8 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
-    Q_INVOKABLE bool addToConversation(const QString& user_id, const QByteArray& conversation_id);
+    Q_INVOKABLE bool addToConversation(const QString& user_id);
+    Q_INVOKABLE bool addToConversationById(const QString& user_id, const QByteArray& conversation_id);
     Q_INVOKABLE bool addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE bool bulkAddToConversation(const QByteArray& user_id_array, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;

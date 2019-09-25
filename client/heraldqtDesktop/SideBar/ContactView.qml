@@ -17,21 +17,21 @@ import "popups" as Popups
 
 /// --- displays a list of contacts
 ListView {
-    visible: gsContactsSearch
     id: contactList
 
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    Connections {
-        target: appRoot
-        onGsConversationIdChanged: {
-            if (gsConversationId === undefined) {
-                contactList.currentIndex = -1
-            }
-        }
-    }
+// TODO : remove this if it does not create bugs
+//    Connections {
+//        target: convModel
+//        onConversationIdChanged: {
+//            if (convModel.conversationId === undefined) {
+//                contactList.currentIndex = -1
+//            }
+//        }
+//    }
 
     ScrollBar.vertical: ScrollBar {
     }
@@ -41,8 +41,9 @@ ListView {
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
 
+
         // This ternary is okay, types are enforced by QML
-        height: visible ? 60 : 0
+        height: visible ? 55 : 0
         width: parent.width
         visible: matched
 
@@ -88,18 +89,16 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
-                    JS.contactClickHandler(mouse, contactList, index,
-                                           pairwiseConversationId,
-                                           popupManager.optionsMenu,
-                                           messageModel, appRoot)
-                    appRoot.gsConvoColor = QmlCfg.avatarColors[color]
+                    //JS.contactClickHandler(mouse, contactList, index,
+                    //                       pairwiseConversationId,
+                    //                       popupManager.optionsMenu,
+                    //                       convModel, appRoot)
                 }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""
             }
 
-            ///NPB : see the QT labs menu import. [https://doc.qt.io/qt-5/qml-qt-labs-platform-menu.html]
             Popups.ContactClickedPopup {
                 id: popupManager
             }
@@ -111,7 +110,7 @@ ListView {
         /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
         /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
         Common.Avatar {
-            size: 50
+            size: 45
             id: contactAvatar
             avatarLabel: displayName
             colorHash: color

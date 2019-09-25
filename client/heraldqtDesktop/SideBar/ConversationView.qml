@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "../common/utils.mjs" as Utils
+import "../ChatView" as CV
 import "./ContactView.mjs" as JS
 import "popups" as Popups
 
@@ -18,37 +19,47 @@ import "popups" as Popups
 /// --- displays a list of conversations
 ListView {
     id: conversationList
-    visible: !gsContactsSearch
 
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    Connections {
-        target: appRoot
-        onGsConversationIdChanged: {
-            if (gsConversationId === undefined) {
-                conversationList.currentIndex = -1
-            }
-        }
-    }
+    //Connections {
+    //    target: convModel
+    //    onConversationIdChanged: {
+    //        if (convModel.conversationId === undefined) {
+    //            conversationList.currentIndex = -1
+    //        }
+    //    }
+    //}
 
     ScrollBar.vertical: ScrollBar {
     }
 
     delegate: Item {
         id: conversationItem
+
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item conversationAvatar: conversationAvatar
-
-        // This ternary is okay, types are enforced by QML
-        height: visible ? 60 : 0
-        width: parent.width
+        property var conversationIdProxy: conversationId
+        property bool isPairwise: pairwise
+        property var childChatView: Component {
+            CV.ChatView {
+              ownedConversation: Messages {
+                conversationId: conversationIdProxy
+              }
+           }
+        }
 
         Users {
             id: convoItemMembers
-            conversationId: conversationsModel.conversationId(index)
+            conversationId: conversationIdProxy
         }
+
+        // This ternary is okay, types are enforced by QML
+        visible: matched
+        height: visible ? 55 : 0
+        width: parent.width
 
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
@@ -60,6 +71,7 @@ ListView {
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
+                height: 2
             }
 
             anchors.fill: parent
@@ -91,12 +103,10 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
+                    chatView.sourceComponent = childChatView;
                     conversationList.currentIndex = index
-                    messageModel.conversationId = conversationId
-                    appRoot.gsConversationId = conversationId
-                    appRoot.gsConvoColor = QmlCfg.avatarColors[color]
-                    appRoot.gsConvoItemMembers = convoItemMembers
-                    appRoot.gsCurrentConvo = conversationItem
+//                  convModel.conversationId = conversationId
+//                  appRoot.gsConvoItemMembers = convoItemMembers
                 }
 
                 // ternary is okay here, type enforced by QML
@@ -107,10 +117,10 @@ ListView {
         }
 
         Common.Avatar {
-            size: 50
+            size: 45
             id: conversationAvatar
             avatarLabel: Utils.unwrapOr(title, "unknown")
-            colorHash: color
+            colorHash: Utils.unwrapOr(color, 0)
             pfpUrl: Utils.safeStringOrDefault(picture)
         }
     }

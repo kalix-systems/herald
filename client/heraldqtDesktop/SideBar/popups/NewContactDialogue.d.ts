@@ -1,1 +1,1 @@
-export declare function insertContact(dialogue: Popup, entryArea: TextArea, contactsModel: Users, networkHandle: NetworkHandle): void;
+export declare function insertContact(entryArea: TextArea, contactsModel: Users, networkHandle: NetworkHandle, conversationsModel: Conversations): void;

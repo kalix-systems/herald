@@ -4,22 +4,25 @@ use heraldcore::{
     abort_err, chrono,
     config::Config,
     conversation,
-    message::{self, Message},
+    message::{self, Message as Msg},
     types::*,
 };
 use std::convert::TryFrom;
 
+type Emitter = MessagesEmitter;
+type List = MessagesList;
+
 #[derive(Clone)]
-struct MessagesItem {
-    inner: Message,
+struct Message {
+    inner: Msg,
 }
 
 pub struct Messages {
-    conversation_id: Option<ConversationId>,
-    emit: MessagesEmitter,
-    model: MessagesList,
-    list: Vec<MessagesItem>,
+    emit: Emitter,
+    model: List,
+    list: Vec<Message>,
     local_id: UserId,
+    conversation_id: Option<ConversationId>,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
@@ -27,19 +30,13 @@ impl Messages {
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
         self.updated = chrono::Utc::now();
 
-        let conversation_id = match &self.conversation_id {
-            Some(conv) => conv,
-            None => {
-                eprintln!("Error: conversation_id not set.");
-                return None;
-            }
-        };
+        let conversation_id = ret_none!(self.conversation_id, None);
 
         let (msg_id, timestamp) = ret_err!(
             message::add_message(
                 None,
                 self.local_id,
-                conversation_id,
+                &conversation_id,
                 body.as_str(),
                 None,
                 &op
@@ -47,9 +44,9 @@ impl Messages {
             None
         );
 
-        let msg = MessagesItem {
-            inner: Message {
-                author: self.local_id,
+        let msg = Message {
+            inner: Msg {
+                author: self.local_id.clone(),
                 body: body,
                 conversation: conversation_id.clone(),
                 message_id: msg_id.clone(),
@@ -59,59 +56,76 @@ impl Messages {
                 send_status: None,
             },
         };
+
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(msg);
         self.model.end_insert_rows();
+
         Some(msg_id)
     }
 }
 
 impl MessagesTrait for Messages {
-    fn new(emit: MessagesEmitter, model: MessagesList) -> Messages {
+    fn new(emit: Emitter, model: List) -> Self {
         Messages {
-            conversation_id: None,
             list: Vec::new(),
             model,
             emit,
+            conversation_id: None,
             local_id: abort_err!(Config::static_id()),
             updated: chrono::Utc::now(),
         }
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
-        let conversation_id = match conversation_id {
-            Some(id) => Some(ret_err!(ConversationId::try_from(id))),
-            None => None,
-        };
+        match conversation_id {
+            Some(id) => {
+                let conversation_id = ret_err!(ConversationId::try_from(id));
 
-        if self.conversation_id == conversation_id {
-            return;
-        }
+                if self.conversation_id == Some(conversation_id) {
+                    return;
+                }
 
-        println!("Setting conversation_id to: {:?}", conversation_id);
-        self.conversation_id = conversation_id;
+                self.conversation_id = Some(conversation_id);
+                self.emit.conversation_id_changed();
 
-        if let Some(conversation_id) = self.conversation_id.as_ref() {
-            self.model.begin_reset_model();
-            self.list = Vec::new();
-            self.model.end_reset_model();
+                self.model.begin_reset_model();
+                self.list = Vec::new();
+                self.model.end_reset_model();
 
-            let messages: Vec<MessagesItem> =
-                ret_err!(conversation::conversation_messages(&conversation_id))
-                    .into_iter()
-                    .map(|m| MessagesItem { inner: m })
-                    .collect();
+                let messages: Vec<Message> =
+                    ret_err!(conversation::conversation_messages(&conversation_id))
+                        .into_iter()
+                        .map(|m| Message { inner: m })
+                        .collect();
 
-            if messages.is_empty() {
-                return;
+                if messages.is_empty() {
+                    return;
+                }
+
+                self.model.begin_insert_rows(0, messages.len() - 1);
+                self.list = messages;
+                self.model.end_insert_rows();
             }
+            None => {
+                if self.conversation_id.is_none() {
+                    return;
+                }
 
-            self.model.begin_insert_rows(0, messages.len() - 1);
-            self.list = messages;
-            self.model.end_insert_rows();
-            self.emit.conversation_id_changed();
+                self.conversation_id = None;
+                self.emit.conversation_id_changed();
+                self.emit.conversation_id_changed();
+
+                self.model.begin_reset_model();
+                self.list = Vec::new();
+                self.model.end_reset_model();
+            }
         }
+    }
+
+    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
+        self.conversation_id.as_ref().map(|c| c.as_slice())
     }
 
     fn author(&self, row_index: usize) -> FfiUserIdRef {
@@ -139,13 +153,6 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
-        match &self.conversation_id {
-            Some(id) => Some(id.as_slice()),
-            None => None,
-        }
-    }
-
     fn insert_message(&mut self, body: String) -> FfiMsgId {
         match self.raw_insert(body, None) {
             Some(message_id) => message_id.to_vec(),
@@ -154,13 +161,7 @@ impl MessagesTrait for Messages {
     }
 
     fn reply(&mut self, body: String, op: FfiMsgIdRef) -> FfiMsgId {
-        let op = match MsgId::try_from(op) {
-            Ok(op) => op,
-            Err(e) => {
-                eprintln!("{}", e);
-                return vec![];
-            }
-        };
+        let op = ret_err!(MsgId::try_from(op), vec![]);
 
         match self.raw_insert(body, Some(op)) {
             Some(message_id) => message_id.to_vec(),
@@ -186,20 +187,13 @@ impl MessagesTrait for Messages {
     }
 
     /// Deletes all messages in the current conversation.
-    fn delete_conversation(&mut self) -> bool {
-        let id = match &self.conversation_id {
-            Some(id) => id,
-            None => {
-                eprintln!("Warning: Conversation id not set");
-                return false;
-            }
-        };
+    fn clear_conversation_history(&mut self) -> bool {
+        let id = ret_none!(self.conversation_id, false);
 
-        ret_err!(conversation::delete_conversation(id), false);
+        ret_err!(conversation::delete_conversation(&id), false);
 
         self.model.begin_reset_model();
         self.list = Vec::new();
-        self.conversation_id = None;
         self.model.end_reset_model();
         true
     }
@@ -211,36 +205,15 @@ impl MessagesTrait for Messages {
             .timestamp_millis()
     }
 
-    /// Deletes all messages in a conversation.
-    fn delete_conversation_by_id(&mut self, id: FfiConversationIdRef) -> bool {
-        let id = ret_err!(ConversationId::try_from(id), false);
-
-        ret_err!(conversation::delete_conversation(&id), false);
-
-        if Some(id) == self.conversation_id {
-            self.model.begin_reset_model();
-            self.list = Vec::new();
-            self.model.end_reset_model();
-        }
-
-        true
-    }
-
     /// Clears the current view without modifying the underlying data
     fn clear_conversation_view(&mut self) {
         self.model.begin_reset_model();
         self.list = Vec::new();
-        self.conversation_id = None;
         self.model.end_reset_model();
     }
 
     fn refresh(&mut self) -> bool {
-        let conv_id = match self.conversation_id {
-            Some(id) => id,
-            None => {
-                return true;
-            }
-        };
+        let conv_id = ret_none!(self.conversation_id, true);
 
         let new = ret_err!(
             conversation::conversation_messages_since(&conv_id, self.updated),
@@ -258,13 +231,13 @@ impl MessagesTrait for Messages {
             (self.list.len() + new.len()).saturating_sub(1),
         );
         self.list
-            .extend(new.into_iter().map(|inner| MessagesItem { inner }));
+            .extend(new.into_iter().map(|inner| Message { inner }));
         self.model.end_insert_rows();
 
         true
     }
 
-    fn emit(&mut self) -> &mut MessagesEmitter {
+    fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 

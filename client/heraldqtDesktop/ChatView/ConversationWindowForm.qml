@@ -41,7 +41,7 @@ Flickable {
         Repeater {
             id: chatListView
             anchors.fill: parent
-            model: messageModel
+            model: ownedConversation
 
             delegate: Column {
                 readonly property bool outbound: author === config.configId
@@ -58,7 +58,6 @@ Flickable {
                 }
                 rightPadding: QmlCfg.margin
 
-
                 //NOTE: see chat bubble form
                 CVUtils.ChatBubbleForm {
                     messageText: body
@@ -69,7 +68,7 @@ Flickable {
                         }
                     }
                     // This is okay as a ternary, the types are enforced by QML.
-                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : appRoot.gsConvoColor
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[ownedConversation.color]
                 } //bubble
             } //bubble wrapper
         } // Repeater

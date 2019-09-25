@@ -32,10 +32,12 @@ ToolBar {
     Common.Avatar {
         id: configAvatar
         avatarLabel: config.displayName
+        secondaryText: "@" + config.configId
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-        anchors.horizontalCenter: parent.horizontalCenter
+        labelGap: 0
         // JH: Bad margin semantics
+        anchors.verticalCenter: parent.verticalCenter
         size: parent.height - QmlCfg.margin
         isDefault: false
     }
@@ -48,9 +50,23 @@ ToolBar {
         anchors {
             verticalCenter: parent.verticalCenter
             rightMargin: QmlCfg.margin
+            right: configButton.left
+        }
+        source: "qrc:/add-contact-icon.svg"
+        onClicked: {
+            convoPane.state = "newContactState"
+            searchLoader.sourceComponent = searchBarComponent
+        }
+    }
+
+    Common.ButtonForm {
+        id: configButton
+        anchors {
+            verticalCenter: parent.verticalCenter
+            rightMargin: QmlCfg.margin
             right: parent.right
         }
-        source: "qrc:/gear.png"
+        source: "qrc:/gear-icon.svg"
         onClicked: {
             /// Note: this needs to pay attention to root state
             configPopup.show()

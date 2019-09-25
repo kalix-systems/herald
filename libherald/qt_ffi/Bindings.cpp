@@ -436,6 +436,7 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
+    bool conversations_hard_refresh(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -639,9 +640,8 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
-    bool messages_delete_conversation(Messages::Private*);
-    bool messages_delete_conversation_by_id(Messages::Private*, const char*, int);
     bool messages_delete_message(Messages::Private*, quint64);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool messages_refresh(Messages::Private*);
@@ -986,7 +986,8 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    bool users_add_to_conversation(Users::Private*, const ushort*, int, const char*, int);
+    bool users_add_to_conversation(Users::Private*, const ushort*, int);
+    bool users_add_to_conversation_by_id(Users::Private*, const ushort*, int, const char*, int);
     bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
     bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
@@ -1161,6 +1162,10 @@ QByteArray Conversations::addConversation()
     conversations_add_conversation(m_d, &s, set_qbytearray);
     return s;
 }
+bool Conversations::hardRefresh()
+{
+    return conversations_hard_refresh(m_d);
+}
 bool Conversations::removeConversation(quint64 row_index)
 {
     return conversations_remove_conversation(m_d, row_index);
@@ -1303,17 +1308,13 @@ void Messages::setConversationId(const QByteArray& v) {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
 }
+bool Messages::clearConversationHistory()
+{
+    return messages_clear_conversation_history(m_d);
+}
 void Messages::clearConversationView()
 {
     return messages_clear_conversation_view(m_d);
-}
-bool Messages::deleteConversation()
-{
-    return messages_delete_conversation(m_d);
-}
-bool Messages::deleteConversationById(const QByteArray& conversation_id)
-{
-    return messages_delete_conversation_by_id(m_d, conversation_id.data(), conversation_id.size());
 }
 bool Messages::deleteMessage(quint64 row_index)
 {
@@ -1498,9 +1499,13 @@ QByteArray Users::add(const QString& id)
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
-bool Users::addToConversation(const QString& user_id, const QByteArray& conversation_id)
+bool Users::addToConversation(const QString& user_id)
 {
-    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
+    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+}
+bool Users::addToConversationById(const QString& user_id, const QByteArray& conversation_id)
+{
+    return users_add_to_conversation_by_id(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 bool Users::addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id)
 {

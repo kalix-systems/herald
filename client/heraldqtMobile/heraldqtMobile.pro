@@ -21,8 +21,7 @@ QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 # silence the project warning about unsuported SDK
 CONFIG+=sdk_no_version_check
 
-RESOURCES += \
-    qml.qrc
+RESOURCES +=  qml.qrc
 SOURCES   += main.cpp
 
 # Default rules for deployment.

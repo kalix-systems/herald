@@ -117,6 +117,10 @@
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
+                },
+                "hardRefresh": {
+                    "mut": true,
+                    "return": "bool"
                 }
             }
         },
@@ -267,7 +271,7 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "addToConversation": {
+                "addToConversationById": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
@@ -278,6 +282,16 @@
                         {
                             "name": "conversation_id",
                             "type": "QByteArray"
+                        }
+                    ]
+                },
+                "addToConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
                         }
                     ]
                 },
@@ -330,8 +344,8 @@
             "properties": {
                 "conversationId": {
                     "type": "QByteArray",
-                    "optional": true,
-                    "write": true
+                    "write": true,
+                    "optional": true
                 }
             },
             "itemProperties": {
@@ -395,18 +409,8 @@
                     "mut": true,
                     "return": "void"
                 },
-                "deleteConversation": {
+                "clearConversationHistory": {
                     "mut": true,
-                    "return": "bool"
-                },
-                "deleteConversationById": {
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ],
                     "return": "bool"
                 }
             }

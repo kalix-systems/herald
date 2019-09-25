@@ -1,4 +1,4 @@
-QML2_IMPORT_PATH += $$PWD/qml/
+QML_IMPORT_PATH += $$PWD/qml/
 
 RESOURCES += \
     $$PWD/qml/commonQml.qrc \

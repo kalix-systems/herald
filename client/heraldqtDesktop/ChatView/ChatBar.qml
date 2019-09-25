@@ -35,7 +35,7 @@ ToolBar {
 
     Common.Avatar {
         id: chatBarAvatar
-        anchors.centerIn: parent
+        anchors.left: parent.left
         // JH: Margin fudging
         size: QmlCfg.toolbarHeight - QmlCfg.margin
         pfpUrl: currentAvatar.pfpUrl
@@ -53,9 +53,15 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: messageModel.deleteConversation(appRoot.gsCurrentConvo.index)
+            onTriggered: ownedConversation.clearConversationHistory()
         }
 
+        MenuItem {
+            text: "Add Member"
+            visible: isPairwise
+
+            onTriggered: newMemberPopup.open()
+        }
     }
 
     Common.ButtonForm {
@@ -64,14 +70,6 @@ ToolBar {
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
-    }
-
-    Button {
-        text: "New member"
-        anchors.right: convOptionsButton.left
-        onClicked: {
-            newMemberPopup.open()
-        }
     }
 
     Popup {
@@ -88,8 +86,7 @@ ToolBar {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
-                gsConvoItemMembers.addToConversation(userIdText.text,
-                                                     gsConversationId)
+                convoItemMembers.addToConversation(userIdText.text)
                 newMemberPopup.close()
             }
         }

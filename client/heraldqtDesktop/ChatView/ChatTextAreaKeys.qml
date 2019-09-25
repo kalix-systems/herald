@@ -1,6 +1,8 @@
 import QtQuick 2.0
 
 Keys {
+    // TS
+    // DEAD CODE
     onReturnPressed: {
         if (event.modifiers & Qt.ShiftModifier) {
             chatText.text = chatText.text + "\n"
