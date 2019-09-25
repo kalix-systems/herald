@@ -55,10 +55,6 @@ impl UsersTrait for Users {
 
     /// Adds a contact by their `id`
     fn add(&mut self, id: UserId) -> FfiConversationId {
-        if id.len() > 255 {
-            return vec![];
-        }
-
         let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
         self.model.begin_insert_rows(0, 0);
@@ -325,7 +321,27 @@ impl UsersTrait for Users {
         true
     }
 
-    fn add_to_conversation(
+    fn add_to_conversation(&mut self, user_id: UserId) -> bool {
+        let conv_id = ret_none!(self.conversation_id, false);
+        ret_err!(
+            heraldcore::members::add_member(&conv_id, user_id.as_str()),
+            false
+        );
+
+        let contact = ret_err!(heraldcore::contact::by_user_id(user_id.as_str()), false);
+        self.model.begin_insert_rows(0, 0);
+        self.list.insert(
+            0,
+            User {
+                matched: contact.matches(&self.filter),
+                inner: contact,
+            },
+        );
+        self.model.end_insert_rows();
+        true
+    }
+
+    fn add_to_conversation_by_id(
         &mut self,
         user_id: UserId,
         conversation_id: FfiConversationIdRef,

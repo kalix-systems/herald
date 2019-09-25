@@ -45,7 +45,6 @@ ListView {
         property bool isPairwise: pairwise
         property var childChatView: Component {
             CV.ChatView {
-              conversationId: conversationIdProxy
               ownedConversation: Messages {
                 conversationId: conversationIdProxy
               }

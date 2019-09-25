@@ -271,7 +271,7 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "addToConversation": {
+                "addToConversationById": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
@@ -282,6 +282,16 @@
                         {
                             "name": "conversation_id",
                             "type": "QByteArray"
+                        }
+                    ]
+                },
+                "addToConversation": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
                         }
                     ]
                 },

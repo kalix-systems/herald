@@ -16,5 +16,3 @@ declare enum ColorScheme {
   SolarizedDark = 2,
   SolarizedLight = 3
 }
-
-declare class GlobalState {}
