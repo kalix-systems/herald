@@ -91,7 +91,7 @@ ListView {
                     JS.contactClickHandler(mouse, contactList, index,
                                            pairwiseConversationId,
                                            popupManager.optionsMenu,
-                                           messageModel, appRoot)
+                                           convModel, appRoot)
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                 }
 

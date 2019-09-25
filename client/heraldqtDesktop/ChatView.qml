@@ -34,7 +34,7 @@ Pane {
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
         Connections {
-            target: messageModel
+            target: convModel
             onRowsInserted: {
                 convWindow.contentY = convWindow.contentHeight
             }
@@ -54,7 +54,7 @@ Pane {
         keysProxy: Item {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
                                       event, chatTextArea.chatText,
-                                      networkHandle, messageModel)
+                                      networkHandle, convModel)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: print("placeholder until emoji pop up")

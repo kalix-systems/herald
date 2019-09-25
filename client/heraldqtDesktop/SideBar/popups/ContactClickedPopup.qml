@@ -36,7 +36,7 @@ Item {
 
         MenuItem {
             text: 'Delete Contact'
-            onTriggered: JS.deleteContact(index, contactsModel, messageModel,
+            onTriggered: JS.deleteContact(index, contactsModel, convModel,
                                           appRoot, heraldUtils)
         }
 

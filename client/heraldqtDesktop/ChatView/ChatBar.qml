@@ -53,7 +53,7 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: messageModel.deleteConversation(appRoot.gsCurrentConvo.index)
+            onTriggered: convModel.deleteConversation(appRoot.gsCurrentConvo.index)
         }
 
     }

@@ -41,7 +41,7 @@ Flickable {
         Repeater {
             id: chatListView
             anchors.fill: parent
-            model: messageModel
+            model: convModel
 
             delegate: Column {
                 readonly property bool outbound: author === config.configId

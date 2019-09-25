@@ -28,13 +28,13 @@ Item {
 
     NetworkHandle {
         id: networkHandle
-        onNewMessageChanged: messageModel.refresh()
+        onNewMessageChanged: convModel.refresh()
         onNewContactChanged: contactsModel.refresh()
         onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
-    Messages {
-        id: messageModel
+    Conversation {
+        id: convModel
     }
 
     Users {

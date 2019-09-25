@@ -92,7 +92,7 @@ ListView {
 
                 onClicked: {
                     conversationList.currentIndex = index
-                    messageModel.conversationId = conversationId
+                    convModel.conversationId = conversationId
                     appRoot.gsConversationId = conversationId
                     appRoot.gsConvoColor = QmlCfg.avatarColors[color]
                     appRoot.gsConvoItemMembers = convoItemMembers

@@ -96,7 +96,7 @@ Rectangle {
         id: messageOptionsMenu
         MenuItem {
             text: "Delete Message"
-            onTriggered: messageModel.deleteMessage(index)
+            onTriggered: convModel.deleteMessage(index)
         }
         MenuItem {
             text: "More Info..."
