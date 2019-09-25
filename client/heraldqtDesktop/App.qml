@@ -21,7 +21,8 @@ Item {
 
     NetworkHandle {
         id: networkHandle
-        onNewMessageChanged: convModel.refresh()
+          // every conversation has it's own refresh signal. guards
+//        onNewMessageChanged: convModel.refresh()
         onNewContactChanged: contactsModel.refresh()
         onNewConversationChanged: conversationsModel.hardRefresh()
     }
@@ -71,6 +72,15 @@ Item {
         id: config
     }
 
+    Component {
+        id: splash
+        Image {
+            anchors.fill: parent
+            source: "qrc:/land.png"
+            mipmap: true
+        }
+    }
+
     SplitView {
         id: rootSplitView
         anchors.fill: parent
@@ -78,13 +88,17 @@ Item {
         Layout.fillHeight: true
         orientation: Qt.Horizontal
 
+
         SideBar {
             id: sideBar
         }
 
-        ChatView {
+
+        Loader {
             id: chatView
+            sourceComponent: splash
         }
+
 
         handle: Rectangle {
             implicitWidth: 1.1

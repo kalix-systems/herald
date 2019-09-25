@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "../common/utils.mjs" as Utils
+import "../ChatView" as CV
 import "./ContactView.mjs" as JS
 import "popups" as Popups
 
@@ -37,18 +38,29 @@ ListView {
 
     delegate: Item {
         id: conversationItem
+
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item conversationAvatar: conversationAvatar
+        property var conversationIdProxy: conversationId
+
+        property var childChatView: Component {
+            CV.ChatView {
+              conversationId: conversationIdProxy
+              ownedConversation: Conversation {
+                conversationId: conversationIdProxy
+              }
+           }
+        }
+
+        Users {
+            id: convoItemMembers
+            conversationId: conversationIdProxy
+        }
 
         // This ternary is okay, types are enforced by QML
         visible: matched
         height: visible ? 55 : 0
         width: parent.width
-
-        Users {
-            id: convoItemMembers
-            conversationId: conversationsModel.conversationId(index)
-        }
 
         /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
@@ -92,9 +104,10 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
+                    chatView.sourceComponent = childChatView;
                     conversationList.currentIndex = index
-                    convModel.conversationId = conversationId
-                    appRoot.gsConvoItemMembers = convoItemMembers
+//                  convModel.conversationId = conversationId
+//                  appRoot.gsConvoItemMembers = convoItemMembers
                 }
 
                 // ternary is okay here, type enforced by QML

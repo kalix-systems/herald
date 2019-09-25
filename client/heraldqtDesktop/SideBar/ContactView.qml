@@ -23,14 +23,15 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    Connections {
-        target: convModel
-        onConversationIdChanged: {
-            if (convModel.conversationId === undefined) {
-                contactList.currentIndex = -1
-            }
-        }
-    }
+// TODO : remove this if it does not create bugs
+//    Connections {
+//        target: convModel
+//        onConversationIdChanged: {
+//            if (convModel.conversationId === undefined) {
+//                contactList.currentIndex = -1
+//            }
+//        }
+//    }
 
     ScrollBar.vertical: ScrollBar {
     }
@@ -39,6 +40,7 @@ ListView {
         id: contactItem
         //GS : rexporting the contact avatar to global state is a backwards ref!
         property Item contactAvatar: contactAvatar
+
 
         // This ternary is okay, types are enforced by QML
         height: visible ? 55 : 0
