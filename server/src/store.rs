@@ -44,6 +44,11 @@ pub trait Store {
         user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error>;
+    fn register_user(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::ToClient, Error>;
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
@@ -153,6 +158,39 @@ impl Store for Conn {
         Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
+    fn register_user(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::ToClient, Error> {
+        let builder = self.build_transaction().deferrable();
+
+        builder.run(|| {
+            let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
+
+            if select(exists(query)).get_result(&self.0)? {
+                return Ok(register::ToClient::UIDTaken);
+            }
+
+            diesel::insert_into(keys::table)
+                .values((
+                    keys::key.eq(key.data().as_ref()),
+                    keys::signed_by.eq(key.signed_by().as_ref()),
+                    keys::ts.eq(key.timestamp()),
+                    keys::signature.eq(key.sig().as_ref()),
+                ))
+                .execute(&self.0)?;
+
+            diesel::insert_into(userkeys::table)
+                .values((
+                    userkeys::user_id.eq(user_id.as_str()),
+                    userkeys::key.eq(key.data().as_ref()),
+                ))
+                .execute(&self.0)?;
+            return Ok(register::ToClient::Success);
+        })
+    }
+
     fn add_key(
         &mut self,
         user_id_arg: UserId,
@@ -160,6 +198,12 @@ impl Store for Conn {
     ) -> Result<PKIResponse, Error> {
         let builder = self.build_transaction().deferrable();
         builder.run(|| {
+            let query = userkeys::table.filter(userkeys::user_id.eq(user_id_arg.as_str()));
+
+            if !select(exists(query)).get_result(&self.0)? {
+                return Err(MissingData);
+            }
+
             let res = diesel::insert_into(keys::table)
                 .values((
                     keys::key.eq(new_key.data().as_ref()),
@@ -420,9 +464,54 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.device_exists(kp.public_key()).unwrap());
 
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        assert!(conn.device_exists(kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn register_and_add() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!conn.device_exists(kp.public_key()).unwrap());
+
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        assert!(conn.device_exists(kp.public_key()).unwrap());
+
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!conn.device_exists(kp.public_key()).unwrap());
+
         conn.add_key(user_id, signed_pk).unwrap();
 
         assert!(conn.device_exists(kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn register_twice() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
+
+        match conn.register_user(user_id, signed_pk) {
+            Ok(register::ToClient::UIDTaken) => {}
+            _ => panic!(),
+        }
     }
 
     #[test]
@@ -437,7 +526,7 @@ mod tests {
 
         let signed_pk = kp.sign(*kp.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.key_is_valid(*kp.public_key()).unwrap());
 
@@ -467,7 +556,7 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.user_exists(&user_id).unwrap());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.user_exists(&user_id).unwrap());
     }
@@ -482,7 +571,7 @@ mod tests {
 
         let signed_pk = kp.sign(*kp.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let keys = conn.read_meta(&user_id).unwrap().keys;
         assert_eq!(keys.len(), 1);
@@ -499,7 +588,7 @@ mod tests {
         let user_id = "Hello".try_into().unwrap();
 
         let signed_pk = kp.sign(*kp.public_key());
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let pending = conn.get_pending(*kp.public_key()).unwrap();
         assert_eq!(pending.len(), 0);
@@ -534,7 +623,7 @@ mod tests {
         let kp = sig::KeyPair::gen_new();
         let signed_pk = kp.sign(*kp.public_key());
         let user_id = "Hello".try_into().unwrap();
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let sealed_kp = sealed::KeyPair::gen_new();
 
@@ -556,7 +645,7 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.key_is_valid(*kp.public_key()).unwrap());
 
@@ -577,7 +666,7 @@ mod tests {
 
         let signed_pk = kp.sign(*kp.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         conn.deprecate_key(signed_pk).unwrap();
 

@@ -180,10 +180,8 @@ pub mod register {
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum ToClient {
         UIDTaken,
-        UIDReady,
         KeyTaken,
         BadSig,
-        KeyReady,
         Success,
     }
 }
