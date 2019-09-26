@@ -1,6 +1,5 @@
 //! Core logic for herald client.
 
-#![feature(try_blocks)]
 #![warn(missing_docs)]
 #![allow(warnings)]
 

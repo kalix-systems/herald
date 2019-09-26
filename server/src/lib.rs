@@ -1,4 +1,3 @@
-#![feature(try_blocks)]
 #![allow(unused_imports)]
 
 #[macro_use]

@@ -3,6 +3,32 @@
 
 namespace {
 
+    struct option_qint64 {
+    public:
+        qint64 value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_qint64>::value, "option_qint64 must be a POD type.");
+
+    struct option_quint32 {
+    public:
+        quint32 value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_quint32>::value, "option_quint32 must be a POD type.");
+
     struct option_quintptr {
     public:
         quintptr value;
@@ -77,6 +103,22 @@ namespace {
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
+    }
+    inline void messagesLastAuthorChanged(Messages* o)
+    {
+        Q_EMIT o->lastAuthorChanged();
+    }
+    inline void messagesLastBodyChanged(Messages* o)
+    {
+        Q_EMIT o->lastBodyChanged();
+    }
+    inline void messagesLastEpochTimestampMsChanged(Messages* o)
+    {
+        Q_EMIT o->lastEpochTimestampMsChanged();
+    }
+    inline void messagesLastStatusChanged(Messages* o)
+    {
+        Q_EMIT o->lastStatusChanged();
     }
     inline void networkHandleConnectionPendingChanged(NetworkHandle* o)
     {
@@ -623,7 +665,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -640,6 +682,10 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    void messages_last_author_get(const Messages::Private*, QString*, qstring_set);
+    void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
+    option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
+    option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
@@ -1241,6 +1287,10 @@ Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
         messagesConversationIdChanged,
+        messagesLastAuthorChanged,
+        messagesLastBodyChanged,
+        messagesLastEpochTimestampMsChanged,
+        messagesLastStatusChanged,
         [](const Messages* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1307,6 +1357,36 @@ void Messages::setConversationId(const QByteArray& v) {
     } else {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
+}
+QString Messages::lastAuthor() const
+{
+    QString v;
+    messages_last_author_get(m_d, &v, set_qstring);
+    return v;
+}
+QString Messages::lastBody() const
+{
+    QString v;
+    messages_last_body_get(m_d, &v, set_qstring);
+    return v;
+}
+QVariant Messages::lastEpochTimestampMs() const
+{
+    QVariant v;
+    auto r = messages_last_epoch_timestamp_ms_get(m_d);
+    if (r.some) {
+        v.setValue(r.value);
+    }
+    return r;
+}
+QVariant Messages::lastStatus() const
+{
+    QVariant v;
+    auto r = messages_last_status_get(m_d);
+    if (r.some) {
+        v.setValue(r.value);
+    }
+    return r;
 }
 bool Messages::clearConversationHistory()
 {

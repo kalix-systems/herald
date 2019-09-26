@@ -1,5 +1,3 @@
-#![feature(try_blocks)]
-
 mod crypto;
 pub use crypto::*;
 #[cfg(feature = "diesel_pg")]
