@@ -4,7 +4,11 @@ use diesel::{
     pg::PgConnection,
     prelude::*,
     r2d2::{self, ConnectionManager},
-    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
+    result::{
+        DatabaseErrorKind::UniqueViolation,
+        Error::{DatabaseError, NotFound},
+        QueryResult,
+    },
 };
 use dotenv::dotenv;
 use herald_common::*;
@@ -31,32 +35,53 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 // TODO: consider having this take slices instead of vec's
 pub trait Store {
+    // batch this
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+
+    // batch this
     fn add_prekey(
         &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<PKIResponse, Error>;
+
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(
         &mut self,
-        user_id: UserId,
+        // user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error>;
+
+    fn register_user(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::Res, Error>;
+
+    // batch this
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
+    // batch this
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+    // batch this
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
+
+    // batch this
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
-    // TODO: add this
-    // fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
+
+    // batch this (map)
+    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
 
     // TODO: make this take a vec of messages
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+
     // TODO: replace these w/methods that get first n, remove first n, in insertion order
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
+
+    // TODO expire all as well
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
@@ -155,30 +180,80 @@ impl Store for Conn {
         Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
-    fn add_key(
+    fn register_user(
         &mut self,
-        user_id_arg: UserId,
-        new_key: Signed<sig::PublicKey>,
-    ) -> Result<PKIResponse, Error> {
-        let res = diesel::insert_into(keys::table)
-            .values((
-                keys::key.eq(new_key.data().as_ref()),
-                keys::signed_by.eq(new_key.signed_by().as_ref()),
-                keys::ts.eq(new_key.timestamp()),
-                keys::signature.eq(new_key.sig().as_ref()),
-            ))
-            .execute(self.deref_mut());
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::Res, Error> {
+        let builder = self.build_transaction().deferrable();
 
-        unique_violation_to_redundant(res)?;
+        let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
 
-        let res = diesel::insert_into(userkeys::table)
-            .values((
-                userkeys::user_id.eq(user_id_arg.as_str()),
-                userkeys::key.eq(new_key.data().as_ref()),
-            ))
-            .execute(self.deref_mut());
+        builder.run(|| {
+            if select(exists(query)).get_result(&self.0)? {
+                return Ok(register::Res::UIDTaken);
+            }
 
-        unique_violation_to_redundant(res)
+            diesel::insert_into(keys::table)
+                .values((
+                    keys::key.eq(key.data().as_ref()),
+                    keys::signed_by.eq(key.signed_by().as_ref()),
+                    keys::ts.eq(key.timestamp()),
+                    keys::signature.eq(key.sig().as_ref()),
+                ))
+                .execute(&self.0)?;
+
+            diesel::insert_into(userkeys::table)
+                .values((
+                    userkeys::user_id.eq(user_id.as_str()),
+                    userkeys::key.eq(key.data().as_ref()),
+                ))
+                .execute(&self.0)?;
+            return Ok(register::Res::Success);
+        })
+    }
+
+    fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
+        let builder = self.build_transaction().deferrable();
+
+        builder.run(|| {
+            let user_id: String = match keys::table
+                .filter(keys::key.eq(new_key.signed_by().as_ref()))
+                .filter(keys::dep_signature.is_null())
+                .filter(keys::dep_signed_by.is_null())
+                .filter(keys::dep_ts.is_null())
+                .inner_join(userkeys::table)
+                .select(userkeys::user_id)
+                .get_result(&self.0)
+                .optional()?
+            {
+                None => {
+                    // TODO test this branch
+                    return Ok(PKIResponse::DeadKey);
+                }
+                Some(uid) => uid,
+            };
+
+            let res = diesel::insert_into(keys::table)
+                .values((
+                    keys::key.eq(new_key.data().as_ref()),
+                    keys::signed_by.eq(new_key.signed_by().as_ref()),
+                    keys::ts.eq(new_key.timestamp()),
+                    keys::signature.eq(new_key.sig().as_ref()),
+                ))
+                .execute(&self.0);
+
+            unique_violation_to_redundant(res)?;
+
+            let res = diesel::insert_into(userkeys::table)
+                .values((
+                    userkeys::user_id.eq(user_id.as_str()),
+                    userkeys::key.eq(new_key.data().as_ref()),
+                ))
+                .execute(&self.0);
+
+            unique_violation_to_redundant(res)
+        })
     }
 
     fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
@@ -221,25 +296,41 @@ impl Store for Conn {
         use crate::schema::keys::dsl::*;
 
         let (data, meta) = signed_key.split();
-        let filter = keys
+
+        let to_dep = keys
             .filter(key.eq(data.as_ref()))
             .filter(dep_ts.is_null())
             .filter(dep_signature.is_null())
             .filter(dep_signed_by.is_null());
 
-        let num_updated = update(filter)
-            .set((
-                dep_ts.eq(meta.timestamp().naive_utc()),
-                dep_signed_by.eq(meta.signed_by().as_ref()),
-                dep_signature.eq(meta.sig().as_ref()),
-            ))
-            .execute(self.deref_mut())?;
+        let signer_key = meta.signed_by();
+        let signed_by_filter = keys
+            .filter(key.eq(signer_key.as_ref()))
+            .filter(dep_ts.is_null())
+            .filter(dep_signature.is_null())
+            .filter(dep_signed_by.is_null());
 
-        if num_updated != 1 {
-            return Ok(PKIResponse::Redundant);
-        }
+        let builder = self.build_transaction().deferrable();
 
-        Ok(PKIResponse::Success)
+        builder.run(|| {
+            if !select(exists(signed_by_filter)).get_result(&self.0)? {
+                return Ok(PKIResponse::DeadKey);
+            }
+
+            let num_updated = update(to_dep)
+                .set((
+                    dep_ts.eq(meta.timestamp().naive_utc()),
+                    dep_signed_by.eq(meta.signed_by().as_ref()),
+                    dep_signature.eq(meta.sig().as_ref()),
+                ))
+                .execute(&self.0)?;
+
+            if num_updated != 1 {
+                return Ok(PKIResponse::Redundant);
+            }
+
+            Ok(PKIResponse::Success)
+        })
     }
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
@@ -251,16 +342,30 @@ impl Store for Conn {
     }
 
     fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
-        use crate::schema::userkeys::dsl::*;
+        use crate::schema::keys::dsl::*;
 
-        let query = userkeys
+        let query = keys
             .filter(key.eq(key_arg.as_ref()))
+            .filter(dep_ts.is_null())
+            .filter(dep_signed_by.is_null())
+            .filter(dep_signature.is_null());
+
+        Ok(select(exists(query)).get_result(self.deref_mut())?)
+    }
+
+    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
+        let keys: Vec<Vec<u8>> = userkeys::table
+            .filter(userkeys::user_id.eq(uid.as_str()))
             .inner_join(keys::table)
             .filter(keys::dep_ts.is_null())
             .filter(keys::dep_signed_by.is_null())
-            .filter(keys::dep_signature.is_null());
+            .filter(keys::dep_signature.is_null())
+            .select(keys::key)
+            .get_results(self.deref_mut())?;
 
-        Ok(select(exists(query)).get_result(self.deref_mut())?)
+        keys.iter()
+            .map(|raw| sig::PublicKey::from_slice(raw).ok_or(Error::InvalidKey))
+            .collect()
     }
 
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
@@ -383,15 +488,28 @@ mod tests {
     use super::*;
     use serial_test_derive::serial;
     use std::convert::TryInto;
+    use womp::*;
 
     fn open_conn() -> Conn {
         let pool = init_pool();
 
         let conn = pool.get().expect("Failed to get connection");
+        diesel::delete(pending::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(pushes::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(prekeys::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(userkeys::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(keys::table)
+            .execute(conn.deref())
+            .expect(womp!());
 
-        // so none of the changes are committed
-        conn.begin_test_transaction()
-            .expect("Couldn't start test transaction");
         Conn(conn)
     }
 
@@ -406,9 +524,56 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.device_exists(kp.public_key()).unwrap());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.device_exists(kp.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn register_and_add() {
+        let mut conn = open_conn();
+
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk1 = kp1.sign(*kp1.public_key());
+        assert!(!conn.device_exists(kp1.public_key()).unwrap());
+
+        conn.register_user(user_id, signed_pk1).unwrap();
+
+        assert!(conn.device_exists(kp1.public_key()).unwrap());
+
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
+
+        assert!(conn.device_exists(kp1.public_key()).unwrap());
+        assert!(!conn.device_exists(kp2.public_key()).unwrap());
+
+        conn.add_key(signed_pk2).unwrap();
+
+        assert!(conn.device_exists(kp2.public_key()).unwrap());
+    }
+
+    #[test]
+    #[serial]
+    fn register_twice() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
+
+        match conn.register_user(user_id, signed_pk) {
+            Ok(register::Res::UIDTaken) => {}
+            _ => panic!(),
+        }
     }
 
     #[test]
@@ -423,7 +588,7 @@ mod tests {
 
         let signed_pk = kp.sign(*kp.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.key_is_valid(*kp.public_key()).unwrap());
 
@@ -453,7 +618,7 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.user_exists(&user_id).unwrap());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.user_exists(&user_id).unwrap());
     }
@@ -468,10 +633,30 @@ mod tests {
 
         let signed_pk = kp.sign(*kp.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let keys = conn.read_meta(&user_id).unwrap().keys;
         assert_eq!(keys.len(), 1);
+    }
+
+    #[test]
+    #[serial]
+    fn valid_keys() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        let keys = conn.valid_keys(&user_id).unwrap();
+        assert_eq!(keys.len(), 1);
+
+        conn.deprecate_key(signed_pk).unwrap();
+        let keys = conn.valid_keys(&user_id).unwrap();
+        assert_eq!(keys.len(), 0);
     }
 
     #[test]
@@ -485,7 +670,7 @@ mod tests {
         let user_id = "Hello".try_into().unwrap();
 
         let signed_pk = kp.sign(*kp.public_key());
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let pending = conn.get_pending(*kp.public_key()).unwrap();
         assert_eq!(pending.len(), 0);
@@ -520,7 +705,7 @@ mod tests {
         let kp = sig::KeyPair::gen_new();
         let signed_pk = kp.sign(*kp.public_key());
         let user_id = "Hello".try_into().unwrap();
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         let sealed_kp = sealed::KeyPair::gen_new();
 
@@ -542,7 +727,7 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk).unwrap();
 
         assert!(conn.key_is_valid(*kp.public_key()).unwrap());
 
@@ -558,17 +743,48 @@ mod tests {
     fn double_deprecation() {
         let mut conn = open_conn();
 
-        let kp = sig::KeyPair::gen_new();
-        let user_id = "Hello".try_into().unwrap();
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().unwrap();
 
-        let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk1).unwrap();
 
-        conn.deprecate_key(signed_pk).unwrap();
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-        match conn.deprecate_key(signed_pk) {
+        conn.add_key(signed_pk2).unwrap();
+
+        conn.deprecate_key(signed_pk2).unwrap();
+
+        match conn.deprecate_key(signed_pk2) {
             Ok(PKIResponse::Redundant) => {}
+            // ok(pkiresponse::deadkey) => {}
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn invalid_deprecation() {
+        let mut conn = open_conn();
+
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().unwrap();
+
+        let signed_pk1 = kp1.sign(*kp1.public_key());
+
+        conn.register_user(user_id, signed_pk1).unwrap();
+
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
+
+        conn.add_key(signed_pk2).unwrap();
+
+        conn.deprecate_key(signed_pk1).unwrap();
+
+        match conn.deprecate_key(signed_pk2) {
+            Ok(PKIResponse::DeadKey) => {}
             _ => panic!(),
         }
     }
