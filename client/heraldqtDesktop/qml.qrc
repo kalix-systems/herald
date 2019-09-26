@@ -36,5 +36,6 @@
         <file>common/utils.mjs</file>
         <file>main.qml</file>
         <file>SideBar/SearchComponent.qml</file>
+        <file>SideBar/ConversationLabel.qml</file>
     </qresource>
 </RCC>

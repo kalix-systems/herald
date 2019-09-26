@@ -43,13 +43,16 @@ ListView {
         property Item conversationAvatar: conversationAvatar
         property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
+        property Messages messageModel: Messages {
+            conversationId: conversationIdProxy
+          }
+
         property var childChatView: Component {
             CV.ChatView {
-              ownedConversation: Messages {
-                conversationId: conversationIdProxy
-              }
+              ownedConversation: messageModel
            }
         }
+
 
         Users {
             id: convoItemMembers
@@ -72,6 +75,23 @@ ListView {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
                 height: 2
+            }
+
+            Common.Avatar {
+                id: conversationAvatar
+                size: 45
+                labeled: false
+                labelGap: QmlCfg.smallMargin
+                avatarLabel: Utils.unwrapOr(title, "unknown")
+                colorHash: Utils.unwrapOr(color, 0)
+                pfpUrl: Utils.safeStringOrDefault(picture)
+            }
+
+            ConversationLabel {
+                anchors.left: conversationAvatar.right
+                anchors.right: parent.right
+                label: title
+                summaryText: JS.formatSummary(messageModel.lastAuthor, messageModel.lastBody)
             }
 
             anchors.fill: parent
@@ -105,8 +125,6 @@ ListView {
                 onClicked: {
                     chatView.sourceComponent = childChatView;
                     conversationList.currentIndex = index
-//                  convModel.conversationId = conversationId
-//                  appRoot.gsConvoItemMembers = convoItemMembers
                 }
 
                 // ternary is okay here, type enforced by QML
@@ -116,12 +134,5 @@ ListView {
             color: conversationItem.focus ? focusColor : defaultColor
         }
 
-        Common.Avatar {
-            size: 45
-            id: conversationAvatar
-            avatarLabel: Utils.unwrapOr(title, "unknown")
-            colorHash: Utils.unwrapOr(color, 0)
-            pfpUrl: Utils.safeStringOrDefault(picture)
-        }
     }
 }
