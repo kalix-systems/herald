@@ -34,56 +34,56 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 }
 
 // TODO: consider having this take slices instead of vec's
-pub trait Store {
-    #[deprecated]
-    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
-
-    // batch this
-    fn add_prekey(
-        &mut self,
-        key: sig::PublicKey,
-        pre: sealed::PublicKey,
-    ) -> Result<PKIResponse, Error>;
-
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
-
-    fn add_key(
-        &mut self,
-        // user_id: UserId,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<PKIResponse, Error>;
-
-    fn register_user(
-        &mut self,
-        user_id: UserId,
-        key: Signed<sig::PublicKey>,
-    ) -> Result<register::Res, Error>;
-
-    // batch this
-    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-
-    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
-
-    // batch this
-    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
-    // batch this
-    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
-
-    // batch this
-    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
-
-    // batch this (map)
-    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
-
-    // TODO: make this take a vec of messages
-    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
-
-    // TODO: replace these w/methods that get first n, remove first n, in insertion order
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
-
-    // TODO expire all as well
-    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
-}
+//pub trait Store {
+//    #[deprecated]
+//    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+//
+//    // batch this
+//    fn add_prekey(
+//        &mut self,
+//        key: sig::PublicKey,
+//        pre: sealed::PublicKey,
+//    ) -> Result<PKIResponse, Error>;
+//
+//    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
+//
+//    fn add_key(
+//        &mut self,
+//        // user_id: UserId,
+//        key: Signed<sig::PublicKey>,
+//    ) -> Result<PKIResponse, Error>;
+//
+//    fn register_user(
+//        &mut self,
+//        user_id: UserId,
+//        key: Signed<sig::PublicKey>,
+//    ) -> Result<register::Res, Error>;
+//
+//    // batch this
+//    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+//
+//    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
+//
+//    // batch this
+//    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+//    // batch this
+//    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
+//
+//    // batch this
+//    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
+//
+//    // batch this (map)
+//    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
+//
+//    // TODO: make this take a vec of messages
+//    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+//
+//    // TODO: replace these w/methods that get first n, remove first n, in insertion order
+//    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
+//
+//    // TODO expire all as well
+//    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
+//}
 
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -142,16 +142,16 @@ type RawKeyAndMeta = (
     Option<Vec<u8>>,
 );
 
-impl Store for Conn {
+impl Conn {
     // TODO implement the appropriate traits for this
     // TODO read about postgres performance
-    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+    pub fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref_mut())?)
     }
 
-    fn add_prekey(
+    pub fn add_prekey(
         &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
@@ -168,7 +168,7 @@ impl Store for Conn {
         unique_violation_to_redundant(res)
     }
 
-    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
+    pub fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
         use crate::schema::prekeys::dsl::*;
 
         let raw_pk: Vec<u8> = prekeys
@@ -180,7 +180,7 @@ impl Store for Conn {
         Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
     }
 
-    fn register_user(
+    pub fn register_user(
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
@@ -213,7 +213,7 @@ impl Store for Conn {
         })
     }
 
-    fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
+    pub fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
         let builder = self.build_transaction().deferrable();
 
         builder.run(|| {
@@ -256,7 +256,7 @@ impl Store for Conn {
         })
     }
 
-    fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+    pub fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = keys::table
             .filter(keys::key.eq(key_arg.as_ref()))
             .select((
@@ -292,7 +292,10 @@ impl Store for Conn {
         Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
     }
 
-    fn deprecate_key(&mut self, signed_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
+    pub fn deprecate_key(
+        &mut self,
+        signed_key: Signed<sig::PublicKey>,
+    ) -> Result<PKIResponse, Error> {
         use crate::schema::keys::dsl::*;
 
         let (data, meta) = signed_key.split();
@@ -333,7 +336,7 @@ impl Store for Conn {
         })
     }
 
-    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
+    pub fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
 
         let query = userkeys.filter(user_id.eq(uid.as_str()));
@@ -341,7 +344,7 @@ impl Store for Conn {
         Ok(select(exists(query)).get_result(self.deref_mut())?)
     }
 
-    fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
+    pub fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
         use crate::schema::keys::dsl::*;
 
         let query = keys
@@ -353,7 +356,7 @@ impl Store for Conn {
         Ok(select(exists(query)).get_result(self.deref_mut())?)
     }
 
-    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
+    pub fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
         let keys: Vec<Vec<u8>> = userkeys::table
             .filter(userkeys::user_id.eq(uid.as_str()))
             .inner_join(keys::table)
@@ -368,7 +371,7 @@ impl Store for Conn {
             .collect()
     }
 
-    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
+    pub fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
         let keys: Vec<RawKeyAndMeta> = userkeys::table
             .filter(userkeys::user_id.eq(uid.as_str()))
             .inner_join(keys::table)
@@ -430,7 +433,7 @@ impl Store for Conn {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
+    pub fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
         let push_row_id: i64 = {
             use crate::schema::pushes::dsl::*;
 
@@ -455,7 +458,7 @@ impl Store for Conn {
         Ok(())
     }
 
-    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
+    pub fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
         let pushes: Vec<Vec<u8>> = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
@@ -471,7 +474,7 @@ impl Store for Conn {
         Ok(out)
     }
 
-    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
+    pub fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
         let push_ids = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))

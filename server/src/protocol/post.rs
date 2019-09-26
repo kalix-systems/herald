@@ -10,11 +10,11 @@ use tokio::sync::mpsc::{
 };
 use warp::filters::ws;
 
-pub async fn register<S: Store>(_: &mut S, _: register::Req) -> Result<register::Res, Error> {
+pub async fn register(_: &mut Conn, _: register::Req) -> Result<register::Res, Error> {
     unimplemented!()
 }
 
-pub async fn new_key<S: Store>(store: &mut S, req: new_key::Req) -> Result<new_key::Res, Error> {
+pub async fn new_key(store: &mut Conn, req: new_key::Req) -> Result<new_key::Res, Error> {
     use new_key::*;
 
     let res = if req.0.verify_sig() {
@@ -28,7 +28,7 @@ pub async fn new_key<S: Store>(store: &mut S, req: new_key::Req) -> Result<new_k
     Ok(Res(res))
 }
 
-pub async fn dep_key<S: Store>(store: &mut S, req: dep_key::Req) -> Result<dep_key::Res, Error> {
+pub async fn dep_key(store: &mut Conn, req: dep_key::Req) -> Result<dep_key::Res, Error> {
     use dep_key::*;
 
     let res = if req.0.verify_sig() {

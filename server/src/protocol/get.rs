@@ -2,8 +2,10 @@ use super::*;
 use crate::{prelude::*, store::*};
 use bytes::Buf;
 use dashmap::DashMap;
-use futures::compat::*;
-use futures::stream::{Stream, StreamExt};
+use futures::{
+    compat::*,
+    stream::{Stream, StreamExt},
+};
 use sodiumoxide::crypto::sign;
 use std::collections::HashMap;
 use tokio::sync::mpsc::{
@@ -11,7 +13,7 @@ use tokio::sync::mpsc::{
 };
 use warp::filters::ws;
 
-pub fn keys_of<S: Store>(store: &mut S, req: keys_of::Req) -> Result<keys_of::Res, Error> {
+pub fn keys_of(store: &mut Conn, req: keys_of::Req) -> Result<keys_of::Res, Error> {
     use keys_of::*;
 
     let mut map = HashMap::with_capacity(req.0.len());
@@ -24,7 +26,7 @@ pub fn keys_of<S: Store>(store: &mut S, req: keys_of::Req) -> Result<keys_of::Re
     Ok(Res(map))
 }
 
-pub fn key_info<S: Store>(store: &mut S, req: key_info::Req) -> Result<key_info::Res, Error> {
+pub fn key_info(store: &mut Conn, req: key_info::Req) -> Result<key_info::Res, Error> {
     use key_info::*;
 
     let mut map = HashMap::with_capacity(req.0.len());
@@ -37,7 +39,7 @@ pub fn key_info<S: Store>(store: &mut S, req: key_info::Req) -> Result<key_info:
     Ok(Res(map))
 }
 
-pub fn keys_exist<S: Store>(store: &mut S, req: keys_exist::Req) -> Result<keys_exist::Res, Error> {
+pub fn keys_exist(store: &mut Conn, req: keys_exist::Req) -> Result<keys_exist::Res, Error> {
     use keys_exist::*;
 
     let mut vec = Vec::with_capacity(req.0.len());
@@ -49,10 +51,7 @@ pub fn keys_exist<S: Store>(store: &mut S, req: keys_exist::Req) -> Result<keys_
     Ok(Res(vec))
 }
 
-pub fn users_exist<S: Store>(
-    store: &mut S,
-    req: users_exist::Req,
-) -> Result<users_exist::Res, Error> {
+pub fn users_exist(store: &mut Conn, req: users_exist::Req) -> Result<users_exist::Res, Error> {
     use users_exist::*;
 
     let mut vec = Vec::with_capacity(req.0.len());
