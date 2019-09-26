@@ -4,11 +4,7 @@ use diesel::{
     pg::PgConnection,
     prelude::*,
     r2d2::{self, ConnectionManager},
-    result::{
-        DatabaseErrorKind::UniqueViolation,
-        Error::{DatabaseError, NotFound},
-        QueryResult,
-    },
+    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
 };
 use dotenv::dotenv;
 use herald_common::*;

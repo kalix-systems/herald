@@ -1,16 +1,7 @@
 use super::*;
-use crate::{prelude::*, store::*};
-use dashmap::DashMap;
-use futures::{
-    compat::*,
-    stream::{Stream, StreamExt},
-};
+use futures::stream::Stream;
 use sodiumoxide::crypto::sign;
-use std::collections::VecDeque;
-use tokio::sync::mpsc::{
-    unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
-};
-use warp::{filters::ws, Future as WFut, Stream as WStream};
+use warp::filters::ws;
 
 pub async fn login<W, E>(store: &mut Conn, ws: &mut W) -> Result<GlobalId, Error>
 where
