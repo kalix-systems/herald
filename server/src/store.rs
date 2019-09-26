@@ -188,9 +188,9 @@ impl Store for Conn {
     ) -> Result<register::Res, Error> {
         let builder = self.build_transaction().deferrable();
 
-        builder.run(|| {
-            let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
+        let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
 
+        builder.run(|| {
             if select(exists(query)).get_result(&self.0)? {
                 return Ok(register::Res::UIDTaken);
             }
@@ -216,6 +216,7 @@ impl Store for Conn {
 
     fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
         let builder = self.build_transaction().deferrable();
+
         builder.run(|| {
             let user_id: String = match keys::table
                 .filter(keys::key.eq(new_key.signed_by().as_ref()))
@@ -295,25 +296,30 @@ impl Store for Conn {
         use crate::schema::keys::dsl::*;
 
         let (data, meta) = signed_key.split();
+
         let filter = keys
             .filter(key.eq(data.as_ref()))
             .filter(dep_ts.is_null())
             .filter(dep_signature.is_null())
             .filter(dep_signed_by.is_null());
 
-        let num_updated = update(filter)
-            .set((
-                dep_ts.eq(meta.timestamp().naive_utc()),
-                dep_signed_by.eq(meta.signed_by().as_ref()),
-                dep_signature.eq(meta.sig().as_ref()),
-            ))
-            .execute(self.deref_mut())?;
+        let builder = self.build_transaction().deferrable();
 
-        if num_updated != 1 {
-            return Ok(PKIResponse::Redundant);
-        }
+        builder.run(|| {
+            let num_updated = update(filter)
+                .set((
+                    dep_ts.eq(meta.timestamp().naive_utc()),
+                    dep_signed_by.eq(meta.signed_by().as_ref()),
+                    dep_signature.eq(meta.sig().as_ref()),
+                ))
+                .execute(&self.0)?;
 
-        Ok(PKIResponse::Success)
+            if num_updated != 1 {
+                return Ok(PKIResponse::Redundant);
+            }
+
+            Ok(PKIResponse::Success)
+        })
     }
 
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
@@ -325,14 +331,13 @@ impl Store for Conn {
     }
 
     fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
-        use crate::schema::userkeys::dsl::*;
+        use crate::schema::keys::dsl::*;
 
-        let query = userkeys
+        let query = keys
             .filter(key.eq(key_arg.as_ref()))
-            .inner_join(keys::table)
-            .filter(keys::dep_ts.is_null())
-            .filter(keys::dep_signed_by.is_null())
-            .filter(keys::dep_signature.is_null());
+            .filter(dep_ts.is_null())
+            .filter(dep_signed_by.is_null())
+            .filter(dep_signature.is_null());
 
         Ok(select(exists(query)).get_result(self.deref_mut())?)
     }
