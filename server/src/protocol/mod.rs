@@ -110,50 +110,6 @@ impl State {
             Ok(Res::Missing(missing_users, missing_devs))
         }
     }
-
-    // fn handle_get(&'static self) -> impl warp::Filter {
-    //     path::path("keys_of")
-    //         .and(body::concat())
-    //         .map(move |b: body::FullBody| {
-    //             let mut con = self
-    //                 .new_connection()
-    //                 .map_err(|e| warp::reject::custom("asdf"))?;
-    //             // TODO: consider making this more efficient
-    //             let buf: Vec<u8> = b.collect();
-    //             let req = serde_cbor::from_slice(&buf).map_err(|e| warp::reject::custom("asdf"))?;
-    //             let res = get::keys_of(&mut con, req).map_err(|e| warp::reject::custom("asdf"))?;
-    //             let res_ser = serde_cbor::to_vec(&res).map_err(|e| warp::reject::custom("asdf"))?;
-    //             Ok::<_, warp::reject::Rejection>(res_ser)
-    //         })
-    //         .or(path::path("key_info")
-    //             .and(body::concat())
-    //             .map(move |b: body::FullBody| {
-    //                 self.get_req_handler(b, get::key_info)
-    //                     .map_err(|e| warp::reject::custom("asdf"))
-    //             }))
-    //         .or(path::path("keys_exist")
-    //             .and(body::concat())
-    //             .map(move |b: body::FullBody| {
-    //                 self.get_req_handler(b, get::keys_exist)
-    //                     .map_err(|e| warp::reject::custom("asdf"))
-    //             }))
-    //         .or(path::path("users_exist")
-    //             .and(body::concat())
-    //             .map(move |b: body::FullBody| {
-    //                 let mut con = self
-    //                     .new_connection()
-    //                     .map_err(|e| warp::reject::custom("asdf"))?;
-    //                 // TODO: consider making this more efficient
-    //                 let buf: Vec<u8> = b.collect();
-    //                 let req =
-    //                     serde_cbor::from_slice(&buf).map_err(|e| warp::reject::custom("asdf"))?;
-    //                 let res = get::users_exist(&mut con, req)
-    //                     .map_err(|e| warp::reject::custom("asdf"))?;
-    //                 let res_ser =
-    //                     serde_cbor::to_vec(&res).map_err(|e| warp::reject::custom("asdf"))?;
-    //                 Ok::<_, warp::reject::Rejection>(res_ser)
-    //             }))
-    // }
 }
 
 async fn send_pushes<Tx, E, Rx>(tx: &mut Tx, rx: &mut Rx) -> Result<(), Error>
