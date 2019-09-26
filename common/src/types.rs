@@ -196,7 +196,7 @@ pub mod register {
     use super::*;
 
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct Req(UserId, Signed<sign::PublicKey>);
+    pub struct Req(pub UserId, pub Signed<sign::PublicKey>);
 
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum Res {
