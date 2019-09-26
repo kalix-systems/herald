@@ -1,4 +1,5 @@
 use crate::{prelude::*, store::*};
+use bytes::Buf;
 use dashmap::DashMap;
 use futures::compat::*;
 use sodiumoxide::{crypto::sign, randombytes::randombytes_into};
@@ -6,7 +7,10 @@ use std::convert::TryInto;
 use tokio::sync::mpsc::{
     unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
 };
-use warp::filters::ws;
+use warp::{
+    filters::{body, path, ws},
+    Filter,
+};
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<Push>>,
@@ -16,16 +20,21 @@ pub struct State {
 pub mod get;
 pub mod login;
 pub mod post;
-pub mod register;
 
 impl State {
+    pub fn new() -> Self {
+        State {
+            active: DashMap::default(),
+            pool: init_pool(),
+        }
+    }
+
     fn new_connection(&self) -> Result<Conn, Error> {
         // TODO add error type
         Ok(Conn(self.pool.get().unwrap()))
     }
 
-    pub async fn handle_login(&self, ws: warp::filters::ws::WebSocket) -> Result<(), Error> {
-        let mut ws = ws.sink_compat();
+    pub async fn handle_login(&self, mut ws: warp::filters::ws::WebSocket) -> Result<(), Error> {
         let mut con = self.new_connection()?;
         let gid = login::login(&mut con, &mut ws).await?;
         self.add_active(gid.did, &mut ws).await?;
@@ -70,6 +79,7 @@ impl State {
                 missing_devs.push(*device);
             }
         }
+
         for user in to_users {
             if con.user_exists(&user)? {
                 for key in con.read_meta(&user)?.valid_keys() {
@@ -100,6 +110,50 @@ impl State {
             Ok(Res::Missing(missing_users, missing_devs))
         }
     }
+
+    // fn handle_get(&'static self) -> impl warp::Filter {
+    //     path::path("keys_of")
+    //         .and(body::concat())
+    //         .map(move |b: body::FullBody| {
+    //             let mut con = self
+    //                 .new_connection()
+    //                 .map_err(|e| warp::reject::custom("asdf"))?;
+    //             // TODO: consider making this more efficient
+    //             let buf: Vec<u8> = b.collect();
+    //             let req = serde_cbor::from_slice(&buf).map_err(|e| warp::reject::custom("asdf"))?;
+    //             let res = get::keys_of(&mut con, req).map_err(|e| warp::reject::custom("asdf"))?;
+    //             let res_ser = serde_cbor::to_vec(&res).map_err(|e| warp::reject::custom("asdf"))?;
+    //             Ok::<_, warp::reject::Rejection>(res_ser)
+    //         })
+    //         .or(path::path("key_info")
+    //             .and(body::concat())
+    //             .map(move |b: body::FullBody| {
+    //                 self.get_req_handler(b, get::key_info)
+    //                     .map_err(|e| warp::reject::custom("asdf"))
+    //             }))
+    //         .or(path::path("keys_exist")
+    //             .and(body::concat())
+    //             .map(move |b: body::FullBody| {
+    //                 self.get_req_handler(b, get::keys_exist)
+    //                     .map_err(|e| warp::reject::custom("asdf"))
+    //             }))
+    //         .or(path::path("users_exist")
+    //             .and(body::concat())
+    //             .map(move |b: body::FullBody| {
+    //                 let mut con = self
+    //                     .new_connection()
+    //                     .map_err(|e| warp::reject::custom("asdf"))?;
+    //                 // TODO: consider making this more efficient
+    //                 let buf: Vec<u8> = b.collect();
+    //                 let req =
+    //                     serde_cbor::from_slice(&buf).map_err(|e| warp::reject::custom("asdf"))?;
+    //                 let res = get::users_exist(&mut con, req)
+    //                     .map_err(|e| warp::reject::custom("asdf"))?;
+    //                 let res_ser =
+    //                     serde_cbor::to_vec(&res).map_err(|e| warp::reject::custom("asdf"))?;
+    //                 Ok::<_, warp::reject::Rejection>(res_ser)
+    //             }))
+    // }
 }
 
 async fn send_pushes<Tx, E, Rx>(tx: &mut Tx, rx: &mut Rx) -> Result<(), Error>
