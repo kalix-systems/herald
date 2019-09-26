@@ -56,7 +56,7 @@ pub trait Store {
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
     // TODO: add this
-    // fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
+    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
 
     // TODO: make this take a vec of messages
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
@@ -308,6 +308,21 @@ impl Store for Conn {
             .filter(keys::dep_signature.is_null());
 
         Ok(select(exists(query)).get_result(self.deref_mut())?)
+    }
+
+    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
+        let keys: Vec<Vec<u8>> = userkeys::table
+            .filter(userkeys::user_id.eq(uid.as_str()))
+            .inner_join(keys::table)
+            .filter(keys::dep_ts.is_null())
+            .filter(keys::dep_signed_by.is_null())
+            .filter(keys::dep_signature.is_null())
+            .select(keys::key)
+            .get_results(self.deref_mut())?;
+
+        keys.iter()
+            .map(|raw| sig::PublicKey::from_slice(raw).ok_or(Error::InvalidKey))
+            .collect()
     }
 
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
@@ -577,6 +592,26 @@ mod tests {
 
         let keys = conn.read_meta(&user_id).unwrap().keys;
         assert_eq!(keys.len(), 1);
+    }
+
+    #[test]
+    #[serial]
+    fn valid_keys() {
+        let mut conn = open_conn();
+
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().unwrap();
+
+        let signed_pk = kp.sign(*kp.public_key());
+
+        conn.register_user(user_id, signed_pk).unwrap();
+
+        let keys = conn.valid_keys(&user_id).unwrap();
+        assert_eq!(keys.len(), 1);
+
+        conn.deprecate_key(signed_pk).unwrap();
+        let keys = conn.valid_keys(&user_id).unwrap();
+        assert_eq!(keys.len(), 0);
     }
 
     #[test]
