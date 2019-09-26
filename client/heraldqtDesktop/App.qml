@@ -21,13 +21,10 @@ Item {
 
     NetworkHandle {
         id: networkHandle
-        onNewMessageChanged: convModel.refresh()
+        // every conversation has it's own refresh signal. guards
+        //        onNewMessageChanged: convModel.refresh()
         onNewContactChanged: contactsModel.refresh()
         onNewConversationChanged: conversationsModel.hardRefresh()
-    }
-
-    Conversation {
-        id: convModel
     }
 
     Users {
@@ -36,11 +33,6 @@ Item {
 
     Conversations {
         id: conversationsModel
-    }
-
-    Users {
-        id: conversationMembers
-        conversationId: Utils.unwrapOr(convModel.conversationId, "")
     }
 
     Popups.ConfigPopup {
@@ -71,6 +63,15 @@ Item {
         id: config
     }
 
+    Component {
+        id: splash
+        Image {
+            anchors.fill: parent
+            source: "qrc:/land.png"
+            mipmap: true
+        }
+    }
+
     SplitView {
         id: rootSplitView
         anchors.fill: parent
@@ -82,8 +83,9 @@ Item {
             id: sideBar
         }
 
-        ChatView {
+        Loader {
             id: chatView
+            sourceComponent: splash
         }
 
         handle: Rectangle {

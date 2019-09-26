@@ -53,11 +53,12 @@ ToolBar {
 
         MenuItem {
             text: "Clear History"
-            onTriggered: convModel.deleteConversation()
+            onTriggered: ownedConversation.clearConversationHistory()
         }
 
         MenuItem {
             text: "Add Member"
+            visible: isPairwise
 
             onTriggered: newMemberPopup.open()
         }
@@ -85,8 +86,7 @@ ToolBar {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
             onClicked: {
-                gsConvoItemMembers.addToConversation(userIdText.text,
-                                                     convModel.conversationId)
+                convoItemMembers.addToConversation(userIdText.text)
                 newMemberPopup.close()
             }
         }

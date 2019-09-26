@@ -41,7 +41,7 @@ Flickable {
         Repeater {
             id: chatListView
             anchors.fill: parent
-            model: convModel
+            model: ownedConversation
 
             delegate: Column {
                 readonly property bool outbound: author === config.configId
@@ -68,7 +68,7 @@ Flickable {
                         }
                     }
                     // This is okay as a ternary, the types are enforced by QML.
-                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[convModel.color]
+                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[ownedConversation.color]
                 } //bubble
             } //bubble wrapper
         } // Repeater

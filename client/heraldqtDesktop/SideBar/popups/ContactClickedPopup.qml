@@ -34,12 +34,11 @@ Item {
     Menu {
         id: optionsMenu
 
-        MenuItem {
-            text: 'Delete Contact'
-            onTriggered: JS.deleteContact(index, contactsModel, convModel,
-                                          appRoot, heraldUtils)
-        }
-
+        //MenuItem {
+        //    text: 'Delete Contact'
+        //    onTriggered: JS.deleteContact(index, contactsModel, convModel,
+        //                                  appRoot, heraldUtils)
+        //}
         MenuSeparator {
         }
 

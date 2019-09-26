@@ -100,7 +100,7 @@ Rectangle {
         id: messageOptionsMenu
         MenuItem {
             text: "Delete Message"
-            onTriggered: convModel.deleteMessage(index)
+            onTriggered: ownedConversation.deleteMessage(index)
         }
         MenuItem {
             text: "More Info..."

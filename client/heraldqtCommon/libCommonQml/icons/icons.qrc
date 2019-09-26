@@ -40,5 +40,6 @@
         <file>x-icon-white.svg</file>
         <file>x-icon.svg</file>
         <file>reply-icon.svg</file>
+        <file>pencil-icon-black.svg</file>
     </qresource>
 </RCC>

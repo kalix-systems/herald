@@ -1,11 +1,3 @@
-export function submit(
-  config: Config,
-  configInit: boolean,
-  useridField: TextField,
-  usernameField: TextField
-): void {
-  if (!configInit) {
-    config.configId = useridField.text.trim();
-  }
+export function submit(config: Config, usernameField: TextField): void {
   config.name = usernameField.text.trim();
 }
