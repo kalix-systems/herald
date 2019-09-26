@@ -1,10 +1,7 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
 use bytes::Bytes;
-use std::{
-    collections::HashMap,
-    convert::{TryFrom, TryInto},
-};
+use std::{collections::HashMap, convert::TryFrom};
 
 type UserIdInner = [u8; 32];
 

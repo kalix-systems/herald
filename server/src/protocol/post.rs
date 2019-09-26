@@ -11,16 +11,22 @@ use tokio::sync::mpsc::{
 use warp::filters::ws;
 
 pub fn register(store: &mut Conn, req: register::Req) -> Result<register::Res, Error> {
-    store.register_user(req.0, req.1)
+    use register::*;
+
+    let res = if req.1.verify_sig() {
+        store.register_user(req.0, req.1)?
+    } else {
+        Res::BadSig
+    };
+
+    Ok(res)
 }
 
 pub fn new_key(store: &mut Conn, req: new_key::Req) -> Result<new_key::Res, Error> {
     use new_key::*;
 
     let res = if req.0.verify_sig() {
-        drop(store);
-        // store.add_key(req.0)?
-        unimplemented!()
+        store.add_key(req.0)?
     } else {
         PKIResponse::BadSignature
     };
@@ -32,9 +38,7 @@ pub fn dep_key(store: &mut Conn, req: dep_key::Req) -> Result<dep_key::Res, Erro
     use dep_key::*;
 
     let res = if req.0.verify_sig() {
-        drop(store);
-        // store.deprecate_key(req.0)?
-        unimplemented!()
+        store.deprecate_key(req.0)?
     } else {
         PKIResponse::BadSignature
     };

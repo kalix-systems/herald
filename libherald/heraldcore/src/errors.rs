@@ -23,10 +23,7 @@ pub enum HErr {
     RegistrationError,
     MissingFields,
     RequestDropped,
-    //BadResponse {
-    //    expected: &'static str,
-    //    found: Response,
-    //},
+    SurfError(surf::Exception),
 }
 
 impl fmt::Display for HErr {
@@ -50,9 +47,7 @@ impl fmt::Display for HErr {
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
             RequestDropped => write!(f, "RequestDropped"),
-            // BadResponse { expected, found } => {
-            //    write!(f, "BadResponse, expected {}, found {:?}", expected, found)
-            // }
+            SurfError(e) => write!(f, "SurfError: {}", e),
         }
     }
 }
@@ -62,20 +57,29 @@ impl std::error::Error for HErr {
         use HErr::*;
         Some(match self {
             DatabaseError(e) => e,
-            HeraldError(_) => return None,
-            MutexError(_) => return None,
-            InvalidUserId => return None,
             IoError(e) => e,
             ImageError(s) => s,
             Utf8Error(s) => s,
             CborError(e) => e,
             TransportError(s) => s,
             RegexError(e) => e,
+            SurfError(e) => e.as_ref(),
             _ => return None,
         })
     }
 }
 
+macro_rules! from_fn {
+    ($to:ty, $from:ty, $fn:expr) => {
+        impl From<$from> for $to {
+            fn from(f: $from) -> $to {
+                $fn(f)
+            }
+        }
+    };
+}
+
+// TODO: replace these
 impl<T> From<PoisonError<T>> for HErr {
     fn from(e: PoisonError<T>) -> Self {
         HErr::MutexError(e.to_string())
@@ -139,3 +143,5 @@ impl From<LazyError> for HErr {
         HErr::LazyPondError
     }
 }
+
+from_fn!(HErr, surf::Exception, HErr::SurfError);
