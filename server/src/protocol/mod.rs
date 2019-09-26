@@ -52,6 +52,51 @@ impl State {
 
         Ok(())
     }
+
+    pub async fn send_push(
+        &self,
+        to_users: Vec<UserId>,
+        mut to_devs: Vec<sig::PublicKey>,
+        msg: Push,
+    ) -> Result<push::Response, Error> {
+        let mut missing_users = Vec::new();
+        let mut missing_devs = Vec::new();
+        let mut con = self.new_connection()?;
+        for device in to_devs.iter() {
+            if !con.key_is_valid(*device)? {
+                missing_devs.push(*device);
+            }
+        }
+        for user in to_users {
+            if con.user_exists(&user)? {
+                for key in con.read_meta(&user)?.valid_keys() {
+                    to_devs.push(key);
+                }
+            } else {
+                missing_users.push(user);
+            }
+        }
+
+        if missing_users.is_empty() && missing_devs.is_empty() {
+            let mut to_pending = Vec::new();
+
+            for dev in to_devs {
+                if let Some(s) = self.active.async_get(dev).await {
+                    let mut sender = s.clone();
+                    // TODO: handle this error?
+                    drop(sender.send(msg.clone()).await);
+                } else {
+                    to_pending.push(dev);
+                }
+            }
+
+            con.add_pending(to_pending, msg)?;
+
+            Ok(push::Response::Success)
+        } else {
+            Ok(push::Response::Missing(missing_users, missing_devs))
+        }
+    }
 }
 
 async fn send_pushes<Tx, E, Rx>(tx: &mut Tx, rx: &mut Rx) -> Result<(), Error>

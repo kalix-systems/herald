@@ -92,6 +92,23 @@ pub enum Push {
     },
 }
 
+pub mod push {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct PushReq {
+        pub to_users: Vec<UserId>,
+        pub to_devs: Vec<sig::PublicKey>,
+        pub msg: Push,
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Response {
+        Success,
+        Missing(Vec<UserId>, Vec<sig::PublicKey>),
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Tagged<T> {
     pub mid: UQ,

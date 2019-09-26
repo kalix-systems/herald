@@ -50,6 +50,8 @@ pub trait Store {
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
+    // TODO: add this
+    // fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
 
     // TODO: make this take a vec of messages
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
