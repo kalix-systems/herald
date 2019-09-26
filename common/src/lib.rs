@@ -1,4 +1,3 @@
-#![feature(try_blocks)]
 #![allow(warnings)]
 
 mod crypto;
