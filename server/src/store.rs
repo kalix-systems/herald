@@ -35,7 +35,7 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 // TODO: consider having this take slices instead of vec's
 pub trait Store {
-    // batch this
+    #[deprecated]
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
 
     // batch this
