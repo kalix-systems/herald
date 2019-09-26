@@ -9,7 +9,6 @@ pub use types::*;
 #[macro_use]
 mod newtype_macros;
 
-pub use async_trait::*;
 pub use bytes::Bytes;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
