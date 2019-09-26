@@ -196,18 +196,13 @@ pub mod register {
     use super::*;
 
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum ToServer {
-        RequestUID(UserId),
-        UseKey(Signed<sign::PublicKey>),
-    }
+    pub struct Req(UserId, Signed<sign::PublicKey>);
 
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-    pub enum ToClient {
+    pub enum Res {
         UIDTaken,
-        UIDReady,
         KeyTaken,
         BadSig,
-        KeyReady,
         Success,
     }
 }
