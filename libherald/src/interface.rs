@@ -842,6 +842,10 @@ pub struct MessagesQObject {}
 pub struct MessagesEmitter {
     qobject: Arc<AtomicPtr<MessagesQObject>>,
     conversation_id_changed: fn(*mut MessagesQObject),
+    last_author_changed: fn(*mut MessagesQObject),
+    last_body_changed: fn(*mut MessagesQObject),
+    last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
+    last_status_changed: fn(*mut MessagesQObject),
     new_data_ready: fn(*mut MessagesQObject),
 }
 
@@ -858,6 +862,10 @@ impl MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
             conversation_id_changed: self.conversation_id_changed,
+            last_author_changed: self.last_author_changed,
+            last_body_changed: self.last_body_changed,
+            last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
+            last_status_changed: self.last_status_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -869,6 +877,30 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.conversation_id_changed)(ptr);
+        }
+    }
+    pub fn last_author_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.last_author_changed)(ptr);
+        }
+    }
+    pub fn last_body_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.last_body_changed)(ptr);
+        }
+    }
+    pub fn last_epoch_timestamp_ms_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.last_epoch_timestamp_ms_changed)(ptr);
+        }
+    }
+    pub fn last_status_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.last_status_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -936,6 +968,10 @@ pub trait MessagesTrait {
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn last_author(&self) -> Option<&str>;
+    fn last_body(&self) -> Option<&str>;
+    fn last_epoch_timestamp_ms(&self) -> Option<i64>;
+    fn last_status(&self) -> Option<u32>;
     fn clear_conversation_history(&mut self) -> bool;
     fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
@@ -961,6 +997,10 @@ pub trait MessagesTrait {
 pub extern "C" fn messages_new(
     messages: *mut MessagesQObject,
     messages_conversation_id_changed: fn(*mut MessagesQObject),
+    messages_last_author_changed: fn(*mut MessagesQObject),
+    messages_last_body_changed: fn(*mut MessagesQObject),
+    messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
+    messages_last_status_changed: fn(*mut MessagesQObject),
     messages_new_data_ready: fn(*mut MessagesQObject),
     messages_layout_about_to_be_changed: fn(*mut MessagesQObject),
     messages_layout_changed: fn(*mut MessagesQObject),
@@ -977,6 +1017,10 @@ pub extern "C" fn messages_new(
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
         conversation_id_changed: messages_conversation_id_changed,
+        last_author_changed: messages_last_author_changed,
+        last_body_changed: messages_last_body_changed,
+        last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
+        last_status_changed: messages_last_status_changed,
         new_data_ready: messages_new_data_ready,
     };
     let model = MessagesList {
@@ -1027,6 +1071,50 @@ pub unsafe extern "C" fn messages_conversation_id_set(ptr: *mut Messages, v: *co
 pub unsafe extern "C" fn messages_conversation_id_set_none(ptr: *mut Messages) {
     let o = &mut *ptr;
     o.set_conversation_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_author_get(
+    ptr: *const Messages,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.last_author();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_body_get(
+    ptr: *const Messages,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.last_body();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_epoch_timestamp_ms_get(ptr: *const Messages) -> COption<i64> {
+    match (&*ptr).last_epoch_timestamp_ms() {
+        Some(value) => COption { data: value, some: true },
+        None => COption { data: i64::default(), some: false}
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COption<u32> {
+    match (&*ptr).last_status() {
+        Some(value) => COption { data: value, some: true },
+        None => COption { data: u32::default(), some: false}
+    }
 }
 
 #[no_mangle]

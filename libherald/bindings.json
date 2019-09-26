@@ -346,6 +346,22 @@
                     "type": "QByteArray",
                     "write": true,
                     "optional": true
+                },
+                "lastAuthor": {
+                    "optional": true,
+                    "type": "QString"
+                },
+                "lastBody": {
+                    "optional": true,
+                    "type": "QString"
+                },
+                "lastEpochTimestampMs": {
+                    "optional": true,
+                    "type": "qint64"
+                },
+                "lastStatus": {
+                    "optional": true,
+                    "type": "quint32"
                 }
             },
             "itemProperties": {

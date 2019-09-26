@@ -11,3 +11,32 @@ export function contactClickHandler(
   }
   return;
 }
+
+
+export function formatSummary(author: string, body: string): string {
+  if (author) {
+    return author + ": " + body
+  } else {
+    return ""
+  }
+}
+
+//see herald_common/types.rs
+export function receiptStatusSwitch(receipt: number): string {
+  switch (receipt) {
+    case 0: {
+      // animated svg in the future
+      return ""
+    }
+    case 1: {
+      return "qrc:/single-check-receipt-icon.svg"
+    }
+    case 2: {
+      return "qrc:/double-check-receipt-icon.svg"
+    }
+    case 3: {
+      return "qrc:/single-check-receipt-icon.svg"
+    }
+  }
+  return ""
+}
