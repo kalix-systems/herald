@@ -53,15 +53,18 @@ impl State {
         Ok(())
     }
 
-    pub async fn send_push(
-        &self,
-        to_users: Vec<UserId>,
-        mut to_devs: Vec<sig::PublicKey>,
-        msg: Push,
-    ) -> Result<push::Response, Error> {
+    pub async fn send_push(&self, req: push::Req) -> Result<push::Res, Error> {
+        use push::*;
+        let Req {
+            to_users,
+            mut to_devs,
+            msg,
+        } = req;
+
         let mut missing_users = Vec::new();
         let mut missing_devs = Vec::new();
         let mut con = self.new_connection()?;
+
         for device in to_devs.iter() {
             if !con.key_is_valid(*device)? {
                 missing_devs.push(*device);
@@ -92,9 +95,9 @@ impl State {
 
             con.add_pending(to_pending, msg)?;
 
-            Ok(push::Response::Success)
+            Ok(Res::Success)
         } else {
-            Ok(push::Response::Missing(missing_users, missing_devs))
+            Ok(Res::Missing(missing_users, missing_devs))
         }
     }
 }

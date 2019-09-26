@@ -92,74 +92,81 @@ pub enum Push {
     },
 }
 
+pub mod keys_of {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<UserId>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub HashMap<UserId, UserMeta>);
+}
+
+pub mod key_info {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<sig::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub HashMap<sig::PublicKey, sig::PKMeta>);
+}
+
+pub mod keys_exist {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<sig::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub Vec<bool>);
+}
+
+pub mod users_exist {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<UserId>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub Vec<bool>);
+}
+
 pub mod push {
     use super::*;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub struct PushReq {
+    pub struct Req {
         pub to_users: Vec<UserId>,
         pub to_devs: Vec<sig::PublicKey>,
         pub msg: Push,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub enum Response {
+    pub enum Res {
         Success,
         Missing(Vec<UserId>, Vec<sig::PublicKey>),
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct Tagged<T> {
-    pub mid: UQ,
-    pub dat: T,
+pub mod new_key {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Signed<sig::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub PKIResponse);
 }
 
-impl<T> Tagged<T> {
-    pub fn new(t: T) -> Self {
-        Tagged {
-            mid: UQ::new(),
-            dat: t,
-        }
-    }
-}
+pub mod dep_key {
+    use super::*;
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
-#[repr(u8)]
-pub enum SessionType {
-    Register = 0,
-    Login = 1,
-}
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Signed<sig::PublicKey>);
 
-impl TryFrom<u8> for SessionType {
-    type Error = u8;
-
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
-            0 => Ok(Self::Register),
-            1 => Ok(Self::Login),
-            i => Err(i),
-        }
-    }
-}
-
-impl Serialize for SessionType {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
-    }
-}
-
-impl<'de> Deserialize<'de> for SessionType {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
-        u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 2).as_str(),
-            )
-        })
-    }
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Res(pub PKIResponse);
 }
 
 pub mod login {
