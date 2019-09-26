@@ -68,10 +68,9 @@ Row {
                    }
         }
 
-
         Text {
             id: userName
-            visible: secondaryText !== ""
+            visible: labeled
             text: secondaryText
             // is white instead of palette maincolor bc shld be white regardless of theme
             color: if (!!!isDefault) {

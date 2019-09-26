@@ -47,19 +47,6 @@ ListView {
             conversationId: conversationIdProxy
           }
 
-        property string summary: if (messageModel.lastAuthor) {
-                                     return messageModel.lastAuthor + ": " +  messageModel.lastBody;
-                                 } else {
-                                     ""
-                                 }
-
-        // keeping this separate from avatar in order for anchors to work properly.
-        property string summaryTimestamp: if (messageModel.lastAuthor) {
-                                              return Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
-                                          } else {
-                                              ""
-                                          }
-
         property var childChatView: Component {
             CV.ChatView {
               ownedConversation: messageModel
@@ -90,13 +77,21 @@ ListView {
                 height: 2
             }
 
-            Text {
+            Common.Avatar {
+                id: conversationAvatar
+                size: 45
+                labeled: false
+                labelGap: QmlCfg.smallMargin
+                avatarLabel: Utils.unwrapOr(title, "unknown")
+                colorHash: Utils.unwrapOr(color, 0)
+                pfpUrl: Utils.safeStringOrDefault(picture)
+            }
+
+            ConversationLabel {
+                anchors.left: conversationAvatar.right
                 anchors.right: parent.right
-                anchors.top: parent.top
-                text: summaryTimestamp
-                font.pointSize: 10
-                color: QmlCfg.palette.secondaryTextColor
-                anchors.margins: QmlCfg.margin / 4
+                label: title
+                summaryText: JS.formatSummary(messageModel.lastAuthor, messageModel.lastBody)
             }
 
             anchors.fill: parent
@@ -130,8 +125,6 @@ ListView {
                 onClicked: {
                     chatView.sourceComponent = childChatView;
                     conversationList.currentIndex = index
-//                  convModel.conversationId = conversationId
-//                  appRoot.gsConvoItemMembers = convoItemMembers
                 }
 
                 // ternary is okay here, type enforced by QML
@@ -141,14 +134,5 @@ ListView {
             color: conversationItem.focus ? focusColor : defaultColor
         }
 
-        Common.Avatar {
-            size: 45
-            id: conversationAvatar
-            labelGap: QmlCfg.smallMargin
-            secondaryText: conversationItem.summary
-            avatarLabel: Utils.unwrapOr(title, "unknown")
-            colorHash: Utils.unwrapOr(color, 0)
-            pfpUrl: Utils.safeStringOrDefault(picture)
-        }
     }
 }

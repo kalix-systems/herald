@@ -68,7 +68,6 @@ impl Messages {
             .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(msg);
         self.model.end_insert_rows();
-
         Some(msg_id)
     }
 }
@@ -103,6 +102,7 @@ impl MessagesTrait for Messages {
         match self.list.last() {
             Some(msg) => {
                 if let Some(status_vec) = &msg.inner.receipts {
+                    print!("{}", status_vec.len());
                     status_vec.iter().map(|(_, status)| *status as u32).max()
                 } else {
                     None
