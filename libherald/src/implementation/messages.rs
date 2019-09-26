@@ -84,17 +84,13 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn last_author(&self) -> Option<&str> {
-        match self.list.last() {
-            Some(msg) => {
-                let who = msg.inner.author.as_str();
-                if who == self.local_id {
-                    Some("You")
-                } else {
-                    Some(who)
-                }
-            }
-            None => None,
+    fn last_author(&self) -> Option<FfiUserIdRef> {
+        let inner = &self.list.last()?.inner;
+
+        if inner.author == self.local_id {
+            Some("You")
+        } else {
+            Some(inner.author.as_str())
         }
     }
 
