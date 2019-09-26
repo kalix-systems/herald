@@ -27,6 +27,13 @@ pub struct Messages {
 }
 
 impl Messages {
+    fn update_last(&mut self) {
+        self.emit.last_author_changed();
+        self.emit.last_body_changed();
+        self.emit.last_epoch_timestamp_ms_changed();
+        self.emit.last_status_changed();
+    }
+
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
         self.updated = chrono::Utc::now();
 
@@ -78,6 +85,47 @@ impl MessagesTrait for Messages {
         }
     }
 
+    fn last_author(&self) -> Option<&str> {
+        match self.list.last() {
+            Some(msg) => {
+                let who = msg.inner.author.as_str();
+                if who == self.local_id {
+                    Some("You")
+                } else {
+                    Some(who)
+                }
+            }
+            None => None,
+        }
+    }
+
+    fn last_status(&self) -> Option<u32> {
+        match self.list.last() {
+            Some(msg) => {
+                if let Some(status_vec) = &msg.inner.receipts {
+                    status_vec.iter().map(|(_, status)| *status as u32).max()
+                } else {
+                    None
+                }
+            }
+            None => None,
+        }
+    }
+
+    fn last_body(&self) -> Option<&str> {
+        match self.list.last() {
+            Some(msg) => Some(msg.inner.body.as_str()),
+            None => None,
+        }
+    }
+
+    fn last_epoch_timestamp_ms(&self) -> Option<i64> {
+        match self.list.last() {
+            Some(msg) => Some(msg.inner.timestamp.timestamp_millis()),
+            None => None,
+        }
+    }
+
     fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
         match conversation_id {
             Some(id) => {
@@ -107,6 +155,7 @@ impl MessagesTrait for Messages {
                 self.model.begin_insert_rows(0, messages.len() - 1);
                 self.list = messages;
                 self.model.end_insert_rows();
+                self.update_last();
             }
             None => {
                 if self.conversation_id.is_none() {
@@ -155,7 +204,10 @@ impl MessagesTrait for Messages {
 
     fn insert_message(&mut self, body: String) -> FfiMsgId {
         match self.raw_insert(body, None) {
-            Some(message_id) => message_id.to_vec(),
+            Some(message_id) => {
+                self.update_last();
+                message_id.to_vec()
+            }
             None => vec![],
         }
     }

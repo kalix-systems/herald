@@ -43,13 +43,22 @@ ListView {
         property Item conversationAvatar: conversationAvatar
         property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
+        property Messages messageModel: Messages {
+            conversationId: conversationIdProxy
+          }
+
+        property string summary: if (messageModel.lastAuthor) {
+                                     return messageModel.lastAuthor + ": " +  messageModel.lastBody;
+                                 } else {
+                                     ""
+                                 }
+
         property var childChatView: Component {
             CV.ChatView {
-              ownedConversation: Messages {
-                conversationId: conversationIdProxy
-              }
+              ownedConversation: messageModel
            }
         }
+
 
         Users {
             id: convoItemMembers
@@ -119,6 +128,8 @@ ListView {
         Common.Avatar {
             size: 45
             id: conversationAvatar
+            labelGap: QmlCfg.smallMargin
+            secondaryText: conversationItem.summary
             avatarLabel: Utils.unwrapOr(title, "unknown")
             colorHash: Utils.unwrapOr(color, 0)
             pfpUrl: Utils.safeStringOrDefault(picture)

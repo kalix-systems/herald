@@ -160,12 +160,20 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
+    Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
+    Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
+    Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
     ~Messages();
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
+    QString lastAuthor() const;
+    QString lastBody() const;
+    QVariant lastEpochTimestampMs() const;
+    QVariant lastStatus() const;
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
@@ -204,6 +212,10 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void conversationIdChanged();
+    void lastAuthorChanged();
+    void lastBodyChanged();
+    void lastEpochTimestampMsChanged();
+    void lastStatusChanged();
 };
 
 class NetworkHandle : public QObject
