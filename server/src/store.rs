@@ -4,7 +4,11 @@ use diesel::{
     pg::PgConnection,
     prelude::*,
     r2d2::{self, ConnectionManager},
-    result::{DatabaseErrorKind::UniqueViolation, Error::DatabaseError, QueryResult},
+    result::{
+        DatabaseErrorKind::UniqueViolation,
+        Error::{DatabaseError, NotFound},
+        QueryResult,
+    },
 };
 use dotenv::dotenv;
 use herald_common::*;
@@ -31,37 +35,54 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
 
 // TODO: consider having this take slices instead of vec's
 pub trait Store {
+    // batch this
     fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
+
+    // batch this
     fn add_prekey(
         &mut self,
         key: sig::PublicKey,
         pre: sealed::PublicKey,
     ) -> Result<PKIResponse, Error>;
+
     fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
 
     fn add_key(
         &mut self,
-        user_id: UserId,
+        // user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error>;
+
     fn register_user(
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<register::Res, Error>;
+
+    // batch this
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
+
+    // check if signer's key is live
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
+    // batch this
     fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
+    // batch this
     fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
+
+    // batch this
     fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
 
+    // batch this (map)
     fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
 
     // TODO: make this take a vec of messages
     fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
+
     // TODO: replace these w/methods that get first n, remove first n, in insertion order
     fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
+
+    // TODO expire all as well
     fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
 }
 
@@ -193,18 +214,24 @@ impl Store for Conn {
         })
     }
 
-    fn add_key(
-        &mut self,
-        user_id_arg: UserId,
-        new_key: Signed<sig::PublicKey>,
-    ) -> Result<PKIResponse, Error> {
+    fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
         let builder = self.build_transaction().deferrable();
         builder.run(|| {
-            let query = userkeys::table.filter(userkeys::user_id.eq(user_id_arg.as_str()));
-
-            if !select(exists(query)).get_result(&self.0)? {
-                return Err(MissingData);
-            }
+            let user_id: String = match keys::table
+                .filter(keys::key.eq(new_key.signed_by().as_ref()))
+                .filter(keys::dep_signature.is_null())
+                .filter(keys::dep_signed_by.is_null())
+                .filter(keys::dep_ts.is_null())
+                .inner_join(userkeys::table)
+                .select(userkeys::user_id)
+                .get_result(&self.0)
+                .optional()?
+            {
+                None => {
+                    return Ok(PKIResponse::DeadKey);
+                }
+                Some(uid) => uid,
+            };
 
             let res = diesel::insert_into(keys::table)
                 .values((
@@ -219,7 +246,7 @@ impl Store for Conn {
 
             let res = diesel::insert_into(userkeys::table)
                 .values((
-                    userkeys::user_id.eq(user_id_arg.as_str()),
+                    userkeys::user_id.eq(user_id.as_str()),
                     userkeys::key.eq(new_key.data().as_ref()),
                 ))
                 .execute(&self.0);
@@ -491,23 +518,25 @@ mod tests {
     fn register_and_add() {
         let mut conn = open_conn();
 
-        let kp = sig::KeyPair::gen_new();
+        let kp1 = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
 
-        let signed_pk = kp.sign(*kp.public_key());
-        assert!(!conn.device_exists(kp.public_key()).unwrap());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
+        assert!(!conn.device_exists(kp1.public_key()).unwrap());
 
-        conn.register_user(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk1).unwrap();
 
-        assert!(conn.device_exists(kp.public_key()).unwrap());
+        assert!(conn.device_exists(kp1.public_key()).unwrap());
 
-        let kp = sig::KeyPair::gen_new();
-        let signed_pk = kp.sign(*kp.public_key());
-        assert!(!conn.device_exists(kp.public_key()).unwrap());
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-        conn.add_key(user_id, signed_pk).unwrap();
+        assert!(conn.device_exists(kp1.public_key()).unwrap());
+        assert!(!conn.device_exists(kp2.public_key()).unwrap());
 
-        assert!(conn.device_exists(kp.public_key()).unwrap());
+        conn.add_key(signed_pk2).unwrap();
+
+        assert!(conn.device_exists(kp2.public_key()).unwrap());
     }
 
     #[test]
