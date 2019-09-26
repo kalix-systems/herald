@@ -229,6 +229,7 @@ impl Store for Conn {
                 .optional()?
             {
                 None => {
+                    // TODO test this branch
                     return Ok(PKIResponse::DeadKey);
                 }
                 Some(uid) => uid,
@@ -297,8 +298,15 @@ impl Store for Conn {
 
         let (data, meta) = signed_key.split();
 
-        let filter = keys
+        let to_dep = keys
             .filter(key.eq(data.as_ref()))
+            .filter(dep_ts.is_null())
+            .filter(dep_signature.is_null())
+            .filter(dep_signed_by.is_null());
+
+        let signer_key = meta.signed_by();
+        let signed_by_filter = keys
+            .filter(key.eq(signer_key.as_ref()))
             .filter(dep_ts.is_null())
             .filter(dep_signature.is_null())
             .filter(dep_signed_by.is_null());
@@ -306,7 +314,11 @@ impl Store for Conn {
         let builder = self.build_transaction().deferrable();
 
         builder.run(|| {
-            let num_updated = update(filter)
+            if !select(exists(signed_by_filter)).get_result(&self.0)? {
+                return Ok(PKIResponse::DeadKey);
+            }
+
+            let num_updated = update(to_dep)
                 .set((
                     dep_ts.eq(meta.timestamp().naive_utc()),
                     dep_signed_by.eq(meta.signed_by().as_ref()),
@@ -732,17 +744,48 @@ mod tests {
     fn double_deprecation() {
         let mut conn = open_conn();
 
-        let kp = sig::KeyPair::gen_new();
-        let user_id = "Hello".try_into().unwrap();
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().unwrap();
 
-        let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
 
-        conn.register_user(user_id, signed_pk).unwrap();
+        conn.register_user(user_id, signed_pk1).unwrap();
 
-        conn.deprecate_key(signed_pk).unwrap();
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-        match conn.deprecate_key(signed_pk) {
+        conn.add_key(signed_pk2).unwrap();
+
+        conn.deprecate_key(signed_pk2).unwrap();
+
+        match conn.deprecate_key(signed_pk2) {
             Ok(PKIResponse::Redundant) => {}
+            // ok(pkiresponse::deadkey) => {}
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    #[serial]
+    fn invalid_deprecation() {
+        let mut conn = open_conn();
+
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().unwrap();
+
+        let signed_pk1 = kp1.sign(*kp1.public_key());
+
+        conn.register_user(user_id, signed_pk1).unwrap();
+
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
+
+        conn.add_key(signed_pk2).unwrap();
+
+        conn.deprecate_key(signed_pk1).unwrap();
+
+        match conn.deprecate_key(signed_pk2) {
+            Ok(PKIResponse::DeadKey) => {}
             _ => panic!(),
         }
     }
