@@ -1,5 +1,4 @@
 use super::*;
-use futures::stream::Stream;
 use sodiumoxide::crypto::sign;
 use warp::filters::ws;
 
