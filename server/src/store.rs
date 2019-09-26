@@ -62,7 +62,6 @@ pub trait Store {
     // batch this
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
 
-    // check if signer's key is live
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
     // batch this
