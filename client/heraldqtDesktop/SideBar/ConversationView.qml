@@ -53,6 +53,13 @@ ListView {
                                      ""
                                  }
 
+        // keeping this separate from avatar in order for anchors to work properly.
+        property string summaryTimestamp: if (messageModel.lastAuthor) {
+                                              return Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
+                                          } else {
+                                              ""
+                                          }
+
         property var childChatView: Component {
             CV.ChatView {
               ownedConversation: messageModel
@@ -81,6 +88,15 @@ ListView {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
                 height: 2
+            }
+
+            Text {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                text: summaryTimestamp
+                font.pointSize: 10
+                color: QmlCfg.palette.secondaryTextColor
+                anchors.margins: QmlCfg.margin / 4
             }
 
             anchors.fill: parent
