@@ -12,9 +12,8 @@ use tokio::sync::mpsc::{
 };
 use warp::{filters::ws, Future as WFut, Stream as WStream};
 
-pub async fn login<S, W, E>(store: &mut S, ws: &mut W) -> Result<GlobalId, Error>
+pub async fn login<W, E>(store: &mut Conn, ws: &mut W) -> Result<GlobalId, Error>
 where
-    S: Store,
     W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
     Error: From<E>,
 {

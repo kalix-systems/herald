@@ -125,9 +125,8 @@ where
     Ok(())
 }
 
-async fn archive_pushes<S, Rx>(store: &mut S, mut rx: Rx, to: sig::PublicKey) -> Result<(), Error>
+async fn archive_pushes<Rx>(store: &mut Conn, mut rx: Rx, to: sig::PublicKey) -> Result<(), Error>
 where
-    S: Store,
     Rx: Stream<Item = Push> + Unpin,
 {
     while let Some(p) = rx.next().await {
@@ -136,9 +135,8 @@ where
     Ok(())
 }
 
-async fn catchup<S, W, E>(did: sign::PublicKey, s: &mut S, ws: &mut W) -> Result<(), Error>
+async fn catchup<W, E>(did: sign::PublicKey, s: &mut Conn, ws: &mut W) -> Result<(), Error>
 where
-    S: Store,
     W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
     Error: From<E>,
 {
