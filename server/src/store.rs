@@ -48,7 +48,7 @@ pub trait Store {
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
-    ) -> Result<register::ToClient, Error>;
+    ) -> Result<register::Res, Error>;
     fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
     fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
 
@@ -164,14 +164,14 @@ impl Store for Conn {
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
-    ) -> Result<register::ToClient, Error> {
+    ) -> Result<register::Res, Error> {
         let builder = self.build_transaction().deferrable();
 
         builder.run(|| {
             let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
 
             if select(exists(query)).get_result(&self.0)? {
-                return Ok(register::ToClient::UIDTaken);
+                return Ok(register::Res::UIDTaken);
             }
 
             diesel::insert_into(keys::table)
@@ -189,7 +189,7 @@ impl Store for Conn {
                     userkeys::key.eq(key.data().as_ref()),
                 ))
                 .execute(&self.0)?;
-            return Ok(register::ToClient::Success);
+            return Ok(register::Res::Success);
         })
     }
 
@@ -511,7 +511,7 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
 
         match conn.register_user(user_id, signed_pk) {
-            Ok(register::ToClient::UIDTaken) => {}
+            Ok(register::Res::UIDTaken) => {}
             _ => panic!(),
         }
     }
