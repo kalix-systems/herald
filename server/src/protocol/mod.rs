@@ -18,6 +18,7 @@ pub struct State {
 }
 
 pub mod get;
+pub mod http;
 pub mod login;
 pub mod post;
 
@@ -109,6 +110,20 @@ impl State {
         } else {
             Ok(Res::Missing(missing_users, missing_devs))
         }
+    }
+    pub(crate) fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
+    where
+        B: Buf,
+        I: for<'a> Deserialize<'a>,
+        O: Serialize,
+        F: FnOnce(&mut Conn, I) -> Result<O, Error>,
+    {
+        let mut con = self.new_connection()?;
+        let buf: Vec<u8> = req.collect();
+        let req = serde_cbor::from_slice(&buf)?;
+        let res = f(&mut con, req)?;
+        let res_ser = serde_cbor::to_vec(&res)?;
+        Ok(res_ser)
     }
 }
 
