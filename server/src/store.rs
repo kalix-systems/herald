@@ -158,25 +158,28 @@ impl Store for Conn {
         user_id_arg: UserId,
         new_key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error> {
-        let res = diesel::insert_into(keys::table)
-            .values((
-                keys::key.eq(new_key.data().as_ref()),
-                keys::signed_by.eq(new_key.signed_by().as_ref()),
-                keys::ts.eq(new_key.timestamp()),
-                keys::signature.eq(new_key.sig().as_ref()),
-            ))
-            .execute(self.deref_mut());
+        let builder = self.build_transaction().deferrable();
+        builder.run(|| {
+            let res = diesel::insert_into(keys::table)
+                .values((
+                    keys::key.eq(new_key.data().as_ref()),
+                    keys::signed_by.eq(new_key.signed_by().as_ref()),
+                    keys::ts.eq(new_key.timestamp()),
+                    keys::signature.eq(new_key.sig().as_ref()),
+                ))
+                .execute(&self.0);
 
-        unique_violation_to_redundant(res)?;
+            unique_violation_to_redundant(res)?;
 
-        let res = diesel::insert_into(userkeys::table)
-            .values((
-                userkeys::user_id.eq(user_id_arg.as_str()),
-                userkeys::key.eq(new_key.data().as_ref()),
-            ))
-            .execute(self.deref_mut());
+            let res = diesel::insert_into(userkeys::table)
+                .values((
+                    userkeys::user_id.eq(user_id_arg.as_str()),
+                    userkeys::key.eq(new_key.data().as_ref()),
+                ))
+                .execute(&self.0);
 
-        unique_violation_to_redundant(res)
+            unique_violation_to_redundant(res)
+        })
     }
 
     fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
@@ -381,15 +384,28 @@ mod tests {
     use super::*;
     use serial_test_derive::serial;
     use std::convert::TryInto;
+    use womp::*;
 
     fn open_conn() -> Conn {
         let pool = init_pool();
 
         let conn = pool.get().expect("Failed to get connection");
+        diesel::delete(pending::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(pushes::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(prekeys::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(userkeys::table)
+            .execute(conn.deref())
+            .expect(womp!());
+        diesel::delete(keys::table)
+            .execute(conn.deref())
+            .expect(womp!());
 
-        // so none of the changes are committed
-        conn.begin_test_transaction()
-            .expect("Couldn't start test transaction");
         Conn(conn)
     }
 
