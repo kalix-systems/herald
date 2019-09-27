@@ -1,9 +1,8 @@
 use super::*;
-use futures::future::TryFutureExt;
 
 impl State {
     pub async fn serve(&'static self, port: u16) {
-        use warp::filters::{method, ws};
+        use warp::filters::method;
         let route_get = {
             use get::*;
             mk_filter!(self, keys_of)

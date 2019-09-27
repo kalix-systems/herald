@@ -1,16 +1,9 @@
 use crate::{prelude::*, store::*};
 use bytes::Buf;
 use dashmap::DashMap;
-use futures::compat::*;
-use sodiumoxide::{crypto::sign, randombytes::randombytes_into};
-use std::convert::TryInto;
-use tokio::sync::mpsc::{
-    unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
-};
-use warp::{
-    filters::{body, path, ws},
-    Filter,
-};
+use sodiumoxide::crypto::sign;
+use tokio::sync::mpsc::{unbounded_channel as channel, UnboundedSender as Sender};
+use warp::{filters::ws, Filter};
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<Push>>,

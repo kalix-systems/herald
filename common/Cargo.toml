@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-async-trait = "0.1"
+# async-trait = "0.1"
 chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
 serde_cbor  = "0.10"
 serde_bytes = "0.11"
