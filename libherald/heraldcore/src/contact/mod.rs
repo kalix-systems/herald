@@ -16,20 +16,20 @@ pub struct ContactsHandle {}
 impl DBTable for ContactsHandle {
     fn create_table() -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("../sql/contact/create_table.sql"), NO_PARAMS)?;
         Ok(())
     }
 
     fn drop_table() -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
+        db.execute(include_str!("../sql/contact/drop_table.sql"), NO_PARAMS)?;
 
         Ok(())
     }
 
     fn exists() -> Result<bool, HErr> {
         let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("sql/contact/table_exists.sql"))?;
+        let mut stmt = db.prepare(include_str!("../sql/contact/table_exists.sql"))?;
 
         Ok(stmt.exists(NO_PARAMS)?)
     }
@@ -37,8 +37,8 @@ impl DBTable for ContactsHandle {
     fn reset() -> Result<(), HErr> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
-        tx.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("../sql/contact/drop_table.sql"), NO_PARAMS)?;
+        tx.execute(include_str!("../sql/contact/create_table.sql"), NO_PARAMS)?;
         tx.commit()?;
         Ok(())
     }
@@ -47,7 +47,7 @@ impl DBTable for ContactsHandle {
 /// Gets a contact's name by their `id`.
 pub fn name(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_name.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_name.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
@@ -55,7 +55,7 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 /// Change name of contact by their `id`
 pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/update_name.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/update_name.sql"))?;
 
     stmt.execute(params![name, id])?;
     Ok(())
@@ -64,7 +64,7 @@ pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
 /// Gets a contact's profile picture by their `id`.
 pub fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_profile_picture.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_profile_picture.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
@@ -80,7 +80,7 @@ pub fn conversation_members_since(
     since: DateTime<Utc>,
 ) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_by_conversation.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_conversation.sql"))?;
 
     let rows = stmt.query_map(
         params![conversation_id, since.timestamp()],
@@ -114,7 +114,7 @@ pub fn set_profile_picture(
 
     let db = Database::get()?;
     db.execute(
-        include_str!("sql/contact/update_profile_picture.sql"),
+        include_str!("../sql/contact/update_profile_picture.sql"),
         params![profile_picture, id],
     )?;
     Ok(profile_picture)
@@ -124,7 +124,7 @@ pub fn set_profile_picture(
 pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("sql/contact/update_color.sql"),
+        include_str!("../sql/contact/update_color.sql"),
         params![color, id],
     )?;
     Ok(())
@@ -133,7 +133,7 @@ pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
 /// Indicates whether contact exists
 pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/contact_exists.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/contact_exists.sql"))?;
     Ok(stmt.exists(&[id])?)
 }
 
@@ -149,19 +149,19 @@ pub fn set_status(
         Deleted => {
             let tx = db.transaction()?;
             tx.execute(
-                include_str!("sql/contact/delete_contact_meta.sql"),
+                include_str!("../sql/contact/delete_contact_meta.sql"),
                 params![id],
             )?;
             crate::message_status::delete_by_conversation_tx(&tx, pairwise_conv)?;
             tx.execute(
-                include_str!("sql/message/delete_pairwise_conversation.sql"),
+                include_str!("../sql/message/delete_pairwise_conversation.sql"),
                 params![id],
             )?;
             tx.commit()?;
         }
         _ => {
             db.execute(
-                include_str!("sql/contact/set_status.sql"),
+                include_str!("../sql/contact/set_status.sql"),
                 params![status, id],
             )?;
         }
@@ -172,7 +172,7 @@ pub fn set_status(
 /// Gets contact status
 pub fn status(id: UserId) -> Result<ContactStatus, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_status.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_status.sql"))?;
 
     Ok(stmt.query_row(&[id], |row| row.get(0))?)
 }
@@ -185,7 +185,7 @@ pub fn all() -> Result<Vec<Contact>, HErr> {
 /// Returns all contacts
 pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_all.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_all.sql"))?;
 
     let rows = stmt.query_map(params![since.timestamp()], Contact::from_db)?;
 
@@ -200,7 +200,7 @@ pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
 /// Returns a single contact by `user_id`
 pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_by_id.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_id.sql"))?;
 
     Ok(stmt.query_row(params![user_id], Contact::from_db)?)
 }
@@ -208,7 +208,7 @@ pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
 /// Returns all contacts with the specified `status`
 pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact/get_by_status.sql"))?;
+    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_status.sql"))?;
 
     let rows = stmt.query_map(
         params![status, chrono::MIN_DATE.and_hms(0, 0, 0).timestamp()],
@@ -446,7 +446,7 @@ impl ContactBuilder {
         };
 
         tx.execute(
-            include_str!("sql/contact/add.sql"),
+            include_str!("../sql/contact/add.sql"),
             params![
                 contact.id,
                 contact.name,
@@ -458,7 +458,7 @@ impl ContactBuilder {
             ],
         )?;
         tx.execute(
-            include_str!("sql/members/add_member.sql"),
+            include_str!("../sql/members/add_member.sql"),
             params![contact.pairwise_conversation, contact.id],
         )?;
 
@@ -535,307 +535,4 @@ impl Contact {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{db::Database, womp};
-    use serial_test_derive::serial;
-
-    #[test]
-    #[serial]
-    fn create_drop_exists_reset() {
-        Database::reset_all().expect(womp!());
-        // drop twice, it shouldn't panic on multiple drops
-        ContactsHandle::drop_table().expect(womp!());
-        ContactsHandle::drop_table().expect(womp!());
-
-        ContactsHandle::create_table().expect(womp!());
-        assert!(ContactsHandle::exists().expect(womp!()));
-        ContactsHandle::create_table().expect(womp!());
-        assert!(ContactsHandle::exists().expect(womp!()));
-        ContactsHandle::drop_table().expect(womp!());
-        assert!(!ContactsHandle::exists().expect(womp!()));
-
-        Database::reset_all().expect(womp!());
-
-        let id = "Hello".try_into().expect(womp!());
-        ContactBuilder::new(id)
-            .add()
-            .expect("Failed to add contact");
-        //this should be a foreign key constraint error
-        assert!(ContactsHandle::reset().is_err());
-    }
-
-    #[test]
-    #[serial]
-    fn add_contact() {
-        Database::reset_all().expect(womp!());
-
-        let id1 = "Hello".try_into().expect(womp!());
-        let id2 = "World".try_into().expect(womp!());
-
-        ContactBuilder::new(id1)
-            .name("name".into())
-            .add()
-            .expect("Failed to add contact");
-        ContactBuilder::new(id2)
-            .color(1)
-            .add()
-            .expect("Failed to add contact");
-    }
-
-    #[test]
-    #[serial]
-    fn all_contact_since() {
-        Database::reset_all().expect(womp!());
-
-        let id1 = "test1".try_into().expect(womp!());
-        let timestamp = chrono::Utc::now();
-
-        ContactBuilder::new(id1)
-            .add()
-            .expect("failed to add contact");
-
-        let contactlist = all_since(timestamp).expect("Failed to get contacts");
-
-        assert_eq!(contactlist.len(), 0);
-    }
-
-    #[test]
-    #[serial]
-    fn get_contact_name() {
-        Database::reset_all().expect(womp!());
-
-        let id = "HelloWorld".try_into().expect(womp!());
-
-        ContactBuilder::new(id)
-            .name("name".into())
-            .add()
-            .expect("Failed to add contact");
-
-        assert_eq!(
-            name(id).expect("Failed to get name").expect(womp!()),
-            "name"
-        );
-    }
-
-    #[test]
-    #[serial]
-    fn get_set_contact_profile_picture() {
-        Database::reset_all().expect(womp!());
-
-        let id = "HelloWorld".try_into().expect(womp!());
-        let profile_picture = "picture";
-
-        ContactBuilder::new(id)
-            .profile_picture(profile_picture.into())
-            .add()
-            .expect("Failed to add contact");
-
-        assert_eq!(
-            super::profile_picture(id)
-                .expect("Failed to get profile picture")
-                .expect(womp!())
-                .as_str(),
-            profile_picture
-        );
-
-        Database::reset_all().expect(womp!());
-
-        let test_picture = "test_resources/maryland.png";
-
-        ContactBuilder::new(id)
-            .add()
-            .expect("Failed to add contact");
-
-        set_profile_picture(id, Some(test_picture.into()), None)
-            .expect("Failed to set profile picture");
-
-        std::fs::remove_dir_all("profile_pictures").expect(womp!());
-    }
-
-    #[test]
-    #[serial]
-    fn get_set_color() {
-        Database::reset_all().expect(womp!());
-        let id = "userid".try_into().expect(womp!());
-
-        ContactBuilder::new(id)
-            .name("Hello".into())
-            .add()
-            .expect(womp!());
-
-        set_color(id, 1).expect("Failed to set color");
-
-        let contacts = all().expect(womp!());
-
-        assert_eq!(contacts[0].color, 1);
-    }
-
-    #[test]
-    #[serial]
-    fn check_contact_exists() {
-        Database::reset_all().expect(womp!());
-        let id = "userid".try_into().expect(womp!());
-
-        ContactBuilder::new(id)
-            .name("Hello".into())
-            .add()
-            .expect(womp!());
-
-        assert_eq!(contact_exists(id).unwrap(), true);
-
-        Database::reset_all().expect(womp!());
-
-        assert_eq!(contact_exists(id).unwrap(), false)
-    }
-
-    #[test]
-    #[serial]
-    fn update_name() {
-        Database::reset_all().expect(womp!());
-
-        let id = "userid".try_into().expect(womp!());
-
-        ContactBuilder::new(id)
-            .name("Hello".into())
-            .add()
-            .expect(womp!());
-
-        set_name(id, Some("World")).expect("Failed to update name");
-
-        assert_eq!(
-            name(id).expect("Failed to get contact").expect(womp!()),
-            "World"
-        );
-    }
-
-    #[test]
-    #[serial]
-    fn test_by_user_id() {
-        Database::reset_all().expect(womp!());
-
-        let id = "id".try_into().expect(womp!());
-
-        ContactBuilder::new(id)
-            .name("name".into())
-            .add()
-            .expect(womp!());
-
-        let contact = by_user_id(id).expect("Unable to get contact from userid");
-
-        assert_eq!(contact.id, id);
-        assert_eq!(contact.name.expect(womp!()), "name");
-    }
-
-    #[test]
-    #[serial]
-    fn all_contacts() {
-        Database::reset_all().expect(womp!());
-
-        let id1 = "Hello".try_into().expect(womp!());
-        let id2 = "World".try_into().expect(womp!());
-
-        ContactBuilder::new(id1)
-            .add()
-            .expect(womp!("Failed to add id1"));
-
-        ContactBuilder::new(id2)
-            .add()
-            .expect(womp!("Failed to add id2"));
-
-        let contacts = all().expect(womp!());
-        assert_eq!(contacts.len(), 2);
-        assert_eq!(contacts[0].id, id1);
-        assert_eq!(contacts[1].id, id2);
-    }
-
-    #[test]
-    #[serial]
-    fn set_status() {
-        use crate::conversation::Conversations;
-        Database::reset_all().expect(womp!());
-
-        let id = "HelloWorld".try_into().expect(womp!());
-        let contact = ContactBuilder::new(id).add().expect(womp!());
-
-        super::set_status(id, contact.pairwise_conversation, ContactStatus::Archived)
-            .expect(womp!());
-
-        assert_eq!(
-            status(id).expect("Failed to determine contact status"),
-            ContactStatus::Archived
-        );
-
-        super::set_status(id, contact.pairwise_conversation, ContactStatus::Deleted)
-            .expect(womp!());
-
-        assert_eq!(
-            super::status(id).expect("Failed to determine contact status"),
-            ContactStatus::Deleted
-        );
-
-        assert!(
-            crate::conversation::conversation_messages(&contact.pairwise_conversation)
-                .expect(womp!())
-                .is_empty()
-        );
-    }
-
-    #[test]
-    #[serial]
-    fn add_remove_member() {
-        Database::reset_all().expect(womp!());
-
-        let id1 = "id1".try_into().expect(womp!());
-        let id2 = "id2".try_into().expect(womp!());
-
-        let conv_id = ConversationId::from([0; 32]);
-
-        ContactBuilder::new(id1)
-            .add()
-            .expect(womp!("Failed to add id1"));
-
-        ContactBuilder::new(id2)
-            .pairwise_conversation(conv_id)
-            .add()
-            .expect(womp!("Failed to add id2"));
-
-        let contacts = all().expect(womp!());
-
-        crate::members::add_member(&conv_id, contacts[0].id).expect(womp!("failed to add member"));
-
-        let members = conversation_members(&conv_id).expect(womp!("failed to get members"));
-
-        assert_eq!(members.len(), 2);
-
-        assert_eq!(members[0].id, id1);
-
-        crate::members::remove_member(&conv_id, contacts[0].id)
-            .expect(womp!("failed to remove member"));
-
-        let members_new = conversation_members(&conv_id).expect(womp!("failed to get members"));
-
-        assert_eq!(members_new.len(), 1);
-        //is the correct member remaining?
-        assert_eq!(members_new[0].id, id2);
-    }
-
-    #[test]
-    #[serial]
-    fn by_status_contacts() {
-        Database::reset_all().expect(womp!());
-
-        let id1 = "Hello".try_into().expect(womp!());
-        let id2 = "World".try_into().expect(womp!());
-
-        ContactBuilder::new(id1).add().expect("Failed to add id1");
-        ContactBuilder::new(id2)
-            .status(ContactStatus::Archived)
-            .add()
-            .expect("Failed to add id2");
-
-        let contacts = get_by_status(ContactStatus::Active).expect(womp!());
-        assert_eq!(contacts.len(), 1);
-        assert_eq!(contacts[0].id, id1);
-    }
-}
+mod tests;
