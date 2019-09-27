@@ -9,6 +9,7 @@ edition = "2018"
 [dependencies]
 chainmail     = { git = "https://github.com/kalix-systems/chainmail" }
 chrono        = { version = "0.4.7", default_features  = false}
+crossbeam     = "0.7"
 dashmap       = "1.0"
 herald_common = { path    = "../../common", features = ["rusqlite_"] }
 image         = { version = "0.22.1", default_features = false, features = ["jpeg", "png_codec"]}
@@ -21,6 +22,8 @@ serde_cbor    = "0.10.1"
 sodiumoxide   = "0.2"
 surf          = "1.0"
 tokio         = "0.2.0-alpha.5"
+tungstenite   = "0.9"
+url           = "2.1"
 
 [dev-dependencies]
 serial_test        = "0.2.0"

@@ -24,6 +24,7 @@ pub enum HErr {
     MissingFields,
     RequestDropped,
     SurfError(surf::Exception),
+    TungsteniteError(tungstenite::Error),
 }
 
 impl fmt::Display for HErr {
@@ -48,6 +49,7 @@ impl fmt::Display for HErr {
             MissingFields => write!(f, "MissingFields"),
             RequestDropped => write!(f, "RequestDropped"),
             SurfError(e) => write!(f, "SurfError: {}", e),
+            TungsteniteError(e) => write!(f, "TungsteniteError: {}", e),
         }
     }
 }
@@ -64,6 +66,7 @@ impl std::error::Error for HErr {
             TransportError(s) => s,
             RegexError(e) => e,
             SurfError(e) => e.as_ref(),
+            TungsteniteError(e) => e,
             _ => return None,
         })
     }
@@ -145,3 +148,4 @@ impl From<LazyError> for HErr {
 }
 
 from_fn!(HErr, surf::Exception, HErr::SurfError);
+from_fn!(HErr, tungstenite::Error, HErr::TungsteniteError);
