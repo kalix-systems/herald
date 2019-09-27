@@ -8,7 +8,6 @@ use std::collections::BTreeSet;
 
 #[derive(Default)]
 pub(crate) struct ChainKeys {
-    db: Database,
 }
 
 impl DBTable for ChainKeys {
@@ -131,7 +130,8 @@ fn get_unused(db: &rusqlite::Connection) -> Result<Vec<(BlockHash, ChainKey)>, C
 impl BlockStore for ChainKeys {
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<(), ChainError> {
-        store_key(&self.db, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
+        let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
+        store_key(&db, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
     }
 
     // we'll want to implement some kind of gc strategy to collect keys marked used
@@ -141,9 +141,9 @@ impl BlockStore for ChainKeys {
         &mut self,
         blocks: I,
     ) -> Result<(), ChainError> {
+        let mut db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
         // do this all in a transaction
-        let tx = self
-            .db
+        let tx = db
             .transaction()
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
@@ -155,12 +155,14 @@ impl BlockStore for ChainKeys {
         &self,
         blocks: I,
     ) -> Option<BTreeSet<ChainKey>> {
-        get_keys(&self.db, blocks)
+        let db = Database::get().ok()?;
+        get_keys(&db, blocks)
     }
 
     // this should *not* mark keys as used
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
-        get_unused(&self.db)
+        let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
+        get_unused(&db)
     }
 }
 
