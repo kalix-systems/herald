@@ -14,6 +14,7 @@ use std::convert::TryInto;
 /// Conversations
 pub struct Conversations {}
 
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
 pub struct ConversationMeta {
     /// Conversation id

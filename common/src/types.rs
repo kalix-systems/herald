@@ -75,8 +75,6 @@ pub enum PKIResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum Push {
-    KeyRegistered(Signed<sign::PublicKey>),
-    KeyDeprecated(Signed<sign::PublicKey>),
     NewUMessage {
         timestamp: DateTime<Utc>,
         from: GlobalId,

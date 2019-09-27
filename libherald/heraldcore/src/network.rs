@@ -9,7 +9,6 @@ use crate::{
 use chrono::prelude::*;
 use crossbeam::channel;
 use dashmap::DashMap;
-// use futures::compat::*;
 use herald_common::*;
 use lazy_static::*;
 use sodiumoxide::{
@@ -19,6 +18,7 @@ use sodiumoxide::{
 use std::{
     collections::HashMap,
     env,
+    io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
     ops::DerefMut,
 };
@@ -41,7 +41,7 @@ lazy_static! {
     };
 }
 
-fn server_url(ext: &str) -> String {
+pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
 }
 
@@ -121,44 +121,67 @@ pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(helper::register(&register::Req(uid, sig)).await?)
 }
 
-pub fn login() -> Result<channel::Receiver<Push>, HErr> {
-    use login::*;
-    use tungstenite::*;
+// pub fn login() -> Result<channel::Receiver<Notification>, HErr> {
+//     use login::*;
+//     use tungstenite::*;
 
-    let uid = Config::static_id()?;
-    let kp = Config::static_keypair()?;
-    let gid = GlobalId {
-        uid,
-        did: *kp.public_key(),
-    };
+//     let uid = Config::static_id()?;
+//     let kp = Config::static_keypair()?;
+//     let gid = GlobalId {
+//         uid,
+//         did: *kp.public_key(),
+//     };
 
-    let (mut sender, receiver) = channel::unbounded();
-    let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
-        .expect("failed to parse login url");
-    let (mut ws, _) = client::connect(wsurl)?;
+//     let (mut sender, receiver) = channel::unbounded();
+//     let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
+//         .expect("failed to parse login url");
+//     let (mut ws, _) = client::connect(wsurl)?;
 
-    let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
-    ws.write_message(m)?;
+//     let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
+//     ws.write_message(m)?;
 
-    if let SignAsResponse::Sign(u) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-        let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
-        let m = Message::binary(serde_cbor::to_vec(&token)?);
-        ws.write_message(m)?;
+//     if let SignAsResponse::Sign(u) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+//         let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
+//         let m = Message::binary(serde_cbor::to_vec(&token)?);
+//         ws.write_message(m)?;
 
-        match serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-            LoginTokenResponse::Success => {}
-            LoginTokenResponse::BadSig => return Err(LoginError),
-        }
-    } else {
-        return Err(LoginError);
-    }
+//         match serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+//             LoginTokenResponse::Success => {}
+//             LoginTokenResponse::BadSig => return Err(LoginError),
+//         }
+//     } else {
+//         return Err(LoginError);
+//     }
 
-    // catchup(ws)?;
+//     let (mut success_sender, mut success_receiver) = channel::bounded(1);
 
-    // std::thread::spawn(move || {
+//     std::thread::spawn(move || {
+//         let should_continue = catchup(&mut ws).is_ok();
+//         success_sender.send(should_continue);
+//         if should_continue {
+//             recv_messages(ws, sender);
+//         }
+//     });
 
-    // });
-    Ok(receiver)
-}
+//     if success_receiver.recv().map_err(|_| LoginError)? {
+//         Ok(receiver)
+//     } else {
+//         Err(LoginError)
+//     }
+// }
 
-// fn catchup<S: Read+Write>(ws: tungstenite::WebSocket<S>)
+// fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<(), HErr> {
+//     use catchup::*;
+
+//     loop {
+//         let Catchup(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())?;
+//         for push in
+//     }
+// }
+
+// fn recv_messages<S: Read + Write>(
+//     ws: tungstenite::WebSocket<S>,
+//     sender: channel::Sender<Notification>,
+// ) -> Result<(), HErr> {
+//     unimplemented!()
+// }
