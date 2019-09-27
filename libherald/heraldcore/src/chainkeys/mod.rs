@@ -7,8 +7,7 @@ use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 #[derive(Default)]
-pub(crate) struct ChainKeys {
-}
+pub(crate) struct ChainKeys {}
 
 impl DBTable for ChainKeys {
     fn create_table() -> Result<(), HErr> {
