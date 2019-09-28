@@ -127,6 +127,8 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
     use login::*;
     use tungstenite::Message;
 
+    CAUGHT_UP.store(false, Ordering::Release);
+
     let uid = Config::static_id()?;
     let kp = Config::static_keypair()?;
     let gid = GlobalId {
@@ -152,35 +154,40 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
         return Err(LoginError);
     }
 
-    let ev = catchup(&mut ws)?;
-    ev.execute(&mut sender)?;
+    catchup(&mut ws, &mut sender)?;
 
     std::thread::spawn(move || {
         recv_messages(&mut ws, &mut sender)
-            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e));
+            .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
         CAUGHT_UP.store(false, Ordering::Release);
     });
 
     Ok(receiver)
 }
 
-fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event, HErr> {
+fn catchup<S: Read + Write>(
+    ws: &mut tungstenite::WebSocket<S>,
+    sender: &mut Sender<Notification>,
+) -> Result<(), HErr> {
     use catchup::*;
     use tungstenite::*;
-
-    let mut ev = Event::default();
 
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            ev.merge(handle_push(push)?);
+            handle_push(push)?.execute(sender)?;
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
 
     CAUGHT_UP.store(true, Ordering::Release);
 
-    Ok(ev)
+    for (tag, cid, content) in get_pending()? {
+        send_cmessage(cid, content)?;
+        remove_pending(tag)?;
+    }
+
+    Ok(())
 }
 
 fn recv_messages<S: Read + Write>(
@@ -233,14 +240,15 @@ impl Event {
         self.replies.append(&mut other.replies);
     }
 
-    pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
+    pub fn execute(self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
         for note in self.notifications.iter() {
-            // TODO: handle or drop this error
-            sender.send(*note).expect("failed to send notification");
+            // we drop this error because it's pretty ok if this fails - it means we're not
+            // updating the UI, but that's not a catastrophic error.
+            drop(sender.send(*note));
         }
 
-        for (cid, content) in self.replies.iter() {
-            send_cmessage(*cid, content)?;
+        for (cid, content) in self.replies {
+            send_cmessage(cid, content)?;
         }
 
         Ok(())
@@ -269,19 +277,37 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
 }
 
 // TODO: consider returning err if res != Success
-pub fn send_cmessage(
-    cid: ConversationId,
-    content: &ConversationMessageBody,
-) -> Result<push_users::Res, HErr> {
+pub fn send_cmessage(cid: ConversationId, content: ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = ConversationMessage::seal(cid, content)?;
+        let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, msg };
-        let res = helper::push_users(&req)?;
-        Ok(res)
+        match helper::push_users(&req)? {
+            push_users::Res::Success => Ok(()),
+            push_users::Res::Missing(missing) => Err(HeraldError(format!(
+                "tried to send messages to nonexistent users {:?}",
+                missing
+            ))),
+        }
     } else {
         // TODO: load it to pending here
-        unimplemented!()
+        add_to_pending(cid, content)
     }
+}
+
+// generates unique tag and adds it to pending messages in database with that tag
+fn add_to_pending(cid: ConversationId, content: ConversationMessageBody) -> Result<(), HErr> {
+    unimplemented!()
+}
+
+// returns (tag, cid, content) triples that have been loaded by add_to_pending
+// note: doesn't have to be type UQ, could also be u64, or whatever else SQL will give us by default
+fn get_pending() -> Result<Vec<(UQ, ConversationId, ConversationMessageBody)>, HErr> {
+    unimplemented!()
+}
+
+// removes pending message associated with tag
+fn remove_pending(tag: UQ) -> Result<(), HErr> {
+    unimplemented!()
 }

@@ -6,6 +6,7 @@ use std::{fmt, sync::PoisonError};
 
 #[derive(Debug)]
 pub enum HErr {
+    // TODO: replace all instances of this with enum branches
     HeraldError(String),
     DatabaseError(rusqlite::Error),
     LazyPondError,
