@@ -12,7 +12,7 @@ use std::{
     env,
     io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
-    sync::atomic::AtomicBool,
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 const DEFAULT_PORT: u16 = 8000;
@@ -31,7 +31,7 @@ lazy_static! {
     };
 }
 
-static LOGGED_IN: AtomicBool = AtomicBool::new(false);
+static CAUGHT_UP: AtomicBool = AtomicBool::new(false);
 
 pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
@@ -157,7 +157,8 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
 
     std::thread::spawn(move || {
         recv_messages(&mut ws, &mut sender)
-            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e))
+            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e));
+        CAUGHT_UP.store(false, Ordering::Release);
     });
 
     Ok(receiver)
@@ -176,6 +177,8 @@ fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event,
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
+
+    CAUGHT_UP.store(true, Ordering::Release);
 
     Ok(ev)
 }
@@ -270,10 +273,15 @@ pub fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessageBody,
 ) -> Result<push_users::Res, HErr> {
-    let cm = ConversationMessage::seal(cid, content)?;
-    let to = crate::members::members(&cid)?;
-    let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
-    let req = push_users::Req { to, msg };
-    let res = helper::push_users(&req);
-    Ok(res)
+    if CAUGHT_UP.load(Ordering::Acquire) {
+        let cm = ConversationMessage::seal(cid, content)?;
+        let to = crate::members::members(&cid)?;
+        let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+        let req = push_users::Req { to, msg };
+        let res = helper::push_users(&req)?;
+        Ok(res)
+    } else {
+        // TODO: load it to pending here
+        unimplemented!()
+    }
 }
