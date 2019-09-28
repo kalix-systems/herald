@@ -190,7 +190,6 @@ fn recv_messages<S: Read + Write>(
         let ev = handle_push(&next)?;
         ev.execute(sender)?;
     }
-    Ok(())
 }
 
 fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
