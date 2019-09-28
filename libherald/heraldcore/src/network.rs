@@ -112,13 +112,16 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     Ok(helper::new_key(&req)?.0)
 }
 
-#[allow(unused_variables)]
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
     let res = helper::register(&register::Req(uid, sig))?;
-    unimplemented!()
-    // Ok(res)
+    // TODO: retry if this fails?
+    crate::config::ConfigBuilder::new()
+        .id(uid)
+        .keypair(kp)
+        .add()?;
+    Ok(res)
 }
 
 pub fn login() -> Result<Receiver<Notification>, HErr> {
@@ -187,7 +190,6 @@ fn recv_messages<S: Read + Write>(
         let ev = handle_push(&next)?;
         ev.execute(sender)?;
     }
-    Ok(())
 }
 
 fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
