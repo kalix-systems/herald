@@ -4,23 +4,6 @@ use serial_test_derive::serial;
 
 #[test]
 #[serial]
-fn create_drop_exists() {
-    Database::reset_all().expect(womp!());
-    // drop twice, it shouldn't panic on multiple drops
-    ChainKeys::drop_table().expect(womp!());
-    ChainKeys::drop_table().expect(womp!());
-
-    ChainKeys::create_table().expect(womp!());
-    assert!(ChainKeys::exists().expect(womp!()));
-    ChainKeys::create_table().expect(womp!());
-    assert!(ChainKeys::exists().expect(womp!()));
-    ChainKeys::drop_table().expect(womp!());
-    assert!(!ChainKeys::exists().expect(womp!()));
-    ChainKeys::reset().expect(womp!());
-}
-
-#[test]
-#[serial]
 fn blockstore() {
     Database::reset_all().expect(womp!());
     let mut handle = ChainKeys::default();

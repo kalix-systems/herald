@@ -1,28 +1,7 @@
 use super::*;
 use crate::{contact::ContactBuilder, db::Database, womp};
 use serial_test_derive::serial;
-
-#[test]
-#[serial]
-fn create_drop_exists_reset() {
-    Database::reset_all().expect(womp!());
-    // drop twice, it shouldn't panic on multiple drops
-    Conversations::drop_table().expect(womp!());
-    Conversations::drop_table().expect(womp!());
-
-    Conversations::create_table().expect(womp!());
-    assert!(Conversations::exists().expect(womp!()));
-    Conversations::create_table().expect(womp!());
-    assert!(Conversations::exists().expect(womp!()));
-    Conversations::drop_table().expect(womp!());
-    assert!(!Conversations::exists().expect(womp!()));
-
-    Database::reset_all().expect(womp!());
-
-    Conversations::create_table().expect(womp!());
-    Conversations::reset().expect(womp!());
-    assert!(Conversations::exists().expect(womp!()));
-}
+use std::convert::TryInto;
 
 #[test]
 #[serial]

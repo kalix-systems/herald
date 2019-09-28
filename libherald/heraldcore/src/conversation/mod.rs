@@ -1,18 +1,7 @@
-use crate::{
-    db::{DBTable, Database},
-    errors::HErr,
-    message::Message,
-    types::*,
-    utils,
-};
+use crate::{db::Database, errors::HErr, message::Message, types::*, utils};
 use chrono::{DateTime, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
-use std::convert::TryInto;
-
-#[derive(Default)]
-/// Conversations
-pub struct Conversations {}
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
@@ -288,47 +277,6 @@ pub(crate) fn add_pairwise_conversation(
     title: Option<&str>,
 ) -> Result<ConversationId, HErr> {
     add_conversation_with_tx(tx, conversation_id, title, false)
-}
-
-impl DBTable for Conversations {
-    fn create_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("../sql/conversation/create_table.sql"),
-            NO_PARAMS,
-        )?;
-        Ok(())
-    }
-
-    fn drop_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("../sql/conversation/drop_table.sql"),
-            NO_PARAMS,
-        )?;
-        Ok(())
-    }
-
-    fn exists() -> Result<bool, HErr> {
-        let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("../sql/conversation/table_exists.sql"))?;
-        Ok(stmt.exists(NO_PARAMS)?)
-    }
-
-    fn reset() -> Result<(), HErr> {
-        let mut db = Database::get()?;
-        let tx = db.transaction()?;
-        tx.execute(
-            include_str!("../sql/conversation/drop_table.sql"),
-            NO_PARAMS,
-        )?;
-        tx.execute(
-            include_str!("../sql/conversation/create_table.sql"),
-            NO_PARAMS,
-        )?;
-        tx.commit()?;
-        Ok(())
-    }
 }
 
 #[cfg(test)]

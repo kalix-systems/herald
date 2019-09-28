@@ -1,16 +1,7 @@
-use crate::{
-    db::{DBTable, Database},
-    errors::HErr,
-    types::*,
-    utils,
-};
+use crate::{db::Database, errors::HErr, types::*, utils};
 use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
-use rusqlite::{params, NO_PARAMS};
-
-#[derive(Default, Clone)]
-/// Messages
-pub struct Messages {}
+use rusqlite::params;
 
 /// Message
 #[derive(Clone)]
@@ -105,40 +96,6 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
         params![id],
     )?;
     Ok(())
-}
-
-impl DBTable for Messages {
-    fn create_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(
-            include_str!("../sql/message_status/create_table.sql"),
-            NO_PARAMS,
-        )?;
-        db.execute(include_str!("../sql/message/create_table.sql"), NO_PARAMS)?;
-
-        Ok(())
-    }
-
-    fn drop_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("../sql/message/drop_table.sql"), NO_PARAMS)?;
-        Ok(())
-    }
-
-    fn exists() -> Result<bool, HErr> {
-        let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("../sql/message/table_exists.sql"))?;
-        Ok(stmt.exists(NO_PARAMS)?)
-    }
-
-    fn reset() -> Result<(), HErr> {
-        let mut db = Database::get()?;
-        let tx = db.transaction()?;
-        tx.execute(include_str!("../sql/message/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("../sql/message/create_table.sql"), NO_PARAMS)?;
-        tx.commit()?;
-        Ok(())
-    }
 }
 
 #[cfg(test)]
