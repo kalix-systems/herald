@@ -51,6 +51,17 @@ impl DerefMut for Database {
     }
 }
 
+/// Initializes storage
+pub fn init() -> Result<(), HErr> {
+    let mut db = Database::get()?;
+
+    let tx = db.transaction()?;
+    tx.execute_batch(include_str!("sql/create_all.sql"))?;
+    tx.commit()?;
+
+    Ok(())
+}
+
 impl Database {
     /// Connect to database at path `P`.
     /// Creates a database if one does not exist.
@@ -101,25 +112,10 @@ impl Database {
         let tx = db.transaction()?;
 
         // drop
-        tx.execute(include_str!("sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/message_status/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/config/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
+        tx.execute_batch(include_str!("sql/drop_all.sql"))?;
 
         // create
-        tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
-        tx.execute(
-            include_str!("sql/message_status/create_table.sql"),
-            NO_PARAMS,
-        )?;
-        tx.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/config/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/members/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
+        tx.execute_batch(include_str!("sql/create_all.sql"))?;
         tx.commit()?;
         Ok(())
     }
@@ -130,19 +126,4 @@ impl Default for Database {
     fn default() -> Self {
         abort_err!(Self::new(DB_PATH.as_str()))
     }
-}
-
-/// Types that are wrappers around database tables.
-pub trait DBTable {
-    /// Drops table if it exists.
-    fn drop_table() -> Result<(), HErr>;
-
-    /// Creates table if it does not exist.
-    fn create_table() -> Result<(), HErr>;
-
-    /// Indicates whether a table exists
-    fn exists() -> Result<bool, HErr>;
-
-    /// Resets the table.
-    fn reset() -> Result<(), HErr>;
 }

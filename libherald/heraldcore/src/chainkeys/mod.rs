@@ -1,42 +1,10 @@
-use crate::{
-    db::{DBTable, Database},
-    errors::HErr,
-};
+use crate::{db::Database, errors::HErr};
 use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 #[derive(Default)]
 pub(crate) struct ChainKeys {}
-
-impl DBTable for ChainKeys {
-    fn create_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("../sql/chainkeys/create_table.sql"), NO_PARAMS)?;
-        Ok(())
-    }
-
-    fn drop_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("../sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
-        Ok(())
-    }
-
-    fn exists() -> Result<bool, HErr> {
-        let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("../sql/chainkeys/table_exists.sql"))?;
-        Ok(stmt.exists(NO_PARAMS)?)
-    }
-
-    fn reset() -> Result<(), HErr> {
-        let mut db = Database::get()?;
-        let tx = db.transaction()?;
-        tx.execute(include_str!("../sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("../sql/chainkeys/create_table.sql"), NO_PARAMS)?;
-        tx.commit()?;
-        Ok(())
-    }
-}
 
 fn store_key(db: &rusqlite::Connection, hash: BlockHash, key: ChainKey) -> Result<(), HErr> {
     db.execute(

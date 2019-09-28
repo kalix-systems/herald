@@ -4,31 +4,6 @@ use serial_test_derive::serial;
 
 #[test]
 #[serial]
-fn create_drop_exists_reset() {
-    Database::reset_all().expect(womp!());
-    // drop twice, it shouldn't panic on multiple drops
-    ContactsHandle::drop_table().expect(womp!());
-    ContactsHandle::drop_table().expect(womp!());
-
-    ContactsHandle::create_table().expect(womp!());
-    assert!(ContactsHandle::exists().expect(womp!()));
-    ContactsHandle::create_table().expect(womp!());
-    assert!(ContactsHandle::exists().expect(womp!()));
-    ContactsHandle::drop_table().expect(womp!());
-    assert!(!ContactsHandle::exists().expect(womp!()));
-
-    Database::reset_all().expect(womp!());
-
-    let id = "Hello".try_into().expect(womp!());
-    ContactBuilder::new(id)
-        .add()
-        .expect("Failed to add contact");
-    //this should be a foreign key constraint error
-    assert!(ContactsHandle::reset().is_err());
-}
-
-#[test]
-#[serial]
 fn add_contact() {
     Database::reset_all().expect(womp!());
 
@@ -214,7 +189,6 @@ fn all_contacts() {
 #[test]
 #[serial]
 fn set_status() {
-    use crate::conversation::Conversations;
     Database::reset_all().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());

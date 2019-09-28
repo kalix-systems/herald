@@ -6,22 +6,6 @@ use std::convert::TryInto;
 
 #[test]
 #[serial]
-fn create_drop_exists() {
-    // drop twice, it shouldn't panic on multiple drops
-    Config::drop_table().expect(womp!());
-    Config::drop_table().expect(womp!());
-
-    Config::create_table().expect(womp!());
-    assert!(Config::exists().expect(womp!()));
-    Config::create_table().expect(womp!());
-    assert!(Config::exists().expect(womp!()));
-    Config::drop_table().expect(womp!());
-    assert!(!Config::exists().expect(womp!()));
-    Config::reset().expect(womp!());
-}
-
-#[test]
-#[serial]
 fn add_get_set_config() {
     Database::reset_all().expect(womp!());
 
