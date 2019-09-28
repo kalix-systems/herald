@@ -8,7 +8,7 @@ pub(crate) struct ChainKeys {}
 
 fn store_key(db: &rusqlite::Connection, hash: BlockHash, key: ChainKey) -> Result<(), HErr> {
     db.execute(
-        include_str!("../sql/chainkeys/store_key.sql"),
+        include_str!("sql/store_key.sql"),
         params![hash.as_ref(), key.as_ref()],
     )?;
 
@@ -22,11 +22,11 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     // references to transaction needs to be dropped before committing
     {
         let mut mark_stmt = tx
-            .prepare(include_str!("../sql/chainkeys/mark_used.sql"))
+            .prepare(include_str!("sql/mark_used.sql"))
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         let mut key_used_stmt = tx
-            .prepare(include_str!("../sql/chainkeys/get_key_used_status.sql"))
+            .prepare(include_str!("sql/get_key_used_status.sql"))
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
         for block in blocks {
@@ -55,9 +55,7 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     db: &rusqlite::Connection,
     blocks: I,
 ) -> Option<BTreeSet<ChainKey>> {
-    let mut stmt = db
-        .prepare(include_str!("../sql/chainkeys/get_keys.sql"))
-        .ok()?;
+    let mut stmt = db.prepare(include_str!("sql/get_keys.sql")).ok()?;
 
     let mut keys: BTreeSet<ChainKey> = BTreeSet::new();
 
@@ -72,7 +70,7 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
 // this should *not* mark keys as used
 fn get_unused(db: &rusqlite::Connection) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
     let mut stmt = db
-        .prepare(include_str!("../sql/chainkeys/get_unused.sql"))
+        .prepare(include_str!("sql/get_unused.sql"))
         .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
     let results = stmt
