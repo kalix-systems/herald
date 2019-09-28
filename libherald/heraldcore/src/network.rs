@@ -183,7 +183,7 @@ fn catchup<S: Read + Write>(
     CAUGHT_UP.store(true, Ordering::Release);
 
     for (tag, cid, content) in get_pending()? {
-        send_cmessage(cid, content)?;
+        send_cmessage(cid, &content)?;
         remove_pending(tag)?;
     }
 
@@ -240,15 +240,15 @@ impl Event {
         self.replies.append(&mut other.replies);
     }
 
-    pub fn execute(self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
+    pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
         for note in self.notifications.iter() {
             // we drop this error because it's pretty ok if this fails - it means we're not
             // updating the UI, but that's not a catastrophic error.
             drop(sender.send(*note));
         }
 
-        for (cid, content) in self.replies {
-            send_cmessage(cid, content)?;
+        for (cid, content) in self.replies.iter() {
+            send_cmessage(*cid, content)?;
         }
 
         Ok(())
@@ -333,7 +333,7 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
 }
 
 // TODO: consider returning err if res != Success
-pub fn send_cmessage(cid: ConversationId, content: ConversationMessageBody) -> Result<(), HErr> {
+pub fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
@@ -352,8 +352,25 @@ pub fn send_cmessage(cid: ConversationId, content: ConversationMessageBody) -> R
     }
 }
 
+pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(), HErr> {
+    use crate::conversation;
+    let pairwise = conversation::get_pairwise_conversations(members)?;
+    let cid = conversation::add_conversation(None, title)?;
+    let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
+        members: Vec::from(members),
+        cid,
+        title: title.map(String::from),
+    });
+
+    for cid in pairwise {
+        send_cmessage(cid, &body)?;
+    }
+
+    Ok(())
+}
+
 // generates unique tag and adds it to pending messages in database with that tag
-fn add_to_pending(cid: ConversationId, content: ConversationMessageBody) -> Result<(), HErr> {
+fn add_to_pending(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     unimplemented!()
 }
 

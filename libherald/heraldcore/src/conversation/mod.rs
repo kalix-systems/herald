@@ -279,5 +279,10 @@ pub(crate) fn add_pairwise_conversation(
     add_conversation_with_tx(tx, conversation_id, title, false)
 }
 
+// NOTE (Jack): I don't currently care what order these are returned in
+pub(crate) fn get_pairwise_conversations(uids: &[UserId]) -> Result<Vec<ConversationId>, HErr> {
+    unimplemented!()
+}
+
 #[cfg(test)]
 mod tests;
