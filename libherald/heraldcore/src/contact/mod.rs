@@ -7,7 +7,7 @@ use std::convert::TryInto;
 /// Gets a contact's name by their `id`.
 pub fn name(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_name.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_name.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
@@ -15,7 +15,7 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 /// Change name of contact by their `id`
 pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/update_name.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/update_name.sql"))?;
 
     stmt.execute(params![name, id])?;
     Ok(())
@@ -24,7 +24,7 @@ pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
 /// Gets a contact's profile picture by their `id`.
 pub fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_profile_picture.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_profile_picture.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
@@ -40,7 +40,7 @@ pub fn conversation_members_since(
     since: DateTime<Utc>,
 ) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_conversation.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_by_conversation.sql"))?;
 
     let rows = stmt.query_map(
         params![conversation_id, since.timestamp()],
@@ -74,7 +74,7 @@ pub fn set_profile_picture(
 
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/contact/update_profile_picture.sql"),
+        include_str!("sql/update_profile_picture.sql"),
         params![profile_picture, id],
     )?;
     Ok(profile_picture)
@@ -83,17 +83,14 @@ pub fn set_profile_picture(
 /// Sets a contact's color
 pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
-    db.execute(
-        include_str!("../sql/contact/update_color.sql"),
-        params![color, id],
-    )?;
+    db.execute(include_str!("sql/update_color.sql"), params![color, id])?;
     Ok(())
 }
 
 /// Indicates whether contact exists
 pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/contact_exists.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/contact_exists.sql"))?;
     Ok(stmt.exists(&[id])?)
 }
 
@@ -108,10 +105,7 @@ pub fn set_status(
     match status {
         Deleted => {
             let tx = db.transaction()?;
-            tx.execute(
-                include_str!("../sql/contact/delete_contact_meta.sql"),
-                params![id],
-            )?;
+            tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
             crate::message_status::delete_by_conversation_tx(&tx, pairwise_conv)?;
             tx.execute(
                 include_str!("../sql/message/delete_pairwise_conversation.sql"),
@@ -120,10 +114,7 @@ pub fn set_status(
             tx.commit()?;
         }
         _ => {
-            db.execute(
-                include_str!("../sql/contact/set_status.sql"),
-                params![status, id],
-            )?;
+            db.execute(include_str!("sql/set_status.sql"), params![status, id])?;
         }
     }
     Ok(())
@@ -132,7 +123,7 @@ pub fn set_status(
 /// Gets contact status
 pub fn status(id: UserId) -> Result<ContactStatus, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_status.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_status.sql"))?;
 
     Ok(stmt.query_row(&[id], |row| row.get(0))?)
 }
@@ -145,7 +136,7 @@ pub fn all() -> Result<Vec<Contact>, HErr> {
 /// Returns all contacts
 pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_all.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_all.sql"))?;
 
     let rows = stmt.query_map(params![since.timestamp()], Contact::from_db)?;
 
@@ -160,7 +151,7 @@ pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
 /// Returns a single contact by `user_id`
 pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_id.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_by_id.sql"))?;
 
     Ok(stmt.query_row(params![user_id], Contact::from_db)?)
 }
@@ -168,7 +159,7 @@ pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
 /// Returns all contacts with the specified `status`
 pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/contact/get_by_status.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_by_status.sql"))?;
 
     let rows = stmt.query_map(
         params![status, chrono::MIN_DATE.and_hms(0, 0, 0).timestamp()],
@@ -406,7 +397,7 @@ impl ContactBuilder {
         };
 
         tx.execute(
-            include_str!("../sql/contact/add.sql"),
+            include_str!("sql/add.sql"),
             params![
                 contact.id,
                 contact.name,
@@ -418,7 +409,7 @@ impl ContactBuilder {
             ],
         )?;
         tx.execute(
-            include_str!("../sql/members/add_member.sql"),
+            include_str!("../members/sql/add_member.sql"),
             params![contact.pairwise_conversation, contact.id],
         )?;
 

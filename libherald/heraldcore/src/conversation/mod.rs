@@ -83,7 +83,7 @@ pub(crate) fn add_conversation_db(
     let color = crate::utils::id_to_color(&id);
 
     db.execute(
-        include_str!("../sql/conversation/add_conversation.sql"),
+        include_str!("sql/add_conversation.sql"),
         params![id, title, color, pairwise],
     )?;
 
@@ -116,7 +116,7 @@ pub(crate) fn add_conversation_with_tx(
     let color = crate::utils::id_to_color(&id);
 
     tx.execute(
-        include_str!("../sql/conversation/add_conversation.sql"),
+        include_str!("sql/add_conversation.sql"),
         params![id, title, color, pairwise],
     )?;
 
@@ -173,7 +173,7 @@ pub fn conversation_messages_since(
 pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
     let db = Database::get()?;
     Ok(db.query_row(
-        include_str!("../sql/conversation/get_conversation_meta.sql"),
+        include_str!("sql/get_conversation_meta.sql"),
         params![conversation_id],
         ConversationMeta::from_db,
     )?)
@@ -183,7 +183,7 @@ pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> 
 pub fn set_color(conversation_id: &ConversationId, color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/conversation/update_color.sql"),
+        include_str!("sql/update_color.sql"),
         params![color, conversation_id],
     )?;
     Ok(())
@@ -193,7 +193,7 @@ pub fn set_color(conversation_id: &ConversationId, color: u32) -> Result<(), HEr
 pub fn set_muted(conversation_id: &ConversationId, muted: bool) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/conversation/update_muted.sql"),
+        include_str!("sql/update_muted.sql"),
         params![muted, conversation_id],
     )?;
     Ok(())
@@ -203,7 +203,7 @@ pub fn set_muted(conversation_id: &ConversationId, muted: bool) -> Result<(), HE
 pub fn set_title(conversation_id: &ConversationId, title: Option<&str>) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/conversation/update_title.sql"),
+        include_str!("sql/update_title.sql"),
         params![title, conversation_id],
     )?;
     Ok(())
@@ -236,7 +236,7 @@ pub fn set_picture(
 
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/conversation/update_picture.sql"),
+        include_str!("sql/update_picture.sql"),
         params![path, conversation_id],
     )?;
 
@@ -246,7 +246,7 @@ pub fn set_picture(
 /// Get metadata of all conversations
 pub fn all_meta() -> Result<Vec<ConversationMeta>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/conversation/all_meta.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/all_meta.sql"))?;
     let res = stmt.query_map(NO_PARAMS, ConversationMeta::from_db)?;
 
     let mut meta = Vec::new();

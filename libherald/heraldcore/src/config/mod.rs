@@ -135,7 +135,7 @@ impl ConfigBuilder {
 
         let tx = db.transaction()?;
         tx.execute(
-            include_str!("../sql/config/add_config.sql"),
+            include_str!("sql/add_config.sql"),
             params![id, keypair, colorscheme],
         )?;
 
@@ -162,21 +162,17 @@ impl Config {
         let db = Database::get()?;
 
         let (id, name, profile_picture, color, colorscheme, nts_conversation, keypair) = db
-            .query_row(
-                include_str!("../sql/config/get_config.sql"),
-                NO_PARAMS,
-                |row| {
-                    Ok((
-                        row.get(0)?,
-                        row.get(1)?,
-                        row.get(2)?,
-                        row.get(3)?,
-                        row.get(4)?,
-                        row.get(5)?,
-                        row.get(6)?,
-                    ))
-                },
-            )?;
+            .query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
+                Ok((
+                    row.get(0)?,
+                    row.get(1)?,
+                    row.get(2)?,
+                    row.get(3)?,
+                    row.get(4)?,
+                    row.get(5)?,
+                    row.get(6)?,
+                ))
+            })?;
 
         Ok(Config {
             id,
@@ -197,21 +193,17 @@ impl Config {
     /// Gets user id directly from database.
     pub fn static_id() -> Result<UserId, HErr> {
         let db = Database::get()?;
-        Ok(
-            db.query_row(include_str!("../sql/config/get_id.sql"), NO_PARAMS, |row| {
-                row.get(0)
-            })?,
-        )
+        Ok(db.query_row(include_str!("sql/get_id.sql"), NO_PARAMS, |row| row.get(0))?)
     }
 
     /// Gets the current user's kepair directly from the database.
     pub fn static_keypair() -> Result<sig::KeyPair, HErr> {
         let db = Database::get()?;
-        Ok(db.query_row(
-            include_str!("../sql/config/get_keypair.sql"),
-            NO_PARAMS,
-            |row| row.get(0),
-        )?)
+        Ok(
+            db.query_row(include_str!("sql/get_keypair.sql"), NO_PARAMS, |row| {
+                row.get(0)
+            })?,
+        )
     }
 
     /// Updates user's display name
@@ -246,10 +238,7 @@ impl Config {
     /// Update user's colorscheme
     pub fn set_colorscheme(&mut self, colorscheme: u32) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(
-            include_str!("../sql/config/update_colorscheme.sql"),
-            &[colorscheme],
-        )?;
+        db.execute(include_str!("sql/update_colorscheme.sql"), &[colorscheme])?;
 
         self.colorscheme = colorscheme;
 
