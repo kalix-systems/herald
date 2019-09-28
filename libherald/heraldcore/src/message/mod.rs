@@ -117,9 +117,5 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     Ok(())
 }
 
-pub fn add_receipt(id: MsgId, from: UserId, stat: MessageReceiptStatus) -> Result<(), HErr> {
-    unimplemented!()
-}
-
 #[cfg(test)]
 mod tests;

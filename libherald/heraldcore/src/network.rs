@@ -307,7 +307,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
         }
         Ack(ack) => {
-            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
+            crate::message_receipts::add_receipt(ack.of, cm.from().uid, ack.stat)?;
             ev.notifications.push(Notification::Ack(ack.of));
         }
     }
