@@ -1,10 +1,14 @@
+use crate::types::ConversationId;
 use crate::{db::Database, errors::HErr};
 use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 #[derive(Default)]
-pub(crate) struct ChainKeys {}
+pub(crate) struct ChainKeys {
+    // TODO use this, update other logic
+    cid: ConversationId,
+}
 
 fn store_key(db: &rusqlite::Connection, hash: BlockHash, key: ChainKey) -> Result<(), HErr> {
     db.execute(
