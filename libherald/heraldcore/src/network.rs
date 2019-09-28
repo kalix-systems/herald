@@ -274,7 +274,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
         AddedToConvo(ac) => {
             let mut db = crate::db::Database::get()?;
             let tx = db.transaction()?;
-            // TODO: figure out if conversations are pairwise somehow?
             let cid = ac.cid;
             let title = ac.title.as_ref().map(String::as_str);
             crate::conversation::add_conversation_with_tx(&tx, Some(&cid), title, false)?;
@@ -318,7 +317,19 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
 
 #[allow(unused_variables)]
 fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
-    unimplemented!()
+    let mut ev = Event::default();
+
+    match msg {
+        DeviceMessage::ContactReq(cr) => {
+            let mut db = crate::db::Database::get()?;
+            let tx = db.transaction()?;
+            crate::conversation::add_conversation_with_tx(&tx, Some(&cr.cid), None, true)?;
+            crate::members::add_members_with_tx(&tx, cr.cid, &[cr.uid])?;
+            ev.notifications.push(Notification::NewConversation);
+        }
+    }
+
+    Ok(ev)
 }
 
 // TODO: consider returning err if res != Success

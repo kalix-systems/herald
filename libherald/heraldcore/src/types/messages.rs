@@ -219,8 +219,8 @@ mod dmessages {
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct ContactReq {
-        uid: UserId,
-        cid: ConversationId,
+        pub uid: UserId,
+        pub cid: ConversationId,
     }
 }
 
