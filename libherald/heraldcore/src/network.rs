@@ -12,6 +12,7 @@ use std::{
     env,
     io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
+    sync::atomic::{AtomicBool, Ordering},
 };
 
 const DEFAULT_PORT: u16 = 8000;
@@ -29,6 +30,8 @@ lazy_static! {
         )),
     };
 }
+
+static CAUGHT_UP: AtomicBool = AtomicBool::new(false);
 
 pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
@@ -96,10 +99,6 @@ get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMet
 get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
-// TODO: replace this w/nicer api
-// this is just there to silence the warning
-pub use helper::{push_devices, push_users};
-
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
@@ -158,7 +157,8 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
 
     std::thread::spawn(move || {
         recv_messages(&mut ws, &mut sender)
-            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e))
+            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e));
+        CAUGHT_UP.store(false, Ordering::Release);
     });
 
     Ok(receiver)
@@ -177,6 +177,8 @@ fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event,
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
+
+    CAUGHT_UP.store(true, Ordering::Release);
 
     Ok(ev)
 }
@@ -238,8 +240,7 @@ impl Event {
         }
 
         for (cid, content) in self.replies.iter() {
-            let cm = ConversationMessage::seal(*cid, content)?;
-            send_cmessage(cm)?;
+            send_cmessage(*cid, content)?;
         }
 
         Ok(())
@@ -267,8 +268,20 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
     unimplemented!()
 }
 
-// TODO: form push, send to server
-#[allow(unused_variables)]
-fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
-    unimplemented!()
+// TODO: consider returning err if res != Success
+pub fn send_cmessage(
+    cid: ConversationId,
+    content: &ConversationMessageBody,
+) -> Result<push_users::Res, HErr> {
+    if CAUGHT_UP.load(Ordering::Acquire) {
+        let cm = ConversationMessage::seal(cid, content)?;
+        let to = crate::members::members(&cid)?;
+        let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+        let req = push_users::Req { to, msg };
+        let res = helper::push_users(&req)?;
+        Ok(res)
+    } else {
+        // TODO: load it to pending here
+        unimplemented!()
+    }
 }
