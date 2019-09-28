@@ -1,5 +1,5 @@
 SELECT
-  msg_id,
+  messages.msg_id,
   author,
   conversation_id,
   body,
@@ -7,7 +7,7 @@ SELECT
   timestamp,
   send_status
 FROM
-  messages
+  messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE
   conversation_id = @1
   AND timestamp > @2

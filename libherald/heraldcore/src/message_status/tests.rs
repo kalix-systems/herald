@@ -23,5 +23,5 @@ fn message_send_status_updates() {
     let (msg_id, _) = add_message(None, author, &conversation_id, "1", None, &None)
         .expect(womp!("Failed to add first message"));
 
-    set_message_status(msg_id, conversation_id, MessageReceiptStatus::Read).expect(womp!());
+    set_message_status(msg_id, MessageReceiptStatus::Read).expect(womp!());
 }
