@@ -1,4 +1,4 @@
-use herald_common::{serde_cbor, TransportError};
+use herald_common::serde_cbor;
 use image;
 use lazy_pond::LazyError;
 use regex;
@@ -18,12 +18,11 @@ pub enum HErr {
     ImageError(image::ImageError),
     RegexError(regex::Error),
     CborError(serde_cbor::Error),
-    TransportError(TransportError),
     LoginError,
     RegistrationError,
     MissingFields,
     RequestDropped,
-    SurfError(surf::Exception),
+    ReqwestError(reqwest::Error),
     TungsteniteError(tungstenite::Error),
 }
 
@@ -39,7 +38,6 @@ impl fmt::Display for HErr {
             ImageError(s) => write!(f, "ImageError: {}", s),
             Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
             CborError(e) => write!(f, "CborError error: {}", e),
-            TransportError(s) => write!(f, "TransportError: {}", s),
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
@@ -48,7 +46,7 @@ impl fmt::Display for HErr {
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
             RequestDropped => write!(f, "RequestDropped"),
-            SurfError(e) => write!(f, "SurfError: {}", e),
+            ReqwestError(e) => write!(f, "ReqwestError: {}", e),
             TungsteniteError(e) => write!(f, "TungsteniteError: {}", e),
         }
     }
@@ -63,9 +61,8 @@ impl std::error::Error for HErr {
             ImageError(s) => s,
             Utf8Error(s) => s,
             CborError(e) => e,
-            TransportError(s) => s,
             RegexError(e) => e,
-            SurfError(e) => e.as_ref(),
+            ReqwestError(e) => e,
             TungsteniteError(e) => e,
             _ => return None,
         })
@@ -129,12 +126,6 @@ impl From<serde_cbor::Error> for HErr {
     }
 }
 
-impl From<TransportError> for HErr {
-    fn from(e: TransportError) -> Self {
-        HErr::TransportError(e)
-    }
-}
-
 impl From<std::str::Utf8Error> for HErr {
     fn from(e: std::str::Utf8Error) -> Self {
         HErr::Utf8Error(e)
@@ -147,5 +138,5 @@ impl From<LazyError> for HErr {
     }
 }
 
-from_fn!(HErr, surf::Exception, HErr::SurfError);
+from_fn!(HErr, reqwest::Error, HErr::ReqwestError);
 from_fn!(HErr, tungstenite::Error, HErr::TungsteniteError);

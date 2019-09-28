@@ -27,10 +27,8 @@ pub mod message;
 mod message_status;
 /// Networking
 pub mod network;
-/// Utils
-pub mod utils;
-/// Tokio re-export
-pub use tokio;
 /// Types
 pub mod types;
+/// Utils
+pub mod utils;
 pub use chrono;

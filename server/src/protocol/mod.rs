@@ -2,7 +2,10 @@ use crate::{prelude::*, store::*};
 use bytes::Buf;
 use dashmap::DashMap;
 use sodiumoxide::crypto::sign;
-use tokio::sync::mpsc::{unbounded_channel as channel, UnboundedSender as Sender};
+use tokio::{
+    prelude::*,
+    sync::mpsc::{unbounded_channel as channel, UnboundedSender as Sender},
+};
 use warp::{filters::ws, Filter};
 
 pub struct State {
@@ -56,54 +59,82 @@ impl State {
         Ok(())
     }
 
-    pub async fn send_push(&self, req: push::Req) -> Result<push::Res, Error> {
-        use push::*;
-        let Req {
-            to_users,
-            mut to_devs,
+    pub async fn push_users(&self, req: push_users::Req) -> Result<push_users::Res, Error> {
+        let push_users::Req { to, msg } = req;
+        let msg = Push {
+            tag: PushTag::User,
+            timestamp: Utc::now(),
             msg,
-        } = req;
+        };
 
         let mut missing_users = Vec::new();
-        let mut missing_devs = Vec::new();
+        let mut to_devs = Vec::new();
         let mut con = self.new_connection()?;
 
-        for device in to_devs.iter() {
-            if !con.key_is_valid(*device)? {
-                missing_devs.push(*device);
-            }
-        }
-
-        for user in to_users {
-            if con.user_exists(&user)? {
-                for key in con.read_meta(&user)?.valid_keys() {
-                    to_devs.push(key);
-                }
-            } else {
+        for user in to {
+            if !con.user_exists(&user)? {
                 missing_users.push(user);
+            } else {
+                to_devs.extend_from_slice(&con.valid_keys(&user)?);
             }
         }
 
-        if missing_users.is_empty() && missing_devs.is_empty() {
-            let mut to_pending = Vec::new();
-
-            for dev in to_devs {
-                if let Some(s) = self.active.async_get(dev).await {
-                    let mut sender = s.clone();
-                    // TODO: handle this error?
-                    drop(sender.send(msg.clone()).await);
-                } else {
-                    to_pending.push(dev);
-                }
-            }
-
-            con.add_pending(to_pending, msg)?;
-
-            Ok(Res::Success)
+        Ok(if !missing_users.is_empty() {
+            push_users::Res::Missing(missing_users)
         } else {
-            Ok(Res::Missing(missing_users, missing_devs))
-        }
+            self.send_push_to_devices(&mut con, to_devs, msg).await?;
+            push_users::Res::Success
+        })
     }
+
+    pub async fn push_devices(&self, req: push_devices::Req) -> Result<push_devices::Res, Error> {
+        let push_devices::Req { to, msg } = req;
+        let msg = Push {
+            tag: PushTag::Device,
+            timestamp: Utc::now(),
+            msg,
+        };
+
+        let mut con = self.new_connection()?;
+        let mut missing_devs = Vec::new();
+
+        for dev in to.iter() {
+            if !con.device_exists(dev)? {
+                missing_devs.push(*dev);
+            }
+        }
+
+        Ok(if !missing_devs.is_empty() {
+            push_devices::Res::Missing(missing_devs)
+        } else {
+            self.send_push_to_devices(&mut con, to, msg).await?;
+            push_devices::Res::Success
+        })
+    }
+
+    async fn send_push_to_devices(
+        &self,
+        con: &mut Conn,
+        to_devs: Vec<sig::PublicKey>,
+        msg: Push,
+    ) -> Result<(), Error> {
+        let mut to_pending = Vec::new();
+
+        for dev in to_devs {
+            if let Some(s) = self.active.async_get(dev).await {
+                let mut sender = s.clone();
+                // TODO: handle this error?
+                drop(sender.send(msg.clone()).await);
+            } else {
+                to_pending.push(dev);
+            }
+        }
+
+        con.add_pending(to_pending, msg)?;
+
+        Ok(())
+    }
+
     pub(crate) fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
     where
         B: Buf,
@@ -115,6 +146,25 @@ impl State {
         let buf: Vec<u8> = req.collect();
         let req = serde_cbor::from_slice(&buf)?;
         let res = f(&mut con, req)?;
+        let res_ser = serde_cbor::to_vec(&res)?;
+        Ok(res_ser)
+    }
+
+    pub(crate) async fn req_handler_async<'a, B, I, O, F, Fut>(
+        &'a self,
+        req: B,
+        f: F,
+    ) -> Result<Vec<u8>, Error>
+    where
+        B: Buf,
+        I: for<'b> Deserialize<'b>,
+        O: Serialize,
+        F: FnOnce(&'a Self, I) -> Fut,
+        Fut: Future<Output = Result<O, Error>>,
+    {
+        let buf: Vec<u8> = req.collect();
+        let req = serde_cbor::from_slice(&buf)?;
+        let res = f(self, req).await?;
         let res_ser = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }
@@ -154,7 +204,7 @@ where
     // TCP over TCP...
     for chunk in pending.chunks(CHUNK_SIZE) {
         // TODO: remove unnecessary memcpy here by using a draining chunk iterator?
-        let msg = Catchup(Vec::from(chunk));
+        let msg = Catchup::Messages(Vec::from(chunk));
         loop {
             ws.send(ws::Message::binary(serde_cbor::to_vec(&msg)?))
                 .await?;
@@ -166,6 +216,9 @@ where
             }
         }
     }
+
+    ws.send(ws::Message::binary(serde_cbor::to_vec(&Catchup::Done)?))
+        .await?;
 
     s.expire_pending(did)?;
 

@@ -65,28 +65,6 @@ pub struct GlobalId {
     pub did: sig::PublicKey,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PKIResponse {
-    Success,
-    BadSignature,
-    Redundant,
-    DeadKey,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum Push {
-    NewUMessage {
-        timestamp: DateTime<Utc>,
-        from: GlobalId,
-        msg: Bytes,
-    },
-    NewDMessage {
-        timestamp: DateTime<Utc>,
-        from: GlobalId,
-        msg: Bytes,
-    },
-}
-
 pub mod keys_of {
     use super::*;
 
@@ -127,21 +105,49 @@ pub mod users_exist {
     pub struct Res(pub Vec<bool>);
 }
 
-pub mod push {
+pub mod push_users {
     use super::*;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
-        pub to_users: Vec<UserId>,
-        pub to_devs: Vec<sig::PublicKey>,
-        pub msg: Push,
+        pub to: Vec<UserId>,
+        pub msg: Bytes,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Success,
-        Missing(Vec<UserId>, Vec<sig::PublicKey>),
+        Missing(Vec<UserId>),
     }
+}
+
+pub mod push_devices {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req {
+        pub to: Vec<sig::PublicKey>,
+        pub msg: Bytes,
+    }
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        Missing(Vec<sig::PublicKey>),
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PushTag {
+    User,
+    Device,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct Push {
+    pub tag: PushTag,
+    pub timestamp: DateTime<Utc>,
+    pub msg: Bytes,
 }
 
 pub mod new_key {
@@ -162,6 +168,14 @@ pub mod dep_key {
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct Res(pub PKIResponse);
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PKIResponse {
+    Success,
+    BadSignature,
+    Redundant,
+    DeadKey,
 }
 
 pub mod login {
@@ -208,7 +222,10 @@ pub mod catchup {
     pub const CHUNK_SIZE: usize = 256;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub struct Catchup(pub Vec<Push>);
+    pub enum Catchup {
+        Messages(Vec<Push>),
+        Done,
+    }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct CatchupAck(pub u64);

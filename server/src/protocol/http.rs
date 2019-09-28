@@ -15,6 +15,8 @@ impl State {
             mk_filter!(self, register)
                 .or(mk_filter!(self, new_key))
                 .or(mk_filter!(self, dep_key))
+                .or(push_filter!(self, push_users))
+                .or(push_filter!(self, push_devices))
         };
 
         let routes = method::get2()

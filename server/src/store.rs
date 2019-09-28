@@ -29,58 +29,6 @@ pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
     out
 }
 
-// TODO: consider having this take slices instead of vec's
-//pub trait Store {
-//    #[deprecated]
-//    fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error>;
-//
-//    // batch this
-//    fn add_prekey(
-//        &mut self,
-//        key: sig::PublicKey,
-//        pre: sealed::PublicKey,
-//    ) -> Result<PKIResponse, Error>;
-//
-//    fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error>;
-//
-//    fn add_key(
-//        &mut self,
-//        // user_id: UserId,
-//        key: Signed<sig::PublicKey>,
-//    ) -> Result<PKIResponse, Error>;
-//
-//    fn register_user(
-//        &mut self,
-//        user_id: UserId,
-//        key: Signed<sig::PublicKey>,
-//    ) -> Result<register::Res, Error>;
-//
-//    // batch this
-//    fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error>;
-//
-//    fn deprecate_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error>;
-//
-//    // batch this
-//    fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error>;
-//    // batch this
-//    fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error>;
-//
-//    // batch this
-//    fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error>;
-//
-//    // batch this (map)
-//    fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error>;
-//
-//    // TODO: make this take a vec of messages
-//    fn add_pending(&mut self, key: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error>;
-//
-//    // TODO: replace these w/methods that get first n, remove first n, in insertion order
-//    fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error>;
-//
-//    // TODO expire all as well
-//    fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error>;
-//}
-
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {

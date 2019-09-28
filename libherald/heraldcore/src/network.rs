@@ -7,8 +7,6 @@ use crate::{
     utils,
 };
 use chrono::prelude::*;
-use crossbeam::channel;
-use dashmap::DashMap;
 use herald_common::*;
 use lazy_static::*;
 use sodiumoxide::{
@@ -22,8 +20,6 @@ use std::{
     net::{SocketAddr, SocketAddrV4},
     ops::DerefMut,
 };
-use surf::{http, url};
-use tungstenite::client;
 
 const DEFAULT_PORT: u16 = 8000;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -47,7 +43,7 @@ pub(crate) fn server_url(ext: &str) -> String {
 
 pub type QID = [u8; 32];
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 /// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
     /// A new message has been received.
@@ -66,15 +62,16 @@ mod helper {
     use super::server_url;
     use crate::errors::*;
     use herald_common::*;
-    use surf::*;
 
     macro_rules! mk_request {
         ($method: tt, $path: tt) => {
-            pub async fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
-                let res_bytes = surf::$method(server_url(stringify!($path)))
-                    .body_bytes(serde_cbor::to_vec(req)?)
-                    .recv_bytes()
-                    .await?;
+            pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
+                let mut res_bytes = Vec::new();
+                reqwest::Client::new()
+                    .$method(&server_url(stringify!($path)))
+                    .body(serde_cbor::to_vec(req)?)
+                    .send()?
+                    .copy_to(&mut res_bytes)?;
                 let res = serde_cbor::from_slice(&res_bytes)?;
                 Ok(res)
             }
@@ -88,42 +85,46 @@ mod helper {
     mk_request!(post, register);
     mk_request!(post, new_key);
     mk_request!(post, dep_key);
+    mk_request!(post, push_users);
+    mk_request!(post, push_devices);
 }
 
-macro_rules! of_helper {
+macro_rules! get_of_helper {
     ($name: tt, $of: ty, $to: ty) => {
-        pub async fn $name(of: $of) -> Result<$to, HErr> {
-            Ok(helper::$name(&$name::Req(of)).await?.0)
+        pub fn $name(of: $of) -> Result<$to, HErr> {
+            Ok(helper::$name(&$name::Req(of))?.0)
         }
     };
 }
 
-of_helper!(keys_of, Vec<UserId>, HashMap<UserId, UserMeta>);
-of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMeta>);
-of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
-of_helper!(users_exist, Vec<UserId>, Vec<bool>);
+get_of_helper!(keys_of, Vec<UserId>, HashMap<UserId, UserMeta>);
+get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMeta>);
+get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
+get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
-pub async fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
+pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
-    Ok(helper::dep_key(&req).await?.0)
+    Ok(helper::dep_key(&req)?.0)
 }
 
-pub async fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
+pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = new_key::Req(kp.sign(to_new));
-    Ok(helper::new_key(&req).await?.0)
+    Ok(helper::new_key(&req)?.0)
 }
 
-pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
+pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
-    Ok(helper::register(&register::Req(uid, sig)).await?)
+    Ok(helper::register(&register::Req(uid, sig))?)
 }
 
-// pub fn login() -> Result<channel::Receiver<Notification>, HErr> {
+// pub fn login() -> Result<Receiver<Notification>, HErr> {
+//     use futures::compat::*;
 //     use login::*;
-//     use tungstenite::*;
+//     use tokio_tungstenite::connect_async;
+//     use tungstenite::Message;
 
 //     let uid = Config::static_id()?;
 //     let kp = Config::static_keypair()?;
@@ -132,10 +133,10 @@ pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
 //         did: *kp.public_key(),
 //     };
 
-//     let (mut sender, receiver) = channel::unbounded();
+//     let (mut sender, receiver) = channel();
 //     let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
 //         .expect("failed to parse login url");
-//     let (mut ws, _) = client::connect(wsurl)?;
+//     let (mut ws, _) = connect_async(wsurl).compat()?;
 
 //     let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
 //     ws.write_message(m)?;
@@ -153,35 +154,96 @@ pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
 //         return Err(LoginError);
 //     }
 
-//     let (mut success_sender, mut success_receiver) = channel::bounded(1);
+//     let ev = catchup(&mut ws)?;
+//     ev.execute(&mut sender)?;
 
-//     std::thread::spawn(move || {
-//         let should_continue = catchup(&mut ws).is_ok();
-//         success_sender.send(should_continue);
-//         if should_continue {
-//             recv_messages(ws, sender);
+//     Ok(receiver)
+// }
+
+// fn catchup<S: AsyncRead + AsyncWrite>(
+//     ws: &mut tokio_tungstenite::WebSocketStream<S>,
+// ) -> Result<Event, HErr> {
+//     unimplemented!()
+//     // use catchup::*;
+//     // use tungstenite::*;
+
+//     // let mut ev = Event::default();
+
+//     // while let Catchup::Messages(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+//     //     for push in p.iter() {
+//     //         ev.merge(match push.tag {
+//     //             PushTag::User => {
+//     //                 let umsg = serde_cbor::from_slice(&push.msg)?;
+//     //                 handle_cmessage(push.timestamp, umsg)?
+//     //             }
+//     //             PushTag::Device => {
+//     //                 let dmsg = serde_cbor::from_slice(&push.msg)?;
+//     //                 handle_dmessage(push.timestamp, dmsg)?
+//     //             }
+//     //         });
+//     //     }
+
+//     //     ws.write_message(Message::binary(serde_cbor::to_vec(&CatchupAck(
+//     //         p.len() as u64
+//     //     ))?))?;
+//     // }
+
+//     // Ok(ev)
+// }
+
+// fn recv_messages<S: AsyncRead + AsyncWrite>(
+//     ws: tokio_tungstenite::WebSocketStream<S>,
+//     sender: Sender<Notification>,
+// ) {
+//     unimplemented!()
+// }
+
+// pub struct Event {
+//     notifications: Vec<Notification>,
+//     replies: Vec<(ConversationId, ConversationMessageBody)>,
+// }
+
+// impl Event {
+//     pub fn merge(&mut self, mut other: Self) {
+//         self.notifications.append(&mut other.notifications);
+//         self.replies.append(&mut other.replies);
+//     }
+
+//     pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
+//         for note in self.notifications.iter() {
+//             sender.send(*note);
 //         }
-//     });
 
-//     if success_receiver.recv().map_err(|_| LoginError)? {
-//         Ok(receiver)
-//     } else {
-//         Err(LoginError)
+//         for (cid, content) in self.replies.iter() {
+//             let cm = ConversationMessage::seal(*cid, content)?;
+//             send_cmessage(cm)?;
+//         }
+
+//         Ok(())
 //     }
 // }
 
-// fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<(), HErr> {
-//     use catchup::*;
-
-//     loop {
-//         let Catchup(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())?;
-//         for push in
+// impl Default for Event {
+//     fn default() -> Self {
+//         Event {
+//             notifications: Vec::new(),
+//             replies: Vec::new(),
+//         }
 //     }
 // }
 
-// fn recv_messages<S: Read + Write>(
-//     ws: tungstenite::WebSocket<S>,
-//     sender: channel::Sender<Notification>,
-// ) -> Result<(), HErr> {
+// #[allow(unused_variables)]
+// fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
+//     // TODO: use this, remove allow
+//     let body = cm.open()?;
+//     unimplemented!()
+// }
+
+// fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
+//     unimplemented!()
+// }
+
+// // TODO: form push, send to server
+// fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
 //     unimplemented!()
 // }

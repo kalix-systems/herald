@@ -159,9 +159,6 @@ mod cmessages {
     }
 }
 
-/// This type gets serialized into raw bytes and sent to the server
-/// Then it is deserialized again on the client side to implement
-/// control flow for the frontend.
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub enum ConversationMessageBody {
     NewKey(cmessages::NewKey),
@@ -174,11 +171,26 @@ pub enum ConversationMessageBody {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct ConversationMessage {
-    pub body: ConversationMessageBody,
+    pub body: Bytes,
     /// Conversation the message is associated with
     pub cid: ConversationId,
     // TODO: block caching
     // pub bid: UQ,
+}
+
+// TODO: make these use chainmail
+impl ConversationMessage {
+    pub fn seal(
+        cid: ConversationId,
+        content: &ConversationMessageBody,
+    ) -> Result<ConversationMessage, HErr> {
+        let body = Bytes::from(serde_cbor::to_vec(content)?);
+        Ok(ConversationMessage { cid, body })
+    }
+
+    pub fn open(&self) -> Result<ConversationMessageBody, HErr> {
+        Ok(serde_cbor::from_slice(&self.body)?)
+    }
 }
 
 mod dmessages {
@@ -192,6 +204,6 @@ mod dmessages {
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-pub enum MessageToDevice {
+pub enum DeviceMessage {
     ContactReq(dmessages::ContactReq),
 }
