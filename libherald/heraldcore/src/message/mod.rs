@@ -96,17 +96,18 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
     Ok(())
 }
 
-/// Sets the message status of an item in the database
-pub fn batch_update_send_status(
-    _old_status: MessageSendStatus,
-    _new_status: MessageSendStatus,
-) -> Result<(), HErr> {
-    unimplemented!();
-}
+/// Gets message's by `MessageSendStatus`
+pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
+    let db = Database::get()?;
+    let mut stmt = db.prepare(include_str!("../message/sql/by_send_status.sql"))?;
+    let res = stmt.query_map(&[send_status], Message::from_db)?;
 
-/// Gets message id's by `MessageSendStatus`
-pub fn by_send_status(_send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
-    unimplemented!()
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(msg?);
+    }
+
+    Ok(messages)
 }
 
 /// Deletes a message
