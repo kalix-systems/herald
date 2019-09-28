@@ -128,11 +128,13 @@ declare class Popup {
   open(): void;
 }
 
-declare class Menu extends Popup {}
+declare class Menu extends Popup { }
 
 declare class TextArea {
   text: string;
   cursorPosition: number;
+  selectionEnd: number;
+  insert(position: number, text: string): void;
   clear(): void;
 }
 

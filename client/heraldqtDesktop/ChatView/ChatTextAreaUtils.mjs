@@ -13,3 +13,7 @@ export function enterKeyHandler(event, target, networkHandle, messageModel) {
     const messageId = messageModel.insertMessage(text);
     networkHandle.sendMessage(text, messageModel.conversationId, messageId);
 }
+export function appendToTextArea(text, target) {
+    const position = target.selectionEnd;
+    target.insert(position, text);
+}

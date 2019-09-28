@@ -37,5 +37,9 @@
         <file>main.qml</file>
         <file>SideBar/SearchComponent.qml</file>
         <file>SideBar/ConversationLabel.qml</file>
+        <file>EmojiKeyboard/EmojiButton.qml</file>
+        <file>EmojiKeyboard/EmojiPicker.qml</file>
+        <file>EmojiKeyboard/PickerInterior.qml</file>
+        <file>EmojiKeyboard/PickerShape.qml</file>
     </qresource>
 </RCC>
