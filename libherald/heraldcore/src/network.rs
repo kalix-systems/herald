@@ -137,17 +137,14 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
         .expect("failed to parse login url");
     let (mut ws, _) = tungstenite::connect(wsurl)?;
 
-    let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
-    ws.write_message(m)?;
+    sock_send_msg(&mut ws, &SignAs(gid))?;
 
-    if let SignAsResponse::Sign(u) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+    if let SignAsResponse::Sign(u) = sock_get_msg(&mut ws)? {
         let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
-        let m = Message::binary(serde_cbor::to_vec(&token)?);
-        ws.write_message(m)?;
+        sock_send_msg(&mut ws, &token)?;
 
-        match serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-            LoginTokenResponse::Success => {}
-            LoginTokenResponse::BadSig => return Err(LoginError),
+        if LoginTokenResponse::BadSig == sock_get_msg(&mut ws)? {
+            return Err(LoginError);
         }
     } else {
         return Err(LoginError);
@@ -167,31 +164,46 @@ fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event,
 
     let mut ev = Event::default();
 
-    while let Catchup::Messages(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+    while let Catchup::Messages(p) = sock_get_msg(ws)? {
+        let len = p.len() as u64;
         for push in p.iter() {
-            ev.merge(match push.tag {
-                PushTag::User => {
-                    let umsg = serde_cbor::from_slice(&push.msg)?;
-                    handle_cmessage(push.timestamp, umsg)?
-                }
-                PushTag::Device => {
-                    let dmsg = serde_cbor::from_slice(&push.msg)?;
-                    handle_dmessage(push.timestamp, dmsg)?
-                }
-            });
+            ev.merge(handle_push(push)?);
         }
-
-        ws.write_message(Message::binary(serde_cbor::to_vec(&CatchupAck(
-            p.len() as u64
-        ))?))?;
+        sock_send_msg(ws, &CatchupAck(len))?;
     }
 
     Ok(ev)
 }
 
 #[allow(unused_variables)]
-fn recv_messages<S: Read + Write>(ws: tungstenite::WebSocket<S>, sender: Sender<Notification>) {
-    unimplemented!()
+fn recv_messages<S: Read + Write>(ws: tungstenite::WebSocket<S>, sender: Sender<Notification>) {}
+
+fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
+    ws: &mut tungstenite::WebSocket<S>,
+) -> Result<T, HErr> {
+    Ok(serde_cbor::from_slice(&ws.read_message()?.into_data())?)
+}
+
+fn sock_send_msg<S: Read + Write, T: Serialize>(
+    ws: &mut tungstenite::WebSocket<S>,
+    t: &T,
+) -> Result<(), HErr> {
+    let m = tungstenite::Message::binary(serde_cbor::to_vec(t)?);
+    ws.write_message(m)?;
+    Ok(())
+}
+
+fn handle_push(push: &Push) -> Result<Event, HErr> {
+    match push.tag {
+        PushTag::User => {
+            let umsg = serde_cbor::from_slice(&push.msg)?;
+            handle_cmessage(push.timestamp, umsg)
+        }
+        PushTag::Device => {
+            let dmsg = serde_cbor::from_slice(&push.msg)?;
+            handle_dmessage(push.timestamp, dmsg)
+        }
+    }
 }
 
 pub struct Event {

@@ -171,15 +171,23 @@ pub enum ConversationMessageBody {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct ConversationMessage {
-    pub body: Bytes,
+    body: Bytes,
     /// Conversation the message is associated with
-    pub cid: ConversationId,
+    cid: ConversationId,
     // TODO: block caching
-    // pub bid: UQ,
+    // bid: UQ,
 }
 
 // TODO: make these use chainmail
 impl ConversationMessage {
+    pub fn body(&self) -> Bytes {
+        self.body.clone()
+    }
+
+    pub fn cid(&self) -> ConversationId {
+        self.cid
+    }
+
     pub fn seal(
         cid: ConversationId,
         content: &ConversationMessageBody,
