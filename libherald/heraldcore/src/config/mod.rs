@@ -57,11 +57,13 @@ impl ConfigBuilder {
         }
     }
 
+    /// Sets the `UserId`. This is required.
     pub fn id(mut self, id: UserId) -> Self {
         self.id = Some(id);
         self
     }
 
+    /// Sets the `KeyPair`. This is required.
     pub fn keypair(mut self, pair: sig::KeyPair) -> Self {
         self.keypair = Some(pair);
         self
@@ -235,6 +237,7 @@ impl Config {
         )
     }
 
+    /// Gets the current user's kepair directly from the database.
     pub fn static_keypair() -> Result<sig::KeyPair, HErr> {
         let db = Database::get()?;
         Ok(db.query_row(

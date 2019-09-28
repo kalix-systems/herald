@@ -21,6 +21,7 @@ lazy_static! {
         Err(_) => "store.sqlite3".to_owned(),
     };
 }
+
 /// Thin wrapper around sqlite3 database connection.
 pub(crate) struct Database(Connection);
 
@@ -82,6 +83,9 @@ impl Database {
 
                 // set foreign key constraint
                 conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;
+
+                // enable WAL
+                conn.query_row("PRAGMA journal_mode = WAL", NO_PARAMS, |_| Ok(()))?;
 
                 let db = Database(conn);
                 Ok(db)
