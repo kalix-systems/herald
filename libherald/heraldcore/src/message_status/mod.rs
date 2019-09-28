@@ -9,7 +9,7 @@ pub(crate) fn delete_by_conversation_tx(
     conversation: ConversationId,
 ) -> Result<(), HErr> {
     tx.execute(
-        include_str!("../sql/message_status/delete_by_conversation.sql"),
+        include_str!("sql/delete_by_conversation.sql"),
         params![conversation],
     )?;
     Ok(())
@@ -23,7 +23,7 @@ pub(crate) fn set_message_status(
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/message_status/set_message_status.sql"),
+        include_str!("sql/set_message_status.sql"),
         params![msg_id, conversation, receipt_status],
     )?;
     Ok(())
