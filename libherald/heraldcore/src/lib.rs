@@ -1,7 +1,7 @@
 //! Core logic for herald client.
 
-#![warn(missing_docs)]
-// #![allow(warnings)]
+// #![warn(missing_docs)]
+#![allow(warnings)]
 
 /// Chainmail support
 mod chainkeys;
