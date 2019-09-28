@@ -56,7 +56,7 @@ pub fn add_message(
     let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/message/add.sql"),
+        include_str!("sql/add.sql"),
         params![
             msg_id,
             author,
@@ -73,7 +73,7 @@ pub fn add_message(
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     let db = Database::get()?;
     Ok(db.query_row(
-        include_str!("../sql/message/get_message.sql"),
+        include_str!("sql/get_message.sql"),
         params![msg_id],
         Message::from_db,
     )?)
@@ -82,7 +82,7 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
 pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/message/update_send_status.sql"),
+        include_str!("sql/update_send_status.sql"),
         params![status, msg_id],
     )?;
     Ok(())
@@ -91,10 +91,7 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
 /// Deletes a message
 pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
-    db.execute(
-        include_str!("../sql/message/delete_message.sql"),
-        params![id],
-    )?;
+    db.execute(include_str!("sql/delete_message.sql"), params![id])?;
     Ok(())
 }
 

@@ -127,7 +127,7 @@ pub(crate) fn add_conversation_with_tx(
 pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/message/delete_conversation.sql"),
+        include_str!("../message/sql/delete_conversation.sql"),
         &[conversation_id],
     )?;
     Ok(())
@@ -136,7 +136,7 @@ pub fn delete_conversation(conversation_id: &ConversationId) -> Result<(), HErr>
 /// Get all messages in a conversation.
 pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/message/conversation_messages.sql"))?;
+    let mut stmt = db.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
     let res = stmt.query_map(&[conversation_id], Message::from_db)?;
 
     let mut messages = Vec::new();
@@ -154,7 +154,7 @@ pub fn conversation_messages_since(
 ) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!(
-        "../sql/message/conversation_messages_since.sql"
+        "../message/sql/conversation_messages_since.sql"
     ))?;
     let res = stmt.query_map(
         params![conversation_id, since.timestamp()],
