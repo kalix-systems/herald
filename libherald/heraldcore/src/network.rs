@@ -339,12 +339,24 @@ pub fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> 
         let to = crate::members::members(&cid)?;
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, msg };
-        match helper::push_users(&req)? {
-            push_users::Res::Success => Ok(()),
-            push_users::Res::Missing(missing) => Err(HeraldError(format!(
+        match helper::push_users(&req) {
+            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
             ))),
+            Err(e) => {
+                // TODO: maybe try more than once?
+                eprintln!(
+                    "failed to send message {:?}, error was {}\n\
+                     assuming failed session and adding to pending now",
+                    req, e
+                );
+
+                CAUGHT_UP.store(false, Ordering::Release);
+
+                add_to_pending(cid, content)
+            }
         }
     } else {
         // TODO: load it to pending here
