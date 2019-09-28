@@ -81,7 +81,6 @@ mod helper {
     mk_request!(post, register);
     mk_request!(post, new_key);
     mk_request!(post, dep_key);
-    // TODO: use these
     mk_request!(post, push_users);
     mk_request!(post, push_devices);
 }
@@ -332,7 +331,6 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
     Ok(ev)
 }
 
-// TODO: consider returning err if res != Success
 pub fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
@@ -347,6 +345,7 @@ pub fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> 
             ))),
             Err(e) => {
                 // TODO: maybe try more than once?
+                // maybe have some mechanism to send a signal that more things have gone wrong?
                 eprintln!(
                     "failed to send message {:?}, error was {}\n\
                      assuming failed session and adding to pending now",
@@ -379,6 +378,22 @@ pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(),
     }
 
     Ok(())
+}
+
+pub fn send_text(cid: ConversationId, body: String, op: Option<MsgId>) -> Result<(), HErr> {
+    use crate::message;
+    let (mid, ts) = message::add_message(
+        None,
+        crate::config::Config::static_id()?,
+        &cid,
+        &body,
+        None,
+        None,
+        &op,
+    )?;
+    let content = cmessages::Message::Text(body);
+    let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
+    send_cmessage(cid, &body)
 }
 
 // generates unique tag and adds it to pending messages in database with that tag
