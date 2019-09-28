@@ -6,15 +6,14 @@ CREATE TABLE IF NOT EXISTS chainkeys(
 );
 
 CREATE TABLE IF NOT EXISTS message_status(
-  msg_id BLOB NOT NULL,
+  msg_id BLOB PRIMARY KEY NOT NULL,
   status INTEGER DEFAULT(0) NOT NULL,
-  PRIMARY KEY(msg_id),
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
 );
 
 CREATE TABLE IF NOT EXISTS messages (
   -- message id
-  msg_id BLOB PRIMARY KEY,
+  msg_id BLOB PRIMARY KEY NOT NULL,
   -- id of message author
   author TEXT NOT NULL,
   -- id of conversation
@@ -23,8 +22,6 @@ CREATE TABLE IF NOT EXISTS messages (
   body TEXT NOT NULL,
   -- attachment to the message TODO this is another table
   attachment BLOB,
-  -- message id of message being replied to
-  op_msg_id INTEGER,
   -- timestamp associated with message
   timestamp INTEGER NOT NULL,
   -- time when message self-destructs
@@ -34,6 +31,17 @@ CREATE TABLE IF NOT EXISTS messages (
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
+
+CREATE TABLE IF NOT EXISTS replies (
+  -- message id
+  msg_id BLOB PRIMARY KEY NOT NULL,
+  -- message id of message being replied to
+  op_msg_id INTEGER,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
+  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+);
+
+CREATE INDEX reply_op ON replies(op_msg_id);
 
 CREATE TABLE IF NOT EXISTS contacts (
   -- user id

@@ -54,18 +54,17 @@ pub fn add_message(
     let timestamp = timestamp.unwrap_or_else(Utc::now);
 
     let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
-    let db = Database::get()?;
-    db.execute(
+    let mut db = Database::get()?;
+    let tx = db.transaction()?;
+    tx.execute(
         include_str!("sql/add.sql"),
-        params![
-            msg_id,
-            author,
-            conversation_id,
-            body,
-            timestamp.timestamp(),
-            op,
-        ],
+        params![msg_id, author, conversation_id, body, timestamp.timestamp(),],
     )?;
+
+    if let Some(op) = op {
+        tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+    }
+    tx.commit()?;
     Ok((msg_id, timestamp))
 }
 
