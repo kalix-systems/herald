@@ -19,7 +19,7 @@ pub struct Message {
     /// Message id of the message being replied to
     pub op: Option<MsgId>,
     /// Send status
-    pub send_status: Option<MessageSendStatus>,
+    pub send_status: MessageSendStatus,
     /// Receipts
     pub receipts: Option<Vec<(UserId, MessageReceiptStatus)>>,
 }
@@ -49,6 +49,7 @@ pub fn add_message(
     conversation_id: &ConversationId,
     body: &str,
     timestamp: Option<DateTime<Utc>>,
+    send_status: Option<MessageSendStatus>,
     op: &Option<MsgId>,
 ) -> Result<(MsgId, DateTime<Utc>), HErr> {
     let timestamp = timestamp.unwrap_or_else(Utc::now);
@@ -58,7 +59,14 @@ pub fn add_message(
     let tx = db.transaction()?;
     tx.execute(
         include_str!("sql/add.sql"),
-        params![msg_id, author, conversation_id, body, timestamp.timestamp(),],
+        params![
+            msg_id,
+            author,
+            conversation_id,
+            body,
+            send_status.unwrap_or(MessageSendStatus::NoAck),
+            timestamp.timestamp(),
+        ],
     )?;
 
     if let Some(op) = op {

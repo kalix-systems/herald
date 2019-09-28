@@ -20,7 +20,7 @@ fn message_send_status_updates() {
         .expect(womp!());
     crate::members::add_member(&conversation_id, author).expect(womp!());
 
-    let (msg_id, _) = add_message(None, author, &conversation_id, "1", None, &None)
+    let (msg_id, _) = add_message(None, author, &conversation_id, "1", None, None, &None)
         .expect(womp!("Failed to add first message"));
 
     set_message_status(msg_id, MessageReceiptStatus::Read).expect(womp!());

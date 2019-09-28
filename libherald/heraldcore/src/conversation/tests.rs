@@ -50,10 +50,10 @@ fn add_and_get() {
     super::add_conversation(Some(&conversation), None)
         .expect(womp!("Failed to create conversation"));
 
-    crate::message::add_message(None, author, &conversation, "1", None, &None)
+    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
         .expect(womp!("Failed to add first message"));
 
-    crate::message::add_message(None, author, &conversation, "2", None, &None)
+    crate::message::add_message(None, author, &conversation, "2", None, None, &None)
         .expect(womp!("Failed to add second message"));
 
     let msgs = super::conversation(&conversation).expect(womp!("Failed to get conversation"));
@@ -160,7 +160,7 @@ fn conv_messages_since() {
 
     super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to make conversation"));
 
-    crate::message::add_message(None, contact, &conv_id, "1", None, &None)
+    crate::message::add_message(None, contact, &conv_id, "1", None, None, &None)
         .expect(womp!("Failed to make message"));
     let timestamp = chrono::Utc::now();
 
@@ -217,8 +217,9 @@ fn delete_message() {
     super::add_conversation(Some(&conversation), None)
         .expect(womp!("Failed to create conversation"));
 
-    let (msg_id, _) = crate::message::add_message(None, author, &conversation, "1", None, &None)
-        .expect(womp!("Failed to add first message"));
+    let (msg_id, _) =
+        crate::message::add_message(None, author, &conversation, "1", None, None, &None)
+            .expect(womp!("Failed to add first message"));
 
     crate::message::delete_message(&msg_id).expect(womp!());
 
@@ -240,10 +241,10 @@ fn delete_conversation() {
     super::add_conversation(Some(&conversation), None)
         .expect(womp!("Failed to create conversation"));
 
-    crate::message::add_message(None, author, &conversation, "1", None, &None)
+    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
         .expect(womp!("Failed to add first message"));
 
-    crate::message::add_message(None, author, &conversation, "1", None, &None)
+    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
         .expect(womp!("Failed to add second message"));
 
     super::delete_conversation(&conversation).expect(womp!());

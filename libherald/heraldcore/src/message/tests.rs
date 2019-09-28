@@ -21,7 +21,7 @@ fn delete_get_message() {
 
     crate::members::add_member(&conv_id, contact).expect(womp!());
 
-    let (msg_id, _) = super::add_message(None, contact, &conv_id, "test", None, &None)
+    let (msg_id, _) = super::add_message(None, contact, &conv_id, "test", None, None, &None)
         .expect(womp!("Failed to add message"));
 
     let message = super::get_message(&msg_id).expect(womp!("unable to get message"));
@@ -50,7 +50,7 @@ fn message_send_status_updates() {
 
     crate::members::add_member(&conversation_id, author).expect(womp!());
 
-    let (msg_id, _) = super::add_message(None, author, &conversation_id, "1", None, &None)
+    let (msg_id, _) = super::add_message(None, author, &conversation_id, "1", None, None, &None)
         .expect(womp!("Failed to add first message"));
 
     //check message id length
@@ -61,7 +61,7 @@ fn message_send_status_updates() {
         super::get_message(&msg_id)
             .expect(womp!("failed to get conversation by author"))
             .send_status,
-        None,
+        MessageSendStatus::NoAck,
     );
 
     update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
@@ -70,6 +70,6 @@ fn message_send_status_updates() {
         crate::conversation::conversation_messages(&conversation_id)
             .expect(womp!("failed to get conversation by author"))[0]
             .send_status,
-        Some(MessageSendStatus::Ack)
+        MessageSendStatus::Ack
     );
 }

@@ -20,14 +20,12 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT NOT NULL,
-  -- attachment to the message TODO this is another table
-  attachment BLOB,
   -- timestamp associated with message
-  timestamp INTEGER NOT NULL,
+  ts INTEGER NOT NULL,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
-  send_status INTEGER,
+  send_status INTEGER NOT NULL,
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
@@ -42,6 +40,14 @@ CREATE TABLE IF NOT EXISTS replies (
 );
 
 CREATE INDEX reply_op ON replies(op_msg_id);
+
+CREATE TABLE IF NOT EXISTS msg_attachments (
+  -- path to media attachment?
+  attachment TEXT NOT NULL,
+  msg_id BLOB NOT NULL,
+  -- TODO this is touchy
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+);
 
 CREATE TABLE IF NOT EXISTS contacts (
   -- user id

@@ -4,6 +4,7 @@ INSERT INTO
     author,
     conversation_id,
     body,
-    timestamp
+    send_status,
+    ts
   )
-VALUES(@1, @2, @3, @4, @5)
+VALUES(@1, @2, @3, @4, @5, @6)
