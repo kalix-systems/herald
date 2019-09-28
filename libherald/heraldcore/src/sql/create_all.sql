@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- attachment to the message TODO this is another table
   attachment BLOB,
   -- timestamp associated with message
-  timestamp INTEGER NOT NULL,
+  ts INTEGER NOT NULL,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
