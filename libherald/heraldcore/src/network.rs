@@ -1,25 +1,17 @@
 use crate::{
-    abort_err,
-    config::{Config, ConfigBuilder},
+    config::Config,
     errors::HErr::{self, *},
-    members, message, message_status,
     types::*,
-    utils,
 };
 use chrono::prelude::*;
 use crossbeam_channel::*;
 use herald_common::*;
 use lazy_static::*;
-use sodiumoxide::{
-    crypto::{box_, generichash as hash, sealedbox, sign},
-    randombytes::randombytes_into,
-};
 use std::{
     collections::HashMap,
     env,
     io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
-    ops::DerefMut,
 };
 
 const DEFAULT_PORT: u16 = 8000;
@@ -86,6 +78,7 @@ mod helper {
     mk_request!(post, register);
     mk_request!(post, new_key);
     mk_request!(post, dep_key);
+    // TODO: use these
     mk_request!(post, push_users);
     mk_request!(post, push_devices);
 }
@@ -103,6 +96,10 @@ get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMet
 get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
+// TODO: replace this w/nicer api
+// this is just there to silence the warning
+pub use helper::{push_devices, push_users};
+
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
@@ -118,7 +115,9 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
-    Ok(helper::register(&register::Req(uid, sig))?)
+    let res = helper::register(&register::Req(uid, sig))?;
+    unimplemented!()
+    // Ok(res)
 }
 
 pub fn login() -> Result<Receiver<Notification>, HErr> {
@@ -156,6 +155,8 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
     let ev = catchup(&mut ws)?;
     ev.execute(&mut sender)?;
 
+    std::thread::spawn(move || recv_messages(ws, sender));
+
     Ok(receiver)
 }
 
@@ -187,6 +188,7 @@ fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event,
     Ok(ev)
 }
 
+#[allow(unused_variables)]
 fn recv_messages<S: Read + Write>(ws: tungstenite::WebSocket<S>, sender: Sender<Notification>) {
     unimplemented!()
 }
@@ -204,7 +206,8 @@ impl Event {
 
     pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
         for note in self.notifications.iter() {
-            sender.send(*note);
+            // TODO: handle or drop this error
+            sender.send(*note).expect("failed to send notification");
         }
 
         for (cid, content) in self.replies.iter() {
@@ -232,11 +235,13 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     unimplemented!()
 }
 
+#[allow(unused_variables)]
 fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
     unimplemented!()
 }
 
 // TODO: form push, send to server
+#[allow(unused_variables)]
 fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
     unimplemented!()
 }
