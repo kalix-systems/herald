@@ -85,6 +85,7 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
         Message::from_db,
     )?)
 }
+
 /// Sets the message status of an item in the database
 pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
     let db = Database::get()?;
@@ -93,6 +94,19 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
         params![status, msg_id],
     )?;
     Ok(())
+}
+
+/// Sets the message status of an item in the database
+pub fn batch_update_send_status(
+    _old_status: MessageSendStatus,
+    _new_status: MessageSendStatus,
+) -> Result<(), HErr> {
+    unimplemented!();
+}
+
+/// Gets message id's by `MessageSendStatus`
+pub fn by_send_status(_send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
+    unimplemented!()
 }
 
 /// Deletes a message
