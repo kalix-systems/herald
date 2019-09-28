@@ -22,15 +22,15 @@ CREATE TABLE IF NOT EXISTS messages (
   -- text of message
   body TEXT NOT NULL,
   -- attachment to the message TODO this is another table
-  attachment TEXT,
+  attachment BLOB,
   -- message id of message being replied to
-  op_msg_id INT,
+  op_msg_id INTEGER,
   -- timestamp associated with message
   timestamp INTEGER NOT NULL,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
-  send_status INT,
+  send_status INTEGER,
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
