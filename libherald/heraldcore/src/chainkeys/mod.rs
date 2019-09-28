@@ -4,17 +4,6 @@ use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
-pub(crate) struct ChainKeys {
-    // TODO use this, update other logic
-    cid: ConversationId,
-}
-
-impl ChainKeys {
-    fn new(cid: ConversationId) -> Self {
-        ChainKeys { cid }
-    }
-}
-
 fn store_key(
     db: &rusqlite::Connection,
     cid: ConversationId,
@@ -114,11 +103,11 @@ fn get_unused(
     Ok(pairs)
 }
 
-impl BlockStore for ChainKeys {
+impl BlockStore for ConversationId {
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<(), ChainError> {
         let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
-        store_key(&db, self.cid, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
+        store_key(&db, *self, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
     }
 
     // we'll want to implement some kind of gc strategy to collect keys marked used
@@ -134,7 +123,7 @@ impl BlockStore for ChainKeys {
             .transaction()
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
-        mark_used(tx, self.cid, blocks)
+        mark_used(tx, *self, blocks)
     }
 
     // this should *not* mark keys as used
@@ -143,13 +132,13 @@ impl BlockStore for ChainKeys {
         blocks: I,
     ) -> Option<BTreeSet<ChainKey>> {
         let db = Database::get().ok()?;
-        get_keys(&db, self.cid, blocks)
+        get_keys(&db, *self, blocks)
     }
 
     // this should *not* mark keys as used
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
         let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
-        get_unused(&db, self.cid)
+        get_unused(&db, *self)
     }
 }
 
