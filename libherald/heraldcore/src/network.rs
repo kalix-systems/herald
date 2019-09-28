@@ -112,6 +112,7 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     Ok(helper::new_key(&req)?.0)
 }
 
+#[allow(unused_variables)]
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
