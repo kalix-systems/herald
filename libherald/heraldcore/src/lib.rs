@@ -27,6 +27,8 @@ pub mod message;
 mod message_status;
 /// Networking
 pub mod network;
+/// Pending out messages
+pub mod pending;
 /// Types
 pub mod types;
 /// Utils

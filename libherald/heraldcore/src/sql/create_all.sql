@@ -81,6 +81,13 @@ CREATE TABLE IF NOT EXISTS config (
   CONSTRAINT CHK_config_singlerow CHECK (chk_id = 1)
 );
 
+CREATE TABLE IF NOT EXISTS pending_out (
+  pending_tag INTEGER PRIMARY KEY NOT NULL,
+  conversation_id BLOB NOT NULL,
+  content BLOB NOT NULL,
+  FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id)
+);
+
 CREATE TABLE IF NOT EXISTS conversation_members (
   member_id TEXT NOT NULL,
   conversation_id BLOB NOT NULL,

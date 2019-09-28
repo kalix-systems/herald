@@ -1,6 +1,7 @@
 use crate::{
     config::Config,
     errors::HErr::{self, *},
+    pending,
     types::*,
 };
 use chrono::prelude::*;
@@ -181,9 +182,9 @@ fn catchup<S: Read + Write>(
 
     CAUGHT_UP.store(true, Ordering::Release);
 
-    for (tag, cid, content) in get_pending()? {
+    for (tag, cid, content) in pending::get_pending()? {
         send_cmessage(cid, &content)?;
-        remove_pending(tag)?;
+        pending::remove_pending(tag)?;
     }
 
     Ok(())
@@ -354,12 +355,12 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
-                add_to_pending(cid, content)
+                pending::add_to_pending(cid, content)
             }
         }
     } else {
         // TODO: load it to pending here
-        add_to_pending(cid, content)
+        pending::add_to_pending(cid, content)
     }
 }
 
@@ -394,22 +395,6 @@ pub fn send_text(cid: ConversationId, body: String, op: Option<MsgId>) -> Result
     let content = cmessages::Message::Text(body);
     let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
     send_cmessage(cid, &body)
-}
-
-// generates unique tag and adds it to pending messages in database with that tag
-fn add_to_pending(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
-    unimplemented!()
-}
-
-// returns (tag, cid, content) triples that have been loaded by add_to_pending
-// note: doesn't have to be type UQ, could also be u64, or whatever else SQL will give us by default
-fn get_pending() -> Result<Vec<(UQ, ConversationId, ConversationMessageBody)>, HErr> {
-    unimplemented!()
-}
-
-// removes pending message associated with tag
-fn remove_pending(tag: UQ) -> Result<(), HErr> {
-    unimplemented!()
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessageBody, HErr> {
