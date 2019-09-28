@@ -7,6 +7,7 @@ use crate::{
     utils,
 };
 use chrono::prelude::*;
+use crossbeam_channel::*;
 use herald_common::*;
 use lazy_static::*;
 use sodiumoxide::{
@@ -120,130 +121,122 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(helper::register(&register::Req(uid, sig))?)
 }
 
-// pub fn login() -> Result<Receiver<Notification>, HErr> {
-//     use futures::compat::*;
-//     use login::*;
-//     use tokio_tungstenite::connect_async;
-//     use tungstenite::Message;
+pub fn login() -> Result<Receiver<Notification>, HErr> {
+    use login::*;
+    use tungstenite::Message;
 
-//     let uid = Config::static_id()?;
-//     let kp = Config::static_keypair()?;
-//     let gid = GlobalId {
-//         uid,
-//         did: *kp.public_key(),
-//     };
+    let uid = Config::static_id()?;
+    let kp = Config::static_keypair()?;
+    let gid = GlobalId {
+        uid,
+        did: *kp.public_key(),
+    };
 
-//     let (mut sender, receiver) = channel();
-//     let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
-//         .expect("failed to parse login url");
-//     let (mut ws, _) = connect_async(wsurl).compat()?;
+    let (mut sender, receiver) = unbounded();
+    let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
+        .expect("failed to parse login url");
+    let (mut ws, _) = tungstenite::connect(wsurl)?;
 
-//     let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
-//     ws.write_message(m)?;
+    let m = Message::binary(serde_cbor::to_vec(&SignAs(gid))?);
+    ws.write_message(m)?;
 
-//     if let SignAsResponse::Sign(u) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-//         let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
-//         let m = Message::binary(serde_cbor::to_vec(&token)?);
-//         ws.write_message(m)?;
+    if let SignAsResponse::Sign(u) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+        let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
+        let m = Message::binary(serde_cbor::to_vec(&token)?);
+        ws.write_message(m)?;
 
-//         match serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-//             LoginTokenResponse::Success => {}
-//             LoginTokenResponse::BadSig => return Err(LoginError),
-//         }
-//     } else {
-//         return Err(LoginError);
-//     }
+        match serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+            LoginTokenResponse::Success => {}
+            LoginTokenResponse::BadSig => return Err(LoginError),
+        }
+    } else {
+        return Err(LoginError);
+    }
 
-//     let ev = catchup(&mut ws)?;
-//     ev.execute(&mut sender)?;
+    let ev = catchup(&mut ws)?;
+    ev.execute(&mut sender)?;
 
-//     Ok(receiver)
-// }
+    Ok(receiver)
+}
 
-// fn catchup<S: AsyncRead + AsyncWrite>(
-//     ws: &mut tokio_tungstenite::WebSocketStream<S>,
-// ) -> Result<Event, HErr> {
-//     unimplemented!()
-//     // use catchup::*;
-//     // use tungstenite::*;
+fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event, HErr> {
+    use catchup::*;
+    use tungstenite::*;
 
-//     // let mut ev = Event::default();
+    let mut ev = Event::default();
 
-//     // while let Catchup::Messages(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
-//     //     for push in p.iter() {
-//     //         ev.merge(match push.tag {
-//     //             PushTag::User => {
-//     //                 let umsg = serde_cbor::from_slice(&push.msg)?;
-//     //                 handle_cmessage(push.timestamp, umsg)?
-//     //             }
-//     //             PushTag::Device => {
-//     //                 let dmsg = serde_cbor::from_slice(&push.msg)?;
-//     //                 handle_dmessage(push.timestamp, dmsg)?
-//     //             }
-//     //         });
-//     //     }
+    while let Catchup::Messages(p) = serde_cbor::from_slice(&ws.read_message()?.into_data())? {
+        for push in p.iter() {
+            ev.merge(match push.tag {
+                PushTag::User => {
+                    let umsg = serde_cbor::from_slice(&push.msg)?;
+                    handle_cmessage(push.timestamp, umsg)?
+                }
+                PushTag::Device => {
+                    let dmsg = serde_cbor::from_slice(&push.msg)?;
+                    handle_dmessage(push.timestamp, dmsg)?
+                }
+            });
+        }
 
-//     //     ws.write_message(Message::binary(serde_cbor::to_vec(&CatchupAck(
-//     //         p.len() as u64
-//     //     ))?))?;
-//     // }
+        ws.write_message(Message::binary(serde_cbor::to_vec(&CatchupAck(
+            p.len() as u64
+        ))?))?;
+    }
 
-//     // Ok(ev)
-// }
+    Ok(ev)
+}
 
-// fn recv_messages<S: AsyncRead + AsyncWrite>(
-//     ws: tokio_tungstenite::WebSocketStream<S>,
-//     sender: Sender<Notification>,
-// ) {
-//     unimplemented!()
-// }
+fn recv_messages<S: Read + Write>(ws: tungstenite::WebSocket<S>, sender: Sender<Notification>) {
+    unimplemented!()
+}
 
-// pub struct Event {
-//     notifications: Vec<Notification>,
-//     replies: Vec<(ConversationId, ConversationMessageBody)>,
-// }
+pub struct Event {
+    notifications: Vec<Notification>,
+    replies: Vec<(ConversationId, ConversationMessageBody)>,
+}
 
-// impl Event {
-//     pub fn merge(&mut self, mut other: Self) {
-//         self.notifications.append(&mut other.notifications);
-//         self.replies.append(&mut other.replies);
-//     }
+impl Event {
+    pub fn merge(&mut self, mut other: Self) {
+        self.notifications.append(&mut other.notifications);
+        self.replies.append(&mut other.replies);
+    }
 
-//     pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
-//         for note in self.notifications.iter() {
-//             sender.send(*note);
-//         }
+    pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
+        for note in self.notifications.iter() {
+            sender.send(*note);
+        }
 
-//         for (cid, content) in self.replies.iter() {
-//             let cm = ConversationMessage::seal(*cid, content)?;
-//             send_cmessage(cm)?;
-//         }
+        for (cid, content) in self.replies.iter() {
+            let cm = ConversationMessage::seal(*cid, content)?;
+            send_cmessage(cm)?;
+        }
 
-//         Ok(())
-//     }
-// }
+        Ok(())
+    }
+}
 
-// impl Default for Event {
-//     fn default() -> Self {
-//         Event {
-//             notifications: Vec::new(),
-//             replies: Vec::new(),
-//         }
-//     }
-// }
+impl Default for Event {
+    fn default() -> Self {
+        Event {
+            notifications: Vec::new(),
+            replies: Vec::new(),
+        }
+    }
+}
 
-// #[allow(unused_variables)]
-// fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
-//     // TODO: use this, remove allow
-//     let body = cm.open()?;
-//     unimplemented!()
-// }
+#[allow(unused_variables)]
+fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
+    // TODO: use this, remove allow
+    let body = cm.open()?;
+    unimplemented!()
+}
 
-// fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
-//     unimplemented!()
-// }
+fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
+    unimplemented!()
+}
 
-// // TODO: form push, send to server
-// fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
-//     unimplemented!()
-// }
+// TODO: form push, send to server
+fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
+    unimplemented!()
+}
