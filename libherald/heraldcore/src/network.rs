@@ -12,6 +12,7 @@ use std::{
     env,
     io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
+    sync::atomic::AtomicBool,
 };
 
 const DEFAULT_PORT: u16 = 8000;
@@ -29,6 +30,8 @@ lazy_static! {
         )),
     };
 }
+
+static LOGGED_IN: AtomicBool = AtomicBool::new(false);
 
 pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
@@ -95,10 +98,6 @@ get_of_helper!(keys_of, Vec<UserId>, HashMap<UserId, UserMeta>);
 get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMeta>);
 get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
-
-// TODO: replace this w/nicer api
-// this is just there to silence the warning
-pub use helper::{push_devices, push_users};
 
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
@@ -238,8 +237,7 @@ impl Event {
         }
 
         for (cid, content) in self.replies.iter() {
-            let cm = ConversationMessage::seal(*cid, content)?;
-            send_cmessage(cm)?;
+            send_cmessage(*cid, content)?;
         }
 
         Ok(())
@@ -267,8 +265,15 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
     unimplemented!()
 }
 
-// TODO: form push, send to server
-#[allow(unused_variables)]
-fn send_cmessage(cm: ConversationMessage) -> Result<(), HErr> {
-    unimplemented!()
+// TODO: consider returning err if res != Success
+pub fn send_cmessage(
+    cid: ConversationId,
+    content: &ConversationMessageBody,
+) -> Result<push_users::Res, HErr> {
+    let cm = ConversationMessage::seal(cid, content)?;
+    let to = crate::members::members(&cid)?;
+    let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+    let req = push_users::Req { to, msg };
+    let res = helper::push_users(&req);
+    Ok(res)
 }
