@@ -290,17 +290,12 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
         }
         Msg(msg) => {
-            let cmessages::Msg {
-                mid,
-                from,
-                content,
-                op,
-            } = msg;
+            let cmessages::Msg { mid, content, op } = msg;
             match content {
                 cmessages::Message::Text(body) => {
                     crate::message::add_message(
                         Some(mid),
-                        from,
+                        cm.from().uid,
                         &cm.cid(),
                         &body,
                         Some(ts),
@@ -312,7 +307,10 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
                 cmessages::Message::Blob(body) => unimplemented!(),
             }
         }
-        Ack(ack) => unimplemented!(),
+        Ack(ack) => {
+            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
+            ev.notifications.push(Notification::Ack(ack.of));
+        }
     }
 
     Ok(ev)
@@ -362,7 +360,6 @@ fn remove_pending(tag: UQ) -> Result<(), HErr> {
 fn form_ack(mid: MsgId) -> Result<ConversationMessageBody, HErr> {
     Ok(ConversationMessageBody::Ack(cmessages::Ack {
         of: mid,
-        from: Config::static_id()?,
         stat: MessageReceiptStatus::Received,
     }))
 }

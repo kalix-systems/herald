@@ -149,7 +149,6 @@ pub mod cmessages {
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct Msg {
         pub mid: MsgId,
-        pub from: UserId,
         pub content: Message,
         pub op: Option<MsgId>,
     }
@@ -162,7 +161,6 @@ pub mod cmessages {
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct Ack {
         pub of: MsgId,
-        pub from: UserId,
         pub stat: MessageReceiptStatus,
     }
 }
@@ -180,11 +178,12 @@ pub enum ConversationMessageBody {
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 pub struct ConversationMessage {
+    // TODO: replace this with Block
     body: Bytes,
     /// Conversation the message is associated with
     cid: ConversationId,
-    // TODO: block caching
-    // bid: UQ,
+    /// Who supposedly sent the message
+    from: GlobalId,
 }
 
 // TODO: make these use chainmail
@@ -197,12 +196,17 @@ impl ConversationMessage {
         self.cid
     }
 
+    pub fn from(&self) -> GlobalId {
+        self.from
+    }
+
     pub fn seal(
         cid: ConversationId,
         content: &ConversationMessageBody,
     ) -> Result<ConversationMessage, HErr> {
         let body = Bytes::from(serde_cbor::to_vec(content)?);
-        Ok(ConversationMessage { cid, body })
+        let from = crate::config::Config::static_gid()?;
+        Ok(ConversationMessage { cid, from, body })
     }
 
     pub fn open(&self) -> Result<ConversationMessageBody, HErr> {

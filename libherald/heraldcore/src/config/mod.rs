@@ -206,6 +206,13 @@ impl Config {
         )
     }
 
+    /// Gets the current user's GlobalId
+    pub fn static_gid() -> Result<GlobalId, HErr> {
+        let uid = Config::static_id()?;
+        let did = *Config::static_keypair()?.public_key();
+        Ok(GlobalId { uid, did })
+    }
+
     /// Updates user's display name
     pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
         crate::contact::set_name(self.id, name.as_ref().map(|s| s.as_str()))?;
