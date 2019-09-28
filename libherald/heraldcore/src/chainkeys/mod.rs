@@ -4,26 +4,38 @@ use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
-#[derive(Default)]
 pub(crate) struct ChainKeys {
     // TODO use this, update other logic
     cid: ConversationId,
 }
 
-fn store_key(db: &rusqlite::Connection, hash: BlockHash, key: ChainKey) -> Result<(), HErr> {
+impl ChainKeys {
+    fn new(cid: ConversationId) -> Self {
+        ChainKeys { cid }
+    }
+}
+
+fn store_key(
+    db: &rusqlite::Connection,
+    cid: ConversationId,
+    hash: BlockHash,
+    key: ChainKey,
+) -> Result<(), HErr> {
     db.execute(
         include_str!("sql/store_key.sql"),
-        params![hash.as_ref(), key.as_ref()],
-    )?;
+        params![cid, hash.as_ref(), key.as_ref()],
+    )
+    .unwrap();
 
     Ok(())
 }
 
 fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     tx: rusqlite::Transaction,
+    cid: ConversationId,
     blocks: I,
 ) -> Result<(), ChainError> {
-    // references to transaction needs to be dropped before committing
+    // references to transaction need to be dropped before committing
     {
         let mut mark_stmt = tx
             .prepare(include_str!("sql/mark_used.sql"))
@@ -35,7 +47,9 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
 
         for block in blocks {
             if key_used_stmt
-                .query_row(params![block.as_ref()], |row| Ok(row.get::<_, bool>(0)?))
+                .query_row(params![cid, block.as_ref()], |row| {
+                    Ok(row.get::<_, bool>(0)?)
+                })
                 // return a `MissingKeys` error if the query result is empty
                 .map_err(|_| ChainError::MissingKeys)?
             {
@@ -43,9 +57,9 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
                 return Err(ChainError::RedundantMark);
             }
 
-            // otherwise we can mark the key as unused
+            // otherwise we can mark the key as used
             mark_stmt
-                .execute(params![block.as_ref()])
+                .execute(params![cid, block.as_ref()])
                 .map_err(|_| ChainError::BlockStoreUnavailable)?;
         }
     }
@@ -57,6 +71,7 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
 
 fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     db: &rusqlite::Connection,
+    cid: ConversationId,
     blocks: I,
 ) -> Option<BTreeSet<ChainKey>> {
     let mut stmt = db.prepare(include_str!("sql/get_keys.sql")).ok()?;
@@ -64,7 +79,7 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     let mut keys: BTreeSet<ChainKey> = BTreeSet::new();
 
     for block in blocks.map(|block| block.as_ref()) {
-        let key: Vec<u8> = stmt.query_row(params![block], |row| row.get(0)).ok()?;
+        let key: Vec<u8> = stmt.query_row(params![cid, block], |row| row.get(0)).ok()?;
         keys.insert(ChainKey::from_slice(key.as_slice())?);
     }
 
@@ -72,13 +87,16 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
 }
 
 // this should *not* mark keys as used
-fn get_unused(db: &rusqlite::Connection) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
+fn get_unused(
+    db: &rusqlite::Connection,
+    cid: ConversationId,
+) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
     let mut stmt = db
         .prepare(include_str!("sql/get_unused.sql"))
         .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
     let results = stmt
-        .query_map(NO_PARAMS, |row| {
+        .query_map(params![cid], |row| {
             Ok((row.get::<_, Vec<u8>>(0)?, row.get::<_, Vec<u8>>(1)?))
         })
         .map_err(|_| ChainError::BlockStoreCorrupted)?;
@@ -100,7 +118,7 @@ impl BlockStore for ChainKeys {
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<(), ChainError> {
         let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
-        store_key(&db, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
+        store_key(&db, self.cid, hash, key).map_err(|_| ChainError::BlockStoreUnavailable)
     }
 
     // we'll want to implement some kind of gc strategy to collect keys marked used
@@ -116,7 +134,7 @@ impl BlockStore for ChainKeys {
             .transaction()
             .map_err(|_| ChainError::BlockStoreUnavailable)?;
 
-        mark_used(tx, blocks)
+        mark_used(tx, self.cid, blocks)
     }
 
     // this should *not* mark keys as used
@@ -125,13 +143,13 @@ impl BlockStore for ChainKeys {
         blocks: I,
     ) -> Option<BTreeSet<ChainKey>> {
         let db = Database::get().ok()?;
-        get_keys(&db, blocks)
+        get_keys(&db, self.cid, blocks)
     }
 
     // this should *not* mark keys as used
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, ChainError> {
         let db = Database::get().map_err(|_| ChainError::BlockStoreUnavailable)?;
-        get_unused(&db)
+        get_unused(&db, self.cid)
     }
 }
 

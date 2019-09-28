@@ -1,4 +1,5 @@
 use super::*;
+use crate::conversation::add_conversation;
 use crate::womp;
 use serial_test_derive::serial;
 
@@ -6,7 +7,9 @@ use serial_test_derive::serial;
 #[serial]
 fn blockstore() {
     Database::reset_all().expect(womp!());
-    let mut handle = ChainKeys::default();
+    let conversation_id = ConversationId::from(crate::utils::rand_id());
+    add_conversation(Some(&conversation_id), None).expect(womp!());
+    let mut handle = ChainKeys::new(conversation_id);
 
     let blockhash1 = BlockHash::from_slice(vec![1; BLOCKHASH_BYTES].as_slice()).expect(womp!());
     let blockhash2 = BlockHash::from_slice(vec![2; BLOCKHASH_BYTES].as_slice()).expect(womp!());
@@ -34,6 +37,7 @@ fn blockstore() {
     handle.mark_used(vec![blockhash1].iter()).expect(womp!());
 
     let unused: Vec<_> = handle.get_unused().expect(womp!()).into_iter().collect();
+
     assert_eq!(unused.len(), 1);
     assert_eq!(unused, vec![(blockhash2, chainkey2)]);
 

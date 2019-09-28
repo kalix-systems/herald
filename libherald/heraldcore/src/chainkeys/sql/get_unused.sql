@@ -4,4 +4,4 @@ SELECT
 FROM
   chainkeys
 WHERE
-  used = 0
+  (conversation_id = @1) AND (used = 0)

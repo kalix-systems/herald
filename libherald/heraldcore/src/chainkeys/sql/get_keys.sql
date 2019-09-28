@@ -3,4 +3,4 @@ SELECT
 FROM
   chainkeys
 WHERE
-  hash = ?
+  (conversation_id = @1) AND (hash = @2)

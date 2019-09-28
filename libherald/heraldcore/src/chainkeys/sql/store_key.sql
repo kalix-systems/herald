@@ -1,3 +1,3 @@
 INSERT INTO
-  chainkeys(hash, chainkey)
-VALUES(@1, @2)
+  chainkeys(conversation_id, hash, chainkey)
+VALUES(@1, @2, @3)

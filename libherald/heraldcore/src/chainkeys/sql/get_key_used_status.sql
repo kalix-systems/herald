@@ -3,6 +3,6 @@ SELECT
 FROM
   chainkeys
 WHERE
-  hash = @1
+  (conversation_id = @1) AND (hash = @2)
 LIMIT
   1
