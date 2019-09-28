@@ -17,7 +17,13 @@ pub fn add_members_with_tx(
     cid: ConversationId,
     members: &[UserId],
 ) -> Result<(), HErr> {
-    unimplemented!()
+    let mut stmt = tx.prepare(include_str!("sql/add_member.sql"))?;
+
+    for member_id in members {
+        stmt.execute(params![cid, member_id])?;
+    }
+
+    Ok(())
 }
 
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
