@@ -1,48 +1,8 @@
-use crate::{
-    db::{DBTable, Database},
-    errors::HErr,
-    image_utils,
-    types::*,
-};
+use crate::{db::Database, errors::HErr, image_utils, types::*};
 use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
-use rusqlite::{params, NO_PARAMS};
+use rusqlite::params;
 use std::convert::TryInto;
-
-#[derive(Default)]
-/// Wrapper around contacts table.
-pub struct ContactsHandle {}
-
-impl DBTable for ContactsHandle {
-    fn create_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("../sql/contact/create_table.sql"), NO_PARAMS)?;
-        Ok(())
-    }
-
-    fn drop_table() -> Result<(), HErr> {
-        let db = Database::get()?;
-        db.execute(include_str!("../sql/contact/drop_table.sql"), NO_PARAMS)?;
-
-        Ok(())
-    }
-
-    fn exists() -> Result<bool, HErr> {
-        let db = Database::get()?;
-        let mut stmt = db.prepare(include_str!("../sql/contact/table_exists.sql"))?;
-
-        Ok(stmt.exists(NO_PARAMS)?)
-    }
-
-    fn reset() -> Result<(), HErr> {
-        let mut db = Database::get()?;
-        let tx = db.transaction()?;
-        tx.execute(include_str!("../sql/contact/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("../sql/contact/create_table.sql"), NO_PARAMS)?;
-        tx.commit()?;
-        Ok(())
-    }
-}
 
 /// Gets a contact's name by their `id`.
 pub fn name(id: UserId) -> Result<Option<String>, HErr> {

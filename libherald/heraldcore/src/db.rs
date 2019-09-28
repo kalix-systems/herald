@@ -51,6 +51,26 @@ impl DerefMut for Database {
     }
 }
 
+/// Initializes storage
+pub fn init() -> Result<(), HErr> {
+    let mut db = Database::get()?;
+    let tx = db.transaction()?;
+
+    // create
+    tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
+    tx.execute(
+        include_str!("sql/message_status/create_table.sql"),
+        NO_PARAMS,
+    )?;
+    tx.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
+    tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
+    tx.execute(include_str!("sql/config/create_table.sql"), NO_PARAMS)?;
+    tx.execute(include_str!("sql/members/create_table.sql"), NO_PARAMS)?;
+    tx.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
+    tx.commit()?;
+    Ok(())
+}
+
 impl Database {
     /// Connect to database at path `P`.
     /// Creates a database if one does not exist.
@@ -132,17 +152,17 @@ impl Default for Database {
     }
 }
 
-/// Types that are wrappers around database tables.
-pub trait DBTable {
-    /// Drops table if it exists.
-    fn drop_table() -> Result<(), HErr>;
-
-    /// Creates table if it does not exist.
-    fn create_table() -> Result<(), HErr>;
-
-    /// Indicates whether a table exists
-    fn exists() -> Result<bool, HErr>;
-
-    /// Resets the table.
-    fn reset() -> Result<(), HErr>;
-}
+///// Types that are wrappers around database tables.
+//pub trait DBTable {
+//    /// Drops table if it exists.
+//    fn drop_table() -> Result<(), HErr>;
+//
+//    /// Creates table if it does not exist.
+//    fn create_table() -> Result<(), HErr>;
+//
+//    /// Indicates whether a table exists
+//    fn exists() -> Result<bool, HErr>;
+//
+//    /// Resets the table.
+//    fn reset() -> Result<(), HErr>;
+//}
