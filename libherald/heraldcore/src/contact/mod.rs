@@ -409,7 +409,7 @@ impl ContactBuilder {
             ],
         )?;
         tx.execute(
-            include_str!("../sql/members/add_member.sql"),
+            include_str!("../members/sql/add_member.sql"),
             params![contact.pairwise_conversation, contact.id],
         )?;
 

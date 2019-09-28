@@ -6,7 +6,7 @@ use rusqlite::params;
 pub fn add_member(conversation_id: &ConversationId, member_id: UserId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/members/add_member.sql"),
+        include_str!("sql/add_member.sql"),
         params![conversation_id, member_id],
     )?;
     Ok(())
@@ -16,7 +16,7 @@ pub fn add_member(conversation_id: &ConversationId, member_id: UserId) -> Result
 pub fn remove_member(conversation_id: &ConversationId, member_id: UserId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(
-        include_str!("../sql/members/remove_member.sql"),
+        include_str!("sql/remove_member.sql"),
         params![conversation_id, member_id],
     )?;
     Ok(())
@@ -25,7 +25,7 @@ pub fn remove_member(conversation_id: &ConversationId, member_id: UserId) -> Res
 /// Gets the members of a conversation.
 pub fn members(conversation_id: &ConversationId) -> Result<Vec<UserId>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/members/get_conversation_members.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/get_conversation_members.sql"))?;
     let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
 
     let mut members = Vec::new();
