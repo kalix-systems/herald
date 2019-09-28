@@ -153,7 +153,10 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
     let ev = catchup(&mut ws)?;
     ev.execute(&mut sender)?;
 
-    std::thread::spawn(move || recv_messages(ws, sender));
+    std::thread::spawn(move || {
+        recv_messages(&mut ws, &mut sender)
+            .unwrap_or_else(|e| eprintln!("login connection closed with error: {}", e))
+    });
 
     Ok(receiver)
 }
@@ -175,8 +178,17 @@ fn catchup<S: Read + Write>(ws: &mut tungstenite::WebSocket<S>) -> Result<Event,
     Ok(ev)
 }
 
-#[allow(unused_variables)]
-fn recv_messages<S: Read + Write>(ws: tungstenite::WebSocket<S>, sender: Sender<Notification>) {}
+fn recv_messages<S: Read + Write>(
+    ws: &mut tungstenite::WebSocket<S>,
+    sender: &mut Sender<Notification>,
+) -> Result<(), HErr> {
+    loop {
+        let next = sock_get_msg(ws)?;
+        let ev = handle_push(&next)?;
+        ev.execute(sender)?;
+    }
+    Ok(())
+}
 
 fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
     ws: &mut tungstenite::WebSocket<S>,
