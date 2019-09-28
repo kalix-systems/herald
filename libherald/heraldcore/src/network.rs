@@ -266,9 +266,56 @@ impl Default for Event {
 
 #[allow(unused_variables)]
 fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
-    // TODO: use this, remove allow
-    let body = cm.open()?;
-    unimplemented!()
+    use ConversationMessageBody::*;
+    let mut ev = Event::default();
+    match cm.open()? {
+        NewKey(nk) => crate::contact_keys::key_registered(nk.0)?,
+        DepKey(dk) => crate::contact_keys::key_deprecated(dk.0)?,
+        AddedToConvo(ac) => {
+            let mut db = crate::db::Database::get()?;
+            let tx = db.transaction()?;
+            // TODO: figure out if conversations are pairwise somehow?
+            let cid = ac.cid;
+            let title = ac.title.as_ref().map(String::as_str);
+            crate::conversation::add_conversation_with_tx(&tx, Some(&cid), title, false)?;
+            crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
+            ev.notifications.push(Notification::NewConversation);
+        }
+        ContactReqAck(cr) => {
+            // TODO: handle this somehow
+        }
+        NewMembers(nm) => {
+            for member in nm.0 {
+                crate::members::add_member(&cm.cid(), member)?;
+            }
+        }
+        Msg(msg) => {
+            let cmessages::Msg {
+                mid,
+                from,
+                content,
+                op,
+            } = msg;
+            match content {
+                cmessages::Message::Text(body) => {
+                    crate::message::add_message(
+                        Some(mid),
+                        from,
+                        &cm.cid(),
+                        &body,
+                        Some(ts),
+                        None,
+                        &op,
+                    )?;
+                    ev.replies.push((cm.cid(), form_ack(mid)?));
+                }
+                cmessages::Message::Blob(body) => unimplemented!(),
+            }
+        }
+        Ack(ack) => unimplemented!(),
+    }
+
+    Ok(ev)
 }
 
 #[allow(unused_variables)]
@@ -310,4 +357,12 @@ fn get_pending() -> Result<Vec<(UQ, ConversationId, ConversationMessageBody)>, H
 // removes pending message associated with tag
 fn remove_pending(tag: UQ) -> Result<(), HErr> {
     unimplemented!()
+}
+
+fn form_ack(mid: MsgId) -> Result<ConversationMessageBody, HErr> {
+    Ok(ConversationMessageBody::Ack(cmessages::Ack {
+        of: mid,
+        from: Config::static_id()?,
+        stat: MessageReceiptStatus::Received,
+    }))
 }

@@ -12,6 +12,14 @@ pub fn add_member(conversation_id: &ConversationId, member_id: UserId) -> Result
     Ok(())
 }
 
+pub fn add_members_with_tx(
+    tx: &rusqlite::Transaction,
+    cid: ConversationId,
+    members: &[UserId],
+) -> Result<(), HErr> {
+    unimplemented!()
+}
+
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
 pub fn remove_member(conversation_id: &ConversationId, member_id: UserId) -> Result<(), HErr> {
     let db = Database::get()?;

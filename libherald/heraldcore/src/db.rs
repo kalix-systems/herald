@@ -106,7 +106,6 @@ impl Database {
     }
 
     /// Reset all table in database
-    #[allow(dead_code)]
     pub(crate) fn reset_all() -> Result<(), HErr> {
         let mut db = Self::get()?;
         let tx = db.transaction()?;

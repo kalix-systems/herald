@@ -129,33 +129,41 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
     }
 }
 
-mod cmessages {
+pub mod cmessages {
     use super::*;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-    pub struct NewKey(sig::PublicKey);
+    pub struct NewKey(pub Signed<sig::PublicKey>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-    pub struct DepKey(sig::PublicKey);
+    pub struct DepKey(pub Signed<sig::PublicKey>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-    pub struct NewMembers(Vec<UserId>);
+    pub struct NewMembers(pub Vec<UserId>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct AddedToConvo {
-        members: Vec<UserId>,
-        meta: crate::conversation::ConversationMeta,
+        pub members: Vec<UserId>,
+        pub cid: ConversationId,
+        pub title: Option<String>,
     }
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
-    pub struct ContactReqAck(bool);
+    pub struct ContactReqAck(pub bool);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct Msg {
-        mid: MsgId,
-        from: UserId,
-        content: Message,
+        pub mid: MsgId,
+        pub from: UserId,
+        pub content: Message,
+        pub op: Option<MsgId>,
     }
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
     pub enum Message {
         Text(String),
         Blob(Bytes),
-        Ack(MessageReceiptStatus),
+    }
+
+    #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    pub struct Ack {
+        pub of: MsgId,
+        pub from: UserId,
+        pub stat: MessageReceiptStatus,
     }
 }
 
@@ -167,6 +175,7 @@ pub enum ConversationMessageBody {
     AddedToConvo(cmessages::AddedToConvo),
     ContactReqAck(cmessages::ContactReqAck),
     Msg(cmessages::Msg),
+    Ack(cmessages::Ack),
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
