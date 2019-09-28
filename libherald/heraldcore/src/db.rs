@@ -54,20 +54,11 @@ impl DerefMut for Database {
 /// Initializes storage
 pub fn init() -> Result<(), HErr> {
     let mut db = Database::get()?;
-    let tx = db.transaction()?;
 
-    // create
-    tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
-    tx.execute(
-        include_str!("sql/message_status/create_table.sql"),
-        NO_PARAMS,
-    )?;
-    tx.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
-    tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
-    tx.execute(include_str!("sql/config/create_table.sql"), NO_PARAMS)?;
-    tx.execute(include_str!("sql/members/create_table.sql"), NO_PARAMS)?;
-    tx.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
+    let tx = db.transaction()?;
+    tx.execute_batch(include_str!("sql/create_all.sql"))?;
     tx.commit()?;
+
     Ok(())
 }
 
@@ -121,25 +112,10 @@ impl Database {
         let tx = db.transaction()?;
 
         // drop
-        tx.execute(include_str!("sql/chainkeys/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/message_status/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/message/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/members/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/contact/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/config/drop_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/conversation/drop_table.sql"), NO_PARAMS)?;
+        tx.execute_batch(include_str!("sql/drop_all.sql"))?;
 
         // create
-        tx.execute(include_str!("sql/chainkeys/create_table.sql"), NO_PARAMS)?;
-        tx.execute(
-            include_str!("sql/message_status/create_table.sql"),
-            NO_PARAMS,
-        )?;
-        tx.execute(include_str!("sql/message/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/contact/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/config/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/members/create_table.sql"), NO_PARAMS)?;
-        tx.execute(include_str!("sql/conversation/create_table.sql"), NO_PARAMS)?;
+        tx.execute_batch(include_str!("sql/create_all.sql"))?;
         tx.commit()?;
         Ok(())
     }
