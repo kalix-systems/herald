@@ -20,7 +20,7 @@ pub fn add_members_with_tx(
     let mut stmt = tx.prepare(include_str!("sql/add_member.sql"))?;
 
     for member_id in members {
-        stmt.execute(params![cid, member_id])?;
+        stmt.execute(params![&cid, member_id])?;
     }
 
     Ok(())
