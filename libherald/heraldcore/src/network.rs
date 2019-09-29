@@ -269,7 +269,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     use ConversationMessageBody::*;
     let mut ev = Event::default();
     match cm.open()? {
-        NewKey(nk) => crate::contact_keys::key_registered(nk.0)?,
+        NewKey(nk) => crate::contact_keys::add_key(nk.0)?,
         DepKey(dk) => crate::contact_keys::key_deprecated(dk.0)?,
         AddedToConvo(ac) => {
             let mut db = crate::db::Database::get()?;

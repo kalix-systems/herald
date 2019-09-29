@@ -69,8 +69,28 @@ CREATE TABLE IF NOT EXISTS contacts (
   status INTEGER NOT NULL,
   -- contact type
   contact_type INTEGER NOT NULL,
-  added INTEGER DEFAULT (strftime('%s', 'now')),
+  added INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
+);
+
+CREATE TABLE key_creations (
+  -- key, 32 bytes
+  key BLOB PRIMARY KEY,
+  -- signed by, 32 bytes
+  signed_by BLOB NOT NULL,
+  -- timestamp of creation
+  ts INTEGER NOT NULL,
+  -- signature, 64 bytes
+  signature BLOB NOT NULL
+);
+
+CREATE TABLE key_deprecations (
+  -- key, 32 bytes
+  key BLOB PRIMARY KEY,
+  -- timestamp of the deprecation
+  ts INTEGER NOT NULL,
+  signed_by BLOB NOT NULL,
+  signature BLOB NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS config (
