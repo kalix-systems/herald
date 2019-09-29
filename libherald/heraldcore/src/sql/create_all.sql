@@ -76,21 +76,25 @@ CREATE TABLE IF NOT EXISTS contacts (
 CREATE TABLE key_creations (
   -- key, 32 bytes
   key BLOB PRIMARY KEY,
+  user_id BLOB NOT NULL,
   -- signed by, 32 bytes
   signed_by BLOB NOT NULL,
   -- timestamp of creation
   ts INTEGER NOT NULL,
   -- signature, 64 bytes
-  signature BLOB NOT NULL
+  signature BLOB NOT NULL,
+  FOREIGN KEY(user_id) REFERENCES contacts(user_id)
 );
 
 CREATE TABLE key_deprecations (
   -- key, 32 bytes
   key BLOB PRIMARY KEY,
+  user_id BLOB NOT NULL,
   -- timestamp of the deprecation
   ts INTEGER NOT NULL,
   signed_by BLOB NOT NULL,
-  signature BLOB NOT NULL
+  signature BLOB NOT NULL,
+  FOREIGN KEY(user_id) REFERENCES contacts(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS config (
