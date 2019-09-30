@@ -73,28 +73,38 @@ CREATE TABLE IF NOT EXISTS contacts (
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 );
 
-CREATE TABLE key_creations (
-  -- key, 32 bytes
-  key BLOB PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS user_keys (
+  key BLOB NOT NULL PRIMARY KEY,
   user_id BLOB NOT NULL,
-  -- signed by, 32 bytes
-  signed_by BLOB NOT NULL,
-  -- timestamp of creation
-  ts INTEGER NOT NULL,
-  -- signature, 64 bytes
-  signature BLOB NOT NULL,
   FOREIGN KEY(user_id) REFERENCES contacts(user_id)
 );
 
-CREATE TABLE key_deprecations (
-  -- key, 32 bytes
-  key BLOB PRIMARY KEY,
-  user_id BLOB NOT NULL,
-  -- timestamp of the deprecation
-  ts INTEGER NOT NULL,
+CREATE INDEX user_keys_uid_ix ON user_keys(user_id);
+
+CREATE TABLE key_creations (
+  -- key
+  key BLOB PRIMARY KEY NOT NULL,
+  -- signing key
   signed_by BLOB NOT NULL,
+  -- signature, 64 bytes
   signature BLOB NOT NULL,
-  FOREIGN KEY(user_id) REFERENCES contacts(user_id)
+  -- timestamp of creation
+  ts INTEGER NOT NULL,
+  FOREIGN KEY(signed_by) REFERENCES user_keys(key),
+  FOREIGN KEY(key) REFERENCES user_keys(key)
+);
+
+CREATE TABLE key_deprecations (
+  -- key
+  key BLOB PRIMARY KEY NOT NULL,
+  -- signing key
+  signed_by BLOB NOT NULL,
+  -- signature, 64 bytes
+  signature BLOB NOT NULL,
+  -- timestamp of creation
+  ts INTEGER NOT NULL,
+  FOREIGN KEY(signed_by) REFERENCES user_keys(key),
+  FOREIGN KEY(key) REFERENCES user_keys(key)
 );
 
 CREATE TABLE IF NOT EXISTS config (
