@@ -41,5 +41,13 @@
         <file>x-icon.svg</file>
         <file>reply-icon.svg</file>
         <file>pencil-icon-black.svg</file>
+        <file>emoji-categories/flags.svg</file>
+        <file>emoji-categories/food.svg</file>
+        <file>emoji-categories/gestural.svg</file>
+        <file>emoji-categories/items.svg</file>
+        <file>emoji-categories/nature.svg</file>
+        <file>emoji-categories/sports.svg</file>
+        <file>emoji-categories/symbols.svg</file>
+        <file>emoji-categories/transport.svg</file>
     </qresource>
 </RCC>

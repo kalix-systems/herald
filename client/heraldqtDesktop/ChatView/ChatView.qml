@@ -80,6 +80,7 @@ Pane {
      /// in a repeater everytime we open a chat.
     Loader {
         id: emoKeysPopup
+        clip: true
         property var window: convWindow
         active: false
         sourceComponent: emojiPickerComp

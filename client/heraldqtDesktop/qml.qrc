@@ -41,5 +41,6 @@
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>EmojiKeyboard/PickerShape.qml</file>
+        <file>EmojiKeyboard/AnchorButton.qml</file>
     </qresource>
 </RCC>

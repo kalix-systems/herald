@@ -1,133 +1,204 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
+import LibHerald 1.0
 
 Item {
-    // most recent 20 emojis.
-    property var mostRecent: []
-    // enum skinTone { yellow, ... }
-    property int skinTone: 0
     property color lowlight: "light gray"
     readonly property int categoryCount: 8
-   // header and search bar
-   Item {
-       id: header
-       height: 30
-       anchors.top: parent.top
-       anchors.topMargin: 10
-       anchors.right: parent.right
-       anchors.left: parent.left
+    // header and search bar
+    Item {
+        id: header
+        height: 30
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        anchors.right: parent.right
+        anchors.left: parent.left
 
+        // search bar and exit button
+        Rectangle {
+            id: taBox
+            ScrollView {
+                anchors {
+                    left: parent.left
+                    right: exitButton.left
+                    leftMargin: 0
+                }
+                TextArea {
+                    placeholderText: "Search..."
+                    Keys.onReturnPressed: {
+                        event.accepted = true
+                    }
+                }
+            }
+            Button {
+                id: exitButton
+                background: Rectangle {
+                    color: parent.pressed ? "#33000000" : "#44000000" // transparent
+                    radius: parent.height
+                    anchors.fill: parent
+                }
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                anchors.margins: QmlCfg.smallMargin - 1
+                width: height
+                onClicked: emoKeysPopup.active = false
+                Text {
+                    text: "X"
+                    anchors.centerIn: parent
+                }
+            }
 
-       Rectangle {
+            anchors {
+                left: parent.left
+                right: menu.left
+                margins: 10
+            }
 
-           TextArea {
-               placeholderText: "Search..."
-               anchors.left: parent.left
-               anchors.right: parent.right
-               anchors.margins: 10
-               anchors.verticalCenter: parent.verticalCenter
-           }
+            color: "#33000000" // transparent
+            radius: QmlCfg.radius
+            border.color: "white"
+            border.width: 0.5
+            height: 25
+        }
 
-           anchors {
-               left: parent.left
-               right: menu.left
-               margins: 10
-           }
-
-           color: "#33000000" // transparent
-           radius: 10
-           border.color: "white"
-           border.width: 0.5
-           height: 25
-       }
-
-        Button {
+        // skin swatch selector
+        ComboBox {
             id: menu
             anchors.right: parent.right
-            anchors.margins: 10
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: QmlCfg.margin
+            anchors.verticalCenter: taBox.verticalCenter
             height: 20
             width: 20
-            background: Rectangle {
-                id: bg
-                radius: 5
-                opacity: parent.pressed ? 1.0 : 0.0
+            currentIndex: QmlCfg.skinSwatchIndex
+            model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
+            indicator: Item {}
+            delegate: ItemDelegate {
+                height: menu.height
+                Rectangle {
+                    anchors.fill: parent
+                    color: menu.model[index]
+                }
+            }
+
+            onCurrentIndexChanged: {
+                QmlCfg.skinSwatchIndex = currentIndex
+            }
+
+            contentItem: Rectangle {
                 anchors.fill: parent
-                color: lowlight
-            }
-            /// ToDo: bring up skin color dialog
-            /// Maybe this should just be a skin color swatch, or
-            /// and emoji
-            Text {
-                font.pixelSize: 20
-                anchors.centerIn: parent
-                font.bold: true
-                text: "⋮"
+                color: menu.model[menu.currentIndex]
             }
         }
-   }
+    }
 
-   Rectangle {
-       width: parent.width
-       height: 0.5
-       color: "white"
-       anchors.bottom: listView.top
-   }
+    Rectangle {
+        width: parent.width
+        height: 0.5
+        color: "white"
+        anchors.bottom: listView.top
+    }
+
+    // actual interior
+    Item {
+        id: listView
+        width: parent.width
+        anchors {
+            top: header.bottom
+            bottom: footer.top
+        }
+
+        Flickable {
+            anchors.fill: parent
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+            contentHeight: col.height
+            ScrollBar.vertical: ScrollBar {}
+            Column {
+                id: col
+                spacing: QmlCfg.margin
+                Repeater {
+                    id: categoryBlock
+                    model: categoryCount
+                    Column {
+                        spacing: QmlCfg.smallMargin
+                        topPadding: QmlCfg.margin
 
 
-   Item {
-       id: listView
-       width: parent.width
-       anchors {
-           top: header.bottom
-           bottom: footer.top
-       }
-     Flickable {
-        anchors.fill: parent
-        boundsBehavior: Flickable.StopAtBounds
-        clip: true
-        contentHeight: col.height
-       Column {
-           id: col
-           spacing: 10
-           Repeater {
-                model: categoryCount
-                Grid {
-                    columns: 8
-                    spacing: 2
-                    Repeater {
-                        model: 101
-                        EmojiButton {}
+                        Text {
+                            leftPadding: QmlCfg.smallMargin
+                            text: "Category Name"
+                            font.bold: true
+                        }
+                        Grid {
+                            id: emojiGrid
+                            columns: 8
+                            spacing: 2
+                            Repeater {
+                                model: 101
+                                EmojiButton {}
+                            }
+                        }
                     }
-                 }
-              }
-            }
-          }
-      }
-
-   Item {
-       id: footer
-       width: parent.width
-       height: 30
-       anchors.bottom: parent.bottom
-       anchors.bottomMargin: 20 // 10 + carat height
-
-       Rectangle {
-           width: parent.width
-           height: 0.5
-           color: "white"
-       }
-
-       // todo: these should be buttons
-       // and not emojis
-       Row {
-           anchors.centerIn: parent
-        Repeater {
-            model: categoryCount
-            EmojiButton {
-               lowlight: lowlight
+                }
             }
         }
-       }
-   }
+    }
+
+    // footer and anchor links
+    Item {
+        id: footer
+        width: parent.width
+        height: 30
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 20 // 10 + carat height
+
+        Rectangle {
+            id: hr
+            width: parent.width
+            height: 0.5
+            color: "white"
+        }
+
+        Row {
+            anchors {
+                topMargin: QmlCfg.margin
+                top: hr.bottom
+                horizontalCenter: hr.horizontalCenter
+            }
+            spacing: QmlCfg.margin
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/gestural.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/nature.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/food.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/sports.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/transport.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/items.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/symbols.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                imageSource: "qrc:/emoji-categories/flags.svg"
+            }
+        }
+    }
 }

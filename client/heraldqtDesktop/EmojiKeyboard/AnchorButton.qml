@@ -1,18 +1,19 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+
 Button {
-    property bool takesModifier: true
-    readonly property string baseEmoji: "👍"
-    property string emoji:takesModifier ? baseEmoji + QmlCfg.skinSwatchList[QmlCfg.skinSwatchIndex] : baseEmoji
+    property string    imageSource: ""
+    property int       anchorIndex
+    property ListView  list
     property color lowlight: "light gray"
 
     onClicked: {
-        maskShape.send(emoji)
+//        list.positionViewAtIndex(anchorIndex)
     }
 
-    height: selector.height + 3
-    width: selector.width + 5
+    height: selector.height+5
+     width: selector.width+5
 
     background: Rectangle {
         id: bg
@@ -22,12 +23,14 @@ Button {
         color: lowlight
     }
 
-    Text {
+    Image {
         id: selector
         opacity: 1.0
+        source: imageSource
+        sourceSize: Qt.size(24,24)
+        height: 17
+        width: height
         anchors.centerIn: parent
-        font.pixelSize: 20
-        text: emoji
     }
 
 }

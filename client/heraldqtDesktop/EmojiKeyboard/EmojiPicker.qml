@@ -7,6 +7,7 @@ Item {
         readonly property color pickerColor: "light gray"
         readonly property int   edgeRadius: 10
         readonly property color pickerClickColor: Qt.lighter("light gray", 1.5);
+        property string modifier: ""
         property var caratCenter
         property var window
         signal send(string emoji)
