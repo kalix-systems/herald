@@ -33,7 +33,10 @@ pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {
     let manager = ConnectionManager::<PgConnection>::new(database_url());
-    r2d2::Pool::new(manager).expect("db pool")
+    r2d2::Pool::builder()
+        .max_size(32)
+        .build(manager)
+        .expect("db pool")
 }
 
 fn database_url() -> String {
@@ -611,8 +614,6 @@ mod tests {
     fn add_get_expire_pending() {
         let mut conn = open_conn();
 
-        let kp_other = sig::KeyPair::gen_new();
-
         let kp = sig::KeyPair::gen_new();
         let user_id = "Hello".try_into().unwrap();
 
@@ -622,15 +623,10 @@ mod tests {
         let pending = conn.get_pending(*kp.public_key()).unwrap();
         assert_eq!(pending.len(), 0);
 
-        let from = GlobalId {
-            did: *kp_other.public_key(),
-            uid: "World".try_into().unwrap(),
-        };
-
-        let push = Push::NewUMessage {
-            from,
-            msg: bytes::Bytes::new(),
+        let push = Push {
+            tag: PushTag::User,
             timestamp: Utc::now(),
+            msg: bytes::Bytes::new(),
         };
 
         assert!(conn.add_pending(vec![*kp.public_key()], push).is_ok());

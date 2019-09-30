@@ -20,9 +20,12 @@ pub mod post;
 
 impl State {
     pub fn new() -> Self {
+        println!("starting pool");
+        let pool = init_pool();
+        println!("pool started");
         State {
             active: DashMap::default(),
-            pool: init_pool(),
+            pool,
         }
     }
 
