@@ -27,6 +27,8 @@ ToolBar {
     }
     clip: true
     height: QmlCfg.toolbarHeight
+    // JH: factor z values into the config
+    z: 5
     anchors {
         top: parent.top
         left: parent.left

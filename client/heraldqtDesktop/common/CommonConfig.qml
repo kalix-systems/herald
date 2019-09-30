@@ -1,5 +1,7 @@
 pragma Singleton
 import QtQuick 2.13
+import Qt.labs.settings 1.0
+import "EmojiJson.js" as JSON
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -10,11 +12,14 @@ import QtQuick 2.13
 // Factor Component: FC
 // FS: Fix scoping
 Item {
-    property int theme: 0 /// user settable
+    id: cfg
+
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
     readonly property int margin: 10
+    /// fitzpatrick emoji swatch codes
+    readonly property var skinSwatchList: ["","🏻","🏼","🏽","🏾","🏿"]
     /// standard half margin
     readonly property int smallMargin: 5
     /// standard half padding unit
@@ -25,6 +30,22 @@ Item {
     readonly property int toolbarHeight: 40
     /// standard chat text size
     property int chatTextSize: 10
+
+
+    /// user settable cfg
+    property int theme: 0
+    /// emoji skin color
+    property int skinSwatchIndex: 0
+    /// persistent most common emojis
+    readonly property var emojiModel: JSON.emojiJson
+
+
+
+    Settings {
+        property alias theme: cfg.theme
+        property alias skinSwatchIndex: cfg.skinSwatchIndex
+    }
+
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme
@@ -68,6 +89,7 @@ Item {
             case (3):
             break
         }
+
     }
     /// Todo : finish these later THIS LIST IS APPEND ONLY
     property var avatarColors: ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
