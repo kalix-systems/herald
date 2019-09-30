@@ -24,9 +24,11 @@ pub mod members;
 /// Functions and data structures related to messages.
 pub mod message;
 /// message status
-mod message_status;
+mod message_receipts;
 /// Networking
 pub mod network;
+/// Pending out messages
+pub mod pending;
 /// Types
 pub mod types;
 /// Utils

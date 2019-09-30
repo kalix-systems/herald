@@ -279,9 +279,14 @@ pub(crate) fn add_pairwise_conversation(
     add_conversation_with_tx(tx, conversation_id, title, false)
 }
 
-// NOTE (Jack): I don't currently care what order these are returned in
 pub(crate) fn get_pairwise_conversations(uids: &[UserId]) -> Result<Vec<ConversationId>, HErr> {
-    unimplemented!()
+    let db = Database::get()?;
+    let mut stmt = db.prepare(include_str!("sql/pairwise_cid.sql"))?;
+
+    uids.iter()
+        .map(|uid| stmt.query_row(params![uid], |row| Ok(row.get(0)?)))
+        .map(|res| Ok(res?))
+        .collect()
 }
 
 #[cfg(test)]

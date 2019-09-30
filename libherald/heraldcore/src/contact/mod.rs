@@ -106,7 +106,7 @@ pub fn set_status(
         Deleted => {
             let tx = db.transaction()?;
             tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
-            crate::message_status::delete_by_conversation_tx(&tx, pairwise_conv)?;
+            crate::message_receipts::delete_by_conversation_tx(&tx, pairwise_conv)?;
             tx.execute(
                 include_str!("../message/sql/delete_pairwise_conversation.sql"),
                 params![id],

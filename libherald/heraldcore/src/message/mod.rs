@@ -96,7 +96,7 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
     Ok(())
 }
 
-/// Gets message's by `MessageSendStatus`
+/// Gets messages by `MessageSendStatus`
 pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("../message/sql/by_send_status.sql"))?;
@@ -115,10 +115,6 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(include_str!("sql/delete_message.sql"), params![id])?;
     Ok(())
-}
-
-pub fn add_receipt(id: MsgId, from: UserId, stat: MessageReceiptStatus) -> Result<(), HErr> {
-    unimplemented!()
 }
 
 #[cfg(test)]

@@ -253,3 +253,23 @@ fn delete_conversation() {
         .expect(womp!())
         .is_empty());
 }
+
+#[test]
+#[serial]
+fn pairwise_cids() {
+    Database::reset_all().expect(womp!());
+
+    let uid1 = "Hello".try_into().expect(womp!());
+    let c1 = ContactBuilder::new(uid1).add().expect(womp!());
+    let uid2 = "World".try_into().expect(womp!());
+    let c2 = ContactBuilder::new(uid2).add().expect(womp!());
+
+    let uid3 = "GoodMorning".try_into().expect(womp!());
+    ContactBuilder::new(uid3).add().expect(womp!());
+
+    let cids = get_pairwise_conversations(&[uid1, uid2]).expect(womp!());
+
+    assert_eq!(cids.len(), 2);
+    assert_eq!(cids[0], c1.pairwise_conversation);
+    assert_eq!(cids[1], c2.pairwise_conversation);
+}

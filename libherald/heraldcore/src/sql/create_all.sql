@@ -7,10 +7,13 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   PRIMARY KEY(chainkey, hash)
 );
 
-CREATE TABLE IF NOT EXISTS message_status(
-  msg_id BLOB PRIMARY KEY NOT NULL,
+CREATE TABLE IF NOT EXISTS message_receipts(
+  msg_id BLOB NOT NULL,
+  user_id TEXT NOT NULL,
   status INTEGER DEFAULT(0) NOT NULL,
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
+  PRIMARY KEY(msg_id, user_id),
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
+  FOREIGN KEY(user_id) REFERENCES contacts(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -66,8 +69,42 @@ CREATE TABLE IF NOT EXISTS contacts (
   status INTEGER NOT NULL,
   -- contact type
   contact_type INTEGER NOT NULL,
-  added INTEGER DEFAULT (strftime('%s', 'now')),
+  added INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_keys (
+  key BLOB NOT NULL PRIMARY KEY,
+  user_id BLOB NOT NULL,
+  FOREIGN KEY(user_id) REFERENCES contacts(user_id)
+);
+
+CREATE INDEX user_keys_uid_ix ON user_keys(user_id);
+
+CREATE TABLE key_creations (
+  -- key
+  key BLOB PRIMARY KEY NOT NULL,
+  -- signing key
+  signed_by BLOB NOT NULL,
+  -- signature, 64 bytes
+  signature BLOB NOT NULL,
+  -- timestamp of creation
+  ts INTEGER NOT NULL,
+  FOREIGN KEY(signed_by) REFERENCES user_keys(key),
+  FOREIGN KEY(key) REFERENCES user_keys(key)
+);
+
+CREATE TABLE key_deprecations (
+  -- key
+  key BLOB PRIMARY KEY NOT NULL,
+  -- signing key
+  signed_by BLOB NOT NULL,
+  -- signature, 64 bytes
+  signature BLOB NOT NULL,
+  -- timestamp of creation
+  ts INTEGER NOT NULL,
+  FOREIGN KEY(signed_by) REFERENCES user_keys(key),
+  FOREIGN KEY(key) REFERENCES user_keys(key)
 );
 
 CREATE TABLE IF NOT EXISTS config (
@@ -79,6 +116,13 @@ CREATE TABLE IF NOT EXISTS config (
   -- enforce this table having no more than one row
   chk_id INTEGER UNIQUE default(1),
   CONSTRAINT CHK_config_singlerow CHECK (chk_id = 1)
+);
+
+CREATE TABLE IF NOT EXISTS pending_out (
+  pending_tag INTEGER PRIMARY KEY NOT NULL,
+  conversation_id BLOB NOT NULL,
+  content BLOB NOT NULL,
+  FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id)
 );
 
 CREATE TABLE IF NOT EXISTS conversation_members (

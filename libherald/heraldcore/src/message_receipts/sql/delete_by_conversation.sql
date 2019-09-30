@@ -1,5 +1,5 @@
 DELETE FROM
-  message_status
+  message_receipts
 WHERE
   msg_id
 IN (
