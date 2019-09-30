@@ -32,11 +32,33 @@ pub(crate) fn add_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<
 }
 
 pub(crate) fn get_valid_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> {
-    unimplemented!();
+    let mut db = Database::get()?;
+    let mut stmt = db.prepare(include_str!("sql/valid_keys.sql"))?;
+
+    let out = stmt
+        .query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?
+        .map(|res| {
+            sign::PublicKey::from_slice(res?.as_slice())
+                .ok_or(HErr::HeraldError("Invalid key".into()))
+        })
+        .collect();
+
+    out
 }
 
 pub(crate) fn get_deprecated_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> {
-    unimplemented!();
+    let mut db = Database::get()?;
+    let mut stmt = db.prepare(include_str!("sql/dep_keys.sql"))?;
+
+    let out = stmt
+        .query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?
+        .map(|res| {
+            sign::PublicKey::from_slice(res?.as_slice())
+                .ok_or(HErr::HeraldError("Invalid key".into()))
+        })
+        .collect();
+
+    out
 }
 
 pub(crate) fn deprecate_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<(), HErr> {
