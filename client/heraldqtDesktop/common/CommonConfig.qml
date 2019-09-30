@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick 2.13
 import Qt.labs.settings 1.0
+import "EmojiJson.js" as JSON
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -35,16 +36,14 @@ Item {
     property int theme: 0
     /// emoji skin color
     property int skinSwatchIndex: 0
-    ///
-    property var mostCommonEmojis: []
+    /// persistent most common emojis
+    readonly property var emojiModel: JSON.emojiJson
+
 
     Settings {
         property alias theme: cfg.theme
         property alias skinSwatchIndex: cfg.skinSwatchIndex
-        property alias mostCommonEmojis: cfg.mostCommonEmojis
     }
-
-
 
     /// palette :
     /// object which contains all of the color configurations
@@ -89,6 +88,7 @@ Item {
             case (3):
             break
         }
+
     }
     /// Todo : finish these later THIS LIST IS APPEND ONLY
     property var avatarColors: ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]

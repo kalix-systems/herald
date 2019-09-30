@@ -1,16 +1,14 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
 import LibHerald 1.0
-
 Item {
     property color lowlight: "light gray"
-    readonly property int categoryCount: 8
     // header and search bar
     Item {
         id: header
-        height: 30
+        height: 30 //enough for search bar of default size w/ margins
         anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.topMargin: QmlCfg.margin
         anchors.right: parent.right
         anchors.left: parent.left
 
@@ -21,7 +19,6 @@ Item {
                 anchors {
                     left: parent.left
                     right: exitButton.left
-                    leftMargin: 0
                 }
                 TextArea {
                     placeholderText: "Search..."
@@ -37,10 +34,12 @@ Item {
                     radius: parent.height
                     anchors.fill: parent
                 }
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                anchors.margins: QmlCfg.smallMargin - 1
+                anchors {
+                    top: parent.top
+                    bottom: parent.bottom
+                    right: parent.right
+                    margins: QmlCfg.smallMargin - 1 // magic
+                  }
                 width: height
                 onClicked: emoKeysPopup.active = false
                 Text {
@@ -108,42 +107,36 @@ Item {
             bottom: footer.top
         }
 
-        Flickable {
+        ListView {
+            id: emojiList
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            contentHeight: col.height
             ScrollBar.vertical: ScrollBar {}
-            Column {
-                id: col
-                spacing: QmlCfg.margin
-                Repeater {
-                    id: categoryBlock
-                    model: categoryCount
-                    Column {
-                        spacing: QmlCfg.smallMargin
-                        topPadding: QmlCfg.margin
-
-
-                        Text {
-                            leftPadding: QmlCfg.smallMargin
-                            text: "Category Name"
-                            font.bold: true
-                        }
-                        Grid {
-                            id: emojiGrid
-                            columns: 8
-                            spacing: 2
-                            Repeater {
-                                model: 101
-                                EmojiButton {}
-                            }
-                        }
+            model: QmlCfg.emojiModel
+            delegate: Column {
+                Text {
+                    padding: QmlCfg.smallMargin
+                    text: modelData.sectionName
+                    font.bold: true
+                }
+                Grid {
+                       id: emojiGrid
+                       columns: 8
+                       spacing: 2
+                 Repeater {
+                         id: self
+                          model: modelData.List
+                          EmojiButton {
+                              baseEmoji: self.model[index][0]
+                              takesModifier:  self.model[index].length === 3
+                          }
+                       }
                     }
                 }
-            }
-        }
-    }
+           }
+      }
+
 
     // footer and anchor links
     Item {
@@ -169,34 +162,42 @@ Item {
             spacing: QmlCfg.margin
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 0
                 imageSource: "qrc:/emoji-categories/gestural.svg"
             }
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 1
                 imageSource: "qrc:/emoji-categories/nature.svg"
             }
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 2
                 imageSource: "qrc:/emoji-categories/food.svg"
             }
             AnchorButton {
                 lowlight: lowlight
-                imageSource: "qrc:/emoji-categories/sports.svg"
-            }
-            AnchorButton {
-                lowlight: lowlight
+                anchorIndex: 3
                 imageSource: "qrc:/emoji-categories/transport.svg"
             }
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 4
+                imageSource: "qrc:/emoji-categories/sports.svg"
+            }
+            AnchorButton {
+                lowlight: lowlight
+                anchorIndex: 5
                 imageSource: "qrc:/emoji-categories/items.svg"
             }
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 6
                 imageSource: "qrc:/emoji-categories/symbols.svg"
             }
             AnchorButton {
                 lowlight: lowlight
+                anchorIndex: 7
                 imageSource: "qrc:/emoji-categories/flags.svg"
             }
         }

@@ -1,15 +1,15 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
+import QtGraphicalEffects 1.0
 import LibHerald 1.0
 
 Button {
     property string    imageSource: ""
     property int       anchorIndex
-    property ListView  list
     property color lowlight: "light gray"
 
     onClicked: {
-//        list.positionViewAtIndex(anchorIndex)
+        emojiList.positionViewAtIndex(anchorIndex, ListView.Beginning)
     }
 
     height: selector.height+5
@@ -31,6 +31,13 @@ Button {
         height: 17
         width: height
         anchors.centerIn: parent
+    }
+
+    ColorOverlay {
+        visible: emojiList.currentIndex === anchorIndex
+        anchors.fill: selector
+        source: selector
+        color: "#AA0000FF"
     }
 
 }

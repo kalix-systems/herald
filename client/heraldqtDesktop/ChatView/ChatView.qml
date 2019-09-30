@@ -6,8 +6,8 @@ import QtQuick.Dialogs 1.3
 import "." as CVUtils
 import "../common/utils.mjs" as Utils
 import "./ChatTextAreaUtils.mjs" as CTUtils
-import "../common" as Common
 import "../EmojiKeyboard" as EK
+import "../common" as Common
 
 Pane {
     id: chatPane
@@ -48,6 +48,7 @@ Pane {
         }
     }
 
+
     Component{
         id: emojiPickerComp
         EK.EmojiPicker {
@@ -66,7 +67,6 @@ Pane {
               }
         }
     }
-
     MouseArea {
         id: exit
         anchors.fill: convWindow
@@ -81,8 +81,8 @@ Pane {
     Loader {
         id: emoKeysPopup
         clip: true
-        property var window: convWindow
         active: false
+        property var window: convWindow
         sourceComponent: emojiPickerComp
         anchors.bottom: chatTextArea.top
         anchors.left: chatTextArea.left
