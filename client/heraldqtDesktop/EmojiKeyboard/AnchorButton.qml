@@ -33,11 +33,6 @@ Button {
         anchors.centerIn: parent
     }
 
-    ColorOverlay {
-        visible: emojiList.currentIndex === anchorIndex
-        anchors.fill: selector
-        source: selector
-        color: "#AA0000FF"
-    }
+
 
 }

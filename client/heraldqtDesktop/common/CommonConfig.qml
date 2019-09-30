@@ -39,7 +39,6 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
-
     Settings {
         property alias theme: cfg.theme
         property alias skinSwatchIndex: cfg.skinSwatchIndex

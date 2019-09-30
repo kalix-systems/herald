@@ -21,6 +21,7 @@ Item {
                     right: exitButton.left
                 }
                 TextArea {
+                    id: searchTextArea
                     placeholderText: "Search..."
                     Keys.onReturnPressed: {
                         event.accepted = true
@@ -113,7 +114,7 @@ Item {
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             ScrollBar.vertical: ScrollBar {}
-            model: QmlCfg.emojiModel
+            model: searchTextArea.text.length ? QmlCfg.lookup(searchTextArea.text) : QmlCfg.emojiModel
             delegate: Column {
                 Text {
                     padding: QmlCfg.smallMargin
