@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
 import LibHerald 1.0
+
 Item {
     property color lowlight: "light gray"
     // header and search bar
@@ -40,7 +41,7 @@ Item {
                     bottom: parent.bottom
                     right: parent.right
                     margins: QmlCfg.smallMargin - 1 // magic
-                  }
+                }
                 width: height
                 onClicked: emoKeysPopup.active = false
                 Text {
@@ -107,37 +108,49 @@ Item {
             top: header.bottom
             bottom: footer.top
         }
-
-        ListView {
+        Flickable {
             id: emojiList
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
             ScrollBar.vertical: ScrollBar {}
-            model: searchTextArea.text.length ? QmlCfg.lookup(searchTextArea.text) : QmlCfg.emojiModel
-            delegate: Column {
-                Text {
-                    padding: QmlCfg.smallMargin
-                    text: modelData.sectionName
-                    font.bold: true
-                }
-                Grid {
-                       id: emojiGrid
-                       columns: 8
-                       spacing: 2
-                 Repeater {
-                         id: self
-                          model: modelData.List
-                          EmojiButton {
-                              baseEmoji: self.model[index][0]
-                              takesModifier:  self.model[index].length === 3
-                          }
-                       }
+            contentHeight: innerCol.height
+            Column {
+                id: innerCol
+                Repeater {
+                    id: innerRepeater
+                    model: searchTextArea.text.length ? [] : QmlCfg.emojiModel
+                    Column {
+                        Text {
+                            padding: QmlCfg.smallMargin
+                            text: modelData.sectionName
+                            font.bold: true
+                        }
+                        Component {
+                            id: emojiComp
+                            Grid {
+                                id: emojiGrid
+                                columns: 8
+                                spacing: 2
+                                Repeater {
+                                    id: self
+                                    model: modelData.List
+                                    EmojiButton {
+                                        baseEmoji: self.model[index][0]
+                                        takesModifier: self.model[index].length === 3
+                                    }
+                                }
+                            }
+                        }
+                        Loader {
+                            sourceComponent: emojiComp
+                            asynchronous: index > 0
+                        }
                     }
                 }
-           }
-      }
-
+            }
+        }
+    }
 
     // footer and anchor links
     Item {
@@ -150,7 +163,7 @@ Item {
         Rectangle {
             id: hr
             width: parent.width
-            height: 0.5
+            height: 1
             color: "white"
         }
 
