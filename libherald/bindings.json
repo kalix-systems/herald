@@ -117,7 +117,6 @@
             "type": "Object",
             "functions": {
                 "sendMessage": {
-                    "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
@@ -135,6 +134,15 @@
                     ]
                 },
                 "sendAddRequest": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "registerNewUser": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
@@ -144,32 +152,20 @@
                         }
                     ]
                 },
-                "registerDevice": {
+                "login": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id",
-                            "type": "QString"
-                        }
-                    ]
+                    "return": "bool"
                 }
             },
             "properties": {
-                "newMessage": {
-                    "type": "bool"
-                },
-                "newConversation": {
-                    "type": "bool"
-                },
                 "connectionUp": {
                     "type": "bool"
                 },
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newContact": {
-                    "type": "bool"
+                "newEvents": {
+                    "type": "quint64"
                 }
             }
         },

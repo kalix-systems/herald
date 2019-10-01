@@ -1253,9 +1253,7 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    new_contact_changed: fn(*mut NetworkHandleQObject),
-    new_conversation_changed: fn(*mut NetworkHandleQObject),
-    new_message_changed: fn(*mut NetworkHandleQObject),
+    new_events_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -1272,9 +1270,7 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            new_contact_changed: self.new_contact_changed,
-            new_conversation_changed: self.new_conversation_changed,
-            new_message_changed: self.new_message_changed,
+            new_events_changed: self.new_events_changed,
         }
     }
     fn clear(&self) {
@@ -1293,22 +1289,10 @@ impl NetworkHandleEmitter {
             (self.connection_up_changed)(ptr);
         }
     }
-    pub fn new_contact_changed(&mut self) {
+    pub fn new_events_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
-            (self.new_contact_changed)(ptr);
-        }
-    }
-    pub fn new_conversation_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_conversation_changed)(ptr);
-        }
-    }
-    pub fn new_message_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_message_changed)(ptr);
+            (self.new_events_changed)(ptr);
         }
     }
 }
@@ -1318,12 +1302,11 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn new_contact(&self) -> bool;
-    fn new_conversation(&self) -> bool;
-    fn new_message(&self) -> bool;
-    fn register_device(&mut self, user_id: String) -> bool;
-    fn send_add_request(&mut self, user_id: String) -> bool;
-    fn send_message(&mut self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
+    fn new_events(&self) -> u64;
+    fn login(&mut self) -> bool;
+    fn register_new_user(&mut self, user_id: String) -> bool;
+    fn send_add_request(&self, user_id: String) -> bool;
+    fn send_message(&self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
 
 #[no_mangle]
@@ -1331,17 +1314,13 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_contact_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_conversation_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
+    network_handle_new_events_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        new_contact_changed: network_handle_new_contact_changed,
-        new_conversation_changed: network_handle_new_conversation_changed,
-        new_message_changed: network_handle_new_message_changed,
+        new_events_changed: network_handle_new_events_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -1363,45 +1342,42 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_contact_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_contact()
+pub unsafe extern "C" fn network_handle_new_events_get(ptr: *const NetworkHandle) -> u64 {
+    (&*ptr).new_events()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_conversation()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_new_message_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_message()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_register_device(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+pub unsafe extern "C" fn network_handle_login(ptr: *mut NetworkHandle) -> bool {
     let o = &mut *ptr;
-    let r = o.register_device(user_id);
+    let r = o.login();
     r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_add_request(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
+    let r = o.register_new_user(user_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn network_handle_send_add_request(ptr: *const NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let o = &*ptr;
     let r = o.send_add_request(user_id);
     r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_message(ptr: *mut NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_char, to_len: c_int, msg_id_str: *const c_char, msg_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_send_message(ptr: *const NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_char, to_len: c_int, msg_id_str: *const c_char, msg_id_len: c_int) -> bool {
     let mut message_body = String::new();
     set_string_from_utf16(&mut message_body, message_body_str, message_body_len);
     let to = { slice::from_raw_parts(to_str as *const u8, to_usize(to_len)) };
     let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &mut *ptr;
+    let o = &*ptr;
     let r = o.send_message(message_body, to, msg_id);
     r
 }

@@ -32,7 +32,8 @@ ListView {
     //        }
     //    }
     //}
-    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.vertical: ScrollBar {
+    }
 
     delegate: Item {
         id: conversationItem

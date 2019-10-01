@@ -1,7 +1,7 @@
 use crate::{interface::*, ret_err, types::*};
 use herald_common::*;
 use heraldcore::network;
-use heraldcore::{abort_err, types::*};
+use heraldcore::types::*;
 use std::{
     convert::{TryFrom, TryInto},
     sync::{
@@ -16,9 +16,6 @@ type Emitter = NetworkHandleEmitter;
 pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
-    net_new_message: AtomicBool,
-    net_new_contact: AtomicBool,
-    net_new_conversation: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -26,53 +23,51 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            net_new_message: AtomicBool::new(false),
-            net_new_contact: AtomicBool::new(false),
-            net_new_conversation: AtomicBool::new(false),
         }
     }
-    pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
-        // drop the pending and online flags, we are in a fail state
-        self.net_online.fetch_and(false, Ordering::Relaxed);
-        self.net_pending.fetch_or(true, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Down!");
-    }
-    pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_online.fetch_or(true, Ordering::Relaxed);
-        self.net_pending.fetch_and(false, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Up!")
-    }
-    pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_online.fetch_and(false, Ordering::Relaxed);
-        self.net_pending.fetch_and(true, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Pending!")
-    }
-    pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_message.fetch_xor(old, Ordering::Relaxed);
-        emit.new_message_changed();
-    }
-    pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-        emit.new_contact_changed();
-    }
-    pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-        emit.new_conversation_changed();
-    }
+    //pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
+    //    // drop the pending and online flags, we are in a fail state
+    //    self.net_online.fetch_and(false, Ordering::Relaxed);
+    //    self.net_pending.fetch_or(true, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Down!");
+    //}
+    //pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
+    //    self.net_online.fetch_or(true, Ordering::Relaxed);
+    //    self.net_pending.fetch_and(false, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Up!")
+    //}
+    //pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
+    //    self.net_online.fetch_and(false, Ordering::Relaxed);
+    //    self.net_pending.fetch_and(true, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Pending!")
+    //}
+    //pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_message.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_message_changed();
+    //}
+    //pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_contact_changed();
+    //}
+    //pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_conversation_changed();
+    //}
 }
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
+    new_events: usize,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
@@ -80,19 +75,19 @@ impl NetworkHandleTrait for NetworkHandle {
         let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(EffectsFlags::new()),
+            new_events: 0,
         };
         handle
+    }
+
+    fn new_events(&self) -> u64 {
+        self.new_events as u64
     }
 
     /// this is the API exposed to QML
     /// note, currently this function has all together too much copying.
     /// this will be rectified when stupid hanfles fan out.
-    fn send_message(
-        &mut self,
-        body: String,
-        to: FfiConversationIdRef,
-        msg_id: FfiMsgIdRef,
-    ) -> bool {
+    fn send_message(&self, body: String, to: FfiConversationIdRef, msg_id: FfiMsgIdRef) -> bool {
         let conv_id = ret_err!(ConversationId::try_from(to), false);
 
         let msg_id = ret_err!(MsgId::try_from(msg_id), false);
@@ -101,30 +96,21 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(&mut self, user_id: FfiUserId) -> bool {
+    fn send_add_request(&self, user_id: FfiUserId) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);
         ret_err!(network::send_contact_req(uid), false);
         true
     }
 
-    fn register_device(&mut self, user_id: FfiUserId) -> bool {
+    fn register_new_user(&mut self, user_id: FfiUserId) -> bool {
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
         ret_err!(network::register(uid), false);
         true
     }
 
-    fn new_message(&self) -> bool {
-        self.status_flags.net_new_message.load(Ordering::Relaxed)
-    }
-
-    fn new_contact(&self) -> bool {
-        self.status_flags.net_new_contact.load(Ordering::Relaxed)
-    }
-
-    fn new_conversation(&self) -> bool {
-        self.status_flags
-            .net_new_conversation
-            .load(Ordering::Relaxed)
+    fn login(&mut self) -> bool {
+        eprintln!("Login is not yet supported");
+        true
     }
 
     fn connection_up(&self) -> bool {
