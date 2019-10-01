@@ -46,6 +46,7 @@ impl Messages {
                 &conversation_id,
                 body.as_str(),
                 None,
+                None,
                 &op
             ),
             None
@@ -60,7 +61,7 @@ impl Messages {
                 op,
                 timestamp,
                 receipts: None,
-                send_status: None,
+                send_status: MessageSendStatus::NoAck,
             },
         };
 

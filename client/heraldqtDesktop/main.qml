@@ -3,6 +3,7 @@ import QtQuick.Window 2.13
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+import Qt.labs.settings 1.0
 import "SideBar/popups" as Popups
 import QtQml 2.13
 
@@ -14,6 +15,7 @@ ApplicationWindow {
     title: qsTr("Herald")
     minimumWidth: 500
     minimumHeight: 300
+
 
     TopMenuBar {
     }

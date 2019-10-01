@@ -1,7 +1,7 @@
-declare class ByteArray {}
+declare class ByteArray { }
 
-declare class ConversationID extends ByteArray {}
-declare class MessageId extends ByteArray {}
+declare class ConversationID extends ByteArray { }
+declare class MessageId extends ByteArray { }
 
 declare type UserId = string;
 
@@ -36,7 +36,7 @@ declare class Messages {
   deleteConversationById(conversationId: ConversationID): boolean;
 }
 
-declare class Message extends Item {}
+declare class Message extends Item { }
 
 declare class Users {
   add(userid: UserId): ConversationID;

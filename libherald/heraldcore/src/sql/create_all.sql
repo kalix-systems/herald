@@ -90,6 +90,7 @@ CREATE TABLE key_creations (
   signature BLOB NOT NULL,
   -- timestamp of creation
   ts INTEGER NOT NULL,
+  deprecation BLOB DEFAULT NULL,
   FOREIGN KEY(signed_by) REFERENCES user_keys(key),
   FOREIGN KEY(key) REFERENCES user_keys(key)
 );

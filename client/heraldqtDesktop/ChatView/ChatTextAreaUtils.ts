@@ -21,3 +21,8 @@ export function enterKeyHandler(
   const messageId = messageModel.insertMessage(text);
   networkHandle.sendMessage(text, messageModel.conversationId, messageId);
 }
+
+export function appendToTextArea(text: string, target: TextArea): void {
+  const position = target.selectionEnd;
+  target.insert(position, text);
+}
