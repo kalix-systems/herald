@@ -141,10 +141,6 @@
                         {
                             "name": "user_id",
                             "type": "QString"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },

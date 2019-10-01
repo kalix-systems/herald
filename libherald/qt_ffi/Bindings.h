@@ -241,7 +241,7 @@ public:
     bool newConversation() const;
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice(const QString& user_id);
-    Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id);
+    Q_INVOKABLE bool sendAddRequest(const QString& user_id);
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id);
 Q_SIGNALS:
     void connectionPendingChanged();

@@ -703,7 +703,7 @@ extern "C" {
     bool network_handle_new_conversation_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int, const char*, int);
+    bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
@@ -1462,9 +1462,9 @@ bool NetworkHandle::registerDevice(const QString& user_id)
 {
     return network_handle_register_device(m_d, user_id.utf16(), user_id.size());
 }
-bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id)
+bool NetworkHandle::sendAddRequest(const QString& user_id)
 {
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
+    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size());
 }
 bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id)
 {

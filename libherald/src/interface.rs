@@ -1322,7 +1322,7 @@ pub trait NetworkHandleTrait {
     fn new_conversation(&self) -> bool;
     fn new_message(&self) -> bool;
     fn register_device(&mut self, user_id: String) -> bool;
-    fn send_add_request(&mut self, user_id: String, conversation_id: &[u8]) -> bool;
+    fn send_add_request(&mut self, user_id: String) -> bool;
     fn send_message(&mut self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
 
@@ -1387,12 +1387,11 @@ pub unsafe extern "C" fn network_handle_register_device(ptr: *mut NetworkHandle,
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_add_request(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_send_add_request(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
     let o = &mut *ptr;
-    let r = o.send_add_request(user_id, conversation_id);
+    let r = o.send_add_request(user_id);
     r
 }
 

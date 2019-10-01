@@ -101,13 +101,9 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(
-        &mut self,
-        user_id: FfiUserId,
-        conversation_id: FfiConversationIdRef,
-    ) -> bool {
+    fn send_add_request(&mut self, user_id: FfiUserId) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);
-        ret_err!(network::start_conversation(&[uid], None), false);
+        ret_err!(network::send_contact_req(uid), false);
         true
     }
 
