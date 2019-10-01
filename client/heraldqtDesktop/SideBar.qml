@@ -15,8 +15,8 @@ import "common" as Common
 Pane {
     id: contactPane
     // GS : we do this to get the current Item, BAD.
-    property alias contactsListView: contactsListView
-    property alias conversationsListView: conversationsListView
+//    property alias contactsListView: contactsListView
+//    property alias conversationsListView: conversationsListView
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
@@ -83,18 +83,29 @@ Pane {
             bottom: parent.bottom
         }
 
+      Component {
+          id: contactslvComponent
         SBUtils.ContactView {
             id: contactsListView
-            visible: false
             anchors.fill: parent
             model: contactsModel
         }
+      }
 
+      Component {
+          id: convoslvComponent
         SBUtils.ConversationView {
             id: conversationsListView
             anchors.fill: parent
             model: conversationsModel
         }
+      }
+
+      Loader {
+        id: sideBarBodyLoader
+        anchors.fill: parent
+        sourceComponent: convoslvComponent
+      }
 
         states: [
             State {
@@ -112,10 +123,10 @@ Pane {
 
             State {
                 name: "conversationSearch"
-                PropertyChanges {
-                    target: conversationsListView
-                    visible: true
-                }
+//                PropertyChanges {
+//                    target: conversationsListView
+//                    visible: true
+//                }
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: searchBarComponent
@@ -126,14 +137,13 @@ Pane {
             State {
                 name: "newConversationState"
                 PropertyChanges {
-                    target: contactsListView
-                    visible: true
+                    target: sideBarBodyLoader
+                    sourceComponent: contactslvComponent
                 }
-                PropertyChanges {
-                    target: conversationsListView
-                    visible: false
-                }
-
+//                PropertyChanges {
+//                    target: conversationsListView
+//                    visible: false
+//                }
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: searchBarComponent

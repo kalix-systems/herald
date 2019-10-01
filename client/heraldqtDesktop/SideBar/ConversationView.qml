@@ -32,44 +32,42 @@ ListView {
     //        }
     //    }
     //}
-
-    ScrollBar.vertical: ScrollBar {
-    }
+    ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: conversationItem
 
-        //GS : rexporting the contact avatar to global state is a backwards ref!
-        property Item conversationAvatar: conversationAvatar
-        property var conversationIdProxy: conversationId
+        readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
+
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
-          }
+        }
 
         property var childChatView: Component {
             CV.ChatView {
-              ownedConversation: messageModel
-           }
+                conversationAvatar: conversationItemAvatar
+                ownedConversation: messageModel
+            }
         }
-
 
         Users {
             id: convoItemMembers
             conversationId: conversationIdProxy
         }
 
-        // This ternary is okay, types are enforced by QML
         visible: matched
+        // This ternary is okay, types are enforced by QML
         height: visible ? 55 : 0
         width: parent.width
 
-        /// NPB : This ought to be a mouse area with a hovered handler
         Rectangle {
             id: bgBox
             readonly property color focusColor: QmlCfg.palette.tertiaryColor
             readonly property color hoverColor: QmlCfg.palette.secondaryColor
             readonly property color defaultColor: QmlCfg.palette.mainColor
+
+            anchors.fill: parent
 
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
@@ -78,7 +76,7 @@ ListView {
             }
 
             Common.Avatar {
-                id: conversationAvatar
+                id: conversationItemAvatar
                 size: 45
                 labeled: false
                 labelGap: QmlCfg.smallMargin
@@ -87,19 +85,18 @@ ListView {
                 pfpUrl: Utils.safeStringOrDefault(picture)
             }
 
+
             ConversationLabel {
-                anchors.left: conversationAvatar.right
+                anchors.left: conversationItemAvatar.right
                 anchors.right: parent.right
-                label: title
-                summaryText: JS.formatSummary(messageModel.lastAuthor, messageModel.lastBody)
+                label: Utils.unwrapOr(title, "unknown")
+                summaryText: JS.formatSummary(messageModel.lastAuthor,
+                                              messageModel.lastBody)
             }
 
-            anchors.fill: parent
-
-            /// Note: can we use the highlight property here
-            /// we can do this once contact deletion updates current item for listview properly
             states: [
                 State {
+                    when: hoverHandler.containsMouse
                     name: "hovering"
                     PropertyChanges {
                         target: bgBox
@@ -107,7 +104,8 @@ ListView {
                     }
                 },
                 State {
-                    name: "focused"
+                    when: conversationItem.focus
+                    name: "selected"
                     PropertyChanges {
                         target: bgBox
                         color: focusColor
@@ -116,23 +114,24 @@ ListView {
             ]
 
             MouseArea {
+                id: hoverHandler
                 hoverEnabled: true
                 z: 10
                 anchors.fill: parent
-                onEntered: parent.state = "hovering"
-                onExited: parent.state = ""
-
+                // ToDo: remove the imperative state transitions if it does not break
+                // anything. they are now handled with `when` bindings
+                //                onEntered: parent.state = "hovering"
+                //                onExited: parent.state = ""
                 onClicked: {
-                    chatView.sourceComponent = childChatView;
+                    chatView.sourceComponent = childChatView
                     conversationList.currentIndex = index
                 }
 
                 // ternary is okay here, type enforced by QML
-                onReleased: parent.state = containsMouse ? "hovering" : ""
+                //onReleased: parent.state = containsMouse ? "hovering" : ""
             }
             // ternary is okay here, type enforced by QML
-            color: conversationItem.focus ? focusColor : defaultColor
+            // color: conversationItem.focus ? focusColor : defaultColor
         }
-
     }
 }

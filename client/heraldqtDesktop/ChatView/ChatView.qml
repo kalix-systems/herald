@@ -13,11 +13,13 @@ Pane {
     id: chatPane
     padding: 0
     property alias messageBar: messageBar
+    property var conversationAvatar
     property Messages ownedConversation
 
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
+        currentAvatar: conversationAvatar
     }
 
     Common.Divider {

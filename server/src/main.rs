@@ -10,7 +10,7 @@ lazy_static! {
 
 // const PGVOLUME: &'static str = "/tmp/postgres_volume:/var/lib/postgresql/data";
 
-#[warp::tokio_rt]
+#[tokio::main]
 async fn main() {
     ctrlc::set_handler(|| {
         println!("");

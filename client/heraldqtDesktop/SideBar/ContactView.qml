@@ -39,7 +39,6 @@ ListView {
     delegate: Item {
         id: contactItem
         //GS : rexporting the contact avatar to global state is a backwards ref!
-        property Item contactAvatar: contactAvatar
 
 
         // This ternary is okay, types are enforced by QML
@@ -113,6 +112,8 @@ ListView {
             size: 45
             id: contactAvatar
             avatarLabel: displayName
+            labelGap: QmlCfg.smallMargin
+            secondaryText: "@" + userId
             colorHash: color
             pfpUrl: Utils.safeStringOrDefault(profilePicture)
         }
