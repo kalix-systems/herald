@@ -1322,8 +1322,8 @@ pub trait NetworkHandleTrait {
     fn new_conversation(&self) -> bool;
     fn new_message(&self) -> bool;
     fn register_device(&mut self, user_id: String) -> bool;
-    fn send_add_request(&mut self, user_id: String) -> bool;
-    fn send_message(&mut self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
+    fn send_add_request(&self, user_id: String) -> bool;
+    fn send_message(&self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
 
 #[no_mangle]
@@ -1387,21 +1387,21 @@ pub unsafe extern "C" fn network_handle_register_device(ptr: *mut NetworkHandle,
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_add_request(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_send_add_request(ptr: *const NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let o = &mut *ptr;
+    let o = &*ptr;
     let r = o.send_add_request(user_id);
     r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_send_message(ptr: *mut NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_char, to_len: c_int, msg_id_str: *const c_char, msg_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_send_message(ptr: *const NetworkHandle, message_body_str: *const c_ushort, message_body_len: c_int, to_str: *const c_char, to_len: c_int, msg_id_str: *const c_char, msg_id_len: c_int) -> bool {
     let mut message_body = String::new();
     set_string_from_utf16(&mut message_body, message_body_str, message_body_len);
     let to = { slice::from_raw_parts(to_str as *const u8, to_usize(to_len)) };
     let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &mut *ptr;
+    let o = &*ptr;
     let r = o.send_message(message_body, to, msg_id);
     r
 }
