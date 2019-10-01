@@ -232,7 +232,7 @@ impl ConversationMessage {
     }
 }
 
-mod dmessages {
+pub mod dmessages {
     use super::*;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
