@@ -123,7 +123,7 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(res)
 }
 
-pub fn login() -> Result<Receiver<Notification>, HErr> {
+pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HErr> {
     use login::*;
     use tungstenite::Message;
 
@@ -136,7 +136,6 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
         did: *kp.public_key(),
     };
 
-    let (mut sender, receiver) = unbounded();
     let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
         .expect("failed to parse login url");
     let (mut ws, _) = tungstenite::connect(wsurl)?;
@@ -154,20 +153,20 @@ pub fn login() -> Result<Receiver<Notification>, HErr> {
         return Err(LoginError);
     }
 
-    catchup(&mut ws, &mut sender)?;
+    catchup(&mut ws, &mut f)?;
 
     std::thread::spawn(move || {
-        recv_messages(&mut ws, &mut sender)
+        recv_messages(&mut ws, &mut f)
             .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
         CAUGHT_UP.store(false, Ordering::Release);
     });
 
-    Ok(receiver)
+    Ok(())
 }
 
-fn catchup<S: Read + Write>(
+fn catchup<S: Read + Write, F: FnMut(Notification)>(
     ws: &mut tungstenite::WebSocket<S>,
-    sender: &mut Sender<Notification>,
+    f: &mut F,
 ) -> Result<(), HErr> {
     use catchup::*;
     use tungstenite::*;
@@ -175,7 +174,7 @@ fn catchup<S: Read + Write>(
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            handle_push(push)?.execute(sender)?;
+            handle_push(push)?.execute(f)?;
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
@@ -190,14 +189,14 @@ fn catchup<S: Read + Write>(
     Ok(())
 }
 
-fn recv_messages<S: Read + Write>(
+fn recv_messages<S: Read + Write, F: FnMut(Notification)>(
     ws: &mut tungstenite::WebSocket<S>,
-    sender: &mut Sender<Notification>,
+    f: &mut F,
 ) -> Result<(), HErr> {
     loop {
         let next = sock_get_msg(ws)?;
         let ev = handle_push(&next)?;
-        ev.execute(sender)?;
+        ev.execute(f)?;
     }
 }
 
@@ -240,11 +239,9 @@ impl Event {
         self.replies.append(&mut other.replies);
     }
 
-    pub fn execute(&self, sender: &mut Sender<Notification>) -> Result<(), HErr> {
+    pub fn execute<F: FnMut(Notification)>(&self, f: &mut F) -> Result<(), HErr> {
         for note in self.notifications.iter() {
-            // we drop this error because it's pretty ok if this fails - it means we're not
-            // updating the UI, but that's not a catastrophic error.
-            drop(sender.send(*note));
+            f(*note);
         }
 
         for (cid, content) in self.replies.iter() {
