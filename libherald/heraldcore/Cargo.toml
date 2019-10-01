@@ -9,7 +9,6 @@ edition = "2018"
 [dependencies]
 chainmail     = { git = "https://github.com/kalix-systems/chainmail" }
 chrono        = { version = "0.4.7", default_features  = false}
-crossbeam-channel = "0.3"
 herald_common = { path    = "../../common", features = ["rusqlite_"] }
 image         = { version = "0.22.1", default_features = false, features = ["jpeg", "png_codec"]}
 lazy_pond     = { path    = "../../lazy_pond" }

@@ -6,7 +6,6 @@ use crate::{
     womp,
 };
 use chrono::prelude::*;
-use crossbeam_channel::*;
 use herald_common::*;
 use lazy_static::*;
 use std::{
