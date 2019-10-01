@@ -15,7 +15,6 @@ Pane {
     property alias messageBar: messageBar
     property Messages ownedConversation
 
-
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar
@@ -48,36 +47,38 @@ Pane {
         }
     }
 
-
-    Component{
+    Component {
         id: emojiPickerComp
         EK.EmojiPicker {
-              id: emojiPicker
-              window: parent.window
-              Component.onCompleted: {
-                  emojiPicker.send.connect((emoji) =>{
-                   CTUtils.appendToTextArea(emoji,chatTextArea.chatText);
-                    })
-              }
-              MouseArea {
-                  id: block
-                  z: exit.z + 1
-                  anchors.fill: parent
-                  // just blocks input to exit
-              }
-        }
-    }
-    MouseArea {
-        id: exit
-        anchors.fill: convWindow
-        onClicked: {
-            emoKeysPopup.active = false
+            id: emojiPicker
+            window: parent.window
+            Component.onCompleted: {
+                emojiPicker.send.connect(function anon(emoji) {
+                    CTUtils.appendToTextArea(emoji, chatTextArea.chatText)
+                })
+            }
+            MouseArea {
+                id: block
+                z: exit.z + 1
+                anchors.fill: parent
+                // just blocks input to exit
+            }
         }
     }
 
-     /// Q: why is this not a popup?
-     /// A: We don't actually want to load 1000 emojis
-     /// in a repeater everytime we open a chat.
+    MouseArea {
+        id: exit
+        enabled: emoKeysPopup.active
+        anchors.fill: parent
+        onClicked: {
+            emoKeysPopup.active = false
+            anchors.fill = undefined
+        }
+    }
+
+    /// Q: why is this not a popup?
+    /// A: We don't actually want to load 1000 emojis
+    /// in a repeater everytime we open a chat.
     Loader {
         id: emoKeysPopup
         clip: true
