@@ -1,6 +1,5 @@
-use crate::{interface::*, ret_err, types::*};
-use heraldcore::config::{Config, ConfigBuilder};
-use std::convert::TryInto;
+use crate::interface::*;
+use heraldcore::{abort_err, config::Config};
 
 pub struct HeraldState {
     config_init: bool,
@@ -9,25 +8,23 @@ pub struct HeraldState {
 
 impl HeraldStateTrait for HeraldState {
     fn new(emit: HeraldStateEmitter) -> Self {
-        HeraldState {
-            emit,
-            config_init: Config::static_id().is_ok(),
-        }
+        let config_init = if Config::static_id().is_ok() {
+            true
+        } else {
+            abort_err!(heraldcore::db::init());
+            false
+        };
+
+        HeraldState { emit, config_init }
     }
 
     fn config_init(&self) -> bool {
         self.config_init
     }
 
-    fn set_config_id(&mut self, id: FfiUserId) -> bool {
-        use heraldcore::*;
-        let id = ret_err!(id.as_str().try_into(), false);
-        ret_err!(db::init(), false);
-        ret_err!(ConfigBuilder::new().id(id).add(), false);
-
+    fn set_config_init(&mut self, val: bool) {
+        self.config_init |= val;
         self.emit.config_init_changed();
-
-        true
     }
 
     fn emit(&mut self) -> &mut HeraldStateEmitter {

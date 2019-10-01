@@ -3,6 +3,7 @@ use crate::{
     errors::HErr::{self, *},
     pending,
     types::*,
+    womp,
 };
 use chrono::prelude::*;
 use crossbeam_channel::*;
@@ -16,7 +17,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-const DEFAULT_PORT: u16 = 8000;
+const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
@@ -119,7 +120,8 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     crate::config::ConfigBuilder::new()
         .id(uid)
         .keypair(kp)
-        .add()?;
+        .add()
+        .expect(womp!());
     Ok(res)
 }
 

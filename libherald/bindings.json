@@ -10,19 +10,8 @@
             "type": "Object",
             "properties": {
                 "configInit": {
-                    "type": "bool"
-                }
-            },
-            "functions": {
-                "setConfigId": {
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "config_id",
-                            "type": "QString"
-                        }
-                    ],
-                    "return": "bool"
+                    "type": "bool",
+                    "write": true
                 }
             }
         },
@@ -172,7 +161,12 @@
                 "registerDevice": {
                     "mut": true,
                     "return": "bool",
-                    "arguments": []
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
                 }
             },
             "properties": {
@@ -384,7 +378,7 @@
             },
             "functions": {
                 "insertMessage": {
-                    "return": "QByteArray",
+                    "return": "bool",
                     "mut": true,
                     "arguments": [
                         {

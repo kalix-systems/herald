@@ -10,3 +10,4 @@ DROP TABLE IF EXISTS user_keys;
 DROP TABLE IF EXISTS contacts;
 DROP TABLE IF EXISTS config;
 DROP TABLE IF EXISTS conversations;
+DROP INDEX reply_op;

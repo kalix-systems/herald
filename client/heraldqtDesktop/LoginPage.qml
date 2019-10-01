@@ -62,7 +62,9 @@ Rectangle {
             }
 
             Keys.onReturnPressed: {
-                heraldState.setConfigId(entryField.text.trim())
+                if (networkHandle.registerDevice(entryField.text.trim())) {
+                    heraldState.configInit = true
+                }
             }
         }
 
@@ -80,8 +82,9 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                // TODO check length of id
-                heraldState.setConfigId(entryField.text.trim())
+                if (networkHandle.registerDevice(entryField.text.trim())) {
+                    heraldState.configInit = true
+                }
             }
         }
     }

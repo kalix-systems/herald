@@ -487,7 +487,7 @@ extern "C" {
     HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
-    bool herald_state_set_config_id(HeraldState::Private*, const ushort*, int);
+    void herald_state_config_init_set(HeraldState::Private*, bool);
 };
 
 extern "C" {
@@ -689,7 +689,7 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    bool messages_insert_message(Messages::Private*, const ushort*, int);
     bool messages_refresh(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
@@ -702,7 +702,7 @@ extern "C" {
     bool network_handle_new_contact_get(const NetworkHandle::Private*);
     bool network_handle_new_conversation_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
-    bool network_handle_register_device(NetworkHandle::Private*);
+    bool network_handle_register_device(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
@@ -1244,9 +1244,8 @@ bool HeraldState::configInit() const
 {
     return herald_state_config_init_get(m_d);
 }
-bool HeraldState::setConfigId(const QString& config_id)
-{
-    return herald_state_set_config_id(m_d, config_id.utf16(), config_id.size());
+void HeraldState::setConfigInit(bool v) {
+    herald_state_config_init_set(m_d, v);
 }
 HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -1400,11 +1399,9 @@ bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-QByteArray Messages::insertMessage(const QString& body)
+bool Messages::insertMessage(const QString& body)
 {
-    QByteArray s;
-    messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
-    return s;
+    return messages_insert_message(m_d, body.utf16(), body.size());
 }
 bool Messages::refresh()
 {
@@ -1460,9 +1457,9 @@ bool NetworkHandle::newMessage() const
 {
     return network_handle_new_message_get(m_d);
 }
-bool NetworkHandle::registerDevice()
+bool NetworkHandle::registerDevice(const QString& user_id)
 {
-    return network_handle_register_device(m_d);
+    return network_handle_register_device(m_d, user_id.utf16(), user_id.size());
 }
 bool NetworkHandle::requestMetaData(const QString& of)
 {

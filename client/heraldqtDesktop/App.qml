@@ -19,13 +19,6 @@ Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-    NetworkHandle {
-        id: networkHandle
-        // every conversation has it's own refresh signal. guards
-        //        onNewMessageChanged: convModel.refresh()
-        onNewContactChanged: contactsModel.refresh()
-        onNewConversationChanged: conversationsModel.hardRefresh()
-    }
 
     Users {
         id: contactsModel

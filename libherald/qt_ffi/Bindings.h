@@ -123,13 +123,13 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
+    Q_PROPERTY(bool configInit READ configInit WRITE setConfigInit NOTIFY configInitChanged FINAL)
     explicit HeraldState(bool owned, QObject *parent);
 public:
     explicit HeraldState(QObject *parent = nullptr);
     ~HeraldState();
     bool configInit() const;
-    Q_INVOKABLE bool setConfigId(const QString& config_id);
+    void setConfigInit(bool v);
 Q_SIGNALS:
     void configInitChanged();
 };
@@ -177,7 +177,7 @@ public:
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
-    Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE bool insertMessage(const QString& body);
     Q_INVOKABLE bool refresh();
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
@@ -240,7 +240,7 @@ public:
     bool newContact() const;
     bool newConversation() const;
     bool newMessage() const;
-    Q_INVOKABLE bool registerDevice();
+    Q_INVOKABLE bool registerDevice(const QString& user_id);
     Q_INVOKABLE bool requestMetaData(const QString& of);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id);
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id);

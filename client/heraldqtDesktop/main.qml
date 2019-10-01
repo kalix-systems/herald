@@ -20,6 +20,7 @@ ApplicationWindow {
     TopMenuBar {
     }
 
+
     // This provides a few purely functional helper methods
     HeraldUtils {
         id: heraldUtils
@@ -32,6 +33,14 @@ ApplicationWindow {
             appLoader.active = !appLoader.active
             loginLoader.active = !loginLoader.active
         }
+    }
+
+    NetworkHandle {
+        id: networkHandle
+        // every conversation has it's own refresh signal. guards
+        //        onNewMessageChanged: convModel.refresh()
+        //onNewContactChanged: contactsModel.refresh()
+        //onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
     Loader {

@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS replies (
   FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
 );
 
-CREATE INDEX reply_op ON replies(op_msg_id);
+CREATE INDEX IF NOT EXISTS reply_op ON replies(op_msg_id);
 
 CREATE TABLE IF NOT EXISTS msg_attachments (
   -- path to media attachment?
@@ -79,9 +79,7 @@ CREATE TABLE IF NOT EXISTS user_keys (
   FOREIGN KEY(user_id) REFERENCES contacts(user_id)
 );
 
-CREATE INDEX user_keys_uid_ix ON user_keys(user_id);
-
-CREATE TABLE key_creations (
+CREATE TABLE IF NOT EXISTS key_creations (
   -- key
   key BLOB PRIMARY KEY NOT NULL,
   -- signing key
@@ -95,7 +93,7 @@ CREATE TABLE key_creations (
   FOREIGN KEY(key) REFERENCES user_keys(key)
 );
 
-CREATE TABLE key_deprecations (
+CREATE TABLE IF NOT EXISTS key_deprecations (
   -- key
   key BLOB PRIMARY KEY NOT NULL,
   -- signing key
