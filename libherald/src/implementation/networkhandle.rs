@@ -16,9 +16,6 @@ type Emitter = NetworkHandleEmitter;
 pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
-    net_new_message: AtomicBool,
-    net_new_contact: AtomicBool,
-    net_new_conversation: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -26,9 +23,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            net_new_message: AtomicBool::new(false),
-            net_new_contact: AtomicBool::new(false),
-            net_new_conversation: AtomicBool::new(false),
         }
     }
     //pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
@@ -73,6 +67,7 @@ impl EffectsFlags {
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
+    new_events: usize,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
@@ -80,8 +75,13 @@ impl NetworkHandleTrait for NetworkHandle {
         let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(EffectsFlags::new()),
+            new_events: 0,
         };
         handle
+    }
+
+    fn new_events(&self) -> u64 {
+        self.new_events as u64
     }
 
     /// this is the API exposed to QML
@@ -102,24 +102,15 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn register_device(&mut self, user_id: FfiUserId) -> bool {
+    fn register_new_user(&mut self, user_id: FfiUserId) -> bool {
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
         ret_err!(network::register(uid), false);
         true
     }
 
-    fn new_message(&self) -> bool {
-        self.status_flags.net_new_message.load(Ordering::Relaxed)
-    }
-
-    fn new_contact(&self) -> bool {
-        self.status_flags.net_new_contact.load(Ordering::Relaxed)
-    }
-
-    fn new_conversation(&self) -> bool {
-        self.status_flags
-            .net_new_conversation
-            .load(Ordering::Relaxed)
+    fn login(&mut self) -> bool {
+        eprintln!("Login is not yet supported");
+        true
     }
 
     fn connection_up(&self) -> bool {

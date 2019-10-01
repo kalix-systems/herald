@@ -90,7 +90,7 @@ ListView {
             ConversationLabel {
                 anchors.left: conversationAvatar.right
                 anchors.right: parent.right
-                label: title
+                label: Utils.unwrapOr(title, "unknown")
                 summaryText: JS.formatSummary(messageModel.lastAuthor, messageModel.lastBody)
             }
 

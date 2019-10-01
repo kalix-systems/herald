@@ -1253,9 +1253,7 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    new_contact_changed: fn(*mut NetworkHandleQObject),
-    new_conversation_changed: fn(*mut NetworkHandleQObject),
-    new_message_changed: fn(*mut NetworkHandleQObject),
+    new_events_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -1272,9 +1270,7 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            new_contact_changed: self.new_contact_changed,
-            new_conversation_changed: self.new_conversation_changed,
-            new_message_changed: self.new_message_changed,
+            new_events_changed: self.new_events_changed,
         }
     }
     fn clear(&self) {
@@ -1293,22 +1289,10 @@ impl NetworkHandleEmitter {
             (self.connection_up_changed)(ptr);
         }
     }
-    pub fn new_contact_changed(&mut self) {
+    pub fn new_events_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
-            (self.new_contact_changed)(ptr);
-        }
-    }
-    pub fn new_conversation_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_conversation_changed)(ptr);
-        }
-    }
-    pub fn new_message_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_message_changed)(ptr);
+            (self.new_events_changed)(ptr);
         }
     }
 }
@@ -1318,10 +1302,9 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn new_contact(&self) -> bool;
-    fn new_conversation(&self) -> bool;
-    fn new_message(&self) -> bool;
-    fn register_device(&mut self, user_id: String) -> bool;
+    fn new_events(&self) -> u64;
+    fn login(&mut self) -> bool;
+    fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String) -> bool;
     fn send_message(&self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
@@ -1331,17 +1314,13 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_contact_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_conversation_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
+    network_handle_new_events_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        new_contact_changed: network_handle_new_contact_changed,
-        new_conversation_changed: network_handle_new_conversation_changed,
-        new_message_changed: network_handle_new_message_changed,
+        new_events_changed: network_handle_new_events_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -1363,26 +1342,23 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_contact_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_contact()
+pub unsafe extern "C" fn network_handle_new_events_get(ptr: *const NetworkHandle) -> u64 {
+    (&*ptr).new_events()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_conversation()
+pub unsafe extern "C" fn network_handle_login(ptr: *mut NetworkHandle) -> bool {
+    let o = &mut *ptr;
+    let r = o.login();
+    r
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_message_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).new_message()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_register_device(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.register_device(user_id);
+    let r = o.register_new_user(user_id);
     r
 }
 

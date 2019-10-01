@@ -9,7 +9,7 @@
         <file>ChatView/ConversationWindowForm.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
         <file>ChatView/TextAreaForm.qml</file>
-        <file>LoginPage.qml</file>
+        <file>RegistrationPage.qml</file>
         <file>SideBar.qml</file>
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.mjs</file>

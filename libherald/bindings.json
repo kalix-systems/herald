@@ -142,7 +142,7 @@
                         }
                     ]
                 },
-                "registerDevice": {
+                "registerNewUser": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
@@ -151,23 +151,21 @@
                             "type": "QString"
                         }
                     ]
+                },
+                "login": {
+                    "mut": true,
+                    "return": "bool"
                 }
             },
             "properties": {
-                "newMessage": {
-                    "type": "bool"
-                },
-                "newConversation": {
-                    "type": "bool"
-                },
                 "connectionUp": {
                     "type": "bool"
                 },
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newContact": {
-                    "type": "bool"
+                "newEvents": {
+                    "type": "quint64"
                 }
             }
         },

@@ -31,7 +31,7 @@ ApplicationWindow {
 
         onConfigInitChanged: {
             appLoader.active = !appLoader.active
-            loginLoader.active = !loginLoader.active
+            registrationLoader.active = !registrationLoader.active
         }
     }
 
@@ -55,9 +55,9 @@ ApplicationWindow {
 
     Loader {
         anchors.fill: parent
-        id: loginLoader
+        id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: LoginPage {
+        sourceComponent: RegistrationPage {
         }
     }
 }

@@ -128,17 +128,9 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleNewContactChanged(NetworkHandle* o)
+    inline void networkHandleNewEventsChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newContactChanged();
-    }
-    inline void networkHandleNewConversationChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newConversationChanged();
-    }
-    inline void networkHandleNewMessageChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newMessageChanged();
+        Q_EMIT o->newEventsChanged();
     }
     inline void usersConversationIdChanged(Users* o)
     {
@@ -695,14 +687,13 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    bool network_handle_new_contact_get(const NetworkHandle::Private*);
-    bool network_handle_new_conversation_get(const NetworkHandle::Private*);
-    bool network_handle_new_message_get(const NetworkHandle::Private*);
-    bool network_handle_register_device(NetworkHandle::Private*, const ushort*, int);
+    quint64 network_handle_new_events_get(const NetworkHandle::Private*);
+    bool network_handle_login(NetworkHandle::Private*);
+    bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
@@ -1426,9 +1417,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleNewContactChanged,
-        networkHandleNewConversationChanged,
-        networkHandleNewMessageChanged)),
+        networkHandleNewEventsChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -1446,21 +1435,17 @@ bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
 }
-bool NetworkHandle::newContact() const
+quint64 NetworkHandle::newEvents() const
 {
-    return network_handle_new_contact_get(m_d);
+    return network_handle_new_events_get(m_d);
 }
-bool NetworkHandle::newConversation() const
+bool NetworkHandle::login()
 {
-    return network_handle_new_conversation_get(m_d);
+    return network_handle_login(m_d);
 }
-bool NetworkHandle::newMessage() const
+bool NetworkHandle::registerNewUser(const QString& user_id)
 {
-    return network_handle_new_message_get(m_d);
-}
-bool NetworkHandle::registerDevice(const QString& user_id)
-{
-    return network_handle_register_device(m_d, user_id.utf16(), user_id.size());
+    return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
 bool NetworkHandle::sendAddRequest(const QString& user_id) const
 {
