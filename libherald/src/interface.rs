@@ -971,7 +971,7 @@ pub trait MessagesTrait {
     fn clear_conversation_history(&mut self) -> bool;
     fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
-    fn insert_message(&mut self, body: String) -> bool;
+    fn insert_message(&mut self, body: String) -> Vec<u8>;
     fn refresh(&mut self) -> bool;
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
@@ -1135,12 +1135,13 @@ pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
+pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let mut body = String::new();
     set_string_from_utf16(&mut body, body_str, body_len);
     let o = &mut *ptr;
     let r = o.insert_message(body);
-    r
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
@@ -1321,7 +1322,6 @@ pub trait NetworkHandleTrait {
     fn new_conversation(&self) -> bool;
     fn new_message(&self) -> bool;
     fn register_device(&mut self, user_id: String) -> bool;
-    fn request_meta_data(&mut self, of: String) -> bool;
     fn send_add_request(&mut self, user_id: String, conversation_id: &[u8]) -> bool;
     fn send_message(&mut self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
 }
@@ -1383,15 +1383,6 @@ pub unsafe extern "C" fn network_handle_register_device(ptr: *mut NetworkHandle,
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     let r = o.register_device(user_id);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_request_meta_data(ptr: *mut NetworkHandle, of_str: *const c_ushort, of_len: c_int) -> bool {
-    let mut of = String::new();
-    set_string_from_utf16(&mut of, of_str, of_len);
-    let o = &mut *ptr;
-    let r = o.request_meta_data(of);
     r
 }
 

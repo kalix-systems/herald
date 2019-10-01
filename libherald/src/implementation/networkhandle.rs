@@ -93,33 +93,12 @@ impl NetworkHandleTrait for NetworkHandle {
         to: FfiConversationIdRef,
         msg_id: FfiMsgIdRef,
     ) -> bool {
-        //// we copy this repeatedly, if this gets slow, put it in an arc.
         let conv_id = ret_err!(ConversationId::try_from(to), false);
-
-        let members = ret_err!(heraldcore::members::members(&conv_id), false);
 
         let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
-        //for member in members {
-        //    println!("attempting to send to {}", &member);
-
-        //    ret_err!(
-        //        self.tx.try_send(FuncCall::SendMsg {
-        //            msg: ConversationMessage {
-        //                body: ConversationMessageBody::Message {
-        //                    body: body.clone(),
-        //                    msg_id: msg_id.clone(),
-        //                    op_msg_id: None
-        //                },
-        //                cid: conv_id.clone(),
-        //                }
-        //        }),
-        //        false
-        //    );
-
-        //    println!("message queued for send");
-        //}
-        //true
+        ret_err!(network::send_text(conv_id, body, msg_id, None), false);
+        true
     }
 
     fn send_add_request(
@@ -127,54 +106,15 @@ impl NetworkHandleTrait for NetworkHandle {
         user_id: FfiUserId,
         conversation_id: FfiConversationIdRef,
     ) -> bool {
-        unimplemented!()
-        //let user_id = ret_err!(user_id.as_str().try_into(), false);
-
-        //let conversation_id = match ConversationId::try_from(conversation_id) {
-        //    Ok(id) => id,
-        //    Err(e) => {
-        //        eprintln!("{}", e);
-        //        return false;
-        //    }
-        //};
-
-        //match self
-        //    .tx
-        //    .try_send(FuncCall::AddRequest(conversation_id, user_id))
-        //{
-        //    Ok(_) => return true,
-        //    Err(_) => {
-        //        eprintln!("failed to send");
-        //        return false;
-        //    }
-        //}
+        let uid = ret_err!(user_id.as_str().try_into(), false);
+        ret_err!(network::start_conversation(&[uid], None), false);
+        true
     }
 
     fn register_device(&mut self, user_id: FfiUserId) -> bool {
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
         ret_err!(network::register(uid), false);
         true
-        //match self.tx.try_send(FuncCall::RegisterDevice) {
-        //    Ok(_) => true,
-        //    Err(_e) => {
-        //        eprintln!("could not register device, error unrpintable");
-        //        false
-        //    }
-        //}
-    }
-
-    /// this is the API exposed to QML
-    fn request_meta_data(&mut self, of: FfiUserId) -> bool {
-        unimplemented!();
-        //let of = ret_err!(of.as_str().try_into(), false);
-
-        //match self.tx.try_send(FuncCall::RequestMeta(of)) {
-        //    Ok(_) => true,
-        //    Err(_e) => {
-        //        eprintln!("could not get meta data, error unrpintable");
-        //        false
-        //    }
-        //}
     }
 
     fn new_message(&self) -> bool {

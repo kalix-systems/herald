@@ -383,17 +383,12 @@ pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(),
     Ok(())
 }
 
-pub fn send_text(cid: ConversationId, body: String, op: Option<MsgId>) -> Result<(), HErr> {
-    use crate::message;
-    let (mid, ts) = message::add_message(
-        None,
-        crate::config::Config::static_id()?,
-        &cid,
-        &body,
-        None,
-        None,
-        &op,
-    )?;
+pub fn send_text(
+    cid: ConversationId,
+    body: String,
+    mid: MsgId,
+    op: Option<MsgId>,
+) -> Result<(), HErr> {
     let content = cmessages::Message::Text(body);
     let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
     send_cmessage(cid, &body)

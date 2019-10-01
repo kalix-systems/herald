@@ -177,7 +177,7 @@ public:
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
-    Q_INVOKABLE bool insertMessage(const QString& body);
+    Q_INVOKABLE QByteArray insertMessage(const QString& body);
     Q_INVOKABLE bool refresh();
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 
@@ -241,7 +241,6 @@ public:
     bool newConversation() const;
     bool newMessage() const;
     Q_INVOKABLE bool registerDevice(const QString& user_id);
-    Q_INVOKABLE bool requestMetaData(const QString& of);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id);
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id);
 Q_SIGNALS:

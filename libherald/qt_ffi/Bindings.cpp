@@ -689,7 +689,7 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    bool messages_insert_message(Messages::Private*, const ushort*, int);
+    void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     bool messages_refresh(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
@@ -703,7 +703,6 @@ extern "C" {
     bool network_handle_new_conversation_get(const NetworkHandle::Private*);
     bool network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_register_device(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
@@ -1399,9 +1398,11 @@ bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-bool Messages::insertMessage(const QString& body)
+QByteArray Messages::insertMessage(const QString& body)
 {
-    return messages_insert_message(m_d, body.utf16(), body.size());
+    QByteArray s;
+    messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
+    return s;
 }
 bool Messages::refresh()
 {
@@ -1460,10 +1461,6 @@ bool NetworkHandle::newMessage() const
 bool NetworkHandle::registerDevice(const QString& user_id)
 {
     return network_handle_register_device(m_d, user_id.utf16(), user_id.size());
-}
-bool NetworkHandle::requestMetaData(const QString& of)
-{
-    return network_handle_request_meta_data(m_d, of.utf16(), of.size());
 }
 bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id)
 {
