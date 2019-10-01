@@ -16,15 +16,7 @@ import "../common/utils.mjs" as Utils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
-    /// GS: this should be bound to global state
-    property alias chatBarAvatar: chatBarAvatar
-    property var currentAvatar: {
-        Utils.unwrapOr(sideBar.conversationsListView.currentItem, {
-                           "conversationAvatar": Qt.createComponent(
-                                                     "qrc:common/Avatar.qml").createObject(
-                                                     parent)
-                       }).conversationAvatar
-    }
+    property var currentAvatar
     clip: true
     height: QmlCfg.toolbarHeight
     // JH: factor z values into the config

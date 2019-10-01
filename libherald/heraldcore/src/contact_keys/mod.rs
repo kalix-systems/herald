@@ -31,8 +31,9 @@ pub(crate) fn add_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<
     Ok(())
 }
 
+#[allow(unused)]
 pub(crate) fn get_valid_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> {
-    let mut db = Database::get()?;
+    let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/valid_keys.sql"))?;
 
     let out = stmt
@@ -46,8 +47,9 @@ pub(crate) fn get_valid_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> 
     out
 }
 
+#[allow(unused)]
 pub(crate) fn get_deprecated_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> {
-    let mut db = Database::get()?;
+    let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/dep_keys.sql"))?;
 
     let out = stmt
@@ -61,7 +63,7 @@ pub(crate) fn get_deprecated_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, H
     out
 }
 
-pub(crate) fn deprecate_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<(), HErr> {
+pub(crate) fn deprecate_keys(keys: &[Signed<sign::PublicKey>]) -> Result<(), HErr> {
     let mut db = Database::get()?;
     let tx = db.transaction()?;
 

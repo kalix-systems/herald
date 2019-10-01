@@ -2,7 +2,6 @@ use crate::db::Database;
 use crate::errors::HErr;
 use crate::types::{ConversationId, ConversationMessageBody};
 use rusqlite::{params, NO_PARAMS};
-use serde_cbor;
 
 /// Adds message to pending messages in database
 pub(crate) fn add_to_pending(

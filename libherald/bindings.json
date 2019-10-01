@@ -10,19 +10,8 @@
             "type": "Object",
             "properties": {
                 "configInit": {
-                    "type": "bool"
-                }
-            },
-            "functions": {
-                "setConfigId": {
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "config_id",
-                            "type": "QString"
-                        }
-                    ],
-                    "return": "bool"
+                    "type": "bool",
+                    "write": true
                 }
             }
         },
@@ -128,7 +117,6 @@
             "type": "Object",
             "functions": {
                 "sendMessage": {
-                    "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
@@ -146,50 +134,38 @@
                     ]
                 },
                 "sendAddRequest": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "registerNewUser": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
                             "name": "user_id",
                             "type": "QString"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },
-                "requestMetaData": {
+                "login": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "of",
-                            "type": "QString"
-                        }
-                    ]
-                },
-                "registerDevice": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": []
+                    "return": "bool"
                 }
             },
             "properties": {
-                "newMessage": {
-                    "type": "bool"
-                },
-                "newConversation": {
-                    "type": "bool"
-                },
                 "connectionUp": {
                     "type": "bool"
                 },
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newContact": {
-                    "type": "bool"
+                "newEvents": {
+                    "type": "quint64"
                 }
             }
         },

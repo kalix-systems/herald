@@ -16,7 +16,6 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-
     TopMenuBar {
     }
 
@@ -30,8 +29,12 @@ ApplicationWindow {
 
         onConfigInitChanged: {
             appLoader.active = !appLoader.active
-            loginLoader.active = !loginLoader.active
+            registrationLoader.active = !registrationLoader.active
         }
+    }
+
+    NetworkHandle {
+        id: networkHandle
     }
 
     Loader {
@@ -46,9 +49,9 @@ ApplicationWindow {
 
     Loader {
         anchors.fill: parent
-        id: loginLoader
+        id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: LoginPage {
+        sourceComponent: RegistrationPage {
         }
     }
 }

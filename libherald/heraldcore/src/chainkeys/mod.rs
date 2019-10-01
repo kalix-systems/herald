@@ -1,7 +1,7 @@
 use crate::types::ConversationId;
 use crate::{db::Database, errors::HErr};
 use chainmail::{block::*, errors::Error as ChainError};
-use rusqlite::{params, NO_PARAMS};
+use rusqlite::params;
 use std::collections::BTreeSet;
 
 fn store_key(

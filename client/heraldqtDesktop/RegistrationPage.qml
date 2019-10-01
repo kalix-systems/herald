@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 Rectangle {
     readonly property int heightUnit: root.minimumHeight / 3
-    id: loginPage
+    id: registrationPage
     anchors.fill: parent
 
     LinearGradient {
@@ -62,7 +62,9 @@ Rectangle {
             }
 
             Keys.onReturnPressed: {
-                heraldState.setConfigId(entryField.text.trim())
+                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                    heraldState.configInit = true
+                }
             }
         }
 
@@ -80,8 +82,9 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                // TODO check length of id
-                heraldState.setConfigId(entryField.text.trim())
+                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                    heraldState.configInit = true
+                }
             }
         }
     }

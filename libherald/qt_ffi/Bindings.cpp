@@ -128,17 +128,9 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleNewContactChanged(NetworkHandle* o)
+    inline void networkHandleNewEventsChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newContactChanged();
-    }
-    inline void networkHandleNewConversationChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newConversationChanged();
-    }
-    inline void networkHandleNewMessageChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newMessageChanged();
+        Q_EMIT o->newEventsChanged();
     }
     inline void usersConversationIdChanged(Users* o)
     {
@@ -487,7 +479,7 @@ extern "C" {
     HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
-    bool herald_state_set_config_id(HeraldState::Private*, const ushort*, int);
+    void herald_state_config_init_set(HeraldState::Private*, bool);
 };
 
 extern "C" {
@@ -695,17 +687,15 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    bool network_handle_new_contact_get(const NetworkHandle::Private*);
-    bool network_handle_new_conversation_get(const NetworkHandle::Private*);
-    bool network_handle_new_message_get(const NetworkHandle::Private*);
-    bool network_handle_register_device(NetworkHandle::Private*);
-    bool network_handle_request_meta_data(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(NetworkHandle::Private*, const ushort*, int, const char*, int);
-    bool network_handle_send_message(NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
+    quint64 network_handle_new_events_get(const NetworkHandle::Private*);
+    bool network_handle_login(NetworkHandle::Private*);
+    bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
+    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int);
+    bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
 extern "C" {
@@ -1244,9 +1234,8 @@ bool HeraldState::configInit() const
 {
     return herald_state_config_init_get(m_d);
 }
-bool HeraldState::setConfigId(const QString& config_id)
-{
-    return herald_state_set_config_id(m_d, config_id.utf16(), config_id.size());
+void HeraldState::setConfigInit(bool v) {
+    herald_state_config_init_set(m_d, v);
 }
 HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -1428,9 +1417,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleNewContactChanged,
-        networkHandleNewConversationChanged,
-        networkHandleNewMessageChanged)),
+        networkHandleNewEventsChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -1448,31 +1435,23 @@ bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
 }
-bool NetworkHandle::newContact() const
+quint64 NetworkHandle::newEvents() const
 {
-    return network_handle_new_contact_get(m_d);
+    return network_handle_new_events_get(m_d);
 }
-bool NetworkHandle::newConversation() const
+bool NetworkHandle::login()
 {
-    return network_handle_new_conversation_get(m_d);
+    return network_handle_login(m_d);
 }
-bool NetworkHandle::newMessage() const
+bool NetworkHandle::registerNewUser(const QString& user_id)
 {
-    return network_handle_new_message_get(m_d);
+    return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
-bool NetworkHandle::registerDevice()
+bool NetworkHandle::sendAddRequest(const QString& user_id) const
 {
-    return network_handle_register_device(m_d);
+    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size());
 }
-bool NetworkHandle::requestMetaData(const QString& of)
-{
-    return network_handle_request_meta_data(m_d, of.utf16(), of.size());
-}
-bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id)
-{
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
-}
-bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id)
+bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const
 {
     return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.data(), to.size(), msg_id.data(), msg_id.size());
 }

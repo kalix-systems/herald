@@ -3,6 +3,7 @@ use crate::{
     errors::HErr::{self, *},
     pending,
     types::*,
+    womp,
 };
 use chrono::prelude::*;
 use crossbeam_channel::*;
@@ -16,7 +17,7 @@ use std::{
     sync::atomic::{AtomicBool, Ordering},
 };
 
-const DEFAULT_PORT: u16 = 8000;
+const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
@@ -119,13 +120,13 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     crate::config::ConfigBuilder::new()
         .id(uid)
         .keypair(kp)
-        .add()?;
+        .add()
+        .expect(womp!());
     Ok(res)
 }
 
 pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HErr> {
     use login::*;
-    use tungstenite::Message;
 
     CAUGHT_UP.store(false, Ordering::Release);
 
@@ -169,7 +170,6 @@ fn catchup<S: Read + Write, F: FnMut(Notification)>(
     f: &mut F,
 ) -> Result<(), HErr> {
     use catchup::*;
-    use tungstenite::*;
 
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
@@ -267,7 +267,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     let mut ev = Event::default();
     match cm.open()? {
         NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
-        DepKey(dk) => crate::contact_keys::deprecate_keys(cm.from().uid, &[dk.0])?,
+        DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
         AddedToConvo(ac) => {
             let mut db = crate::db::Database::get()?;
             let tx = db.transaction()?;
@@ -356,9 +356,49 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
             }
         }
     } else {
-        // TODO: load it to pending here
         pending::add_to_pending(cid, content)
     }
+}
+
+fn send_dmessage(dids: &[sig::PublicKey], msg: &DeviceMessage) -> Result<(), HErr> {
+    let msg = Bytes::from(serde_cbor::to_vec(msg)?);
+
+    let req = push_devices::Req {
+        to: dids.to_vec(),
+        msg,
+    };
+
+    // TODO retry logic? for now, things go to the void
+    match helper::push_devices(&req)? {
+        push_devices::Res::Success => Ok(()),
+        push_devices::Res::Missing(missing) => Err(HeraldError(format!(
+            "tried to send messages to nonexistent key_infos {:?}",
+            missing
+        ))),
+    }
+}
+
+fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
+    let meta = keys_of(vec![uid])?
+        .remove(&uid)
+        .ok_or(HErr::HeraldError(format!(
+            "No keys associated with {}",
+            uid
+        )))?;
+
+    let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
+
+    send_dmessage(&keys, msg)
+}
+
+pub fn send_contact_req(uid: UserId) -> Result<(), HErr> {
+    let cid = crate::conversation::add_conversation(None, None)?;
+
+    let req = dmessages::ContactReq {
+        uid: Config::static_id()?,
+        cid,
+    };
+    send_umessage(uid, &DeviceMessage::ContactReq(req))
 }
 
 pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(), HErr> {
@@ -378,17 +418,12 @@ pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(),
     Ok(())
 }
 
-pub fn send_text(cid: ConversationId, body: String, op: Option<MsgId>) -> Result<(), HErr> {
-    use crate::message;
-    let (mid, ts) = message::add_message(
-        None,
-        crate::config::Config::static_id()?,
-        &cid,
-        &body,
-        None,
-        None,
-        &op,
-    )?;
+pub fn send_text(
+    cid: ConversationId,
+    body: String,
+    mid: MsgId,
+    op: Option<MsgId>,
+) -> Result<(), HErr> {
     let content = cmessages::Message::Text(body);
     let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
     send_cmessage(cid, &body)

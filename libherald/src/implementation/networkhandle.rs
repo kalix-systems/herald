@@ -1,10 +1,7 @@
 use crate::{interface::*, ret_err, types::*};
 use herald_common::*;
-use heraldcore::{
-    abort_err,
-    tokio::{self, sync::mpsc::*},
-    types::*,
-};
+use heraldcore::network;
+use heraldcore::types::*;
 use std::{
     convert::{TryFrom, TryInto},
     sync::{
@@ -19,9 +16,6 @@ type Emitter = NetworkHandleEmitter;
 pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
-    net_new_message: AtomicBool,
-    net_new_contact: AtomicBool,
-    net_new_conversation: AtomicBool,
 }
 
 impl EffectsFlags {
@@ -29,187 +23,94 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            net_new_message: AtomicBool::new(false),
-            net_new_contact: AtomicBool::new(false),
-            net_new_conversation: AtomicBool::new(false),
         }
     }
-    pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
-        // drop the pending and online flags, we are in a fail state
-        self.net_online.fetch_and(false, Ordering::Relaxed);
-        self.net_pending.fetch_or(true, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Down!");
-    }
-    pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_online.fetch_or(true, Ordering::Relaxed);
-        self.net_pending.fetch_and(false, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Up!")
-    }
-    pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
-        self.net_online.fetch_and(false, Ordering::Relaxed);
-        self.net_pending.fetch_and(true, Ordering::Relaxed);
-        emit.connection_up_changed();
-        emit.connection_pending_changed();
-        println!("Net Pending!")
-    }
-    pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_message.fetch_xor(old, Ordering::Relaxed);
-        emit.new_message_changed();
-    }
-    pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-        emit.new_contact_changed();
-    }
-    pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
-        let old = self.net_new_message.load(Ordering::Relaxed);
-        self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-        emit.new_conversation_changed();
-    }
-}
-
-/// map to function calls from the herald core session api
-#[derive(Debug)]
-pub enum FuncCall {
-    SendMsg {
-        to: UserId,
-        msg: ConversationMessage,
-    },
-    AddRequest(ConversationId, UserId),
-    RequestMeta(UserId),
-    RegisterDevice,
+    //pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
+    //    // drop the pending and online flags, we are in a fail state
+    //    self.net_online.fetch_and(false, Ordering::Relaxed);
+    //    self.net_pending.fetch_or(true, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Down!");
+    //}
+    //pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
+    //    self.net_online.fetch_or(true, Ordering::Relaxed);
+    //    self.net_pending.fetch_and(false, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Up!")
+    //}
+    //pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
+    //    self.net_online.fetch_and(false, Ordering::Relaxed);
+    //    self.net_pending.fetch_and(true, Ordering::Relaxed);
+    //    emit.connection_up_changed();
+    //    emit.connection_pending_changed();
+    //    println!("Net Pending!")
+    //}
+    //pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_message.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_message_changed();
+    //}
+    //pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_contact_changed();
+    //}
+    //pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
+    //    let old = self.net_new_message.load(Ordering::Relaxed);
+    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
+    //    emit.new_conversation_changed();
+    //}
 }
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
-    tx: UnboundedSender<FuncCall>,
+    new_events: usize,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
     fn new(emit: NetworkHandleEmitter) -> Self {
-        let (tx, rx) = unbounded_channel();
-
-        let mut handle = NetworkHandle {
+        let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(EffectsFlags::new()),
-            tx,
+            new_events: 0,
         };
-        // start_worker(handle.emit.clone(), handle.status_flags.clone(), rx);
         handle
+    }
+
+    fn new_events(&self) -> u64 {
+        self.new_events as u64
     }
 
     /// this is the API exposed to QML
     /// note, currently this function has all together too much copying.
     /// this will be rectified when stupid hanfles fan out.
-    fn send_message(
-        &mut self,
-        body: String,
-        to: FfiConversationIdRef,
-        msg_id: FfiMsgIdRef,
-    ) -> bool {
-        unimplemented!()
-        //if to.len() != 32 {
-        //    eprintln!("");
-        //    return false;
-        //}
+    fn send_message(&self, body: String, to: FfiConversationIdRef, msg_id: FfiMsgIdRef) -> bool {
+        let conv_id = ret_err!(ConversationId::try_from(to), false);
 
-        //// we copy this repeatedly, if this gets slow, put it in an arc.
-        //let conv_id = ret_err!(ConversationId::try_from(to), false);
+        let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
-        //let members = ret_err!(heraldcore::members::members(&conv_id), false);
-
-        //let msg_id = ret_err!(MsgId::try_from(msg_id), false);
-
-        //for member in members {
-        //    println!("attempting to send to {}", &member);
-
-        //    ret_err!(
-        //        self.tx.try_send(FuncCall::SendMsg {
-        //            msg: ConversationMessage {
-        //                body: ConversationMessageBody::Message {
-        //                    body: body.clone(),
-        //                    msg_id: msg_id.clone(),
-        //                    op_msg_id: None
-        //                },
-        //                cid: conv_id.clone(),
-        //                }
-        //        }),
-        //        false
-        //    );
-
-        //    println!("message queued for send");
-        //}
-        //true
+        ret_err!(network::send_text(conv_id, body, msg_id, None), false);
+        true
     }
 
-    fn send_add_request(
-        &mut self,
-        user_id: FfiUserId,
-        conversation_id: FfiConversationIdRef,
-    ) -> bool {
-        let user_id = ret_err!(user_id.as_str().try_into(), false);
-
-        let conversation_id = match ConversationId::try_from(conversation_id) {
-            Ok(id) => id,
-            Err(e) => {
-                eprintln!("{}", e);
-                return false;
-            }
-        };
-
-        match self
-            .tx
-            .try_send(FuncCall::AddRequest(conversation_id, user_id))
-        {
-            Ok(_) => return true,
-            Err(_) => {
-                eprintln!("failed to send");
-                return false;
-            }
-        }
+    fn send_add_request(&self, user_id: FfiUserId) -> bool {
+        let uid = ret_err!(user_id.as_str().try_into(), false);
+        ret_err!(network::send_contact_req(uid), false);
+        true
     }
 
-    fn register_device(&mut self) -> bool {
-        match self.tx.try_send(FuncCall::RegisterDevice) {
-            Ok(_) => true,
-            Err(_e) => {
-                eprintln!("could not register device, error unrpintable");
-                false
-            }
-        }
+    fn register_new_user(&mut self, user_id: FfiUserId) -> bool {
+        let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
+        ret_err!(network::register(uid), false);
+        true
     }
 
-    /// this is the API exposed to QML
-    fn request_meta_data(&mut self, of: FfiUserId) -> bool {
-        let of = ret_err!(of.as_str().try_into(), false);
-
-        match self.tx.try_send(FuncCall::RequestMeta(of)) {
-            Ok(_) => true,
-            Err(_e) => {
-                eprintln!("could not get meta data, error unrpintable");
-                false
-            }
-        }
-    }
-
-    fn new_message(&self) -> bool {
-        self.status_flags.net_new_message.load(Ordering::Relaxed)
-    }
-
-    fn new_contact(&self) -> bool {
-        self.status_flags.net_new_contact.load(Ordering::Relaxed)
-    }
-
-    fn new_conversation(&self) -> bool {
-        self.status_flags
-            .net_new_conversation
-            .load(Ordering::Relaxed)
+    fn login(&mut self) -> bool {
+        eprintln!("Login is not yet supported");
+        true
     }
 
     fn connection_up(&self) -> bool {

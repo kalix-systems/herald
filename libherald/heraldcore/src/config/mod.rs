@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::*, types::*};
+use crate::{db::Database, errors::*, types::*, womp};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
@@ -108,9 +108,8 @@ impl ConfigBuilder {
             profile_picture,
         } = self;
 
-        let id = id.ok_or(HErr::MissingFields)?;
-        // TODO: use this
-        let keypair = keypair.ok_or(HErr::MissingFields)?;
+        let id = id.ok_or(HErr::MissingFields).expect(womp!());
+        let keypair = keypair.ok_or(HErr::MissingFields).expect(womp!());
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);

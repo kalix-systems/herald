@@ -21,9 +21,7 @@ Component {
 
       Keys.onPressed: {
           // NOTE: What is the first comparison doing?
-          if (event.key === Qt.Key_Return) {
-              event.accepted = true
-          } else if (event.key === Qt.Key_Tab) {
+          if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
               event.accepted = true
           }
       }
