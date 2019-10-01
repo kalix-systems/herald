@@ -8,7 +8,6 @@ Item {
     property string label: "unknown"
     property string summaryText: ""
 
-
     Text {
         id: displayName
         text: label
@@ -27,7 +26,7 @@ Item {
     Text {
         id: summary
         text: summaryText
-        color:  QmlCfg.palette.secondaryTextColor
+        color: QmlCfg.palette.secondaryTextColor
         elide: Text.ElideRight
 
         anchors {
@@ -53,10 +52,11 @@ Item {
 
     Image {
         id: receiptIcon
-        sourceSize: Qt.size(24,24)
+        sourceSize: Qt.size(24, 24)
         height: 16
         width: 16
-        source: JS.receiptStatusSwitch(messageModel.lastStatus) //ToDo: this value is alwasy undefined
+        source: JS.receiptStatusSwitch(
+                    messageModel.lastStatus) //ToDo: this value is alwasy undefined
         anchors {
             right: parent.right
             bottom: parent.bottom

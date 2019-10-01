@@ -16,10 +16,8 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-
     TopMenuBar {
     }
-
 
     // This provides a few purely functional helper methods
     HeraldUtils {

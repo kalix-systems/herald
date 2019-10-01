@@ -19,7 +19,6 @@ Item {
     Layout.fillWidth: true
     Layout.fillHeight: true
 
-
     Users {
         id: contactsModel
     }
@@ -51,7 +50,6 @@ Item {
             }
         }
     }
-
 
     Config {
         id: config

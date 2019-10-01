@@ -32,7 +32,6 @@ ListView {
     //        }
     //    }
     //}
-
     ScrollBar.vertical: ScrollBar {
     }
 
@@ -45,14 +44,13 @@ ListView {
         property bool isPairwise: pairwise
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
-          }
+        }
 
         property var childChatView: Component {
             CV.ChatView {
-              ownedConversation: messageModel
-           }
+                ownedConversation: messageModel
+            }
         }
-
 
         Users {
             id: convoItemMembers
@@ -91,7 +89,8 @@ ListView {
                 anchors.left: conversationAvatar.right
                 anchors.right: parent.right
                 label: Utils.unwrapOr(title, "unknown")
-                summaryText: JS.formatSummary(messageModel.lastAuthor, messageModel.lastBody)
+                summaryText: JS.formatSummary(messageModel.lastAuthor,
+                                              messageModel.lastBody)
             }
 
             anchors.fill: parent
@@ -123,7 +122,7 @@ ListView {
                 onExited: parent.state = ""
 
                 onClicked: {
-                    chatView.sourceComponent = childChatView;
+                    chatView.sourceComponent = childChatView
                     conversationList.currentIndex = index
                 }
 
@@ -133,6 +132,5 @@ ListView {
             // ternary is okay here, type enforced by QML
             color: conversationItem.focus ? focusColor : defaultColor
         }
-
     }
 }

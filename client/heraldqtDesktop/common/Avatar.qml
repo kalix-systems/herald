@@ -15,7 +15,6 @@ import "utils.mjs" as Utils
 // FS: Fix scoping
 
 /// --- displays a list of contacts
-
 Row {
     id: wrapperRow
     property string avatarLabel: ""
@@ -44,7 +43,7 @@ Row {
                                          initialAvatar)
         anchors.verticalCenter: parent.verticalCenter
     }
-// TODO : this seems kinda like a seperate component at this point.
+    // TODO : this seems kinda like a seperate component at this point.
     Column {
         id: textCol
         anchors {
@@ -80,10 +79,7 @@ Row {
                    }
             elide: Text.ElideRight
         }
-
-   }
-
-
+    }
 
     ///--- potential avatar components
     /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do

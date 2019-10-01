@@ -1,10 +1,11 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
+
 Button {
     property bool takesModifier: false
     property string baseEmoji: ""
-    property string emoji:takesModifier ? baseEmoji + QmlCfg.skinSwatchList[QmlCfg.skinSwatchIndex] : baseEmoji
+    property string emoji: takesModifier ? baseEmoji + QmlCfg.skinSwatchList[QmlCfg.skinSwatchIndex] : baseEmoji
     property color lowlight: "light gray"
 
     onClicked: {
@@ -29,5 +30,4 @@ Button {
         font.pixelSize: 20
         text: emoji
     }
-
 }
