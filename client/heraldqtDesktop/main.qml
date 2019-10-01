@@ -35,10 +35,6 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-        // every conversation has it's own refresh signal. guards
-        //        onNewMessageChanged: convModel.refresh()
-        //onNewContactChanged: contactsModel.refresh()
-        //onNewConversationChanged: conversationsModel.hardRefresh()
     }
 
     Loader {

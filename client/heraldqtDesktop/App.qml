@@ -85,4 +85,8 @@ Item {
             color: "black"
         }
     }
+
+    Component.onCompleted: {
+        networkHandle.login()
+    }
 }
