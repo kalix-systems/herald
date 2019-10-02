@@ -35,6 +35,12 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
+        onNewContactChanged: {
+            print("new friend")
+        }
+        onNewMessageChanged: {
+            print("oh hai")
+        }
     }
 
     Loader {

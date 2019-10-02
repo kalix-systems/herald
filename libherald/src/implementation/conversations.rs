@@ -2,6 +2,7 @@ use crate::{interface::*, ret_err, ret_none, types::*};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
+    types::*,
     utils::SearchPattern,
 };
 
@@ -193,21 +194,17 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
-    fn hard_refresh(&mut self) -> bool {
-        self.model.begin_reset_model();
-        self.list = Vec::new();
-        self.model.end_reset_model();
+    fn refresh(&mut self, notif: &[u8]) -> bool {
+        use herald_common::UserId;
 
-        let list: Vec<Conversation> = abort_err!(conversation::all_meta())
-            .into_iter()
-            .map(|inner| Conversation {
-                inner,
-                matched: true,
-            })
-            .collect();
+        let (_, cid): (UserId, ConversationId) = ret_err!(serde_cbor::from_slice(notif), false);
+        let meta = abort_err!(conversation::meta(&cid));
         self.model
-            .begin_insert_rows(0, list.len().saturating_sub(1));
-        self.list = list;
+            .begin_insert_rows(self.list.len(), self.list.len());
+        self.list.push(Conversation {
+            matched: meta.matches(&self.filter),
+            inner: meta,
+        });
         self.model.end_insert_rows();
 
         true

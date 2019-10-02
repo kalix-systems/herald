@@ -23,21 +23,11 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    // TODO : remove this if it does not create bugs
-    //    Connections {
-    //        target: convModel
-    //        onConversationIdChanged: {
-    //            if (convModel.conversationId === undefined) {
-    //                contactList.currentIndex = -1
-    //            }
-    //        }
-    //    }
     ScrollBar.vertical: ScrollBar {
     }
 
     delegate: Item {
         id: contactItem
-        //GS : rexporting the contact avatar to global state is a backwards ref!
 
         // This ternary is okay, types are enforced by QML
         height: visible ? 55 : 0
@@ -58,8 +48,6 @@ ListView {
 
             anchors.fill: parent
 
-            /// Note: can we use the highlight property here
-            /// we can do this once contact deletion updates current item for listview properly
             states: [
                 State {
                     name: "hovering"
@@ -84,14 +72,6 @@ ListView {
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onEntered: parent.state = "hovering"
                 onExited: parent.state = ""
-
-                onClicked: {
-
-                    //JS.contactClickHandler(mouse, contactList, index,
-                    //                       pairwiseConversationId,
-                    //                       popupManager.optionsMenu,
-                    //                       convModel, appRoot)
-                }
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""

@@ -490,7 +490,7 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
-    bool conversations_hard_refresh(Conversations::Private*);
+    bool conversations_refresh(Conversations::Private*, const char*, int);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -725,7 +725,7 @@ extern "C" {
     void network_handle_next_new_conversation(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_new_message(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int);
+    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
@@ -1058,7 +1058,7 @@ extern "C" {
     bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
     bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
-    bool users_refresh(Users::Private*);
+    bool users_refresh(Users::Private*, const char*, int);
     bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
     bool users_toggle_filter_regex(Users::Private*);
 };
@@ -1229,9 +1229,9 @@ QByteArray Conversations::addConversation()
     conversations_add_conversation(m_d, &s, set_qbytearray);
     return s;
 }
-bool Conversations::hardRefresh()
+bool Conversations::refresh(const QByteArray& notif)
 {
-    return conversations_hard_refresh(m_d);
+    return conversations_refresh(m_d, notif.data(), notif.size());
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
@@ -1539,9 +1539,9 @@ bool NetworkHandle::registerNewUser(const QString& user_id)
 {
     return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
-bool NetworkHandle::sendAddRequest(const QString& user_id) const
+bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
 {
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size());
+    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const
 {
@@ -1670,9 +1670,9 @@ qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
 {
     return users_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
 }
-bool Users::refresh()
+bool Users::refresh(const QByteArray& notif)
 {
-    return users_refresh(m_d);
+    return users_refresh(m_d, notif.data(), notif.size());
 }
 bool Users::removeFromConversation(quint64 row_index, const QByteArray& conversation_id)
 {

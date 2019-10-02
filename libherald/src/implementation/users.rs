@@ -390,31 +390,20 @@ impl UsersTrait for Users {
     }
 
     // TODO handle removals
-    fn refresh(&mut self) -> bool {
-        let new = match self.conversation_id {
-            Some(id) => ret_err!(
-                contact::conversation_members_since(&id, self.updated),
-                false
-            ),
-            None => ret_err!(contact::all_since(self.updated), false),
-        };
+    fn refresh(&mut self, notif: &[u8]) -> bool {
+        let (uid, _): (UserId, ConversationId) = ret_err!(serde_cbor::from_slice(notif), false);
+        let new_user = ret_err!(contact::by_user_id(uid), false);
 
         self.updated = chrono::Utc::now();
 
-        if new.is_empty() {
-            return true;
-        }
-
         let filter = &self.filter;
 
-        self.model.begin_insert_rows(
-            self.list.len(),
-            (self.list.len() + new.len()).saturating_sub(1),
-        );
-        self.list.extend(new.into_iter().map(|inner| User {
-            matched: inner.matches(&filter),
-            inner,
-        }));
+        self.model
+            .begin_insert_rows(self.list.len(), (self.list.len() + 1).saturating_sub(1));
+        self.list.push(User {
+            matched: new_user.matches(&filter),
+            inner: new_user,
+        });
         self.model.end_insert_rows();
 
         true

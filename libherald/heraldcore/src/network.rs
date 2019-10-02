@@ -317,10 +317,9 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
 
     match msg {
         DeviceMessage::ContactReq(cr) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            crate::conversation::add_conversation_with_tx(&tx, Some(&cr.cid), None, true)?;
-            crate::members::add_members_with_tx(&tx, cr.cid, &[cr.uid])?;
+            crate::contact::ContactBuilder::new(cr.uid)
+                .pairwise_conversation(cr.cid)
+                .add()?;
             ev.notifications
                 .push(Notification::NewContact(cr.uid, cr.cid));
         }
@@ -391,9 +390,7 @@ fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
     send_dmessage(&keys, msg)
 }
 
-pub fn send_contact_req(uid: UserId) -> Result<(), HErr> {
-    let cid = crate::conversation::add_conversation(None, None)?;
-
+pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let req = dmessages::ContactReq {
         uid: Config::static_id()?,
         cid,

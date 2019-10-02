@@ -107,8 +107,14 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "hardRefresh": {
+                "refresh": {
                     "mut": true,
+                    "arguments": [
+                        {
+                            "name": "notif",
+                            "type": "QByteArray"
+                        }
+                    ],
                     "return": "bool"
                 }
             }
@@ -165,6 +171,10 @@
                         {
                             "name": "user_id",
                             "type": "QString"
+                        },
+                        {
+                            "name": "conversation_id",
+                            "type": "QByteArray"
                         }
                     ]
                 },
@@ -350,6 +360,16 @@
                             "name": "conversation_id",
                             "type": "QByteArray"
                         }
+                    ]
+                },
+                "refresh": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                      {
+                      "name": "notif",
+                      "type": "QByteArray"
+                      }
                     ]
                 }
             }
