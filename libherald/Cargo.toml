@@ -8,7 +8,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 libc = "0.2.60"
-heraldcore = {path="./heraldcore"}
+heraldcore = {path="../heraldcore"}
 serde_cbor    = "0.10.1"
 serde         = "1.0.99"
 herald_common = {path="../common"}
