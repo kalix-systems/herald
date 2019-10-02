@@ -36,15 +36,13 @@ pub(crate) fn get_valid_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, HErr> 
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/valid_keys.sql"))?;
 
-    let out = stmt
-        .query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?
-        .map(|res| {
-            sign::PublicKey::from_slice(res?.as_slice())
-                .ok_or(HErr::HeraldError("Invalid key".into()))
-        })
-        .collect();
+    let res = stmt.query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?;
 
-    out
+    res.map(|res| {
+        sign::PublicKey::from_slice(res?.as_slice())
+            .ok_or_else(|| HErr::HeraldError("Invalid key".into()))
+    })
+    .collect()
 }
 
 #[allow(unused)]
@@ -52,15 +50,13 @@ pub(crate) fn get_deprecated_keys(uid: UserId) -> Result<Vec<sign::PublicKey>, H
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/dep_keys.sql"))?;
 
-    let out = stmt
-        .query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?
-        .map(|res| {
-            sign::PublicKey::from_slice(res?.as_slice())
-                .ok_or(HErr::HeraldError("Invalid key".into()))
-        })
-        .collect();
+    let res = stmt.query_map(params![uid], |row| Ok(row.get::<_, Vec<u8>>(0)?))?;
 
-    out
+    res.map(|res| {
+        sign::PublicKey::from_slice(res?.as_slice())
+            .ok_or_else(|| HErr::HeraldError("Invalid key".into()))
+    })
+    .collect()
 }
 
 pub(crate) fn deprecate_keys(keys: &[Signed<sign::PublicKey>]) -> Result<(), HErr> {

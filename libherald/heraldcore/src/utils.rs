@@ -151,7 +151,7 @@ macro_rules! womp {
 
 pub(crate) fn rand_id() -> [u8; RAND_ID_LEN] {
     use sodiumoxide::randombytes::randombytes_into;
-    if let Err(_) = sodiumoxide::init() {
+    if sodiumoxide::init().is_err() {
         eprintln!("failed to init libsodium - what have you done");
         std::process::abort()
     }

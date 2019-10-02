@@ -45,7 +45,7 @@ impl TryFrom<&str> for UserId {
 
     fn try_from(val: &str) -> Result<Self, Self::Error> {
         if !val.bytes().all(|c| c.is_ascii_alphanumeric()) {
-            return Err(InvalidUserId::NonAlphaNumeric);
+            Err(InvalidUserId::NonAlphaNumeric)
         } else {
             Ok(Self(
                 ArrayString::from(val).map_err(|_| InvalidUserId::CapacityError)?,
@@ -54,7 +54,7 @@ impl TryFrom<&str> for UserId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserMeta {
     pub keys: HashMap<sig::PublicKey, sig::PKMeta>,
 }

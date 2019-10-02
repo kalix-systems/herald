@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::*, types::*, womp};
+use crate::{db::Database, errors::*, types::*};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
@@ -24,6 +24,7 @@ pub struct Config {
 }
 
 /// Builder for `Config`
+#[derive(Default)]
 pub struct ConfigBuilder {
     /// ID of the local user
     id: Option<UserId>,
@@ -108,13 +109,13 @@ impl ConfigBuilder {
             profile_picture,
         } = self;
 
-        let id = id.ok_or(HErr::MissingFields).expect(womp!());
-        let keypair = keypair.ok_or(HErr::MissingFields).expect(womp!());
+        let id = id.ok_or(HErr::MissingFields)?;
+        let keypair = keypair.ok_or(HErr::MissingFields)?;
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
 
-        let mut contact_builder = crate::contact::ContactBuilder::new(id.clone()).local();
+        let mut contact_builder = crate::contact::ContactBuilder::new(id).local();
 
         if let Some(name) = name {
             contact_builder = contact_builder.name(name);

@@ -3,7 +3,6 @@ use crate::{
     errors::HErr::{self, *},
     pending,
     types::*,
-    womp,
 };
 use chrono::prelude::*;
 use herald_common::*;
@@ -119,8 +118,7 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     crate::config::ConfigBuilder::new()
         .id(uid)
         .keypair(kp)
-        .add()
-        .expect(womp!());
+        .add()?;
     Ok(res)
 }
 
@@ -389,10 +387,7 @@ fn send_dmessage(dids: &[sig::PublicKey], msg: &DeviceMessage) -> Result<(), HEr
 fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
     let meta = keys_of(vec![uid])?
         .remove(&uid)
-        .ok_or(HErr::HeraldError(format!(
-            "No keys associated with {}",
-            uid
-        )))?;
+        .ok_or_else(|| HErr::HeraldError(format!("No keys associated with {}", uid)))?;
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
 

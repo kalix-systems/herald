@@ -36,9 +36,7 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
 
         for block in blocks {
             if key_used_stmt
-                .query_row(params![cid, block.as_ref()], |row| {
-                    Ok(row.get::<_, bool>(0)?)
-                })
+                .query_row(params![cid, block.as_ref()], |row| row.get::<_, bool>(0))
                 // return a `MissingKeys` error if the query result is empty
                 .map_err(|_| ChainError::MissingKeys)?
             {

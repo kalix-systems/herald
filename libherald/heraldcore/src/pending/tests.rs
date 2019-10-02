@@ -1,9 +1,7 @@
 use super::*;
-use super::*;
 use crate::types;
 use crate::womp;
 use serial_test_derive::serial;
-use std::convert::TryInto;
 
 #[test]
 #[serial]

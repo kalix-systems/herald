@@ -1,3 +1,5 @@
+#![allow(clippy::new_without_default)]
+
 use crate::*;
 pub use chrono::prelude::*;
 pub use serde::*;
