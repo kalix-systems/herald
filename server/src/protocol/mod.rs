@@ -52,12 +52,12 @@ impl State {
         // TODO: handle this error somehow?
         // for now we're just dropping it
         if catchup(did, &mut store, ws).await.is_ok() {
-            // TODO: maybe handle this one too?
-            // again just dropping it since the flow must go on
-            drop(send_pushes(ws, &mut receiver).await);
+            drop(self.send_pushes(ws, &mut receiver, did).await);
+            archive_pushes(&mut store, receiver, did).await?;
+        } else {
+            self.active.remove(&did);
+            archive_pushes(&mut store, receiver, did).await?;
         }
-        self.active.remove(&did);
-        archive_pushes(&mut store, receiver, did).await?;
 
         Ok(())
     }
@@ -171,19 +171,31 @@ impl State {
         let res_ser = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }
-}
 
-async fn send_pushes<Tx, E, Rx>(tx: &mut Tx, rx: &mut Rx) -> Result<(), Error>
-where
-    Tx: Sink<ws::Message, Error = E> + Unpin,
-    Error: From<E>,
-    Rx: Stream<Item = Push> + Unpin,
-{
-    while let Some(p) = rx.next().await {
-        tx.send(ws::Message::binary(serde_cbor::to_vec(&p)?))
-            .await?;
+    async fn send_pushes<Tx, E, Rx>(
+        &self,
+        tx: &mut Tx,
+        rx: &mut Rx,
+        did: sig::PublicKey,
+    ) -> Result<(), Error>
+    where
+        Tx: Sink<ws::Message, Error = E> + Unpin,
+        Error: From<E>,
+        Rx: Stream<Item = Push> + Unpin,
+    {
+        while let Some(p) = rx.next().await {
+            match tx.send(ws::Message::binary(serde_cbor::to_vec(&p)?)).await {
+                Ok(_) => {}
+                Err(_) => {
+                    // TODO: figure out a better way to cause this to happen
+                    // probably involves splitting the sender
+                    self.active.remove(&did);
+                    break;
+                }
+            }
+        }
+        Ok(())
     }
-    Ok(())
 }
 
 async fn archive_pushes<Rx>(store: &mut Conn, mut rx: Rx, to: sig::PublicKey) -> Result<(), Error>
