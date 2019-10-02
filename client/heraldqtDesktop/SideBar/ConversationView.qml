@@ -53,6 +53,11 @@ ListView {
             conversationId: conversationIdProxy
         }
 
+        Connections {
+            target: networkHandle
+            onNewConvDataChanged: messageModel.pollUpdate()
+        }
+
         property var childChatView: Component {
             CV.ChatView {
                 conversationAvatar: conversationItemAvatar

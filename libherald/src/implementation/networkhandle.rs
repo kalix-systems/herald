@@ -1,9 +1,11 @@
+use crate::shared::{ConvUpdate, CONV_MSG_RXS};
 use crate::{interface::*, ret_err, ret_none, types::*};
 use crossbeam_channel::*;
 use herald_common::*;
 use heraldcore::abort_err;
 use heraldcore::network::{self, Notification};
 use heraldcore::types::*;
+use std::collections::HashMap;
 use std::{
     convert::{TryFrom, TryInto},
     sync::{
@@ -21,8 +23,6 @@ struct EffectsFlags {
 }
 
 struct NotifRx {
-    msg_rx: Receiver<(MsgId, ConversationId)>,
-    ack_rx: Receiver<(MsgId, ConversationId)>,
     contact_rx: Receiver<UserId>,
     conversation_rx: Receiver<ConversationId>,
     add_contact_resp_rx: Receiver<(ConversationId, UserId, bool)>,
@@ -31,26 +31,6 @@ struct NotifRx {
 }
 
 impl NotifRx {
-    fn msg_recv(&mut self) -> Option<(MsgId, ConversationId)> {
-        let val = self.msg_rx.recv().ok()?;
-        self.emit.new_message_changed();
-        Some(val)
-    }
-
-    fn new_msg(&self) -> u64 {
-        self.msg_rx.len() as u64
-    }
-
-    fn ack_recv(&mut self) -> Option<(MsgId, ConversationId)> {
-        let val = self.ack_rx.recv().ok()?;
-        self.emit.new_ack_changed();
-        Some(val)
-    }
-
-    fn new_ack(&self) -> u64 {
-        self.ack_rx.len() as u64
-    }
-
     fn contact_recv(&mut self) -> Option<UserId> {
         let val = self.contact_rx.recv().ok()?;
         self.emit.new_contact_changed();
@@ -93,12 +73,12 @@ impl NotifRx {
 }
 
 struct NotifTx {
-    msg_tx: Sender<(MsgId, ConversationId)>,
-    ack_tx: Sender<(MsgId, ConversationId)>,
     contact_tx: Sender<UserId>,
     conversation_tx: Sender<ConversationId>,
     add_contact_resp_tx: Sender<(ConversationId, UserId, bool)>,
     add_conv_resp_tx: Sender<(ConversationId, bool)>,
+    conv_senders: HashMap<ConversationId, Sender<ConvUpdate>>,
+    conv_data: Arc<AtomicBool>,
     emit: Emitter,
 }
 
@@ -107,56 +87,78 @@ impl NotifTx {
         use Notification::*;
         match notif {
             NewMsg(msg_id, cid) => {
-                abort_err!(self.msg_tx.send((msg_id, cid)));
-                self.emit.new_message_changed();
+                match self.conv_senders.get(&cid) {
+                    Some(tx) => {
+                        ret_err!(tx.send(ConvUpdate::Msg(msg_id)));
+                    }
+                    None => {
+                        let (tx, rx) = unbounded();
+
+                        ret_err!(tx.send(ConvUpdate::Msg(msg_id)));
+                        self.conv_senders.insert(cid, tx);
+                        CONV_MSG_RXS.insert(cid, rx);
+                    }
+                }
+                self.conv_data
+                    .fetch_xor(self.conv_data.load(Ordering::Relaxed), Ordering::Acquire);
+                self.emit.new_conv_data_changed();
             }
             Ack(msg_id, cid) => {
-                abort_err!(self.ack_tx.send((msg_id, cid)));
-                self.emit.new_ack_changed();
+                match self.conv_senders.get(&cid) {
+                    Some(tx) => {
+                        ret_err!(tx.send(ConvUpdate::Ack(msg_id)));
+                    }
+                    None => {
+                        let (tx, rx) = unbounded();
+
+                        ret_err!(tx.send(ConvUpdate::Ack(msg_id)));
+                        self.conv_senders.insert(cid, tx);
+                        CONV_MSG_RXS.insert(cid, rx);
+                    }
+                }
+                self.conv_data
+                    .fetch_xor(self.conv_data.load(Ordering::Relaxed), Ordering::Acquire);
+                self.emit.new_conv_data_changed();
             }
             NewContact(uid, cid) => {
-                abort_err!(self.contact_tx.send(uid));
+                ret_err!(self.contact_tx.send(uid));
                 self.emit.new_contact_changed();
-                abort_err!(self.conversation_tx.send(cid));
+                ret_err!(self.conversation_tx.send(cid));
                 self.emit.new_conversation_changed();
             }
             NewConversation(cid) => {
-                abort_err!(self.conversation_tx.send(cid));
+                ret_err!(self.conversation_tx.send(cid));
                 self.emit.new_conversation_changed();
             }
             AddContactResponse(cid, uid, accepted) => {
-                abort_err!(self.add_contact_resp_tx.send((cid, uid, accepted)));
+                ret_err!(self.add_contact_resp_tx.send((cid, uid, accepted)));
                 self.emit.new_add_contact_resp_changed();
             }
             AddConversationResponse(cid, accepted) => {
-                abort_err!(self.add_conv_resp_tx.send((cid, accepted)));
+                ret_err!(self.add_conv_resp_tx.send((cid, accepted)));
                 self.emit.new_add_conv_resp_changed();
             }
         }
     }
 }
 
-fn notif_channel(mut emit: Emitter) -> (NotifTx, NotifRx) {
-    let (msg_tx, msg_rx) = unbounded();
-    let (ack_tx, ack_rx) = unbounded();
+fn notif_channel(mut emit: Emitter, conv_data: Arc<AtomicBool>) -> (NotifTx, NotifRx) {
     let (contact_tx, contact_rx) = unbounded();
     let (conversation_tx, conversation_rx) = unbounded();
     let (add_contact_resp_tx, add_contact_resp_rx) = unbounded();
     let (add_conv_resp_tx, add_conv_resp_rx) = unbounded();
 
     let tx = NotifTx {
-        msg_tx,
-        ack_tx,
         contact_tx,
         conversation_tx,
         add_contact_resp_tx,
         add_conv_resp_tx,
+        conv_senders: HashMap::new(),
+        conv_data,
         emit: emit.clone(),
     };
 
     let rx = NotifRx {
-        msg_rx,
-        ack_rx,
         contact_rx,
         conversation_rx,
         add_contact_resp_rx,
@@ -179,6 +181,7 @@ impl EffectsFlags {
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
+    new_conv_data: Arc<AtomicBool>,
     notif_rx: Option<NotifRx>,
 }
 
@@ -187,6 +190,7 @@ impl NetworkHandleTrait for NetworkHandle {
         let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(EffectsFlags::new()),
+            new_conv_data: Arc::new(AtomicBool::new(false)),
             notif_rx: None,
         };
         handle
@@ -218,7 +222,8 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn login(&mut self) -> bool {
-        let (mut tx, rx) = notif_channel(self.emit.clone());
+        let (mut tx, rx) = notif_channel(self.emit.clone(), self.new_conv_data.clone());
+
         self.notif_rx.replace(rx);
 
         ret_err!(
@@ -238,8 +243,8 @@ impl NetworkHandleTrait for NetworkHandle {
         self.status_flags.net_pending.load(Ordering::Relaxed)
     }
 
-    fn new_ack(&self) -> u64 {
-        ret_none!(&self.notif_rx, 0).new_ack()
+    fn new_conv_data(&self) -> bool {
+        self.new_conv_data.load(Ordering::Relaxed)
     }
 
     fn new_add_contact_resp(&self) -> u64 {
@@ -256,10 +261,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn new_conversation(&self) -> u64 {
         ret_none!(&self.notif_rx, 0).new_conversation()
-    }
-
-    fn new_message(&self) -> u64 {
-        ret_none!(&self.notif_rx, 0).new_msg()
     }
 
     /// Returns a `(ConversationId, UserId, bool)` serialized as CBOR,
@@ -284,17 +285,6 @@ impl NetworkHandleTrait for NetworkHandle {
         ret_err!(serde_cbor::to_vec(&res), cbor_none())
     }
 
-    /// Returns a `(MsgId, ConversationId)` serialized as CBOR,
-    /// or `None` serialized as CBOR if the queue is exhausted.
-    fn next_new_ack(&mut self) -> Vec<u8> {
-        let res = ret_none!(
-            ret_none!(&mut self.notif_rx, cbor_none()).ack_recv(),
-            cbor_none()
-        );
-
-        ret_err!(serde_cbor::to_vec(&res), cbor_none())
-    }
-
     /// Returns a string representation of a `UserId`, or an empty string if the queue
     /// is exhausted
     fn next_new_contact(&mut self) -> FfiUserId {
@@ -313,17 +303,6 @@ impl NetworkHandleTrait for NetworkHandle {
             vec![]
         )
         .to_vec()
-    }
-
-    /// Returns a `(MsgId, ConversationId)` serialized as CBOR,
-    /// or `None` serialized as CBOR if the queue is exhausted.
-    fn next_new_message(&mut self) -> Vec<u8> {
-        let res = ret_none!(
-            ret_none!(&mut self.notif_rx, cbor_none()).msg_recv(),
-            cbor_none()
-        );
-
-        ret_err!(serde_cbor::to_vec(&res), cbor_none())
     }
 
     fn emit(&mut self) -> &mut Emitter {

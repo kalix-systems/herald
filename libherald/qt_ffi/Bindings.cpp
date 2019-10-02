@@ -128,10 +128,6 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleNewAckChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newAckChanged();
-    }
     inline void networkHandleNewAddContactRespChanged(NetworkHandle* o)
     {
         Q_EMIT o->newAddContactRespChanged();
@@ -144,13 +140,13 @@ namespace {
     {
         Q_EMIT o->newContactChanged();
     }
+    inline void networkHandleNewConvDataChanged(NetworkHandle* o)
+    {
+        Q_EMIT o->newConvDataChanged();
+    }
     inline void networkHandleNewConversationChanged(NetworkHandle* o)
     {
         Q_EMIT o->newConversationChanged();
-    }
-    inline void networkHandleNewMessageChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newMessageChanged();
     }
     inline void usersConversationIdChanged(Users* o)
     {
@@ -703,28 +699,25 @@ extern "C" {
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    bool messages_refresh(Messages::Private*);
+    bool messages_poll_update(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_ack_get(const NetworkHandle::Private*);
     quint64 network_handle_new_add_contact_resp_get(const NetworkHandle::Private*);
     quint64 network_handle_new_add_conv_resp_get(const NetworkHandle::Private*);
     quint64 network_handle_new_contact_get(const NetworkHandle::Private*);
+    bool network_handle_new_conv_data_get(const NetworkHandle::Private*);
     quint64 network_handle_new_conversation_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_message_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
     void network_handle_next_add_contact_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_add_conversation_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
-    void network_handle_next_new_ack(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_new_contact(NetworkHandle::Private*, QString*, qstring_set);
     void network_handle_next_new_conversation(NetworkHandle::Private*, QByteArray*, qbytearray_set);
-    void network_handle_next_new_message(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
@@ -1431,9 +1424,9 @@ QByteArray Messages::insertMessage(const QString& body)
     messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
     return s;
 }
-bool Messages::refresh()
+bool Messages::pollUpdate()
 {
-    return messages_refresh(m_d);
+    return messages_poll_update(m_d);
 }
 QByteArray Messages::reply(const QString& body, const QByteArray& op)
 {
@@ -1453,12 +1446,11 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleNewAckChanged,
         networkHandleNewAddContactRespChanged,
         networkHandleNewAddConvRespChanged,
         networkHandleNewContactChanged,
-        networkHandleNewConversationChanged,
-        networkHandleNewMessageChanged)),
+        networkHandleNewConvDataChanged,
+        networkHandleNewConversationChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -1476,10 +1468,6 @@ bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
 }
-quint64 NetworkHandle::newAck() const
-{
-    return network_handle_new_ack_get(m_d);
-}
 quint64 NetworkHandle::newAddContactResp() const
 {
     return network_handle_new_add_contact_resp_get(m_d);
@@ -1492,13 +1480,13 @@ quint64 NetworkHandle::newContact() const
 {
     return network_handle_new_contact_get(m_d);
 }
+bool NetworkHandle::newConvData() const
+{
+    return network_handle_new_conv_data_get(m_d);
+}
 quint64 NetworkHandle::newConversation() const
 {
     return network_handle_new_conversation_get(m_d);
-}
-quint64 NetworkHandle::newMessage() const
-{
-    return network_handle_new_message_get(m_d);
 }
 bool NetworkHandle::login()
 {
@@ -1516,12 +1504,6 @@ QByteArray NetworkHandle::nextAddConversationResp()
     network_handle_next_add_conversation_resp(m_d, &s, set_qbytearray);
     return s;
 }
-QByteArray NetworkHandle::nextNewAck()
-{
-    QByteArray s;
-    network_handle_next_new_ack(m_d, &s, set_qbytearray);
-    return s;
-}
 QString NetworkHandle::nextNewContact()
 {
     QString s;
@@ -1532,12 +1514,6 @@ QByteArray NetworkHandle::nextNewConversation()
 {
     QByteArray s;
     network_handle_next_new_conversation(m_d, &s, set_qbytearray);
-    return s;
-}
-QByteArray NetworkHandle::nextNewMessage()
-{
-    QByteArray s;
-    network_handle_next_new_message(m_d, &s, set_qbytearray);
     return s;
 }
 bool NetworkHandle::registerNewUser(const QString& user_id)

@@ -301,6 +301,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
                         None,
                         &op,
                     )?;
+                    ev.notifications.push(Notification::NewMsg(mid, cm.cid()));
                     ev.replies.push((cm.cid(), form_ack(mid)?));
                 }
                 cmessages::Message::Blob(body) => unimplemented!(),

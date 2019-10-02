@@ -1,3 +1,4 @@
+use crate::shared::{ConvUpdate, CONV_MSG_RXS};
 use crate::{interface::*, ret_err, ret_none, types::*};
 use herald_common::UserId;
 use heraldcore::{
@@ -261,29 +262,37 @@ impl MessagesTrait for Messages {
         self.model.end_reset_model();
     }
 
-    fn refresh(&mut self) -> bool {
+    /// Polls for updates
+    fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, true);
 
-        let new = ret_err!(
-            conversation::conversation_messages_since(&conv_id, self.updated),
-            false
-        );
+        let rx = match CONV_MSG_RXS.get(&conv_id) {
+            Some(rx) => rx,
+            None => return true,
+        };
 
-        self.updated = chrono::Utc::now();
+        let notif = ret_err!(rx.recv(), false);
 
-        if new.is_empty() {
-            return true;
+        match notif {
+            ConvUpdate::Msg(mid) => {
+                let new = ret_err!(message::get_message(&mid), false);
+
+                self.updated = chrono::Utc::now();
+
+                self.model
+                    .begin_insert_rows(self.list.len(), self.list.len());
+                self.list.push(Message { inner: new });
+                self.model.end_insert_rows();
+
+                self.update_last();
+
+                true
+            }
+            ConvUpdate::Ack(_mid) => {
+                println!("TODO: Handle acks");
+                true
+            }
         }
-
-        self.model.begin_insert_rows(
-            self.list.len(),
-            (self.list.len() + new.len()).saturating_sub(1),
-        );
-        self.list
-            .extend(new.into_iter().map(|inner| Message { inner }));
-        self.model.end_insert_rows();
-
-        true
     }
 
     fn emit(&mut self) -> &mut Emitter {

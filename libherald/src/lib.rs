@@ -8,5 +8,6 @@ mod implementation;
 #[allow(missing_docs)]
 pub mod interface;
 
+pub(crate) mod shared;
 pub(crate) mod types;
 pub(crate) mod utils;

@@ -118,14 +118,14 @@
                     "return": "bool"
                 },
                 "handleContactReqAck": {
-                  "mut": true,
-                  "return": "bool",
-                  "arguments": [
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
                         {
                             "name": "notif",
                             "type": "QByteArray"
                         }
-                  ]
+                    ]
                 }
             }
         },
@@ -138,11 +138,8 @@
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newMessage": {
-                    "type": "quint64"
-                },
-                "newAck": {
-                    "type": "quint64"
+                "newConvData": {
+                    "type": "bool"
                 },
                 "newContact": {
                     "type": "quint64"
@@ -201,14 +198,6 @@
                 "login": {
                     "mut": true,
                     "return": "bool"
-                },
-                "nextNewMessage": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
-                "nextNewAck": {
-                    "mut": true,
-                    "return": "QByteArray"
                 },
                 "nextNewContact": {
                     "mut": true,
@@ -298,10 +287,6 @@
                     ],
                     "return": "qint64"
                 },
-                "refresh": {
-                    "mut": true,
-                    "return": "bool"
-                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
@@ -376,10 +361,10 @@
                     "mut": true,
                     "return": "bool",
                     "arguments": [
-                      {
-                      "name": "notif_user_id",
-                      "type": "QString"
-                      }
+                        {
+                            "name": "notif_user_id",
+                            "type": "QString"
+                        }
                     ]
                 }
             }
@@ -452,10 +437,6 @@
                         }
                     ]
                 },
-                "refresh": {
-                    "return": "bool",
-                    "mut": true
-                },
                 "deleteMessage": {
                     "return": "bool",
                     "mut": true,
@@ -473,6 +454,10 @@
                 "clearConversationHistory": {
                     "mut": true,
                     "return": "bool"
+                },
+                "pollUpdate": {
+                    "return": "bool",
+                    "mut": true
                 }
             }
         },

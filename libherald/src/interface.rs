@@ -982,7 +982,7 @@ pub trait MessagesTrait {
     fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn insert_message(&mut self, body: String) -> Vec<u8>;
-    fn refresh(&mut self) -> bool;
+    fn poll_update(&mut self) -> bool;
     fn reply(&mut self, body: String, op: &[u8]) -> Vec<u8>;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -1155,9 +1155,9 @@ pub unsafe extern "C" fn messages_insert_message(ptr: *mut Messages, body_str: *
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_refresh(ptr: *mut Messages) -> bool {
+pub unsafe extern "C" fn messages_poll_update(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
-    let r = o.refresh();
+    let r = o.poll_update();
     r
 }
 
@@ -1263,12 +1263,11 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    new_ack_changed: fn(*mut NetworkHandleQObject),
     new_add_contact_resp_changed: fn(*mut NetworkHandleQObject),
     new_add_conv_resp_changed: fn(*mut NetworkHandleQObject),
     new_contact_changed: fn(*mut NetworkHandleQObject),
+    new_conv_data_changed: fn(*mut NetworkHandleQObject),
     new_conversation_changed: fn(*mut NetworkHandleQObject),
-    new_message_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -1285,12 +1284,11 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            new_ack_changed: self.new_ack_changed,
             new_add_contact_resp_changed: self.new_add_contact_resp_changed,
             new_add_conv_resp_changed: self.new_add_conv_resp_changed,
             new_contact_changed: self.new_contact_changed,
+            new_conv_data_changed: self.new_conv_data_changed,
             new_conversation_changed: self.new_conversation_changed,
-            new_message_changed: self.new_message_changed,
         }
     }
     fn clear(&self) {
@@ -1307,12 +1305,6 @@ impl NetworkHandleEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.connection_up_changed)(ptr);
-        }
-    }
-    pub fn new_ack_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_ack_changed)(ptr);
         }
     }
     pub fn new_add_contact_resp_changed(&mut self) {
@@ -1333,16 +1325,16 @@ impl NetworkHandleEmitter {
             (self.new_contact_changed)(ptr);
         }
     }
+    pub fn new_conv_data_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_conv_data_changed)(ptr);
+        }
+    }
     pub fn new_conversation_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.new_conversation_changed)(ptr);
-        }
-    }
-    pub fn new_message_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_message_changed)(ptr);
         }
     }
 }
@@ -1352,19 +1344,16 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn new_ack(&self) -> u64;
     fn new_add_contact_resp(&self) -> u64;
     fn new_add_conv_resp(&self) -> u64;
     fn new_contact(&self) -> u64;
+    fn new_conv_data(&self) -> bool;
     fn new_conversation(&self) -> u64;
-    fn new_message(&self) -> u64;
     fn login(&mut self) -> bool;
     fn next_add_contact_resp(&mut self) -> Vec<u8>;
     fn next_add_conversation_resp(&mut self) -> Vec<u8>;
-    fn next_new_ack(&mut self) -> Vec<u8>;
     fn next_new_contact(&mut self) -> String;
     fn next_new_conversation(&mut self) -> Vec<u8>;
-    fn next_new_message(&mut self) -> Vec<u8>;
     fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
     fn send_message(&self, message_body: String, to: &[u8], msg_id: &[u8]) -> bool;
@@ -1375,23 +1364,21 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_ack_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_add_contact_resp_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_add_conv_resp_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_contact_changed: fn(*mut NetworkHandleQObject),
+    network_handle_new_conv_data_changed: fn(*mut NetworkHandleQObject),
     network_handle_new_conversation_changed: fn(*mut NetworkHandleQObject),
-    network_handle_new_message_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        new_ack_changed: network_handle_new_ack_changed,
         new_add_contact_resp_changed: network_handle_new_add_contact_resp_changed,
         new_add_conv_resp_changed: network_handle_new_add_conv_resp_changed,
         new_contact_changed: network_handle_new_contact_changed,
+        new_conv_data_changed: network_handle_new_conv_data_changed,
         new_conversation_changed: network_handle_new_conversation_changed,
-        new_message_changed: network_handle_new_message_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -1413,11 +1400,6 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_ack_get(ptr: *const NetworkHandle) -> u64 {
-    (&*ptr).new_ack()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn network_handle_new_add_contact_resp_get(ptr: *const NetworkHandle) -> u64 {
     (&*ptr).new_add_contact_resp()
 }
@@ -1433,13 +1415,13 @@ pub unsafe extern "C" fn network_handle_new_contact_get(ptr: *const NetworkHandl
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> u64 {
-    (&*ptr).new_conversation()
+pub unsafe extern "C" fn network_handle_new_conv_data_get(ptr: *const NetworkHandle) -> bool {
+    (&*ptr).new_conv_data()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_new_message_get(ptr: *const NetworkHandle) -> u64 {
-    (&*ptr).new_message()
+pub unsafe extern "C" fn network_handle_new_conversation_get(ptr: *const NetworkHandle) -> u64 {
+    (&*ptr).new_conversation()
 }
 
 #[no_mangle]
@@ -1466,14 +1448,6 @@ pub unsafe extern "C" fn network_handle_next_add_conversation_resp(ptr: *mut Net
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_next_new_ack(ptr: *mut NetworkHandle, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
-    let o = &mut *ptr;
-    let r = o.next_new_ack();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn network_handle_next_new_contact(ptr: *mut NetworkHandle, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
     let o = &mut *ptr;
     let r = o.next_new_contact();
@@ -1485,14 +1459,6 @@ pub unsafe extern "C" fn network_handle_next_new_contact(ptr: *mut NetworkHandle
 pub unsafe extern "C" fn network_handle_next_new_conversation(ptr: *mut NetworkHandle, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
     let o = &mut *ptr;
     let r = o.next_new_conversation();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_next_new_message(ptr: *mut NetworkHandle, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
-    let o = &mut *ptr;
-    let r = o.next_new_message();
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
 }
