@@ -35,12 +35,6 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-        onNewAddContactRespChanged: {
-            print("contact resp happens")
-        }
-        onNewAddConvRespChanged: {
-            print("conv resp happens")
-        }
     }
 
     Loader {
