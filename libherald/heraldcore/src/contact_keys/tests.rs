@@ -16,7 +16,7 @@ fn add_and_deprecate() {
     let pk_signed = kp.sign(*kp.public_key());
 
     add_keys(uid, &[pk_signed]).expect(womp!());
-    deprecate_keys(uid, &[pk_signed]).expect(womp!());
+    deprecate_keys(&[pk_signed]).expect(womp!());
 }
 
 #[test]
@@ -36,7 +36,7 @@ fn get_valid_deprecated() {
     let dep_keys = get_deprecated_keys(uid).expect(womp!());
     assert_eq!(valid.len(), 2);
     assert!(dep_keys.is_empty());
-    deprecate_keys(uid, &[pk1_signed]).expect(womp!());
+    deprecate_keys(&[pk1_signed]).expect(womp!());
 
     let valid = get_valid_keys(uid).expect(womp!());
     let dep_keys = get_deprecated_keys(uid).expect(womp!());

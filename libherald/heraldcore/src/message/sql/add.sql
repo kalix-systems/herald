@@ -1,4 +1,4 @@
-INSERT INTO
+INSERT OR IGNORE INTO
   messages(
     msg_id,
     author,
