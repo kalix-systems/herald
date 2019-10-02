@@ -1,4 +1,4 @@
-use crate::{interface::*, ret_err, ret_none, types::*};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
@@ -60,7 +60,7 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn conversation_id(&self, index: usize) -> FfiConversationIdRef {
+    fn conversation_id(&self, index: usize) -> ffi::ConversationIdRef {
         ret_none!(self.list.get(index), &[])
             .inner
             .conversation_id
@@ -194,7 +194,7 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
-    fn refresh(&mut self, notif: FfiConversationIdRef) -> bool {
+    fn refresh(&mut self, notif: ffi::ConversationIdRef) -> bool {
         let cid = ret_err!(notif.try_into(), false);
         let meta = abort_err!(conversation::meta(&cid));
         self.model

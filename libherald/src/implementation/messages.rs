@@ -1,5 +1,5 @@
 use crate::shared::{ConvUpdate, CONV_MSG_RXS};
-use crate::{interface::*, ret_err, ret_none, types::*};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
@@ -86,7 +86,7 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn last_author(&self) -> Option<FfiUserIdRef> {
+    fn last_author(&self) -> Option<ffi::UserIdRef> {
         let inner = &self.list.last()?.inner;
 
         if inner.author == self.local_id {
@@ -124,7 +124,7 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
+    fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
         match conversation_id {
             Some(id) => {
                 let conversation_id = ret_err!(ConversationId::try_from(id));
@@ -171,11 +171,11 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
+    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
         self.conversation_id.as_ref().map(|c| c.as_slice())
     }
 
-    fn author(&self, row_index: usize) -> FfiUserIdRef {
+    fn author(&self, row_index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(row_index), "")
             .inner
             .author
@@ -186,14 +186,14 @@ impl MessagesTrait for Messages {
         ret_none!(self.list.get(row_index), "").inner.body.as_str()
     }
 
-    fn message_id(&self, row_index: usize) -> FfiMsgIdRef {
+    fn message_id(&self, row_index: usize) -> ffi::MsgIdRef {
         ret_none!(self.list.get(row_index), &[])
             .inner
             .message_id
             .as_slice()
     }
 
-    fn message_body_by_id(&self, msg_id: FfiMsgIdRef) -> String {
+    fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
         let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
 
         self.list
@@ -203,14 +203,14 @@ impl MessagesTrait for Messages {
             .unwrap_or("".into())
     }
 
-    fn op(&self, row_index: usize) -> Option<FfiMsgIdRef> {
+    fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
         match &ret_none!(self.list.get(row_index), None).inner.op {
             Some(id) => Some(id.as_slice()),
             None => None,
         }
     }
 
-    fn insert_message(&mut self, body: String) -> FfiMsgId {
+    fn insert_message(&mut self, body: String) -> ffi::MsgId {
         match self.raw_insert(body, None) {
             Some(message_id) => {
                 self.update_last();
@@ -220,7 +220,7 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn reply(&mut self, body: String, op: FfiMsgIdRef) -> FfiMsgId {
+    fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> ffi::MsgId {
         let op = ret_err!(MsgId::try_from(op), vec![]);
 
         match self.raw_insert(body, Some(op)) {

@@ -1,4 +1,4 @@
-use crate::{interface::*, types::*};
+use crate::{ffi, interface::*};
 use heraldcore::{abort_err, config::Config as Core};
 
 pub struct Config {
@@ -12,7 +12,7 @@ impl ConfigTrait for Config {
         Config { emit, inner }
     }
 
-    fn config_id(&self) -> FfiUserIdRef {
+    fn config_id(&self) -> ffi::UserIdRef {
         self.inner.id.as_str()
     }
 

@@ -1,5 +1,5 @@
 use crate::shared::{ConvUpdate, CONV_MSG_RXS};
-use crate::{interface::*, ret_err, ret_none, types::*};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use crossbeam_channel::*;
 use herald_common::*;
 use heraldcore::abort_err;
@@ -199,7 +199,12 @@ impl NetworkHandleTrait for NetworkHandle {
     /// this is the API exposed to QML
     /// note, currently this function has all together too much copying.
     /// this will be rectified when stupid hanfles fan out.
-    fn send_message(&self, body: String, to: FfiConversationIdRef, msg_id: FfiMsgIdRef) -> bool {
+    fn send_message(
+        &self,
+        body: String,
+        to: ffi::ConversationIdRef,
+        msg_id: ffi::MsgIdRef,
+    ) -> bool {
         let conv_id = ret_err!(ConversationId::try_from(to), false);
 
         let msg_id = ret_err!(MsgId::try_from(msg_id), false);
@@ -208,14 +213,14 @@ impl NetworkHandleTrait for NetworkHandle {
         true
     }
 
-    fn send_add_request(&self, user_id: FfiUserId, cid: FfiConversationIdRef) -> bool {
+    fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);
         let cid = ret_err!(cid.try_into(), false);
         ret_err!(network::send_contact_req(uid, cid), false);
         true
     }
 
-    fn register_new_user(&mut self, user_id: FfiUserId) -> bool {
+    fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
         ret_err!(network::register(uid), false);
         true
@@ -287,7 +292,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
     /// Returns a string representation of a `UserId`, or an empty string if the queue
     /// is exhausted
-    fn next_new_contact(&mut self) -> FfiUserId {
+    fn next_new_contact(&mut self) -> ffi::UserId {
         ret_none!(
             ret_none!(&mut self.notif_rx, "".into()).contact_recv(),
             "".into()
@@ -297,7 +302,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
     /// Returns a `ConversationId`, or an empty vector if the queue
     /// is exhausted
-    fn next_new_conversation(&mut self) -> FfiConversationId {
+    fn next_new_conversation(&mut self) -> ffi::ConversationId {
         ret_none!(
             ret_none!(&mut self.notif_rx, vec![]).conversation_recv(),
             vec![]

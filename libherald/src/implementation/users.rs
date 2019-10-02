@@ -1,4 +1,4 @@
-use crate::{bounds_chk, interface::*, ret_err, ret_none, types::*};
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
@@ -54,7 +54,7 @@ impl UsersTrait for Users {
     }
 
     /// Adds a contact by their `id`
-    fn add(&mut self, id: FfiUserId) -> FfiConversationId {
+    fn add(&mut self, id: ffi::UserId) -> ffi::ConversationId {
         let id = ret_err!(id.as_str().try_into(), vec![]);
         let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
@@ -72,11 +72,11 @@ impl UsersTrait for Users {
             .to_vec()
     }
 
-    fn conversation_id(&self) -> Option<FfiConversationIdRef> {
+    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
         self.conversation_id.as_ref().map(|id| id.as_slice())
     }
 
-    fn set_conversation_id(&mut self, conversation_id: Option<FfiConversationIdRef>) {
+    fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
         let new_list = match conversation_id {
             Some(conv_id) => {
                 let conv_id = ret_err!(ConversationId::try_from(conv_id));
@@ -115,7 +115,7 @@ impl UsersTrait for Users {
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> FfiUserIdRef {
+    fn user_id(&self, row_index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(row_index), "").inner.id.as_str()
     }
 
@@ -129,7 +129,7 @@ impl UsersTrait for Users {
     }
 
     /// Returns conversation id.
-    fn pairwise_conversation_id(&self, row_index: usize) -> FfiConversationIdRef {
+    fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationIdRef {
         ret_none!(self.list.get(row_index), &[])
             .inner
             .pairwise_conversation
@@ -236,7 +236,7 @@ impl UsersTrait for Users {
         true
     }
 
-    fn index_from_conversation_id(&self, conv_id: FfiConversationIdRef) -> i64 {
+    fn index_from_conversation_id(&self, conv_id: ffi::ConversationIdRef) -> i64 {
         let conv_id = ret_err!(ConversationId::try_from(conv_id), -1);
 
         self.list
@@ -315,7 +315,7 @@ impl UsersTrait for Users {
     fn add_to_conversation_by_index(
         &mut self,
         index: u64,
-        conversation_id: FfiConversationIdRef,
+        conversation_id: ffi::ConversationIdRef,
     ) -> bool {
         let index = index as usize;
         bounds_chk!(self, index, false);
@@ -328,7 +328,7 @@ impl UsersTrait for Users {
         true
     }
 
-    fn add_to_conversation(&mut self, user_id: FfiUserId) -> bool {
+    fn add_to_conversation(&mut self, user_id: ffi::UserId) -> bool {
         let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
@@ -348,8 +348,8 @@ impl UsersTrait for Users {
 
     fn add_to_conversation_by_id(
         &mut self,
-        user_id: FfiUserId,
-        conversation_id: FfiConversationIdRef,
+        user_id: ffi::UserId,
+        conversation_id: ffi::ConversationIdRef,
     ) -> bool {
         let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
@@ -361,7 +361,7 @@ impl UsersTrait for Users {
     fn bulk_add_to_conversation(
         &mut self,
         user_id_array: &[u8],
-        conversation_id: FfiConversationIdRef,
+        conversation_id: ffi::ConversationIdRef,
     ) -> bool {
         let conv_id = ret_err!(ConversationId::try_from(conversation_id), false);
         let user_ids: Vec<UserId> = ret_err!(serde_cbor::from_slice(user_id_array), false);
@@ -376,7 +376,7 @@ impl UsersTrait for Users {
     fn remove_from_conversation(
         &mut self,
         index: u64,
-        conversation_id: FfiConversationIdRef,
+        conversation_id: ffi::ConversationIdRef,
     ) -> bool {
         let index = index as usize;
         bounds_chk!(self, index, false);
