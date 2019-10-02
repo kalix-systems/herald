@@ -179,6 +179,7 @@ public:
     Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE QByteArray insertMessage(const QString& body);
+    Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE QByteArray reply(const QString& body, const QByteArray& op);
 

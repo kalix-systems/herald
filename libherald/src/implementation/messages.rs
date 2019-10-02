@@ -193,6 +193,16 @@ impl MessagesTrait for Messages {
             .as_slice()
     }
 
+    fn message_body_by_id(&self, msg_id: FfiMsgIdRef) -> String {
+        let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
+
+        self.list
+            .iter()
+            .find(|m| m.inner.message_id == msg_id)
+            .map(|m| m.inner.body.clone())
+            .unwrap_or("".into())
+    }
+
     fn op(&self, row_index: usize) -> Option<FfiMsgIdRef> {
         match &ret_none!(self.list.get(row_index), None).inner.op {
             Some(id) => Some(id.as_slice()),

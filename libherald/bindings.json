@@ -437,6 +437,15 @@
                         }
                     ]
                 },
+                "messageBodyById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "deleteMessage": {
                     "return": "bool",
                     "mut": true,

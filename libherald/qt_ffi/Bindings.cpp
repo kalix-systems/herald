@@ -699,6 +699,7 @@ extern "C" {
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
     void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
 };
@@ -1422,6 +1423,12 @@ QByteArray Messages::insertMessage(const QString& body)
 {
     QByteArray s;
     messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
+    return s;
+}
+QString Messages::messageBodyById(const QByteArray& msg_id) const
+{
+    QString s;
+    messages_message_body_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
     return s;
 }
 bool Messages::pollUpdate()
