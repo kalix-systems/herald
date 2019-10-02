@@ -23,6 +23,15 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
+    Connections {
+        target: networkHandle
+        onNewContactChanged: {
+            if (networkHandle.newContact > 0) {
+                contactsModel.refresh(networkHandle.nextNewContact())
+            }
+        }
+    }
+
     ScrollBar.vertical: ScrollBar {
     }
 

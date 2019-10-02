@@ -23,18 +23,18 @@ struct EffectsFlags {
 struct NotifRx {
     msg_rx: Receiver<(MsgId, ConversationId)>,
     ack_rx: Receiver<(MsgId, ConversationId)>,
-    contact_rx: Receiver<(UserId, ConversationId)>,
+    contact_rx: Receiver<UserId>,
     conversation_rx: Receiver<ConversationId>,
-    add_contact_resp_rx: Receiver<(UserId, bool)>,
+    add_contact_resp_rx: Receiver<(ConversationId, UserId, bool)>,
     add_conv_resp_rx: Receiver<(ConversationId, bool)>,
     emit: Emitter,
 }
 
 impl NotifRx {
     fn msg_recv(&mut self) -> Option<(MsgId, ConversationId)> {
-        let val = self.msg_rx.recv().ok();
+        let val = self.msg_rx.recv().ok()?;
         self.emit.new_message_changed();
-        val
+        Some(val)
     }
 
     fn new_msg(&self) -> u64 {
@@ -42,19 +42,19 @@ impl NotifRx {
     }
 
     fn ack_recv(&mut self) -> Option<(MsgId, ConversationId)> {
-        let val = self.ack_rx.recv().ok();
+        let val = self.ack_rx.recv().ok()?;
         self.emit.new_ack_changed();
-        val
+        Some(val)
     }
 
     fn new_ack(&self) -> u64 {
         self.ack_rx.len() as u64
     }
 
-    fn contact_recv(&mut self) -> Option<(UserId, ConversationId)> {
-        let val = self.contact_rx.recv().ok();
+    fn contact_recv(&mut self) -> Option<UserId> {
+        let val = self.contact_rx.recv().ok()?;
         self.emit.new_contact_changed();
-        val
+        Some(val)
     }
 
     fn new_contact(&self) -> u64 {
@@ -62,19 +62,19 @@ impl NotifRx {
     }
 
     fn conversation_recv(&mut self) -> Option<ConversationId> {
-        let val = self.conversation_rx.recv().ok();
+        let val = self.conversation_rx.recv().ok()?;
         self.emit.new_conversation_changed();
-        val
+        Some(val)
     }
 
     fn new_conversation(&self) -> u64 {
         self.conversation_rx.len() as u64
     }
 
-    fn add_contact_resp_recv(&mut self) -> Option<(UserId, bool)> {
-        let val = self.add_contact_resp_rx.recv().ok();
+    fn add_contact_resp_recv(&mut self) -> Option<(ConversationId, UserId, bool)> {
+        let val = self.add_contact_resp_rx.recv().ok()?;
         self.emit.new_add_contact_resp_changed();
-        val
+        Some(val)
     }
 
     fn new_add_contact_resp(&self) -> u64 {
@@ -82,9 +82,9 @@ impl NotifRx {
     }
 
     fn add_conv_resp_recv(&mut self) -> Option<(ConversationId, bool)> {
-        let val = self.add_conv_resp_rx.recv().ok();
+        let val = self.add_conv_resp_rx.recv().ok()?;
         self.emit.new_add_conv_resp_changed();
-        val
+        Some(val)
     }
 
     fn new_add_conv_resp(&self) -> u64 {
@@ -95,9 +95,9 @@ impl NotifRx {
 struct NotifTx {
     msg_tx: Sender<(MsgId, ConversationId)>,
     ack_tx: Sender<(MsgId, ConversationId)>,
-    contact_tx: Sender<(UserId, ConversationId)>,
+    contact_tx: Sender<UserId>,
     conversation_tx: Sender<ConversationId>,
-    add_contact_resp_tx: Sender<(UserId, bool)>,
+    add_contact_resp_tx: Sender<(ConversationId, UserId, bool)>,
     add_conv_resp_tx: Sender<(ConversationId, bool)>,
     emit: Emitter,
 }
@@ -115,15 +115,17 @@ impl NotifTx {
                 self.emit.new_ack_changed();
             }
             NewContact(uid, cid) => {
-                abort_err!(self.contact_tx.send((uid, cid)));
+                abort_err!(self.contact_tx.send(uid));
                 self.emit.new_contact_changed();
+                abort_err!(self.conversation_tx.send(cid));
+                self.emit.new_conversation_changed();
             }
             NewConversation(cid) => {
                 abort_err!(self.conversation_tx.send(cid));
                 self.emit.new_conversation_changed();
             }
-            AddContactResponse(uid, accepted) => {
-                abort_err!(self.add_contact_resp_tx.send((uid, accepted)));
+            AddContactResponse(cid, uid, accepted) => {
+                abort_err!(self.add_contact_resp_tx.send((cid, uid, accepted)));
                 self.emit.new_add_contact_resp_changed();
             }
             AddConversationResponse(cid, accepted) => {
@@ -260,7 +262,7 @@ impl NetworkHandleTrait for NetworkHandle {
         ret_none!(&self.notif_rx, 0).new_msg()
     }
 
-    /// Returns a `(UserId, bool)` serialized as CBOR,
+    /// Returns a `(ConversationId, UserId, bool)` serialized as CBOR,
     /// or `None` serialized as CBOR if the queue is exhausted.
     fn next_add_contact_resp(&mut self) -> Vec<u8> {
         let res = ret_none!(
@@ -293,15 +295,14 @@ impl NetworkHandleTrait for NetworkHandle {
         ret_err!(serde_cbor::to_vec(&res), cbor_none())
     }
 
-    /// Returns a `(UserId, ConversationId)` serialized as CBOR,
-    /// or `None` serialized as CBOR if the queue is exhausted.
-    fn next_new_contact(&mut self) -> Vec<u8> {
-        let res = ret_none!(
-            ret_none!(&mut self.notif_rx, cbor_none()).contact_recv(),
-            cbor_none()
-        );
-
-        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    /// Returns a string representation of a `UserId`, or an empty string if the queue
+    /// is exhausted
+    fn next_new_contact(&mut self) -> FfiUserId {
+        ret_none!(
+            ret_none!(&mut self.notif_rx, "".into()).contact_recv(),
+            "".into()
+        )
+        .to_string()
     }
 
     /// Returns a `ConversationId`, or an empty vector if the queue

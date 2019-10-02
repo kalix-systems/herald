@@ -58,18 +58,18 @@ impl UsersTrait for Users {
         let id = ret_err!(id.as_str().try_into(), vec![]);
         let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
 
-        self.model.begin_insert_rows(0, 0);
-        self.list.insert(
-            0,
-            User {
-                matched: contact.matches(&self.filter),
-                inner: contact,
-            },
-        );
+        self.model
+            .begin_insert_rows(self.list.len(), self.list.len());
+        self.list.push(User {
+            matched: contact.matches(&self.filter),
+            inner: contact,
+        });
         self.model.end_insert_rows();
 
-        // this is okay, we just performed an insertion
-        self.list[0].inner.pairwise_conversation.to_vec()
+        ret_none!(self.list.last(), vec![])
+            .inner
+            .pairwise_conversation
+            .to_vec()
     }
 
     fn conversation_id(&self) -> Option<FfiConversationIdRef> {
@@ -390,8 +390,8 @@ impl UsersTrait for Users {
     }
 
     // TODO handle removals
-    fn refresh(&mut self, notif: &[u8]) -> bool {
-        let (uid, _): (UserId, ConversationId) = ret_err!(serde_cbor::from_slice(notif), false);
+    fn refresh(&mut self, notif: String) -> bool {
+        let uid = ret_err!(notif.as_str().try_into(), false);
         let new_user = ret_err!(contact::by_user_id(uid), false);
 
         self.updated = chrono::Utc::now();

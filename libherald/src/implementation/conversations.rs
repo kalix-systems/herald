@@ -2,9 +2,9 @@ use crate::{interface::*, ret_err, ret_none, types::*};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
-    types::*,
     utils::SearchPattern,
 };
+use std::convert::TryInto;
 
 struct Conversation {
     inner: ConversationMeta,
@@ -194,13 +194,35 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
-    fn refresh(&mut self, notif: &[u8]) -> bool {
-        use herald_common::UserId;
-
-        let (_, cid): (UserId, ConversationId) = ret_err!(serde_cbor::from_slice(notif), false);
+    fn refresh(&mut self, notif: FfiConversationIdRef) -> bool {
+        let cid = ret_err!(notif.try_into(), false);
         let meta = abort_err!(conversation::meta(&cid));
         self.model
-            .begin_insert_rows(self.list.len(), self.list.len());
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(Conversation {
+            matched: meta.matches(&self.filter),
+            inner: meta,
+        });
+        self.model.end_insert_rows();
+
+        true
+    }
+
+    fn handle_contact_req_ack(&mut self, notif: &[u8]) -> bool {
+        use herald_common::UserId;
+        use heraldcore::types::ConversationId;
+
+        let val: Option<(ConversationId, UserId, bool)> =
+            ret_err!(serde_cbor::from_slice(notif), false);
+        let (cid, _, accepted) = ret_none!(val, false);
+
+        if !accepted {
+            return false;
+        }
+
+        let meta = abort_err!(conversation::meta(&cid));
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(Conversation {
             matched: meta.matches(&self.filter),
             inner: meta,

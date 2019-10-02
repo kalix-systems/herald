@@ -35,11 +35,11 @@ ApplicationWindow {
 
     NetworkHandle {
         id: networkHandle
-        onNewContactChanged: {
-            print("new friend")
+        onNewAddContactRespChanged: {
+            print("contact resp happens")
         }
-        onNewMessageChanged: {
-            print("oh hai")
+        onNewAddConvRespChanged: {
+            print("conv resp happens")
         }
     }
 

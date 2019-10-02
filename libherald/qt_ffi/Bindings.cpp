@@ -490,6 +490,7 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
+    bool conversations_handle_contact_req_ack(Conversations::Private*, const char*, int);
     bool conversations_refresh(Conversations::Private*, const char*, int);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
@@ -721,7 +722,7 @@ extern "C" {
     void network_handle_next_add_contact_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_add_conversation_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_new_ack(NetworkHandle::Private*, QByteArray*, qbytearray_set);
-    void network_handle_next_new_contact(NetworkHandle::Private*, QByteArray*, qbytearray_set);
+    void network_handle_next_new_contact(NetworkHandle::Private*, QString*, qstring_set);
     void network_handle_next_new_conversation(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     void network_handle_next_new_message(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
@@ -1058,7 +1059,7 @@ extern "C" {
     bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
     bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
     qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
-    bool users_refresh(Users::Private*, const char*, int);
+    bool users_refresh(Users::Private*, const ushort*, int);
     bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
     bool users_toggle_filter_regex(Users::Private*);
 };
@@ -1229,9 +1230,13 @@ QByteArray Conversations::addConversation()
     conversations_add_conversation(m_d, &s, set_qbytearray);
     return s;
 }
-bool Conversations::refresh(const QByteArray& notif)
+bool Conversations::handleContactReqAck(const QByteArray& notif)
 {
-    return conversations_refresh(m_d, notif.data(), notif.size());
+    return conversations_handle_contact_req_ack(m_d, notif.data(), notif.size());
+}
+bool Conversations::refresh(const QByteArray& notif_conv_id)
+{
+    return conversations_refresh(m_d, notif_conv_id.data(), notif_conv_id.size());
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
@@ -1517,10 +1522,10 @@ QByteArray NetworkHandle::nextNewAck()
     network_handle_next_new_ack(m_d, &s, set_qbytearray);
     return s;
 }
-QByteArray NetworkHandle::nextNewContact()
+QString NetworkHandle::nextNewContact()
 {
-    QByteArray s;
-    network_handle_next_new_contact(m_d, &s, set_qbytearray);
+    QString s;
+    network_handle_next_new_contact(m_d, &s, set_qstring);
     return s;
 }
 QByteArray NetworkHandle::nextNewConversation()
@@ -1670,9 +1675,9 @@ qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
 {
     return users_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
 }
-bool Users::refresh(const QByteArray& notif)
+bool Users::refresh(const QString& notif_user_id)
 {
-    return users_refresh(m_d, notif.data(), notif.size());
+    return users_refresh(m_d, notif_user_id.utf16(), notif_user_id.size());
 }
 bool Users::removeFromConversation(quint64 row_index, const QByteArray& conversation_id)
 {

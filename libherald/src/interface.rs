@@ -419,7 +419,8 @@ pub trait ConversationsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add_conversation(&mut self) -> Vec<u8>;
-    fn refresh(&mut self, notif: &[u8]) -> bool;
+    fn handle_contact_req_ack(&mut self, notif: &[u8]) -> bool;
+    fn refresh(&mut self, notif_conv_id: &[u8]) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -530,10 +531,18 @@ pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations,
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_refresh(ptr: *mut Conversations, notif_str: *const c_char, notif_len: c_int) -> bool {
+pub unsafe extern "C" fn conversations_handle_contact_req_ack(ptr: *mut Conversations, notif_str: *const c_char, notif_len: c_int) -> bool {
     let notif = { slice::from_raw_parts(notif_str as *const u8, to_usize(notif_len)) };
     let o = &mut *ptr;
-    let r = o.refresh(notif);
+    let r = o.handle_contact_req_ack(notif);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_refresh(ptr: *mut Conversations, notif_conv_id_str: *const c_char, notif_conv_id_len: c_int) -> bool {
+    let notif_conv_id = { slice::from_raw_parts(notif_conv_id_str as *const u8, to_usize(notif_conv_id_len)) };
+    let o = &mut *ptr;
+    let r = o.refresh(notif_conv_id);
     r
 }
 
@@ -1353,7 +1362,7 @@ pub trait NetworkHandleTrait {
     fn next_add_contact_resp(&mut self) -> Vec<u8>;
     fn next_add_conversation_resp(&mut self) -> Vec<u8>;
     fn next_new_ack(&mut self) -> Vec<u8>;
-    fn next_new_contact(&mut self) -> Vec<u8>;
+    fn next_new_contact(&mut self) -> String;
     fn next_new_conversation(&mut self) -> Vec<u8>;
     fn next_new_message(&mut self) -> Vec<u8>;
     fn register_new_user(&mut self, user_id: String) -> bool;
@@ -1465,7 +1474,7 @@ pub unsafe extern "C" fn network_handle_next_new_ack(ptr: *mut NetworkHandle, d:
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_next_new_contact(ptr: *mut NetworkHandle, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
+pub unsafe extern "C" fn network_handle_next_new_contact(ptr: *mut NetworkHandle, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
     let o = &mut *ptr;
     let r = o.next_new_contact();
     let s: *const c_char = r.as_ptr() as (*const c_char);
@@ -1643,7 +1652,7 @@ pub trait UsersTrait {
     fn add_to_conversation_by_index(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn bulk_add_to_conversation(&mut self, user_id_array: &[u8], conversation_id: &[u8]) -> bool;
     fn index_from_conversation_id(&self, conversation_id: &[u8]) -> i64;
-    fn refresh(&mut self, notif: &[u8]) -> bool;
+    fn refresh(&mut self, notif_user_id: String) -> bool;
     fn remove_from_conversation(&mut self, row_index: u64, conversation_id: &[u8]) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -1830,10 +1839,11 @@ pub unsafe extern "C" fn users_index_from_conversation_id(ptr: *const Users, con
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_refresh(ptr: *mut Users, notif_str: *const c_char, notif_len: c_int) -> bool {
-    let notif = { slice::from_raw_parts(notif_str as *const u8, to_usize(notif_len)) };
+pub unsafe extern "C" fn users_refresh(ptr: *mut Users, notif_user_id_str: *const c_ushort, notif_user_id_len: c_int) -> bool {
+    let mut notif_user_id = String::new();
+    set_string_from_utf16(&mut notif_user_id, notif_user_id_str, notif_user_id_len);
     let o = &mut *ptr;
-    let r = o.refresh(notif);
+    let r = o.refresh(notif_user_id);
     r
 }
 

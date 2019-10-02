@@ -69,7 +69,8 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray addConversation();
-    Q_INVOKABLE bool refresh(const QByteArray& notif);
+    Q_INVOKABLE bool handleContactReqAck(const QByteArray& notif);
+    Q_INVOKABLE bool refresh(const QByteArray& notif_conv_id);
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -250,7 +251,7 @@ public:
     Q_INVOKABLE QByteArray nextAddContactResp();
     Q_INVOKABLE QByteArray nextAddConversationResp();
     Q_INVOKABLE QByteArray nextNewAck();
-    Q_INVOKABLE QByteArray nextNewContact();
+    Q_INVOKABLE QString nextNewContact();
     Q_INVOKABLE QByteArray nextNewConversation();
     Q_INVOKABLE QByteArray nextNewMessage();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
@@ -294,7 +295,7 @@ public:
     Q_INVOKABLE bool addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE bool bulkAddToConversation(const QByteArray& user_id_array, const QByteArray& conversation_id);
     Q_INVOKABLE qint64 indexFromConversationId(const QByteArray& conversation_id) const;
-    Q_INVOKABLE bool refresh(const QByteArray& notif);
+    Q_INVOKABLE bool refresh(const QString& notif_user_id);
     Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE bool toggleFilterRegex();
 

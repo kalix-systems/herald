@@ -28,8 +28,14 @@ ListView {
     Connections {
         target: networkHandle
         onNewConversationChanged: {
-            if (networkHandle.newConversation !== 0) {
+            if (networkHandle.newConversation > 0) {
                 conversationsModel.refresh(networkHandle.nextNewConversation())
+            }
+        }
+        onNewAddContactRespChanged: {
+            if (networkHandle.newAddContactResp > 0) {
+                conversationsModel.handleContactReqAck(networkHandle.nextAddContactResp())
+                print("TODO: other UI event for a contact request being accepted")
             }
         }
     }

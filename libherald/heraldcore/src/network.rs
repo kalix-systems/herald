@@ -51,7 +51,7 @@ pub enum Notification {
     NewContact(UserId, ConversationId),
     /// A new conversation has been added
     NewConversation(ConversationId),
-    AddContactResponse(UserId, bool),
+    AddContactResponse(ConversationId, UserId, bool),
     AddConversationResponse(ConversationId, bool),
 }
 
@@ -274,15 +274,19 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             let title = ac.title.as_ref().map(String::as_str);
             crate::conversation::add_conversation_with_tx(&tx, Some(&cid), title, false)?;
             crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
+            tx.commit()?;
             ev.notifications.push(Notification::NewConversation(cid));
         }
-        ContactReqAck(cr) => {
-            // TODO: handle this somehow
-        }
+        ContactReqAck(cr) => ev.notifications.push(Notification::AddContactResponse(
+            cm.cid(),
+            cm.from().uid,
+            cr.0,
+        )),
         NewMembers(nm) => {
-            for member in nm.0 {
-                crate::members::add_member(&cm.cid(), member)?;
-            }
+            let mut db = crate::db::Database::get()?;
+            let tx = db.transaction()?;
+            crate::members::add_members_with_tx(&tx, cm.cid(), &nm.0)?;
+            tx.commit()?;
         }
         Msg(msg) => {
             let cmessages::Msg { mid, content, op } = msg;
@@ -322,6 +326,10 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
                 .add()?;
             ev.notifications
                 .push(Notification::NewContact(cr.uid, cr.cid));
+            ev.replies.push((
+                cr.cid,
+                ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
+            ))
         }
     }
 

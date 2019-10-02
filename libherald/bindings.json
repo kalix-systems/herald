@@ -111,11 +111,21 @@
                     "mut": true,
                     "arguments": [
                         {
-                            "name": "notif",
+                            "name": "notif_conv_id",
                             "type": "QByteArray"
                         }
                     ],
                     "return": "bool"
+                },
+                "handleContactReqAck": {
+                  "mut": true,
+                  "return": "bool",
+                  "arguments": [
+                        {
+                            "name": "notif",
+                            "type": "QByteArray"
+                        }
+                  ]
                 }
             }
         },
@@ -202,7 +212,7 @@
                 },
                 "nextNewContact": {
                     "mut": true,
-                    "return": "QByteArray"
+                    "return": "QString"
                 },
                 "nextNewConversation": {
                     "mut": true,
@@ -367,8 +377,8 @@
                     "return": "bool",
                     "arguments": [
                       {
-                      "name": "notif",
-                      "type": "QByteArray"
+                      "name": "notif_user_id",
+                      "type": "QString"
                       }
                     ]
                 }
