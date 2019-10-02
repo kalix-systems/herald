@@ -44,15 +44,15 @@ pub type QID = [u8; 32];
 /// `Notification`s contain info about what updates were made to the db.
 pub enum Notification {
     /// A new message has been received.
-    NewMsg(ConversationId),
+    NewMsg(MsgId, ConversationId),
     /// An ack has been received.
-    Ack(MsgId),
+    Ack(MsgId, ConversationId),
     /// A new contact has been added
-    NewContact,
+    NewContact(UserId, ConversationId),
     /// A new conversation has been added
-    NewConversation,
-    AddContactReponse(bool),
-    AddConversationReponse(bool),
+    NewConversation(ConversationId),
+    AddContactResponse(UserId, bool),
+    AddConversationResponse(ConversationId, bool),
 }
 
 mod helper {
@@ -274,7 +274,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             let title = ac.title.as_ref().map(String::as_str);
             crate::conversation::add_conversation_with_tx(&tx, Some(&cid), title, false)?;
             crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
-            ev.notifications.push(Notification::NewConversation);
+            ev.notifications.push(Notification::NewConversation(cid));
         }
         ContactReqAck(cr) => {
             // TODO: handle this somehow
@@ -304,7 +304,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
         }
         Ack(ack) => {
             crate::message_receipts::add_receipt(ack.of, cm.from().uid, ack.stat)?;
-            ev.notifications.push(Notification::Ack(ack.of));
+            ev.notifications.push(Notification::Ack(ack.of, cm.cid()));
         }
     }
 
@@ -321,7 +321,8 @@ fn handle_dmessage(ts: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr>
             let tx = db.transaction()?;
             crate::conversation::add_conversation_with_tx(&tx, Some(&cr.cid), None, true)?;
             crate::members::add_members_with_tx(&tx, cr.cid, &[cr.uid])?;
-            ev.notifications.push(Notification::NewConversation);
+            ev.notifications
+                .push(Notification::NewContact(cr.uid, cr.cid));
         }
     }
 

@@ -1,6 +1,8 @@
-use crate::{interface::*, ret_err, types::*};
+use crate::{interface::*, ret_err, ret_none, types::*};
+use crossbeam_channel::*;
 use herald_common::*;
-use heraldcore::network;
+use heraldcore::abort_err;
+use heraldcore::network::{self, Notification};
 use heraldcore::types::*;
 use std::{
     convert::{TryFrom, TryInto},
@@ -13,9 +15,154 @@ use std::{
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
 
-pub struct EffectsFlags {
+struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
+}
+
+struct NotifRx {
+    msg_rx: Receiver<(MsgId, ConversationId)>,
+    ack_rx: Receiver<(MsgId, ConversationId)>,
+    contact_rx: Receiver<(UserId, ConversationId)>,
+    conversation_rx: Receiver<ConversationId>,
+    add_contact_resp_rx: Receiver<(UserId, bool)>,
+    add_conv_resp_rx: Receiver<(ConversationId, bool)>,
+    emit: Emitter,
+}
+
+impl NotifRx {
+    fn msg_recv(&mut self) -> Option<(MsgId, ConversationId)> {
+        let val = self.msg_rx.recv().ok();
+        self.emit.new_message_changed();
+        val
+    }
+
+    fn new_msg(&self) -> u64 {
+        self.msg_rx.len() as u64
+    }
+
+    fn ack_recv(&mut self) -> Option<(MsgId, ConversationId)> {
+        let val = self.ack_rx.recv().ok();
+        self.emit.new_ack_changed();
+        val
+    }
+
+    fn new_ack(&self) -> u64 {
+        self.ack_rx.len() as u64
+    }
+
+    fn contact_recv(&mut self) -> Option<(UserId, ConversationId)> {
+        let val = self.contact_rx.recv().ok();
+        self.emit.new_contact_changed();
+        val
+    }
+
+    fn new_contact(&self) -> u64 {
+        self.contact_rx.len() as u64
+    }
+
+    fn conversation_recv(&mut self) -> Option<ConversationId> {
+        let val = self.conversation_rx.recv().ok();
+        self.emit.new_conversation_changed();
+        val
+    }
+
+    fn new_conversation(&self) -> u64 {
+        self.conversation_rx.len() as u64
+    }
+
+    fn add_contact_resp_recv(&mut self) -> Option<(UserId, bool)> {
+        let val = self.add_contact_resp_rx.recv().ok();
+        self.emit.new_add_contact_resp_changed();
+        val
+    }
+
+    fn new_add_contact_resp(&self) -> u64 {
+        self.add_contact_resp_rx.len() as u64
+    }
+
+    fn add_conv_resp_recv(&mut self) -> Option<(ConversationId, bool)> {
+        let val = self.add_conv_resp_rx.recv().ok();
+        self.emit.new_add_conv_resp_changed();
+        val
+    }
+
+    fn new_add_conv_resp(&self) -> u64 {
+        self.add_conv_resp_rx.len() as u64
+    }
+}
+
+struct NotifTx {
+    msg_tx: Sender<(MsgId, ConversationId)>,
+    ack_tx: Sender<(MsgId, ConversationId)>,
+    contact_tx: Sender<(UserId, ConversationId)>,
+    conversation_tx: Sender<ConversationId>,
+    add_contact_resp_tx: Sender<(UserId, bool)>,
+    add_conv_resp_tx: Sender<(ConversationId, bool)>,
+    emit: Emitter,
+}
+
+impl NotifTx {
+    fn send(&mut self, notif: Notification) {
+        use Notification::*;
+        match notif {
+            NewMsg(msg_id, cid) => {
+                abort_err!(self.msg_tx.send((msg_id, cid)));
+                self.emit.new_message_changed();
+            }
+            Ack(msg_id, cid) => {
+                abort_err!(self.ack_tx.send((msg_id, cid)));
+                self.emit.new_ack_changed();
+            }
+            NewContact(uid, cid) => {
+                abort_err!(self.contact_tx.send((uid, cid)));
+                self.emit.new_contact_changed();
+            }
+            NewConversation(cid) => {
+                abort_err!(self.conversation_tx.send(cid));
+                self.emit.new_conversation_changed();
+            }
+            AddContactResponse(uid, accepted) => {
+                abort_err!(self.add_contact_resp_tx.send((uid, accepted)));
+                self.emit.new_add_contact_resp_changed();
+            }
+            AddConversationResponse(cid, accepted) => {
+                abort_err!(self.add_conv_resp_tx.send((cid, accepted)));
+                self.emit.new_add_conv_resp_changed();
+            }
+        }
+    }
+}
+
+fn notif_channel(mut emit: Emitter) -> (NotifTx, NotifRx) {
+    let (msg_tx, msg_rx) = unbounded();
+    let (ack_tx, ack_rx) = unbounded();
+    let (contact_tx, contact_rx) = unbounded();
+    let (conversation_tx, conversation_rx) = unbounded();
+    let (add_contact_resp_tx, add_contact_resp_rx) = unbounded();
+    let (add_conv_resp_tx, add_conv_resp_rx) = unbounded();
+
+    let tx = NotifTx {
+        msg_tx,
+        ack_tx,
+        contact_tx,
+        conversation_tx,
+        add_contact_resp_tx,
+        add_conv_resp_tx,
+        emit: emit.clone(),
+    };
+
+    let rx = NotifRx {
+        msg_rx,
+        ack_rx,
+        contact_rx,
+        conversation_rx,
+        add_contact_resp_rx,
+        add_conv_resp_rx,
+        emit: emit.clone(),
+    };
+
+    (tx, rx)
 }
 
 impl EffectsFlags {
@@ -25,49 +172,12 @@ impl EffectsFlags {
             net_pending: AtomicBool::new(false),
         }
     }
-    //pub fn emit_net_down(&self, emit: &mut NetworkHandleEmitter) {
-    //    // drop the pending and online flags, we are in a fail state
-    //    self.net_online.fetch_and(false, Ordering::Relaxed);
-    //    self.net_pending.fetch_or(true, Ordering::Relaxed);
-    //    emit.connection_up_changed();
-    //    emit.connection_pending_changed();
-    //    println!("Net Down!");
-    //}
-    //pub fn emit_net_up(&self, emit: &mut NetworkHandleEmitter) {
-    //    self.net_online.fetch_or(true, Ordering::Relaxed);
-    //    self.net_pending.fetch_and(false, Ordering::Relaxed);
-    //    emit.connection_up_changed();
-    //    emit.connection_pending_changed();
-    //    println!("Net Up!")
-    //}
-    //pub fn emit_net_pending(&self, emit: &mut NetworkHandleEmitter) {
-    //    self.net_online.fetch_and(false, Ordering::Relaxed);
-    //    self.net_pending.fetch_and(true, Ordering::Relaxed);
-    //    emit.connection_up_changed();
-    //    emit.connection_pending_changed();
-    //    println!("Net Pending!")
-    //}
-    //pub fn emit_new_msg(&self, emit: &mut NetworkHandleEmitter) {
-    //    let old = self.net_new_message.load(Ordering::Relaxed);
-    //    self.net_new_message.fetch_xor(old, Ordering::Relaxed);
-    //    emit.new_message_changed();
-    //}
-    //pub fn emit_new_contact(&self, emit: &mut NetworkHandleEmitter) {
-    //    let old = self.net_new_message.load(Ordering::Relaxed);
-    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-    //    emit.new_contact_changed();
-    //}
-    //pub fn emit_new_conversation(&self, emit: &mut NetworkHandleEmitter) {
-    //    let old = self.net_new_message.load(Ordering::Relaxed);
-    //    self.net_new_contact.fetch_xor(old, Ordering::Relaxed);
-    //    emit.new_conversation_changed();
-    //}
 }
 
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,
-    new_events: usize,
+    notif_rx: Option<NotifRx>,
 }
 
 impl NetworkHandleTrait for NetworkHandle {
@@ -75,13 +185,9 @@ impl NetworkHandleTrait for NetworkHandle {
         let handle = NetworkHandle {
             emit,
             status_flags: Arc::new(EffectsFlags::new()),
-            new_events: 0,
+            notif_rx: None,
         };
         handle
-    }
-
-    fn new_events(&self) -> u64 {
-        self.new_events as u64
     }
 
     /// this is the API exposed to QML
@@ -109,7 +215,15 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn login(&mut self) -> bool {
-        eprintln!("Login is not yet supported");
+        let (mut tx, rx) = notif_channel(self.emit.clone());
+        self.notif_rx.replace(rx);
+
+        ret_err!(
+            network::login(move |notif: Notification| {
+                tx.send(notif);
+            }),
+            false
+        );
         true
     }
 
@@ -121,98 +235,100 @@ impl NetworkHandleTrait for NetworkHandle {
         self.status_flags.net_pending.load(Ordering::Relaxed)
     }
 
+    fn new_ack(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_ack()
+    }
+
+    fn new_add_contact_resp(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_add_contact_resp()
+    }
+
+    fn new_add_conv_resp(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_add_conv_resp()
+    }
+
+    fn new_contact(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_contact()
+    }
+
+    fn new_conversation(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_conversation()
+    }
+
+    fn new_message(&self) -> u64 {
+        ret_none!(&self.notif_rx, 0).new_msg()
+    }
+
+    /// Returns a `(UserId, bool)` serialized as CBOR,
+    /// or `None` serialized as CBOR if the queue is exhausted.
+    fn next_add_contact_resp(&mut self) -> Vec<u8> {
+        let res = ret_none!(
+            ret_none!(&mut self.notif_rx, cbor_none()).add_contact_resp_recv(),
+            cbor_none()
+        );
+
+        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    }
+
+    /// Returns a `(ConversationId, bool)` serialized as CBOR,
+    /// or `None` serialized as CBOR if the queue is exhausted.
+    fn next_add_conversation_resp(&mut self) -> Vec<u8> {
+        let res = ret_none!(
+            ret_none!(&mut self.notif_rx, cbor_none()).add_conv_resp_recv(),
+            cbor_none()
+        );
+
+        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    }
+
+    /// Returns a `(MsgId, ConversationId)` serialized as CBOR,
+    /// or `None` serialized as CBOR if the queue is exhausted.
+    fn next_new_ack(&mut self) -> Vec<u8> {
+        let res = ret_none!(
+            ret_none!(&mut self.notif_rx, cbor_none()).ack_recv(),
+            cbor_none()
+        );
+
+        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    }
+
+    /// Returns a `(UserId, ConversationId)` serialized as CBOR,
+    /// or `None` serialized as CBOR if the queue is exhausted.
+    fn next_new_contact(&mut self) -> Vec<u8> {
+        let res = ret_none!(
+            ret_none!(&mut self.notif_rx, cbor_none()).contact_recv(),
+            cbor_none()
+        );
+
+        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    }
+
+    /// Returns a `ConversationId`, or an empty vector if the queue
+    /// is exhausted
+    fn next_new_conversation(&mut self) -> FfiConversationId {
+        ret_none!(
+            ret_none!(&mut self.notif_rx, vec![]).conversation_recv(),
+            vec![]
+        )
+        .to_vec()
+    }
+
+    /// Returns a `(MsgId, ConversationId)` serialized as CBOR,
+    /// or `None` serialized as CBOR if the queue is exhausted.
+    fn next_new_message(&mut self) -> Vec<u8> {
+        let res = ret_none!(
+            ret_none!(&mut self.notif_rx, cbor_none()).msg_recv(),
+            cbor_none()
+        );
+
+        ret_err!(serde_cbor::to_vec(&res), cbor_none())
+    }
+
     fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 }
 
-// qtrx: receive from qt
-//fn start_worker(
-//    mut emit: NetworkHandleEmitter,
-//    status_flags: Arc<EffectsFlags>,
-//    qtrx: UnboundedReceiver<FuncCall>,
-//) {
-//    std::thread::spawn(move || {
-//        let mut rt = abort_err!(
-//            tokio::runtime::current_thread::Runtime::new(),
-//            "could not spawn runtime"
-//        );
-//
-//        rt.block_on(async move {
-//            status_flags.emit_net_pending(&mut emit);
-//            if let Ok((nwrx, sess)) = Session::init().await {
-//                status_flags.emit_net_up(&mut emit);
-//
-//                tokio::spawn(handle_qt_channel(qtrx, sess.clone()));
-//                tokio::spawn(handle_nw_channel(nwrx, sess, emit, status_flags));
-//            } else {
-//                println!("could not connect to server");
-//
-//                status_flags.emit_net_down(&mut emit);
-//            }
-//        });
-//
-//        abort_err!(rt.run());
-//    });
-//}
-//
-//async fn handle_qt_channel(mut rx: UnboundedReceiver<FuncCall>, sess: Session) {
-//    loop {
-//        match rx.recv().await {
-//            Some(call) => match call {
-//                FuncCall::RegisterDevice => {
-//                    abort_err!(sess.register_device().await, "could not register device");
-//                }
-//                FuncCall::RequestMeta(id) => {
-//                    abort_err!(sess.request_meta(id).await, "could not retrieve meta data");
-//                }
-//                FuncCall::SendMsg { to, msg } => {
-//                    abort_err!(sess.send_msg(to, msg).await, "failed to send message");
-//                }
-//                FuncCall::AddRequest(conversation_id, user_id) => {
-//                    abort_err!(
-//                        sess.send_msg(user_id, MessageToPeer::AddRequest(conversation_id))
-//                            .await,
-//                        "failed to send add request"
-//                    );
-//                }
-//            },
-//            None => {}
-//        };
-//        // tokio delay here on return of none
-//    }
-//}
-//async fn handle_nw_channel(
-//    mut rx: UnboundedReceiver<Notification>,
-//    _sess: Session,
-//    mut emit: NetworkHandleEmitter,
-//    status_flags: Arc<EffectsFlags>,
-//) {
-//    use Notification::*;
-//    loop {
-//        match rx.recv().await {
-//            Some(notif) => match notif {
-//                Ack(message_id) => {
-//                    println!(
-//                        "Receiving notification: {:?}",
-//                        message_id
-//                    );
-//                    // TODO update the UI here.
-//                }
-//                NewMsg(cid) => {
-//                    println!("NEW MESSAGE FROM : {:?}", cid);
-//                    status_flags.emit_new_msg(&mut emit);
-//                }
-//                NewContact => {
-//                    println!("NEW CONTACT ADDED");
-//                    status_flags.emit_new_contact(&mut emit);
-//                }
-//                NewConversation => {
-//                    println!("NEW CONVERSATION ADDED");
-//                    status_flags.emit_new_conversation(&mut emit);
-//                }
-//            },
-//            None => println!("print nope"),
-//        };
-//    }
-//}
+fn cbor_none() -> Vec<u8> {
+    abort_err!(serde_cbor::to_vec(&serde_cbor::Value::Null))
+}

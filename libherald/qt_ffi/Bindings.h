@@ -228,22 +228,43 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint64 newEvents READ newEvents NOTIFY newEventsChanged FINAL)
+    Q_PROPERTY(quint64 newAck READ newAck NOTIFY newAckChanged FINAL)
+    Q_PROPERTY(quint64 newAddContactResp READ newAddContactResp NOTIFY newAddContactRespChanged FINAL)
+    Q_PROPERTY(quint64 newAddConvResp READ newAddConvResp NOTIFY newAddConvRespChanged FINAL)
+    Q_PROPERTY(quint64 newContact READ newContact NOTIFY newContactChanged FINAL)
+    Q_PROPERTY(quint64 newConversation READ newConversation NOTIFY newConversationChanged FINAL)
+    Q_PROPERTY(quint64 newMessage READ newMessage NOTIFY newMessageChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
-    quint64 newEvents() const;
+    quint64 newAck() const;
+    quint64 newAddContactResp() const;
+    quint64 newAddConvResp() const;
+    quint64 newContact() const;
+    quint64 newConversation() const;
+    quint64 newMessage() const;
     Q_INVOKABLE bool login();
+    Q_INVOKABLE QByteArray nextAddContactResp();
+    Q_INVOKABLE QByteArray nextAddConversationResp();
+    Q_INVOKABLE QByteArray nextNewAck();
+    Q_INVOKABLE QByteArray nextNewContact();
+    Q_INVOKABLE QByteArray nextNewConversation();
+    Q_INVOKABLE QByteArray nextNewMessage();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id) const;
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void newEventsChanged();
+    void newAckChanged();
+    void newAddContactRespChanged();
+    void newAddConvRespChanged();
+    void newContactChanged();
+    void newConversationChanged();
+    void newMessageChanged();
 };
 
 class Users : public QAbstractItemModel

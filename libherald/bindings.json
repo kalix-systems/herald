@@ -115,6 +115,32 @@
         },
         "NetworkHandle": {
             "type": "Object",
+            "properties": {
+                "connectionUp": {
+                    "type": "bool"
+                },
+                "connectionPending": {
+                    "type": "bool"
+                },
+                "newMessage": {
+                    "type": "quint64"
+                },
+                "newAck": {
+                    "type": "quint64"
+                },
+                "newContact": {
+                    "type": "quint64"
+                },
+                "newConversation": {
+                    "type": "quint64"
+                },
+                "newAddContactResp": {
+                    "type": "quint64"
+                },
+                "newAddConvResp": {
+                    "type": "quint64"
+                }
+            },
             "functions": {
                 "sendMessage": {
                     "return": "bool",
@@ -155,17 +181,30 @@
                 "login": {
                     "mut": true,
                     "return": "bool"
-                }
-            },
-            "properties": {
-                "connectionUp": {
-                    "type": "bool"
                 },
-                "connectionPending": {
-                    "type": "bool"
+                "nextNewMessage": {
+                    "mut": true,
+                    "return": "QByteArray"
                 },
-                "newEvents": {
-                    "type": "quint64"
+                "nextNewAck": {
+                    "mut": true,
+                    "return": "QByteArray"
+                },
+                "nextNewContact": {
+                    "mut": true,
+                    "return": "QByteArray"
+                },
+                "nextNewConversation": {
+                    "mut": true,
+                    "return": "QByteArray"
+                },
+                "nextAddContactResp": {
+                    "mut": true,
+                    "return": "QByteArray"
+                },
+                "nextAddConversationResp": {
+                    "mut": true,
+                    "return": "QByteArray"
                 }
             }
         },
