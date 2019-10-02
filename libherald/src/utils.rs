@@ -1,3 +1,4 @@
+/// Strips `qrc` prefix from paths passed from QML.
 pub fn strip_qrc(path: Option<String>) -> Option<String> {
     let mut path = path;
 
