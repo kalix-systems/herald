@@ -24,7 +24,6 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-
     Connections {
         target: networkHandle
         onNewConversationChanged: {
@@ -34,7 +33,8 @@ ListView {
         }
         onNewAddContactRespChanged: {
             if (networkHandle.newAddContactResp > 0) {
-                conversationsModel.handleContactReqAck(networkHandle.nextAddContactResp())
+                conversationsModel.handleContactReqAck(
+                            networkHandle.nextAddContactResp())
                 print("TODO: other UI event for a contact request being accepted")
             }
         }
@@ -98,7 +98,6 @@ ListView {
                 colorHash: Utils.unwrapOr(color, 0)
                 pfpUrl: Utils.safeStringOrDefault(picture)
             }
-
 
             ConversationLabel {
                 anchors.left: conversationItemAvatar.right
