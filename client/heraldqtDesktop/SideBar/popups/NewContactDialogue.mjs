@@ -6,4 +6,5 @@ export function insertContact(entryArea, contactsModel, networkHandle, conversat
     const conversationId = contactsModel.add(trimmedText);
     networkHandle.sendAddRequest(trimmedText, conversationId);
     entryArea.clear();
+    conversationsModel.refresh(conversationId);
 }
