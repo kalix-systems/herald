@@ -504,6 +504,7 @@ extern "C" {
     void herald_utils_free(HeraldUtils::Private*);
     double herald_utils_chat_bubble_natural_width(const HeraldUtils::Private*, double, double);
     bool herald_utils_compare_byte_array(const HeraldUtils::Private*, const char*, int, const char*, int);
+    bool herald_utils_is_valid_rand_id(const HeraldUtils::Private*, const char*, int);
 };
 
 extern "C" {
@@ -1293,6 +1294,10 @@ double HeraldUtils::chatBubbleNaturalWidth(double chat_pane_width, double text_w
 bool HeraldUtils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const
 {
     return herald_utils_compare_byte_array(m_d, bs1.data(), bs1.size(), bs2.data(), bs2.size());
+}
+bool HeraldUtils::isValidRandId(const QByteArray& bs) const
+{
+    return herald_utils_is_valid_rand_id(m_d, bs.data(), bs.size());
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

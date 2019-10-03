@@ -14,6 +14,10 @@ impl HeraldUtilsTrait for HeraldUtils {
         bs1 == bs2
     }
 
+    fn is_valid_rand_id(&self, bs: &[u8]) -> bool {
+        bs.len() == 32
+    }
+
     fn chat_bubble_natural_width(&self, chat_pane_width: f64, text_width: f64) -> f64 {
         (chat_pane_width * 2. / 3.).min(text_width)
     }

@@ -43,6 +43,15 @@
                             "type": "double"
                         }
                     ]
+                },
+                "isValidRandId": {
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "bs",
+                            "type": "QByteArray"
+                        }
+                    ]
                 }
             }
         },
