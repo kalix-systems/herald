@@ -45,6 +45,7 @@ impl UsersTrait for Users {
             }
         };
 
+        // this should *really* never fail
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
         Users {
@@ -60,8 +61,8 @@ impl UsersTrait for Users {
 
     /// Adds a contact by their `id`
     fn add(&mut self, id: ffi::UserId) -> ffi::ConversationId {
-        let id = ret_err!(id.as_str().try_into(), vec![]);
-        let contact = ret_err!(ContactBuilder::new(id).add(), vec![]);
+        let id = ret_err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
+        let contact = ret_err!(ContactBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
@@ -71,7 +72,7 @@ impl UsersTrait for Users {
         });
         self.model.end_insert_rows();
 
-        ret_none!(self.list.last(), vec![])
+        ret_none!(self.list.last(), ffi::NULL_CONV_ID.to_vec())
             .inner
             .pairwise_conversation
             .to_vec()

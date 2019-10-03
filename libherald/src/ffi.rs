@@ -16,6 +16,10 @@ pub type ConversationIdRef<'a> = &'a [u8];
 /// represents a [`heraldcore::types::ConversationId`]
 pub type ConversationId = Vec<u8>;
 
+/// A null conversation id, required because the QML runtime
+/// has difficulty with bytearrays.
+pub const NULL_CONV_ID: [u8; 0] = [];
+
 /// Used to indicate that the data
 /// represents a [`herald_common::UserId`]
 pub type UserId = String;
