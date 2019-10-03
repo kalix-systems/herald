@@ -630,7 +630,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 3:
             return QVariant::fromValue(messageId(index.row()));
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return QVariant::fromValue(op(index.row()));
         }
         break;
     }

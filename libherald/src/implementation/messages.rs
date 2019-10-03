@@ -103,7 +103,6 @@ impl MessagesTrait for Messages {
         match self.list.last() {
             Some(msg) => {
                 if let Some(status_vec) = &msg.inner.receipts {
-                    print!("{}", status_vec.len());
                     status_vec.iter().map(|(_, status)| *status as u32).max()
                 } else {
                     None
@@ -190,7 +189,7 @@ impl MessagesTrait for Messages {
     }
 
     fn message_id(&self, row_index: usize) -> ffi::MsgIdRef {
-        ret_none!(self.list.get(row_index), &[])
+        ret_none!(self.list.get(row_index), &ffi::NULL_MSG_ID)
             .inner
             .message_id
             .as_slice()
@@ -206,10 +205,13 @@ impl MessagesTrait for Messages {
             .unwrap_or("".into())
     }
 
-    fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
-        match &ret_none!(self.list.get(row_index), None).inner.op {
-            Some(id) => Some(id.as_slice()),
-            None => None,
+    fn op(&self, row_index: usize) -> ffi::MsgIdRef {
+        match &ret_none!(self.list.get(row_index), &ffi::NULL_MSG_ID)
+            .inner
+            .op
+        {
+            Some(id) => id.as_slice(),
+            None => &ffi::NULL_MSG_ID,
         }
     }
 
@@ -219,16 +221,16 @@ impl MessagesTrait for Messages {
                 self.update_last();
                 message_id.to_vec()
             }
-            None => vec![],
+            None => ffi::NULL_MSG_ID.to_vec(),
         }
     }
 
     fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> ffi::MsgId {
-        let op = ret_err!(MsgId::try_from(op), vec![]);
+        let op = ret_err!(MsgId::try_from(op), ffi::NULL_MSG_ID.to_vec());
 
         match self.raw_insert(body, Some(op)) {
             Some(message_id) => message_id.to_vec(),
-            None => vec![],
+            None => ffi::NULL_MSG_ID.to_vec(),
         }
     }
 

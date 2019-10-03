@@ -417,8 +417,7 @@
                     "type": "qint64"
                 },
                 "op": {
-                    "type": "QByteArray",
-                    "optional": true
+                    "type": "QByteArray"
                 }
             },
             "functions": {
