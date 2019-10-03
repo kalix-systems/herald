@@ -474,7 +474,6 @@ dependencies = [
  "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
  "chainmail 0.1.0 (git+https://github.com/kalix-systems/chainmail.git)",
  "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "diesel 1.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_cbor 0.10.1 (registry+https://github.com/rust-lang/crates.io-index)",

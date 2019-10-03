@@ -23,7 +23,7 @@ serde           = { version = "1.0",            features = ["derive"] }
 warp            = { git = "https://github.com/jxs/warp.git" }
 
 womp          = { git  = "https://github.com/kalix-systems/womp"}
-herald_common = { path = "../common", features = ["diesel_pg"] }
+herald_common = { path = "../common" }
 
 
 [dev-dependencies]
