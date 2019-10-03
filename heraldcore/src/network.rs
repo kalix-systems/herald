@@ -37,10 +37,11 @@ pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
 }
 
+/// Query ID.
 pub type QID = [u8; 32];
 
 #[derive(Copy, Clone, Debug)]
-/// `Notification`s contain info about what updates were made to the db.
+/// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
     /// A new message has been received.
     NewMsg(MsgId, ConversationId),
@@ -50,7 +51,9 @@ pub enum Notification {
     NewContact(UserId, ConversationId),
     /// A new conversation has been added
     NewConversation(ConversationId),
+    /// Response to contact request.
     AddContactResponse(ConversationId, UserId, bool),
+    /// Response to request to join conversation.
     AddConversationResponse(ConversationId, bool),
 }
 
@@ -87,6 +90,7 @@ mod helper {
 
 macro_rules! get_of_helper {
     ($name: tt, $of: ty, $to: ty) => {
+        #[allow(missing_docs)]
         pub fn $name(of: $of) -> Result<$to, HErr> {
             Ok(helper::$name(&$name::Req(of))?.0)
         }
@@ -98,18 +102,21 @@ get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMet
 get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
+/// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
     Ok(helper::dep_key(&req)?.0)
 }
 
+/// Adds new key to the server's key registry.
 pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = new_key::Req(kp.sign(to_new));
     Ok(helper::new_key(&req)?.0)
 }
 
+/// Registers new user on the server.
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
@@ -122,6 +129,10 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(res)
 }
 
+/// Attempts to login to the server, spawning a long-lived thread to handle messages pushed from
+/// the server.
+///
+/// Takes a callback as an argument that is called whenever a message is received.
 pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HErr> {
     use login::*;
 
@@ -225,17 +236,21 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
     }
 }
 
+/// An event. These are produced in response a message being received from the server.
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
 }
 
 impl Event {
+    /// Merges two events.
     pub fn merge(&mut self, mut other: Self) {
         self.notifications.append(&mut other.notifications);
         self.replies.append(&mut other.replies);
     }
 
+    /// Sends replies to inbound messages and calls `f`, passing each notification in as an
+    /// argument.
     pub fn execute<F: FnMut(Notification)>(&self, f: &mut F) -> Result<(), HErr> {
         for note in self.notifications.iter() {
             f(*note);
@@ -394,6 +409,7 @@ fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
     send_dmessage(&keys, msg)
 }
 
+/// Sends a contact request to `uid` with a proposed conversation id `cid`.
 pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let req = dmessages::ContactReq {
         uid: Config::static_id()?,
@@ -402,6 +418,7 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     send_umessage(uid, &DeviceMessage::ContactReq(req))
 }
 
+/// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
 pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(), HErr> {
     use crate::conversation;
     let pairwise = conversation::get_pairwise_conversations(members)?;
@@ -419,6 +436,7 @@ pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(),
     Ok(())
 }
 
+/// Sends a text message `body` with id `mid` to the conversation associated with `cid`.
 pub fn send_text(
     cid: ConversationId,
     body: String,

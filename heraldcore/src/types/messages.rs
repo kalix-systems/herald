@@ -129,50 +129,79 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
     }
 }
 
+/// Types relevant to [`ConversationMessage`]s
 pub mod cmessages {
     use super::*;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// A new, signed key.
     pub struct NewKey(pub Signed<sig::PublicKey>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// A key that is to be marked as deprecated.
     pub struct DepKey(pub Signed<sig::PublicKey>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// Members that have just been added to a conversation.
     pub struct NewMembers(pub Vec<UserId>);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// A message received by a user when they are addeded to a conversation.
     pub struct AddedToConvo {
+        /// The current members in that conversation.
         pub members: Vec<UserId>,
+        /// The [`ConversationId`]
         pub cid: ConversationId,
+        /// The conversation's title.
         pub title: Option<String>,
     }
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// An acknowledgement of a contact request, with a bool to indicate whether the
+    /// request was accepted.
     pub struct ContactReqAck(pub bool);
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// A normal message to the conversation.
     pub struct Msg {
+        /// The message id. Globally unique.
         pub mid: MsgId,
+        /// The content of the message.
         pub content: Message,
+        /// The message id of the message being replied to, if this
+        /// message is a reply.
         pub op: Option<MsgId>,
     }
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// Variants of messages.
     pub enum Message {
+        /// A text message.
         Text(String),
+        /// A blob message, e.g., an attachment.
         Blob(Bytes),
     }
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// An acknowledgement that a message was received.
     pub struct Ack {
+        /// The message id.
         pub of: MsgId,
+        /// The receipt status of the message.
         pub stat: MessageReceiptStatus,
     }
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+/// The body of a [`ConversationMessage`]
 pub enum ConversationMessageBody {
+    /// A new key
     NewKey(cmessages::NewKey),
+    /// A key to be marked as deprecated
     DepKey(cmessages::DepKey),
+    /// Members just added to a conversation
     NewMembers(cmessages::NewMembers),
+    /// A message a user receives upon being added to a conversation
     AddedToConvo(cmessages::AddedToConvo),
+    /// An acknowledgement of a contact request.
     ContactReqAck(cmessages::ContactReqAck),
+    /// A normal message.
     Msg(cmessages::Msg),
+    /// An acknowledgement of a normal message.
     Ack(cmessages::Ack),
 }
 
@@ -195,6 +224,7 @@ impl ToSql for ConversationMessageBody {
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+/// A conversation message
 pub struct ConversationMessage {
     // TODO: replace this with Block
     body: Bytes,
@@ -206,18 +236,22 @@ pub struct ConversationMessage {
 
 // TODO: make these use chainmail
 impl ConversationMessage {
+    /// Raw body of the message
     pub fn body(&self) -> Bytes {
         self.body.clone()
     }
 
+    /// `ConversationId` associated with the message
     pub fn cid(&self) -> ConversationId {
         self.cid
     }
 
+    /// The device the message claims to be from.
     pub fn from(&self) -> GlobalId {
         self.from
     }
 
+    /// Seals the messages.
     pub fn seal(
         cid: ConversationId,
         content: &ConversationMessageBody,
@@ -227,22 +261,29 @@ impl ConversationMessage {
         Ok(ConversationMessage { cid, from, body })
     }
 
+    /// Opens the message.
     pub fn open(&self) -> Result<ConversationMessageBody, HErr> {
         Ok(serde_cbor::from_slice(&self.body)?)
     }
 }
 
+/// Types associated with [`DeviceMessage`]s
 pub mod dmessages {
     use super::*;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    /// A contact request.
     pub struct ContactReq {
+        /// The user making the request.
         pub uid: UserId,
+        /// The proposed conversation id.
         pub cid: ConversationId,
     }
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+/// Types of device message.
 pub enum DeviceMessage {
+    /// A contact request
     ContactReq(dmessages::ContactReq),
 }

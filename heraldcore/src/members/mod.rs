@@ -12,7 +12,7 @@ pub fn add_member(conversation_id: &ConversationId, member_id: UserId) -> Result
     Ok(())
 }
 
-pub fn add_members_with_tx(
+pub(crate) fn add_members_with_tx(
     tx: &rusqlite::Transaction,
     cid: ConversationId,
     members: &[UserId],
