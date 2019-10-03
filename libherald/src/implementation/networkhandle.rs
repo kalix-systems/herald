@@ -203,9 +203,6 @@ impl NetworkHandleTrait for NetworkHandle {
         handle
     }
 
-    /// this is the API exposed to QML
-    /// note, currently this function has all together too much copying.
-    /// this will be rectified when stupid hanfles fan out.
     fn send_message(
         &self,
         body: String,
