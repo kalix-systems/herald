@@ -6,6 +6,7 @@ use heraldcore::abort_err;
 use heraldcore::network::{self, Notification};
 use heraldcore::types::*;
 use std::collections::HashMap;
+use std::thread;
 use std::{
     convert::{TryFrom, TryInto},
     sync::{
@@ -213,14 +214,26 @@ impl NetworkHandleTrait for NetworkHandle {
 
         let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
-        ret_err!(network::send_text(conv_id, body, msg_id, None), false);
+        ret_err!(
+            thread::Builder::new().spawn(move || {
+                ret_err!(network::send_text(conv_id, body, msg_id, None));
+            }),
+            false
+        );
         true
     }
 
     fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);
         let cid = ret_err!(cid.try_into(), false);
-        ret_err!(network::send_contact_req(uid, cid), false);
+
+        ret_err!(
+            thread::Builder::new().spawn(move || {
+                ret_err!(network::send_contact_req(uid, cid));
+            }),
+            false
+        );
+
         true
     }
 
