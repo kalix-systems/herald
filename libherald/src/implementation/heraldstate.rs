@@ -1,6 +1,9 @@
 use crate::interface::*;
 use heraldcore::{abort_err, config::Config};
 
+/// Global state for the application that can't easily be included
+/// in another model. Currently only used to distinguish initial registration
+/// from logins.
 pub struct HeraldState {
     config_init: bool,
     emit: HeraldStateEmitter,

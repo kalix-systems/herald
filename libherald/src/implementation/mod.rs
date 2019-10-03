@@ -1,15 +1,22 @@
-pub(crate) mod config;
-pub(crate) mod conversations;
-pub(crate) mod heraldstate;
-pub(crate) mod heraldutils;
-pub(crate) mod messages;
-pub(crate) mod networkhandle;
-pub(crate) mod users;
+/// Implementation of [`crate::interface::ConfigTrait`].
+pub mod config;
+/// Implementation of [`crate::interface::ConversationsTrait`].
+pub mod conversations;
+/// Implementation of [`crate::interface::HeraldStateTrait`].
+pub mod heraldstate;
+/// Implementation of [`crate::interface::HeraldUtilsTrait`].
+pub mod heraldutils;
+/// Implementation of [`crate::interface::MessagesTrait`].
+pub mod messages;
+/// Implementation of [`crate::interface::NetworkHandleTrait`].
+pub mod networkhandle;
+/// Implementation of [`crate::interface::UsersTrait`].
+pub mod users;
 
-pub(crate) use config::*;
-pub(crate) use conversations::*;
-pub(crate) use heraldstate::*;
-pub(crate) use heraldutils::*;
-pub(crate) use messages::*;
-pub(crate) use networkhandle::*;
-pub(crate) use users::*;
+pub use config::*;
+pub use conversations::*;
+pub use heraldstate::*;
+pub use heraldutils::*;
+pub use messages::*;
+pub use networkhandle::*;
+pub use users::*;

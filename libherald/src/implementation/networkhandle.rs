@@ -17,12 +17,14 @@ use std::{
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
 
-struct EffectsFlags {
+/// A bundle of [`AtomicBool`]s used for signalling
+pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
 }
 
-struct NotifRx {
+/// A bundle of channel receivers used for receiving notifications from the network.
+pub struct NotifRx {
     contact_rx: Receiver<UserId>,
     conversation_rx: Receiver<ConversationId>,
     add_contact_resp_rx: Receiver<(ConversationId, UserId, bool)>,
@@ -72,7 +74,9 @@ impl NotifRx {
     }
 }
 
-struct NotifTx {
+/// A bundle of channel senders. This is passed inside of a callback to the login function,
+/// and sends signals and notifications to the QML runtime.
+pub struct NotifTx {
     contact_tx: Sender<UserId>,
     conversation_tx: Sender<ConversationId>,
     add_contact_resp_tx: Sender<(ConversationId, UserId, bool)>,
@@ -170,6 +174,7 @@ fn notif_channel(mut emit: Emitter, conv_data: Arc<AtomicBool>) -> (NotifTx, Not
 }
 
 impl EffectsFlags {
+    /// Creates a new [`EffectsFlags`]
     pub fn new() -> Self {
         EffectsFlags {
             net_online: AtomicBool::new(false),
@@ -178,6 +183,8 @@ impl EffectsFlags {
     }
 }
 
+/// This struct provides an interface to interact with the network and receive
+/// notifications.
 pub struct NetworkHandle {
     emit: NetworkHandleEmitter,
     status_flags: Arc<EffectsFlags>,

@@ -1,5 +1,6 @@
 use crate::interface::*;
 
+/// A collection of pure functions that are used in QML.
 pub struct HeraldUtils {
     emit: HeraldUtilsEmitter,
 }

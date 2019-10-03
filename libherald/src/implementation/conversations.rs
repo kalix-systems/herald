@@ -6,11 +6,16 @@ use heraldcore::{
 };
 use std::convert::TryInto;
 
-struct Conversation {
+/// Thin wrapper around [`ConversationMeta`],
+/// with an additional field to facilitate filtering
+/// in the UI.
+pub struct Conversation {
     inner: ConversationMeta,
     matched: bool,
 }
 
+/// A wrapper around a vector of [`Conversation`], with additional
+/// fields to facilitate interaction with Qt.
 pub struct Conversations {
     emit: ConversationsEmitter,
     model: ConversationsList,
