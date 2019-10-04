@@ -39,12 +39,12 @@ pub enum ConvUpdate {
 }
 
 lazy_static! {
-    /// Concurrent hash map from [`ConversationId`]s to an event stream.
+    /// Concurrent hash map from `ConversationId`s to an event stream.
     /// This is used to route notifications that arrive from the network.
     pub static ref CONV_MSG_RXS: DashMap<ConversationId, Receiver<ConvUpdate>> = DashMap::default();
 }
 
 lazy_static! {
-    /// Concurrent hashmap from [`UserId`] to [`contact::Contact`]. Used to avoid data replication.
+    /// Concurrent hashmap from `UserId` to `Contact`. Used to avoid data replication.
     pub static ref USER_DATA: DashMap<UserId, contact::Contact> = DashMap::default();
 }

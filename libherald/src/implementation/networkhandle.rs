@@ -18,7 +18,7 @@ use std::{
 // short type aliases for cleanliness
 type Emitter = NetworkHandleEmitter;
 
-/// A bundle of [`AtomicBool`]s used for signalling
+/// A bundle of `AtomicBool`s used for signalling
 pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
@@ -175,7 +175,7 @@ fn notif_channel(mut emit: Emitter, conv_data: Arc<AtomicBool>) -> (NotifTx, Not
 }
 
 impl EffectsFlags {
-    /// Creates a new [`EffectsFlags`]
+    /// Creates a new `EffectsFlags`
     pub fn new() -> Self {
         EffectsFlags {
             net_online: AtomicBool::new(false),

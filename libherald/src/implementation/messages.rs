@@ -14,12 +14,12 @@ type Emitter = MessagesEmitter;
 type List = MessagesList;
 
 #[derive(Clone)]
-/// A thin wrapper around [`heraldcore::message::Message`]
+/// A thin wrapper around `heraldcore::message::Message`
 pub struct Message {
     inner: Msg,
 }
 
-/// A wrapper around a vector of [`Message`]s with additional fields
+/// A wrapper around a vector of `Message`s with additional fields
 /// to facilitate interaction with QML.
 pub struct Messages {
     emit: Emitter,

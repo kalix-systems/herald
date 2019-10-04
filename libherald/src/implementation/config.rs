@@ -1,7 +1,7 @@
 use crate::{ffi, interface::*};
 use heraldcore::{abort_err, config::Config as Core};
 
-/// Thin wrapper around [`heraldcore::config::Config`],
+/// Thin wrapper around heraldcore::config::Config,
 /// with a field containing emitters for Qt.
 pub struct Config {
     emit: ConfigEmitter,
@@ -9,13 +9,13 @@ pub struct Config {
 }
 
 impl ConfigTrait for Config {
-    /// Returns new [`Config`]. Will typically end up being called from C++
+    /// Returns new Config. Will typically end up being called from C++
     fn new(emit: ConfigEmitter) -> Self {
         let inner = abort_err!(Core::get());
         Config { emit, inner }
     }
 
-    /// [`UserId`] of the current user as an `&str`.
+    /// UserId of the current user as an `&str`.
     fn config_id(&self) -> ffi::UserIdRef {
         self.inner.id.as_str()
     }
@@ -25,7 +25,7 @@ impl ConfigTrait for Config {
         self.inner.name.as_ref().map(|s| s.as_str())
     }
 
-    /// Sets the name of the current user. If `name` is [`None`], this
+    /// Sets the name of the current user. If `name` is None, this
     /// clears the name.
     fn set_name(&mut self, name: Option<String>) {
         match self.inner.set_name(name) {
@@ -44,13 +44,13 @@ impl ConfigTrait for Config {
     }
 
     /// Returns the path to the current users profile picture, if it is set.
-    /// Otherwise returns [`None`].
+    /// Otherwise returns None.
     fn profile_picture(&self) -> Option<&str> {
         self.inner.profile_picture.as_ref().map(|s| s.as_str())
     }
 
     /// Sets the profile picture of the current user to the picture at the specified path.
-    /// If `picture` is [`None`], this clears the user's profile picture.
+    /// If `picture` is None, this clears the user's profile picture.
     fn set_profile_picture(&mut self, picture: Option<String>) {
         match self.inner.set_profile_picture(picture) {
             Ok(()) => self.emit.profile_picture_changed(),

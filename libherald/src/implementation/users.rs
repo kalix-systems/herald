@@ -9,7 +9,7 @@ use heraldcore::{
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone)]
-/// Thin wrapper around [`heraldcore::contact::Contact`],
+/// Thin wrapper around `heraldcore::contact::Contact`,
 /// with an additional field to facilitate filtering
 /// in the UI.
 pub struct User {
@@ -17,7 +17,7 @@ pub struct User {
     matched: bool,
 }
 
-/// A wrapper around a vector of [`User`]s, with additional
+/// A wrapper around a vector of `User`s, with additional
 /// fields to facilitate interaction with Qt.
 pub struct Users {
     emit: UsersEmitter,
