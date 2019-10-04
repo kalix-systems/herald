@@ -229,11 +229,6 @@
         "Users": {
             "type": "List",
             "properties": {
-                "conversationId": {
-                    "type": "QByteArray",
-                    "write": true,
-                    "optional": true
-                },
                 "filter": {
                     "write": true,
                     "type": "QString"
@@ -295,6 +290,77 @@
                     "mut": true,
                     "return": "bool"
                 },
+                "refresh": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "notif_user_id",
+                            "type": "QString"
+                        }
+                    ]
+                }
+            }
+        },
+        "Members": {
+            "type": "List",
+            "properties": {
+                "conversationId": {
+                    "type": "QByteArray",
+                    "write": true,
+                    "optional": true
+                },
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
+            "itemProperties": {
+                "userId": {
+                    "type": "QString"
+                },
+                "name": {
+                    "write": true,
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "pairwiseConversationId": {
+                    "type": "QByteArray",
+                    "rustByValue": true
+                },
+                "profilePicture": {
+                    "write": true,
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "color": {
+                    "write": true,
+                    "type": "quint32"
+                },
+                "status": {
+                    "write": true,
+                    "type": "quint8"
+                },
+                "matched": {
+                    "write": true,
+                    "type": "bool"
+                },
+                "displayName": {
+                    "type": "QString",
+                    "rustByValue": true
+                }
+            },
+            "functions": {
+                "toggleFilterRegex": {
+                    "mut": true,
+                    "return": "bool"
+                },
                 "addToConversation": {
                     "mut": true,
                     "return": "bool",
@@ -305,29 +371,19 @@
                         }
                     ]
                 },
-                "removeFromConversation": {
+                "removeFromConversationByIndex": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
                             "name": "row_index",
                             "type": "quint64"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },
-                "refresh": {
+                "pollUpdate": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "notif_user_id",
-                            "type": "QString"
-                        }
-                    ]
+                    "return": "bool"
                 }
             }
         },

@@ -65,7 +65,7 @@ ListView {
             }
         }
 
-        Users {
+        Members {
             id: convoItemMembers
             conversationId: conversationIdProxy
         }

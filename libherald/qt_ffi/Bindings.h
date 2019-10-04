@@ -9,6 +9,7 @@ class Config;
 class Conversations;
 class HeraldState;
 class HeraldUtils;
+class Members;
 class Messages;
 class NetworkHandle;
 class Users;
@@ -153,6 +154,76 @@ public:
 Q_SIGNALS:
 };
 
+class Members : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
+    explicit Members(bool owned, QObject *parent);
+public:
+    explicit Members(QObject *parent = nullptr);
+    ~Members();
+    QByteArray conversationId() const;
+    void setConversationId(const QByteArray& v);
+    QString filter() const;
+    void setFilter(const QString& v);
+    bool filterRegex() const;
+    void setFilterRegex(bool v);
+    Q_INVOKABLE bool addToConversation(const QString& user_id);
+    Q_INVOKABLE bool pollUpdate();
+    Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
+    Q_INVOKABLE bool toggleFilterRegex();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE quint32 color(int row) const;
+    Q_INVOKABLE bool setColor(int row, quint32 value);
+    Q_INVOKABLE QString displayName(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE bool setMatched(int row, bool value);
+    Q_INVOKABLE QString name(int row) const;
+    Q_INVOKABLE bool setName(int row, const QString& value);
+    Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
+    Q_INVOKABLE QString profilePicture(int row) const;
+    Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
+    Q_INVOKABLE quint8 status(int row) const;
+    Q_INVOKABLE bool setStatus(int row, quint8 value);
+    Q_INVOKABLE QString userId(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void conversationIdChanged();
+    void filterChanged();
+    void filterRegexChanged();
+};
+
 class Messages : public QAbstractItemModel
 {
     Q_OBJECT
@@ -273,23 +344,18 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
     explicit Users(bool owned, QObject *parent);
 public:
     explicit Users(QObject *parent = nullptr);
     ~Users();
-    QByteArray conversationId() const;
-    void setConversationId(const QByteArray& v);
     QString filter() const;
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
-    Q_INVOKABLE bool addToConversation(const QString& user_id);
     Q_INVOKABLE bool refresh(const QString& notif_user_id);
-    Q_INVOKABLE bool removeFromConversation(quint64 row_index, const QByteArray& conversation_id);
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -331,7 +397,6 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
-    void conversationIdChanged();
     void filterChanged();
     void filterRegexChanged();
 };

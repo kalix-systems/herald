@@ -2,13 +2,14 @@ use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
-    contact::{self, ContactBuilder, ContactStatus},
+    contact::{self, ContactStatus},
+    types::*,
     utils::SearchPattern,
 };
 use std::convert::{TryFrom, TryInto};
 
-type Emitter = UsersEmitter;
-type List = UsersList;
+type Emitter = MembersEmitter;
+type List = MembersList;
 
 #[derive(Clone)]
 /// Thin wrapper around `heraldcore::contact::Contact`,
@@ -21,64 +22,73 @@ pub struct User {
 
 /// A wrapper around a vector of `User`s, with additional
 /// fields to facilitate interaction with Qt.
-pub struct Users {
+pub struct Members {
     emit: Emitter,
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<User>,
+    // Note: this is not really optional, but it is difficult to
+    // pass as an argument.
+    conversation_id: Option<ConversationId>,
 }
 
-impl UsersTrait for Users {
-    fn new(emit: Emitter, model: List) -> Users {
-        let list = match contact::all() {
-            Ok(v) => v
-                .into_iter()
-                .map(|u| {
-                    let id = u.id;
-                    USER_DATA.insert(id, u);
-                    User { id, matched: true }
-                })
-                .collect(),
-            Err(e) => {
-                eprintln!("{}", e);
-                Vec::new()
-            }
-        };
-
+impl MembersTrait for Members {
+    fn new(emit: Emitter, model: List) -> Members {
         // this should *really* never fail
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
-        Users {
+        Members {
             emit,
             model,
-            list,
+            list: Vec::new(),
             filter,
             filter_regex: false,
+            conversation_id: None,
         }
     }
 
-    /// Adds a contact by their `id`
-    fn add(&mut self, id: ffi::UserId) -> ffi::ConversationId {
-        let id = ret_err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
-        let contact = ret_err!(ContactBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
+    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
+        self.conversation_id.as_ref().map(|id| id.as_slice())
+    }
 
-        let pairwise_conversation = contact.pairwise_conversation;
+    fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
+        if self.conversation_id.is_some() {
+            eprintln!("Cannot modify conversation id");
+            return;
+        }
+
+        let new_list = match conversation_id {
+            Some(conv_id) => {
+                let conv_id = ret_err!(ConversationId::try_from(conv_id));
+
+                ret_err!(contact::conversation_members(&conv_id))
+            }
+            None => {
+                return;
+            }
+        };
+
         self.model
-            .begin_insert_rows(self.list.len(), self.list.len());
-        self.list.push(User {
-            matched: contact.matches(&self.filter),
-            id: contact.id,
-        });
-        USER_DATA.insert(contact.id, contact);
+            .begin_insert_rows(0, new_list.len().saturating_sub(1));
+        let list = new_list
+            .into_iter()
+            .map(|u| {
+                let id = u.id;
+                User { id, matched: true }
+            })
+            .collect();
+        self.list = list;
         self.model.end_insert_rows();
 
-        pairwise_conversation.to_vec()
+        self.emit.conversation_id_changed();
     }
 
     /// Returns user id.
     fn user_id(&self, row_index: usize) -> ffi::UserIdRef {
-        ret_none!(self.list.get(row_index), "").id.as_str()
+        ret_none!(self.list.get(row_index), ffi::NULL_USER_ID)
+            .id
+            .as_str()
     }
 
     /// Returns name if it is set, otherwise returns the user's id.
@@ -257,28 +267,56 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    // TODO handle removals
-    // TODO replace polling
-    fn refresh(&mut self, notif: String) -> bool {
-        let uid = ret_err!(notif.as_str().try_into(), false);
-        let new_user = ret_err!(contact::by_user_id(uid), false);
+    fn add_to_conversation(&mut self, user_id: ffi::UserId) -> bool {
+        let user_id = ret_err!(user_id.as_str().try_into(), false);
+        let conv_id = ret_none!(self.conversation_id, false);
+        ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let filter = &self.filter;
-
+        let contact = ret_err!(heraldcore::contact::by_user_id(user_id), false);
         self.model
-            .begin_insert_rows(self.list.len(), (self.list.len() + 1).saturating_sub(1));
+            .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
-            matched: new_user.matches(&filter),
-            id: uid,
+            matched: contact.matches(&self.filter),
+            id: user_id,
         });
-        USER_DATA.insert(uid, new_user);
+        USER_DATA.insert(user_id, contact);
         self.model.end_insert_rows();
-
         true
+    }
+
+    fn remove_from_conversation_by_index(&mut self, index: u64) -> bool {
+        let index = index as usize;
+        let conv_id = ret_err!(
+            ConversationId::try_from(ret_none!(self.conversation_id, false)),
+            false
+        );
+        let uid = ret_none!(self.list.get(index), false).id;
+
+        ret_err!(heraldcore::members::remove_member(&conv_id, uid), false);
+        true
+    }
+
+    fn poll_update(&mut self) -> bool {
+        unimplemented!()
+        //let uid = ret_err!(notif.as_str().try_into(), false);
+        //let new_user = ret_err!(contact::by_user_id(uid), false);
+
+        //let filter = &self.filter;
+
+        //self.model
+        //    .begin_insert_rows(self.list.len(), (self.list.len() + 1).saturating_sub(1));
+        //self.list.push(User {
+        //    matched: new_user.matches(&filter),
+        //    id: uid,
+        //});
+        //USER_DATA.insert(uid, new_user);
+        //self.model.end_insert_rows();
+
+        //true
     }
 }
 
-impl Users {
+impl Members {
     fn clear_filter(&mut self) {
         for contact in self.list.iter_mut() {
             contact.matched = true;
