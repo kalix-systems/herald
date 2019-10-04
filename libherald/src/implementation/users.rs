@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
@@ -6,7 +6,6 @@ use heraldcore::{
     types::*,
     utils::SearchPattern,
 };
-use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
 
 #[derive(Clone)]
@@ -26,29 +25,25 @@ pub struct Users {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<User>,
-    map: HashMap<UserId, contact::Contact>,
+    //map: HashMap<UserId, contact::Contact>,
     conversation_id: Option<ConversationId>,
     updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
     fn new(emit: UsersEmitter, model: UsersList) -> Users {
-        let (list, map) = match contact::all() {
+        let list = match contact::all() {
             Ok(v) => v
                 .into_iter()
-                .map(|c| {
-                    (
-                        User {
-                            id: c.id,
-                            matched: true,
-                        },
-                        (c.id, c),
-                    )
+                .map(|u| {
+                    let id = u.id;
+                    USER_DATA.insert(id, u);
+                    User { id, matched: true }
                 })
-                .unzip(),
+                .collect(),
             Err(e) => {
                 eprintln!("{}", e);
-                (Vec::new(), HashMap::new())
+                Vec::new()
             }
         };
 
@@ -59,7 +54,6 @@ impl UsersTrait for Users {
             emit,
             model,
             list,
-            map,
             filter,
             filter_regex: false,
             conversation_id: None,
@@ -79,7 +73,7 @@ impl UsersTrait for Users {
             matched: contact.matches(&self.filter),
             id: contact.id,
         });
-        self.map.insert(contact.id, contact);
+        USER_DATA.insert(contact.id, contact);
         self.model.end_insert_rows();
 
         pairwise_conversation.to_vec()
@@ -115,20 +109,15 @@ impl UsersTrait for Users {
 
         self.model
             .begin_insert_rows(0, new_list.len().saturating_sub(1));
-        let (list, map) = new_list
+        let list = new_list
             .into_iter()
-            .map(|c| {
-                (
-                    User {
-                        id: c.id,
-                        matched: true,
-                    },
-                    (c.id, c),
-                )
+            .map(|u| {
+                let id = u.id;
+                USER_DATA.insert(id, u);
+                User { id, matched: true }
             })
-            .unzip();
+            .collect();
         self.list = list;
-        self.map = map;
         self.model.end_insert_rows();
 
         self.emit.conversation_id_changed();
@@ -140,34 +129,34 @@ impl UsersTrait for Users {
     }
 
     /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name(&self, row_index: usize) -> &str {
-        let uid = &ret_none!(self.list.get(row_index), "").id;
-        let inner = ret_none!(self.map.get(uid), "");
+    fn display_name(&self, row_index: usize) -> String {
+        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
+        let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
         match inner.name.as_ref() {
-            Some(name) => name.as_str(),
-            None => inner.id.as_str(),
+            Some(name) => name.clone(),
+            None => inner.id.to_string(),
         }
     }
 
     /// Returns conversation id.
-    fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationIdRef {
-        let uid = &ret_none!(self.list.get(row_index), &ffi::NULL_CONV_ID).id;
-        let inner = ret_none!(self.map.get(uid), &ffi::NULL_CONV_ID);
-        inner.pairwise_conversation.as_slice()
+    fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
+        let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
+        let inner = ret_none!(USER_DATA.get(uid), ffi::NULL_CONV_ID.to_vec());
+        inner.pairwise_conversation.to_vec()
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> Option<&str> {
+    fn name(&self, row_index: usize) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = self.map.get(uid)?;
+        let inner = USER_DATA.get(uid)?;
 
-        inner.name.as_ref().map(|n| n.as_str())
+        inner.name.clone()
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let inner = ret_none!(self.map.get_mut(&uid), false);
+        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
         ret_err!(
             contact::set_name(uid, name.as_ref().map(|s| s.as_str())),
             false
@@ -179,10 +168,10 @@ impl UsersTrait for Users {
     }
 
     /// Returns profile picture
-    fn profile_picture(&self, row_index: usize) -> Option<&str> {
+    fn profile_picture(&self, row_index: usize) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = self.map.get(uid)?;
-        inner.profile_picture.as_ref().map(|s| s.as_str())
+        let inner = USER_DATA.get(uid)?;
+        inner.profile_picture.clone()
     }
 
     /// Sets profile picture.
@@ -190,7 +179,7 @@ impl UsersTrait for Users {
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let inner = ret_none!(self.map.get_mut(&uid), false);
+        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
         let path = ret_err!(
             contact::set_profile_picture(
                 uid,
@@ -207,14 +196,14 @@ impl UsersTrait for Users {
     /// Returns user's color
     fn color(&self, row_index: usize) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(self.map.get(&uid), 0);
+        let inner = ret_none!(USER_DATA.get(&uid), 0);
         inner.color
     }
 
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let inner = ret_none!(self.map.get_mut(&uid), false);
+        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
 
         ret_err!(contact::set_color(uid, color), false);
 
@@ -224,14 +213,14 @@ impl UsersTrait for Users {
 
     fn status(&self, row_index: usize) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(self.map.get(&uid), 0);
+        let inner = ret_none!(USER_DATA.get(&uid), 0);
         inner.status as u8
     }
 
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         let status = ret_err!(ContactStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let inner = ret_none!(self.map.get_mut(&uid), false);
+        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
 
         ret_err!(
             contact::set_status(uid, inner.pairwise_conversation, status),
@@ -243,7 +232,7 @@ impl UsersTrait for Users {
         if status == ContactStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);
             self.list.remove(row_index);
-            self.map.remove(&uid);
+            USER_DATA.remove(&uid);
             self.model.end_remove_rows();
         }
 
@@ -327,7 +316,7 @@ impl UsersTrait for Users {
             matched: contact.matches(&self.filter),
             id: user_id,
         });
-        self.map.insert(user_id, contact);
+        USER_DATA.insert(user_id, contact);
         self.model.end_insert_rows();
         true
     }
@@ -361,7 +350,7 @@ impl UsersTrait for Users {
             matched: new_user.matches(&filter),
             id: uid,
         });
-        self.map.insert(uid, new_user);
+        USER_DATA.insert(uid, new_user);
         self.model.end_insert_rows();
 
         true
@@ -387,7 +376,7 @@ impl Users {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            let inner = ret_none!(self.map.get(&contact.id));
+            let inner = ret_none!(USER_DATA.get(&contact.id));
             contact.matched = inner.matches(&self.filter);
         }
         self.model

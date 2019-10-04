@@ -250,14 +250,17 @@
                 "name": {
                     "write": true,
                     "type": "QString",
+                    "rustByValue": true,
                     "optional": true
                 },
                 "pairwiseConversationId": {
-                    "type": "QByteArray"
+                    "type": "QByteArray",
+                    "rustByValue": true
                 },
                 "profilePicture": {
                     "write": true,
                     "type": "QString",
+                    "rustByValue": true,
                     "optional": true
                 },
                 "color": {
@@ -273,7 +276,8 @@
                     "type": "bool"
                 },
                 "displayName": {
-                    "type": "QString"
+                    "type": "QString",
+                    "rustByValue": true
                 }
             },
             "functions": {
