@@ -1,7 +1,7 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, chrono,
+    abort_err,
     contact::{self, ContactBuilder, ContactStatus},
     types::*,
     utils::SearchPattern,
@@ -25,9 +25,7 @@ pub struct Users {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<User>,
-    //map: HashMap<UserId, contact::Contact>,
     conversation_id: Option<ConversationId>,
-    updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl UsersTrait for Users {
@@ -57,7 +55,6 @@ impl UsersTrait for Users {
             filter,
             filter_regex: false,
             conversation_id: None,
-            updated: chrono::Utc::now(),
         }
     }
 
@@ -339,8 +336,6 @@ impl UsersTrait for Users {
     fn refresh(&mut self, notif: String) -> bool {
         let uid = ret_err!(notif.as_str().try_into(), false);
         let new_user = ret_err!(contact::by_user_id(uid), false);
-
-        self.updated = chrono::Utc::now();
 
         let filter = &self.filter;
 
