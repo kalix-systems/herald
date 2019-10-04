@@ -30,8 +30,8 @@ lazy_static! {
     pub static ref ERROR_QUEUE: ErrorQueue = ErrorQueue::default();
 }
 
-/// Conversation updates
-pub enum ConvUpdate {
+/// Message related conversation updates
+pub enum ConvMsgUpdate {
     /// A new message
     Msg(MsgId),
     /// A message has been acknowledged
@@ -40,8 +40,8 @@ pub enum ConvUpdate {
 
 lazy_static! {
     /// Concurrent hash map from `ConversationId`s to an event stream.
-    /// This is used to route notifications that arrive from the network.
-    pub static ref CONV_MSG_RXS: DashMap<ConversationId, Receiver<ConvUpdate>> = DashMap::default();
+    /// This is used to route message related notifications that arrive from the network.
+    pub static ref CONV_MSG_RXS: DashMap<ConversationId, Receiver<ConvMsgUpdate>> = DashMap::default();
 }
 
 lazy_static! {

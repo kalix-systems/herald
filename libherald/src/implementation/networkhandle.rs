@@ -1,4 +1,4 @@
-use crate::shared::{ConvUpdate, CONV_MSG_RXS};
+use crate::shared::{ConvMsgUpdate, CONV_MSG_RXS};
 use crate::{ffi, interface::*, ret_err, ret_none};
 use crossbeam_channel::*;
 use herald_common::*;
@@ -82,7 +82,7 @@ pub struct NotifTx {
     conversation_tx: Sender<ConversationId>,
     add_contact_resp_tx: Sender<(ConversationId, UserId, bool)>,
     add_conv_resp_tx: Sender<(ConversationId, bool)>,
-    conv_senders: HashMap<ConversationId, Sender<ConvUpdate>>,
+    conv_senders: HashMap<ConversationId, Sender<ConvMsgUpdate>>,
     conv_data: Arc<AtomicBool>,
     emit: Emitter,
 }
@@ -94,12 +94,12 @@ impl NotifTx {
             NewMsg(msg_id, cid) => {
                 match self.conv_senders.get(&cid) {
                     Some(tx) => {
-                        ret_err!(tx.send(ConvUpdate::Msg(msg_id)));
+                        ret_err!(tx.send(ConvMsgUpdate::Msg(msg_id)));
                     }
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(ConvUpdate::Msg(msg_id)));
+                        ret_err!(tx.send(ConvMsgUpdate::Msg(msg_id)));
                         self.conv_senders.insert(cid, tx);
                         CONV_MSG_RXS.insert(cid, rx);
                     }
@@ -111,12 +111,12 @@ impl NotifTx {
             Ack(msg_id, cid) => {
                 match self.conv_senders.get(&cid) {
                     Some(tx) => {
-                        ret_err!(tx.send(ConvUpdate::Ack(msg_id)));
+                        ret_err!(tx.send(ConvMsgUpdate::Ack(msg_id)));
                     }
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(ConvUpdate::Ack(msg_id)));
+                        ret_err!(tx.send(ConvMsgUpdate::Ack(msg_id)));
                         self.conv_senders.insert(cid, tx);
                         CONV_MSG_RXS.insert(cid, rx);
                     }
