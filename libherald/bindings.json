@@ -287,32 +287,9 @@
                         }
                     ]
                 },
-                "indexFromConversationId": {
-                    "arguments": [
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ],
-                    "return": "qint64"
-                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
-                },
-                "addToConversationById": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ]
                 },
                 "addToConversation": {
                     "mut": true,
@@ -321,34 +298,6 @@
                         {
                             "name": "user_id",
                             "type": "QString"
-                        }
-                    ]
-                },
-                "bulkAddToConversation": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id_array",
-                            "type": "QByteArray"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ]
-                },
-                "addToConversationByIndex": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "row_index",
-                            "type": "quint64"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },
