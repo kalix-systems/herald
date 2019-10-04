@@ -6,5 +6,7 @@
         <file>TeamColumn.qml</file>
         <file>ChatBubble.qml</file>
         <file>Harness.qml</file>
+        <file>MultiImageContent.qml</file>
+        <file>ImageContent.qml</file>
     </qresource>
 </RCC>
