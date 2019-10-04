@@ -67,6 +67,11 @@ fn message_send_status_updates() {
     update_send_status(msg_id, MessageSendStatus::Ack).expect(womp!());
 
     assert_eq!(
+        by_send_status(MessageSendStatus::Ack).expect(womp!())[0].body,
+        "1"
+    );
+
+    assert_eq!(
         crate::conversation::conversation_messages(&conversation_id)
             .expect(womp!("failed to get conversation by author"))[0]
             .send_status,
