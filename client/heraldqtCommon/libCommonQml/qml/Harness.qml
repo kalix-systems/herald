@@ -26,6 +26,9 @@ Window {
         body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
         epochtimestamp_ms: 100
         bubbleColor: "light gray"
-        additionalContent: ReplyContent {}
+        reply: {
+            text: "greese"
+            op: "bob"
+        }
     }
 }

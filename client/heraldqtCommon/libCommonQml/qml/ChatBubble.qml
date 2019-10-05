@@ -11,7 +11,9 @@ Rectangle {
     property real cfgRadius: 10
     property int epochtimestamp_ms: 100
     property int maxWidth: parent.width * 0.66
+    property var reply: undefined
     property Component additionalContent
+
     color: bubbleColor
     width: bubbleLayout.width
     height: bubbleLayout.height
@@ -22,17 +24,29 @@ Rectangle {
         spacing: 0
 
         Loader {
-            id: adContent
+            id: imageContent
             active: additionalContent
-            Layout.topMargin: active ? 10 : 0
-            Layout.bottomMargin: active ? 10 : 0
+            Layout.topMargin: active ? cfgMargins : 0
+            Layout.bottomMargin: active ? cfgMargins : 0
             sourceComponent: additionalContent
+        }
+
+        Loader {
+            id: replyContent
+            active: reply !== undefined
+            Layout.margins: active ? cfgSmallMargins : 0
+            sourceComponent: ReplyContent {
+                text: reply.text
+                op: reply.op
+                color: reply.color
+                messageId: reply.messageId
+            }
         }
 
         TextEdit {
             id: text
             Layout.preferredWidth: maxWidth
-            Layout.maximumWidth: adContent.active ? adContent.width - 10 : undefined
+            Layout.maximumWidth: imageContent.active ? imageContent.width - cfgMargins : undefined
             Layout.minimumWidth: 200
             Layout.margins: body.length > 0 ? cfgSmallMargins : 0
             text: body
