@@ -9,7 +9,7 @@ Window {
     height: 500
 
     ChatBubble {
-        anchors.verticalCenter: parent.verticalCenter
+        id: thing
         anchors.right: parent.right
         anchors.margins: 10
         body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
@@ -18,5 +18,14 @@ Window {
         additionalContent: ImageContent {
             source: "https://www.audubon.org/sites/default/files/a1_4202_1_fish-crow_alejandra_lewandowski_kk.jpg"
         }
+    }
+    ChatBubble {
+        anchors.top: thing.bottom
+        anchors.right: parent.right
+        anchors.margins: 10
+        body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
+        epochtimestamp_ms: 100
+        bubbleColor: "light gray"
+        additionalContent: ReplyContent {}
     }
 }

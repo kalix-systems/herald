@@ -22,7 +22,7 @@ Rectangle {
         spacing: 0
 
         Loader {
-            id: image
+            id: adContent
             active: additionalContent
             Layout.topMargin: active ? 10 : 0
             Layout.bottomMargin: active ? 10 : 0
@@ -31,8 +31,8 @@ Rectangle {
 
         TextEdit {
             id: text
-            Layout.preferredWidth: image.active ? image.width : maxWidth
-            Layout.maximumWidth: image.active ? image.width - 10 : undefined
+            Layout.preferredWidth: maxWidth
+            Layout.maximumWidth: adContent.active ? adContent.width - 10 : undefined
             Layout.minimumWidth: 200
             Layout.margins: body.length > 0 ? cfgSmallMargins : 0
             text: body

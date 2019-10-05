@@ -8,5 +8,6 @@
         <file>Harness.qml</file>
         <file>MultiImageContent.qml</file>
         <file>ImageContent.qml</file>
+        <file>ReplyContent.qml</file>
     </qresource>
 </RCC>
