@@ -45,8 +45,17 @@ pub type QID = [u8; 32];
 pub enum Notification {
     /// A new message has been received.
     NewMsg(MsgId, ConversationId),
-    /// An ack has been received.
-    Ack(MsgId, ConversationId),
+    /// A message has been received.
+    MsgReceipt {
+        /// The message that was received
+        mid: MsgId,
+        /// The conversation the message was part of
+        cid: ConversationId,
+        /// The new status of the message
+        stat: MessageReceiptStatus,
+        /// The recipient of the message
+        by: UserId,
+    },
     /// A new contact has been added
     NewContact(UserId, ConversationId),
     /// A new conversation has been added
@@ -302,7 +311,13 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             tx.commit()?;
         }
         Msg(msg) => {
+            // fix for message loopback back until this can be handled server side
+            if cm.from().did == *Config::static_keypair()?.public_key() {
+                return Ok(ev);
+            }
+
             let cmessages::Msg { mid, content, op } = msg;
+
             match content {
                 cmessages::Message::Text(body) => {
                     crate::message::add_message(
@@ -321,8 +336,16 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
         }
         Ack(ack) => {
+            // TODO: This will cause a foreign key constraint error if the receipt is
+            // received after a message has been removed locally.
+            // We should check the sqlite3 extended error code (787) here.
             crate::message_receipts::add_receipt(ack.of, cm.from().uid, ack.stat)?;
-            ev.notifications.push(Notification::Ack(ack.of, cm.cid()));
+            ev.notifications.push(Notification::MsgReceipt {
+                mid: ack.of,
+                cid: cm.cid(),
+                stat: ack.stat,
+                by: cm.from().uid,
+            });
         }
     }
 

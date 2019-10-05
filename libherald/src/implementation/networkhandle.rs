@@ -45,34 +45,34 @@ impl NotifHandler {
         use Notification::*;
         match notif {
             NewMsg(msg_id, cid) => {
-                match self.msg_senders.get(&cid) {
-                    Some(tx) => {
-                        ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                    }
+                let tx = match self.msg_senders.get(&cid) {
+                    Some(tx) => tx,
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
                         self.msg_senders.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
+                        ret_none!(self.msg_senders.get(&cid))
                     }
-                }
+                };
+
+                ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }
-            Ack(msg_id, cid) => {
-                match self.msg_senders.get(&cid) {
-                    Some(tx) => {
-                        ret_err!(tx.send(MsgUpdate::Ack(msg_id)));
-                    }
+            MsgReceipt { mid, cid, stat, by } => {
+                let tx = match self.msg_senders.get(&cid) {
+                    Some(tx) => tx,
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(MsgUpdate::Ack(msg_id)));
                         self.msg_senders.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
+                        ret_none!(self.msg_senders.get(&cid))
                     }
-                }
+                };
+
+                ret_err!(tx.send(MsgUpdate::Receipt { mid, stat, by }));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }

@@ -43,7 +43,7 @@ impl Messages {
         self.map.get(&mid)
     }
 
-    fn update_last(&mut self) {
+    fn emit_last_changed(&mut self) {
         self.emit.last_author_changed();
         self.emit.last_body_changed();
         self.emit.last_epoch_timestamp_ms_changed();
@@ -83,6 +83,7 @@ impl Messages {
         self.model.end_insert_rows();
 
         thread::Builder::new().spawn(move || {
+            // TODO update send status?
             ret_err!(network::send_text(conversation_id, body, msg_id, op));
         })?;
 
@@ -156,7 +157,7 @@ impl MessagesTrait for Messages {
                     .begin_insert_rows(0, messages.len().saturating_sub(1));
                 self.list = messages;
                 self.model.end_insert_rows();
-                self.update_last();
+                self.emit_last_changed();
             }
             _ => {
                 return;
@@ -240,7 +241,10 @@ impl MessagesTrait for Messages {
 
         self.model.begin_reset_model();
         self.list = Vec::new();
+        self.map = HashMap::new();
         self.model.end_reset_model();
+
+        self.emit_last_changed();
         true
     }
 
@@ -273,9 +277,9 @@ impl MessagesTrait for Messages {
             match update {
                 MsgUpdate::Msg(mid) => {
                     // NOTE: temporary hack to avoid double insertions
-                    if self.map.contains_key(&mid) {
-                        return true;
-                    }
+                    //if self.map.contains_key(&mid) {
+                    //    continue;
+                    //}
 
                     let new = ret_err!(message::get_message(&mid), false);
 
@@ -289,10 +293,43 @@ impl MessagesTrait for Messages {
                     self.map.insert(new.message_id, new);
                     self.model.end_insert_rows();
 
-                    self.update_last();
+                    self.emit_last_changed();
                 }
-                MsgUpdate::Ack(_mid) => {
-                    println!("TODO: Handle acks");
+                MsgUpdate::Receipt { mid, by, stat } => {
+                    let mut msg = match self.map.get_mut(&mid) {
+                        None => {
+                            // This can (possibly) happen if the message
+                            // was deleted between the receipt
+                            // being received over the network
+                            // and this part of the code.
+                            continue;
+                        }
+                        Some(msg) => msg,
+                    };
+
+                    // NOTE: If this fails, there is a bug somewhere
+                    // in libherald.
+                    //
+                    // It is probably trivial, but may reflect something
+                    // deeply wrong with our understanding of the program's
+                    // concurrency.
+                    let ix = ret_none!(
+                        self.list
+                            .iter()
+                            // search backwards,
+                            // it's probably fairly recent
+                            .rposition(|m| m.msg_id == mid),
+                        false
+                    );
+
+                    match &mut msg.receipts {
+                        Some(receipts) => {
+                            receipts.push((by, stat));
+                        }
+                        None => msg.receipts = Some(vec![(by, stat)]),
+                    }
+
+                    self.model.data_changed(ix, ix);
                 }
             }
         }
