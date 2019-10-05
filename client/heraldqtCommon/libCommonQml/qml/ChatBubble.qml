@@ -18,22 +18,24 @@ Rectangle {
 
     ColumnLayout {
         id: bubbleLayout
-        Layout.minimumWidth: content.width
+        spacing: 0
 
         Loader {
             id: content
             Layout.topMargin: active ? 10 : 0
             Layout.bottomMargin: active ? 10 : 0
-            Layout.alignment: Qt.AlignCenter
-            Layout.preferredWidth: additionalContent.width
-            Layout.maximumWidth: maxWidth
-            Layout.minimumWidth: 10
-            Layout.maximumHeight: 400
+
+            Layout.maximumHeight: 500
+            Layout.preferredWidth: maxWidth + 10
+            Layout.minimumWidth: text.width + 10
+
             sourceComponent: additionalContent
         }
 
         TextEdit {
+            id: text
             Layout.preferredWidth: maxWidth
+            Layout.minimumWidth: 200
             Layout.margins: body.length > 0 ? cfgSmallMargins : 0
             text: body
             readOnly: true
