@@ -1,5 +1,9 @@
-use crate::shared::{MsgUpdate, MSG_RXS};
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{MsgUpdate, MSG_RXS},
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,

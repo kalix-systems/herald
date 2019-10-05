@@ -1,19 +1,18 @@
-use crate::shared::*;
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::*};
 use crossbeam_channel::*;
 use herald_common::*;
-use heraldcore::network::{self, Notification};
-use heraldcore::types::*;
-use std::collections::HashMap;
-use std::thread;
+use heraldcore::{
+    network::{self, Notification},
+    types::*,
+};
 use std::{
+    collections::HashMap,
     convert::{TryFrom, TryInto},
     sync::{
-        atomic::{
-            Ordering, {AtomicBool, AtomicU8},
-        },
+        atomic::{AtomicBool, AtomicU8, Ordering},
         Arc,
     },
+    thread,
 };
 
 // short type aliases for cleanliness
@@ -213,8 +212,10 @@ impl NetworkHandleTrait for NetworkHandle {
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
         ret_err!(
-            network::login(move |notif: Notification| {
-                handler.send(notif);
+            thread::Builder::new().spawn(move || {
+                ret_err!(network::login(move |notif: Notification| {
+                    handler.send(notif);
+                }))
             }),
             false
         );

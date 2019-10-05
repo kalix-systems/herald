@@ -1,7 +1,5 @@
 use super::*;
-use crate::contact::ContactBuilder;
-use crate::conversation::add_conversation;
-use crate::womp;
+use crate::{contact::ContactBuilder, conversation::add_conversation, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
 

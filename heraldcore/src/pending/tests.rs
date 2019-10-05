@@ -1,6 +1,5 @@
 use super::*;
-use crate::types;
-use crate::womp;
+use crate::{types, womp};
 use serial_test_derive::serial;
 
 #[test]

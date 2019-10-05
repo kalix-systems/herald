@@ -1,6 +1,5 @@
 use super::*;
-use crate::contact::ContactBuilder;
-use crate::womp;
+use crate::{contact::ContactBuilder, womp};
 use herald_common::sig;
 use serial_test_derive::serial;
 use std::convert::TryFrom;

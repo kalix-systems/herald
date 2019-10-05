@@ -1,8 +1,10 @@
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use herald_common::UserId;
-use heraldcore::contact;
-use heraldcore::types::{ConversationId, MsgId};
+use heraldcore::{
+    contact,
+    types::{ConversationId, MsgId},
+};
 use lazy_static::*;
 use parking_lot::Mutex;
 use std::collections::VecDeque;
