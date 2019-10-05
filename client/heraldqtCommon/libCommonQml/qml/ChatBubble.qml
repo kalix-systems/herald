@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 
 Rectangle {
+    id: background
     property color bubbleColor: "light green"
     property string body: ""
     property real cfgMargins: 10
@@ -21,20 +22,17 @@ Rectangle {
         spacing: 0
 
         Loader {
-            id: content
+            id: image
+            active: additionalContent
             Layout.topMargin: active ? 10 : 0
             Layout.bottomMargin: active ? 10 : 0
-
-            Layout.maximumHeight: 500
-            Layout.preferredWidth: maxWidth + 10
-            Layout.minimumWidth: text.width + 10
-
             sourceComponent: additionalContent
         }
 
         TextEdit {
             id: text
-            Layout.preferredWidth: maxWidth
+            Layout.preferredWidth: image.active ? image.width : maxWidth
+            Layout.maximumWidth: image.active ? image.width - 10 : undefined
             Layout.minimumWidth: 200
             Layout.margins: body.length > 0 ? cfgSmallMargins : 0
             text: body

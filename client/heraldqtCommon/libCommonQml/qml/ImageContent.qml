@@ -2,7 +2,14 @@ import QtQuick 2.13
 import QtQuick.Layouts 1.12
 
 Image {
-    id: image
+    height: 0
+    width: 350
+    onStatusChanged: {
+        if (status == Image.Ready) {
+            height = Math.min(sourceSize.height, 400)
+            width = Math.min(sourceSize.width, 350)
+        }
+    }
     fillMode: Image.PreserveAspectCrop
-    mipmap: true
+    asynchronous: true
 }
