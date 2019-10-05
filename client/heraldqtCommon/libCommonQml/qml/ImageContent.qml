@@ -8,8 +8,10 @@ Image {
         if (status == Image.Ready) {
             height = Math.min(sourceSize.height, 400)
             width = Math.min(sourceSize.width, 350)
+            height = paintedHeight
+            width = paintedWidth
         }
     }
-    fillMode: Image.PreserveAspectCrop
+    fillMode: Image.PreserveAspectFit
     asynchronous: true
 }

@@ -16,7 +16,7 @@ Window {
         epochtimestamp_ms: 100
         bubbleColor: "light gray"
         additionalContent: ImageContent {
-            source: "http://clipart-library.com/data_images/87233.png"
+            source: "https://www.audubon.org/sites/default/files/a1_4202_1_fish-crow_alejandra_lewandowski_kk.jpg"
         }
     }
 }
