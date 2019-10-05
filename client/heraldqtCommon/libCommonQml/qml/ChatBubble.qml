@@ -25,9 +25,9 @@ Rectangle {
             Layout.topMargin: active ? 10 : 0
             Layout.bottomMargin: active ? 10 : 0
             Layout.alignment: Qt.AlignCenter
-            //Layout.fillWidth: true
             Layout.preferredWidth: additionalContent.width
             Layout.maximumWidth: maxWidth
+            Layout.minimumWidth: 10
             Layout.maximumHeight: 400
             sourceComponent: additionalContent
         }
