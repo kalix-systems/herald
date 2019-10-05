@@ -1,64 +1,49 @@
 import QtQuick 2.13
 import QtQuick.Layouts 1.12
 
-Component {
+Item {
     id: multipleImageView
-    Item {
-        height: contentHeight
-        width: contentWidth
-        Row {
-            anchors.fill: parent
-            Item {
-                id: self
-                anchors.fill: parent
-                anchors.margins: self.width * 0.08
-                Rectangle {
-                    id: outerItem
-                    color: "black"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenterOffset: self.width * 0.08
-                    anchors.verticalCenterOffset: -self.width * 0.08
-                    width: parent.width - labelText.width
-                    height: parent.height
-                }
+    property var sourceItems: ["qrc:/mary.png", "qrc:/mary.png"]
+    property var cfgMargin: 10
+    property real firstItemHeight: 300
+    property real firstItemWidth: 500
+    Rectangle {
+        id: upper
+        z: 3
+        height: parent.height - cfgMargin
+        width: parent.width - cfgMargin - label.width
+        x: 10
+        y: 10
+        anchors {
+            margins: cfgMargin
+        }
+        color: "gray"
+    }
+    Rectangle {
+        z: 2
+        height: parent.height - cfgMargin * 2.0
+        width: parent.width - cfgMargin * 2.0 - label.width
+        anchors {
+            margins: cfgMargin
+        }
 
-                Rectangle {
-                    z: 2
-                    color: "gray"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.horizontalCenterOffset: self.width * 0.04
-                    anchors.verticalCenterOffset: -self.width * 0.04
-                    width: parent.width
-                    height: parent.height
-                }
-
-                Image {
-                    source: imageSource[0]
-                    width: parent.width
-                    height: parent.height
-                }
-            }
-            Item {
-                Text {
-                    id: labelText
-                    anchors.verticalCenter: outerItem.verticalCenter
-                    anchors.leftMargin: marginWidth
-                    text: "+ " + contentSource.length
-                    font.pixelSize: self.height * 0.2 * gu
-                    font.bold: true
-                }
-                Text {
-                    id: more
-                    anchors.verticalCenter: outerItem.verticalCenter
-                    anchors.topMargin: marginWidth
-                    anchors.top: labelText.bottom
-                    text: "more"
-                    font.pixelSize: self.height * 0.2 * gu
-                    font.bold: true
-                }
-            }
+        color: "black"
+    }
+    Image {}
+    Column {
+        id: label
+        anchors.left: upper.right
+        anchors.margins: parent.width - upper.width
+        anchors.verticalCenter: multipleImageView.verticalCenter
+        Text {
+            id: count
+            text: "+ " + sourceItems.length
+            font.bold: true
+        }
+        Text {
+            anchors.horizontalCenter: count.horizontalCenter
+            text: "More"
+            font.bold: true
         }
     }
 }

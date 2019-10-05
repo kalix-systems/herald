@@ -10,10 +10,13 @@ Window {
 
     ChatBubble {
         anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        body: "world WorldHello  WorldHello WorldHello World"
+        anchors.right: parent.right
+        anchors.margins: 10
+        body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
         epochtimestamp_ms: 100
         bubbleColor: "light gray"
-        additionalContent: MultiImageContent {}
+        additionalContent: ImageContent {
+            source: "https://www.audubon.org/sites/default/files/a1_4202_1_fish-crow_alejandra_lewandowski_kk.jpg"
+        }
     }
 }
