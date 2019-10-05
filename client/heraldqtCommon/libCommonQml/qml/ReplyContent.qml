@@ -3,10 +3,13 @@ import QtQuick 2.13
 Rectangle {
 
     color: "green"
-    width: Math.max(metrics.width)
+    width: metrics.width
     height: 30
-    TextEdit {
+    TextMetrics {
         id: metrics
+        text: "gogol"
+    }
+    TextEdit {
         text: "gogol"
     }
 }
