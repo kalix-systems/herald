@@ -1,5 +1,4 @@
-use crate::types::ConversationId;
-use crate::{db::Database, errors::HErr};
+use crate::{db::Database, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::Error as ChainError};
 use rusqlite::params;
 use std::collections::BTreeSet;

@@ -54,7 +54,7 @@ pub enum Notification {
     /// Response to contact request.
     AddContactResponse(ConversationId, UserId, bool),
     /// Response to request to join conversation.
-    AddConversationResponse(ConversationId, bool),
+    AddConversationResponse(ConversationId, UserId, bool),
 }
 
 mod helper {

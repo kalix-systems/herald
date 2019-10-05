@@ -26,17 +26,8 @@ ListView {
 
     Connections {
         target: networkHandle
-        onNewConversationChanged: {
-            if (networkHandle.newConversation > 0) {
-                conversationsModel.refresh(networkHandle.nextNewConversation())
-            }
-        }
-        onNewAddContactRespChanged: {
-            if (networkHandle.newAddContactResp > 0) {
-                conversationsModel.handleContactReqAck(
-                            networkHandle.nextAddContactResp())
-                print("TODO: other UI event for a contact request being accepted")
-            }
+        onConvDataChanged: {
+            conversationsModel.pollUpdate()
         }
     }
 
@@ -55,7 +46,7 @@ ListView {
 
         Connections {
             target: networkHandle
-            onNewConvDataChanged: messageModel.pollUpdate()
+            onMsgDataChanged: messageModel.pollUpdate()
         }
 
         property var childChatView: Component {
@@ -65,7 +56,7 @@ ListView {
             }
         }
 
-        Users {
+        Members {
             id: convoItemMembers
             conversationId: conversationIdProxy
         }

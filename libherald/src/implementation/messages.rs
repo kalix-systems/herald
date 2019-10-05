@@ -1,5 +1,9 @@
-use crate::shared::{ConvUpdate, CONV_MSG_RXS};
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{MsgUpdate, MSG_RXS},
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, chrono,
@@ -14,12 +18,12 @@ type Emitter = MessagesEmitter;
 type List = MessagesList;
 
 #[derive(Clone)]
-/// A thin wrapper around [`heraldcore::message::Message`]
+/// A thin wrapper around `heraldcore::message::Message`
 pub struct Message {
     inner: Msg,
 }
 
-/// A wrapper around a vector of [`Message`]s with additional fields
+/// A wrapper around a vector of `Message`s with additional fields
 /// to facilitate interaction with QML.
 pub struct Messages {
     emit: Emitter,
@@ -281,7 +285,7 @@ impl MessagesTrait for Messages {
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, true);
 
-        let rx = match CONV_MSG_RXS.get(&conv_id) {
+        let rx = match MSG_RXS.get(&conv_id) {
             Some(rx) => rx,
             None => return true,
         };
@@ -289,7 +293,7 @@ impl MessagesTrait for Messages {
         let notif = ret_err!(rx.recv(), false);
 
         match notif {
-            ConvUpdate::Msg(mid) => {
+            MsgUpdate::Msg(mid) => {
                 let new = ret_err!(message::get_message(&mid), false);
 
                 self.updated = chrono::Utc::now();
@@ -303,7 +307,7 @@ impl MessagesTrait for Messages {
 
                 true
             }
-            ConvUpdate::Ack(_mid) => {
+            MsgUpdate::Ack(_mid) => {
                 println!("TODO: Handle acks");
                 true
             }

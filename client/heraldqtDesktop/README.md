@@ -11,7 +11,7 @@ To install the necessary dependencies, run:
 $ npm install
 ```
 
-from the `heraldqt` root directory.
+from the `heraldqtDesktop` root directory.
 
 ## Configuration files
 
@@ -42,6 +42,6 @@ To compile the files, rename them, and add new files to `qml.qrc` run:
 $ ./run_tsc.py
 ```
 
-from the `heraldqt` root directory.
+from the `heraldqtDesktop` root directory.
 
 Now simply [import the modules into QML](https://doc.qt.io/qt-5/qtqml-javascript-imports.html).

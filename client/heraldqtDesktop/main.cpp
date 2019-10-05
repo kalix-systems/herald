@@ -9,6 +9,7 @@ int main(int argc, char* argv[])
   QApplication app(argc, argv);
 
   qmlRegisterType<Users>("LibHerald", 1, 0, "Users");
+  qmlRegisterType<Members>("LibHerald", 1, 0, "Members");
   qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
   qmlRegisterType<Conversations>("LibHerald", 1, 0, "Conversations");
   qmlRegisterType<Config>("LibHerald", 1, 0, "Config");

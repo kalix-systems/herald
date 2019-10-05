@@ -100,6 +100,18 @@ namespace {
     {
         Q_EMIT o->configInitChanged();
     }
+    inline void membersConversationIdChanged(Members* o)
+    {
+        Q_EMIT o->conversationIdChanged();
+    }
+    inline void membersFilterChanged(Members* o)
+    {
+        Q_EMIT o->filterChanged();
+    }
+    inline void membersFilterRegexChanged(Members* o)
+    {
+        Q_EMIT o->filterRegexChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -128,29 +140,21 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleNewAddContactRespChanged(NetworkHandle* o)
+    inline void networkHandleConvDataChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newAddContactRespChanged();
+        Q_EMIT o->convDataChanged();
     }
-    inline void networkHandleNewAddConvRespChanged(NetworkHandle* o)
+    inline void networkHandleMembersDataChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newAddConvRespChanged();
+        Q_EMIT o->membersDataChanged();
     }
-    inline void networkHandleNewContactChanged(NetworkHandle* o)
+    inline void networkHandleMsgDataChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newContactChanged();
+        Q_EMIT o->msgDataChanged();
     }
-    inline void networkHandleNewConvDataChanged(NetworkHandle* o)
+    inline void networkHandleUsersDataChanged(NetworkHandle* o)
     {
-        Q_EMIT o->newConvDataChanged();
-    }
-    inline void networkHandleNewConversationChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->newConversationChanged();
-    }
-    inline void usersConversationIdChanged(Users* o)
-    {
-        Q_EMIT o->conversationIdChanged();
+        Q_EMIT o->usersDataChanged();
     }
     inline void usersFilterChanged(Users* o)
     {
@@ -486,8 +490,7 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
-    bool conversations_handle_contact_req_ack(Conversations::Private*, const char*, int);
-    bool conversations_refresh(Conversations::Private*, const char*, int);
+    bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -505,6 +508,335 @@ extern "C" {
     double herald_utils_chat_bubble_natural_width(const HeraldUtils::Private*, double, double);
     bool herald_utils_compare_byte_array(const HeraldUtils::Private*, const char*, int, const char*, int);
     bool herald_utils_is_valid_rand_id(const HeraldUtils::Private*, const char*, int);
+};
+
+extern "C" {
+    quint32 members_data_color(const Members::Private*, int);
+    bool members_set_data_color(Members::Private*, int, quint32);
+    void members_data_display_name(const Members::Private*, int, QString*, qstring_set);
+    bool members_data_matched(const Members::Private*, int);
+    bool members_set_data_matched(Members::Private*, int, bool);
+    void members_data_name(const Members::Private*, int, QString*, qstring_set);
+    bool members_set_data_name(Members::Private*, int, const ushort* s, int len);
+    bool members_set_data_name_none(Members::Private*, int);
+    void members_data_pairwise_conversation_id(const Members::Private*, int, QByteArray*, qbytearray_set);
+    void members_data_profile_picture(const Members::Private*, int, QString*, qstring_set);
+    bool members_set_data_profile_picture(Members::Private*, int, const ushort* s, int len);
+    bool members_set_data_profile_picture_none(Members::Private*, int);
+    quint8 members_data_status(const Members::Private*, int);
+    bool members_set_data_status(Members::Private*, int, quint8);
+    void members_data_user_id(const Members::Private*, int, QString*, qstring_set);
+    void members_sort(Members::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int members_row_count(const Members::Private*);
+    bool members_insert_rows(Members::Private*, int, int);
+    bool members_remove_rows(Members::Private*, int, int);
+    bool members_can_fetch_more(const Members::Private*);
+    void members_fetch_more(Members::Private*);
+}
+int Members::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool Members::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int Members::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : members_row_count(m_d);
+}
+
+bool Members::insertRows(int row, int count, const QModelIndex &)
+{
+    return members_insert_rows(m_d, row, count);
+}
+
+bool Members::removeRows(int row, int count, const QModelIndex &)
+{
+    return members_remove_rows(m_d, row, count);
+}
+
+QModelIndex Members::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex Members::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool Members::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : members_can_fetch_more(m_d);
+}
+
+void Members::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        members_fetch_more(m_d);
+    }
+}
+void Members::updatePersistentIndexes() {}
+
+void Members::sort(int column, Qt::SortOrder order)
+{
+    members_sort(m_d, column, order);
+}
+Qt::ItemFlags Members::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    if (i.column() == 0) {
+        flags |= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
+quint32 Members::color(int row) const
+{
+    return members_data_color(m_d, row);
+}
+
+bool Members::setColor(int row, quint32 value)
+{
+    bool set = false;
+    set = members_set_data_color(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString Members::displayName(int row) const
+{
+    QString s;
+    members_data_display_name(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool Members::matched(int row) const
+{
+    return members_data_matched(m_d, row);
+}
+
+bool Members::setMatched(int row, bool value)
+{
+    bool set = false;
+    set = members_set_data_matched(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString Members::name(int row) const
+{
+    QString s;
+    members_data_name(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool Members::setName(int row, const QString& value)
+{
+    bool set = false;
+    if (value.isNull()) {
+        set = members_set_data_name_none(m_d, row);
+    } else {
+    set = members_set_data_name(m_d, row, value.utf16(), value.length());
+    }
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QByteArray Members::pairwiseConversationId(int row) const
+{
+    QByteArray b;
+    members_data_pairwise_conversation_id(m_d, row, &b, set_qbytearray);
+    return b;
+}
+
+QString Members::profilePicture(int row) const
+{
+    QString s;
+    members_data_profile_picture(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool Members::setProfilePicture(int row, const QString& value)
+{
+    bool set = false;
+    if (value.isNull()) {
+        set = members_set_data_profile_picture_none(m_d, row);
+    } else {
+    set = members_set_data_profile_picture(m_d, row, value.utf16(), value.length());
+    }
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+quint8 Members::status(int row) const
+{
+    return members_data_status(m_d, row);
+}
+
+bool Members::setStatus(int row, quint8 value)
+{
+    bool set = false;
+    set = members_set_data_status(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString Members::userId(int row) const
+{
+    QString s;
+    members_data_user_id(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QVariant Members::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return QVariant::fromValue(color(index.row()));
+        case Qt::UserRole + 1:
+            return QVariant::fromValue(displayName(index.row()));
+        case Qt::UserRole + 2:
+            return QVariant::fromValue(matched(index.row()));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+        case Qt::UserRole + 4:
+            return QVariant::fromValue(pairwiseConversationId(index.row()));
+        case Qt::UserRole + 5:
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
+        case Qt::UserRole + 6:
+            return QVariant::fromValue(status(index.row()));
+        case Qt::UserRole + 7:
+            return QVariant::fromValue(userId(index.row()));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int Members::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> Members::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "color");
+    names.insert(Qt::UserRole + 1, "displayName");
+    names.insert(Qt::UserRole + 2, "matched");
+    names.insert(Qt::UserRole + 3, "name");
+    names.insert(Qt::UserRole + 4, "pairwiseConversationId");
+    names.insert(Qt::UserRole + 5, "profilePicture");
+    names.insert(Qt::UserRole + 6, "status");
+    names.insert(Qt::UserRole + 7, "userId");
+    return names;
+}
+QVariant Members::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+bool Members::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.column() == 0) {
+        if (role == Qt::UserRole + 0) {
+            if (value.canConvert(qMetaTypeId<quint32>())) {
+                return setColor(index.row(), value.value<quint32>());
+            }
+        }
+        if (role == Qt::UserRole + 2) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 3) {
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setName(index.row(), value.value<QString>());
+            }
+        }
+        if (role == Qt::UserRole + 5) {
+            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+                return setProfilePicture(index.row(), value.value<QString>());
+            }
+        }
+        if (role == Qt::UserRole + 6) {
+            if (value.canConvert(qMetaTypeId<quint8>())) {
+                return setStatus(index.row(), value.value<quint8>());
+            }
+        }
+    }
+    return false;
+}
+
+extern "C" {
+    Members::Private* members_new(Members*, void (*)(Members*), void (*)(Members*), void (*)(Members*),
+        void (*)(const Members*),
+        void (*)(Members*),
+        void (*)(Members*),
+        void (*)(Members*, quintptr, quintptr),
+        void (*)(Members*),
+        void (*)(Members*),
+        void (*)(Members*, int, int),
+        void (*)(Members*),
+        void (*)(Members*, int, int, int),
+        void (*)(Members*),
+        void (*)(Members*, int, int),
+        void (*)(Members*));
+    void members_free(Members::Private*);
+    void members_conversation_id_get(const Members::Private*, QByteArray*, qbytearray_set);
+    void members_conversation_id_set(Members::Private*, const char* bytes, int len);
+    void members_conversation_id_set_none(Members::Private*);
+    void members_filter_get(const Members::Private*, QString*, qstring_set);
+    void members_filter_set(Members::Private*, const ushort *str, int len);
+    bool members_filter_regex_get(const Members::Private*);
+    void members_filter_regex_set(Members::Private*, bool);
+    bool members_add_to_conversation(Members::Private*, const ushort*, int);
+    bool members_poll_update(Members::Private*);
+    bool members_remove_from_conversation_by_index(Members::Private*, quint64);
+    bool members_toggle_filter_regex(Members::Private*);
 };
 
 extern "C" {
@@ -706,20 +1038,15 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_add_contact_resp_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_add_conv_resp_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_contact_get(const NetworkHandle::Private*);
-    bool network_handle_new_conv_data_get(const NetworkHandle::Private*);
-    quint64 network_handle_new_conversation_get(const NetworkHandle::Private*);
+    quint8 network_handle_conv_data_get(const NetworkHandle::Private*);
+    quint8 network_handle_members_data_get(const NetworkHandle::Private*);
+    quint8 network_handle_msg_data_get(const NetworkHandle::Private*);
+    quint8 network_handle_users_data_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
-    void network_handle_next_add_contact_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
-    void network_handle_next_add_conversation_resp(NetworkHandle::Private*, QByteArray*, qbytearray_set);
-    void network_handle_next_new_contact(NetworkHandle::Private*, QString*, qstring_set);
-    void network_handle_next_new_conversation(NetworkHandle::Private*, QByteArray*, qbytearray_set);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
     bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
@@ -1027,7 +1354,7 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
 }
 
 extern "C" {
-    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*), void (*)(Users*),
+    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*),
         void (*)(const Users*),
         void (*)(Users*),
         void (*)(Users*),
@@ -1041,21 +1368,12 @@ extern "C" {
         void (*)(Users*, int, int),
         void (*)(Users*));
     void users_free(Users::Private*);
-    void users_conversation_id_get(const Users::Private*, QByteArray*, qbytearray_set);
-    void users_conversation_id_set(Users::Private*, const char* bytes, int len);
-    void users_conversation_id_set_none(Users::Private*);
     void users_filter_get(const Users::Private*, QString*, qstring_set);
     void users_filter_set(Users::Private*, const ushort *str, int len);
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
-    bool users_add_to_conversation(Users::Private*, const ushort*, int);
-    bool users_add_to_conversation_by_id(Users::Private*, const ushort*, int, const char*, int);
-    bool users_add_to_conversation_by_index(Users::Private*, quint64, const char*, int);
-    bool users_bulk_add_to_conversation(Users::Private*, const char*, int, const char*, int);
-    qint64 users_index_from_conversation_id(const Users::Private*, const char*, int);
-    bool users_refresh(Users::Private*, const ushort*, int);
-    bool users_remove_from_conversation(Users::Private*, quint64, const char*, int);
+    bool users_poll_update(Users::Private*);
     bool users_toggle_filter_regex(Users::Private*);
 };
 
@@ -1225,13 +1543,9 @@ QByteArray Conversations::addConversation()
     conversations_add_conversation(m_d, &s, set_qbytearray);
     return s;
 }
-bool Conversations::handleContactReqAck(const QByteArray& notif)
+bool Conversations::pollUpdate()
 {
-    return conversations_handle_contact_req_ack(m_d, notif.data(), notif.size());
-}
-bool Conversations::refresh(const QByteArray& notif_conv_id)
-{
-    return conversations_refresh(m_d, notif_conv_id.data(), notif_conv_id.size());
+    return conversations_poll_update(m_d);
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
@@ -1298,6 +1612,119 @@ bool HeraldUtils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2)
 bool HeraldUtils::isValidRandId(const QByteArray& bs) const
 {
     return herald_utils_is_valid_rand_id(m_d, bs.data(), bs.size());
+}
+Members::Members(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+Members::Members(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(members_new(this,
+        membersConversationIdChanged,
+        membersFilterChanged,
+        membersFilterRegexChanged,
+        [](const Members* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](Members* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](Members* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](Members* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](Members* o) {
+            o->beginResetModel();
+        },
+        [](Members* o) {
+            o->endResetModel();
+        },
+        [](Members* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](Members* o) {
+            o->endInsertRows();
+        },
+        [](Members* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](Members* o) {
+            o->endMoveRows();
+        },
+        [](Members* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](Members* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &Members::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+Members::~Members() {
+    if (m_ownsPrivate) {
+        members_free(m_d);
+    }
+}
+void Members::initHeaderData() {
+}
+QByteArray Members::conversationId() const
+{
+    QByteArray v;
+    members_conversation_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void Members::setConversationId(const QByteArray& v) {
+    if (v.isNull()) {
+        members_conversation_id_set_none(m_d);
+    } else {
+    members_conversation_id_set(m_d, v.data(), v.size());
+    }
+}
+QString Members::filter() const
+{
+    QString v;
+    members_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void Members::setFilter(const QString& v) {
+    members_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Members::filterRegex() const
+{
+    return members_filter_regex_get(m_d);
+}
+void Members::setFilterRegex(bool v) {
+    members_filter_regex_set(m_d, v);
+}
+bool Members::addToConversation(const QString& user_id)
+{
+    return members_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+}
+bool Members::pollUpdate()
+{
+    return members_poll_update(m_d);
+}
+bool Members::removeFromConversationByIndex(quint64 row_index)
+{
+    return members_remove_from_conversation_by_index(m_d, row_index);
+}
+bool Members::toggleFilterRegex()
+{
+    return members_toggle_filter_regex(m_d);
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -1458,11 +1885,10 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleNewAddContactRespChanged,
-        networkHandleNewAddConvRespChanged,
-        networkHandleNewContactChanged,
-        networkHandleNewConvDataChanged,
-        networkHandleNewConversationChanged)),
+        networkHandleConvDataChanged,
+        networkHandleMembersDataChanged,
+        networkHandleMsgDataChanged,
+        networkHandleUsersDataChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -1480,53 +1906,25 @@ bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
 }
-quint64 NetworkHandle::newAddContactResp() const
+quint8 NetworkHandle::convData() const
 {
-    return network_handle_new_add_contact_resp_get(m_d);
+    return network_handle_conv_data_get(m_d);
 }
-quint64 NetworkHandle::newAddConvResp() const
+quint8 NetworkHandle::membersData() const
 {
-    return network_handle_new_add_conv_resp_get(m_d);
+    return network_handle_members_data_get(m_d);
 }
-quint64 NetworkHandle::newContact() const
+quint8 NetworkHandle::msgData() const
 {
-    return network_handle_new_contact_get(m_d);
+    return network_handle_msg_data_get(m_d);
 }
-bool NetworkHandle::newConvData() const
+quint8 NetworkHandle::usersData() const
 {
-    return network_handle_new_conv_data_get(m_d);
-}
-quint64 NetworkHandle::newConversation() const
-{
-    return network_handle_new_conversation_get(m_d);
+    return network_handle_users_data_get(m_d);
 }
 bool NetworkHandle::login()
 {
     return network_handle_login(m_d);
-}
-QByteArray NetworkHandle::nextAddContactResp()
-{
-    QByteArray s;
-    network_handle_next_add_contact_resp(m_d, &s, set_qbytearray);
-    return s;
-}
-QByteArray NetworkHandle::nextAddConversationResp()
-{
-    QByteArray s;
-    network_handle_next_add_conversation_resp(m_d, &s, set_qbytearray);
-    return s;
-}
-QString NetworkHandle::nextNewContact()
-{
-    QString s;
-    network_handle_next_new_contact(m_d, &s, set_qstring);
-    return s;
-}
-QByteArray NetworkHandle::nextNewConversation()
-{
-    QByteArray s;
-    network_handle_next_new_conversation(m_d, &s, set_qbytearray);
-    return s;
 }
 bool NetworkHandle::registerNewUser(const QString& user_id)
 {
@@ -1551,7 +1949,6 @@ Users::Users(bool /*owned*/, QObject *parent):
 Users::Users(QObject *parent):
     QAbstractItemModel(parent),
     m_d(users_new(this,
-        usersConversationIdChanged,
         usersFilterChanged,
         usersFilterRegexChanged,
         [](const Users* o) {
@@ -1608,19 +2005,6 @@ Users::~Users() {
 }
 void Users::initHeaderData() {
 }
-QByteArray Users::conversationId() const
-{
-    QByteArray v;
-    users_conversation_id_get(m_d, &v, set_qbytearray);
-    return v;
-}
-void Users::setConversationId(const QByteArray& v) {
-    if (v.isNull()) {
-        users_conversation_id_set_none(m_d);
-    } else {
-    users_conversation_id_set(m_d, v.data(), v.size());
-    }
-}
 QString Users::filter() const
 {
     QString v;
@@ -1643,33 +2027,9 @@ QByteArray Users::add(const QString& id)
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
-bool Users::addToConversation(const QString& user_id)
+bool Users::pollUpdate()
 {
-    return users_add_to_conversation(m_d, user_id.utf16(), user_id.size());
-}
-bool Users::addToConversationById(const QString& user_id, const QByteArray& conversation_id)
-{
-    return users_add_to_conversation_by_id(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
-}
-bool Users::addToConversationByIndex(quint64 row_index, const QByteArray& conversation_id)
-{
-    return users_add_to_conversation_by_index(m_d, row_index, conversation_id.data(), conversation_id.size());
-}
-bool Users::bulkAddToConversation(const QByteArray& user_id_array, const QByteArray& conversation_id)
-{
-    return users_bulk_add_to_conversation(m_d, user_id_array.data(), user_id_array.size(), conversation_id.data(), conversation_id.size());
-}
-qint64 Users::indexFromConversationId(const QByteArray& conversation_id) const
-{
-    return users_index_from_conversation_id(m_d, conversation_id.data(), conversation_id.size());
-}
-bool Users::refresh(const QString& notif_user_id)
-{
-    return users_refresh(m_d, notif_user_id.utf16(), notif_user_id.size());
-}
-bool Users::removeFromConversation(quint64 row_index, const QByteArray& conversation_id)
-{
-    return users_remove_from_conversation(m_d, row_index, conversation_id.data(), conversation_id.size());
+    return users_poll_update(m_d);
 }
 bool Users::toggleFilterRegex()
 {

@@ -1,6 +1,5 @@
 use super::*;
-use crate::conversation::add_conversation;
-use crate::womp;
+use crate::{conversation::add_conversation, womp};
 use serial_test_derive::serial;
 
 #[test]

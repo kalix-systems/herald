@@ -116,25 +116,9 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "refresh": {
+                "pollUpdate": {
                     "mut": true,
-                    "arguments": [
-                        {
-                            "name": "notif_conv_id",
-                            "type": "QByteArray"
-                        }
-                    ],
                     "return": "bool"
-                },
-                "handleContactReqAck": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "notif",
-                            "type": "QByteArray"
-                        }
-                    ]
                 }
             }
         },
@@ -147,20 +131,17 @@
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newConvData": {
-                    "type": "bool"
+                "msgData": {
+                    "type": "quint8"
                 },
-                "newContact": {
-                    "type": "quint64"
+                "usersData": {
+                    "type": "quint8"
                 },
-                "newConversation": {
-                    "type": "quint64"
+                "membersData": {
+                    "type": "quint8"
                 },
-                "newAddContactResp": {
-                    "type": "quint64"
-                },
-                "newAddConvResp": {
-                    "type": "quint64"
+                "convData": {
+                    "type": "quint8"
                 }
             },
             "functions": {
@@ -207,26 +188,80 @@
                 "login": {
                     "mut": true,
                     "return": "bool"
-                },
-                "nextNewContact": {
-                    "mut": true,
-                    "return": "QString"
-                },
-                "nextNewConversation": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
-                "nextAddContactResp": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
-                "nextAddConversationResp": {
-                    "mut": true,
-                    "return": "QByteArray"
                 }
             }
         },
         "Users": {
+            "type": "List",
+            "properties": {
+                "filter": {
+                    "write": true,
+                    "type": "QString"
+                },
+                "filterRegex": {
+                    "write": true,
+                    "type": "bool"
+                }
+            },
+            "itemProperties": {
+                "userId": {
+                    "type": "QString"
+                },
+                "name": {
+                    "write": true,
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "pairwiseConversationId": {
+                    "type": "QByteArray",
+                    "rustByValue": true
+                },
+                "profilePicture": {
+                    "write": true,
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "color": {
+                    "write": true,
+                    "type": "quint32"
+                },
+                "status": {
+                    "write": true,
+                    "type": "quint8"
+                },
+                "matched": {
+                    "write": true,
+                    "type": "bool"
+                },
+                "displayName": {
+                    "type": "QString",
+                    "rustByValue": true
+                }
+            },
+            "functions": {
+                "add": {
+                    "return": "QByteArray",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "toggleFilterRegex": {
+                    "mut": true,
+                    "return": "bool"
+                },
+                "pollUpdate": {
+                    "mut": true,
+                    "return": "bool"
+                }
+            }
+        },
+        "Members": {
             "type": "List",
             "properties": {
                 "conversationId": {
@@ -250,14 +285,17 @@
                 "name": {
                     "write": true,
                     "type": "QString",
+                    "rustByValue": true,
                     "optional": true
                 },
                 "pairwiseConversationId": {
-                    "type": "QByteArray"
+                    "type": "QByteArray",
+                    "rustByValue": true
                 },
                 "profilePicture": {
                     "write": true,
                     "type": "QString",
+                    "rustByValue": true,
                     "optional": true
                 },
                 "color": {
@@ -273,46 +311,14 @@
                     "type": "bool"
                 },
                 "displayName": {
-                    "type": "QString"
+                    "type": "QString",
+                    "rustByValue": true
                 }
             },
             "functions": {
-                "add": {
-                    "return": "QByteArray",
-                    "mut": true,
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "QString"
-                        }
-                    ]
-                },
-                "indexFromConversationId": {
-                    "arguments": [
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ],
-                    "return": "qint64"
-                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
-                },
-                "addToConversationById": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ]
                 },
                 "addToConversation": {
                     "mut": true,
@@ -324,57 +330,19 @@
                         }
                     ]
                 },
-                "bulkAddToConversation": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id_array",
-                            "type": "QByteArray"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ]
-                },
-                "addToConversationByIndex": {
+                "removeFromConversationByIndex": {
                     "mut": true,
                     "return": "bool",
                     "arguments": [
                         {
                             "name": "row_index",
                             "type": "quint64"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
                         }
                     ]
                 },
-                "removeFromConversation": {
+                "pollUpdate": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "row_index",
-                            "type": "quint64"
-                        },
-                        {
-                            "name": "conversation_id",
-                            "type": "QByteArray"
-                        }
-                    ]
-                },
-                "refresh": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "notif_user_id",
-                            "type": "QString"
-                        }
-                    ]
+                    "return": "bool"
                 }
             }
         },

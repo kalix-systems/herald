@@ -1,6 +1,8 @@
-use crate::db::Database;
-use crate::errors::HErr;
-use crate::types::{ConversationId, ConversationMessageBody};
+use crate::{
+    db::Database,
+    errors::HErr,
+    types::{ConversationId, ConversationMessageBody},
+};
 use rusqlite::{params, NO_PARAMS};
 
 /// Adds message to pending messages in database
