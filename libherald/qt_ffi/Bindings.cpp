@@ -1031,10 +1031,10 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
-    void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
+    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
+    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -1049,7 +1049,6 @@ extern "C" {
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
-    bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
 extern "C" {
@@ -1851,12 +1850,6 @@ bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-QByteArray Messages::insertMessage(const QString& body)
-{
-    QByteArray s;
-    messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
-    return s;
-}
 QString Messages::messageBodyById(const QByteArray& msg_id) const
 {
     QString s;
@@ -1867,11 +1860,13 @@ bool Messages::pollUpdate()
 {
     return messages_poll_update(m_d);
 }
-QByteArray Messages::reply(const QString& body, const QByteArray& op)
+bool Messages::reply(const QString& body, const QByteArray& op)
 {
-    QByteArray s;
-    messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size(), &s, set_qbytearray);
-    return s;
+    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
+}
+bool Messages::sendMessage(const QString& body)
+{
+    return messages_send_message(m_d, body.utf16(), body.size());
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -1933,10 +1928,6 @@ bool NetworkHandle::registerNewUser(const QString& user_id)
 bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
 {
     return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
-}
-bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const
-{
-    return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.data(), to.size(), msg_id.data(), msg_id.size());
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

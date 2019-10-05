@@ -15,7 +15,7 @@ pub mod conversation;
 /// Wrapper around database.
 pub mod db;
 /// Errors
-mod errors;
+pub mod errors;
 /// Image processing
 pub(crate) mod image_utils;
 /// Members of conversations

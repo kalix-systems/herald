@@ -9,10 +9,12 @@ use heraldcore::{
     abort_err, chrono,
     config::Config,
     conversation,
+    errors::HErr::{self, NoneError as NE},
     message::{self, Message as Msg},
+    network,
     types::*,
 };
-use std::convert::TryFrom;
+use std::{convert::TryFrom, thread};
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;
@@ -42,28 +44,25 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Option<MsgId> {
+    fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Result<(), HErr> {
         self.updated = chrono::Utc::now();
 
-        let conversation_id = ret_none!(self.conversation_id, None);
+        let conversation_id = self.conversation_id.ok_or(NE)?;
 
-        let (msg_id, timestamp) = ret_err!(
-            message::add_message(
-                None,
-                self.local_id,
-                &conversation_id,
-                body.as_str(),
-                None,
-                None,
-                &op
-            ),
-            None
-        );
+        let (msg_id, timestamp) = message::add_message(
+            None,
+            self.local_id,
+            &conversation_id,
+            body.as_str(),
+            None,
+            None,
+            &op,
+        )?;
 
         let msg = Message {
             inner: Msg {
                 author: self.local_id.clone(),
-                body: body,
+                body: (&body).clone(),
                 conversation: conversation_id.clone(),
                 message_id: msg_id.clone(),
                 op,
@@ -77,7 +76,12 @@ impl Messages {
             .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(msg);
         self.model.end_insert_rows();
-        Some(msg_id)
+
+        thread::Builder::new().spawn(move || {
+            ret_err!(network::send_text(conversation_id, body, msg_id, op));
+        })?;
+
+        Ok(())
     }
 }
 
@@ -219,23 +223,16 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn insert_message(&mut self, body: String) -> ffi::MsgId {
-        match self.raw_insert(body, None) {
-            Some(message_id) => {
-                self.update_last();
-                message_id.to_vec()
-            }
-            None => ffi::NULL_MSG_ID.to_vec(),
-        }
+    fn send_message(&mut self, body: String) -> bool {
+        ret_err!(self.raw_insert(body, None), false);
+        true
     }
 
-    fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> ffi::MsgId {
-        let op = ret_err!(MsgId::try_from(op), ffi::NULL_MSG_ID.to_vec());
+    fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> bool {
+        let op = ret_err!(MsgId::try_from(op), false);
 
-        match self.raw_insert(body, Some(op)) {
-            Some(message_id) => message_id.to_vec(),
-            None => ffi::NULL_MSG_ID.to_vec(),
-        }
+        ret_err!(self.raw_insert(body, Some(op)), false);
+        true
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {
@@ -287,31 +284,30 @@ impl MessagesTrait for Messages {
 
         let rx = match MSG_RXS.get(&conv_id) {
             Some(rx) => rx,
+            // it's not a problem if the model doesn't have a receiver yet
             None => return true,
         };
 
-        let notif = ret_err!(rx.recv(), false);
+        for update in rx.try_iter() {
+            match update {
+                MsgUpdate::Msg(mid) => {
+                    let new = ret_err!(message::get_message(&mid), false);
 
-        match notif {
-            MsgUpdate::Msg(mid) => {
-                let new = ret_err!(message::get_message(&mid), false);
+                    self.updated = chrono::Utc::now();
 
-                self.updated = chrono::Utc::now();
+                    self.model
+                        .begin_insert_rows(self.list.len(), self.list.len());
+                    self.list.push(Message { inner: new });
+                    self.model.end_insert_rows();
 
-                self.model
-                    .begin_insert_rows(self.list.len(), self.list.len());
-                self.list.push(Message { inner: new });
-                self.model.end_insert_rows();
-
-                self.update_last();
-
-                true
-            }
-            MsgUpdate::Ack(_mid) => {
-                println!("TODO: Handle acks");
-                true
+                    self.update_last();
+                }
+                MsgUpdate::Ack(_mid) => {
+                    println!("TODO: Handle acks");
+                }
             }
         }
+        true
     }
 
     fn emit(&mut self) -> &mut Emitter {

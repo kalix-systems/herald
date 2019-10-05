@@ -145,23 +145,6 @@
                 }
             },
             "functions": {
-                "sendMessage": {
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "message_body",
-                            "type": "QString"
-                        },
-                        {
-                            "name": "to",
-                            "type": "QByteArray"
-                        },
-                        {
-                            "name": "msg_id",
-                            "type": "QByteArray"
-                        }
-                    ]
-                },
                 "sendAddRequest": {
                     "return": "bool",
                     "arguments": [
@@ -389,8 +372,8 @@
                 }
             },
             "functions": {
-                "insertMessage": {
-                    "return": "QByteArray",
+                "sendMessage": {
+                    "return": "bool",
                     "mut": true,
                     "arguments": [
                         {
@@ -400,7 +383,7 @@
                     ]
                 },
                 "reply": {
-                    "return": "QByteArray",
+                    "return": "bool",
                     "mut": true,
                     "arguments": [
                         {
