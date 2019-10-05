@@ -13,7 +13,7 @@ Rectangle {
     ColumnLayout {
         id: content
         TextEdit {
-            Layout.preferredWidth: maxWidth
+            Layout.preferredWidth: 500
             Layout.minimumWidth: 200
             Layout.margins: cfgSmallMargins
             text: "greeee"
@@ -21,12 +21,4 @@ Rectangle {
             wrapMode: TextEdit.Wrap
         }
     }
-
-    //    TextMetrics {
-    //        id: metrics
-    //        text: "gogol"
-    //    }
-    //    TextEdit {
-    //        text: "gogol"
-    //    }
 }
