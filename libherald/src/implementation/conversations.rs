@@ -1,10 +1,14 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{ConvUpdates, CONV_CHANNEL},
+};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
     utils::SearchPattern,
 };
-use std::convert::TryInto;
 
 /// Thin wrapper around `ConversationMeta`,
 /// with an additional field to facilitate filtering
@@ -199,41 +203,23 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
-    fn refresh(&mut self, notif: ffi::ConversationIdRef) -> bool {
-        let cid = ret_err!(notif.try_into(), false);
-        let meta = abort_err!(conversation::meta(&cid));
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Conversation {
-            matched: meta.matches(&self.filter),
-            inner: meta,
-        });
-        self.model.end_insert_rows();
-
-        true
-    }
-
-    fn handle_contact_req_ack(&mut self, notif: &[u8]) -> bool {
-        use herald_common::UserId;
-        use heraldcore::types::ConversationId;
-
-        let val: Option<(ConversationId, UserId, bool)> =
-            ret_err!(serde_cbor::from_slice(notif), false);
-        let (cid, _, accepted) = ret_none!(val, false);
-
-        if !accepted {
-            return false;
+    fn poll_update(&mut self) -> bool {
+        use ConvUpdates::*;
+        for update in CONV_CHANNEL.rx.try_iter() {
+            match update {
+                NewConversation(cid) => {
+                    let meta = ret_err!(conversation::meta(&cid), false);
+                    let conv = Conversation {
+                        matched: meta.matches(&self.filter),
+                        inner: meta,
+                    };
+                    self.model
+                        .begin_insert_rows(self.row_count(), self.row_count());
+                    self.list.push(conv);
+                    self.model.end_insert_rows();
+                }
+            }
         }
-
-        let meta = abort_err!(conversation::meta(&cid));
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Conversation {
-            matched: meta.matches(&self.filter),
-            inner: meta,
-        });
-        self.model.end_insert_rows();
-
         true
     }
 

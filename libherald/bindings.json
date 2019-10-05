@@ -116,25 +116,9 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "refresh": {
+                "pollUpdate": {
                     "mut": true,
-                    "arguments": [
-                        {
-                            "name": "notif_conv_id",
-                            "type": "QByteArray"
-                        }
-                    ],
                     "return": "bool"
-                },
-                "handleContactReqAck": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "notif",
-                            "type": "QByteArray"
-                        }
-                    ]
                 }
             }
         },
@@ -147,20 +131,17 @@
                 "connectionPending": {
                     "type": "bool"
                 },
-                "newConvData": {
-                    "type": "bool"
+                "msgData": {
+                    "type": "quint8"
                 },
-                "newContact": {
-                    "type": "quint64"
+                "usersData": {
+                    "type": "quint8"
                 },
-                "newConversation": {
-                    "type": "quint64"
+                "membersData": {
+                    "type": "quint8"
                 },
-                "newAddContactResp": {
-                    "type": "quint64"
-                },
-                "newAddConvResp": {
-                    "type": "quint64"
+                "convData": {
+                    "type": "quint8"
                 }
             },
             "functions": {
@@ -207,22 +188,6 @@
                 "login": {
                     "mut": true,
                     "return": "bool"
-                },
-                "nextNewContact": {
-                    "mut": true,
-                    "return": "QString"
-                },
-                "nextNewConversation": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
-                "nextAddContactResp": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
-                "nextAddConversationResp": {
-                    "mut": true,
-                    "return": "QByteArray"
                 }
             }
         },
@@ -290,15 +255,9 @@
                     "mut": true,
                     "return": "bool"
                 },
-                "refresh": {
+                "pollUpdate": {
                     "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "notif_user_id",
-                            "type": "QString"
-                        }
-                    ]
+                    "return": "bool"
                 }
             }
         },

@@ -1,4 +1,4 @@
-use crate::shared::{ConvMsgUpdate, CONV_MSG_RXS};
+use crate::shared::{MsgUpdate, MSG_RXS};
 use crate::{ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{
@@ -281,7 +281,7 @@ impl MessagesTrait for Messages {
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, true);
 
-        let rx = match CONV_MSG_RXS.get(&conv_id) {
+        let rx = match MSG_RXS.get(&conv_id) {
             Some(rx) => rx,
             None => return true,
         };
@@ -289,7 +289,7 @@ impl MessagesTrait for Messages {
         let notif = ret_err!(rx.recv(), false);
 
         match notif {
-            ConvMsgUpdate::Msg(mid) => {
+            MsgUpdate::Msg(mid) => {
                 let new = ret_err!(message::get_message(&mid), false);
 
                 self.updated = chrono::Utc::now();
@@ -303,7 +303,7 @@ impl MessagesTrait for Messages {
 
                 true
             }
-            ConvMsgUpdate::Ack(_mid) => {
+            MsgUpdate::Ack(_mid) => {
                 println!("TODO: Handle acks");
                 true
             }

@@ -1,4 +1,9 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{UsersUpdates, USER_CHANNEL, USER_DATA},
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -257,22 +262,30 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    // TODO handle removals
-    // TODO replace polling
-    fn refresh(&mut self, notif: String) -> bool {
-        let uid = ret_err!(notif.as_str().try_into(), false);
-        let new_user = ret_err!(contact::by_user_id(uid), false);
+    fn poll_update(&mut self) -> bool {
+        for update in USER_CHANNEL.rx.try_recv() {
+            match update {
+                UsersUpdates::NewUser(uid) => {
+                    let new_user = ret_err!(contact::by_user_id(uid), false);
 
-        let filter = &self.filter;
+                    let filter = &self.filter;
 
-        self.model
-            .begin_insert_rows(self.list.len(), (self.list.len() + 1).saturating_sub(1));
-        self.list.push(User {
-            matched: new_user.matches(&filter),
-            id: uid,
-        });
-        USER_DATA.insert(uid, new_user);
-        self.model.end_insert_rows();
+                    self.model.begin_insert_rows(
+                        self.list.len(),
+                        (self.list.len() + 1).saturating_sub(1),
+                    );
+                    self.list.push(User {
+                        matched: new_user.matches(&filter),
+                        id: uid,
+                    });
+                    USER_DATA.insert(uid, new_user);
+                    self.model.end_insert_rows();
+                }
+                UsersUpdates::ReqResp(..) => {
+                    eprintln!("TODO: handle request responses");
+                }
+            }
+        }
 
         true
     }

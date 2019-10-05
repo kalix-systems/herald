@@ -70,8 +70,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray addConversation();
-    Q_INVOKABLE bool handleContactReqAck(const QByteArray& notif);
-    Q_INVOKABLE bool refresh(const QByteArray& notif_conv_id);
+    Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -302,38 +301,31 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint64 newAddContactResp READ newAddContactResp NOTIFY newAddContactRespChanged FINAL)
-    Q_PROPERTY(quint64 newAddConvResp READ newAddConvResp NOTIFY newAddConvRespChanged FINAL)
-    Q_PROPERTY(quint64 newContact READ newContact NOTIFY newContactChanged FINAL)
-    Q_PROPERTY(bool newConvData READ newConvData NOTIFY newConvDataChanged FINAL)
-    Q_PROPERTY(quint64 newConversation READ newConversation NOTIFY newConversationChanged FINAL)
+    Q_PROPERTY(quint8 convData READ convData NOTIFY convDataChanged FINAL)
+    Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
+    Q_PROPERTY(quint8 msgData READ msgData NOTIFY msgDataChanged FINAL)
+    Q_PROPERTY(quint8 usersData READ usersData NOTIFY usersDataChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
-    quint64 newAddContactResp() const;
-    quint64 newAddConvResp() const;
-    quint64 newContact() const;
-    bool newConvData() const;
-    quint64 newConversation() const;
+    quint8 convData() const;
+    quint8 membersData() const;
+    quint8 msgData() const;
+    quint8 usersData() const;
     Q_INVOKABLE bool login();
-    Q_INVOKABLE QByteArray nextAddContactResp();
-    Q_INVOKABLE QByteArray nextAddConversationResp();
-    Q_INVOKABLE QString nextNewContact();
-    Q_INVOKABLE QByteArray nextNewConversation();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
     Q_INVOKABLE bool sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void newAddContactRespChanged();
-    void newAddConvRespChanged();
-    void newContactChanged();
-    void newConvDataChanged();
-    void newConversationChanged();
+    void convDataChanged();
+    void membersDataChanged();
+    void msgDataChanged();
+    void usersDataChanged();
 };
 
 class Users : public QAbstractItemModel
@@ -355,7 +347,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
-    Q_INVOKABLE bool refresh(const QString& notif_user_id);
+    Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

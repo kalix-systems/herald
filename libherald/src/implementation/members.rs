@@ -1,4 +1,9 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{MemberUpdate, MEMBER_RXS, USER_DATA},
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -297,22 +302,25 @@ impl MembersTrait for Members {
     }
 
     fn poll_update(&mut self) -> bool {
-        unimplemented!()
-        //let uid = ret_err!(notif.as_str().try_into(), false);
-        //let new_user = ret_err!(contact::by_user_id(uid), false);
+        let cid = &ret_none!(self.conversation_id, false);
+        let rx = ret_none!(MEMBER_RXS.get(cid), false);
 
-        //let filter = &self.filter;
+        use MemberUpdate::*;
+        for update in rx.try_iter() {
+            match update {
+                ReqResp(uid, _accepted) => {
+                    // TODO use accepted somehow
+                    let matched = match USER_DATA.get(&uid) {
+                        Some(meta) => meta.matches(&self.filter),
+                        None => continue,
+                    };
 
-        //self.model
-        //    .begin_insert_rows(self.list.len(), (self.list.len() + 1).saturating_sub(1));
-        //self.list.push(User {
-        //    matched: new_user.matches(&filter),
-        //    id: uid,
-        //});
-        //USER_DATA.insert(uid, new_user);
-        //self.model.end_insert_rows();
-
-        //true
+                    let user = User { matched, id: uid };
+                    self.list.push(user);
+                }
+            }
+        }
+        true
     }
 }
 
