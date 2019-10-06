@@ -183,6 +183,16 @@ extern "C" {
 };
 
 extern "C" {
+    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*);
+    void conversation_builder_free(ConversationBuilder::Private*);
+    bool conversation_builder_add_user(ConversationBuilder::Private*, const ushort*, int);
+    void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    bool conversation_builder_set_color(ConversationBuilder::Private*, quint32);
+    bool conversation_builder_set_picture(ConversationBuilder::Private*, const ushort*, int);
+    bool conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
+};
+
+extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
@@ -1452,6 +1462,47 @@ void Config::setProfilePicture(const QString& v) {
     } else {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
+}
+ConversationBuilder::ConversationBuilder(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+ConversationBuilder::ConversationBuilder(QObject *parent):
+    QObject(parent),
+    m_d(conversation_builder_new(this)),
+    m_ownsPrivate(true)
+{
+}
+
+ConversationBuilder::~ConversationBuilder() {
+    if (m_ownsPrivate) {
+        conversation_builder_free(m_d);
+    }
+}
+bool ConversationBuilder::addUser(const QString& user_id)
+{
+    return conversation_builder_add_user(m_d, user_id.utf16(), user_id.size());
+}
+QByteArray ConversationBuilder::finalize()
+{
+    QByteArray s;
+    conversation_builder_finalize(m_d, &s, set_qbytearray);
+    return s;
+}
+bool ConversationBuilder::setColor(quint32 color)
+{
+    return conversation_builder_set_color(m_d, color);
+}
+bool ConversationBuilder::setPicture(const QString& picture_path)
+{
+    return conversation_builder_set_picture(m_d, picture_path.utf16(), picture_path.size());
+}
+bool ConversationBuilder::setTitle(const QString& title)
+{
+    return conversation_builder_set_title(m_d, title.utf16(), title.size());
 }
 Conversations::Conversations(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

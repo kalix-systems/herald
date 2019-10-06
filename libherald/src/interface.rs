@@ -309,6 +309,100 @@ pub unsafe extern "C" fn config_profile_picture_set_none(ptr: *mut Config) {
     o.set_profile_picture(None);
 }
 
+pub struct ConversationBuilderQObject {}
+
+pub struct ConversationBuilderEmitter {
+    qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
+}
+
+unsafe impl Send for ConversationBuilderEmitter {}
+
+impl ConversationBuilderEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> ConversationBuilderEmitter {
+        ConversationBuilderEmitter {
+            qobject: self.qobject.clone(),
+        }
+    }
+    fn clear(&self) {
+        let n: *const ConversationBuilderQObject = null();
+        self.qobject.store(n as *mut ConversationBuilderQObject, Ordering::SeqCst);
+    }
+}
+
+pub trait ConversationBuilderTrait {
+    fn new(emit: ConversationBuilderEmitter) -> Self;
+    fn emit(&mut self) -> &mut ConversationBuilderEmitter;
+    fn add_user(&mut self, user_id: String) -> bool;
+    fn finalize(&mut self) -> Vec<u8>;
+    fn set_color(&mut self, color: u32) -> bool;
+    fn set_picture(&mut self, picture_path: String) -> bool;
+    fn set_title(&mut self, title: String) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn conversation_builder_new(
+    conversation_builder: *mut ConversationBuilderQObject,
+) -> *mut ConversationBuilder {
+    let conversation_builder_emit = ConversationBuilderEmitter {
+        qobject: Arc::new(AtomicPtr::new(conversation_builder)),
+    };
+    let d_conversation_builder = ConversationBuilder::new(conversation_builder_emit);
+    Box::into_raw(Box::new(d_conversation_builder))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_free(ptr: *mut ConversationBuilder) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_add_user(ptr: *mut ConversationBuilder, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let o = &mut *ptr;
+    let r = o.add_user(user_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
+    let o = &mut *ptr;
+    let r = o.finalize();
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_set_color(ptr: *mut ConversationBuilder, color: u32) -> bool {
+    let o = &mut *ptr;
+    let r = o.set_color(color);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_set_picture(ptr: *mut ConversationBuilder, picture_path_str: *const c_ushort, picture_path_len: c_int) -> bool {
+    let mut picture_path = String::new();
+    set_string_from_utf16(&mut picture_path, picture_path_str, picture_path_len);
+    let o = &mut *ptr;
+    let r = o.set_picture(picture_path);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_set_title(ptr: *mut ConversationBuilder, title_str: *const c_ushort, title_len: c_int) -> bool {
+    let mut title = String::new();
+    set_string_from_utf16(&mut title, title_str, title_len);
+    let o = &mut *ptr;
+    let r = o.set_title(title);
+    r
+}
+
 pub struct ConversationsQObject {}
 
 pub struct ConversationsEmitter {

@@ -6,6 +6,7 @@
 #include <QtCore/QAbstractItemModel>
 
 class Config;
+class ConversationBuilder;
 class Conversations;
 class HeraldState;
 class HeraldUtils;
@@ -49,6 +50,26 @@ Q_SIGNALS:
     void displayNameChanged();
     void nameChanged();
     void profilePictureChanged();
+};
+
+class ConversationBuilder : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    explicit ConversationBuilder(bool owned, QObject *parent);
+public:
+    explicit ConversationBuilder(QObject *parent = nullptr);
+    ~ConversationBuilder();
+    Q_INVOKABLE bool addUser(const QString& user_id);
+    Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE bool setColor(quint32 color);
+    Q_INVOKABLE bool setPicture(const QString& picture_path);
+    Q_INVOKABLE bool setTitle(const QString& title);
+Q_SIGNALS:
 };
 
 class Conversations : public QAbstractItemModel

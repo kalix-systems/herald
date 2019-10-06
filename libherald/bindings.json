@@ -457,6 +457,55 @@
                     "write": true
                 }
             }
+        },
+        "ConversationBuilder": {
+            "type": "Object",
+            "functions": {
+                "addUser": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "setTitle": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "title",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "setPicture": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "picture_path",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "setColor": {
+                    "mut": true,
+                    "return": "bool",
+                    "arguments": [
+                        {
+                            "name": "color",
+                            "type": "quint32"
+                        }
+                    ]
+                },
+                "finalize": {
+                    "mut": true,
+                    "return": "QByteArray"
+                }
+            }
         }
     }
 }
