@@ -2,7 +2,7 @@
 
 members = [
   "herald_common",
-  "server",
+  "herald_server",
   "heraldcore",
   "libherald",
   "lazy_pond",
