@@ -13,14 +13,13 @@ lazy_static     = "1.4"
 dotenv          = "0.9.0"
 serde_cbor      = "0.10"
 sodiumoxide     = "0.2"
-tokio           = "0.2.0-alpha.4"
+tokio           = "0.2.0-alpha.6"
 
 bytes           = { version = "0.4",            features = ["serde"] }
 chrono          = { version = "0.4",            features = ["serde"] }
-# futures-preview = { version = "0.3.0-alpha.18", features = ["compat"] }
 diesel          = { version = "1.0.0",          features = ["postgres", "chrono", "r2d2"] }
 serde           = { version = "1.0",            features = ["derive"] }
-warp            = { git = "https://github.com/jxs/warp.git" }
+warp            = { git = "https://github.com/udoprog/warp.git" }
 
 womp          = { git  = "https://github.com/kalix-systems/womp"}
 herald_common = { path = "../common" }
