@@ -16,6 +16,10 @@ Rectangle {
         anchors.left: parent.left
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
+
+        onClicked: {
+            convoPane.state = "newGroupState"
+        }
     }
 
     Text {

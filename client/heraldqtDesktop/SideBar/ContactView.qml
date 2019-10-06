@@ -82,6 +82,12 @@ ListView {
 
                 // ternary is okay here, type enforced by QML
                 onReleased: parent.state = containsMouse ? "hovering" : ""
+
+                onClicked: {
+                    if (convoPane.state == "newGroupState") {
+                        groupMemberSelect.append({name: displayName})
+                    }
+                }
             }
 
             Popups.ContactClickedPopup {

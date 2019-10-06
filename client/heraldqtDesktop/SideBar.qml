@@ -74,6 +74,11 @@ Pane {
         visible: (convoPane.state == "newConversationState")
     }
 
+    ListModel {
+        id: groupMemberSelect
+
+    }
+
     ///--- Contacts View Actual
     Pane {
         id: convoPane
@@ -136,6 +141,7 @@ Pane {
                 }
             },
 
+
             State {
                 name: "newConversationState"
                 PropertyChanges {
@@ -152,7 +158,23 @@ Pane {
                     searchPlaceholder: "Enter contact name"
                     contactsSearch: true
                 }
-            }
+            },
+
+            State {
+                name: "newGroupState"
+                PropertyChanges {
+                    target: sideBarBodyLoader
+                    sourceComponent: contactslvComponent
+                }
+
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: searchBarComponent
+                    searchPlaceholder: "Add people"
+                    contactsSearch: true
+                }
+                }
+
         ]
     }
 }

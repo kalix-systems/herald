@@ -25,6 +25,22 @@ Component {
               event.accepted = true
           }
       }
+      cursorPosition: groupGrid.right
+
+
+
+      GridLayout {
+          id: groupGrid
+          width: parent.width
+          Repeater {
+              model: groupMemberSelect
+              Text {
+                  text: name
+              }
+
+          }
+
+      }
 
       Common.ButtonForm {
           source: "qrc:/x-icon.svg"
