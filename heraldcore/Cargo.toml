@@ -9,19 +9,19 @@ edition = "2018"
 [dependencies]
 chainmail     = { git = "https://github.com/kalix-systems/chainmail" }
 chrono        = { version = "0.4.7", default_features  = false}
-herald_common = { path    = "../common", features = ["rusqlite_"] }
+herald_common = { path    = "../herald_common", features = ["rusqlite_"] }
 image         = { version = "0.22.1", default_features = false, features = ["jpeg", "png_codec"]}
 lazy_pond     = { path    = "../lazy_pond" }
 lazy_static   = "1.3.0"
 regex         = "1.2.1"
-reqwest       = { version = "0.9.20", default_features = false, features = ["rustls-tls"] }
 rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
 serde         = "1.0.99"
 serde_bytes   = "0.11.2"
 serde_cbor    = "0.10.1"
 sodiumoxide   = "0.2"
-tungstenite   = "0.9"
+ureq          = { version = "0.11", default_features = false }
 url           = "2.1"
+websocket     = { version = "0.23", default_features = false, features = ["sync"] }
 
 [dev-dependencies]
 serial_test        = "0.2.0"

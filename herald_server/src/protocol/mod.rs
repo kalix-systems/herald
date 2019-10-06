@@ -34,25 +34,36 @@ impl State {
         Ok(Conn(self.pool.get().unwrap()))
     }
 
-    pub async fn handle_login(&self, mut ws: warp::filters::ws::WebSocket) -> Result<(), Error> {
+    pub async fn handle_login(
+        &'static self,
+        mut ws: warp::filters::ws::WebSocket,
+    ) -> Result<(), Error> {
         let mut con = self.new_connection()?;
         let gid = login::login(&mut con, &mut ws).await?;
-        self.add_active(gid.did, &mut ws).await?;
+        self.add_active(gid.did, ws).await?;
         Ok(())
     }
 
-    pub async fn add_active<W, E>(&self, did: sig::PublicKey, ws: &mut W) -> Result<(), Error>
-    where
-        W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
-        Error: From<E>,
-    {
+    pub async fn add_active(
+        &'static self,
+        did: sig::PublicKey,
+        mut ws: warp::filters::ws::WebSocket,
+    ) -> Result<(), Error> {
         let mut store = self.new_connection()?;
         let (sender, mut receiver) = channel();
         self.active.insert(did, sender);
         // TODO: handle this error somehow?
         // for now we're just dropping it
-        if catchup(did, &mut store, ws).await.is_ok() {
-            drop(self.send_pushes(ws, &mut receiver, did).await);
+        if catchup(did, &mut store, &mut ws).await.is_ok() {
+            let (mut tx, mut rx) = ws.split();
+            tokio::spawn(async move {
+                rx.next().await;
+                self.active.remove(&did);
+            });
+            drop(
+                self.send_pushes(&mut store, &mut tx, &mut receiver, did)
+                    .await,
+            );
             archive_pushes(&mut store, receiver, did).await?;
         } else {
             self.active.remove(&did);
@@ -174,6 +185,7 @@ impl State {
 
     async fn send_pushes<Tx, E, Rx>(
         &self,
+        store: &mut Conn,
         tx: &mut Tx,
         rx: &mut Rx,
         did: sig::PublicKey,
@@ -187,9 +199,8 @@ impl State {
             match tx.send(ws::Message::binary(serde_cbor::to_vec(&p)?)).await {
                 Ok(_) => {}
                 Err(_) => {
-                    // TODO: figure out a better way to cause this to happen
-                    // probably involves splitting the sender
                     self.active.remove(&did);
+                    store.add_pending(vec![did], p)?;
                     break;
                 }
             }

@@ -2,29 +2,44 @@ use herald_common::serde_cbor;
 use image;
 use lazy_pond::LazyError;
 use regex;
-use std::{fmt, sync::PoisonError};
+use std::fmt;
 
 #[derive(Debug)]
+/// Error variants
 pub enum HErr {
     // TODO: replace all instances of this with enum branches
+    /// Uncategorized error.
     HeraldError(String),
+    /// Database error.
     DatabaseError(rusqlite::Error),
+    /// Error from connection pool
     LazyPondError,
-    MutexError(String),
+    /// Invalid `UserId`
     InvalidUserId,
+    /// Invalid `MsgId`
     InvalidMessageId,
+    /// Invalid `ConversationId`
     InvalidConversationId,
-    Utf8Error(std::str::Utf8Error),
+    /// IO Error
     IoError(std::io::Error),
+    /// Error processing images
     ImageError(image::ImageError),
+    /// Error compiling regex
     RegexError(regex::Error),
+    /// Serialization or deserialization
+    /// error
     CborError(serde_cbor::Error),
+    /// An issue occurred at login
     LoginError,
+    /// An issue occurred at registration
     RegistrationError,
+    /// Failed to find expected
     MissingFields,
-    RequestDropped,
-    ReqwestError(reqwest::Error),
-    TungsteniteError(tungstenite::Error),
+    /// An HTTP request was dropped
+    /// Websocket issue
+    WebsocketError(websocket::result::WebSocketError),
+    /// Unexpected `None`
+    NoneError,
 }
 
 impl fmt::Display for HErr {
@@ -33,11 +48,10 @@ impl fmt::Display for HErr {
         match self {
             DatabaseError(e) => write!(f, "Database Error: {}", e),
             HeraldError(s) => write!(f, "Herald Error: {}", s),
-            MutexError(s) => write!(f, "Mutex Error: {}", s),
             InvalidUserId => write!(f, "InvalidUserId"),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
-            Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
+            // Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
             CborError(e) => write!(f, "CborError error: {}", e),
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
@@ -46,9 +60,9 @@ impl fmt::Display for HErr {
             LoginError => write!(f, "LoginError"),
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
-            RequestDropped => write!(f, "RequestDropped"),
-            ReqwestError(e) => write!(f, "ReqwestError: {}", e),
-            TungsteniteError(e) => write!(f, "TungsteniteError: {}", e),
+            //RequestDropped => write!(f, "RequestDropped"),
+            WebsocketError(e) => write!(f, "WebsocketError: {}", e),
+            NoneError => write!(f, "Unexpected none"),
         }
     }
 }
@@ -60,11 +74,10 @@ impl std::error::Error for HErr {
             DatabaseError(e) => e,
             IoError(e) => e,
             ImageError(s) => s,
-            Utf8Error(s) => s,
+            //Utf8Error(s) => s,
             CborError(e) => e,
             RegexError(e) => e,
-            ReqwestError(e) => e,
-            TungsteniteError(e) => e,
+            WebsocketError(e) => e,
             _ => return None,
         })
     }
@@ -81,11 +94,6 @@ macro_rules! from_fn {
 }
 
 // TODO: replace these
-impl<T> From<PoisonError<T>> for HErr {
-    fn from(e: PoisonError<T>) -> Self {
-        HErr::MutexError(e.to_string())
-    }
-}
 
 impl From<rusqlite::Error> for HErr {
     fn from(e: rusqlite::Error) -> Self {
@@ -127,17 +135,14 @@ impl From<serde_cbor::Error> for HErr {
     }
 }
 
-impl From<std::str::Utf8Error> for HErr {
-    fn from(e: std::str::Utf8Error) -> Self {
-        HErr::Utf8Error(e)
-    }
-}
-
 impl From<LazyError> for HErr {
     fn from(_: LazyError) -> Self {
         HErr::LazyPondError
     }
 }
 
-from_fn!(HErr, reqwest::Error, HErr::ReqwestError);
-from_fn!(HErr, tungstenite::Error, HErr::TungsteniteError);
+from_fn!(
+    HErr,
+    websocket::result::WebSocketError,
+    HErr::WebsocketError
+);

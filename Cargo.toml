@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+  "herald_common",
+  "herald_server",
+  "heraldcore",
+  "libherald",
+  "lazy_pond",
+]

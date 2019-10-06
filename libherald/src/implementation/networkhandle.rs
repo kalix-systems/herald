@@ -45,34 +45,34 @@ impl NotifHandler {
         use Notification::*;
         match notif {
             NewMsg(msg_id, cid) => {
-                match self.msg_senders.get(&cid) {
-                    Some(tx) => {
-                        ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                    }
+                let tx = match self.msg_senders.get(&cid) {
+                    Some(tx) => tx,
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
                         self.msg_senders.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
+                        ret_none!(self.msg_senders.get(&cid))
                     }
-                }
+                };
+
+                ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }
-            Ack(msg_id, cid) => {
-                match self.msg_senders.get(&cid) {
-                    Some(tx) => {
-                        ret_err!(tx.send(MsgUpdate::Ack(msg_id)));
-                    }
+            MsgReceipt { mid, cid, stat, by } => {
+                let tx = match self.msg_senders.get(&cid) {
+                    Some(tx) => tx,
                     None => {
                         let (tx, rx) = unbounded();
 
-                        ret_err!(tx.send(MsgUpdate::Ack(msg_id)));
                         self.msg_senders.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
+                        ret_none!(self.msg_senders.get(&cid))
                     }
-                }
+                };
+
+                ret_err!(tx.send(MsgUpdate::Receipt { mid, stat, by }));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }
@@ -169,24 +169,24 @@ impl NetworkHandleTrait for NetworkHandle {
         handle
     }
 
-    fn send_message(
-        &self,
-        body: String,
-        to: ffi::ConversationIdRef,
-        msg_id: ffi::MsgIdRef,
-    ) -> bool {
-        let conv_id = ret_err!(ConversationId::try_from(to), false);
+    //fn send_message(
+    //    &self,
+    //    body: String,
+    //    to: ffi::ConversationIdRef,
+    //    msg_id: ffi::MsgIdRef,
+    //) -> bool {
+    //    let conv_id = ret_err!(ConversationId::try_from(to), false);
 
-        let msg_id = ret_err!(MsgId::try_from(msg_id), false);
+    //    let msg_id = ret_err!(MsgId::try_from(msg_id), false);
 
-        ret_err!(
-            thread::Builder::new().spawn(move || {
-                ret_err!(network::send_text(conv_id, body, msg_id, None));
-            }),
-            false
-        );
-        true
-    }
+    //    ret_err!(
+    //        thread::Builder::new().spawn(move || {
+    //            ret_err!(network::send_text(conv_id, body, msg_id, None));
+    //        }),
+    //        false
+    //    );
+    //    true
+    //}
 
     fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);

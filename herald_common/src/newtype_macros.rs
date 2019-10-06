@@ -94,71 +94,6 @@ macro_rules! newtype_traits {
                 &self.0
             }
         }
-
-        /// Allows a user to access the byte contents of an object as a slice.
-        ///
-        /// WARNING: it might be tempting to do comparisons on objects
-        /// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
-        /// when comparing for example authenticator tags. Because of this only
-        /// use the comparison functions exposed by the sodiumoxide API.
-        #[deprecated(
-            since = "0.2.2",
-            note = "Use the `AsRef` or `AsMut` implementation instead"
-        )]
-        impl ::std::ops::Index<::std::ops::Range<usize>> for $newtype {
-            type Output = [u8];
-            fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
-                self.0.index(_index)
-            }
-        }
-        /// Allows a user to access the byte contents of an object as a slice.
-        ///
-        /// WARNING: it might be tempting to do comparisons on objects
-        /// by using `x[..b] == y[..b]`. This will open up for timing attacks
-        /// when comparing for example authenticator tags. Because of this only
-        /// use the comparison functions exposed by the sodiumoxide API.
-        #[deprecated(
-            since = "0.2.2",
-            note = "Use the `AsRef` or `AsMut` implementation instead"
-        )]
-        impl ::std::ops::Index<::std::ops::RangeTo<usize>> for $newtype {
-            type Output = [u8];
-            fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
-                self.0.index(_index)
-            }
-        }
-        /// Allows a user to access the byte contents of an object as a slice.
-        ///
-        /// WARNING: it might be tempting to do comparisons on objects
-        /// by using `x[a..] == y[a..]`. This will open up for timing attacks
-        /// when comparing for example authenticator tags. Because of this only
-        /// use the comparison functions exposed by the sodiumoxide API.
-        #[deprecated(
-            since = "0.2.2",
-            note = "Use the `AsRef` or `AsMut` implementation instead"
-        )]
-        impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for $newtype {
-            type Output = [u8];
-            fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
-                self.0.index(_index)
-            }
-        }
-        /// Allows a user to access the byte contents of an object as a slice.
-        ///
-        /// WARNING: it might be tempting to do comparisons on objects
-        /// by using `x[] == y[]`. This will open up for timing attacks
-        /// when comparing for example authenticator tags. Because of this only
-        /// use the comparison functions exposed by the sodiumoxide API.
-        #[deprecated(
-            since = "0.2.2",
-            note = "Use the `AsRef` or `AsMut` implementation instead"
-        )]
-        impl ::std::ops::Index<::std::ops::RangeFull> for $newtype {
-            type Output = [u8];
-            fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
-                self.0.index(_index)
-            }
-        }
     };
 }
 
@@ -205,32 +140,6 @@ macro_rules! public_newtype_traits {
 ///
 /// Usage:
 /// Generating secret datatypes, e.g. keys
-///
-/// ```
-/// new_type! {
-///     /// This is some documentation for our type
-///     secret Key(KEYBYTES);
-/// }
-/// ```
-///
-/// Generating public datatypes, e.g. public keys
-///
-/// ```
-/// new_type! {
-///     /// This is some documentation for our type
-///     public PublicKey(PUBLICKEYBYTES);
-/// }
-///
-/// ```
-///
-/// Generating nonce types
-///
-/// ```
-/// new_type! {
-///     /// This is some documentation for our type
-///     nonce Nonce(NONCEBYTES);
-/// }
-/// ```
 #[macro_export]
 macro_rules! new_type {
     ( $(#[$meta:meta])*

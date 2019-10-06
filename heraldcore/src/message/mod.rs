@@ -21,6 +21,7 @@ pub struct Message {
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
+    // TODO: should this just be a hashmap?
     pub receipts: Option<Vec<(UserId, MessageReceiptStatus)>>,
 }
 
@@ -36,6 +37,7 @@ impl Message {
                 .timestamp_opt(row.get(5)?, 0)
                 .single()
                 .unwrap_or_else(Utc::now),
+            // TODO get receipts from database
             receipts: None,
             send_status: row.get(6)?,
         })

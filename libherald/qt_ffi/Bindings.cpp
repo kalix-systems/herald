@@ -183,6 +183,151 @@ extern "C" {
 };
 
 extern "C" {
+    void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int conversation_builder_row_count(const ConversationBuilder::Private*);
+    bool conversation_builder_insert_rows(ConversationBuilder::Private*, int, int);
+    bool conversation_builder_remove_rows(ConversationBuilder::Private*, int, int);
+    bool conversation_builder_can_fetch_more(const ConversationBuilder::Private*);
+    void conversation_builder_fetch_more(ConversationBuilder::Private*);
+}
+int ConversationBuilder::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool ConversationBuilder::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int ConversationBuilder::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : conversation_builder_row_count(m_d);
+}
+
+bool ConversationBuilder::insertRows(int row, int count, const QModelIndex &)
+{
+    return conversation_builder_insert_rows(m_d, row, count);
+}
+
+bool ConversationBuilder::removeRows(int row, int count, const QModelIndex &)
+{
+    return conversation_builder_remove_rows(m_d, row, count);
+}
+
+QModelIndex ConversationBuilder::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex ConversationBuilder::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool ConversationBuilder::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : conversation_builder_can_fetch_more(m_d);
+}
+
+void ConversationBuilder::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        conversation_builder_fetch_more(m_d);
+    }
+}
+void ConversationBuilder::updatePersistentIndexes() {}
+
+void ConversationBuilder::sort(int column, Qt::SortOrder order)
+{
+    conversation_builder_sort(m_d, column, order);
+}
+Qt::ItemFlags ConversationBuilder::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    return flags;
+}
+
+QString ConversationBuilder::displayName(int row) const
+{
+    QString s;
+    conversation_builder_data_display_name(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return QVariant::fromValue(displayName(index.row()));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int ConversationBuilder::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> ConversationBuilder::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "displayName");
+    return names;
+}
+QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+extern "C" {
+    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*,
+        void (*)(const ConversationBuilder*),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*, quintptr, quintptr),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*, int, int),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*, int, int, int),
+        void (*)(ConversationBuilder*),
+        void (*)(ConversationBuilder*, int, int),
+        void (*)(ConversationBuilder*));
+    void conversation_builder_free(ConversationBuilder::Private*);
+    bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
+    void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
+};
+
+extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
@@ -1031,10 +1176,10 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    void messages_insert_message(Messages::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
-    void messages_reply(Messages::Private*, const ushort*, int, const char*, int, QByteArray*, qbytearray_set);
+    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
+    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -1049,7 +1194,6 @@ extern "C" {
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
-    bool network_handle_send_message(const NetworkHandle::Private*, const ushort*, int, const char*, int, const char*, int);
 };
 
 extern "C" {
@@ -1454,6 +1598,85 @@ void Config::setProfilePicture(const QString& v) {
     config_profile_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
     }
 }
+ConversationBuilder::ConversationBuilder(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+ConversationBuilder::ConversationBuilder(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(conversation_builder_new(this,
+        [](const ConversationBuilder* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](ConversationBuilder* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](ConversationBuilder* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](ConversationBuilder* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](ConversationBuilder* o) {
+            o->beginResetModel();
+        },
+        [](ConversationBuilder* o) {
+            o->endResetModel();
+        },
+        [](ConversationBuilder* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](ConversationBuilder* o) {
+            o->endInsertRows();
+        },
+        [](ConversationBuilder* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](ConversationBuilder* o) {
+            o->endMoveRows();
+        },
+        [](ConversationBuilder* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](ConversationBuilder* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &ConversationBuilder::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+ConversationBuilder::~ConversationBuilder() {
+    if (m_ownsPrivate) {
+        conversation_builder_free(m_d);
+    }
+}
+void ConversationBuilder::initHeaderData() {
+}
+bool ConversationBuilder::addMember(const QString& user_id)
+{
+    return conversation_builder_add_member(m_d, user_id.utf16(), user_id.size());
+}
+QByteArray ConversationBuilder::finalize()
+{
+    QByteArray s;
+    conversation_builder_finalize(m_d, &s, set_qbytearray);
+    return s;
+}
+void ConversationBuilder::setTitle(const QString& title)
+{
+    return conversation_builder_set_title(m_d, title.utf16(), title.size());
+}
 Conversations::Conversations(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -1851,12 +2074,6 @@ bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-QByteArray Messages::insertMessage(const QString& body)
-{
-    QByteArray s;
-    messages_insert_message(m_d, body.utf16(), body.size(), &s, set_qbytearray);
-    return s;
-}
 QString Messages::messageBodyById(const QByteArray& msg_id) const
 {
     QString s;
@@ -1867,11 +2084,13 @@ bool Messages::pollUpdate()
 {
     return messages_poll_update(m_d);
 }
-QByteArray Messages::reply(const QString& body, const QByteArray& op)
+bool Messages::reply(const QString& body, const QByteArray& op)
 {
-    QByteArray s;
-    messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size(), &s, set_qbytearray);
-    return s;
+    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
+}
+bool Messages::sendMessage(const QString& body)
+{
+    return messages_send_message(m_d, body.utf16(), body.size());
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -1933,10 +2152,6 @@ bool NetworkHandle::registerNewUser(const QString& user_id)
 bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
 {
     return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
-}
-bool NetworkHandle::sendMessage(const QString& message_body, const QByteArray& to, const QByteArray& msg_id) const
-{
-    return network_handle_send_message(m_d, message_body.utf16(), message_body.size(), to.data(), to.size(), msg_id.data(), msg_id.size());
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

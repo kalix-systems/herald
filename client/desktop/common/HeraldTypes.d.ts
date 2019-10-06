@@ -7,28 +7,25 @@ declare type UserId = string;
 
 declare class HeraldState {
   configInit: boolean;
-  setConfigId(configId: UserId): boolean;
 }
 
 declare class NetworkHandle {
-  newMessage: boolean;
   connectionUp: boolean;
   connectionPending: boolean;
 
-  sendMessage(
-    text: string,
-    conversationID: ConversationID,
-    messageId: MessageId
-  ): boolean;
+  msgData: number;
+  usersData: number;
+  membersData: number;
+  convData: number;
 
   sendAddRequest(userid: UserId, conversationID: ConversationID): boolean;
-
-  requestMetaData(of: UserId): boolean;
+  registerNewUser(userid: UserId): boolean;
+  login(): boolean;
 }
 
 declare class Messages {
   conversationId: ConversationID;
-  insertMessage(text: string): MessageId;
+  sendMessage(text: string): MessageId;
   reply(text: string, op: MessageId): MessageId;
   deleteMessage(rowIndex: number): boolean;
   clearConversationView(): void;
@@ -77,10 +74,14 @@ declare class Config {
 declare class Conversations {
   filter: string;
   filterRegex: string;
+  toggleFilterRegex(): boolean;
+  addConversation(): ByteArray;
   removeConversation(rowIndex: number): boolean;
-  refresh(cid: ConversationID): boolean;
+  pollUpdate(): boolean;
 }
 
 declare class HeraldUtils {
   compareByteArray(bs1: ByteArray, bs2: ByteArray): boolean;
+  chatBubbleNaturalWidth(chat_pane_width: number, text_width: number): number;
+  isValidRandId(bs: ByteArray): boolean;
 }

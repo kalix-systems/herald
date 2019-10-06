@@ -11,5 +11,4 @@ export function insertContact(
   const conversationId = contactsModel.add(trimmedText);
   networkHandle.sendAddRequest(trimmedText, conversationId);
   entryArea.clear();
-  conversationsModel.refresh(conversationId);
 }

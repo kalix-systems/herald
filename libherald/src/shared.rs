@@ -3,7 +3,7 @@ use dashmap::DashMap;
 use herald_common::UserId;
 use heraldcore::{
     contact,
-    types::{ConversationId, MsgId},
+    types::{ConversationId, MessageReceiptStatus, MsgId},
 };
 use lazy_static::*;
 use parking_lot::Mutex;
@@ -109,7 +109,14 @@ pub enum MsgUpdate {
     /// A new message
     Msg(MsgId),
     /// A message has been acknowledged
-    Ack(MsgId),
+    Receipt {
+        /// The message that was received
+        mid: MsgId,
+        /// The receipt status
+        stat: MessageReceiptStatus,
+        /// The user that received the message
+        by: UserId,
+    },
 }
 
 lazy_static! {

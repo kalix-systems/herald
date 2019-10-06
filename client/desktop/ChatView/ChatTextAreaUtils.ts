@@ -1,4 +1,3 @@
-
 export function enterKeyHandler(
   event: QKeyEvent,
   target: TextArea,
@@ -18,8 +17,7 @@ export function enterKeyHandler(
   // clear before positional reset
   const text = target.text;
   target.clear();
-  const messageId = messageModel.insertMessage(text);
-  networkHandle.sendMessage(text, messageModel.conversationId, messageId);
+  const messageId = messageModel.sendMessage(text);
 }
 
 export function appendToTextArea(text: string, target: TextArea): void {

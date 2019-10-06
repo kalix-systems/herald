@@ -10,10 +10,10 @@ use lazy_static::*;
 use std::{
     collections::HashMap,
     env,
-    io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
 };
+use websocket::sync::client as wsclient;
 
 const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -45,8 +45,17 @@ pub type QID = [u8; 32];
 pub enum Notification {
     /// A new message has been received.
     NewMsg(MsgId, ConversationId),
-    /// An ack has been received.
-    Ack(MsgId, ConversationId),
+    /// A message has been received.
+    MsgReceipt {
+        /// The message that was received
+        mid: MsgId,
+        /// The conversation the message was part of
+        cid: ConversationId,
+        /// The new status of the message
+        stat: MessageReceiptStatus,
+        /// The recipient of the message
+        by: UserId,
+    },
     /// A new contact has been added
     NewContact(UserId, ConversationId),
     /// A new conversation has been added
@@ -65,13 +74,10 @@ mod helper {
     macro_rules! mk_request {
         ($method: tt, $path: tt) => {
             pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
-                let mut res_bytes = Vec::new();
-                reqwest::Client::new()
-                    .$method(&server_url(stringify!($path)))
-                    .body(serde_cbor::to_vec(req)?)
-                    .send()?
-                    .copy_to(&mut res_bytes)?;
-                let res = serde_cbor::from_slice(&res_bytes)?;
+                let res_reader = ureq::$method(&server_url(stringify!($path)))
+                    .send_bytes(&serde_cbor::to_vec(req)?)
+                    .into_reader();
+                let res = serde_cbor::from_reader(res_reader)?;
                 Ok(res)
             }
         };
@@ -145,9 +151,10 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         did: *kp.public_key(),
     };
 
-    let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
-        .expect("failed to parse login url");
-    let (mut ws, _) = tungstenite::connect(wsurl)?;
+    let wsurl = format!("ws://{}/login", *SERVER_ADDR);
+    let mut ws = wsclient::ClientBuilder::new(&wsurl)
+        .expect("failed to parse server url")
+        .connect_insecure()?;
 
     sock_send_msg(&mut ws, &SignAs(gid))?;
 
@@ -173,8 +180,8 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
     Ok(())
 }
 
-fn catchup<S: Read + Write, F: FnMut(Notification)>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn catchup<S: websocket::stream::Stream, F: FnMut(Notification)>(
+    ws: &mut wsclient::Client<S>,
     f: &mut F,
 ) -> Result<(), HErr> {
     use catchup::*;
@@ -197,8 +204,8 @@ fn catchup<S: Read + Write, F: FnMut(Notification)>(
     Ok(())
 }
 
-fn recv_messages<S: Read + Write, F: FnMut(Notification)>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
+    ws: &mut wsclient::Client<S>,
     f: &mut F,
 ) -> Result<(), HErr> {
     loop {
@@ -208,18 +215,21 @@ fn recv_messages<S: Read + Write, F: FnMut(Notification)>(
     }
 }
 
-fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
-    Ok(serde_cbor::from_slice(&ws.read_message()?.into_data())?)
+    let res = ws.recv_message()?;
+    let parsed = serde_cbor::from_slice(websocket::message::Message::from(res).payload.as_ref())?;
+    Ok(parsed)
 }
 
-fn sock_send_msg<S: Read + Write, T: Serialize>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
+    ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    let m = tungstenite::Message::binary(serde_cbor::to_vec(t)?);
-    ws.write_message(m)?;
+    use websocket::message::OwnedMessage;
+    let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
+    ws.send_message(&m)?;
     Ok(())
 }
 
@@ -302,7 +312,13 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             tx.commit()?;
         }
         Msg(msg) => {
+            // fix for message loopback back until this can be handled server side
+            if cm.from().did == *Config::static_keypair()?.public_key() {
+                return Ok(ev);
+            }
+
             let cmessages::Msg { mid, content, op } = msg;
+
             match content {
                 cmessages::Message::Text(body) => {
                     crate::message::add_message(
@@ -321,8 +337,16 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
         }
         Ack(ack) => {
+            // TODO: This will cause a foreign key constraint error if the receipt is
+            // received after a message has been removed locally.
+            // We should check the sqlite3 extended error code (787) here.
             crate::message_receipts::add_receipt(ack.of, cm.from().uid, ack.stat)?;
-            ev.notifications.push(Notification::Ack(ack.of, cm.cid()));
+            ev.notifications.push(Notification::MsgReceipt {
+                mid: ack.of,
+                cid: cm.cid(),
+                stat: ack.stat,
+                by: cm.from().uid,
+            });
         }
     }
 
@@ -419,21 +443,28 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
-pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(), HErr> {
+pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<ConversationId, HErr> {
     use crate::conversation;
+
     let pairwise = conversation::get_pairwise_conversations(members)?;
-    let cid = conversation::add_conversation(None, title)?;
+
+    let mut db = crate::db::Database::get()?;
+    let tx = db.transaction()?;
+    let cid = conversation::add_conversation_with_tx(&tx, None, title, false)?;
+    crate::members::add_members_with_tx(&tx, cid, members)?;
+    tx.commit()?;
+
     let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
         members: Vec::from(members),
         cid,
         title: title.map(String::from),
     });
 
-    for cid in pairwise {
-        send_cmessage(cid, &body)?;
+    for pw_cid in pairwise {
+        send_cmessage(pw_cid, &body)?;
     }
 
-    Ok(())
+    Ok(cid)
 }
 
 /// Sends a text message `body` with id `mid` to the conversation associated with `cid`.
