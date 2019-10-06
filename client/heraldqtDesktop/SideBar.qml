@@ -60,6 +60,7 @@ Pane {
         id: searchBarComponent
     }
 
+
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
@@ -67,9 +68,10 @@ Pane {
         color: "black"
     }
 
-    SBUtils.ContactsToggle {
-        id: contactsToggleBar
+    SBUtils.NewGroupBar {
+        id: newGroupBar
         anchors.top: searchBarBorder.bottom
+        visible: (convoPane.state == "newConversationState")
     }
 
     ///--- Contacts View Actual
@@ -79,7 +81,7 @@ Pane {
         anchors {
             right: parent.right
             left: parent.left
-            top: searchBarBorder.bottom
+            top: newGroupBar.bottom
             bottom: parent.bottom
         }
 

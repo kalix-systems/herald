@@ -36,6 +36,8 @@ Component {
           }
       }
 
+
+
       onTextChanged: {
           if (contactsSearch) {
           Qt.callLater((text) => { contactsModel.filter = text }, searchText.text) }
@@ -52,6 +54,10 @@ Component {
       }
 
 
+
+
 }
+
+
 
 }

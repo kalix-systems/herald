@@ -43,5 +43,6 @@
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>common/EmojiJson.js</file>
+        <file>SideBar/NewGroupBar.qml</file>
     </qresource>
 </RCC>
