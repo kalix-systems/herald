@@ -106,7 +106,7 @@ pub(crate) fn add_conversation_with_tx(
     pairwise: bool,
 ) -> Result<ConversationId, HErr> {
     let id = match conversation_id {
-        Some(id) => id.to_owned(),
+        Some(id) => *id,
         None => {
             let rand_array = utils::rand_id();
             ConversationId::from(rand_array)

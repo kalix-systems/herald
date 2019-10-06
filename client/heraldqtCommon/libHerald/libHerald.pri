@@ -24,18 +24,18 @@ else {
 # untested, may need -lsqlite3
 android {
     QMAKE_LFLAGS += -nostdlib++
-    LIBS +=  $${PWD}/../../../libherald/target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
+    LIBS +=  $${PWD}/../../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
 }
 
 iphonesimulator {
-    LIBS +=  $${PWD}/../../../libherald/target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
+    LIBS +=  $${PWD}/../../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -lsqlite3
 }
 
 macx {
-  LIBS += -L $${PWD}/../../../libherald/target/$${RUST_BUILD_TYPE} -lherald
+  LIBS += -L $${PWD}/../../../target/$${RUST_BUILD_TYPE} -lherald
 }
 
 linux {
-  LIBS += $${PWD}/../../../libherald/target/$${RUST_BUILD_TYPE}/libherald.so
+  LIBS += $${PWD}/../../../target/$${RUST_BUILD_TYPE}/libherald.so
 }

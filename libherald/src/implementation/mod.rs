@@ -1,6 +1,6 @@
 /// Implementation of `crate::interface::ConfigTrait`.
 pub mod config;
-/// Implementation of `crate::interface::ConversationsTraitBuilderTrait`
+/// Implementation of `crate::interface::ConvBuilderTrait`
 pub mod conversation_builder;
 /// Implementation of `crate::interface::ConversationsTrait`.
 pub mod conversations;

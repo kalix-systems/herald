@@ -227,7 +227,7 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    use ::websocket::message::OwnedMessage;
+    use websocket::message::OwnedMessage;
     let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
@@ -443,21 +443,28 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
-pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<(), HErr> {
+pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<ConversationId, HErr> {
     use crate::conversation;
+
     let pairwise = conversation::get_pairwise_conversations(members)?;
-    let cid = conversation::add_conversation(None, title)?;
+
+    let mut db = crate::db::Database::get()?;
+    let tx = db.transaction()?;
+    let cid = conversation::add_conversation_with_tx(&tx, None, title, false)?;
+    crate::members::add_members_with_tx(&tx, cid, members)?;
+    tx.commit()?;
+
     let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
         members: Vec::from(members),
         cid,
         title: title.map(String::from),
     });
 
-    for cid in pairwise {
-        send_cmessage(cid, &body)?;
+    for pw_cid in pairwise {
+        send_cmessage(pw_cid, &body)?;
     }
 
-    Ok(())
+    Ok(cid)
 }
 
 /// Sends a text message `body` with id `mid` to the conversation associated with `cid`.

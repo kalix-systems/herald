@@ -77,7 +77,7 @@ declare class Conversations {
   toggleFilterRegex(): boolean;
   addConversation(): ByteArray;
   removeConversation(rowIndex: number): boolean;
-  refresh(cid: ConversationID): boolean;
+  pollUpdate(): boolean;
 }
 
 declare class HeraldUtils {

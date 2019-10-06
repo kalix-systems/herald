@@ -82,6 +82,8 @@ impl Messages {
         self.map.insert(msg_id, msg);
         self.model.end_insert_rows();
 
+        self.emit_last_changed();
+
         thread::Builder::new().spawn(move || {
             // TODO update send status?
             ret_err!(network::send_text(conversation_id, body, msg_id, op));
