@@ -53,7 +53,6 @@ Pane {
             property bool contactsSearch: false
             anchors.fill: parent
             id: searchLoader
-            height: item.height
         }
     }
 

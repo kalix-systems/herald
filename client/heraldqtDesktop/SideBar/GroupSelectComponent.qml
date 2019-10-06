@@ -9,25 +9,25 @@ import "../SideBar" as SBUtils
 Component {
     id: groupSelectComponent
 
-
-    Column {
-        width: wrapperRect.width
-
     Rectangle {
         anchors.fill: parent
         id: wrapperRect
-        anchors.verticalCenter: parent.verticalCenter
         color: QmlCfg.palette.mainColor
 
 
     Flow {
 
+        topPadding: QmlCfg.smallMargin
+        leftPadding: QmlCfg.smallMargin
+
         id: groupFlow
         height: parent.height
         width: parent.width
-        spacing: QmlCfg.smallMargin
+        spacing: QmlCfg.smallMargin / 2
+
 
         Repeater {
+            id: contactBubbleRepeater
             Keys.enabled: true
             model: groupMemberSelect
 
@@ -51,10 +51,12 @@ Component {
           }
         }
 
+
         TextArea {
             id: searchText
 
-          placeholderText: searchLoader.searchPlaceholder
+          placeholderText: if (groupMemberSelect.count === 0) "Add people"
+          else ""
 
           verticalAlignment: TextEdit.AlignVCenter
           background: Rectangle {
@@ -69,19 +71,6 @@ Component {
               }
           }
 
-
-
-
-
-          Common.ButtonForm {
-              source: "qrc:/x-icon.svg"
-              anchors.right: parent.right
-              anchors.verticalCenter: parent.verticalCenter
-              scale: 0.8
-              onClicked: {
-                  convoPane.state = ""
-              }
-          }
 
 
 
@@ -101,10 +90,6 @@ Component {
           }
 
 
-
-
-
-
     }
 
     }
@@ -115,5 +100,4 @@ Component {
 
 
 
-}
 }
