@@ -88,6 +88,35 @@ impl Messages {
 
         Ok(())
     }
+
+    #[cfg(target_os = "linux")]
+    fn new_msg_toast(&self, msg: &Msg) {
+        use notify_rust::*;
+        Notification::new()
+            .appname(crate::DESKTOP_APP_NAME)
+            .summary(&format!("New message from {}", msg.author))
+            .body(msg.body.as_str())
+            .hint(NotificationHint::Category("im.received".to_owned()))
+            .show()
+            .ok();
+    }
+
+    #[cfg(target_os = "macos")]
+    fn new_msg_toast(&self, msg: &Msg) {
+        use notify_rust::*;
+        // TODO: sketchy global state! This should be set
+        // somewhere else.
+        set_application(crate::DESKTOP_APP_NAME);
+        Notification::new()
+            .summary(&format!("New message from {}", msg.author))
+            .subtitle("TODO: macOS has subtitles! Do we want them?")
+            .body(msg.body.as_str())
+            .show()
+            .ok();
+    }
+
+    #[cfg(all(not(target_os = "macos"), not(target_os = "linux")))]
+    fn new_msg_toast(&self, _: &Msg) {}
 }
 
 impl MessagesTrait for Messages {
@@ -263,7 +292,7 @@ impl MessagesTrait for Messages {
 
     /// Polls for updates
     fn poll_update(&mut self) -> bool {
-        let conv_id = ret_none!(self.conversation_id, true);
+        let conv_id = ret_none!(self.conversation_id, false);
 
         let rx = match MSG_RXS.get(&conv_id) {
             Some(rx) => rx,
@@ -280,6 +309,8 @@ impl MessagesTrait for Messages {
                     //}
 
                     let new = ret_err!(message::get_message(&mid), false);
+
+                    self.new_msg_toast(&new);
 
                     self.model
                         .begin_insert_rows(self.list.len(), self.list.len());
