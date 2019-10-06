@@ -4,8 +4,9 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../common" as Common
 import "popups/NewContactDialogue.mjs" as JS
+import "../SideBar" as SBUtils
 
-Component {
+Item {
     id: searchBarComponent
 
     TextArea {
@@ -21,23 +22,30 @@ Component {
 
       Keys.onPressed: {
           // NOTE: What is the first comparison doing?
+          // this makes sure that returns and tabs are not evaluated
           if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
               event.accepted = true
           }
       }
-      cursorPosition: groupGrid.right
 
 
 
-      GridLayout {
-          id: groupGrid
+      Flow {
+          anchors.margins: QmlCfg.margin
+          anchors.verticalCenter: parent.verticalCenter
+          id: groupFlow
           width: parent.width
+          height: parent.height
+          spacing: QmlCfg.smallMargin
           Repeater {
-              model: groupMemberSelect
-              Text {
-                  text: name
-              }
+             Layout.fillWidth: true
 
+              model: groupMemberSelect
+            SBUtils.ContactBubble {
+                  text: name
+                  Layout.alignment: Qt.AlignLeft
+
+              }
           }
 
       }

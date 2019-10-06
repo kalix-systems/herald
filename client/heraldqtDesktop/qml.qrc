@@ -44,5 +44,6 @@
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>common/EmojiJson.js</file>
         <file>SideBar/NewGroupBar.qml</file>
+        <file>SideBar/ContactBubble.qml</file>
     </qresource>
 </RCC>
