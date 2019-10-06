@@ -69,6 +69,9 @@ Component {
               if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
                   event.accepted = true
               }
+              if (event.key === Qt.Key_Backspace && text === "") {
+                  groupMemberSelect.remove(groupMemberSelect.count - 1)
+              }
           }
 
 
