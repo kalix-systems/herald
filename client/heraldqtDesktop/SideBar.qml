@@ -53,11 +53,16 @@ Pane {
             property bool contactsSearch: false
             anchors.fill: parent
             id: searchLoader
+            height: item.height
         }
     }
 
     SBUtils.SearchComponent {
         id: searchBarComponent
+    }
+
+    SBUtils.GroupSelectComponent {
+        id: groupSelectComponent
     }
 
 
@@ -169,7 +174,7 @@ Pane {
 
                 PropertyChanges {
                     target: searchLoader
-                    sourceComponent: searchBarComponent
+                    sourceComponent: groupSelectComponent
                     searchPlaceholder: "Add people"
                     contactsSearch: true
                 }

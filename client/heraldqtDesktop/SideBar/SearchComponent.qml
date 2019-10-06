@@ -9,50 +9,6 @@ import "../SideBar" as SBUtils
 Component {
     id: searchBarComponent
 
-    Rectangle {
-        anchors.fill: parent
-        anchors.verticalCenter: parent.verticalCenter
-        color: QmlCfg.palette.mainColor
-    Flow {
-         Layout.maximumWidth: parent.width
-         height: 400
-
-
-
-
-
-
-    Flow {
-
-        id: groupFlow
-        height: parent.height
-        spacing: QmlCfg.smallMargin
-
-        Repeater {
-            Keys.enabled: true
-            model: groupMemberSelect
-          SBUtils.ContactBubble {
-
-                text: name
-                defaultColor: QmlCfg.avatarColors[bubbleColor]
-                Layout.alignment: Qt.AlignLeft
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                       parent.state == "" ? parent.state = "clickedstate" : parent.state = ""
-                    }
-                }
-
-
-
-            }
-          Keys.onPressed: {
-              print("hi")
-          }
-        }
-
-    }
-
     TextArea {
         id: searchText
 
@@ -61,6 +17,7 @@ Component {
       verticalAlignment: TextEdit.AlignVCenter
       background: Rectangle {
           color: QmlCfg.palette.mainColor
+          anchors.fill: parent
       }
 
       Keys.onPressed: {
@@ -109,9 +66,7 @@ Component {
 
 }
 
-    }
-
-
-
 }
-}
+
+
+
