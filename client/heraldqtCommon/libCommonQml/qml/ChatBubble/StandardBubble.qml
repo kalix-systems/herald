@@ -28,7 +28,6 @@ ColumnLayout {
 
     RowLayout {
         Layout.margins: 5
-
         Label {
             text: friendlyTimestamp
             id: timestamp

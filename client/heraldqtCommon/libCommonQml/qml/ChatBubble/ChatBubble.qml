@@ -7,10 +7,13 @@ Rectangle {
     property color bubbleColor: "light green"
     property string receiptImage: ""
     property string friendlyTimestamp: ""
+    property var proxyCfg: {
+        radius: 10
+    }
     property Component content
 
     color: bubbleColor
-    radius: 10
+    radius: proxyCfg.radius
     width: contentLoader.width
     height: contentLoader.height
 
