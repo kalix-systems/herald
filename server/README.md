@@ -11,7 +11,9 @@ Specifically, you will need `libpq`. You can find platform specific instructions
 
 # Setting up the development Postgres server
 
-Install docker, and the main file will handle the rest.
+You'll have to install docker and docker-compose.
+If you want to start the postgres instance (for example to run tests) you'll want to run `docker-compose up -d` from this directory.
+To take the postgres instance back down you'll want to run `docker-compose down`.
 
 # Setting up the Postgres client
 
