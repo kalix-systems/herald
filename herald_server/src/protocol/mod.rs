@@ -57,7 +57,7 @@ impl State {
         if catchup(did, &mut store, &mut ws).await.is_ok() {
             let (mut tx, mut rx) = ws.split();
             tokio::spawn(async move {
-                while rx.next().await.is_some() {}
+                rx.next().await;
                 self.active.remove(&did);
             });
             drop(
