@@ -464,6 +464,9 @@
                 "displayName": {
                     "type": "QString",
                     "rustByValue": true
+                },
+                "color": {
+                    "type": "quint32"
                 }
             },
             "functions": {

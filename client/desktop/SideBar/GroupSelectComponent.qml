@@ -33,8 +33,9 @@ Component {
 
           SBUtils.ContactBubble {
 
-                text: name
-                defaultColor: QmlCfg.avatarColors[bubbleColor]
+                text: displayName
+                defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
+
                 Layout.alignment: Qt.AlignLeft
                 MouseArea {
                     anchors.fill: parent

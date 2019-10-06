@@ -409,6 +409,7 @@ pub trait ConversationBuilderTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn color(&self, index: usize) -> u32;
     fn display_name(&self, index: usize) -> String;
 }
 
@@ -508,6 +509,12 @@ pub unsafe extern "C" fn conversation_builder_sort(
     order: SortOrder,
 ) {
     (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_data_color(ptr: *const ConversationBuilder, row: c_int) -> u32 {
+    let o = &*ptr;
+    o.color(to_usize(row)).into()
 }
 
 #[no_mangle]

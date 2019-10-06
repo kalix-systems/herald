@@ -78,4 +78,11 @@ impl ConversationBuilderTrait for ConversationBuilder {
             None => inner.id.to_string(),
         }
     }
+
+    fn color(&self, index: usize) -> u32 {
+        let uid = ret_none!(self.list.get(index), 0);
+        let inner = ret_none!(USER_DATA.get(uid), 0);
+
+        inner.color
+    }
 }

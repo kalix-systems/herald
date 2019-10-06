@@ -78,7 +78,7 @@ Pane {
         visible: (convoPane.state == "newConversationState")
     }
 
-    ListModel {
+    ConversationBuilder {
         id: groupMemberSelect
 
     }

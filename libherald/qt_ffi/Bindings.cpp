@@ -183,6 +183,7 @@ extern "C" {
 };
 
 extern "C" {
+    quint32 conversation_builder_data_color(const ConversationBuilder::Private*, int);
     void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
     void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -253,6 +254,11 @@ Qt::ItemFlags ConversationBuilder::flags(const QModelIndex &i) const
     return flags;
 }
 
+quint32 ConversationBuilder::color(int row) const
+{
+    return conversation_builder_data_color(m_d, row);
+}
+
 QString ConversationBuilder::displayName(int row) const
 {
     QString s;
@@ -267,6 +273,8 @@ QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
+            return QVariant::fromValue(color(index.row()));
+        case Qt::UserRole + 1:
             return QVariant::fromValue(displayName(index.row()));
         }
         break;
@@ -287,7 +295,8 @@ int ConversationBuilder::role(const char* name) const {
 }
 QHash<int, QByteArray> ConversationBuilder::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "displayName");
+    names.insert(Qt::UserRole + 0, "color");
+    names.insert(Qt::UserRole + 1, "displayName");
     return names;
 }
 QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientation, int role) const
