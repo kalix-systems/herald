@@ -5,19 +5,12 @@ import QtQuick.Controls 2.13
 Rectangle {
     id: background
     property color bubbleColor: "light green"
-    property var cfgProxy: {
-        // default cfg
-        margin: 10
-        smallMargins: 5
-        radius: 10
-    }
-
-    property int receiptCode: 0
-    property int epochtimestamp_ms: 100
+    property string receiptImage: ""
+    property string friendlyTimestamp: ""
     property Component content
 
     color: bubbleColor
-    radius: cfgProxy
+    radius: 10
     width: contentLoader.width
     height: contentLoader.height
 

@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.12
 
 ColumnLayout {
     property string body: ""
-    property int epochtimestamp_ms: 100
-    property int receiptCode: 0
+    property string friendlyTimestamp: ""
+    property string receiptImage: ""
     property string imageSource: ""
     spacing: 0
 
@@ -17,15 +17,13 @@ ColumnLayout {
 
     Image {
         id: image
-        property real aspectRatio: sourceSize.height / sourceSize.height
-
-        Layout.maximumWidth: 500
+        property real aspectRatio: sourceSize.height / sourceSize.width
+        Layout.maximumWidth: 400
         Layout.minimumWidth: 200
-
-        Layout.maximumHeight: 500
-        //        Layout.minimumHeight: aspectRatio * width
+        Layout.preferredWidth: sourceSize.width
+        Layout.maximumHeight: 300
         source: imageSource
-        fillMode: sourceSize.height > 500 ? Image.PreserveAspectCrop : Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
         asynchronous: true
     }
 
@@ -33,6 +31,7 @@ ColumnLayout {
         text: body
         Layout.leftMargin: 5
         Layout.rightMargin: 5
+        Layout.preferredHeight: body.length === 0 ? 0 : undefined
         Layout.maximumWidth: image.width - 10 // margin
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
@@ -41,7 +40,7 @@ ColumnLayout {
         Layout.margins: 5
 
         Label {
-            text: "100"
+            text: friendlyTimestamp
             id: timestamp
         }
 
@@ -51,7 +50,7 @@ ColumnLayout {
 
         Image {
             id: receipt
-            source: "file:../../icons/double-check-receipt-icon.svg"
+            source: receiptImage
             sourceSize: Qt.size(16, 16)
         }
     }

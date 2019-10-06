@@ -12,6 +12,5 @@
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/ReplyBubble.qml</file>
         <file>ChatBubble/ImageBubble.qml</file>
-        <file>ChatBubble/MultiImageBubble.qml</file>
     </qresource>
 </RCC>

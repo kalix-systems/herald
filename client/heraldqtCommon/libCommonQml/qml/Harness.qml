@@ -14,9 +14,6 @@ Window {
         anchors.margins: 10
         CB.ChatBubble {
             id: thing
-
-            epochtimestamp_ms: 100
-            receiptCode: 0
             bubbleColor: "light gray"
             content: CB.StandardBubble {
                 body: "test text that is"
@@ -25,8 +22,6 @@ Window {
 
         CB.ChatBubble {
             anchors.margins: 10
-            epochtimestamp_ms: 100
-            receiptCode: 0
             bubbleColor: "light gray"
             content: CB.ReplyBubble {
                 body: "test text that is"
@@ -35,12 +30,10 @@ Window {
 
         CB.ChatBubble {
             anchors.margins: 10
-            epochtimestamp_ms: 100
-            receiptCode: 0
             bubbleColor: "light gray"
             content: CB.ImageBubble {
-                imageSource: "https://via.placeholder.com/200x200/100"
-                body: "test text that is the fuck are you talking about"
+                imageSource: "https://via.placeholder.com/30x3000/100"
+                body: ""
             }
         }
     }

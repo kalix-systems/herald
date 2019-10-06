@@ -8,9 +8,8 @@ ColumnLayout {
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property string body: ""
-    property int epochtimestamp_ms: 100
-    property int receiptCode: 0
-
+    property string friendlyTimestamp: ""
+    property string receiptImage: ""
     spacing: 0
 
     Label {
@@ -31,7 +30,7 @@ ColumnLayout {
         Layout.margins: 5
 
         Label {
-            text: "100"
+            text: friendlyTimestamp
             id: timestamp
         }
 
@@ -41,7 +40,7 @@ ColumnLayout {
 
         Image {
             id: receipt
-            source: "file:../../icons/double-check-receipt-icon.svg"
+            source: receiptImage
             sourceSize: Qt.size(16, 16)
         }
     }
