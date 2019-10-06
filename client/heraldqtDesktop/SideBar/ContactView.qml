@@ -85,7 +85,7 @@ ListView {
 
                 onClicked: {
                     if (convoPane.state == "newGroupState") {
-                        groupMemberSelect.append({name: displayName})
+                        groupMemberSelect.append({name: displayName, bubbleColor: color})
                     }
                 }
             }

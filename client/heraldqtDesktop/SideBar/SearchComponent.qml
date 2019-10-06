@@ -6,15 +6,58 @@ import "../common" as Common
 import "popups/NewContactDialogue.mjs" as JS
 import "../SideBar" as SBUtils
 
-Item {
+Component {
     id: searchBarComponent
+
+    Rectangle {
+        anchors.fill: parent
+        anchors.verticalCenter: parent.verticalCenter
+        color: QmlCfg.palette.mainColor
+    Flow {
+         Layout.maximumWidth: parent.width
+         height: 400
+
+
+
+
+
+
+    Flow {
+
+        id: groupFlow
+        height: parent.height
+        spacing: QmlCfg.smallMargin
+
+        Repeater {
+            Keys.enabled: true
+            model: groupMemberSelect
+          SBUtils.ContactBubble {
+
+                text: name
+                defaultColor: QmlCfg.avatarColors[bubbleColor]
+                Layout.alignment: Qt.AlignLeft
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                       parent.state == "" ? parent.state = "clickedstate" : parent.state = ""
+                    }
+                }
+
+
+
+            }
+          Keys.onPressed: {
+              print("hi")
+          }
+        }
+
+    }
 
     TextArea {
         id: searchText
 
       placeholderText: searchLoader.searchPlaceholder
-      anchors.fill: parent
-      anchors.verticalCenter: parent.verticalCenter
+
       verticalAlignment: TextEdit.AlignVCenter
       background: Rectangle {
           color: QmlCfg.palette.mainColor
@@ -30,25 +73,7 @@ Item {
 
 
 
-      Flow {
-          anchors.margins: QmlCfg.margin
-          anchors.verticalCenter: parent.verticalCenter
-          id: groupFlow
-          width: parent.width
-          height: parent.height
-          spacing: QmlCfg.smallMargin
-          Repeater {
-             Layout.fillWidth: true
 
-              model: groupMemberSelect
-            SBUtils.ContactBubble {
-                  text: name
-                  Layout.alignment: Qt.AlignLeft
-
-              }
-          }
-
-      }
 
       Common.ButtonForm {
           source: "qrc:/x-icon.svg"
@@ -80,8 +105,13 @@ Item {
 
 
 
+
+
 }
 
+    }
 
 
+
+}
 }
