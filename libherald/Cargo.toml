@@ -11,7 +11,7 @@ libc = "0.2.60"
 heraldcore = {path="../heraldcore"}
 serde_cbor    = "0.10.1"
 serde         = "1.0.99"
-herald_common = {path="../common"}
+herald_common = {path="../herald_common"}
 crossbeam-channel = "0.3.9"
 lazy_static = "1.4.0"
 dashmap = "1.0.5"
