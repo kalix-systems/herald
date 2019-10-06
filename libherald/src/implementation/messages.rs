@@ -6,7 +6,7 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, chrono,
+    abort_err,
     config::Config,
     conversation,
     errors::HErr::{self, NoneError as NE},
@@ -34,7 +34,6 @@ pub struct Messages {
     map: HashMap<MsgId, Msg>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
-    updated: chrono::DateTime<chrono::Utc>,
 }
 
 impl Messages {
@@ -51,8 +50,6 @@ impl Messages {
     }
 
     fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Result<(), HErr> {
-        self.updated = chrono::Utc::now();
-
         let conversation_id = self.conversation_id.ok_or(NE)?;
 
         let (msg_id, timestamp) = message::add_message(
@@ -102,7 +99,6 @@ impl MessagesTrait for Messages {
             emit,
             conversation_id: None,
             local_id: abort_err!(Config::static_id()),
-            updated: chrono::Utc::now(),
         }
     }
 
@@ -284,8 +280,6 @@ impl MessagesTrait for Messages {
                     //}
 
                     let new = ret_err!(message::get_message(&mid), false);
-
-                    self.updated = chrono::Utc::now();
 
                     self.model
                         .begin_insert_rows(self.list.len(), self.list.len());
