@@ -13,7 +13,7 @@ Rectangle {
     ColumnLayout {
         id: content
         TextEdit {
-            Layout.preferredWidth: 500
+            Layout.fillWidth: true
             Layout.minimumWidth: 200
             Layout.margins: cfgSmallMargins
             text: "greeee"

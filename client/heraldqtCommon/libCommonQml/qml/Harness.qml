@@ -1,34 +1,47 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Window 2.13
+import "./ChatBubble" as CB
 
 Window {
     id: window
 
     width: 650
     height: 500
+    Column {
+        spacing: 10
+        anchors.right: parent.right
+        anchors.margins: 10
+        CB.ChatBubble {
+            id: thing
 
-    ChatBubble {
-        id: thing
-        anchors.right: parent.right
-        anchors.margins: 10
-        body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
-        epochtimestamp_ms: 100
-        bubbleColor: "light gray"
-        additionalContent: ImageContent {
-            source: "https://www.audubon.org/sites/default/files/a1_4202_1_fish-crow_alejandra_lewandowski_kk.jpg"
+            epochtimestamp_ms: 100
+            receiptCode: 0
+            bubbleColor: "light gray"
+            content: CB.StandardBubble {
+                body: "test text that is"
+            }
         }
-    }
-    ChatBubble {
-        anchors.top: thing.bottom
-        anchors.right: parent.right
-        anchors.margins: 10
-        body: " abu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuuabu dabuuu bu dabuuu"
-        epochtimestamp_ms: 100
-        bubbleColor: "light gray"
-        reply: {
-            text: "greese"
-            op: "bob"
+
+        CB.ChatBubble {
+            anchors.margins: 10
+            epochtimestamp_ms: 100
+            receiptCode: 0
+            bubbleColor: "light gray"
+            content: CB.ReplyBubble {
+                body: "test text that is"
+            }
+        }
+
+        CB.ChatBubble {
+            anchors.margins: 10
+            epochtimestamp_ms: 100
+            receiptCode: 0
+            bubbleColor: "light gray"
+            content: CB.ImageBubble {
+                imageSource: "https://via.placeholder.com/200x200/100"
+                body: "test text that is the fuck are you talking about"
+            }
         }
     }
 }
