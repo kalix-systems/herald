@@ -19,9 +19,9 @@ serde         = "1.0.99"
 serde_bytes   = "0.11.2"
 serde_cbor    = "0.10.1"
 sodiumoxide   = "0.2"
-tungstenite   = "0.9"
 ureq          = { version = "0.11", default_features = false }
 url           = "2.1"
+websocket     = { version = "0.23", default_features = false, features = ["sync"] }
 
 [dev-dependencies]
 serial_test        = "0.2.0"

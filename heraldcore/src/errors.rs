@@ -37,7 +37,7 @@ pub enum HErr {
     MissingFields,
     /// An HTTP request was dropped
     /// Websocket issue
-    TungsteniteError(tungstenite::Error),
+    WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
     NoneError,
 }
@@ -61,7 +61,7 @@ impl fmt::Display for HErr {
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
             //RequestDropped => write!(f, "RequestDropped"),
-            TungsteniteError(e) => write!(f, "TungsteniteError: {}", e),
+            WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             NoneError => write!(f, "Unexpected none"),
         }
     }
@@ -77,7 +77,7 @@ impl std::error::Error for HErr {
             //Utf8Error(s) => s,
             CborError(e) => e,
             RegexError(e) => e,
-            TungsteniteError(e) => e,
+            WebsocketError(e) => e,
             _ => return None,
         })
     }
@@ -141,4 +141,8 @@ impl From<LazyError> for HErr {
     }
 }
 
-from_fn!(HErr, tungstenite::Error, HErr::TungsteniteError);
+from_fn!(
+    HErr,
+    websocket::result::WebSocketError,
+    HErr::WebsocketError
+);

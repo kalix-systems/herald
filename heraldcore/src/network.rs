@@ -10,10 +10,10 @@ use lazy_static::*;
 use std::{
     collections::HashMap,
     env,
-    io::{Read, Write},
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
 };
+use websocket::sync::client as wsclient;
 
 const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -151,9 +151,10 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         did: *kp.public_key(),
     };
 
-    let wsurl = url::Url::parse(&format!("ws://{}/login", *SERVER_ADDR))
-        .expect("failed to parse login url");
-    let (mut ws, _) = tungstenite::connect(wsurl)?;
+    let wsurl = format!("ws://{}/login", *SERVER_ADDR);
+    let mut ws = wsclient::ClientBuilder::new(&wsurl)
+        .expect("failed to parse server url")
+        .connect_insecure()?;
 
     sock_send_msg(&mut ws, &SignAs(gid))?;
 
@@ -179,8 +180,8 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
     Ok(())
 }
 
-fn catchup<S: Read + Write, F: FnMut(Notification)>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn catchup<S: websocket::stream::Stream, F: FnMut(Notification)>(
+    ws: &mut wsclient::Client<S>,
     f: &mut F,
 ) -> Result<(), HErr> {
     use catchup::*;
@@ -203,8 +204,8 @@ fn catchup<S: Read + Write, F: FnMut(Notification)>(
     Ok(())
 }
 
-fn recv_messages<S: Read + Write, F: FnMut(Notification)>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
+    ws: &mut wsclient::Client<S>,
     f: &mut F,
 ) -> Result<(), HErr> {
     loop {
@@ -214,18 +215,21 @@ fn recv_messages<S: Read + Write, F: FnMut(Notification)>(
     }
 }
 
-fn sock_get_msg<S: Read + Write, T: for<'a> Deserialize<'a>>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
-    Ok(serde_cbor::from_slice(&ws.read_message()?.into_data())?)
+    let res = ws.recv_message()?;
+    let parsed = serde_cbor::from_slice(websocket::message::Message::from(res).payload.as_ref())?;
+    Ok(parsed)
 }
 
-fn sock_send_msg<S: Read + Write, T: Serialize>(
-    ws: &mut tungstenite::WebSocket<S>,
+fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
+    ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    let m = tungstenite::Message::binary(serde_cbor::to_vec(t)?);
-    ws.write_message(m)?;
+    use ::websocket::message::OwnedMessage;
+    let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
+    ws.send_message(&m)?;
     Ok(())
 }
 
