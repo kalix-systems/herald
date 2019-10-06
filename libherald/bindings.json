@@ -459,21 +459,17 @@
             }
         },
         "ConversationBuilder": {
-            "type": "Object",
+            "type": "List",
+            "itemProperties": {
+                "displayName": {
+                    "type": "QString",
+                    "rustByValue": true
+                }
+            },
             "functions": {
-                "addUser": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "user_id",
-                            "type": "QString"
-                        }
-                    ]
-                },
                 "setTitle": {
+                    "return": "void",
                     "mut": true,
-                    "return": "bool",
                     "arguments": [
                         {
                             "name": "title",
@@ -481,23 +477,13 @@
                         }
                     ]
                 },
-                "setPicture": {
-                    "mut": true,
+                "addMember": {
                     "return": "bool",
+                    "mut": true,
                     "arguments": [
                         {
-                            "name": "picture_path",
+                            "name": "user_id",
                             "type": "QString"
-                        }
-                    ]
-                },
-                "setColor": {
-                    "mut": true,
-                    "return": "bool",
-                    "arguments": [
-                        {
-                            "name": "color",
-                            "type": "quint32"
                         }
                     ]
                 },

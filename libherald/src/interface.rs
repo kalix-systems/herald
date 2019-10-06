@@ -313,6 +313,7 @@ pub struct ConversationBuilderQObject {}
 
 pub struct ConversationBuilderEmitter {
     qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
+    new_data_ready: fn(*mut ConversationBuilderQObject),
 }
 
 unsafe impl Send for ConversationBuilderEmitter {}
@@ -327,32 +328,125 @@ impl ConversationBuilderEmitter {
     pub fn clone(&mut self) -> ConversationBuilderEmitter {
         ConversationBuilderEmitter {
             qobject: self.qobject.clone(),
+            new_data_ready: self.new_data_ready,
         }
     }
     fn clear(&self) {
         let n: *const ConversationBuilderQObject = null();
         self.qobject.store(n as *mut ConversationBuilderQObject, Ordering::SeqCst);
     }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ConversationBuilderList {
+    qobject: *mut ConversationBuilderQObject,
+    layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
+    layout_changed: fn(*mut ConversationBuilderQObject),
+    data_changed: fn(*mut ConversationBuilderQObject, usize, usize),
+    begin_reset_model: fn(*mut ConversationBuilderQObject),
+    end_reset_model: fn(*mut ConversationBuilderQObject),
+    begin_insert_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    end_insert_rows: fn(*mut ConversationBuilderQObject),
+    begin_move_rows: fn(*mut ConversationBuilderQObject, usize, usize, usize),
+    end_move_rows: fn(*mut ConversationBuilderQObject),
+    begin_remove_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    end_remove_rows: fn(*mut ConversationBuilderQObject),
+}
+
+impl ConversationBuilderList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
 }
 
 pub trait ConversationBuilderTrait {
-    fn new(emit: ConversationBuilderEmitter) -> Self;
+    fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
-    fn add_user(&mut self, user_id: String) -> bool;
+    fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> Vec<u8>;
-    fn set_color(&mut self, color: u32) -> bool;
-    fn set_picture(&mut self, picture_path: String) -> bool;
-    fn set_title(&mut self, title: String) -> bool;
+    fn set_title(&mut self, title: String) -> ();
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn display_name(&self, index: usize) -> String;
 }
 
 #[no_mangle]
 pub extern "C" fn conversation_builder_new(
     conversation_builder: *mut ConversationBuilderQObject,
+    conversation_builder_new_data_ready: fn(*mut ConversationBuilderQObject),
+    conversation_builder_layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
+    conversation_builder_layout_changed: fn(*mut ConversationBuilderQObject),
+    conversation_builder_data_changed: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_begin_reset_model: fn(*mut ConversationBuilderQObject),
+    conversation_builder_end_reset_model: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_insert_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_end_insert_rows: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_move_rows: fn(*mut ConversationBuilderQObject, usize, usize, usize),
+    conversation_builder_end_move_rows: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_remove_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_end_remove_rows: fn(*mut ConversationBuilderQObject),
 ) -> *mut ConversationBuilder {
     let conversation_builder_emit = ConversationBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_builder)),
+        new_data_ready: conversation_builder_new_data_ready,
     };
-    let d_conversation_builder = ConversationBuilder::new(conversation_builder_emit);
+    let model = ConversationBuilderList {
+        qobject: conversation_builder,
+        layout_about_to_be_changed: conversation_builder_layout_about_to_be_changed,
+        layout_changed: conversation_builder_layout_changed,
+        data_changed: conversation_builder_data_changed,
+        begin_reset_model: conversation_builder_begin_reset_model,
+        end_reset_model: conversation_builder_end_reset_model,
+        begin_insert_rows: conversation_builder_begin_insert_rows,
+        end_insert_rows: conversation_builder_end_insert_rows,
+        begin_move_rows: conversation_builder_begin_move_rows,
+        end_move_rows: conversation_builder_end_move_rows,
+        begin_remove_rows: conversation_builder_begin_remove_rows,
+        end_remove_rows: conversation_builder_end_remove_rows,
+    };
+    let d_conversation_builder = ConversationBuilder::new(conversation_builder_emit, model);
     Box::into_raw(Box::new(d_conversation_builder))
 }
 
@@ -362,11 +456,11 @@ pub unsafe extern "C" fn conversation_builder_free(ptr: *mut ConversationBuilder
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_add_user(ptr: *mut ConversationBuilder, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+pub unsafe extern "C" fn conversation_builder_add_member(ptr: *mut ConversationBuilder, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.add_user(user_id);
+    let r = o.add_member(user_id);
     r
 }
 
@@ -379,28 +473,53 @@ pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBui
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_set_color(ptr: *mut ConversationBuilder, color: u32) -> bool {
-    let o = &mut *ptr;
-    let r = o.set_color(color);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_set_picture(ptr: *mut ConversationBuilder, picture_path_str: *const c_ushort, picture_path_len: c_int) -> bool {
-    let mut picture_path = String::new();
-    set_string_from_utf16(&mut picture_path, picture_path_str, picture_path_len);
-    let o = &mut *ptr;
-    let r = o.set_picture(picture_path);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_set_title(ptr: *mut ConversationBuilder, title_str: *const c_ushort, title_len: c_int) -> bool {
+pub unsafe extern "C" fn conversation_builder_set_title(ptr: *mut ConversationBuilder, title_str: *const c_ushort, title_len: c_int) -> () {
     let mut title = String::new();
     set_string_from_utf16(&mut title, title_str, title_len);
     let o = &mut *ptr;
     let r = o.set_title(title);
     r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_row_count(ptr: *const ConversationBuilder) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_insert_rows(ptr: *mut ConversationBuilder, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).insert_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_remove_rows(ptr: *mut ConversationBuilder, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).remove_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_can_fetch_more(ptr: *const ConversationBuilder) -> bool {
+    (&*ptr).can_fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_fetch_more(ptr: *mut ConversationBuilder) {
+    (&mut *ptr).fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_sort(
+    ptr: *mut ConversationBuilder,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_data_display_name(
+    ptr: *const ConversationBuilder, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.display_name(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 pub struct ConversationsQObject {}
