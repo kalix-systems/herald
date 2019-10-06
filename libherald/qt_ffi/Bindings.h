@@ -66,6 +66,7 @@ public:
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE bool removeMember(const QString& user_id);
     Q_INVOKABLE void setTitle(const QString& title);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

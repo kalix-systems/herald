@@ -490,6 +490,16 @@
                         }
                     ]
                 },
+                "removeMember": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
+                },
                 "finalize": {
                     "mut": true,
                     "return": "QByteArray"

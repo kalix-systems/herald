@@ -333,6 +333,7 @@ extern "C" {
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    bool conversation_builder_remove_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
 };
 
@@ -1681,6 +1682,10 @@ QByteArray ConversationBuilder::finalize()
     QByteArray s;
     conversation_builder_finalize(m_d, &s, set_qbytearray);
     return s;
+}
+bool ConversationBuilder::removeMember(const QString& user_id)
+{
+    return conversation_builder_remove_member(m_d, user_id.utf16(), user_id.size());
 }
 void ConversationBuilder::setTitle(const QString& title)
 {

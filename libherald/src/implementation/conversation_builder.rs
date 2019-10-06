@@ -1,5 +1,6 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
 use herald_common::UserId;
+use heraldcore::abort_err;
 use std::convert::TryInto;
 
 type Emitter = ConversationBuilderEmitter;
@@ -11,6 +12,7 @@ pub struct ConversationBuilder {
     model: List,
     list: Vec<UserId>,
     title: Option<String>,
+    local_id: UserId,
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
@@ -20,6 +22,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             model,
             list: Vec::new(),
             title: None,
+            local_id: abort_err!(heraldcore::config::Config::static_id()),
         }
     }
 
@@ -29,6 +32,11 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
     fn add_member(&mut self, user_id: ffi::UserId) -> bool {
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+
+        // don't allow users to add themselves
+        if user_id == self.local_id {
+            return true;
+        }
 
         // Avoid redundant inserts
         // This is linear time, yes, but
@@ -51,7 +59,20 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
+    fn remove_member(&mut self, user_id: ffi::UserId) -> bool {
+        let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+
+        let ix = ret_none!(self.list.iter().position(|uid| uid == &user_id), false);
+
+        self.model.begin_remove_rows(ix, ix);
+        self.list.remove(ix);
+        self.model.end_insert_rows();
+
+        true
+    }
+
     fn finalize(&mut self) -> ffi::ConversationId {
+        self.list.push(self.local_id);
         ret_err!(
             heraldcore::network::start_conversation(
                 self.list.as_slice(),
