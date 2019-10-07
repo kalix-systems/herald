@@ -15,8 +15,6 @@ Component {
         id: wrapperRect
         color: QmlCfg.palette.mainColor
 
-
-
         Common.ButtonForm {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
@@ -54,11 +52,11 @@ Component {
             Keys.enabled: true
             model: groupMemberSelect
 
-         delegate: SBUtils.ContactBubble {
+          SBUtils.ContactBubble {
 
                 text: displayName
                 userId: userId
-                color: QmlCfg.avatarColors[memberColor]
+                defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
 
                 Layout.alignment: Qt.AlignLeft
                 xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)

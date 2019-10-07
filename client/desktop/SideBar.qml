@@ -59,10 +59,6 @@ Pane {
 
     }
 
-    ConversationBuilder {
-        id: groupMemberSelect
-    }
-
     SBUtils.UtilityBar {
         id: utilityBarComponent
     }
@@ -91,8 +87,13 @@ Pane {
         visible: (convoPane.state == "newConversationState")
     }
 
+    ConversationBuilder {
+        id: groupMemberSelect
+    }
 
-
+    ListModel {
+        id: dummyGroup
+    }
 
     ///--- Contacts View Actual
     Pane {

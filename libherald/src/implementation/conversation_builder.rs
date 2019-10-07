@@ -66,7 +66,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         self.model.begin_remove_rows(ix, ix);
         self.list.remove(ix);
-        self.model.end_remove_rows();
+        self.model.end_insert_rows();
 
         true
     }
@@ -78,7 +78,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         self.model.begin_remove_rows(ix, ix);
         self.list.remove(ix);
-        self.model.end_remove_rows();
+        self.model.end_insert_rows();
 
         true
     }
@@ -119,9 +119,11 @@ impl ConversationBuilderTrait for ConversationBuilder {
         }
     }
 
-    fn member_color(&self, index: usize) -> u32 {
+    fn color(&self, index: usize) -> u32 {
         let uid = ret_none!(self.list.get(index), 0);
-        ret_none!(USER_DATA.get(uid), 0).color
+        let inner = ret_none!(USER_DATA.get(uid), 0);
+
+        inner.color
     }
 
     fn user_id(&self, index: usize) -> &str {

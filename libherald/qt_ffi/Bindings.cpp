@@ -183,8 +183,8 @@ extern "C" {
 };
 
 extern "C" {
+    quint32 conversation_builder_data_color(const ConversationBuilder::Private*, int);
     void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
-    quint32 conversation_builder_data_member_color(const ConversationBuilder::Private*, int);
     void conversation_builder_data_user_id(const ConversationBuilder::Private*, int, QString*, qstring_set);
     void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -255,16 +255,16 @@ Qt::ItemFlags ConversationBuilder::flags(const QModelIndex &i) const
     return flags;
 }
 
+quint32 ConversationBuilder::color(int row) const
+{
+    return conversation_builder_data_color(m_d, row);
+}
+
 QString ConversationBuilder::displayName(int row) const
 {
     QString s;
     conversation_builder_data_display_name(m_d, row, &s, set_qstring);
     return s;
-}
-
-quint32 ConversationBuilder::memberColor(int row) const
-{
-    return conversation_builder_data_member_color(m_d, row);
 }
 
 QString ConversationBuilder::userId(int row) const
@@ -281,9 +281,9 @@ QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(displayName(index.row()));
+            return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 1:
-            return QVariant::fromValue(memberColor(index.row()));
+            return QVariant::fromValue(displayName(index.row()));
         case Qt::UserRole + 2:
             return QVariant::fromValue(userId(index.row()));
         }
@@ -305,8 +305,8 @@ int ConversationBuilder::role(const char* name) const {
 }
 QHash<int, QByteArray> ConversationBuilder::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "displayName");
-    names.insert(Qt::UserRole + 1, "memberColor");
+    names.insert(Qt::UserRole + 0, "color");
+    names.insert(Qt::UserRole + 1, "displayName");
     names.insert(Qt::UserRole + 2, "userId");
     return names;
 }

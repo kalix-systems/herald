@@ -84,11 +84,10 @@ ListView {
                 onReleased: parent.state = containsMouse ? "hovering" : ""
 
                 onClicked: {
-
                     if (convoPane.state == "newGroupState") {
+
                         groupMemberSelect.addMember(userId)
                     }
-
                 }
             }
 
