@@ -59,7 +59,7 @@ Component {
                 defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
 
                 Layout.alignment: Qt.AlignLeft
-                //xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
+                xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
 
             }
           Keys.onPressed: {
@@ -86,9 +86,6 @@ Component {
               // this makes sure that returns and tabs are not evaluated
               if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
                   event.accepted = true
-              }
-              if (event.key === Qt.Key_Backspace && text === "") {
-                  groupMemberSelect.remove(groupMemberSelect.count - 1)
               }
           }
 

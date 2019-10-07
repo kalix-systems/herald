@@ -49,7 +49,6 @@ Pane {
 
         anchors.top: toolBar.bottom
         width: parent.width
-
         Loader {
             property string searchPlaceholder: ""
             property bool contactsSearch: false
@@ -178,6 +177,7 @@ Pane {
                     target: sideBarBodyLoader
                     sourceComponent: contactslvComponent
                 }
+
 
                 PropertyChanges {
                     target: searchLoader
