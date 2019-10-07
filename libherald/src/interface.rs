@@ -701,7 +701,6 @@ pub trait ConversationsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn try_poll(&self) -> u8;
-    fn add_conversation(&mut self) -> Vec<u8>;
     fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -809,14 +808,6 @@ pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations,
 #[no_mangle]
 pub unsafe extern "C" fn conversations_try_poll_get(ptr: *const Conversations) -> u8 {
     (&*ptr).try_poll()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
-    let o = &mut *ptr;
-    let r = o.add_conversation();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]

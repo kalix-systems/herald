@@ -101,10 +101,6 @@
                 }
             },
             "functions": {
-                "addConversation": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
                 "removeConversation": {
                     "mut": true,
                     "return": "bool",

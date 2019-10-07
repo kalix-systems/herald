@@ -102,10 +102,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.list.push(self.local_id);
 
         let cid = ret_err!(
-            heraldcore::network::start_conversation(
-                self.list.as_slice(),
-                self.title.as_ref().map(String::as_str)
-            ),
+            heraldcore::network::start_conversation(self.list.as_slice(), self.title.take()),
             ffi::NULL_CONV_ID.to_vec()
         );
 
