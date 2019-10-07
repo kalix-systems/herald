@@ -66,7 +66,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         self.model.begin_remove_rows(ix, ix);
         self.list.remove(ix);
-        self.model.end_insert_rows();
+        self.model.end_remove_rows();
 
         true
     }
@@ -78,7 +78,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         self.model.begin_remove_rows(ix, ix);
         self.list.remove(ix);
-        self.model.end_insert_rows();
+        self.model.end_remove_rows();
 
         true
     }
@@ -89,7 +89,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             self.list.len().saturating_sub(1),
         );
         self.list.pop();
-        self.model.end_insert_rows();
+        self.model.end_remove_rows();
     }
 
     fn finalize(&mut self) -> ffi::ConversationId {
