@@ -122,7 +122,6 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     quint8 tryPoll() const;
-    Q_INVOKABLE QByteArray addConversation();
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();

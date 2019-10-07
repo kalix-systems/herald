@@ -12,7 +12,10 @@ fn add_get_delete() {
 
     let conv_id = [0; 32].into();
 
-    crate::conversation::add_conversation(Some(&conv_id), None).expect(womp!());
+    crate::conversation::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!());
 
     let msg = types::cmessages::Ack {
         of: [1; 32].into(),

@@ -669,7 +669,6 @@ extern "C" {
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
     quint8 conversations_try_poll_get(const Conversations::Private*);
-    void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
     bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
@@ -1810,12 +1809,6 @@ void Conversations::setFilterRegex(bool v) {
 quint8 Conversations::tryPoll() const
 {
     return conversations_try_poll_get(m_d);
-}
-QByteArray Conversations::addConversation()
-{
-    QByteArray s;
-    conversations_add_conversation(m_d, &s, set_qbytearray);
-    return s;
 }
 bool Conversations::pollUpdate()
 {
