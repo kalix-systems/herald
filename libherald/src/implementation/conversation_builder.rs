@@ -1,4 +1,9 @@
-use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
+use crate::{
+    bounds_chk, ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{conv_global::*, USER_DATA},
+};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -92,16 +97,25 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.model.end_remove_rows();
     }
 
+    // TODO: Does this have to be blocking?
     fn finalize(&mut self) -> ffi::ConversationId {
         self.list.push(self.local_id);
-        ret_err!(
+
+        let cid = ret_err!(
             heraldcore::network::start_conversation(
                 self.list.as_slice(),
                 self.title.as_ref().map(String::as_str)
             ),
             ffi::NULL_CONV_ID.to_vec()
-        )
-        .to_vec()
+        );
+
+        // send update to Conversations list
+        ret_err!(
+            CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)),
+            ffi::NULL_CONV_ID.to_vec()
+        );
+
+        cid.to_vec()
     }
 
     fn set_title(&mut self, title: String) {

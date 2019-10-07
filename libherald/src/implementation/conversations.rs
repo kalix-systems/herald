@@ -1,12 +1,9 @@
-use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{ConvUpdates, CONV_CHANNEL},
-};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::conv_global::*};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
+    errors::HErr,
+    types::ConversationId,
     utils::SearchPattern,
 };
 
@@ -28,8 +25,23 @@ pub struct Conversations {
     list: Vec<Conversation>,
 }
 
+impl Conversations {
+    fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
+        let meta = conversation::meta(&cid)?;
+        let conv = Conversation {
+            matched: meta.matches(&self.filter),
+            inner: meta,
+        };
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(conv);
+        self.model.end_insert_rows();
+        Ok(())
+    }
+}
+
 impl ConversationsTrait for Conversations {
-    fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self {
+    fn new(mut emit: ConversationsEmitter, model: ConversationsList) -> Self {
         let list = abort_err!(conversation::all_meta())
             .into_iter()
             .map(|inner| Conversation {
@@ -39,6 +51,10 @@ impl ConversationsTrait for Conversations {
             .collect();
 
         let filter = abort_err!(SearchPattern::new_normal("".into()));
+
+        let global_emit = emit.clone();
+
+        CONV_EMITTER.lock().replace(global_emit);
 
         Self {
             emit,
@@ -208,16 +224,10 @@ impl ConversationsTrait for Conversations {
         for update in CONV_CHANNEL.rx.try_iter() {
             match update {
                 NewConversation(cid) => {
-                    let meta = ret_err!(conversation::meta(&cid), false);
-                    let conv = Conversation {
-                        matched: meta.matches(&self.filter),
-                        inner: meta,
-                    };
-                    self.model
-                        .begin_insert_rows(self.row_count(), self.row_count());
-                    self.list.push(conv);
-                    self.model.end_insert_rows();
+                    // TODO add push notification here
+                    ret_err!(self.raw_fetch_and_insert(cid), false)
                 }
+                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
             }
         }
         true

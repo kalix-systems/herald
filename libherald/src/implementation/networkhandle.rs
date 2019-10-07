@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::*};
+use crate::{ffi, interface::*, ret_err, ret_none, shared};
 use crossbeam_channel::*;
 use herald_common::*;
 use heraldcore::{
@@ -34,8 +34,8 @@ pub struct EffectsFlags {
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    msg_senders: HashMap<ConversationId, Sender<MsgUpdate>>,
-    members_senders: HashMap<ConversationId, Sender<MemberUpdate>>,
+    msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
+    members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
     effects_flags: Arc<EffectsFlags>,
     emit: Emitter,
 }
@@ -45,6 +45,7 @@ impl NotifHandler {
         use Notification::*;
         match notif {
             NewMsg(msg_id, cid) => {
+                use shared::messages::*;
                 let tx = match self.msg_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
@@ -61,6 +62,7 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             MsgReceipt { mid, cid, stat, by } => {
+                use shared::messages::*;
                 let tx = match self.msg_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
@@ -77,6 +79,8 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             NewContact(uid, cid) => {
+                use shared::{conv_global::*, user_global::*};
+
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
                 self.effects_flags
@@ -90,11 +94,14 @@ impl NotifHandler {
                 self.emit.conv_data_changed();
             }
             NewConversation(cid) => {
+                use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
                 self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
                 self.emit.conv_data_changed();
             }
             AddContactResponse(cid, uid, accepted) => {
+                use shared::{conv_global::*, user_global::*};
+
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
                 self.effects_flags
@@ -110,6 +117,8 @@ impl NotifHandler {
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
+                use shared::members::*;
+
                 let tx = match self.members_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
