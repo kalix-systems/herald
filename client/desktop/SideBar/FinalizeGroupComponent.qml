@@ -50,6 +50,20 @@ Component {
             anchors.fill: parent
         }
 
+        Keys.onPressed: {
+            // NOTE: What is the first comparison doing?
+            // this makes sure that returns and tabs are not evaluated
+            if (event.key === Qt.Key_Tab){
+                event.accepted = true
+            }
+
+            if (event.key === Qt.Key_Return) {
+                groupMemberSelect.setTitle(groupTitle.text)
+                groupMemberSelect.finalize()
+                convoPane.state = ""
+            }
+        }
+
 
 
 

@@ -85,11 +85,15 @@ Component {
           Keys.onPressed: {
               // NOTE: What is the first comparison doing?
               // this makes sure that returns and tabs are not evaluated
-              if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
+              if (event.key === Qt.Key_Tab){
                   event.accepted = true
               }
               if (event.key === Qt.Key_Backspace && text === "") {
                   groupMemberSelect.removeLast()
+              }
+
+              if (event.key === Qt.Key_Return) {
+                  convoPane.state = "finalizeGroupState"
               }
           }
 
