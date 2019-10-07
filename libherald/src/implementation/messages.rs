@@ -215,6 +215,14 @@ impl MessagesTrait for Messages {
         ret_none!(self.map.get(&msg_id), "".to_owned()).body.clone()
     }
 
+    fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
+        let msg_id = ret_err!(MsgId::try_from(msg_id), ffi::NULL_USER_ID.to_string());
+
+        ret_none!(self.map.get(&msg_id), ffi::NULL_USER_ID.to_string())
+            .author
+            .to_string()
+    }
+
     fn op(&self, row_index: usize) -> ffi::MsgIdRef {
         let mid = ret_none!(self.list.get(row_index), &ffi::NULL_MSG_ID).msg_id;
 
