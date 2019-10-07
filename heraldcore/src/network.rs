@@ -288,12 +288,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
-    // TODO: This is a hacky fix. Currently the server sends copies of conversation messages
-    // back to the client that sent them. This will be addressed on the server.
-    if cm.from().did == *Config::static_keypair()?.public_key() {
-        return Ok(ev);
-    }
-
     match cm.open()? {
         NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
         DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
@@ -380,8 +374,9 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
+        let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
-        let req = push_users::Req { to, msg };
+        let req = push_users::Req { to, exc, msg };
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => Ok(()),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(

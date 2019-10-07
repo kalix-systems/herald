@@ -74,7 +74,7 @@ impl State {
     }
 
     pub async fn push_users(&self, req: push_users::Req) -> Result<push_users::Res, Error> {
-        let push_users::Req { to, msg } = req;
+        let push_users::Req { to, exc, msg } = req;
         let msg = Push {
             tag: PushTag::User,
             timestamp: Utc::now(),
@@ -89,7 +89,11 @@ impl State {
             if !con.user_exists(&user)? {
                 missing_users.push(user);
             } else {
-                to_devs.extend_from_slice(&con.valid_keys(&user)?);
+                for dev in con.valid_keys(&user)? {
+                    if dev != exc {
+                        to_devs.push(dev);
+                    }
+                }
             }
         }
 
