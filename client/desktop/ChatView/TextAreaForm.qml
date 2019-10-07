@@ -79,19 +79,16 @@ Rectangle {
         }
         topPadding: QmlCfg.smallMargin
 
+        Loader {
+            id: replyLoader
+            active: false
+            source: "ReplyComponent.qml"
+            width: textField.width
+        }
+
         ColumnLayout {
-            width: parent.width
+            id: textField
             Layout.fillWidth: true
-
-            Loader {
-                property int wrapperWidth: containerCol.width
-                property string messageText
-                property color replyBubbleColor: "grey"
-                id: replyLoader
-                active: false
-                source: "ReplyComponent.qml"
-            }
-
             ScrollView {
                 id: scrollView
                 height: scrollHeight
@@ -126,10 +123,6 @@ Rectangle {
         onSelectionAccepted: {
             print("todo: attachments api")
         }
-    }
-
-    onStateChanged: {
-        print(state)
     }
 
     states: [

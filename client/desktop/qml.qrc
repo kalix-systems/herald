@@ -3,7 +3,6 @@
         <file>App.qml</file>
         <file>ChatView/ChatView.qml</file>
         <file>ChatView/ChatBar.qml</file>
-        <file>ChatView/ChatBubbleForm.qml</file>
         <file>ChatView/ChatTextAreaKeys.qml</file>
         <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ConversationWindowForm.qml</file>

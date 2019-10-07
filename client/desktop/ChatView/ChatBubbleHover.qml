@@ -60,7 +60,6 @@ MouseArea {
             chatTextArea.state = "replystate"
             chatTextArea.replyId = messageId
             chatTextArea.replyText = body
-            chatTextArea.replyWidth = 500
         }
     }
 }

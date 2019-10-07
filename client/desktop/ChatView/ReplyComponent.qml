@@ -15,9 +15,21 @@ import QtQuick.Layouts 1.12
 //NPB: just looks kind bad
 Rectangle {
     property color startColor: "light blue"
+    property string opText: "Optimatric"
     radius: QmlCfg.radius
     color: startColor
+    width: parent.width
+    height: textCol.height
+
+    Column {
+        id: textCol
+        anchors.margins: QmlCfg.margin
+        Text {
+            text: opText
+        }
+    }
     Rectangle {
+        color: startColor
         height: QmlCfg.margin
         anchors.top: parent.bottom
     }
