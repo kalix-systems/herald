@@ -19,9 +19,8 @@ Component {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
-            anchors.top: parent.top
-            scale: 0.7
-
+            scale: 0.8
+            anchors.verticalCenter: parent.verticalCenter
             onClicked: convoPane.state = "newConversationState"
 
         }
@@ -30,8 +29,9 @@ Component {
             id: frontbutton
             source: "qrc:/forward-arrow-icon.svg"
             anchors.right: parent.right
-            anchors.top: parent.top
-            scale: 0.7
+            scale: 0.8
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: convoPane.state = "finalizeGroupState"
 
         }
 
@@ -88,7 +88,7 @@ Component {
                   event.accepted = true
               }
               if (event.key === Qt.Key_Backspace && text === "") {
-                  groupMemberSelect.removeLast()
+                  groupMemberSelect.remove(groupMemberSelect.count - 1)
               }
           }
 

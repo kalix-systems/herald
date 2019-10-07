@@ -28,7 +28,7 @@ Rectangle {
         anchors.verticalCenter: innerText.verticalCenter
         anchors.right: parent.right
         padding: 0
-        scale: 0.7
+        scale: 0.6
         source: "qrc:/x-icon-white.svg"
       //  onClicked: print("ho")
 
