@@ -14,3 +14,6 @@ pub mod ffi;
 pub mod shared;
 /// Utilities.
 pub mod utils;
+
+/// App name on desktop, used for toasts
+pub(crate) const DESKTOP_APP_NAME: &str = "heraldqtDesktop";
