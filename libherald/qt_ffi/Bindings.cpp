@@ -1550,7 +1550,11 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    quint32 users_color_by_id(const Users::Private*, const ushort*, int);
+    void users_display_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
+    void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     bool users_poll_update(Users::Private*);
+    void users_profile_picture_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     bool users_toggle_filter_regex(Users::Private*);
 };
 
@@ -2281,9 +2285,31 @@ QByteArray Users::add(const QString& id)
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
 }
+quint32 Users::colorById(const QString& id) const
+{
+    return users_color_by_id(m_d, id.utf16(), id.size());
+}
+QString Users::displayNameById(const QString& id) const
+{
+    QString s;
+    users_display_name_by_id(m_d, id.utf16(), id.size(), &s, set_qstring);
+    return s;
+}
+QString Users::nameById(const QString& id) const
+{
+    QString s;
+    users_name_by_id(m_d, id.utf16(), id.size(), &s, set_qstring);
+    return s;
+}
 bool Users::pollUpdate()
 {
     return users_poll_update(m_d);
+}
+QString Users::profilePictureById(const QString& id) const
+{
+    QString s;
+    users_profile_picture_by_id(m_d, id.utf16(), id.size(), &s, set_qstring);
+    return s;
 }
 bool Users::toggleFilterRegex()
 {

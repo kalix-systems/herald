@@ -396,7 +396,11 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
+    Q_INVOKABLE quint32 colorById(const QString& id) const;
+    Q_INVOKABLE QString displayNameById(const QString& id) const;
+    Q_INVOKABLE QString nameById(const QString& id) const;
     Q_INVOKABLE bool pollUpdate();
+    Q_INVOKABLE QString profilePictureById(const QString& id) const;
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
