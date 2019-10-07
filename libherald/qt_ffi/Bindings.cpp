@@ -344,6 +344,7 @@ extern "C" {
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    void conversation_builder_remove_last(ConversationBuilder::Private*);
     bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
     bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
     void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
@@ -1694,6 +1695,10 @@ QByteArray ConversationBuilder::finalize()
     QByteArray s;
     conversation_builder_finalize(m_d, &s, set_qbytearray);
     return s;
+}
+void ConversationBuilder::removeLast()
+{
+    return conversation_builder_remove_last(m_d);
 }
 bool ConversationBuilder::removeMemberById(const QString& user_id)
 {

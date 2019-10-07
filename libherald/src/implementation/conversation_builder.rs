@@ -83,6 +83,13 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
+    fn remove_last(&mut self) {
+        self.model
+            .begin_remove_rows(self.list.len(), self.list.len());
+        self.list.pop();
+        self.model.end_insert_rows();
+    }
+
     fn finalize(&mut self) -> ffi::ConversationId {
         self.list.push(self.local_id);
         ret_err!(

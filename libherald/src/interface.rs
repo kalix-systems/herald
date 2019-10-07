@@ -400,6 +400,7 @@ pub trait ConversationBuilderTrait {
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> Vec<u8>;
+    fn remove_last(&mut self) -> ();
     fn remove_member_by_id(&mut self, user_id: String) -> bool;
     fn remove_member_by_index(&mut self, index: u64) -> bool;
     fn set_title(&mut self, title: String) -> ();
@@ -474,6 +475,13 @@ pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBui
     let r = o.finalize();
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_remove_last(ptr: *mut ConversationBuilder) -> () {
+    let o = &mut *ptr;
+    let r = o.remove_last();
+    r
 }
 
 #[no_mangle]

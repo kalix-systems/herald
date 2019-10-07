@@ -513,6 +513,10 @@
                         }
                     ]
                 },
+                "removeLast": {
+                    "return": "void",
+                    "mut": true
+                },
                 "finalize": {
                     "mut": true,
                     "return": "QByteArray"
