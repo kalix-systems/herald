@@ -21,6 +21,7 @@ Rectangle {
 
         onClicked: {
             convoPane.state = "newGroupState"
+
         }
     }
 

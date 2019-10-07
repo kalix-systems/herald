@@ -74,6 +74,10 @@ Pane {
         id: finalizeGroupComponent
     }
 
+    ConversationBuilder {
+        id: groupMemberSelect
+    }
+
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
@@ -87,9 +91,7 @@ Pane {
         visible: (convoPane.state == "newConversationState")
     }
 
-    ConversationBuilder {
-        id: groupMemberSelect
-    }
+
 
     ListModel {
         id: dummyGroup

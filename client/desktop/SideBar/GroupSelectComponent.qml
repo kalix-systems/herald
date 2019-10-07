@@ -15,6 +15,7 @@ Component {
         id: wrapperRect
         color: QmlCfg.palette.mainColor
 
+
         Common.ButtonForm {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
@@ -88,12 +89,9 @@ Component {
                   event.accepted = true
               }
               if (event.key === Qt.Key_Backspace && text === "") {
-                  groupMemberSelect.remove(groupMemberSelect.count - 1)
+                  groupMemberSelect.removeLast()
               }
           }
-
-
-
 
           onTextChanged: {
               if (contactsSearch) {
@@ -107,10 +105,7 @@ Component {
 
     }
 
-
-
     }
-
 
 
 }
