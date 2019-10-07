@@ -5,5 +5,6 @@ import LibHerald 1.0
 import "../SideBar" as SBUtils
 import "../common" as Common
 
+// this is its own file because it should not be in a component.
     ConversationBuilder {
     }
