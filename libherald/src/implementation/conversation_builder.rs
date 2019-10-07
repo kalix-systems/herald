@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -59,10 +59,22 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
-    fn remove_member(&mut self, user_id: ffi::UserId) -> bool {
+    fn remove_member_by_id(&mut self, user_id: ffi::UserId) -> bool {
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
 
         let ix = ret_none!(self.list.iter().position(|uid| uid == &user_id), false);
+
+        self.model.begin_remove_rows(ix, ix);
+        self.list.remove(ix);
+        self.model.end_insert_rows();
+
+        true
+    }
+
+    fn remove_member_by_index(&mut self, index: u64) -> bool {
+        let ix = index as usize;
+
+        bounds_chk!(self, ix, false);
 
         self.model.begin_remove_rows(ix, ix);
         self.list.remove(ix);
@@ -105,5 +117,9 @@ impl ConversationBuilderTrait for ConversationBuilder {
         let inner = ret_none!(USER_DATA.get(uid), 0);
 
         inner.color
+    }
+
+    fn user_id(&self, index: usize) -> &str {
+        ret_none!(self.list.get(index), "").as_str()
     }
 }

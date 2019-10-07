@@ -185,6 +185,7 @@ extern "C" {
 extern "C" {
     quint32 conversation_builder_data_color(const ConversationBuilder::Private*, int);
     void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_data_user_id(const ConversationBuilder::Private*, int, QString*, qstring_set);
     void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int conversation_builder_row_count(const ConversationBuilder::Private*);
@@ -266,6 +267,13 @@ QString ConversationBuilder::displayName(int row) const
     return s;
 }
 
+QString ConversationBuilder::userId(int row) const
+{
+    QString s;
+    conversation_builder_data_user_id(m_d, row, &s, set_qstring);
+    return s;
+}
+
 QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
 {
     Q_ASSERT(rowCount(index.parent()) > index.row());
@@ -276,6 +284,8 @@ QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(color(index.row()));
         case Qt::UserRole + 1:
             return QVariant::fromValue(displayName(index.row()));
+        case Qt::UserRole + 2:
+            return QVariant::fromValue(userId(index.row()));
         }
         break;
     }
@@ -297,6 +307,7 @@ QHash<int, QByteArray> ConversationBuilder::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "displayName");
+    names.insert(Qt::UserRole + 2, "userId");
     return names;
 }
 QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientation, int role) const
@@ -333,7 +344,8 @@ extern "C" {
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
-    bool conversation_builder_remove_member(ConversationBuilder::Private*, const ushort*, int);
+    bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
+    bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
     void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
 };
 
@@ -1683,9 +1695,13 @@ QByteArray ConversationBuilder::finalize()
     conversation_builder_finalize(m_d, &s, set_qbytearray);
     return s;
 }
-bool ConversationBuilder::removeMember(const QString& user_id)
+bool ConversationBuilder::removeMemberById(const QString& user_id)
 {
-    return conversation_builder_remove_member(m_d, user_id.utf16(), user_id.size());
+    return conversation_builder_remove_member_by_id(m_d, user_id.utf16(), user_id.size());
+}
+bool ConversationBuilder::removeMemberByIndex(quint64 index)
+{
+    return conversation_builder_remove_member_by_index(m_d, index);
 }
 void ConversationBuilder::setTitle(const QString& title)
 {

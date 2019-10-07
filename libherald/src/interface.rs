@@ -400,7 +400,8 @@ pub trait ConversationBuilderTrait {
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> Vec<u8>;
-    fn remove_member(&mut self, user_id: String) -> bool;
+    fn remove_member_by_id(&mut self, user_id: String) -> bool;
+    fn remove_member_by_index(&mut self, index: u64) -> bool;
     fn set_title(&mut self, title: String) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -412,6 +413,7 @@ pub trait ConversationBuilderTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn display_name(&self, index: usize) -> String;
+    fn user_id(&self, index: usize) -> &str;
 }
 
 #[no_mangle]
@@ -475,11 +477,18 @@ pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBui
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_remove_member(ptr: *mut ConversationBuilder, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+pub unsafe extern "C" fn conversation_builder_remove_member_by_id(ptr: *mut ConversationBuilder, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.remove_member(user_id);
+    let r = o.remove_member_by_id(user_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_remove_member_by_index(ptr: *mut ConversationBuilder, index: u64) -> bool {
+    let o = &mut *ptr;
+    let r = o.remove_member_by_index(index);
     r
 }
 
@@ -535,6 +544,18 @@ pub unsafe extern "C" fn conversation_builder_data_display_name(
 ) {
     let o = &*ptr;
     let data = o.display_name(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_data_user_id(
+    ptr: *const ConversationBuilder, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.user_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
 }

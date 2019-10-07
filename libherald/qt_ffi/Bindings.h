@@ -66,7 +66,8 @@ public:
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE QByteArray finalize();
-    Q_INVOKABLE bool removeMember(const QString& user_id);
+    Q_INVOKABLE bool removeMemberById(const QString& user_id);
+    Q_INVOKABLE bool removeMemberByIndex(quint64 index);
     Q_INVOKABLE void setTitle(const QString& title);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -87,6 +88,7 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE QString displayName(int row) const;
+    Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

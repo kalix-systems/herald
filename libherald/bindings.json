@@ -467,6 +467,9 @@
                 },
                 "color": {
                     "type": "quint32"
+                },
+                "userId": {
+                    "type": "QString"
                 }
             },
             "functions": {
@@ -490,13 +493,23 @@
                         }
                     ]
                 },
-                "removeMember": {
+                "removeMemberById": {
                     "return": "bool",
                     "mut": true,
                     "arguments": [
                         {
                             "name": "user_id",
                             "type": "QString"
+                        }
+                    ]
+                },
+                "removeMemberByIndex": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "index",
+                            "type": "quint64"
                         }
                     ]
                 },
