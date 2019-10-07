@@ -14,48 +14,55 @@ import QtQuick.Layouts 1.12
 
 //NPB: just looks kind bad
 Rectangle {
-    //message displayed in the textEdit
-    property string messageText: ""
-    //color of the bubble proper
-    property color replyBubbleColor
+
     //who the message is from
     property string from: ""
     // the width the text sits at without wrapping
     //NPB: same weird margin fuding
-    readonly property int naturalWidth: heraldUtils.chatBubbleNaturalWidth(
-                                            chatPane.width,
-                                            messageMetrics.width) + QmlCfg.margin
+   // readonly property int naturalWidth: heraldUtils.chatBubbleNaturalWidth(
+               //                             wrapperWidth,
+                                         //   messageMetrics.width) + QmlCfg.margin
     // the width of the parent object that we either match or override
-    property var uiContainer: {
-        width: 0
-    }
 
-    color: bubbleColor
-    height: col.height
+
+    color: "light green"/*replyBubbleColor*/
+    Layout.preferredHeight: col.height //+ QmlCfg.margin
     //NPB: same weird margin fudging
-    width: Math.max(naturalWidth, uiContainer.width) + QmlCfg.smallMargin
+    Layout.preferredWidth: col.width + QmlCfg.margin
+    Layout.minimumWidth: 100
+    Layout.minimumHeight: 50
 
     TextMetrics {
         id: messageMetrics
         text: messageText
-        elideWidth: 140
+        elide: Text.ElideRight
+        elideWidth: parent.width
     }
 
     radius: QmlCfg.radius
 
-    Column {
+
+    ColumnLayout {
         id: col
         spacing: 0
         Label {
             id: who
             text: from
         }
+       // width: 100
+        Layout.fillHeight: true
+        Layout.fillWidth: true
+//       width: wrapperWidth
+       Component.onCompleted: print(height)
+
 
         TextEdit {
+            leftPadding: QmlCfg.smallMargin
+            bottomPadding: QmlCfg.smallMargin
+            topPadding: QmlCfg.smallMargin
             id: bubbleText
-            text: messageMetrics.text
-            width: naturalWidth
-            wrapMode: TextEdit.Wrap
+            text: messageMetrics.elidedText
+            wrapMode: TextEdit.WrapAnywhere
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true

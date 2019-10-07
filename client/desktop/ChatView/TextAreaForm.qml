@@ -17,6 +17,7 @@ import "../common" as Common
 // RS: Rusts job
 // Factor Component: FC
 Rectangle {
+    id: textWrapperRect
 
     property var parentPage
     // height of the text area, computed in JS
@@ -35,6 +36,9 @@ Rectangle {
     property alias attachmentsDialogue: attachmentsDialogue
     // camera button
     property alias cameraButton: cameraButton
+    property var replyId
+    property string replyText: ""
+    property var replyWidth
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -75,10 +79,23 @@ Rectangle {
         }
         topPadding: QmlCfg.smallMargin
 
+        ColumnLayout {
+            width: parent.width
+            Layout.fillWidth: true
+
+        Loader {
+            property int wrapperWidth: containerCol.width
+            property string messageText
+            property color replyBubbleColor: "grey"
+            visible: false
+            id: replyLoader
+            source: ""
+        }
+
         ScrollView {
             id: scrollView
             height: scrollHeight
-            width: containerCol.width
+            implicitWidth: containerCol.width
             focus: true
 
             TextArea {
@@ -101,6 +118,7 @@ Rectangle {
             }
         }
     }
+    }
 
     FileDialog {
         id: attachmentsDialogue
@@ -108,5 +126,17 @@ Rectangle {
         onSelectionAccepted: {
             print("todo: attachments api")
         }
+    }
+
+    states: State {
+        name: "replystate"
+
+        PropertyChanges {
+            target: replyLoader
+            source: "ReplyComponent.qml"
+            visible: true
+            messageText: replyText
+        }
+
     }
 }

@@ -91,7 +91,10 @@ Rectangle {
             z: 10
 
             onClicked: {
-                print("kaavya! put some business logic here.")
+                chatTextArea.state = "replystate"
+                chatTextArea.replyId = messageId
+                chatTextArea.replyText = messageText
+                chatTextArea.replyWidth = bubbleText.width
             }
         }
     }
@@ -107,11 +110,7 @@ Rectangle {
         }
     }
 
-    // NPB find a better generic way to spawn items inside of chat bubbles, states and loaders
-    Component.onCompleted: {
-        contentArgs.uiContainer = bubbleText
-        attachmentLoader.setSource(additionalContent, contentArgs)
-    }
+   Component.onCompleted: print(heraldUtils.isValidRandId(op))
 
     width: bubble.width
     height: bubble.height
@@ -121,10 +120,34 @@ Rectangle {
         id: bubble
         padding: QmlCfg.smallPadding
 
+        ColumnLayout {
+        Layout.fillWidth: true
         /// NBP: find a better way to generically load content
         Loader {
             id: attachmentLoader
+            property string messageText
+            property color replyBubbleColor
             source: additionalContent
+
+//            property var wrapperWidth: {
+//                if (replyWidth < bubbleText.width)
+//                   {
+//                print("1", replyWidth)
+//                replyWidth + QmlCfg.margin}
+//                else if (bubbleText.width < 100 < replyWidth)
+//                {
+
+//                    print("2", replyWidth)
+//                 100 + QmlCfg.margin}
+//                else
+
+//                {
+//                        print("3", replyWidth)
+//                     bubbleText.width + QmlCfg.margin
+//                    }
+//            }
+
+
         }
 
         Common.CorrectText {
@@ -146,6 +169,21 @@ Rectangle {
                                   QmlCfg.palette.secondaryTextColor, 1.5)
             text: Utils.friendlyTimestamp(epochTimestampMs)
             font.pixelSize: QmlCfg.chatTextSize
+        }
+    }
+    }
+
+
+    states: State {
+        name: "replystate"
+        when: heraldUtils.isValidRandId(op)
+
+
+        PropertyChanges {
+            target: attachmentLoader
+            source: "ReplyComponent.qml"
+            messageText: ownedConversation.messageBodyById(op)
+            replyBubbleColor: Qt.lighter(bubbleColor, 1.3)
         }
     }
 }

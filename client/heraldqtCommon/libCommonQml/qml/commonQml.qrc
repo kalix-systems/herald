@@ -1,9 +1,16 @@
 <RCC>
     <qresource prefix="/">
         <file>Avatar.qml</file>
-        <file>ConversationList.qml</file>
         <file>qmldir</file>
         <file>UtilityBar.qml</file>
         <file>TeamColumn.qml</file>
+        <file>Harness.qml</file>
+        <file>MultiImageContent.qml</file>
+        <file>ImageContent.qml</file>
+        <file>ReplyContent.qml</file>
+        <file>ChatBubble/ChatBubble.qml</file>
+        <file>ChatBubble/StandardBubble.qml</file>
+        <file>ChatBubble/ReplyBubble.qml</file>
+        <file>ChatBubble/ImageBubble.qml</file>
     </qresource>
 </RCC>
