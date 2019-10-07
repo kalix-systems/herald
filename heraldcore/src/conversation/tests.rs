@@ -7,7 +7,9 @@ use std::convert::TryInto;
 #[serial]
 fn conv_id_length() {
     Database::reset_all().expect(womp!());
-    super::add_conversation(None, None).expect(womp!("failed to create conversation"));
+    super::ConversationBuilder::new()
+        .add()
+        .expect(womp!("failed to create conversation"));
 
     let all_meta = super::all_meta().expect(womp!("failed to get data"));
 
@@ -20,20 +22,30 @@ fn add_conversation() {
     Database::reset_all().expect(womp!());
 
     // test without id
-    super::add_conversation(None, None).expect(womp!("failed to create conversation"));
+    super::ConversationBuilder::new()
+        .add()
+        .expect(womp!("failed to create conversation"));
 
     let conversation_id = ConversationId::from([0; 32]);
     // test with id
     assert_eq!(
         conversation_id,
-        super::add_conversation(Some(&conversation_id), None)
+        super::ConversationBuilder::new()
+            .conversation_id(conversation_id)
+            .add()
             .expect(womp!("failed to create conversation"))
     );
 
-    super::add_conversation(Some(&[1; 32].into()), Some("el groupo"))
+    super::ConversationBuilder::new()
+        .conversation_id([1; 32].into())
+        .title("el groupo".to_owned())
+        .add()
         .expect(womp!("failed to create conversation"));
 
-    super::add_conversation(Some(&[2; 32].into()), Some("el groupo"))
+    super::ConversationBuilder::new()
+        .conversation_id([2; 32].into())
+        .title("el groupo".to_owned())
+        .add()
         .expect(womp!("failed to create conversation"));
 }
 
@@ -47,7 +59,9 @@ fn add_and_get() {
 
     let conversation = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conversation), None)
+    super::ConversationBuilder::new()
+        .conversation_id(conversation)
+        .add()
         .expect(womp!("Failed to create conversation"));
 
     crate::message::add_message(None, author, &conversation, "1", None, None, &None)
@@ -67,8 +81,10 @@ fn matches() {
     Database::reset_all().expect(womp!());
 
     // test without id
-    let conv_id =
-        super::add_conversation(None, Some("title")).expect(womp!("failed to create conversation"));
+    let conv_id = super::ConversationBuilder::new()
+        .title("title".into())
+        .add()
+        .expect(womp!("failed to create conversation"));
 
     let conv = meta(&conv_id).expect(womp!());
 
@@ -87,7 +103,10 @@ fn set_prof_pic() {
     Database::reset_all().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to create conversation"));
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!("Failed to create conversation"));
 
     let test_picture = "test_resources/maryland.png";
 
@@ -102,7 +121,10 @@ fn set_muted_test() {
     Database::reset_all().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to create conversation"));
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!("Failed to create conversation"));
 
     super::set_muted(&conv_id, true).expect(womp!("Unable to set mute"));
 
@@ -124,7 +146,10 @@ fn set_get_meta() {
 
     let conv_id = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to create conversation"));
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!("Failed to create conversation"));
 
     super::set_color(&conv_id, 1).expect(womp!("Failed to set color"));
 
@@ -138,7 +163,10 @@ fn set_get_meta() {
 
     let conv_id2 = ConversationId::from([1; 32]);
 
-    super::add_conversation(Some(&conv_id2), Some("hello"))
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id2)
+        .title("hello".to_owned())
+        .add()
         .expect(womp!("Failed to create conversation"));
 
     let all_meta = super::all_meta().expect(womp!("Failed to get all metadata"));
@@ -158,7 +186,10 @@ fn conv_messages_since() {
 
     let conv_id = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to make conversation"));
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!("Failed to make conversation"));
 
     crate::message::add_message(None, contact, &conv_id, "1", None, None, &None)
         .expect(womp!("Failed to make message"));
@@ -187,7 +218,10 @@ fn add_remove_member() {
         .add()
         .expect(womp!("Failed to add id2"));
 
-    super::add_conversation(Some(&conv_id), None).expect(womp!("Failed to create conversation"));
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!("Failed to create conversation"));
 
     crate::members::add_member(&conv_id, id1).expect(womp!("failed to add member"));
 
@@ -214,7 +248,9 @@ fn delete_message() {
 
     let conversation = ConversationId::from([0; 32]);
 
-    super::add_conversation(Some(&conversation), None)
+    super::ConversationBuilder::new()
+        .conversation_id(conversation)
+        .add()
         .expect(womp!("Failed to create conversation"));
 
     let (msg_id, _) =
@@ -238,7 +274,9 @@ fn delete_conversation() {
 
     let conversation = [0; 32].into();
 
-    super::add_conversation(Some(&conversation), None)
+    super::ConversationBuilder::new()
+        .conversation_id(conversation)
+        .add()
         .expect(womp!("Failed to create conversation"));
 
     crate::message::add_message(None, author, &conversation, "1", None, None, &None)

@@ -361,29 +361,37 @@ impl ContactBuilder {
     }
 
     pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<Contact, HErr> {
+        use crate::conversation::ConversationBuilder;
+
+        let mut conv_builder = ConversationBuilder::new();
+        conv_builder.pairwise(true);
+
         let color = self
             .color
             .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
+
+        conv_builder.color(color);
 
         let name = self.name.as_ref().map(|s| s.as_str());
 
         let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
 
         let title = if let ContactType::Local = contact_type {
-            Some(crate::config::NTS_CONVERSATION_NAME)
+            crate::config::NTS_CONVERSATION_NAME
         } else {
             match name {
-                Some(name) => Some(name),
-                None => Some(self.id.as_str()),
+                Some(name) => name,
+                None => self.id.as_str(),
             }
         };
 
-        let pairwise_conversation = match self.pairwise_conversation {
-            Some(conv_id) => {
-                crate::conversation::add_pairwise_conversation(tx, Some(&conv_id), title)?
-            }
-            None => crate::conversation::add_pairwise_conversation(tx, None, title)?,
-        };
+        conv_builder.title(title.to_owned());
+
+        if let Some(cid) = self.pairwise_conversation {
+            conv_builder.conversation_id(cid);
+        }
+
+        let pairwise_conversation = conv_builder.add_with_tx(&tx)?;
 
         let contact = Contact {
             id: self.id,

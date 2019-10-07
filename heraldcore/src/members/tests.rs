@@ -1,5 +1,5 @@
 use super::*;
-use crate::{contact::ContactBuilder, conversation::add_conversation, womp};
+use crate::{contact::ContactBuilder, conversation::ConversationBuilder, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -11,7 +11,7 @@ fn add_remove_member() {
     let uid = "Hello".try_into().expect(womp!());
     ContactBuilder::new(uid).add().expect(womp!());
 
-    let cid = add_conversation(None, None).expect(womp!());
+    let cid = ConversationBuilder::new().add().expect(womp!());
 
     let mems = members(&cid).expect(womp!());
     assert!(mems.is_empty());
@@ -36,7 +36,7 @@ fn add_tx() {
     let uid2 = "World".try_into().expect(womp!());
     ContactBuilder::new(uid2).add().expect(womp!());
 
-    let cid = add_conversation(None, None).expect(womp!());
+    let cid = ConversationBuilder::new().add().expect(womp!());
 
     let mut db = Database::get().expect(womp!());
     let tx = db.transaction().expect(womp!());
