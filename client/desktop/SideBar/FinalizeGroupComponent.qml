@@ -31,7 +31,6 @@ Component {
             anchors.verticalCenter: parent.verticalCenter
             scale: 0.8
             onClicked: {
-                print("hi")
                 convoPane.state = "newGroupState"
             }
         }

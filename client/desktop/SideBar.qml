@@ -24,6 +24,8 @@ Pane {
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
 
+    property alias groupMemberSelect: convoBuilderLoader.item
+
     padding: 0 // All Interior Elements span the entire pane
     height: parent.height
 
@@ -74,9 +76,6 @@ Pane {
         id: finalizeGroupComponent
     }
 
-    ConversationBuilder {
-        id: groupMemberSelect
-    }
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
@@ -93,8 +92,8 @@ Pane {
 
 
 
-    ListModel {
-        id: dummyGroup
+    Loader {
+        id: convoBuilderLoader
     }
 
     ///--- Contacts View Actual
@@ -190,6 +189,10 @@ Pane {
                     sourceComponent: groupSelectComponent
                     contactsSearch: true
                 }
+                PropertyChanges {
+                    target: convoBuilderLoader
+                    source: "SideBar/ConvoBuilder.qml"
+                }
             },
 
             State {
@@ -198,6 +201,11 @@ Pane {
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: finalizeGroupComponent
+                }
+
+                PropertyChanges {
+                    target: convoBuilderLoader
+                    source: "SideBar/ConvoBuilder.qml"
                 }
             }
 
