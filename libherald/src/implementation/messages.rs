@@ -106,7 +106,7 @@ impl Messages {
         use notify_rust::*;
         // TODO: sketchy global state! This should be set
         // somewhere else.
-        set_application(crate::DESKTOP_APP_NAME);
+        // set_application(crate::DESKTOP_APP_NAME);
         Notification::new()
             .summary(&format!("New message from {}", msg.author))
             .subtitle("TODO: macOS has subtitles! Do we want them?")

@@ -44,16 +44,25 @@ Pane {
     }
 
     ///--- SearchBar for contacts, add contact button
-    SBUtils.UtilityBar {
+
+    Column {
         id: utilityBar
+
         anchors.top: toolBar.bottom
+        width: parent.width
 
         Loader {
             property string searchPlaceholder: ""
             property bool contactsSearch: false
-            anchors.fill: parent
             id: searchLoader
+            sourceComponent: utilityBarComponent
+            width: parent.width
         }
+
+    }
+
+    SBUtils.UtilityBar {
+        id: utilityBarComponent
     }
 
     SBUtils.SearchComponent {
@@ -81,6 +90,10 @@ Pane {
     ConversationBuilder {
         id: groupMemberSelect
 
+    }
+
+    ListModel {
+        id: dummyGroup
     }
 
     ///--- Contacts View Actual

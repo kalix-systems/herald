@@ -10,7 +10,8 @@ Component {
     id: searchBarComponent
 
     TextArea {
-        id: searchText
+      id: searchText
+      height: QmlCfg.toolbarHeight
 
       placeholderText: searchLoader.searchPlaceholder
 
@@ -28,10 +29,6 @@ Component {
           }
       }
 
-
-
-
-
       Common.ButtonForm {
           source: "qrc:/x-icon.svg"
           anchors.right: parent.right
@@ -41,8 +38,6 @@ Component {
               convoPane.state = ""
           }
       }
-
-
 
       onTextChanged: {
           if (contactsSearch) {
@@ -58,12 +53,6 @@ Component {
               convoPane.state = ""
           }
       }
-
-
-
-
-
-
 }
 
 }

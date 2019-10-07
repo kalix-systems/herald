@@ -10,7 +10,8 @@ Component {
     id: groupSelectComponent
 
     Rectangle {
-        anchors.fill: parent
+        height: groupFlow.height
+        width: parent.width
         id: wrapperRect
         color: QmlCfg.palette.mainColor
 
@@ -21,7 +22,6 @@ Component {
         leftPadding: QmlCfg.smallMargin
 
         id: groupFlow
-        height: parent.height
         width: parent.width
         spacing: QmlCfg.smallMargin / 2
 
@@ -85,14 +85,6 @@ Component {
                   Qt.callLater((text) => { conversationsModel.filter = text }, searchText.text)
               }
           }
-
-          Keys.onReturnPressed: {
-              if (convoPane.state == "newContactState") {
-                  JS.insertContact(searchText, contactsModel, networkHandle, conversationsModel)
-                  convoPane.state = ""
-              }
-          }
-
 
     }
 

@@ -15,6 +15,7 @@ import "../SideBar" as SideBar
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
+Component {
 ToolBar {
     id: utilityBar
     anchors.left: parent.left
@@ -75,4 +76,5 @@ ToolBar {
     Popups.NewContactDialogue {
         id: newContactDialogue
     }
+}
 }
