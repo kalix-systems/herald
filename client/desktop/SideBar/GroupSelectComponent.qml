@@ -54,12 +54,12 @@ Component {
 
           SBUtils.ContactBubble {
 
-                text: displayName
-                userId: userId
-                defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
+                text: memberDisplayName
+                userId: memberId
+                defaultColor: QmlCfg.avatarColors[memberColor]
 
                 Layout.alignment: Qt.AlignLeft
-                //xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
+                xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
 
             }
           Keys.onPressed: {
@@ -88,7 +88,7 @@ Component {
                   event.accepted = true
               }
               if (event.key === Qt.Key_Backspace && text === "") {
-                  groupMemberSelect.remove(groupMemberSelect.count - 1)
+                  groupMemberSelect.removeLast()
               }
           }
 

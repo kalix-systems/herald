@@ -244,12 +244,13 @@ impl MessagesTrait for Messages {
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 
-        let id = &ret_none!(self.list.get(row_index), false).msg_id;
+        let id = ret_none!(self.list.get(row_index), false).msg_id;
 
         match message::delete_message(&id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
                 self.list.remove(row_index);
+                self.map.remove(&id);
                 self.model.end_remove_rows();
                 true
             }

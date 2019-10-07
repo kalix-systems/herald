@@ -412,9 +412,10 @@ pub trait ConversationBuilderTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> u32;
-    fn display_name(&self, index: usize) -> String;
-    fn user_id(&self, index: usize) -> &str;
+    fn member_color(&self, index: usize) -> u32;
+    fn member_display_name(&self, index: usize) -> String;
+    fn member_id(&self, index: usize) -> &str;
+    fn member_profile_picture(&self, index: usize) -> Option<String>;
 }
 
 #[no_mangle]
@@ -539,33 +540,47 @@ pub unsafe extern "C" fn conversation_builder_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_color(ptr: *const ConversationBuilder, row: c_int) -> u32 {
+pub unsafe extern "C" fn conversation_builder_data_member_color(ptr: *const ConversationBuilder, row: c_int) -> u32 {
     let o = &*ptr;
-    o.color(to_usize(row)).into()
+    o.member_color(to_usize(row)).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_display_name(
+pub unsafe extern "C" fn conversation_builder_data_member_display_name(
     ptr: *const ConversationBuilder, row: c_int,
     d: *mut QString,
     set: fn(*mut QString, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
-    let data = o.display_name(to_usize(row));
+    let data = o.member_display_name(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_user_id(
+pub unsafe extern "C" fn conversation_builder_data_member_id(
     ptr: *const ConversationBuilder, row: c_int,
     d: *mut QString,
     set: fn(*mut QString, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
-    let data = o.user_id(to_usize(row));
+    let data = o.member_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_data_member_profile_picture(
+    ptr: *const ConversationBuilder, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.member_profile_picture(to_usize(row));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 pub struct ConversationsQObject {}
