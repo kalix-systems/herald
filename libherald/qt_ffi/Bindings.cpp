@@ -183,9 +183,10 @@ extern "C" {
 };
 
 extern "C" {
-    quint32 conversation_builder_data_color(const ConversationBuilder::Private*, int);
-    void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
-    void conversation_builder_data_user_id(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    quint32 conversation_builder_data_member_color(const ConversationBuilder::Private*, int);
+    void conversation_builder_data_member_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_data_member_id(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_data_member_profile_picture(const ConversationBuilder::Private*, int, QString*, qstring_set);
     void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int conversation_builder_row_count(const ConversationBuilder::Private*);
@@ -255,22 +256,29 @@ Qt::ItemFlags ConversationBuilder::flags(const QModelIndex &i) const
     return flags;
 }
 
-quint32 ConversationBuilder::color(int row) const
+quint32 ConversationBuilder::memberColor(int row) const
 {
-    return conversation_builder_data_color(m_d, row);
+    return conversation_builder_data_member_color(m_d, row);
 }
 
-QString ConversationBuilder::displayName(int row) const
+QString ConversationBuilder::memberDisplayName(int row) const
 {
     QString s;
-    conversation_builder_data_display_name(m_d, row, &s, set_qstring);
+    conversation_builder_data_member_display_name(m_d, row, &s, set_qstring);
     return s;
 }
 
-QString ConversationBuilder::userId(int row) const
+QString ConversationBuilder::memberId(int row) const
 {
     QString s;
-    conversation_builder_data_user_id(m_d, row, &s, set_qstring);
+    conversation_builder_data_member_id(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QString ConversationBuilder::memberProfilePicture(int row) const
+{
+    QString s;
+    conversation_builder_data_member_profile_picture(m_d, row, &s, set_qstring);
     return s;
 }
 
@@ -281,11 +289,13 @@ QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(color(index.row()));
+            return QVariant::fromValue(memberColor(index.row()));
         case Qt::UserRole + 1:
-            return QVariant::fromValue(displayName(index.row()));
+            return QVariant::fromValue(memberDisplayName(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(userId(index.row()));
+            return QVariant::fromValue(memberId(index.row()));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(memberProfilePicture(index.row())));
         }
         break;
     }
@@ -305,9 +315,10 @@ int ConversationBuilder::role(const char* name) const {
 }
 QHash<int, QByteArray> ConversationBuilder::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "color");
-    names.insert(Qt::UserRole + 1, "displayName");
-    names.insert(Qt::UserRole + 2, "userId");
+    names.insert(Qt::UserRole + 0, "memberColor");
+    names.insert(Qt::UserRole + 1, "memberDisplayName");
+    names.insert(Qt::UserRole + 2, "memberId");
+    names.insert(Qt::UserRole + 3, "memberProfilePicture");
     return names;
 }
 QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientation, int role) const

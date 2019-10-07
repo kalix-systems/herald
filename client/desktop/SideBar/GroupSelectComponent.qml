@@ -54,9 +54,9 @@ Component {
 
           SBUtils.ContactBubble {
 
-                text: displayName
-                userId: userId
-                defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
+                text: memberDisplayName
+                userId: memberId
+                defaultColor: QmlCfg.avatarColors[memberColor]
 
                 Layout.alignment: Qt.AlignLeft
                 xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
@@ -73,7 +73,7 @@ Component {
             focus: true
             leftPadding: QmlCfg.smallMargin
 
-          placeholderText: if (groupMemberSelect.rowCount() === 0) "Add people"
+          placeholderText: if (groupMemberSelect.count === 0) "Add people"
           else ""
 
           verticalAlignment: TextEdit.AlignVCenter
@@ -87,7 +87,13 @@ Component {
               if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
                   event.accepted = true
               }
+              if (event.key === Qt.Key_Backspace && text === "") {
+                  groupMemberSelect.remove(groupMemberSelect.count - 1)
+              }
           }
+
+
+
 
           onTextChanged: {
               if (contactsSearch) {

@@ -84,8 +84,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn remove_last(&mut self) {
-        self.model
-            .begin_remove_rows(self.list.len(), self.list.len());
+        self.model.begin_remove_rows(
+            self.list.len().saturating_sub(1),
+            self.list.len().saturating_sub(1),
+        );
         self.list.pop();
         self.model.end_insert_rows();
     }
@@ -110,7 +112,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.list.len()
     }
 
-    fn display_name(&self, index: usize) -> String {
+    fn member_display_name(&self, index: usize) -> String {
         let uid = ret_none!(self.list.get(index), "".to_owned());
         let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
         match inner.name.as_ref() {
@@ -119,14 +121,21 @@ impl ConversationBuilderTrait for ConversationBuilder {
         }
     }
 
-    fn color(&self, index: usize) -> u32 {
+    fn member_color(&self, index: usize) -> u32 {
         let uid = ret_none!(self.list.get(index), 0);
         let inner = ret_none!(USER_DATA.get(uid), 0);
 
         inner.color
     }
 
-    fn user_id(&self, index: usize) -> &str {
+    fn member_profile_picture(&self, index: usize) -> Option<String> {
+        let uid = ret_none!(self.list.get(index), None);
+        let inner = ret_none!(USER_DATA.get(uid), None);
+
+        inner.profile_picture.clone()
+    }
+
+    fn member_id(&self, index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(index), "").as_str()
     }
 }

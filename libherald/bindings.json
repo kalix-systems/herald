@@ -461,14 +461,19 @@
         "ConversationBuilder": {
             "type": "List",
             "itemProperties": {
-                "displayName": {
+                "memberDisplayName": {
                     "type": "QString",
                     "rustByValue": true
                 },
-                "color": {
+                "memberColor": {
                     "type": "quint32"
                 },
-                "userId": {
+                "memberProfilePicture": {
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "memberId": {
                     "type": "QString"
                 }
             },
