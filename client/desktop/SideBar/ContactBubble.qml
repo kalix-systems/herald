@@ -12,7 +12,6 @@ Rectangle {
     property alias xButton: xButton
     width: innerText.width + QmlCfg.margin * 3
     height: innerText.height + QmlCfg.margin
-    color: defaultColor
     radius: QmlCfg.radius
     Text {
         anchors.left: parent.left

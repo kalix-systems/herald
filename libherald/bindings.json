@@ -465,7 +465,7 @@
                     "type": "QString",
                     "rustByValue": true
                 },
-                "color": {
+                "memberColor": {
                     "type": "quint32"
                 },
                 "userId": {

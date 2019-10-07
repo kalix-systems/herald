@@ -87,8 +87,8 @@ public:
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE QString displayName(int row) const;
+    Q_INVOKABLE quint32 memberColor(int row) const;
     Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
