@@ -36,9 +36,10 @@ Rectangle {
     property alias attachmentsDialogue: attachmentsDialogue
     // camera button
     property alias cameraButton: cameraButton
-    property var replyId
+
     property string replyText: ""
-    property var replyWidth
+    property string replyName: ""
+    property var replyId
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -81,6 +82,9 @@ Rectangle {
 
         Loader {
             id: replyLoader
+            property string opName: replyName
+            property string opText: replyText
+            height: active ? undefined : 0
             active: false
             source: "ReplyComponent.qml"
             width: textField.width

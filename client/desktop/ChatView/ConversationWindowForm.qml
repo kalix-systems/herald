@@ -31,6 +31,10 @@ Flickable {
         width: QmlCfg.padding
     }
 
+    Component.onCompleted: {
+        chatScrollBar.position = 1.0
+    }
+
     Column {
         id: textMessageCol
         focus: true
@@ -101,7 +105,7 @@ Flickable {
                     color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[3]
                     content: if (false) {
                                  image
-                             } else if (op.bytelength === 32) {
+                             } else if (op.byteLength === 32) {
                                  reply
                              } else {
                                  std

@@ -58,8 +58,9 @@ MouseArea {
 
         onClicked: {
             chatTextArea.state = "replystate"
-            chatTextArea.replyId = messageId
             chatTextArea.replyText = body
+            chatTextArea.replyId = messageId
+            chatTextArea.replyName = "@" + author
         }
     }
 }
