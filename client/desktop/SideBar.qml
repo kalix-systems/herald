@@ -44,7 +44,6 @@ Pane {
     }
 
     ///--- SearchBar for contacts, add contact button
-
     Column {
         id: utilityBar
 
@@ -58,7 +57,6 @@ Pane {
             sourceComponent: utilityBarComponent
             width: parent.width
         }
-
     }
 
     SBUtils.UtilityBar {
@@ -72,7 +70,6 @@ Pane {
     SBUtils.GroupSelectComponent {
         id: groupSelectComponent
     }
-
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
@@ -89,7 +86,6 @@ Pane {
 
     ConversationBuilder {
         id: groupMemberSelect
-
     }
 
     ListModel {
@@ -158,7 +154,6 @@ Pane {
                 }
             },
 
-
             State {
                 name: "newConversationState"
                 PropertyChanges {
@@ -190,8 +185,7 @@ Pane {
                     searchPlaceholder: "Add people"
                     contactsSearch: true
                 }
-                }
-
+            }
         ]
     }
 }

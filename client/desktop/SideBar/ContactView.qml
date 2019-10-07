@@ -86,7 +86,7 @@ ListView {
                 onClicked: {
                     if (convoPane.state == "newGroupState") {
 
-                      groupMemberSelect.addMember(userId)
+                        groupMemberSelect.addMember(userId)
                     }
                 }
             }

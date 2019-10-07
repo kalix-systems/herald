@@ -13,24 +13,24 @@ Page {
         secondary: QmlCfg.palette.secondaryColor
 
         drawerButton {
-            onClicked: homeDrawer.open();
+            onClicked: homeDrawer.open()
         }
 
-       searchButton {
-           onClicked: {
+        searchButton {
+            onClicked: {
 
-           }
-       }
-       toggleButton {
-          onClicked: {
+            }
+        }
+        toggleButton {
+            onClicked: {
 
-          }
-       }
-       menuButton {
-         onClicked: {
+            }
+        }
+        menuButton {
+            onClicked: {
 
-         }
-       }
+            }
+        }
     }
 
     // floating compose message button
@@ -67,13 +67,12 @@ Page {
         }
 
         Rectangle {
-            anchors.left : teamColumn.right
+            anchors.left: teamColumn.right
             color: "black"
             height: parent.height
             width: 1
         }
-
-      }
+    }
 
     // contact view
 }

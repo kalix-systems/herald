@@ -4,7 +4,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 
-
 Rectangle {
     id: bubble
     property color defaultColor
@@ -21,7 +20,6 @@ Rectangle {
         color: "white"
         font.bold: true
         anchors.leftMargin: QmlCfg.smallMargin
-
     }
 
     Common.ButtonForm {
@@ -32,8 +30,6 @@ Rectangle {
         scale: 0.6
         source: "qrc:/x-icon-white.svg"
     }
-
-
 
     states: State {
         name: "clickedstate"

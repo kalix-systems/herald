@@ -6,8 +6,10 @@ import "../common" as Common
 
 Rectangle {
     width: parent.width
-    height: if (visible) 30
-    else 0
+    height: if (visible)
+                30
+            else
+                0
 
     Common.ButtonForm {
         id: groupIcon
@@ -28,5 +30,4 @@ Rectangle {
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
     }
-
 }
