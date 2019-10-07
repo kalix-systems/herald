@@ -56,6 +56,7 @@ Pane {
             sourceComponent: utilityBarComponent
             width: parent.width
         }
+
     }
 
     SBUtils.UtilityBar {
@@ -68,6 +69,9 @@ Pane {
 
     SBUtils.GroupSelectComponent {
         id: groupSelectComponent
+    }
+    SBUtils.FinalizeGroupComponent {
+        id: finalizeGroupComponent
     }
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
@@ -182,10 +186,19 @@ Pane {
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: groupSelectComponent
-                    searchPlaceholder: "Add people"
                     contactsSearch: true
                 }
+            },
+
+            State {
+                name: "finalizeGroupState"
+
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: finalizeGroupComponent
+                }
             }
+
         ]
     }
 }

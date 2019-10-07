@@ -19,9 +19,8 @@ Component {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
-            anchors.top: parent.top
-            scale: 0.7
-
+            scale: 0.8
+            anchors.verticalCenter: parent.verticalCenter
             onClicked: convoPane.state = "newConversationState"
 
         }
@@ -30,8 +29,9 @@ Component {
             id: frontbutton
             source: "qrc:/forward-arrow-icon.svg"
             anchors.right: parent.right
-            anchors.top: parent.top
-            scale: 0.7
+            scale: 0.8
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: convoPane.state = "finalizeGroupState"
 
         }
 
@@ -73,7 +73,7 @@ Component {
             focus: true
             leftPadding: QmlCfg.smallMargin
 
-          placeholderText: if (groupMemberSelect.count === 0) "Add people"
+          placeholderText: if (groupMemberSelect.rowCount() === 0) "Add people"
           else ""
 
           verticalAlignment: TextEdit.AlignVCenter
@@ -88,9 +88,6 @@ Component {
                   event.accepted = true
               }
           }
-
-
-
 
           onTextChanged: {
               if (contactsSearch) {
