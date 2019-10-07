@@ -31,4 +31,11 @@ Rectangle {
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
     }
+    Common.Divider {
+        anchors.verticalCenter:parent.bottom
+        height: 2
+        color: "black"
+        z:1000
+        Component.onCompleted: print(height)
+    }
 }
