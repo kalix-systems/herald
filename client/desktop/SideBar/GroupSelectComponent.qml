@@ -15,11 +15,21 @@ Component {
         id: wrapperRect
         color: QmlCfg.palette.mainColor
 
+        Common.ButtonForm {
+            id: backbutton
+            source: "qrc:/back-arrow-icon.svg"
+            anchors.left: parent.left
+            anchors.top: parent.top
+            scale: 0.7
+
+        }
+
 
     Flow {
 
         topPadding: QmlCfg.smallMargin
         leftPadding: QmlCfg.smallMargin
+       anchors.left: backbutton.right
 
         id: groupFlow
         width: parent.width
@@ -43,6 +53,9 @@ Component {
                        parent.state == "" ? parent.state = "clickedstate" : parent.state = ""
                     }
                 }
+                xButton.onClicked: {
+                   // groupMemberSelect.removeMember(userId)
+                }
 
 
 
@@ -55,6 +68,8 @@ Component {
 
         TextArea {
             id: searchText
+            focus: true
+            leftPadding: QmlCfg.smallMargin
 
           placeholderText: if (groupMemberSelect.count === 0) "Add people"
           else ""

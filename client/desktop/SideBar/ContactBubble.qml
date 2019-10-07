@@ -9,16 +9,28 @@ Rectangle {
     id: bubble
     property color defaultColor
     property alias text: innerText.text
-    width: innerText.width + QmlCfg.margin
+    property alias xButton: xButton
+    width: innerText.width + QmlCfg.margin * 3
     height: innerText.height + QmlCfg.margin
     color: defaultColor
     radius: QmlCfg.radius
     Text {
-        anchors.centerIn: parent
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
         id: innerText
         color: "white"
         font.bold: true
+        anchors.leftMargin: QmlCfg.smallMargin
 
+    }
+
+    Common.ButtonForm {
+        id: xButton
+        anchors.verticalCenter: innerText.verticalCenter
+        anchors.right: parent.right
+        padding: 0
+        scale: 0.6
+        source: "qrc:/x-icon-white.svg"
     }
 
 
