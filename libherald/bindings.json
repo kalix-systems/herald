@@ -142,9 +142,6 @@
                 },
                 "membersData": {
                     "type": "quint8"
-                },
-                "convData": {
-                    "type": "quint8"
                 }
             },
             "functions": {

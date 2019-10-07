@@ -28,7 +28,6 @@ pub struct EffectsFlags {
     msg_data: AtomicU8,
     users_data: AtomicU8,
     members_data: AtomicU8,
-    conv_data: AtomicU8,
 }
 
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
@@ -90,14 +89,12 @@ impl NotifHandler {
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                conv_emit_try_poll();
             }
             NewConversation(cid) => {
                 use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                conv_emit_try_poll();
             }
             AddContactResponse(cid, uid, accepted) => {
                 use shared::{conv_global::*, user_global::*};
@@ -107,13 +104,12 @@ impl NotifHandler {
                 self.effects_flags
                     .users_data
                     .fetch_add(1, Ordering::Acquire);
+                self.emit.users_data_changed();
 
                 // add conversation
                 if accepted {
                     ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                    self.emit.conv_data_changed();
-                    self.emit.users_data_changed();
+                    conv_emit_try_poll();
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -134,7 +130,7 @@ impl NotifHandler {
                 self.effects_flags
                     .members_data
                     .fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                self.emit.members_data_changed();
             }
         }
     }
@@ -154,7 +150,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            conv_data: AtomicU8::new(0),
             users_data: AtomicU8::new(0),
             msg_data: AtomicU8::new(0),
             members_data: AtomicU8::new(0),
@@ -237,10 +232,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn connection_pending(&self) -> bool {
         self.effects_flags.net_pending.load(Ordering::Relaxed)
-    }
-
-    fn conv_data(&self) -> u8 {
-        self.effects_flags.conv_data.load(Ordering::Relaxed)
     }
 
     fn members_data(&self) -> u8 {

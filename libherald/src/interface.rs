@@ -2007,7 +2007,6 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    conv_data_changed: fn(*mut NetworkHandleQObject),
     members_data_changed: fn(*mut NetworkHandleQObject),
     msg_data_changed: fn(*mut NetworkHandleQObject),
     users_data_changed: fn(*mut NetworkHandleQObject),
@@ -2027,7 +2026,6 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            conv_data_changed: self.conv_data_changed,
             members_data_changed: self.members_data_changed,
             msg_data_changed: self.msg_data_changed,
             users_data_changed: self.users_data_changed,
@@ -2047,12 +2045,6 @@ impl NetworkHandleEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.connection_up_changed)(ptr);
-        }
-    }
-    pub fn conv_data_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.conv_data_changed)(ptr);
         }
     }
     pub fn members_data_changed(&mut self) {
@@ -2080,7 +2072,6 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn conv_data(&self) -> u8;
     fn members_data(&self) -> u8;
     fn msg_data(&self) -> u8;
     fn users_data(&self) -> u8;
@@ -2094,7 +2085,6 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_conv_data_changed: fn(*mut NetworkHandleQObject),
     network_handle_members_data_changed: fn(*mut NetworkHandleQObject),
     network_handle_msg_data_changed: fn(*mut NetworkHandleQObject),
     network_handle_users_data_changed: fn(*mut NetworkHandleQObject),
@@ -2103,7 +2093,6 @@ pub extern "C" fn network_handle_new(
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        conv_data_changed: network_handle_conv_data_changed,
         members_data_changed: network_handle_members_data_changed,
         msg_data_changed: network_handle_msg_data_changed,
         users_data_changed: network_handle_users_data_changed,
@@ -2125,11 +2114,6 @@ pub unsafe extern "C" fn network_handle_connection_pending_get(ptr: *const Netwo
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHandle) -> bool {
     (&*ptr).connection_up()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_conv_data_get(ptr: *const NetworkHandle) -> u8 {
-    (&*ptr).conv_data()
 }
 
 #[no_mangle]

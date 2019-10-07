@@ -355,7 +355,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint8 convData READ convData NOTIFY convDataChanged FINAL)
     Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
     Q_PROPERTY(quint8 msgData READ msgData NOTIFY msgDataChanged FINAL)
     Q_PROPERTY(quint8 usersData READ usersData NOTIFY usersDataChanged FINAL)
@@ -365,7 +364,6 @@ public:
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
-    quint8 convData() const;
     quint8 membersData() const;
     quint8 msgData() const;
     quint8 usersData() const;
@@ -375,7 +373,6 @@ public:
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void convDataChanged();
     void membersDataChanged();
     void msgDataChanged();
     void usersDataChanged();

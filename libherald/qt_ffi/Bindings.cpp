@@ -144,10 +144,6 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleConvDataChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->convDataChanged();
-    }
     inline void networkHandleMembersDataChanged(NetworkHandle* o)
     {
         Q_EMIT o->membersDataChanged();
@@ -1222,11 +1218,10 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    quint8 network_handle_conv_data_get(const NetworkHandle::Private*);
     quint8 network_handle_members_data_get(const NetworkHandle::Private*);
     quint8 network_handle_msg_data_get(const NetworkHandle::Private*);
     quint8 network_handle_users_data_get(const NetworkHandle::Private*);
@@ -2160,7 +2155,6 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleConvDataChanged,
         networkHandleMembersDataChanged,
         networkHandleMsgDataChanged,
         networkHandleUsersDataChanged)),
@@ -2180,10 +2174,6 @@ bool NetworkHandle::connectionPending() const
 bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
-}
-quint8 NetworkHandle::convData() const
-{
-    return network_handle_conv_data_get(m_d);
 }
 quint8 NetworkHandle::membersData() const
 {
