@@ -5,11 +5,14 @@ import QtQuick.Dialogs 1.3
 import "../common" as Common
 
 Rectangle {
+    id: bgBar
     width: parent.width
     height: if (visible)
                 30
             else
                 0
+
+    property color hoverColor: QmlCfg.palette.secondaryColor
 
     Common.ButtonForm {
         id: groupIcon
@@ -19,10 +22,7 @@ Rectangle {
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
 
-        onClicked: {
-            convoPane.state = "newGroupState"
 
-        }
     }
 
     Text {
@@ -36,4 +36,26 @@ Rectangle {
         height: 2
         color: "black"
     }
+
+    MouseArea {
+        hoverEnabled: true
+        z: 10
+        anchors.fill: parent
+        onEntered: parent.state = "hovering"
+        onExited: parent.state = ""
+
+        onClicked: {
+            convoPane.state = "newGroupState"
+
+        }
+    }
+
+    states: [
+        State {
+            name: "hovering"
+            PropertyChanges {
+                target: bgBar
+                color: hoverColor
+            }
+        } ]
 }
