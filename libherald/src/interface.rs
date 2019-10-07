@@ -589,6 +589,7 @@ pub struct ConversationsEmitter {
     qobject: Arc<AtomicPtr<ConversationsQObject>>,
     filter_changed: fn(*mut ConversationsQObject),
     filter_regex_changed: fn(*mut ConversationsQObject),
+    try_poll_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
 
@@ -606,6 +607,7 @@ impl ConversationsEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
+            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -623,6 +625,12 @@ impl ConversationsEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
+        }
+    }
+    pub fn try_poll_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -692,6 +700,7 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
+    fn try_poll(&self) -> u8;
     fn add_conversation(&mut self) -> Vec<u8>;
     fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
@@ -723,6 +732,7 @@ pub extern "C" fn conversations_new(
     conversations: *mut ConversationsQObject,
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
+    conversations_try_poll_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),
     conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
     conversations_layout_changed: fn(*mut ConversationsQObject),
@@ -740,6 +750,7 @@ pub extern "C" fn conversations_new(
         qobject: Arc::new(AtomicPtr::new(conversations)),
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
+        try_poll_changed: conversations_try_poll_changed,
         new_data_ready: conversations_new_data_ready,
     };
     let model = ConversationsList {
@@ -793,6 +804,11 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_try_poll_get(ptr: *const Conversations) -> u8 {
+    (&*ptr).try_poll()
 }
 
 #[no_mangle]

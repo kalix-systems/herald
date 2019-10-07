@@ -65,6 +65,9 @@
                 "filterRegex": {
                     "write": true,
                     "type": "bool"
+                },
+                "tryPoll": {
+                    "type": "quint8"
                 }
             },
             "itemProperties": {

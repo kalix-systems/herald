@@ -112,6 +112,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
+    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
@@ -120,6 +121,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
+    quint8 tryPoll() const;
     Q_INVOKABLE QByteArray addConversation();
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
@@ -165,6 +167,7 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+    void tryPollChanged();
 };
 
 class HeraldState : public QObject

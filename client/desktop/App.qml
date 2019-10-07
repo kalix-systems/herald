@@ -25,6 +25,10 @@ Item {
 
     Conversations {
         id: conversationsModel
+
+        onTryPollChanged: {
+            pollUpdate()
+        }
     }
 
     Popups.ConfigPopup {
