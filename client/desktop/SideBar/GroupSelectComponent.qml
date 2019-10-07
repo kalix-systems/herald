@@ -22,6 +22,17 @@ Component {
             anchors.top: parent.top
             scale: 0.7
 
+            onClicked: convoPane.state = "newConversationState"
+
+        }
+
+        Common.ButtonForm {
+            id: frontbutton
+            source: "qrc:/forward-arrow-icon.svg"
+            anchors.right: parent.right
+            anchors.top: parent.top
+            scale: 0.7
+
         }
 
 
@@ -30,9 +41,9 @@ Component {
         topPadding: QmlCfg.smallMargin
         leftPadding: QmlCfg.smallMargin
        anchors.left: backbutton.right
+       anchors.right: frontbutton.left
 
         id: groupFlow
-        width: parent.width
         spacing: QmlCfg.smallMargin / 2
 
 
@@ -44,20 +55,11 @@ Component {
           SBUtils.ContactBubble {
 
                 text: displayName
+                userId: userId
                 defaultColor: QmlCfg.avatarColors[groupMemberSelect.color(index)]
 
                 Layout.alignment: Qt.AlignLeft
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                       parent.state == "" ? parent.state = "clickedstate" : parent.state = ""
-                    }
-                }
-                xButton.onClicked: {
-                   // groupMemberSelect.removeMember(userId)
-                }
-
-
+                //xButton.onClicked: groupMemberSelect.removeMemberByIndex(index)
 
             }
           Keys.onPressed: {

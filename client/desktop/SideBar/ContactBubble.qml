@@ -8,6 +8,7 @@ Rectangle {
     id: bubble
     property color defaultColor
     property alias text: innerText.text
+    property string userId: ""
     property alias xButton: xButton
     width: innerText.width + QmlCfg.margin * 3
     height: innerText.height + QmlCfg.margin
@@ -27,8 +28,12 @@ Rectangle {
         anchors.verticalCenter: innerText.verticalCenter
         anchors.right: parent.right
         padding: 0
-        scale: 0.6
+        scale: 0.7
         source: "qrc:/x-icon-white.svg"
+      //  onClicked: print("ho")
+
+
+
     }
 
     states: State {
