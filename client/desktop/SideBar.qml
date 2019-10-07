@@ -65,13 +65,17 @@ Pane {
         id: utilityBarComponent
     }
 
+    //search component loaded to search convos and contacts
     SBUtils.SearchComponent {
         id: searchBarComponent
     }
 
+    //component loaded when selecting a new group
     SBUtils.GroupSelectComponent {
         id: groupSelectComponent
     }
+
+    //component loaded when finalizing new group
     SBUtils.FinalizeGroupComponent {
         id: finalizeGroupComponent
     }
@@ -122,6 +126,15 @@ Pane {
                 id: conversationsListView
                 anchors.fill: parent
                 model: conversationsModel
+            }
+        }
+
+        Component {
+            id: convoFinalGroup
+            SBUtils.FinalGroupList {
+                id: groupListView
+                anchors.fill: parent
+                model: groupMemberSelect
             }
         }
 
@@ -206,6 +219,11 @@ Pane {
                 PropertyChanges {
                     target: convoBuilderLoader
                     source: "SideBar/ConvoBuilder.qml"
+                }
+
+                PropertyChanges {
+                    target: sideBarBodyLoader
+                    sourceComponent: convoFinalGroup
                 }
             }
 

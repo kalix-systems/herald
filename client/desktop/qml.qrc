@@ -48,5 +48,6 @@
         <file>SideBar/GroupSelectComponent.qml</file>
         <file>SideBar/FinalizeGroupComponent.qml</file>
         <file>SideBar/ConvoBuilder.qml</file>
+        <file>SideBar/FinalGroupList.qml</file>
     </qresource>
 </RCC>

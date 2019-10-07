@@ -73,8 +73,11 @@ Component {
         }
 
         //NOTE: see previous notes about using native dialogs
+        // we're not using this anymore
+        /**
         Popups.NewContactDialogue {
             id: newContactDialogue
         }
+        **/
     }
 }
