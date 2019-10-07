@@ -287,6 +287,13 @@ impl Default for Event {
 fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
+
+    // TODO: This is a hacky fix. Currently the server sends copies of conversation messages
+    // back to the client that sent them. This will be addressed on the server.
+    if cm.from().did == *Config::static_keypair()?.public_key() {
+        return Ok(ev);
+    }
+
     match cm.open()? {
         NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
         DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
@@ -312,11 +319,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             tx.commit()?;
         }
         Msg(msg) => {
-            // fix for message loopback back until this can be handled server side
-            if cm.from().did == *Config::static_keypair()?.public_key() {
-                return Ok(ev);
-            }
-
             let cmessages::Msg { mid, content, op } = msg;
 
             match content {
