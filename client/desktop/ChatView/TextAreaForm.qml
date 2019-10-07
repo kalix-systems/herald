@@ -83,41 +83,41 @@ Rectangle {
             width: parent.width
             Layout.fillWidth: true
 
-        Loader {
-            property int wrapperWidth: containerCol.width
-            property string messageText
-            property color replyBubbleColor: "grey"
-            visible: false
-            id: replyLoader
-            source: ""
-        }
+            Loader {
+                property int wrapperWidth: containerCol.width
+                property string messageText
+                property color replyBubbleColor: "grey"
+                id: replyLoader
+                active: false
+                source: "ReplyComponent.qml"
+            }
 
-        ScrollView {
-            id: scrollView
-            height: scrollHeight
-            implicitWidth: containerCol.width
-            focus: true
+            ScrollView {
+                id: scrollView
+                height: scrollHeight
+                implicitWidth: containerCol.width
+                focus: true
 
-            TextArea {
-                id: chatText
-                background: Rectangle {
-                    color: QmlCfg.palette.secondaryColor
-                    anchors {
-                        fill: parent
-                        horizontalCenter: parent.horizontalCenter
-                        bottom: parent.bottom
+                TextArea {
+                    id: chatText
+                    background: Rectangle {
+                        color: QmlCfg.palette.secondaryColor
+                        anchors {
+                            fill: parent
+                            horizontalCenter: parent.horizontalCenter
+                            bottom: parent.bottom
+                        }
+                        radius: QmlCfg.radius
                     }
-                    radius: QmlCfg.radius
+                    selectionColor: QmlCfg.palette.tertiaryColor
+                    selectByMouse: true
+                    wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                    placeholderText: "Send a Message ..."
+                    Keys.forwardTo: keysProxy
+                    Keys.onEscapePressed: focus = false
                 }
-                selectionColor: QmlCfg.palette.tertiaryColor
-                selectByMouse: true
-                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: "Send a Message ..."
-                Keys.forwardTo: keysProxy
-                Keys.onEscapePressed: focus = false
             }
         }
-    }
     }
 
     FileDialog {
@@ -128,15 +128,24 @@ Rectangle {
         }
     }
 
-    states: State {
-        name: "replystate"
-
-        PropertyChanges {
-            target: replyLoader
-            source: "ReplyComponent.qml"
-            visible: true
-            messageText: replyText
-        }
-
+    onStateChanged: {
+        print(state)
     }
+
+    states: [
+        State {
+            name: "replystate"
+            PropertyChanges {
+                target: replyLoader
+                active: true
+            }
+        },
+        State {
+            name: "default"
+            PropertyChanges {
+                target: replyLoader
+                active: false
+            }
+        }
+    ]
 }

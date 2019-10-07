@@ -22,14 +22,14 @@ export function enterKeyHandler(
 
   let messageId;
 
-   if (textAreaForm.state === "replystate") {
-     messageId = messageModel.reply(text, textAreaForm.replyId);
+  if (textAreaForm.state === "replystate") {
+    messageId = messageModel.reply(text, textAreaForm.replyId);
+    textAreaForm.state = "default"
   }
   else {
-     messageId = messageModel.insertMessage(text);
+    messageId = messageModel.sendMessage(text);
   }
-  
-  networkHandle.sendMessage(text, messageModel.conversationId, messageId);
+
 }
 
 export function appendToTextArea(text: string, target: TextArea): void {

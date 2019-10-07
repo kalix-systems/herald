@@ -7,7 +7,6 @@
         <file>ChatView/ChatTextAreaKeys.qml</file>
         <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ConversationWindowForm.qml</file>
-        <file>ChatView/ReplyComponent.qml</file>
         <file>ChatView/TextAreaForm.qml</file>
         <file>RegistrationPage.qml</file>
         <file>SideBar.qml</file>
@@ -43,5 +42,11 @@
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>common/EmojiJson.js</file>
+        <file>ChatBubble/ChatBubble.qml</file>
+        <file>ChatBubble/ImageBubble.qml</file>
+        <file>ChatBubble/ReplyBubble.qml</file>
+        <file>ChatBubble/StandardBubble.qml</file>
+        <file>ChatView/ChatBubbleHover.qml</file>
+        <file>ChatView/ReplyComponent.qml</file>
     </qresource>
 </RCC>

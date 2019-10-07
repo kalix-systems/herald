@@ -13,11 +13,11 @@ export function enterKeyHandler(event, target, networkHandle, messageModel, text
     let messageId;
     if (textAreaForm.state === "replystate") {
         messageId = messageModel.reply(text, textAreaForm.replyId);
+        textAreaForm.state = "default";
     }
     else {
-        messageId = messageModel.insertMessage(text);
+        messageId = messageModel.sendMessage(text);
     }
-    networkHandle.sendMessage(text, messageModel.conversationId, messageId);
 }
 export function appendToTextArea(text, target) {
     const position = target.selectionEnd;

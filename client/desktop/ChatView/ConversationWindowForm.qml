@@ -1,10 +1,12 @@
-import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
+import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
+import "../ChatBubble"
 import "." as CVUtils
 import "../common/utils.mjs" as Utils
+import "../SideBar/ContactView.mjs" as CUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -17,6 +19,7 @@ import "../common/utils.mjs" as Utils
 Flickable {
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
+    id: cvPane
 
     clip: true
     interactive: true
@@ -44,6 +47,11 @@ Flickable {
             model: ownedConversation
 
             delegate: Column {
+                readonly property string proxyBody: body
+                readonly property string proxyReceiptImage: CUtils.receiptStatusSwitch(
+                                                                0)
+                readonly property string timestamp: Utils.friendlyTimestamp(
+                                                        epochTimestampMs)
                 readonly property bool outbound: author === config.configId
                 // this is where scroll bar position needs to be set to instantiate in the right location
                 Component.onCompleted: chatScrollBar.position = 1.0
@@ -58,18 +66,47 @@ Flickable {
                 }
                 rightPadding: QmlCfg.margin
 
-                //NOTE: see chat bubble form
-                CVUtils.ChatBubbleForm {
-                    messageText: body
-                    additionalContent: ""
-                    contentArgs: {
-                        return {
-
-                        }
+                Component {
+                    id: std
+                    StandardBubble {
+                        body: proxyBody
+                        friendlyTimestamp: timestamp
+                        authorName: outbound ? "" : author
+                        receiptImage: proxyReceiptImage
                     }
-                    // This is okay as a ternary, the types are enforced by QML.
-                    bubbleColor: outbound ? QmlCfg.palette.tertiaryColor : "grey" //QmlCfg.avatarColors[ownedConversation.color]
-                } //bubble
+                }
+
+                Component {
+                    id: reply
+                    ReplyBubble {
+                        body: proxyBody
+                        friendlyTimestamp: timestamp
+                        receiptImage: proxyReceiptImage
+                    }
+                }
+
+                Component {
+                    id: image
+                    ImageBubble {
+                        body: proxyBody
+                        friendlyTimestamp: timestamp
+                        receiptImage: proxyReceiptImage
+                    }
+                }
+
+                ChatBubble {
+                    ChatBubbleHover {}
+                    radius: 10
+                    maxWidth: cvPane.width * 0.66
+                    color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[3]
+                    content: if (false) {
+                                 image
+                             } else if (op.bytelength === 32) {
+                                 reply
+                             } else {
+                                 std
+                             }
+                }
             } //bubble wrapper
         } // Repeater
     } //singleton Col

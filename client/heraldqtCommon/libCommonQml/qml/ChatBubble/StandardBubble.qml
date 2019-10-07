@@ -10,6 +10,7 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
+
     spacing: 0
 
     Label {
@@ -29,6 +30,7 @@ ColumnLayout {
     RowLayout {
         Layout.margins: 5
         Label {
+            font.pixelSize: 10
             text: friendlyTimestamp
             id: timestamp
         }
@@ -40,7 +42,7 @@ ColumnLayout {
         Image {
             id: receipt
             source: receiptImage
-            sourceSize: Qt.size(16, 16)
+            sourceSize: Qt.size(12, 12)
         }
     }
 }
