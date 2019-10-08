@@ -15,6 +15,7 @@ ColumnLayout {
     property string opBody: ownedConversation.messageBodyById(op)
     property color opColor: "gray"
     property string authorName: ""
+    property int
 
     spacing: 0
 
@@ -30,7 +31,7 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: opColor
+        color: outbound ? opColor : Qt.lighter(userColor, 1.6)
         radius: QmlCfg.radius / 2
         Layout.margins: 5
         Layout.topMargin: 0
