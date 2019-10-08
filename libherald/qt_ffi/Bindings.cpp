@@ -152,10 +152,6 @@ namespace {
     {
         Q_EMIT o->msgDataChanged();
     }
-    inline void networkHandleUsersDataChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->usersDataChanged();
-    }
     inline void usersFilterChanged(Users* o)
     {
         Q_EMIT o->filterChanged();
@@ -163,6 +159,10 @@ namespace {
     inline void usersFilterRegexChanged(Users* o)
     {
         Q_EMIT o->filterRegexChanged();
+    }
+    inline void usersTryPollChanged(Users* o)
+    {
+        Q_EMIT o->tryPollChanged();
     }
 }
 extern "C" {
@@ -1024,6 +1024,7 @@ extern "C" {
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
+    quint32 messages_data_receipt_status(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -1126,6 +1127,11 @@ QByteArray Messages::op(int row) const
     return b;
 }
 
+quint32 Messages::receiptStatus(int row) const
+{
+    return messages_data_receipt_status(m_d, row);
+}
+
 QVariant Messages::data(const QModelIndex &index, int role) const
 {
     Q_ASSERT(rowCount(index.parent()) > index.row());
@@ -1142,6 +1148,8 @@ QVariant Messages::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(messageId(index.row()));
         case Qt::UserRole + 4:
             return QVariant::fromValue(op(index.row()));
+        case Qt::UserRole + 5:
+            return QVariant::fromValue(receiptStatus(index.row()));
         }
         break;
     }
@@ -1166,6 +1174,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 2, "epochTimestampMs");
     names.insert(Qt::UserRole + 3, "messageId");
     names.insert(Qt::UserRole + 4, "op");
+    names.insert(Qt::UserRole + 5, "receiptStatus");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -1219,13 +1228,12 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     quint8 network_handle_members_data_get(const NetworkHandle::Private*);
     quint8 network_handle_msg_data_get(const NetworkHandle::Private*);
-    quint8 network_handle_users_data_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
@@ -1533,7 +1541,7 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
 }
 
 extern "C" {
-    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*),
+    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*), void (*)(Users*),
         void (*)(const Users*),
         void (*)(Users*),
         void (*)(Users*),
@@ -1551,6 +1559,7 @@ extern "C" {
     void users_filter_set(Users::Private*, const ushort *str, int len);
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
+    quint8 users_try_poll_get(const Users::Private*);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_display_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -2165,8 +2174,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
         networkHandleMembersDataChanged,
-        networkHandleMsgDataChanged,
-        networkHandleUsersDataChanged)),
+        networkHandleMsgDataChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -2191,10 +2199,6 @@ quint8 NetworkHandle::membersData() const
 quint8 NetworkHandle::msgData() const
 {
     return network_handle_msg_data_get(m_d);
-}
-quint8 NetworkHandle::usersData() const
-{
-    return network_handle_users_data_get(m_d);
 }
 bool NetworkHandle::login()
 {
@@ -2221,6 +2225,7 @@ Users::Users(QObject *parent):
     m_d(users_new(this,
         usersFilterChanged,
         usersFilterRegexChanged,
+        usersTryPollChanged,
         [](const Users* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -2290,6 +2295,10 @@ bool Users::filterRegex() const
 }
 void Users::setFilterRegex(bool v) {
     users_filter_regex_set(m_d, v);
+}
+quint8 Users::tryPoll() const
+{
+    return users_try_poll_get(m_d);
 }
 QByteArray Users::add(const QString& id)
 {

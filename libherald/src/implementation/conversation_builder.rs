@@ -112,7 +112,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             ffi::NULL_CONV_ID.to_vec()
         );
 
-        conv_emit_try_poll();
+        ret_none!(conv_emit_try_poll(), ffi::NULL_CONV_ID.to_vec());
 
         cid.to_vec()
     }

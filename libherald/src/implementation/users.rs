@@ -10,7 +10,13 @@ use heraldcore::{
     contact::{self, ContactBuilder, ContactStatus},
     utils::SearchPattern,
 };
-use std::convert::{TryFrom, TryInto};
+use std::{
+    convert::{TryFrom, TryInto},
+    sync::{
+        atomic::{AtomicU8, Ordering},
+        Arc,
+    },
+};
 
 type Emitter = UsersEmitter;
 type List = UsersList;
@@ -31,6 +37,7 @@ pub struct Users {
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
+    try_poll: Arc<AtomicU8>,
     list: Vec<User>,
 }
 
@@ -59,7 +66,7 @@ fn profile_picture(uid: &UserId) -> Option<String> {
 }
 
 impl UsersTrait for Users {
-    fn new(emit: Emitter, model: List) -> Users {
+    fn new(mut emit: Emitter, model: List) -> Users {
         let list = match contact::all() {
             Ok(v) => v
                 .into_iter()
@@ -75,6 +82,9 @@ impl UsersTrait for Users {
             }
         };
 
+        let global_emit = emit.clone();
+
+        USER_EMITTER.lock().replace(global_emit);
         // this should *really* never fail
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
@@ -84,6 +94,7 @@ impl UsersTrait for Users {
             list,
             filter,
             filter_regex: false,
+            try_poll: USER_TRY_POLL.clone(),
         }
     }
 
@@ -196,7 +207,7 @@ impl UsersTrait for Users {
     /// Returns name if it is set, otherwise returns the user's id.
     fn color_by_id(&self, id: ffi::UserId) -> u32 {
         let uid = &ret_err!(id.as_str().try_into(), 0);
-        color(&uid).unwrap_or(0)
+        ret_none!(color(&uid), 0)
     }
 
     /// Sets color
@@ -221,10 +232,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
 
-        ret_err!(
-            contact::set_status(uid, inner.pairwise_conversation, status),
-            false
-        );
+        ret_err!(contact::set_status(uid, status), false);
 
         inner.status = status;
 
@@ -301,6 +309,10 @@ impl UsersTrait for Users {
 
     fn row_count(&self) -> usize {
         self.list.len()
+    }
+
+    fn try_poll(&self) -> u8 {
+        self.try_poll.load(Ordering::Acquire)
     }
 
     fn poll_update(&mut self) -> bool {

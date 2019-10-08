@@ -88,6 +88,7 @@ pub mod conv_global {
     }
 
     /// Emits a signal to the QML runtime, returns `None` on failure.
+    #[must_use]
     pub fn conv_emit_try_poll() -> Option<()> {
         let mut lock = CONV_EMITTER.lock();
         let emitter = lock.as_mut()?;
@@ -101,6 +102,8 @@ pub mod conv_global {
 /// Shared state related to global user list
 pub mod user_global {
     use super::*;
+    use crate::interface::UsersEmitter as Emitter;
+    use parking_lot::Mutex;
 
     /// User list updates
     pub enum UsersUpdates {
@@ -128,6 +131,23 @@ pub mod user_global {
         /// Statically initialized instance of `UsersUpdates` used to pass notifications
         /// from the network.
         pub static ref USER_CHANNEL: UserChannel = UserChannel::new();
+
+        /// Users list emitter, filled in when the users list is constructed
+        pub static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+
+        /// Data associated with `CONV_EMITTER`.
+        pub static ref USER_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
+    }
+
+    /// Emits a signal to the QML runtime, returns `None` on failure.
+    #[must_use]
+    pub fn users_emit_try_poll() -> Option<()> {
+        let mut lock = USER_EMITTER.lock();
+        let emitter = lock.as_mut()?;
+
+        USER_TRY_POLL.fetch_add(1, Ordering::Acquire);
+        emitter.try_poll_changed();
+        Some(())
     }
 }
 

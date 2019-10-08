@@ -21,6 +21,10 @@ Item {
 
     Users {
         id: contactsModel
+
+        onTryPollChanged: {
+            pollUpdate()
+        }
     }
 
     Conversations {

@@ -133,9 +133,6 @@
                 "msgData": {
                     "type": "quint8"
                 },
-                "usersData": {
-                    "type": "quint8"
-                },
                 "membersData": {
                     "type": "quint8"
                 }
@@ -180,6 +177,9 @@
                 "filterRegex": {
                     "write": true,
                     "type": "bool"
+                },
+                "tryPoll": {
+                    "type": "quint8"
                 }
             },
             "itemProperties": {
@@ -401,6 +401,9 @@
                 },
                 "op": {
                     "type": "QByteArray"
+                },
+                "receiptStatus": {
+                    "type": "quint32"
                 }
             },
             "functions": {

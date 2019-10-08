@@ -190,10 +190,7 @@ impl MembersTrait for Members {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
 
-        ret_err!(
-            contact::set_status(uid, inner.pairwise_conversation, status),
-            false
-        );
+        ret_err!(contact::set_status(uid, status), false);
 
         inner.status = status;
 

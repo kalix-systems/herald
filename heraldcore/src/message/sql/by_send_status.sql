@@ -5,6 +5,7 @@ SELECT
   body,
   op_msg_id,
   ts,
+  receipts,
   send_status
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id

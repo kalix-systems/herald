@@ -330,6 +330,7 @@ public:
     Q_INVOKABLE qint64 epochTimestampMs(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
+    Q_INVOKABLE quint32 receiptStatus(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -358,7 +359,6 @@ private:
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
     Q_PROPERTY(quint8 msgData READ msgData NOTIFY msgDataChanged FINAL)
-    Q_PROPERTY(quint8 usersData READ usersData NOTIFY usersDataChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
@@ -367,7 +367,6 @@ public:
     bool connectionUp() const;
     quint8 membersData() const;
     quint8 msgData() const;
-    quint8 usersData() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
@@ -376,7 +375,6 @@ Q_SIGNALS:
     void connectionUpChanged();
     void membersDataChanged();
     void msgDataChanged();
-    void usersDataChanged();
 };
 
 class Users : public QAbstractItemModel
@@ -389,6 +387,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
+    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Users(bool owned, QObject *parent);
 public:
     explicit Users(QObject *parent = nullptr);
@@ -397,6 +396,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
+    quint8 tryPoll() const;
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE quint32 colorById(const QString& id) const;
     Q_INVOKABLE QString displayNameById(const QString& id) const;
@@ -446,5 +446,6 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+    void tryPollChanged();
 };
 #endif // BINDINGS_H
