@@ -20,7 +20,8 @@ Rectangle {
     color: startColor
     width: parent.width
     height: Math.max(textCol.height + QmlCfg.margin, 20)
-    property color startColor: parent.startColor ? parent.startColor : "light blue"
+
+    property color startColor
     property string opText: parent.opText
     property string opName: parent.opName
 

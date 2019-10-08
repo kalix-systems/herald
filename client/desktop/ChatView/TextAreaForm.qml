@@ -88,10 +88,10 @@ Rectangle {
             id: replyLoader
             property string opName: replyName
             property string opText: replyText
-            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
+                startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
             }
             width: scrollView.width
 
