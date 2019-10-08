@@ -2,6 +2,7 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
+import "../common" as Common
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -25,7 +26,7 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    Button {
+    Common.ButtonForm {
         id: exitButton
         font.pixelSize: 10
 
@@ -35,15 +36,19 @@ Rectangle {
             top: parent.top
         }
 
+
+
         background: Rectangle {
             color: Qt.darker(startColor, 1.9)
             height: 15
             width: height
             radius: height
-            Text {
-                anchors.margins: QmlCfg.smallMargin
+
+            // this icon is very slightly off center everywhere it's used, i think it needs to be fixed
+            Image {
+                source: "qrc:/x-icon-white.svg"
                 anchors.centerIn: parent
-                text: qsTr("x") //todo: make this an icon
+                scale: 0.6
             }
         }
 
