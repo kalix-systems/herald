@@ -1,5 +1,6 @@
 import QtQuick 2.13
 import "../common" as Common
+import Qt.labs.platform 1.1
 import LibHerald 1.0
 
 MouseArea {
@@ -41,6 +42,17 @@ MouseArea {
 
         onClicked: {
             messageOptionsMenu.open()
+        }
+
+        Menu {
+            id: messageOptionsMenu
+            MenuItem {
+                text: "Delete Message"
+                onTriggered: ownedConversation.deleteMessage(index)
+            }
+            MenuItem {
+                text: "More Info..."
+            }
         }
     }
 
