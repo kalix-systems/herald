@@ -401,6 +401,9 @@
                 },
                 "op": {
                     "type": "QByteArray"
+                },
+                "receiptStatus": {
+                    "type": "quint32"
                 }
             },
             "functions": {

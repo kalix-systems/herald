@@ -1729,6 +1729,7 @@ pub trait MessagesTrait {
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
     fn message_id(&self, index: usize) -> &[u8];
     fn op(&self, index: usize) -> &[u8];
+    fn receipt_status(&self, index: usize) -> u32;
 }
 
 #[no_mangle]
@@ -2009,6 +2010,12 @@ pub unsafe extern "C" fn messages_data_op(
     let data = o.op(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row: c_int) -> u32 {
+    let o = &*ptr;
+    o.receipt_status(to_usize(row)).into()
 }
 
 pub struct NetworkHandleQObject {}

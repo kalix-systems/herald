@@ -1024,6 +1024,7 @@ extern "C" {
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
+    quint32 messages_data_receipt_status(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -1126,6 +1127,11 @@ QByteArray Messages::op(int row) const
     return b;
 }
 
+quint32 Messages::receiptStatus(int row) const
+{
+    return messages_data_receipt_status(m_d, row);
+}
+
 QVariant Messages::data(const QModelIndex &index, int role) const
 {
     Q_ASSERT(rowCount(index.parent()) > index.row());
@@ -1142,6 +1148,8 @@ QVariant Messages::data(const QModelIndex &index, int role) const
             return QVariant::fromValue(messageId(index.row()));
         case Qt::UserRole + 4:
             return QVariant::fromValue(op(index.row()));
+        case Qt::UserRole + 5:
+            return QVariant::fromValue(receiptStatus(index.row()));
         }
         break;
     }
@@ -1166,6 +1174,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 2, "epochTimestampMs");
     names.insert(Qt::UserRole + 3, "messageId");
     names.insert(Qt::UserRole + 4, "op");
+    names.insert(Qt::UserRole + 5, "receiptStatus");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const

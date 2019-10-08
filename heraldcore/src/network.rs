@@ -345,7 +345,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             // TODO: This will cause a foreign key constraint error if the receipt is
             // received after a message has been removed locally.
             // We should check the sqlite3 extended error code (787) here.
-            crate::message_receipts::add_receipt(ack.of, cm.from().uid, ack.stat)?;
+            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,
                 cid: cm.cid(),

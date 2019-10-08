@@ -7,14 +7,14 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   PRIMARY KEY(chainkey, hash)
 );
 
-CREATE TABLE IF NOT EXISTS message_receipts(
-  msg_id BLOB NOT NULL,
-  user_id TEXT NOT NULL,
-  status INTEGER DEFAULT(0) NOT NULL,
-  PRIMARY KEY(msg_id, user_id),
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
-  FOREIGN KEY(user_id) REFERENCES contacts(user_id) ON DELETE CASCADE
-);
+-- CREATE TABLE IF NOT EXISTS message_receipts(
+--   msg_id BLOB NOT NULL,
+--   user_id TEXT NOT NULL,
+--   status INTEGER DEFAULT(0) NOT NULL,
+--   PRIMARY KEY(msg_id, user_id),
+--   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
+--   FOREIGN KEY(user_id) REFERENCES contacts(user_id) ON DELETE CASCADE
+-- );
 
 CREATE TABLE IF NOT EXISTS messages (
   -- message id
@@ -31,6 +31,8 @@ CREATE TABLE IF NOT EXISTS messages (
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
   send_status INTEGER NOT NULL,
+  -- read receipts as a map from user ids to receipt status, encoded as CBOR
+  receipts BLOB DEFAULT NULL,
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );

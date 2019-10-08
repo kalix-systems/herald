@@ -194,14 +194,14 @@ fn set_status() {
     let id = "HelloWorld".try_into().expect(womp!());
     let contact = ContactBuilder::new(id).add().expect(womp!());
 
-    super::set_status(id, contact.pairwise_conversation, ContactStatus::Archived).expect(womp!());
+    super::set_status(id, ContactStatus::Archived).expect(womp!());
 
     assert_eq!(
         status(id).expect("Failed to determine contact status"),
         ContactStatus::Archived
     );
 
-    super::set_status(id, contact.pairwise_conversation, ContactStatus::Deleted).expect(womp!());
+    super::set_status(id, ContactStatus::Deleted).expect(womp!());
 
     assert_eq!(
         super::status(id).expect("Failed to determine contact status"),

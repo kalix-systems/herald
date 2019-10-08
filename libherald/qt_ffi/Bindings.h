@@ -330,6 +330,7 @@ public:
     Q_INVOKABLE qint64 epochTimestampMs(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
+    Q_INVOKABLE quint32 receiptStatus(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

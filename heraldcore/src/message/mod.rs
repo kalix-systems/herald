@@ -2,6 +2,7 @@ use crate::{db::Database, errors::HErr, types::*, utils};
 use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::params;
+// use std::collections::HashMap;
 
 /// Message
 #[derive(Clone)]
@@ -21,12 +22,22 @@ pub struct Message {
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
-    // TODO: should this just be a hashmap?
-    pub receipts: Option<Vec<(UserId, MessageReceiptStatus)>>,
+    pub receipts: Option<HashMap<UserId, MessageReceiptStatus>>,
 }
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        let receipts = match row.get::<_, Option<Vec<u8>>>(6)? {
+            Some(data) => serde_cbor::from_slice(&data).map_err(|e| {
+                rusqlite::Error::FromSqlConversionFailure(
+                    6,
+                    rusqlite::types::Type::Blob,
+                    Box::new(e),
+                )
+            })?,
+            None => None,
+        };
+
         Ok(Message {
             message_id: row.get(0)?,
             author: row.get(1)?,
@@ -37,9 +48,8 @@ impl Message {
                 .timestamp_opt(row.get(5)?, 0)
                 .single()
                 .unwrap_or_else(Utc::now),
-            // TODO get receipts from database
-            receipts: None,
-            send_status: row.get(6)?,
+            receipts,
+            send_status: row.get(7)?,
         })
     }
 }
@@ -98,10 +108,43 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
     Ok(())
 }
 
+pub(crate) fn add_receipt(
+    msg_id: MsgId,
+    of: UserId,
+    receipt_status: MessageReceiptStatus,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+    let tx = db.transaction()?;
+
+    let mut get_stmt = tx.prepare(include_str!("sql/get_receipts.sql"))?;
+    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> =
+        get_stmt.query_row(params![msg_id], |row| {
+            Ok(match row.get::<_, Option<Vec<u8>>>(0)? {
+                Some(data) => serde_cbor::from_slice(&data).map_err(|e| {
+                    rusqlite::Error::FromSqlConversionFailure(
+                        0,
+                        rusqlite::types::Type::Blob,
+                        Box::new(e),
+                    )
+                })?,
+                None => None,
+            })
+        })?;
+
+    let mut receipts = receipts.unwrap_or_default();
+    receipts.insert(of, receipt_status);
+    let data = serde_cbor::to_vec(&receipts)?;
+
+    let mut put_stmt = tx.prepare(include_str!("sql/set_receipts.sql"))?;
+    put_stmt.execute(params![data, msg_id])?;
+
+    Ok(())
+}
+
 /// Gets messages by `MessageSendStatus`
 pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../message/sql/by_send_status.sql"))?;
+    let mut stmt = db.prepare(include_str!("sql/by_send_status.sql"))?;
     let res = stmt.query_map(&[send_status], Message::from_db)?;
 
     let mut messages = Vec::new();
