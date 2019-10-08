@@ -24,10 +24,6 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    onHeightChanged: {
-        parent.height = height
-    }
-
     Button {
         id: exitButton
         font.pixelSize: 10

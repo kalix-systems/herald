@@ -87,6 +87,7 @@ Rectangle {
             property string opName: replyName
             property string opText: replyText
             active: false
+            height: item ? item.height : 0
             sourceComponent: ReplyComponent {}
             width: textField.width
         }

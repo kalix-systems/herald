@@ -3,8 +3,9 @@ import "../common" as Common
 import LibHerald 1.0
 
 MouseArea {
-    propagateComposedEvents: true
     id: chatBubbleHitbox
+    z: -1
+    propagateComposedEvents: true
     hoverEnabled: true
     width: parent.width + 50
 
