@@ -22,7 +22,7 @@ ColumnLayout {
         Layout.bottomMargin: authorName === "" ? QmlCfg.smallMargin : QmlCfg.margin
         Layout.preferredHeight: authorName !== "" ? QmlCfg.margin : 0
         font.bold: true
-        color: outbound ? "black" : "white"
+        color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
     }
 
     StandardTextEdit {}

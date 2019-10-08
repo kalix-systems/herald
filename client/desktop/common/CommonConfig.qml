@@ -80,7 +80,8 @@ Item {
              tertiary color.*/
 
             alertTextColor: "red",
-            iconFill: "white"
+            iconFill: "white",
+            iconMatte: "black"
         };
 
         case (1):
@@ -90,9 +91,10 @@ Item {
             tertiaryColor: "#425358",
             tertiaryComplement: "#839496",
             mainTextColor: "#839496",
-            secondaryTextColor: "#6e8992",
+            secondaryTextColor: "#93a1a1",
             iconFill: "#eee8d5",
-            alertTextColor: "#dc322f"
+            alertTextColor: "#dc322f",
+            iconMatte: "#eee8d5"
         };
     }
 

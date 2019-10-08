@@ -31,6 +31,7 @@ Pane {
 
     background: Rectangle {
         border.color: QmlCfg.palette.secondaryColor
+        color: QmlCfg.palette.mainColor
     }
 
     ///--- Username and Settings gear button
