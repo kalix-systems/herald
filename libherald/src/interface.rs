@@ -1710,6 +1710,7 @@ pub trait MessagesTrait {
     fn clear_conversation_history(&mut self) -> bool;
     fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
+    fn index_by_id(&self, msg_id: &[u8]) -> i64;
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
     fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn poll_update(&mut self) -> bool;
@@ -1872,6 +1873,14 @@ pub unsafe extern "C" fn messages_clear_conversation_view(ptr: *mut Messages) ->
 pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: u64) -> bool {
     let o = &mut *ptr;
     let r = o.delete_message(row_index);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int) -> i64 {
+    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
+    let o = &*ptr;
+    let r = o.index_by_id(msg_id);
     r
 }
 

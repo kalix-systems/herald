@@ -446,6 +446,15 @@
                         }
                     ]
                 },
+                "indexById": {
+                    "return": "qint64",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
                 "deleteMessage": {
                     "return": "bool",
                     "mut": true,

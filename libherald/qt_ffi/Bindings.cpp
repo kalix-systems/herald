@@ -1210,6 +1210,7 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
+    qint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
@@ -2122,6 +2123,10 @@ void Messages::clearConversationView()
 bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
+}
+qint64 Messages::indexById(const QByteArray& msg_id) const
+{
+    return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
 }
 QString Messages::messageAuthorById(const QByteArray& msg_id) const
 {

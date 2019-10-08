@@ -9,7 +9,11 @@ use heraldcore::{
     network,
     types::*,
 };
-use std::{collections::HashMap, convert::TryFrom, thread};
+use std::{
+    collections::HashMap,
+    convert::{TryFrom, TryInto},
+    thread,
+};
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;
@@ -151,6 +155,24 @@ impl MessagesTrait for Messages {
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
         Some(self.last_msg()?.timestamp.timestamp_millis())
+    }
+
+    /// Returns index of a message given its id. Returns `-1` if the message
+    /// cannot be found or `msg_id` is invalid.
+    fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> i64 {
+        let msg_id = ret_err!(msg_id.try_into(), -1);
+
+        // sanity check
+        if !self.map.contains_key(&msg_id) {
+            return -1;
+        }
+
+        // search backwards
+        self.list
+            .iter()
+            .rposition(|mid| msg_id == mid.msg_id)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
