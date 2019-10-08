@@ -1,7 +1,10 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
 use bytes::Bytes;
-use std::{collections::BTreeMap, convert::TryFrom};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    convert::TryFrom,
+};
 
 type UserIdInner = [u8; 32];
 
@@ -230,4 +233,31 @@ pub mod catchup {
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct CatchupAck(pub u64);
+}
+
+pub mod add_prekeys {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<sealed::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Missing(Vec<sig::PublicKey>),
+        BadSig,
+        Success,
+    }
+}
+
+pub mod get_prekeys {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub BTreeSet<sig::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success(Vec<(sig::PublicKey, sealed::PublicKey)>),
+        Missing(Vec<sig::PublicKey>),
+    }
 }
