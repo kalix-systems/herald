@@ -82,17 +82,25 @@ impl Conn {
         Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref_mut())?)
     }
 
-    pub fn add_prekey(&mut self, pre: sealed::PublicKey) -> Result<PKIResponse, Error> {
+    pub fn add_prekeys(&mut self, pres: &[sealed::PublicKey]) -> Result<Vec<PKIResponse>, Error> {
         use crate::schema::prekeys::dsl::*;
 
-        let res = diesel::insert_into(prekeys)
-            .values((
-                signing_key.eq(pre.signed_by().as_ref()),
-                sealed_key.eq(serde_cbor::to_vec(&pre)?),
-            ))
-            .execute(self.deref_mut());
+        let builder = self.build_transaction().deferrable();
 
-        unique_violation_to_redundant(res)
+        builder.run(|| {
+            pres.iter()
+                .map(|pre| {
+                    let res = diesel::insert_into(prekeys)
+                        .values((
+                            signing_key.eq(pre.signed_by().as_ref()),
+                            sealed_key.eq(serde_cbor::to_vec(&pre)?),
+                        ))
+                        .execute(&self.0);
+
+                    unique_violation_to_redundant(res)
+                })
+                .collect()
+        })
     }
 
     pub fn pop_prekeys(
@@ -660,8 +668,7 @@ mod tests {
         let sealed_pk1 = sealed_kp1.sign_pub(&kp);
         let sealed_pk2 = sealed_kp2.sign_pub(&kp);
 
-        conn.add_prekey(sealed_pk1).unwrap();
-        conn.add_prekey(sealed_pk2).unwrap();
+        conn.add_prekeys(&[sealed_pk1, sealed_pk2]).unwrap();
 
         let retrieved = conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].unwrap();
         assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
