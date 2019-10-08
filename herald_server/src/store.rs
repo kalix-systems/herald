@@ -74,7 +74,6 @@ type RawKeyAndMeta = (
 );
 
 impl Conn {
-    // TODO implement the appropriate traits for this
     // TODO read about postgres performance
     pub fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
