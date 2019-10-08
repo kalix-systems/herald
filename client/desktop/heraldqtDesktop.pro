@@ -12,10 +12,10 @@ CONFIG  += qtquickcompiler
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # libherald headers, source, and libs
-include( ../heraldqtCommon/libHerald/libHerald.pri )
+include(../heraldqtCommon/libHerald/libHerald.pri )
 
 # common qml componenets
-include( ../heraldqtCommon/libCommonQml/libCommonQml.pri)
+include(../heraldqtCommon/libCommonQml/libCommonQml.pri)
 
 # silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
@@ -23,6 +23,7 @@ QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 CONFIG+=sdk_no_version_check
 
 RESOURCES += qml.qrc
+
 SOURCES   += main.cpp
 
 

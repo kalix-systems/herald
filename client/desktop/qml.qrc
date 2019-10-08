@@ -3,11 +3,9 @@
         <file>App.qml</file>
         <file>ChatView/ChatView.qml</file>
         <file>ChatView/ChatBar.qml</file>
-        <file>ChatView/ChatBubbleForm.qml</file>
         <file>ChatView/ChatTextAreaKeys.qml</file>
         <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ConversationWindowForm.qml</file>
-        <file>ChatView/ReplyComponent.qml</file>
         <file>ChatView/TextAreaForm.qml</file>
         <file>RegistrationPage.qml</file>
         <file>SideBar.qml</file>
@@ -49,5 +47,11 @@
         <file>SideBar/FinalizeGroupComponent.qml</file>
         <file>SideBar/ConvoBuilder.qml</file>
         <file>SideBar/FinalGroupList.qml</file>
+        <file>ChatBubble/ChatBubble.qml</file>
+        <file>ChatBubble/ImageBubble.qml</file>
+        <file>ChatBubble/ReplyBubble.qml</file>
+        <file>ChatBubble/StandardBubble.qml</file>
+        <file>ChatView/ChatBubbleHover.qml</file>
+        <file>ChatView/ReplyComponent.qml</file>
     </qresource>
 </RCC>

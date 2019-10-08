@@ -61,7 +61,7 @@ LibHerald::LibHerald()
 
   h_state = new HeraldState();
   // Bob never spawns a server, only Alice does, Alice is static.
-  h_state->setConfigId("Alice");
+  h_state->setConfigInit(true); // setConfigId("Alice");
 }
 
 LibHerald::~LibHerald() {}
