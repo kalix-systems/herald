@@ -39,7 +39,7 @@ Rectangle {
     property string replyText: ""
     property string replyName: ""
     property bool owned: replyName === config.displayName
-    property string replyUid: ""
+    property string replyUid
 
     property var replyId
 
@@ -94,35 +94,33 @@ Rectangle {
                 startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
             }
             width: scrollView.width
-
         }
 
-            ScrollView {
-                id: scrollView
-                height: scrollHeight
-                implicitWidth: containerCol.width
-                focus: true
+        ScrollView {
+            id: scrollView
+            height: scrollHeight
+            implicitWidth: containerCol.width
+            focus: true
 
-
-                TextArea {
-                    id: chatText
-                    background: Rectangle {
-                        color: QmlCfg.palette.secondaryColor
-                        anchors {
-                            fill: parent
-                            horizontalCenter: parent.horizontalCenter
-                            bottom: parent.bottom
-                        }
-                        radius: QmlCfg.radius
+            TextArea {
+                id: chatText
+                background: Rectangle {
+                    color: QmlCfg.palette.secondaryColor
+                    anchors {
+                        fill: parent
+                        horizontalCenter: parent.horizontalCenter
+                        bottom: parent.bottom
                     }
-                    selectionColor: QmlCfg.palette.tertiaryColor
-                    selectByMouse: true
-                    wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                    placeholderText: "Send a Message ..."
-                    Keys.forwardTo: keysProxy
-                    Keys.onEscapePressed: focus = false
+                    radius: QmlCfg.radius
                 }
+                selectionColor: QmlCfg.palette.tertiaryColor
+                selectByMouse: true
+                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                placeholderText: "Send a Message ..."
+                Keys.forwardTo: keysProxy
+                Keys.onEscapePressed: focus = false
             }
+        }
     }
 
     FileDialog {

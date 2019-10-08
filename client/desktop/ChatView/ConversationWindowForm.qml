@@ -54,7 +54,8 @@ Flickable {
                 readonly property string proxyBody: body
                 readonly property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                                 receiptStatus)
-                readonly property color userColor : QmlCfg.avatarColors[contactsModel.colorById(author)]
+                readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
+                                                                           author)]
 
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
@@ -77,7 +78,8 @@ Flickable {
                     StandardBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        authorName: outbound ? "" : contactsModel.displayNameById(author)
+                        authorName: outbound ? "" : contactsModel.displayNameById(
+                                                   author)
                         receiptImage: proxyReceiptImage
                     }
                 }
@@ -89,7 +91,9 @@ Flickable {
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
                         opName: ownedConversation.messageAuthorById(op)
-                        opColor: opName === config.configId ? Qt.darker(QmlCfg.palette.tertiaryColor, 1.3) : QmlCfg.avatarColors[contactsModel.colorById(opName)]
+                        opColor: opName === config.configId ? Qt.darker(
+                                                                  QmlCfg.palette.tertiaryColor,
+                                                                  1.3) : QmlCfg.avatarColors[contactsModel.colorById(opName)]
                     }
                 }
 
@@ -103,7 +107,8 @@ Flickable {
                 }
 
                 ChatBubble {
-                    ChatBubbleHover {}
+                    ChatBubbleHover {
+                    }
                     radius: 10
                     maxWidth: cvPane.width * 0.66
                     color: outbound ? QmlCfg.palette.tertiaryColor : userColor

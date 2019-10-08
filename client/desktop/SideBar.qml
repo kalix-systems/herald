@@ -58,7 +58,6 @@ Pane {
             sourceComponent: utilityBarComponent
             width: parent.width
         }
-
     }
 
     SBUtils.UtilityBar {
@@ -80,7 +79,6 @@ Pane {
         id: finalizeGroupComponent
     }
 
-
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
@@ -93,8 +91,6 @@ Pane {
         anchors.top: searchBarBorder.bottom
         visible: (convoPane.state == "newConversationState")
     }
-
-
 
     Loader {
         id: convoBuilderLoader
@@ -196,7 +192,6 @@ Pane {
                     sourceComponent: contactslvComponent
                 }
 
-
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: groupSelectComponent
@@ -226,7 +221,6 @@ Pane {
                     sourceComponent: convoFinalGroup
                 }
             }
-
         ]
     }
 }

@@ -21,8 +21,6 @@ Rectangle {
         anchors.left: parent.left
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
-
-
     }
 
     Text {
@@ -32,7 +30,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
     }
     Common.Divider {
-        anchors.verticalCenter:parent.bottom
+        anchors.verticalCenter: parent.bottom
         height: 2
         color: "black"
     }
@@ -46,7 +44,6 @@ Rectangle {
 
         onClicked: {
             convoPane.state = "newGroupState"
-
         }
     }
 
@@ -57,5 +54,6 @@ Rectangle {
                 target: bgBar
                 color: hoverColor
             }
-        } ]
+        }
+    ]
 }

@@ -70,11 +70,11 @@ MouseArea {
         z: 10
 
         onClicked: {
-            chatTextArea.state = "replystate"
             chatTextArea.replyText = body
             chatTextArea.replyId = messageId
             chatTextArea.replyUid = author
             chatTextArea.replyName = contactsModel.displayNameById(author)
+            chatTextArea.state = "replystate"
         }
     }
 }

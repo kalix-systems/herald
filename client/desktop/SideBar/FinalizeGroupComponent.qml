@@ -35,38 +35,34 @@ Component {
             }
         }
 
-    TextArea {
+        TextArea {
 
-        id: groupTitle
-        height: parent.height
-        anchors.left: backbutton.right
-        anchors.right: finalizegroupbutton.left
+            id: groupTitle
+            height: parent.height
+            anchors.left: backbutton.right
+            anchors.right: finalizegroupbutton.left
 
-        placeholderText: "Group title"
+            placeholderText: "Group title"
 
-        verticalAlignment: TextEdit.AlignVCenter
-        background: Rectangle {
-            color: QmlCfg.palette.mainColor
-            anchors.fill: parent
-        }
-
-        Keys.onPressed: {
-            // NOTE: What is the first comparison doing?
-            // this makes sure that returns and tabs are not evaluated
-            if (event.key === Qt.Key_Tab){
-                event.accepted = true
+            verticalAlignment: TextEdit.AlignVCenter
+            background: Rectangle {
+                color: QmlCfg.palette.mainColor
+                anchors.fill: parent
             }
 
-            if (event.key === Qt.Key_Return) {
-                groupMemberSelect.setTitle(groupTitle.text)
-                groupMemberSelect.finalize()
-                convoPane.state = ""
+            Keys.onPressed: {
+                // NOTE: What is the first comparison doing?
+                // this makes sure that returns and tabs are not evaluated
+                if (event.key === Qt.Key_Tab) {
+                    event.accepted = true
+                }
+
+                if (event.key === Qt.Key_Return) {
+                    groupMemberSelect.setTitle(groupTitle.text)
+                    groupMemberSelect.finalize()
+                    convoPane.state = ""
+                }
             }
         }
-
-
-
-
-    }
     }
 }
