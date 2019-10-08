@@ -9,7 +9,11 @@ use heraldcore::{
     network,
     types::*,
 };
-use std::{collections::HashMap, convert::TryFrom, thread};
+use std::{
+    collections::HashMap,
+    convert::{TryFrom, TryInto},
+    thread,
+};
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;
@@ -153,6 +157,24 @@ impl MessagesTrait for Messages {
         Some(self.last_msg()?.timestamp.timestamp_millis())
     }
 
+    /// Returns index of a message given its id. Returns `-1` if the message
+    /// cannot be found or `msg_id` is invalid.
+    fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> i64 {
+        let msg_id = ret_err!(msg_id.try_into(), -1);
+
+        // sanity check
+        if !self.map.contains_key(&msg_id) {
+            return -1;
+        }
+
+        // search backwards
+        self.list
+            .iter()
+            .rposition(|mid| msg_id == mid.msg_id)
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
         match (conversation_id, self.conversation_id) {
             (Some(id), None) => {
@@ -209,10 +231,36 @@ impl MessagesTrait for Messages {
             .as_slice()
     }
 
+    fn receipt_status(&self, row_index: usize) -> u32 {
+        let mid = ret_none!(self.list.get(row_index), MessageReceiptStatus::NoAck as u32).msg_id;
+        let inner = ret_none!(self.map.get(&mid), MessageReceiptStatus::NoAck as u32);
+
+        let receipts = match inner.receipts.as_ref() {
+            Some(receipts) => receipts,
+            None => {
+                return MessageReceiptStatus::NoAck as u32;
+            }
+        };
+
+        receipts
+            .values()
+            .map(|r| *r as u32)
+            .max()
+            .unwrap_or(MessageReceiptStatus::NoAck as u32)
+    }
+
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
         let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
 
         ret_none!(self.map.get(&msg_id), "".to_owned()).body.clone()
+    }
+
+    fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
+        let msg_id = ret_err!(MsgId::try_from(msg_id), ffi::NULL_USER_ID.to_string());
+
+        ret_none!(self.map.get(&msg_id), ffi::NULL_USER_ID.to_string())
+            .author
+            .to_string()
     }
 
     fn op(&self, row_index: usize) -> ffi::MsgIdRef {
@@ -347,9 +395,15 @@ impl MessagesTrait for Messages {
 
                     match &mut msg.receipts {
                         Some(receipts) => {
-                            receipts.push((by, stat));
+                            receipts.insert(by, stat);
                         }
-                        None => msg.receipts = Some(vec![(by, stat)]),
+                        None => {
+                            msg.receipts = {
+                                let mut receipts = HashMap::new();
+                                receipts.insert(by, stat);
+                                Some(receipts)
+                            }
+                        }
                     }
 
                     self.model.data_changed(ix, ix);

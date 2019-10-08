@@ -25,7 +25,6 @@ ColumnLayout {
         Layout.bottomMargin: authorName === "" ? QmlCfg.smallMargin : QmlCfg.margin
         Layout.preferredHeight: authorName !== "" ? QmlCfg.margin : 0
         font.bold: true
-        color: outbound ? "black" : "white"
     }
 
     Rectangle {
@@ -42,6 +41,7 @@ ColumnLayout {
             Label {
                 id: opLabel
                 text: opName
+                font.bold: true
                 Layout.margins: 5
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
@@ -56,7 +56,6 @@ ColumnLayout {
                 selectByKeyboard: true
                 readOnly: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: outbound ? "black" : "white"
             }
         }
     }

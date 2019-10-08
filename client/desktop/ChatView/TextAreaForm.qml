@@ -39,6 +39,8 @@ Rectangle {
 
     property string replyText: ""
     property string replyName: ""
+    property bool owned: replyName === "@"+config.displayName
+
     property var replyId
 
     color: QmlCfg.palette.mainColor
@@ -86,10 +88,13 @@ Rectangle {
             id: replyLoader
             property string opName: replyName
             property string opText: replyText
+            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(ownedConversation.messageAuthorById(replyId))]
             active: false
             height: item ? item.height : 0
-            sourceComponent: ReplyComponent {}
+            sourceComponent: ReplyComponent {
+            }
             width: textField.width
+
         }
 
         ColumnLayout {

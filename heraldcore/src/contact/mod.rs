@@ -95,18 +95,13 @@ pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
 }
 
 /// Sets contact status
-pub fn set_status(
-    id: UserId,
-    pairwise_conv: ConversationId,
-    status: ContactStatus,
-) -> Result<(), HErr> {
+pub fn set_status(id: UserId, status: ContactStatus) -> Result<(), HErr> {
     use ContactStatus::*;
     let mut db = Database::get()?;
     match status {
         Deleted => {
             let tx = db.transaction()?;
             tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
-            crate::message_receipts::delete_by_conversation_tx(&tx, pairwise_conv)?;
             tx.execute(
                 include_str!("../message/sql/delete_pairwise_conversation.sql"),
                 params![id],

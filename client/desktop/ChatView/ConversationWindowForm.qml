@@ -53,7 +53,8 @@ Flickable {
             delegate: Column {
                 readonly property string proxyBody: body
                 readonly property string proxyReceiptImage: CUtils.receiptStatusSwitch(
-                                                                0)
+                                                                receiptStatus)
+                readonly property color userColor : QmlCfg.avatarColors[contactsModel.colorById(author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
                 readonly property bool outbound: author === config.configId
@@ -86,6 +87,8 @@ Flickable {
                         body: proxyBody
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
+                        opName: ownedConversation.messageAuthorById(op)
+                        opColor: opName === config.configId ? Qt.darker(QmlCfg.palette.tertiaryColor, 1.3) : QmlCfg.avatarColors[contactsModel.colorById(opName)]
                     }
                 }
 
@@ -102,7 +105,7 @@ Flickable {
                     ChatBubbleHover {}
                     radius: 10
                     maxWidth: cvPane.width * 0.66
-                    color: outbound ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[3]
+                    color: outbound ? QmlCfg.palette.tertiaryColor : userColor
                     content: if (false) {
                                  image
                              } else if (op.byteLength === 32) {

@@ -34,6 +34,30 @@ pub struct Users {
     list: Vec<User>,
 }
 
+fn display_name(uid: &UserId) -> Option<String> {
+    let inner = USER_DATA.get(uid)?;
+    match inner.name.as_ref() {
+        Some(name) => Some(name.clone()),
+        None => Some(inner.id.to_string()),
+    }
+}
+
+fn color(uid: &UserId) -> Option<u32> {
+    Some(USER_DATA.get(&uid)?.color)
+}
+
+fn name(uid: &UserId) -> Option<String> {
+    let inner = USER_DATA.get(uid)?;
+
+    inner.name.clone()
+}
+
+fn profile_picture(uid: &UserId) -> Option<String> {
+    let inner = USER_DATA.get(uid)?;
+
+    inner.profile_picture.clone()
+}
+
 impl UsersTrait for Users {
     fn new(emit: Emitter, model: List) -> Users {
         let list = match contact::all() {
@@ -89,11 +113,13 @@ impl UsersTrait for Users {
     /// Returns name if it is set, otherwise returns the user's id.
     fn display_name(&self, row_index: usize) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
-        match inner.name.as_ref() {
-            Some(name) => name.clone(),
-            None => inner.id.to_string(),
-        }
+        display_name(uid).unwrap_or_else(|| "".to_owned())
+    }
+
+    /// Returns name if it is set, otherwise returns the user's id.
+    fn display_name_by_id(&self, id: ffi::UserId) -> String {
+        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
+        display_name(uid).unwrap_or_else(|| "".to_owned())
     }
 
     /// Returns conversation id.
@@ -106,9 +132,14 @@ impl UsersTrait for Users {
     /// Returns users name
     fn name(&self, row_index: usize) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = USER_DATA.get(uid)?;
 
-        inner.name.clone()
+        name(uid)
+    }
+
+    /// Returns name if it is set, otherwise returns empty string
+    fn name_by_id(&self, id: ffi::UserId) -> String {
+        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
+        name(uid).unwrap_or_else(|| "".to_owned())
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
@@ -128,8 +159,13 @@ impl UsersTrait for Users {
     /// Returns profile picture
     fn profile_picture(&self, row_index: usize) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = USER_DATA.get(uid)?;
-        inner.profile_picture.clone()
+        profile_picture(&uid)
+    }
+
+    /// Returns path to profile if it is set, otherwise returns the empty string.
+    fn profile_picture_by_id(&self, id: ffi::UserId) -> String {
+        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
+        profile_picture(uid).unwrap_or_else(|| "".to_owned())
     }
 
     /// Sets profile picture.
@@ -154,8 +190,13 @@ impl UsersTrait for Users {
     /// Returns user's color
     fn color(&self, row_index: usize) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(USER_DATA.get(&uid), 0);
-        inner.color
+        color(&uid).unwrap_or(0)
+    }
+
+    /// Returns name if it is set, otherwise returns the user's id.
+    fn color_by_id(&self, id: ffi::UserId) -> u32 {
+        let uid = &ret_err!(id.as_str().try_into(), 0);
+        color(&uid).unwrap_or(0)
     }
 
     /// Sets color
@@ -180,10 +221,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
 
-        ret_err!(
-            contact::set_status(uid, inner.pairwise_conversation, status),
-            false
-        );
+        ret_err!(contact::set_status(uid, status), false);
 
         inner.status = status;
 

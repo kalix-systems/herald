@@ -230,6 +230,42 @@
                         }
                     ]
                 },
+                "colorById": {
+                    "return": "quint32",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "nameById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "displayNameById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "profilePictureById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
                 "toggleFilterRegex": {
                     "mut": true,
                     "return": "bool"
@@ -365,6 +401,9 @@
                 },
                 "op": {
                     "type": "QByteArray"
+                },
+                "receiptStatus": {
+                    "type": "quint32"
                 }
             },
             "functions": {
@@ -394,6 +433,24 @@
                 },
                 "messageBodyById": {
                     "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "messageAuthorById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "indexById": {
+                    "return": "qint64",
                     "arguments": [
                         {
                             "name": "msg_id",

@@ -302,6 +302,8 @@ public:
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
+    Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
+    Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
@@ -328,6 +330,7 @@ public:
     Q_INVOKABLE qint64 epochTimestampMs(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
+    Q_INVOKABLE quint32 receiptStatus(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -396,7 +399,11 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
+    Q_INVOKABLE quint32 colorById(const QString& id) const;
+    Q_INVOKABLE QString displayNameById(const QString& id) const;
+    Q_INVOKABLE QString nameById(const QString& id) const;
     Q_INVOKABLE bool pollUpdate();
+    Q_INVOKABLE QString profilePictureById(const QString& id) const;
     Q_INVOKABLE bool toggleFilterRegex();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

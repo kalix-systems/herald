@@ -15,13 +15,11 @@ import QtQuick.Layouts 1.12
 //NPB: just looks kind bad
 Rectangle {
     id: wrapper
-    property color startColor: "light blue"
-
     radius: QmlCfg.radius
     color: startColor
     width: parent.width
     height: Math.max(textCol.height + QmlCfg.margin, 20)
-
+    property color startColor: parent.startColor ? parent.startColor : "light blue"
     property string opText: parent.opText
     property string opName: parent.opName
 
