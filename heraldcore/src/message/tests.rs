@@ -11,7 +11,10 @@ fn delete_get_message() {
 
     let conv_id = [0; 32].into();
 
-    crate::conversation::add_conversation(Some(&conv_id), None).expect(womp!());
+    crate::conversation::ConversationBuilder::new()
+        .conversation_id(conv_id)
+        .add()
+        .expect(womp!());
 
     let contact = "contact".try_into().unwrap();
 
@@ -40,7 +43,10 @@ fn message_send_status_updates() {
 
     let conversation_id = [0; 32].into();
 
-    crate::conversation::add_conversation(Some(&conversation_id), None).expect(womp!());
+    crate::conversation::ConversationBuilder::new()
+        .conversation_id(conversation_id)
+        .add()
+        .expect(womp!());
 
     let author = "Hello".try_into().expect(womp!());
 

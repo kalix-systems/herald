@@ -101,10 +101,6 @@
                 }
             },
             "functions": {
-                "addConversation": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
                 "removeConversation": {
                     "mut": true,
                     "return": "bool",
@@ -227,6 +223,42 @@
                 "add": {
                     "return": "QByteArray",
                     "mut": true,
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "colorById": {
+                    "return": "quint32",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "nameById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "displayNameById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "profilePictureById": {
+                    "return": "QString",
                     "arguments": [
                         {
                             "name": "id",
@@ -398,6 +430,24 @@
                 },
                 "messageBodyById": {
                     "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "messageAuthorById": {
+                    "return": "QString",
+                    "arguments": [
+                        {
+                            "name": "msg_id",
+                            "type": "QByteArray"
+                        }
+                    ]
+                },
+                "indexById": {
+                    "return": "qint64",
                     "arguments": [
                         {
                             "name": "msg_id",

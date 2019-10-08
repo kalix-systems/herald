@@ -65,62 +65,106 @@ impl Conversation {
     }
 }
 
-/// Adds a conversation to the database
-pub(crate) fn add_conversation_db(
-    conversation_id: Option<&ConversationId>,
-    title: Option<&str>,
-    pairwise: bool,
-) -> Result<ConversationId, HErr> {
-    let db = Database::get()?;
-    let id = match conversation_id {
-        Some(id) => id.to_owned(),
-        None => {
-            let rand_array = utils::rand_id();
-            ConversationId::from(rand_array)
-        }
-    };
-
-    let color = crate::utils::id_to_color(&id);
-
-    db.execute(
-        include_str!("sql/add_conversation.sql"),
-        params![id, title, color, pairwise],
-    )?;
-
-    Ok(id)
+/// Builder for Conversations
+#[derive(Default)]
+pub struct ConversationBuilder {
+    /// Conversation id
+    conversation_id: Option<ConversationId>,
+    /// Conversation title
+    title: Option<String>,
+    /// Conversation picture
+    picture: Option<String>,
+    /// Conversation color,
+    color: Option<u32>,
+    /// Indicates whether the conversation is muted
+    muted: Option<bool>,
+    /// Indicates whether the conversation is a canonical pairwise conversation
+    pairwise: Option<bool>,
 }
 
-/// Adds a non-pairwise conversation
-pub fn add_conversation(
-    conversation_id: Option<&ConversationId>,
-    title: Option<&str>,
-) -> Result<ConversationId, HErr> {
-    add_conversation_db(conversation_id, title, false)
-}
+impl ConversationBuilder {
+    /// Creates new `ConversationBuilder`
+    pub fn new() -> Self {
+        Self::default()
+    }
 
-/// Adds a conversation to the database
-pub(crate) fn add_conversation_with_tx(
-    tx: &rusqlite::Transaction,
-    conversation_id: Option<&ConversationId>,
-    title: Option<&str>,
-    pairwise: bool,
-) -> Result<ConversationId, HErr> {
-    let id = match conversation_id {
-        Some(id) => *id,
-        None => {
-            let rand_array = utils::rand_id();
-            ConversationId::from(rand_array)
-        }
-    };
+    /// Sets title
+    pub fn title(&mut self, title: String) -> &mut Self {
+        self.title.replace(title);
+        self
+    }
 
-    let color = crate::utils::id_to_color(&id);
+    /// Sets conversation id
+    pub fn conversation_id(&mut self, cid: ConversationId) -> &mut Self {
+        self.conversation_id.replace(cid);
+        self
+    }
 
-    tx.execute(
-        include_str!("sql/add_conversation.sql"),
-        params![id, title, color, pairwise],
-    )?;
+    /// Sets picture
+    pub fn picture(&mut self, picture: String) -> &mut Self {
+        self.picture.replace(picture);
+        self
+    }
 
-    Ok(id)
+    /// Sets color
+    pub fn color(&mut self, color: u32) -> &mut Self {
+        self.color.replace(color);
+        self
+    }
+
+    /// Sets muted status
+    pub fn muted(&mut self, muted: bool) -> &mut Self {
+        self.muted.replace(muted);
+        self
+    }
+
+    /// Sets muted status
+    pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
+        self.pairwise.replace(pairwise);
+        self
+    }
+
+    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
+        let id = match self.conversation_id {
+            Some(id) => id.to_owned(),
+            None => {
+                let rand_array = utils::rand_id();
+                ConversationId::from(rand_array)
+            }
+        };
+
+        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
+        let pairwise = self.pairwise.unwrap_or(false);
+        let muted = self.muted.unwrap_or(false);
+
+        tx.execute(
+            include_str!("sql/add_conversation.sql"),
+            params![id, self.title, self.picture, color, pairwise, muted],
+        )?;
+        Ok(id)
+    }
+
+    /// Adds conversation
+    pub fn add(&mut self) -> Result<ConversationId, HErr> {
+        let db = Database::get()?;
+        let id = match self.conversation_id {
+            Some(id) => id.to_owned(),
+            None => {
+                let rand_array = utils::rand_id();
+                ConversationId::from(rand_array)
+            }
+        };
+
+        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
+        let pairwise = self.pairwise.unwrap_or(false);
+        let muted = self.muted.unwrap_or(false);
+
+        db.execute(
+            include_str!("sql/add_conversation.sql"),
+            params![id, self.title, self.picture, color, pairwise, muted],
+        )?;
+        Ok(id)
+    }
 }
 
 /// Deletes all messages in a conversation.
@@ -270,14 +314,14 @@ pub fn conversation(conversation_id: &ConversationId) -> Result<Conversation, HE
     })
 }
 
-/// Adds a conversation to the database
-pub(crate) fn add_pairwise_conversation(
-    tx: &rusqlite::Transaction,
-    conversation_id: Option<&ConversationId>,
-    title: Option<&str>,
-) -> Result<ConversationId, HErr> {
-    add_conversation_with_tx(tx, conversation_id, title, false)
-}
+///// Adds a conversation to the database
+//pub(crate) fn add_pairwise_conversation(
+//    tx: &rusqlite::Transaction,
+//    conversation_id: Option<&ConversationId>,
+//    title: Option<&str>,
+//) -> Result<ConversationId, HErr> {
+//    add_conversation_with_tx(tx, conversation_id, title, false)
+//}
 
 pub(crate) fn get_pairwise_conversations(uids: &[UserId]) -> Result<Vec<ConversationId>, HErr> {
     let db = Database::get()?;

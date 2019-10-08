@@ -158,21 +158,6 @@ impl ConversationsTrait for Conversations {
         ret_none!(self.list.get(index), false).inner.pairwise
     }
 
-    fn add_conversation(&mut self) -> Vec<u8> {
-        let conv_id = ret_err!(conversation::add_conversation(None, None), vec![]);
-        let inner = ret_err!(conversation::meta(&conv_id), vec![]);
-
-        let meta = Conversation {
-            matched: inner.matches(&self.filter),
-            inner,
-        };
-
-        self.model.begin_insert_rows(0, 0);
-        self.list.insert(0, meta);
-        self.model.end_insert_rows();
-        conv_id.to_vec()
-    }
-
     fn remove_conversation(&mut self, index: u64) -> bool {
         let index = index as usize;
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;

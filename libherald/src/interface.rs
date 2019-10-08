@@ -701,7 +701,6 @@ pub trait ConversationsTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn try_poll(&self) -> u8;
-    fn add_conversation(&mut self) -> Vec<u8>;
     fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -809,14 +808,6 @@ pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations,
 #[no_mangle]
 pub unsafe extern "C" fn conversations_try_poll_get(ptr: *const Conversations) -> u8 {
     (&*ptr).try_poll()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_add_conversation(ptr: *mut Conversations, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
-    let o = &mut *ptr;
-    let r = o.add_conversation();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
@@ -1719,6 +1710,8 @@ pub trait MessagesTrait {
     fn clear_conversation_history(&mut self) -> bool;
     fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
+    fn index_by_id(&self, msg_id: &[u8]) -> i64;
+    fn message_author_by_id(&self, msg_id: &[u8]) -> String;
     fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn poll_update(&mut self) -> bool;
     fn reply(&mut self, body: String, op: &[u8]) -> bool;
@@ -1881,6 +1874,23 @@ pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: 
     let o = &mut *ptr;
     let r = o.delete_message(row_index);
     r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int) -> i64 {
+    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
+    let o = &*ptr;
+    let r = o.index_by_id(msg_id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_message_author_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
+    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
+    let o = &*ptr;
+    let r = o.message_author_by_id(msg_id);
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
@@ -2267,7 +2277,11 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn color_by_id(&self, id: String) -> u32;
+    fn display_name_by_id(&self, id: String) -> String;
+    fn name_by_id(&self, id: String) -> String;
     fn poll_update(&mut self) -> bool;
+    fn profile_picture_by_id(&self, id: String) -> String;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -2380,10 +2394,49 @@ pub unsafe extern "C" fn users_add(ptr: *mut Users, id_str: *const c_ushort, id_
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn users_color_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int) -> u32 {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    let o = &*ptr;
+    let r = o.color_by_id(id);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_display_name_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    let o = &*ptr;
+    let r = o.display_name_by_id(id);
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_name_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    let o = &*ptr;
+    let r = o.name_by_id(id);
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn users_poll_update(ptr: *mut Users) -> bool {
     let o = &mut *ptr;
     let r = o.poll_update();
     r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_profile_picture_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
+    let o = &*ptr;
+    let r = o.profile_picture_by_id(id);
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
