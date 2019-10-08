@@ -40,12 +40,7 @@
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>common/EmojiJson.js</file>
-        <file>SideBar/NewGroupBar.qml</file>
         <file>SideBar/ContactBubble.qml</file>
-        <file>SideBar/GroupSelectComponent.qml</file>
-        <file>SideBar/FinalizeGroupComponent.qml</file>
-        <file>SideBar/ConvoBuilder.qml</file>
-        <file>SideBar/FinalGroupList.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/ImageBubble.qml</file>
         <file>ChatBubble/ReplyBubble.qml</file>

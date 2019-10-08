@@ -69,12 +69,12 @@ Pane {
     }
 
     //component loaded when selecting a new group
-    SBUtils.GroupSelectComponent {
+    ConvUtils.GroupSelectComponent {
         id: groupSelectComponent
     }
 
     //component loaded when finalizing new group
-    SBUtils.FinalizeGroupComponent {
+    ConvUtils.FinalizeGroupComponent {
         id: finalizeGroupComponent
     }
 
@@ -85,7 +85,7 @@ Pane {
         color: "black"
     }
 
-    SBUtils.NewGroupBar {
+    ConvUtils.NewGroupBar {
         id: newGroupBar
         anchors.top: searchBarBorder.bottom
         visible: (convoPane.state == "newConversationState")
@@ -126,7 +126,7 @@ Pane {
 
         Component {
             id: convoFinalGroup
-            SBUtils.FinalGroupList {
+            ConvUtils.FinalGroupList {
                 id: groupListView
                 anchors.fill: parent
                 model: groupMemberSelect
