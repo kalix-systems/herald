@@ -39,13 +39,10 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
-    Component.onCompleted: {
-        print(theme)
-    }
 
     Settings {
         id: settings
-        property alias theme: cfg.theme
+        //property alias theme: cfg.theme
         property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
 
@@ -63,8 +60,8 @@ Item {
             secondaryColor: "lightgrey",
             /* tertiaryColor:
             used for additional highlighting, selection indication*/
-
-            tertiaryColor: "lightsteelblue", /* teriaryComplement:
+            tertiaryColor: "lightsteelblue",
+            /* teriaryComplement:
             a direct compliment to the selection color, should be used for alerts
             and uncommon events */
 
@@ -82,17 +79,19 @@ Item {
              Color in alert messages, that can be display on top of the
              tertiary color.*/
 
-            alertTextColor: "red"
+            alertTextColor: "red",
+            iconFill: "white"
         };
 
         case (1):
         return {
             mainColor: "#002b36",
             secondaryColor: "#073642",
-            tertiaryColor: "#586e75",
+            tertiaryColor: "#425358",
             tertiaryComplement: "#839496",
             mainTextColor: "#839496",
-            secondaryTextColor: "#586e75",
+            secondaryTextColor: "#6e8992",
+            iconFill: "#eee8d5",
             alertTextColor: "#dc322f"
         };
     }

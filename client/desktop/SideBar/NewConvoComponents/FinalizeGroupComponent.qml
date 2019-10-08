@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "../common" as Common
+import "../../common" as Common
 
 Component {
     id: finalizeGroupComponent

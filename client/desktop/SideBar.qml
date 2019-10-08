@@ -3,6 +3,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "SideBar" as SBUtils
+import "SideBar/NewConvoComponents" as ConvUtils
 import "common" as Common
 
 // Reveiw Key
@@ -23,7 +24,6 @@ Pane {
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
-
     property alias groupMemberSelect: convoBuilderLoader.item
 
     padding: 0 // All Interior Elements span the entire pane
@@ -41,14 +41,13 @@ Pane {
     Common.Divider {
         id: configBarBorder
         anchors.bottom: utilityBar.top
-        color: "black"
+        color: QmlCfg.palette.secondaryColor
         height: 1
     }
 
     ///--- SearchBar for contacts, add contact button
     Column {
         id: utilityBar
-
         anchors.top: toolBar.bottom
         width: parent.width
         Loader {
@@ -58,7 +57,6 @@ Pane {
             sourceComponent: utilityBarComponent
             width: parent.width
         }
-
     }
 
     SBUtils.UtilityBar {
@@ -80,7 +78,6 @@ Pane {
         id: finalizeGroupComponent
     }
 
-
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
@@ -93,8 +90,6 @@ Pane {
         anchors.top: searchBarBorder.bottom
         visible: (convoPane.state == "newConversationState")
     }
-
-
 
     Loader {
         id: convoBuilderLoader
@@ -160,10 +155,7 @@ Pane {
 
             State {
                 name: "conversationSearch"
-                //                PropertyChanges {
-                //                    target: conversationsListView
-                //                    visible: true
-                //                }
+
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: searchBarComponent
@@ -177,10 +169,7 @@ Pane {
                     target: sideBarBodyLoader
                     sourceComponent: contactslvComponent
                 }
-                //                PropertyChanges {
-                //                    target: conversationsListView
-                //                    visible: false
-                //                }
+
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: searchBarComponent
@@ -196,7 +185,6 @@ Pane {
                     sourceComponent: contactslvComponent
                 }
 
-
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: groupSelectComponent
@@ -204,7 +192,7 @@ Pane {
                 }
                 PropertyChanges {
                     target: convoBuilderLoader
-                    source: "SideBar/ConvoBuilder.qml"
+                    source: "SideBar/NewConvoComponents/ConvoBuilder.qml"
                 }
             },
 
@@ -218,7 +206,7 @@ Pane {
 
                 PropertyChanges {
                     target: convoBuilderLoader
-                    source: "SideBar/ConvoBuilder.qml"
+                    source: "SideBar/NewConvoComponents/ConvoBuilder.qml"
                 }
 
                 PropertyChanges {
@@ -226,7 +214,6 @@ Pane {
                     sourceComponent: convoFinalGroup
                 }
             }
-
         ]
     }
 }

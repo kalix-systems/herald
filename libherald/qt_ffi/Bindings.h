@@ -200,7 +200,6 @@ private:
 public:
     explicit HeraldUtils(QObject *parent = nullptr);
     ~HeraldUtils();
-    Q_INVOKABLE double chatBubbleNaturalWidth(double chat_pane_width, double text_width) const;
     Q_INVOKABLE bool compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const;
     Q_INVOKABLE bool isValidRandId(const QByteArray& bs) const;
 Q_SIGNALS:

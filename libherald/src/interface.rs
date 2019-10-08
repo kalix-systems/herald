@@ -1078,7 +1078,6 @@ impl HeraldUtilsEmitter {
 pub trait HeraldUtilsTrait {
     fn new(emit: HeraldUtilsEmitter) -> Self;
     fn emit(&mut self) -> &mut HeraldUtilsEmitter;
-    fn chat_bubble_natural_width(&self, chat_pane_width: f64, text_width: f64) -> f64;
     fn compare_byte_array(&self, bs1: &[u8], bs2: &[u8]) -> bool;
     fn is_valid_rand_id(&self, bs: &[u8]) -> bool;
 }
@@ -1097,13 +1096,6 @@ pub extern "C" fn herald_utils_new(
 #[no_mangle]
 pub unsafe extern "C" fn herald_utils_free(ptr: *mut HeraldUtils) {
     Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_utils_chat_bubble_natural_width(ptr: *const HeraldUtils, chat_pane_width: f64, text_width: f64) -> f64 {
-    let o = &*ptr;
-    let r = o.chat_bubble_natural_width(chat_pane_width, text_width);
-    r
 }
 
 #[no_mangle]

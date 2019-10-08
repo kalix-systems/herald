@@ -684,7 +684,6 @@ extern "C" {
 extern "C" {
     HeraldUtils::Private* herald_utils_new(HeraldUtils*);
     void herald_utils_free(HeraldUtils::Private*);
-    double herald_utils_chat_bubble_natural_width(const HeraldUtils::Private*, double, double);
     bool herald_utils_compare_byte_array(const HeraldUtils::Private*, const char*, int, const char*, int);
     bool herald_utils_is_valid_rand_id(const HeraldUtils::Private*, const char*, int);
 };
@@ -1882,10 +1881,6 @@ HeraldUtils::~HeraldUtils() {
     if (m_ownsPrivate) {
         herald_utils_free(m_d);
     }
-}
-double HeraldUtils::chatBubbleNaturalWidth(double chat_pane_width, double text_width) const
-{
-    return herald_utils_chat_bubble_natural_width(m_d, chat_pane_width, text_width);
 }
 bool HeraldUtils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const
 {

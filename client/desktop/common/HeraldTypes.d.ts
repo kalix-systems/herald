@@ -1,7 +1,7 @@
-declare class ByteArray {}
+declare class ByteArray { }
 
-declare class ConversationID extends ByteArray {}
-declare class MessageId extends ByteArray {}
+declare class ConversationID extends ByteArray { }
+declare class MessageId extends ByteArray { }
 
 declare type UserId = string;
 
@@ -36,7 +36,7 @@ declare class Messages {
   deleteConversationById(conversationId: ConversationID): boolean;
 }
 
-declare class Message extends Item {}
+declare class Message extends Item { }
 
 declare class Users {
   add(userid: UserId): ConversationID;
@@ -84,15 +84,14 @@ declare class Conversations {
 }
 
 declare class ConversationBuilder {
-	addMember(user_id: UserId): boolean;
-	removeMemberByID(user_id: UserId): boolean;
-	removeMemberByIndex(rowIndex: number): boolean;
-	removeLast(): void;
-	finalize(): ByteArray;
+  addMember(user_id: UserId): boolean;
+  removeMemberByID(user_id: UserId): boolean;
+  removeMemberByIndex(rowIndex: number): boolean;
+  removeLast(): void;
+  finalize(): ByteArray;
 }
 
 declare class HeraldUtils {
   compareByteArray(bs1: ByteArray, bs2: ByteArray): boolean;
-  chatBubbleNaturalWidth(chat_pane_width: number, text_width: number): number;
   isValidRandId(bs: ByteArray): boolean;
 }

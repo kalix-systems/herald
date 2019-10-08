@@ -27,7 +27,6 @@
         <file>common/Avatar.qml</file>
         <file>common/ButtonForm.qml</file>
         <file>common/CommonConfig.qml</file>
-        <file>common/CorrectText.qml</file>
         <file>common/Divider.qml</file>
         <file>common/ImageAvatar.qml</file>
         <file>common/Theme.qml</file>
@@ -53,5 +52,10 @@
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
+        <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
+        <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
+        <file>SideBar/NewConvoComponents/FinalizeGroupComponent.qml</file>
+        <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
+        <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
     </qresource>
 </RCC>
