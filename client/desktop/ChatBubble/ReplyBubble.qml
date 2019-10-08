@@ -30,9 +30,9 @@ ColumnLayout {
 
     Rectangle {
         id: replyWrapper
-        height: reply.height
+        Layout.preferredHeight: reply.implicitHeight
         color: opColor
-        radius: 10
+        radius: QmlCfg.radius / 2
         Layout.margins: 5
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
@@ -50,7 +50,11 @@ ColumnLayout {
             TextEdit {
                 Layout.margins: 5
                 text: opBody
-                Layout.maximumWidth: Math.max(parent.maxWidth, 200)
+                Layout.maximumWidth: Math.max(maxWidth, 200)
+                Layout.minimumWidth: messageBody.width
+                selectByMouse: true
+                selectByKeyboard: true
+                readOnly: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color: outbound ? "black" : "white"
             }
@@ -58,6 +62,7 @@ ColumnLayout {
     }
 
     TextEdit {
+        id: messageBody
         text: body
         Layout.leftMargin: 5
         Layout.rightMargin: 5

@@ -14,12 +14,13 @@ import QtQuick.Layouts 1.12
 
 //NPB: just looks kind bad
 Rectangle {
+    id: wrapper
     property color startColor: "light blue"
 
     radius: QmlCfg.radius
     color: startColor
     width: parent.width
-    height: Math.max(textCol.height, 20)
+    height: Math.max(textCol.height + QmlCfg.margin, 20)
 
     property string opText: parent.opText
     property string opName: parent.opName
@@ -51,9 +52,8 @@ Rectangle {
         }
     }
 
-    Column {
+    ColumnLayout {
         id: textCol
-        padding: QmlCfg.smallMargin
         Label {
             id: sender
             text: opName
@@ -65,6 +65,7 @@ Rectangle {
 
         TextEdit {
             text: opText
+            Layout.maximumWidth: wrapper.width
             Layout.leftMargin: QmlCfg.smallMargin
             Layout.rightMargin: QmlCfg.smallMargin
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
@@ -73,6 +74,8 @@ Rectangle {
             selectByKeyboard: true
             readOnly: true
         }
+
+        Item {}
     }
 
     Rectangle {

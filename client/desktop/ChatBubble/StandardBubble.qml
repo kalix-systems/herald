@@ -27,6 +27,7 @@ ColumnLayout {
 
     TextEdit {
         text: body
+        Layout.maximumWidth: maxWidth
         Layout.leftMargin: QmlCfg.smallMargin
         Layout.rightMargin: QmlCfg.smallMargin
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
