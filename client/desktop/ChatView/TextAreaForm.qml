@@ -78,15 +78,15 @@ Rectangle {
             leftMargin: QmlCfg.smallMargin
             rightMargin: QmlCfg.smallMargin
         }
+
         topPadding: QmlCfg.smallMargin
 
         Loader {
             id: replyLoader
             property string opName: replyName
             property string opText: replyText
-            height: active ? undefined : 0
             active: false
-            source: "ReplyComponent.qml"
+            sourceComponent: ReplyComponent {}
             width: textField.width
         }
 

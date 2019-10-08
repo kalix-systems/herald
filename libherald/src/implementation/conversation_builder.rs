@@ -1,5 +1,11 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::USER_DATA};
+use crate::{
+    bounds_chk, ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{conv_global::*, USER_DATA},
+};
 use herald_common::UserId;
+use heraldcore::abort_err;
 use std::convert::TryInto;
 
 type Emitter = ConversationBuilderEmitter;
@@ -11,6 +17,7 @@ pub struct ConversationBuilder {
     model: List,
     list: Vec<UserId>,
     title: Option<String>,
+    local_id: UserId,
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
@@ -20,6 +27,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             model,
             list: Vec::new(),
             title: None,
+            local_id: abort_err!(heraldcore::config::Config::static_id()),
         }
     }
 
@@ -29,6 +37,11 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
     fn add_member(&mut self, user_id: ffi::UserId) -> bool {
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+
+        // don't allow users to add themselves
+        if user_id == self.local_id {
+            return true;
+        }
 
         // Avoid redundant inserts
         // This is linear time, yes, but
@@ -51,15 +64,57 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
+    fn remove_member_by_id(&mut self, user_id: ffi::UserId) -> bool {
+        let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+
+        let ix = ret_none!(self.list.iter().position(|uid| uid == &user_id), false);
+
+        self.model.begin_remove_rows(ix, ix);
+        self.list.remove(ix);
+        self.model.end_remove_rows();
+
+        true
+    }
+
+    fn remove_member_by_index(&mut self, index: u64) -> bool {
+        let ix = index as usize;
+
+        bounds_chk!(self, ix, false);
+
+        self.model.begin_remove_rows(ix, ix);
+        self.list.remove(ix);
+        self.model.end_remove_rows();
+
+        true
+    }
+
+    fn remove_last(&mut self) {
+        self.model.begin_remove_rows(
+            self.list.len().saturating_sub(1),
+            self.list.len().saturating_sub(1),
+        );
+        self.list.pop();
+        self.model.end_remove_rows();
+    }
+
+    // TODO: Does this have to be blocking?
     fn finalize(&mut self) -> ffi::ConversationId {
-        ret_err!(
-            heraldcore::network::start_conversation(
-                self.list.as_slice(),
-                self.title.as_ref().map(String::as_str)
-            ),
+        self.list.push(self.local_id);
+
+        let cid = ret_err!(
+            heraldcore::network::start_conversation(self.list.as_slice(), self.title.take()),
             ffi::NULL_CONV_ID.to_vec()
-        )
-        .to_vec()
+        );
+
+        // send update to Conversations list
+        ret_err!(
+            CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)),
+            ffi::NULL_CONV_ID.to_vec()
+        );
+
+        conv_emit_try_poll();
+
+        cid.to_vec()
     }
 
     fn set_title(&mut self, title: String) {
@@ -70,12 +125,30 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.list.len()
     }
 
-    fn display_name(&self, index: usize) -> String {
+    fn member_display_name(&self, index: usize) -> String {
         let uid = ret_none!(self.list.get(index), "".to_owned());
         let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
         match inner.name.as_ref() {
             Some(name) => name.clone(),
             None => inner.id.to_string(),
         }
+    }
+
+    fn member_color(&self, index: usize) -> u32 {
+        let uid = ret_none!(self.list.get(index), 0);
+        let inner = ret_none!(USER_DATA.get(uid), 0);
+
+        inner.color
+    }
+
+    fn member_profile_picture(&self, index: usize) -> Option<String> {
+        let uid = ret_none!(self.list.get(index), None);
+        let inner = ret_none!(USER_DATA.get(uid), None);
+
+        inner.profile_picture.clone()
+    }
+
+    fn member_id(&self, index: usize) -> ffi::UserIdRef {
+        ret_none!(self.list.get(index), "").as_str()
     }
 }

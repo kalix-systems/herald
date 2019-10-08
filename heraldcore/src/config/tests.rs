@@ -72,9 +72,17 @@ fn add_get_set_config() {
     db_config.set_colorscheme(1).expect(womp!());
     db_config.set_color(0).expect(womp!());
 
-    let db_config = Config::get().expect(womp!());
+    let mut db_config = Config::get().expect(womp!());
     assert_eq!(db_config.color, 0);
     assert_eq!(db_config.colorscheme, 1);
+
+    let test_picture = "test_resources/maryland.png";
+
+    db_config
+        .set_profile_picture(Some(test_picture.to_string()))
+        .expect(womp!("failed to set picture"));
+
+    std::fs::remove_dir_all("profile_pictures").expect(womp!());
 }
 
 #[test]

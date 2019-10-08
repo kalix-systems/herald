@@ -21,6 +21,13 @@ Rectangle {
     width: parent.width
     height: Math.max(textCol.height, 20)
 
+    property string opText: parent.opText
+    property string opName: parent.opName
+
+    onHeightChanged: {
+        parent.height = height
+    }
+
     Button {
         id: exitButton
         font.pixelSize: 10
@@ -37,6 +44,7 @@ Rectangle {
             width: height
             radius: height
             Text {
+                anchors.margins: QmlCfg.smallMargin
                 anchors.centerIn: parent
                 text: qsTr("x") //todo: make this an icon
             }
@@ -44,8 +52,6 @@ Rectangle {
 
         onClicked: {
             chatTextArea.state = "default"
-            chatTextArea.replyText = ""
-            chatTextArea.replyName = ""
         }
     }
 

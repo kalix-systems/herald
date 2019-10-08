@@ -2,7 +2,7 @@ use crate::{
     ffi,
     interface::*,
     ret_err, ret_none,
-    shared::{UsersUpdates, USER_CHANNEL, USER_DATA},
+    shared::{user_global::*, USER_DATA},
 };
 use herald_common::UserId;
 use heraldcore::{

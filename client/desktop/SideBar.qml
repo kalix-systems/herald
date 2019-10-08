@@ -24,6 +24,8 @@ Pane {
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
 
+    property alias groupMemberSelect: convoBuilderLoader.item
+
     padding: 0 // All Interior Elements span the entire pane
     height: parent.height
 
@@ -44,21 +46,40 @@ Pane {
     }
 
     ///--- SearchBar for contacts, add contact button
-    SBUtils.UtilityBar {
+    Column {
         id: utilityBar
-        anchors.top: toolBar.bottom
 
+        anchors.top: toolBar.bottom
+        width: parent.width
         Loader {
             property string searchPlaceholder: ""
             property bool contactsSearch: false
-            anchors.fill: parent
             id: searchLoader
+            sourceComponent: utilityBarComponent
+            width: parent.width
         }
+
     }
 
+    SBUtils.UtilityBar {
+        id: utilityBarComponent
+    }
+
+    //search component loaded to search convos and contacts
     SBUtils.SearchComponent {
         id: searchBarComponent
     }
+
+    //component loaded when selecting a new group
+    SBUtils.GroupSelectComponent {
+        id: groupSelectComponent
+    }
+
+    //component loaded when finalizing new group
+    SBUtils.FinalizeGroupComponent {
+        id: finalizeGroupComponent
+    }
+
 
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
@@ -67,9 +88,16 @@ Pane {
         color: "black"
     }
 
-    SBUtils.ContactsToggle {
-        id: contactsToggleBar
+    SBUtils.NewGroupBar {
+        id: newGroupBar
         anchors.top: searchBarBorder.bottom
+        visible: (convoPane.state == "newConversationState")
+    }
+
+
+
+    Loader {
+        id: convoBuilderLoader
     }
 
     ///--- Contacts View Actual
@@ -79,7 +107,7 @@ Pane {
         anchors {
             right: parent.right
             left: parent.left
-            top: searchBarBorder.bottom
+            top: newGroupBar.bottom
             bottom: parent.bottom
         }
 
@@ -98,6 +126,15 @@ Pane {
                 id: conversationsListView
                 anchors.fill: parent
                 model: conversationsModel
+            }
+        }
+
+        Component {
+            id: convoFinalGroup
+            SBUtils.FinalGroupList {
+                id: groupListView
+                anchors.fill: parent
+                model: groupMemberSelect
             }
         }
 
@@ -150,7 +187,46 @@ Pane {
                     searchPlaceholder: "Enter contact name"
                     contactsSearch: true
                 }
+            },
+
+            State {
+                name: "newGroupState"
+                PropertyChanges {
+                    target: sideBarBodyLoader
+                    sourceComponent: contactslvComponent
+                }
+
+
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: groupSelectComponent
+                    contactsSearch: true
+                }
+                PropertyChanges {
+                    target: convoBuilderLoader
+                    source: "SideBar/ConvoBuilder.qml"
+                }
+            },
+
+            State {
+                name: "finalizeGroupState"
+
+                PropertyChanges {
+                    target: searchLoader
+                    sourceComponent: finalizeGroupComponent
+                }
+
+                PropertyChanges {
+                    target: convoBuilderLoader
+                    source: "SideBar/ConvoBuilder.qml"
+                }
+
+                PropertyChanges {
+                    target: sideBarBodyLoader
+                    sourceComponent: convoFinalGroup
+                }
             }
+
         ]
     }
 }

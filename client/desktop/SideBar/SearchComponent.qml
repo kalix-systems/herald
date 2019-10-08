@@ -4,23 +4,26 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../common" as Common
 import "popups/NewContactDialogue.mjs" as JS
+import "../SideBar" as SBUtils
 
 Component {
     id: searchBarComponent
 
     TextArea {
-        id: searchText
+      id: searchText
+      height: QmlCfg.toolbarHeight
 
       placeholderText: searchLoader.searchPlaceholder
-      anchors.fill: parent
-      anchors.verticalCenter: parent.verticalCenter
+
       verticalAlignment: TextEdit.AlignVCenter
       background: Rectangle {
           color: QmlCfg.palette.mainColor
+          anchors.fill: parent
       }
 
       Keys.onPressed: {
           // NOTE: What is the first comparison doing?
+          // this makes sure that returns and tabs are not evaluated
           if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
               event.accepted = true
           }
@@ -50,8 +53,9 @@ Component {
               convoPane.state = ""
           }
       }
-
-
 }
 
 }
+
+
+

@@ -1,13 +1,14 @@
-use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{ConvUpdates, CONV_CHANNEL},
-};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::conv_global::*};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
+    errors::HErr,
+    types::ConversationId,
     utils::SearchPattern,
+};
+use std::sync::{
+    atomic::{AtomicU8, Ordering},
+    Arc,
 };
 
 /// Thin wrapper around `ConversationMeta`,
@@ -26,10 +27,26 @@ pub struct Conversations {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vec<Conversation>,
+    try_poll: Arc<AtomicU8>,
+}
+
+impl Conversations {
+    fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
+        let meta = conversation::meta(&cid)?;
+        let conv = Conversation {
+            matched: meta.matches(&self.filter),
+            inner: meta,
+        };
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(conv);
+        self.model.end_insert_rows();
+        Ok(())
+    }
 }
 
 impl ConversationsTrait for Conversations {
-    fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self {
+    fn new(mut emit: ConversationsEmitter, model: ConversationsList) -> Self {
         let list = abort_err!(conversation::all_meta())
             .into_iter()
             .map(|inner| Conversation {
@@ -40,12 +57,17 @@ impl ConversationsTrait for Conversations {
 
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
+        let global_emit = emit.clone();
+
+        CONV_EMITTER.lock().replace(global_emit);
+
         Self {
             emit,
             filter,
             filter_regex: false,
             model,
             list,
+            try_poll: CONV_TRY_POLL.clone(),
         }
     }
 
@@ -136,21 +158,6 @@ impl ConversationsTrait for Conversations {
         ret_none!(self.list.get(index), false).inner.pairwise
     }
 
-    fn add_conversation(&mut self) -> Vec<u8> {
-        let conv_id = ret_err!(conversation::add_conversation(None, None), vec![]);
-        let inner = ret_err!(conversation::meta(&conv_id), vec![]);
-
-        let meta = Conversation {
-            matched: inner.matches(&self.filter),
-            inner,
-        };
-
-        self.model.begin_insert_rows(0, 0);
-        self.list.insert(0, meta);
-        self.model.end_insert_rows();
-        conv_id.to_vec()
-    }
-
     fn remove_conversation(&mut self, index: u64) -> bool {
         let index = index as usize;
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
@@ -208,19 +215,17 @@ impl ConversationsTrait for Conversations {
         for update in CONV_CHANNEL.rx.try_iter() {
             match update {
                 NewConversation(cid) => {
-                    let meta = ret_err!(conversation::meta(&cid), false);
-                    let conv = Conversation {
-                        matched: meta.matches(&self.filter),
-                        inner: meta,
-                    };
-                    self.model
-                        .begin_insert_rows(self.row_count(), self.row_count());
-                    self.list.push(conv);
-                    self.model.end_insert_rows();
+                    // TODO add push notification here
+                    ret_err!(self.raw_fetch_and_insert(cid), false)
                 }
+                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
             }
         }
         true
+    }
+
+    fn try_poll(&self) -> u8 {
+        self.try_poll.load(Ordering::Acquire)
     }
 
     /// Indicates whether regex search is activated

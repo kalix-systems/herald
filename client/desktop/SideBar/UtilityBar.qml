@@ -15,64 +15,69 @@ import "../SideBar" as SideBar
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
-ToolBar {
-    id: utilityBar
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: QmlCfg.toolbarHeight
-
-    background: Rectangle {
-        anchors.fill: parent
-        color: QmlCfg.palette.secondaryColor
-    }
-
-    Text {
-        text: "Conversations"
+Component {
+    ToolBar {
+        id: utilityBar
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: QmlCfg.margin
-    }
+        anchors.right: parent.right
+        height: QmlCfg.toolbarHeight
 
-    Common.ButtonForm {
-        id: searchButton
-        property bool searchRegex: false
-        anchors {
-            right: addContactButton.left
-            verticalCenter: parent.verticalCenter
-            rightMargin: QmlCfg.margin
-            verticalCenterOffset: 1
-        }
-        source: "qrc:/search-icon.svg"
-        scale: 1.0
-        //todo : add back in regex logic once ui is known
-        onClicked: {
-            convoPane.state = "conversationSearch"
-        }
-    }
-
-    ///--- Add contact button
-    Common.ButtonForm {
-        id: addContactButton
-        anchors {
-            rightMargin: QmlCfg.margin
-            verticalCenterOffset: 0
-            right: parent.right
-            verticalCenter: parent.verticalCenter
-        }
-        source: "qrc:/pencil-icon-black.svg"
-        z: -1
-
-        MouseArea {
+        background: Rectangle {
             anchors.fill: parent
+            color: QmlCfg.palette.secondaryColor
+        }
 
+        Text {
+            text: "Conversations"
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.margins: QmlCfg.margin
+        }
+
+        Common.ButtonForm {
+            id: searchButton
+            property bool searchRegex: false
+            anchors {
+                right: addContactButton.left
+                verticalCenter: parent.verticalCenter
+                rightMargin: QmlCfg.margin
+                verticalCenterOffset: 1
+            }
+            source: "qrc:/search-icon.svg"
+            scale: 1.0
+            //todo : add back in regex logic once ui is known
             onClicked: {
-                convoPane.state = "newConversationState"
+                convoPane.state = "conversationSearch"
             }
         }
-    }
 
-    //NOTE: see previous notes about using native dialogs
-    Popups.NewContactDialogue {
-        id: newContactDialogue
+        ///--- Add contact button
+        Common.ButtonForm {
+            id: addContactButton
+            anchors {
+                rightMargin: QmlCfg.margin
+                verticalCenterOffset: 0
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
+            source: "qrc:/pencil-icon-black.svg"
+            z: -1
+
+            MouseArea {
+                anchors.fill: parent
+
+                onClicked: {
+                    convoPane.state = "newConversationState"
+                }
+            }
+        }
+
+        //NOTE: see previous notes about using native dialogs
+        // we're not using this anymore
+        /**
+        Popups.NewContactDialogue {
+            id: newContactDialogue
+        }
+        **/
     }
 }

@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::*};
+use crate::{ffi, interface::*, ret_err, ret_none, shared};
 use crossbeam_channel::*;
 use herald_common::*;
 use heraldcore::{
@@ -28,14 +28,13 @@ pub struct EffectsFlags {
     msg_data: AtomicU8,
     users_data: AtomicU8,
     members_data: AtomicU8,
-    conv_data: AtomicU8,
 }
 
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    msg_senders: HashMap<ConversationId, Sender<MsgUpdate>>,
-    members_senders: HashMap<ConversationId, Sender<MemberUpdate>>,
+    msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
+    members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
     effects_flags: Arc<EffectsFlags>,
     emit: Emitter,
 }
@@ -45,6 +44,7 @@ impl NotifHandler {
         use Notification::*;
         match notif {
             NewMsg(msg_id, cid) => {
+                use shared::messages::*;
                 let tx = match self.msg_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
@@ -61,6 +61,7 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             MsgReceipt { mid, cid, stat, by } => {
+                use shared::messages::*;
                 let tx = match self.msg_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
@@ -77,6 +78,8 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             NewContact(uid, cid) => {
+                use shared::{conv_global::*, user_global::*};
+
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
                 self.effects_flags
@@ -86,30 +89,32 @@ impl NotifHandler {
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                conv_emit_try_poll();
             }
             NewConversation(cid) => {
+                use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                conv_emit_try_poll();
             }
             AddContactResponse(cid, uid, accepted) => {
+                use shared::{conv_global::*, user_global::*};
+
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
                 self.effects_flags
                     .users_data
                     .fetch_add(1, Ordering::Acquire);
+                self.emit.users_data_changed();
 
                 // add conversation
                 if accepted {
                     ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    self.effects_flags.conv_data.fetch_add(1, Ordering::Acquire);
-                    self.emit.conv_data_changed();
-                    self.emit.users_data_changed();
+                    conv_emit_try_poll();
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
+                use shared::members::*;
+
                 let tx = match self.members_senders.get(&cid) {
                     Some(tx) => tx,
                     None => {
@@ -125,7 +130,7 @@ impl NotifHandler {
                 self.effects_flags
                     .members_data
                     .fetch_add(1, Ordering::Acquire);
-                self.emit.conv_data_changed();
+                self.emit.members_data_changed();
             }
         }
     }
@@ -145,7 +150,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            conv_data: AtomicU8::new(0),
             users_data: AtomicU8::new(0),
             msg_data: AtomicU8::new(0),
             members_data: AtomicU8::new(0),
@@ -228,10 +232,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn connection_pending(&self) -> bool {
         self.effects_flags.net_pending.load(Ordering::Relaxed)
-    }
-
-    fn conv_data(&self) -> u8 {
-        self.effects_flags.conv_data.load(Ordering::Relaxed)
     }
 
     fn members_data(&self) -> u8 {

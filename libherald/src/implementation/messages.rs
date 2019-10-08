@@ -1,9 +1,4 @@
-use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{MsgUpdate, MSG_RXS},
-};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -106,7 +101,7 @@ impl Messages {
         use notify_rust::*;
         // TODO: sketchy global state! This should be set
         // somewhere else.
-        set_application(crate::DESKTOP_APP_NAME);
+        set_application(crate::DESKTOP_APP_NAME).ok();
         Notification::new()
             .summary(&format!("New message from {}", msg.author))
             .subtitle("TODO: macOS has subtitles! Do we want them?")
@@ -244,12 +239,13 @@ impl MessagesTrait for Messages {
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 
-        let id = &ret_none!(self.list.get(row_index), false).msg_id;
+        let id = ret_none!(self.list.get(row_index), false).msg_id;
 
         match message::delete_message(&id) {
             Ok(_) => {
                 self.model.begin_remove_rows(row_index, row_index);
                 self.list.remove(row_index);
+                self.map.remove(&id);
                 self.model.end_remove_rows();
                 true
             }

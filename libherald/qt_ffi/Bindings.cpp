@@ -96,6 +96,10 @@ namespace {
     {
         Q_EMIT o->filterRegexChanged();
     }
+    inline void conversationsTryPollChanged(Conversations* o)
+    {
+        Q_EMIT o->tryPollChanged();
+    }
     inline void heraldStateConfigInitChanged(HeraldState* o)
     {
         Q_EMIT o->configInitChanged();
@@ -140,10 +144,6 @@ namespace {
     {
         Q_EMIT o->connectionUpChanged();
     }
-    inline void networkHandleConvDataChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->convDataChanged();
-    }
     inline void networkHandleMembersDataChanged(NetworkHandle* o)
     {
         Q_EMIT o->membersDataChanged();
@@ -183,7 +183,10 @@ extern "C" {
 };
 
 extern "C" {
-    void conversation_builder_data_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    quint32 conversation_builder_data_member_color(const ConversationBuilder::Private*, int);
+    void conversation_builder_data_member_display_name(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_data_member_id(const ConversationBuilder::Private*, int, QString*, qstring_set);
+    void conversation_builder_data_member_profile_picture(const ConversationBuilder::Private*, int, QString*, qstring_set);
     void conversation_builder_sort(ConversationBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int conversation_builder_row_count(const ConversationBuilder::Private*);
@@ -253,10 +256,29 @@ Qt::ItemFlags ConversationBuilder::flags(const QModelIndex &i) const
     return flags;
 }
 
-QString ConversationBuilder::displayName(int row) const
+quint32 ConversationBuilder::memberColor(int row) const
+{
+    return conversation_builder_data_member_color(m_d, row);
+}
+
+QString ConversationBuilder::memberDisplayName(int row) const
 {
     QString s;
-    conversation_builder_data_display_name(m_d, row, &s, set_qstring);
+    conversation_builder_data_member_display_name(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QString ConversationBuilder::memberId(int row) const
+{
+    QString s;
+    conversation_builder_data_member_id(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QString ConversationBuilder::memberProfilePicture(int row) const
+{
+    QString s;
+    conversation_builder_data_member_profile_picture(m_d, row, &s, set_qstring);
     return s;
 }
 
@@ -267,7 +289,13 @@ QVariant ConversationBuilder::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(displayName(index.row()));
+            return QVariant::fromValue(memberColor(index.row()));
+        case Qt::UserRole + 1:
+            return QVariant::fromValue(memberDisplayName(index.row()));
+        case Qt::UserRole + 2:
+            return QVariant::fromValue(memberId(index.row()));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(memberProfilePicture(index.row())));
         }
         break;
     }
@@ -287,7 +315,10 @@ int ConversationBuilder::role(const char* name) const {
 }
 QHash<int, QByteArray> ConversationBuilder::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "displayName");
+    names.insert(Qt::UserRole + 0, "memberColor");
+    names.insert(Qt::UserRole + 1, "memberDisplayName");
+    names.insert(Qt::UserRole + 2, "memberId");
+    names.insert(Qt::UserRole + 3, "memberProfilePicture");
     return names;
 }
 QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientation, int role) const
@@ -324,6 +355,9 @@ extern "C" {
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    void conversation_builder_remove_last(ConversationBuilder::Private*);
+    bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
+    bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
     void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
 };
 
@@ -616,7 +650,7 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 extern "C" {
-    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*),
+    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*), void (*)(Conversations*),
         void (*)(const Conversations*),
         void (*)(Conversations*),
         void (*)(Conversations*),
@@ -634,7 +668,7 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
-    void conversations_add_conversation(Conversations::Private*, QByteArray*, qbytearray_set);
+    quint8 conversations_try_poll_get(const Conversations::Private*);
     bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
@@ -1183,11 +1217,10 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    quint8 network_handle_conv_data_get(const NetworkHandle::Private*);
     quint8 network_handle_members_data_get(const NetworkHandle::Private*);
     quint8 network_handle_msg_data_get(const NetworkHandle::Private*);
     quint8 network_handle_users_data_get(const NetworkHandle::Private*);
@@ -1673,6 +1706,18 @@ QByteArray ConversationBuilder::finalize()
     conversation_builder_finalize(m_d, &s, set_qbytearray);
     return s;
 }
+void ConversationBuilder::removeLast()
+{
+    return conversation_builder_remove_last(m_d);
+}
+bool ConversationBuilder::removeMemberById(const QString& user_id)
+{
+    return conversation_builder_remove_member_by_id(m_d, user_id.utf16(), user_id.size());
+}
+bool ConversationBuilder::removeMemberByIndex(quint64 index)
+{
+    return conversation_builder_remove_member_by_index(m_d, index);
+}
 void ConversationBuilder::setTitle(const QString& title)
 {
     return conversation_builder_set_title(m_d, title.utf16(), title.size());
@@ -1690,6 +1735,7 @@ Conversations::Conversations(QObject *parent):
     m_d(conversations_new(this,
         conversationsFilterChanged,
         conversationsFilterRegexChanged,
+        conversationsTryPollChanged,
         [](const Conversations* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1760,11 +1806,9 @@ bool Conversations::filterRegex() const
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
 }
-QByteArray Conversations::addConversation()
+quint8 Conversations::tryPoll() const
 {
-    QByteArray s;
-    conversations_add_conversation(m_d, &s, set_qbytearray);
-    return s;
+    return conversations_try_poll_get(m_d);
 }
 bool Conversations::pollUpdate()
 {
@@ -2104,7 +2148,6 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleConvDataChanged,
         networkHandleMembersDataChanged,
         networkHandleMsgDataChanged,
         networkHandleUsersDataChanged)),
@@ -2124,10 +2167,6 @@ bool NetworkHandle::connectionPending() const
 bool NetworkHandle::connectionUp() const
 {
     return network_handle_connection_up_get(m_d);
-}
-quint8 NetworkHandle::convData() const
-{
-    return network_handle_conv_data_get(m_d);
 }
 quint8 NetworkHandle::membersData() const
 {

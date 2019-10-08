@@ -66,6 +66,9 @@ public:
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE void removeLast();
+    Q_INVOKABLE bool removeMemberById(const QString& user_id);
+    Q_INVOKABLE bool removeMemberByIndex(quint64 index);
     Q_INVOKABLE void setTitle(const QString& title);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -84,7 +87,10 @@ public:
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE QString displayName(int row) const;
+    Q_INVOKABLE quint32 memberColor(int row) const;
+    Q_INVOKABLE QString memberDisplayName(int row) const;
+    Q_INVOKABLE QString memberId(int row) const;
+    Q_INVOKABLE QString memberProfilePicture(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -106,6 +112,7 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
+    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
@@ -114,7 +121,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE QByteArray addConversation();
+    quint8 tryPoll() const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
@@ -159,6 +166,7 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+    void tryPollChanged();
 };
 
 class HeraldState : public QObject
@@ -346,7 +354,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint8 convData READ convData NOTIFY convDataChanged FINAL)
     Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
     Q_PROPERTY(quint8 msgData READ msgData NOTIFY msgDataChanged FINAL)
     Q_PROPERTY(quint8 usersData READ usersData NOTIFY usersDataChanged FINAL)
@@ -356,7 +363,6 @@ public:
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
-    quint8 convData() const;
     quint8 membersData() const;
     quint8 msgData() const;
     quint8 usersData() const;
@@ -366,7 +372,6 @@ public:
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void convDataChanged();
     void membersDataChanged();
     void msgDataChanged();
     void usersDataChanged();

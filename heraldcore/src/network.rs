@@ -287,6 +287,7 @@ impl Default for Event {
 fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
+
     match cm.open()? {
         NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
         DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
@@ -294,8 +295,17 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             let mut db = crate::db::Database::get()?;
             let tx = db.transaction()?;
             let cid = ac.cid;
-            let title = ac.title.as_ref().map(String::as_str);
-            crate::conversation::add_conversation_with_tx(&tx, Some(&cid), title, false)?;
+
+            let title = ac.title;
+
+            let mut conv_builder = crate::conversation::ConversationBuilder::new();
+            conv_builder.conversation_id(cid);
+
+            if let Some(title) = title {
+                conv_builder.title(title);
+            }
+
+            conv_builder.add_with_tx(&tx)?;
             crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
             tx.commit()?;
             ev.notifications.push(Notification::NewConversation(cid));
@@ -312,11 +322,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             tx.commit()?;
         }
         Msg(msg) => {
-            // fix for message loopback back until this can be handled server side
-            if cm.from().did == *Config::static_keypair()?.public_key() {
-                return Ok(ev);
-            }
-
             let cmessages::Msg { mid, content, op } = msg;
 
             match content {
@@ -378,8 +383,9 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
+        let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
-        let req = push_users::Req { to, msg };
+        let req = push_users::Req { to, exc, msg };
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => Ok(()),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
@@ -443,14 +449,23 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
-pub fn start_conversation(members: &[UserId], title: Option<&str>) -> Result<ConversationId, HErr> {
+pub fn start_conversation(
+    members: &[UserId],
+    title: Option<String>,
+) -> Result<ConversationId, HErr> {
     use crate::conversation;
 
     let pairwise = conversation::get_pairwise_conversations(members)?;
 
     let mut db = crate::db::Database::get()?;
     let tx = db.transaction()?;
-    let cid = conversation::add_conversation_with_tx(&tx, None, title, false)?;
+
+    let mut conv_builder = conversation::ConversationBuilder::new();
+    if let Some(title) = title.as_ref() {
+        conv_builder.title(title.clone());
+    }
+
+    let cid = conv_builder.add_with_tx(&tx)?;
     crate::members::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
 

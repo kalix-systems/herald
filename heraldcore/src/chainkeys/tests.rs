@@ -1,5 +1,5 @@
 use super::*;
-use crate::{conversation::add_conversation, womp};
+use crate::{conversation::ConversationBuilder, womp};
 use serial_test_derive::serial;
 
 #[test]
@@ -9,8 +9,14 @@ fn blockstore() {
     let mut cid1 = ConversationId::from(crate::utils::rand_id());
     let mut cid2 = ConversationId::from(crate::utils::rand_id());
 
-    add_conversation(Some(&cid1), None).expect(womp!());
-    add_conversation(Some(&cid2), None).expect(womp!());
+    ConversationBuilder::new()
+        .conversation_id(cid1)
+        .add()
+        .expect(womp!());
+    ConversationBuilder::new()
+        .conversation_id(cid2)
+        .add()
+        .expect(womp!());
 
     let blockhash11 = BlockHash::from_slice(vec![11; BLOCKHASH_BYTES].as_slice()).expect(womp!());
     let blockhash12 = BlockHash::from_slice(vec![12; BLOCKHASH_BYTES].as_slice()).expect(womp!());

@@ -28,7 +28,7 @@ Pane {
         color: "black"
     }
 
-    ///--- chat view, shows messages
+    /// chat view, shows messages
     CVUtils.ConversationWindowForm {
         id: convWindow
         focus: true
@@ -106,7 +106,8 @@ Pane {
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
                                       event, chatTextArea.chatText,
                                       // this is actually a text area TODO rename
-                                      networkHandle, ownedConversation, chatTextArea)
+                                      networkHandle, ownedConversation,
+                                      chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

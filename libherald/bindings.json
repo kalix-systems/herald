@@ -65,6 +65,9 @@
                 "filterRegex": {
                     "write": true,
                     "type": "bool"
+                },
+                "tryPoll": {
+                    "type": "quint8"
                 }
             },
             "itemProperties": {
@@ -98,10 +101,6 @@
                 }
             },
             "functions": {
-                "addConversation": {
-                    "mut": true,
-                    "return": "QByteArray"
-                },
                 "removeConversation": {
                     "mut": true,
                     "return": "bool",
@@ -138,9 +137,6 @@
                     "type": "quint8"
                 },
                 "membersData": {
-                    "type": "quint8"
-                },
-                "convData": {
                     "type": "quint8"
                 }
             },
@@ -461,9 +457,20 @@
         "ConversationBuilder": {
             "type": "List",
             "itemProperties": {
-                "displayName": {
+                "memberDisplayName": {
                     "type": "QString",
                     "rustByValue": true
+                },
+                "memberColor": {
+                    "type": "quint32"
+                },
+                "memberProfilePicture": {
+                    "type": "QString",
+                    "rustByValue": true,
+                    "optional": true
+                },
+                "memberId": {
+                    "type": "QString"
                 }
             },
             "functions": {
@@ -486,6 +493,30 @@
                             "type": "QString"
                         }
                     ]
+                },
+                "removeMemberById": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "user_id",
+                            "type": "QString"
+                        }
+                    ]
+                },
+                "removeMemberByIndex": {
+                    "return": "bool",
+                    "mut": true,
+                    "arguments": [
+                        {
+                            "name": "index",
+                            "type": "quint64"
+                        }
+                    ]
+                },
+                "removeLast": {
+                    "return": "void",
+                    "mut": true
                 },
                 "finalize": {
                     "mut": true,

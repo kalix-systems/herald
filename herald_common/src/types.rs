@@ -111,6 +111,7 @@ pub mod push_users {
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
         pub to: Vec<UserId>,
+        pub exc: sig::PublicKey,
         pub msg: Bytes,
     }
 
