@@ -88,7 +88,7 @@ Rectangle {
             id: replyLoader
             property string opName: replyName
             property string opText: replyText
-            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(ownedConversation.messageAuthorById(replyId))]
+            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyName.slice(1,replyName.length))]
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
