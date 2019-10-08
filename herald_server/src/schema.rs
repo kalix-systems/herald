@@ -18,9 +18,9 @@ table! {
 }
 
 table! {
-    prekeys (sealed_key) {
-        sealed_key -> Bytea,
+    prekeys (signing_key) {
         signing_key -> Bytea,
+        sealed_key -> Bytea,
     }
 }
 

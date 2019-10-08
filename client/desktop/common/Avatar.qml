@@ -92,11 +92,10 @@ Row {
             height: size
             anchors.verticalCenter: parent.verticalCenter
             //is white instead of palette maincolor bc shld be white regardless of theme
-            color: if (!isDefault) {
-                       "white"
-                   } else {
-                       QmlCfg.avatarColors[colorHash]
-                   }
+
+
+            readonly property color startColor:  !!!isDefault ?  "white" : QmlCfg.avatarColors[colorHash]
+            color: startColor
             // Note:
             radius: shape
             ///---- initial

@@ -28,8 +28,8 @@ ColumnLayout {
     TextEdit {
         text: body
         Layout.maximumWidth: maxWidth
-        Layout.leftMargin: QmlCfg.smallMargin
-        Layout.rightMargin: QmlCfg.smallMargin
+        Layout.margins: QmlCfg.smallMargin
+        Layout.bottomMargin: QmlCfg.smallMargin
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
         Layout.alignment: Qt.AlignLeft
         selectByMouse: true

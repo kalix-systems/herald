@@ -33,17 +33,18 @@ ColumnLayout {
         Layout.preferredHeight: reply.implicitHeight
         color: outbound ? opColor : Qt.lighter(userColor, 1.2)
         radius: QmlCfg.radius / 2
-        Layout.margins: 5
+        Layout.margins: QmlCfg.smallMargin
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
         ColumnLayout {
             id: reply
             spacing: 1
+
             Label {
                 id: opLabel
                 text: opName
                 font.bold: true
-                Layout.margins: 5
+                Layout.margins: QmlCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
             }
@@ -51,12 +52,13 @@ ColumnLayout {
             TextMetrics {
                 id: opBodyTextMetrics
                 text: opBody
-                elideWidth: (maxWidth - QmlCfg.smallMargin) * 2
+                elideWidth: replyBody.width * 5
                 elide: Text.ElideRight
             }
 
             TextEdit {
-                Layout.margins: 5
+                id: replyBody
+                Layout.margins: QmlCfg.smallMargin
                 text: opBodyTextMetrics.elidedText
                 Layout.maximumWidth: Math.max(maxWidth, 200)
                 Layout.minimumWidth: messageBody.width
@@ -73,8 +75,8 @@ ColumnLayout {
     TextEdit {
         id: messageBody
         text: body
-        Layout.leftMargin: 5
-        Layout.rightMargin: 5
+        Layout.leftMargin: QmlCfg.smallMargin
+        Layout.rightMargin: QmlCfg.smallMargin
         Layout.maximumWidth: Math.max(parent.maxWidth, 200)
         Layout.alignment: Qt.AlignLeft
         selectByMouse: true

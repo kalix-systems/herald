@@ -101,7 +101,7 @@ Item {
     property var avatarColors: switch (theme) {
         /// none of these besides Light implemented ATM
         case (0):
-        return ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
+        return ["#9C2E38", "#ce8054", "#9da86f", "#7498a4", "#bfb35a", "#32a198", "#5e8c6a", "#729eb8", "#CB8C9D"]
         case (1):
         return ["#b58900", "#cb4b16", "#dc322f", "#d33682", "#6c71c4", "#268bd2", "#2aa198", "#859900", "#cd74d4"]
         case (2):
