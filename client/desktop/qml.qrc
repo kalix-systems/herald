@@ -52,5 +52,7 @@
         <file>SideBar/NewConvoComponents/FinalizeGroupComponent.qml</file>
         <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
+        <file>ChatBubble/StandardTextEdit.qml</file>
+        <file>ChatBubble/StandardStamps.qml</file>
     </qresource>
 </RCC>

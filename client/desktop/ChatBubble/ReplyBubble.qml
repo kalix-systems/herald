@@ -15,9 +15,7 @@ ColumnLayout {
     property string opBody: ownedConversation.messageBodyById(op)
     property color opColor: "gray"
     property string authorName: ""
-    property int
-
-    spacing: 0
+    property int spacing: 0
 
     Label {
         id: sender
@@ -70,40 +68,9 @@ ColumnLayout {
         }
     }
 
-
-
-    TextEdit {
+    StandardTextEdit {
         id: messageBody
-        text: body
-        Layout.leftMargin: QmlCfg.smallMargin
-        Layout.rightMargin: QmlCfg.smallMargin
-        Layout.maximumWidth: Math.max(parent.maxWidth, 200)
-        Layout.alignment: Qt.AlignLeft
-        selectByMouse: true
-        selectByKeyboard: true
-        readOnly: true
-        color: outbound ? "black" : "white"
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
-    RowLayout {
-        Layout.margins: 5
-
-        Label {
-            font.pixelSize: QmlCfg.chatTextSize
-            text: friendlyTimestamp
-            id: timestamp
-            color: outbound ? "black" : "white"
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        Image {
-            id: receipt
-            source: receiptImage
-            sourceSize: Qt.size(16, 16)
-        }
-    }
+    StandardStamps {}
 }
