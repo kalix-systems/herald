@@ -31,7 +31,7 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: outbound ? opColor : Qt.lighter(userColor, 1.6)
+        color: outbound ? opColor : Qt.lighter(userColor, 1.2)
         radius: QmlCfg.radius / 2
         Layout.margins: 5
         Layout.topMargin: 0
