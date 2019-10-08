@@ -39,7 +39,8 @@ Rectangle {
 
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyName === "@"+config.displayName
+    property bool owned: replyName === config.displayName
+    property string replyUid: ""
 
     property var replyId
 
@@ -88,7 +89,7 @@ Rectangle {
             id: replyLoader
             property string opName: replyName
             property string opText: replyText
-            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyName.slice(1,replyName.length))]
+            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
