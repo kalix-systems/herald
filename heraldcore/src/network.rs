@@ -8,7 +8,6 @@ use chrono::prelude::*;
 use herald_common::*;
 use lazy_static::*;
 use std::{
-    collections::HashMap,
     env,
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
@@ -103,8 +102,12 @@ macro_rules! get_of_helper {
     };
 }
 
-get_of_helper!(keys_of, Vec<UserId>, HashMap<UserId, UserMeta>);
-get_of_helper!(key_info, Vec<sig::PublicKey>, HashMap<sig::PublicKey, sig::PKMeta>);
+get_of_helper!(keys_of, Vec<UserId>, Vec<(UserId, UserMeta)>);
+get_of_helper!(
+    key_info,
+    Vec<sig::PublicKey>,
+    Vec<(sig::PublicKey, sig::PKMeta)>
+);
 get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
@@ -428,9 +431,26 @@ fn send_dmessage(dids: &[sig::PublicKey], msg: &DeviceMessage) -> Result<(), HEr
 }
 
 fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
-    let meta = keys_of(vec![uid])?
-        .remove(&uid)
-        .ok_or_else(|| HErr::HeraldError(format!("No keys associated with {}", uid)))?;
+    let meta = match keys_of(vec![uid])?.pop() {
+        Some((u, m)) => {
+            if u == uid {
+                Ok(m)
+            } else {
+                Err(HErr::HeraldError(format!(
+                    "Response returned keys not associated with uid {}\n\
+                     failed at line {}",
+                    uid,
+                    line!()
+                )))
+            }
+        }
+        None => Err(HErr::HeraldError(format!(
+            "No keys associated with {}\n\
+             failed at line {}",
+            uid,
+            line!()
+        ))),
+    }?;
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
 

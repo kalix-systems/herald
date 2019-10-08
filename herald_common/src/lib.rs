@@ -13,12 +13,12 @@ pub use bytes::Bytes;
 pub use chainmail::block::*;
 pub use chrono::prelude::*;
 pub use serde_cbor;
-pub use std::collections::HashMap;
+pub use std::collections::BTreeMap;
 
 impl UserMeta {
     pub fn new() -> Self {
         UserMeta {
-            keys: HashMap::new(),
+            keys: BTreeMap::new(),
         }
     }
 
