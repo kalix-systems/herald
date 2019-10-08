@@ -25,6 +25,9 @@ declare class NetworkHandle {
 
 declare class Messages {
   conversationId: ConversationID;
+  lastAuthor: string;
+  lastBody: string;
+  lastEpochTimestampMs: number;
   sendMessage(text: string): MessageId;
   reply(text: string, op: MessageId): MessageId;
   deleteMessage(rowIndex: number): boolean;
@@ -78,6 +81,14 @@ declare class Conversations {
   addConversation(): ByteArray;
   removeConversation(rowIndex: number): boolean;
   pollUpdate(): boolean;
+}
+
+declare class ConversationBuilder {
+	addMember(user_id: UserId): boolean;
+	removeMemberByID(user_id: UserId): boolean;
+	removeMemberByIndex(rowIndex: number): boolean;
+	removeLast(): void;
+	finalize(): ByteArray;
 }
 
 declare class HeraldUtils {
