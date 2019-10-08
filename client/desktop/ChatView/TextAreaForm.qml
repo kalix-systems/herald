@@ -77,6 +77,7 @@ Rectangle {
             right: attachmentsButton.left
             leftMargin: QmlCfg.smallMargin
             rightMargin: QmlCfg.smallMargin
+            topMargin: QmlCfg.smallMargin
         }
 
         topPadding: QmlCfg.smallMargin
