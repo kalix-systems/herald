@@ -13,22 +13,6 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-pub fn prekeys_of(key: sig::PublicKey) -> Vec<u8> {
-    let suffix = b":prekeys";
-    let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
-    out.extend_from_slice(key.as_ref());
-    out.extend_from_slice(suffix);
-    out
-}
-
-pub fn pending_of(key: sig::PublicKey) -> Vec<u8> {
-    let suffix = b":pending";
-    let mut out = Vec::with_capacity(key.as_ref().len() + suffix.len());
-    out.extend_from_slice(key.as_ref());
-    out.extend_from_slice(suffix);
-    out
-}
-
 pub type Pool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
 pub fn init_pool() -> Pool {
