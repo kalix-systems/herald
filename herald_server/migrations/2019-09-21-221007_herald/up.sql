@@ -26,6 +26,7 @@ CREATE TABLE pending (
   FOREIGN KEY(push_id) REFERENCES pushes(push_id) ON DELETE CASCADE
 );
 
+
 CREATE TABLE prekeys (
   -- sealing_key, 32 bytes
   sealed_key BYTEA PRIMARY KEY,
@@ -33,6 +34,8 @@ CREATE TABLE prekeys (
   signing_key BYTEA NOT NULL,
   FOREIGN KEY(signing_key) REFERENCES keys(key)
 );
+
+CREATE INDEX prekey_signer ON prekeys(signing_key);
 
 CREATE TABLE userkeys (
   user_id CHAR(32) NOT NULL,
