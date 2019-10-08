@@ -1,14 +1,13 @@
 use super::*;
-use std::collections::HashMap;
 
 pub fn keys_of(store: &mut Conn, req: keys_of::Req) -> Result<keys_of::Res, Error> {
     use keys_of::*;
 
-    let mut map = HashMap::with_capacity(req.0.len());
+    let mut map = Vec::with_capacity(req.0.len());
 
     for uid in req.0 {
         let meta = store.read_meta(&uid)?;
-        map.insert(uid, meta);
+        map.push((uid, meta));
     }
 
     Ok(Res(map))
@@ -17,11 +16,11 @@ pub fn keys_of(store: &mut Conn, req: keys_of::Req) -> Result<keys_of::Res, Erro
 pub fn key_info(store: &mut Conn, req: key_info::Req) -> Result<key_info::Res, Error> {
     use key_info::*;
 
-    let mut map = HashMap::with_capacity(req.0.len());
+    let mut map = Vec::with_capacity(req.0.len());
 
     for key in req.0 {
         let meta = store.read_key(key)?;
-        map.insert(key, meta);
+        map.push((key, meta));
     }
 
     Ok(Res(map))

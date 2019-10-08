@@ -8,7 +8,7 @@ use std::{
 
 type UserIdInner = [u8; 32];
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct UserId(ArrayString<UserIdInner>);
 
 impl std::ops::Deref for UserId {

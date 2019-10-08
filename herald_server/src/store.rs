@@ -317,7 +317,7 @@ impl Conn {
             ))
             .get_results(self.deref_mut())?;
 
-        let meta_inner: Result<HashMap<sig::PublicKey, sig::PKMeta>, Error> = keys
+        let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = keys
             .into_iter()
             .map(
                 |(
