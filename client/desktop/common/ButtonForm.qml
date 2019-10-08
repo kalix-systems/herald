@@ -9,18 +9,33 @@ Button {
     property alias scale: background.scale
     height: 25
     width: height
+
     background: Image {
         id: background
         source: parent.source
-        sourceSize: Qt.size(48, 48)
+        sourceSize: Qt.size(24, 24)
         height: width
-        scale: 0.9
         mipmap: true
+        layer.enabled: true
+        layer.samplerName: "maskSource"
+        layer.effect: ShaderEffect {
+            property color overlay: QmlCfg.palette.iconMatte
+            property var source: background
+            fragmentShader:
+                     "
+                      uniform lowp sampler2D source;
+                      uniform lowp sampler2D maskSource;
+                      uniform vec4 overlay;
+                      varying highp vec2 qt_TexCoord0;
+                      void main() {
+                       lowp vec4 tex = texture2D(source, qt_TexCoord0);
+                       lowp vec4 mask = texture2D(maskSource, qt_TexCoord0);
+                       gl_FragColor = overlay * mask.a;
+                        }
+                      "
+            }
     }
 
-    ColorOverlay {
-        anchors.fill: background
-        source: background
-        color: QmlCfg.palette.iconMatte
-    }
+
+
 }

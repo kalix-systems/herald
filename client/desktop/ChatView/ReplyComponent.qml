@@ -28,15 +28,12 @@ Rectangle {
 
    Button {
         id: exitButton
-        font.pixelSize: 10
 
         anchors {
             margins: QmlCfg.smallMargin
             right: parent.right
             top: parent.top
         }
-
-
 
         background: Rectangle {
             color: Qt.darker(startColor, 1.9)
@@ -49,7 +46,7 @@ Rectangle {
                 id: x
                 source: "qrc:/x-icon-white.svg"
                 anchors.centerIn: parent
-                scale: 0.6
+                sourceSize: Qt.size(15,15)
             }
             ColorOverlay {
                 anchors.fill: x

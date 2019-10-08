@@ -33,7 +33,7 @@ Item {
     property int chatTextSize: 10
 
     /// user settable cfg
-    property int theme: 0
+    property int theme: 1
     /// emoji skin color
     property int skinSwatchIndex: 0
     /// persistent most common emojis
