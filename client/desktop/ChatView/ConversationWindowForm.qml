@@ -55,6 +55,7 @@ Flickable {
                 readonly property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                                 receiptStatus)
                 readonly property color userColor : QmlCfg.avatarColors[contactsModel.colorById(author)]
+
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
                 readonly property bool outbound: author === config.configId
@@ -76,7 +77,7 @@ Flickable {
                     StandardBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        authorName: outbound ? "" : author
+                        authorName: outbound ? "" : contactsModel.displayNameById(author)
                         receiptImage: proxyReceiptImage
                     }
                 }

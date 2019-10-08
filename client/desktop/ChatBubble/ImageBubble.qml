@@ -12,7 +12,7 @@ ColumnLayout {
 
     Label {
         id: sender
-        text: authorName === "" ? "" : "@" + authorName
+        text: authorName === "" ? "" : authorName
         Layout.margins: authorName === "" ? 0 : QmlCfg.smallMargin
         Layout.bottomMargin: authorName === "" ? QmlCfg.smallMargin : QmlCfg.margin
         Layout.preferredHeight: authorName !== "" ? QmlCfg.margin : 0
