@@ -10,12 +10,5 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    println!("starting docker container");
-    Command::new("docker-compose")
-        .args(&["up", "-d"])
-        .output()
-        .expect("failed to start docker container");
-
-    println!("starting server");
     HANDLER.serve(8080).await;
 }

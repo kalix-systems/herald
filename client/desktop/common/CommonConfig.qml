@@ -1,4 +1,5 @@
 pragma Singleton
+
 import QtQuick 2.13
 import Qt.labs.settings 1.0
 import "EmojiJson.js" as JSON
@@ -38,7 +39,12 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
+    Component.onCompleted: {
+        print(theme)
+    }
+
     Settings {
+        id: settings
         property alias theme: cfg.theme
         property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
@@ -46,50 +52,63 @@ Item {
     /// palette :
     /// object which contains all of the color configurations
     /// this is defaulted to the Light color scheme
-    property var palette: QtObject {
-        /// mainColor:
-        /// used for backgrounds and default fills
-        property string mainColor: "white"
-        /// secondaryColor:
-        /// used for secondary lowlighting, borders
-        property string secondaryColor: "lightgrey"
-        /// tertiaryColor:
-        /// used for additional highlighting, selection indication
-        property string tertiaryColor: "lightsteelblue"
-        /// teriaryComplement:
-        /// a direct compliment to the selection color, should be used for alerts
-        /// and uncommon events
-        property string tertiaryComplement: "lightsalmon"
-        /// textColor:
-        /// the color of commonly displayed text when it is on
-        /// a surface of the primary color
-        property string mainTextColor: "black"
-        /// secondaryTextColor:
-        /// the color of text on a surface of the secondaryColor
-        property string secondaryTextColor: "grey"
-        /// alertTextColor:
-        /// Color in alert messages, that can be display on top of the
-        /// tertiary color.
-        property string alertTextColor: "red"
+    property var palette: switch (theme) {
+        case (0):
+        return {
+            /* mainColor:
+            used for backgrounds and default fills*/
+            mainColor: "white",
+            /* secondaryColor:
+             used for secondary lowlighting, borders*/
+            secondaryColor: "lightgrey",
+            /* tertiaryColor:
+            used for additional highlighting, selection indication*/
+
+            tertiaryColor: "lightsteelblue", /* teriaryComplement:
+            a direct compliment to the selection color, should be used for alerts
+            and uncommon events */
+
+            tertiaryComplement: "lightsalmon",
+            /* textColor:
+             the color of commonly displayed text when it is on
+             a surface of the primary color*/
+
+            mainTextColor: "black",
+            /* secondaryTextColor:
+             the color of text on a surface of the secondaryColor*/
+
+            secondaryTextColor: "grey",
+            /* alertTextColor:
+             Color in alert messages, that can be display on top of the
+             tertiary color.*/
+
+            alertTextColor: "red"
+        };
+
+        case (1):
+        return {
+            mainColor: "#002b36",
+            secondaryColor: "#073642",
+            tertiaryColor: "#586e75",
+            tertiaryComplement: "#839496",
+            mainTextColor: "#839496",
+            secondaryTextColor: "#586e75",
+            alertTextColor: "#dc322f"
+        };
     }
 
-    Component.onCompleted: {
-        switch (theme) {
-            /// none of these besides Light implemented ATM
-            case (0):
-            avatarColors = ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
-            break
-            case (1):
-            break
-            case (2):
-            break
-            case (3):
-            break
-        }
-    }
     /// Todo : finish these later THIS LIST IS APPEND ONLY
-    property var avatarColors: ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
-
+    property var avatarColors: switch (theme) {
+        /// none of these besides Light implemented ATM
+        case (0):
+        return ["#d93434", "#c48531", "#a68b1e", "#2e8ccf", "#d13a82", "#32a198", "#8ab872", "#729eb8", "#cd74d4"]
+        case (1):
+        return ["#b58900", "#cb4b16", "#dc322f", "#d33682", "#6c71c4", "#268bd2", "#2aa198", "#859900", "#cd74d4"]
+        case (2):
+        break
+        case (3):
+        break
+    }
     /// Default Font:
     /// Default Text Size:
     /// Platform :

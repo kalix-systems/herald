@@ -1,4 +1,7 @@
-module HeraldQtCommon
+module CommonQml
 UtilityBar 1.0 UtilityBar.qml
 TeamColumn 1.0 TeamColumn.qml
-ConversationList 1.0 ConversationList.qml
+ChatBubble 1.0 Chatbubble/ChatBubble.qml
+ImageBubble 1.0 Chatbubble/ImageBubble.qml
+ReplyBubble 1.0 Chatbubble/ReplyBubble.qml
+StandardBubble 1.0 Chatbubble/StandardBubble.qml

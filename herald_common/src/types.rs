@@ -1,11 +1,14 @@
 use crate::crypto::*;
 use arrayvec::ArrayString;
 use bytes::Bytes;
-use std::{collections::HashMap, convert::TryFrom};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    convert::TryFrom,
+};
 
 type UserIdInner = [u8; 32];
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct UserId(ArrayString<UserIdInner>);
 
 impl std::ops::Deref for UserId {
@@ -56,7 +59,7 @@ impl TryFrom<&str> for UserId {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserMeta {
-    pub keys: HashMap<sig::PublicKey, sig::PKMeta>,
+    pub keys: BTreeMap<sig::PublicKey, sig::PKMeta>,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
@@ -72,7 +75,7 @@ pub mod keys_of {
     pub struct Req(pub Vec<UserId>);
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub HashMap<UserId, UserMeta>);
+    pub struct Res(pub Vec<(UserId, UserMeta)>);
 }
 
 pub mod key_info {
@@ -82,7 +85,7 @@ pub mod key_info {
     pub struct Req(pub Vec<sig::PublicKey>);
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    pub struct Res(pub HashMap<sig::PublicKey, sig::PKMeta>);
+    pub struct Res(pub Vec<(sig::PublicKey, sig::PKMeta)>);
 }
 
 pub mod keys_exist {
@@ -230,4 +233,31 @@ pub mod catchup {
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct CatchupAck(pub u64);
+}
+
+pub mod add_prekeys {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub Vec<sealed::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Missing(Vec<sig::PublicKey>),
+        BadSig,
+        Success,
+    }
+}
+
+pub mod get_prekeys {
+    use super::*;
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub struct Req(pub BTreeSet<sig::PublicKey>);
+
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success(Vec<(sig::PublicKey, sealed::PublicKey)>),
+        Missing(Vec<sig::PublicKey>),
+    }
 }

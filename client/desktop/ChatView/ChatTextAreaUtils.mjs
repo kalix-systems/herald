@@ -1,4 +1,4 @@
-export function enterKeyHandler(event, target, networkHandle, messageModel) {
+export function enterKeyHandler(event, target, networkHandle, messageModel, textAreaForm) {
     if (event.modifiers & Qt.ShiftModifier) {
         target.text = target.text + "\n";
         target.cursorPosition = target.text.length;
@@ -10,7 +10,14 @@ export function enterKeyHandler(event, target, networkHandle, messageModel) {
     // clear before positional reset
     const text = target.text;
     target.clear();
-    const messageId = messageModel.sendMessage(text);
+    let messageId;
+    if (textAreaForm.state === "replystate") {
+        messageId = messageModel.reply(text, textAreaForm.replyId);
+        textAreaForm.state = "default";
+    }
+    else {
+        messageId = messageModel.sendMessage(text);
+    }
 }
 export function appendToTextArea(text, target) {
     const position = target.selectionEnd;

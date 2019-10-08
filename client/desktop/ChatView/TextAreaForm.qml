@@ -17,6 +17,7 @@ import "../common" as Common
 // RS: Rusts job
 // Factor Component: FC
 Rectangle {
+    id: textWrapperRect
 
     property var parentPage
     // height of the text area, computed in JS
@@ -35,6 +36,13 @@ Rectangle {
     property alias attachmentsDialogue: attachmentsDialogue
     // camera button
     property alias cameraButton: cameraButton
+
+    property string replyText: ""
+    property string replyName: ""
+    property bool owned: replyName === config.displayName
+    property string replyUid: ""
+
+    property var replyId
 
     color: QmlCfg.palette.mainColor
     clip: true
@@ -72,32 +80,51 @@ Rectangle {
             right: attachmentsButton.left
             leftMargin: QmlCfg.smallMargin
             rightMargin: QmlCfg.smallMargin
+            topMargin: QmlCfg.smallMargin
         }
+
         topPadding: QmlCfg.smallMargin
 
-        ScrollView {
-            id: scrollView
-            height: scrollHeight
-            width: containerCol.width
-            focus: true
+        Loader {
+            id: replyLoader
+            property string opName: replyName
+            property string opText: replyText
+            property string startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
+            active: false
+            height: item ? item.height : 0
+            sourceComponent: ReplyComponent {
+            }
+            width: textField.width
 
-            TextArea {
-                id: chatText
-                background: Rectangle {
-                    color: QmlCfg.palette.secondaryColor
-                    anchors {
-                        fill: parent
-                        horizontalCenter: parent.horizontalCenter
-                        bottom: parent.bottom
+        }
+
+        ColumnLayout {
+            id: textField
+            Layout.fillWidth: true
+            ScrollView {
+                id: scrollView
+                height: scrollHeight
+                implicitWidth: containerCol.width
+                focus: true
+
+                TextArea {
+                    id: chatText
+                    background: Rectangle {
+                        color: QmlCfg.palette.secondaryColor
+                        anchors {
+                            fill: parent
+                            horizontalCenter: parent.horizontalCenter
+                            bottom: parent.bottom
+                        }
+                        radius: QmlCfg.radius
                     }
-                    radius: QmlCfg.radius
+                    selectionColor: QmlCfg.palette.tertiaryColor
+                    selectByMouse: true
+                    wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
+                    placeholderText: "Send a Message ..."
+                    Keys.forwardTo: keysProxy
+                    Keys.onEscapePressed: focus = false
                 }
-                selectionColor: QmlCfg.palette.tertiaryColor
-                selectByMouse: true
-                wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: "Send a Message ..."
-                Keys.forwardTo: keysProxy
-                Keys.onEscapePressed: focus = false
             }
         }
     }
@@ -109,4 +136,21 @@ Rectangle {
             print("todo: attachments api")
         }
     }
+
+    states: [
+        State {
+            name: "replystate"
+            PropertyChanges {
+                target: replyLoader
+                active: true
+            }
+        },
+        State {
+            name: "default"
+            PropertyChanges {
+                target: replyLoader
+                active: false
+            }
+        }
+    ]
 }
