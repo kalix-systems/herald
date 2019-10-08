@@ -18,12 +18,11 @@ import "../common" as Common
 // Factor Component: FC
 Rectangle {
     id: textWrapperRect
-
     property var parentPage
     // height of the text area, computed in JS
     property int scrollHeight
     // height of the text content proper
-    property int contentHeight: scrollView.contentHeight
+    property alias contentHeight: scrollView.contentHeight
     // object to forward keypresses to.
     property var keysProxy
     // the attatchments button
@@ -94,18 +93,16 @@ Rectangle {
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
             }
-            width: textField.width
+            width: scrollView.width
 
         }
 
-        ColumnLayout {
-            id: textField
-            Layout.fillWidth: true
             ScrollView {
                 id: scrollView
                 height: scrollHeight
                 implicitWidth: containerCol.width
                 focus: true
+
 
                 TextArea {
                     id: chatText
@@ -126,7 +123,6 @@ Rectangle {
                     Keys.onEscapePressed: focus = false
                 }
             }
-        }
     }
 
     FileDialog {
