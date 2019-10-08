@@ -11,134 +11,105 @@ pub fn strip_qrc(path: Option<String>) -> Option<String> {
     }
 }
 
+pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
+    format!(
+        "{error} at {file}:{line}",
+        error = e,
+        file = file,
+        line = line,
+    )
+}
+
 #[macro_export]
 /// Early return on error
 macro_rules! ret_err {
     ($maybe: expr) => {
-        match $maybe {
-            Ok(val) => val,
-            Err(e) => {
-                if crate::shared::errors::ERROR_QUEUE
-                    .tx
-                    .send(format!(
-                        "{error} at {file}:{line}:{column}",
-                        error = e,
-                        file = file!(),
-                        line = line!(),
-                        column = column!()
-                    ))
-                    .is_ok()
-                {
-                    crate::shared::errors::error_emit_try_poll();
-                }
-                eprintln!(
-                    "{error} at {file}:{line}:{column}",
-                    error = e,
-                    file = file!(),
-                    line = line!(),
-                    column = column!()
-                );
-                return;
-            }
-        }
+        ret_err!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
+                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+
+                eprintln!("{}", err_string);
                 if crate::shared::errors::ERROR_QUEUE
                     .tx
-                    .send(format!(
-                        "{error} at {file}:{line}:{column}",
-                        error = e,
-                        file = file!(),
-                        line = line!(),
-                        column = column!()
-                    ))
+                    .send(err_string)
                     .is_ok()
                 {
                     crate::shared::errors::error_emit_try_poll();
                 }
-                eprintln!(
-                    "{error} at {file}:{line}:{column}",
-                    error = e,
-                    file = file!(),
-                    line = line!(),
-                    column = column!()
-                );
                 return $retval;
             }
         }
     };
+}
+
+pub(crate) fn ret_none_string(file: &str, line: u32) -> String {
+    format!(
+        "Unexpected `None` at {file}:{line}",
+        file = file,
+        line = line,
+    )
 }
 
 #[macro_export]
 /// Early return on unexpected `None`
 macro_rules! ret_none {
     ($maybe: expr) => {
-        match $maybe {
-            Some(val) => val,
-            None => {
-                if crate::shared::errors::ERROR_QUEUE
-                    .tx
-                    .send(format!(
-                        "Unexpected `None` at {file}:{line}:{column}",
-                        file = file!(),
-                        line = line!(),
-                        column = column!()
-                    ))
-                    .is_ok()
-                {
-                    crate::shared::errors::error_emit_try_poll();
-                }
-                eprintln!(
-                    "Unexpected `None` at {file}:{line}:{column}",
-                    file = file!(),
-                    line = line!(),
-                    column = column!()
-                );
-                return;
-            }
-        }
+        ret_none!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Some(val) => val,
             None => {
+                let err_string = crate::utils::ret_none_string(file!(), line!());
+
+                eprintln!("{}", err_string);
                 if crate::shared::errors::ERROR_QUEUE
                     .tx
-                    .send(format!(
-                        "Unexpected `None` at {file}:{line}:{column}",
-                        file = file!(),
-                        line = line!(),
-                        column = column!()
-                    ))
+                    .send(err_string)
                     .is_ok()
                 {
                     crate::shared::errors::error_emit_try_poll();
                 }
-                eprintln!(
-                    "Unexpected `None` at {file}:{line}:{column}",
-                    file = file!(),
-                    line = line!(),
-                    column = column!()
-                );
                 return $retval;
             }
         }
     };
 }
 
+pub(crate) fn bounds_chk_string(ix: usize, len: usize, file: &str, line: u32) -> String {
+    format!(
+        "Tried get index {ix} from a list of length {actual} at {file}:{line}",
+        ix = ix,
+        actual = len,
+        file = file,
+        line = line,
+    )
+}
+
 #[macro_export]
 /// Performs a bounds check
 macro_rules! bounds_chk {
     ($slf: expr, $ix: expr) => {
-        if $slf.list.len().saturating_sub(1) < $ix {
-            return;
-        }
+        bounds_chk!($slf, $ix, ())
     };
     ($slf: expr, $ix: expr, $retval: expr) => {
         if $slf.list.len().saturating_sub(1) < $ix {
+            let err_string =
+                crate::utils::bounds_chk_string($ix, $slf.list.len(), file!(), line!());
+
+            eprint!("{}", err_string);
+
+            if crate::shared::errors::ERROR_QUEUE
+                .tx
+                .send(err_string)
+                .is_ok()
+            {
+                crate::shared::errors::error_emit_try_poll();
+            }
             return $retval;
         }
     };
