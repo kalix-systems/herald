@@ -247,7 +247,7 @@ pub mod sealed {
     use std::ops::Deref;
 
     #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct PublicKey(Signed<box_::PublicKey>);
+    pub struct PublicKey(pub Signed<box_::PublicKey>);
 
     impl Deref for PublicKey {
         type Target = Signed<box_::PublicKey>;
