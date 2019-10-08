@@ -74,7 +74,6 @@ type RawKeyAndMeta = (
 );
 
 impl Conn {
-    // TODO implement the appropriate traits for this
     // TODO read about postgres performance
     pub fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
         use crate::schema::userkeys::dsl::*;
@@ -99,16 +98,40 @@ impl Conn {
         unique_violation_to_redundant(res)
     }
 
-    pub fn get_prekey(&mut self, key: sig::PublicKey) -> Result<sealed::PublicKey, Error> {
-        use crate::schema::prekeys::dsl::*;
+    pub fn pop_prekeys(
+        &mut self,
+        keys: &[sig::PublicKey],
+    ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
+        let builder = self.build_transaction().deferrable();
 
-        let raw_pk: Vec<u8> = prekeys
-            .filter(signing_key.eq(key.as_ref()))
-            .select(sealed_key)
-            .limit(1)
-            .get_result(self.deref_mut())?;
+        builder.run(|| {
+            keys.iter()
+                .map(|k| {
+                    // TODO I think this can be simplified using a RETURNING clause but diesel
+                    // doesn't support this syntax ¯\_(ツ)_/¯, fix it when we switch to tokio-postgres
+                    let raw_pk: Option<Vec<u8>> = prekeys::table
+                        .filter(prekeys::signing_key.eq(k.as_ref()))
+                        .select(prekeys::sealed_key)
+                        .limit(1)
+                        .get_result(&self.0)
+                        .optional()?;
 
-        Ok(serde_cbor::from_slice(raw_pk.as_slice())?)
+                    match raw_pk {
+                        Some(raw) => {
+                            diesel::delete(
+                                prekeys::table
+                                    .filter(prekeys::signing_key.eq(k.as_ref()))
+                                    .filter(prekeys::sealed_key.eq(&raw)),
+                            )
+                            .execute(&self.0)?;
+
+                            Ok(Some(serde_cbor::from_slice(raw.as_slice())?))
+                        }
+                        None => Ok(None),
+                    }
+                })
+                .collect()
+        })
     }
 
     pub fn register_user(
@@ -634,13 +657,22 @@ mod tests {
         let user_id = "Hello".try_into().unwrap();
         conn.register_user(user_id, signed_pk).unwrap();
 
-        let sealed_kp = sealed::KeyPair::gen_new();
+        let sealed_kp1 = sealed::KeyPair::gen_new();
+        let sealed_kp2 = sealed::KeyPair::gen_new();
 
-        let sealed_pk = sealed_kp.sign_pub(&kp);
+        let sealed_pk1 = sealed_kp1.sign_pub(&kp);
+        let sealed_pk2 = sealed_kp2.sign_pub(&kp);
 
-        conn.add_prekey(*kp.public_key(), sealed_pk).unwrap();
-        let retrieved = conn.get_prekey(*kp.public_key()).unwrap();
-        assert_eq!(retrieved, sealed_pk);
+        conn.add_prekey(*kp.public_key(), sealed_pk1).unwrap();
+        conn.add_prekey(*kp.public_key(), sealed_pk2).unwrap();
+
+        let retrieved = conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].unwrap();
+        assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+
+        let retrieved = conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].unwrap();
+        assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+
+        assert!(conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].is_none());
     }
 
     #[test]

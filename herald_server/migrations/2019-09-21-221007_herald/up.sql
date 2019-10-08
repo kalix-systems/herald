@@ -27,10 +27,10 @@ CREATE TABLE pending (
 );
 
 CREATE TABLE prekeys (
-  -- signing_key, 32 bytes
-  signing_key BYTEA PRIMARY KEY,
   -- sealing_key, 32 bytes
-  sealed_key BYTEA NOT NULL,
+  sealed_key BYTEA PRIMARY KEY,
+  -- signing_key, 32 bytes
+  signing_key BYTEA NOT NULL,
   FOREIGN KEY(signing_key) REFERENCES keys(key)
 );
 
