@@ -66,8 +66,15 @@ Rectangle {
             font.bold: true
         }
 
-        TextEdit {
+        TextMetrics {
+            id: opTextMetrics
             text: opText
+            elideWidth: (wrapper.width - QmlCfg.margin) * 2
+            elide: Text.ElideRight
+        }
+
+        TextEdit {
+            text: opTextMetrics.elidedText
             Layout.maximumWidth: wrapper.width
             Layout.leftMargin: QmlCfg.smallMargin
             Layout.rightMargin: QmlCfg.smallMargin

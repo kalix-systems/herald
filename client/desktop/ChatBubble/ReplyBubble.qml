@@ -48,9 +48,16 @@ ColumnLayout {
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
             }
 
+            TextMetrics {
+                id: opBodyTextMetrics
+                text: opBody
+                elideWidth: (maxWidth - QmlCfg.smallMargin) * 2
+                elide: Text.ElideRight
+            }
+
             TextEdit {
                 Layout.margins: 5
-                text: opBody
+                text: opBodyTextMetrics.elidedText
                 Layout.maximumWidth: Math.max(maxWidth, 200)
                 Layout.minimumWidth: messageBody.width
                 selectByMouse: true
@@ -60,6 +67,8 @@ ColumnLayout {
             }
         }
     }
+
+
 
     TextEdit {
         id: messageBody
