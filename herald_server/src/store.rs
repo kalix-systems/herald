@@ -82,16 +82,12 @@ impl Conn {
         Ok(select(exists(userkeys.filter(key.eq(pk.as_ref())))).get_result(self.deref_mut())?)
     }
 
-    pub fn add_prekey(
-        &mut self,
-        key: sig::PublicKey,
-        pre: sealed::PublicKey,
-    ) -> Result<PKIResponse, Error> {
+    pub fn add_prekey(&mut self, pre: sealed::PublicKey) -> Result<PKIResponse, Error> {
         use crate::schema::prekeys::dsl::*;
 
         let res = diesel::insert_into(prekeys)
             .values((
-                signing_key.eq(key.as_ref()),
+                signing_key.eq(pre.signed_by().as_ref()),
                 sealed_key.eq(serde_cbor::to_vec(&pre)?),
             ))
             .execute(self.deref_mut());
@@ -638,7 +634,7 @@ mod tests {
 
         let sealed_pk = sealed_kp.sign_pub(&kp);
 
-        conn.add_prekey(*kp.public_key(), sealed_pk).unwrap();
+        conn.add_prekey(sealed_pk).unwrap();
         let retrieved = conn.get_prekey(*kp.public_key()).unwrap();
         assert_eq!(retrieved, sealed_pk);
     }
