@@ -23,13 +23,6 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    Connections {
-        target: networkHandle
-        onUsersDataChanged: {
-            contactsModel.pollUpdate()
-        }
-    }
-
     ScrollBar.vertical: ScrollBar {
     }
 

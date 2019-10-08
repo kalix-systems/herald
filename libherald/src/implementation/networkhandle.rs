@@ -26,7 +26,7 @@ pub struct EffectsFlags {
     // how to atomically negate an `AtomicBool`.
     // The values really just function simple toggles.
     msg_data: AtomicU8,
-    users_data: AtomicU8,
+    //users_data: AtomicU8,
     members_data: AtomicU8,
 }
 
@@ -82,34 +82,28 @@ impl NotifHandler {
 
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
-                self.effects_flags
-                    .users_data
-                    .fetch_add(1, Ordering::Acquire);
-                self.emit.users_data_changed();
+                ret_none!(users_emit_try_poll());
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                conv_emit_try_poll();
+                ret_none!(conv_emit_try_poll());
             }
             NewConversation(cid) => {
                 use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                conv_emit_try_poll();
+                ret_none!(conv_emit_try_poll());
             }
             AddContactResponse(cid, uid, accepted) => {
                 use shared::{conv_global::*, user_global::*};
 
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
-                self.effects_flags
-                    .users_data
-                    .fetch_add(1, Ordering::Acquire);
-                self.emit.users_data_changed();
+                ret_none!(users_emit_try_poll());
 
                 // add conversation
                 if accepted {
                     ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    conv_emit_try_poll();
+                    ret_none!(conv_emit_try_poll());
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -150,7 +144,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            users_data: AtomicU8::new(0),
             msg_data: AtomicU8::new(0),
             members_data: AtomicU8::new(0),
         }
@@ -240,10 +233,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn msg_data(&self) -> u8 {
         self.effects_flags.msg_data.load(Ordering::Relaxed)
-    }
-
-    fn users_data(&self) -> u8 {
-        self.effects_flags.users_data.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut Emitter {

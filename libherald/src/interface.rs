@@ -2026,7 +2026,6 @@ pub struct NetworkHandleEmitter {
     connection_up_changed: fn(*mut NetworkHandleQObject),
     members_data_changed: fn(*mut NetworkHandleQObject),
     msg_data_changed: fn(*mut NetworkHandleQObject),
-    users_data_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -2045,7 +2044,6 @@ impl NetworkHandleEmitter {
             connection_up_changed: self.connection_up_changed,
             members_data_changed: self.members_data_changed,
             msg_data_changed: self.msg_data_changed,
-            users_data_changed: self.users_data_changed,
         }
     }
     fn clear(&self) {
@@ -2076,12 +2074,6 @@ impl NetworkHandleEmitter {
             (self.msg_data_changed)(ptr);
         }
     }
-    pub fn users_data_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.users_data_changed)(ptr);
-        }
-    }
 }
 
 pub trait NetworkHandleTrait {
@@ -2091,7 +2083,6 @@ pub trait NetworkHandleTrait {
     fn connection_up(&self) -> bool;
     fn members_data(&self) -> u8;
     fn msg_data(&self) -> u8;
-    fn users_data(&self) -> u8;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
@@ -2104,7 +2095,6 @@ pub extern "C" fn network_handle_new(
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
     network_handle_members_data_changed: fn(*mut NetworkHandleQObject),
     network_handle_msg_data_changed: fn(*mut NetworkHandleQObject),
-    network_handle_users_data_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
@@ -2112,7 +2102,6 @@ pub extern "C" fn network_handle_new(
         connection_up_changed: network_handle_connection_up_changed,
         members_data_changed: network_handle_members_data_changed,
         msg_data_changed: network_handle_msg_data_changed,
-        users_data_changed: network_handle_users_data_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -2141,11 +2130,6 @@ pub unsafe extern "C" fn network_handle_members_data_get(ptr: *const NetworkHand
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_msg_data_get(ptr: *const NetworkHandle) -> u8 {
     (&*ptr).msg_data()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_users_data_get(ptr: *const NetworkHandle) -> u8 {
-    (&*ptr).users_data()
 }
 
 #[no_mangle]
@@ -2180,6 +2164,7 @@ pub struct UsersEmitter {
     qobject: Arc<AtomicPtr<UsersQObject>>,
     filter_changed: fn(*mut UsersQObject),
     filter_regex_changed: fn(*mut UsersQObject),
+    try_poll_changed: fn(*mut UsersQObject),
     new_data_ready: fn(*mut UsersQObject),
 }
 
@@ -2197,6 +2182,7 @@ impl UsersEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
+            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -2214,6 +2200,12 @@ impl UsersEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
+        }
+    }
+    pub fn try_poll_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -2283,6 +2275,7 @@ pub trait UsersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
+    fn try_poll(&self) -> u8;
     fn add(&mut self, id: String) -> Vec<u8>;
     fn color_by_id(&self, id: String) -> u32;
     fn display_name_by_id(&self, id: String) -> String;
@@ -2318,6 +2311,7 @@ pub extern "C" fn users_new(
     users: *mut UsersQObject,
     users_filter_changed: fn(*mut UsersQObject),
     users_filter_regex_changed: fn(*mut UsersQObject),
+    users_try_poll_changed: fn(*mut UsersQObject),
     users_new_data_ready: fn(*mut UsersQObject),
     users_layout_about_to_be_changed: fn(*mut UsersQObject),
     users_layout_changed: fn(*mut UsersQObject),
@@ -2335,6 +2329,7 @@ pub extern "C" fn users_new(
         qobject: Arc::new(AtomicPtr::new(users)),
         filter_changed: users_filter_changed,
         filter_regex_changed: users_filter_regex_changed,
+        try_poll_changed: users_try_poll_changed,
         new_data_ready: users_new_data_ready,
     };
     let model = UsersList {
@@ -2388,6 +2383,11 @@ pub unsafe extern "C" fn users_filter_regex_get(ptr: *const Users) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn users_filter_regex_set(ptr: *mut Users, v: bool) {
     (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_try_poll_get(ptr: *const Users) -> u8 {
+    (&*ptr).try_poll()
 }
 
 #[no_mangle]
