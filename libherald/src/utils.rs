@@ -18,6 +18,19 @@ macro_rules! ret_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
+                if crate::shared::errors::ERROR_QUEUE
+                    .tx
+                    .send(format!(
+                        "{error} at {file}:{line}:{column}",
+                        error = e,
+                        file = file!(),
+                        line = line!(),
+                        column = column!()
+                    ))
+                    .is_ok()
+                {
+                    crate::shared::errors::error_emit_try_poll();
+                }
                 eprintln!(
                     "{error} at {file}:{line}:{column}",
                     error = e,
@@ -33,6 +46,19 @@ macro_rules! ret_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
+                if crate::shared::errors::ERROR_QUEUE
+                    .tx
+                    .send(format!(
+                        "{error} at {file}:{line}:{column}",
+                        error = e,
+                        file = file!(),
+                        line = line!(),
+                        column = column!()
+                    ))
+                    .is_ok()
+                {
+                    crate::shared::errors::error_emit_try_poll();
+                }
                 eprintln!(
                     "{error} at {file}:{line}:{column}",
                     error = e,
@@ -53,6 +79,18 @@ macro_rules! ret_none {
         match $maybe {
             Some(val) => val,
             None => {
+                if crate::shared::errors::ERROR_QUEUE
+                    .tx
+                    .send(format!(
+                        "Unexpected `None` at {file}:{line}:{column}",
+                        file = file!(),
+                        line = line!(),
+                        column = column!()
+                    ))
+                    .is_ok()
+                {
+                    crate::shared::errors::error_emit_try_poll();
+                }
                 eprintln!(
                     "Unexpected `None` at {file}:{line}:{column}",
                     file = file!(),
@@ -67,6 +105,18 @@ macro_rules! ret_none {
         match $maybe {
             Some(val) => val,
             None => {
+                if crate::shared::errors::ERROR_QUEUE
+                    .tx
+                    .send(format!(
+                        "Unexpected `None` at {file}:{line}:{column}",
+                        file = file!(),
+                        line = line!(),
+                        column = column!()
+                    ))
+                    .is_ok()
+                {
+                    crate::shared::errors::error_emit_try_poll();
+                }
                 eprintln!(
                     "Unexpected `None` at {file}:{line}:{column}",
                     file = file!(),

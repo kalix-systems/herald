@@ -53,5 +53,6 @@
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
+        <file>errors/ErrorDialog.qml</file>
     </qresource>
 </RCC>

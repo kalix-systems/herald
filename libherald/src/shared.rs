@@ -19,31 +19,46 @@ lazy_static! {
 /// Shared state related to error handling
 pub mod errors {
     use super::*;
+    use crate::interface::ErrorsEmitter;
     use parking_lot::Mutex;
-    use std::collections::VecDeque;
 
-    type QueueError = (u8, String);
+    type Emitter = ErrorsEmitter;
+
+    type QueueError = String;
 
     /// Error queue
-    // TODO this should just be channel
-    #[derive(Default)]
-    pub struct ErrorQueue(Mutex<VecDeque<QueueError>>);
+    pub struct ErrorQueue {
+        pub(crate) rx: Receiver<QueueError>,
+        pub(crate) tx: Sender<QueueError>,
+    }
 
     impl ErrorQueue {
-        /// Reads the oldest unread error.
-        pub fn read(&self) -> Option<QueueError> {
-            self.0.lock().pop_front()
-        }
-
-        /// Adds a new error to the back of the queue.
-        pub fn push(&self, e: QueueError) {
-            self.0.lock().push_back(e)
+        /// Creates new `ConvChannel`
+        pub fn new() -> Self {
+            let (tx, rx) = unbounded();
+            Self { rx, tx }
         }
     }
 
     lazy_static! {
         /// Global error queue
-        pub static ref ERROR_QUEUE: ErrorQueue = ErrorQueue::default();
+        pub static ref ERROR_QUEUE: ErrorQueue = ErrorQueue::new();
+
+        /// Errors emitter, filled in when the errors object is constructed
+        pub static ref ERROR_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+
+        /// Data associated with `CONV_EMITTER`.
+        pub static ref ERROR_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
+    }
+
+    /// Emits a signal to the QML runtime, returns `None` on failure.
+    pub fn error_emit_try_poll() -> Option<()> {
+        let mut lock = ERROR_EMITTER.lock();
+        let emitter = lock.as_mut()?;
+
+        ERROR_TRY_POLL.fetch_add(1, Ordering::Acquire);
+        emitter.try_poll_changed();
+        Some(())
     }
 }
 

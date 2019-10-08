@@ -8,6 +8,7 @@
 class Config;
 class ConversationBuilder;
 class Conversations;
+class Errors;
 class HeraldState;
 class HeraldUtils;
 class Members;
@@ -166,6 +167,25 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+    void tryPollChanged();
+};
+
+class Errors : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
+    explicit Errors(bool owned, QObject *parent);
+public:
+    explicit Errors(QObject *parent = nullptr);
+    ~Errors();
+    quint8 tryPoll() const;
+    Q_INVOKABLE QString nextError();
+Q_SIGNALS:
     void tryPollChanged();
 };
 
