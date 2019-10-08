@@ -283,7 +283,6 @@ impl Default for Event {
     }
 }
 
-#[allow(unused_variables)]
 fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
@@ -329,7 +328,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
                     ev.notifications.push(Notification::NewMsg(mid, cm.cid()));
                     ev.replies.push((cm.cid(), form_ack(mid)?));
                 }
-                cmessages::Message::Blob(body) => unimplemented!(),
+                cmessages::Message::Blob(_) => unimplemented!(),
             }
         }
         Ack(ack) => {
