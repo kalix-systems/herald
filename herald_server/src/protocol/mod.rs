@@ -141,8 +141,9 @@ impl State {
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
                 let mut sender = s.clone();
-                // TODO: handle this error?
-                drop(sender.send(msg.clone()).await);
+                if sender.send(msg.clone()).await.is_err() {
+                    to_pending.push(dev);
+                }
             } else {
                 to_pending.push(dev);
             }
@@ -218,6 +219,7 @@ where
     Rx: Stream<Item = Push> + Unpin,
 {
     while let Some(p) = rx.next().await {
+        // TODO: handle this error, add the rest?
         store.add_pending(vec![to], p)?;
     }
     Ok(())
