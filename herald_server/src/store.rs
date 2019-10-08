@@ -391,29 +391,42 @@ impl Conn {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    pub fn add_pending(&mut self, key_arg: Vec<sig::PublicKey>, msg: Push) -> Result<(), Error> {
-        let push_row_id: i64 = {
-            use crate::schema::pushes::dsl::*;
+    pub fn add_pending<'a, M: Iterator<Item = &'a Push>>(
+        &mut self,
+        key_arg: Vec<sig::PublicKey>,
+        msgs: M,
+    ) -> Result<(), Error> {
+        let builder = self.build_transaction().deferrable();
 
-            let push_vec = serde_cbor::to_vec(&msg)?;
-            insert_into(pushes)
-                .values(push_data.eq(push_vec))
-                .returning(push_id)
-                .get_result(self.deref_mut())?
-        };
-
-        use crate::schema::pending::dsl::*;
-
-        let keys: Vec<_> = key_arg
+        let key_arg: Vec<_> = key_arg
             .into_iter()
-            .map(|k| (key.eq(k.as_ref().to_vec()), push_id.eq(push_row_id)))
+            .map(|k| k.as_ref().to_vec()) // borrow checker appeasement
+            .map(|k| pending::key.eq(k))
             .collect();
 
-        insert_into(pending)
-            .values(keys)
-            .execute(self.deref_mut())?;
+        builder.run(|| {
+            for msg in msgs {
+                let push_row_id: i64 = {
+                    use crate::schema::pushes::dsl::*;
 
-        Ok(())
+                    let push_vec = serde_cbor::to_vec(msg)?;
+                    insert_into(pushes)
+                        .values(push_data.eq(push_vec))
+                        .returning(push_id)
+                        .get_result(&self.0)?
+                };
+
+                use crate::schema::pending::dsl::*;
+
+                let keys: Vec<_> = key_arg
+                    .iter()
+                    .map(|k| (k, push_id.eq(push_row_id)))
+                    .collect();
+
+                insert_into(pending).values(keys).execute(&self.0)?;
+            }
+            Ok(())
+        })
     }
 
     pub fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
@@ -640,7 +653,9 @@ mod tests {
             msg: bytes::Bytes::new(),
         };
 
-        assert!(conn.add_pending(vec![*kp.public_key()], push).is_ok());
+        assert!(conn
+            .add_pending(vec![*kp.public_key()], [push].iter())
+            .is_ok());
 
         let pending = conn.get_pending(*kp.public_key()).unwrap();
         assert_eq!(pending.len(), 1);

@@ -149,7 +149,7 @@ impl State {
             }
         }
 
-        con.add_pending(to_pending, msg)?;
+        con.add_pending(to_pending, [msg].iter())?;
 
         Ok(())
     }
@@ -205,7 +205,7 @@ impl State {
                 Ok(_) => {}
                 Err(_) => {
                     self.active.remove(&did);
-                    store.add_pending(vec![did], p)?;
+                    store.add_pending(vec![did], [p].iter())?;
                     break;
                 }
             }
@@ -220,7 +220,7 @@ where
 {
     while let Some(p) = rx.next().await {
         // TODO: handle this error, add the rest?
-        store.add_pending(vec![to], p)?;
+        store.add_pending(vec![to], [p].iter())?;
     }
     Ok(())
 }
