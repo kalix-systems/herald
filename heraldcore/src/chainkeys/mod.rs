@@ -105,7 +105,9 @@ impl BlockStore for ConversationId {
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<Vec<Block>, Self::Error> {
         let db = Database::get()?;
+        // modify this to remove missing block dependencies
         store_key(&db, *self, hash, key)
+        // get all blocks that no longer have dependencies
     }
 
     // we'll want to implement some kind of gc strategy to collect keys marked used
