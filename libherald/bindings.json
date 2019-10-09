@@ -15,6 +15,20 @@
                 }
             }
         },
+        "Errors": {
+            "type": "Object",
+            "properties": {
+                "tryPoll": {
+                    "type": "quint8"
+                }
+            },
+            "functions": {
+                "nextError": {
+                    "mut": true,
+                    "return": "QString"
+                }
+            }
+        },
         "HeraldUtils": {
             "type": "Object",
             "functions": {

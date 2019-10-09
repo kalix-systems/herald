@@ -980,6 +980,78 @@ pub unsafe extern "C" fn conversations_set_data_title_none(ptr: *mut Conversatio
     (&mut *ptr).set_title(to_usize(row), None)
 }
 
+pub struct ErrorsQObject {}
+
+pub struct ErrorsEmitter {
+    qobject: Arc<AtomicPtr<ErrorsQObject>>,
+    try_poll_changed: fn(*mut ErrorsQObject),
+}
+
+unsafe impl Send for ErrorsEmitter {}
+
+impl ErrorsEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> ErrorsEmitter {
+        ErrorsEmitter {
+            qobject: self.qobject.clone(),
+            try_poll_changed: self.try_poll_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const ErrorsQObject = null();
+        self.qobject.store(n as *mut ErrorsQObject, Ordering::SeqCst);
+    }
+    pub fn try_poll_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.try_poll_changed)(ptr);
+        }
+    }
+}
+
+pub trait ErrorsTrait {
+    fn new(emit: ErrorsEmitter) -> Self;
+    fn emit(&mut self) -> &mut ErrorsEmitter;
+    fn try_poll(&self) -> u8;
+    fn next_error(&mut self) -> String;
+}
+
+#[no_mangle]
+pub extern "C" fn errors_new(
+    errors: *mut ErrorsQObject,
+    errors_try_poll_changed: fn(*mut ErrorsQObject),
+) -> *mut Errors {
+    let errors_emit = ErrorsEmitter {
+        qobject: Arc::new(AtomicPtr::new(errors)),
+        try_poll_changed: errors_try_poll_changed,
+    };
+    let d_errors = Errors::new(errors_emit);
+    Box::into_raw(Box::new(d_errors))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn errors_free(ptr: *mut Errors) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn errors_try_poll_get(ptr: *const Errors) -> u8 {
+    (&*ptr).try_poll()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn errors_next_error(ptr: *mut Errors, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
+    let o = &mut *ptr;
+    let r = o.next_error();
+    let s: *const c_char = r.as_ptr() as (*const c_char);
+    set(d, s, r.len() as i32);
+}
+
 pub struct HeraldStateQObject {}
 
 pub struct HeraldStateEmitter {

@@ -93,7 +93,8 @@ Rectangle {
             color:  QmlCfg.palette.mainTextColor
         }
 
-        Item {}
+        Item {
+        }
     }
 
     Rectangle {

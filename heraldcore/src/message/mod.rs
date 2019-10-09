@@ -2,7 +2,7 @@ use crate::{db::Database, errors::HErr, types::*, utils};
 use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::params;
-// use std::collections::HashMap;
+use std::collections::HashMap;
 
 /// Message
 #[derive(Clone)]
@@ -22,7 +22,7 @@ pub struct Message {
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
-    pub receipts: Option<BTreeMap<UserId, MessageReceiptStatus>>,
+    pub receipts: Option<HashMap<UserId, MessageReceiptStatus>>,
 }
 
 impl Message {
@@ -117,7 +117,7 @@ pub(crate) fn add_receipt(
     let tx = db.transaction()?;
 
     let mut get_stmt = tx.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: Option<BTreeMap<UserId, MessageReceiptStatus>> =
+    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> =
         get_stmt.query_row(params![msg_id], |row| {
             Ok(match row.get::<_, Option<Vec<u8>>>(0)? {
                 Some(data) => serde_cbor::from_slice(&data).map_err(|e| {

@@ -1,7 +1,7 @@
 use crate::{db::Database, errors::HErr, image_utils, types::*};
 use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
-use rusqlite::params;
+use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
 
 /// Gets a contact's name by their `id`.
@@ -125,15 +125,10 @@ pub fn status(id: UserId) -> Result<ContactStatus, HErr> {
 
 /// Returns all contacts
 pub fn all() -> Result<Vec<Contact>, HErr> {
-    all_since(chrono::MIN_DATE.and_hms(0, 0, 0))
-}
-
-/// Returns all contacts
-pub fn all_since(since: DateTime<Utc>) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/get_all.sql"))?;
 
-    let rows = stmt.query_map(params![since.timestamp()], Contact::from_db)?;
+    let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {

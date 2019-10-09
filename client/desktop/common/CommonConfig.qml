@@ -39,7 +39,6 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
-
     Settings {
         id: settings
         property alias theme: cfg.theme
@@ -52,50 +51,48 @@ Item {
     property var palette: switch (theme) {
         case (0):
         return {
+            "mainColor"
             /* mainColor:
             used for backgrounds and default fills*/
-            mainColor: "white",
+            : "white",
+            "secondaryColor"
             /* secondaryColor:
              used for secondary lowlighting, borders*/
-            secondaryColor: "lightgrey",
+            : "lightgrey",
+            "tertiaryColor"
             /* tertiaryColor:
             used for additional highlighting, selection indication*/
-            tertiaryColor: "lightsteelblue",
+            : "lightsteelblue",
+            "tertiaryComplement"
             /* teriaryComplement:
             a direct compliment to the selection color, should be used for alerts
             and uncommon events */
-
-            tertiaryComplement: "lightsalmon",
+            : "lightsalmon",
+            "mainTextColor"
             /* textColor:
              the color of commonly displayed text when it is on
              a surface of the primary color*/
-
-            mainTextColor: "black",
+            : "black",
+            "secondaryTextColor"
             /* secondaryTextColor:
              the color of text on a surface of the secondaryColor*/
-
-            secondaryTextColor: "grey",
-            /* alertTextColor:
-             Color in alert messages, that can be display on top of the
-             tertiary color.*/
-
-            alertTextColor: "red",
-            iconFill: "white",
-            iconMatte: "black"
-        };
-
+            : "grey",
+            "alertTextColor": "red",
+            "iconFill": "white",
+            "iconMatte": "black"
+        }
         case (1):
         return {
-            mainColor: "#002b36",
-            secondaryColor: "#073642",
-            tertiaryColor: "#073642",
-            tertiaryComplement: "#839496",
-            mainTextColor: "#839496",
-            secondaryTextColor: "#93a1a1",
-            iconFill: "#eee8d5",
-            alertTextColor: "#dc322f",
-            iconMatte: "#eee8d5"
-        };
+            "mainColor": "#002b36",
+            "secondaryColor": "#073642",
+            "tertiaryColor": "#073642",
+            "tertiaryComplement": "#839496",
+            "mainTextColor": "#839496",
+            "secondaryTextColor": "#93a1a1",
+            "iconFill": "#eee8d5",
+            "alertTextColor": "#dc322f",
+            "iconMatte": "#eee8d5"
+        }
     }
 
     /// Todo : finish these later THIS LIST IS APPEND ONLY

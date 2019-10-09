@@ -40,7 +40,7 @@ Item {
     Text {
         id: timestampLabel
         text: Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
-        font.pointSize: 10
+        font.pixelSize: 10
         color: QmlCfg.palette.secondaryTextColor
         anchors {
             top: parent.top

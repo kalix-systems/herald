@@ -7,15 +7,6 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   PRIMARY KEY(chainkey, hash)
 );
 
--- CREATE TABLE IF NOT EXISTS message_receipts(
---   msg_id BLOB NOT NULL,
---   user_id TEXT NOT NULL,
---   status INTEGER DEFAULT(0) NOT NULL,
---   PRIMARY KEY(msg_id, user_id),
---   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
---   FOREIGN KEY(user_id) REFERENCES contacts(user_id) ON DELETE CASCADE
--- );
-
 CREATE TABLE IF NOT EXISTS messages (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,
