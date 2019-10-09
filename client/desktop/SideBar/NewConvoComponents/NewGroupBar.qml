@@ -9,7 +9,8 @@ Rectangle {
     width: parent.width
     height: visible ? 30 : 0
 
-    property color hoverColor: QmlCfg.palette.secondaryColor
+    property color hoverColor: QmlCfg.palette.mainColor
+    color: QmlCfg.palette.secondaryColor
 
     Common.ButtonForm {
         id: groupIcon
@@ -25,12 +26,13 @@ Rectangle {
         anchors.left: groupIcon.right
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
+        color: QmlCfg.palette.mainTextColor
     }
 
     Common.Divider {
         anchors.verticalCenter: parent.bottom
         height: 2
-        color: "black"
+        color: QmlCfg.palette.tertiaryColor
     }
 
     MouseArea {

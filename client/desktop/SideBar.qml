@@ -107,6 +107,11 @@ Pane {
             bottom: parent.bottom
         }
 
+        background: Rectangle {
+            anchors.fill: parent
+            color: QmlCfg.palette.mainColor
+        }
+
         Component {
             id: contactslvComponent
             SBUtils.ContactView {

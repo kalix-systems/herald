@@ -10,13 +10,12 @@ Component {
     Rectangle {
         height: QmlCfg.toolbarHeight
         width: parent.width
-
+        color: QmlCfg.palette.secondaryColor
         Common.ButtonForm {
             id: finalizegroupbutton
             source: "qrc:/single-check-receipt-icon.svg"
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            scale: 0.8
             onClicked: {
                 groupMemberSelect.setTitle(groupTitle.text)
                 groupMemberSelect.finalize()
@@ -43,7 +42,7 @@ Component {
             anchors.right: finalizegroupbutton.left
 
             placeholderText: "Group title"
-
+            color: QmlCfg.palette.mainTextColor
             verticalAlignment: TextEdit.AlignVCenter
             background: Rectangle {
                 color: QmlCfg.palette.mainColor

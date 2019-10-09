@@ -19,7 +19,7 @@ Component {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
-            scale: 0.8
+            height: 20
             anchors.verticalCenter: parent.verticalCenter
             onClicked: convoPane.state = "newConversationState"
         }
@@ -28,7 +28,7 @@ Component {
             id: frontbutton
             source: "qrc:/forward-arrow-icon.svg"
             anchors.right: parent.right
-            scale: 0.8
+            height: 20
             anchors.verticalCenter: parent.verticalCenter
             onClicked: convoPane.state = "finalizeGroupState"
         }

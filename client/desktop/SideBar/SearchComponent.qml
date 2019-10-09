@@ -14,12 +14,15 @@ Component {
       height: QmlCfg.toolbarHeight
 
       placeholderText: searchLoader.searchPlaceholder
-
+      color: QmlCfg.palette.mainTextColor
       verticalAlignment: TextEdit.AlignVCenter
+
       background: Rectangle {
-          color: QmlCfg.palette.mainColor
+          color: QmlCfg.palette.secondaryColor
           anchors.fill: parent
       }
+
+
 
       Keys.onPressed: {
           // NOTE: What is the first comparison doing?
@@ -31,9 +34,9 @@ Component {
 
       Common.ButtonForm {
           source: "qrc:/x-icon.svg"
+          height: 20
           anchors.right: parent.right
           anchors.verticalCenter: parent.verticalCenter
-          scale: 0.8
           onClicked: {
               convoPane.state = ""
           }

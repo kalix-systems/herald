@@ -115,6 +115,7 @@ Rectangle {
                         }
                         radius: QmlCfg.radius
                     }
+                    color: QmlCfg.palette.mainTextColor
                     selectionColor: QmlCfg.palette.tertiaryColor
                     selectByMouse: true
                     wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
