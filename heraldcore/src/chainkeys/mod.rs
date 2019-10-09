@@ -25,32 +25,22 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
 ) -> Result<(), HErr> {
     // references to transaction need to be dropped before committing
     {
-        let mut mark_stmt = tx
-            .prepare(include_str!("sql/mark_used.sql"))
-            .map_err(|_| ChainError::BlockStoreUnavailable)?;
+        let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
 
-        let mut key_used_stmt = tx
-            .prepare(include_str!("sql/get_key_used_status.sql"))
-            .map_err(|_| ChainError::BlockStoreUnavailable)?;
+        let mut key_used_stmt = tx.prepare(include_str!("sql/get_key_used_status.sql"))?;
 
         for block in blocks {
-            if key_used_stmt
-                .query_row(params![cid, block.as_ref()], |row| row.get::<_, bool>(0))
-                // return a `MissingKeys` error if the query result is empty
-                .map_err(|_| ChainError::MissingKeys)?
-            {
+            if key_used_stmt.query_row(params![cid, block.as_ref()], |row| row.get::<_, bool>(0))? {
                 // if the key is already marked used, return a `RedundantMark` error
-                return Err(ChainError::RedundantMark)?;
+                return Err(ChainError::RedundantMark.into());
             }
 
             // otherwise we can mark the key as used
-            mark_stmt
-                .execute(params![cid, block.as_ref()])
-                .map_err(|_| ChainError::BlockStoreUnavailable)?;
+            mark_stmt.execute(params![cid, block.as_ref()])?;
         }
     }
 
-    tx.commit().map_err(|_| ChainError::BlockStoreUnavailable)?;
+    tx.commit()?;
 
     Ok(())
 }
@@ -90,20 +80,16 @@ fn get_unused(
     db: &rusqlite::Connection,
     cid: ConversationId,
 ) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
-    let mut stmt = db
-        .prepare(include_str!("sql/get_unused.sql"))
-        .map_err(|_| ChainError::BlockStoreUnavailable)?;
+    let mut stmt = db.prepare(include_str!("sql/get_unused.sql"))?;
 
-    let results = stmt
-        .query_map(params![cid], |row| {
-            Ok((row.get::<_, Vec<u8>>(0)?, row.get::<_, Vec<u8>>(1)?))
-        })
-        .map_err(|_| ChainError::BlockStoreCorrupted)?;
+    let results = stmt.query_map(params![cid], |row| {
+        Ok((row.get::<_, Vec<u8>>(0)?, row.get::<_, Vec<u8>>(1)?))
+    })?;
 
     let mut pairs = vec![];
 
     for res in results {
-        let (raw_hash, raw_key) = res.map_err(|_| ChainError::MissingKeys)?;
+        let (raw_hash, raw_key) = res?;
         pairs.push((
             BlockHash::from_slice(raw_hash.as_slice()).ok_or(ChainError::BlockStoreCorrupted)?,
             ChainKey::from_slice(raw_key.as_slice()).ok_or(ChainError::BlockStoreCorrupted)?,
@@ -131,9 +117,7 @@ impl BlockStore for ConversationId {
     ) -> Result<(), Self::Error> {
         let mut db = Database::get()?;
         // do this all in a transaction
-        let tx = db
-            .transaction()
-            .map_err(|_| ChainError::BlockStoreUnavailable)?;
+        let tx = db.transaction()?;
 
         mark_used(tx, *self, blocks)
     }
