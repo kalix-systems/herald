@@ -4,6 +4,8 @@ pub mod config;
 pub mod conversation_builder;
 /// Implementation of `crate::interface::ConversationsTrait`.
 pub mod conversations;
+/// Implementation of `crate::interface::ErrorsTrait`.
+pub mod errors;
 /// Implementation of `crate::interface::HeraldStateTrait`.
 pub mod heraldstate;
 /// Implementation of `crate::interface::HeraldUtilsTrait`.
@@ -20,6 +22,7 @@ pub mod users;
 pub use config::*;
 pub use conversation_builder::*;
 pub use conversations::*;
+pub use errors::*;
 pub use heraldstate::*;
 pub use heraldutils::*;
 pub use members::*;

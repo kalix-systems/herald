@@ -5,6 +5,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import Qt.labs.settings 1.0
 import "SideBar/popups" as Popups
+import "errors" as ErrorUtils
 import QtQml 2.13
 
 ApplicationWindow {
@@ -17,6 +18,21 @@ ApplicationWindow {
     minimumHeight: 300
 
     TopMenuBar {
+    }
+
+    Errors {
+        id: errorQueue
+
+        onTryPollChanged: {
+            let errMsg = errorQueue.nextError();
+            if (errMsg !== "") {
+                errPopup.errorMsg = errMsg;
+                errPopup.open()
+            }
+        }
+
+        property var errPopup: ErrorUtils.ErrorDialog {
+        }
     }
 
     // This provides a few purely functional helper methods

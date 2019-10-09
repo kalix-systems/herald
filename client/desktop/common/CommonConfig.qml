@@ -55,46 +55,48 @@ Item {
     property var palette: switch (theme) {
         case (0):
         return {
+            "mainColor"
             /* mainColor:
             used for backgrounds and default fills*/
-            mainColor: "white",
+            : "white",
+            "secondaryColor"
             /* secondaryColor:
              used for secondary lowlighting, borders*/
-            secondaryColor: "lightgrey",
+            : "lightgrey",
+            "tertiaryColor"
             /* tertiaryColor:
             used for additional highlighting, selection indication*/
-
-            tertiaryColor: "lightsteelblue", /* teriaryComplement:
+            : "lightsteelblue",
+            "tertiaryComplement"
+            /* teriaryComplement:
             a direct compliment to the selection color, should be used for alerts
             and uncommon events */
-
-            tertiaryComplement: "lightsalmon",
+            : "lightsalmon",
+            "mainTextColor"
             /* textColor:
              the color of commonly displayed text when it is on
              a surface of the primary color*/
-
-            mainTextColor: "black",
+            : "black",
+            "secondaryTextColor"
             /* secondaryTextColor:
              the color of text on a surface of the secondaryColor*/
-
-            secondaryTextColor: "grey",
+            : "grey",
+            "alertTextColor"
             /* alertTextColor:
              Color in alert messages, that can be display on top of the
              tertiary color.*/
-
-            alertTextColor: "red"
-        };
-
+            : "red"
+        }
         case (1):
         return {
-            mainColor: "#002b36",
-            secondaryColor: "#073642",
-            tertiaryColor: "#586e75",
-            tertiaryComplement: "#839496",
-            mainTextColor: "#839496",
-            secondaryTextColor: "#586e75",
-            alertTextColor: "#dc322f"
-        };
+            "mainColor": "#002b36",
+            "secondaryColor": "#073642",
+            "tertiaryColor": "#586e75",
+            "tertiaryComplement": "#839496",
+            "mainTextColor": "#839496",
+            "secondaryTextColor": "#586e75",
+            "alertTextColor": "#dc322f"
+        }
     }
 
     /// Todo : finish these later THIS LIST IS APPEND ONLY

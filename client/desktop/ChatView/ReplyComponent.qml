@@ -35,8 +35,6 @@ Rectangle {
             top: parent.top
         }
 
-
-
         background: Rectangle {
             color: Qt.darker(startColor, 1.9)
             height: 15
@@ -86,7 +84,8 @@ Rectangle {
             readOnly: true
         }
 
-        Item {}
+        Item {
+        }
     }
 
     Rectangle {

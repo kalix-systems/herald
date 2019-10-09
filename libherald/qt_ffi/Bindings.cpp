@@ -100,6 +100,10 @@ namespace {
     {
         Q_EMIT o->tryPollChanged();
     }
+    inline void errorsTryPollChanged(Errors* o)
+    {
+        Q_EMIT o->tryPollChanged();
+    }
     inline void heraldStateConfigInitChanged(HeraldState* o)
     {
         Q_EMIT o->configInitChanged();
@@ -672,6 +676,13 @@ extern "C" {
     bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
+};
+
+extern "C" {
+    Errors::Private* errors_new(Errors*, void (*)(Errors*));
+    void errors_free(Errors::Private*);
+    quint8 errors_try_poll_get(const Errors::Private*);
+    void errors_next_error(Errors::Private*, QString*, qstring_set);
 };
 
 extern "C" {
@@ -1836,6 +1847,36 @@ bool Conversations::removeConversation(quint64 row_index)
 bool Conversations::toggleFilterRegex()
 {
     return conversations_toggle_filter_regex(m_d);
+}
+Errors::Errors(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+Errors::Errors(QObject *parent):
+    QObject(parent),
+    m_d(errors_new(this,
+        errorsTryPollChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+Errors::~Errors() {
+    if (m_ownsPrivate) {
+        errors_free(m_d);
+    }
+}
+quint8 Errors::tryPoll() const
+{
+    return errors_try_poll_get(m_d);
+}
+QString Errors::nextError()
+{
+    QString s;
+    errors_next_error(m_d, &s, set_qstring);
+    return s;
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent):
     QObject(parent),

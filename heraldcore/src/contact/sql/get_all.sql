@@ -11,4 +11,3 @@ FROM
   contacts
 WHERE
   status < 2
-  AND added > ?

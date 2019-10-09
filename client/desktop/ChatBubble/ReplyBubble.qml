@@ -15,9 +15,7 @@ ColumnLayout {
     property string opBody: ownedConversation.messageBodyById(op)
     property color opColor: "gray"
     property string authorName: ""
-    property int
-
-    spacing: 0
+    property int spacing: 0
 
     Label {
         id: sender
@@ -69,8 +67,6 @@ ColumnLayout {
             }
         }
     }
-
-
 
     TextEdit {
         id: messageBody

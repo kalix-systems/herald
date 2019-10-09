@@ -38,5 +38,5 @@ ListView {
             colorHash: memberColor
             pfpUrl: Utils.safeStringOrDefault(memberProfilePicture)
         }
-}
+    }
 }
