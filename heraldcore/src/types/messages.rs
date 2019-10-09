@@ -1,4 +1,5 @@
 use super::*;
+use crate::{config::*, errors::HErr::*};
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -226,8 +227,8 @@ impl ToSql for ConversationMessageBody {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// A conversation message
 pub struct ConversationMessage {
-    /// The ciphertext of the `ConversationMessage`. After decryption, this should deserialize as a
-    /// `ConversationMessageBody`.
+    /// The ciphertext of the message. After decryption, this should deserialize as a
+    /// [`ConversationMessageBody`].
     body: chainmail::block::Block,
     /// Conversation the message is associated with
     cid: ConversationId,
@@ -235,7 +236,6 @@ pub struct ConversationMessage {
     from: GlobalId,
 }
 
-// TODO: make these use chainmail
 impl ConversationMessage {
     /// Raw body of the message
     pub fn body(&self) -> &Block {
@@ -259,8 +259,8 @@ impl ConversationMessage {
         content: &ConversationMessageBody,
     ) -> Result<ConversationMessage, HErr> {
         let cbytes = serde_cbor::to_vec(content)?;
-        let kp = crate::config::Config::static_keypair()?;
-        let from = crate::config::Config::static_gid()?;
+        let kp = Config::static_keypair()?;
+        let from = Config::static_gid()?;
         let body = cid.seal_block(kp.secret_key(), cbytes)?;
         Ok(ConversationMessage { cid, from, body })
     }
@@ -286,19 +286,116 @@ impl ConversationMessage {
 pub mod dmessages {
     use super::*;
 
-    #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     /// A contact request.
     pub struct ContactReq {
-        /// The user making the request.
-        pub uid: UserId,
+        /// The genesis block for the conversation.
+        pub gen: Genesis,
         /// The proposed conversation id.
         pub cid: ConversationId,
     }
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// Types of device message.
-pub enum DeviceMessage {
+pub enum DeviceMessageBody {
     /// A contact request
     ContactReq(dmessages::ContactReq),
+}
+
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+pub struct DeviceMessage {
+    /// The sender of the message
+    from: GlobalId,
+    /// The ciphertext of the message. After decryption, this should deserialize as a
+    /// [`DeviceMessageBody`]
+    content: Vec<u8>,
+    nonce: box_::Nonce,
+    tag: box_::Tag,
+    /// The prekey used to encrypt the message.
+    /// If none, the message was encrypted with this device's public signing key treated as an
+    /// encryption key.
+    /// Until we've implemented prekey infrastructure, this will always be `None`.
+    prekey: Option<box_::PublicKey>,
+}
+
+fn spk_to_epk(pk: &sig::PublicKey) -> Result<box_::PublicKey, HErr> {
+    let mut pkbuf = [0u8; box_::PUBLICKEYBYTES];
+    let ret = unsafe {
+        libsodium_sys::crypto_sign_ed25519_pk_to_curve25519(
+            pkbuf.as_mut_ptr(),
+            pk.as_ref().as_ptr(),
+        )
+    };
+    if ret == 0 {
+        Ok(box_::PublicKey(pkbuf))
+    } else {
+        Err(HeraldError(
+            "failed to convert ed25519 public key to x25519 public key".into(),
+        ))
+    }
+}
+fn ssk_to_esk(sk: &sign::SecretKey) -> Result<box_::SecretKey, HErr> {
+    let mut skbuf = [0u8; box_::SECRETKEYBYTES];
+    let ret = unsafe {
+        libsodium_sys::crypto_sign_ed25519_sk_to_curve25519(
+            skbuf.as_mut_ptr(),
+            sk.as_ref().as_ptr(),
+        )
+    };
+    if ret == 0 {
+        Ok(box_::SecretKey(skbuf))
+    } else {
+        Err(HeraldError(
+            "failed to convert ed25519 public key to x25519 public key".into(),
+        ))
+    }
+}
+
+impl DeviceMessage {
+    pub fn seal(to: &sig::PublicKey, content: &DeviceMessageBody) -> Result<DeviceMessage, HErr> {
+        let mut content = serde_cbor::to_vec(content)?;
+
+        let pk = spk_to_epk(to)?;
+
+        let kp = Config::static_keypair()?;
+        let sk = ssk_to_esk(kp.secret_key())?;
+
+        let nonce = box_::gen_nonce();
+
+        let tag = box_::seal_detached(&mut content, &nonce, &pk, &sk);
+
+        Ok(DeviceMessage {
+            from: Config::static_gid()?,
+            content,
+            nonce,
+            tag,
+            prekey: None,
+        })
+    }
+
+    pub fn open(self) -> Result<(GlobalId, DeviceMessageBody), HErr> {
+        // TODO: remove this, handle prekey
+        assert!(self.prekey.is_none());
+
+        let DeviceMessage {
+            from,
+            mut content,
+            nonce,
+            tag,
+            prekey,
+        } = self;
+
+        let pk = spk_to_epk(&from.did)?;
+
+        let kp = Config::static_keypair()?;
+        let sk = ssk_to_esk(kp.secret_key())?;
+
+        box_::open_detached(&mut content, &tag, &nonce, &pk, &sk)
+            .map_err(|_| HeraldError("Failed to decrypt message to device".into()))?;
+
+        let dm = serde_cbor::from_slice(&content)?;
+
+        Ok((from, dm))
+    }
 }

@@ -4,6 +4,7 @@ use crate::{
     pending,
     types::*,
 };
+use chainmail::block::*;
 use chrono::prelude::*;
 use herald_common::*;
 use lazy_static::*;
@@ -364,17 +365,26 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
 fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
+    let (from, msg) = msg.open()?;
+
     match msg {
-        DeviceMessage::ContactReq(cr) => {
-            crate::contact::ContactBuilder::new(cr.uid)
-                .pairwise_conversation(cr.cid)
-                .add()?;
-            ev.notifications
-                .push(Notification::NewContact(cr.uid, cr.cid));
-            ev.replies.push((
-                cr.cid,
-                ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
-            ))
+        DeviceMessageBody::ContactReq(cr) => {
+            let dmessages::ContactReq { gen, mut cid } = cr;
+            if gen.verify_sig(&from.did) {
+                crate::contact::ContactBuilder::new(from.uid)
+                    .pairwise_conversation(cid)
+                    .add()?;
+
+                cid.store_genesis(gen)?;
+
+                ev.notifications
+                    .push(Notification::NewContact(from.uid, cid));
+
+                ev.replies.push((
+                    cid,
+                    ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
+                ))
+            }
         }
     }
 
@@ -413,25 +423,22 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
     }
 }
 
-fn send_dmessage(dids: &[sig::PublicKey], msg: &DeviceMessage) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(msg)?);
+fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
+    let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
 
-    let req = push_devices::Req {
-        to: dids.to_vec(),
-        msg,
-    };
+    let req = push_devices::Req { to: vec![to], msg };
 
     // TODO retry logic? for now, things go to the void
     match helper::push_devices(&req)? {
         push_devices::Res::Success => Ok(()),
         push_devices::Res::Missing(missing) => Err(HeraldError(format!(
-            "tried to send messages to nonexistent key_infos {:?}",
+            "tried to send messages to nonexistent keys {:?}",
             missing
         ))),
     }
 }
 
-fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
+fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
     let meta = match keys_of(vec![uid])?.pop() {
         Some((u, m)) => {
             if u == uid {
@@ -454,17 +461,19 @@ fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
     }?;
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
+    for key in keys {
+        send_dmessage(key, msg)?;
+    }
 
-    send_dmessage(&keys, msg)
+    Ok(())
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
 pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
-    let req = dmessages::ContactReq {
-        uid: Config::static_id()?,
-        cid,
-    };
-    send_umessage(uid, &DeviceMessage::ContactReq(req))
+    let kp = Config::static_keypair()?;
+    let gen = Genesis::new(kp.secret_key());
+    let req = dmessages::ContactReq { gen, cid };
+    send_umessage(uid, &DeviceMessageBody::ContactReq(req))
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
