@@ -10,7 +10,7 @@ Component {
     Rectangle {
         height: QmlCfg.toolbarHeight
         width: parent.width
-        color: QmlCfg.palette.secondaryColor
+        color: QmlCfg.palette.mainColor
         Common.ButtonForm {
             id: finalizegroupbutton
             source: "qrc:/single-check-receipt-icon.svg"
@@ -28,7 +28,6 @@ Component {
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            scale: 0.8
             onClicked: {
                 convoPane.state = "newGroupState"
             }
