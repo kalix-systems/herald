@@ -469,10 +469,15 @@ fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
+pub fn send_contact_req(uid: UserId, mut cid: ConversationId) -> Result<(), HErr> {
     let kp = Config::static_keypair()?;
+
     let gen = Genesis::new(kp.secret_key());
+
+    cid.store_genesis(gen.clone())?;
+
     let req = dmessages::ContactReq { gen, cid };
+
     send_umessage(uid, &DeviceMessageBody::ContactReq(req))
 }
 
