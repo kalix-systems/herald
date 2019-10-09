@@ -49,8 +49,13 @@ fn blockstore() {
         .get_keys(vec![blockhash11, blockhash12].iter())
         .expect(womp!());
 
-    assert_eq!(keys1.len(), 2);
-    assert_eq!(known_keys1, keys1);
+    match keys1 {
+        FoundKeys::Found(keys) => {
+            assert_eq!(keys.len(), 2);
+            assert_eq!(known_keys1, keys);
+        }
+        _ => panic!(),
+    }
 
     // cid2 known keys
     let known_keys2: BTreeSet<ChainKey> = vec![(&chainkey21).clone(), (&chainkey22).clone()]
@@ -61,8 +66,13 @@ fn blockstore() {
         .get_keys(vec![blockhash21, blockhash22].iter())
         .expect(womp!());
 
-    assert_eq!(keys2.len(), 2);
-    assert_eq!(known_keys2, keys2);
+    match keys2 {
+        FoundKeys::Found(keys) => {
+            assert_eq!(keys.len(), 2);
+            assert_eq!(known_keys2, keys);
+        }
+        _ => panic!(),
+    }
 
     // cid1 mark used
     cid1.mark_used(vec![blockhash11].iter()).expect(womp!());
