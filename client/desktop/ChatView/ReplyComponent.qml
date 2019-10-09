@@ -62,6 +62,7 @@ Rectangle {
 
     ColumnLayout {
         id: textCol
+
         Label {
             id: sender
             text: opName
@@ -69,7 +70,7 @@ Rectangle {
             Layout.bottomMargin: QmlCfg.smallMargin
             Layout.preferredHeight: QmlCfg.margin
             font.bold: true
-            color:  QmlCfg.palette.iconFill
+            color: QmlCfg.palette.mainTextColor
         }
 
         TextMetrics {
@@ -89,7 +90,7 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color:  QmlCfg.palette.iconFill
+            color:  QmlCfg.palette.mainTextColor
         }
 
         Item {}

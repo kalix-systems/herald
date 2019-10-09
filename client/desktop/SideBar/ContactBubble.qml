@@ -27,12 +27,11 @@ Rectangle {
         id: xButton
         anchors.verticalCenter: innerText.verticalCenter
         anchors.right: parent.right
+        anchors.top : parent.top
+        anchors.margins: QmlCfg.smallMargin
         padding: 0
-        scale: 0.6
         source: "qrc:/x-icon-white.svg"
-
-
-
+        fill : QmlCfg.palette.iconFill
     }
 
     states: State {

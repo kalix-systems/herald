@@ -32,7 +32,7 @@ Rectangle {
     Common.Divider {
         anchors.verticalCenter: parent.bottom
         height: 2
-        color: QmlCfg.palette.tertiaryColor
+        color: QmlCfg.palette.secondaryColor
     }
 
     MouseArea {

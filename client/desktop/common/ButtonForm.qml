@@ -7,6 +7,7 @@ import LibHerald 1.0
 Button {
     property string source
     property alias scale: background.scale
+    property color fill: QmlCfg.palette.iconMatte
     height: 25
     width: height
 
@@ -19,7 +20,7 @@ Button {
         layer.enabled: true
         layer.samplerName: "maskSource"
         layer.effect: ShaderEffect {
-            property color overlay: QmlCfg.palette.iconMatte
+            property color overlay: fill
             property var source: background
             fragmentShader:
                      "

@@ -45,12 +45,14 @@ ColumnLayout {
                 Layout.margins: QmlCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
+                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
 
             TextMetrics {
+                readonly property real constWidth: replyBody.width * 5
                 id: opBodyTextMetrics
                 text: opBody
-                elideWidth: replyBody.width * 5
+                elideWidth: constWidth
                 elide: Text.ElideRight
             }
 
@@ -64,6 +66,7 @@ ColumnLayout {
                 selectByKeyboard: true
                 readOnly: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
         }
     }

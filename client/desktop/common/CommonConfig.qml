@@ -33,7 +33,7 @@ Item {
     property int chatTextSize: 10
 
     /// user settable cfg
-    property int theme: 1
+    property int theme: 0
     /// emoji skin color
     property int skinSwatchIndex: 0
     /// persistent most common emojis
@@ -42,7 +42,7 @@ Item {
 
     Settings {
         id: settings
-        //property alias theme: cfg.theme
+        property alias theme: cfg.theme
         property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
 
@@ -88,7 +88,7 @@ Item {
         return {
             mainColor: "#002b36",
             secondaryColor: "#073642",
-            tertiaryColor: "#425358",
+            tertiaryColor: "#073642",
             tertiaryComplement: "#839496",
             mainTextColor: "#839496",
             secondaryTextColor: "#93a1a1",
