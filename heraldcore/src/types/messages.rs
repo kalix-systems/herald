@@ -226,8 +226,9 @@ impl ToSql for ConversationMessageBody {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// A conversation message
 pub struct ConversationMessage {
-    // TODO: replace this with Block
-    body: Bytes,
+    /// The ciphertext of the `ConversationMessage`. After decryption, this should deserialize as a
+    /// `ConversationMessageBody`.
+    body: chainmail::block::Block,
     /// Conversation the message is associated with
     cid: ConversationId,
     /// Who supposedly sent the message
@@ -237,8 +238,8 @@ pub struct ConversationMessage {
 // TODO: make these use chainmail
 impl ConversationMessage {
     /// Raw body of the message
-    pub fn body(&self) -> Bytes {
-        self.body.clone()
+    pub fn body(&self) -> &Block {
+        &self.body
     }
 
     /// `ConversationId` associated with the message
@@ -253,17 +254,31 @@ impl ConversationMessage {
 
     /// Seals the messages.
     pub fn seal(
-        cid: ConversationId,
+        // note: this is only mut because BlockStore thinks it should be
+        mut cid: ConversationId,
         content: &ConversationMessageBody,
     ) -> Result<ConversationMessage, HErr> {
-        let body = Bytes::from(serde_cbor::to_vec(content)?);
+        let cbytes = serde_cbor::to_vec(content)?;
+        let kp = crate::config::Config::static_keypair()?;
         let from = crate::config::Config::static_gid()?;
+        let body = cid.seal_block(kp.secret_key(), cbytes)?;
         Ok(ConversationMessage { cid, from, body })
     }
 
     /// Opens the message.
-    pub fn open(&self) -> Result<ConversationMessageBody, HErr> {
-        Ok(serde_cbor::from_slice(&self.body)?)
+    pub fn open(self) -> Result<ConversationMessageBody, HErr> {
+        let ConversationMessage {
+            mut cid,
+            from,
+            body,
+        } = self;
+        match cid.open_block(&from.did, body)? {
+            DecryptionResult::Success(bvec, u) => {
+                assert!(u.is_empty());
+                Ok(serde_cbor::from_slice(&bvec)?)
+            }
+            DecryptionResult::Pending(_) => unimplemented!(),
+        }
     }
 }
 

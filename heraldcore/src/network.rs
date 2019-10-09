@@ -290,8 +290,11 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
+    let cid = cm.cid();
+    let from = cm.from();
+
     match cm.open()? {
-        NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
+        NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
         DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
         AddedToConvo(ac) => {
             let mut db = crate::db::Database::get()?;
@@ -312,15 +315,13 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             tx.commit()?;
             ev.notifications.push(Notification::NewConversation(cid));
         }
-        ContactReqAck(cr) => ev.notifications.push(Notification::AddContactResponse(
-            cm.cid(),
-            cm.from().uid,
-            cr.0,
-        )),
+        ContactReqAck(cr) => ev
+            .notifications
+            .push(Notification::AddContactResponse(cid, from.uid, cr.0)),
         NewMembers(nm) => {
             let mut db = crate::db::Database::get()?;
             let tx = db.transaction()?;
-            crate::members::add_members_with_tx(&tx, cm.cid(), &nm.0)?;
+            crate::members::add_members_with_tx(&tx, cid, &nm.0)?;
             tx.commit()?;
         }
         Msg(msg) => {
@@ -330,15 +331,15 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
                 cmessages::Message::Text(body) => {
                     crate::message::add_message(
                         Some(mid),
-                        cm.from().uid,
-                        &cm.cid(),
+                        from.uid,
+                        &cid,
                         &body,
                         Some(ts),
                         None,
                         &op,
                     )?;
-                    ev.notifications.push(Notification::NewMsg(mid, cm.cid()));
-                    ev.replies.push((cm.cid(), form_ack(mid)?));
+                    ev.notifications.push(Notification::NewMsg(mid, cid));
+                    ev.replies.push((cid, form_ack(mid)?));
                 }
                 cmessages::Message::Blob(_) => unimplemented!(),
             }
@@ -347,12 +348,12 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             // TODO: This will cause a foreign key constraint error if the receipt is
             // received after a message has been removed locally.
             // We should check the sqlite3 extended error code (787) here.
-            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
+            crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,
-                cid: cm.cid(),
+                cid: cid,
                 stat: ack.stat,
-                by: cm.from().uid,
+                by: from.uid,
             });
         }
     }
