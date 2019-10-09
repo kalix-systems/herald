@@ -1,10 +1,11 @@
 import QtQuick 2.13
 import QtQuick.Shapes 1.12
+import LibHerald 1.0
 
 // the shape, used to mask the background object
 // as specified by --window--
 Item {
-    property color pickerColor: "white"
+    property color pickerColor: QmlCfg.palette.mainColor
     property int edgeRadius: 10
 
     Rectangle {

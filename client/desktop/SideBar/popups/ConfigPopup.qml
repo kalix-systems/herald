@@ -96,6 +96,10 @@ Window {
         }
         Item {
             id: uiPreferences
+            Button {
+                text: "toggle solarized dark"
+                onClicked: QmlCfg.theme = QmlCfg.theme === 1 ? 0 : 1
+            }
         }
         Item {
             id: authenticationPreferences

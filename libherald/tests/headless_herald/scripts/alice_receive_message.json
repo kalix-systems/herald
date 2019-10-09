@@ -1,0 +1,11 @@
+{
+    "userid": "Alice",
+    "actions": [
+        {
+            "action_type": "Await",
+            "what": "Message",
+            "from": "Bob",
+            "timeOut": -1
+        }
+    ]
+}

@@ -1,8 +1,9 @@
 import QtQuick 2.13
-import LibHerald 1.0
 import QtQuick.Controls 2.13
+import QtGraphicalEffects 1.13
 import QtQuick.Layouts 1.12
 import "../common" as Common
+import LibHerald 1.0
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -25,9 +26,8 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    Common.ButtonForm {
+   Button {
         id: exitButton
-        font.pixelSize: 10
 
         anchors {
             margins: QmlCfg.smallMargin
@@ -43,9 +43,15 @@ Rectangle {
 
             // this icon is very slightly off center everywhere it's used, i think it needs to be fixed
             Image {
+                id: x
                 source: "qrc:/x-icon-white.svg"
                 anchors.centerIn: parent
-                scale: 0.6
+                sourceSize: Qt.size(15,15)
+            }
+            ColorOverlay {
+                anchors.fill: x
+                source: x
+                color: QmlCfg.palette.iconMatte
             }
         }
 
@@ -56,6 +62,7 @@ Rectangle {
 
     ColumnLayout {
         id: textCol
+
         Label {
             id: sender
             text: opName
@@ -63,25 +70,26 @@ Rectangle {
             Layout.bottomMargin: QmlCfg.smallMargin
             Layout.preferredHeight: QmlCfg.margin
             font.bold: true
+            color: QmlCfg.palette.mainTextColor
         }
 
         TextMetrics {
             id: opTextMetrics
             text: opText
-            elideWidth: (wrapper.width - QmlCfg.margin) * 2
+            elideWidth: (wrapper.width - QmlCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
 
         TextEdit {
             text: opTextMetrics.elidedText
-            Layout.maximumWidth: wrapper.width
-            Layout.leftMargin: QmlCfg.smallMargin
-            Layout.rightMargin: QmlCfg.smallMargin
+            Layout.maximumWidth: wrapper.width - QmlCfg.smallMargin
+            Layout.margins: QmlCfg.smallMargin
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             Layout.alignment: Qt.AlignLeft
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
+            color:  QmlCfg.palette.mainTextColor
         }
 
         Item {

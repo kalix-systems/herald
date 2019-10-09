@@ -1,0 +1,16 @@
+{
+    "userid": "Bob",
+    "actions": [
+        {
+            "action_type": "Send",
+            "to": "Alice",
+            "body": "Hello Alice"
+        },
+        {
+            "action_type": "Await",
+            "what": "MessageAck",
+            "from": "Alice",
+            "timeOut": 2
+        }
+    ]
+}

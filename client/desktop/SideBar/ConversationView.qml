@@ -65,6 +65,7 @@ ListView {
             readonly property color hoverColor: QmlCfg.palette.secondaryColor
             readonly property color defaultColor: QmlCfg.palette.mainColor
 
+            color: defaultColor
             anchors.fill: parent
 
             Common.Divider {

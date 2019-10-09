@@ -2,17 +2,15 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
-import "../common" as Common
+import "../../common" as Common
 
 Rectangle {
     id: bgBar
     width: parent.width
-    height: if (visible)
-                30
-            else
-                0
+    height: visible ? 30 : 0
 
     property color hoverColor: QmlCfg.palette.secondaryColor
+    color: QmlCfg.palette.mainColor
 
     Common.ButtonForm {
         id: groupIcon
@@ -28,11 +26,13 @@ Rectangle {
         anchors.left: groupIcon.right
         anchors.margins: QmlCfg.margin
         anchors.verticalCenter: parent.verticalCenter
+        color: QmlCfg.palette.mainTextColor
     }
+
     Common.Divider {
         anchors.verticalCenter: parent.bottom
         height: 2
-        color: "black"
+        color: QmlCfg.palette.secondaryColor
     }
 
     MouseArea {
