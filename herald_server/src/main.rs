@@ -2,7 +2,6 @@
 extern crate lazy_static;
 
 use herald_server::protocol::*;
-use std::process::Command;
 
 lazy_static! {
     static ref HANDLER: State = State::new();

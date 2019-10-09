@@ -22,39 +22,10 @@ ColumnLayout {
         Layout.bottomMargin: authorName === "" ? QmlCfg.smallMargin : QmlCfg.margin
         Layout.preferredHeight: authorName !== "" ? QmlCfg.margin : 0
         font.bold: true
-        color: outbound ? "black" : "white"
+        color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
     }
 
-    TextEdit {
-        text: body
-        Layout.maximumWidth: maxWidth
-        Layout.margins: QmlCfg.smallMargin
-        Layout.bottomMargin: QmlCfg.smallMargin
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-        Layout.alignment: Qt.AlignLeft
-        selectByMouse: true
-        selectByKeyboard: true
-        readOnly: true
-        color: outbound ? "black" : "white"
-    }
+    StandardTextEdit {}
 
-    RowLayout {
-        Layout.margins: QmlCfg.smallMargin
-        Label {
-            font.pixelSize: 10
-            text: friendlyTimestamp
-            id: timestamp
-            color: outbound ? "black" : "white"
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        Image {
-            id: receipt
-            source: receiptImage
-            sourceSize: Qt.size(12, 12)
-        }
-    }
+    StandardStamps {}
 }

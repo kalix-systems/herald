@@ -7,6 +7,20 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   PRIMARY KEY(chainkey, hash)
 );
 
+CREATE TABLE IF NOT EXISTS pending_blocks(
+  block_id INTEGER PRIMARY KEY NOT NULL,
+  block BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS block_dependencies(
+  block_id INTEGER NOT NULL,
+  parent_hash BLOB NOT NULL,
+  FOREIGN KEY(block_id) REFERENCES pending_blocks(block_id),
+  PRIMARY KEY(block_id, parent_hash)
+);
+
+CREATE INDEX IF NOT EXISTS block_dep_parent ON block_dependencies(parent_hash);
+
 CREATE TABLE IF NOT EXISTS messages (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,

@@ -16,6 +16,11 @@ Pane {
     property var conversationAvatar
     property Messages ownedConversation
 
+    background: Rectangle {
+        anchors.fill: parent
+        color: QmlCfg.palette.mainColor
+    }
+
     /// bar at the top that displays the avatar
     CVUtils.ChatBar {
         id: messageBar

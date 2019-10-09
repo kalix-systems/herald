@@ -39,10 +39,6 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
-    Component.onCompleted: {
-        print(theme)
-    }
-
     Settings {
         id: settings
         property alias theme: cfg.theme
@@ -81,21 +77,21 @@ Item {
             /* secondaryTextColor:
              the color of text on a surface of the secondaryColor*/
             : "grey",
-            "alertTextColor"
-            /* alertTextColor:
-             Color in alert messages, that can be display on top of the
-             tertiary color.*/
-            : "red"
+            "alertTextColor": "red",
+            "iconFill": "white",
+            "iconMatte": "black"
         }
         case (1):
         return {
             "mainColor": "#002b36",
             "secondaryColor": "#073642",
-            "tertiaryColor": "#586e75",
+            "tertiaryColor": "#073642",
             "tertiaryComplement": "#839496",
             "mainTextColor": "#839496",
-            "secondaryTextColor": "#586e75",
-            "alertTextColor": "#dc322f"
+            "secondaryTextColor": "#93a1a1",
+            "iconFill": "#eee8d5",
+            "alertTextColor": "#dc322f",
+            "iconMatte": "#eee8d5"
         }
     }
 

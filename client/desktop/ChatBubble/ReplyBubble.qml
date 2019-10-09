@@ -45,12 +45,14 @@ ColumnLayout {
                 Layout.margins: QmlCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
+                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
 
             TextMetrics {
+                readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
                 text: opBody
-                elideWidth: replyBody.width * 5
+                elideWidth: constWidth
                 elide: Text.ElideRight
             }
 
@@ -64,42 +66,14 @@ ColumnLayout {
                 selectByKeyboard: true
                 readOnly: true
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
         }
     }
 
-    TextEdit {
+    StandardTextEdit {
         id: messageBody
-        text: body
-        Layout.leftMargin: QmlCfg.smallMargin
-        Layout.rightMargin: QmlCfg.smallMargin
-        Layout.maximumWidth: Math.max(parent.maxWidth, 200)
-        Layout.alignment: Qt.AlignLeft
-        selectByMouse: true
-        selectByKeyboard: true
-        readOnly: true
-        color: outbound ? "black" : "white"
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     }
 
-    RowLayout {
-        Layout.margins: 5
-
-        Label {
-            font.pixelSize: QmlCfg.chatTextSize
-            text: friendlyTimestamp
-            id: timestamp
-            color: outbound ? "black" : "white"
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        Image {
-            id: receipt
-            source: receiptImage
-            sourceSize: Qt.size(16, 16)
-        }
-    }
+    StandardStamps {}
 }

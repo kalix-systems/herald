@@ -112,8 +112,11 @@ Rectangle {
                         bottom: parent.bottom
                     }
                     radius: QmlCfg.radius
+                    Keys.forwardTo: keysProxy
+                    Keys.onEscapePressed: focus = false
                 }
                 selectionColor: QmlCfg.palette.tertiaryColor
+                color: QmlCfg.palette.mainTextColor
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Send a Message ..."

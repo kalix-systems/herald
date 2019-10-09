@@ -32,6 +32,7 @@ Component {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.margins: QmlCfg.margin
+            color: QmlCfg.palette.mainTextColor
         }
 
         Common.ButtonForm {

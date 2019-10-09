@@ -61,7 +61,7 @@ Row {
             font.bold: true
             //is white instead of palette maincolor bc shld be white regardless of theme
             color: if (!!!isDefault) {
-                       "white"
+                       QmlCfg.palette.iconFill
                    } else {
                        QmlCfg.palette.mainTextColor
                    }
@@ -73,7 +73,7 @@ Row {
             text: secondaryText
             // is white instead of palette maincolor bc shld be white regardless of theme
             color: if (!!!isDefault) {
-                       "white"
+                       QmlCfg.palette.iconFill
                    } else {
                        QmlCfg.palette.secondaryTextColor
                    }
@@ -94,7 +94,7 @@ Row {
             //is white instead of palette maincolor bc shld be white regardless of theme
 
 
-            readonly property color startColor:  !!!isDefault ?  "white" : QmlCfg.avatarColors[colorHash]
+            readonly property color startColor:  !!!isDefault ? QmlCfg.palette.iconFill: QmlCfg.avatarColors[colorHash]
             color: startColor
             // Note:
             radius: shape
@@ -105,7 +105,7 @@ Row {
                 color: if (!isDefault) {
                            QmlCfg.avatarColors[colorHash]
                        } else {
-                           "white"
+                            QmlCfg.palette.iconFill
                        }
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3

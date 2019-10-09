@@ -32,39 +32,7 @@ ColumnLayout {
         asynchronous: true
     }
 
-    TextEdit {
-        text: body
-        Layout.leftMargin: QmlCfg.smallMargin
-        Layout.rightMargin: QmlCfg.smallMargin
-        font.pixelSize: QmlCfg.chatTextSize
-        Layout.preferredHeight: body.length === 0 ? 0 : undefined
-        Layout.maximumWidth: image.width - 10 // margin
-        Layout.alignment: Qt.AlignLeft
-        selectByMouse: true
-        selectByKeyboard: true
-        readOnly: true
-        color: outbound ? "black" : "white"
-        wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-    }
+    StandardTextEdit {}
 
-    RowLayout {
-        Layout.margins: QmlCfg.smallMargin
-
-        Label {
-            text: friendlyTimestamp
-            id: timestamp
-            font.pixelSize: QmlCfg.chatTextSize
-            color: outbound ? "black" : "white"
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        Image {
-            id: receipt
-            source: receiptImage
-            sourceSize: Qt.size(16, 16)
-        }
-    }
+    StandardStamps {}
 }
