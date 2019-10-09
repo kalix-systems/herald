@@ -49,7 +49,7 @@ ColumnLayout {
             }
 
             TextMetrics {
-                readonly property real constWidth: replyBody.width * 5
+                readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
                 text: opBody
                 elideWidth: constWidth

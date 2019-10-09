@@ -18,7 +18,7 @@ Component {
       verticalAlignment: TextEdit.AlignVCenter
 
       background: Rectangle {
-          color: QmlCfg.palette.secondaryColor
+          color: QmlCfg.palette.mainColor
           anchors.fill: parent
       }
 

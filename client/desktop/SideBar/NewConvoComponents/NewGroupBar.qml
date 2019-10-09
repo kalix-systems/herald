@@ -9,8 +9,8 @@ Rectangle {
     width: parent.width
     height: visible ? 30 : 0
 
-    property color hoverColor: QmlCfg.palette.mainColor
-    color: QmlCfg.palette.secondaryColor
+    property color hoverColor: QmlCfg.palette.secondaryColor
+    color: QmlCfg.palette.mainColor
 
     Common.ButtonForm {
         id: groupIcon

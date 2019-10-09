@@ -76,15 +76,14 @@ Rectangle {
         TextMetrics {
             id: opTextMetrics
             text: opText
-            elideWidth: (wrapper.width - QmlCfg.margin) * 2
+            elideWidth: (wrapper.width - QmlCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
 
         TextEdit {
             text: opTextMetrics.elidedText
-            Layout.maximumWidth: wrapper.width
-            Layout.leftMargin: QmlCfg.smallMargin
-            Layout.rightMargin: QmlCfg.smallMargin
+            Layout.maximumWidth: wrapper.width - QmlCfg.smallMargin
+            Layout.margins: QmlCfg.smallMargin
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             Layout.alignment: Qt.AlignLeft
             selectByMouse: true
