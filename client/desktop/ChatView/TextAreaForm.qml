@@ -138,12 +138,21 @@ Rectangle {
                 target: replyLoader
                 active: true
             }
+            PropertyChanges {
+                target: scrollView
+                focus: true
+            }
         },
         State {
             name: "default"
             PropertyChanges {
                 target: replyLoader
                 active: false
+            }
+
+            PropertyChanges {
+                target: scrollView
+                focus: true
             }
         }
     ]

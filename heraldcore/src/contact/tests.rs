@@ -22,23 +22,6 @@ fn add_contact() {
 
 #[test]
 #[serial]
-fn all_contact_since() {
-    Database::reset_all().expect(womp!());
-
-    let id1 = "test1".try_into().expect(womp!());
-    let timestamp = chrono::Utc::now();
-
-    ContactBuilder::new(id1)
-        .add()
-        .expect("failed to add contact");
-
-    let contactlist = all_since(timestamp).expect("Failed to get contacts");
-
-    assert_eq!(contactlist.len(), 0);
-}
-
-#[test]
-#[serial]
 fn get_contact_name() {
     Database::reset_all().expect(womp!());
 

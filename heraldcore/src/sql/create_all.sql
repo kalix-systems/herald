@@ -7,14 +7,19 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   PRIMARY KEY(chainkey, hash)
 );
 
--- CREATE TABLE IF NOT EXISTS message_receipts(
---   msg_id BLOB NOT NULL,
---   user_id TEXT NOT NULL,
---   status INTEGER DEFAULT(0) NOT NULL,
---   PRIMARY KEY(msg_id, user_id),
---   FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
---   FOREIGN KEY(user_id) REFERENCES contacts(user_id) ON DELETE CASCADE
--- );
+CREATE TABLE IF NOT EXISTS pending_blocks(
+  block_id INTEGER PRIMARY KEY NOT NULL,
+  block BLOB NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS block_dependencies(
+  block_id INTEGER NOT NULL,
+  parent BLOB NOT NULL,
+  FOREIGN KEY(block_id) REFERENCES pending_blocks(block_id),
+  PRIMARY KEY(block_id, parent)
+);
+
+CREATE INDEX block_dep_parent ON block_dependencies(parent);
 
 CREATE TABLE IF NOT EXISTS messages (
   -- message id

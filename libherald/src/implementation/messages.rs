@@ -10,7 +10,7 @@ use heraldcore::{
     types::*,
 };
 use std::{
-    collections::{BTreeMap, HashMap},
+    collections::HashMap,
     convert::{TryFrom, TryInto},
     thread,
 };
@@ -399,7 +399,7 @@ impl MessagesTrait for Messages {
                         }
                         None => {
                             msg.receipts = {
-                                let mut receipts = BTreeMap::new();
+                                let mut receipts = HashMap::new();
                                 receipts.insert(by, stat);
                                 Some(receipts)
                             }

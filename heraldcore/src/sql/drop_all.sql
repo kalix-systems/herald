@@ -1,5 +1,6 @@
 DROP TABLE IF EXISTS chainkeys;
--- DROP TABLE IF EXISTS message_receipts;
+DROP TABLE IF EXISTS pending_blocks;
+DROP TABLE IF EXISTS block_dependencies;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS pending_out;
 DROP TABLE IF EXISTS replies;

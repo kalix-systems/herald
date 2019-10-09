@@ -1,3 +1,4 @@
+use chainmail::errors::ChainError;
 use herald_common::serde_cbor;
 use image;
 use lazy_pond::LazyError;
@@ -40,6 +41,8 @@ pub enum HErr {
     WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
     NoneError,
+    /// Error from `chainmail`
+    ChainError(ChainError),
 }
 
 impl fmt::Display for HErr {
@@ -57,10 +60,10 @@ impl fmt::Display for HErr {
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
             LazyPondError => write!(f, "LazyPondError"),
+            ChainError(e) => write!(f, "ChainError: {}", e),
             LoginError => write!(f, "LoginError"),
             RegistrationError => write!(f, "RegistrationError"),
             MissingFields => write!(f, "MissingFields"),
-            //RequestDropped => write!(f, "RequestDropped"),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             NoneError => write!(f, "Unexpected none"),
         }
@@ -74,7 +77,6 @@ impl std::error::Error for HErr {
             DatabaseError(e) => e,
             IoError(e) => e,
             ImageError(s) => s,
-            //Utf8Error(s) => s,
             CborError(e) => e,
             RegexError(e) => e,
             WebsocketError(e) => e,
@@ -92,6 +94,8 @@ macro_rules! from_fn {
         }
     };
 }
+
+from_fn!(HErr, ChainError, HErr::ChainError);
 
 // TODO: replace these
 
