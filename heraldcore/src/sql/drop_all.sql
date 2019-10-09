@@ -1,3 +1,7 @@
+-- drop indices
+DROP INDEX IF EXISTS block_dep_parent;
+DROP INDEX IF EXISTS reply_op;
+-- drop tables
 DROP TABLE IF EXISTS chainkeys;
 DROP TABLE IF EXISTS pending_blocks;
 DROP TABLE IF EXISTS block_dependencies;
