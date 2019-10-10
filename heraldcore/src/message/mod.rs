@@ -186,6 +186,18 @@ pub(crate) fn add_receipt(
     match receipts {
         Some(ref mut receipts) => {
             // update receipts
+
+            match receipts.get(&recip) {
+                Some(old_status) => {
+                    if (*old_status as u8) < (receipt_status as u8) {
+                        receipts.insert(recip, receipt_status);
+                    }
+                }
+                None => {
+                    receipts.insert(recip, receipt_status);
+                }
+            }
+
             receipts.insert(recip, receipt_status);
             let data = serde_cbor::to_vec(&receipts)?;
 
