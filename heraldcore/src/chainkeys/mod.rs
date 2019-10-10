@@ -27,15 +27,7 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     {
         let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
 
-        let mut key_used_stmt = tx.prepare(include_str!("sql/get_key_used_status.sql"))?;
-
         for block in blocks {
-            if key_used_stmt.query_row(params![cid, block.as_ref()], |row| row.get::<_, bool>(0))? {
-                // if the key is already marked used, return a `RedundantMark` error
-                return Err(ChainError::RedundantMark.into());
-            }
-
-            // otherwise we can mark the key as used
             mark_stmt.execute(params![cid, block.as_ref()])?;
         }
     }
