@@ -15,7 +15,7 @@ use std::{
 use websocket::sync::client as wsclient;
 
 const DEFAULT_PORT: u16 = 8080;
-const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
+const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [54, 213, 103, 80];
 
 lazy_static! {
     static ref SERVER_ADDR: SocketAddr = match env::var("SERVER_ADDR") {
@@ -347,7 +347,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             // TODO: This will cause a foreign key constraint error if the receipt is
             // received after a message has been removed locally.
             // We should check the sqlite3 extended error code (787) here.
-            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
+            crate::message::add_receipt(ack.of, from.uid, ack.stat);
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,
                 cid: cm.cid(),
