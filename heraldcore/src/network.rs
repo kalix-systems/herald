@@ -300,7 +300,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
         AddedToConvo(ac) => {
             let mut db = crate::db::Database::get()?;
             let tx = db.transaction()?;
-            let cid = ac.cid;
+            let mut cid = ac.cid;
 
             let title = ac.title;
 
@@ -314,6 +314,9 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             conv_builder.add_with_tx(&tx)?;
             crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
             tx.commit()?;
+
+            cid.store_genesis(ac.gen)?;
+
             ev.notifications.push(Notification::NewConversation(cid));
         }
         ContactReqAck(cr) => ev
@@ -498,12 +501,18 @@ pub fn start_conversation(
         conv_builder.title(title.clone());
     }
 
-    let cid = conv_builder.add_with_tx(&tx)?;
+    let mut cid = conv_builder.add_with_tx(&tx)?;
+
     crate::members::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
 
+    let kp = crate::config::Config::static_keypair()?;
+    let gen = Genesis::new(kp.secret_key());
+    cid.store_genesis(gen.clone())?;
+
     let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
         members: Vec::from(members),
+        gen,
         cid,
         title: title.map(String::from),
     });
