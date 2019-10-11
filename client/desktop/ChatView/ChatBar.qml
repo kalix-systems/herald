@@ -70,8 +70,7 @@ ToolBar {
     }
 
     Popup {
-        //PAUL demagic me
-        width: 200
+        width: QmlCfg.popupWidth
         height: 150
         id: newMemberPopup
         TextArea {

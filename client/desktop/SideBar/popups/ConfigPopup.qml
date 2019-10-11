@@ -10,9 +10,8 @@ import "./ConfigPopupSubmission.mjs" as JS
 
 Window {
     id: configPopup
-    //PAUL: fix magic number\
-    width: 600
-    height: 200
+    width: QmlCfg.configWidth
+    height: QmlCfg.configHeight
     maximumHeight: height
     minimumHeight: height
     maximumWidth: width

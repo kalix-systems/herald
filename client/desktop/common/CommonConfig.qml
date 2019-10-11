@@ -31,6 +31,9 @@ Item {
     readonly property int toolbarHeight: 40
     /// standard chat text size
     property int chatTextSize: 10
+    property int popupWidth: 200
+    property int configWidth: 600
+    property int configHeight: 200
 
     /// user settable cfg
     property int theme: 0

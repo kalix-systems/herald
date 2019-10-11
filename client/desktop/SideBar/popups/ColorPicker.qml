@@ -6,7 +6,7 @@ import QtQuick.Window 2.13
 
 Window {
     id: colorWindow
-    width: 200
+    width: QmlCfg.popupWidth
     height: 250
     maximumHeight: height
     minimumHeight: height
@@ -16,8 +16,7 @@ Window {
     property var colorIndex
 
     GridLayout {
-        //PAUL: fix magic number
-        width: 200
+        width: QmlCfg.popupWidth
         height: width
         columns: 3
         rows: 3
