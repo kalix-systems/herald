@@ -175,8 +175,8 @@ pub trait ConfigTrait {
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
     fn display_name(&self) -> &str;
-    fn name(&self) -> Option<&str>;
-    fn set_name(&mut self, value: Option<String>);
+    fn name(&self) -> &str;
+    fn set_name(&mut self, value: String);
     fn profile_picture(&self) -> Option<&str>;
     fn set_profile_picture(&mut self, value: Option<String>);
 }
@@ -261,10 +261,8 @@ pub unsafe extern "C" fn config_name_get(
 ) {
     let o = &*ptr;
     let v = o.name();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
 }
 
 #[no_mangle]
@@ -272,13 +270,7 @@ pub unsafe extern "C" fn config_name_set(ptr: *mut Config, v: *const c_ushort, l
     let o = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, v, len);
-    o.set_name(Some(s));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_name_set_none(ptr: *mut Config) {
-    let o = &mut *ptr;
-    o.set_name(None);
+    o.set_name(s);
 }
 
 #[no_mangle]
@@ -1323,8 +1315,8 @@ pub trait MembersTrait {
     fn display_name(&self, index: usize) -> String;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
-    fn name(&self, index: usize) -> Option<String>;
-    fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
+    fn name(&self, index: usize) -> String;
+    fn set_name(&mut self, index: usize, _: String) -> bool;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
     fn profile_picture(&self, index: usize) -> Option<String>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
@@ -1546,10 +1538,8 @@ pub unsafe extern "C" fn members_data_name(
 ) {
     let o = &*ptr;
     let data = o.name(to_usize(row));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1560,12 +1550,7 @@ pub unsafe extern "C" fn members_set_data_name(
     let o = &mut *ptr;
     let mut v = String::new();
     set_string_from_utf16(&mut v, s, len);
-    o.set_name(to_usize(row), Some(v))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_name_none(ptr: *mut Members, row: c_int) -> bool {
-    (&mut *ptr).set_name(to_usize(row), None)
+    o.set_name(to_usize(row), v)
 }
 
 #[no_mangle]
@@ -2360,8 +2345,8 @@ pub trait UsersTrait {
     fn display_name(&self, index: usize) -> String;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
-    fn name(&self, index: usize) -> Option<String>;
-    fn set_name(&mut self, index: usize, _: Option<String>) -> bool;
+    fn name(&self, index: usize) -> String;
+    fn set_name(&mut self, index: usize, _: String) -> bool;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
     fn profile_picture(&self, index: usize) -> Option<String>;
     fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
@@ -2594,10 +2579,8 @@ pub unsafe extern "C" fn users_data_name(
 ) {
     let o = &*ptr;
     let data = o.name(to_usize(row));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -2608,12 +2591,7 @@ pub unsafe extern "C" fn users_set_data_name(
     let o = &mut *ptr;
     let mut v = String::new();
     set_string_from_utf16(&mut v, s, len);
-    o.set_name(to_usize(row), Some(v))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_name_none(ptr: *mut Users, row: c_int) -> bool {
-    (&mut *ptr).set_name(to_usize(row), None)
+    o.set_name(to_usize(row), v)
 }
 
 #[no_mangle]

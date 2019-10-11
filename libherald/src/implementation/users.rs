@@ -43,10 +43,8 @@ pub struct Users {
 
 fn display_name(uid: &UserId) -> Option<String> {
     let inner = USER_DATA.get(uid)?;
-    match inner.name.as_ref() {
-        Some(name) => Some(name.clone()),
-        None => Some(inner.id.to_string()),
-    }
+
+    Some(inner.name.clone())
 }
 
 fn color(uid: &UserId) -> Option<u32> {
@@ -56,7 +54,7 @@ fn color(uid: &UserId) -> Option<u32> {
 fn name(uid: &UserId) -> Option<String> {
     let inner = USER_DATA.get(uid)?;
 
-    inner.name.clone()
+    Some(inner.name.clone())
 }
 
 fn profile_picture(uid: &UserId) -> Option<String> {
@@ -141,10 +139,10 @@ impl UsersTrait for Users {
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
+    fn name(&self, row_index: usize) -> String {
+        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
 
-        name(uid)
+        ret_none!(name(uid), uid.to_string())
     }
 
     /// Returns name if it is set, otherwise returns empty string
@@ -154,15 +152,11 @@ impl UsersTrait for Users {
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+    fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-        ret_err!(
-            contact::set_name(uid, name.as_ref().map(|s| s.as_str())),
-            false
-        );
+        ret_err!(contact::set_name(uid, name.as_str()), false);
 
-        // already checked
         inner.name = name;
         true
     }

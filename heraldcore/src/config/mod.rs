@@ -13,7 +13,7 @@ pub struct Config {
     /// Colorscheme
     pub colorscheme: u32,
     /// Name of the local user
-    pub name: Option<String>,
+    pub name: String,
     /// Profile picture of the local user
     pub profile_picture: Option<String>,
     /// Color of the local user
@@ -214,8 +214,8 @@ impl Config {
     }
 
     /// Updates user's display name
-    pub fn set_name(&mut self, name: Option<String>) -> Result<(), HErr> {
-        crate::contact::set_name(self.id, name.as_ref().map(|s| s.as_str()))?;
+    pub fn set_name(&mut self, name: String) -> Result<(), HErr> {
+        crate::contact::set_name(self.id, name.as_str())?;
 
         self.name = name;
         Ok(())
