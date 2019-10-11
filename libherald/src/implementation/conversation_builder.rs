@@ -128,10 +128,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
     fn member_display_name(&self, index: usize) -> String {
         let uid = ret_none!(self.list.get(index), "".to_owned());
         let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
-        match inner.name.as_ref() {
-            Some(name) => name.clone(),
-            None => inner.id.to_string(),
-        }
+        inner.name.to_owned()
     }
 
     fn member_color(&self, index: usize) -> u32 {

@@ -13,7 +13,7 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 }
 
 /// Change name of contact by their `id`
-pub fn set_name(id: UserId, name: Option<&str>) -> Result<(), HErr> {
+pub fn set_name(id: UserId, name: &str) -> Result<(), HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/update_name.sql"))?;
 
@@ -362,17 +362,14 @@ impl ContactBuilder {
 
         conv_builder.color(color);
 
-        let name = self.name.as_ref().map(|s| s.as_str());
+        let name = self.name.unwrap_or(self.id.to_string());
 
         let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
 
         let title = if let ContactType::Local = contact_type {
             crate::config::NTS_CONVERSATION_NAME
         } else {
-            match name {
-                Some(name) => name,
-                None => self.id.as_str(),
-            }
+            name.as_str()
         };
 
         conv_builder.title(title.to_owned());
@@ -385,7 +382,7 @@ impl ContactBuilder {
 
         let contact = Contact {
             id: self.id,
-            name: self.name,
+            name: name,
             profile_picture: self.profile_picture,
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
@@ -421,7 +418,7 @@ pub struct Contact {
     /// Contact id
     pub id: UserId,
     /// Contact name
-    pub name: Option<String>,
+    pub name: String,
     /// Path of profile picture
     pub profile_picture: Option<String>,
     /// User set color for user
@@ -438,8 +435,8 @@ pub struct Contact {
 
 impl Contact {
     /// Returns name
-    pub fn name(&self) -> Option<&str> {
-        self.name.as_ref().map(|s| s.as_str())
+    pub fn name(&self) -> &str {
+        self.name.as_str()
     }
 
     /// Returns path to profile picture
@@ -459,11 +456,7 @@ impl Contact {
 
     /// Matches contact's text fields against a [`SearchPattern`]
     pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
-        pattern.is_match(self.id.as_str())
-            || match self.name.as_ref() {
-                Some(name) => pattern.is_match(name),
-                None => false,
-            }
+        pattern.is_match(self.id.as_str()) || pattern.is_match(self.name.as_str())
     }
 
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {

@@ -21,13 +21,13 @@ impl ConfigTrait for Config {
     }
 
     /// Name of the current user, if one is set.
-    fn name(&self) -> Option<&str> {
-        self.inner.name.as_ref().map(|s| s.as_str())
+    fn name(&self) -> &str {
+        self.inner.name.as_str()
     }
 
     /// Sets the name of the current user. If `name` is None, this
     /// clears the name.
-    fn set_name(&mut self, name: Option<String>) {
+    fn set_name(&mut self, name: String) {
         match self.inner.set_name(name) {
             Ok(()) => self.emit.name_changed(),
             Err(e) => eprintln!("{}", e),
@@ -37,10 +37,7 @@ impl ConfigTrait for Config {
 
     /// Returns the current user's name if it is set, otherwise returns the user's id.
     fn display_name(&self) -> &str {
-        match self.inner.name.as_ref() {
-            Some(name) => name.as_str(),
-            None => self.inner.id.as_str(),
-        }
+        self.inner.name.as_str()
     }
 
     /// Returns the path to the current users profile picture, if it is set.

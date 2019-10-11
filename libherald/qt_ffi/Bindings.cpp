@@ -180,7 +180,6 @@ extern "C" {
     void config_display_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
-    void config_name_set_none(Config::Private*);
     void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
     void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
@@ -707,7 +706,6 @@ extern "C" {
     bool members_set_data_matched(Members::Private*, int, bool);
     void members_data_name(const Members::Private*, int, QString*, qstring_set);
     bool members_set_data_name(Members::Private*, int, const ushort* s, int len);
-    bool members_set_data_name_none(Members::Private*, int);
     void members_data_pairwise_conversation_id(const Members::Private*, int, QByteArray*, qbytearray_set);
     void members_data_profile_picture(const Members::Private*, int, QString*, qstring_set);
     bool members_set_data_profile_picture(Members::Private*, int, const ushort* s, int len);
@@ -836,11 +834,7 @@ QString Members::name(int row) const
 bool Members::setName(int row, const QString& value)
 {
     bool set = false;
-    if (value.isNull()) {
-        set = members_set_data_name_none(m_d, row);
-    } else {
     set = members_set_data_name(m_d, row, value.utf16(), value.length());
-    }
     if (set) {
         QModelIndex index = createIndex(row, 0, row);
         Q_EMIT dataChanged(index, index);
@@ -913,7 +907,7 @@ QVariant Members::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 2:
             return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 3:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+            return QVariant::fromValue(name(index.row()));
         case Qt::UserRole + 4:
             return QVariant::fromValue(pairwiseConversationId(index.row()));
         case Qt::UserRole + 5:
@@ -982,7 +976,7 @@ bool Members::setData(const QModelIndex &index, const QVariant &value, int role)
             }
         }
         if (role == Qt::UserRole + 3) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+            if (value.canConvert(qMetaTypeId<QString>())) {
                 return setName(index.row(), value.value<QString>());
             }
         }
@@ -1257,7 +1251,6 @@ extern "C" {
     bool users_set_data_matched(Users::Private*, int, bool);
     void users_data_name(const Users::Private*, int, QString*, qstring_set);
     bool users_set_data_name(Users::Private*, int, const ushort* s, int len);
-    bool users_set_data_name_none(Users::Private*, int);
     void users_data_pairwise_conversation_id(const Users::Private*, int, QByteArray*, qbytearray_set);
     void users_data_profile_picture(const Users::Private*, int, QString*, qstring_set);
     bool users_set_data_profile_picture(Users::Private*, int, const ushort* s, int len);
@@ -1386,11 +1379,7 @@ QString Users::name(int row) const
 bool Users::setName(int row, const QString& value)
 {
     bool set = false;
-    if (value.isNull()) {
-        set = users_set_data_name_none(m_d, row);
-    } else {
     set = users_set_data_name(m_d, row, value.utf16(), value.length());
-    }
     if (set) {
         QModelIndex index = createIndex(row, 0, row);
         Q_EMIT dataChanged(index, index);
@@ -1463,7 +1452,7 @@ QVariant Users::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 2:
             return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 3:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+            return QVariant::fromValue(name(index.row()));
         case Qt::UserRole + 4:
             return QVariant::fromValue(pairwiseConversationId(index.row()));
         case Qt::UserRole + 5:
@@ -1532,7 +1521,7 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
             }
         }
         if (role == Qt::UserRole + 3) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
+            if (value.canConvert(qMetaTypeId<QString>())) {
                 return setName(index.row(), value.value<QString>());
             }
         }
@@ -1637,11 +1626,7 @@ QString Config::name() const
     return v;
 }
 void Config::setName(const QString& v) {
-    if (v.isNull()) {
-        config_name_set_none(m_d);
-    } else {
     config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
-    }
 }
 QString Config::profilePicture() const
 {

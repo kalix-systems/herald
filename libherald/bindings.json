@@ -190,8 +190,7 @@
                 "name": {
                     "write": true,
                     "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
+                    "rustByValue": true
                 },
                 "pairwiseConversationId": {
                     "type": "QByteArray",
@@ -301,8 +300,7 @@
                 "name": {
                     "write": true,
                     "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
+                    "rustByValue": true
                 },
                 "pairwiseConversationId": {
                     "type": "QByteArray",
@@ -491,8 +489,7 @@
                 },
                 "name": {
                     "type": "QString",
-                    "write": true,
-                    "optional": true
+                    "write": true
                 },
                 "displayName": {
                     "type": "QString"
