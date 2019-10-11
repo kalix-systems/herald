@@ -4,51 +4,43 @@ use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 fn store_key(
-    tx: rusqlite::Transaction,
+    tx: &rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
 ) -> Result<Vec<Block>, HErr> {
-    let blocks = {
-        let mut store_stmt = tx.prepare(include_str!("sql/store_key.sql"))?;
-        store_stmt.execute(params![cid, hash.as_ref(), key.as_ref()])?;
+    // store key
+    let mut store_stmt = tx.prepare(include_str!("sql/store_key.sql"))?;
+    store_stmt.execute(params![cid, hash.as_ref(), key.as_ref()])?;
 
-        let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
-        remove_deps_stmt.execute(params![hash.as_ref()])?;
+    // remove key as blocking dependency
+    let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
+    remove_deps_stmt.execute(params![hash.as_ref()])?;
 
-        let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
+    // get blocks that are now available
+    let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
 
-        let mut blocks: Vec<Block> = Vec::new();
+    let mut blocks: Vec<Block> = Vec::new();
 
-        for res in get_blocks_stmt.query_map(NO_PARAMS, |row| row.get::<_, Vec<u8>>(0))? {
-            let block_bytes = res?;
-            let block = serde_cbor::from_slice(&block_bytes)?;
-            blocks.push(block);
-        }
-        blocks
-    };
-
-    tx.commit()?;
+    for res in get_blocks_stmt.query_map(NO_PARAMS, |row| row.get::<_, Vec<u8>>(0))? {
+        let block_bytes = res?;
+        let block = serde_cbor::from_slice(&block_bytes)?;
+        blocks.push(block);
+    }
 
     Ok(blocks)
 }
 
 fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-    tx: rusqlite::Transaction,
+    tx: &rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
 ) -> Result<(), HErr> {
-    // references to transaction need to be dropped before committing
-    {
-        let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
+    let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
 
-        for block in blocks {
-            // otherwise we can mark the key as used
-            mark_stmt.execute(params![cid, block.as_ref()])?;
-        }
+    for block in blocks {
+        mark_stmt.execute(params![cid, block.as_ref()])?;
     }
-
-    tx.commit()?;
 
     Ok(())
 }
@@ -83,7 +75,6 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     })
 }
 
-// this should *not* mark keys as used
 fn get_unused(
     db: &rusqlite::Connection,
     cid: ConversationId,
@@ -110,30 +101,28 @@ fn get_unused(
 impl BlockStore for ConversationId {
     type Error = HErr;
 
-    // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<Vec<Block>, Self::Error> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
-        // modify this to remove missing block dependencies
-        store_key(tx, *self, hash, key)
-        // get all blocks that no longer have dependencies
+        let blocks = store_key(&tx, *self, hash, key);
+        tx.commit()?;
+
+        blocks
     }
 
-    // we'll want to implement some kind of gc strategy to collect keys marked used
-    // if they're less than an hour old we should keep them, otherwise delete
-    // could run on a schedule, or every time we call get_unused, or something else
+    // TODO GC strategy
     fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
         &mut self,
         blocks: I,
     ) -> Result<(), Self::Error> {
         let mut db = Database::get()?;
-        // do this all in a transaction
         let tx = db.transaction()?;
 
-        mark_used(tx, *self, blocks)
+        mark_used(&tx, *self, blocks)?;
+        tx.commit()?;
+        Ok(())
     }
 
-    // this should *not* mark keys as used
     fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
         &self,
         blocks: I,
@@ -142,17 +131,12 @@ impl BlockStore for ConversationId {
         get_keys(&db, *self, blocks)
     }
 
-    // this should *not* mark keys as used
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
         let db = Database::get()?;
         get_unused(&db, *self)
     }
 
     fn add_pending(&self, block: Block, awaiting: Vec<BlockHash>) -> Result<(), Self::Error> {
-        if awaiting.is_empty() {
-            return Ok(());
-        }
-
         let mut db = Database::get()?;
         let tx = db.transaction()?;
         let mut pending_blocks_stmt = tx.prepare(include_str!("sql/add_pending_block.sql"))?;
