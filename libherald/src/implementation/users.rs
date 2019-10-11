@@ -41,12 +41,6 @@ pub struct Users {
     list: Vec<User>,
 }
 
-fn display_name(uid: &UserId) -> Option<String> {
-    let inner = USER_DATA.get(uid)?;
-
-    Some(inner.name.clone())
-}
-
 fn color(uid: &UserId) -> Option<u32> {
     Some(USER_DATA.get(&uid)?.color)
 }
@@ -117,18 +111,6 @@ impl UsersTrait for Users {
     /// Returns user id.
     fn user_id(&self, row_index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(row_index), "").id.as_str()
-    }
-
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name(&self, row_index: usize) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        display_name(uid).unwrap_or_else(|| "".to_owned())
-    }
-
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name_by_id(&self, id: ffi::UserId) -> String {
-        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
-        display_name(uid).unwrap_or_else(|| "".to_owned())
     }
 
     /// Returns conversation id.

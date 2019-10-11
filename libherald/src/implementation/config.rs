@@ -32,12 +32,6 @@ impl ConfigTrait for Config {
             Ok(()) => self.emit.name_changed(),
             Err(e) => eprintln!("{}", e),
         }
-        self.emit.display_name_changed();
-    }
-
-    /// Returns the current user's name if it is set, otherwise returns the user's id.
-    fn display_name(&self) -> &str {
-        self.inner.name.as_str()
     }
 
     /// Returns the path to the current users profile picture, if it is set.
