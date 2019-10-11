@@ -2,8 +2,8 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
-import "Avatar.mjs" as JS
-import "utils.mjs" as Utils
+import "js/Avatar.mjs" as JS
+import "js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD

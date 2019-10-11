@@ -10,11 +10,11 @@
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
         <file>ChatView/ChatTextAreaKeys.qml</file>
-        <file>ChatView/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ChatView.qml</file>
         <file>ChatView/ConversationWindowForm.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
         <file>ChatView/TextAreaForm.qml</file>
+        <file>ChatView/js/ChatTextAreaUtils.mjs</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>EmojiKeyboard/EmojiButton.qml</file>
         <file>EmojiKeyboard/EmojiPicker.qml</file>
@@ -24,7 +24,6 @@
         <file>SideBar.qml</file>
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactBubble.qml</file>
-        <file>SideBar/ContactView.mjs</file>
         <file>SideBar/ContactView.qml</file>
         <file>SideBar/ContactsToggle.qml</file>
         <file>SideBar/ConversationLabel.qml</file>
@@ -36,15 +35,15 @@
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
         <file>SideBar/SearchComponent.qml</file>
         <file>SideBar/UtilityBar.qml</file>
+        <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
-        <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
-        <file>SideBar/popups/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/ContactClickedPopup.qml</file>
-        <file>SideBar/popups/NewContactDialogue.mjs</file>
         <file>SideBar/popups/NewContactDialogue.qml</file>
+        <file>SideBar/popups/js/ConfigPopupSubmission.mjs</file>
+        <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
+        <file>SideBar/popups/js/NewContactDialogue.mjs</file>
         <file>TopMenuBar.qml</file>
-        <file>common/Avatar.mjs</file>
         <file>common/Avatar.qml</file>
         <file>common/ButtonForm.qml</file>
         <file>common/CommonConfig.qml</file>
@@ -52,7 +51,8 @@
         <file>common/EmojiJson.js</file>
         <file>common/ImageAvatar.qml</file>
         <file>common/Theme.qml</file>
-        <file>common/utils.mjs</file>
+        <file>common/js/Avatar.mjs</file>
+        <file>common/js/utils.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
     </qresource>
