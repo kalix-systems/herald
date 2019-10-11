@@ -2,9 +2,8 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
-import "../common" as Common
+import "../../common" as Common
 
-// KAAVYA 0: this should be in the NewConvoComponents.
 Rectangle {
     id: bubble
     property color defaultColor

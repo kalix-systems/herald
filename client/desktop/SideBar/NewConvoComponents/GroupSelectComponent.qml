@@ -48,12 +48,10 @@ Component {
                 Keys.enabled: true
                 model: groupMemberSelect
 
-                SBUtils.ContactBubble {
-
+                ContactBubble {
                     text: memberDisplayName
                     userId: memberId
                     defaultColor: QmlCfg.avatarColors[memberColor]
-
                     Layout.alignment: Qt.AlignLeft
                     xButton.onClicked: groupMemberSelect.removeMemberByIndex(
                                            index)
@@ -72,7 +70,6 @@ Component {
                                      "Add people"
                                  else
                                      ""
-
                 verticalAlignment: TextEdit.AlignVCenter
                 background: Rectangle {
                     color: QmlCfg.palette.mainColor
