@@ -4,6 +4,69 @@ use serial_test_derive::serial;
 
 #[test]
 #[serial]
+fn raw_pending() {
+    Database::reset_all().expect(womp!());
+    let cid = ConversationId::from(crate::utils::rand_id());
+
+    ConversationBuilder::new()
+        .conversation_id(cid)
+        .add()
+        .expect(womp!());
+
+    let mut db = Database::get().expect(womp!());
+    let tx = db.transaction().expect(womp!());
+
+    let blockhash1 = BlockHash::from_slice(&[1; BLOCKHASH_BYTES]).expect(womp!());
+    let blockhash2 = BlockHash::from_slice(&[2; BLOCKHASH_BYTES]).expect(womp!());
+    let chainkey1 = ChainKey::from_slice(&[1; CHAINKEY_BYTES]).expect(womp!());
+    let chainkey2 = ChainKey::from_slice(&[2; CHAINKEY_BYTES]).expect(womp!());
+
+    let dummy_block_bytes1 = &[0; 32];
+    let dummy_block_bytes2 = &[1; 32];
+    let dummy_block_bytes3 = &[2; 32];
+
+    let block_id1 = raw_add_pending_block(&tx, dummy_block_bytes1.to_vec()).expect(womp!());
+    raw_add_block_dependencies(&tx, block_id1, vec![blockhash1.as_ref()].into_iter())
+        .expect(womp!());
+
+    let block_id2 = raw_add_pending_block(&tx, dummy_block_bytes2.to_vec()).expect(womp!());
+    raw_add_block_dependencies(
+        &tx,
+        block_id2,
+        vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
+    )
+    .expect(womp!());
+
+    let block_id3 = raw_add_pending_block(&tx, dummy_block_bytes3.to_vec()).expect(womp!());
+    raw_add_block_dependencies(
+        &tx,
+        block_id3,
+        vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
+    )
+    .expect(womp!());
+
+    // free dummy_block_bytes1
+    raw_store_key(&tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&tx, blockhash1.as_ref()).expect(womp!());
+
+    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    assert_eq!(blocks.len(), 1);
+    assert_eq!(blocks[0], dummy_block_bytes1);
+
+    // free dummy_block_bytes2 and dummy_block_bytes3
+    raw_store_key(&tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&tx, blockhash2.as_ref()).expect(womp!());
+
+    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    assert_eq!(blocks.len(), 2);
+    assert_eq!(blocks[0], dummy_block_bytes2);
+    assert_eq!(blocks[1], dummy_block_bytes3);
+
+    tx.commit().expect(womp!());
+}
+
+#[test]
+#[serial]
 fn blockstore() {
     Database::reset_all().expect(womp!());
     let mut cid1 = ConversationId::from(crate::utils::rand_id());
@@ -18,15 +81,15 @@ fn blockstore() {
         .add()
         .expect(womp!());
 
-    let blockhash11 = BlockHash::from_slice(vec![11; BLOCKHASH_BYTES].as_slice()).expect(womp!());
-    let blockhash12 = BlockHash::from_slice(vec![12; BLOCKHASH_BYTES].as_slice()).expect(womp!());
-    let chainkey11 = ChainKey::from_slice(vec![11; CHAINKEY_BYTES].as_slice()).expect(womp!());
-    let chainkey12 = ChainKey::from_slice(vec![12; CHAINKEY_BYTES].as_slice()).expect(womp!());
+    let blockhash11 = BlockHash::from_slice(&[11; BLOCKHASH_BYTES]).expect(womp!());
+    let blockhash12 = BlockHash::from_slice(&[12; BLOCKHASH_BYTES]).expect(womp!());
+    let chainkey11 = ChainKey::from_slice(&[11; CHAINKEY_BYTES]).expect(womp!());
+    let chainkey12 = ChainKey::from_slice(&[12; CHAINKEY_BYTES]).expect(womp!());
 
-    let blockhash21 = BlockHash::from_slice(vec![21; BLOCKHASH_BYTES].as_slice()).expect(womp!());
-    let blockhash22 = BlockHash::from_slice(vec![22; BLOCKHASH_BYTES].as_slice()).expect(womp!());
-    let chainkey21 = ChainKey::from_slice(vec![21; CHAINKEY_BYTES].as_slice()).expect(womp!());
-    let chainkey22 = ChainKey::from_slice(vec![22; CHAINKEY_BYTES].as_slice()).expect(womp!());
+    let blockhash21 = BlockHash::from_slice(&[21; BLOCKHASH_BYTES]).expect(womp!());
+    let blockhash22 = BlockHash::from_slice(&[22; BLOCKHASH_BYTES]).expect(womp!());
+    let chainkey21 = ChainKey::from_slice(&[21; CHAINKEY_BYTES]).expect(womp!());
+    let chainkey22 = ChainKey::from_slice(&[22; CHAINKEY_BYTES]).expect(womp!());
 
     // cid1 keys
     cid1.store_key(blockhash11, (&chainkey11).clone())
