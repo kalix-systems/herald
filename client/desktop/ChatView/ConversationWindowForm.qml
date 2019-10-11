@@ -17,9 +17,9 @@ import "../SideBar/ContactView.mjs" as CUtils
 // RS: Rusts job
 // Factor Component: FC
 Flickable {
+    id: cvPane
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
-    id: cvPane
 
     clip: true
     interactive: true
@@ -107,8 +107,7 @@ Flickable {
                 }
 
                 ChatBubble {
-                    ChatBubbleHover {
-                    }
+                    ChatBubbleHover {}
                     radius: 10
                     maxWidth: cvPane.width * 0.66
                     color: outbound ? QmlCfg.palette.tertiaryColor : userColor

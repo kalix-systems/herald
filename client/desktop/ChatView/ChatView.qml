@@ -9,6 +9,7 @@ import "./ChatTextAreaUtils.mjs" as CTUtils
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 
+// PAUL : this whole
 Pane {
     id: chatPane
     padding: 0
@@ -28,7 +29,6 @@ Pane {
     }
 
     Common.Divider {
-        height: 1
         anchors.bottom: messageBar.bottom
         color: "black"
     }
@@ -60,6 +60,7 @@ Pane {
             id: emojiPicker
             window: parent.window
             Component.onCompleted: {
+                // PAUL : Do this whole conneciton from c++ with a lambda.
                 emojiPicker.send.connect(function anon(emoji) {
                     CTUtils.appendToTextArea(emoji, chatTextArea.chatText)
                 })

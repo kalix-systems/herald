@@ -10,13 +10,13 @@ RowLayout {
         text: friendlyTimestamp
         id: timestamp
         color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
-
     }
 
     Item {
         Layout.fillWidth: true
     }
 
+    // PAUL: make this the same color as all icons
     Image {
         id: receipt
         source: receiptImage
