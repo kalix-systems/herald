@@ -86,11 +86,9 @@ Item {
             sourceComponent: splash
         }
 
-        // PAUL 2: there should be a border color in QmlCfg.
-        // universal black is not acceptable for all themes
         handle: Rectangle {
             implicitWidth: 1.1
-            color: "black"
+            color: QmlCfg.palette.borderColor
         }
     }
 

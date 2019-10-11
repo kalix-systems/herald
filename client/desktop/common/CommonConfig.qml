@@ -79,7 +79,8 @@ Item {
             : "grey",
             "alertTextColor": "red",
             "iconFill": "white",
-            "iconMatte": "black"
+            "iconMatte": "black",
+            "borderColor": "black"
         }
         case (1):
         return {
@@ -91,7 +92,8 @@ Item {
             "secondaryTextColor": "#93a1a1",
             "iconFill": "#eee8d5",
             "alertTextColor": "#dc322f",
-            "iconMatte": "#eee8d5"
+            "iconMatte": "#eee8d5",
+            "borderColor": "#073642"
         }
     }
 
