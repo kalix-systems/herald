@@ -15,8 +15,11 @@ CREATE TABLE keys (
 
 CREATE TABLE pushes (
   push_id BIGSERIAL PRIMARY KEY,
+  push_ts TIMESTAMPTZ NOT NULL,
   push_data BYTEA NOT NULL
 );
+
+CREATE INDEX push_ts_ix ON pushes(push_ts);
 
 CREATE TABLE pending (
   key BYTEA NOT NULL,

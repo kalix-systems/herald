@@ -409,9 +409,10 @@ impl Conn {
                 let push_row_id: i64 = {
                     use crate::schema::pushes::dsl::*;
 
+                    let push_timestamp = msg.timestamp;
                     let push_vec = serde_cbor::to_vec(msg)?;
                     insert_into(pushes)
-                        .values(push_data.eq(push_vec))
+                        .values((push_data.eq(push_vec), push_ts.eq(push_timestamp)))
                         .returning(push_id)
                         .get_result(&self.0)?
                 };
@@ -434,6 +435,7 @@ impl Conn {
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_data)
+            .order(pushes::push_ts.asc())
             .get_results(self.deref_mut())?;
 
         let mut out = Vec::with_capacity(pushes.len());
