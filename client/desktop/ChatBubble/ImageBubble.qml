@@ -11,8 +11,6 @@ ColumnLayout {
     property string imageSource: ""
     spacing: 0
 
-    // PAUL & KAAVYA : factor this boy out.
-
     Common.ChatLabel {
         id: sender
         senderName: authorName

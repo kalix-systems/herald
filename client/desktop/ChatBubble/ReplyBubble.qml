@@ -4,8 +4,6 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../common" as Common
 
-// TODO: demagic with libherald import
-// TODO: js for switching and choosing read receipts
 ColumnLayout {
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
