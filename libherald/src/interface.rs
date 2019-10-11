@@ -99,7 +99,6 @@ pub struct ConfigEmitter {
     color_changed: fn(*mut ConfigQObject),
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
-    display_name_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
 }
@@ -119,7 +118,6 @@ impl ConfigEmitter {
             color_changed: self.color_changed,
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
-            display_name_changed: self.display_name_changed,
             name_changed: self.name_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
@@ -146,12 +144,6 @@ impl ConfigEmitter {
             (self.config_id_changed)(ptr);
         }
     }
-    pub fn display_name_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.display_name_changed)(ptr);
-        }
-    }
     pub fn name_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -174,7 +166,6 @@ pub trait ConfigTrait {
     fn colorscheme(&self) -> u32;
     fn set_colorscheme(&mut self, value: u32);
     fn config_id(&self) -> &str;
-    fn display_name(&self) -> &str;
     fn name(&self) -> &str;
     fn set_name(&mut self, value: String);
     fn profile_picture(&self) -> Option<&str>;
@@ -187,7 +178,6 @@ pub extern "C" fn config_new(
     config_color_changed: fn(*mut ConfigQObject),
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
-    config_display_name_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
@@ -196,7 +186,6 @@ pub extern "C" fn config_new(
         color_changed: config_color_changed,
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
-        display_name_changed: config_display_name_changed,
         name_changed: config_name_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
@@ -237,18 +226,6 @@ pub unsafe extern "C" fn config_config_id_get(
 ) {
     let o = &*ptr;
     let v = o.config_id();
-    let s: *const c_char = v.as_ptr() as (*const c_char);
-    set(p, s, to_c_int(v.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn config_display_name_get(
-    ptr: *const Config,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.display_name();
     let s: *const c_char = v.as_ptr() as (*const c_char);
     set(p, s, to_c_int(v.len()));
 }
@@ -404,10 +381,7 @@ pub trait ConversationBuilderTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn member_color(&self, index: usize) -> u32;
-    fn member_display_name(&self, index: usize) -> String;
     fn member_id(&self, index: usize) -> &str;
-    fn member_profile_picture(&self, index: usize) -> Option<String>;
 }
 
 #[no_mangle]
@@ -532,24 +506,6 @@ pub unsafe extern "C" fn conversation_builder_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_color(ptr: *const ConversationBuilder, row: c_int) -> u32 {
-    let o = &*ptr;
-    o.member_color(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_display_name(
-    ptr: *const ConversationBuilder, row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.member_display_name(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversation_builder_data_member_id(
     ptr: *const ConversationBuilder, row: c_int,
     d: *mut QString,
@@ -559,20 +515,6 @@ pub unsafe extern "C" fn conversation_builder_data_member_id(
     let data = o.member_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_data_member_profile_picture(
-    ptr: *const ConversationBuilder, row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.member_profile_picture(to_usize(row));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
 }
 
 pub struct ConversationsQObject {}
@@ -1312,7 +1254,6 @@ pub trait MembersTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
-    fn display_name(&self, index: usize) -> String;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
@@ -1502,18 +1443,6 @@ pub unsafe extern "C" fn members_set_data_color(
     v: u32,
 ) -> bool {
     (&mut *ptr).set_color(to_usize(row), v)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_data_display_name(
-    ptr: *const Members, row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.display_name(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -2327,7 +2256,6 @@ pub trait UsersTrait {
     fn try_poll(&self) -> u8;
     fn add(&mut self, id: String) -> Vec<u8>;
     fn color_by_id(&self, id: String) -> u32;
-    fn display_name_by_id(&self, id: String) -> String;
     fn name_by_id(&self, id: String) -> String;
     fn poll_update(&mut self) -> bool;
     fn profile_picture_by_id(&self, id: String) -> String;
@@ -2342,7 +2270,6 @@ pub trait UsersTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
-    fn display_name(&self, index: usize) -> String;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
@@ -2459,16 +2386,6 @@ pub unsafe extern "C" fn users_color_by_id(ptr: *const Users, id_str: *const c_u
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_display_name_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
-    let mut id = String::new();
-    set_string_from_utf16(&mut id, id_str, id_len);
-    let o = &*ptr;
-    let r = o.display_name_by_id(id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn users_name_by_id(ptr: *const Users, id_str: *const c_ushort, id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
     let mut id = String::new();
     set_string_from_utf16(&mut id, id_str, id_len);
@@ -2543,18 +2460,6 @@ pub unsafe extern "C" fn users_set_data_color(
     v: u32,
 ) -> bool {
     (&mut *ptr).set_color(to_usize(row), v)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_data_display_name(
-    ptr: *const Users, row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.display_name(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
 }
 
 #[no_mangle]

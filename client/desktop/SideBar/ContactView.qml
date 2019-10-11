@@ -97,7 +97,7 @@ ListView {
         Common.Avatar {
             size: 45
             id: contactAvatar
-            avatarLabel: displayName
+            avatarLabel: name
             labelGap: QmlCfg.smallMargin
             secondaryText: "@" + userId
             colorHash: color

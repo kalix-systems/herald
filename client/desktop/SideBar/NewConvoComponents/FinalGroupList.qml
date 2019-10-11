@@ -32,11 +32,12 @@ ListView {
         Common.Avatar {
             size: 45
             id: memberAvatar
-            avatarLabel: memberDisplayName
+            avatarLabel: contactsModel.nameById(memberId)
             labelGap: QmlCfg.smallMargin
             secondaryText: "@" + memberId
-            colorHash: memberColor
-            pfpUrl: Utils.safeStringOrDefault(memberProfilePicture)
+            colorHash: contactsModel.colorById(memberId)
+            pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(
+                                                  memberId))
         }
     }
 }

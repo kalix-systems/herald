@@ -213,10 +213,6 @@
                 "matched": {
                     "write": true,
                     "type": "bool"
-                },
-                "displayName": {
-                    "type": "QString",
-                    "rustByValue": true
                 }
             },
             "functions": {
@@ -240,15 +236,6 @@
                     ]
                 },
                 "nameById": {
-                    "return": "QString",
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "QString"
-                        }
-                    ]
-                },
-                "displayNameById": {
                     "return": "QString",
                     "arguments": [
                         {
@@ -323,10 +310,6 @@
                 "matched": {
                     "write": true,
                     "type": "bool"
-                },
-                "displayName": {
-                    "type": "QString",
-                    "rustByValue": true
                 }
             },
             "functions": {
@@ -491,9 +474,6 @@
                     "type": "QString",
                     "write": true
                 },
-                "displayName": {
-                    "type": "QString"
-                },
                 "profilePicture": {
                     "type": "QString",
                     "write": true,
@@ -512,18 +492,6 @@
         "ConversationBuilder": {
             "type": "List",
             "itemProperties": {
-                "memberDisplayName": {
-                    "type": "QString",
-                    "rustByValue": true
-                },
-                "memberColor": {
-                    "type": "quint32"
-                },
-                "memberProfilePicture": {
-                    "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
-                },
                 "memberId": {
                     "type": "QString"
                 }

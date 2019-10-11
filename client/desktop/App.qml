@@ -22,17 +22,13 @@ Item {
     Users {
         id: contactsModel
 
-        onTryPollChanged: {
-            pollUpdate()
-        }
+        onTryPollChanged: pollUpdate()
     }
 
     Conversations {
         id: conversationsModel
 
-        onTryPollChanged: {
-            pollUpdate()
-        }
+        onTryPollChanged: pollUpdate()
     }
 
     Popups.ConfigPopup {
@@ -94,7 +90,5 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        networkHandle.login()
-    }
+    Component.onCompleted: networkHandle.login()
 }

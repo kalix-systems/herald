@@ -96,14 +96,6 @@ impl MembersTrait for Members {
             .as_str()
     }
 
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name(&self, row_index: usize) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
-
-        inner.name.to_owned()
-    }
-
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;

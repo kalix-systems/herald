@@ -38,7 +38,7 @@ Rectangle {
 
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyName === config.displayName
+    property bool owned: replyUid === config.configId
     property string replyUid
 
     property var replyId

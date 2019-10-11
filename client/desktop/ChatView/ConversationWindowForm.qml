@@ -78,7 +78,7 @@ Flickable {
                     StandardBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        authorName: outbound ? "" : contactsModel.displayNameById(
+                        authorName: outbound ? "" : contactsModel.nameById(
                                                    author)
                         receiptImage: proxyReceiptImage
                     }

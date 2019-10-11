@@ -49,10 +49,10 @@ Component {
                 model: groupMemberSelect
 
                 SBUtils.ContactBubble {
-
-                    text: memberDisplayName
+                    text: contactsModel.nameById(memberId)
                     userId: memberId
-                    defaultColor: QmlCfg.avatarColors[memberColor]
+                    defaultColor: QmlCfg.avatarColors[contactsModel.colorById(
+                                                          memberId)]
 
                     Layout.alignment: Qt.AlignLeft
                     xButton.onClicked: groupMemberSelect.removeMemberByIndex(

@@ -10,7 +10,6 @@ RowLayout {
         text: friendlyTimestamp
         id: timestamp
         color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
-
     }
 
     Item {
