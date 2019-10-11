@@ -54,18 +54,10 @@ ColumnLayout {
                 elide: Text.ElideRight
             }
 
-            // PAUL : this can be StandardTextEdit
-            TextEdit {
+            StandardTextEdit {
                 id: replyBody
-                Layout.margins: QmlCfg.smallMargin
                 text: opBodyTextMetrics.elidedText
-                Layout.maximumWidth: Math.max(maxWidth, 200)
                 Layout.minimumWidth: messageBody.width
-                selectByMouse: true
-                selectByKeyboard: true
-                readOnly: true
-                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
         }
     }

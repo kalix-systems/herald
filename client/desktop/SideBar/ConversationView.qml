@@ -61,9 +61,6 @@ ListView {
         height: visible ? 55 : 0
         width: parent.width
 
-        //KAAVYA: this should be a factored out component
-        // so it can be reused in contactview and convoview
-
         Common.PlatonicRectangle {
             id: convoRectangle
             boxColor: conversationsModel.color(index)

@@ -55,8 +55,8 @@ Item {
         sourceSize: Qt.size(24, 24)
         height: 16
         width: 16
-        source: JS.receiptStatusSwitch(
-                    messageModel.lastStatus) //ToDo: this value is alwasy undefined
+        //ToDo: this value is alwasy undefined
+        source: JS.receiptStatusSwitch(messageModel.lastStatus)
         anchors {
             right: parent.right
             bottom: parent.bottom
