@@ -91,10 +91,9 @@ Row {
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter
+
             //is white instead of palette maincolor bc shld be white regardless of theme
-
-
-            readonly property color startColor:  !!!isDefault ? QmlCfg.palette.iconFill: QmlCfg.avatarColors[colorHash]
+            readonly property color startColor: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.avatarColors[colorHash]
             color: startColor
             // Note:
             radius: shape
@@ -105,7 +104,7 @@ Row {
                 color: if (!isDefault) {
                            QmlCfg.avatarColors[colorHash]
                        } else {
-                            QmlCfg.palette.iconFill
+                           QmlCfg.palette.iconFill
                        }
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3

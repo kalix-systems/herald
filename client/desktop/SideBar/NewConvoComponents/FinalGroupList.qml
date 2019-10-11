@@ -36,7 +36,8 @@ ListView {
             labelGap: QmlCfg.smallMargin
             secondaryText: "@" + memberId
             colorHash: contactsModel.colorById(memberId)
-            pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(memberId))
+            pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(
+                                                  memberId))
         }
     }
 }

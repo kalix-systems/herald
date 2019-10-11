@@ -24,9 +24,9 @@ ApplicationWindow {
         id: errorQueue
 
         onTryPollChanged: {
-            let errMsg = errorQueue.nextError();
+            var errMsg = errorQueue.nextError()
             if (errMsg !== "") {
-                errPopup.errorMsg = errMsg;
+                errPopup.errorMsg = errMsg
                 errPopup.open()
             }
         }
