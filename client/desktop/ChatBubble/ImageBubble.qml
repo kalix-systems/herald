@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import "../common" as Common
 
 ColumnLayout {
     property string body: ""
@@ -11,14 +12,10 @@ ColumnLayout {
     spacing: 0
 
     // PAUL & KAAVYA : factor this boy out.
-    Label {
+
+    Common.ChatLabel {
         id: sender
-        text: authorName === "" ? "" : authorName
-        Layout.margins: authorName === "" ? 0 : QmlCfg.smallMargin
-        Layout.bottomMargin: authorName === "" ? QmlCfg.smallMargin : QmlCfg.margin
-        Layout.preferredHeight: authorName !== "" ? QmlCfg.margin : 0
-        font.bold: true
-        color: outbound ? "black" : "white"
+        senderName: authorName
     }
 
     Image {

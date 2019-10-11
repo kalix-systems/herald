@@ -52,5 +52,6 @@
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>SideBar/popups/NewContactDialogue.mjs</file>
+        <file>common/ChatLabel.qml</file>
     </qresource>
 </RCC>
