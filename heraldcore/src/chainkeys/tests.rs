@@ -82,8 +82,6 @@ fn blockstore() {
     assert_eq!(unused1.len(), 1);
     assert_eq!(unused1, vec![(blockhash12, chainkey12)]);
 
-    assert!(cid1.mark_used(vec![blockhash11].iter()).is_err());
-
     // cid2 mark used
     cid2.mark_used(vec![blockhash21].iter()).expect(womp!());
 
@@ -91,6 +89,4 @@ fn blockstore() {
 
     assert_eq!(unused2.len(), 1);
     assert_eq!(unused2, vec![(blockhash22, chainkey22)]);
-
-    assert!(cid1.mark_used(vec![blockhash21].iter()).is_err());
 }
