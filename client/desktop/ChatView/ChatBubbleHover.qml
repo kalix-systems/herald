@@ -5,19 +5,12 @@ import LibHerald 1.0
 
 MouseArea {
     id: chatBubbleHitbox
+    // PAUL: demagic the Z
     z: -1
     propagateComposedEvents: true
     hoverEnabled: true
+    // KAAVYA: there has to be a better way to do this.
     width: parent.width + 50
-
-    onEntered: {
-        messageOptionsButton.visible = !messageOptionsButton.visible
-        replyButton.visible = !replyButton.visible
-    }
-    onExited: {
-        messageOptionsButton.visible = !messageOptionsButton.visible
-        replyButton.visible = !replyButton.visible
-    }
 
     anchors {
         // Ternary is okay, types are enforced, cases are explicit.
@@ -29,7 +22,7 @@ MouseArea {
     // PAUL : this should be a row
     Common.ButtonForm {
         id: messageOptionsButton
-        visible: false
+        visible: chatBubbleHitbox.containsMouse
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
             left: outbound ? parent.left : undefined
@@ -38,7 +31,7 @@ MouseArea {
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/options-icon.svg"
-        z: 10
+        z: 10 // PAUL: DEMAGIC
 
         onClicked: messageOptionsMenu.open()
 
@@ -56,7 +49,7 @@ MouseArea {
 
     Common.ButtonForm {
         id: replyButton
-        visible: false
+        visible: chatBubbleHitbox.containsMouse
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
             right: outbound ? messageOptionsButton.left : undefined
