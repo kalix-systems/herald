@@ -51,10 +51,6 @@ pub enum Notification {
         mid: MsgId,
         /// The conversation the message was part of
         cid: ConversationId,
-        /// The new status of the message
-        stat: MessageReceiptStatus,
-        /// The recipient of the message
-        by: UserId,
     },
     /// A new contact has been added
     NewContact(UserId, ConversationId),
@@ -351,13 +347,10 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
         Ack(ack) => {
             // TODO: This will cause a query returned no rows error if the receipt is
             // received after a message has been removed locally.
-            // We should check the sqlite3 extended error code (787) here.
             crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,
                 cid: cid,
-                stat: ack.stat,
-                by: from.uid,
             });
         }
     }
