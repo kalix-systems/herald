@@ -2,7 +2,11 @@ use super::*;
 use sodiumoxide::crypto::sign;
 use warp::filters::ws;
 
-pub async fn login<W, E>(store: &mut Conn, ws: &mut W) -> Result<GlobalId, Error>
+pub async fn login<T, W, E>(
+    active: &DashMap<sign::PublicKey, T>,
+    store: &mut Conn,
+    ws: &mut W,
+) -> Result<GlobalId, Error>
 where
     W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
     Error: From<E>,
@@ -13,27 +17,28 @@ where
 
     let g = read_msg::<SignAs, _, _>(ws).await?.0;
 
-    let res = if !store.key_is_valid(g.did)? {
-        SignAsResponse::KeyDeprecated
+    if active.contains_key(&g.did) {
+        write_msg(&SignAsResponse::SessionExists, ws).await?;
+        return Err(LoginFailed);
+    } else if !store.key_is_valid(g.did)? {
+        write_msg(&SignAsResponse::KeyDeprecated, ws).await?;
+        return Err(LoginFailed);
     } else if !store.user_exists(&g.uid)? {
-        SignAsResponse::MissingUID
+        write_msg(&SignAsResponse::MissingUID, ws).await?;
+        return Err(LoginFailed);
     } else {
-        SignAsResponse::Sign(bytes)
+        let res = SignAsResponse::Sign(bytes);
+        write_msg(&res, ws).await?;
     };
-    write_msg(&res, ws).await?;
 
     let s = read_msg::<LoginToken, _, _>(ws).await?.0;
 
-    let res = if sign::verify_detached(&s, bytes.as_ref(), &g.did) {
-        LoginTokenResponse::Success
+    if !sign::verify_detached(&s, bytes.as_ref(), &g.did) {
+        write_msg(&LoginTokenResponse::BadSig, ws).await?;
+        Err(LoginFailed)
     } else {
-        LoginTokenResponse::BadSig
-    };
-    write_msg(&res, ws).await?;
-
-    match res {
-        LoginTokenResponse::Success => Ok(g),
-        LoginTokenResponse::BadSig => Err(LoginFailed),
+        write_msg(&LoginTokenResponse::Success, ws).await?;
+        Ok(g)
     }
 }
 

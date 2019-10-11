@@ -247,6 +247,7 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 }
 
 /// An event. These are produced in response a message being received from the server.
+#[derive(Debug)]
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,

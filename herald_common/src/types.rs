@@ -191,6 +191,7 @@ pub mod login {
     #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum SignAsResponse {
         Sign(UQ),
+        SessionExists,
         KeyDeprecated,
         MissingUID,
     }
