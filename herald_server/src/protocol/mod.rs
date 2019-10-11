@@ -39,7 +39,7 @@ impl State {
         mut ws: warp::filters::ws::WebSocket,
     ) -> Result<(), Error> {
         let mut con = self.new_connection()?;
-        let gid = login::login(&mut con, &mut ws).await?;
+        let gid = login::login(&self.active, &mut con, &mut ws).await?;
         self.add_active(gid.did, ws).await?;
         Ok(())
     }

@@ -263,7 +263,7 @@ impl ConversationMessage {
         let cbytes = serde_cbor::to_vec(content)?;
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
-        let body = cid.seal_block(kp.secret_key(), cbytes)?;
+        let body = dbg!(cid.seal_block(kp.secret_key(), cbytes))?;
         Ok(ConversationMessage { cid, from, body })
     }
 
@@ -274,10 +274,10 @@ impl ConversationMessage {
             from,
             body,
         } = self;
-        match cid.open_block(&from.did, body)? {
+        match dbg!(cid.open_block(&from.did, body))? {
             DecryptionResult::Success(bvec, u) => {
                 assert!(u.is_empty());
-                Ok(serde_cbor::from_slice(&bvec)?)
+                Ok(dbg!(serde_cbor::from_slice(&bvec))?)
             }
             DecryptionResult::Pending(_) => unimplemented!(),
         }

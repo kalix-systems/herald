@@ -213,10 +213,11 @@ fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
     f: &mut F,
 ) -> Result<(), HErr> {
     loop {
-        let next = sock_get_msg(ws)?;
-        let ev = handle_push(&next)?;
-        ev.execute(f)?;
+        let next = dbg!(sock_get_msg(ws))?;
+        let ev = dbg!(handle_push(&next))?;
+        dbg!(ev.execute(f))?;
     }
+    dbg!();
 }
 
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
@@ -251,6 +252,7 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 }
 
 /// An event. These are produced in response a message being received from the server.
+#[derive(Debug)]
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
@@ -352,7 +354,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             // TODO: This will cause a foreign key constraint error if the receipt is
             // received after a message has been removed locally.
             // We should check the sqlite3 extended error code (787) here.
-            crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
+            crate::message::add_receipt(ack.of, from.uid, ack.stat);
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,
                 cid: cid,
@@ -396,12 +398,12 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
 
 fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = ConversationMessage::seal(cid, &content)?;
-        let to = crate::members::members(&cid)?;
-        let exc = *crate::config::Config::static_keypair()?.public_key();
-        let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+        let cm = dbg!(ConversationMessage::seal(cid, &content))?;
+        let to = dbg!(crate::members::members(&cid))?;
+        let exc = *dbg!(crate::config::Config::static_keypair())?.public_key();
+        let msg = Bytes::from(dbg!(serde_cbor::to_vec(&cm))?);
         let req = push_users::Req { to, exc, msg };
-        match helper::push_users(&req) {
+        match dbg!(helper::push_users(&req)) {
             Ok(push_users::Res::Success) => Ok(()),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
@@ -418,11 +420,11 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
-                pending::add_to_pending(cid, content)
+                dbg!(pending::add_to_pending(cid, content))
             }
         }
     } else {
-        pending::add_to_pending(cid, content)
+        dbg!(pending::add_to_pending(cid, content))
     }
 }
 
