@@ -103,11 +103,33 @@ impl TryFrom<u8> for MessageReceiptStatus {
     }
 }
 
+impl std::convert::TryFrom<i64> for MessageReceiptStatus {
+    type Error = HErr;
+
+    fn try_from(n: i64) -> Result<Self, HErr> {
+        match u8::try_from(n) {
+            Ok(n) => n
+                .try_into()
+                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
+            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
+        }
+    }
+}
+
 impl ToSql for MessageReceiptStatus {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 
         Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
+    }
+}
+
+impl FromSql for MessageReceiptStatus {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        value
+            .as_i64()?
+            .try_into()
+            .map_err(|_| FromSqlError::InvalidType)
     }
 }
 
@@ -306,6 +328,7 @@ pub enum DeviceMessageBody {
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+/// A message sent to a specific device.
 pub struct DeviceMessage {
     /// The sender of the message
     from: GlobalId,
@@ -355,7 +378,10 @@ fn ssk_to_esk(sk: &sign::SecretKey) -> Result<box_::SecretKey, HErr> {
 }
 
 impl DeviceMessage {
-    pub fn seal(to: &sig::PublicKey, content: &DeviceMessageBody) -> Result<DeviceMessage, HErr> {
+    pub(crate) fn seal(
+        to: &sig::PublicKey,
+        content: &DeviceMessageBody,
+    ) -> Result<DeviceMessage, HErr> {
         let mut content = serde_cbor::to_vec(content)?;
 
         let pk = spk_to_epk(to)?;
@@ -376,7 +402,7 @@ impl DeviceMessage {
         })
     }
 
-    pub fn open(self) -> Result<(GlobalId, DeviceMessageBody), HErr> {
+    pub(crate) fn open(self) -> Result<(GlobalId, DeviceMessageBody), HErr> {
         // TODO: remove this, handle prekey
         assert!(self.prekey.is_none());
 
