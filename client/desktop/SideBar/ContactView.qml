@@ -34,74 +34,23 @@ ListView {
         width: parent.width
         visible: matched
 
-        /// NPB : This ought to be a mouse area with a hovered handler
-        Rectangle {
-            id: bgBox
-            readonly property color focusColor: QmlCfg.palette.tertiaryColor
-            readonly property color hoverColor: QmlCfg.palette.secondaryColor
-            readonly property color defaultColor: QmlCfg.palette.mainColor
-
-            Common.Divider {
-                color: QmlCfg.palette.secondaryColor
-                anchor: parent.bottom
-            }
-
-            anchors.fill: parent
-
-            states: [
-                State {
-                    name: "hovering"
-                    PropertyChanges {
-                        target: bgBox
-                        color: hoverColor
-                    }
-                },
-                State {
-                    name: "focused"
-                    PropertyChanges {
-                        target: bgBox
-                        color: focusColor
-                    }
-                }
-            ]
+        Common.PlatonicRectangle {
+            id: contactRectangle
+            boxColor: contactsModel.color(index)
+            boxTitle: displayName
+            isContact: true
 
             MouseArea {
+                id: hoverHandler
                 hoverEnabled: true
                 z: 10
                 anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-                onEntered: parent.state = "hovering"
-                onExited: parent.state = ""
-
-                // ternary is okay here, type enforced by QML
-                onReleased: parent.state = containsMouse ? "hovering" : ""
-
                 onClicked: {
                     if (convoPane.state == "newGroupState") {
-
                         groupMemberSelect.addMember(userId)
                     }
                 }
             }
-
-            Popups.ContactClickedPopup {
-                id: popupManager
-            }
-            // ternary is okay here, type enforced by QML
-            color: contactItem.focus ? focusColor : defaultColor
-        }
-
-        /// NPB: Make ALL calls to model proerties use the Explicit row syntax.
-        /// NPB: unwrapOr should use a subset of falsey values to coerce to false, maybe make a tryGetOr(getter *fn , index, failValue)
-        /// NB: Where is  index coming from?? (Positioner, but this is so implicit that we hate it)
-        Common.Avatar {
-            size: 45
-            id: contactAvatar
-            avatarLabel: displayName
-            labelGap: QmlCfg.smallMargin
-            secondaryText: "@" + userId
-            colorHash: color
-            pfpUrl: Utils.safeStringOrDefault(profilePicture)
         }
     }
 }

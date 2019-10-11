@@ -47,7 +47,7 @@ ListView {
 
         property var childChatView: Component {
             CV.ChatView {
-                conversationAvatar: conversationItemAvatar
+                conversationAvatar: convoRectangle.conversationItemAvatar
                 ownedConversation: messageModel
             }
         }
@@ -64,56 +64,19 @@ ListView {
         //KAAVYA: this should be a factored out component
         // so it can be reused in contactview and convoview
 
-        Rectangle {
-            id: bgBox
-            color: QmlCfg.palette.mainColor
-            anchors.fill: parent
-
-            Common.Divider {
-                color: QmlCfg.palette.secondaryColor
-                anchor: parent.bottom
-                // PAUL: convert to device independent size this is magic.
-                height: 2
-            }
-
-            Common.Avatar {
-                id: conversationItemAvatar
-                // PAUL: convert to device independent size this is magic.
-                size: 45
-                labeled: false
-                labelGap: QmlCfg.smallMargin
-                avatarLabel: Utils.unwrapOr(title, "unknown")
-                colorHash: Utils.unwrapOr(color, 0)
-                pfpUrl: Utils.safeStringOrDefault(picture)
-            }
+        Common.PlatonicRectangle {
+            id: convoRectangle
+            boxColor: conversationsModel.color(index)
+            boxTitle: Utils.unwrapOr(title, "unknown")
+            isContact: false
 
             ConversationLabel {
-                anchors.left: conversationItemAvatar.right
+                anchors.left: parent.conversationItemAvatar.right
                 anchors.right: parent.right
-                label: Utils.unwrapOr(title, "unknown")
+                label: parent.boxTitle
                 summaryText: JS.formatSummary(messageModel.lastAuthor,
                                               messageModel.lastBody)
             }
-
-            states: [
-                State {
-                    when: hoverHandler.containsMouse
-                    name: "hovering"
-                    PropertyChanges {
-                        target: bgBox
-                        color: QmlCfg.palette.secondaryColor
-                    }
-                },
-                State {
-                    when: conversationItem.focus
-                    name: "selected"
-                    PropertyChanges {
-                        target: bgBox
-                        color: QmlCfg.palette.tertiaryColor
-                    }
-                }
-            ]
-
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
