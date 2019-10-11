@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
+import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "popups" as Popups
 import "../common" as Common
@@ -13,22 +14,22 @@ import "../common/utils.mjs" as Utils
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
+
+// PAUL 6: toolbars should contain Rows/RowLayouts.
 ToolBar {
     id: toolBar
+    height: QmlCfg.toolbarHeight
 
     anchors {
         left: parent.left
         right: parent.right
-        top: parent.top
     }
-
-    height: QmlCfg.toolbarHeight
 
     background: Rectangle {
         color: QmlCfg.avatarColors[configAvatar.colorHash]
-        // border.color: QmlCfg.palette.secondaryColor
     }
 
+    // PAUL 5: move the label out of avatar. put it in common
     Common.Avatar {
         id: configAvatar
         avatarLabel: config.displayName

@@ -13,6 +13,7 @@ ListView {
     delegate: Item {
         id: memberItem
 
+        //PAUL: Demagic this number
         height: 55
         width: parent.width
 
@@ -30,6 +31,7 @@ ListView {
         }
 
         Common.Avatar {
+            //PAUL: Demagic this number
             size: 45
             id: memberAvatar
             avatarLabel: memberDisplayName

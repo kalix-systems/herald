@@ -17,24 +17,23 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    TopMenuBar {
-    }
+    TopMenuBar {}
 
     Errors {
         id: errorQueue
 
         onTryPollChanged: {
-            let errMsg = errorQueue.nextError();
+            let errMsg = errorQueue.nextError()
             if (errMsg !== "") {
-                errPopup.errorMsg = errMsg;
+                errPopup.errorMsg = errMsg
                 errPopup.open()
             }
         }
 
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
+        property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
+    // Paul 7: move these utils and state to a ```globals``` qml module.
     // This provides a few purely functional helper methods
     HeraldUtils {
         id: heraldUtils
@@ -42,11 +41,6 @@ ApplicationWindow {
 
     HeraldState {
         id: heraldState
-
-        onConfigInitChanged: {
-            appLoader.active = !appLoader.active
-            registrationLoader.active = !registrationLoader.active
-        }
     }
 
     NetworkHandle {
@@ -57,17 +51,13 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: RegistrationPage {
-        }
+        sourceComponent: RegistrationPage {}
     }
 }

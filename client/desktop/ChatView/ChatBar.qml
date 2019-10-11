@@ -21,10 +21,14 @@ ToolBar {
     height: QmlCfg.toolbarHeight
     // JH: factor z values into the config
     z: 5
+
     anchors {
-        top: parent.top
         left: parent.left
         right: parent.right
+    }
+
+    background: Rectangle {
+        color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
     }
 
     Common.Avatar {
@@ -38,35 +42,35 @@ ToolBar {
         isDefault: false
     }
 
-    Menu {
-        id: convOptionsMenu
-
-        MenuItem {
-            text: "Archive"
-        }
-
-        MenuItem {
-            text: "Clear History"
-            onTriggered: ownedConversation.clearConversationHistory()
-        }
-
-        MenuItem {
-            text: "Add Member"
-            visible: isPairwise
-
-            onTriggered: newMemberPopup.open()
-        }
-    }
-
     Common.ButtonForm {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
+        Menu {
+            id: convOptionsMenu
+
+            MenuItem {
+                text: "Archive"
+            }
+
+            MenuItem {
+                text: "Clear History"
+                onTriggered: ownedConversation.clearConversationHistory()
+            }
+
+            MenuItem {
+                text: "Add Member"
+                visible: isPairwise
+
+                onTriggered: newMemberPopup.open()
+            }
+        }
     }
 
     Popup {
+        //PAUL demagic me
         width: 200
         height: 150
         id: newMemberPopup
@@ -84,10 +88,5 @@ ToolBar {
                 newMemberPopup.close()
             }
         }
-    }
-
-    background: Rectangle {
-        color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
-        anchors.fill: parent
     }
 }

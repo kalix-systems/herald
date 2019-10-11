@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 
+//PAUL: demagic all numbers and colors
 Button {
     property bool takesModifier: false
     property string baseEmoji: ""

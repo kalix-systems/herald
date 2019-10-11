@@ -12,7 +12,6 @@
         <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.mjs</file>
         <file>SideBar/ContactView.qml</file>
-        <file>SideBar/ContactsToggle.qml</file>
         <file>SideBar/ConversationView.qml</file>
         <file>SideBar/UtilityBar.qml</file>
         <file>SideBar/popups/ColorPicker.qml</file>
@@ -20,8 +19,6 @@
         <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
         <file>SideBar/popups/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/ContactClickedPopup.qml</file>
-        <file>SideBar/popups/NewContactDialogue.mjs</file>
-        <file>SideBar/popups/NewContactDialogue.qml</file>
         <file>TopMenuBar.qml</file>
         <file>common/Avatar.mjs</file>
         <file>common/Avatar.qml</file>
@@ -55,5 +52,6 @@
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
+        <file>SideBar/popups/NewContactDialogue.mjs</file>
     </qresource>
 </RCC>

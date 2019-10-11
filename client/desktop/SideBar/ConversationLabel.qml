@@ -3,6 +3,7 @@ import "./ContactView.mjs" as JS
 import "../common/utils.mjs" as Utils
 import LibHerald 1.0
 
+// KAAVYA 1: this is bad, and paul watches jimmy neutron.
 Item {
 
     property string label: "unknown"

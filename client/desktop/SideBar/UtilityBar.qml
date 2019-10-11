@@ -16,6 +16,7 @@ import "../SideBar" as SideBar
 // Factor Component: FC
 // FS: Fix scoping
 Component {
+    // PAUL: move this in a rowlayout.
     ToolBar {
         id: utilityBar
         anchors.left: parent.left

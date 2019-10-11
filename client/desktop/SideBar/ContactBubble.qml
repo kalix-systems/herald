@@ -4,6 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
 
+// KAAVYA 0: this should be in the NewConvoComponents.
 Rectangle {
     id: bubble
     property color defaultColor
@@ -14,31 +15,24 @@ Rectangle {
     height: innerText.height + QmlCfg.margin
     color: defaultColor
     radius: QmlCfg.radius
+
     Text {
+        id: innerText
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        id: innerText
+        anchors.leftMargin: QmlCfg.smallMargin
         color: "white"
         font.bold: true
-        anchors.leftMargin: QmlCfg.smallMargin
     }
 
     Common.ButtonForm {
         id: xButton
         anchors.verticalCenter: innerText.verticalCenter
         anchors.right: parent.right
-        anchors.top : parent.top
+        anchors.top: parent.top
         anchors.margins: QmlCfg.smallMargin
         padding: 0
         source: "qrc:/x-icon-white.svg"
-        fill : QmlCfg.palette.iconFill
-    }
-
-    states: State {
-        name: "clickedstate"
-        PropertyChanges {
-            target: bubble
-            color: Qt.lighter(defaultColor, 1.2)
-        }
+        fill: QmlCfg.palette.iconFill
     }
 }

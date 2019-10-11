@@ -22,10 +22,7 @@ Component {
           anchors.fill: parent
       }
 
-
-
       Keys.onPressed: {
-          // NOTE: What is the first comparison doing?
           // this makes sure that returns and tabs are not evaluated
           if (event.key === Qt.Key_Return || event.key === Qt.Key_Tab){
               event.accepted = true
@@ -48,6 +45,12 @@ Component {
           else {
               Qt.callLater((text) => { conversationsModel.filter = text }, searchText.text)
           }
+      }
+
+      // PAUL 8: expose API for this Baeo.
+      Component.onDestruction: {
+          contactsModel.filter = ""
+          conversationsModel.filter  = ""
       }
 
       Keys.onReturnPressed: {

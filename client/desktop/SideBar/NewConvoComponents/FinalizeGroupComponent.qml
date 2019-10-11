@@ -48,6 +48,7 @@ Component {
                 anchors.fill: parent
             }
 
+            // PAUL: move this to C++
             Keys.onPressed: {
                 // NOTE: What is the first comparison doing?
                 // this makes sure that returns and tabs are not evaluated

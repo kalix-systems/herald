@@ -26,7 +26,7 @@ MouseArea {
         bottom: parent.bottom
         top: parent.top
     }
-
+    // PAUL : this should be a row
     Common.ButtonForm {
         id: messageOptionsButton
         visible: false
@@ -40,9 +40,7 @@ MouseArea {
         source: "qrc:/options-icon.svg"
         z: 10
 
-        onClicked: {
-            messageOptionsMenu.open()
-        }
+        onClicked: messageOptionsMenu.open()
 
         Menu {
             id: messageOptionsMenu
@@ -69,6 +67,7 @@ MouseArea {
         source: "qrc:/reply-icon.svg"
         z: 10
 
+        //PAUL : move this to C++
         onClicked: {
             chatTextArea.replyText = body
             chatTextArea.replyId = messageId

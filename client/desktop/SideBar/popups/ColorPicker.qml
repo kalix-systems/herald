@@ -16,6 +16,7 @@ Window {
     property var colorIndex
 
     GridLayout {
+        //PAUL: fix magic number
         width: 200
         height: width
         columns: 3

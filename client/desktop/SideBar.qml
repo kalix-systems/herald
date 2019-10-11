@@ -15,15 +15,13 @@ import "common" as Common
 // Factor Component: FC
 Pane {
     id: contactPane
-    // GS : we do this to get the current Item, BAD.
-    //    property alias contactsListView: contactsListView
-    //    property alias conversationsListView: conversationsListView
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
+
     property alias groupMemberSelect: convoBuilderLoader.item
 
     padding: 0 // All Interior Elements span the entire pane
@@ -37,13 +35,6 @@ Pane {
     ///--- Username and Settings gear button
     SBUtils.ConfigBar {
         id: toolBar
-    }
-
-    Common.Divider {
-        id: configBarBorder
-        anchors.bottom: utilityBar.top
-        color: QmlCfg.palette.secondaryColor
-        height: 1
     }
 
     ///--- SearchBar for contacts, add contact button
@@ -89,7 +80,7 @@ Pane {
     ConvUtils.NewGroupBar {
         id: newGroupBar
         anchors.top: searchBarBorder.bottom
-        visible: (convoPane.state == "newConversationState")
+        visible: convoPane.state === "newConversationState"
     }
 
     Loader {
@@ -146,6 +137,8 @@ Pane {
         }
 
         states: [
+            // PAUL 4: this state should belong to an object in a
+            // different subdirectory.
             State {
                 name: "newContactState"
                 PropertyChanges {
@@ -161,7 +154,6 @@ Pane {
 
             State {
                 name: "conversationSearch"
-
                 PropertyChanges {
                     target: searchLoader
                     sourceComponent: searchBarComponent

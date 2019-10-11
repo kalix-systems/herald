@@ -19,6 +19,8 @@ import "../popups" as Popups
 // Factor Component: FC
 
 /// --- displays a list of contacts
+
+// PAUL: make this do something again.
 Item {
     property alias optionsMenu: optionsMenu
     // GS: These should be bound to global scope. handled ENTIRELY
@@ -74,6 +76,7 @@ Item {
 
             onTriggered: {
                 // TODO pass an argument
+                // Paul 0: see Paul:0
                 gsSelectedIndex = index
                 avatarColorPicker.show()
             }
@@ -84,6 +87,7 @@ Item {
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        // PAUL: demagic this number.
         width: 300
         height: 100
 

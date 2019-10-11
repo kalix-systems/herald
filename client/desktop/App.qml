@@ -11,13 +11,12 @@ Item {
     id: appRoot
 
     // TODO this can be passed as an argument wherever it's needed
+    // PAUL 0: this can be passed as an argument to a C++ helper function.
+    // currently the issue is with scoping, instead we can just pass
+    // this index like an argument with a dynamic property in C++
     property int gsSelectedIndex: -1
-    // TODO why does this need to be global?
-    property var gsConvoItemMembers
 
     anchors.fill: parent.fill
-    Layout.fillWidth: true
-    Layout.fillHeight: true
 
     Users {
         id: contactsModel
@@ -29,20 +28,20 @@ Item {
 
     Conversations {
         id: conversationsModel
-
+        // PAUL 1: see if we can call connect over FFI to clean these functions up.
+        // we could easily do that in `new`.
         onTryPollChanged: {
             pollUpdate()
         }
     }
 
-    Popups.ConfigPopup {
-        id: preferencesPopup
-    }
+    Popups.ConfigPopup { id: preferencesPopup }
 
     Popups.ColorPicker {
         id: avatarColorPicker
 
-        // button is here to know index of contact clicked
+        //PAUL 0:  button is here to know index of contact clicked
+        // move this inside the color picker after refactor
         Button {
             id: colorSubmissionButton
             text: "Submit"
@@ -63,6 +62,7 @@ Item {
         id: config
     }
 
+    // PAUL: it is time for real art here.
     Component {
         id: splash
         Image {
@@ -75,8 +75,6 @@ Item {
     SplitView {
         id: rootSplitView
         anchors.fill: parent
-        Layout.fillWidth: true
-        Layout.fillHeight: true
         orientation: Qt.Horizontal
 
         SideBar {
@@ -88,6 +86,8 @@ Item {
             sourceComponent: splash
         }
 
+        // PAUL 2: there should be a border color in QmlCfg.
+        // universal black is not acceptable for all themes
         handle: Rectangle {
             implicitWidth: 1.1
             color: "black"

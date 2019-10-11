@@ -48,6 +48,7 @@ ColumnLayout {
                 color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
 
+            // KAAVYA: write our own ellision function
             TextMetrics {
                 readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
@@ -56,6 +57,7 @@ ColumnLayout {
                 elide: Text.ElideRight
             }
 
+            // PAUL : this can be StandardTextEdit
             TextEdit {
                 id: replyBody
                 Layout.margins: QmlCfg.smallMargin

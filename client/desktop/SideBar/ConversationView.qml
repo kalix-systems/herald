@@ -17,13 +17,16 @@ import "popups" as Popups
 // Factor Component: FC
 
 /// --- displays a list of conversations
+
+// PAUL: this can be refactored into a filterable list component.
+// we will need this for filtering raw text as well, lets not repeat code.
 ListView {
     id: conversationList
-
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
+    //PAUL: , lets write our own QML formatter so that this is a one liner
     ScrollBar.vertical: ScrollBar {
     }
 
@@ -55,27 +58,24 @@ ListView {
         }
 
         visible: matched
-        // This ternary is okay, types are enforced by QML
         height: visible ? 55 : 0
         width: parent.width
 
         Rectangle {
             id: bgBox
-            readonly property color focusColor: QmlCfg.palette.tertiaryColor
-            readonly property color hoverColor: QmlCfg.palette.secondaryColor
-            readonly property color defaultColor: QmlCfg.palette.mainColor
-
-            color: defaultColor
+            color: QmlCfg.palette.mainColor
             anchors.fill: parent
 
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
                 anchor: parent.bottom
+                // PAUL: convert to device independent size this is magic.
                 height: 2
             }
 
             Common.Avatar {
                 id: conversationItemAvatar
+                // PAUL: convert to device independent size this is magic.
                 size: 45
                 labeled: false
                 labelGap: QmlCfg.smallMargin
@@ -98,7 +98,7 @@ ListView {
                     name: "hovering"
                     PropertyChanges {
                         target: bgBox
-                        color: hoverColor
+                        color: QmlCfg.palette.secondaryColor
                     }
                 },
                 State {
@@ -106,7 +106,7 @@ ListView {
                     name: "selected"
                     PropertyChanges {
                         target: bgBox
-                        color: focusColor
+                        color: QmlCfg.palette.tertiaryColor
                     }
                 }
             ]
@@ -114,22 +114,13 @@ ListView {
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
-                z: 10
+                z: 10 // PAUL: unmagic all the z's
                 anchors.fill: parent
-                // ToDo: remove the imperative state transitions if it does not break
-                // anything. they are now handled with `when` bindings
-                //                onEntered: parent.state = "hovering"
-                //                onExited: parent.state = ""
                 onClicked: {
                     chatView.sourceComponent = childChatView
                     conversationList.currentIndex = index
                 }
-
-                // ternary is okay here, type enforced by QML
-                //onReleased: parent.state = containsMouse ? "hovering" : ""
             }
-            // ternary is okay here, type enforced by QML
-            // color: conversationItem.focus ? focusColor : defaultColor
         }
     }
 }

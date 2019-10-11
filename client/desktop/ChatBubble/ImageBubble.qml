@@ -10,6 +10,7 @@ ColumnLayout {
     property string imageSource: ""
     spacing: 0
 
+    // PAUL & KAAVYA : factor this boy out.
     Label {
         id: sender
         text: authorName === "" ? "" : authorName

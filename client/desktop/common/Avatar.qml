@@ -59,31 +59,19 @@ Row {
             visible: labeled
             text: avatarLabel
             font.bold: true
-            //is white instead of palette maincolor bc shld be white regardless of theme
-            color: if (!!!isDefault) {
-                       QmlCfg.palette.iconFill
-                   } else {
-                       QmlCfg.palette.mainTextColor
-                   }
+            color: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.mainTextColor
         }
 
         Text {
             id: userName
             visible: labeled
             text: secondaryText
-            // is white instead of palette maincolor bc shld be white regardless of theme
-            color: if (!!!isDefault) {
-                       QmlCfg.palette.iconFill
-                   } else {
-                       QmlCfg.palette.secondaryTextColor
-                   }
+            color: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.secondaryTextColor
+
             elide: Text.ElideRight
         }
     }
 
-    ///--- potential avatar components
-    /// NPB: looks very clunky and bad by default, choose fonts, finalize design, maybe don't do
-    /// what every other chat app does for this? are there easier to track avatars out there?
     Component {
         id: initialAvatar
         Rectangle {
@@ -91,29 +79,21 @@ Row {
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter
-            //is white instead of palette maincolor bc shld be white regardless of theme
 
-
-            readonly property color startColor:  !!!isDefault ? QmlCfg.palette.iconFill: QmlCfg.avatarColors[colorHash]
+            readonly property color startColor: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.avatarColors[colorHash]
             color: startColor
-            // Note:
             radius: shape
-            ///---- initial
             Text {
                 text: qsTr(avatarLabel[0].toUpperCase())
                 font.bold: true
-                color: if (!isDefault) {
-                           QmlCfg.avatarColors[colorHash]
-                       } else {
-                            QmlCfg.palette.iconFill
-                       }
+                color: !!!isDefault ? QmlCfg.avatarColors[colorHash] : QmlCfg.palette.iconFill
+
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3
             }
         }
     }
 
-    ///--- image compoenent
     Component {
         id: imageAvatar
         Item {

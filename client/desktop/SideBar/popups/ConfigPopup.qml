@@ -10,7 +10,7 @@ import "./ConfigPopupSubmission.mjs" as JS
 
 Window {
     id: configPopup
-
+    //PAUL: fix magic number\
     width: 600
     height: 200
     maximumHeight: height
