@@ -5,8 +5,7 @@ SELECT
   color,
   status,
   pairwise_conversation,
-  contact_type,
-  added
+  contact_type
 FROM
   contacts
 WHERE
@@ -18,4 +17,3 @@ WHERE
     WHERE
       conversation_id = @1
   )
-  AND added > @2
