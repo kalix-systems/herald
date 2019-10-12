@@ -125,28 +125,19 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.list.len()
     }
 
-    fn member_display_name(&self, index: usize) -> String {
-        let uid = ret_none!(self.list.get(index), "".to_owned());
-        let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
-        match inner.name.as_ref() {
-            Some(name) => name.clone(),
-            None => inner.id.to_string(),
-        }
-    }
+    //fn member_color(&self, index: usize) -> u32 {
+    //    let uid = ret_none!(self.list.get(index), 0);
+    //    let inner = ret_none!(USER_DATA.get(uid), 0);
 
-    fn member_color(&self, index: usize) -> u32 {
-        let uid = ret_none!(self.list.get(index), 0);
-        let inner = ret_none!(USER_DATA.get(uid), 0);
+    //    inner.color
+    //}
 
-        inner.color
-    }
+    //fn member_profile_picture(&self, index: usize) -> Option<String> {
+    //    let uid = ret_none!(self.list.get(index), None);
+    //    let inner = ret_none!(USER_DATA.get(uid), None);
 
-    fn member_profile_picture(&self, index: usize) -> Option<String> {
-        let uid = ret_none!(self.list.get(index), None);
-        let inner = ret_none!(USER_DATA.get(uid), None);
-
-        inner.profile_picture.clone()
-    }
+    //    inner.profile_picture.clone()
+    //}
 
     fn member_id(&self, index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(index), "").as_str()

@@ -25,7 +25,9 @@ ColumnLayout {
         color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
     }
 
-    StandardTextEdit {}
+    StandardTextEdit {
+    }
 
-    StandardStamps {}
+    StandardStamps {
+    }
 }

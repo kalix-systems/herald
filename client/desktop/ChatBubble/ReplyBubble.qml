@@ -75,5 +75,6 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {}
+    StandardStamps {
+    }
 }

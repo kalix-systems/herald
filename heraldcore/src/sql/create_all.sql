@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- user id
   user_id TEXT PRIMARY KEY NOT NULL,
   -- name as a string
-  name TEXT,
+  name TEXT NOT NULL,
   -- profile picture
   profile_picture TEXT,
   -- Conversation id of the pairwise conversation with the user

@@ -3,8 +3,8 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
-import "../common/utils.mjs" as Utils
-import "./ContactView.mjs" as JS
+import "../common/js/utils.mjs" as Utils
+import "./js/ContactView.mjs" as JS
 import "popups" as Popups
 
 // Reveiw Key
@@ -97,7 +97,7 @@ ListView {
         Common.Avatar {
             size: 45
             id: contactAvatar
-            avatarLabel: displayName
+            avatarLabel: name
             labelGap: QmlCfg.smallMargin
             secondaryText: "@" + userId
             colorHash: color

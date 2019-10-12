@@ -4,7 +4,7 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import "popups" as Popups
 import "../common" as Common
-import "../common/utils.mjs" as Utils
+import "../common/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -31,7 +31,7 @@ ToolBar {
 
     Common.Avatar {
         id: configAvatar
-        avatarLabel: config.displayName
+        avatarLabel: config.name
         secondaryText: "@" + config.configId
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")

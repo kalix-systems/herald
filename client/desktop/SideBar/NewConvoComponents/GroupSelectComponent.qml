@@ -3,7 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../common" as Common
-import "../popups/NewContactDialogue.mjs" as JS
+import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
 
 Component {
@@ -49,10 +49,10 @@ Component {
                 model: groupMemberSelect
 
                 SBUtils.ContactBubble {
-
-                    text: memberDisplayName
+                    text: contactsModel.nameById(memberId)
                     userId: memberId
-                    defaultColor: QmlCfg.avatarColors[memberColor]
+                    defaultColor: QmlCfg.avatarColors[contactsModel.colorById(
+                                                          memberId)]
 
                     Layout.alignment: Qt.AlignLeft
                     xButton.onClicked: groupMemberSelect.removeMemberByIndex(

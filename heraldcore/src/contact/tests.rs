@@ -121,7 +121,7 @@ fn update_name() {
         .add()
         .expect(womp!());
 
-    set_name(id, Some("World")).expect("Failed to update name");
+    set_name(id, "World").expect("Failed to update name");
 
     assert_eq!(
         name(id).expect("Failed to get contact").expect(womp!()),
@@ -144,7 +144,7 @@ fn test_by_user_id() {
     let contact = by_user_id(id).expect("Unable to get contact from userid");
 
     assert_eq!(contact.id, id);
-    assert_eq!(contact.name.expect(womp!()), "name");
+    assert_eq!(contact.name.as_str(), "name");
 }
 
 #[test]
@@ -155,11 +155,11 @@ fn all_contacts() {
     let id1 = "Hello".try_into().expect(womp!());
     let id2 = "World".try_into().expect(womp!());
 
-    ContactBuilder::new(id1)
+    ContactBuilder::new(id2)
         .add()
         .expect(womp!("Failed to add id1"));
 
-    ContactBuilder::new(id2)
+    ContactBuilder::new(id1)
         .add()
         .expect(womp!("Failed to add id2"));
 

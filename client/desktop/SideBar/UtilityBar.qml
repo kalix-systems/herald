@@ -4,7 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
 import "../common" as Common
-import "../common/utils.mjs" as Utils
+import "../common/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 
 // Reveiw Key
@@ -75,6 +75,7 @@ Component {
 
         //NOTE: see previous notes about using native dialogs
         // we're not using this anymore
+
 
         /**
         Popups.NewContactDialogue {

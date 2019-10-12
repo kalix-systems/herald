@@ -2,8 +2,8 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
-import "Avatar.mjs" as JS
-import "utils.mjs" as Utils
+import "js/Avatar.mjs" as JS
+import "js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -91,10 +91,9 @@ Row {
             width: size
             height: size
             anchors.verticalCenter: parent.verticalCenter
+
             //is white instead of palette maincolor bc shld be white regardless of theme
-
-
-            readonly property color startColor:  !!!isDefault ? QmlCfg.palette.iconFill: QmlCfg.avatarColors[colorHash]
+            readonly property color startColor: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.avatarColors[colorHash]
             color: startColor
             // Note:
             radius: shape
@@ -105,7 +104,7 @@ Row {
                 color: if (!isDefault) {
                            QmlCfg.avatarColors[colorHash]
                        } else {
-                            QmlCfg.palette.iconFill
+                           QmlCfg.palette.iconFill
                        }
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3

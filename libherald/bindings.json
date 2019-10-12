@@ -190,8 +190,7 @@
                 "name": {
                     "write": true,
                     "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
+                    "rustByValue": true
                 },
                 "pairwiseConversationId": {
                     "type": "QByteArray",
@@ -214,10 +213,6 @@
                 "matched": {
                     "write": true,
                     "type": "bool"
-                },
-                "displayName": {
-                    "type": "QString",
-                    "rustByValue": true
                 }
             },
             "functions": {
@@ -241,15 +236,6 @@
                     ]
                 },
                 "nameById": {
-                    "return": "QString",
-                    "arguments": [
-                        {
-                            "name": "id",
-                            "type": "QString"
-                        }
-                    ]
-                },
-                "displayNameById": {
                     "return": "QString",
                     "arguments": [
                         {
@@ -301,8 +287,7 @@
                 "name": {
                     "write": true,
                     "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
+                    "rustByValue": true
                 },
                 "pairwiseConversationId": {
                     "type": "QByteArray",
@@ -325,10 +310,6 @@
                 "matched": {
                     "write": true,
                     "type": "bool"
-                },
-                "displayName": {
-                    "type": "QString",
-                    "rustByValue": true
                 }
             },
             "functions": {
@@ -491,11 +472,7 @@
                 },
                 "name": {
                     "type": "QString",
-                    "write": true,
-                    "optional": true
-                },
-                "displayName": {
-                    "type": "QString"
+                    "write": true
                 },
                 "profilePicture": {
                     "type": "QString",
@@ -515,18 +492,6 @@
         "ConversationBuilder": {
             "type": "List",
             "itemProperties": {
-                "memberDisplayName": {
-                    "type": "QString",
-                    "rustByValue": true
-                },
-                "memberColor": {
-                    "type": "quint32"
-                },
-                "memberProfilePicture": {
-                    "type": "QString",
-                    "rustByValue": true,
-                    "optional": true
-                },
                 "memberId": {
                     "type": "QString"
                 }

@@ -1,7 +1,7 @@
 UPDATE
   contacts
 SET
-  name = NULL,
+  name = '',
   profile_picture = NULL,
   status = 2
 WHERE

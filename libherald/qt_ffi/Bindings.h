@@ -27,7 +27,6 @@ private:
     Q_PROPERTY(quint32 color READ color WRITE setColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
     Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
-    Q_PROPERTY(QString displayName READ displayName NOTIFY displayNameChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
     Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture NOTIFY profilePictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
@@ -39,7 +38,6 @@ public:
     quint32 colorscheme() const;
     void setColorscheme(quint32 v);
     QString configId() const;
-    QString displayName() const;
     QString name() const;
     void setName(const QString& v);
     QString profilePicture() const;
@@ -48,7 +46,6 @@ Q_SIGNALS:
     void colorChanged();
     void colorschemeChanged();
     void configIdChanged();
-    void displayNameChanged();
     void nameChanged();
     void profilePictureChanged();
 };
@@ -88,10 +85,7 @@ public:
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE quint32 memberColor(int row) const;
-    Q_INVOKABLE QString memberDisplayName(int row) const;
     Q_INVOKABLE QString memberId(int row) const;
-    Q_INVOKABLE QString memberProfilePicture(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -270,7 +264,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
-    Q_INVOKABLE QString displayName(int row) const;
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
@@ -418,7 +411,6 @@ public:
     quint8 tryPoll() const;
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE quint32 colorById(const QString& id) const;
-    Q_INVOKABLE QString displayNameById(const QString& id) const;
     Q_INVOKABLE QString nameById(const QString& id) const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE QString profilePictureById(const QString& id) const;
@@ -443,7 +435,6 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
-    Q_INVOKABLE QString displayName(int row) const;
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;

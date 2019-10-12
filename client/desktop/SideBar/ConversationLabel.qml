@@ -1,6 +1,6 @@
 import QtQuick 2.13
-import "./ContactView.mjs" as JS
-import "../common/utils.mjs" as Utils
+import "./js/ContactView.mjs" as JS
+import "../common/js/utils.mjs" as Utils
 import LibHerald 1.0
 
 Item {

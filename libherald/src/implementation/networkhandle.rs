@@ -60,7 +60,7 @@ impl NotifHandler {
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }
-            MsgReceipt { mid, cid, stat, by } => {
+            MsgReceipt { mid, cid } => {
                 use shared::messages::*;
                 let tx = match self.msg_senders.get(&cid) {
                     Some(tx) => tx,
@@ -73,7 +73,7 @@ impl NotifHandler {
                     }
                 };
 
-                ret_err!(tx.send(MsgUpdate::Receipt { mid, stat, by }));
+                ret_err!(tx.send(MsgUpdate::Receipt(mid)));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
             }
