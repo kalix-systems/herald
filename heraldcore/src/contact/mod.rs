@@ -362,7 +362,7 @@ impl ContactBuilder {
 
         conv_builder.color(color);
 
-        let name = self.name.unwrap_or(self.id.to_string());
+        let name = self.name.clone().unwrap_or_else(|| self.id.to_string());
 
         let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
 
@@ -382,7 +382,7 @@ impl ContactBuilder {
 
         let contact = Contact {
             id: self.id,
-            name: name,
+            name,
             profile_picture: self.profile_picture,
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
