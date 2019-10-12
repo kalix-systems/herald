@@ -15,7 +15,6 @@ import "../common/utils.mjs" as Utils
 // Needs polish badly: NPB
 // Factor Component: FC
 
-// PAUL 6: toolbars should contain Rows/RowLayouts.
 ToolBar {
     id: toolBar
     height: QmlCfg.toolbarHeight
@@ -29,18 +28,23 @@ ToolBar {
         color: QmlCfg.avatarColors[configAvatar.colorHash]
     }
 
+    RowLayout {
+        anchors.fill: parent
     // PAUL 5: move the label out of avatar. put it in common
     Common.Avatar {
         id: configAvatar
+        Layout.topMargin: QmlCfg.smallMargin
+        Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft
         avatarLabel: config.displayName
         secondaryText: "@" + config.configId
         colorHash: config.color
         pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
         labelGap: 0
         // JH: Bad margin semantics
-        anchors.verticalCenter: parent.verticalCenter
         size: parent.height - QmlCfg.margin
         isDefault: false
+        inLayout: true
+        Layout.rightMargin: QmlCfg.margin
     }
 
     Popups.ConfigPopup {
@@ -48,11 +52,8 @@ ToolBar {
     }
 
     Common.ButtonForm {
-        anchors {
-            verticalCenter: parent.verticalCenter
-            rightMargin: QmlCfg.margin
-            right: configButton.left
-        }
+        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+        Layout.leftMargin: QmlCfg.margin
         source: "qrc:/add-contact-icon.svg"
         onClicked: {
             convoPane.state = "newContactState"
@@ -61,16 +62,14 @@ ToolBar {
     }
 
     Common.ButtonForm {
+        Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+        Layout.leftMargin: QmlCfg.margin
         id: configButton
-        anchors {
-            verticalCenter: parent.verticalCenter
-            rightMargin: QmlCfg.margin
-            right: parent.right
-        }
         source: "qrc:/gear-icon.svg"
         onClicked: {
             /// Note: this needs to pay attention to root state
             configPopup.show()
         }
+    }
     }
 }

@@ -28,13 +28,14 @@ Row {
     property int shape: JS.avatarShape(shapeEnum, this)
     property bool labeled: true /// whether or not to show the name
     property bool isDefault: true
+    property bool inLayout: false
 
     spacing: QmlCfg.padding
 
     ///--- Circle with initial
     leftPadding: QmlCfg.margin
-    anchors.verticalCenter: parent.verticalCenter
-    anchors.top: parent.top
+    anchors.verticalCenter: inLayout ? undefined : parent.verticalCenter
+    anchors.top: inLayout ? undefined : parent.top
     Loader {
         id: avatarLoader
         width: size
