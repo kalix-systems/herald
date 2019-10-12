@@ -36,13 +36,10 @@ Rectangle {
     }
 
     MouseArea {
+        id: gBarMouseArea
         hoverEnabled: true
         z: 10
         anchors.fill: parent
-        // BNOTE: can these be when bindings?
-        onEntered: parent.state = "hovering"
-        onExited: parent.state = ""
-
         onClicked: {
             convoPane.state = "newGroupState"
         }
@@ -51,6 +48,7 @@ Rectangle {
     states: [
         State {
             name: "hovering"
+            when: gBarMouseArea.containsMouse
             PropertyChanges {
                 target: bgBar
                 color: hoverColor

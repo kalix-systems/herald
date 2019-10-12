@@ -16,7 +16,6 @@ import "../SideBar" as SideBar
 // Factor Component: FC
 // FS: Fix scoping
 Component {
-    // PAUL: move this in a rowlayout.
     ToolBar {
         id: utilityBar
         anchors.left: parent.left
@@ -28,23 +27,24 @@ Component {
             color: QmlCfg.palette.secondaryColor
         }
 
+        RowLayout {
+            anchors.fill: parent
+
         Text {
             text: "Conversations"
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.margins: QmlCfg.margin
+            Layout.leftMargin: QmlCfg.margin
+            Layout.rightMargin: QmlCfg.margin
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             color: QmlCfg.palette.mainTextColor
         }
 
         Common.ButtonForm {
             id: searchButton
             property bool searchRegex: false
-            anchors {
-                right: addContactButton.left
-                verticalCenter: parent.verticalCenter
-                rightMargin: QmlCfg.margin
-                verticalCenterOffset: 1
-            }
+            Layout.leftMargin: QmlCfg.margin
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            //this is a vertical center offset
+            Layout.topMargin: 1
             source: "qrc:/search-icon.svg"
             scale: 1.0
             //todo : add back in regex logic once ui is known
@@ -56,12 +56,8 @@ Component {
         ///--- Add contact button
         Common.ButtonForm {
             id: addContactButton
-            anchors {
-                rightMargin: QmlCfg.margin
-                verticalCenterOffset: 0
-                right: parent.right
-                verticalCenter: parent.verticalCenter
-            }
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            Layout.leftMargin: QmlCfg.margin
             source: "qrc:/pencil-icon-black.svg"
             z: -1
 
@@ -73,5 +69,6 @@ Component {
                 }
             }
         }
+    }
     }
 }

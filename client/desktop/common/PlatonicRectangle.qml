@@ -6,11 +6,14 @@ import "../common" as Common
 import "../common/utils.mjs" as Utils
 import "../SideBar" as SideBar
 
-// BNOTE: leave a comment about what this is for
+// Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
+    // color of the contact/convo
     property int boxColor
+    // title of the contact/convo
     property string boxTitle
+    // is true if it's a contact, false if it's a conversation
     property bool isContact
     id: bgBox
     color: QmlCfg.palette.mainColor

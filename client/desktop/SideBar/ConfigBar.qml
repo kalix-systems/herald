@@ -33,6 +33,7 @@ ToolBar {
         Common.Avatar {
             id: configAvatar
             Layout.topMargin: QmlCfg.smallMargin
+            Layout.rightMargin: QmlCfg.margin
             Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft
             avatarLabel: config.displayName
             secondaryText: "@" + config.configId
@@ -43,7 +44,6 @@ ToolBar {
             size: parent.height - QmlCfg.margin
             isDefault: false
             inLayout: true
-            Layout.rightMargin: QmlCfg.margin
         }
 
         Popups.ConfigPopup {
