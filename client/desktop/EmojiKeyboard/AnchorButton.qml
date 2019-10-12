@@ -8,10 +8,10 @@ Button {
     property int anchorIndex
     property color lowlight: "light gray"
 
-    // BNOTE: this can be a one-liner
     onClicked: {
-        var item = innerRepeater.itemAt(anchorIndex)
-        emojiList.contentY = item.y
+        emojiList.contentY = innerRepeater.itemAt(anchorIndex).y
+        //var item = innerRepeater.itemAt(anchorIndex)
+        //emojiList.contentY = item.y
     }
 
     height: selector.height + 5

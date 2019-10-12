@@ -56,10 +56,6 @@ Component {
                     xButton.onClicked: groupMemberSelect.removeMemberByIndex(
                                            index)
                 }
-                Keys.onPressed: {
-                    // BNOTE: why is this here?
-                    print("hi")
-                }
             }
 
             TextArea {

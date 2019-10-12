@@ -15,22 +15,25 @@ Rectangle {
     color: defaultColor
     radius: QmlCfg.radius
 
-    /// BNOTE: consolidate these anchors
     Text {
         id: innerText
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: QmlCfg.smallMargin
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: QmlCfg.smallMargin
+        }
         color: "white"
         font.bold: true
     }
 
     Common.ButtonForm {
         id: xButton
-        anchors.verticalCenter: innerText.verticalCenter
-        anchors.right: parent.right
-        anchors.top: parent.top
-        anchors.margins: QmlCfg.smallMargin
+        anchors {
+            verticalCenter: innerText.verticalCenter
+            right: parent.right
+            top: parent.top
+            margins: QmlCfg.smallMargin
+        }
         padding: 0
         source: "qrc:/x-icon-white.svg"
         fill: QmlCfg.palette.iconFill
