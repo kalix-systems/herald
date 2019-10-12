@@ -57,6 +57,7 @@ Component {
                                            index)
                 }
                 Keys.onPressed: {
+                    // BNOTE: why is this here?
                     print("hi")
                 }
             }
@@ -66,6 +67,7 @@ Component {
                 focus: true
                 leftPadding: QmlCfg.smallMargin
 
+                // BNOTE: I don't think count works?
                 placeholderText: if (groupMemberSelect.count === 0)
                                      "Add people"
                                  else
@@ -94,11 +96,11 @@ Component {
                 //PAUL: move this logic to C++
                 onTextChanged: {
                     if (contactsSearch) {
-                        Qt.callLater(function anon(text) {
+                        Qt.callLater(function (text) {
                             contactsModel.filter = text
                         }, searchText.text)
                     } else {
-                        Qt.callLater(function anon(text) {
+                        Qt.callLater(function (text) {
                             conversationsModel.filter = text
                         }, searchText.text)
                     }

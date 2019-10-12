@@ -38,6 +38,8 @@ Rectangle {
 
     property string replyText: ""
     property string replyName: ""
+    // BNOTE: Don't use names! They aren't globally unique! This is a bad idea
+    // but this is already fixed on master
     property bool owned: replyName === config.displayName
     property string replyUid
 

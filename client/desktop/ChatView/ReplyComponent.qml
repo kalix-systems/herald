@@ -26,7 +26,7 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-   Button {
+    Button {
         id: exitButton
 
         anchors {
@@ -46,7 +46,7 @@ Rectangle {
                 id: x
                 source: "qrc:/x-icon-white.svg"
                 anchors.centerIn: parent
-                sourceSize: Qt.size(15,15)
+                sourceSize: Qt.size(15, 15)
             }
             ColorOverlay {
                 anchors.fill: x
@@ -55,9 +55,7 @@ Rectangle {
             }
         }
 
-        onClicked: {
-            chatTextArea.state = "default"
-        }
+        onClicked: chatTextArea.state = "default"
     }
 
     ColumnLayout {
@@ -89,10 +87,7 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color:  QmlCfg.palette.mainTextColor
-        }
-
-        Item {
+            color: QmlCfg.palette.mainTextColor
         }
     }
 

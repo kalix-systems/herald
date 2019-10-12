@@ -6,6 +6,7 @@ import LibHerald 1.0
 Label {
     property string senderName
     id: sender
+    // BNOTE: This boolean should be a property:w
     text: senderName === "" ? "" : senderName
     Layout.margins: senderName === "" ? 0 : QmlCfg.smallMargin
     Layout.bottomMargin: senderName === "" ? QmlCfg.smallMargin : QmlCfg.margin

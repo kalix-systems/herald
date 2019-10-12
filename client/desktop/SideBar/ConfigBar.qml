@@ -14,7 +14,6 @@ import "../common/utils.mjs" as Utils
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
-
 ToolBar {
     id: toolBar
     height: QmlCfg.toolbarHeight
@@ -30,46 +29,47 @@ ToolBar {
 
     RowLayout {
         anchors.fill: parent
-    // PAUL 5: move the label out of avatar. put it in common
-    Common.Avatar {
-        id: configAvatar
-        Layout.topMargin: QmlCfg.smallMargin
-        Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft
-        avatarLabel: config.displayName
-        secondaryText: "@" + config.configId
-        colorHash: config.color
-        pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-        labelGap: 0
-        // JH: Bad margin semantics
-        size: parent.height - QmlCfg.margin
-        isDefault: false
-        inLayout: true
-        Layout.rightMargin: QmlCfg.margin
-    }
-
-    Popups.ConfigPopup {
-        id: configPopup
-    }
-
-    Common.ButtonForm {
-        Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-        Layout.leftMargin: QmlCfg.margin
-        source: "qrc:/add-contact-icon.svg"
-        onClicked: {
-            convoPane.state = "newContactState"
-            searchLoader.sourceComponent = searchBarComponent
+        // PAUL 5: move the label out of avatar. put it in common
+        Common.Avatar {
+            id: configAvatar
+            Layout.topMargin: QmlCfg.smallMargin
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft
+            avatarLabel: config.displayName
+            secondaryText: "@" + config.configId
+            colorHash: config.color
+            pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
+            labelGap: 0
+            // JH: Bad margin semantics
+            size: parent.height - QmlCfg.margin
+            isDefault: false
+            inLayout: true
+            Layout.rightMargin: QmlCfg.margin
         }
-    }
 
-    Common.ButtonForm {
-        Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-        Layout.leftMargin: QmlCfg.margin
-        id: configButton
-        source: "qrc:/gear-icon.svg"
-        onClicked: {
-            /// Note: this needs to pay attention to root state
-            configPopup.show()
+        Popups.ConfigPopup {
+            id: configPopup
         }
-    }
+
+        Common.ButtonForm {
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+            Layout.leftMargin: QmlCfg.margin
+            source: "qrc:/add-contact-icon.svg"
+            onClicked: {
+                // BNOTE: Is this the right order? It might be, but check:w
+                convoPane.state = "newContactState"
+                searchLoader.sourceComponent = searchBarComponent
+            }
+        }
+
+        Common.ButtonForm {
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            Layout.leftMargin: QmlCfg.margin
+            id: configButton
+            source: "qrc:/gear-icon.svg"
+            onClicked: {
+                /// Note: this needs to pay attention to root state
+                configPopup.show()
+            }
+        }
     }
 }

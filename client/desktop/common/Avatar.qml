@@ -27,6 +27,7 @@ Row {
     property int size: 0 /// the size of the avatar, width and height
     property int shape: JS.avatarShape(shapeEnum, this)
     property bool labeled: true /// whether or not to show the name
+    // BNOTE: what does this even mean?
     property bool isDefault: true
     property bool inLayout: false
 

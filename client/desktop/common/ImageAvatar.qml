@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.12
 import "./utils.mjs" as Utils
 
 /// --- displays a list of contacts
+// BNOTE: this looks like margin fudging
 Image {
     width: rowHeight - 10
     height: rowHeight - 10

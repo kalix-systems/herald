@@ -6,6 +6,7 @@ import "../common" as Common
 import "../common/utils.mjs" as Utils
 import "../SideBar" as SideBar
 
+// BNOTE: leave a comment about what this is for
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
     property int boxColor
@@ -33,7 +34,6 @@ Rectangle {
         pfpUrl: Utils.safeStringOrDefault(picture)
         secondaryText: isContact ? "@" + userId : ""
     }
-
 
     states: [
         State {

@@ -19,7 +19,9 @@ ColumnLayout {
         senderName: authorName
     }
 
-    StandardTextEdit {}
+    StandardTextEdit {
+    }
 
-    StandardStamps {}
+    StandardStamps {
+    }
 }

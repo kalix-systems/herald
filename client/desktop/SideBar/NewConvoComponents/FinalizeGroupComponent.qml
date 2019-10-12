@@ -28,13 +28,10 @@ Component {
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: {
-                convoPane.state = "newGroupState"
-            }
+            onClicked: convoPane.state = "newGroupState"
         }
 
         TextArea {
-
             id: groupTitle
             height: parent.height
             anchors.left: backbutton.right

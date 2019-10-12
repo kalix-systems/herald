@@ -30,12 +30,12 @@ Item {
         id: conversationsModel
         // PAUL 1: see if we can call connect over FFI to clean these functions up.
         // we could easily do that in `new`.
-        onTryPollChanged: {
-            pollUpdate()
-        }
+        onTryPollChanged: pollUpdate()
     }
 
-    Popups.ConfigPopup { id: preferencesPopup }
+    Popups.ConfigPopup {
+        id: preferencesPopup
+    }
 
     Popups.ColorPicker {
         id: avatarColorPicker

@@ -63,6 +63,7 @@ Window {
             RowLayout {
                 TextField {
                     id: cfgUid
+                    // BNOTE: This shouldn't even be loaded until this is true
                     enabled: !config.configId
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.configId
@@ -80,9 +81,7 @@ Window {
 
             Button {
                 text: "select profile picture"
-                onClicked: {
-                    cfgPfp.open()
-                }
+                onClicked: cfgPfp.open()
             }
 
             Button {

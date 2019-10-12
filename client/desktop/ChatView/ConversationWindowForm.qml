@@ -107,7 +107,8 @@ Flickable {
                 }
 
                 ChatBubble {
-                    ChatBubbleHover {}
+                    ChatBubbleHover {
+                    }
                     radius: 10
                     maxWidth: cvPane.width * 0.66
                     color: outbound ? QmlCfg.palette.tertiaryColor : userColor

@@ -9,9 +9,7 @@ Button {
     property string emoji: takesModifier ? baseEmoji + QmlCfg.skinSwatchList[QmlCfg.skinSwatchIndex] : baseEmoji
     property color lowlight: "light gray"
 
-    onClicked: {
-        maskShape.send(emoji)
-    }
+    onClicked: maskShape.send(emoji)
 
     height: selector.height + 3
     width: selector.width + 5

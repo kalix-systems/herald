@@ -15,6 +15,7 @@ Rectangle {
     color: defaultColor
     radius: QmlCfg.radius
 
+    /// BNOTE: consolidate these anchors
     Text {
         id: innerText
         anchors.left: parent.left

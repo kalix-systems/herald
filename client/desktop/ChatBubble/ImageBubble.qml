@@ -28,7 +28,9 @@ ColumnLayout {
         asynchronous: true
     }
 
-    StandardTextEdit {}
+    StandardTextEdit {
+    }
 
-    StandardStamps {}
+    StandardStamps {
+    }
 }
