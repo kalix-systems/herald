@@ -11,3 +11,5 @@ FROM
   contacts
 WHERE
   status < 2
+ORDER BY
+  name COLLATE NOCASE ASC

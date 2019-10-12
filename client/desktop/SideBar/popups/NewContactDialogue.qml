@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "./NewContactDialogue.mjs" as JS
+import "./js/NewContactDialogue.mjs" as JS
 import QtQuick.Window 2.13
 
 // Reveiw Key
