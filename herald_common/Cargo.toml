@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
+crc32fast   = "1.2"
 serde_cbor  = "0.10"
 serde_bytes = "0.11"
 sodiumoxide = "0.2"
@@ -19,7 +20,6 @@ features = ["serde-1"]
 [dependencies.bytes]
 version = "0.4"
 features = ["serde"]
-
 
 [dependencies.chrono]
 version = "0.4"
