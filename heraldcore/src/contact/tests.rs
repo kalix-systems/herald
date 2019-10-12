@@ -155,11 +155,11 @@ fn all_contacts() {
     let id1 = "Hello".try_into().expect(womp!());
     let id2 = "World".try_into().expect(womp!());
 
-    ContactBuilder::new(id1)
+    ContactBuilder::new(id2)
         .add()
         .expect(womp!("Failed to add id1"));
 
-    ContactBuilder::new(id2)
+    ContactBuilder::new(id1)
         .add()
         .expect(womp!("Failed to add id2"));
 
