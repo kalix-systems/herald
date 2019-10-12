@@ -1,9 +1,12 @@
 SELECT
-  conversation_id,
+  conversations.conversation_id,
   title,
   picture,
   color,
   muted,
-  pairwise
+  pairwise,
+  last_active_ts
 FROM
   conversations
+ORDER BY
+  last_active_ts DESC

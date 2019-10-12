@@ -1,5 +1,4 @@
 use crate::{db::Database, errors::HErr, image_utils, types::*};
-use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
@@ -31,21 +30,10 @@ pub fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
 
 /// Returns all members of a conversation.
 pub fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<Contact>, HErr> {
-    conversation_members_since(conversation_id, chrono::MIN_DATE.and_hms(0, 0, 0))
-}
-
-/// Returns all members of a conversation.
-pub fn conversation_members_since(
-    conversation_id: &ConversationId,
-    since: DateTime<Utc>,
-) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(
-        params![conversation_id, since.timestamp()],
-        Contact::from_db,
-    )?;
+    let rows = stmt.query_map(params![conversation_id], Contact::from_db)?;
 
     let mut contacts: Vec<Contact> = Vec::new();
     for contact in rows {
@@ -151,10 +139,7 @@ pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("sql/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(
-        params![status, chrono::MIN_DATE.and_hms(0, 0, 0).timestamp()],
-        Contact::from_db,
-    )?;
+    let rows = stmt.query_map(params![status], Contact::from_db)?;
 
     let mut names: Vec<Contact> = Vec::new();
     for name_res in rows {
@@ -362,7 +347,7 @@ impl ContactBuilder {
 
         conv_builder.color(color);
 
-        let name = self.name.unwrap_or(self.id.to_string());
+        let name = self.name.clone().unwrap_or_else(|| self.id.to_string());
 
         let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
 
@@ -382,13 +367,12 @@ impl ContactBuilder {
 
         let contact = Contact {
             id: self.id,
-            name: name,
+            name,
             profile_picture: self.profile_picture,
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,
             contact_type,
-            added: chrono::Utc::now(),
         };
 
         tx.execute(
@@ -429,8 +413,6 @@ pub struct Contact {
     pub pairwise_conversation: ConversationId,
     /// Contact type, local or remote
     pub contact_type: ContactType,
-    /// when was the contact added?
-    pub added: DateTime<Utc>,
 }
 
 impl Contact {
@@ -468,10 +450,6 @@ impl Contact {
             status: row.get(4)?,
             pairwise_conversation: row.get(5)?,
             contact_type: row.get(6)?,
-            added: Utc
-                .timestamp_opt(row.get(7)?, 0)
-                .single()
-                .unwrap_or_else(Utc::now),
         })
     }
 }

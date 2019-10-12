@@ -74,6 +74,8 @@ pub mod conv_global {
         NewConversation(ConversationId),
         /// A conversation builder can been finalized
         BuilderFinished(ConversationId),
+        /// New activity
+        NewActivity(ConversationId),
     }
 
     /// Channel for global conversation list updates

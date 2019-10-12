@@ -80,6 +80,17 @@ impl Messages {
 
         self.emit_last_changed();
 
+        use crate::shared::conv_global::*;
+
+        // this should not return an error
+        ret_err!(
+            CONV_CHANNEL
+                .tx
+                .send(ConvUpdates::NewActivity(conversation_id)),
+            Ok(())
+        );
+        ret_none!(conv_emit_try_poll(), Ok(()));
+
         thread::Builder::new().spawn(move || {
             // TODO update send status?
             ret_err!(network::send_text(conversation_id, body, msg_id, op));

@@ -4,7 +4,8 @@ SELECT
   picture,
   color,
   muted,
-  pairwise
+  pairwise,
+  last_active_ts
 FROM
   conversations
 WHERE
