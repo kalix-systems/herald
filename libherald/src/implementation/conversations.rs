@@ -6,6 +6,7 @@ use heraldcore::{
     types::ConversationId,
     utils::SearchPattern,
 };
+use im_rc::vector::Vector;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
@@ -14,6 +15,7 @@ use std::sync::{
 /// Thin wrapper around `ConversationMeta`,
 /// with an additional field to facilitate filtering
 /// in the UI.
+#[derive(Clone)]
 pub struct Conversation {
     inner: ConversationMeta,
     matched: bool,
@@ -26,7 +28,7 @@ pub struct Conversations {
     model: ConversationsList,
     filter: SearchPattern,
     filter_regex: bool,
-    list: Vec<Conversation>,
+    list: Vector<Conversation>,
     try_poll: Arc<AtomicU8>,
 }
 
@@ -39,7 +41,7 @@ impl Conversations {
         };
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(conv);
+        self.list.push_front(conv);
         self.model.end_insert_rows();
         Ok(())
     }
@@ -235,7 +237,7 @@ impl ConversationsTrait for Conversations {
 
                     self.model.begin_move_rows(pos, pos, 0);
                     let conv = self.list.remove(pos);
-                    self.list.insert(0, conv);
+                    self.list.push_front(conv);
                     self.model.end_move_rows();
                 }
             }
