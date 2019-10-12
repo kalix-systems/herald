@@ -219,6 +219,25 @@ impl ConversationsTrait for Conversations {
                     ret_err!(self.raw_fetch_and_insert(cid), false)
                 }
                 BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
+                NewActivity(cid) => {
+                    let pos = ret_none!(
+                        self.list
+                            .iter()
+                            .position(|c| c.inner.conversation_id == cid),
+                        false
+                    );
+
+                    // NOTE: This is very important. If this check isn't here,
+                    // the program will crash.
+                    if pos == 0 {
+                        return true;
+                    }
+
+                    self.model.begin_move_rows(pos, pos, 0);
+                    let conv = self.list.remove(pos);
+                    self.list.insert(0, conv);
+                    self.model.end_move_rows();
+                }
             }
         }
         true

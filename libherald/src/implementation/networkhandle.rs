@@ -59,6 +59,11 @@ impl NotifHandler {
                 ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
+
+                use crate::shared::conv_global::*;
+
+                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewActivity(cid)));
+                ret_none!(conv_emit_try_poll());
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;

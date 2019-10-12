@@ -4,14 +4,9 @@ SELECT
   picture,
   color,
   muted,
-  pairwise
+  pairwise,
+  last_active_ts
 FROM
   conversations
-LEFT OUTER JOIN
-  messages
-ON
-  messages.conversation_id = conversations.conversation_id
-GROUP BY
-  conversations.conversation_id
 ORDER BY
-  messages.ts DESC
+  last_active_ts DESC

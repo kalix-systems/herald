@@ -149,5 +149,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   -- Indicates whether conversation is muted, defaults to false
   muted INTEGER DEFAULT(0),
   -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
-  pairwise INTEGER DEFAULT(0)
+  pairwise INTEGER DEFAULT(0),
+  -- Time of last important activity
+  last_active_ts INTEGER NOT NULL
 );

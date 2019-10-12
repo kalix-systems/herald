@@ -17,10 +17,17 @@ pub struct ConversationMeta {
     pub muted: bool,
     /// Indicates whether the conversation is a canonical pairwise conversation
     pub pairwise: bool,
+    /// Last notable activity
+    pub last_active: chrono::DateTime<chrono::Utc>,
 }
 
 impl ConversationMeta {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        let last_active = match chrono::Utc.timestamp_opt(row.get::<_, i64>(6)?, 0) {
+            chrono::LocalResult::Single(ts) => ts,
+            _ => Utc::now(),
+        };
+
         Ok(ConversationMeta {
             conversation_id: row.get(0)?,
             title: row.get(1)?,
@@ -28,6 +35,7 @@ impl ConversationMeta {
             color: row.get(3)?,
             muted: row.get(4)?,
             pairwise: row.get(5)?,
+            last_active,
         })
     }
 
@@ -138,7 +146,15 @@ impl ConversationBuilder {
 
         tx.execute(
             include_str!("sql/add_conversation.sql"),
-            params![id, self.title, self.picture, color, pairwise, muted],
+            params![
+                id,
+                self.title,
+                self.picture,
+                color,
+                pairwise,
+                muted,
+                chrono::Utc::now().timestamp()
+            ],
         )?;
         Ok(id)
     }
@@ -160,7 +176,15 @@ impl ConversationBuilder {
 
         db.execute(
             include_str!("sql/add_conversation.sql"),
-            params![id, self.title, self.picture, color, pairwise, muted],
+            params![
+                id,
+                self.title,
+                self.picture,
+                color,
+                pairwise,
+                muted,
+                chrono::Utc::now().timestamp()
+            ],
         )?;
         Ok(id)
     }
