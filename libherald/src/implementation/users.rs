@@ -21,7 +21,7 @@ use std::{
 type Emitter = UsersEmitter;
 type List = UsersList;
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, PartialOrd, Ord)]
 /// Thin wrapper around `heraldcore::contact::Contact`,
 /// with an additional field to facilitate filtering
 /// in the UI.
@@ -96,12 +96,19 @@ impl UsersTrait for Users {
         let contact = ret_err!(ContactBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
         let pairwise_conversation = contact.pairwise_conversation;
-        self.model
-            .begin_insert_rows(self.list.len(), self.list.len());
-        self.list.push(User {
+
+        let user = User {
             matched: contact.matches(&self.filter),
             id: contact.id,
-        });
+        };
+
+        let pos = match self.list.binary_search(&user) {
+            Ok(_) => return pairwise_conversation.to_vec(),
+            Err(pos) => pos,
+        };
+
+        self.model.begin_insert_rows(pos, pos);
+        self.list.insert(pos, user);
         USER_DATA.insert(contact.id, contact);
         self.model.end_insert_rows();
 
@@ -295,23 +302,25 @@ impl UsersTrait for Users {
         for update in USER_CHANNEL.rx.try_recv() {
             match update {
                 UsersUpdates::NewUser(uid) => {
-                    let new_user = ret_err!(contact::by_user_id(uid), false);
+                    let new_contact = ret_err!(contact::by_user_id(uid), false);
 
-                    let filter = &self.filter;
-
-                    self.model.begin_insert_rows(
-                        self.list.len(),
-                        (self.list.len() + 1).saturating_sub(1),
-                    );
-                    self.list.push(User {
-                        matched: new_user.matches(&filter),
+                    let new_user = User {
+                        matched: new_contact.matches(&self.filter),
                         id: uid,
-                    });
-                    USER_DATA.insert(uid, new_user);
+                    };
+
+                    let pos = match self.list.binary_search(&new_user) {
+                        Ok(_) => return true, // this should never happen
+                        Err(pos) => pos,
+                    };
+
+                    self.model.begin_insert_rows(pos, pos);
+                    self.list.push(new_user);
+                    USER_DATA.insert(uid, new_contact);
                     self.model.end_insert_rows();
                 }
                 UsersUpdates::ReqResp(..) => {
-                    eprintln!("TODO: handle request responses");
+                    eprintln!("TODO: handle request responses?");
                 }
             }
         }
