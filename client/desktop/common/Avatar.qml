@@ -27,7 +27,7 @@ Row {
     property int size: 0 /// the size of the avatar, width and height
     property int shape: JS.avatarShape(shapeEnum, this)
     property bool labeled: true /// whether or not to show the name
-    // BNOTE: what does this even mean?
+    // bool that checks whether the avatar is the default or has a profile picture
     property bool isDefault: true
     property bool inLayout: false
 
