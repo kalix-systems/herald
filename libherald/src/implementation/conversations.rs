@@ -209,10 +209,7 @@ impl ConversationsTrait for Conversations {
         use ConvUpdates::*;
         for update in CONV_CHANNEL.rx.try_iter() {
             match update {
-                NewConversation(cid) => {
-                    // TODO add push notification here
-                    ret_err!(self.raw_fetch_and_insert(cid), false)
-                }
+                NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
                 BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
                 NewActivity(cid) => {
                     let pos = ret_none!(
