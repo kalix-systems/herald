@@ -43,6 +43,8 @@ pub enum HErr {
     NoneError,
     /// Error from `chainmail`
     ChainError(ChainError),
+    /// Malformed path
+    BadPath(std::ffi::OsString),
 }
 
 impl fmt::Display for HErr {
@@ -54,8 +56,8 @@ impl fmt::Display for HErr {
             InvalidUserId => write!(f, "InvalidUserId"),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
-            // Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
             CborError(e) => write!(f, "CborError error: {}", e),
+            BadPath(s) => write!(f, "Bad path: {:?}", s),
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
@@ -95,19 +97,23 @@ macro_rules! from_fn {
     };
 }
 
-from_fn!(HErr, ChainError, HErr::ChainError);
-
-// TODO: replace these
-
-impl From<rusqlite::Error> for HErr {
-    fn from(e: rusqlite::Error) -> Self {
-        HErr::DatabaseError(e)
-    }
+macro_rules! herr {
+    ($from:ty, $fn:ident) => {
+        from_fn!(HErr, $from, HErr::$fn);
+    };
 }
 
-impl From<std::io::Error> for HErr {
-    fn from(e: std::io::Error) -> Self {
-        HErr::IoError(e)
+herr!(ChainError, ChainError);
+herr!(rusqlite::Error, DatabaseError);
+herr!(std::io::Error, IoError);
+herr!(serde_cbor::Error, CborError);
+herr!(websocket::result::WebSocketError, WebsocketError);
+herr!(regex::Error, RegexError);
+herr!(std::ffi::OsString, BadPath);
+
+impl From<LazyError> for HErr {
+    fn from(_: LazyError) -> Self {
+        HErr::LazyPondError
     }
 }
 
@@ -120,33 +126,3 @@ impl From<image::ImageError> for HErr {
         }
     }
 }
-
-impl From<regex::Error> for HErr {
-    fn from(e: regex::Error) -> Self {
-        HErr::RegexError(e)
-    }
-}
-
-impl From<std::ffi::OsString> for HErr {
-    fn from(e: std::ffi::OsString) -> Self {
-        HErr::HeraldError(format!("Bad path: {:?}", e))
-    }
-}
-
-impl From<serde_cbor::Error> for HErr {
-    fn from(e: serde_cbor::Error) -> Self {
-        HErr::CborError(e)
-    }
-}
-
-impl From<LazyError> for HErr {
-    fn from(_: LazyError) -> Self {
-        HErr::LazyPondError
-    }
-}
-
-from_fn!(
-    HErr,
-    websocket::result::WebSocketError,
-    HErr::WebsocketError
-);
