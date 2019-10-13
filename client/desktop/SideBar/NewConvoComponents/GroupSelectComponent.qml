@@ -48,7 +48,7 @@ Component {
                 Keys.enabled: true
                 model: groupMemberSelect
 
-                SBUtils.ContactBubble {
+                ContactBubble {
                     text: contactsModel.nameById(memberId)
                     userId: memberId
                     defaultColor: QmlCfg.avatarColors[contactsModel.colorById(

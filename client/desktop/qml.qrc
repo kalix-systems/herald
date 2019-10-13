@@ -1,58 +1,58 @@
 <RCC>
     <qresource prefix="/">
         <file>App.qml</file>
-        <file>ChatView/ChatView.qml</file>
-        <file>ChatView/ChatBar.qml</file>
-        <file>ChatView/ChatTextAreaUtils.mjs</file>
-        <file>ChatView/ConversationWindowForm.qml</file>
-        <file>ChatView/TextAreaForm.qml</file>
-        <file>RegistrationPage.qml</file>
-        <file>SideBar.qml</file>
-        <file>SideBar/ConfigBar.qml</file>
-        <file>SideBar/ContactView.mjs</file>
-        <file>SideBar/ContactView.qml</file>
-        <file>SideBar/ConversationView.qml</file>
-        <file>SideBar/UtilityBar.qml</file>
-        <file>SideBar/popups/ColorPicker.qml</file>
-        <file>SideBar/popups/ConfigPopup.qml</file>
-        <file>SideBar/popups/ConfigPopupSubmission.mjs</file>
-        <file>SideBar/popups/ContactClickedPopup.mjs</file>
-        <file>SideBar/popups/ContactClickedPopup.qml</file>
-        <file>TopMenuBar.qml</file>
-        <file>common/Avatar.mjs</file>
-        <file>common/Avatar.qml</file>
-        <file>common/ButtonForm.qml</file>
-        <file>common/CommonConfig.qml</file>
-        <file>common/Divider.qml</file>
-        <file>common/ImageAvatar.qml</file>
-        <file>common/Theme.qml</file>
-        <file>common/utils.mjs</file>
-        <file>main.qml</file>
-        <file>SideBar/SearchComponent.qml</file>
-        <file>SideBar/ConversationLabel.qml</file>
-        <file>EmojiKeyboard/EmojiButton.qml</file>
-        <file>EmojiKeyboard/EmojiPicker.qml</file>
-        <file>EmojiKeyboard/PickerInterior.qml</file>
-        <file>EmojiKeyboard/PickerShape.qml</file>
-        <file>EmojiKeyboard/AnchorButton.qml</file>
-        <file>common/EmojiJson.js</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/ImageBubble.qml</file>
         <file>ChatBubble/ReplyBubble.qml</file>
         <file>ChatBubble/StandardBubble.qml</file>
+        <file>ChatBubble/StandardStamps.qml</file>
+        <file>ChatBubble/StandardTextEdit.qml</file>
+        <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
+        <file>ChatView/js/ChatTextAreaUtils.mjs</file>
+        <file>ChatView/ChatView.qml</file>
+        <file>ChatView/ConversationWindowForm.qml</file>
         <file>ChatView/ReplyComponent.qml</file>
-        <file>errors/ErrorDialog.qml</file>
+        <file>ChatView/TextAreaForm.qml</file>
+        <file>EmojiKeyboard/AnchorButton.qml</file>
+        <file>EmojiKeyboard/EmojiButton.qml</file>
+        <file>EmojiKeyboard/EmojiPicker.qml</file>
+        <file>EmojiKeyboard/PickerInterior.qml</file>
+        <file>EmojiKeyboard/PickerShape.qml</file>
+        <file>RegistrationPage.qml</file>
+        <file>SideBar.qml</file>
+        <file>SideBar/ConfigBar.qml</file>
+        <file>SideBar/js/ContactView.mjs</file>
+        <file>SideBar/ContactView.qml</file>
+        <file>SideBar/ConversationLabel.qml</file>
+        <file>SideBar/ConversationView.qml</file>
+        <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
         <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
         <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
         <file>SideBar/NewConvoComponents/FinalizeGroupComponent.qml</file>
         <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
-        <file>ChatBubble/StandardTextEdit.qml</file>
-        <file>ChatBubble/StandardStamps.qml</file>
-        <file>SideBar/popups/NewContactDialogue.mjs</file>
+        <file>SideBar/SearchComponent.qml</file>
+        <file>SideBar/UtilityBar.qml</file>
+        <file>SideBar/popups/ColorPicker.qml</file>
+        <file>SideBar/popups/ConfigPopup.qml</file>
+        <file>SideBar/popups/js/ConfigPopupSubmission.mjs</file>
+        <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
+        <file>SideBar/popups/ContactClickedPopup.qml</file>
+        <file>SideBar/popups/js/NewContactDialogue.mjs</file>
+        <file>TopMenuBar.qml</file>
+        <file>common/js/Avatar.mjs</file>
+        <file>common/Avatar.qml</file>
+        <file>common/ButtonForm.qml</file>
         <file>common/ChatLabel.qml</file>
+        <file>common/CommonConfig.qml</file>
+        <file>common/Divider.qml</file>
+        <file>common/EmojiJson.js</file>
+        <file>common/ImageAvatar.qml</file>
         <file>common/PlatonicRectangle.qml</file>
-        <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
+        <file>common/Theme.qml</file>
+        <file>common/js/utils.mjs</file>
+        <file>errors/ErrorDialog.qml</file>
+        <file>main.qml</file>
     </qresource>
 </RCC>
