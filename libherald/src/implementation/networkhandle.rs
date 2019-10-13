@@ -26,7 +26,6 @@ pub struct EffectsFlags {
     // how to atomically negate an `AtomicBool`.
     // The values really just function simple toggles.
     msg_data: AtomicU8,
-    //users_data: AtomicU8,
     members_data: AtomicU8,
 }
 
@@ -170,25 +169,6 @@ impl NetworkHandleTrait for NetworkHandle {
         };
         handle
     }
-
-    //fn send_message(
-    //    &self,
-    //    body: String,
-    //    to: ffi::ConversationIdRef,
-    //    msg_id: ffi::MsgIdRef,
-    //) -> bool {
-    //    let conv_id = ret_err!(ConversationId::try_from(to), false);
-
-    //    let msg_id = ret_err!(MsgId::try_from(msg_id), false);
-
-    //    ret_err!(
-    //        thread::Builder::new().spawn(move || {
-    //            ret_err!(network::send_text(conv_id, body, msg_id, None));
-    //        }),
-    //        false
-    //    );
-    //    true
-    //}
 
     fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);

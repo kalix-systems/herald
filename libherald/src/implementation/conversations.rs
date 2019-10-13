@@ -238,10 +238,6 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    //fn try_poll(&self) -> u8 {
-    //    self.try_poll.load(Ordering::Acquire)
-    //}
-
     /// Indicates whether regex search is activated
     fn filter_regex(&self) -> bool {
         self.filter_regex
