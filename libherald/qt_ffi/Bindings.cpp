@@ -92,10 +92,6 @@ namespace {
     {
         Q_EMIT o->filterRegexChanged();
     }
-    inline void conversationsTryPollChanged(Conversations* o)
-    {
-        Q_EMIT o->tryPollChanged();
-    }
     inline void errorsTryPollChanged(Errors* o)
     {
         Q_EMIT o->tryPollChanged();
@@ -159,10 +155,6 @@ namespace {
     inline void usersFilterRegexChanged(Users* o)
     {
         Q_EMIT o->filterRegexChanged();
-    }
-    inline void usersTryPollChanged(Users* o)
-    {
-        Q_EMIT o->tryPollChanged();
     }
 }
 extern "C" {
@@ -617,7 +609,7 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 extern "C" {
-    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*), void (*)(Conversations*),
+    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*),
         void (*)(const Conversations*),
         void (*)(Conversations*),
         void (*)(Conversations*),
@@ -635,7 +627,6 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
-    quint8 conversations_try_poll_get(const Conversations::Private*);
     bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
@@ -1482,7 +1473,7 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
 }
 
 extern "C" {
-    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*), void (*)(Users*),
+    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*),
         void (*)(const Users*),
         void (*)(Users*),
         void (*)(Users*),
@@ -1500,7 +1491,6 @@ extern "C" {
     void users_filter_set(Users::Private*, const ushort *str, int len);
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
-    quint8 users_try_poll_get(const Users::Private*);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -1679,7 +1669,6 @@ Conversations::Conversations(QObject *parent):
     m_d(conversations_new(this,
         conversationsFilterChanged,
         conversationsFilterRegexChanged,
-        conversationsTryPollChanged,
         [](const Conversations* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1749,10 +1738,6 @@ bool Conversations::filterRegex() const
 }
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
-}
-quint8 Conversations::tryPoll() const
-{
-    return conversations_try_poll_get(m_d);
 }
 bool Conversations::pollUpdate()
 {
@@ -2180,7 +2165,6 @@ Users::Users(QObject *parent):
     m_d(users_new(this,
         usersFilterChanged,
         usersFilterRegexChanged,
-        usersTryPollChanged,
         [](const Users* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -2250,10 +2234,6 @@ bool Users::filterRegex() const
 }
 void Users::setFilterRegex(bool v) {
     users_filter_regex_set(m_d, v);
-}
-quint8 Users::tryPoll() const
-{
-    return users_try_poll_get(m_d);
 }
 QByteArray Users::add(const QString& id)
 {

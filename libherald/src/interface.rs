@@ -523,7 +523,6 @@ pub struct ConversationsEmitter {
     qobject: Arc<AtomicPtr<ConversationsQObject>>,
     filter_changed: fn(*mut ConversationsQObject),
     filter_regex_changed: fn(*mut ConversationsQObject),
-    try_poll_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
 
@@ -541,7 +540,6 @@ impl ConversationsEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
-            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -559,12 +557,6 @@ impl ConversationsEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
-        }
-    }
-    pub fn try_poll_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -634,7 +626,6 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn try_poll(&self) -> u8;
     fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -665,7 +656,6 @@ pub extern "C" fn conversations_new(
     conversations: *mut ConversationsQObject,
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
-    conversations_try_poll_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),
     conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
     conversations_layout_changed: fn(*mut ConversationsQObject),
@@ -683,7 +673,6 @@ pub extern "C" fn conversations_new(
         qobject: Arc::new(AtomicPtr::new(conversations)),
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
-        try_poll_changed: conversations_try_poll_changed,
         new_data_ready: conversations_new_data_ready,
     };
     let model = ConversationsList {
@@ -737,11 +726,6 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_try_poll_get(ptr: *const Conversations) -> u8 {
-    (&*ptr).try_poll()
 }
 
 #[no_mangle]
@@ -2142,7 +2126,6 @@ pub struct UsersEmitter {
     qobject: Arc<AtomicPtr<UsersQObject>>,
     filter_changed: fn(*mut UsersQObject),
     filter_regex_changed: fn(*mut UsersQObject),
-    try_poll_changed: fn(*mut UsersQObject),
     new_data_ready: fn(*mut UsersQObject),
 }
 
@@ -2160,7 +2143,6 @@ impl UsersEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
-            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -2178,12 +2160,6 @@ impl UsersEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
-        }
-    }
-    pub fn try_poll_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -2253,7 +2229,6 @@ pub trait UsersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn try_poll(&self) -> u8;
     fn add(&mut self, id: String) -> Vec<u8>;
     fn color_by_id(&self, id: String) -> u32;
     fn name_by_id(&self, id: String) -> String;
@@ -2287,7 +2262,6 @@ pub extern "C" fn users_new(
     users: *mut UsersQObject,
     users_filter_changed: fn(*mut UsersQObject),
     users_filter_regex_changed: fn(*mut UsersQObject),
-    users_try_poll_changed: fn(*mut UsersQObject),
     users_new_data_ready: fn(*mut UsersQObject),
     users_layout_about_to_be_changed: fn(*mut UsersQObject),
     users_layout_changed: fn(*mut UsersQObject),
@@ -2305,7 +2279,6 @@ pub extern "C" fn users_new(
         qobject: Arc::new(AtomicPtr::new(users)),
         filter_changed: users_filter_changed,
         filter_regex_changed: users_filter_regex_changed,
-        try_poll_changed: users_try_poll_changed,
         new_data_ready: users_new_data_ready,
     };
     let model = UsersList {
@@ -2359,11 +2332,6 @@ pub unsafe extern "C" fn users_filter_regex_get(ptr: *const Users) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn users_filter_regex_set(ptr: *mut Users, v: bool) {
     (&mut *ptr).set_filter_regex(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_try_poll_get(ptr: *const Users) -> u8 {
-    (&*ptr).try_poll()
 }
 
 #[no_mangle]

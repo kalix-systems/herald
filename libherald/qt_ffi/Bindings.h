@@ -107,7 +107,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
-    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
@@ -116,7 +115,6 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    quint8 tryPoll() const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
@@ -161,7 +159,6 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
-    void tryPollChanged();
 };
 
 class Errors : public QObject
@@ -399,7 +396,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
-    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Users(bool owned, QObject *parent);
 public:
     explicit Users(QObject *parent = nullptr);
@@ -408,7 +404,6 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    quint8 tryPoll() const;
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE quint32 colorById(const QString& id) const;
     Q_INVOKABLE QString nameById(const QString& id) const;
@@ -456,6 +451,5 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
-    void tryPollChanged();
 };
 #endif // BINDINGS_H

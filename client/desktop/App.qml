@@ -22,13 +22,13 @@ Item {
     Users {
         id: contactsModel
 
-        onTryPollChanged: pollUpdate()
+        onNewDataReady: pollUpdate()
     }
 
     Conversations {
         id: conversationsModel
 
-        onTryPollChanged: pollUpdate()
+        onNewDataReady: pollUpdate()
     }
 
     Popups.ConfigPopup {

@@ -89,7 +89,7 @@ impl Messages {
                 .send(ConvUpdates::NewActivity(conversation_id)),
             Ok(())
         );
-        ret_none!(conv_emit_try_poll(), Ok(()));
+        ret_none!(conv_emit_new_data(), Ok(()));
 
         thread::Builder::new().spawn(move || {
             // TODO update send status?

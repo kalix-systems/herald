@@ -26,7 +26,6 @@ pub struct EffectsFlags {
     // how to atomically negate an `AtomicBool`.
     // The values really just function simple toggles.
     msg_data: AtomicU8,
-    //users_data: AtomicU8,
     members_data: AtomicU8,
 }
 
@@ -63,7 +62,7 @@ impl NotifHandler {
                 use crate::shared::conv_global::*;
 
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewActivity(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
@@ -87,28 +86,28 @@ impl NotifHandler {
 
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(users_emit_data_ready());
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             NewConversation(cid) => {
                 use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             AddContactResponse(cid, uid, accepted) => {
                 use shared::{conv_global::*, user_global::*};
 
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(users_emit_data_ready());
 
                 // add conversation
                 if accepted {
                     ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    ret_none!(conv_emit_try_poll());
+                    ret_none!(conv_emit_new_data());
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -170,25 +169,6 @@ impl NetworkHandleTrait for NetworkHandle {
         };
         handle
     }
-
-    //fn send_message(
-    //    &self,
-    //    body: String,
-    //    to: ffi::ConversationIdRef,
-    //    msg_id: ffi::MsgIdRef,
-    //) -> bool {
-    //    let conv_id = ret_err!(ConversationId::try_from(to), false);
-
-    //    let msg_id = ret_err!(MsgId::try_from(msg_id), false);
-
-    //    ret_err!(
-    //        thread::Builder::new().spawn(move || {
-    //            ret_err!(network::send_text(conv_id, body, msg_id, None));
-    //        }),
-    //        false
-    //    );
-    //    true
-    //}
 
     fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);

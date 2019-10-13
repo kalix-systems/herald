@@ -112,7 +112,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             ffi::NULL_CONV_ID.to_vec()
         );
 
-        ret_none!(conv_emit_try_poll(), ffi::NULL_CONV_ID.to_vec());
+        ret_none!(conv_emit_new_data(), ffi::NULL_CONV_ID.to_vec());
 
         cid.to_vec()
     }
@@ -124,20 +124,6 @@ impl ConversationBuilderTrait for ConversationBuilder {
     fn row_count(&self) -> usize {
         self.list.len()
     }
-
-    //fn member_color(&self, index: usize) -> u32 {
-    //    let uid = ret_none!(self.list.get(index), 0);
-    //    let inner = ret_none!(USER_DATA.get(uid), 0);
-
-    //    inner.color
-    //}
-
-    //fn member_profile_picture(&self, index: usize) -> Option<String> {
-    //    let uid = ret_none!(self.list.get(index), None);
-    //    let inner = ret_none!(USER_DATA.get(uid), None);
-
-    //    inner.profile_picture.clone()
-    //}
 
     fn member_id(&self, index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(index), "").as_str()

@@ -99,19 +99,15 @@ pub mod conv_global {
 
         /// Conversations list emitter, filled in when the conversations list is constructed
         pub static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-
-        /// Data associated with `CONV_EMITTER`.
-        pub static ref CONV_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
     }
 
     /// Emits a signal to the QML runtime, returns `None` on failure.
     #[must_use]
-    pub fn conv_emit_try_poll() -> Option<()> {
+    pub fn conv_emit_new_data() -> Option<()> {
         let mut lock = CONV_EMITTER.lock();
         let emitter = lock.as_mut()?;
 
-        CONV_TRY_POLL.fetch_add(1, Ordering::Acquire);
-        emitter.try_poll_changed();
+        emitter.new_data_ready();
         Some(())
     }
 }
@@ -158,12 +154,12 @@ pub mod user_global {
 
     /// Emits a signal to the QML runtime, returns `None` on failure.
     #[must_use]
-    pub fn users_emit_try_poll() -> Option<()> {
+    pub fn users_emit_data_ready() -> Option<()> {
         let mut lock = USER_EMITTER.lock();
         let emitter = lock.as_mut()?;
 
         USER_TRY_POLL.fetch_add(1, Ordering::Acquire);
-        emitter.try_poll_changed();
+        emitter.new_data_ready();
         Some(())
     }
 }
