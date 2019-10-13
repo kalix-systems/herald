@@ -399,9 +399,8 @@ impl MessagesTrait for Messages {
                         false
                     );
 
-                    // TODO: make this more efficient
-                    let db_msg = ret_err!(message::get_message(&mid), false);
-                    msg.receipts = db_msg.receipts;
+                    let receipts = ret_err!(message::get_message_receipts(&mid), false);
+                    msg.receipts = receipts;
 
                     self.model.data_changed(ix, ix);
                 }
