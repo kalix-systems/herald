@@ -340,8 +340,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
         }
         Ack(ack) => {
-            // TODO: This will cause a "Query returned no rows" error if the receipt is
-            // received after a message has been removed locally.
             crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
             ev.notifications.push(Notification::MsgReceipt {
                 mid: ack.of,

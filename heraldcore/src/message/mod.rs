@@ -122,19 +122,13 @@ pub(crate) fn add_receipt(
     let tx = db.transaction()?;
 
     let mut get_stmt = tx.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> =
-        get_stmt.query_row(params![msg_id], |row| {
-            Ok(match row.get::<_, Option<Vec<u8>>>(0)? {
-                Some(data) => serde_cbor::from_slice(&data).map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Blob,
-                        Box::new(e),
-                    )
-                })?,
-                None => None,
-            })
-        })?;
+    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> = {
+        let res = get_stmt.query_row(params![msg_id], |row| row.get::<_, Option<Vec<u8>>>(0))?;
+        match res {
+            Some(data) => Some(serde_cbor::from_slice(&data)?),
+            None => None,
+        }
+    };
 
     let mut receipts = receipts.unwrap_or_default();
     receipts.insert(of, receipt_status);
