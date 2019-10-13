@@ -278,8 +278,8 @@ async fn write_msg<T>(t: &T, ws: &mut WebSocket) -> Result<(), Error>
 where
     T: Serialize,
 {
-    let bvec = serde_cbor::to_vec(t)?;
-    let packets = Packet::from_slice(&bvec);
+    let bvec = Bytes::from(serde_cbor::to_vec(t)?);
+    let packets = Packet::from_bytes(bvec);
     let len = packets.len() as u64;
 
     loop {
