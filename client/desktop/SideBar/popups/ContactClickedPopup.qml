@@ -5,9 +5,9 @@ import QtQuick.Controls 2.13
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
-import "../../common/utils.mjs" as Utils
-import "./ContactClickedPopup.mjs" as JS
-import "../popups" as Popups
+import "../../common/js/utils.mjs" as Utils
+import "./js/ContactClickedPopup.mjs" as JS
+import "../popups/js/" as Popups
 
 // Reveiw Key
 // OS Dependent: OSD

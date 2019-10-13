@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "popups" as Popups
 import "../common" as Common
-import "../common/utils.mjs" as Utils
+import "../common/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -35,7 +35,7 @@ ToolBar {
             Layout.topMargin: QmlCfg.smallMargin
             Layout.rightMargin: QmlCfg.margin
             Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft
-            avatarLabel: config.displayName
+            avatarLabel: config.name
             secondaryText: "@" + config.configId
             colorHash: config.color
             pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
@@ -55,7 +55,7 @@ ToolBar {
             Layout.leftMargin: QmlCfg.margin
             source: "qrc:/add-contact-icon.svg"
             onClicked: {
-                // BNOTE: Is this the right order? It might be, but check:w
+                // BNOTE: Is this the right order? It might be, but check
                 convoPane.state = "newContactState"
                 searchLoader.sourceComponent = searchBarComponent
             }

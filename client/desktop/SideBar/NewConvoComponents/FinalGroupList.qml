@@ -3,9 +3,9 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../common" as Common
-import "../popups/NewContactDialogue.mjs" as JS
+import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
-import "../../common/utils.mjs" as Utils
+import "../../common/js/utils.mjs" as Utils
 
 ListView {
     id: groupList
@@ -34,11 +34,12 @@ ListView {
             //PAUL: Demagic this number
             size: 45
             id: memberAvatar
-            avatarLabel: memberDisplayName
+            avatarLabel: contactsModel.nameById(memberId)
             labelGap: QmlCfg.smallMargin
             secondaryText: "@" + memberId
-            colorHash: memberColor
-            pfpUrl: Utils.safeStringOrDefault(memberProfilePicture)
+            colorHash: contactsModel.colorById(memberId)
+            pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(
+                                                  memberId))
         }
     }
 }

@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
+crc32fast   = "1.2"
 serde_cbor  = "0.10"
 serde_bytes = "0.11"
 sodiumoxide = "0.2"
@@ -20,15 +21,9 @@ features = ["serde-1"]
 version = "0.4"
 features = ["serde"]
 
-
 [dependencies.chrono]
 version = "0.4"
 features = ["serde"]
-
-[dependencies.diesel]
-version = "1.4.2"
-features = ["postgres"]
-optional = true
 
 [dependencies.rusqlite]
 version = "0.20.0"
@@ -39,5 +34,5 @@ version = "1.0"
 features = ["derive"]
 
 [features]
-diesel_pg = ["diesel/postgres"]
+# diesel_pg = ["diesel/postgres"]
 rusqlite_ = ["rusqlite"]

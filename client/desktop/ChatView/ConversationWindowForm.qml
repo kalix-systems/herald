@@ -5,8 +5,8 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "../ChatBubble"
 import "." as CVUtils
-import "../common/utils.mjs" as Utils
-import "../SideBar/ContactView.mjs" as CUtils
+import "../common/js/utils.mjs" as Utils
+import "../SideBar/js/ContactView.mjs" as CUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -78,7 +78,7 @@ Flickable {
                     StandardBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        authorName: outbound ? "" : contactsModel.displayNameById(
+                        authorName: outbound ? "" : contactsModel.nameById(
                                                    author)
                         receiptImage: proxyReceiptImage
                     }

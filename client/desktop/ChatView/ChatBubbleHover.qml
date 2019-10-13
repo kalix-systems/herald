@@ -65,7 +65,7 @@ MouseArea {
             chatTextArea.replyText = body
             chatTextArea.replyId = messageId
             chatTextArea.replyUid = author
-            chatTextArea.replyName = contactsModel.displayNameById(author)
+            chatTextArea.replyName = contactsModel.nameById(author)
             chatTextArea.state = "replystate"
         }
     }

@@ -80,6 +80,17 @@ impl Messages {
 
         self.emit_last_changed();
 
+        use crate::shared::conv_global::*;
+
+        // this should not return an error
+        ret_err!(
+            CONV_CHANNEL
+                .tx
+                .send(ConvUpdates::NewActivity(conversation_id)),
+            Ok(())
+        );
+        ret_none!(conv_emit_try_poll(), Ok(()));
+
         thread::Builder::new().spawn(move || {
             // TODO update send status?
             ret_err!(network::send_text(conversation_id, body, msg_id, op));
@@ -347,11 +358,6 @@ impl MessagesTrait for Messages {
         for update in rx.try_iter() {
             match update {
                 MsgUpdate::Msg(mid) => {
-                    // NOTE: temporary hack to avoid double insertions
-                    //if self.map.contains_key(&mid) {
-                    //    continue;
-                    //}
-
                     let new = ret_err!(message::get_message(&mid), false);
 
                     self.new_msg_toast(&new);
@@ -366,7 +372,7 @@ impl MessagesTrait for Messages {
 
                     self.emit_last_changed();
                 }
-                MsgUpdate::Receipt { mid, by, stat } => {
+                MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {
                         None => {
                             // This can (possibly) happen if the message
@@ -393,18 +399,9 @@ impl MessagesTrait for Messages {
                         false
                     );
 
-                    match &mut msg.receipts {
-                        Some(receipts) => {
-                            receipts.insert(by, stat);
-                        }
-                        None => {
-                            msg.receipts = {
-                                let mut receipts = HashMap::new();
-                                receipts.insert(by, stat);
-                                Some(receipts)
-                            }
-                        }
-                    }
+                    // TODO: make this more efficient
+                    let db_msg = ret_err!(message::get_message(&mid), false);
+                    msg.receipts = db_msg.receipts;
 
                     self.model.data_changed(ix, ix);
                 }

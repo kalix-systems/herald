@@ -1,7 +1,5 @@
 mod crypto;
 pub use crypto::*;
-#[cfg(feature = "diesel_pg")]
-mod diesel_impls;
 #[cfg(feature = "rusqlite_")]
 mod rusqlite_impls;
 mod types;

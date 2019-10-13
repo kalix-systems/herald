@@ -3,7 +3,7 @@ use dashmap::DashMap;
 use herald_common::UserId;
 use heraldcore::{
     contact,
-    types::{ConversationId, MessageReceiptStatus, MsgId},
+    types::{ConversationId, MsgId},
 };
 use lazy_static::*;
 use std::sync::{
@@ -74,6 +74,8 @@ pub mod conv_global {
         NewConversation(ConversationId),
         /// A conversation builder can been finalized
         BuilderFinished(ConversationId),
+        /// New activity
+        NewActivity(ConversationId),
     }
 
     /// Channel for global conversation list updates
@@ -192,14 +194,7 @@ pub mod messages {
         /// A new message
         Msg(MsgId),
         /// A message has been acknowledged
-        Receipt {
-            /// The message that was received
-            mid: MsgId,
-            /// The receipt status
-            stat: MessageReceiptStatus,
-            /// The user that received the message
-            by: UserId,
-        },
+        Receipt(MsgId),
     }
 
     lazy_static! {

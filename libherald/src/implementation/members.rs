@@ -96,16 +96,6 @@ impl MembersTrait for Members {
             .as_str()
     }
 
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name(&self, row_index: usize) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        let inner = ret_none!(USER_DATA.get(uid), "".to_owned());
-        match inner.name.as_ref() {
-            Some(name) => name.clone(),
-            None => inner.id.to_string(),
-        }
-    }
-
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
@@ -114,21 +104,18 @@ impl MembersTrait for Members {
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
-        let inner = USER_DATA.get(uid)?;
+    fn name(&self, row_index: usize) -> String {
+        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
+        let inner = ret_none!(USER_DATA.get(uid), uid.to_string());
 
         inner.name.clone()
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+    fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-        ret_err!(
-            contact::set_name(uid, name.as_ref().map(|s| s.as_str())),
-            false
-        );
+        ret_err!(contact::set_name(uid, name.as_str()), false);
 
         // already checked
         inner.name = name;

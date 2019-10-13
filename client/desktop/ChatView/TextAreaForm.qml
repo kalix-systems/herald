@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
-import "ChatTextAreaUtils.mjs" as CTUtils
+import "js/ChatTextAreaUtils.mjs" as CTUtils
 import "../common" as Common
 
 // Reveiw Key
@@ -38,9 +38,7 @@ Rectangle {
 
     property string replyText: ""
     property string replyName: ""
-    // BNOTE: Don't use names! They aren't globally unique! This is a bad idea
-    // but this is already fixed on master
-    property bool owned: replyName === config.displayName
+    property bool owned: replyUid === config.configId
     property string replyUid
 
     property var replyId

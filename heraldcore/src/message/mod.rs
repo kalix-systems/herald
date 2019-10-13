@@ -81,6 +81,11 @@ pub fn add_message(
         ],
     )?;
 
+    tx.execute(
+        include_str!("../conversation/sql/update_last_active.sql"),
+        params![Utc::now().timestamp(), conversation_id],
+    )?;
+
     if let Some(op) = op {
         tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
     }

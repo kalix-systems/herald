@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
-import "common/utils.mjs" as Utils
+import "common/js/utils.mjs" as Utils
 import QtQml 2.13
 
 Item {
@@ -21,9 +21,7 @@ Item {
     Users {
         id: contactsModel
 
-        onTryPollChanged: {
-            pollUpdate()
-        }
+        onTryPollChanged: pollUpdate()
     }
 
     Conversations {
@@ -92,7 +90,5 @@ Item {
         }
     }
 
-    Component.onCompleted: {
-        networkHandle.login()
-    }
+    Component.onCompleted: networkHandle.login()
 }

@@ -5,10 +5,8 @@ SELECT
   color,
   status,
   pairwise_conversation,
-  contact_type,
-  added
+  contact_type
 FROM
   contacts
 WHERE
   status = @1
-  AND added > @2

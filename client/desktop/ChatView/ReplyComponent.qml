@@ -55,7 +55,9 @@ Rectangle {
             }
         }
 
-        onClicked: chatTextArea.state = "default"
+        onClicked: {
+            chatTextArea.state = "default"
+        }
     }
 
     ColumnLayout {

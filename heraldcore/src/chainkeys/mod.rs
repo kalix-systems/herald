@@ -1,21 +1,36 @@
 use crate::{db::Database, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::ChainError};
-use rusqlite::params;
+use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 fn store_key(
-    db: &rusqlite::Connection,
+    tx: rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
 ) -> Result<Vec<Block>, HErr> {
-    db.execute(
-        include_str!("sql/store_key.sql"),
-        params![cid, hash.as_ref(), key.as_ref()],
-    )?;
+    let blocks = {
+        let mut store_stmt = tx.prepare(include_str!("sql/store_key.sql"))?;
+        store_stmt.execute(params![cid, hash.as_ref(), key.as_ref()])?;
 
-    // TODO return real vector
-    Ok(vec![])
+        let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
+        remove_deps_stmt.execute(params![hash.as_ref()])?;
+
+        let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
+
+        let mut blocks: Vec<Block> = Vec::new();
+
+        for res in get_blocks_stmt.query_map(NO_PARAMS, |row| row.get::<_, Vec<u8>>(0))? {
+            let block_bytes = res?;
+            let block = serde_cbor::from_slice(&block_bytes)?;
+            blocks.push(block);
+        }
+        blocks
+    };
+
+    tx.commit()?;
+
+    Ok(blocks)
 }
 
 fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
@@ -27,14 +42,7 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     {
         let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
 
-        let mut key_used_stmt = tx.prepare(include_str!("sql/get_key_used_status.sql"))?;
-
         for block in blocks {
-            if key_used_stmt.query_row(params![cid, block.as_ref()], |row| row.get::<_, bool>(0))? {
-                // if the key is already marked used, return a `RedundantMark` error
-                return Err(ChainError::RedundantMark.into());
-            }
-
             // otherwise we can mark the key as used
             mark_stmt.execute(params![cid, block.as_ref()])?;
         }
@@ -104,9 +112,10 @@ impl BlockStore for ConversationId {
 
     // stores a key, does not mark key as used
     fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<Vec<Block>, Self::Error> {
-        let db = Database::get()?;
+        let mut db = Database::get()?;
+        let tx = db.transaction()?;
         // modify this to remove missing block dependencies
-        store_key(&db, *self, hash, key)
+        store_key(tx, *self, hash, key)
         // get all blocks that no longer have dependencies
     }
 
@@ -139,8 +148,27 @@ impl BlockStore for ConversationId {
         get_unused(&db, *self)
     }
 
-    fn add_pending(&self, _block: Block, _awaiting: Vec<BlockHash>) -> Result<(), Self::Error> {
-        unimplemented!()
+    fn add_pending(&self, block: Block, awaiting: Vec<BlockHash>) -> Result<(), Self::Error> {
+        if awaiting.is_empty() {
+            return Ok(());
+        }
+
+        let mut db = Database::get()?;
+        let tx = db.transaction()?;
+        let mut pending_blocks_stmt = tx.prepare(include_str!("sql/add_pending_block.sql"))?;
+
+        let block_bytes = serde_cbor::to_vec(&block)?;
+
+        pending_blocks_stmt.execute(params![block_bytes])?;
+
+        let block_id = tx.last_insert_rowid();
+        let mut block_dep_stmt = tx.prepare(include_str!("sql/add_block_dependency.sql"))?;
+
+        for parent_hash in awaiting {
+            block_dep_stmt.execute(params![block_id, parent_hash.as_ref()])?;
+        }
+
+        Ok(())
     }
 }
 

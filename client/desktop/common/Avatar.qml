@@ -2,8 +2,8 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
-import "Avatar.mjs" as JS
-import "utils.mjs" as Utils
+import "js/Avatar.mjs" as JS
+import "js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -61,14 +61,14 @@ Row {
             visible: labeled
             text: avatarLabel
             font.bold: true
-            color: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.mainTextColor
+            color: !isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.mainTextColor
         }
 
         Text {
             id: userName
             visible: labeled
             text: secondaryText
-            color: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.secondaryTextColor
+            color: !isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.secondaryTextColor
 
             elide: Text.ElideRight
         }
@@ -88,7 +88,7 @@ Row {
             Text {
                 text: qsTr(avatarLabel[0].toUpperCase())
                 font.bold: true
-                color: !!!isDefault ? QmlCfg.avatarColors[colorHash] : QmlCfg.palette.iconFill
+                color: !isDefault ? QmlCfg.avatarColors[colorHash] : QmlCfg.palette.iconFill
 
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3

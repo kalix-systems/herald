@@ -21,7 +21,7 @@ use std::{
 type Emitter = UsersEmitter;
 type List = UsersList;
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, PartialOrd, Ord)]
 /// Thin wrapper around `heraldcore::contact::Contact`,
 /// with an additional field to facilitate filtering
 /// in the UI.
@@ -41,14 +41,6 @@ pub struct Users {
     list: Vec<User>,
 }
 
-fn display_name(uid: &UserId) -> Option<String> {
-    let inner = USER_DATA.get(uid)?;
-    match inner.name.as_ref() {
-        Some(name) => Some(name.clone()),
-        None => Some(inner.id.to_string()),
-    }
-}
-
 fn color(uid: &UserId) -> Option<u32> {
     Some(USER_DATA.get(&uid)?.color)
 }
@@ -56,7 +48,7 @@ fn color(uid: &UserId) -> Option<u32> {
 fn name(uid: &UserId) -> Option<String> {
     let inner = USER_DATA.get(uid)?;
 
-    inner.name.clone()
+    Some(inner.name.clone())
 }
 
 fn profile_picture(uid: &UserId) -> Option<String> {
@@ -104,12 +96,19 @@ impl UsersTrait for Users {
         let contact = ret_err!(ContactBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
         let pairwise_conversation = contact.pairwise_conversation;
-        self.model
-            .begin_insert_rows(self.list.len(), self.list.len());
-        self.list.push(User {
+
+        let user = User {
             matched: contact.matches(&self.filter),
             id: contact.id,
-        });
+        };
+
+        let pos = match self.list.binary_search(&user) {
+            Ok(_) => return pairwise_conversation.to_vec(),
+            Err(pos) => pos,
+        };
+
+        self.model.begin_insert_rows(pos, pos);
+        self.list.insert(pos, user);
         USER_DATA.insert(contact.id, contact);
         self.model.end_insert_rows();
 
@@ -121,18 +120,6 @@ impl UsersTrait for Users {
         ret_none!(self.list.get(row_index), "").id.as_str()
     }
 
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name(&self, row_index: usize) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        display_name(uid).unwrap_or_else(|| "".to_owned())
-    }
-
-    /// Returns name if it is set, otherwise returns the user's id.
-    fn display_name_by_id(&self, id: ffi::UserId) -> String {
-        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
-        display_name(uid).unwrap_or_else(|| "".to_owned())
-    }
-
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
@@ -141,10 +128,10 @@ impl UsersTrait for Users {
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> Option<String> {
-        let uid = &self.list.get(row_index)?.id;
+    fn name(&self, row_index: usize) -> String {
+        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
 
-        name(uid)
+        ret_none!(name(uid), uid.to_string())
     }
 
     /// Returns name if it is set, otherwise returns empty string
@@ -154,15 +141,11 @@ impl UsersTrait for Users {
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: Option<String>) -> bool {
+    fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-        ret_err!(
-            contact::set_name(uid, name.as_ref().map(|s| s.as_str())),
-            false
-        );
+        ret_err!(contact::set_name(uid, name.as_str()), false);
 
-        // already checked
         inner.name = name;
         true
     }
@@ -319,23 +302,25 @@ impl UsersTrait for Users {
         for update in USER_CHANNEL.rx.try_recv() {
             match update {
                 UsersUpdates::NewUser(uid) => {
-                    let new_user = ret_err!(contact::by_user_id(uid), false);
+                    let new_contact = ret_err!(contact::by_user_id(uid), false);
 
-                    let filter = &self.filter;
-
-                    self.model.begin_insert_rows(
-                        self.list.len(),
-                        (self.list.len() + 1).saturating_sub(1),
-                    );
-                    self.list.push(User {
-                        matched: new_user.matches(&filter),
+                    let new_user = User {
+                        matched: new_contact.matches(&self.filter),
                         id: uid,
-                    });
-                    USER_DATA.insert(uid, new_user);
+                    };
+
+                    let pos = match self.list.binary_search(&new_user) {
+                        Ok(_) => return true, // this should never happen
+                        Err(pos) => pos,
+                    };
+
+                    self.model.begin_insert_rows(pos, pos);
+                    self.list.push(new_user);
+                    USER_DATA.insert(uid, new_contact);
                     self.model.end_insert_rows();
                 }
                 UsersUpdates::ReqResp(..) => {
-                    eprintln!("TODO: handle request responses");
+                    eprintln!("TODO: handle request responses?");
                 }
             }
         }

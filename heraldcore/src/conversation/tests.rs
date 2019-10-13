@@ -70,7 +70,8 @@ fn add_and_get() {
     crate::message::add_message(None, author, &conversation, "2", None, None, &None)
         .expect(womp!("Failed to add second message"));
 
-    let msgs = super::conversation(&conversation).expect(womp!("Failed to get conversation"));
+    let msgs =
+        super::conversation_messages(&conversation).expect(womp!("Failed to get conversation"));
 
     assert_eq!(msgs.len(), 2);
 }
@@ -178,30 +179,6 @@ fn set_get_meta() {
 
 #[test]
 #[serial]
-fn conv_messages_since() {
-    Database::reset_all().expect(womp!());
-
-    let contact = "contact".try_into().unwrap();
-    ContactBuilder::new(contact).add().expect(womp!());
-
-    let conv_id = ConversationId::from([0; 32]);
-
-    super::ConversationBuilder::new()
-        .conversation_id(conv_id)
-        .add()
-        .expect(womp!("Failed to make conversation"));
-
-    crate::message::add_message(None, contact, &conv_id, "1", None, None, &None)
-        .expect(womp!("Failed to make message"));
-    let timestamp = chrono::Utc::now();
-
-    assert!(conversation_messages_since(&conv_id, timestamp)
-        .expect(womp!())
-        .is_empty());
-}
-
-#[test]
-#[serial]
 fn add_remove_member() {
     Database::reset_all().expect(womp!());
 
@@ -259,7 +236,7 @@ fn delete_message() {
 
     crate::message::delete_message(&msg_id).expect(womp!());
 
-    assert!(super::conversation(&conversation)
+    assert!(super::conversation_messages(&conversation)
         .expect(womp!())
         .is_empty());
 }
@@ -287,7 +264,7 @@ fn delete_conversation() {
 
     super::delete_conversation(&conversation).expect(womp!());
 
-    assert!(super::conversation(&conversation)
+    assert!(super::conversation_messages(&conversation)
         .expect(womp!())
         .is_empty());
 }

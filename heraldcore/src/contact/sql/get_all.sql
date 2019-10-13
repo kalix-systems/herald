@@ -5,9 +5,10 @@ SELECT
   color,
   status,
   pairwise_conversation,
-  contact_type,
-  added
+  contact_type
 FROM
   contacts
 WHERE
   status < 2
+ORDER BY
+  name COLLATE NOCASE ASC

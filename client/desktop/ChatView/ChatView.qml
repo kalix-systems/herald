@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "." as CVUtils
-import "../common/utils.mjs" as Utils
-import "./ChatTextAreaUtils.mjs" as CTUtils
+import "../common/js/utils.mjs" as Utils
+import "./js/ChatTextAreaUtils.mjs" as CTUtils
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 

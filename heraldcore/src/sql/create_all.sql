@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS contacts (
   -- user id
   user_id TEXT PRIMARY KEY NOT NULL,
   -- name as a string
-  name TEXT,
+  name TEXT NOT NULL,
   -- profile picture
   profile_picture TEXT,
   -- Conversation id of the pairwise conversation with the user
@@ -76,7 +76,6 @@ CREATE TABLE IF NOT EXISTS contacts (
   status INTEGER NOT NULL,
   -- contact type
   contact_type INTEGER NOT NULL,
-  added INTEGER DEFAULT (strftime('%s', 'now')) NOT NULL,
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 );
 
@@ -150,5 +149,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   -- Indicates whether conversation is muted, defaults to false
   muted INTEGER DEFAULT(0),
   -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
-  pairwise INTEGER DEFAULT(0)
+  pairwise INTEGER DEFAULT(0),
+  -- Time of last important activity
+  last_active_ts INTEGER NOT NULL
 );

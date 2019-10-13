@@ -23,7 +23,7 @@ fn add_get_set_config() {
     assert_eq!(config.colorscheme, 0);
     assert_eq!(config.color, crate::utils::id_to_color(id));
     assert_eq!(config.color, crate::utils::id_to_color(id));
-    assert!(config.name.is_none());
+    assert_eq!(config.name.as_str(), id.as_str());
     assert!(config.profile_picture.is_none());
 
     Database::reset_all().expect(womp!());
@@ -51,7 +51,7 @@ fn add_get_set_config() {
 
     assert_eq!(config.nts_conversation, db_config.nts_conversation);
     assert_eq!(db_config.id(), id);
-    assert_eq!(db_config.name.as_ref().expect(womp!()), name);
+    assert_eq!(db_config.name.as_str(), name);
     assert_eq!(db_config.nts_conversation, nts_id);
     assert_eq!(db_config.colorscheme, 1);
     assert_eq!(db_config.color, 2);
@@ -61,13 +61,13 @@ fn add_get_set_config() {
     );
 
     let mut db_config = Config::get().expect(womp!());
-    db_config.set_name(None).expect(womp!());
-    assert_eq!(db_config.name, None);
+    db_config.set_name("test".to_owned()).expect(womp!());
+    assert_eq!(db_config.name, "test");
 
-    db_config.set_name(Some("hello".into())).expect(womp!());
+    db_config.set_name("hello".to_owned()).expect(womp!());
 
     let mut db_config = Config::get().expect(womp!());
-    assert_eq!(db_config.name, Some("hello".into()));
+    assert_eq!(db_config.name, "hello");
 
     db_config.set_colorscheme(1).expect(womp!());
     db_config.set_color(0).expect(womp!());

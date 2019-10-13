@@ -1,5 +1,4 @@
 use crate::{db::Database, errors::HErr, message::Message, types::*, utils};
-use chrono::{DateTime, Utc};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
@@ -18,10 +17,17 @@ pub struct ConversationMeta {
     pub muted: bool,
     /// Indicates whether the conversation is a canonical pairwise conversation
     pub pairwise: bool,
+    /// Last notable activity
+    pub last_active: chrono::DateTime<chrono::Utc>,
 }
 
 impl ConversationMeta {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+        let last_active = match chrono::Utc.timestamp_opt(row.get::<_, i64>(6)?, 0) {
+            chrono::LocalResult::Single(ts) => ts,
+            _ => Utc::now(),
+        };
+
         Ok(ConversationMeta {
             conversation_id: row.get(0)?,
             title: row.get(1)?,
@@ -29,6 +35,7 @@ impl ConversationMeta {
             color: row.get(3)?,
             muted: row.get(4)?,
             pairwise: row.get(5)?,
+            last_active,
         })
     }
 
@@ -139,7 +146,15 @@ impl ConversationBuilder {
 
         tx.execute(
             include_str!("sql/add_conversation.sql"),
-            params![id, self.title, self.picture, color, pairwise, muted],
+            params![
+                id,
+                self.title,
+                self.picture,
+                color,
+                pairwise,
+                muted,
+                chrono::Utc::now().timestamp()
+            ],
         )?;
         Ok(id)
     }
@@ -161,7 +176,15 @@ impl ConversationBuilder {
 
         db.execute(
             include_str!("sql/add_conversation.sql"),
-            params![id, self.title, self.picture, color, pairwise, muted],
+            params![
+                id,
+                self.title,
+                self.picture,
+                color,
+                pairwise,
+                muted,
+                chrono::Utc::now().timestamp()
+            ],
         )?;
         Ok(id)
     }
@@ -182,28 +205,6 @@ pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Mes
     let db = Database::get()?;
     let mut stmt = db.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
     let res = stmt.query_map(&[conversation_id], Message::from_db)?;
-
-    let mut messages = Vec::new();
-    for msg in res {
-        messages.push(msg?);
-    }
-
-    Ok(messages)
-}
-
-/// Get all messages in a conversation.
-pub fn conversation_messages_since(
-    conversation_id: &ConversationId,
-    since: DateTime<Utc>,
-) -> Result<Vec<Message>, HErr> {
-    let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!(
-        "../message/sql/conversation_messages_since.sql"
-    ))?;
-    let res = stmt.query_map(
-        params![conversation_id, since.timestamp()],
-        Message::from_db,
-    )?;
 
     let mut messages = Vec::new();
     for msg in res {
@@ -300,28 +301,6 @@ pub fn all_meta() -> Result<Vec<ConversationMeta>, HErr> {
 
     Ok(meta)
 }
-
-/// Get conversation
-pub fn conversation(conversation_id: &ConversationId) -> Result<Conversation, HErr> {
-    let messages = conversation_messages(conversation_id)?;
-    let meta = meta(conversation_id)?;
-    let members = crate::members::members(conversation_id)?;
-
-    Ok(Conversation {
-        meta,
-        members,
-        messages,
-    })
-}
-
-///// Adds a conversation to the database
-//pub(crate) fn add_pairwise_conversation(
-//    tx: &rusqlite::Transaction,
-//    conversation_id: Option<&ConversationId>,
-//    title: Option<&str>,
-//) -> Result<ConversationId, HErr> {
-//    add_conversation_with_tx(tx, conversation_id, title, false)
-//}
 
 pub(crate) fn get_pairwise_conversations(uids: &[UserId]) -> Result<Vec<ConversationId>, HErr> {
     let db = Database::get()?;
