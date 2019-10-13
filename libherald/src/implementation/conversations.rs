@@ -39,8 +39,7 @@ impl Conversations {
             matched: meta.matches(&self.filter),
             inner: meta,
         };
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
+        self.model.begin_insert_rows(0, 0);
         self.list.push_front(conv);
         self.model.end_insert_rows();
         Ok(())
