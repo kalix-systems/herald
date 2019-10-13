@@ -18,6 +18,7 @@ pub enum Error {
     LoginFailed,
     RegistrationFailed,
     BadSessionType(u8),
+    TimedOut(tokio::timer::timeout::Elapsed),
 }
 
 pub use Error::*;
@@ -36,3 +37,4 @@ from_fn!(Error, std::io::Error, Error::IO);
 from_fn!(Error, diesel::result::Error, Error::DieselError);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
 from_fn!(Error, warp::Error, Error::Warp);
+from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);

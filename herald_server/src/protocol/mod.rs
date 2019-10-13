@@ -2,11 +2,15 @@ use crate::{prelude::*, store::*};
 use bytes::Buf;
 use dashmap::DashMap;
 use sodiumoxide::crypto::sign;
+use std::time::Duration;
 use tokio::{
     prelude::*,
     sync::mpsc::{unbounded_channel as channel, UnboundedSender as Sender},
 };
-use warp::{filters::ws, Filter};
+use warp::{
+    filters::ws::{self, WebSocket},
+    Filter,
+};
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<Push>>,
@@ -253,6 +257,58 @@ where
         .await?;
 
     s.expire_pending(did)?;
+
+    Ok(())
+}
+
+const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
+
+async fn read_msg<T>(ws: &mut WebSocket) -> Result<T, Error>
+where
+    T: serde::de::DeserializeOwned,
+{
+    let m = ws.next().await.ok_or(LoginFailed)??;
+    let t = serde_cbor::from_slice::<T>(m.as_bytes())?;
+    Ok(t)
+}
+
+fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
+    Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
+}
+
+async fn write_msg<T>(t: &T, ws: &mut WebSocket) -> Result<(), Error>
+where
+    T: Serialize,
+{
+    let bvec = serde_cbor::to_vec(t)?;
+    let packets = Packet::from_slice(&bvec);
+    let len = packets.len() as u64;
+
+    loop {
+        ws.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+
+        if len == read_msg::<u64>(ws).timeout(TIMEOUT_DUR).await?? {
+            ws.send(ser_msg(&PacketResponse::Success)?)
+                .timeout(TIMEOUT_DUR)
+                .await??;
+            break;
+        } else {
+            ws.send(ser_msg(&PacketResponse::Retry)?)
+                .timeout(TIMEOUT_DUR)
+                .await??;
+        }
+    }
+
+    loop {
+        for packet in packets.iter() {
+            ws.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+        }
+
+        match read_msg(ws).timeout(TIMEOUT_DUR).await?? {
+            PacketResponse::Success => break,
+            PacketResponse::Retry => {}
+        }
+    }
 
     Ok(())
 }

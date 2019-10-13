@@ -42,3 +42,9 @@ impl<'a> Packet<'a> {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PacketResponse {
+    Success,
+    Retry,
+}
