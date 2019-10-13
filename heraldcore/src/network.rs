@@ -217,7 +217,7 @@ fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
-    let mut len = 0u64;
+    let len;
 
     loop {
         let maybe_len = sock_get_block(ws)?;
