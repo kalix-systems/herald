@@ -221,7 +221,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
 
     loop {
         let maybe_len = sock_get_block(ws)?;
-        sock_send_msg(ws, &len)?;
+        sock_send_msg(ws, &maybe_len)?;
         match sock_get_block(ws)? {
             PacketResponse::Success => {
                 len = maybe_len;
@@ -232,6 +232,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     }
 
     loop {
+        let maybe_len = sock_get_block(ws)?;
         let mut packets = Vec::with_capacity(len as usize);
         for _ in 0..len {
             packets.push(sock_get_block(ws)?);
@@ -267,8 +268,7 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    use websocket::message::OwnedMessage;
-    let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
+    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
 }
