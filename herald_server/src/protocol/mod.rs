@@ -227,11 +227,7 @@ where
     Ok(())
 }
 
-async fn catchup<W, E>(did: sign::PublicKey, s: &mut Conn, ws: &mut W) -> Result<(), Error>
-where
-    W: Stream<Item = Result<ws::Message, warp::Error>> + Sink<ws::Message, Error = E> + Unpin,
-    Error: From<E>,
-{
+async fn catchup(did: sign::PublicKey, s: &mut Conn, ws: &mut WebSocket) -> Result<(), Error> {
     use catchup::*;
     let pending = s.get_pending(did)?;
 
