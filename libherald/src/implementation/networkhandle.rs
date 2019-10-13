@@ -63,7 +63,7 @@ impl NotifHandler {
                 use crate::shared::conv_global::*;
 
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewActivity(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
@@ -87,28 +87,28 @@ impl NotifHandler {
 
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(users_emit_data_ready());
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             NewConversation(cid) => {
                 use shared::conv_global::*;
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(conv_emit_new_data());
             }
             AddContactResponse(cid, uid, accepted) => {
                 use shared::{conv_global::*, user_global::*};
 
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(users_emit_data_ready());
 
                 // add conversation
                 if accepted {
                     ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    ret_none!(conv_emit_try_poll());
+                    ret_none!(conv_emit_new_data());
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {

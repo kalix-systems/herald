@@ -10,13 +10,7 @@ use heraldcore::{
     contact::{self, ContactBuilder, ContactStatus},
     utils::SearchPattern,
 };
-use std::{
-    convert::{TryFrom, TryInto},
-    sync::{
-        atomic::{AtomicU8, Ordering},
-        Arc,
-    },
-};
+use std::convert::{TryFrom, TryInto};
 
 type Emitter = UsersEmitter;
 type List = UsersList;
@@ -37,7 +31,7 @@ pub struct Users {
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
-    try_poll: Arc<AtomicU8>,
+    //     try_poll: Arc<AtomicU8>,
     list: Vec<User>,
 }
 
@@ -86,7 +80,7 @@ impl UsersTrait for Users {
             list,
             filter,
             filter_regex: false,
-            try_poll: USER_TRY_POLL.clone(),
+            // try_poll: USER_TRY_POLL.clone(),
         }
     }
 
@@ -292,10 +286,6 @@ impl UsersTrait for Users {
 
     fn row_count(&self) -> usize {
         self.list.len()
-    }
-
-    fn try_poll(&self) -> u8 {
-        self.try_poll.load(Ordering::Acquire)
     }
 
     fn poll_update(&mut self) -> bool {

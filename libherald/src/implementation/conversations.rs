@@ -7,10 +7,6 @@ use heraldcore::{
     utils::SearchPattern,
 };
 use im_rc::vector::Vector;
-use std::sync::{
-    atomic::{AtomicU8, Ordering},
-    Arc,
-};
 
 /// Thin wrapper around `ConversationMeta`,
 /// with an additional field to facilitate filtering
@@ -29,7 +25,6 @@ pub struct Conversations {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vector<Conversation>,
-    try_poll: Arc<AtomicU8>,
 }
 
 impl Conversations {
@@ -68,7 +63,6 @@ impl ConversationsTrait for Conversations {
             filter_regex: false,
             model,
             list,
-            try_poll: CONV_TRY_POLL.clone(),
         }
     }
 
@@ -244,9 +238,9 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn try_poll(&self) -> u8 {
-        self.try_poll.load(Ordering::Acquire)
-    }
+    //fn try_poll(&self) -> u8 {
+    //    self.try_poll.load(Ordering::Acquire)
+    //}
 
     /// Indicates whether regex search is activated
     fn filter_regex(&self) -> bool {
