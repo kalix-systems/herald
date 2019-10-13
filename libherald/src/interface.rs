@@ -368,7 +368,7 @@ pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn add_member(&mut self, user_id: String) -> bool;
-    fn finalize(&mut self) -> Vec<u8>;
+    fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
     fn remove_member_by_id(&mut self, user_id: String) -> bool;
     fn remove_member_by_index(&mut self, index: u64) -> bool;
@@ -437,11 +437,10 @@ pub unsafe extern "C" fn conversation_builder_add_member(ptr: *mut ConversationB
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
+pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder) -> () {
     let o = &mut *ptr;
     let r = o.finalize();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
+    r
 }
 
 #[no_mangle]

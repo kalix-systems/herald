@@ -313,7 +313,7 @@ extern "C" {
         void (*)(ConversationBuilder*));
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
-    void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    void conversation_builder_finalize(ConversationBuilder::Private*);
     void conversation_builder_remove_last(ConversationBuilder::Private*);
     bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
     bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
@@ -1634,11 +1634,9 @@ bool ConversationBuilder::addMember(const QString& user_id)
 {
     return conversation_builder_add_member(m_d, user_id.utf16(), user_id.size());
 }
-QByteArray ConversationBuilder::finalize()
+void ConversationBuilder::finalize()
 {
-    QByteArray s;
-    conversation_builder_finalize(m_d, &s, set_qbytearray);
-    return s;
+    return conversation_builder_finalize(m_d);
 }
 void ConversationBuilder::removeLast()
 {

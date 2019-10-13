@@ -63,7 +63,7 @@ public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
-    Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
     Q_INVOKABLE bool removeMemberById(const QString& user_id);
     Q_INVOKABLE bool removeMemberByIndex(quint64 index);

@@ -537,7 +537,7 @@
                 },
                 "finalize": {
                     "mut": true,
-                    "return": "QByteArray"
+                    "return": "void"
                 }
             }
         }
