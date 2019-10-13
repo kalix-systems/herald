@@ -15,7 +15,7 @@ use std::{
 use websocket::sync::client as wsclient;
 
 const DEFAULT_PORT: u16 = 8080;
-const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [54, 213, 103, 80];
+const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
     static ref SERVER_ADDR: SocketAddr = match env::var("SERVER_ADDR") {
