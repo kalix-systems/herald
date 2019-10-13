@@ -240,19 +240,15 @@ where
         // TODO: remove unnecessary memcpy here by using a draining chunk iterator?
         let msg = Catchup::Messages(Vec::from(chunk));
         loop {
-            ws.send(ws::Message::binary(serde_cbor::to_vec(&msg)?))
-                .await?;
+            write_msg(&msg, ws).await?;
 
-            let m = ws.next().await.ok_or(CatchupFailed)??;
-
-            if CatchupAck(chunk.len() as u64) == serde_cbor::from_slice(m.as_bytes())? {
+            if CatchupAck(chunk.len() as u64) == read_msg(ws).await? {
                 break;
             }
         }
     }
 
-    ws.send(ws::Message::binary(serde_cbor::to_vec(&Catchup::Done)?))
-        .await?;
+    write_msg(&Catchup::Done, ws).await?;
 
     s.expire_pending(did)?;
 
