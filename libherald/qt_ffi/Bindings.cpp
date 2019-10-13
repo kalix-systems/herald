@@ -84,6 +84,10 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
+    inline void conversationBuilderTitleChanged(ConversationBuilder* o)
+    {
+        Q_EMIT o->titleChanged();
+    }
     inline void conversationsFilterChanged(Conversations* o)
     {
         Q_EMIT o->filterChanged();
@@ -298,7 +302,7 @@ bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation
 }
 
 extern "C" {
-    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*,
+    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*, void (*)(ConversationBuilder*),
         void (*)(const ConversationBuilder*),
         void (*)(ConversationBuilder*),
         void (*)(ConversationBuilder*),
@@ -312,6 +316,7 @@ extern "C" {
         void (*)(ConversationBuilder*, int, int),
         void (*)(ConversationBuilder*));
     void conversation_builder_free(ConversationBuilder::Private*);
+    void conversation_builder_title_get(const ConversationBuilder::Private*, QString*, qstring_set);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*);
     void conversation_builder_remove_last(ConversationBuilder::Private*);
@@ -1165,7 +1170,6 @@ extern "C" {
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_clear_conversation_history(Messages::Private*);
-    void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     qint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
@@ -1576,6 +1580,7 @@ ConversationBuilder::ConversationBuilder(bool /*owned*/, QObject *parent):
 ConversationBuilder::ConversationBuilder(QObject *parent):
     QAbstractItemModel(parent),
     m_d(conversation_builder_new(this,
+        conversationBuilderTitleChanged,
         [](const ConversationBuilder* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1629,6 +1634,12 @@ ConversationBuilder::~ConversationBuilder() {
     }
 }
 void ConversationBuilder::initHeaderData() {
+}
+QString ConversationBuilder::title() const
+{
+    QString v;
+    conversation_builder_title_get(m_d, &v, set_qstring);
+    return v;
 }
 bool ConversationBuilder::addMember(const QString& user_id)
 {
@@ -2062,10 +2073,6 @@ QVariant Messages::lastStatus() const
 bool Messages::clearConversationHistory()
 {
     return messages_clear_conversation_history(m_d);
-}
-void Messages::clearConversationView()
-{
-    return messages_clear_conversation_view(m_d);
 }
 bool Messages::deleteMessage(quint64 row_index)
 {

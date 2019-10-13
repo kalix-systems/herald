@@ -338,13 +338,6 @@ impl MessagesTrait for Messages {
             .timestamp_millis()
     }
 
-    /// Clears the current view without modifying the underlying data
-    fn clear_conversation_view(&mut self) {
-        self.model.begin_reset_model();
-        self.list = Vec::new();
-        self.model.end_reset_model();
-    }
-
     /// Polls for updates
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, false);

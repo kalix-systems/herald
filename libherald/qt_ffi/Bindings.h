@@ -58,10 +58,12 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString title READ title NOTIFY titleChanged FINAL)
     explicit ConversationBuilder(bool owned, QObject *parent);
 public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder();
+    QString title() const;
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
@@ -95,6 +97,7 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void titleChanged();
 };
 
 class Conversations : public QAbstractItemModel
@@ -309,7 +312,6 @@ public:
     QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
     Q_INVOKABLE bool clearConversationHistory();
-    Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;

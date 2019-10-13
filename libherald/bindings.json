@@ -444,10 +444,6 @@
                         }
                     ]
                 },
-                "clearConversationView": {
-                    "mut": true,
-                    "return": "void"
-                },
                 "clearConversationHistory": {
                     "mut": true,
                     "return": "bool"
@@ -485,6 +481,12 @@
         },
         "ConversationBuilder": {
             "type": "List",
+            "properties": {
+                "title": {
+                    "type": "QString",
+                    "optional": true
+                }
+            },
             "itemProperties": {
                 "memberId": {
                     "type": "QString"

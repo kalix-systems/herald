@@ -31,7 +31,7 @@ declare class Messages {
   sendMessage(text: string): MessageId;
   reply(text: string, op: MessageId): MessageId;
   deleteMessage(rowIndex: number): boolean;
-  clearConversationView(): void;
+  clearConversationHistory(): void;
   deleteConversation(): boolean;
   deleteConversationById(conversationId: ConversationID): boolean;
 }
