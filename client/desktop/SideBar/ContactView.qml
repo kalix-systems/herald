@@ -37,7 +37,7 @@ ListView {
         Common.PlatonicRectangle {
             id: contactRectangle
             boxColor: contactsModel.color(index)
-            boxTitle: name
+            boxTitle: contactsModel.name(index)
             isContact: true
 
             MouseArea {

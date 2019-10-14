@@ -54,5 +54,6 @@
         <file>common/js/utils.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
+        <file>SideBar/SidePane.qml</file>
     </qresource>
 </RCC>
