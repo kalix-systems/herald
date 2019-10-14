@@ -1165,7 +1165,6 @@ extern "C" {
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_clear_conversation_history(Messages::Private*);
-    void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     qint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
@@ -1930,9 +1929,9 @@ bool Members::filterRegex() const
 void Members::setFilterRegex(bool v) {
     members_filter_regex_set(m_d, v);
 }
-bool Members::addToConversation(const QString& user_id)
+bool Members::addToConversation(const QString& id)
 {
-    return members_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+    return members_add_to_conversation(m_d, id.utf16(), id.size());
 }
 bool Members::pollUpdate()
 {
@@ -2062,10 +2061,6 @@ QVariant Messages::lastStatus() const
 bool Messages::clearConversationHistory()
 {
     return messages_clear_conversation_history(m_d);
-}
-void Messages::clearConversationView()
-{
-    return messages_clear_conversation_view(m_d);
 }
 bool Messages::deleteMessage(quint64 row_index)
 {
