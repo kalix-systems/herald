@@ -13,7 +13,7 @@ use std::{
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
 };
-use websocket::sync::client as wsclient;
+use websocket::{message::OwnedMessage as WMessage, sync::client as wsclient};
 
 const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -218,17 +218,57 @@ fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
-    let res = ws.recv_message()?;
-    let parsed = serde_cbor::from_slice(websocket::message::Message::from(res).payload.as_ref())?;
-    Ok(parsed)
+    let len;
+
+    loop {
+        let maybe_len = sock_get_block(ws)?;
+        sock_send_msg(ws, &maybe_len)?;
+        match sock_get_block(ws)? {
+            PacketResponse::Success => {
+                len = maybe_len;
+                break;
+            }
+            PacketResponse::Retry => {}
+        }
+    }
+
+    loop {
+        let mut packets = Vec::with_capacity(len as usize);
+        for _ in 0..len {
+            packets.push(sock_get_block(ws)?);
+        }
+        match Packet::collect(&packets) {
+            Some(v) => {
+                // TODO: consider doing this later?
+                // or maybe having a callback that has to succeeed here?
+                // after the server receives this, it *will* delete the message,
+                // so I'm inclined to be damn sure we're done with it
+                sock_send_msg(ws, &PacketResponse::Success)?;
+                return Ok(serde_cbor::from_slice(&v)?);
+            }
+            None => {
+                sock_send_msg(ws, &PacketResponse::Retry)?;
+            }
+        }
+    }
+}
+
+fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>,
+) -> Result<T, HErr> {
+    loop {
+        match ws.recv_message()? {
+            WMessage::Binary(v) => return Ok(serde_cbor::from_slice(&v)?),
+            _ => {}
+        }
+    }
 }
 
 fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    use websocket::message::OwnedMessage;
-    let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
+    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
 }
