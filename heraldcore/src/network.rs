@@ -1,4 +1,5 @@
 use crate::{
+    chainkeys,
     config::Config,
     errors::HErr::{self, *},
     pending,
@@ -176,6 +177,7 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         pending::remove_pending(tag)?;
     }
 
+    // send read receipts, etc
     ev.execute(&mut f)?;
 
     std::thread::spawn(move || {
@@ -423,7 +425,7 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
     Ok(ev)
 }
 
-fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
@@ -446,6 +448,17 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
                 );
 
                 CAUGHT_UP.store(false, Ordering::Release);
+
+                // TODO: make chainmail API return hash on sealing so this won't be necessary
+                let hash = cm
+                    .body()
+                    .compute_hash()
+                    .expect("failed to compute block hash");
+
+                // TODO: delete key instead of marking it used
+                // I don't understand why this works and del_key doesn't
+                cid.mark_used([hash].iter())?;
+                // chainkeys::del_key(cid, hash)?;
 
                 pending::add_to_pending(cid, content)
             }
