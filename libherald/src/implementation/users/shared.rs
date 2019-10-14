@@ -32,9 +32,9 @@ pub enum UsersUpdates {
 }
 
 /// Channel for global user list updates
-pub struct UserChannel {
-    pub(crate) rx: Receiver<UsersUpdates>,
-    pub(crate) tx: Sender<UsersUpdates>,
+pub(super) struct UserChannel {
+    pub(super) rx: Receiver<UsersUpdates>,
+    pub(super) tx: Sender<UsersUpdates>,
 }
 
 impl UserChannel {
@@ -54,15 +54,15 @@ lazy_static! {
     pub(super) static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 }
 
-pub fn send_user_update(update: UsersUpdates) -> Option<()> {
+pub fn push_user_update(update: UsersUpdates) -> Option<()> {
     USER_CHANNEL.tx.send(update).ok()?;
-    users_emit_data_ready()?;
+    users_emit_new_data()?;
     Some(())
 }
 
 /// Emits a signal to the QML runtime, returns `None` on failure.
 #[must_use]
-fn users_emit_data_ready() -> Option<()> {
+fn users_emit_new_data() -> Option<()> {
     let mut lock = USER_EMITTER.lock();
     let emitter = lock.as_mut()?;
 

@@ -54,56 +54,6 @@ pub mod errors {
     }
 }
 
-/// Shared state related to global conversation list
-pub mod conv_global {
-    use super::*;
-    use crate::interface::ConversationsEmitter as Emitter;
-    use parking_lot::Mutex;
-
-    /// Conversation list updates
-    pub enum ConvUpdates {
-        /// A new conversation has been added
-        NewConversation(ConversationId),
-        /// A conversation builder can been finalized
-        BuilderFinished(ConversationId),
-        /// New activity
-        NewActivity(ConversationId),
-    }
-
-    /// Channel for global conversation list updates
-    pub struct ConvChannel {
-        pub(crate) rx: Receiver<ConvUpdates>,
-        pub(crate) tx: Sender<ConvUpdates>,
-    }
-
-    impl ConvChannel {
-        /// Creates new `ConvChannel`
-        pub fn new() -> Self {
-            let (tx, rx) = unbounded();
-            Self { rx, tx }
-        }
-    }
-
-    lazy_static! {
-        /// Statically initialized instance of `UsersUpdates` used to pass notifications
-        /// from the network.
-        pub static ref CONV_CHANNEL: ConvChannel = ConvChannel::new();
-
-        /// Conversations list emitter, filled in when the conversations list is constructed
-        pub static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-    }
-
-    /// Emits a signal to the QML runtime, returns `None` on failure.
-    #[must_use]
-    pub fn conv_emit_new_data() -> Option<()> {
-        let mut lock = CONV_EMITTER.lock();
-        let emitter = lock.as_mut()?;
-
-        emitter.new_data_ready();
-        Some(())
-    }
-}
-
 /// Shared state related to conversation members
 pub mod members {
     use super::*;

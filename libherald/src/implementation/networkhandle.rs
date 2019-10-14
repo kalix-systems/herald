@@ -59,10 +59,9 @@ impl NotifHandler {
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
 
-                use crate::shared::conv_global::*;
+                use crate::implementation::conversations::shared::*;
 
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewActivity(cid)));
-                ret_none!(conv_emit_new_data());
+                ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
@@ -82,32 +81,29 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             NewContact(uid, cid) => {
+                use crate::implementation::conversations::shared::*;
                 use crate::implementation::users::shared::*;
-                use shared::conv_global::*;
 
                 // add user
-                ret_none!(send_user_update(UsersUpdates::NewUser(uid)));
+                ret_none!(push_user_update(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_new_data());
+                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
             }
             NewConversation(cid) => {
-                use shared::conv_global::*;
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_new_data());
+                use crate::implementation::conversations::shared::*;
+                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
+                use crate::implementation::conversations::shared::*;
                 use crate::implementation::users::shared::*;
-                use shared::conv_global::*;
 
                 // handle response
-                ret_none!(send_user_update(UsersUpdates::ReqResp(uid, accepted)));
+                ret_none!(push_user_update(UsersUpdates::ReqResp(uid, accepted)));
 
                 // add conversation
                 if accepted {
-                    ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    ret_none!(conv_emit_new_data());
+                    ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {

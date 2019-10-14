@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::conv_global::*};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
@@ -7,6 +7,9 @@ use heraldcore::{
     utils::SearchPattern,
 };
 use im_rc::vector::Vector;
+
+pub(crate) mod shared;
+use shared::*;
 
 /// Thin wrapper around `ConversationMeta`,
 /// with an additional field to facilitate filtering

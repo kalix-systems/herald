@@ -80,16 +80,12 @@ impl Messages {
 
         self.emit_last_changed();
 
-        use crate::shared::conv_global::*;
-
+        use crate::implementation::conversations::shared::*;
         // this should not return an error
-        ret_err!(
-            CONV_CHANNEL
-                .tx
-                .send(ConvUpdates::NewActivity(conversation_id)),
+        ret_none!(
+            push_conv_update(ConvUpdates::NewActivity(conversation_id)),
             Ok(())
         );
-        ret_none!(conv_emit_new_data(), Ok(()));
 
         thread::Builder::new().spawn(move || {
             // TODO update send status?

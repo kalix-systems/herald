@@ -1,5 +1,8 @@
-use crate::implementation::users::shared::user_in_cache;
-use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::conv_global::*};
+use crate::implementation::{
+    conversations::shared::{push_conv_update, ConvUpdates},
+    users::shared::user_in_cache,
+};
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -103,9 +106,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
 
             // send update to Conversations list
-            ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)));
-
-            ret_none!(conv_emit_new_data());
+            push_conv_update(ConvUpdates::BuilderFinished(cid));
         }));
     }
 
