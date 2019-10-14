@@ -268,7 +268,6 @@ impl MembersTrait for Members {
             matched: contact.matches(&self.filter),
             id: user_id,
         });
-        USER_DATA.insert(user_id, contact);
         self.model.end_insert_rows();
         true
     }
