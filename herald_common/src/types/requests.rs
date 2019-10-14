@@ -92,6 +92,7 @@ pub mod dep_key {
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub struct Res(pub PKIResponse);
 }
+
 pub mod register {
     use super::*;
 

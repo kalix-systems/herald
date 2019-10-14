@@ -5,6 +5,7 @@ INSERT OR IGNORE INTO
     conversation_id,
     body,
     send_status,
+    receipts,
     ts
   )
-VALUES(@1, @2, @3, @4, @5, @6)
+VALUES(@1, @2, @3, @4, @5, @6, @7)

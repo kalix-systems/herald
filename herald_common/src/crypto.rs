@@ -213,6 +213,10 @@ pub mod sig {
             &self.public
         }
 
+        pub fn secret_key(&self) -> &sign::SecretKey {
+            &self.secret
+        }
+
         pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
             let timestamp = Utc::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);

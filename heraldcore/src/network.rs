@@ -4,6 +4,7 @@ use crate::{
     pending,
     types::*,
 };
+use chainmail::block::*;
 use chrono::prelude::*;
 use herald_common::*;
 use lazy_static::*;
@@ -12,7 +13,7 @@ use std::{
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
 };
-use websocket::sync::client as wsclient;
+use websocket::{message::OwnedMessage as WMessage, sync::client as wsclient};
 
 const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
@@ -35,9 +36,6 @@ static CAUGHT_UP: AtomicBool = AtomicBool::new(false);
 pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
 }
-
-/// Query ID.
-pub type QID = [u8; 32];
 
 #[derive(Copy, Clone, Debug)]
 /// `Notification`s contain info about what updates were made to the database.
@@ -168,66 +166,102 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         return Err(LoginError);
     }
 
-    catchup(&mut ws, &mut f)?;
+    let ev = catchup(&mut ws)?;
+
+    CAUGHT_UP.store(true, Ordering::Release);
+
+    // clear pending
+    for (tag, cid, content) in pending::get_pending()? {
+        send_cmessage(cid, &content)?;
+        pending::remove_pending(tag)?;
+    }
+
+    // send read receipts, etc
+    ev.execute(&mut f)?;
 
     std::thread::spawn(move || {
-        recv_messages(&mut ws, &mut f)
-            .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
+        move || -> Result<(), HErr> {
+            loop {
+                catchup(&mut ws)?.execute(&mut f)?;
+            }
+        }()
+        .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
         CAUGHT_UP.store(false, Ordering::Release);
     });
 
     Ok(())
 }
 
-fn catchup<S: websocket::stream::Stream, F: FnMut(Notification)>(
-    ws: &mut wsclient::Client<S>,
-    f: &mut F,
-) -> Result<(), HErr> {
+fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
     use catchup::*;
+
+    let mut ev = Event::default();
 
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            handle_push(push)?.execute(f)?;
+            ev.merge(handle_push(push)?);
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
 
-    CAUGHT_UP.store(true, Ordering::Release);
-
-    for (tag, cid, content) in pending::get_pending()? {
-        send_cmessage(cid, &content)?;
-        pending::remove_pending(tag)?;
-    }
-
-    Ok(())
-}
-
-fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
-    ws: &mut wsclient::Client<S>,
-    f: &mut F,
-) -> Result<(), HErr> {
-    loop {
-        let next = sock_get_msg(ws)?;
-        let ev = handle_push(&next)?;
-        ev.execute(f)?;
-    }
+    Ok(ev)
 }
 
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
-    let res = ws.recv_message()?;
-    let parsed = serde_cbor::from_slice(websocket::message::Message::from(res).payload.as_ref())?;
-    Ok(parsed)
+    let len;
+
+    loop {
+        let maybe_len = sock_get_block(ws)?;
+        sock_send_msg(ws, &maybe_len)?;
+        match sock_get_block(ws)? {
+            PacketResponse::Success => {
+                len = maybe_len;
+                break;
+            }
+            PacketResponse::Retry => {}
+        }
+    }
+
+    loop {
+        let mut packets = Vec::with_capacity(len as usize);
+        for _ in 0..len {
+            packets.push(sock_get_block(ws)?);
+        }
+        match Packet::collect(&packets) {
+            Some(v) => {
+                // TODO: consider doing this later?
+                // or maybe having a callback that has to succeeed here?
+                // after the server receives this, it *will* delete the message,
+                // so I'm inclined to be damn sure we're done with it
+                sock_send_msg(ws, &PacketResponse::Success)?;
+                return Ok(serde_cbor::from_slice(&v)?);
+            }
+            None => {
+                sock_send_msg(ws, &PacketResponse::Retry)?;
+            }
+        }
+    }
+}
+
+fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>,
+) -> Result<T, HErr> {
+    loop {
+        match ws.recv_message()? {
+            WMessage::Binary(v) => return Ok(serde_cbor::from_slice(&v)?),
+            _ => {}
+        }
+    }
 }
 
 fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    use websocket::message::OwnedMessage;
-    let m = OwnedMessage::Binary(serde_cbor::to_vec(t)?);
+    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
 }
@@ -246,6 +280,7 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 }
 
 /// An event. These are produced in response a message being received from the server.
+#[derive(Debug)]
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
@@ -286,65 +321,72 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
-    match cm.open()? {
-        NewKey(nk) => crate::contact_keys::add_keys(cm.from().uid, &[nk.0])?,
-        DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
-        AddedToConvo(ac) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            let cid = ac.cid;
+    let cid = cm.cid();
 
-            let title = ac.title;
+    let msgs = cm.open()?;
 
-            let mut conv_builder = crate::conversation::ConversationBuilder::new();
-            conv_builder.conversation_id(cid);
+    for (msg, from) in msgs {
+        match msg {
+            NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
+            DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
+            AddedToConvo(ac) => {
+                let mut db = crate::db::Database::get()?;
+                let tx = db.transaction()?;
+                let mut cid = ac.cid;
 
-            if let Some(title) = title {
-                conv_builder.title(title);
-            }
+                let title = ac.title;
 
-            conv_builder.add_with_tx(&tx)?;
-            crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
-            tx.commit()?;
-            ev.notifications.push(Notification::NewConversation(cid));
-        }
-        ContactReqAck(cr) => ev.notifications.push(Notification::AddContactResponse(
-            cm.cid(),
-            cm.from().uid,
-            cr.0,
-        )),
-        NewMembers(nm) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            crate::members::add_members_with_tx(&tx, cm.cid(), &nm.0)?;
-            tx.commit()?;
-        }
-        Msg(msg) => {
-            let cmessages::Msg { mid, content, op } = msg;
+                let mut conv_builder = crate::conversation::ConversationBuilder::new();
+                conv_builder.conversation_id(cid);
 
-            match content {
-                cmessages::Message::Text(body) => {
-                    crate::message::add_message(
-                        Some(mid),
-                        cm.from().uid,
-                        &cm.cid(),
-                        &body,
-                        Some(ts),
-                        None,
-                        &op,
-                    )?;
-                    ev.notifications.push(Notification::NewMsg(mid, cm.cid()));
-                    ev.replies.push((cm.cid(), form_ack(mid)?));
+                if let Some(title) = title {
+                    conv_builder.title(title);
                 }
-                cmessages::Message::Blob(_) => unimplemented!(),
+
+                conv_builder.add_with_tx(&tx)?;
+                crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
+                tx.commit()?;
+
+                cid.store_genesis(ac.gen)?;
+
+                ev.notifications.push(Notification::NewConversation(cid));
             }
-        }
-        Ack(ack) => {
-            crate::message::add_receipt(ack.of, cm.from().uid, ack.stat)?;
-            ev.notifications.push(Notification::MsgReceipt {
-                mid: ack.of,
-                cid: cm.cid(),
-            });
+            ContactReqAck(cr) => ev
+                .notifications
+                .push(Notification::AddContactResponse(cid, from.uid, cr.0)),
+            NewMembers(nm) => {
+                let mut db = crate::db::Database::get()?;
+                let tx = db.transaction()?;
+                crate::members::add_members_with_tx(&tx, cid, &nm.0)?;
+                tx.commit()?;
+            }
+            Msg(msg) => {
+                let cmessages::Msg { mid, content, op } = msg;
+
+                match content {
+                    cmessages::Message::Text(body) => {
+                        crate::message::add_message(
+                            Some(mid),
+                            from.uid,
+                            &cid,
+                            &body,
+                            Some(ts),
+                            None,
+                            &op,
+                        )?;
+                        ev.notifications.push(Notification::NewMsg(mid, cid));
+                        ev.replies.push((cid, form_ack(mid)?));
+                    }
+                    cmessages::Message::Blob(_) => unimplemented!(),
+                }
+            }
+            Ack(ack) => {
+                crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
+                ev.notifications.push(Notification::MsgReceipt {
+                    mid: ack.of,
+                    cid: cid,
+                });
+            }
         }
     }
 
@@ -354,24 +396,33 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
 fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
+    let (from, msg) = msg.open()?;
+
     match msg {
-        DeviceMessage::ContactReq(cr) => {
-            crate::contact::ContactBuilder::new(cr.uid)
-                .pairwise_conversation(cr.cid)
-                .add()?;
-            ev.notifications
-                .push(Notification::NewContact(cr.uid, cr.cid));
-            ev.replies.push((
-                cr.cid,
-                ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
-            ))
+        DeviceMessageBody::ContactReq(cr) => {
+            let dmessages::ContactReq { gen, mut cid } = cr;
+            if gen.verify_sig(&from.did) {
+                crate::contact::ContactBuilder::new(from.uid)
+                    .pairwise_conversation(cid)
+                    .add()?;
+
+                cid.store_genesis(gen)?;
+
+                ev.notifications
+                    .push(Notification::NewContact(from.uid, cid));
+
+                ev.replies.push((
+                    cid,
+                    ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
+                ))
+            }
         }
     }
 
     Ok(ev)
 }
 
-fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
@@ -395,6 +446,14 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
+                // TODO: make chainmail API return hash on sealing so this won't be necessary
+                let hash = cm
+                    .body()
+                    .compute_hash()
+                    .expect("failed to compute block hash");
+
+                cid.mark_used([hash].iter())?;
+
                 pending::add_to_pending(cid, content)
             }
         }
@@ -403,25 +462,22 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
     }
 }
 
-fn send_dmessage(dids: &[sig::PublicKey], msg: &DeviceMessage) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(msg)?);
+fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
+    let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
 
-    let req = push_devices::Req {
-        to: dids.to_vec(),
-        msg,
-    };
+    let req = push_devices::Req { to: vec![to], msg };
 
     // TODO retry logic? for now, things go to the void
     match helper::push_devices(&req)? {
         push_devices::Res::Success => Ok(()),
         push_devices::Res::Missing(missing) => Err(HeraldError(format!(
-            "tried to send messages to nonexistent key_infos {:?}",
+            "tried to send messages to nonexistent keys {:?}",
             missing
         ))),
     }
 }
 
-fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
+fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
     let meta = match keys_of(vec![uid])?.pop() {
         Some((u, m)) => {
             if u == uid {
@@ -444,17 +500,24 @@ fn send_umessage(uid: UserId, msg: &DeviceMessage) -> Result<(), HErr> {
     }?;
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
+    for key in keys {
+        send_dmessage(key, msg)?;
+    }
 
-    send_dmessage(&keys, msg)
+    Ok(())
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
-    let req = dmessages::ContactReq {
-        uid: Config::static_id()?,
-        cid,
-    };
-    send_umessage(uid, &DeviceMessage::ContactReq(req))
+pub fn send_contact_req(uid: UserId, mut cid: ConversationId) -> Result<(), HErr> {
+    let kp = Config::static_keypair()?;
+
+    let gen = Genesis::new(kp.secret_key());
+
+    cid.store_genesis(gen.clone())?;
+
+    let req = dmessages::ContactReq { gen, cid };
+
+    send_umessage(uid, &DeviceMessageBody::ContactReq(req))
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
@@ -474,12 +537,18 @@ pub fn start_conversation(
         conv_builder.title(title.clone());
     }
 
-    let cid = conv_builder.add_with_tx(&tx)?;
+    let mut cid = conv_builder.add_with_tx(&tx)?;
+
     crate::members::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
 
+    let kp = crate::config::Config::static_keypair()?;
+    let gen = Genesis::new(kp.secret_key());
+    cid.store_genesis(gen.clone())?;
+
     let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
         members: Vec::from(members),
+        gen,
         cid,
         title: title.map(String::from),
     });

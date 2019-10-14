@@ -76,3 +76,17 @@ pub struct GlobalId {
     pub uid: UserId,
     pub did: sig::PublicKey,
 }
+
+impl std::convert::AsRef<sig::PublicKey> for GlobalId {
+    fn as_ref(&self) -> &sig::PublicKey {
+        &self.did
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PKIResponse {
+    Success,
+    BadSignature,
+    Redundant,
+    DeadKey,
+}

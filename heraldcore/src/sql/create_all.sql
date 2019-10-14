@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS chainkeys(
 
 CREATE TABLE IF NOT EXISTS pending_blocks(
   block_id INTEGER PRIMARY KEY NOT NULL,
+  global_id_bytes BLOB NOT NULL,
   block BLOB NOT NULL
 );
 
@@ -37,9 +38,18 @@ CREATE TABLE IF NOT EXISTS messages (
   -- send status of the message
   send_status INTEGER NOT NULL,
   -- read receipts as a map from user ids to receipt status, encoded as CBOR
-  receipts BLOB DEFAULT NULL,
+  receipts BLOB NOT NULL,
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS pending_receipts (
+  -- message id
+  msg_id BLOB NOT NULL,
+  -- user that sent the receipt
+  recipient TEXT NOT NULL,
+  -- receipt status of the message
+  status INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS replies (
