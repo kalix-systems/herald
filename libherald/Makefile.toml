@@ -1,3 +1,11 @@
 [tasks.docs]
 command = "cargo"
 args = ["rustdoc", "--open", "--", "--document-private-items"]
+
+[tasks.bindgen]
+script = [
+  '''
+  cd qt_bindgen
+  cargo run
+  '''
+]

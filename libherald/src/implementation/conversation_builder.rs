@@ -97,24 +97,20 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.model.end_remove_rows();
     }
 
-    // TODO: Does this have to be blocking?
-    fn finalize(&mut self) -> ffi::ConversationId {
+    fn finalize(&mut self) {
         self.list.push(self.local_id);
 
-        let cid = ret_err!(
-            heraldcore::network::start_conversation(self.list.as_slice(), self.title.take()),
-            ffi::NULL_CONV_ID.to_vec()
-        );
+        let list = std::mem::replace(&mut self.list, vec![]);
+        let title = self.title.take();
 
-        // send update to Conversations list
-        ret_err!(
-            CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)),
-            ffi::NULL_CONV_ID.to_vec()
-        );
+        ret_err!(std::thread::Builder::new().spawn(move || {
+            let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
 
-        ret_none!(conv_emit_new_data(), ffi::NULL_CONV_ID.to_vec());
+            // send update to Conversations list
+            ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)));
 
-        cid.to_vec()
+            ret_none!(conv_emit_new_data());
+        }));
     }
 
     fn set_title(&mut self, title: String) {

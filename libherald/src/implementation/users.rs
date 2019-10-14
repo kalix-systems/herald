@@ -31,7 +31,6 @@ pub struct Users {
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
-    //     try_poll: Arc<AtomicU8>,
     list: Vec<User>,
 }
 
@@ -309,8 +308,12 @@ impl UsersTrait for Users {
                     USER_DATA.insert(uid, new_contact);
                     self.model.end_insert_rows();
                 }
-                UsersUpdates::ReqResp(..) => {
-                    eprintln!("TODO: handle request responses?");
+                UsersUpdates::ReqResp(uid, accepted) => {
+                    if accepted {
+                        println!("PLACEHOLDER: {} accepted your contact request", uid);
+                    } else {
+                        println!("PLACEHOLDER: {} did not accept your contact request", uid);
+                    }
                 }
             }
         }

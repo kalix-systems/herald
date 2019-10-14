@@ -131,6 +131,31 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
     Ok(())
 }
 
+/// Get message read receipts by message id
+pub fn get_message_receipts(
+    msg_id: &MsgId,
+) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    let db = Database::get()?;
+    get_message_receipts_db(&db, msg_id)
+}
+
+/// Get message read receipts by message id
+pub(crate) fn get_message_receipts_db(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> = {
+        let res = get_stmt.query_row(params![msg_id], |row| row.get::<_, Option<Vec<u8>>>(0))?;
+        match res {
+            Some(data) => Some(serde_cbor::from_slice(&data)?),
+            None => None,
+        }
+    };
+    Ok(receipts)
+}
+
+
 pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
     msg_id: MsgId,

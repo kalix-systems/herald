@@ -63,7 +63,7 @@ public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
-    Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
     Q_INVOKABLE bool removeMemberById(const QString& user_id);
     Q_INVOKABLE bool removeMemberByIndex(quint64 index);
@@ -237,7 +237,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE bool addToConversation(const QString& user_id);
+    Q_INVOKABLE bool addToConversation(const QString& id);
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
@@ -309,7 +309,6 @@ public:
     QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
     Q_INVOKABLE bool clearConversationHistory();
-    Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;

@@ -292,15 +292,18 @@ impl MembersTrait for Members {
         use MemberUpdate::*;
         for update in rx.try_iter() {
             match update {
-                ReqResp(uid, _accepted) => {
-                    // TODO use accepted somehow
-                    let matched = match USER_DATA.get(&uid) {
-                        Some(meta) => meta.matches(&self.filter),
-                        None => continue,
-                    };
+                ReqResp(uid, accepted) => {
+                    if accepted {
+                        let matched = match USER_DATA.get(&uid) {
+                            Some(meta) => meta.matches(&self.filter),
+                            None => continue,
+                        };
 
-                    let user = User { matched, id: uid };
-                    self.list.push(user);
+                        let user = User { matched, id: uid };
+                        self.list.push(user);
+                    } else {
+                        println!("PLACEHOLDER: {} is too good for your group chat", uid);
+                    }
                 }
             }
         }

@@ -368,7 +368,7 @@ pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn add_member(&mut self, user_id: String) -> bool;
-    fn finalize(&mut self) -> Vec<u8>;
+    fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
     fn remove_member_by_id(&mut self, user_id: String) -> bool;
     fn remove_member_by_index(&mut self, index: u64) -> bool;
@@ -437,11 +437,10 @@ pub unsafe extern "C" fn conversation_builder_add_member(ptr: *mut ConversationB
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
+pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder) -> () {
     let o = &mut *ptr;
     let r = o.finalize();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
+    r
 }
 
 #[no_mangle]
@@ -1224,7 +1223,7 @@ pub trait MembersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn add_to_conversation(&mut self, user_id: String) -> bool;
+    fn add_to_conversation(&mut self, id: String) -> bool;
     fn poll_update(&mut self) -> bool;
     fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -1357,11 +1356,11 @@ pub unsafe extern "C" fn members_filter_regex_set(ptr: *mut Members, v: bool) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: *const c_ushort, id_len: c_int) -> bool {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
-    let r = o.add_to_conversation(user_id);
+    let r = o.add_to_conversation(id);
     r
 }
 
@@ -1670,7 +1669,6 @@ pub trait MessagesTrait {
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
     fn last_status(&self) -> Option<u32>;
     fn clear_conversation_history(&mut self) -> bool;
-    fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> i64;
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
@@ -1822,13 +1820,6 @@ pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COpti
 pub unsafe extern "C" fn messages_clear_conversation_history(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
     let r = o.clear_conversation_history();
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_clear_conversation_view(ptr: *mut Messages) -> () {
-    let o = &mut *ptr;
-    let r = o.clear_conversation_view();
     r
 }
 
