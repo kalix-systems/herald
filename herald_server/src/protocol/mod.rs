@@ -1,12 +1,16 @@
 use crate::{prelude::*, store::*};
 use bytes::Buf;
 use dashmap::DashMap;
+use futures::stream::*;
 use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
     prelude::*,
-    sync::mpsc::{
-        unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
+    sync::{
+        mpsc::{
+            unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
+        },
+        oneshot,
     },
     timer::Timeout,
 };
@@ -14,6 +18,8 @@ use warp::{
     filters::ws::{self, WebSocket},
     Filter,
 };
+
+type WTx = SplitSink<WebSocket, ws::Message>;
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<Push>>,
@@ -41,25 +47,52 @@ impl State {
         Ok(Conn(self.pool.get().unwrap()))
     }
 
-    pub async fn handle_login(&'static self, mut ws: WebSocket) -> Result<(), Error> {
+    pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
         let mut store = self.new_connection()?;
 
-        let gid = login::login(&self.active, &mut store, &mut ws).await?;
+        let (mut wtx, mut wrx) = ws.split();
+        let (mut rtx, mut rrx) = channel();
+        let (close, closed) = oneshot::channel();
 
-        let (sender, receiver) = channel();
-        self.active.insert(gid.did, sender);
-        // TODO: handle this error somehow?
-        // for now we're just dropping it
+        tokio::spawn(async move {
+            while let Some(Ok(m)) = wrx.next().await {
+                if m.is_close() {
+                    break;
+                } else if m.is_binary() {
+                    if rtx.send(m.into_bytes()).await.is_err() {
+                        break;
+                    }
+                }
+            }
+
+            drop(close.send(()));
+        });
+
+        let gid = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
+
+        let (ptx, prx) = channel();
+
+        self.active.insert(gid.did, ptx);
+        tokio::spawn(async move {
+            drop(closed.await);
+            self.active.remove(&gid.did);
+        });
+
         let remaining = {
-            if catchup(gid.did, &mut store, &mut ws).await.is_ok() {
-                let mut receiver = receiver.timeout(Duration::from_secs(60));
+            // TODO: handle this error somehow?
+            // for now we're just dropping it
+            if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
+                .await
+                .is_ok()
+            {
+                let mut prx = prx.timeout(Duration::from_secs(60));
                 drop(
-                    self.send_pushes(&mut store, &mut ws, &mut receiver, gid.did)
+                    self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                         .await,
                 );
-                receiver.into_inner()
+                prx.into_inner()
             } else {
-                receiver
+                prx
             }
         };
 
@@ -189,21 +222,22 @@ impl State {
     async fn send_pushes(
         &self,
         store: &mut Conn,
-        ws: &mut WebSocket,
+        wtx: &mut WTx,
+        rrx: &mut Receiver<Vec<u8>>,
         rx: &mut Timeout<Receiver<Push>>,
         did: sig::PublicKey,
     ) -> Result<(), Error> {
         while let Some(p) = rx.next().await {
             match p {
                 Ok(p) => {
-                    if write_msg(&p, ws).await.is_err() {
+                    if write_msg(&p, wtx, rrx).await.is_err() {
                         self.active.remove(&did);
                         store.add_pending(vec![did], [p].iter())?;
                         break;
                     }
                 }
                 Err(_) => {
-                    ws.send(ws::Message::ping(vec![0u8]))
+                    wtx.send(ws::Message::ping(vec![0u8]))
                         .timeout(Duration::from_secs(5))
                         .await??;
                 }
@@ -214,7 +248,12 @@ impl State {
     }
 }
 
-async fn catchup(did: sign::PublicKey, s: &mut Conn, ws: &mut WebSocket) -> Result<(), Error> {
+async fn catchup(
+    did: sign::PublicKey,
+    s: &mut Conn,
+    wtx: &mut WTx,
+    rrx: &mut Receiver<Vec<u8>>,
+) -> Result<(), Error> {
     use catchup::*;
     let pending = s.get_pending(did)?;
 
@@ -223,15 +262,15 @@ async fn catchup(did: sign::PublicKey, s: &mut Conn, ws: &mut WebSocket) -> Resu
         // TODO: remove unnecessary memcpy here by using a draining chunk iterator?
         let msg = Catchup::Messages(Vec::from(chunk));
         loop {
-            write_msg(&msg, ws).await?;
+            write_msg(&msg, wtx, rrx).await?;
 
-            if CatchupAck(chunk.len() as u64) == read_msg(ws).await? {
+            if CatchupAck(chunk.len() as u64) == read_msg(rrx).await? {
                 break;
             }
         }
     }
 
-    write_msg(&Catchup::Done, ws).await?;
+    write_msg(&Catchup::Done, wtx, rrx).await?;
 
     s.expire_pending(did)?;
 
@@ -240,12 +279,12 @@ async fn catchup(did: sign::PublicKey, s: &mut Conn, ws: &mut WebSocket) -> Resu
 
 const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
 
-async fn read_msg<T>(ws: &mut WebSocket) -> Result<T, Error>
+async fn read_msg<T>(rx: &mut Receiver<Vec<u8>>) -> Result<T, Error>
 where
     T: serde::de::DeserializeOwned,
 {
-    let m = ws.next().await.ok_or(LoginFailed)??;
-    let t = serde_cbor::from_slice::<T>(m.as_bytes())?;
+    let m = rx.next().await.ok_or(StreamDied)?;
+    let t = serde_cbor::from_slice(&m)?;
     Ok(t)
 }
 
@@ -253,7 +292,7 @@ fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
     Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
 }
 
-async fn write_msg<T>(t: &T, ws: &mut WebSocket) -> Result<(), Error>
+async fn write_msg<T>(t: &T, wtx: &mut WTx, rrx: &mut Receiver<Vec<u8>>) -> Result<(), Error>
 where
     T: Serialize,
 {
@@ -262,15 +301,15 @@ where
     let len = packets.len() as u64;
 
     loop {
-        ws.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+        wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
 
-        if len == read_msg::<u64>(ws).timeout(TIMEOUT_DUR).await?? {
-            ws.send(ser_msg(&PacketResponse::Success)?)
+        if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
+            wtx.send(ser_msg(&PacketResponse::Success)?)
                 .timeout(TIMEOUT_DUR)
                 .await??;
             break;
         } else {
-            ws.send(ser_msg(&PacketResponse::Retry)?)
+            wtx.send(ser_msg(&PacketResponse::Retry)?)
                 .timeout(TIMEOUT_DUR)
                 .await??;
         }
@@ -278,10 +317,10 @@ where
 
     loop {
         for packet in packets.iter() {
-            ws.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+            wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
         }
 
-        match read_msg(ws).timeout(TIMEOUT_DUR).await?? {
+        match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {
             PacketResponse::Success => break,
             PacketResponse::Retry => {}
         }

@@ -19,6 +19,7 @@ pub enum Error {
     RegistrationFailed,
     BadSessionType(u8),
     TimedOut(tokio::timer::timeout::Elapsed),
+    StreamDied,
 }
 
 pub use Error::*;
