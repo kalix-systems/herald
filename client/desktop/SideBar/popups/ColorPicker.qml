@@ -7,7 +7,7 @@ import QtQuick.Window 2.13
 Window {
     id: colorWindow
     width: QmlCfg.popupWidth
-    height: 250
+    height: QmlCfg.popupHeight
     maximumHeight: height
     minimumHeight: height
     maximumWidth: width

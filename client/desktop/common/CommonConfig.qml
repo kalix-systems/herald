@@ -31,9 +31,19 @@ Item {
     readonly property int toolbarHeight: 40
     /// standard chat text size
     property int chatTextSize: 10
+    /// standard popup height and width
     property int popupWidth: 200
+    property int popupHeight: 250
+    /// standard config width and height
     property int configWidth: 600
     property int configHeight: 200
+    /// standard z values
+    property int overlayZ: 10
+    property int underlayZ: -1
+    /// standard avatar size
+    property int avatarSize: 45
+    /// standard conversation/contact height
+    property int convoHeight: 55
 
     /// user settable cfg
     property int theme: 0

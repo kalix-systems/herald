@@ -2,6 +2,7 @@ import QtQuick 2.13
 import "../common" as Common
 import Qt.labs.platform 1.1
 import LibHerald 1.0
+import QtQuick.Layouts 1.12
 
 MouseArea {
     id: chatBubbleHitbox
@@ -20,6 +21,10 @@ MouseArea {
         top: parent.top
     }
     // PAUL : this should be a row
+
+    RowLayout {
+        width: parent.width
+        height: parent.height
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
@@ -31,7 +36,7 @@ MouseArea {
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/options-icon.svg"
-        z: 10 // PAUL: DEMAGIC
+        z: QmlCfg.overlayZ
 
         onClicked: messageOptionsMenu.open()
 
@@ -68,5 +73,6 @@ MouseArea {
             chatTextArea.replyName = contactsModel.nameById(author)
             chatTextArea.state = "replystate"
         }
+    }
     }
 }

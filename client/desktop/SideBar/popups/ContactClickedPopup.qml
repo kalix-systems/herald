@@ -20,7 +20,7 @@ import "../popups/js/" as Popups
 
 /// --- displays a list of contacts
 
-// PAUL: make this do something again.
+//TODO: when UI design is set make this work
 Item {
     property alias optionsMenu: optionsMenu
     // GS: These should be bound to global scope. handled ENTIRELY
@@ -83,13 +83,11 @@ Item {
         }
     }
 
-    //color picker window
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        // PAUL: demagic this number.
-        width: 300
-        height: 100
+        width: QmlCfg.popupWidth
+        height: QmlCfg.popupHeight
 
         TextArea {
             id: entryField

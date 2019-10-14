@@ -13,8 +13,7 @@ ListView {
     delegate: Item {
         id: memberItem
 
-        //PAUL: Demagic this number
-        height: 55
+        height: QmlCfg.convoHeight
         width: parent.width
 
         Rectangle {
@@ -31,8 +30,7 @@ ListView {
         }
 
         Common.Avatar {
-            //PAUL: Demagic this number
-            size: 45
+            size: QmlCfg.avatarSize
             id: memberAvatar
             avatarLabel: contactsModel.nameById(memberId)
             labelGap: QmlCfg.smallMargin

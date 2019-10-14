@@ -64,12 +64,8 @@ Component {
                 id: searchText
                 focus: true
                 leftPadding: QmlCfg.smallMargin
-
-                // BNOTE: I don't think count works?
-                placeholderText: if (groupMemberSelect.count === 0)
-                                     "Add people"
-                                 else
-                                     ""
+                // replace this with a working length property
+                placeholderText: "Add people"
                 verticalAlignment: TextEdit.AlignVCenter
                 background: Rectangle {
                     color: QmlCfg.palette.mainColor

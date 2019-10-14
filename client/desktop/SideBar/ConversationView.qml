@@ -58,7 +58,7 @@ ListView {
         }
 
         visible: matched
-        height: visible ? 55 : 0
+        height: visible ? QmlCfg.convoHeight : 0
         width: parent.width
 
         Common.PlatonicRectangle {
@@ -77,7 +77,7 @@ ListView {
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
-                z: 10 // PAUL: unmagic all the z's
+                z: QmlCfg.overlayZ
                 anchors.fill: parent
                 onClicked: {
                     chatView.sourceComponent = childChatView
