@@ -78,9 +78,7 @@ fn errors() -> Object {
     };
 
     let functions = functions! {
-        mut {
-            nextError() => QString
-        }
+        mut nextError() => QString,
     };
 
     obj! {
@@ -90,23 +88,13 @@ fn errors() -> Object {
 
 fn herald_utils() -> Object {
     let functions = functions! {
-        immutable {
-            compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
-            isValidRandId(bs: QByteArray) => Bool
-        }
+        const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
+        const isValidRandId(bs: QByteArray) => Bool,
     };
 
     obj! {
         HeraldUtils: Obj::new().funcs(functions)
     }
-}
-
-fn toggle_filter_regex_func() -> Func<'static> {
-    Func::new(SimpleType::Bool).mutable()
-}
-
-fn poll_update_func() -> Func<'static> {
-    Func::new(SimpleType::Bool).mutable()
 }
 
 fn conv_id_prop() -> Prop {
@@ -157,11 +145,9 @@ fn conversations() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            removeConversation(row_index: QUint64) => Bool,
-            pollUpdate() => Bool,
-            toggleFilterRegex() => Bool
-        }
+        mut removeConversation(row_index: QUint64) => Bool,
+        mut pollUpdate() => Bool,
+        mut toggleFilterRegex() => Bool,
     };
 
     obj! {
@@ -178,13 +164,9 @@ fn network_handle() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            registerNewUser(user_id: QString) => Bool,
-            login() => Bool
-        }
-        immutable {
-            sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool
-        }
+        mut registerNewUser(user_id: QString) => Bool,
+        mut login() => Bool,
+        const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
     };
 
     obj! {
@@ -206,16 +188,12 @@ fn users() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            add(id: QString) => QByteArray,
-            pollUpdate() => Bool,
-            toggleFilterRegex() => Bool
-        }
-        immutable {
-            colorById(id: QString) => QUint32,
-            nameById(id: QString) => QString,
-            profilePictureById(id: QString) => QString
-        }
+        mut add(id: QString) => QByteArray,
+        mut pollUpdate() => Bool,
+        mut toggleFilterRegex() => Bool,
+        const colorById(id: QString) => QUint32,
+        const nameById(id: QString) => QString,
+        const profilePictureById(id: QString) => QString,
     };
 
     obj! {
@@ -241,12 +219,10 @@ fn members() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            addToConversation(id: QString) => Bool,
-            removeFromConversationByIndex(row_index: QUint64) => Bool,
-            pollUpdate() => Bool,
-            toggleFilterRegex() => Bool
-        }
+        mut addToConversation(id: QString) => Bool,
+        mut removeFromConversationByIndex(row_index: QUint64) => Bool,
+        mut pollUpdate() => Bool,
+        mut  toggleFilterRegex() => Bool,
     };
 
     obj! {
@@ -273,18 +249,14 @@ fn messages() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            sendMessage(body: QString) => Bool,
-            reply(body: QString, op: QByteArray) => Bool,
-            deleteMessage(row_index: QUint64) => Bool,
-            clearConversationHistory() => Bool,
-            pollUpdate() => Bool
-        }
-        immutable {
-            messageBodyById(msg_id: QByteArray) => QString,
-            messageAuthorById(msg_id: QByteArray) => QString,
-            indexById(msg_id: QByteArray) => Qint64
-        }
+        mut sendMessage(body: QString) => Bool,
+        mut reply(body: QString, op: QByteArray) => Bool,
+        mut deleteMessage(row_index: QUint64) => Bool,
+        mut clearConversationHistory() => Bool,
+        mut pollUpdate() => Bool,
+        const messageBodyById(msg_id: QByteArray) => QString,
+        const messageAuthorById(msg_id: QByteArray) => QString,
+        const indexById(msg_id: QByteArray) => Qint64,
     };
 
     obj! {
@@ -314,14 +286,12 @@ fn conversation_builder() -> Object {
     };
 
     let funcs = functions! {
-        mut {
-            addMember(user_id: QString) => Bool,
-            removeMemberById(user_id: QString) => Bool,
-            removeMemberByIndex(index: QUint64) => Bool,
-            removeLast() => Void,
-            setTitle(title: QString) => Void,
-            finalize() => Void
-        }
+        mut addMember(user_id: QString) => Bool,
+        mut removeMemberById(user_id: QString) => Bool,
+        mut removeMemberByIndex(index: QUint64) => Bool,
+        mut removeLast() => Void,
+        mut setTitle(title: QString) => Void,
+        mut finalize() => Void,
     };
 
     obj! {
