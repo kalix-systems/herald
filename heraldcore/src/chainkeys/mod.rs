@@ -1,7 +1,12 @@
 use crate::{db::Database, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::ChainError};
+use herald_common::sign::PublicKey;
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
+
+pub struct BlockStoreSigner(pub(crate) herald_common::sign::PublicKey);
+type RawBlock = Vec<u8>;
+type RawSigner = Vec<u8>;
 
 fn raw_store_key(
     tx: &rusqlite::Transaction,
@@ -23,12 +28,19 @@ fn raw_remove_block_dependencies(
     Ok(())
 }
 
-fn raw_pop_unblocked_blocks(tx: &rusqlite::Transaction) -> Result<Vec<Vec<u8>>, HErr> {
+fn raw_pop_unblocked_blocks(
+    tx: &rusqlite::Transaction,
+) -> Result<Vec<(RawBlock, RawSigner)>, HErr> {
     let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
 
     let res = get_blocks_stmt
-        .query_map(NO_PARAMS, |row| row.get::<_, Vec<u8>>(0))?
-        .map(|block_bytes| Ok(block_bytes?))
+        .query_map(NO_PARAMS, |row| {
+            Ok((row.get::<_, RawBlock>(0)?, row.get::<_, RawSigner>(1)?))
+        })?
+        .map(|res| {
+            let (block_bytes, signer_bytes) = res?;
+            Ok((block_bytes, signer_bytes))
+        })
         .collect();
 
     let mut stmt = tx.prepare(include_str!("sql/remove_pending_blocks.sql"))?;
@@ -42,7 +54,7 @@ fn store_key(
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
-) -> Result<Vec<Block>, HErr> {
+) -> Result<Vec<(Block, BlockStoreSigner)>, HErr> {
     // store key
     raw_store_key(&tx, cid, hash.as_ref(), key.as_ref())?;
 
@@ -52,7 +64,12 @@ fn store_key(
     // get blocks that are now available
     raw_pop_unblocked_blocks(&tx)?
         .into_iter()
-        .map(|block_bytes| Ok(serde_cbor::from_slice(&block_bytes)?))
+        .map(|(block_bytes, signer_bytes)| {
+            Ok((
+                serde_cbor::from_slice(&block_bytes)?,
+                BlockStoreSigner(PublicKey::from_slice(&signer_bytes).ok_or(HErr::NoneError)?),
+            ))
+        })
         .collect()
 }
 
@@ -145,10 +162,21 @@ fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
     Ok(())
 }
 
+impl std::convert::AsRef<PublicKey> for BlockStoreSigner {
+    fn as_ref(&self) -> &PublicKey {
+        &self.0
+    }
+}
+
 impl BlockStore for ConversationId {
     type Error = HErr;
+    type Signer = BlockStoreSigner;
 
-    fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<Vec<Block>, Self::Error> {
+    fn store_key(
+        &mut self,
+        hash: BlockHash,
+        key: ChainKey,
+    ) -> Result<Vec<(Block, Self::Signer)>, Self::Error> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
         let blocks = store_key(&tx, *self, hash, key);
@@ -183,7 +211,12 @@ impl BlockStore for ConversationId {
         get_unused(&db, *self)
     }
 
-    fn add_pending(&self, block: Block, awaiting: Vec<BlockHash>) -> Result<(), Self::Error> {
+    fn add_pending(
+        &self,
+        signer: &Self::Signer,
+        block: Block,
+        awaiting: Vec<BlockHash>,
+    ) -> Result<(), Self::Error> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
 
