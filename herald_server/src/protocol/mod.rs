@@ -255,24 +255,27 @@ async fn catchup(
     rrx: &mut Receiver<Vec<u8>>,
 ) -> Result<(), Error> {
     use catchup::*;
-    let pending = s.get_pending(did)?;
 
-    // TCP over TCP...
-    for chunk in pending.chunks(CHUNK_SIZE) {
-        // TODO: remove unnecessary memcpy here by using a draining chunk iterator?
-        let msg = Catchup::Messages(Vec::from(chunk));
-        loop {
-            write_msg(&msg, wtx, rrx).await?;
+    loop {
+        let pending = s.get_pending(did, CHUNK_SIZE)?;
+        if pending.is_empty() {
+            break;
+        } else {
+            let len = pending.len() as u64;
+            let msg = Catchup::Messages(pending);
 
-            if CatchupAck(chunk.len() as u64) == read_msg(rrx).await? {
-                break;
+            loop {
+                write_msg(&msg, wtx, rrx).await?;
+
+                if CatchupAck(len) == read_msg(rrx).await? {
+                    s.expire_pending(did, CHUNK_SIZE)?;
+                    break;
+                }
             }
         }
     }
 
     write_msg(&Catchup::Done, wtx, rrx).await?;
-
-    s.expire_pending(did)?;
 
     Ok(())
 }

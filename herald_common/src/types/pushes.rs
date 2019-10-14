@@ -46,7 +46,7 @@ pub mod login {
 pub mod catchup {
     use super::*;
 
-    pub const CHUNK_SIZE: usize = 256;
+    pub const CHUNK_SIZE: u32 = 256;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub enum Catchup {
