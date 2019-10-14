@@ -257,7 +257,7 @@ async fn catchup(
                 write_msg(&msg, wtx, rrx).await?;
 
                 if CatchupAck(len) == read_msg(rrx).await? {
-                    s.expire_pending(did, CHUNK_SIZE)?;
+                    s.expire_pending(did, len as u32)?;
                     break;
                 }
             }
