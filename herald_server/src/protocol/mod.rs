@@ -42,33 +42,31 @@ impl State {
     }
 
     pub async fn handle_login(&'static self, mut ws: WebSocket) -> Result<(), Error> {
-        let mut con = self.new_connection()?;
-        let gid = login::login(&self.active, &mut con, &mut ws).await?;
-        self.add_active(gid.did, ws).await?;
-        Ok(())
-    }
-
-    pub async fn add_active(
-        &'static self,
-        did: sig::PublicKey,
-        mut ws: WebSocket,
-    ) -> Result<(), Error> {
         let mut store = self.new_connection()?;
+
+        let gid = login::login(&self.active, &mut store, &mut ws).await?;
+
         let (sender, receiver) = channel();
-        self.active.insert(did, sender);
+        self.active.insert(gid.did, sender);
         // TODO: handle this error somehow?
         // for now we're just dropping it
-        if catchup(did, &mut store, &mut ws).await.is_ok() {
-            let mut receiver = receiver.timeout(Duration::from_secs(60));
-            drop(
-                self.send_pushes(&mut store, &mut ws, &mut receiver, did)
-                    .await,
-            );
-            archive_pushes(&mut store, receiver.into_inner(), did).await?;
-        } else {
-            self.active.remove(&did);
-            archive_pushes(&mut store, receiver, did).await?;
-        }
+        let remaining = {
+            if catchup(gid.did, &mut store, &mut ws).await.is_ok() {
+                let mut receiver = receiver.timeout(Duration::from_secs(60));
+                drop(
+                    self.send_pushes(&mut store, &mut ws, &mut receiver, gid.did)
+                        .await,
+                );
+                receiver.into_inner()
+            } else {
+                receiver
+            }
+        };
+
+        self.active.remove(gid.did);
+        let pending: Vec<Push> = remaining.collect().await;
+
+        store.add_pending(vec![gid.did], pending.iter())?;
 
         Ok(())
     }
@@ -214,17 +212,6 @@ impl State {
 
         Ok(())
     }
-}
-
-async fn archive_pushes<Rx>(store: &mut Conn, mut rx: Rx, to: sig::PublicKey) -> Result<(), Error>
-where
-    Rx: Stream<Item = Push> + Unpin,
-{
-    while let Some(p) = rx.next().await {
-        // TODO: handle this error, add the rest?
-        store.add_pending(vec![to], [p].iter())?;
-    }
-    Ok(())
 }
 
 async fn catchup(did: sign::PublicKey, s: &mut Conn, ws: &mut WebSocket) -> Result<(), Error> {
