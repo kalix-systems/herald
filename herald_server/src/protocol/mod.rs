@@ -63,7 +63,7 @@ impl State {
             }
         };
 
-        self.active.remove(gid.did);
+        self.active.remove(&gid.did);
         let pending: Vec<Push> = remaining.collect().await;
 
         store.add_pending(vec![gid.did], pending.iter())?;
