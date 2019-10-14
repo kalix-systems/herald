@@ -28,7 +28,6 @@ Rectangle {
 
     Common.Avatar {
         id: conversationItemAvatar
-        // PAUL: convert to device independent size this is magic.
         size: QmlCfg.avatarSize
         labeled: isContact
         labelGap: QmlCfg.smallMargin

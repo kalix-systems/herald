@@ -5,7 +5,6 @@ import QtGraphicalEffects 1.12
 //PAUL: demagic all numbers and colors
 Item {
     id: maskShape
-    //PAUL: demagic all numbers and colors
     readonly property color pickerColor: "light gray"
     readonly property int edgeRadius: 10
     readonly property color pickerClickColor: Qt.lighter("light gray", 1.5)

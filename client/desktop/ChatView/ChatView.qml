@@ -9,8 +9,6 @@ import "./js/ChatTextAreaUtils.mjs" as CTUtils
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 
-// PAUL : this whole
-//KAAVYA: wat
 Pane {
     id: chatPane
     padding: 0

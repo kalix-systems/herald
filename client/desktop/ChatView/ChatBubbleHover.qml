@@ -6,8 +6,7 @@ import QtQuick.Layouts 1.12
 
 MouseArea {
     id: chatBubbleHitbox
-    // PAUL: demagic the Z
-    z: -1
+    z: QmlCfg.underlayZ
     propagateComposedEvents: true
     hoverEnabled: true
     // KAAVYA: there has to be a better way to do this.
@@ -22,9 +21,6 @@ MouseArea {
     }
     // PAUL : this should be a row
 
-    RowLayout {
-        width: parent.width
-        height: parent.height
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
@@ -74,5 +70,5 @@ MouseArea {
             chatTextArea.state = "replystate"
         }
     }
-    }
+
 }
