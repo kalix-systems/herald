@@ -1,4 +1,5 @@
 use crate::{
+    chainkeys,
     config::Config,
     errors::HErr::{self, *},
     pending,
@@ -422,7 +423,7 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
     Ok(ev)
 }
 
-fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
@@ -452,10 +453,7 @@ fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> 
                     .compute_hash()
                     .expect("failed to compute block hash");
 
-                // TODO: delete key instead of marking it used
-                // I don't understand why this works and del_key doesn't
-                cid.mark_used([hash].iter())?;
-                // chainkeys::del_key(cid, hash)?;
+                chainkeys::del_key(cid, hash)?;
 
                 pending::add_to_pending(cid, content)
             }
