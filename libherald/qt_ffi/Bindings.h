@@ -58,12 +58,10 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(QString title READ title NOTIFY titleChanged FINAL)
     explicit ConversationBuilder(bool owned, QObject *parent);
 public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder();
-    QString title() const;
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
@@ -97,7 +95,6 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
-    void titleChanged();
 };
 
 class Conversations : public QAbstractItemModel
@@ -240,7 +237,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE bool addToConversation(const QString& user_id);
+    Q_INVOKABLE bool addToConversation(const QString& id);
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();

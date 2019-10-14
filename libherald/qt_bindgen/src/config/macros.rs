@@ -31,6 +31,7 @@ macro_rules! objects {
 macro_rules! props {
     ( $($key:ident : $value:expr),* ) => {
         {
+            #[allow(unused)]
             use rust_qt_binding_generator::configuration::SimpleType::*;
             let mut _map = ::std::collections::BTreeMap::new();
             $(

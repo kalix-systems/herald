@@ -31,7 +31,6 @@ pub struct Users {
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
-    //     try_poll: Arc<AtomicU8>,
     list: Vec<User>,
 }
 

@@ -282,7 +282,6 @@ pub struct ConversationBuilderQObject {}
 
 pub struct ConversationBuilderEmitter {
     qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
-    title_changed: fn(*mut ConversationBuilderQObject),
     new_data_ready: fn(*mut ConversationBuilderQObject),
 }
 
@@ -298,19 +297,12 @@ impl ConversationBuilderEmitter {
     pub fn clone(&mut self) -> ConversationBuilderEmitter {
         ConversationBuilderEmitter {
             qobject: self.qobject.clone(),
-            title_changed: self.title_changed,
             new_data_ready: self.new_data_ready,
         }
     }
     fn clear(&self) {
         let n: *const ConversationBuilderQObject = null();
         self.qobject.store(n as *mut ConversationBuilderQObject, Ordering::SeqCst);
-    }
-    pub fn title_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.title_changed)(ptr);
-        }
     }
     pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -375,7 +367,6 @@ impl ConversationBuilderList {
 pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
-    fn title(&self) -> Option<&str>;
     fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
@@ -396,7 +387,6 @@ pub trait ConversationBuilderTrait {
 #[no_mangle]
 pub extern "C" fn conversation_builder_new(
     conversation_builder: *mut ConversationBuilderQObject,
-    conversation_builder_title_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_new_data_ready: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_changed: fn(*mut ConversationBuilderQObject),
@@ -412,7 +402,6 @@ pub extern "C" fn conversation_builder_new(
 ) -> *mut ConversationBuilder {
     let conversation_builder_emit = ConversationBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_builder)),
-        title_changed: conversation_builder_title_changed,
         new_data_ready: conversation_builder_new_data_ready,
     };
     let model = ConversationBuilderList {
@@ -436,20 +425,6 @@ pub extern "C" fn conversation_builder_new(
 #[no_mangle]
 pub unsafe extern "C" fn conversation_builder_free(ptr: *mut ConversationBuilder) {
     Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_title_get(
-    ptr: *const ConversationBuilder,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.title();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
 }
 
 #[no_mangle]
@@ -1248,7 +1223,7 @@ pub trait MembersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn add_to_conversation(&mut self, user_id: String) -> bool;
+    fn add_to_conversation(&mut self, id: String) -> bool;
     fn poll_update(&mut self) -> bool;
     fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -1381,11 +1356,11 @@ pub unsafe extern "C" fn members_filter_regex_set(ptr: *mut Members, v: bool) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: *const c_ushort, id_len: c_int) -> bool {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
-    let r = o.add_to_conversation(user_id);
+    let r = o.add_to_conversation(id);
     r
 }
 

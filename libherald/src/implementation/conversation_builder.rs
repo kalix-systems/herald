@@ -113,10 +113,6 @@ impl ConversationBuilderTrait for ConversationBuilder {
         }));
     }
 
-    fn title(&self) -> Option<&str> {
-        self.title.as_ref().map(String::as_str)
-    }
-
     fn set_title(&mut self, title: String) {
         self.title.replace(title);
     }

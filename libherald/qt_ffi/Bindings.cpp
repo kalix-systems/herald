@@ -84,10 +84,6 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
-    inline void conversationBuilderTitleChanged(ConversationBuilder* o)
-    {
-        Q_EMIT o->titleChanged();
-    }
     inline void conversationsFilterChanged(Conversations* o)
     {
         Q_EMIT o->filterChanged();
@@ -302,7 +298,7 @@ bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation
 }
 
 extern "C" {
-    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*, void (*)(ConversationBuilder*),
+    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*,
         void (*)(const ConversationBuilder*),
         void (*)(ConversationBuilder*),
         void (*)(ConversationBuilder*),
@@ -316,7 +312,6 @@ extern "C" {
         void (*)(ConversationBuilder*, int, int),
         void (*)(ConversationBuilder*));
     void conversation_builder_free(ConversationBuilder::Private*);
-    void conversation_builder_title_get(const ConversationBuilder::Private*, QString*, qstring_set);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*);
     void conversation_builder_remove_last(ConversationBuilder::Private*);
@@ -1580,7 +1575,6 @@ ConversationBuilder::ConversationBuilder(bool /*owned*/, QObject *parent):
 ConversationBuilder::ConversationBuilder(QObject *parent):
     QAbstractItemModel(parent),
     m_d(conversation_builder_new(this,
-        conversationBuilderTitleChanged,
         [](const ConversationBuilder* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1634,12 +1628,6 @@ ConversationBuilder::~ConversationBuilder() {
     }
 }
 void ConversationBuilder::initHeaderData() {
-}
-QString ConversationBuilder::title() const
-{
-    QString v;
-    conversation_builder_title_get(m_d, &v, set_qstring);
-    return v;
 }
 bool ConversationBuilder::addMember(const QString& user_id)
 {
@@ -1941,9 +1929,9 @@ bool Members::filterRegex() const
 void Members::setFilterRegex(bool v) {
     members_filter_regex_set(m_d, v);
 }
-bool Members::addToConversation(const QString& user_id)
+bool Members::addToConversation(const QString& id)
 {
-    return members_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+    return members_add_to_conversation(m_d, id.utf16(), id.size());
 }
 bool Members::pollUpdate()
 {
