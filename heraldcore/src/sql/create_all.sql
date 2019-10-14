@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS chainkeys(
 
 CREATE TABLE IF NOT EXISTS pending_blocks(
   block_id INTEGER PRIMARY KEY NOT NULL,
+  global_id_bytes BLOB NOT NULL,
   block BLOB NOT NULL
 );
 

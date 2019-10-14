@@ -140,10 +140,14 @@ fn get_unused(
     Ok(pairs)
 }
 
-fn raw_add_pending_block(tx: &rusqlite::Connection, block_bytes: Vec<u8>) -> Result<i64, HErr> {
+fn raw_add_pending_block(
+    tx: &rusqlite::Connection,
+    signer_bytes: Vec<u8>,
+    block_bytes: Vec<u8>,
+) -> Result<i64, HErr> {
     let mut pending_blocks_stmt = tx.prepare(include_str!("sql/add_pending_block.sql"))?;
 
-    pending_blocks_stmt.execute(params![block_bytes])?;
+    pending_blocks_stmt.execute(params![signer_bytes, block_bytes])?;
 
     Ok(tx.last_insert_rowid())
 }
@@ -214,8 +218,9 @@ impl BlockStore for ConversationId {
         let tx = db.transaction()?;
 
         let block_bytes = serde_cbor::to_vec(&block)?;
+        let signer_bytes = serde_cbor::to_vec(&signer)?;
 
-        let block_id = raw_add_pending_block(&tx, block_bytes)?;
+        let block_id = raw_add_pending_block(&tx, signer_bytes, block_bytes)?;
 
         raw_add_block_dependencies(&tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
 

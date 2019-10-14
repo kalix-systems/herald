@@ -22,14 +22,27 @@ fn raw_pending() {
     let chainkey2 = ChainKey::from_slice(&[2; CHAINKEY_BYTES]).expect(womp!());
 
     let dummy_block_bytes1 = &[0; 32];
+    let dummy_signer_bytes1 = &[0; 32];
     let dummy_block_bytes2 = &[1; 32];
+    let dummy_signer_bytes2 = &[1; 32];
     let dummy_block_bytes3 = &[2; 32];
+    let dummy_signer_bytes3 = &[2; 32];
 
-    let block_id1 = raw_add_pending_block(&tx, dummy_block_bytes1.to_vec()).expect(womp!());
+    let block_id1 = raw_add_pending_block(
+        &tx,
+        dummy_signer_bytes1.to_vec(),
+        dummy_block_bytes1.to_vec(),
+    )
+    .expect(womp!());
     raw_add_block_dependencies(&tx, block_id1, vec![blockhash1.as_ref()].into_iter())
         .expect(womp!());
 
-    let block_id2 = raw_add_pending_block(&tx, dummy_block_bytes2.to_vec()).expect(womp!());
+    let block_id2 = raw_add_pending_block(
+        &tx,
+        dummy_signer_bytes2.to_vec(),
+        dummy_block_bytes2.to_vec(),
+    )
+    .expect(womp!());
     raw_add_block_dependencies(
         &tx,
         block_id2,
@@ -37,7 +50,12 @@ fn raw_pending() {
     )
     .expect(womp!());
 
-    let block_id3 = raw_add_pending_block(&tx, dummy_block_bytes3.to_vec()).expect(womp!());
+    let block_id3 = raw_add_pending_block(
+        &tx,
+        dummy_signer_bytes3.to_vec(),
+        dummy_block_bytes3.to_vec(),
+    )
+    .expect(womp!());
     raw_add_block_dependencies(
         &tx,
         block_id3,
@@ -51,7 +69,10 @@ fn raw_pending() {
 
     let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
     assert_eq!(blocks.len(), 1);
-    assert_eq!(blocks[0], dummy_block_bytes1);
+    assert_eq!(
+        blocks[0],
+        (dummy_signer_bytes1.to_vec(), dummy_block_bytes1.to_vec())
+    );
 
     // free dummy_block_bytes2 and dummy_block_bytes3
     raw_store_key(&tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
@@ -59,8 +80,14 @@ fn raw_pending() {
 
     let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
     assert_eq!(blocks.len(), 2);
-    assert_eq!(blocks[0], dummy_block_bytes2);
-    assert_eq!(blocks[1], dummy_block_bytes3);
+    assert_eq!(
+        blocks[0],
+        (dummy_signer_bytes2.to_vec(), dummy_block_bytes2.to_vec())
+    );
+    assert_eq!(
+        blocks[1],
+        (dummy_signer_bytes3.to_vec(), dummy_block_bytes3.to_vec())
+    );
 
     tx.commit().expect(womp!());
 }
