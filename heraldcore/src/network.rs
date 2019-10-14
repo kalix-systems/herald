@@ -328,70 +328,74 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     let mut ev = Event::default();
 
     let cid = cm.cid();
-    let from = cm.from();
 
-    match cm.open()? {
-        NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
-        DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
-        AddedToConvo(ac) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            let mut cid = ac.cid;
+    let msgs = cm.open()?;
 
-            let title = ac.title;
+    for (msg, from) in msgs {
+        dbg!(from);
+        match msg {
+            NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
+            DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
+            AddedToConvo(ac) => {
+                let mut db = crate::db::Database::get()?;
+                let tx = db.transaction()?;
+                let mut cid = ac.cid;
 
-            let mut conv_builder = crate::conversation::ConversationBuilder::new();
-            conv_builder.conversation_id(cid);
+                let title = ac.title;
 
-            if let Some(title) = title {
-                conv_builder.title(title);
-            }
+                let mut conv_builder = crate::conversation::ConversationBuilder::new();
+                conv_builder.conversation_id(cid);
 
-            conv_builder.add_with_tx(&tx)?;
-            crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
-            tx.commit()?;
-
-            cid.store_genesis(ac.gen)?;
-
-            ev.notifications.push(Notification::NewConversation(cid));
-        }
-        ContactReqAck(cr) => ev
-            .notifications
-            .push(Notification::AddContactResponse(cid, from.uid, cr.0)),
-        NewMembers(nm) => {
-            let mut db = crate::db::Database::get()?;
-            let tx = db.transaction()?;
-            crate::members::add_members_with_tx(&tx, cid, &nm.0)?;
-            tx.commit()?;
-        }
-        Msg(msg) => {
-            let cmessages::Msg { mid, content, op } = msg;
-
-            match content {
-                cmessages::Message::Text(body) => {
-                    crate::message::add_message(
-                        Some(mid),
-                        from.uid,
-                        &cid,
-                        &body,
-                        Some(ts),
-                        None,
-                        &op,
-                    )?;
-                    ev.notifications.push(Notification::NewMsg(mid, cid));
-                    ev.replies.push((cid, form_ack(mid)?));
+                if let Some(title) = title {
+                    conv_builder.title(title);
                 }
-                cmessages::Message::Blob(_) => unimplemented!(),
+
+                conv_builder.add_with_tx(&tx)?;
+                crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
+                tx.commit()?;
+
+                cid.store_genesis(ac.gen)?;
+
+                ev.notifications.push(Notification::NewConversation(cid));
             }
-        }
-        Ack(ack) => {
-            // TODO: This will cause a query returned no rows error if the receipt is
-            // received after a message has been removed locally.
-            crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
-            ev.notifications.push(Notification::MsgReceipt {
-                mid: ack.of,
-                cid: cid,
-            });
+            ContactReqAck(cr) => ev
+                .notifications
+                .push(Notification::AddContactResponse(cid, from.uid, cr.0)),
+            NewMembers(nm) => {
+                let mut db = crate::db::Database::get()?;
+                let tx = db.transaction()?;
+                crate::members::add_members_with_tx(&tx, cid, &nm.0)?;
+                tx.commit()?;
+            }
+            Msg(msg) => {
+                let cmessages::Msg { mid, content, op } = msg;
+
+                match content {
+                    cmessages::Message::Text(body) => {
+                        crate::message::add_message(
+                            Some(mid),
+                            from.uid,
+                            &cid,
+                            &body,
+                            Some(ts),
+                            None,
+                            &op,
+                        )?;
+                        ev.notifications.push(Notification::NewMsg(mid, cid));
+                        ev.replies.push((cid, form_ack(mid)?));
+                    }
+                    cmessages::Message::Blob(_) => unimplemented!(),
+                }
+            }
+            Ack(ack) => {
+                // TODO: This will cause a query returned no rows error if the receipt is
+                // received after a message has been removed locally.
+                crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
+                ev.notifications.push(Notification::MsgReceipt {
+                    mid: ack.of,
+                    cid: cid,
+                });
+            }
         }
     }
 

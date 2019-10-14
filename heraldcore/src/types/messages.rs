@@ -291,19 +291,27 @@ impl ConversationMessage {
     }
 
     /// Opens the message.
-    pub fn open(self) -> Result<ConversationMessageBody, HErr> {
+    pub fn open(self) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
         let ConversationMessage {
             mut cid,
             from,
             body,
         } = self;
-        match dbg!(cid.open_block(&from, body))? {
-            DecryptionResult::Success(bvec, u) => {
-                assert!(u.is_empty());
-                Ok(dbg!(serde_cbor::from_slice(&bvec))?)
+
+        let mut out = Vec::new();
+        let mut blocks = vec![(body, from)];
+
+        while let Some((block, from)) = blocks.pop() {
+            match cid.open_block(&from, block)? {
+                DecryptionResult::Success(bvec, mut unlocked) => {
+                    blocks.append(&mut unlocked);
+                    out.push((serde_cbor::from_slice(&bvec)?, from));
+                }
+                DecryptionResult::Pending => {}
             }
-            DecryptionResult::Pending => unimplemented!(),
         }
+
+        Ok(out)
     }
 }
 
