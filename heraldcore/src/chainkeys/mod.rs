@@ -230,5 +230,24 @@ impl BlockStore for ConversationId {
     }
 }
 
+// TODO: make this actually work
+
+// fn raw_del_key(
+//     tx: &rusqlite::Transaction,
+//     cid: ConversationId,
+//     hash_bytes: &[u8],
+// ) -> Result<(), HErr> {
+//     let mut store_stmt = tx.prepare(include_str!("sql/del_key.sql"))?;
+//     store_stmt.execute(params![cid, hash_bytes])?;
+//     Ok(())
+// }
+
+// pub(crate) fn del_key(cid: ConversationId, hash: BlockHash) -> Result<(), HErr> {
+//     let mut db = Database::get()?;
+//     let tx = db.transaction()?;
+//     raw_del_key(&tx, cid, hash.as_ref())?;
+//     Ok(())
+// }
+
 #[cfg(test)]
 mod tests;
