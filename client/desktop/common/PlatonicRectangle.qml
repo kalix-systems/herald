@@ -21,7 +21,7 @@ Rectangle {
 
     Common.Divider {
         color: QmlCfg.palette.secondaryColor
-        anchor: parent.bottom
+        bottomAnchor: parent.bottom
         height: 2
     }
 
