@@ -1,10 +1,9 @@
 use crate::{db::Database, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::ChainError};
-use herald_common::sign::PublicKey;
+use herald_common::GlobalId;
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
-pub struct BlockStoreSigner(pub(crate) herald_common::sign::PublicKey);
 type RawBlock = Vec<u8>;
 type RawSigner = Vec<u8>;
 
@@ -54,7 +53,7 @@ fn store_key(
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
-) -> Result<Vec<(Block, BlockStoreSigner)>, HErr> {
+) -> Result<Vec<(Block, GlobalId)>, HErr> {
     // store key
     raw_store_key(&tx, cid, hash.as_ref(), key.as_ref())?;
 
@@ -67,7 +66,7 @@ fn store_key(
         .map(|(block_bytes, signer_bytes)| {
             Ok((
                 serde_cbor::from_slice(&block_bytes)?,
-                BlockStoreSigner(PublicKey::from_slice(&signer_bytes).ok_or(HErr::NoneError)?),
+                serde_cbor::from_slice(&signer_bytes)?,
             ))
         })
         .collect()
@@ -162,15 +161,9 @@ fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
     Ok(())
 }
 
-impl std::convert::AsRef<PublicKey> for BlockStoreSigner {
-    fn as_ref(&self) -> &PublicKey {
-        &self.0
-    }
-}
-
 impl BlockStore for ConversationId {
     type Error = HErr;
-    type Signer = BlockStoreSigner;
+    type Signer = GlobalId;
 
     fn store_key(
         &mut self,

@@ -1,5 +1,6 @@
 use super::*;
 use crate::{config::*, errors::HErr::*};
+use std::convert::AsRef;
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -296,12 +297,12 @@ impl ConversationMessage {
             from,
             body,
         } = self;
-        match dbg!(cid.open_block(&from.did, body))? {
+        match dbg!(cid.open_block(&from, body))? {
             DecryptionResult::Success(bvec, u) => {
                 assert!(u.is_empty());
                 Ok(dbg!(serde_cbor::from_slice(&bvec))?)
             }
-            DecryptionResult::Pending(_) => unimplemented!(),
+            DecryptionResult::Pending => unimplemented!(),
         }
     }
 }
