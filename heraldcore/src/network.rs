@@ -169,7 +169,7 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         return Err(LoginError);
     }
 
-    catchup(&mut ws, &mut f)?;
+    catchup(&mut ws)?.execute(&mut f)?;
 
     std::thread::spawn(move || {
         recv_messages(&mut ws, &mut f)
@@ -180,16 +180,15 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
     Ok(())
 }
 
-fn catchup<S: websocket::stream::Stream, F: FnMut(Notification)>(
-    ws: &mut wsclient::Client<S>,
-    f: &mut F,
-) -> Result<(), HErr> {
+fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
     use catchup::*;
+
+    let mut ev = Event::default();
 
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            handle_push(push)?.execute(f)?;
+            ev.merge(handle_push(push)?);
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
@@ -201,7 +200,7 @@ fn catchup<S: websocket::stream::Stream, F: FnMut(Notification)>(
         pending::remove_pending(tag)?;
     }
 
-    Ok(())
+    Ok(ev)
 }
 
 fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
