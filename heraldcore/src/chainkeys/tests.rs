@@ -34,6 +34,7 @@ fn raw_pending() {
         dummy_block_bytes1.to_vec(),
     )
     .expect(womp!());
+
     raw_add_block_dependencies(&tx, block_id1, vec![blockhash1.as_ref()].into_iter())
         .expect(womp!());
 
@@ -56,6 +57,7 @@ fn raw_pending() {
         dummy_block_bytes3.to_vec(),
     )
     .expect(womp!());
+
     raw_add_block_dependencies(
         &tx,
         block_id3,
