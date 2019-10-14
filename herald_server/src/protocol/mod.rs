@@ -22,7 +22,7 @@ use warp::{
 type WTx = SplitSink<WebSocket, ws::Message>;
 
 pub struct State {
-    pub active: DashMap<sig::PublicKey, Sender<Push>>,
+    pub active: DashMap<sig::PublicKey, Sender<()>>,
     pub pool: Pool,
 }
 
@@ -50,10 +50,20 @@ impl State {
     pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
         let mut store = self.new_connection()?;
 
+        // all the channels we'll need for plumbing
+        // first we split the websocket
         let (mut wtx, mut wrx) = ws.split();
+        // bytevec messages received from the socket
         let (mut rtx, mut rrx) = channel();
+        // push emitter which will be stored in the active sessions dashmap
+        let (ptx, prx) = channel();
+        // session-close emitter
         let (close, closed) = oneshot::channel();
 
+        // on graceful exit, notify runtime to close channel
+        // we set things up this way so that the rrx channel
+        // will be populated before we call login, hence before
+        // we know the gid
         tokio::spawn(async move {
             while let Some(Ok(m)) = wrx.next().await {
                 if m.is_close() {
@@ -70,36 +80,28 @@ impl State {
 
         let gid = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
-        let (ptx, prx) = channel();
-
         self.active.insert(gid.did, ptx);
+
+        // remove active session on graceful exit
         tokio::spawn(async move {
             drop(closed.await);
             self.active.remove(&gid.did);
         });
 
-        let remaining = {
-            // TODO: handle this error somehow?
-            // for now we're just dropping it
-            if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
-                .await
-                .is_ok()
-            {
-                let mut prx = prx.timeout(Duration::from_secs(60));
-                drop(
-                    self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
-                        .await,
-                );
-                prx.into_inner()
-            } else {
-                prx
-            }
-        };
+        // TODO: handle this error somehow?
+        // for now we're just dropping it
+        if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
+            .await
+            .is_ok()
+        {
+            let mut prx = prx.timeout(Duration::from_secs(60));
+            drop(
+                self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
+                    .await,
+            );
+        }
 
         self.active.remove(&gid.did);
-        let pending: Vec<Push> = remaining.collect().await;
-
-        store.add_pending(vec![gid.did], pending.iter())?;
 
         Ok(())
     }
@@ -167,20 +169,14 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        let mut to_pending = Vec::new();
+        con.add_pending(to_devs.clone(), [msg].iter())?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
                 let mut sender = s.clone();
-                if sender.send(msg.clone()).await.is_err() {
-                    to_pending.push(dev);
-                }
-            } else {
-                to_pending.push(dev);
+                drop(sender.send(()).await);
             }
         }
-
-        con.add_pending(to_pending, [msg].iter())?;
 
         Ok(())
     }
@@ -224,23 +220,16 @@ impl State {
         store: &mut Conn,
         wtx: &mut WTx,
         rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Receiver<Push>>,
+        rx: &mut Timeout<Receiver<()>>,
         did: sig::PublicKey,
     ) -> Result<(), Error> {
         while let Some(p) = rx.next().await {
-            match p {
-                Ok(p) => {
-                    if write_msg(&p, wtx, rrx).await.is_err() {
-                        self.active.remove(&did);
-                        store.add_pending(vec![did], [p].iter())?;
-                        break;
-                    }
-                }
-                Err(_) => {
-                    wtx.send(ws::Message::ping(vec![0u8]))
-                        .timeout(Duration::from_secs(5))
-                        .await??;
-                }
+            if p.is_ok() {
+                catchup(did, store, wtx, rrx).await?;
+            } else {
+                wtx.send(ws::Message::ping(vec![0u8]))
+                    .timeout(Duration::from_secs(5))
+                    .await??;
             }
         }
 

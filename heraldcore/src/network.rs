@@ -37,9 +37,6 @@ pub(crate) fn server_url(ext: &str) -> String {
     format!("http://{}/{}", *SERVER_ADDR, ext)
 }
 
-/// Query ID.
-pub type QID = [u8; 32];
-
 #[derive(Copy, Clone, Debug)]
 /// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
@@ -169,11 +166,25 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
         return Err(LoginError);
     }
 
-    catchup(&mut ws)?.execute(&mut f)?;
+    let ev = catchup(&mut ws)?;
+
+    CAUGHT_UP.store(true, Ordering::Release);
+
+    // clear pending
+    for (tag, cid, content) in pending::get_pending()? {
+        send_cmessage(cid, &content)?;
+        pending::remove_pending(tag)?;
+    }
+
+    ev.execute(&mut f)?;
 
     std::thread::spawn(move || {
-        recv_messages(&mut ws, &mut f)
-            .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
+        move || -> Result<(), HErr> {
+            loop {
+                catchup(&mut ws)?.execute(&mut f)?;
+            }
+        }()
+        .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
         CAUGHT_UP.store(false, Ordering::Release);
     });
 
@@ -193,25 +204,7 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
         sock_send_msg(ws, &CatchupAck(len))?;
     }
 
-    CAUGHT_UP.store(true, Ordering::Release);
-
-    for (tag, cid, content) in pending::get_pending()? {
-        send_cmessage(cid, &content)?;
-        pending::remove_pending(tag)?;
-    }
-
     Ok(ev)
-}
-
-fn recv_messages<S: websocket::stream::Stream, F: FnMut(Notification)>(
-    ws: &mut wsclient::Client<S>,
-    f: &mut F,
-) -> Result<(), HErr> {
-    loop {
-        let next = sock_get_msg(ws)?;
-        let ev = handle_push(&next)?;
-        ev.execute(f)?;
-    }
 }
 
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
@@ -332,7 +325,6 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     let msgs = cm.open()?;
 
     for (msg, from) in msgs {
-        dbg!(from);
         match msg {
             NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
             DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,

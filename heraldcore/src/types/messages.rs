@@ -286,7 +286,7 @@ impl ConversationMessage {
         let cbytes = serde_cbor::to_vec(content)?;
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
-        let body = dbg!(cid.seal_block(kp.secret_key(), cbytes))?;
+        let body = cid.seal_block(kp.secret_key(), cbytes)?;
         Ok(ConversationMessage { cid, from, body })
     }
 
@@ -299,7 +299,16 @@ impl ConversationMessage {
         } = self;
 
         let mut out = Vec::new();
-        let mut blocks = vec![(body, from)];
+
+        let mut blocks = {
+            match cid.open_block(&from, body)? {
+                DecryptionResult::Success(bvec, unlocked) => {
+                    out.push((serde_cbor::from_slice(&bvec)?, from));
+                    unlocked
+                }
+                DecryptionResult::Pending => Vec::new(),
+            }
+        };
 
         while let Some((block, from)) = blocks.pop() {
             match cid.open_block(&from, block)? {
@@ -307,7 +316,9 @@ impl ConversationMessage {
                     blocks.append(&mut unlocked);
                     out.push((serde_cbor::from_slice(&bvec)?, from));
                 }
-                DecryptionResult::Pending => {}
+                DecryptionResult::Pending => {
+                    panic!("this should never happen");
+                }
             }
         }
 
