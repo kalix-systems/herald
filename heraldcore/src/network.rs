@@ -1,5 +1,4 @@
 use crate::{
-    chainkeys,
     config::Config,
     errors::HErr::{self, *},
     pending,
@@ -423,7 +422,7 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
     Ok(ev)
 }
 
-fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
@@ -453,7 +452,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
                     .compute_hash()
                     .expect("failed to compute block hash");
 
-                chainkeys::del_key(cid, hash)?;
+                cid.mark_used([hash].iter())?;
 
                 pending::add_to_pending(cid, content)
             }
