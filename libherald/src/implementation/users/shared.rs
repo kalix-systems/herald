@@ -1,8 +1,10 @@
+use crate::interface::UsersEmitter as Emitter;
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
 use heraldcore::contact;
 use lazy_static::*;
+use parking_lot::Mutex;
 
 lazy_static! {
     /// Concurrent hashmap from `UserId` to `Contact`. Used to avoid data replication.
@@ -21,9 +23,6 @@ pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, contact::Conta
     USER_DATA.get_mut(uid)
 }
 
-use crate::interface::UsersEmitter as Emitter;
-use parking_lot::Mutex;
-
 /// User list updates
 pub enum UsersUpdates {
     /// A new user has been added
@@ -40,7 +39,7 @@ pub struct UserChannel {
 
 impl UserChannel {
     /// Creates new `UserChannel`
-    pub fn new() -> Self {
+    fn new() -> Self {
         let (tx, rx) = unbounded();
         Self { rx, tx }
     }
@@ -49,15 +48,21 @@ impl UserChannel {
 lazy_static! {
     /// Statically initialized instance of `UsersUpdates` used to pass notifications
     /// from the network.
-    pub static ref USER_CHANNEL: UserChannel = UserChannel::new();
+    pub(super) static ref USER_CHANNEL: UserChannel = UserChannel::new();
 
     /// Users list emitter, filled in when the users list is constructed
-    pub static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+    pub(super) static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+}
+
+pub fn send_user_update(update: UsersUpdates) -> Option<()> {
+    USER_CHANNEL.tx.send(update).ok()?;
+    users_emit_data_ready()?;
+    Some(())
 }
 
 /// Emits a signal to the QML runtime, returns `None` on failure.
 #[must_use]
-pub fn users_emit_data_ready() -> Option<()> {
+fn users_emit_data_ready() -> Option<()> {
     let mut lock = USER_EMITTER.lock();
     let emitter = lock.as_mut()?;
 

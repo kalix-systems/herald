@@ -39,7 +39,7 @@ pub mod errors {
         /// Errors emitter, filled in when the errors object is constructed
         pub static ref ERROR_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 
-        /// Data associated with `CONV_EMITTER`.
+        /// Data associated with `ERROR_EMITTER`.
         pub static ref ERROR_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
     }
 

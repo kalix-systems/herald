@@ -86,8 +86,7 @@ impl NotifHandler {
                 use shared::conv_global::*;
 
                 // add user
-                ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
-                ret_none!(users_emit_data_ready());
+                ret_none!(send_user_update(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
                 ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
@@ -103,8 +102,7 @@ impl NotifHandler {
                 use shared::conv_global::*;
 
                 // handle response
-                ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
-                ret_none!(users_emit_data_ready());
+                ret_none!(send_user_update(UsersUpdates::ReqResp(uid, accepted)));
 
                 // add conversation
                 if accepted {
