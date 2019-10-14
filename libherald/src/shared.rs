@@ -1,20 +1,12 @@
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use herald_common::UserId;
-use heraldcore::{
-    contact,
-    types::{ConversationId, MsgId},
-};
+use heraldcore::types::{ConversationId, MsgId};
 use lazy_static::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
 };
-
-lazy_static! {
-    /// Concurrent hashmap from `UserId` to `Contact`. Used to avoid data replication.
-    pub static ref USER_DATA: DashMap<UserId, contact::Contact> = DashMap::default();
-}
 
 /// Shared state related to error handling
 pub mod errors {
@@ -107,58 +99,6 @@ pub mod conv_global {
         let mut lock = CONV_EMITTER.lock();
         let emitter = lock.as_mut()?;
 
-        emitter.new_data_ready();
-        Some(())
-    }
-}
-
-/// Shared state related to global user list
-pub mod user_global {
-    use super::*;
-    use crate::interface::UsersEmitter as Emitter;
-    use parking_lot::Mutex;
-
-    /// User list updates
-    pub enum UsersUpdates {
-        /// A new user has been added
-        NewUser(UserId),
-        /// A contact request has been responded to
-        ReqResp(UserId, bool),
-    }
-
-    /// Channel for global user list updates
-    pub struct UserChannel {
-        pub(crate) rx: Receiver<UsersUpdates>,
-        pub(crate) tx: Sender<UsersUpdates>,
-    }
-
-    impl UserChannel {
-        /// Creates new `UserChannel`
-        pub fn new() -> Self {
-            let (tx, rx) = unbounded();
-            Self { rx, tx }
-        }
-    }
-
-    lazy_static! {
-        /// Statically initialized instance of `UsersUpdates` used to pass notifications
-        /// from the network.
-        pub static ref USER_CHANNEL: UserChannel = UserChannel::new();
-
-        /// Users list emitter, filled in when the users list is constructed
-        pub static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-
-        /// Data associated with `CONV_EMITTER`.
-        pub static ref USER_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
-    }
-
-    /// Emits a signal to the QML runtime, returns `None` on failure.
-    #[must_use]
-    pub fn users_emit_data_ready() -> Option<()> {
-        let mut lock = USER_EMITTER.lock();
-        let emitter = lock.as_mut()?;
-
-        USER_TRY_POLL.fetch_add(1, Ordering::Acquire);
         emitter.new_data_ready();
         Some(())
     }

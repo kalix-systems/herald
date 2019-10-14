@@ -82,7 +82,8 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             NewContact(uid, cid) => {
-                use shared::{conv_global::*, user_global::*};
+                use crate::implementation::users::shared::*;
+                use shared::conv_global::*;
 
                 // add user
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
@@ -98,7 +99,8 @@ impl NotifHandler {
                 ret_none!(conv_emit_new_data());
             }
             AddContactResponse(cid, uid, accepted) => {
-                use shared::{conv_global::*, user_global::*};
+                use crate::implementation::users::shared::*;
+                use shared::conv_global::*;
 
                 // handle response
                 ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));

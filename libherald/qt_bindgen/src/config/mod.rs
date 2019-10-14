@@ -124,11 +124,11 @@ fn filter_props() -> BTreeMap<String, Property> {
 }
 
 fn color_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QUint32).write()
+    ItemProp::new(SimpleType::QUint32)
 }
 
 fn picture_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QString).write().optional()
+    ItemProp::new(SimpleType::QString).optional()
 }
 
 fn conversations() -> Object {
@@ -139,9 +139,9 @@ fn conversations() -> Object {
        title: ItemProp::new(QString).write().optional(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
-       matched: matched_item_prop(),
-       picture: picture_item_prop(),
-       color: color_item_prop()
+       matched: matched_item_prop().write(),
+       picture: picture_item_prop().write(),
+       color: color_item_prop().write()
     };
 
     let funcs = functions! {
@@ -183,8 +183,8 @@ fn users() -> Object {
        pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
        status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       profilePicture: picture_item_prop().get_by_value(),
-       color: color_item_prop()
+       profilePicture: picture_item_prop().get_by_value().write(),
+       color: color_item_prop().write()
     };
 
     let funcs = functions! {
@@ -210,9 +210,9 @@ fn members() -> Object {
 
     let item_props = item_props! {
        userId: ItemProp::new(QString),
-       name: ItemProp::new(QString).get_by_value().write(),
+       name: ItemProp::new(QString).get_by_value(),
        pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
-       status: ItemProp::new(QUint8).write(),
+       status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
        color: color_item_prop()

@@ -1,16 +1,9 @@
 use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{members::*, USER_DATA},
+    ffi, implementation::users::shared::get_user, interface::*, ret_err, ret_none,
+    shared::members::*,
 };
 use herald_common::UserId;
-use heraldcore::{
-    abort_err,
-    contact::{self, ContactStatus},
-    types::*,
-    utils::SearchPattern,
-};
+use heraldcore::{abort_err, contact, types::*, utils::SearchPattern};
 use std::convert::{TryFrom, TryInto};
 
 type Emitter = MembersEmitter;
@@ -99,96 +92,36 @@ impl MembersTrait for Members {
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let inner = ret_none!(USER_DATA.get(uid), ffi::NULL_CONV_ID.to_vec());
+        let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
     /// Returns users name
     fn name(&self, row_index: usize) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        let inner = ret_none!(USER_DATA.get(uid), uid.to_string());
+        let inner = ret_none!(get_user(uid), uid.to_string());
 
         inner.name.clone()
-    }
-
-    /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: String) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-        ret_err!(contact::set_name(uid, name.as_str()), false);
-
-        // already checked
-        inner.name = name;
-        true
     }
 
     /// Returns profile picture
     fn profile_picture(&self, row_index: usize) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = USER_DATA.get(uid)?;
+        let inner = get_user(uid)?;
         inner.profile_picture.clone()
-    }
-
-    /// Sets profile picture.
-    ///
-    /// Returns bool indicating success.
-    fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-        let path = ret_err!(
-            contact::set_profile_picture(
-                uid,
-                crate::utils::strip_qrc(picture),
-                inner.profile_picture.as_ref().map(String::as_str),
-            ),
-            false
-        );
-
-        inner.profile_picture = path;
-        true
     }
 
     /// Returns user's color
     fn color(&self, row_index: usize) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(USER_DATA.get(&uid), 0);
+        let inner = ret_none!(get_user(&uid), 0);
         inner.color
-    }
-
-    /// Sets color
-    fn set_color(&mut self, row_index: usize, color: u32) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-
-        ret_err!(contact::set_color(uid, color), false);
-
-        inner.color = color;
-        true
     }
 
     fn status(&self, row_index: usize) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(USER_DATA.get(&uid), 0);
+        let inner = ret_none!(get_user(&uid), 0);
         inner.status as u8
-    }
-
-    fn set_status(&mut self, row_index: usize, status: u8) -> bool {
-        let status = ret_err!(ContactStatus::try_from(status), false);
-        let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
-
-        ret_err!(contact::set_status(uid, status), false);
-
-        inner.status = status;
-
-        if status == ContactStatus::Deleted {
-            self.model.begin_remove_rows(row_index, row_index);
-            self.list.remove(row_index);
-            USER_DATA.remove(&uid);
-            self.model.end_remove_rows();
-        }
-
-        true
     }
 
     fn matched(&self, row_index: usize) -> bool {
@@ -261,7 +194,7 @@ impl MembersTrait for Members {
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let contact = ret_none!(USER_DATA.get(&user_id), false);
+        let contact = ret_none!(get_user(&user_id), false);
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
@@ -293,7 +226,7 @@ impl MembersTrait for Members {
             match update {
                 ReqResp(uid, accepted) => {
                     if accepted {
-                        let matched = match USER_DATA.get(&uid) {
+                        let matched = match get_user(&uid) {
                             Some(meta) => meta.matches(&self.filter),
                             None => continue,
                         };
@@ -329,7 +262,7 @@ impl Members {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            let inner = ret_none!(USER_DATA.get(&contact.id));
+            let inner = ret_none!(get_user(&contact.id));
             contact.matched = inner.matches(&self.filter);
         }
         self.model

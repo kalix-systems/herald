@@ -1236,16 +1236,12 @@ pub trait MembersTrait {
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
-    fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
-    fn set_name(&mut self, index: usize, _: String) -> bool;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
     fn profile_picture(&self, index: usize) -> Option<String>;
-    fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
     fn status(&self, index: usize) -> u8;
-    fn set_status(&mut self, index: usize, _: u8) -> bool;
     fn user_id(&self, index: usize) -> &str;
 }
 
@@ -1421,14 +1417,6 @@ pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_set_data_color(
-    ptr: *mut Members, row: c_int,
-    v: u32,
-) -> bool {
-    (&mut *ptr).set_color(to_usize(row), v)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row)).into()
@@ -1452,17 +1440,6 @@ pub unsafe extern "C" fn members_data_name(
     let data = o.name(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_name(
-    ptr: *mut Members, row: c_int,
-    s: *const c_ushort, len: c_int,
-) -> bool {
-    let o = &mut *ptr;
-    let mut v = String::new();
-    set_string_from_utf16(&mut v, s, len);
-    o.set_name(to_usize(row), v)
 }
 
 #[no_mangle]
@@ -1492,33 +1469,9 @@ pub unsafe extern "C" fn members_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_set_data_profile_picture(
-    ptr: *mut Members, row: c_int,
-    s: *const c_ushort, len: c_int,
-) -> bool {
-    let o = &mut *ptr;
-    let mut v = String::new();
-    set_string_from_utf16(&mut v, s, len);
-    o.set_profile_picture(to_usize(row), Some(v))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_profile_picture_none(ptr: *mut Members, row: c_int) -> bool {
-    (&mut *ptr).set_profile_picture(to_usize(row), None)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn members_data_status(ptr: *const Members, row: c_int) -> u8 {
     let o = &*ptr;
     o.status(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_status(
-    ptr: *mut Members, row: c_int,
-    v: u8,
-) -> bool {
-    (&mut *ptr).set_status(to_usize(row), v)
 }
 
 #[no_mangle]

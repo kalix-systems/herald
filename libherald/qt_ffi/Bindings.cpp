@@ -655,17 +655,12 @@ extern "C" {
 
 extern "C" {
     quint32 members_data_color(const Members::Private*, int);
-    bool members_set_data_color(Members::Private*, int, quint32);
     bool members_data_matched(const Members::Private*, int);
     bool members_set_data_matched(Members::Private*, int, bool);
     void members_data_name(const Members::Private*, int, QString*, qstring_set);
-    bool members_set_data_name(Members::Private*, int, const ushort* s, int len);
     void members_data_pairwise_conversation_id(const Members::Private*, int, QByteArray*, qbytearray_set);
     void members_data_profile_picture(const Members::Private*, int, QString*, qstring_set);
-    bool members_set_data_profile_picture(Members::Private*, int, const ushort* s, int len);
-    bool members_set_data_profile_picture_none(Members::Private*, int);
     quint8 members_data_status(const Members::Private*, int);
-    bool members_set_data_status(Members::Private*, int, quint8);
     void members_data_user_id(const Members::Private*, int, QString*, qstring_set);
     void members_sort(Members::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -744,17 +739,6 @@ quint32 Members::color(int row) const
     return members_data_color(m_d, row);
 }
 
-bool Members::setColor(int row, quint32 value)
-{
-    bool set = false;
-    set = members_set_data_color(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 bool Members::matched(int row) const
 {
     return members_data_matched(m_d, row);
@@ -778,17 +762,6 @@ QString Members::name(int row) const
     return s;
 }
 
-bool Members::setName(int row, const QString& value)
-{
-    bool set = false;
-    set = members_set_data_name(m_d, row, value.utf16(), value.length());
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 QByteArray Members::pairwiseConversationId(int row) const
 {
     QByteArray b;
@@ -803,35 +776,9 @@ QString Members::profilePicture(int row) const
     return s;
 }
 
-bool Members::setProfilePicture(int row, const QString& value)
-{
-    bool set = false;
-    if (value.isNull()) {
-        set = members_set_data_profile_picture_none(m_d, row);
-    } else {
-    set = members_set_data_profile_picture(m_d, row, value.utf16(), value.length());
-    }
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 quint8 Members::status(int row) const
 {
     return members_data_status(m_d, row);
-}
-
-bool Members::setStatus(int row, quint8 value)
-{
-    bool set = false;
-    set = members_set_data_status(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 QString Members::userId(int row) const
@@ -909,29 +856,9 @@ bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVar
 bool Members::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.column() == 0) {
-        if (role == Qt::UserRole + 0) {
-            if (value.canConvert(qMetaTypeId<quint32>())) {
-                return setColor(index.row(), value.value<quint32>());
-            }
-        }
         if (role == Qt::UserRole + 1) {
             if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMatched(index.row(), value.value<bool>());
-            }
-        }
-        if (role == Qt::UserRole + 2) {
-            if (value.canConvert(qMetaTypeId<QString>())) {
-                return setName(index.row(), value.value<QString>());
-            }
-        }
-        if (role == Qt::UserRole + 4) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setProfilePicture(index.row(), value.value<QString>());
-            }
-        }
-        if (role == Qt::UserRole + 5) {
-            if (value.canConvert(qMetaTypeId<quint8>())) {
-                return setStatus(index.row(), value.value<quint8>());
             }
         }
     }

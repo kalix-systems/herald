@@ -1,9 +1,5 @@
-use crate::{
-    bounds_chk, ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{conv_global::*, USER_DATA},
-};
+use crate::implementation::users::shared::user_in_cache;
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::conv_global::*};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -52,7 +48,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         // You should not be able to add users
         // that you don't have as contacts.
-        if !USER_DATA.contains_key(&user_id) {
+        if !user_in_cache(&user_id) {
             return false;
         }
 
