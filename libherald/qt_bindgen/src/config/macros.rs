@@ -51,20 +51,6 @@ macro_rules! functions {
 }
 
 #[macro_export]
-macro_rules! functions_bak {
-    ( $($key:ident : $value:expr),* ) => {
-        {
-            use rust_qt_binding_generator::configuration::SimpleType::*;
-            let mut _map = ::std::collections::BTreeMap::new();
-            $(
-                let _ = _map.insert(stringify!($key).to_owned(), $value.build());
-            )*
-            _map
-        }
-    };
-}
-
-#[macro_export]
 macro_rules! objects {
     ( $($value:expr),* ) => {
         {
