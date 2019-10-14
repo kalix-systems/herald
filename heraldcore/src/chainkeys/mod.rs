@@ -81,11 +81,12 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     let mut missing: Vec<BlockHash> = Vec::new();
 
     for block in blocks.copied() {
-        match stmt.query_row(params![cid, block.as_ref()], |row| {
-            row.get::<_, Option<Vec<u8>>>(0)
-        })? {
+        match stmt
+            .query_map(params![cid, block.as_ref()], |row| row.get::<_, Vec<u8>>(0))?
+            .next()
+        {
             Some(k) => {
-                keys.insert(ChainKey::from_slice(k.as_slice()).unwrap());
+                keys.insert(ChainKey::from_slice(k?.as_slice()).unwrap());
             }
             None => {
                 missing.push(block);
