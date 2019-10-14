@@ -261,7 +261,7 @@ impl MembersTrait for Members {
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let contact = ret_err!(USER_DATA.get(&user_id), false);
+        let contact = ret_none!(USER_DATA.get(&user_id), false);
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
