@@ -1,3 +1,4 @@
+#![allow(unused)]
 use rust_qt_binding_generator::configuration::*;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
