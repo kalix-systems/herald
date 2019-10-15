@@ -109,19 +109,13 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        let verify_time = Utc::now();
-        let signer_time = self.timestamp;
+        let verify_time = dbg!(Utc::now().timestamp());
+        let signer_time = dbg!(self.timestamp.timestamp());
         let dat = compute_signing_data(self.data.as_ref(), signer_time);
-        if dbg!(
-            dbg!((dbg!(verify_time.timestamp()) >= dbg!(signer_time.timestamp())))
-                || dbg!(
-                    (dbg!((verify_time.timestamp() - signer_time.timestamp()).abs())
-                        <= TIMESTAMP_FUZZ)
-                )
-        ) {
+        if !check_ts(signer_time, verify_time) {
             SigValid::BadTime {
-                signer_time: signer_time.timestamp(),
-                verify_time: verify_time.timestamp(),
+                signer_time,
+                verify_time,
             }
         } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
             SigValid::BadSign
@@ -133,6 +127,10 @@ impl<T: AsRef<[u8]>> Signed<T> {
     pub fn signed_by(&self) -> &sign::PublicKey {
         &self.signed_by
     }
+}
+
+fn check_ts(signer_time: i64, verify_time: i64) -> bool {
+    (signer_time <= verify_time) || ((verify_time - signer_timer).abs() <= TIMESTAMP_FUZZ)
 }
 
 impl SigMeta {
@@ -153,12 +151,10 @@ impl SigMeta {
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
-        let verify_time = Utc::now();
-        let signer_time = self.timestamp;
+        let verify_time = dbg!(Utc::now().timestamp());
+        let signer_time = dbg!(self.timestamp.timestamp());
         let signed = compute_signing_data(msg, signer_time);
-        if (verify_time.timestamp() >= signer_time.timestamp())
-            || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
-        {
+        if !check_ts(signer_time, verify_time) {
             SigValid::BadTime {
                 signer_time: signer_time.timestamp(),
                 verify_time: verify_time.timestamp(),
