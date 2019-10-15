@@ -181,9 +181,24 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {
+        use register::*;
+
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
-        dbg!(ret_err!(network::register(uid), false));
-        true
+        match ret_err!(network::register(uid), false) {
+            Res::UIDTaken => {
+                eprintln!("UID taken!");
+                false
+            }
+            Res::KeyTaken => {
+                eprintln!("Key taken!");
+                false
+            }
+            Res::BadSig(s) => {
+                eprintln!("Bad sig: {:?}", s);
+                false
+            }
+            Res::Success => true,
+        }
     }
 
     fn login(&mut self) -> bool {
