@@ -125,10 +125,7 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let sig = kp.sign(*kp.public_key());
     let res = helper::register(&register::Req(uid, sig))?;
     // TODO: retry if this fails?
-    crate::config::ConfigBuilder::new()
-        .id(uid)
-        .keypair(kp)
-        .add()?;
+    crate::config::ConfigBuilder::new(uid, kp).add()?;
     Ok(res)
 }
 
@@ -162,10 +159,10 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
 
             match sock_get_msg(&mut ws)? {
                 LoginTokenResponse::Success => {}
-                e => return Err(GIDSpecFailed(e)),
+                e => return Err(SignInFailed(e)),
             }
         }
-        e => return Err(SignInFailed(e)),
+        e => return Err(GIDSpecFailed(e)),
     }
 
     let ev = catchup(&mut ws)?;

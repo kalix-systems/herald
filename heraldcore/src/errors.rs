@@ -30,10 +30,10 @@ pub enum HErr {
     /// Serialization or deserialization
     /// error
     CborError(serde_cbor::Error),
-
+    /// Global ID was either already active or involved a nonexistent user
     GIDSpecFailed(login::SignAsResponse),
+    /// Failed to sign in - either signature or timestamp was invalid
     SignInFailed(login::LoginTokenResponse),
-
     /// An HTTP request was dropped
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
