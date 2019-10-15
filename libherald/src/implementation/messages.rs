@@ -80,16 +80,12 @@ impl Messages {
 
         self.emit_last_changed();
 
-        use crate::shared::conv_global::*;
-
+        use crate::implementation::conversations::shared::*;
         // this should not return an error
-        ret_err!(
-            CONV_CHANNEL
-                .tx
-                .send(ConvUpdates::NewActivity(conversation_id)),
+        ret_none!(
+            push_conv_update(ConvUpdates::NewActivity(conversation_id)),
             Ok(())
         );
-        ret_none!(conv_emit_try_poll(), Ok(()));
 
         thread::Builder::new().spawn(move || {
             // TODO update send status?
@@ -338,13 +334,6 @@ impl MessagesTrait for Messages {
             .timestamp_millis()
     }
 
-    /// Clears the current view without modifying the underlying data
-    fn clear_conversation_view(&mut self) {
-        self.model.begin_reset_model();
-        self.list = Vec::new();
-        self.model.end_reset_model();
-    }
-
     /// Polls for updates
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, false);
@@ -399,9 +388,8 @@ impl MessagesTrait for Messages {
                         false
                     );
 
-                    // TODO: make this more efficient
-                    let db_msg = ret_err!(message::get_message(&mid), false);
-                    msg.receipts = db_msg.receipts;
+                    let receipts = ret_err!(message::get_message_receipts(&mid), false);
+                    msg.receipts = receipts;
 
                     self.model.data_changed(ix, ix);
                 }

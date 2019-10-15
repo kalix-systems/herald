@@ -19,14 +19,6 @@ pub struct PushMeta {
     pub timestamp: DateTime<Utc>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-pub enum PKIResponse {
-    Success,
-    BadSignature,
-    Redundant,
-    DeadKey,
-}
-
 pub mod login {
     use super::*;
 
@@ -54,7 +46,7 @@ pub mod login {
 pub mod catchup {
     use super::*;
 
-    pub const CHUNK_SIZE: usize = 256;
+    pub const CHUNK_SIZE: u32 = 256;
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub enum Catchup {

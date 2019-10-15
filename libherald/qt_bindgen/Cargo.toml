@@ -1,0 +1,9 @@
+[package]
+name = "qt_bindgen"
+version = "0.1.0"
+authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+license = "GPLv2"
+
+[dependencies]
+rust_qt_binding_generator = "0.3.4"

@@ -1,54 +1,87 @@
 use crate::{db::Database, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::ChainError};
+use herald_common::GlobalId;
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
+type RawBlock = Vec<u8>;
+type RawSigner = Vec<u8>;
+
+fn raw_store_key(
+    tx: &rusqlite::Transaction,
+    cid: ConversationId,
+    hash_bytes: &[u8],
+    key_bytes: &[u8],
+) -> Result<(), HErr> {
+    let mut store_stmt = tx.prepare(include_str!("sql/store_key.sql"))?;
+    store_stmt.execute(params![cid, hash_bytes, key_bytes])?;
+    Ok(())
+}
+
+fn raw_remove_block_dependencies(
+    tx: &rusqlite::Transaction,
+    hash_bytes: &[u8],
+) -> Result<(), HErr> {
+    let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
+    remove_deps_stmt.execute(params![hash_bytes])?;
+    Ok(())
+}
+
+fn raw_pop_unblocked_blocks(
+    tx: &rusqlite::Transaction,
+) -> Result<Vec<(RawBlock, RawSigner)>, HErr> {
+    let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
+
+    let res = get_blocks_stmt
+        .query_map(NO_PARAMS, |row| {
+            Ok((row.get::<_, RawBlock>(0)?, row.get::<_, RawSigner>(1)?))
+        })?
+        .map(|res| {
+            let (block_bytes, signer_bytes) = res?;
+            Ok((block_bytes, signer_bytes))
+        })
+        .collect();
+
+    let mut stmt = tx.prepare(include_str!("sql/remove_pending_blocks.sql"))?;
+    stmt.execute(NO_PARAMS)?;
+
+    res
+}
+
 fn store_key(
-    tx: rusqlite::Transaction,
+    tx: &rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
-) -> Result<Vec<Block>, HErr> {
-    let blocks = {
-        let mut store_stmt = tx.prepare(include_str!("sql/store_key.sql"))?;
-        store_stmt.execute(params![cid, hash.as_ref(), key.as_ref()])?;
+) -> Result<Vec<(Block, GlobalId)>, HErr> {
+    // store key
+    raw_store_key(&tx, cid, hash.as_ref(), key.as_ref())?;
 
-        let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
-        remove_deps_stmt.execute(params![hash.as_ref()])?;
+    // remove key as blocking dependency
+    raw_remove_block_dependencies(&tx, hash.as_ref())?;
 
-        let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
-
-        let mut blocks: Vec<Block> = Vec::new();
-
-        for res in get_blocks_stmt.query_map(NO_PARAMS, |row| row.get::<_, Vec<u8>>(0))? {
-            let block_bytes = res?;
-            let block = serde_cbor::from_slice(&block_bytes)?;
-            blocks.push(block);
-        }
-        blocks
-    };
-
-    tx.commit()?;
-
-    Ok(blocks)
+    // get blocks that are now available
+    raw_pop_unblocked_blocks(&tx)?
+        .into_iter()
+        .map(|(block_bytes, signer_bytes)| {
+            Ok((
+                serde_cbor::from_slice(&block_bytes)?,
+                serde_cbor::from_slice(&signer_bytes)?,
+            ))
+        })
+        .collect()
 }
 
 fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-    tx: rusqlite::Transaction,
+    tx: &rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
 ) -> Result<(), HErr> {
-    // references to transaction need to be dropped before committing
-    {
-        let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
+    let mut mark_stmt = tx.prepare(include_str!("sql/mark_used.sql"))?;
 
-        for block in blocks {
-            // otherwise we can mark the key as used
-            mark_stmt.execute(params![cid, block.as_ref()])?;
-        }
+    for block in blocks {
+        mark_stmt.execute(params![cid, block.as_ref()])?;
     }
-
-    tx.commit()?;
 
     Ok(())
 }
@@ -64,11 +97,12 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     let mut missing: Vec<BlockHash> = Vec::new();
 
     for block in blocks.copied() {
-        match stmt.query_row(params![cid, block.as_ref()], |row| {
-            row.get::<_, Option<Vec<u8>>>(0)
-        })? {
+        match stmt
+            .query_map(params![cid, block.as_ref()], |row| row.get::<_, Vec<u8>>(0))?
+            .next()
+        {
             Some(k) => {
-                keys.insert(ChainKey::from_slice(k.as_slice()).unwrap());
+                keys.insert(ChainKey::from_slice(k?.as_slice()).unwrap());
             }
             None => {
                 missing.push(block);
@@ -83,7 +117,6 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     })
 }
 
-// this should *not* mark keys as used
 fn get_unused(
     db: &rusqlite::Connection,
     cid: ConversationId,
@@ -107,33 +140,61 @@ fn get_unused(
     Ok(pairs)
 }
 
+fn raw_add_pending_block(
+    tx: &rusqlite::Connection,
+    signer_bytes: Vec<u8>,
+    block_bytes: Vec<u8>,
+) -> Result<i64, HErr> {
+    let mut pending_blocks_stmt = tx.prepare(include_str!("sql/add_pending_block.sql"))?;
+
+    pending_blocks_stmt.execute(params![signer_bytes, block_bytes])?;
+
+    Ok(tx.last_insert_rowid())
+}
+
+fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
+    tx: &rusqlite::Connection,
+    block_id: i64,
+    parent_hashes_bytes: I,
+) -> Result<(), HErr> {
+    let mut block_dep_stmt = tx.prepare(include_str!("sql/add_block_dependency.sql"))?;
+
+    for hash_bytes in parent_hashes_bytes {
+        block_dep_stmt.execute(params![block_id, hash_bytes])?;
+    }
+    Ok(())
+}
+
 impl BlockStore for ConversationId {
     type Error = HErr;
+    type Signer = GlobalId;
 
-    // stores a key, does not mark key as used
-    fn store_key(&mut self, hash: BlockHash, key: ChainKey) -> Result<Vec<Block>, Self::Error> {
+    fn store_key(
+        &mut self,
+        hash: BlockHash,
+        key: ChainKey,
+    ) -> Result<Vec<(Block, Self::Signer)>, Self::Error> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
-        // modify this to remove missing block dependencies
-        store_key(tx, *self, hash, key)
-        // get all blocks that no longer have dependencies
+        let blocks = store_key(&tx, *self, hash, key);
+        tx.commit()?;
+
+        blocks
     }
 
-    // we'll want to implement some kind of gc strategy to collect keys marked used
-    // if they're less than an hour old we should keep them, otherwise delete
-    // could run on a schedule, or every time we call get_unused, or something else
+    // TODO GC strategy
     fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
         &mut self,
         blocks: I,
     ) -> Result<(), Self::Error> {
         let mut db = Database::get()?;
-        // do this all in a transaction
         let tx = db.transaction()?;
 
-        mark_used(tx, *self, blocks)
+        mark_used(&tx, *self, blocks)?;
+        tx.commit()?;
+        Ok(())
     }
 
-    // this should *not* mark keys as used
     fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
         &self,
         blocks: I,
@@ -142,31 +203,28 @@ impl BlockStore for ConversationId {
         get_keys(&db, *self, blocks)
     }
 
-    // this should *not* mark keys as used
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
         let db = Database::get()?;
         get_unused(&db, *self)
     }
 
-    fn add_pending(&self, block: Block, awaiting: Vec<BlockHash>) -> Result<(), Self::Error> {
-        if awaiting.is_empty() {
-            return Ok(());
-        }
-
+    fn add_pending(
+        &self,
+        signer: &Self::Signer,
+        block: Block,
+        awaiting: Vec<BlockHash>,
+    ) -> Result<(), Self::Error> {
         let mut db = Database::get()?;
         let tx = db.transaction()?;
-        let mut pending_blocks_stmt = tx.prepare(include_str!("sql/add_pending_block.sql"))?;
 
         let block_bytes = serde_cbor::to_vec(&block)?;
+        let signer_bytes = serde_cbor::to_vec(&signer)?;
 
-        pending_blocks_stmt.execute(params![block_bytes])?;
+        let block_id = raw_add_pending_block(&tx, signer_bytes, block_bytes)?;
 
-        let block_id = tx.last_insert_rowid();
-        let mut block_dep_stmt = tx.prepare(include_str!("sql/add_block_dependency.sql"))?;
+        raw_add_block_dependencies(&tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
 
-        for parent_hash in awaiting {
-            block_dep_stmt.execute(params![block_id, parent_hash.as_ref()])?;
-        }
+        tx.commit()?;
 
         Ok(())
     }

@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS chainkeys(
 
 CREATE TABLE IF NOT EXISTS pending_blocks(
   block_id INTEGER PRIMARY KEY NOT NULL,
+  global_id_bytes BLOB NOT NULL,
   block BLOB NOT NULL
 );
 
@@ -25,19 +26,20 @@ CREATE TABLE IF NOT EXISTS messages (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,
   -- id of message author
-  author TEXT NOT NULL,
+  author TEXT,
   -- id of conversation
-  conversation_id BLOB NOT NULL,
+  conversation_id BLOB,
   -- text of message
-  body TEXT NOT NULL,
+  body TEXT NOT NULL DEFAULT(''),
   -- timestamp associated with message
-  ts INTEGER NOT NULL,
+  ts INTEGER,
   -- time when message self-destructs
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
-  send_status INTEGER NOT NULL,
+  send_status INTEGER NOT NULL DEFAULT(0),
   -- read receipts as a map from user ids to receipt status, encoded as CBOR
-  receipts BLOB DEFAULT NULL,
+  receipts BLOB,
+  known INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
@@ -47,18 +49,18 @@ CREATE TABLE IF NOT EXISTS replies (
   msg_id BLOB PRIMARY KEY NOT NULL,
   -- message id of message being replied to
   op_msg_id INTEGER,
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
-  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id),
+  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id)
 );
 
 CREATE INDEX IF NOT EXISTS reply_op ON replies(op_msg_id);
 
 CREATE TABLE IF NOT EXISTS msg_attachments (
-  -- path to media attachment?
+  -- path to media attachment
   attachment TEXT NOT NULL,
   msg_id BLOB NOT NULL,
   -- TODO this is touchy
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
 );
 
 CREATE TABLE IF NOT EXISTS contacts (

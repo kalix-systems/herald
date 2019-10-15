@@ -27,6 +27,7 @@ table! {
 table! {
     pushes (push_id) {
         push_id -> Int8,
+        push_ts -> Timestamptz,
         push_data -> Bytea,
     }
 }

@@ -4,3 +4,5 @@ SELECT
   content
 FROM
   pending_out
+ORDER BY
+  pending_tag ASC

@@ -167,6 +167,7 @@ impl Conn {
                     userkeys::key.eq(key.data().as_ref()),
                 ))
                 .execute(&self.0)?;
+
             return Ok(register::Res::Success);
         })
     }
@@ -409,9 +410,10 @@ impl Conn {
                 let push_row_id: i64 = {
                     use crate::schema::pushes::dsl::*;
 
+                    let push_timestamp = msg.timestamp;
                     let push_vec = serde_cbor::to_vec(msg)?;
                     insert_into(pushes)
-                        .values(push_data.eq(push_vec))
+                        .values((push_data.eq(push_vec), push_ts.eq(push_timestamp)))
                         .returning(push_id)
                         .get_result(&self.0)?
                 };
@@ -429,11 +431,13 @@ impl Conn {
         })
     }
 
-    pub fn get_pending(&mut self, key: sig::PublicKey) -> Result<Vec<Push>, Error> {
+    pub fn get_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<Vec<Push>, Error> {
         let pushes: Vec<Vec<u8>> = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_data)
+            .order(pushes::push_ts.asc())
+            .limit(limit as i64)
             .get_results(self.deref_mut())?;
 
         let mut out = Vec::with_capacity(pushes.len());
@@ -445,11 +449,13 @@ impl Conn {
         Ok(out)
     }
 
-    pub fn expire_pending(&mut self, key: sig::PublicKey) -> Result<(), Error> {
+    pub fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
         let push_ids = pending::table
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
-            .select(pushes::push_id);
+            .select(pushes::push_id)
+            .order(pushes::push_ts.asc())
+            .limit(limit as i64);
 
         delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref_mut())?;
 
@@ -644,25 +650,54 @@ mod tests {
         let signed_pk = kp.sign(*kp.public_key());
         conn.register_user(user_id, signed_pk).unwrap();
 
-        let pending = conn.get_pending(*kp.public_key()).unwrap();
+        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
         assert_eq!(pending.len(), 0);
 
-        let push = Push {
+        let pushf = || Push {
             tag: PushTag::User,
             timestamp: Utc::now(),
             msg: bytes::Bytes::new(),
         };
 
+        let push1 = pushf();
+        let push2 = pushf();
+        let push3 = pushf();
+
         assert!(conn
-            .add_pending(vec![*kp.public_key()], [push].iter())
+            .add_pending(
+                vec![*kp.public_key()],
+                [&push1, &push2, &push3].into_iter().map(|r| *r)
+            )
             .is_ok());
 
-        let pending = conn.get_pending(*kp.public_key()).unwrap();
-        assert_eq!(pending.len(), 1);
+        let pushes = vec![push1, push2, push3];
 
-        assert!(conn.expire_pending(*kp.public_key()).is_ok());
+        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[..1]);
 
-        let pending = conn.get_pending(*kp.public_key()).unwrap();
+        let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[..2]);
+
+        let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[..3]);
+
+        let pending = conn.get_pending(*kp.public_key(), 4).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[..3]);
+
+        assert!(conn.expire_pending(*kp.public_key(), 1).is_ok());
+
+        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[1..2]);
+
+        let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+        let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+        assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+        assert!(conn.expire_pending(*kp.public_key(), 2).is_ok());
+
+        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
         assert!(pending.is_empty());
     }
 

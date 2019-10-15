@@ -92,10 +92,6 @@ namespace {
     {
         Q_EMIT o->filterRegexChanged();
     }
-    inline void conversationsTryPollChanged(Conversations* o)
-    {
-        Q_EMIT o->tryPollChanged();
-    }
     inline void errorsTryPollChanged(Errors* o)
     {
         Q_EMIT o->tryPollChanged();
@@ -159,10 +155,6 @@ namespace {
     inline void usersFilterRegexChanged(Users* o)
     {
         Q_EMIT o->filterRegexChanged();
-    }
-    inline void usersTryPollChanged(Users* o)
-    {
-        Q_EMIT o->tryPollChanged();
     }
 }
 extern "C" {
@@ -321,7 +313,7 @@ extern "C" {
         void (*)(ConversationBuilder*));
     void conversation_builder_free(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
-    void conversation_builder_finalize(ConversationBuilder::Private*, QByteArray*, qbytearray_set);
+    void conversation_builder_finalize(ConversationBuilder::Private*);
     void conversation_builder_remove_last(ConversationBuilder::Private*);
     bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
     bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
@@ -617,7 +609,7 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 extern "C" {
-    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*), void (*)(Conversations*),
+    Conversations::Private* conversations_new(Conversations*, void (*)(Conversations*), void (*)(Conversations*),
         void (*)(const Conversations*),
         void (*)(Conversations*),
         void (*)(Conversations*),
@@ -635,7 +627,6 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
-    quint8 conversations_try_poll_get(const Conversations::Private*);
     bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
@@ -664,17 +655,12 @@ extern "C" {
 
 extern "C" {
     quint32 members_data_color(const Members::Private*, int);
-    bool members_set_data_color(Members::Private*, int, quint32);
     bool members_data_matched(const Members::Private*, int);
     bool members_set_data_matched(Members::Private*, int, bool);
     void members_data_name(const Members::Private*, int, QString*, qstring_set);
-    bool members_set_data_name(Members::Private*, int, const ushort* s, int len);
     void members_data_pairwise_conversation_id(const Members::Private*, int, QByteArray*, qbytearray_set);
     void members_data_profile_picture(const Members::Private*, int, QString*, qstring_set);
-    bool members_set_data_profile_picture(Members::Private*, int, const ushort* s, int len);
-    bool members_set_data_profile_picture_none(Members::Private*, int);
     quint8 members_data_status(const Members::Private*, int);
-    bool members_set_data_status(Members::Private*, int, quint8);
     void members_data_user_id(const Members::Private*, int, QString*, qstring_set);
     void members_sort(Members::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
@@ -753,17 +739,6 @@ quint32 Members::color(int row) const
     return members_data_color(m_d, row);
 }
 
-bool Members::setColor(int row, quint32 value)
-{
-    bool set = false;
-    set = members_set_data_color(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 bool Members::matched(int row) const
 {
     return members_data_matched(m_d, row);
@@ -787,17 +762,6 @@ QString Members::name(int row) const
     return s;
 }
 
-bool Members::setName(int row, const QString& value)
-{
-    bool set = false;
-    set = members_set_data_name(m_d, row, value.utf16(), value.length());
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 QByteArray Members::pairwiseConversationId(int row) const
 {
     QByteArray b;
@@ -812,35 +776,9 @@ QString Members::profilePicture(int row) const
     return s;
 }
 
-bool Members::setProfilePicture(int row, const QString& value)
-{
-    bool set = false;
-    if (value.isNull()) {
-        set = members_set_data_profile_picture_none(m_d, row);
-    } else {
-    set = members_set_data_profile_picture(m_d, row, value.utf16(), value.length());
-    }
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
 quint8 Members::status(int row) const
 {
     return members_data_status(m_d, row);
-}
-
-bool Members::setStatus(int row, quint8 value)
-{
-    bool set = false;
-    set = members_set_data_status(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 QString Members::userId(int row) const
@@ -918,29 +856,9 @@ bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVar
 bool Members::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.column() == 0) {
-        if (role == Qt::UserRole + 0) {
-            if (value.canConvert(qMetaTypeId<quint32>())) {
-                return setColor(index.row(), value.value<quint32>());
-            }
-        }
         if (role == Qt::UserRole + 1) {
             if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMatched(index.row(), value.value<bool>());
-            }
-        }
-        if (role == Qt::UserRole + 2) {
-            if (value.canConvert(qMetaTypeId<QString>())) {
-                return setName(index.row(), value.value<QString>());
-            }
-        }
-        if (role == Qt::UserRole + 4) {
-            if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
-                return setProfilePicture(index.row(), value.value<QString>());
-            }
-        }
-        if (role == Qt::UserRole + 5) {
-            if (value.canConvert(qMetaTypeId<quint8>())) {
-                return setStatus(index.row(), value.value<quint8>());
             }
         }
     }
@@ -1174,7 +1092,6 @@ extern "C" {
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_clear_conversation_history(Messages::Private*);
-    void messages_clear_conversation_view(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     qint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
@@ -1482,7 +1399,7 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
 }
 
 extern "C" {
-    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*), void (*)(Users*),
+    Users::Private* users_new(Users*, void (*)(Users*), void (*)(Users*),
         void (*)(const Users*),
         void (*)(Users*),
         void (*)(Users*),
@@ -1500,7 +1417,6 @@ extern "C" {
     void users_filter_set(Users::Private*, const ushort *str, int len);
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
-    quint8 users_try_poll_get(const Users::Private*);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -1644,11 +1560,9 @@ bool ConversationBuilder::addMember(const QString& user_id)
 {
     return conversation_builder_add_member(m_d, user_id.utf16(), user_id.size());
 }
-QByteArray ConversationBuilder::finalize()
+void ConversationBuilder::finalize()
 {
-    QByteArray s;
-    conversation_builder_finalize(m_d, &s, set_qbytearray);
-    return s;
+    return conversation_builder_finalize(m_d);
 }
 void ConversationBuilder::removeLast()
 {
@@ -1679,7 +1593,6 @@ Conversations::Conversations(QObject *parent):
     m_d(conversations_new(this,
         conversationsFilterChanged,
         conversationsFilterRegexChanged,
-        conversationsTryPollChanged,
         [](const Conversations* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -1749,10 +1662,6 @@ bool Conversations::filterRegex() const
 }
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
-}
-quint8 Conversations::tryPoll() const
-{
-    return conversations_try_poll_get(m_d);
 }
 bool Conversations::pollUpdate()
 {
@@ -1947,9 +1856,9 @@ bool Members::filterRegex() const
 void Members::setFilterRegex(bool v) {
     members_filter_regex_set(m_d, v);
 }
-bool Members::addToConversation(const QString& user_id)
+bool Members::addToConversation(const QString& id)
 {
-    return members_add_to_conversation(m_d, user_id.utf16(), user_id.size());
+    return members_add_to_conversation(m_d, id.utf16(), id.size());
 }
 bool Members::pollUpdate()
 {
@@ -2080,10 +1989,6 @@ bool Messages::clearConversationHistory()
 {
     return messages_clear_conversation_history(m_d);
 }
-void Messages::clearConversationView()
-{
-    return messages_clear_conversation_view(m_d);
-}
 bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
@@ -2180,7 +2085,6 @@ Users::Users(QObject *parent):
     m_d(users_new(this,
         usersFilterChanged,
         usersFilterRegexChanged,
-        usersTryPollChanged,
         [](const Users* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -2250,10 +2154,6 @@ bool Users::filterRegex() const
 }
 void Users::setFilterRegex(bool v) {
     users_filter_regex_set(m_d, v);
-}
-quint8 Users::tryPoll() const
-{
-    return users_try_poll_get(m_d);
 }
 QByteArray Users::add(const QString& id)
 {

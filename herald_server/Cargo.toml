@@ -13,6 +13,8 @@ dotenv          = "0.9.0"
 serde_cbor      = "0.10"
 sodiumoxide     = "0.2"
 tokio           = "0.2.0-alpha.6"
+futures-preview = "0.3.0-alpha.19"
+
 
 bytes           = { version = "0.4",            features = ["serde"] }
 chrono          = { version = "0.4",            features = ["serde"] }

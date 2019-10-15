@@ -10,6 +10,6 @@ SELECT
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE
-  messages.msg_id = ?
+  messages.msg_id = ? AND messages.known = 1
 LIMIT
   1

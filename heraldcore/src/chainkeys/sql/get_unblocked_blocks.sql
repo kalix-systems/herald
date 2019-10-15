@@ -1,5 +1,5 @@
 SELECT
-  block
+  global_id_bytes, block
 FROM
   pending_blocks
 WHERE

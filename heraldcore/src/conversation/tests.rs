@@ -288,3 +288,25 @@ fn pairwise_cids() {
     assert_eq!(cids[0], c1.pairwise_conversation);
     assert_eq!(cids[1], c2.pairwise_conversation);
 }
+
+#[test]
+#[serial]
+fn convo_message_order() {
+    Database::reset_all().expect(womp!());
+
+    let conv_id1 = ConversationId::from([0; 32]);
+    let author = "Hello".try_into().unwrap();
+    let conv = ContactBuilder::new(author).add().expect(womp!());
+
+    super::ConversationBuilder::new()
+        .conversation_id(conv_id1)
+        .add()
+        .expect(womp!("failed to add conversation"));
+
+    crate::message::add_message(None, author, &conv_id1, "1", None, None, &None)
+        .expect(womp!("Failed to add message"));
+
+    let meta = super::all_meta().expect(womp!("Failed to get metadata"));
+
+    assert_eq!(meta[0].conversation_id, conv.pairwise_conversation);
+}

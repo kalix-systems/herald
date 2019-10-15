@@ -1,22 +1,14 @@
-use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{user_global::*, USER_DATA},
-};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
     contact::{self, ContactBuilder, ContactStatus},
     utils::SearchPattern,
 };
-use std::{
-    convert::{TryFrom, TryInto},
-    sync::{
-        atomic::{AtomicU8, Ordering},
-        Arc,
-    },
-};
+use std::convert::{TryFrom, TryInto};
+
+pub(crate) mod shared;
+use shared::*;
 
 type Emitter = UsersEmitter;
 type List = UsersList;
@@ -37,22 +29,21 @@ pub struct Users {
     model: List,
     filter: SearchPattern,
     filter_regex: bool,
-    try_poll: Arc<AtomicU8>,
     list: Vec<User>,
 }
 
 fn color(uid: &UserId) -> Option<u32> {
-    Some(USER_DATA.get(&uid)?.color)
+    Some(get_user(&uid)?.color)
 }
 
 fn name(uid: &UserId) -> Option<String> {
-    let inner = USER_DATA.get(uid)?;
+    let inner = get_user(uid)?;
 
     Some(inner.name.clone())
 }
 
 fn profile_picture(uid: &UserId) -> Option<String> {
-    let inner = USER_DATA.get(uid)?;
+    let inner = get_user(uid)?;
 
     inner.profile_picture.clone()
 }
@@ -64,7 +55,7 @@ impl UsersTrait for Users {
                 .into_iter()
                 .map(|u| {
                     let id = u.id;
-                    USER_DATA.insert(id, u);
+                    shared::USER_DATA.insert(id, u);
                     User { id, matched: true }
                 })
                 .collect(),
@@ -76,7 +67,7 @@ impl UsersTrait for Users {
 
         let global_emit = emit.clone();
 
-        USER_EMITTER.lock().replace(global_emit);
+        shared::USER_EMITTER.lock().replace(global_emit);
         // this should *really* never fail
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
@@ -86,7 +77,6 @@ impl UsersTrait for Users {
             list,
             filter,
             filter_regex: false,
-            try_poll: USER_TRY_POLL.clone(),
         }
     }
 
@@ -109,7 +99,7 @@ impl UsersTrait for Users {
 
         self.model.begin_insert_rows(pos, pos);
         self.list.insert(pos, user);
-        USER_DATA.insert(contact.id, contact);
+        shared::USER_DATA.insert(contact.id, contact);
         self.model.end_insert_rows();
 
         pairwise_conversation.to_vec()
@@ -123,7 +113,7 @@ impl UsersTrait for Users {
     /// Returns conversation id.
     fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let inner = ret_none!(USER_DATA.get(uid), ffi::NULL_CONV_ID.to_vec());
+        let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
@@ -143,7 +133,7 @@ impl UsersTrait for Users {
     /// Updates a user's name, returns a boolean to indicate success.
     fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
+        let mut inner = ret_none!(get_user_mut(&uid), false);
         ret_err!(contact::set_name(uid, name.as_str()), false);
 
         inner.name = name;
@@ -167,7 +157,7 @@ impl UsersTrait for Users {
     /// Returns bool indicating success.
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
+        let mut inner = ret_none!(get_user_mut(&uid), false);
         let path = ret_err!(
             contact::set_profile_picture(
                 uid,
@@ -196,7 +186,7 @@ impl UsersTrait for Users {
     /// Sets color
     fn set_color(&mut self, row_index: usize, color: u32) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
+        let mut inner = ret_none!(get_user_mut(&uid), false);
 
         ret_err!(contact::set_color(uid, color), false);
 
@@ -206,14 +196,14 @@ impl UsersTrait for Users {
 
     fn status(&self, row_index: usize) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(USER_DATA.get(&uid), 0);
+        let inner = ret_none!(get_user(&uid), 0);
         inner.status as u8
     }
 
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
         let status = ret_err!(ContactStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(USER_DATA.get_mut(&uid), false);
+        let mut inner = ret_none!(get_user_mut(&uid), false);
 
         ret_err!(contact::set_status(uid, status), false);
 
@@ -294,10 +284,6 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn try_poll(&self) -> u8 {
-        self.try_poll.load(Ordering::Acquire)
-    }
-
     fn poll_update(&mut self) -> bool {
         for update in USER_CHANNEL.rx.try_recv() {
             match update {
@@ -319,8 +305,12 @@ impl UsersTrait for Users {
                     USER_DATA.insert(uid, new_contact);
                     self.model.end_insert_rows();
                 }
-                UsersUpdates::ReqResp(..) => {
-                    eprintln!("TODO: handle request responses?");
+                UsersUpdates::ReqResp(uid, accepted) => {
+                    if accepted {
+                        println!("PLACEHOLDER: {} accepted your contact request", uid);
+                    } else {
+                        println!("PLACEHOLDER: {} did not accept your contact request", uid);
+                    }
                 }
             }
         }
@@ -348,7 +338,7 @@ impl Users {
 
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
-            let inner = ret_none!(USER_DATA.get(&contact.id));
+            let inner = ret_none!(get_user(&contact.id));
             contact.matched = inner.matches(&self.filter);
         }
         self.model

@@ -24,11 +24,10 @@ pub struct Config {
 }
 
 /// Builder for `Config`
-#[derive(Default)]
 pub struct ConfigBuilder {
     /// ID of the local user
-    id: Option<UserId>,
-    keypair: Option<sig::KeyPair>,
+    id: UserId,
+    keypair: sig::KeyPair,
     /// Colorscheme
     colorscheme: Option<u32>,
     /// Name of the local user
@@ -42,28 +41,16 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     /// Creates new `ConfigBuilder`
-    pub fn new() -> Self {
+    pub fn new(id: UserId, keypair: sig::KeyPair) -> Self {
         Self {
-            id: None,
-            keypair: None,
+            id,
+            keypair,
             name: None,
             color: None,
             colorscheme: None,
             profile_picture: None,
             nts_conversation: None,
         }
-    }
-
-    /// Sets the `UserId`. This is required.
-    pub fn id(mut self, id: UserId) -> Self {
-        self.id = Some(id);
-        self
-    }
-
-    /// Sets the `KeyPair`. This is required.
-    pub fn keypair(mut self, pair: sig::KeyPair) -> Self {
-        self.keypair = Some(pair);
-        self
     }
 
     /// Sets colorscheme, defaults to 0 if not set.
@@ -108,9 +95,6 @@ impl ConfigBuilder {
             nts_conversation,
             profile_picture,
         } = self;
-
-        let id = id.ok_or(HErr::MissingFields)?;
-        let keypair = keypair.ok_or(HErr::MissingFields)?;
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
