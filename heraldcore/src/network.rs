@@ -126,11 +126,8 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let req = register::Req(uid, sig);
     let res = helper::register(&req)?;
     // TODO: retry if this fails?
-    match &res {
-        register::Res::Success => {
-            crate::config::ConfigBuilder::new(uid, kp).add()?;
-        }
-        _ => {}
+    if let register::Res::Success = &res {
+        crate::config::ConfigBuilder::new(uid, kp).add()?;
     }
 
     Ok(res)
@@ -261,9 +258,8 @@ fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
     loop {
-        match ws.recv_message()? {
-            WMessage::Binary(v) => return Ok(serde_cbor::from_slice(&v)?),
-            _ => {}
+        if let WMessage::Binary(v) = ws.recv_message()? {
+            return Ok(serde_cbor::from_slice(&v)?);
         }
     }
 }
@@ -393,10 +389,8 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
             Ack(ack) => {
                 crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
-                ev.notifications.push(Notification::MsgReceipt {
-                    mid: ack.of,
-                    cid: cid,
-                });
+                ev.notifications
+                    .push(Notification::MsgReceipt { mid: ack.of, cid });
             }
         }
     }
@@ -557,12 +551,12 @@ pub fn start_conversation(
     let gen = Genesis::new(kp.secret_key());
     cid.store_genesis(gen.clone())?;
 
-    let body = ConversationMessageBody::AddedToConvo(cmessages::AddedToConvo {
+    let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
         members: Vec::from(members),
         gen,
         cid,
         title: title.map(String::from),
-    });
+    }));
 
     for pw_cid in pairwise {
         send_cmessage(pw_cid, &body)?;

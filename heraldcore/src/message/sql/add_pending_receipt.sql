@@ -1,3 +1,3 @@
 INSERT INTO
-  pending_receipts(msg_id, recipient, status)
-VALUES(@1, @2, @3)
+  messages(msg_id, receipts)
+VALUES(@1, @2)

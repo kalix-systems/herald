@@ -1,4 +1,4 @@
-INSERT OR IGNORE INTO
+INSERT OR REPLACE INTO
   messages(
     msg_id,
     author,
@@ -6,6 +6,7 @@ INSERT OR IGNORE INTO
     body,
     send_status,
     receipts,
-    ts
+    ts,
+    known
   )
-VALUES(@1, @2, @3, @4, @5, @6, @7)
+VALUES(@1, @2, @3, @4, @5, @6, @7, 1)

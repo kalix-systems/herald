@@ -222,7 +222,7 @@ pub enum ConversationMessageBody {
     /// Members just added to a conversation
     NewMembers(cmessages::NewMembers),
     /// A message a user receives upon being added to a conversation
-    AddedToConvo(cmessages::AddedToConvo),
+    AddedToConvo(Box<cmessages::AddedToConvo>),
     /// An acknowledgement of a contact request.
     ContactReqAck(cmessages::ContactReqAck),
     /// A normal message.
@@ -431,7 +431,7 @@ impl DeviceMessage {
             mut content,
             nonce,
             tag,
-            prekey: _,
+            ..
         } = self;
 
         let pk = spk_to_epk(&from.did)?;

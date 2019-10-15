@@ -10,6 +10,6 @@ SELECT
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE
-  conversation_id = ?
+  messages.conversation_id = ? AND messages.known = 1
 ORDER BY
   ts ASC

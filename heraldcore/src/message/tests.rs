@@ -117,34 +117,6 @@ fn message_receipt_status_updates() {
 
 #[test]
 #[serial]
-fn add_and_get_receipts_pending() {
-    Database::reset_all().expect(womp!());
-    let msg_id = [1; 32].into();
-
-    let receiver1 = "Hello".try_into().expect(womp!());
-    let receiver2 = "World".try_into().expect(womp!());
-
-    add_receipt(msg_id, receiver1, MessageReceiptStatus::NoAck).expect(womp!());
-
-    add_receipt(msg_id, receiver2, MessageReceiptStatus::NoAck).expect(womp!());
-    add_receipt(msg_id, receiver2, MessageReceiptStatus::Read).expect(womp!());
-
-    let db = Database::get().expect(womp!());
-    let pending_receipts = get_pending_receipts(&db, msg_id).expect(womp!());
-
-    assert_eq!(pending_receipts.len(), 2);
-    assert_eq!(
-        pending_receipts.get(&receiver1).expect(womp!()),
-        &MessageReceiptStatus::NoAck
-    );
-    assert_eq!(
-        pending_receipts.get(&receiver2).expect(womp!()),
-        &MessageReceiptStatus::Read
-    );
-}
-
-#[test]
-#[serial]
 fn receipt_before_message() {
     use crate::contact::ContactBuilder;
 
@@ -188,6 +160,6 @@ fn receipt_before_message() {
         &MessageReceiptStatus::Read
     );
 
-    let db = Database::get().expect(womp!());
-    assert!(get_pending_receipts(&db, msg_id).expect(womp!()).is_empty());
+    // let db = Database::get().expect(womp!());
+    // assert!(get_pending_receipts(&db, msg_id).expect(womp!()).is_empty());
 }
