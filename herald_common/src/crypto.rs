@@ -24,7 +24,10 @@ impl UQ {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SigValid {
     Yes,
-    BadTime,
+    BadTime {
+        signer_time: DateTime<Utc>,
+        verify_time: DateTime<Utc>,
+    },
     BadSign,
 }
 
@@ -109,13 +112,16 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        let ctime = Utc::now();
-        let stime = self.timestamp;
-        let dat = compute_signing_data(self.data.as_ref(), stime);
-        if stime.timestamp() > ctime.timestamp()
-            || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
+        let dat = compute_signing_data(self.data.as_ref(), signer_time);
+        if verify_time.timestamp() > signer_time.timestamp()
+            || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
         {
-            SigValid::BadTime
+            SigValid::BadTime {
+                signer_time,
+                verify_time,
+            }
         } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
             SigValid::BadSign
         } else {
@@ -146,11 +152,16 @@ impl SigMeta {
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
-        let ctime = Utc::now();
-        let stime = self.timestamp;
-        let signed = compute_signing_data(msg, stime);
-        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
-            SigValid::BadTime
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
+        let signed = compute_signing_data(msg, signer_time);
+        if verify_time > signer_time
+            || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
+        {
+            SigValid::BadTime {
+                signer_time,
+                verify_time,
+            }
         } else if sign::verify_detached(&self.sig, &signed, &self.signed_by) {
             SigValid::BadSign
         } else {
