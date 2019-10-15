@@ -112,8 +112,8 @@ impl<T: AsRef<[u8]>> Signed<T> {
         let verify_time = Utc::now();
         let signer_time = self.timestamp;
         let dat = compute_signing_data(self.data.as_ref(), signer_time);
-        if verify_time.timestamp() > signer_time.timestamp()
-            || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
+        if (verify_time.timestamp() >= signer_time.timestamp())
+            || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
         {
             SigValid::BadTime {
                 signer_time: signer_time.timestamp(),
@@ -152,8 +152,8 @@ impl SigMeta {
         let verify_time = Utc::now();
         let signer_time = self.timestamp;
         let signed = compute_signing_data(msg, signer_time);
-        if verify_time > signer_time
-            || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
+        if (verify_time.timestamp() >= signer_time.timestamp())
+            || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
         {
             SigValid::BadTime {
                 signer_time: signer_time.timestamp(),
