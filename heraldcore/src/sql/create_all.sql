@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
   -- read receipts as a map from user ids to receipt status, encoded as CBOR
-  receipts BLOB NOT NULL,
+  receipts BLOB,
   known INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
