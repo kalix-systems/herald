@@ -63,7 +63,7 @@ public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder();
     Q_INVOKABLE bool addMember(const QString& user_id);
-    Q_INVOKABLE QByteArray finalize();
+    Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
     Q_INVOKABLE bool removeMemberById(const QString& user_id);
     Q_INVOKABLE bool removeMemberByIndex(quint64 index);
@@ -107,7 +107,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
-    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
@@ -116,7 +115,6 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    quint8 tryPoll() const;
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
@@ -161,7 +159,6 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
-    void tryPollChanged();
 };
 
 class Errors : public QObject
@@ -240,7 +237,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE bool addToConversation(const QString& user_id);
+    Q_INVOKABLE bool addToConversation(const QString& id);
     Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
@@ -263,16 +260,12 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE quint32 color(int row) const;
-    Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
-    Q_INVOKABLE bool setName(int row, const QString& value);
     Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
     Q_INVOKABLE QString profilePicture(int row) const;
-    Q_INVOKABLE bool setProfilePicture(int row, const QString& value);
     Q_INVOKABLE quint8 status(int row) const;
-    Q_INVOKABLE bool setStatus(int row, quint8 value);
     Q_INVOKABLE QString userId(int row) const;
 
 Q_SIGNALS:
@@ -312,7 +305,6 @@ public:
     QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
     Q_INVOKABLE bool clearConversationHistory();
-    Q_INVOKABLE void clearConversationView();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
@@ -399,7 +391,6 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
     Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY filterRegexChanged FINAL)
-    Q_PROPERTY(quint8 tryPoll READ tryPoll NOTIFY tryPollChanged FINAL)
     explicit Users(bool owned, QObject *parent);
 public:
     explicit Users(QObject *parent = nullptr);
@@ -408,7 +399,6 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    quint8 tryPoll() const;
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE quint32 colorById(const QString& id) const;
     Q_INVOKABLE QString nameById(const QString& id) const;
@@ -456,6 +446,5 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
-    void tryPollChanged();
 };
 #endif // BINDINGS_H

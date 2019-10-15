@@ -26,7 +26,6 @@ pub struct EffectsFlags {
     // how to atomically negate an `AtomicBool`.
     // The values really just function simple toggles.
     msg_data: AtomicU8,
-    //users_data: AtomicU8,
     members_data: AtomicU8,
 }
 
@@ -60,10 +59,9 @@ impl NotifHandler {
                 self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
                 self.emit.msg_data_changed();
 
-                use crate::shared::conv_global::*;
+                use crate::implementation::conversations::shared::*;
 
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewActivity(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
@@ -83,32 +81,29 @@ impl NotifHandler {
                 self.emit.msg_data_changed();
             }
             NewContact(uid, cid) => {
-                use shared::{conv_global::*, user_global::*};
+                use crate::implementation::conversations::shared::*;
+                use crate::implementation::users::shared::*;
 
                 // add user
-                ret_err!(USER_CHANNEL.tx.send(UsersUpdates::NewUser(uid)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(push_user_update(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
             }
             NewConversation(cid) => {
-                use shared::conv_global::*;
-                ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                ret_none!(conv_emit_try_poll());
+                use crate::implementation::conversations::shared::*;
+                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
-                use shared::{conv_global::*, user_global::*};
+                use crate::implementation::conversations::shared::*;
+                use crate::implementation::users::shared::*;
 
                 // handle response
-                ret_err!(USER_CHANNEL.tx.send(UsersUpdates::ReqResp(uid, accepted)));
-                ret_none!(users_emit_try_poll());
+                ret_none!(push_user_update(UsersUpdates::ReqResp(uid, accepted)));
 
                 // add conversation
                 if accepted {
-                    ret_err!(CONV_CHANNEL.tx.send(ConvUpdates::NewConversation(cid)));
-                    ret_none!(conv_emit_try_poll());
+                    ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -171,25 +166,6 @@ impl NetworkHandleTrait for NetworkHandle {
         handle
     }
 
-    //fn send_message(
-    //    &self,
-    //    body: String,
-    //    to: ffi::ConversationIdRef,
-    //    msg_id: ffi::MsgIdRef,
-    //) -> bool {
-    //    let conv_id = ret_err!(ConversationId::try_from(to), false);
-
-    //    let msg_id = ret_err!(MsgId::try_from(msg_id), false);
-
-    //    ret_err!(
-    //        thread::Builder::new().spawn(move || {
-    //            ret_err!(network::send_text(conv_id, body, msg_id, None));
-    //        }),
-    //        false
-    //    );
-    //    true
-    //}
-
     fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
         let uid = ret_err!(user_id.as_str().try_into(), false);
         let cid = ret_err!(cid.try_into(), false);
@@ -205,9 +181,24 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {
+        use register::*;
+
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
-        ret_err!(network::register(uid), false);
-        true
+        match ret_err!(network::register(uid), false) {
+            Res::UIDTaken => {
+                eprintln!("UID taken!");
+                false
+            }
+            Res::KeyTaken => {
+                eprintln!("Key taken!");
+                false
+            }
+            Res::BadSig(s) => {
+                eprintln!("Bad sig: {:?}", s);
+                false
+            }
+            Res::Success => true,
+        }
     }
 
     fn login(&mut self) -> bool {

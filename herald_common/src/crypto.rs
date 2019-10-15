@@ -21,6 +21,16 @@ impl UQ {
     }
 }
 
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SigValid {
+    Yes,
+    BadTime {
+        signer_time: DateTime<Utc>,
+        verify_time: DateTime<Utc>,
+    },
+    BadSign,
+}
+
 /// How far in the future a signature can be stamped and still considered valid, in seconds.
 pub const TIMESTAMP_FUZZ: i64 = 3600;
 
@@ -101,19 +111,30 @@ impl<T: AsRef<[u8]>> Signed<T> {
         &self.timestamp
     }
 
-    pub fn verify_sig(&self) -> bool {
-        let ctime = Utc::now();
-        let stime = self.timestamp;
-        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
-            return false;
+    pub fn verify_sig(&self) -> SigValid {
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
+        let dat = compute_signing_data(self.data.as_ref(), signer_time);
+        if !check_ts(signer_time, verify_time) {
+            SigValid::BadTime {
+                signer_time,
+                verify_time,
+            }
+        } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
+            SigValid::BadSign
+        } else {
+            SigValid::Yes
         }
-        let dat = compute_signing_data(self.data.as_ref(), stime);
-        sign::verify_detached(&self.sig, &dat, &self.signed_by)
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
         &self.signed_by
     }
+}
+
+fn check_ts<Tz: TimeZone>(signer_time: DateTime<Tz>, verify_time: DateTime<Tz>) -> bool {
+    (signer_time <= verify_time)
+        || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
 }
 
 impl SigMeta {
@@ -133,14 +154,20 @@ impl SigMeta {
         self.sig
     }
 
-    pub fn verify_sig(&self, msg: &[u8]) -> bool {
-        let ctime = Utc::now();
-        let stime = self.timestamp;
-        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
-            return false;
+    pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
+        let signed = compute_signing_data(msg, signer_time);
+        if !check_ts(signer_time, verify_time) {
+            SigValid::BadTime {
+                signer_time,
+                verify_time,
+            }
+        } else if sign::verify_detached(&self.sig, &signed, &self.signed_by) {
+            SigValid::BadSign
+        } else {
+            SigValid::Yes
         }
-        let signed = compute_signing_data(msg, stime);
-        sign::verify_detached(&self.sig, &signed, &self.signed_by)
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
@@ -177,12 +204,12 @@ pub mod sig {
 
         pub fn key_is_valid(&self, key: PublicKey) -> bool {
             if let Some(d) = self.deprecated {
-                if d.verify_sig(key.as_ref()) {
+                if d.verify_sig(key.as_ref()) == SigValid::Yes {
                     return false;
                 }
             }
 
-            self.sig.verify_sig(key.as_ref())
+            self.sig.verify_sig(key.as_ref()) == SigValid::Yes
         }
 
         pub fn deprecate(&mut self, deprecation: SigMeta) -> bool {
@@ -213,16 +240,22 @@ pub mod sig {
             &self.public
         }
 
+        pub fn secret_key(&self) -> &sign::SecretKey {
+            &self.secret
+        }
+
         pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
             let timestamp = Utc::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
-            Signed {
+            let signed = Signed {
                 data,
                 timestamp,
                 sig,
                 signed_by: self.public,
-            }
+            };
+            debug_assert!(signed.verify_sig() == SigValid::Yes);
+            signed
         }
 
         pub fn raw_sign_detached(&self, data: &[u8]) -> Signature {
@@ -233,11 +266,13 @@ pub mod sig {
             let timestamp = Utc::now();
             let to_sign = compute_signing_data(data, timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
-            SigMeta {
+            let meta = SigMeta {
                 timestamp,
                 sig,
                 signed_by: self.public,
-            }
+            };
+            debug_assert!(meta.verify_sig(data) == SigValid::Yes);
+            meta
         }
     }
 }

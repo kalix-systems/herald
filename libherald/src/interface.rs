@@ -368,7 +368,7 @@ pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn add_member(&mut self, user_id: String) -> bool;
-    fn finalize(&mut self) -> Vec<u8>;
+    fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
     fn remove_member_by_id(&mut self, user_id: String) -> bool;
     fn remove_member_by_index(&mut self, index: u64) -> bool;
@@ -437,11 +437,10 @@ pub unsafe extern "C" fn conversation_builder_add_member(ptr: *mut ConversationB
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder, d: *mut QByteArray, set: fn(*mut QByteArray, str: *const c_char, len: c_int)) {
+pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder) -> () {
     let o = &mut *ptr;
     let r = o.finalize();
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
+    r
 }
 
 #[no_mangle]
@@ -523,7 +522,6 @@ pub struct ConversationsEmitter {
     qobject: Arc<AtomicPtr<ConversationsQObject>>,
     filter_changed: fn(*mut ConversationsQObject),
     filter_regex_changed: fn(*mut ConversationsQObject),
-    try_poll_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
 
@@ -541,7 +539,6 @@ impl ConversationsEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
-            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -559,12 +556,6 @@ impl ConversationsEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
-        }
-    }
-    pub fn try_poll_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -634,7 +625,6 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn try_poll(&self) -> u8;
     fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -665,7 +655,6 @@ pub extern "C" fn conversations_new(
     conversations: *mut ConversationsQObject,
     conversations_filter_changed: fn(*mut ConversationsQObject),
     conversations_filter_regex_changed: fn(*mut ConversationsQObject),
-    conversations_try_poll_changed: fn(*mut ConversationsQObject),
     conversations_new_data_ready: fn(*mut ConversationsQObject),
     conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
     conversations_layout_changed: fn(*mut ConversationsQObject),
@@ -683,7 +672,6 @@ pub extern "C" fn conversations_new(
         qobject: Arc::new(AtomicPtr::new(conversations)),
         filter_changed: conversations_filter_changed,
         filter_regex_changed: conversations_filter_regex_changed,
-        try_poll_changed: conversations_try_poll_changed,
         new_data_ready: conversations_new_data_ready,
     };
     let model = ConversationsList {
@@ -737,11 +725,6 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_try_poll_get(ptr: *const Conversations) -> u8 {
-    (&*ptr).try_poll()
 }
 
 #[no_mangle]
@@ -1240,7 +1223,7 @@ pub trait MembersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn add_to_conversation(&mut self, user_id: String) -> bool;
+    fn add_to_conversation(&mut self, id: String) -> bool;
     fn poll_update(&mut self) -> bool;
     fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
@@ -1253,16 +1236,12 @@ pub trait MembersTrait {
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
-    fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
-    fn set_name(&mut self, index: usize, _: String) -> bool;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
     fn profile_picture(&self, index: usize) -> Option<String>;
-    fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
     fn status(&self, index: usize) -> u8;
-    fn set_status(&mut self, index: usize, _: u8) -> bool;
     fn user_id(&self, index: usize) -> &str;
 }
 
@@ -1373,11 +1352,11 @@ pub unsafe extern "C" fn members_filter_regex_set(ptr: *mut Members, v: bool) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: *const c_ushort, id_len: c_int) -> bool {
+    let mut id = String::new();
+    set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
-    let r = o.add_to_conversation(user_id);
+    let r = o.add_to_conversation(id);
     r
 }
 
@@ -1438,14 +1417,6 @@ pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_set_data_color(
-    ptr: *mut Members, row: c_int,
-    v: u32,
-) -> bool {
-    (&mut *ptr).set_color(to_usize(row), v)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row)).into()
@@ -1469,17 +1440,6 @@ pub unsafe extern "C" fn members_data_name(
     let data = o.name(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_name(
-    ptr: *mut Members, row: c_int,
-    s: *const c_ushort, len: c_int,
-) -> bool {
-    let o = &mut *ptr;
-    let mut v = String::new();
-    set_string_from_utf16(&mut v, s, len);
-    o.set_name(to_usize(row), v)
 }
 
 #[no_mangle]
@@ -1509,33 +1469,9 @@ pub unsafe extern "C" fn members_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_set_data_profile_picture(
-    ptr: *mut Members, row: c_int,
-    s: *const c_ushort, len: c_int,
-) -> bool {
-    let o = &mut *ptr;
-    let mut v = String::new();
-    set_string_from_utf16(&mut v, s, len);
-    o.set_profile_picture(to_usize(row), Some(v))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_profile_picture_none(ptr: *mut Members, row: c_int) -> bool {
-    (&mut *ptr).set_profile_picture(to_usize(row), None)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn members_data_status(ptr: *const Members, row: c_int) -> u8 {
     let o = &*ptr;
     o.status(to_usize(row)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_status(
-    ptr: *mut Members, row: c_int,
-    v: u8,
-) -> bool {
-    (&mut *ptr).set_status(to_usize(row), v)
 }
 
 #[no_mangle]
@@ -1686,7 +1622,6 @@ pub trait MessagesTrait {
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
     fn last_status(&self) -> Option<u32>;
     fn clear_conversation_history(&mut self) -> bool;
-    fn clear_conversation_view(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> i64;
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
@@ -1838,13 +1773,6 @@ pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COpti
 pub unsafe extern "C" fn messages_clear_conversation_history(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
     let r = o.clear_conversation_history();
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_clear_conversation_view(ptr: *mut Messages) -> () {
-    let o = &mut *ptr;
-    let r = o.clear_conversation_view();
     r
 }
 
@@ -2142,7 +2070,6 @@ pub struct UsersEmitter {
     qobject: Arc<AtomicPtr<UsersQObject>>,
     filter_changed: fn(*mut UsersQObject),
     filter_regex_changed: fn(*mut UsersQObject),
-    try_poll_changed: fn(*mut UsersQObject),
     new_data_ready: fn(*mut UsersQObject),
 }
 
@@ -2160,7 +2087,6 @@ impl UsersEmitter {
             qobject: self.qobject.clone(),
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
-            try_poll_changed: self.try_poll_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -2178,12 +2104,6 @@ impl UsersEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.filter_regex_changed)(ptr);
-        }
-    }
-    pub fn try_poll_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.try_poll_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -2253,7 +2173,6 @@ pub trait UsersTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn try_poll(&self) -> u8;
     fn add(&mut self, id: String) -> Vec<u8>;
     fn color_by_id(&self, id: String) -> u32;
     fn name_by_id(&self, id: String) -> String;
@@ -2287,7 +2206,6 @@ pub extern "C" fn users_new(
     users: *mut UsersQObject,
     users_filter_changed: fn(*mut UsersQObject),
     users_filter_regex_changed: fn(*mut UsersQObject),
-    users_try_poll_changed: fn(*mut UsersQObject),
     users_new_data_ready: fn(*mut UsersQObject),
     users_layout_about_to_be_changed: fn(*mut UsersQObject),
     users_layout_changed: fn(*mut UsersQObject),
@@ -2305,7 +2223,6 @@ pub extern "C" fn users_new(
         qobject: Arc::new(AtomicPtr::new(users)),
         filter_changed: users_filter_changed,
         filter_regex_changed: users_filter_regex_changed,
-        try_poll_changed: users_try_poll_changed,
         new_data_ready: users_new_data_ready,
     };
     let model = UsersList {
@@ -2359,11 +2276,6 @@ pub unsafe extern "C" fn users_filter_regex_get(ptr: *const Users) -> bool {
 #[no_mangle]
 pub unsafe extern "C" fn users_filter_regex_set(ptr: *mut Users, v: bool) {
     (&mut *ptr).set_filter_regex(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_try_poll_get(ptr: *const Users) -> u8 {
-    (&*ptr).try_poll()
 }
 
 #[no_mangle]

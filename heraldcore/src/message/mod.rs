@@ -66,9 +66,15 @@ pub fn add_message(
 ) -> Result<(MsgId, DateTime<Utc>), HErr> {
     let timestamp = timestamp.unwrap_or_else(Utc::now);
 
-    let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
     let mut db = Database::get()?;
     let tx = db.transaction()?;
+
+    let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
+
+    let receipts: HashMap<UserId, MessageReceiptStatus> =
+        get_receipts(&tx, msg_id)?.unwrap_or_default();
+    let receipts = serde_cbor::to_vec(&receipts)?;
+
     tx.execute(
         include_str!("sql/add.sql"),
         params![
@@ -77,6 +83,7 @@ pub fn add_message(
             conversation_id,
             body,
             send_status.unwrap_or(MessageSendStatus::NoAck),
+            receipts,
             timestamp.timestamp(),
         ],
     )?;
@@ -89,6 +96,7 @@ pub fn add_message(
     if let Some(op) = op {
         tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
     }
+
     tx.commit()?;
     Ok((msg_id, timestamp))
 }
@@ -113,35 +121,89 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
     Ok(())
 }
 
+/// Get message read receipts by message id
+pub fn get_message_receipts(
+    msg_id: &MsgId,
+) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    let db = Database::get()?;
+    get_message_receipts_db(&db, msg_id)
+}
+
+/// Get message read receipts by message id
+pub(crate) fn get_message_receipts_db(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> = {
+        let res = get_stmt.query_row(params![msg_id], |row| row.get::<_, Option<Vec<u8>>>(0))?;
+        match res {
+            Some(data) => Some(serde_cbor::from_slice(&data)?),
+            None => None,
+        }
+    };
+    Ok(receipts)
+}
+
+pub(crate) fn get_receipts(
+    conn: &rusqlite::Connection,
+    msg_id: MsgId,
+) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+
+    let mut res = get_stmt.query(params![msg_id])?;
+
+    match res.next()? {
+        Some(row) => {
+            let data = row.get::<_, Vec<u8>>(0)?;
+            Ok(Some(serde_cbor::from_slice(&data)?))
+        }
+        None => Ok(None),
+    }
+}
+
 pub(crate) fn add_receipt(
     msg_id: MsgId,
-    of: UserId,
+    recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let mut db = Database::get()?;
     let tx = db.transaction()?;
 
-    let mut get_stmt = tx.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> =
-        get_stmt.query_row(params![msg_id], |row| {
-            Ok(match row.get::<_, Option<Vec<u8>>>(0)? {
-                Some(data) => serde_cbor::from_slice(&data).map_err(|e| {
-                    rusqlite::Error::FromSqlConversionFailure(
-                        0,
-                        rusqlite::types::Type::Blob,
-                        Box::new(e),
-                    )
-                })?,
-                None => None,
-            })
-        })?;
+    // check if message exists yet
+    let mut receipts = get_receipts(&tx, msg_id)?;
 
-    let mut receipts = receipts.unwrap_or_default();
-    receipts.insert(of, receipt_status);
-    let data = serde_cbor::to_vec(&receipts)?;
+    match receipts {
+        Some(ref mut receipts) => {
+            // update receipts
 
-    let mut put_stmt = tx.prepare(include_str!("sql/set_receipts.sql"))?;
-    put_stmt.execute(params![data, msg_id])?;
+            match receipts.get(&recip) {
+                Some(old_status) => {
+                    if (*old_status as u8) < (receipt_status as u8) {
+                        receipts.insert(recip, receipt_status);
+                    }
+                }
+                None => {
+                    receipts.insert(recip, receipt_status);
+                }
+            }
+
+            receipts.insert(recip, receipt_status);
+            let data = serde_cbor::to_vec(&receipts)?;
+
+            let mut put_stmt = tx.prepare(include_str!("sql/set_receipts.sql"))?;
+            put_stmt.execute(params![data, msg_id])?;
+        }
+        None => {
+            let mut receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::new();
+            receipts.insert(recip, receipt_status);
+            let data = serde_cbor::to_vec(&receipts)?;
+            let mut put_pending_stmt = tx.prepare(include_str!("sql/add_pending_receipt.sql"))?;
+            put_pending_stmt.execute(params![msg_id, data])?;
+        }
+    }
+
+    tx.commit()?;
 
     Ok(())
 }

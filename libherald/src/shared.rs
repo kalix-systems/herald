@@ -1,20 +1,12 @@
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use herald_common::UserId;
-use heraldcore::{
-    contact,
-    types::{ConversationId, MsgId},
-};
+use heraldcore::types::{ConversationId, MsgId};
 use lazy_static::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
 };
-
-lazy_static! {
-    /// Concurrent hashmap from `UserId` to `Contact`. Used to avoid data replication.
-    pub static ref USER_DATA: DashMap<UserId, contact::Contact> = DashMap::default();
-}
 
 /// Shared state related to error handling
 pub mod errors {
@@ -47,7 +39,7 @@ pub mod errors {
         /// Errors emitter, filled in when the errors object is constructed
         pub static ref ERROR_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 
-        /// Data associated with `CONV_EMITTER`.
+        /// Data associated with `ERROR_EMITTER`.
         pub static ref ERROR_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
     }
 
@@ -57,112 +49,6 @@ pub mod errors {
         let emitter = lock.as_mut()?;
 
         ERROR_TRY_POLL.fetch_add(1, Ordering::Acquire);
-        emitter.try_poll_changed();
-        Some(())
-    }
-}
-
-/// Shared state related to global conversation list
-pub mod conv_global {
-    use super::*;
-    use crate::interface::ConversationsEmitter as Emitter;
-    use parking_lot::Mutex;
-
-    /// Conversation list updates
-    pub enum ConvUpdates {
-        /// A new conversation has been added
-        NewConversation(ConversationId),
-        /// A conversation builder can been finalized
-        BuilderFinished(ConversationId),
-        /// New activity
-        NewActivity(ConversationId),
-    }
-
-    /// Channel for global conversation list updates
-    pub struct ConvChannel {
-        pub(crate) rx: Receiver<ConvUpdates>,
-        pub(crate) tx: Sender<ConvUpdates>,
-    }
-
-    impl ConvChannel {
-        /// Creates new `ConvChannel`
-        pub fn new() -> Self {
-            let (tx, rx) = unbounded();
-            Self { rx, tx }
-        }
-    }
-
-    lazy_static! {
-        /// Statically initialized instance of `UsersUpdates` used to pass notifications
-        /// from the network.
-        pub static ref CONV_CHANNEL: ConvChannel = ConvChannel::new();
-
-        /// Conversations list emitter, filled in when the conversations list is constructed
-        pub static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-
-        /// Data associated with `CONV_EMITTER`.
-        pub static ref CONV_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
-    }
-
-    /// Emits a signal to the QML runtime, returns `None` on failure.
-    #[must_use]
-    pub fn conv_emit_try_poll() -> Option<()> {
-        let mut lock = CONV_EMITTER.lock();
-        let emitter = lock.as_mut()?;
-
-        CONV_TRY_POLL.fetch_add(1, Ordering::Acquire);
-        emitter.try_poll_changed();
-        Some(())
-    }
-}
-
-/// Shared state related to global user list
-pub mod user_global {
-    use super::*;
-    use crate::interface::UsersEmitter as Emitter;
-    use parking_lot::Mutex;
-
-    /// User list updates
-    pub enum UsersUpdates {
-        /// A new user has been added
-        NewUser(UserId),
-        /// A contact request has been responded to
-        ReqResp(UserId, bool),
-    }
-
-    /// Channel for global user list updates
-    pub struct UserChannel {
-        pub(crate) rx: Receiver<UsersUpdates>,
-        pub(crate) tx: Sender<UsersUpdates>,
-    }
-
-    impl UserChannel {
-        /// Creates new `UserChannel`
-        pub fn new() -> Self {
-            let (tx, rx) = unbounded();
-            Self { rx, tx }
-        }
-    }
-
-    lazy_static! {
-        /// Statically initialized instance of `UsersUpdates` used to pass notifications
-        /// from the network.
-        pub static ref USER_CHANNEL: UserChannel = UserChannel::new();
-
-        /// Users list emitter, filled in when the users list is constructed
-        pub static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-
-        /// Data associated with `CONV_EMITTER`.
-        pub static ref USER_TRY_POLL: Arc<AtomicU8> = Arc::new(AtomicU8::new(0));
-    }
-
-    /// Emits a signal to the QML runtime, returns `None` on failure.
-    #[must_use]
-    pub fn users_emit_try_poll() -> Option<()> {
-        let mut lock = USER_EMITTER.lock();
-        let emitter = lock.as_mut()?;
-
-        USER_TRY_POLL.fetch_add(1, Ordering::Acquire);
         emitter.try_poll_changed();
         Some(())
     }

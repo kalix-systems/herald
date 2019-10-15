@@ -1,5 +1,5 @@
 use chainmail::errors::ChainError;
-use herald_common::serde_cbor;
+use herald_common::*;
 use image;
 use lazy_pond::LazyError;
 use regex;
@@ -30,12 +30,10 @@ pub enum HErr {
     /// Serialization or deserialization
     /// error
     CborError(serde_cbor::Error),
-    /// An issue occurred at login
-    LoginError,
-    /// An issue occurred at registration
-    RegistrationError,
-    /// Failed to find expected
-    MissingFields,
+    /// Global ID was either already active or involved a nonexistent user
+    GIDSpecFailed(login::SignAsResponse),
+    /// Failed to sign in - either signature or timestamp was invalid
+    SignInFailed(login::LoginTokenResponse),
     /// An HTTP request was dropped
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
@@ -43,6 +41,8 @@ pub enum HErr {
     NoneError,
     /// Error from `chainmail`
     ChainError(ChainError),
+    /// Malformed path
+    BadPath(std::ffi::OsString),
 }
 
 impl fmt::Display for HErr {
@@ -54,16 +54,15 @@ impl fmt::Display for HErr {
             InvalidUserId => write!(f, "InvalidUserId"),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
-            // Utf8Error(e) => write!(f, "Utf8Error error: {}", e),
             CborError(e) => write!(f, "CborError error: {}", e),
+            BadPath(s) => write!(f, "Bad path: {:?}", s),
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
             LazyPondError => write!(f, "LazyPondError"),
             ChainError(e) => write!(f, "ChainError: {}", e),
-            LoginError => write!(f, "LoginError"),
-            RegistrationError => write!(f, "RegistrationError"),
-            MissingFields => write!(f, "MissingFields"),
+            GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
+            SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             NoneError => write!(f, "Unexpected none"),
         }
@@ -95,19 +94,23 @@ macro_rules! from_fn {
     };
 }
 
-from_fn!(HErr, ChainError, HErr::ChainError);
-
-// TODO: replace these
-
-impl From<rusqlite::Error> for HErr {
-    fn from(e: rusqlite::Error) -> Self {
-        HErr::DatabaseError(e)
-    }
+macro_rules! herr {
+    ($from:ty, $fn:ident) => {
+        from_fn!(HErr, $from, HErr::$fn);
+    };
 }
 
-impl From<std::io::Error> for HErr {
-    fn from(e: std::io::Error) -> Self {
-        HErr::IoError(e)
+herr!(ChainError, ChainError);
+herr!(rusqlite::Error, DatabaseError);
+herr!(std::io::Error, IoError);
+herr!(serde_cbor::Error, CborError);
+herr!(websocket::result::WebSocketError, WebsocketError);
+herr!(regex::Error, RegexError);
+herr!(std::ffi::OsString, BadPath);
+
+impl From<LazyError> for HErr {
+    fn from(_: LazyError) -> Self {
+        HErr::LazyPondError
     }
 }
 
@@ -120,33 +123,3 @@ impl From<image::ImageError> for HErr {
         }
     }
 }
-
-impl From<regex::Error> for HErr {
-    fn from(e: regex::Error) -> Self {
-        HErr::RegexError(e)
-    }
-}
-
-impl From<std::ffi::OsString> for HErr {
-    fn from(e: std::ffi::OsString) -> Self {
-        HErr::HeraldError(format!("Bad path: {:?}", e))
-    }
-}
-
-impl From<serde_cbor::Error> for HErr {
-    fn from(e: serde_cbor::Error) -> Self {
-        HErr::CborError(e)
-    }
-}
-
-impl From<LazyError> for HErr {
-    fn from(_: LazyError) -> Self {
-        HErr::LazyPondError
-    }
-}
-
-from_fn!(
-    HErr,
-    websocket::result::WebSocketError,
-    HErr::WebsocketError
-);

@@ -1,9 +1,8 @@
-use crate::{
-    bounds_chk, ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{conv_global::*, USER_DATA},
+use crate::implementation::{
+    conversations::shared::{push_conv_update, ConvUpdates},
+    users::shared::user_in_cache,
 };
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -52,7 +51,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         // You should not be able to add users
         // that you don't have as contacts.
-        if !USER_DATA.contains_key(&user_id) {
+        if !user_in_cache(&user_id) {
             return false;
         }
 
@@ -97,24 +96,18 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.model.end_remove_rows();
     }
 
-    // TODO: Does this have to be blocking?
-    fn finalize(&mut self) -> ffi::ConversationId {
+    fn finalize(&mut self) {
         self.list.push(self.local_id);
 
-        let cid = ret_err!(
-            heraldcore::network::start_conversation(self.list.as_slice(), self.title.take()),
-            ffi::NULL_CONV_ID.to_vec()
-        );
+        let list = std::mem::replace(&mut self.list, vec![]);
+        let title = self.title.take();
 
-        // send update to Conversations list
-        ret_err!(
-            CONV_CHANNEL.tx.send(ConvUpdates::BuilderFinished(cid)),
-            ffi::NULL_CONV_ID.to_vec()
-        );
+        ret_err!(std::thread::Builder::new().spawn(move || {
+            let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
 
-        ret_none!(conv_emit_try_poll(), ffi::NULL_CONV_ID.to_vec());
-
-        cid.to_vec()
+            // send update to Conversations list
+            push_conv_update(ConvUpdates::BuilderFinished(cid));
+        }));
     }
 
     fn set_title(&mut self, title: String) {
@@ -124,20 +117,6 @@ impl ConversationBuilderTrait for ConversationBuilder {
     fn row_count(&self) -> usize {
         self.list.len()
     }
-
-    //fn member_color(&self, index: usize) -> u32 {
-    //    let uid = ret_none!(self.list.get(index), 0);
-    //    let inner = ret_none!(USER_DATA.get(uid), 0);
-
-    //    inner.color
-    //}
-
-    //fn member_profile_picture(&self, index: usize) -> Option<String> {
-    //    let uid = ret_none!(self.list.get(index), None);
-    //    let inner = ret_none!(USER_DATA.get(uid), None);
-
-    //    inner.profile_picture.clone()
-    //}
 
     fn member_id(&self, index: usize) -> ffi::UserIdRef {
         ret_none!(self.list.get(index), "").as_str()
