@@ -46,6 +46,10 @@ ToolBar {
             inLayout: true
         }
 
+        Item {
+            Layout.fillWidth: true
+        }
+
         Popups.ConfigPopup {
             id: configPopup
         }
@@ -62,6 +66,7 @@ ToolBar {
         Common.ButtonForm {
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             Layout.leftMargin: QmlCfg.margin
+            Layout.rightMargin: QmlCfg.margin
             id: configButton
             source: "qrc:/gear-icon.svg"
             onClicked: {

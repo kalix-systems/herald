@@ -38,6 +38,10 @@ Component {
             color: QmlCfg.palette.mainTextColor
         }
 
+        Item {
+            Layout.fillWidth: true
+        }
+
         Common.ButtonForm {
             id: searchButton
             property bool searchRegex: false
@@ -58,6 +62,7 @@ Component {
             id: addContactButton
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             Layout.leftMargin: QmlCfg.margin
+            Layout.rightMargin: QmlCfg.margin
             source: "qrc:/pencil-icon-black.svg"
             z: -1
 

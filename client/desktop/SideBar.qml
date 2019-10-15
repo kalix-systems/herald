@@ -32,10 +32,13 @@ Pane {
         color: QmlCfg.palette.mainColor
     }
 
+
+
     ///--- Username and Settings gear button
     SBUtils.ConfigBar {
         id: toolBar
     }
+
 
     ///--- SearchBar for contacts, add contact button
     Column {
