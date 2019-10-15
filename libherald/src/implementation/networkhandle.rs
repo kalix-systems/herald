@@ -182,7 +182,7 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
-        ret_err!(network::register(uid), false);
+        dbg!(ret_err!(network::register(uid), false));
         true
     }
 

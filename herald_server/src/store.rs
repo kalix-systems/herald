@@ -167,6 +167,7 @@ impl Conn {
                     userkeys::key.eq(key.data().as_ref()),
                 ))
                 .execute(&self.0)?;
+
             return Ok(register::Res::Success);
         })
     }

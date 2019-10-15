@@ -21,6 +21,13 @@ impl UQ {
     }
 }
 
+#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SigValid {
+    Yes,
+    BadTime,
+    BadSign,
+}
+
 /// How far in the future a signature can be stamped and still considered valid, in seconds.
 pub const TIMESTAMP_FUZZ: i64 = 3600;
 
@@ -101,14 +108,19 @@ impl<T: AsRef<[u8]>> Signed<T> {
         &self.timestamp
     }
 
-    pub fn verify_sig(&self) -> bool {
+    pub fn verify_sig(&self) -> SigValid {
         let ctime = Utc::now();
         let stime = self.timestamp;
-        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
-            return false;
-        }
         let dat = compute_signing_data(self.data.as_ref(), stime);
-        sign::verify_detached(&self.sig, &dat, &self.signed_by)
+        if stime.timestamp() > ctime.timestamp()
+            || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ
+        {
+            SigValid::BadTime
+        } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
+            SigValid::BadSign
+        } else {
+            SigValid::Yes
+        }
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
@@ -133,14 +145,17 @@ impl SigMeta {
         self.sig
     }
 
-    pub fn verify_sig(&self, msg: &[u8]) -> bool {
+    pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
         let ctime = Utc::now();
         let stime = self.timestamp;
-        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
-            return false;
-        }
         let signed = compute_signing_data(msg, stime);
-        sign::verify_detached(&self.sig, &signed, &self.signed_by)
+        if stime > ctime || (ctime.timestamp() - stime.timestamp()).abs() > TIMESTAMP_FUZZ {
+            SigValid::BadTime
+        } else if sign::verify_detached(&self.sig, &signed, &self.signed_by) {
+            SigValid::BadSign
+        } else {
+            SigValid::Yes
+        }
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
@@ -177,12 +192,12 @@ pub mod sig {
 
         pub fn key_is_valid(&self, key: PublicKey) -> bool {
             if let Some(d) = self.deprecated {
-                if d.verify_sig(key.as_ref()) {
+                if d.verify_sig(key.as_ref()) == SigValid::Yes {
                     return false;
                 }
             }
 
-            self.sig.verify_sig(key.as_ref())
+            self.sig.verify_sig(key.as_ref()) == SigValid::Yes
         }
 
         pub fn deprecate(&mut self, deprecation: SigMeta) -> bool {
@@ -221,12 +236,14 @@ pub mod sig {
             let timestamp = Utc::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
-            Signed {
+            let signed = Signed {
                 data,
                 timestamp,
                 sig,
                 signed_by: self.public,
-            }
+            };
+            debug_assert!(signed.verify_sig() == SigValid::Yes);
+            signed
         }
 
         pub fn raw_sign_detached(&self, data: &[u8]) -> Signature {
@@ -237,11 +254,13 @@ pub mod sig {
             let timestamp = Utc::now();
             let to_sign = compute_signing_data(data, timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
-            SigMeta {
+            let meta = SigMeta {
                 timestamp,
                 sig,
                 signed_by: self.public,
-            }
+            };
+            debug_assert!(meta.verify_sig(data) == SigValid::Yes);
+            meta
         }
     }
 }

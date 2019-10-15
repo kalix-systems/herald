@@ -123,7 +123,8 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
-    let res = helper::register(&register::Req(uid, sig))?;
+    let req = register::Req(uid, sig);
+    let res = helper::register(&req)?;
     // TODO: retry if this fails?
     crate::config::ConfigBuilder::new(uid, kp).add()?;
     Ok(res)

@@ -103,7 +103,7 @@ pub mod register {
     pub enum Res {
         UIDTaken,
         KeyTaken,
-        BadSig,
+        BadSig(SigValid),
         Success,
     }
 }
@@ -117,7 +117,7 @@ pub mod add_prekeys {
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     pub enum Res {
         Missing(Vec<sig::PublicKey>),
-        BadSig,
+        BadSig(SigValid),
         Success,
     }
 }

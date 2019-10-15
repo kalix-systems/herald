@@ -86,7 +86,7 @@ impl std::convert::AsRef<sig::PublicKey> for GlobalId {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PKIResponse {
     Success,
-    BadSignature,
+    BadSig(SigValid),
     Redundant,
     DeadKey,
 }

@@ -29,7 +29,7 @@ impl UserMeta {
     }
 
     pub fn verify_sig<T: AsRef<[u8]>>(&self, data: &Signed<T>) -> bool {
-        self.key_is_valid(*data.signed_by()) && data.verify_sig()
+        self.key_is_valid(*data.signed_by()) && data.verify_sig().eq(&SigValid::Yes)
     }
 
     pub fn add_new_key(&mut self, new: Signed<sig::PublicKey>) -> bool {
