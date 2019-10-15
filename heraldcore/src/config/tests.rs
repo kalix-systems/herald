@@ -12,11 +12,7 @@ fn add_get_set_config() {
     let id = "HelloWorld".try_into().expect(womp!());
 
     let kp = KeyPair::gen_new();
-    ConfigBuilder::new()
-        .id(id)
-        .keypair(kp)
-        .add()
-        .expect(womp!());
+    ConfigBuilder::new(id, kp).add().expect(womp!());
 
     let config = Config::get().expect(womp!());
     assert_eq!(config.id(), id);
@@ -32,9 +28,7 @@ fn add_get_set_config() {
     let profile_picture = "stuff";
     let nts_id = [0u8; 32].into();
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new()
-        .id(id)
-        .keypair(kp)
+    let config = ConfigBuilder::new(id, kp)
         .name(name.into())
         .colorscheme(1)
         .color(2)
@@ -94,13 +88,9 @@ fn two_configs() {
     let kp2 = KeyPair::gen_new();
     let id2 = "2".try_into().expect(womp!());
 
-    ConfigBuilder::new()
-        .id(id1)
-        .keypair(kp1)
-        .add()
-        .expect(womp!());
+    ConfigBuilder::new(id1, kp1).add().expect(womp!());
 
-    assert!(ConfigBuilder::new().id(id2).keypair(kp2).add().is_err());
+    assert!(ConfigBuilder::new(id2, kp2).add().is_err());
 }
 
 #[test]
@@ -110,11 +100,7 @@ fn get_id() {
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new()
-        .id(id)
-        .keypair(kp)
-        .add()
-        .expect(womp!());
+    let config = ConfigBuilder::new(id, kp).add().expect(womp!());
 
     let static_id = Config::static_id().expect(womp!());
     assert_eq!(config.id, id);
@@ -128,11 +114,7 @@ fn get_kp() {
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new()
-        .id(id)
-        .keypair(kp.clone())
-        .add()
-        .expect(womp!());
+    let config = ConfigBuilder::new(id, kp.clone()).add().expect(womp!());
 
     let static_keypair = Config::static_keypair().expect(womp!());
     assert_eq!(config.keypair, kp);
