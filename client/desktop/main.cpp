@@ -22,6 +22,9 @@ int main(int argc, char* argv[])
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "QmlCfg");
 
+  qmlRegisterSingletonType(QUrl("qrc:///imports/Units.qml"), "LibHerald", 1, 0,
+                           "Units");
+
   app.setOrganizationName("Kalix Systems");
   app.setOrganizationDomain("kalix.io");
   app.setApplicationName("Herald");

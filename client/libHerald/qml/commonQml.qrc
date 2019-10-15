@@ -9,6 +9,7 @@
         <file>themes/MetaThemes.qml</file>
         <file>themes/SolarizedDark.qml</file>
         <file>themes/SolarizedLight.qml</file>
+        <file>Units.qml</file>
     </qresource>
     <qresource prefix="/">
         <file>themes/Dark.qml</file>

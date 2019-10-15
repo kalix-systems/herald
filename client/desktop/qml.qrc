@@ -55,5 +55,6 @@
         <file>main.qml</file>
         <file>SideBar/SidePane.qml</file>
         <file>ChatBubble/ChatLabel.qml</file>
+        <file>common/Temp.qml</file>
     </qresource>
 </RCC>

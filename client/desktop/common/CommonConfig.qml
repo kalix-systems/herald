@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick 2.13
 import Qt.labs.settings 1.0
 import "EmojiJson.js" as JSON
+import "qrc:/imports/themes" as Imports
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -61,52 +62,10 @@ Item {
         property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
 
+    Imports.MetaThemes {
+        id: metaTheme
+    }
     /// palette :
-    /// object which contains all of the color configurations
-    /// this is defaulted to the Light color scheme
-    property var palette: switch (theme) {
-        case (0):
-        return {
-            "mainColor": "white",
-            "secondaryColor": "lightgrey",
-            "tertiaryColor": "lightsteelblue",
-            "tertiaryComplement": "lightsalmon",
-            "mainTextColor": "black",
-            "secondaryTextColor": "grey",
-            "alertTextColor": "red",
-            "iconFill": "white",
-            "iconMatte": "black",
-            "borderColor": "black"
-        }
-        case (1):
-        return {
-            "mainColor": "#002b36",
-            "secondaryColor": "#073642",
-            "tertiaryColor": "#073642",
-            "tertiaryComplement": "#839496",
-            "mainTextColor": "#839496",
-            "secondaryTextColor": "#93a1a1",
-            "iconFill": "#eee8d5",
-            "alertTextColor": "#dc322f",
-            "iconMatte": "#eee8d5",
-            "borderColor": "#073642"
-        }
-    }
-
-    /// Todo : finish these later THIS LIST IS APPEND ONLY
-    property var avatarColors: switch (theme) {
-        /// none of these besides Light implemented ATM
-        case (0):
-        return ["#9C2E38", "#ce8054", "#9da86f", "#7498a4", "#bfb35a", "#32a198", "#5e8c6a", "#729eb8", "#CB8C9D"]
-        case (1):
-        return ["#b58900", "#cb4b16", "#dc322f", "#d33682", "#6c71c4", "#268bd2", "#2aa198", "#859900", "#cd74d4"]
-        case (2):
-        break
-        case (3):
-        break
-    }
-    /// Default Font:
-    /// Default Text Size:
-    /// Platform :
-    /// Global statuses and states :
+    property QtObject palette: metaTheme.themes[theme]
+    property var avatarColors: palette.avatarColors
 }
