@@ -32,18 +32,19 @@ Pane {
         color: QmlCfg.palette.mainColor
     }
 
-
-
+    //this does not exist anymore
+    /**
     ///--- Username and Settings gear button
     SBUtils.ConfigBar {
         id: toolBar
     }
+    **/
 
 
     ///--- SearchBar for contacts, add contact button
     Column {
         id: utilityBar
-        anchors.top: toolBar.bottom
+       // anchors.top: toolBar.bottom
         width: parent.width
         Loader {
             property string searchPlaceholder: ""
