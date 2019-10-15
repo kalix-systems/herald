@@ -84,6 +84,7 @@ Rectangle {
 
         topPadding: QmlCfg.smallMargin
 
+
         Loader {
             id: replyLoader
             property string opName: replyName
@@ -105,7 +106,7 @@ Rectangle {
             TextArea {
                 id: chatText
                 background: Rectangle {
-                    color: QmlCfg.palette.secondaryColor
+                    color: QmlCfg.palette.mainColor
                     anchors {
                         fill: parent
                         horizontalCenter: parent.horizontalCenter

@@ -96,6 +96,12 @@ Pane {
         anchors.left: chatTextArea.left
     }
 
+    Common.Divider {
+        height: 1
+        color: QmlCfg.palette.borderColor
+        bottomAnchor: chatTextArea.top
+    }
+
     ///--- Text entry area, for typing
     CVUtils.TextAreaForm {
         id: chatTextArea
@@ -104,7 +110,10 @@ Pane {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            margins: QmlCfg.margin
+            leftMargin: QmlCfg.margin
+            topMargin: QmlCfg.margin
+            rightMargin: QmlCfg.margin
+            bottomMargin: QmlCfg.smallMargin
         }
 
         keysProxy: Item {
