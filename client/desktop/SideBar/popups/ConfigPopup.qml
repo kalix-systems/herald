@@ -64,7 +64,8 @@ Window {
                 TextField {
                     id: cfgUid
                     // BNOTE: This shouldn't even be loaded until this is true
-                    enabled: !config.configId
+                    // yeah this doesn't even exist until you have a uid
+                    enabled: false //!config.configId
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.configId
                     selectionColor: QmlCfg.palette.tertiaryColor

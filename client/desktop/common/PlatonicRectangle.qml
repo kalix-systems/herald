@@ -21,8 +21,7 @@ Rectangle {
 
     Common.Divider {
         color: QmlCfg.palette.secondaryColor
-        anchor: parent.bottom
-        // PAUL: convert to device independent size this is magic.
+        bottomAnchor: parent.bottom
         height: 2
     }
 

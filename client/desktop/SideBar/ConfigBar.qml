@@ -55,9 +55,7 @@ ToolBar {
             Layout.leftMargin: QmlCfg.margin
             source: "qrc:/add-contact-icon.svg"
             onClicked: {
-                // BNOTE: Is this the right order? It might be, but check
                 convoPane.state = "newContactState"
-                searchLoader.sourceComponent = searchBarComponent
             }
         }
 

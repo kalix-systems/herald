@@ -21,7 +21,7 @@ ListView {
 
             Common.Divider {
                 color: QmlCfg.palette.secondaryColor
-                anchor: parent.bottom
+                bottomAnchor: parent.bottom
             }
 
             anchors.fill: parent
