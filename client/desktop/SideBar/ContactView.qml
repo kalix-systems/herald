@@ -54,3 +54,4 @@ ListView {
         }
     }
 } // BNOTE: Oh Christmas Tree, Oh Christmas Tree
+  // This is pretty factored out already i'm not sure how to fix

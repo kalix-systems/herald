@@ -55,8 +55,6 @@ Pane {
     }
 
     states: [
-        // PAUL 4: this state should belong to an object in a
-        // different subdirectory.
         State {
             name: "newContactState"
             PropertyChanges {
