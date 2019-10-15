@@ -24,10 +24,7 @@ impl UQ {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SigValid {
     Yes,
-    BadTime {
-        signer_time: DateTime<Utc>,
-        verify_time: DateTime<Utc>,
-    },
+    BadTime { signer_time: i64, verify_time: i64 },
     BadSign,
 }
 
@@ -119,8 +116,8 @@ impl<T: AsRef<[u8]>> Signed<T> {
             || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
         {
             SigValid::BadTime {
-                signer_time,
-                verify_time,
+                signer_time: signer_time.timestamp(),
+                verify_time: verify_time.timestamp(),
             }
         } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
             SigValid::BadSign
@@ -159,8 +156,8 @@ impl SigMeta {
             || (verify_time.timestamp() - signer_time.timestamp()).abs() > TIMESTAMP_FUZZ
         {
             SigValid::BadTime {
-                signer_time,
-                verify_time,
+                signer_time: signer_time.timestamp(),
+                verify_time: verify_time.timestamp(),
             }
         } else if sign::verify_detached(&self.sig, &signed, &self.signed_by) {
             SigValid::BadSign
