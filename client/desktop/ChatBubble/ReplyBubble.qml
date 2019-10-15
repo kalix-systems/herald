@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../common" as Common
 
 ColumnLayout {
 
@@ -16,7 +15,7 @@ ColumnLayout {
     property string authorName: ""
     property int spacing: 0
 
-    Common.ChatLabel {
+    ChatLabel {
         id: sender
         senderName: authorName
     }
@@ -64,6 +63,5 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">
+    <qresource prefix="/imports">
         <file>qmldir</file>
         <file>UtilityBar.qml</file>
         <file>TeamColumn.qml</file>

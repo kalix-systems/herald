@@ -44,7 +44,6 @@
         <file>common/js/Avatar.mjs</file>
         <file>common/Avatar.qml</file>
         <file>common/ButtonForm.qml</file>
-        <file>common/ChatLabel.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/Divider.qml</file>
         <file>common/EmojiJson.js</file>
@@ -55,5 +54,6 @@
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/SidePane.qml</file>
+        <file>ChatBubble/ChatLabel.qml</file>
     </qresource>
 </RCC>

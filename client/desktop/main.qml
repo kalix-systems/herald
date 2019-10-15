@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import Qt.labs.settings 1.0
+import "qrc:/imports" as Imports
 import "SideBar/popups" as Popups
 import "errors" as ErrorUtils
 import QtQml 2.13
@@ -17,8 +18,7 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    TopMenuBar {
-    }
+    TopMenuBar {}
 
     Errors {
         id: errorQueue
@@ -31,8 +31,7 @@ ApplicationWindow {
             }
         }
 
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
+        property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
     // Paul 7: move these utils and state to a ```globals``` qml module.
@@ -53,15 +52,13 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: RegistrationPage {
-        }
+        sourceComponent: RegistrationPage {}
     }
 }

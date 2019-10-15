@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../common" as Common
 
 ColumnLayout {
     property string body: ""
@@ -11,7 +10,7 @@ ColumnLayout {
     property string imageSource: ""
     spacing: 0
 
-    Common.ChatLabel {
+    ChatLabel {
         id: sender
         senderName: authorName
     }
@@ -28,9 +27,7 @@ ColumnLayout {
         asynchronous: true
     }
 
-    StandardTextEdit {
-    }
+    StandardTextEdit {}
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }
