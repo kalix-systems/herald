@@ -16,6 +16,8 @@ ColumnLayout {
     ChatLabel {
         senderName: authorName
     }
-    StandardTextEdit {}
-    StandardStamps {}
+    StandardTextEdit {
+    }
+    StandardStamps {
+    }
 }

@@ -90,7 +90,5 @@ Pane {
     ///--- Contacts View Actual
     SBUtils.SidePane {
         id: convoPane
-
     }
-
 }

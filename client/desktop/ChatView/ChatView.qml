@@ -28,7 +28,7 @@ Pane {
     }
 
     Common.Divider {
-       bottomAnchor: messageBar.bottom
+        bottomAnchor: messageBar.bottom
         color: "black"
     }
 

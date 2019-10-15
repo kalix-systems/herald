@@ -30,45 +30,45 @@ Component {
         RowLayout {
             anchors.fill: parent
 
-        Text {
-            text: "Conversations"
-            Layout.leftMargin: QmlCfg.margin
-            Layout.rightMargin: QmlCfg.margin
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            color: QmlCfg.palette.mainTextColor
-        }
-
-        Common.ButtonForm {
-            id: searchButton
-            property bool searchRegex: false
-            Layout.leftMargin: QmlCfg.margin
-            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            //this is a vertical center offset
-            Layout.topMargin: 1
-            source: "qrc:/search-icon.svg"
-            scale: 1.0
-            //todo : add back in regex logic once ui is known
-            onClicked: {
-                convoPane.state = "conversationSearch"
+            Text {
+                text: "Conversations"
+                Layout.leftMargin: QmlCfg.margin
+                Layout.rightMargin: QmlCfg.margin
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                color: QmlCfg.palette.mainTextColor
             }
-        }
 
-        ///--- Add contact button
-        Common.ButtonForm {
-            id: addContactButton
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Layout.leftMargin: QmlCfg.margin
-            source: "qrc:/pencil-icon-black.svg"
-            z: -1
-
-            MouseArea {
-                anchors.fill: parent
-
+            Common.ButtonForm {
+                id: searchButton
+                property bool searchRegex: false
+                Layout.leftMargin: QmlCfg.margin
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                //this is a vertical center offset
+                Layout.topMargin: 1
+                source: "qrc:/search-icon.svg"
+                scale: 1.0
+                //todo : add back in regex logic once ui is known
                 onClicked: {
-                    convoPane.state = "newConversationState"
+                    convoPane.state = "conversationSearch"
+                }
+            }
+
+            ///--- Add contact button
+            Common.ButtonForm {
+                id: addContactButton
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                Layout.leftMargin: QmlCfg.margin
+                source: "qrc:/pencil-icon-black.svg"
+                z: -1
+
+                MouseArea {
+                    anchors.fill: parent
+
+                    onClicked: {
+                        convoPane.state = "newConversationState"
+                    }
                 }
             }
         }
-    }
     }
 }

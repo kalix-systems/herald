@@ -5,7 +5,6 @@ import LibHerald 1.0
 import "../SideBar" as SBUtils
 import "../SideBar/NewConvoComponents" as ConvUtils
 
-
 Pane {
     id: convoPane
     padding: 0
