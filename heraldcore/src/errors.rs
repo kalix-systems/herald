@@ -1,5 +1,5 @@
 use chainmail::errors::ChainError;
-use herald_common::serde_cbor;
+use herald_common::*;
 use image;
 use lazy_pond::LazyError;
 use regex;
@@ -30,12 +30,12 @@ pub enum HErr {
     /// Serialization or deserialization
     /// error
     CborError(serde_cbor::Error),
-    /// An issue occurred at login
-    LoginError,
+
+    GIDSpecFailed(login::SignAsResponse),
+    SignInFailed(login::LoginTokenResponse),
+
     /// An issue occurred at registration
-    RegistrationError,
-    /// Failed to find expected
-    MissingFields,
+    RegistrationError(register::Res),
     /// An HTTP request was dropped
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
@@ -63,9 +63,9 @@ impl fmt::Display for HErr {
             InvalidConversationId => write!(f, "InvalidConversationId"),
             LazyPondError => write!(f, "LazyPondError"),
             ChainError(e) => write!(f, "ChainError: {}", e),
-            LoginError => write!(f, "LoginError"),
-            RegistrationError => write!(f, "RegistrationError"),
-            MissingFields => write!(f, "MissingFields"),
+            GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
+            SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
+            RegistrationError(r) => write!(f, "RegistrationError: {:?}", r),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             NoneError => write!(f, "Unexpected none"),
         }
