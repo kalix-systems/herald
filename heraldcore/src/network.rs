@@ -155,15 +155,17 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
 
     sock_send_msg(&mut ws, &SignAs(gid))?;
 
-    if let SignAsResponse::Sign(u) = sock_get_msg(&mut ws)? {
-        let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
-        sock_send_msg(&mut ws, &token)?;
+    match sock_get_msg(&mut ws)? {
+        SignAsResponse::Sign(u) => {
+            let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
+            sock_send_msg(&mut ws, &token)?;
 
-        if LoginTokenResponse::BadSig == sock_get_msg(&mut ws)? {
-            return Err(LoginError);
+            match sock_get_msg(&mut ws)? {
+                LoginTokenResponse::Success => {}
+                e => return Err(GIDSpecFailed(e)),
+            }
         }
-    } else {
-        return Err(LoginError);
+        e => return Err(SignInFailed(e)),
     }
 
     let ev = catchup(&mut ws)?;

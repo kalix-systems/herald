@@ -34,8 +34,6 @@ pub enum HErr {
     GIDSpecFailed(login::SignAsResponse),
     SignInFailed(login::LoginTokenResponse),
 
-    /// An issue occurred at registration
-    RegistrationError(register::Res),
     /// An HTTP request was dropped
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
@@ -65,7 +63,6 @@ impl fmt::Display for HErr {
             ChainError(e) => write!(f, "ChainError: {}", e),
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
-            RegistrationError(r) => write!(f, "RegistrationError: {:?}", r),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             NoneError => write!(f, "Unexpected none"),
         }
