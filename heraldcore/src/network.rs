@@ -136,6 +136,11 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HErr> {
     use login::*;
 
+    if sodiumoxide::init().is_err() {
+        eprintln!("failed to init libsodium - what are you doing");
+        std::process::abort()
+    }
+
     CAUGHT_UP.store(false, Ordering::Release);
 
     let uid = Config::static_id()?;
