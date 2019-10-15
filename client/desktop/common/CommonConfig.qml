@@ -39,6 +39,9 @@ Item {
     property int configHeight: 200
     /// standard z values
     property int overlayZ: 10
+    property int topZ: 9
+    property int middleZ: 5
+    property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
     property int avatarSize: 45
@@ -64,32 +67,12 @@ Item {
     property var palette: switch (theme) {
         case (0):
         return {
-            "mainColor"
-            /* mainColor:
-            used for backgrounds and default fills*/
-            : "white",
-            "secondaryColor"
-            /* secondaryColor:
-             used for secondary lowlighting, borders*/
-            : "lightgrey",
-            "tertiaryColor"
-            /* tertiaryColor:
-            used for additional highlighting, selection indication*/
-            : "lightsteelblue",
-            "tertiaryComplement"
-            /* teriaryComplement:
-            a direct compliment to the selection color, should be used for alerts
-            and uncommon events */
-            : "lightsalmon",
-            "mainTextColor"
-            /* textColor:
-             the color of commonly displayed text when it is on
-             a surface of the primary color*/
-            : "black",
-            "secondaryTextColor"
-            /* secondaryTextColor:
-             the color of text on a surface of the secondaryColor*/
-            : "grey",
+            "mainColor": "white",
+            "secondaryColor": "lightgrey",
+            "tertiaryColor": "lightsteelblue",
+            "tertiaryComplement": "lightsalmon",
+            "mainTextColor": "black",
+            "secondaryTextColor": "grey",
             "alertTextColor": "red",
             "iconFill": "white",
             "iconMatte": "black",

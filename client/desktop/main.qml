@@ -11,10 +11,11 @@ import QtQml 2.13
 
 ApplicationWindow {
     id: root
+    title: "Herald"
+
     visible: true
     width: 900
     height: 640
-    title: qsTr("Herald")
     minimumWidth: 500
     minimumHeight: 300
 
@@ -22,20 +23,16 @@ ApplicationWindow {
 
     Errors {
         id: errorQueue
-
         onTryPollChanged: {
-            var errMsg = errorQueue.nextError()
+            const errMsg = errorQueue.nextError()
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
                 errPopup.open()
             }
         }
-
         property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
-    // Paul 7: move these utils and state to a ```globals``` qml module.
-    // This provides a few purely functional helper methods
     HeraldUtils {
         id: heraldUtils
     }
