@@ -195,6 +195,16 @@ impl NetworkHandleTrait for NetworkHandle {
             }
             Res::BadSig(s) => {
                 eprintln!("Bad sig: {:?}", s);
+                match s {
+                    SigValid::BadTime {
+                        signer_time,
+                        verify_time,
+                    } => {
+                        eprintln!("server time was: {:?}", verify_time.timestamp());
+                        eprintln!("client time was: {:?}", signer_time.timestamp());
+                    }
+                    _ => {}
+                }
                 false
             }
             Res::Success => true,

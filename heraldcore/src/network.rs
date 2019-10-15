@@ -126,7 +126,13 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     let req = register::Req(uid, sig);
     let res = helper::register(&req)?;
     // TODO: retry if this fails?
-    crate::config::ConfigBuilder::new(uid, kp).add()?;
+    match &res {
+        register::Res::Success => {
+            crate::config::ConfigBuilder::new(uid, kp).add()?;
+        }
+        _ => {}
+    }
+
     Ok(res)
 }
 
