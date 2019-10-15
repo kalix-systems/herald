@@ -24,7 +24,10 @@ impl UQ {
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SigValid {
     Yes,
-    BadTime { signer_time: i64, verify_time: i64 },
+    BadTime {
+        signer_time: DateTime<Utc>,
+        verify_time: DateTime<Utc>,
+    },
     BadSign,
 }
 
@@ -69,10 +72,10 @@ impl<T: AsRef<[u8]>> From<(T, SigMeta)> for Signed<T> {
     }
 }
 
-fn compute_signing_data(slice: &[u8], ts: i64) -> Vec<u8> {
+fn compute_signing_data<Tz: TimeZone>(slice: &[u8], ts: DateTime<Tz>) -> Vec<u8> {
     let mut out = Vec::with_capacity(slice.len() + 8);
     out.extend_from_slice(slice);
-    out.extend_from_slice(&i64::to_le_bytes(ts));
+    out.extend_from_slice(&i64::to_le_bytes(ts.timestamp()));
     out
 }
 
@@ -109,8 +112,8 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        let verify_time = dbg!(Utc::now().timestamp());
-        let signer_time = dbg!(self.timestamp.timestamp());
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
         let dat = compute_signing_data(self.data.as_ref(), signer_time);
         if !check_ts(signer_time, verify_time) {
             SigValid::BadTime {
@@ -129,8 +132,9 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 }
 
-fn check_ts(signer_time: i64, verify_time: i64) -> bool {
-    (signer_time <= verify_time) || ((verify_time - signer_time).abs() <= TIMESTAMP_FUZZ)
+fn check_ts<Tz: TimeZone>(signer_time: DateTime<Tz>, verify_time: DateTime<Tz>) -> bool {
+    (signer_time <= verify_time)
+        || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
 }
 
 impl SigMeta {
@@ -151,8 +155,8 @@ impl SigMeta {
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
-        let verify_time = dbg!(Utc::now().timestamp());
-        let signer_time = dbg!(self.timestamp.timestamp());
+        let verify_time = Utc::now();
+        let signer_time = self.timestamp;
         let signed = compute_signing_data(msg, signer_time);
         if !check_ts(signer_time, verify_time) {
             SigValid::BadTime {
@@ -242,7 +246,7 @@ pub mod sig {
 
         pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
             let timestamp = Utc::now();
-            let to_sign = compute_signing_data(data.as_ref(), timestamp.timestamp());
+            let to_sign = compute_signing_data(data.as_ref(), timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
             let signed = Signed {
                 data,
@@ -260,7 +264,7 @@ pub mod sig {
 
         pub fn sign_detached(&self, data: &[u8]) -> SigMeta {
             let timestamp = Utc::now();
-            let to_sign = compute_signing_data(data, timestamp.timestamp());
+            let to_sign = compute_signing_data(data, timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
             let meta = SigMeta {
                 timestamp,
