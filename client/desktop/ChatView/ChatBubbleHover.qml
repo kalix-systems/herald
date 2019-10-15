@@ -19,8 +19,8 @@ MouseArea {
         bottom: parent.bottom
         top: parent.top
     }
-    // PAUL : this should be a row
 
+    // PAUL : this should be a row
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
@@ -61,7 +61,6 @@ MouseArea {
         source: "qrc:/reply-icon.svg"
         z: 10
 
-        //PAUL : move this to C++
         onClicked: {
             chatTextArea.replyText = body
             chatTextArea.replyId = messageId
@@ -70,5 +69,4 @@ MouseArea {
             chatTextArea.state = "replystate"
         }
     }
-
 }

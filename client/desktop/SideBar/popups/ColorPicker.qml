@@ -13,7 +13,8 @@ Window {
     maximumWidth: width
     minimumWidth: width
     title: "Choose Color"
-    property var colorIndex
+    property int colorIndex: -1
+    property int selectedIndex: -1
 
     GridLayout {
         width: QmlCfg.popupWidth
@@ -41,6 +42,21 @@ Window {
                     }
                 }
             }
+        }
+    }
+    Button {
+        id: colorSubmissionButton
+        text: "Submit"
+
+        anchors {
+            right: parent.right
+            bottom: parent.bottom
+        }
+
+        onClicked: {
+            contactsModel.setColor(gsSelectedIndex,
+                                   avatarColorPicker.colorIndex)
+            avatarColorPicker.close()
         }
     }
 }

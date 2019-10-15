@@ -20,14 +20,11 @@ Item {
 
     Users {
         id: contactsModel
-
         onTryPollChanged: pollUpdate()
     }
 
     Conversations {
         id: conversationsModel
-        // PAUL 1: see if we can call connect over FFI to clean these functions up.
-        // we could easily do that in `new`.
         onTryPollChanged: pollUpdate()
     }
 

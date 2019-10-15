@@ -42,7 +42,6 @@ ColumnLayout {
                 color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
             }
 
-            // KAAVYA: write our own ellision function
             TextMetrics {
                 readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
