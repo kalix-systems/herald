@@ -50,9 +50,6 @@ ToolBar {
             Layout.fillWidth: true
         }
 
-        Popups.ConfigPopup {
-            id: configPopup
-        }
 
         Common.ButtonForm {
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter

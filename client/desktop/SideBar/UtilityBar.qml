@@ -27,6 +27,7 @@ Component {
             color: QmlCfg.palette.secondaryColor
         }
 
+
         RowLayout {
             anchors.fill: parent
 
@@ -45,15 +46,7 @@ Component {
                 size: parent.height - QmlCfg.margin
                 isDefault: true
                 inLayout: true
-                MouseArea {
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    //onClicked: print("hi")
-                }
-            }
 
-            Popups.ConfigPopup {
-                id: configPopup
             }
 
             //probably need a standard divider that also handles layouts
