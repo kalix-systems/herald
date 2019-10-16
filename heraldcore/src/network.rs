@@ -208,7 +208,13 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            ev.merge(handle_push(push)?);
+            match handle_push(push) {
+                Ok(e2) => ev.merge(e2),
+                Err(e) => {
+                    eprintln!("error while catching up, error was:\n{}", e);
+                    ev.errors.push(e);
+                }
+            }
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
@@ -291,6 +297,8 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
+    // TODO: use this field somewhere
+    errors: Vec<HErr>,
 }
 
 impl Event {
@@ -320,6 +328,7 @@ impl Default for Event {
         Event {
             notifications: Vec::new(),
             replies: Vec::new(),
+            errors: Vec::new(),
         }
     }
 }
