@@ -3,7 +3,8 @@ pragma Singleton
 import QtQuick 2.13
 import Qt.labs.settings 1.0
 import "EmojiJson.js" as JSON
-import "qrc:/imports/themes" as Imports
+import "qrc:/imports/themes" as Themes
+import "qrc:/imports" as Imports
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -16,10 +17,13 @@ import "qrc:/imports/themes" as Imports
 Item {
     id: cfg
 
+    Imports.Units {
+        id: units
+    }
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
-    readonly property int margin: 10
+    readonly property int margin: units.largeSpacing
     /// fitzpatrick emoji swatch codes
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
     /// standard half margin
@@ -49,6 +53,9 @@ Item {
     /// standard conversation/contact height
     property int convoHeight: 55
 
+    property real minChatViewWidth: 300
+    property real minContactsWidth: 300
+
     /// user settable cfg
     property int theme: 0
     /// emoji skin color
@@ -62,7 +69,7 @@ Item {
         property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
 
-    Imports.MetaThemes {
+    Themes.MetaThemes {
         id: metaTheme
     }
     /// palette :

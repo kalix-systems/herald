@@ -1,12 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>App.qml</file>
-        <file>ChatBubble/ChatBubble.qml</file>
-        <file>ChatBubble/ImageBubble.qml</file>
-        <file>ChatBubble/ReplyBubble.qml</file>
-        <file>ChatBubble/StandardBubble.qml</file>
-        <file>ChatBubble/StandardStamps.qml</file>
-        <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
         <file>ChatView/js/ChatTextAreaUtils.mjs</file>
@@ -49,12 +43,9 @@
         <file>common/EmojiJson.js</file>
         <file>common/ImageAvatar.qml</file>
         <file>common/PlatonicRectangle.qml</file>
-        <file>common/Theme.qml</file>
         <file>common/js/utils.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/SidePane.qml</file>
-        <file>ChatBubble/ChatLabel.qml</file>
-        <file>common/Temp.qml</file>
     </qresource>
 </RCC>

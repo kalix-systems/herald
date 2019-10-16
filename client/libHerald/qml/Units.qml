@@ -19,7 +19,7 @@
  *   51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import QtQuick 2.13
-pragma Singleton
+import QtQuick.Window 2.13
 
 
 /**
@@ -58,24 +58,26 @@ QtObject {
      * Not devicePixelRation-adjusted::
      * * desktop
      */
+    property bool isMobile: Screen.desktopAvailableWidth > gu(250)
+
     property QtObject iconSizes: QtObject {
         property int small: Math.floor(
                                 fontMetrics.roundedIconSize(
-                                    16 * devicePixelRatio) * (Settings.isMobile ? 1.5 : 1))
+                                    16 * devicePixelRatio) * (isMobile ? 1.5 : 1))
         property int smallMedium: Math.floor(
                                       fontMetrics.roundedIconSize(
-                                          22 * devicePixelRatio) * (Settings.isMobile ? 1.5 : 1))
+                                          22 * devicePixelRatio) * (isMobile ? 1.5 : 1))
         property int medium: Math.floor(
                                  fontMetrics.roundedIconSize(
-                                     32 * devicePixelRatio) * (Settings.isMobile ? 1.5 : 1))
+                                     32 * devicePixelRatio) * (isMobile ? 1.5 : 1))
         property int large: Math.floor(
                                 fontMetrics.roundedIconSize(
-                                    48 * devicePixelRatio) * (Settings.isMobile ? 1.5 : 1))
+                                    48 * devicePixelRatio) * (isMobile ? 1.5 : 1))
         property int huge: Math.floor(
                                fontMetrics.roundedIconSize(
-                                   64 * devicePixelRatio) * (Settings.isMobile ? 1.5 : 1))
+                                   64 * devicePixelRatio) * (isMobile ? 1.5 : 1))
         property int enormous: Math.floor(
-                                   128 * devicePixelRatio * (Settings.isMobile ? 1.5 : 1))
+                                   128 * devicePixelRatio * (isMobile ? 1.5 : 1))
     }
 
 

@@ -10,9 +10,7 @@ ColumnLayout {
     property string friendlyTimestamp: ""
     property string receiptImage: ""
     property string authorName: ""
-
     spacing: 0
-
     ChatLabel {
         senderName: authorName
     }

@@ -47,7 +47,7 @@ ToolBar {
                 sourceSize: Qt.size(iconDimLarge, iconDimLarge)
             }
         }
-        
+
         // spacer
         Item {
             Layout.fillWidth: true
