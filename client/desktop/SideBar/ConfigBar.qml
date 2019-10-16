@@ -68,7 +68,7 @@ ToolBar {
             source: "qrc:/gear-icon.svg"
             onClicked: {
                 /// Note: this needs to pay attention to root state
-                configPopup.show()
+              //  configPopup.show()
             }
         }
     }

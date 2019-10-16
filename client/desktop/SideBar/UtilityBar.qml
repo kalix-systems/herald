@@ -6,6 +6,7 @@ import "popups" as Popups
 import "../common" as Common
 import "../common/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
+import Qt.labs.platform 1.1
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -71,12 +72,11 @@ Component {
         Common.ButtonForm {
             id: searchButton
             property bool searchRegex: false
-            Layout.leftMargin: QmlCfg.margin
+            Layout.leftMargin: QmlCfg.smallMargin
             Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             //this is a vertical center offset
             Layout.topMargin: 1
             source: "qrc:/search-icon.svg"
-            scale: 1.0
             //todo : add back in regex logic once ui is known
             onClicked: {
                 convoPane.state = "conversationSearch"
@@ -85,10 +85,10 @@ Component {
 
         ///--- Add contact button
         Common.ButtonForm {
-            id: addContactButton
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Layout.leftMargin: QmlCfg.margin
-            Layout.rightMargin: QmlCfg.margin
+            id: newMessageButton
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+           // Layout.leftMargin: QmlCfg.margin
+           // Layout.rightMargin: QmlCfg.margin
             source: "qrc:/pencil-icon-black.svg"
             z: -1
 
@@ -99,6 +99,32 @@ Component {
                     convoPane.state = "newConversationState"
                 }
             }
+        }
+
+        //placeholder new contact button
+        Common.ButtonForm {
+            id: newContactButton
+
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+         //  Layout.leftMargin: QmlCfg.margin
+            Layout.rightMargin: QmlCfg.margin
+            source: "qrc:/options-icon.svg"
+
+            MouseArea {
+                anchors.fill: parent
+
+                onClicked: {
+                    utilityOptionsMenu.open()
+                }
+            }
+
+           Menu {
+               id: utilityOptionsMenu
+               MenuItem {
+                   text: "Add contact"
+                   onTriggered: convoPane.state = "newContactState"
+               }
+           }
         }
     }
     }
