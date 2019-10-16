@@ -206,7 +206,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "chainmail"
 version = "0.1.0"
-source = "git+https://github.com/kalix-systems/chainmail.git#6b575da3d54167f7a0f1854079b8df612087a181"
+source = "git+https://github.com/kalix-systems/chainmail.git#e0863d506e9027e497f432fc80c74c76db467a62"
 dependencies = [
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",

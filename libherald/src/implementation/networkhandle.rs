@@ -202,13 +202,20 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn login(&mut self) -> bool {
+        use heraldcore::errors::HErr;
+
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
         ret_err!(
             thread::Builder::new().spawn(move || {
-                ret_err!(network::login(move |notif: Notification| {
-                    handler.send(notif);
-                }))
+                ret_err!(network::login(
+                    move |notif: Notification| {
+                        handler.send(notif);
+                    },
+                    move |herr: HErr| {
+                        ret_err!(Err::<(), HErr>(herr));
+                    }
+                ))
             }),
             false
         );
