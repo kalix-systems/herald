@@ -43,7 +43,7 @@ pub enum HErr {
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
-    NoneError,
+    NoneError(&'static str, u32),
     /// Error from `chainmail`
     ChainError(ChainError),
     /// Malformed path
@@ -71,7 +71,7 @@ impl fmt::Display for HErr {
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             MissingOutboundMessageField(missing) => write!(f, "{}", missing),
             MissingInboundMessageField(missing) => write!(f, "{}", missing),
-            NoneError => write!(f, "Unexpected none"),
+            NoneError(file, line) => write!(f, "Unexpected none in file {} on line {}", file, line),
         }
     }
 }
@@ -131,4 +131,12 @@ impl From<image::ImageError> for HErr {
             e => HErr::ImageError(e),
         }
     }
+}
+
+/// Returns a `NoneError` annotated with the current file and line number.
+#[macro_export]
+macro_rules! NE {
+    () => {
+        ::heraldcore::errors::HErr::NoneError(file!(), line!())
+    };
 }

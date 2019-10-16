@@ -4,10 +4,11 @@ use heraldcore::{
     abort_err,
     config::Config,
     conversation,
-    errors::HErr::{self, NoneError as NE},
+    errors::HErr,
     message::{self, Message as Msg},
     network,
     types::*,
+    NE,
 };
 use std::{
     collections::HashMap,
@@ -49,7 +50,7 @@ impl Messages {
     }
 
     fn raw_text_insert(&mut self, body: MessageBody, op: Option<MsgId>) -> Result<(), HErr> {
-        let conversation_id = self.conversation_id.ok_or(NE)?;
+        let conversation_id = self.conversation_id.ok_or(NE!())?;
 
         let mut builder = message::OutboundMessageBuilder::default()
             .conversation_id(conversation_id)
