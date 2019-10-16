@@ -369,32 +369,29 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
             Msg(msg) => {
                 let cmessages::Msg { mid, content, op } = msg;
+                let cmessages::Message { body, attachments } = content;
 
-                match content {
-                    cmessages::Message::Text(body) => {
-                        let mut builder = crate::message::InboundMessageBuilder::default();
+                let mut builder = crate::message::InboundMessageBuilder::default();
 
-                        builder
-                            .id(mid)
-                            .author(from.uid)
-                            .conversation_id(cid)
-                            .timestamp(ts);
+                builder
+                    .id(mid)
+                    .author(from.uid)
+                    .conversation_id(cid)
+                    .attachments(attachments)
+                    .timestamp(ts);
 
-                        if let Some(body) = body {
-                            builder.body(body);
-                        }
-
-                        if let Some(op) = op {
-                            builder.replying_to(op);
-                        }
-
-                        builder.store()?;
-
-                        ev.notifications.push(Notification::NewMsg(mid, cid));
-                        ev.replies.push((cid, form_ack(mid)?));
-                    }
-                    cmessages::Message::Blob(_) => unimplemented!(),
+                if let Some(body) = body {
+                    builder.body(body);
                 }
+
+                if let Some(op) = op {
+                    builder.replying_to(op);
+                }
+
+                builder.store()?;
+
+                ev.notifications.push(Notification::NewMsg(mid, cid));
+                ev.replies.push((cid, form_ack(mid)?));
             }
             Ack(ack) => {
                 crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
@@ -581,7 +578,10 @@ pub fn send_text(
     mid: MsgId,
     op: Option<MsgId>,
 ) -> Result<(), HErr> {
-    let content = cmessages::Message::Text(Some(body));
+    let content = cmessages::Message {
+        body: Some(body),
+        attachments: vec![],
+    };
     let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
     send_cmessage(cid, &body)
 }

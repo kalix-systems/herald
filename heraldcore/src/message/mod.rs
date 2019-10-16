@@ -3,7 +3,11 @@ use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::params;
 use std::collections::HashMap;
-// use std::path::PathBuf;
+use std::path::PathBuf;
+
+/// Message attachments
+pub mod attachments;
+use attachments::*;
 
 /// Message
 #[derive(Clone)]
@@ -53,11 +57,13 @@ impl Message {
 /// Builder for storing outbound messages
 pub struct OutboundMessageBuilder {
     /// Recipient user id
-    pub conversation: Option<ConversationId>,
+    conversation: Option<ConversationId>,
     /// Body of message
-    pub body: Option<MessageBody>,
+    body: Option<MessageBody>,
     /// Message id of the message being replied to
-    pub op: Option<MsgId>,
+    op: Option<MsgId>,
+    /// Attachments
+    attachments: Vec<PathBuf>,
 }
 
 impl OutboundMessageBuilder {
@@ -79,15 +85,27 @@ impl OutboundMessageBuilder {
         self
     }
 
+    /// Add attachment
+    pub fn add_attachment(mut self, path: PathBuf) -> Self {
+        self.attachments.push(path);
+        self
+    }
+
     /// Store the message
-    pub fn store(self) -> Result<Message, HErr> {
+    pub fn store(self) -> Result<(Message, Vec<Attachment>), HErr> {
         let Self {
             conversation,
             body,
             op,
+            attachments,
         } = self;
 
         use MissingOutboundMessageField::*;
+
+        if attachments.is_empty() && body.is_none() {
+            return Err(MissingBody.into());
+        }
+
         let conversation_id = conversation.ok_or(MissingConversationId)?;
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Utc::now();
@@ -96,6 +114,18 @@ impl OutboundMessageBuilder {
 
         let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
         let receipts_bytes = serde_cbor::to_vec(&receipts)?;
+
+        let attachments: Result<Vec<Attachment>, HErr> = attachments
+            .into_iter()
+            .map(|path| {
+                let attach: Attachment = Attachment::new(path)?;
+
+                attach.save()?;
+
+                Ok(attach)
+            })
+            .collect();
+        let attachments = attachments?;
 
         let mut db = Database::get()?;
         let tx = db.transaction()?;
@@ -122,65 +152,78 @@ impl OutboundMessageBuilder {
             tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
         }
 
+        if !attachments.is_empty() {
+            attachments::add_db(&tx, &msg_id, attachments.iter().map(|a| a.hash_dir()))?;
+        }
+
         tx.commit()?;
 
-        Ok(Message {
-            message_id: msg_id,
-            author,
-            body,
-            op,
-            conversation: conversation_id,
-            timestamp,
-            send_status,
-            receipts: receipts,
-        })
+        Ok((
+            Message {
+                message_id: msg_id,
+                author,
+                body,
+                op,
+                conversation: conversation_id,
+                timestamp,
+                send_status,
+                receipts: receipts,
+            },
+            attachments,
+        ))
     }
 }
 
 #[derive(Default)]
 pub(crate) struct InboundMessageBuilder {
     /// Local message id
-    pub message_id: Option<MsgId>,
+    message_id: Option<MsgId>,
     /// Author user id
-    pub author: Option<UserId>,
+    author: Option<UserId>,
     /// Recipient user id
-    pub conversation: Option<ConversationId>,
+    conversation: Option<ConversationId>,
     /// Body of message
-    pub body: Option<MessageBody>,
+    body: Option<MessageBody>,
     /// Time the message was sent (if outbound) or received at the server (if inbound).
-    pub timestamp: Option<DateTime<Utc>>,
+    timestamp: Option<DateTime<Utc>>,
     /// Message id of the message being replied to
-    pub op: Option<MsgId>,
+    op: Option<MsgId>,
+    attachments: Vec<attachments::Attachment>,
 }
 
 impl InboundMessageBuilder {
-    pub fn id(&mut self, msg_id: MsgId) -> &mut Self {
+    pub(crate) fn id(&mut self, msg_id: MsgId) -> &mut Self {
         self.message_id.replace(msg_id);
         self
     }
 
-    pub fn author(&mut self, uid: UserId) -> &mut Self {
+    pub(crate) fn author(&mut self, uid: UserId) -> &mut Self {
         self.author.replace(uid);
         self
     }
 
-    pub fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
+    pub(crate) fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
         self.conversation.replace(conversation_id);
         self
     }
 
-    pub fn body(&mut self, body: MessageBody) -> &mut Self {
+    pub(crate) fn body(&mut self, body: MessageBody) -> &mut Self {
         self.body.replace(body);
         self
     }
 
-    pub fn timestamp(&mut self, ts: DateTime<Utc>) -> &mut Self {
+    pub(crate) fn timestamp(&mut self, ts: DateTime<Utc>) -> &mut Self {
         self.timestamp.replace(ts);
         self
     }
 
-    pub fn replying_to(&mut self, op_msg_id: MsgId) -> &mut Self {
+    pub(crate) fn replying_to(&mut self, op_msg_id: MsgId) -> &mut Self {
         self.op.replace(op_msg_id);
+        self
+    }
+
+    pub(crate) fn attachments(&mut self, attachments: Vec<attachments::Attachment>) -> &mut Self {
+        self.attachments = attachments;
         self
     }
 
@@ -192,6 +235,7 @@ impl InboundMessageBuilder {
             body,
             timestamp,
             op,
+            attachments,
         } = self;
 
         use MissingInboundMessageField::*;
@@ -200,6 +244,9 @@ impl InboundMessageBuilder {
         let msg_id = message_id.ok_or(MissingMessageId)?;
         let timestamp = timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
+
+        let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
+        let attachment_paths = res?;
 
         // this can be inferred from the fact that this message was received
         let send_status = MessageSendStatus::Ack;
@@ -230,6 +277,10 @@ impl InboundMessageBuilder {
 
         if let Some(op) = op {
             tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+        }
+
+        if !attachment_paths.is_empty() {
+            attachments::add_db(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
         }
 
         tx.commit()?;
@@ -371,7 +422,7 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
 pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, DateTime<Utc>) {
     use crate::womp;
     use std::convert::TryInto;
-    let out = OutboundMessageBuilder::default()
+    let (out, _) = OutboundMessageBuilder::default()
         .conversation_id(conv)
         .body("test".try_into().expect(womp!()))
         .store()

@@ -56,10 +56,11 @@ CREATE TABLE IF NOT EXISTS replies (
 CREATE INDEX IF NOT EXISTS reply_op ON replies(op_msg_id);
 
 CREATE TABLE IF NOT EXISTS msg_attachments (
-  -- path to media attachment
-  attachment TEXT NOT NULL,
+  -- path to attachment
+  hash_dir TEXT NOT NULL,
+  -- number of the attachment
+  pos INTEGER NOT NULL,
   msg_id BLOB NOT NULL,
-  -- TODO this is touchy
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
 );
 

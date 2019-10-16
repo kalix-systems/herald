@@ -1,5 +1,5 @@
 use super::*;
-use crate::{config::*, errors::HErr::*};
+use crate::{config::*, errors::HErr::*, message::attachments::Attachment};
 use std::{convert::AsRef, fmt};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -337,13 +337,14 @@ pub mod cmessages {
         /// message is a reply.
         pub op: Option<MsgId>,
     }
+
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     /// Variants of messages.
-    pub enum Message {
-        /// A text message.
-        Text(Option<MessageBody>),
-        /// A blob message, e.g., an attachment.
-        Blob(Bytes),
+    pub struct Message {
+        /// Body of the message
+        pub body: Option<MessageBody>,
+        /// Attachments
+        pub attachments: Vec<Attachment>,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
