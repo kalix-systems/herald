@@ -1,13 +1,6 @@
 <RCC>
     <qresource prefix="/">
-        <file>common/CommonConfig.qml</file>
-        <file>LoginPage/LoginLandingPage.qml</file>
-        <file>LoginPage/LoginNewDevice.qml</file>
-        <file>App.qml</file>
-        <file>ConversationsHome.qml</file>
         <file>heraldqtMobile.pro</file>
-        <file>LoginPage.qml</file>
-        <file>main.qml</file>
-        <file>qtquickcontrols2.conf</file>
+        <file>qml/main.qml</file>
     </qresource>
 </RCC>
