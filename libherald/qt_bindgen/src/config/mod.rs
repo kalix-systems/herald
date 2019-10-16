@@ -242,7 +242,7 @@ fn messages() -> Object {
     let item_props = item_props! {
         messageId: ItemProp::new(QByteArray),
         author: ItemProp::new(QString),
-        body: ItemProp::new(QString),
+        body: ItemProp::new(QString).optional(),
         epochTimestampMs: ItemProp::new(Qint64),
         op: ItemProp::new(QByteArray),
         receiptStatus: ItemProp::new(QUint32)

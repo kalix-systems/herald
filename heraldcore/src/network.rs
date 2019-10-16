@@ -372,15 +372,24 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
 
                 match content {
                     cmessages::Message::Text(body) => {
-                        crate::message::add_message(
-                            Some(mid),
-                            from.uid,
-                            &cid,
-                            &body,
-                            Some(ts),
-                            None,
-                            &op,
-                        )?;
+                        let mut builder = crate::message::InboundMessageBuilder::default();
+
+                        builder
+                            .id(mid)
+                            .author(from.uid)
+                            .conversation_id(cid)
+                            .timestamp(ts);
+
+                        if let Some(body) = body {
+                            builder.body(body);
+                        }
+
+                        if let Some(op) = op {
+                            builder.replying_to(op);
+                        }
+
+                        builder.store()?;
+
                         ev.notifications.push(Notification::NewMsg(mid, cid));
                         ev.replies.push((cid, form_ack(mid)?));
                     }
@@ -568,11 +577,11 @@ pub fn start_conversation(
 /// Sends a text message `body` with id `mid` to the conversation associated with `cid`.
 pub fn send_text(
     cid: ConversationId,
-    body: String,
+    body: MessageBody,
     mid: MsgId,
     op: Option<MsgId>,
 ) -> Result<(), HErr> {
-    let content = cmessages::Message::Text(body);
+    let content = cmessages::Message::Text(Some(body));
     let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
     send_cmessage(cid, &body)
 }

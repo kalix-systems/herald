@@ -1,3 +1,4 @@
+use crate::types::{MissingInboundMessageField, MissingOutboundMessageField};
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;
@@ -21,6 +22,10 @@ pub enum HErr {
     InvalidMessageId,
     /// Invalid `ConversationId`
     InvalidConversationId,
+    /// Missing fields when sending a message
+    MissingOutboundMessageField(MissingOutboundMessageField),
+    /// Missing fields when storing a received a message
+    MissingInboundMessageField(MissingInboundMessageField),
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
@@ -64,6 +69,8 @@ impl fmt::Display for HErr {
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
+            MissingOutboundMessageField(missing) => write!(f, "{}", missing),
+            MissingInboundMessageField(missing) => write!(f, "{}", missing),
             NoneError => write!(f, "Unexpected none"),
         }
     }
@@ -100,6 +107,8 @@ macro_rules! herr {
     };
 }
 
+herr!(MissingOutboundMessageField, MissingOutboundMessageField);
+herr!(MissingInboundMessageField, MissingInboundMessageField);
 herr!(ChainError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
