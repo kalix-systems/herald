@@ -34,7 +34,7 @@ Rectangle {
     // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
     // camera button
-    property alias cameraButton: cameraButton
+   // property alias cameraButton: cameraButton
 
     property string replyText: ""
     property string replyName: ""
@@ -50,7 +50,7 @@ Rectangle {
 
     Common.ButtonForm {
         id: attachmentsButton
-        anchors.right: cameraButton.left
+        anchors.right: parent.right
         anchors.bottom: parent.bottom
         source: "qrc:/plus-icon.svg"
     }
@@ -62,6 +62,8 @@ Rectangle {
         source: "qrc:/emoji-icon.svg"
     }
 
+    //this doesn't exist anymore
+    /**
     Common.ButtonForm {
         id: cameraButton
         anchors.right: parent.right
@@ -69,6 +71,7 @@ Rectangle {
         anchors.leftMargin: QmlCfg.margin
         source: "qrc:/camera-icon.svg"
     }
+    **/
 
     // wrapper column so replies load
     Column {
@@ -83,6 +86,7 @@ Rectangle {
         }
 
         topPadding: QmlCfg.smallMargin
+
 
         Loader {
             id: replyLoader
@@ -105,7 +109,7 @@ Rectangle {
             TextArea {
                 id: chatText
                 background: Rectangle {
-                    color: QmlCfg.palette.secondaryColor
+                    color: QmlCfg.palette.mainColor
                     anchors {
                         fill: parent
                         horizontalCenter: parent.horizontalCenter

@@ -30,12 +30,49 @@ Component {
         RowLayout {
             anchors.fill: parent
 
+            Common.Avatar {
+                id: configAvatar
+                Layout.topMargin: QmlCfg.smallMargin
+                Layout.rightMargin: QmlCfg.smallMargin
+                Layout.leftMargin: QmlCfg.smallMargin
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft | Qt.AlignHCenter
+                avatarLabel: config.name
+                labeled: false
+                colorHash: config.color
+                pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
+                labelGap: 0
+                // JH: Bad margin semantics
+                size: parent.height - QmlCfg.margin
+                isDefault: true
+                inLayout: true
+                MouseArea {
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    //onClicked: print("hi")
+                }
+            }
+
+            Popups.ConfigPopup {
+                id: configPopup
+            }
+
+            //probably need a standard divider that also handles layouts
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                height: parent.height
+                width: 2
+                color: QmlCfg.palette.mainColor
+            }
+
         Text {
             text: "Conversations"
-            Layout.leftMargin: QmlCfg.margin
-            Layout.rightMargin: QmlCfg.margin
+            font.pixelSize: QmlCfg.headerSize
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             color: QmlCfg.palette.mainTextColor
+        }
+
+        Item {
+            Layout.fillWidth: true
         }
 
         Common.ButtonForm {
@@ -58,6 +95,7 @@ Component {
             id: addContactButton
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             Layout.leftMargin: QmlCfg.margin
+            Layout.rightMargin: QmlCfg.margin
             source: "qrc:/pencil-icon-black.svg"
             z: -1
 
