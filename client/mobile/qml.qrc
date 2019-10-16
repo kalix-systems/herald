@@ -2,5 +2,17 @@
     <qresource prefix="/">
         <file>heraldqtMobile.pro</file>
         <file>qml/main.qml</file>
+        <file>qml/State/AppState.qml</file>
+        <file>qml/ChatView/ChatViewMain.qml</file>
+        <file>qml/LoginPage/AssociateDevice.qml</file>
+        <file>qml/LoginPage/LoginLandingPage.qml</file>
+        <file>qml/LoginPage/LoginPageMain.qml</file>
+        <file>qml/LoginPage/Registration.qml</file>
+        <file>qml/Common/BusyIndicator.qml</file>
+        <file>qml/Common/CommonConfig.qml</file>
+        <file>qml/Common/Divider.qml</file>
+        <file>qml/Common/FilteredList.qml</file>
+        <file>qml/Common/IconButton.qml</file>
+        <file>qml/State/HeraldGlobals.qml</file>
     </qresource>
 </RCC>
