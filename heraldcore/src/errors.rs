@@ -7,6 +7,29 @@ use regex;
 use std::fmt;
 
 #[derive(Debug)]
+/// A location in source code
+pub struct Location {
+    /// The line where the error occurred
+    pub line: u32,
+    /// The column where the error occurred
+    pub col: u32,
+    /// The file where the error occurred
+    pub file: String,
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{file}:{line}:{column}",
+            file = self.file,
+            line = self.line,
+            column = self.file.as_str()
+        )
+    }
+}
+
+#[derive(Debug)]
 /// Error variants
 pub enum HErr {
     // TODO: replace all instances of this with enum branches
@@ -44,6 +67,10 @@ pub enum HErr {
     WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
     NoneError,
+    /// An error occured sending a value through a channel
+    ChannelSendError(Location),
+    /// An error occured receiving a value from a channel
+    ChannelRecvError(Location),
     /// Error from `chainmail`
     ChainError(ChainError),
     /// Malformed path
@@ -72,6 +99,8 @@ impl fmt::Display for HErr {
             MissingOutboundMessageField(missing) => write!(f, "{}", missing),
             MissingInboundMessageField(missing) => write!(f, "{}", missing),
             NoneError => write!(f, "Unexpected none"),
+            ChannelSendError(location) => write!(f, "Channel send error at {}", location),
+            ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
         }
     }
 }
@@ -131,4 +160,34 @@ impl From<image::ImageError> for HErr {
             e => HErr::ImageError(e),
         }
     }
+}
+
+#[macro_export]
+/// Returns the location this macro was called from
+macro_rules! loc {
+    () => {
+        $crate::errors::Location {
+            file: file!().to_owned(),
+            line: line!(),
+            col: column!(),
+        }
+    };
+}
+
+#[macro_export]
+/// Creates a `ChannelSendError`
+macro_rules! channel_send_err {
+    () => {{
+        use $crate::loc;
+        HErr::ChannelSendError(loc!())
+    }};
+}
+
+#[macro_export]
+/// Creates a `ChannelRecvError`
+macro_rules! channel_recv_err {
+    () => {{
+        use $crate::loc;
+        HErr::ChannelRecvError(loc!())
+    }};
 }

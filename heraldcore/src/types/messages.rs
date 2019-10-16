@@ -121,11 +121,6 @@ impl MessageBody {
     pub fn as_slice(&self) -> &[u8] {
         self.as_ref().as_bytes()
     }
-
-    /// Converts to `String`
-    pub fn to_string(&self) -> String {
-        self.0.clone()
-    }
 }
 
 impl ToSql for MessageBody {

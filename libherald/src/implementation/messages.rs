@@ -1,18 +1,17 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*};
+use crossbeam_channel::*;
 use herald_common::UserId;
 use heraldcore::{
-    abort_err,
+    abort_err, channel_recv_err,
     config::Config,
     conversation,
     errors::HErr::{self, NoneError as NE},
-    message::{self, Message as Msg},
-    network,
+    message::{self, Message as Msg, StoreAndSend},
     types::*,
 };
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
-    thread,
 };
 
 type Emitter = MessagesEmitter;
@@ -60,7 +59,18 @@ impl Messages {
             None => builder,
         };
 
-        let msg = builder.store()?;
+        let (msg_tx, msg_rx) = unbounded();
+        builder.store_and_send(move |m| {
+            use StoreAndSend::*;
+
+            match m {
+                Msg(msg) => ret_err!(msg_tx.send(msg)),
+                Error { error, .. } => ret_err!(Err(error)),
+                Done => {}
+            }
+        })?;
+
+        let msg = msg_rx.recv().map_err(|_| channel_recv_err!())?;
         let msg_id = msg.message_id;
 
         self.model
@@ -77,11 +87,6 @@ impl Messages {
             push_conv_update(ConvUpdates::NewActivity(conversation_id)),
             Ok(())
         );
-
-        thread::Builder::new().spawn(move || {
-            // TODO update send status?
-            ret_err!(network::send_text(conversation_id, body, msg_id, op));
-        })?;
 
         Ok(())
     }

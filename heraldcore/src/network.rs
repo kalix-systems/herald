@@ -433,6 +433,10 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
     Ok(ev)
 }
 
+pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
+    send_cmessage(cid, &ConversationMessageBody::Msg(msg))
+}
+
 fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let cm = ConversationMessage::seal(cid, &content)?;
@@ -569,21 +573,6 @@ pub fn start_conversation(
     }
 
     Ok(cid)
-}
-
-/// Sends a text message `body` with id `mid` to the conversation associated with `cid`.
-pub fn send_text(
-    cid: ConversationId,
-    body: MessageBody,
-    mid: MsgId,
-    op: Option<MsgId>,
-) -> Result<(), HErr> {
-    let content = cmessages::Message {
-        body: Some(body),
-        attachments: vec![],
-    };
-    let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
-    send_cmessage(cid, &body)
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessageBody, HErr> {
