@@ -1,6 +1,150 @@
 use super::*;
 use crate::{config::*, errors::HErr::*};
-use std::convert::AsRef;
+use std::{convert::AsRef, fmt};
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// A message body
+pub struct MessageBody(String);
+
+impl fmt::Display for MessageBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
+}
+
+#[derive(Debug)]
+/// Error returned when trying to creat an empty message body
+pub struct EmptyMessageBody;
+
+impl fmt::Display for EmptyMessageBody {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Message bodies must have at least one character")
+    }
+}
+
+impl std::error::Error for EmptyMessageBody {}
+
+#[derive(Debug)]
+/// Error returned if an inbound message is missing data
+pub enum MissingInboundMessageField {
+    /// Message id was missing
+    MissingMessageId,
+    /// Body was missing
+    MissingBody,
+    /// Conversation id was missing
+    MissingConversationId,
+    /// Timestamp was missing
+    MissingTimestamp,
+    /// Author was missing
+    MissingAuthor,
+}
+
+impl fmt::Display for MissingInboundMessageField {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MissingInboundMessageField::MissingMessageId => write!(f, "Message id was missing"),
+            MissingInboundMessageField::MissingBody => write!(f, "Body was missing"),
+            MissingInboundMessageField::MissingConversationId => {
+                write!(f, "Conversation id was missing")
+            }
+            MissingInboundMessageField::MissingTimestamp => write!(f, "Timestamp was missing"),
+            MissingInboundMessageField::MissingAuthor => write!(f, "Author was missing"),
+        }
+    }
+}
+
+impl std::error::Error for MissingInboundMessageField {}
+
+#[derive(Debug)]
+/// Error returned if an outbound message is missing data
+pub enum MissingOutboundMessageField {
+    /// Message body was missing
+    MissingBody,
+    /// Conversation id was missing
+    MissingConversationId,
+}
+
+impl fmt::Display for MissingOutboundMessageField {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MissingOutboundMessageField::MissingBody => write!(f, "Body was missing"),
+            MissingOutboundMessageField::MissingConversationId => {
+                write!(f, "Conversation id was missing")
+            }
+        }
+    }
+}
+
+impl std::error::Error for MissingOutboundMessageField {}
+
+impl TryFrom<String> for MessageBody {
+    type Error = EmptyMessageBody;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        if s.is_empty() {
+            return Err(EmptyMessageBody);
+        }
+        Ok(Self(s))
+    }
+}
+
+impl TryFrom<&str> for MessageBody {
+    type Error = EmptyMessageBody;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        if s.is_empty() {
+            return Err(EmptyMessageBody);
+        }
+        Ok(Self(s.to_owned()))
+    }
+}
+
+impl Into<String> for MessageBody {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl AsRef<str> for MessageBody {
+    fn as_ref(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl MessageBody {
+    /// Returns `MessageBody` as `&str`
+    pub fn as_str(&self) -> &str {
+        self.as_ref()
+    }
+
+    /// Returns `MessageBody` as `&[u8]`
+    pub fn as_slice(&self) -> &[u8] {
+        self.as_ref().as_bytes()
+    }
+
+    /// Converts to `String`
+    pub fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}
+
+impl ToSql for MessageBody {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Borrowed(ValueRef::Text(self.as_slice())))
+    }
+}
+
+impl FromSql for MessageBody {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        value
+            .as_str()?
+            .to_owned()
+            .try_into()
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
@@ -197,7 +341,7 @@ pub mod cmessages {
     /// Variants of messages.
     pub enum Message {
         /// A text message.
-        Text(String),
+        Text(Option<MessageBody>),
         /// A blob message, e.g., an attachment.
         Blob(Bytes),
     }

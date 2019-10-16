@@ -1638,7 +1638,7 @@ pub trait MessagesTrait {
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn author(&self, index: usize) -> &str;
-    fn body(&self, index: usize) -> &str;
+    fn body(&self, index: usize) -> Option<&str>;
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
     fn message_id(&self, index: usize) -> &[u8];
     fn op(&self, index: usize) -> &[u8];
@@ -1884,8 +1884,10 @@ pub unsafe extern "C" fn messages_data_body(
 ) {
     let o = &*ptr;
     let data = o.body(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]

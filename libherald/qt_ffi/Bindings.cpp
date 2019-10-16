@@ -1016,7 +1016,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 0:
             return QVariant::fromValue(author(index.row()));
         case Qt::UserRole + 1:
-            return QVariant::fromValue(body(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(body(index.row())));
         case Qt::UserRole + 2:
             return QVariant::fromValue(epochTimestampMs(index.row()));
         case Qt::UserRole + 3:

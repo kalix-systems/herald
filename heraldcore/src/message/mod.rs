@@ -14,7 +14,7 @@ pub struct Message {
     /// Recipient user id
     pub conversation: ConversationId,
     /// Body of message
-    pub body: String,
+    pub body: Option<MessageBody>,
     /// Time the message was sent (if outbound) or received at the server (if inbound).
     pub timestamp: DateTime<Utc>,
     /// Message id of the message being replied to
@@ -54,51 +54,193 @@ impl Message {
     }
 }
 
-/// Adds a message to the database.
-pub fn add_message(
-    msg_id: Option<MsgId>,
-    author: UserId,
-    conversation_id: &ConversationId,
-    body: &str,
-    timestamp: Option<DateTime<Utc>>,
-    send_status: Option<MessageSendStatus>,
-    op: &Option<MsgId>,
-) -> Result<(MsgId, DateTime<Utc>), HErr> {
-    let timestamp = timestamp.unwrap_or_else(Utc::now);
+#[derive(Default)]
+/// Builder for storing outbound messages
+pub struct OutboundMessageBuilder {
+    /// Recipient user id
+    pub conversation: Option<ConversationId>,
+    /// Body of message
+    pub body: Option<MessageBody>,
+    /// Message id of the message being replied to
+    pub op: Option<MsgId>,
+}
 
-    let mut db = Database::get()?;
-    let tx = db.transaction()?;
-
-    let msg_id = msg_id.unwrap_or_else(|| utils::rand_id().into());
-
-    let receipts: HashMap<UserId, MessageReceiptStatus> =
-        get_receipts(&tx, msg_id)?.unwrap_or_default();
-    let receipts = serde_cbor::to_vec(&receipts)?;
-
-    tx.execute(
-        include_str!("sql/add.sql"),
-        params![
-            msg_id,
-            author,
-            conversation_id,
-            body,
-            send_status.unwrap_or(MessageSendStatus::NoAck),
-            receipts,
-            timestamp.timestamp(),
-        ],
-    )?;
-
-    tx.execute(
-        include_str!("../conversation/sql/update_last_active.sql"),
-        params![Utc::now().timestamp(), conversation_id],
-    )?;
-
-    if let Some(op) = op {
-        tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+impl OutboundMessageBuilder {
+    /// Set conversation id
+    pub fn conversation_id(mut self, conversation_id: ConversationId) -> Self {
+        self.conversation.replace(conversation_id);
+        self
     }
 
-    tx.commit()?;
-    Ok((msg_id, timestamp))
+    /// Set body
+    pub fn body(mut self, body: MessageBody) -> Self {
+        self.body.replace(body);
+        self
+    }
+
+    /// Set the id of the message being replied to, if this message is a reply
+    pub fn replying_to(mut self, op_msg_id: MsgId) -> Self {
+        self.op.replace(op_msg_id);
+        self
+    }
+
+    /// Store the message
+    pub fn store(self) -> Result<Message, HErr> {
+        let Self {
+            conversation,
+            body,
+            op,
+        } = self;
+
+        use MissingOutboundMessageField::*;
+        let conversation_id = conversation.ok_or(MissingConversationId)?;
+        let msg_id: MsgId = utils::rand_id().into();
+        let timestamp = Utc::now();
+        let author = crate::config::Config::static_id()?;
+        let send_status = MessageSendStatus::NoAck;
+
+        let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
+        let receipts_bytes = serde_cbor::to_vec(&receipts)?;
+
+        let mut db = Database::get()?;
+        let tx = db.transaction()?;
+
+        tx.execute(
+            include_str!("sql/add.sql"),
+            params![
+                msg_id,
+                author,
+                conversation_id,
+                body,
+                send_status,
+                receipts_bytes,
+                timestamp.timestamp(),
+            ],
+        )?;
+
+        tx.execute(
+            include_str!("../conversation/sql/update_last_active.sql"),
+            params![timestamp.timestamp(), conversation_id],
+        )?;
+
+        if let Some(op) = op {
+            tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+        }
+
+        tx.commit()?;
+
+        Ok(Message {
+            message_id: msg_id,
+            author,
+            body,
+            op,
+            conversation: conversation_id,
+            timestamp,
+            send_status,
+            receipts: Some(receipts),
+        })
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct InboundMessageBuilder {
+    /// Local message id
+    pub message_id: Option<MsgId>,
+    /// Author user id
+    pub author: Option<UserId>,
+    /// Recipient user id
+    pub conversation: Option<ConversationId>,
+    /// Body of message
+    pub body: Option<MessageBody>,
+    /// Time the message was sent (if outbound) or received at the server (if inbound).
+    pub timestamp: Option<DateTime<Utc>>,
+    /// Message id of the message being replied to
+    pub op: Option<MsgId>,
+}
+
+impl InboundMessageBuilder {
+    pub fn id(&mut self, msg_id: MsgId) -> &mut Self {
+        self.message_id.replace(msg_id);
+        self
+    }
+
+    pub fn author(&mut self, uid: UserId) -> &mut Self {
+        self.author.replace(uid);
+        self
+    }
+
+    pub fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
+        self.conversation.replace(conversation_id);
+        self
+    }
+
+    pub fn body(&mut self, body: MessageBody) -> &mut Self {
+        self.body.replace(body);
+        self
+    }
+
+    pub fn timestamp(&mut self, ts: DateTime<Utc>) -> &mut Self {
+        self.timestamp.replace(ts);
+        self
+    }
+
+    pub fn replying_to(&mut self, op_msg_id: MsgId) -> &mut Self {
+        self.op.replace(op_msg_id);
+        self
+    }
+
+    pub fn store(self) -> Result<(), HErr> {
+        let Self {
+            message_id,
+            author,
+            conversation,
+            body,
+            timestamp,
+            op,
+        } = self;
+
+        use MissingInboundMessageField::*;
+
+        let conversation_id = conversation.ok_or(MissingConversationId)?;
+        let msg_id = message_id.ok_or(MissingMessageId)?;
+        let timestamp = timestamp.ok_or(MissingTimestamp)?;
+        let author = author.ok_or(MissingAuthor)?;
+
+        // this can be inferred from the fact that this message was received
+        let send_status = MessageSendStatus::Ack;
+
+        let mut db = Database::get()?;
+        let tx = db.transaction()?;
+
+        let receipts = get_receipts(&tx, msg_id)?.unwrap_or_default();
+        let receipts = serde_cbor::to_vec(&receipts)?;
+
+        tx.execute(
+            include_str!("sql/add.sql"),
+            params![
+                msg_id,
+                author,
+                conversation_id,
+                body,
+                send_status,
+                receipts,
+                timestamp.timestamp(),
+            ],
+        )?;
+
+        tx.execute(
+            include_str!("../conversation/sql/update_last_active.sql"),
+            params![Utc::now().timestamp(), conversation_id],
+        )?;
+
+        if let Some(op) = op {
+            tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+        }
+
+        tx.commit()?;
+
+        Ok(())
+    }
 }
 
 /// Get message by message id
@@ -149,15 +291,17 @@ pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
     msg_id: MsgId,
 ) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    dbg!();
     let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+    dbg!();
 
     let mut res = get_stmt.query(params![msg_id])?;
 
     match res.next()? {
-        Some(row) => {
-            let data = row.get::<_, Vec<u8>>(0)?;
-            Ok(Some(serde_cbor::from_slice(&data)?))
-        }
+        Some(row) => match row.get::<_, Option<Vec<u8>>>(0)? {
+            Some(data) => Ok(Some(serde_cbor::from_slice(&data)?)),
+            None => Ok(None),
+        },
         None => Ok(None),
     }
 }
@@ -198,8 +342,11 @@ pub(crate) fn add_receipt(
             let mut receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::new();
             receipts.insert(recip, receipt_status);
             let data = serde_cbor::to_vec(&receipts)?;
+
             let mut put_pending_stmt = tx.prepare(include_str!("sql/add_pending_receipt.sql"))?;
+            dbg!();
             put_pending_stmt.execute(params![msg_id, data])?;
+            dbg!();
         }
     }
 
@@ -227,6 +374,19 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(include_str!("sql/delete_message.sql"), params![id])?;
     Ok(())
+}
+
+#[allow(unused)]
+/// Testing utility
+pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, DateTime<Utc>) {
+    use crate::womp;
+    use std::convert::TryInto;
+    let out = OutboundMessageBuilder::default()
+        .conversation_id(conv)
+        .body("test".try_into().expect(womp!()))
+        .store()
+        .expect(womp!());
+    (out.message_id, out.timestamp)
 }
 
 #[cfg(test)]

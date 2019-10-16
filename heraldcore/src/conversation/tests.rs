@@ -1,5 +1,5 @@
 use super::*;
-use crate::{contact::ContactBuilder, db::Database, womp};
+use crate::{contact::ContactBuilder, db::Database, message::InboundMessageBuilder, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -64,11 +64,26 @@ fn add_and_get() {
         .add()
         .expect(womp!("Failed to create conversation"));
 
-    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
-        .expect(womp!("Failed to add first message"));
+    let mid1 = [1; 32].try_into().expect(womp!());
 
-    crate::message::add_message(None, author, &conversation, "2", None, None, &None)
-        .expect(womp!("Failed to add second message"));
+    let mut builder1 = InboundMessageBuilder::default();
+    builder1
+        .id(mid1)
+        .author(author)
+        .timestamp(Utc::now())
+        .conversation_id(conversation)
+        .body("1".try_into().expect(womp!()));
+    builder1.store().expect(womp!());
+
+    let mid2 = [2; 32].try_into().expect(womp!());
+    let mut builder2 = InboundMessageBuilder::default();
+    builder2
+        .id(mid2)
+        .author(author)
+        .timestamp(Utc::now())
+        .conversation_id(conversation)
+        .body("2".try_into().expect(womp!()));
+    builder2.store().expect(womp!());
 
     let msgs =
         super::conversation_messages(&conversation).expect(womp!("Failed to get conversation"));
@@ -230,11 +245,17 @@ fn delete_message() {
         .add()
         .expect(womp!("Failed to create conversation"));
 
-    let (msg_id, _) =
-        crate::message::add_message(None, author, &conversation, "1", None, None, &None)
-            .expect(womp!("Failed to add first message"));
+    let mid = [0; 32].into();
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid)
+        .author(author)
+        .conversation_id(conversation)
+        .timestamp(Utc::now())
+        .body("1".try_into().expect(womp!()));
+    builder.store().expect(womp!());
 
-    crate::message::delete_message(&msg_id).expect(womp!());
+    crate::message::delete_message(&mid).expect(womp!());
 
     assert!(super::conversation_messages(&conversation)
         .expect(womp!())
@@ -256,11 +277,25 @@ fn delete_conversation() {
         .add()
         .expect(womp!("Failed to create conversation"));
 
-    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
-        .expect(womp!("Failed to add first message"));
+    let mid1 = [1; 32].into();
+    let mut builder1 = InboundMessageBuilder::default();
+    builder1
+        .id(mid1)
+        .author(author)
+        .timestamp(Utc::now())
+        .conversation_id(conversation)
+        .body("1".try_into().expect(womp!()));
+    builder1.store().expect(womp!());
 
-    crate::message::add_message(None, author, &conversation, "1", None, None, &None)
-        .expect(womp!("Failed to add second message"));
+    let mid2 = [2; 32].into();
+    let mut builder2 = InboundMessageBuilder::default();
+    builder2
+        .id(mid2)
+        .author(author)
+        .timestamp(Utc::now())
+        .conversation_id(conversation)
+        .body("2".try_into().expect(womp!()));
+    builder2.store().expect(womp!());
 
     super::delete_conversation(&conversation).expect(womp!());
 
@@ -303,8 +338,15 @@ fn convo_message_order() {
         .add()
         .expect(womp!("failed to add conversation"));
 
-    crate::message::add_message(None, author, &conv_id1, "1", None, None, &None)
-        .expect(womp!("Failed to add message"));
+    let mid = [1; 32].into();
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid)
+        .author(author)
+        .conversation_id(conv_id1)
+        .timestamp(Utc::now())
+        .body("1".try_into().expect(womp!()));
+    builder.store().expect(womp!());
 
     let meta = super::all_meta().expect(womp!("Failed to get metadata"));
 

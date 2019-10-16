@@ -48,29 +48,20 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn raw_insert(&mut self, body: String, op: Option<MsgId>) -> Result<(), HErr> {
+    fn raw_text_insert(&mut self, body: MessageBody, op: Option<MsgId>) -> Result<(), HErr> {
         let conversation_id = self.conversation_id.ok_or(NE)?;
 
-        let (msg_id, timestamp) = message::add_message(
-            None,
-            self.local_id,
-            &conversation_id,
-            body.as_str(),
-            None,
-            None,
-            &op,
-        )?;
+        let mut builder = message::OutboundMessageBuilder::default()
+            .conversation_id(conversation_id)
+            .body((&body).clone());
 
-        let msg = Msg {
-            author: self.local_id.clone(),
-            body: (&body).clone(),
-            conversation: conversation_id.clone(),
-            message_id: msg_id.clone(),
-            op,
-            timestamp,
-            receipts: None,
-            send_status: MessageSendStatus::NoAck,
+        builder = match op {
+            Some(op) => builder.replying_to(op),
+            None => builder,
         };
+
+        let msg = builder.store()?;
+        let msg_id = msg.message_id;
 
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
@@ -98,10 +89,17 @@ impl Messages {
     #[cfg(target_os = "linux")]
     fn new_msg_toast(&self, msg: &Msg) {
         use notify_rust::*;
-        Notification::new()
+
+        let mut notif = Notification::new();
+        notif
             .appname(crate::DESKTOP_APP_NAME)
-            .summary(&format!("New message from {}", msg.author))
-            .body(msg.body.as_str())
+            .summary(&format!("New message from {}", msg.author));
+
+        if let Some(body) = &msg.body {
+            notif.body(body.as_str());
+        }
+
+        notif
             .hint(NotificationHint::Category("im.received".to_owned()))
             .show()
             .ok();
@@ -113,12 +111,16 @@ impl Messages {
         // TODO: sketchy global state! This should be set
         // somewhere else.
         set_application(crate::DESKTOP_APP_NAME).ok();
-        Notification::new()
+        let mut notif = Notification::new();
+        notif
             .summary(&format!("New message from {}", msg.author))
-            .subtitle("TODO: macOS has subtitles! Do we want them?")
-            .body(msg.body.as_str())
-            .show()
-            .ok();
+            .subtitle("TODO: macOS has subtitles! Do we want them?");
+
+        if let Some(body) = &msg.body {
+            notif.body(body.as_str());
+        }
+
+        notif.show().ok();
     }
 
     #[cfg(all(not(target_os = "macos"), not(target_os = "linux")))]
@@ -157,7 +159,7 @@ impl MessagesTrait for Messages {
     }
 
     fn last_body(&self) -> Option<&str> {
-        Some(self.last_msg()?.body.as_str())
+        Some(self.last_msg()?.body.as_ref()?.as_str())
     }
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
@@ -227,9 +229,9 @@ impl MessagesTrait for Messages {
             .as_str()
     }
 
-    fn body(&self, row_index: usize) -> &str {
-        let mid = ret_none!(self.list.get(row_index), "").msg_id;
-        ret_none!(self.map.get(&mid), "").body.as_str()
+    fn body(&self, row_index: usize) -> Option<&str> {
+        let mid = self.list.get(row_index)?.msg_id;
+        Some(self.map.get(&mid)?.body.as_ref()?.as_str())
     }
 
     fn message_id(&self, row_index: usize) -> ffi::MsgIdRef {
@@ -259,7 +261,11 @@ impl MessagesTrait for Messages {
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
         let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
 
-        ret_none!(self.map.get(&msg_id), "".to_owned()).body.clone()
+        ret_none!(
+            &ret_none!(self.map.get(&msg_id), "".to_owned()).body,
+            "".to_owned()
+        )
+        .to_string()
     }
 
     fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
@@ -280,14 +286,16 @@ impl MessagesTrait for Messages {
     }
 
     fn send_message(&mut self, body: String) -> bool {
-        ret_err!(self.raw_insert(body, None), false);
+        let body = ret_err!(body.try_into(), false);
+        ret_err!(self.raw_text_insert(body, None), false);
         true
     }
 
     fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> bool {
         let op = ret_err!(MsgId::try_from(op), false);
+        let body = ret_err!(body.try_into(), false);
 
-        ret_err!(self.raw_insert(body, Some(op)), false);
+        ret_err!(self.raw_text_insert(body, Some(op)), false);
         true
     }
 
