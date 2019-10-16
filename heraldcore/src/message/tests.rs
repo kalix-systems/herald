@@ -114,7 +114,7 @@ fn receipt_before_message() {
     let msg = get_message(&msg_id).expect(womp!());
 
     assert_eq!(
-        msg.receipts.expect(womp!()).get(&receiver).expect(womp!()),
+        msg.receipts.get(&receiver).expect(womp!()),
         &MessageReceiptStatus::Read
     );
 }

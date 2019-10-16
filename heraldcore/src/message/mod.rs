@@ -3,6 +3,7 @@ use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::params;
 use std::collections::HashMap;
+// use std::path::PathBuf;
 
 /// Message
 #[derive(Clone)]
@@ -22,21 +23,15 @@ pub struct Message {
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
-    pub receipts: Option<HashMap<UserId, MessageReceiptStatus>>,
+    pub receipts: HashMap<UserId, MessageReceiptStatus>,
 }
 
 impl Message {
     pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let receipts = match row.get::<_, Option<Vec<u8>>>(6)? {
-            Some(data) => serde_cbor::from_slice(&data).map_err(|e| {
-                rusqlite::Error::FromSqlConversionFailure(
-                    6,
-                    rusqlite::types::Type::Blob,
-                    Box::new(e),
-                )
-            })?,
-            None => None,
-        };
+        let data = row.get::<_, Vec<u8>>(6)?;
+        let receipts = serde_cbor::from_slice(&data).map_err(|e| {
+            rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Blob, Box::new(e))
+        })?;
 
         Ok(Message {
             message_id: row.get(0)?,
@@ -137,7 +132,7 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             timestamp,
             send_status,
-            receipts: Some(receipts),
+            receipts: receipts,
         })
     }
 }
@@ -264,9 +259,7 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
 }
 
 /// Get message read receipts by message id
-pub fn get_message_receipts(
-    msg_id: &MsgId,
-) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
     get_message_receipts_db(&db, msg_id)
 }
@@ -275,14 +268,11 @@ pub fn get_message_receipts(
 pub(crate) fn get_message_receipts_db(
     conn: &rusqlite::Connection,
     msg_id: &MsgId,
-) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: Option<HashMap<UserId, MessageReceiptStatus>> = {
-        let res = get_stmt.query_row(params![msg_id], |row| row.get::<_, Option<Vec<u8>>>(0))?;
-        match res {
-            Some(data) => Some(serde_cbor::from_slice(&data)?),
-            None => None,
-        }
+    let receipts: HashMap<UserId, MessageReceiptStatus> = {
+        let data = get_stmt.query_row(params![msg_id], |row| row.get::<_, Vec<u8>>(0))?;
+        serde_cbor::from_slice(&data)?
     };
     Ok(receipts)
 }

@@ -152,7 +152,6 @@ impl MessagesTrait for Messages {
     fn last_status(&self) -> Option<u32> {
         self.last_msg()?
             .receipts
-            .as_ref()?
             .iter()
             .map(|(_, status)| *status as u32)
             .max()
@@ -244,14 +243,8 @@ impl MessagesTrait for Messages {
         let mid = ret_none!(self.list.get(row_index), MessageReceiptStatus::NoAck as u32).msg_id;
         let inner = ret_none!(self.map.get(&mid), MessageReceiptStatus::NoAck as u32);
 
-        let receipts = match inner.receipts.as_ref() {
-            Some(receipts) => receipts,
-            None => {
-                return MessageReceiptStatus::NoAck as u32;
-            }
-        };
-
-        receipts
+        inner
+            .receipts
             .values()
             .map(|r| *r as u32)
             .max()
