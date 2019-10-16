@@ -301,7 +301,6 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
-    // TODO: use this field somewhere
     errors: Vec<HErr>,
 }
 
