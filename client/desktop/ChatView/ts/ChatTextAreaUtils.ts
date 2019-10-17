@@ -21,14 +21,8 @@ export function enterKeyHandler(
 
   builder.body = text;
   builder.conversationId = messageModel.conversationId;
-
-  if (textAreaForm.state === "replystate") {
-    builder.replyingTo = textAreaForm.replyId;
-    builder.finalize();
-    textAreaForm.state = "default";
-  } else {
-    builder.finalize();
-  }
+  builder.finalize();
+  textAreaForm.state = "default";
 }
 
 export function appendToTextArea(text: string, target: TextArea): void {

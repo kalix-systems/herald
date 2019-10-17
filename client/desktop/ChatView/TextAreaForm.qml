@@ -142,6 +142,7 @@ Rectangle {
     states: [
         State {
             name: "replystate"
+            when: builder.isReply
             PropertyChanges {
                 target: replyLoader
                 active: true

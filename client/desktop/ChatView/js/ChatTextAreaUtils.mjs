@@ -12,14 +12,8 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
     target.clear();
     builder.body = text;
     builder.conversationId = messageModel.conversationId;
-    if (textAreaForm.state === "replystate") {
-        builder.replyingTo = textAreaForm.replyId;
-        builder.finalize();
-        textAreaForm.state = "default";
-    }
-    else {
-        builder.finalize();
-    }
+    builder.finalize();
+    textAreaForm.state = "default";
 }
 export function appendToTextArea(text, target) {
     const position = target.selectionEnd;
