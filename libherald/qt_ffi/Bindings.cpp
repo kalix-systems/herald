@@ -124,6 +124,14 @@ namespace {
     {
         Q_EMIT o->conversationIdChanged();
     }
+    inline void messageBuilderIsMediaMessageChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->isMediaMessageChanged();
+    }
+    inline void messageBuilderIsReplyChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->isReplyChanged();
+    }
     inline void messageBuilderReplyingToChanged(MessageBuilder* o)
     {
         Q_EMIT o->replyingToChanged();
@@ -1176,7 +1184,7 @@ bool MessageBuilder::setHeaderData(int section, Qt::Orientation orientation, con
 }
 
 extern "C" {
-    MessageBuilder::Private* message_builder_new(MessageBuilder*, void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*),
+    MessageBuilder::Private* message_builder_new(MessageBuilder*, void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*),
         void (*)(const MessageBuilder*),
         void (*)(MessageBuilder*),
         void (*)(MessageBuilder*),
@@ -1196,10 +1204,13 @@ extern "C" {
     void message_builder_conversation_id_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
     void message_builder_conversation_id_set(MessageBuilder::Private*, const char* bytes, int len);
     void message_builder_conversation_id_set_none(MessageBuilder::Private*);
+    bool message_builder_is_media_message_get(const MessageBuilder::Private*);
+    bool message_builder_is_reply_get(const MessageBuilder::Private*);
     void message_builder_replying_to_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
     void message_builder_replying_to_set(MessageBuilder::Private*, const char* bytes, int len);
     void message_builder_replying_to_set_none(MessageBuilder::Private*);
     bool message_builder_add_attachment(MessageBuilder::Private*, const ushort*, int);
+    void message_builder_clear_reply(MessageBuilder::Private*);
     void message_builder_finalize(MessageBuilder::Private*);
     bool message_builder_remove_attachment(MessageBuilder::Private*, const ushort*, int);
     bool message_builder_remove_attachment_by_index(MessageBuilder::Private*, quint64);
@@ -2274,6 +2285,8 @@ MessageBuilder::MessageBuilder(QObject *parent):
     m_d(message_builder_new(this,
         messageBuilderBodyChanged,
         messageBuilderConversationIdChanged,
+        messageBuilderIsMediaMessageChanged,
+        messageBuilderIsReplyChanged,
         messageBuilderReplyingToChanged,
         [](const MessageBuilder* o) {
             Q_EMIT o->newDataReady(QModelIndex());
@@ -2355,6 +2368,14 @@ void MessageBuilder::setConversationId(const QByteArray& v) {
     message_builder_conversation_id_set(m_d, v.data(), v.size());
     }
 }
+bool MessageBuilder::isMediaMessage() const
+{
+    return message_builder_is_media_message_get(m_d);
+}
+bool MessageBuilder::isReply() const
+{
+    return message_builder_is_reply_get(m_d);
+}
 QByteArray MessageBuilder::replyingTo() const
 {
     QByteArray v;
@@ -2371,6 +2392,10 @@ void MessageBuilder::setReplyingTo(const QByteArray& v) {
 bool MessageBuilder::addAttachment(const QString& path)
 {
     return message_builder_add_attachment(m_d, path.utf16(), path.size());
+}
+void MessageBuilder::clearReply()
+{
+    return message_builder_clear_reply(m_d);
 }
 void MessageBuilder::finalize()
 {

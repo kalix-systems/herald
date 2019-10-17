@@ -39,16 +39,31 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.inner.op.as_ref()?.as_slice())
     }
 
+    fn is_reply(&self) -> bool {
+        self.inner.op.is_some()
+    }
+
+    fn is_media_message(&self) -> bool {
+        !self.inner.attachments.is_empty()
+    }
+
     fn set_replying_to(&mut self, op_msg_id: Option<ffi::MsgIdRef>) {
-        match op_msg_id {
-            Some(op_msg_id) => {
+        match (op_msg_id, self.inner.op) {
+            (Some(op_msg_id), None) => {
                 let op_msg_id = ret_err!(op_msg_id.try_into());
                 self.inner.replying_to(Some(op_msg_id));
+                self.emit.is_reply_changed();
             }
-            None => {
+            (None, Some(_)) => {
                 self.inner.replying_to(None);
+                self.emit.is_reply_changed();
             }
+            _ => {}
         }
+    }
+
+    fn clear_reply(&mut self) {
+        self.set_replying_to(None);
     }
 
     fn add_attachment(&mut self, path: String) -> bool {
@@ -59,6 +74,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.begin_insert_rows(len, len);
         self.inner.add_attachment(path);
         self.model.end_insert_rows();
+
+        if len == 0 {
+            self.emit.is_media_message_changed();
+        }
 
         true
     }
@@ -75,7 +94,7 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn body(&self) -> Option<&str> {
-        None
+        Some(self.inner.body.as_ref()?.as_str())
     }
 
     /// Finalizes the builder, stores and sends the message, and resets the builder.
@@ -130,6 +149,11 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.begin_remove_rows(pos, pos);
         self.inner.attachments.remove(pos);
         self.model.end_remove_rows();
+
+        if self.inner.attachments.is_empty() {
+            self.emit.is_media_message_changed();
+        }
+
         true
     }
 
@@ -144,6 +168,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.inner.attachments.remove(row_index);
         self.model.end_remove_rows();
 
+        if self.inner.attachments.is_empty() {
+            self.emit.is_media_message_changed();
+        }
+
         true
     }
 
@@ -154,6 +182,10 @@ impl MessageBuilderTrait for MessageBuilder {
         );
         self.inner.attachments.pop();
         self.model.end_remove_rows();
+
+        if self.inner.attachments.is_empty() {
+            self.emit.is_media_message_changed();
+        }
     }
 
     fn row_count(&self) -> usize {
