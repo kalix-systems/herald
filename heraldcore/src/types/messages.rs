@@ -12,6 +12,83 @@ impl fmt::Display for MessageBody {
     }
 }
 
+impl TryFrom<String> for MessageBody {
+    type Error = EmptyMessageBody;
+
+    fn try_from(s: String) -> Result<Self, Self::Error> {
+        if s.is_empty() {
+            return Err(EmptyMessageBody);
+        }
+        Ok(Self(s))
+    }
+}
+
+impl TryFrom<&str> for MessageBody {
+    type Error = EmptyMessageBody;
+
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
+        if s.is_empty() {
+            return Err(EmptyMessageBody);
+        }
+        Ok(Self(s.to_owned()))
+    }
+}
+
+impl Into<String> for MessageBody {
+    fn into(self) -> String {
+        self.0
+    }
+}
+
+impl AsRef<str> for MessageBody {
+    fn as_ref(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
+impl MessageBody {
+    /// Returns `MessageBody` as `&str`
+    pub fn as_str(&self) -> &str {
+        self.as_ref()
+    }
+
+    /// Returns `MessageBody` as `&[u8]`
+    pub fn as_slice(&self) -> &[u8] {
+        self.as_ref().as_bytes()
+    }
+
+    /// Parses the text as markdown, rendering it to HTML
+    pub fn parse_markdown(&self) -> Result<Self, EmptyMessageBody> {
+        use pulldown_cmark::{html, Parser};
+
+        let body_str = self.as_str();
+
+        let parser = Parser::new(body_str);
+        let mut buf = String::with_capacity(body_str.len());
+        html::push_html(&mut buf, parser);
+
+        buf.try_into()
+    }
+}
+
+impl ToSql for MessageBody {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Borrowed(ValueRef::Text(self.as_slice())))
+    }
+}
+
+impl FromSql for MessageBody {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        value
+            .as_str()?
+            .to_owned()
+            .try_into()
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
 #[derive(Debug)]
 /// Error returned when trying to creat an empty message body
 pub struct EmptyMessageBody;
@@ -76,70 +153,6 @@ impl fmt::Display for MissingOutboundMessageField {
 }
 
 impl std::error::Error for MissingOutboundMessageField {}
-
-impl TryFrom<String> for MessageBody {
-    type Error = EmptyMessageBody;
-
-    fn try_from(s: String) -> Result<Self, Self::Error> {
-        if s.is_empty() {
-            return Err(EmptyMessageBody);
-        }
-        Ok(Self(s))
-    }
-}
-
-impl TryFrom<&str> for MessageBody {
-    type Error = EmptyMessageBody;
-
-    fn try_from(s: &str) -> Result<Self, Self::Error> {
-        if s.is_empty() {
-            return Err(EmptyMessageBody);
-        }
-        Ok(Self(s.to_owned()))
-    }
-}
-
-impl Into<String> for MessageBody {
-    fn into(self) -> String {
-        self.0
-    }
-}
-
-impl AsRef<str> for MessageBody {
-    fn as_ref(&self) -> &str {
-        self.0.as_str()
-    }
-}
-
-impl MessageBody {
-    /// Returns `MessageBody` as `&str`
-    pub fn as_str(&self) -> &str {
-        self.as_ref()
-    }
-
-    /// Returns `MessageBody` as `&[u8]`
-    pub fn as_slice(&self) -> &[u8] {
-        self.as_ref().as_bytes()
-    }
-}
-
-impl ToSql for MessageBody {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Borrowed(ValueRef::Text(self.as_slice())))
-    }
-}
-
-impl FromSql for MessageBody {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        value
-            .as_str()?
-            .to_owned()
-            .try_into()
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
 
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
 #[repr(u8)]
