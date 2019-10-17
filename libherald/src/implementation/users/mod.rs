@@ -158,10 +158,12 @@ impl UsersTrait for Users {
     fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
+
+        let picture = picture.map(crate::utils::strip_qrc);
         let path = ret_err!(
             contact::set_profile_picture(
                 uid,
-                crate::utils::strip_qrc(picture),
+                picture,
                 inner.profile_picture.as_ref().map(String::as_str),
             ),
             false

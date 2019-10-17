@@ -52,6 +52,7 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn add_attachment(&mut self, path: String) -> bool {
+        let path = crate::utils::strip_qrc(path);
         let path = PathBuf::from(path);
         let len = self.inner.attachments.len();
 
