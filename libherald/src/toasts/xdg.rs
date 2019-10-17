@@ -6,7 +6,7 @@ pub fn new_msg_toast(msg: &Message) {
 
     let mut notif = Notification::new();
     notif
-        .appname(crate::DESKTOP_APP_NAME)
+        .appname(super::DESKTOP_APP_NAME)
         .summary(&format!("New message from {}", msg.author));
 
     if let Some(body) = &msg.body {
