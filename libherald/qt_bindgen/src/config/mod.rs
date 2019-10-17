@@ -245,13 +245,12 @@ fn messages() -> Object {
         author: ItemProp::new(QString),
         body: ItemProp::new(QString).optional(),
         epochTimestampMs: ItemProp::new(Qint64),
-        op: ItemProp::new(QByteArray),
+        op: ItemProp::new(QByteArray).optional(),
+        isReply: ItemProp::new(Bool),
         receiptStatus: ItemProp::new(QUint32)
     };
 
     let funcs = functions! {
-        //mut sendMessage(body: QString) => Bool,
-        //mut reply(body: QString, op: QByteArray) => Bool,
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
         mut pollUpdate() => Bool,

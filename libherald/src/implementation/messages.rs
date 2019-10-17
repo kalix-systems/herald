@@ -211,13 +211,14 @@ impl MessagesTrait for Messages {
             .to_string()
     }
 
-    fn op(&self, row_index: usize) -> ffi::MsgIdRef {
-        let mid = ret_none!(self.list.get(row_index), &ffi::NULL_MSG_ID).msg_id;
+    fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
+        let mid = self.list.get(row_index)?.msg_id;
 
-        match ret_none!(self.map.get(&mid), &ffi::NULL_MSG_ID).op.as_ref() {
-            Some(op) => op.as_slice(),
-            None => &ffi::NULL_MSG_ID,
-        }
+        Some(self.map.get(&mid)?.op.as_ref()?.as_slice())
+    }
+
+    fn is_reply(&self, row_index: usize) -> bool {
+        self.op(row_index).is_some()
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {

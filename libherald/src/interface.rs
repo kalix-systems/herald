@@ -2269,8 +2269,9 @@ pub trait MessagesTrait {
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> Option<&str>;
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
+    fn is_reply(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> &[u8];
-    fn op(&self, index: usize) -> &[u8];
+    fn op(&self, index: usize) -> Option<&[u8]>;
     fn receipt_status(&self, index: usize) -> u32;
 }
 
@@ -2507,6 +2508,12 @@ pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.is_reply(to_usize(row)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_message_id(
     ptr: *const Messages, row: c_int,
     d: *mut QByteArray,
@@ -2526,8 +2533,10 @@ pub unsafe extern "C" fn messages_data_op(
 ) {
     let o = &*ptr;
     let data = o.op(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
