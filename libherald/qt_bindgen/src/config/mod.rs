@@ -247,6 +247,7 @@ fn messages() -> Object {
         epochTimestampMs: ItemProp::new(Qint64),
         op: ItemProp::new(QByteArray).optional(),
         isReply: ItemProp::new(Bool),
+        hasAttachments: ItemProp::new(Bool),
         receiptStatus: ItemProp::new(QUint32)
     };
 

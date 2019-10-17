@@ -6,7 +6,8 @@ SELECT
   op_msg_id,
   ts,
   receipts,
-  send_status
+  send_status,
+  has_attachments
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE

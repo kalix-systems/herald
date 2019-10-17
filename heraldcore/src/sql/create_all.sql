@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- id of conversation
   conversation_id BLOB,
   -- text of message
-  body TEXT NOT NULL DEFAULT(''),
+  body TEXT,
   -- timestamp associated with message
   ts INTEGER,
   -- time when message self-destructs
@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS messages (
   send_status INTEGER NOT NULL DEFAULT(0),
   -- read receipts as a map from user ids to receipt status, encoded as CBOR
   receipts BLOB,
+  has_attachments INTEGER NOT NULL DEFAULT(0),
   known INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)

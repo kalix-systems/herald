@@ -181,6 +181,11 @@ impl MessagesTrait for Messages {
             .as_slice()
     }
 
+    fn has_attachments(&self, row_index: usize) -> bool {
+        let mid = ret_none!(self.list.get(row_index), false).msg_id;
+        ret_none!(self.map.get(&mid), false).has_attachments
+    }
+
     fn receipt_status(&self, row_index: usize) -> u32 {
         let mid = ret_none!(self.list.get(row_index), MessageReceiptStatus::NoAck as u32).msg_id;
         let inner = ret_none!(self.map.get(&mid), MessageReceiptStatus::NoAck as u32);

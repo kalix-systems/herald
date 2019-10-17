@@ -28,6 +28,8 @@ pub struct Message {
     pub send_status: MessageSendStatus,
     /// Receipts
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
+    /// Indicates whether the message has attachments
+    pub has_attachments: bool,
 }
 
 impl Message {
@@ -49,6 +51,7 @@ impl Message {
                 .unwrap_or_else(Utc::now),
             receipts,
             send_status: row.get(7)?,
+            has_attachments: row.get(8)?,
         })
     }
 }
@@ -154,6 +157,7 @@ impl OutboundMessageBuilder {
 
         let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
         let receipts_bytes = serde_cbor::to_vec(&receipts)?;
+        let has_attachments = !attachments.is_empty();
 
         let msg = Message {
             message_id: msg_id,
@@ -164,6 +168,7 @@ impl OutboundMessageBuilder {
             timestamp,
             send_status,
             receipts,
+            has_attachments,
         };
 
         callback(StoreAndSend::Msg(msg));
@@ -208,6 +213,7 @@ impl OutboundMessageBuilder {
                     body,
                     send_status,
                     receipts_bytes,
+                    has_attachments,
                     timestamp.timestamp(),
                 ],
             ));
@@ -346,6 +352,7 @@ impl InboundMessageBuilder {
 
         let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
         let attachment_paths = res?;
+        let has_attachments = !attachment_paths.is_empty();
 
         // this can be inferred from the fact that this message was received
         let send_status = MessageSendStatus::Ack;
@@ -365,6 +372,7 @@ impl InboundMessageBuilder {
                 body,
                 send_status,
                 receipts,
+                has_attachments,
                 timestamp.timestamp(),
             ],
         )?;

@@ -2269,6 +2269,7 @@ pub trait MessagesTrait {
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> Option<&str>;
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
+    fn has_attachments(&self, index: usize) -> bool;
     fn is_reply(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> &[u8];
     fn op(&self, index: usize) -> Option<&[u8]>;
@@ -2505,6 +2506,12 @@ pub unsafe extern "C" fn messages_data_body(
 pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, row: c_int) -> i64 {
     let o = &*ptr;
     o.epoch_timestamp_ms(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_has_attachments(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.has_attachments(to_usize(row)).into()
 }
 
 #[no_mangle]
