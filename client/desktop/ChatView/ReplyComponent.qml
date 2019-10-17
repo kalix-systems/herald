@@ -56,7 +56,8 @@ Rectangle {
         }
 
         onClicked: {
-            chatTextArea.state = "default"
+            builder.clearReply()
+            //chatTextArea.state = "default"
         }
     }
 

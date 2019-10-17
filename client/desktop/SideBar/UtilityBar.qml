@@ -117,11 +117,18 @@ Component {
                 }
             }
 
+
+
             Menu {
                 id: utilityOptionsMenu
                 MenuItem {
                     text: "Add contact"
                     onTriggered: convoPane.state = "newContactState"
+                }
+
+                MenuItem {
+                    text: "Config settings"
+                    onTriggered: configPopup.show()
                 }
             }
         }

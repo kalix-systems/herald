@@ -134,13 +134,15 @@ Rectangle {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
-            print("todo: attachments api")
+            builder.addAttachment(attachmentsDialogue.fileUrl)
+            //print(attachmentsDialogue.fileUrl)
         }
     }
 
     states: [
         State {
             name: "replystate"
+            when: builder.isReply
             PropertyChanges {
                 target: replyLoader
                 active: true
