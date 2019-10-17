@@ -64,6 +64,8 @@ pub struct OutboundMessageBuilder {
     pub op: Option<MsgId>,
     /// Attachments
     pub attachments: Vec<PathBuf>,
+    /// Whether to treat the value as markdown
+    pub parse_markdown: bool,
 }
 
 /// Values `OutboundMessageBuilder`'s `store_and_send` function
@@ -125,12 +127,20 @@ impl OutboundMessageBuilder {
     ) -> Result<(), HErr> {
         let Self {
             conversation,
-            body,
+            mut body,
             op,
             attachments,
+            parse_markdown,
         } = self;
 
         use MissingOutboundMessageField::*;
+
+        if parse_markdown {
+            body = match body {
+                Some(body) => Some(body.parse_markdown()?),
+                None => None,
+            };
+        }
 
         if attachments.is_empty() && body.is_none() {
             return Err(MissingBody.into());

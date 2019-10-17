@@ -132,6 +132,10 @@ namespace {
     {
         Q_EMIT o->isReplyChanged();
     }
+    inline void messageBuilderParseMarkdownChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->parseMarkdownChanged();
+    }
     inline void messageBuilderReplyingToChanged(MessageBuilder* o)
     {
         Q_EMIT o->replyingToChanged();
@@ -1184,7 +1188,7 @@ bool MessageBuilder::setHeaderData(int section, Qt::Orientation orientation, con
 }
 
 extern "C" {
-    MessageBuilder::Private* message_builder_new(MessageBuilder*, void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*),
+    MessageBuilder::Private* message_builder_new(MessageBuilder*, void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*),
         void (*)(const MessageBuilder*),
         void (*)(MessageBuilder*),
         void (*)(MessageBuilder*),
@@ -1206,6 +1210,8 @@ extern "C" {
     void message_builder_conversation_id_set_none(MessageBuilder::Private*);
     bool message_builder_is_media_message_get(const MessageBuilder::Private*);
     bool message_builder_is_reply_get(const MessageBuilder::Private*);
+    bool message_builder_parse_markdown_get(const MessageBuilder::Private*);
+    void message_builder_parse_markdown_set(MessageBuilder::Private*, bool);
     void message_builder_replying_to_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
     void message_builder_replying_to_set(MessageBuilder::Private*, const char* bytes, int len);
     void message_builder_replying_to_set_none(MessageBuilder::Private*);
@@ -2287,6 +2293,7 @@ MessageBuilder::MessageBuilder(QObject *parent):
         messageBuilderConversationIdChanged,
         messageBuilderIsMediaMessageChanged,
         messageBuilderIsReplyChanged,
+        messageBuilderParseMarkdownChanged,
         messageBuilderReplyingToChanged,
         [](const MessageBuilder* o) {
             Q_EMIT o->newDataReady(QModelIndex());
@@ -2375,6 +2382,13 @@ bool MessageBuilder::isMediaMessage() const
 bool MessageBuilder::isReply() const
 {
     return message_builder_is_reply_get(m_d);
+}
+bool MessageBuilder::parseMarkdown() const
+{
+    return message_builder_parse_markdown_get(m_d);
+}
+void MessageBuilder::setParseMarkdown(bool v) {
+    message_builder_parse_markdown_set(m_d, v);
 }
 QByteArray MessageBuilder::replyingTo() const
 {

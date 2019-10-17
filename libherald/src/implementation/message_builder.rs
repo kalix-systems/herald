@@ -8,6 +8,7 @@ pub struct MessageBuilder {
     emit: Emitter,
     model: List,
     inner: OutboundMessageBuilder,
+    parse_markdown: bool,
 }
 
 type Emitter = MessageBuilderEmitter;
@@ -19,6 +20,7 @@ impl MessageBuilderTrait for MessageBuilder {
             emit,
             model,
             inner: OutboundMessageBuilder::default(),
+            parse_markdown: false,
         }
     }
 
@@ -31,6 +33,9 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn set_conversation_id(&mut self, cid: Option<ffi::ConversationIdRef>) {
+        if self.inner.conversation.is_some() {
+            return;
+        }
         let cid = ret_err!(ret_none!(cid).try_into());
         self.inner.conversation_id(cid);
     }
@@ -45,6 +50,14 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn is_media_message(&self) -> bool {
         !self.inner.attachments.is_empty()
+    }
+
+    fn set_parse_markdown(&mut self, val: bool) {
+        self.inner.parse_markdown = val;
+    }
+
+    fn parse_markdown(&self) -> bool {
+        self.parse_markdown
     }
 
     fn set_replying_to(&mut self, op_msg_id: Option<ffi::MsgIdRef>) {
@@ -100,8 +113,10 @@ impl MessageBuilderTrait for MessageBuilder {
 
     /// Finalizes the builder, stores and sends the message, and resets the builder.
     fn finalize(&mut self) {
+        self.model.begin_reset_model();
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
+        self.model.end_reset_model();
 
         let cid = ret_none!(builder.conversation);
 

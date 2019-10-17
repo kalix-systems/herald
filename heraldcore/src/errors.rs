@@ -1,4 +1,4 @@
-use crate::types::{MissingInboundMessageField, MissingOutboundMessageField};
+use crate::types::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField};
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;
@@ -49,6 +49,8 @@ pub enum HErr {
     MissingOutboundMessageField(MissingOutboundMessageField),
     /// Missing fields when storing a received a message
     MissingInboundMessageField(MissingInboundMessageField),
+    /// An empty message body,
+    EmptyMessageBody,
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
@@ -101,6 +103,7 @@ impl fmt::Display for HErr {
             NoneError(file, line) => write!(f, "Unexpected none in file {} on line {}", file, line),
             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
+            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
         }
     }
 }
@@ -145,6 +148,12 @@ herr!(serde_cbor::Error, CborError);
 herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(regex::Error, RegexError);
 herr!(std::ffi::OsString, BadPath);
+
+impl From<EmptyMessageBody> for HErr {
+    fn from(_: EmptyMessageBody) -> Self {
+        HErr::EmptyMessageBody
+    }
+}
 
 impl From<LazyError> for HErr {
     fn from(_: LazyError) -> Self {

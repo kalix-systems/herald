@@ -305,9 +305,10 @@ fn message_builder() -> Object {
         // Message id of the message being replied to
         replyingTo: Prop::new().simple(QByteArray).optional().write(),
         isReply: Prop::new().simple(Bool),
-        // Body of the messagee
+        // Body of the message
         body: Prop::new().simple(QString).optional().write(),
-        isMediaMessage: Prop::new().simple(Bool)
+        isMediaMessage: Prop::new().simple(Bool),
+        parseMarkdown: Prop::new().simple(Bool).write()
     };
 
     let item_props = item_props! {

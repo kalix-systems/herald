@@ -1717,6 +1717,7 @@ pub struct MessageBuilderEmitter {
     conversation_id_changed: fn(*mut MessageBuilderQObject),
     is_media_message_changed: fn(*mut MessageBuilderQObject),
     is_reply_changed: fn(*mut MessageBuilderQObject),
+    parse_markdown_changed: fn(*mut MessageBuilderQObject),
     replying_to_changed: fn(*mut MessageBuilderQObject),
     new_data_ready: fn(*mut MessageBuilderQObject),
 }
@@ -1737,6 +1738,7 @@ impl MessageBuilderEmitter {
             conversation_id_changed: self.conversation_id_changed,
             is_media_message_changed: self.is_media_message_changed,
             is_reply_changed: self.is_reply_changed,
+            parse_markdown_changed: self.parse_markdown_changed,
             replying_to_changed: self.replying_to_changed,
             new_data_ready: self.new_data_ready,
         }
@@ -1767,6 +1769,12 @@ impl MessageBuilderEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.is_reply_changed)(ptr);
+        }
+    }
+    pub fn parse_markdown_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.parse_markdown_changed)(ptr);
         }
     }
     pub fn replying_to_changed(&mut self) {
@@ -1844,6 +1852,8 @@ pub trait MessageBuilderTrait {
     fn set_conversation_id(&mut self, value: Option<&[u8]>);
     fn is_media_message(&self) -> bool;
     fn is_reply(&self) -> bool;
+    fn parse_markdown(&self) -> bool;
+    fn set_parse_markdown(&mut self, value: bool);
     fn replying_to(&self) -> Option<&[u8]>;
     fn set_replying_to(&mut self, value: Option<&[u8]>);
     fn add_attachment(&mut self, path: String) -> bool;
@@ -1870,6 +1880,7 @@ pub extern "C" fn message_builder_new(
     message_builder_conversation_id_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),
+    message_builder_parse_markdown_changed: fn(*mut MessageBuilderQObject),
     message_builder_replying_to_changed: fn(*mut MessageBuilderQObject),
     message_builder_new_data_ready: fn(*mut MessageBuilderQObject),
     message_builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
@@ -1890,6 +1901,7 @@ pub extern "C" fn message_builder_new(
         conversation_id_changed: message_builder_conversation_id_changed,
         is_media_message_changed: message_builder_is_media_message_changed,
         is_reply_changed: message_builder_is_reply_changed,
+        parse_markdown_changed: message_builder_parse_markdown_changed,
         replying_to_changed: message_builder_replying_to_changed,
         new_data_ready: message_builder_new_data_ready,
     };
@@ -1979,6 +1991,16 @@ pub unsafe extern "C" fn message_builder_is_media_message_get(ptr: *const Messag
 #[no_mangle]
 pub unsafe extern "C" fn message_builder_is_reply_get(ptr: *const MessageBuilder) -> bool {
     (&*ptr).is_reply()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_parse_markdown_get(ptr: *const MessageBuilder) -> bool {
+    (&*ptr).parse_markdown()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_parse_markdown_set(ptr: *mut MessageBuilder, v: bool) {
+    (&mut *ptr).set_parse_markdown(v);
 }
 
 #[no_mangle]

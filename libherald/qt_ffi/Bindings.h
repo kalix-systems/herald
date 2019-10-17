@@ -340,6 +340,7 @@ private:
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(bool isMediaMessage READ isMediaMessage NOTIFY isMediaMessageChanged FINAL)
     Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
+    Q_PROPERTY(bool parseMarkdown READ parseMarkdown WRITE setParseMarkdown NOTIFY parseMarkdownChanged FINAL)
     Q_PROPERTY(QByteArray replyingTo READ replyingTo WRITE setReplyingTo NOTIFY replyingToChanged FINAL)
     explicit MessageBuilder(bool owned, QObject *parent);
 public:
@@ -351,6 +352,8 @@ public:
     void setConversationId(const QByteArray& v);
     bool isMediaMessage() const;
     bool isReply() const;
+    bool parseMarkdown() const;
+    void setParseMarkdown(bool v);
     QByteArray replyingTo() const;
     void setReplyingTo(const QByteArray& v);
     Q_INVOKABLE bool addAttachment(const QString& path);
@@ -390,6 +393,7 @@ Q_SIGNALS:
     void conversationIdChanged();
     void isMediaMessageChanged();
     void isReplyChanged();
+    void parseMarkdownChanged();
     void replyingToChanged();
 };
 
