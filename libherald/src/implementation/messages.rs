@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*, toasts::new_msg_toast};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -65,46 +65,6 @@ impl Messages {
 
         Ok(())
     }
-
-    #[cfg(target_os = "linux")]
-    fn new_msg_toast(&self, msg: &Msg) {
-        use notify_rust::*;
-
-        let mut notif = Notification::new();
-        notif
-            .appname(crate::DESKTOP_APP_NAME)
-            .summary(&format!("New message from {}", msg.author));
-
-        if let Some(body) = &msg.body {
-            notif.body(body.as_str());
-        }
-
-        notif
-            .hint(NotificationHint::Category("im.received".to_owned()))
-            .show()
-            .ok();
-    }
-
-    #[cfg(target_os = "macos")]
-    fn new_msg_toast(&self, msg: &Msg) {
-        use notify_rust::*;
-        // TODO: sketchy global state! This should be set
-        // somewhere else.
-        set_application(crate::DESKTOP_APP_NAME).ok();
-        let mut notif = Notification::new();
-        notif
-            .summary(&format!("New message from {}", msg.author))
-            .subtitle("TODO: macOS has subtitles! Do we want them?");
-
-        if let Some(body) = &msg.body {
-            notif.body(body.as_str());
-        }
-
-        notif.show().ok();
-    }
-
-    #[cfg(all(not(target_os = "macos"), not(target_os = "linux")))]
-    fn new_msg_toast(&self, _: &Msg) {}
 }
 
 impl MessagesTrait for Messages {
@@ -318,7 +278,7 @@ impl MessagesTrait for Messages {
                 MsgUpdate::Msg(mid) => {
                     let new = ret_err!(message::get_message(&mid), false);
 
-                    self.new_msg_toast(&new);
+                    new_msg_toast(&new);
 
                     self.model
                         .begin_insert_rows(self.list.len(), self.list.len());
