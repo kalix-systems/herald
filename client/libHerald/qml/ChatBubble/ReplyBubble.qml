@@ -10,7 +10,7 @@ ColumnLayout {
     property string friendlyTimestamp: ""
     property string receiptImage: ""
     property string opName: "@unknown"
-    property string opBody: ownedConversation.messageBodyById(op)
+    property string opBody: ""
     property color opColor: "gray"
     property string authorName: ""
     property int spacing: 0
@@ -23,11 +23,13 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: outbound ? opColor : Qt.lighter(userColor, 1.2)
-        radius: QmlCfg.radius / 2
+        color: Qt.lighter(QmlCfg.palette.tertiaryColor, 1.3)
         Layout.margins: QmlCfg.smallMargin
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
+
+        Rectangle {}
+
         ColumnLayout {
             id: reply
             spacing: 1
@@ -39,7 +41,7 @@ ColumnLayout {
                 Layout.margins: QmlCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
-                color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
+                color: QmlCfg.palette.mainTextColor
             }
 
             TextMetrics {
