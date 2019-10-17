@@ -64,6 +64,7 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn clear_reply(&mut self) {
         self.set_replying_to(None);
+        self.emit.replying_to_changed();
     }
 
     fn add_attachment(&mut self, path: String) -> bool {
