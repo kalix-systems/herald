@@ -7,25 +7,58 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chainmail     = { git = "https://github.com/kalix-systems/chainmail" }
-chrono        = { version = "0.4.7", default_features  = false}
 crossbeam-channel = "0.3.9"
-herald_common = { path    = "../herald_common", default_features = false, features = ["rusqlite_"] }
-hex = "0.4.0"
-image         = { version = "0.22.1", default_features = false, features = ["jpeg", "png_codec"]}
-lazy_pond     = { path    = "../lazy_pond" }
-lazy_static   = "1.3.0"
-libsodium-sys = "0.2.4"
-regex         = "1.2.1"
-rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
-serde         = "1.0.99"
-serde_bytes   = "0.11.2"
-serde_cbor    = "0.10.1"
-sodiumoxide   = "0.2.4"
-tar = "0.4.26"
-ureq          = { version = "0.11", default_features = false }
-url           = "2.1"
-websocket     = { version = "0.23", default_features = false, features = ["sync"] }
+hex               = "0.4.0"
+lazy_static       = "1.3.0"
+libsodium-sys     = "0.2.4"
+regex             = "1.2.1"
+serde             = "1.0.99"
+serde_bytes       = "0.11.2"
+serde_cbor        = "0.10.1"
+sodiumoxide       = "0.2.4"
+tar               = "0.4.26"
+url               = "2.1"
+
+[dependencies.herald_common]
+path             = "../herald_common"
+default_features = false
+features         = ["rusqlite_"]
+
+[dependencies.lazy_pond]
+path = "../lazy_pond"
+
+[dependencies.chainmail]
+git = "https://github.com/kalix-systems/chainmail"
+
+[dependencies.websocket]
+version          = "0.23"
+default_features = false
+features         = ["sync"]
+
+[dependencies.ureq]
+version          = "0.11"
+default_features = false
+
+[dependencies.rusqlite]
+version          = "0.20.0"
+default_features = false
+features         = ["functions"]
+
+[dependencies.image]
+version          = "0.22.1"
+default_features = false
+features         = ["jpeg", "png_codec"]
+
+[dependencies.chrono]
+version          = "0.4.7"
+default_features = false
+
+[dependencies.pulldown-cmark]
+version  = "0.6.0"
+optional = true
+
+[features]
+markdown = ["pulldown-cmark"]
 
 [dev-dependencies]
 serial_test        = "0.2.0"
