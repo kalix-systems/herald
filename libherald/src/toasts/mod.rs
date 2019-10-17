@@ -9,7 +9,7 @@ const DESKTOP_APP_NAME: &'static str = "heraldqtDesktop";
     path = "xdg.rs"
 )]
 #[cfg_attr(target_os = "macos", path = "macos.rs")]
-#[cfg_attr(not(target_family = "unix"), path = "other.rs")]
+#[cfg_attr(any(target_os = "android", target_os = "ios"), path = "other.rs")]
 mod imp;
 
 pub(crate) use imp::new_msg_toast;

@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT      += quick svg xml widgets
+QT      += quick svg xml
 VERSION = 0.0.1
 CONFIG  += c++11
 
@@ -11,10 +11,7 @@ CONFIG  += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # libherald headers, source, and libs
-include( ../heraldqtCommon/libHerald/libHerald.pri )
-
-# common qml componenets
-include( ../heraldqtCommon/libCommonQml/libCommonQml.pri)
+include(../libHerald/libHerald.pri)
 
 # silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]

@@ -23,8 +23,11 @@ else {
 
 # untested, may need -lsqlite3
 android {
-    QMAKE_LFLAGS += -nostdlib++
-    LIBS +=  $${PWD}/../../target/i686-linux-android/$${RUST_BUILD_TYPE}/libherald.a
+    # QMAKE_LFLAGS += -nostdlib++
+    ANDROID_NDK_PLATFORM = android-28
+    ANDROID_API_VERSION = 28
+    LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
+
 }
 
 iphonesimulator {
@@ -37,7 +40,7 @@ macx {
 }
 
 linux {
-  LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.so
+ # LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.so
 }
 
 RESOURCES += \
