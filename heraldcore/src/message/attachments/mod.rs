@@ -2,7 +2,10 @@ use super::*;
 use crate::NE;
 use herald_common::hash_slice;
 use hex::encode;
-use std::path::{Path, PathBuf};
+use std::{
+    fs::read_dir,
+    path::{Path, PathBuf},
+};
 use tar::{Archive, Builder};
 
 /// A message attachmentent
@@ -79,15 +82,17 @@ pub struct AttachmentMeta(Vec<PathBuf>);
 
 impl AttachmentMeta {
     /// Converts `AttachmentMeta` into a vector of `String`s
-    pub fn into_vector_of_strings(self) -> Result<Vec<String>, HErr> {
+    pub fn into_flat_strings(self) -> Result<Vec<String>, HErr> {
         self.0
             .into_iter()
-            .map(|p| {
+            .map(|p| -> Result<_, HErr> {
                 let mut path = PathBuf::from("attachments");
                 path.push(p);
-                path
+                Ok(read_dir(path)?.map(|entry| -> Result<_, HErr> { Ok(entry?.path()) }))
             })
-            .map(|p| Ok(p.into_os_string().into_string()?))
+            .flatten()
+            .flatten()
+            .map(|p| Ok(p?.into_os_string().into_string()?))
             .collect()
     }
 }

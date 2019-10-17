@@ -36,7 +36,7 @@ impl AttachmentsTrait for Attachments {
             (Some(msg_id), None) => {
                 let msg_id = ret_err!(msg_id.try_into());
                 let attachments = ret_err!(attachments::get(&msg_id));
-                let attachment_strings = ret_err!(attachments.into_vector_of_strings());
+                let attachment_strings = ret_err!(attachments.into_flat_strings());
 
                 if attachment_strings.is_empty() {
                     return;

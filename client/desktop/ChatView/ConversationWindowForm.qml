@@ -110,7 +110,7 @@ Flickable {
                         messageId: ownedConversation.messageId(index)
                         imageSource: {
                             messageAttachments.msgId = messageId;
-                            return messageAttachments.attachmentPath(0);
+                            return Utils.safeToQrcURI(messageAttachments.attachmentPath(0));
                         }
                     }
                 }
