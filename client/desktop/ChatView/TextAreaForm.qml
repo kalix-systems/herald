@@ -134,7 +134,8 @@ Rectangle {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
-            print("todo: attachments api")
+            builder.addAttachment(attachmentsDialogue.fileUrl)
+            //print(attachmentsDialogue.fileUrl)
         }
     }
 

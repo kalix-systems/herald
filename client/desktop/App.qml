@@ -55,6 +55,10 @@ Item {
         }
     }
 
+    Popups.ConfigPopup {
+        id: configPopup
+    }
+
     Config {
         id: config
     }

@@ -117,7 +117,7 @@ Flickable {
                     senderColor: userColor
                     content: if (false) {
                                  image
-                             } else if (op.byteLength === 32) {
+                             } else if (isReply) {
                                  reply
                              } else {
                                  std
