@@ -42,11 +42,6 @@ ListView {
             onNewDataReady: messageModel.pollUpdate()
         }
 
-        Connections {
-            target: networkHandle
-            onMsgDataChanged: messageModel.pollUpdate()
-        }
-
         property var childChatView: Component {
             CV.ChatView {
                 conversationAvatar: convoRectangle.conversationItemAvatar

@@ -24,8 +24,6 @@ pub struct EffectsFlags {
     net_pending: AtomicBool,
     // Note: these are `AtomicU8`s because it's not obvious
     // how to atomically negate an `AtomicBool`.
-    // The values really just function simple toggles.
-    msg_data: AtomicU8,
     members_data: AtomicU8,
 }
 
@@ -56,8 +54,9 @@ impl NotifHandler {
                 };
 
                 ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
-                self.emit.msg_data_changed();
+                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                    emitter.new_data_ready();
+                }
 
                 use crate::implementation::conversations::shared::*;
 
@@ -77,8 +76,9 @@ impl NotifHandler {
                 };
 
                 ret_err!(tx.send(MsgUpdate::Receipt(mid)));
-                self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
-                self.emit.msg_data_changed();
+                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                    emitter.new_data_ready();
+                }
             }
             NewContact(uid, cid) => {
                 use crate::implementation::conversations::shared::*;
@@ -143,7 +143,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            msg_data: AtomicU8::new(0),
             members_data: AtomicU8::new(0),
         }
     }
@@ -231,10 +230,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn members_data(&self) -> u8 {
         self.effects_flags.members_data.load(Ordering::Relaxed)
-    }
-
-    fn msg_data(&self) -> u8 {
-        self.effects_flags.msg_data.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut Emitter {

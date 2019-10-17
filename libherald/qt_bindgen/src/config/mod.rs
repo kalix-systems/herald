@@ -161,7 +161,6 @@ fn network_handle() -> Object {
     let props = props! {
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool),
-        msgData: Prop::new().simple(QUint8),
         membersData: Prop::new().simple(QUint8)
     };
 
