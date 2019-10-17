@@ -107,6 +107,11 @@ Flickable {
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
                         authorName: authName
+                        messageId: ownedConversation.messageId(index)
+                        imageSource: {
+                            messageAttachments.msgId = messageId;
+                            return Utils.safeToQrcURI(messageAttachments.attachmentPath(0));
+                        }
                     }
                 }
 
@@ -115,7 +120,7 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: QmlCfg.palette.tertiaryColor
                     senderColor: userColor
-                    content: if (false) {
+                    content: if (hasAttachments) {
                                  image
                              } else if (isReply) {
                                  reply

@@ -9,12 +9,19 @@ ColumnLayout {
     property string receiptImage: ""
     property string imageSource: ""
     property string authorName: ""
+    property var messageId
+    property alias messageAttachments: messageAttachments
 
     spacing: 0
 
     ChatLabel {
         id: sender
         senderName: authorName
+    }
+
+    Attachments {
+        id: messageAttachments
+        msgId: messageId
     }
 
     Image {

@@ -28,7 +28,7 @@ fn outbound_message_attachment() {
 
     let meta = super::get(&msg.message_id)
         .expect(womp!())
-        .into_vector_of_strings()
+        .into_flat_strings()
         .expect(womp!());
 
     assert_eq!(meta.len(), 1);
@@ -62,7 +62,7 @@ fn inbound_message_attachment() {
 
     let meta = super::get(&mid)
         .expect(womp!())
-        .into_vector_of_strings()
+        .into_flat_strings()
         .expect(womp!());
     assert_eq!(meta.len(), 1);
 
