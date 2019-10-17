@@ -6,7 +6,7 @@ lazy_static! {
     static ref SET_APP_RES: Option<()> = set_application(super::DESKTOP_APP_NAME).ok();
 }
 
-fn new_msg_toast(msg: &Message) {
+pub fn new_msg_toast(msg: &Message) {
     if SET_APP_RES.is_some() {
         let mut notif = Notification::new();
         notif
