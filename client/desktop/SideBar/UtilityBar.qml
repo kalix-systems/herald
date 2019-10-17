@@ -81,7 +81,6 @@ Component {
             onClicked: {
                 convoPane.state = "conversationSearch"
             }
-        }
 
         ///--- Add contact button
         Common.ButtonForm {
@@ -92,11 +91,12 @@ Component {
             source: "qrc:/pencil-icon-black.svg"
             z: -1
 
-            MouseArea {
-                anchors.fill: parent
+                MouseArea {
+                    anchors.fill: parent
 
-                onClicked: {
-                    convoPane.state = "newConversationState"
+                    onClicked: {
+                        convoPane.state = "newConversationState"
+                    }
                 }
             }
         }
@@ -126,6 +126,5 @@ Component {
                }
            }
         }
-    }
     }
 }

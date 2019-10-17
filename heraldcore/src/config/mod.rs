@@ -237,5 +237,14 @@ impl Config {
     }
 }
 
+#[allow(unused)]
+pub(crate) fn test_config() -> crate::config::Config {
+    use std::convert::TryInto;
+    let uid = "userid".try_into().expect("Bad user id");
+    crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new())
+        .add()
+        .expect("Failed to create config")
+}
+
 #[cfg(test)]
 mod tests;

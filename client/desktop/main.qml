@@ -19,7 +19,8 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    TopMenuBar {}
+    TopMenuBar {
+    }
 
     Errors {
         id: errorQueue
@@ -49,13 +50,15 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        sourceComponent: App {}
+        sourceComponent: App {
+        }
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: RegistrationPage {}
+        sourceComponent: RegistrationPage {
+        }
     }
 }

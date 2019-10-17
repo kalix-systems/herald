@@ -1,3 +1,4 @@
+use crate::interface::MessagesEmitter;
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use herald_common::UserId;
@@ -74,6 +75,7 @@ pub mod members {
 /// Shared state related to messages
 pub mod messages {
     use super::*;
+    use heraldcore::message::Message;
 
     /// Message related conversation updates
     pub enum MsgUpdate {
@@ -81,11 +83,20 @@ pub mod messages {
         Msg(MsgId),
         /// A message has been acknowledged
         Receipt(MsgId),
+        /// A full message
+        FullMsg(Message),
     }
 
     lazy_static! {
         /// Concurrent hash map from `ConversationId`s to an event stream.
         /// This is used to route message related notifications that arrive from the network.
         pub static ref MSG_RXS: DashMap<ConversationId, Receiver<MsgUpdate>> = DashMap::default();
+
+        /// Concurrent hash map from `ConversationId`s to an event stream.
+        /// This is used to route message related notifications that arrive from the network.
+        pub static ref MSG_TXS: DashMap<ConversationId, Sender<MsgUpdate>> = DashMap::default();
+        /// Concurrent hash map of `MessagesEmitter`. These are removed when the
+        /// `Messages` object is dropped.
+        pub static ref MSG_EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
     }
 }

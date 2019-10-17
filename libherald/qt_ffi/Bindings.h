@@ -5,6 +5,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QAbstractItemModel>
 
+class Attachments;
 class Config;
 class ConversationBuilder;
 class Conversations;
@@ -12,9 +13,55 @@ class Errors;
 class HeraldState;
 class HeraldUtils;
 class Members;
+class MessageBuilder;
 class Messages;
 class NetworkHandle;
 class Users;
+
+class Attachments : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QByteArray msgId READ msgId WRITE setMsgId NOTIFY msgIdChanged FINAL)
+    explicit Attachments(bool owned, QObject *parent);
+public:
+    explicit Attachments(QObject *parent = nullptr);
+    ~Attachments();
+    QByteArray msgId() const;
+    void setMsgId(const QByteArray& v);
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE QString attachmentPath(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void msgIdChanged();
+};
 
 class Config : public QObject
 {
@@ -281,6 +328,64 @@ Q_SIGNALS:
     void filterRegexChanged();
 };
 
+class MessageBuilder : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
+    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(QByteArray replyingTo READ replyingTo WRITE setReplyingTo NOTIFY replyingToChanged FINAL)
+    explicit MessageBuilder(bool owned, QObject *parent);
+public:
+    explicit MessageBuilder(QObject *parent = nullptr);
+    ~MessageBuilder();
+    QString body() const;
+    void setBody(const QString& v);
+    QByteArray conversationId() const;
+    void setConversationId(const QByteArray& v);
+    QByteArray replyingTo() const;
+    void setReplyingTo(const QByteArray& v);
+    Q_INVOKABLE bool addAttachment(const QString& path);
+    Q_INVOKABLE void finalize();
+    Q_INVOKABLE bool removeAttachment(const QString& path);
+    Q_INVOKABLE bool removeAttachmentByIndex(quint64 row_index);
+    Q_INVOKABLE void removeLast();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE QString attachmentPath(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void bodyChanged();
+    void conversationIdChanged();
+    void replyingToChanged();
+};
+
 class Messages : public QAbstractItemModel
 {
     Q_OBJECT
@@ -310,8 +415,6 @@ public:
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
     Q_INVOKABLE bool pollUpdate();
-    Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
-    Q_INVOKABLE bool sendMessage(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -362,7 +465,6 @@ private:
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
-    Q_PROPERTY(quint8 msgData READ msgData NOTIFY msgDataChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
@@ -370,7 +472,6 @@ public:
     bool connectionPending() const;
     bool connectionUp() const;
     quint8 membersData() const;
-    quint8 msgData() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
@@ -378,7 +479,6 @@ Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
     void membersDataChanged();
-    void msgDataChanged();
 };
 
 class Users : public QAbstractItemModel

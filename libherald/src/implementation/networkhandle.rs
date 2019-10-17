@@ -24,15 +24,12 @@ pub struct EffectsFlags {
     net_pending: AtomicBool,
     // Note: these are `AtomicU8`s because it's not obvious
     // how to atomically negate an `AtomicBool`.
-    // The values really just function simple toggles.
-    msg_data: AtomicU8,
     members_data: AtomicU8,
 }
 
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
     members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
     effects_flags: Arc<EffectsFlags>,
     emit: Emitter,
@@ -44,20 +41,21 @@ impl NotifHandler {
         match notif {
             NewMsg(msg_id, cid) => {
                 use shared::messages::*;
-                let tx = match self.msg_senders.get(&cid) {
-                    Some(tx) => tx,
+                let tx = match MSG_TXS.get(&cid) {
+                    Some(tx) => tx.clone(),
                     None => {
                         let (tx, rx) = unbounded();
 
-                        self.msg_senders.insert(cid, tx);
+                        MSG_TXS.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
-                        ret_none!(self.msg_senders.get(&cid))
+                        ret_none!(MSG_TXS.get(&cid)).clone()
                     }
                 };
 
                 ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
-                self.emit.msg_data_changed();
+                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                    emitter.new_data_ready();
+                }
 
                 use crate::implementation::conversations::shared::*;
 
@@ -65,20 +63,21 @@ impl NotifHandler {
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
-                let tx = match self.msg_senders.get(&cid) {
-                    Some(tx) => tx,
+                let tx = match MSG_TXS.get(&cid) {
+                    Some(tx) => tx.clone(),
                     None => {
                         let (tx, rx) = unbounded();
 
-                        self.msg_senders.insert(cid, tx);
+                        MSG_TXS.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
-                        ret_none!(self.msg_senders.get(&cid))
+                        ret_none!(MSG_TXS.get(&cid)).clone()
                     }
                 };
 
                 ret_err!(tx.send(MsgUpdate::Receipt(mid)));
-                self.effects_flags.msg_data.fetch_add(1, Ordering::Acquire);
-                self.emit.msg_data_changed();
+                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                    emitter.new_data_ready();
+                }
             }
             NewContact(uid, cid) => {
                 use crate::implementation::conversations::shared::*;
@@ -130,7 +129,6 @@ impl NotifHandler {
     }
     fn new(mut emit: Emitter, effects_flags: Arc<EffectsFlags>) -> Self {
         Self {
-            msg_senders: HashMap::new(),
             members_senders: HashMap::new(),
             effects_flags,
             emit: emit.clone(),
@@ -144,7 +142,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            msg_data: AtomicU8::new(0),
             members_data: AtomicU8::new(0),
         }
     }
@@ -202,13 +199,20 @@ impl NetworkHandleTrait for NetworkHandle {
     }
 
     fn login(&mut self) -> bool {
+        use heraldcore::errors::HErr;
+
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
         ret_err!(
             thread::Builder::new().spawn(move || {
-                ret_err!(network::login(move |notif: Notification| {
-                    handler.send(notif);
-                }))
+                ret_err!(network::login(
+                    move |notif: Notification| {
+                        handler.send(notif);
+                    },
+                    move |herr: HErr| {
+                        ret_err!(Err::<(), HErr>(herr));
+                    }
+                ))
             }),
             false
         );
@@ -225,10 +229,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn members_data(&self) -> u8 {
         self.effects_flags.members_data.load(Ordering::Relaxed)
-    }
-
-    fn msg_data(&self) -> u8 {
-        self.effects_flags.msg_data.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut Emitter {

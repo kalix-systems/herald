@@ -1,14 +1,6 @@
 /// Strips `qrc` prefix from paths passed from QML.
-pub fn strip_qrc(path: Option<String>) -> Option<String> {
-    let mut path = path;
-
-    match &mut path {
-        Some(path) => {
-            let stripped = path.split_off(7);
-            Some(stripped)
-        }
-        None => None,
-    }
+pub fn strip_qrc(mut path: String) -> String {
+    path.split_off(7)
 }
 
 pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
@@ -115,12 +107,12 @@ macro_rules! bounds_chk {
     };
 }
 
-#[cfg(tests)]
+#[cfg(test)]
 mod tests {
     #[test]
     fn strip_qrc() {
         let path = "file:///what/a/path".into();
 
-        assert_eq!("/what/a/path", super::strip_qrc(path).unwrap());
+        assert_eq!("/what/a/path", super::strip_qrc(path));
     }
 }

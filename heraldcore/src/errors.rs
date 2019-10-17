@@ -1,9 +1,33 @@
+use crate::types::{MissingInboundMessageField, MissingOutboundMessageField};
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;
 use lazy_pond::LazyError;
 use regex;
 use std::fmt;
+
+#[derive(Debug)]
+/// A location in source code
+pub struct Location {
+    /// The line where the error occurred
+    pub line: u32,
+    /// The column where the error occurred
+    pub col: u32,
+    /// The file where the error occurred
+    pub file: &'static str,
+}
+
+impl fmt::Display for Location {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{file}:{line}:{column}",
+            file = self.file,
+            line = self.line,
+            column = self.file
+        )
+    }
+}
 
 #[derive(Debug)]
 /// Error variants
@@ -21,6 +45,10 @@ pub enum HErr {
     InvalidMessageId,
     /// Invalid `ConversationId`
     InvalidConversationId,
+    /// Missing fields when sending a message
+    MissingOutboundMessageField(MissingOutboundMessageField),
+    /// Missing fields when storing a received a message
+    MissingInboundMessageField(MissingInboundMessageField),
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
@@ -38,7 +66,11 @@ pub enum HErr {
     /// Websocket issue
     WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
-    NoneError,
+    NoneError(&'static str, u32),
+    /// An error occured sending a value through a channel
+    ChannelSendError(Location),
+    /// An error occured receiving a value from a channel
+    ChannelRecvError(Location),
     /// Error from `chainmail`
     ChainError(ChainError),
     /// Malformed path
@@ -64,7 +96,11 @@ impl fmt::Display for HErr {
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
-            NoneError => write!(f, "Unexpected none"),
+            MissingOutboundMessageField(missing) => write!(f, "{}", missing),
+            MissingInboundMessageField(missing) => write!(f, "{}", missing),
+            NoneError(file, line) => write!(f, "Unexpected none in file {} on line {}", file, line),
+            ChannelSendError(location) => write!(f, "Channel send error at {}", location),
+            ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
         }
     }
 }
@@ -100,6 +136,8 @@ macro_rules! herr {
     };
 }
 
+herr!(MissingOutboundMessageField, MissingOutboundMessageField);
+herr!(MissingInboundMessageField, MissingInboundMessageField);
 herr!(ChainError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
@@ -122,4 +160,42 @@ impl From<image::ImageError> for HErr {
             e => HErr::ImageError(e),
         }
     }
+}
+
+#[macro_export]
+/// Returns the location this macro was called from
+macro_rules! loc {
+    () => {
+        $crate::errors::Location {
+            file: file!(),
+            line: line!(),
+            col: column!(),
+        }
+    };
+}
+
+#[macro_export]
+/// Creates a `ChannelSendError`
+macro_rules! channel_send_err {
+    () => {{
+        use $crate::loc;
+        HErr::ChannelSendError(loc!())
+    }};
+}
+
+#[macro_export]
+/// Creates a `ChannelRecvError`
+macro_rules! channel_recv_err {
+    () => {{
+        use $crate::loc;
+        HErr::ChannelRecvError(loc!())
+    }};
+}
+
+/// Returns a `NoneError` annotated with the current file and line number.
+#[macro_export]
+macro_rules! NE {
+    () => {
+        $crate::errors::HErr::NoneError(file!(), line!())
+    };
 }

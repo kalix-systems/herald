@@ -27,7 +27,8 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     //PAUL: , lets write our own QML formatter so that this is a one liner
-    ScrollBar.vertical: ScrollBar { }
+    ScrollBar.vertical: ScrollBar {
+    }
 
     delegate: Item {
         id: conversationItem
@@ -37,11 +38,8 @@ ListView {
 
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
-        }
 
-        Connections {
-            target: networkHandle
-            onMsgDataChanged: messageModel.pollUpdate()
+            onNewDataReady: messageModel.pollUpdate()
         }
 
         property var childChatView: Component {

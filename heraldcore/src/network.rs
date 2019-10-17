@@ -137,7 +137,11 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 /// the server.
 ///
 /// Takes a callback as an argument that is called whenever a message is received.
-pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HErr> {
+pub fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
+where
+    F: FnMut(Notification) + Send + 'static,
+    G: FnMut(HErr) + Send + 'static,
+{
     use login::*;
 
     if sodiumoxide::init().is_err() {
@@ -185,12 +189,12 @@ pub fn login<F: FnMut(Notification) + Send + 'static>(mut f: F) -> Result<(), HE
     }
 
     // send read receipts, etc
-    ev.execute(&mut f)?;
+    ev.execute(&mut f, &mut g)?;
 
     std::thread::spawn(move || {
         move || -> Result<(), HErr> {
             loop {
-                catchup(&mut ws)?.execute(&mut f)?;
+                catchup(&mut ws)?.execute(&mut f, &mut g)?;
             }
         }()
         .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
@@ -208,7 +212,13 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p.iter() {
-            ev.merge(handle_push(push)?);
+            match handle_push(push) {
+                Ok(e2) => ev.merge(e2),
+                Err(e) => {
+                    eprintln!("error while catching up, error was:\n{}", e);
+                    ev.errors.push(e);
+                }
+            }
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }
@@ -291,6 +301,7 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
 pub struct Event {
     notifications: Vec<Notification>,
     replies: Vec<(ConversationId, ConversationMessageBody)>,
+    errors: Vec<HErr>,
 }
 
 impl Event {
@@ -302,13 +313,27 @@ impl Event {
 
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
     /// argument.
-    pub fn execute<F: FnMut(Notification)>(&self, f: &mut F) -> Result<(), HErr> {
-        for note in self.notifications.iter() {
-            f(*note);
+    pub fn execute<F: FnMut(Notification), G: FnMut(HErr)>(
+        self,
+        f: &mut F,
+        g: &mut G,
+    ) -> Result<(), HErr> {
+        let Event {
+            notifications,
+            errors,
+            replies,
+        } = self;
+
+        for note in notifications {
+            f(note);
         }
 
-        for (cid, content) in self.replies.iter() {
-            send_cmessage(*cid, content)?;
+        for herr in errors {
+            g(herr);
+        }
+
+        for (cid, content) in replies {
+            send_cmessage(cid, &content)?;
         }
 
         Ok(())
@@ -320,6 +345,7 @@ impl Default for Event {
         Event {
             notifications: Vec::new(),
             replies: Vec::new(),
+            errors: Vec::new(),
         }
     }
 }
@@ -369,23 +395,29 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
             }
             Msg(msg) => {
                 let cmessages::Msg { mid, content, op } = msg;
+                let cmessages::Message { body, attachments } = content;
 
-                match content {
-                    cmessages::Message::Text(body) => {
-                        crate::message::add_message(
-                            Some(mid),
-                            from.uid,
-                            &cid,
-                            &body,
-                            Some(ts),
-                            None,
-                            &op,
-                        )?;
-                        ev.notifications.push(Notification::NewMsg(mid, cid));
-                        ev.replies.push((cid, form_ack(mid)?));
-                    }
-                    cmessages::Message::Blob(_) => unimplemented!(),
+                let mut builder = crate::message::InboundMessageBuilder::default();
+
+                builder
+                    .id(mid)
+                    .author(from.uid)
+                    .conversation_id(cid)
+                    .attachments(attachments)
+                    .timestamp(ts);
+
+                if let Some(body) = body {
+                    builder.body(body);
                 }
+
+                if let Some(op) = op {
+                    builder.replying_to(op);
+                }
+
+                builder.store()?;
+
+                ev.notifications.push(Notification::NewMsg(mid, cid));
+                ev.replies.push((cid, form_ack(mid)?));
             }
             Ack(ack) => {
                 crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
@@ -425,6 +457,10 @@ fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> 
     }
 
     Ok(ev)
+}
+
+pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
+    send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 
 fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
@@ -563,18 +599,6 @@ pub fn start_conversation(
     }
 
     Ok(cid)
-}
-
-/// Sends a text message `body` with id `mid` to the conversation associated with `cid`.
-pub fn send_text(
-    cid: ConversationId,
-    body: String,
-    mid: MsgId,
-    op: Option<MsgId>,
-) -> Result<(), HErr> {
-    let content = cmessages::Message::Text(body);
-    let body = ConversationMessageBody::Msg(cmessages::Msg { mid, op, content });
-    send_cmessage(cid, &body)
 }
 
 fn form_ack(mid: MsgId) -> Result<ConversationMessageBody, HErr> {

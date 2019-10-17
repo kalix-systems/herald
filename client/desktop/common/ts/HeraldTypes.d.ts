@@ -24,16 +24,26 @@ declare class NetworkHandle {
 }
 
 declare class Messages {
-  conversationId: ConversationID;
+  conversationId?: ConversationID;
   lastAuthor: string;
   lastBody: string;
   lastEpochTimestampMs: number;
-  sendMessage(text: string): MessageId;
-  reply(text: string, op: MessageId): MessageId;
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
   deleteConversation(): boolean;
   deleteConversationById(conversationId: ConversationID): boolean;
+}
+
+declare class MessageBuilder {
+  conversationId?: ConversationID;
+  replyingTo?: MessageId;
+  body?: string;
+  finalize(): void;
+  addAttachment(path: string): boolean;
+  removeAttachment(path: string): boolean;
+  removeAttachmentByIndex(rowIndex: number): boolean;
+  removeLast(): void;
+  attachmentPath(rowIndex: number): string;
 }
 
 declare class Message extends Item {}
@@ -92,6 +102,9 @@ declare class ConversationBuilder {
 }
 
 declare class HeraldUtils {
-  compareByteArray(bs1: ByteArray, bs2: ByteArray): boolean;
+  compareByteArray(
+    bs1: ByteArray | undefined,
+    bs2: ByteArray | undefined
+  ): boolean;
   isValidRandId(bs: ByteArray): boolean;
 }
