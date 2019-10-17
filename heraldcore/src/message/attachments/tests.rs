@@ -26,9 +26,12 @@ fn outbound_message_attachment() {
         .conversation_id(config.nts_conversation);
     let msg = builder.store_and_send_blocking().expect(womp!());
 
-    let meta = super::get(&msg.message_id).expect(womp!());
+    let meta = super::get(&msg.message_id)
+        .expect(womp!())
+        .into_vector_of_strings()
+        .expect(womp!());
 
-    assert_eq!(meta.0.len(), 1);
+    assert_eq!(meta.len(), 1);
     std::fs::remove_dir_all("attachments").expect(womp!());
 }
 
@@ -57,8 +60,11 @@ fn inbound_message_attachment() {
         .conversation_id(other.pairwise_conversation);
     builder.store().expect(womp!());
 
-    let meta = super::get(&mid).expect(womp!());
-    assert_eq!(meta.0.len(), 1);
+    let meta = super::get(&mid)
+        .expect(womp!())
+        .into_vector_of_strings()
+        .expect(womp!());
+    assert_eq!(meta.len(), 1);
 
     std::fs::remove_dir_all("attachments").expect(womp!());
 }
