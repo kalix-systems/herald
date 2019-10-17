@@ -11,7 +11,7 @@ CONFIG  += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # libherald headers, source, and libs
-include(../libHerald/libHerald.pri )
+include(../libHerald/libHerald.pri)
 
 # silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
