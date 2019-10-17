@@ -1,14 +1,13 @@
-// #![allow(unused)]
 use rust_qt_binding_generator::configuration::*;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 
-mod func;
-mod item_prop;
-mod macros;
-mod obj;
-mod prop;
+pub mod func;
+pub mod item_prop;
+pub mod macros;
+pub mod obj;
+pub mod prop;
 
 use func::*;
 use item_prop::*;

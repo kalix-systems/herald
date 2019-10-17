@@ -1,4 +1,4 @@
-pub(crate) mod config;
+pub mod config;
 use rust_qt_binding_generator::generate_bindings;
 
 fn main() {
