@@ -30,7 +30,6 @@ pub struct EffectsFlags {
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    // msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
     members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
     effects_flags: Arc<EffectsFlags>,
     emit: Emitter,
