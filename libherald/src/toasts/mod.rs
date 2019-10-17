@@ -1,3 +1,4 @@
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 /// App name on desktop, used for toasts
 const DESKTOP_APP_NAME: &'static str = "heraldqtDesktop";
 
