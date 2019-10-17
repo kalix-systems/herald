@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<HeraldUtils>("LibHerald", 1, 0, "HeraldUtils");
   qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
+  qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "QmlCfg");

@@ -415,8 +415,6 @@ public:
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
     Q_INVOKABLE bool pollUpdate();
-    Q_INVOKABLE bool reply(const QString& body, const QByteArray& op);
-    Q_INVOKABLE bool sendMessage(const QString& body);
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

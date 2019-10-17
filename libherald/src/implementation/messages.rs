@@ -1,15 +1,15 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*};
-use crossbeam_channel::*;
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, channel_recv_err,
+    abort_err,
     config::Config,
     conversation,
     errors::HErr,
-    message::{self, Message as Msg, StoreAndSend},
+    message::{self, Message as Msg},
     types::*,
     NE,
 };
+use std::ops::Drop;
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
@@ -48,29 +48,9 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn raw_text_insert(&mut self, body: MessageBody, op: Option<MsgId>) -> Result<(), HErr> {
-        let conversation_id = self.conversation_id.ok_or(NE!())?;
-
-        let mut builder = message::OutboundMessageBuilder::default();
-        builder
-            .conversation_id(conversation_id)
-            .body((&body).clone())
-            .replying_to(op);
-
-        let (msg_tx, msg_rx) = unbounded();
-        builder.store_and_send(move |m| {
-            use StoreAndSend::*;
-
-            match m {
-                Msg(msg) => ret_err!(msg_tx.send(msg)),
-                Error { error, .. } => ret_err!(Err(error)),
-                Done => {}
-            }
-        })?;
-
-        let msg = msg_rx.recv().map_err(|_| channel_recv_err!())?;
+    fn raw_insert(&mut self, msg: Msg) -> Result<(), HErr> {
         let msg_id = msg.message_id;
-
+        let cid = self.conversation_id.ok_or(NE!())?;
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
         self.list.push(Message { msg_id });
@@ -81,10 +61,7 @@ impl Messages {
 
         use crate::implementation::conversations::shared::*;
         // this should not return an error
-        ret_none!(
-            push_conv_update(ConvUpdates::NewActivity(conversation_id)),
-            Ok(())
-        );
+        ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)), Ok(()));
 
         Ok(())
     }
@@ -191,6 +168,8 @@ impl MessagesTrait for Messages {
             (Some(id), None) => {
                 let conversation_id = ret_err!(ConversationId::try_from(id));
 
+                MSG_EMITTERS.insert(conversation_id, self.emit().clone());
+
                 self.conversation_id = Some(conversation_id);
                 self.emit.conversation_id_changed();
 
@@ -281,20 +260,6 @@ impl MessagesTrait for Messages {
         }
     }
 
-    fn send_message(&mut self, body: String) -> bool {
-        let body = ret_err!(body.try_into(), false);
-        ret_err!(self.raw_text_insert(body, None), false);
-        true
-    }
-
-    fn reply(&mut self, body: String, op: ffi::MsgIdRef) -> bool {
-        let op = ret_err!(MsgId::try_from(op), false);
-        let body = ret_err!(body.try_into(), false);
-
-        ret_err!(self.raw_text_insert(body, Some(op)), false);
-        true
-    }
-
     fn delete_message(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 
@@ -365,6 +330,9 @@ impl MessagesTrait for Messages {
 
                     self.emit_last_changed();
                 }
+                MsgUpdate::FullMsg(msg) => {
+                    ret_err!(self.raw_insert(msg), false);
+                }
                 MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {
                         None => {
@@ -408,5 +376,20 @@ impl MessagesTrait for Messages {
 
     fn row_count(&self) -> usize {
         self.list.len()
+    }
+}
+
+impl Drop for Messages {
+    fn drop(&mut self) {
+        let cid = match self.conversation_id {
+            Some(cid) => cid,
+            None => {
+                return;
+            }
+        };
+
+        MSG_EMITTERS.remove(&cid);
+        MSG_RXS.remove(&cid);
+        MSG_TXS.remove(&cid);
     }
 }

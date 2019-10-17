@@ -7,7 +7,7 @@ use std::path::PathBuf;
 pub struct MessageBuilder {
     emit: Emitter,
     model: List,
-    inner: Option<OutboundMessageBuilder>,
+    inner: OutboundMessageBuilder,
 }
 
 type Emitter = MessageBuilderEmitter;
@@ -18,7 +18,7 @@ impl MessageBuilderTrait for MessageBuilder {
         Self {
             emit,
             model,
-            inner: Some(OutboundMessageBuilder::default()),
+            inner: OutboundMessageBuilder::default(),
         }
     }
 
@@ -27,50 +27,48 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
-        Some(self.inner.as_ref()?.conversation.as_ref()?.as_slice())
+        Some(self.inner.conversation.as_ref()?.as_slice())
     }
 
     fn set_conversation_id(&mut self, cid: Option<ffi::ConversationIdRef>) {
         let cid = ret_err!(ret_none!(cid).try_into());
-        ret_none!(&mut self.inner).conversation_id(cid);
+        self.inner.conversation_id(cid);
     }
 
     fn replying_to(&self) -> Option<ffi::MsgIdRef> {
-        Some(self.inner.as_ref()?.op.as_ref()?.as_slice())
+        Some(self.inner.op.as_ref()?.as_slice())
     }
 
     fn set_replying_to(&mut self, op_msg_id: Option<ffi::MsgIdRef>) {
         match op_msg_id {
             Some(op_msg_id) => {
                 let op_msg_id = ret_err!(op_msg_id.try_into());
-                ret_none!(&mut self.inner).replying_to(Some(op_msg_id));
+                self.inner.replying_to(Some(op_msg_id));
             }
             None => {
-                ret_none!(&mut self.inner).replying_to(None);
+                self.inner.replying_to(None);
             }
         }
     }
 
     fn add_attachment(&mut self, path: String) -> bool {
         let path = PathBuf::from(path);
-        let inner = ret_none!(&mut self.inner, false);
-        let len = inner.attachments.len();
+        let len = self.inner.attachments.len();
 
         self.model.begin_insert_rows(len, len);
-        inner.add_attachment(path);
+        self.inner.add_attachment(path);
         self.model.end_insert_rows();
 
         true
     }
 
     fn set_body(&mut self, body: Option<String>) {
-        let inner = ret_none!(&mut self.inner);
         match body {
             Some(body) => {
-                inner.body(ret_err!(body.try_into()));
+                self.inner.body(ret_err!(body.try_into()));
             }
             None => {
-                inner.body = None;
+                self.inner.body = None;
             }
         }
     }
@@ -79,55 +77,91 @@ impl MessageBuilderTrait for MessageBuilder {
         None
     }
 
+    /// Finalizes the builder, stores and sends the message, and resets the builder.
     fn finalize(&mut self) {
-        let builder = ret_none!(self.inner.take());
-        ret_err!(builder.store_and_send(|_| {}));
+        let builder = std::mem::replace(&mut self.inner, Default::default());
+        self.inner.conversation = builder.conversation;
+
+        let cid = ret_none!(builder.conversation);
+
+        ret_err!(builder.store_and_send(move |m| {
+            use crate::shared::messages::*;
+            use crossbeam_channel::*;
+            use heraldcore::message::StoreAndSend::*;
+
+            match m {
+                Msg(msg) => {
+                    let tx = match MSG_TXS.get(&cid) {
+                        Some(tx) => tx.clone(),
+                        None => {
+                            let (tx, rx) = unbounded();
+
+                            MSG_TXS.insert(cid, tx);
+                            MSG_RXS.insert(cid, rx);
+                            ret_none!(MSG_TXS.get(&cid)).clone()
+                        }
+                    };
+
+                    ret_err!(tx.send(MsgUpdate::FullMsg(msg)));
+                    if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                        emitter.new_data_ready();
+                    }
+                }
+                Error { error, line_number } => {
+                    // TODO better line number usage
+                    eprintln!("Error at {}", line_number);
+                    ret_err!(Err(error))
+                }
+                Done => {
+                    // TODO: send status?
+                }
+            }
+        }));
     }
 
     fn remove_attachment(&mut self, path: String) -> bool {
         let path = PathBuf::from(path);
-        let inner = ret_none!(&mut self.inner, false);
-        let pos = ret_none!(inner.attachments.iter().rposition(|p| p == &path), false);
+        let pos = ret_none!(
+            self.inner.attachments.iter().rposition(|p| p == &path),
+            false
+        );
 
         self.model.begin_remove_rows(pos, pos);
-        inner.attachments.remove(pos);
+        self.inner.attachments.remove(pos);
         self.model.end_remove_rows();
         true
     }
 
     fn remove_attachment_by_index(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
-        let inner = ret_none!(&mut self.inner, false);
 
-        if row_index < inner.attachments.len() {
+        if row_index < self.inner.attachments.len() {
             return false;
         }
 
         self.model.begin_remove_rows(row_index, row_index);
-        inner.attachments.remove(row_index);
+        self.inner.attachments.remove(row_index);
         self.model.end_remove_rows();
 
         true
     }
 
     fn remove_last(&mut self) {
-        let inner = ret_none!(&mut self.inner);
         self.model.begin_remove_rows(
-            inner.attachments.len().saturating_sub(1),
-            inner.attachments.len().saturating_sub(1),
+            self.inner.attachments.len().saturating_sub(1),
+            self.inner.attachments.len().saturating_sub(1),
         );
-        inner.attachments.pop();
+        self.inner.attachments.pop();
         self.model.end_remove_rows();
     }
 
     fn row_count(&self) -> usize {
-        ret_none!(&self.inner, 0).attachments.len()
+        self.inner.attachments.len()
     }
 
     fn attachment_path(&self, index: usize) -> &str {
-        let inner = ret_none!(&self.inner, "");
         ret_none! {
-            ret_none!(inner.attachments.get(index), "").to_str(),
+            ret_none!(self.inner.attachments.get(index), "").to_str(),
             ""
         }
     }

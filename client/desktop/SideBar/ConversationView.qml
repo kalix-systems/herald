@@ -38,6 +38,8 @@ ListView {
 
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
+
+            onNewDataReady: messageModel.pollUpdate()
         }
 
         Connections {

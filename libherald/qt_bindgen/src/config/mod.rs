@@ -251,8 +251,8 @@ fn messages() -> Object {
     };
 
     let funcs = functions! {
-        mut sendMessage(body: QString) => Bool,
-        mut reply(body: QString, op: QByteArray) => Bool,
+        //mut sendMessage(body: QString) => Bool,
+        //mut reply(body: QString, op: QByteArray) => Bool,
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
         mut pollUpdate() => Bool,

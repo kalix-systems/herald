@@ -32,7 +32,7 @@ pub struct EffectsFlags {
 /// A bundle of channel senders. This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
+    // msg_senders: HashMap<ConversationId, Sender<shared::messages::MsgUpdate>>,
     members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
     effects_flags: Arc<EffectsFlags>,
     emit: Emitter,
@@ -44,14 +44,14 @@ impl NotifHandler {
         match notif {
             NewMsg(msg_id, cid) => {
                 use shared::messages::*;
-                let tx = match self.msg_senders.get(&cid) {
-                    Some(tx) => tx,
+                let tx = match MSG_TXS.get(&cid) {
+                    Some(tx) => tx.clone(),
                     None => {
                         let (tx, rx) = unbounded();
 
-                        self.msg_senders.insert(cid, tx);
+                        MSG_TXS.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
-                        ret_none!(self.msg_senders.get(&cid))
+                        ret_none!(MSG_TXS.get(&cid)).clone()
                     }
                 };
 
@@ -65,14 +65,14 @@ impl NotifHandler {
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
-                let tx = match self.msg_senders.get(&cid) {
-                    Some(tx) => tx,
+                let tx = match MSG_TXS.get(&cid) {
+                    Some(tx) => tx.clone(),
                     None => {
                         let (tx, rx) = unbounded();
 
-                        self.msg_senders.insert(cid, tx);
+                        MSG_TXS.insert(cid, tx);
                         MSG_RXS.insert(cid, rx);
-                        ret_none!(self.msg_senders.get(&cid))
+                        ret_none!(MSG_TXS.get(&cid)).clone()
                     }
                 };
 
@@ -130,7 +130,6 @@ impl NotifHandler {
     }
     fn new(mut emit: Emitter, effects_flags: Arc<EffectsFlags>) -> Self {
         Self {
-            msg_senders: HashMap::new(),
             members_senders: HashMap::new(),
             effects_flags,
             emit: emit.clone(),

@@ -1414,8 +1414,6 @@ extern "C" {
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
-    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
-    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -2535,14 +2533,6 @@ QString Messages::messageBodyById(const QByteArray& msg_id) const
 bool Messages::pollUpdate()
 {
     return messages_poll_update(m_d);
-}
-bool Messages::reply(const QString& body, const QByteArray& op)
-{
-    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
-}
-bool Messages::sendMessage(const QString& body)
-{
-    return messages_send_message(m_d, body.utf16(), body.size());
 }
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
