@@ -15,7 +15,7 @@ lazy_pond     = { path    = "../lazy_pond" }
 lazy_static   = "1.3.0"
 libsodium-sys = "0.2.4"
 regex         = "1.2.1"
-rusqlite      = { version = "0.20.0", default_features = false, features = ["functions"]}
+rusqlite      = { version = "0.20.0", default_features = false, features = ["functions", "bundled"]}
 serde         = "1.0.99"
 serde_bytes   = "0.11.2"
 serde_cbor    = "0.10.1"

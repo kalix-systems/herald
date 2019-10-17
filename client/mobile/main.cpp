@@ -1,4 +1,4 @@
-#include "Bindings.h"
+//#include "Bindings.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QtQml/qqml.h>
