@@ -41,6 +41,7 @@ Flickable {
         focus: true
         spacing: QmlCfg.padding
         topPadding: QmlCfg.padding
+        bottomPadding: QmlCfg.padding
         anchors {
             right: parent.right
             left: parent.left
