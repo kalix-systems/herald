@@ -108,7 +108,10 @@ Flickable {
                         receiptImage: proxyReceiptImage
                         authorName: authName
                         messageId: ownedConversation.messageId(index)
-                        imageSource: messageAttachments.attachmentPath(0)
+                        imageSource: {
+                            messageAttachments.msgId = messageId;
+                            return messageAttachments.attachmentPath(0);
+                        }
                     }
                 }
 
