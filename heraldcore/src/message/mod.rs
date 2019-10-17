@@ -167,7 +167,7 @@ impl OutboundMessageBuilder {
             let attachments: Result<Vec<Attachment>, HErr> = attachments
                 .into_iter()
                 .map(|path| {
-                    let attach: Attachment = Attachment::new(path)?;
+                    let attach: Attachment = Attachment::new(&path)?;
 
                     attach.save()?;
 
