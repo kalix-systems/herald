@@ -64,6 +64,10 @@ namespace {
     inline QVariant cleanNullQVariant(const QVariant& v) {
         return (v.isNull()) ?QVariant() :v;
     }
+    inline void attachmentsMsgIdChanged(Attachments* o)
+    {
+        Q_EMIT o->msgIdChanged();
+    }
     inline void configColorChanged(Config* o)
     {
         Q_EMIT o->colorChanged();
@@ -112,6 +116,18 @@ namespace {
     {
         Q_EMIT o->filterRegexChanged();
     }
+    inline void messageBuilderBodyChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->bodyChanged();
+    }
+    inline void messageBuilderConversationIdChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->conversationIdChanged();
+    }
+    inline void messageBuilderReplyingToChanged(MessageBuilder* o)
+    {
+        Q_EMIT o->replyingToChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -144,10 +160,6 @@ namespace {
     {
         Q_EMIT o->membersDataChanged();
     }
-    inline void networkHandleMsgDataChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->msgDataChanged();
-    }
     inline void usersFilterChanged(Users* o)
     {
         Q_EMIT o->filterChanged();
@@ -157,6 +169,151 @@ namespace {
         Q_EMIT o->filterRegexChanged();
     }
 }
+extern "C" {
+    void attachments_data_attachment_path(const Attachments::Private*, int, QString*, qstring_set);
+    void attachments_sort(Attachments::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int attachments_row_count(const Attachments::Private*);
+    bool attachments_insert_rows(Attachments::Private*, int, int);
+    bool attachments_remove_rows(Attachments::Private*, int, int);
+    bool attachments_can_fetch_more(const Attachments::Private*);
+    void attachments_fetch_more(Attachments::Private*);
+}
+int Attachments::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool Attachments::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int Attachments::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : attachments_row_count(m_d);
+}
+
+bool Attachments::insertRows(int row, int count, const QModelIndex &)
+{
+    return attachments_insert_rows(m_d, row, count);
+}
+
+bool Attachments::removeRows(int row, int count, const QModelIndex &)
+{
+    return attachments_remove_rows(m_d, row, count);
+}
+
+QModelIndex Attachments::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex Attachments::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool Attachments::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : attachments_can_fetch_more(m_d);
+}
+
+void Attachments::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        attachments_fetch_more(m_d);
+    }
+}
+void Attachments::updatePersistentIndexes() {}
+
+void Attachments::sort(int column, Qt::SortOrder order)
+{
+    attachments_sort(m_d, column, order);
+}
+Qt::ItemFlags Attachments::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    return flags;
+}
+
+QString Attachments::attachmentPath(int row) const
+{
+    QString s;
+    attachments_data_attachment_path(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QVariant Attachments::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return QVariant::fromValue(attachmentPath(index.row()));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int Attachments::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> Attachments::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "attachmentPath");
+    return names;
+}
+QVariant Attachments::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool Attachments::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+extern "C" {
+    Attachments::Private* attachments_new(Attachments*, void (*)(Attachments*),
+        void (*)(const Attachments*),
+        void (*)(Attachments*),
+        void (*)(Attachments*),
+        void (*)(Attachments*, quintptr, quintptr),
+        void (*)(Attachments*),
+        void (*)(Attachments*),
+        void (*)(Attachments*, int, int),
+        void (*)(Attachments*),
+        void (*)(Attachments*, int, int, int),
+        void (*)(Attachments*),
+        void (*)(Attachments*, int, int),
+        void (*)(Attachments*));
+    void attachments_free(Attachments::Private*);
+    void attachments_msg_id_get(const Attachments::Private*, QByteArray*, qbytearray_set);
+    void attachments_msg_id_set(Attachments::Private*, const char* bytes, int len);
+    void attachments_msg_id_set_none(Attachments::Private*);
+};
+
 extern "C" {
     Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
@@ -894,6 +1051,162 @@ extern "C" {
 };
 
 extern "C" {
+    void message_builder_data_attachment_path(const MessageBuilder::Private*, int, QString*, qstring_set);
+    void message_builder_sort(MessageBuilder::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int message_builder_row_count(const MessageBuilder::Private*);
+    bool message_builder_insert_rows(MessageBuilder::Private*, int, int);
+    bool message_builder_remove_rows(MessageBuilder::Private*, int, int);
+    bool message_builder_can_fetch_more(const MessageBuilder::Private*);
+    void message_builder_fetch_more(MessageBuilder::Private*);
+}
+int MessageBuilder::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool MessageBuilder::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int MessageBuilder::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : message_builder_row_count(m_d);
+}
+
+bool MessageBuilder::insertRows(int row, int count, const QModelIndex &)
+{
+    return message_builder_insert_rows(m_d, row, count);
+}
+
+bool MessageBuilder::removeRows(int row, int count, const QModelIndex &)
+{
+    return message_builder_remove_rows(m_d, row, count);
+}
+
+QModelIndex MessageBuilder::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex MessageBuilder::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool MessageBuilder::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : message_builder_can_fetch_more(m_d);
+}
+
+void MessageBuilder::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        message_builder_fetch_more(m_d);
+    }
+}
+void MessageBuilder::updatePersistentIndexes() {}
+
+void MessageBuilder::sort(int column, Qt::SortOrder order)
+{
+    message_builder_sort(m_d, column, order);
+}
+Qt::ItemFlags MessageBuilder::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    return flags;
+}
+
+QString MessageBuilder::attachmentPath(int row) const
+{
+    QString s;
+    message_builder_data_attachment_path(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QVariant MessageBuilder::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return QVariant::fromValue(attachmentPath(index.row()));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int MessageBuilder::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> MessageBuilder::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "attachmentPath");
+    return names;
+}
+QVariant MessageBuilder::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool MessageBuilder::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+extern "C" {
+    MessageBuilder::Private* message_builder_new(MessageBuilder*, void (*)(MessageBuilder*), void (*)(MessageBuilder*), void (*)(MessageBuilder*),
+        void (*)(const MessageBuilder*),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*, quintptr, quintptr),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*, int, int),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*, int, int, int),
+        void (*)(MessageBuilder*),
+        void (*)(MessageBuilder*, int, int),
+        void (*)(MessageBuilder*));
+    void message_builder_free(MessageBuilder::Private*);
+    void message_builder_body_get(const MessageBuilder::Private*, QString*, qstring_set);
+    void message_builder_body_set(MessageBuilder::Private*, const ushort *str, int len);
+    void message_builder_body_set_none(MessageBuilder::Private*);
+    void message_builder_conversation_id_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
+    void message_builder_conversation_id_set(MessageBuilder::Private*, const char* bytes, int len);
+    void message_builder_conversation_id_set_none(MessageBuilder::Private*);
+    void message_builder_replying_to_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
+    void message_builder_replying_to_set(MessageBuilder::Private*, const char* bytes, int len);
+    void message_builder_replying_to_set_none(MessageBuilder::Private*);
+    bool message_builder_add_attachment(MessageBuilder::Private*, const ushort*, int);
+    void message_builder_finalize(MessageBuilder::Private*);
+    bool message_builder_remove_attachment(MessageBuilder::Private*, const ushort*, int);
+    bool message_builder_remove_attachment_by_index(MessageBuilder::Private*, quint64);
+    void message_builder_remove_last(MessageBuilder::Private*);
+};
+
+extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
@@ -1097,17 +1410,14 @@ extern "C" {
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
-    bool messages_reply(Messages::Private*, const ushort*, int, const char*, int);
-    bool messages_send_message(Messages::Private*, const ushort*, int);
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
+    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*), void (*)(NetworkHandle*));
     void network_handle_free(NetworkHandle::Private*);
     bool network_handle_connection_pending_get(const NetworkHandle::Private*);
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     quint8 network_handle_members_data_get(const NetworkHandle::Private*);
-    quint8 network_handle_msg_data_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
     bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
@@ -1425,6 +1735,85 @@ extern "C" {
     bool users_toggle_filter_regex(Users::Private*);
 };
 
+Attachments::Attachments(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+Attachments::Attachments(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(attachments_new(this,
+        attachmentsMsgIdChanged,
+        [](const Attachments* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](Attachments* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](Attachments* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](Attachments* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](Attachments* o) {
+            o->beginResetModel();
+        },
+        [](Attachments* o) {
+            o->endResetModel();
+        },
+        [](Attachments* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](Attachments* o) {
+            o->endInsertRows();
+        },
+        [](Attachments* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](Attachments* o) {
+            o->endMoveRows();
+        },
+        [](Attachments* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](Attachments* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &Attachments::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+Attachments::~Attachments() {
+    if (m_ownsPrivate) {
+        attachments_free(m_d);
+    }
+}
+void Attachments::initHeaderData() {
+}
+QByteArray Attachments::msgId() const
+{
+    QByteArray v;
+    attachments_msg_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void Attachments::setMsgId(const QByteArray& v) {
+    if (v.isNull()) {
+        attachments_msg_id_set_none(m_d);
+    } else {
+    attachments_msg_id_set(m_d, v.data(), v.size());
+    }
+}
 Config::Config(bool /*owned*/, QObject *parent):
     QObject(parent),
     m_d(nullptr),
@@ -1872,6 +2261,133 @@ bool Members::toggleFilterRegex()
 {
     return members_toggle_filter_regex(m_d);
 }
+MessageBuilder::MessageBuilder(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+MessageBuilder::MessageBuilder(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(message_builder_new(this,
+        messageBuilderBodyChanged,
+        messageBuilderConversationIdChanged,
+        messageBuilderReplyingToChanged,
+        [](const MessageBuilder* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](MessageBuilder* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](MessageBuilder* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](MessageBuilder* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](MessageBuilder* o) {
+            o->beginResetModel();
+        },
+        [](MessageBuilder* o) {
+            o->endResetModel();
+        },
+        [](MessageBuilder* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](MessageBuilder* o) {
+            o->endInsertRows();
+        },
+        [](MessageBuilder* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](MessageBuilder* o) {
+            o->endMoveRows();
+        },
+        [](MessageBuilder* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](MessageBuilder* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &MessageBuilder::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+MessageBuilder::~MessageBuilder() {
+    if (m_ownsPrivate) {
+        message_builder_free(m_d);
+    }
+}
+void MessageBuilder::initHeaderData() {
+}
+QString MessageBuilder::body() const
+{
+    QString v;
+    message_builder_body_get(m_d, &v, set_qstring);
+    return v;
+}
+void MessageBuilder::setBody(const QString& v) {
+    if (v.isNull()) {
+        message_builder_body_set_none(m_d);
+    } else {
+    message_builder_body_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+    }
+}
+QByteArray MessageBuilder::conversationId() const
+{
+    QByteArray v;
+    message_builder_conversation_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void MessageBuilder::setConversationId(const QByteArray& v) {
+    if (v.isNull()) {
+        message_builder_conversation_id_set_none(m_d);
+    } else {
+    message_builder_conversation_id_set(m_d, v.data(), v.size());
+    }
+}
+QByteArray MessageBuilder::replyingTo() const
+{
+    QByteArray v;
+    message_builder_replying_to_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void MessageBuilder::setReplyingTo(const QByteArray& v) {
+    if (v.isNull()) {
+        message_builder_replying_to_set_none(m_d);
+    } else {
+    message_builder_replying_to_set(m_d, v.data(), v.size());
+    }
+}
+bool MessageBuilder::addAttachment(const QString& path)
+{
+    return message_builder_add_attachment(m_d, path.utf16(), path.size());
+}
+void MessageBuilder::finalize()
+{
+    return message_builder_finalize(m_d);
+}
+bool MessageBuilder::removeAttachment(const QString& path)
+{
+    return message_builder_remove_attachment(m_d, path.utf16(), path.size());
+}
+bool MessageBuilder::removeAttachmentByIndex(quint64 row_index)
+{
+    return message_builder_remove_attachment_by_index(m_d, row_index);
+}
+void MessageBuilder::removeLast()
+{
+    return message_builder_remove_last(m_d);
+}
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -2013,14 +2529,6 @@ bool Messages::pollUpdate()
 {
     return messages_poll_update(m_d);
 }
-bool Messages::reply(const QString& body, const QByteArray& op)
-{
-    return messages_reply(m_d, body.utf16(), body.size(), op.data(), op.size());
-}
-bool Messages::sendMessage(const QString& body)
-{
-    return messages_send_message(m_d, body.utf16(), body.size());
-}
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
     m_d(nullptr),
@@ -2033,8 +2541,7 @@ NetworkHandle::NetworkHandle(QObject *parent):
     m_d(network_handle_new(this,
         networkHandleConnectionPendingChanged,
         networkHandleConnectionUpChanged,
-        networkHandleMembersDataChanged,
-        networkHandleMsgDataChanged)),
+        networkHandleMembersDataChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -2055,10 +2562,6 @@ bool NetworkHandle::connectionUp() const
 quint8 NetworkHandle::membersData() const
 {
     return network_handle_members_data_get(m_d);
-}
-quint8 NetworkHandle::msgData() const
-{
-    return network_handle_msg_data_get(m_d);
 }
 bool NetworkHandle::login()
 {

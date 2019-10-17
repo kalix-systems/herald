@@ -1,5 +1,5 @@
 use super::*;
-use crate::{config::*, errors::HErr::*};
+use crate::{config::*, errors::HErr::*, message::attachments::Attachment};
 use std::{convert::AsRef, fmt};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -120,11 +120,6 @@ impl MessageBody {
     /// Returns `MessageBody` as `&[u8]`
     pub fn as_slice(&self) -> &[u8] {
         self.as_ref().as_bytes()
-    }
-
-    /// Converts to `String`
-    pub fn to_string(&self) -> String {
-        self.0.clone()
     }
 }
 
@@ -337,13 +332,14 @@ pub mod cmessages {
         /// message is a reply.
         pub op: Option<MsgId>,
     }
+
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
     /// Variants of messages.
-    pub enum Message {
-        /// A text message.
-        Text(Option<MessageBody>),
-        /// A blob message, e.g., an attachment.
-        Blob(Bytes),
+    pub struct Message {
+        /// Body of the message
+        pub body: Option<MessageBody>,
+        /// Attachments
+        pub attachments: Vec<Attachment>,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]

@@ -38,11 +38,8 @@ ListView {
 
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
-        }
 
-        Connections {
-            target: networkHandle
-            onMsgDataChanged: messageModel.pollUpdate()
+            onNewDataReady: messageModel.pollUpdate()
         }
 
         property var childChatView: Component {

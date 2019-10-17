@@ -1,3 +1,5 @@
+/// Implementation of `crate::interface::AttachmentsTrait`.
+pub mod attachments;
 /// Implementation of `crate::interface::ConfigTrait`.
 pub mod config;
 /// Implementation of `crate::interface::ConvBuilderTrait`
@@ -12,6 +14,8 @@ pub mod heraldstate;
 pub mod heraldutils;
 /// Implementation of `crate::interface::MembersTrait`.
 pub mod members;
+/// Implementation of `crate::interface::MessageBuilderTrait`.
+pub mod message_builder;
 /// Implementation of `crate::interface::MessagesTrait`.
 pub mod messages;
 /// Implementation of `crate::interface::NetworkHandleTrait`.
@@ -19,6 +23,7 @@ pub mod networkhandle;
 /// Implementation of `crate::interface::UsersTrait`.
 pub mod users;
 
+pub use attachments::*;
 pub use config::*;
 pub use conversation_builder::*;
 pub use conversations::*;
@@ -26,6 +31,7 @@ pub use errors::*;
 pub use heraldstate::*;
 pub use heraldutils::*;
 pub use members::*;
+pub use message_builder::*;
 pub use messages::*;
 pub use networkhandle::*;
 pub use users::*;

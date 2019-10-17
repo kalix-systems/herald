@@ -4,7 +4,14 @@ use std::ops::{Deref, DerefMut, Drop};
 const DEFAULT_SIZE: usize = 32;
 
 pub enum LazyError {
-    UnexpectedNone,
+    UnexpectedNone(&'static str, u32),
+}
+
+/// Returns an `UnexpectedNone` annotated with the current file and line number.
+macro_rules! NE {
+    () => {
+        LazyError::UnexpectedNone(file!(), line!())
+    };
 }
 
 pub struct LazyPond<T: Default> {
@@ -63,7 +70,7 @@ impl<T: Default> LazyPond<T> {
     pub fn get(&self) -> Result<Wrapper<T>, LazyError> {
         let conns = &mut self.connections.lock();
         let conn = if !conns.is_empty() {
-            conns.pop().ok_or(LazyError::UnexpectedNone)?
+            conns.pop().ok_or(NE!())?
         } else {
             T::default()
         };

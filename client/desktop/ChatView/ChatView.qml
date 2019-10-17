@@ -108,11 +108,13 @@ Pane {
         }
 
         keysProxy: Item {
+            MessageBuilder {
+                id: builder
+            }
             Keys.onReturnPressed: CTUtils.enterKeyHandler(
-                                      event, chatTextArea.chatText,
+                                      event, chatTextArea.chatText, builder,
                                       // this is actually a text area TODO rename
-                                      networkHandle, ownedConversation,
-                                      chatTextArea)
+                                      ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

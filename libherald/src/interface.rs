@@ -92,6 +92,229 @@ fn to_c_int(n: usize) -> c_int {
 }
 
 
+pub struct AttachmentsQObject {}
+
+pub struct AttachmentsEmitter {
+    qobject: Arc<AtomicPtr<AttachmentsQObject>>,
+    msg_id_changed: fn(*mut AttachmentsQObject),
+    new_data_ready: fn(*mut AttachmentsQObject),
+}
+
+unsafe impl Send for AttachmentsEmitter {}
+
+impl AttachmentsEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> AttachmentsEmitter {
+        AttachmentsEmitter {
+            qobject: self.qobject.clone(),
+            msg_id_changed: self.msg_id_changed,
+            new_data_ready: self.new_data_ready,
+        }
+    }
+    fn clear(&self) {
+        let n: *const AttachmentsQObject = null();
+        self.qobject.store(n as *mut AttachmentsQObject, Ordering::SeqCst);
+    }
+    pub fn msg_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.msg_id_changed)(ptr);
+        }
+    }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct AttachmentsList {
+    qobject: *mut AttachmentsQObject,
+    layout_about_to_be_changed: fn(*mut AttachmentsQObject),
+    layout_changed: fn(*mut AttachmentsQObject),
+    data_changed: fn(*mut AttachmentsQObject, usize, usize),
+    begin_reset_model: fn(*mut AttachmentsQObject),
+    end_reset_model: fn(*mut AttachmentsQObject),
+    begin_insert_rows: fn(*mut AttachmentsQObject, usize, usize),
+    end_insert_rows: fn(*mut AttachmentsQObject),
+    begin_move_rows: fn(*mut AttachmentsQObject, usize, usize, usize),
+    end_move_rows: fn(*mut AttachmentsQObject),
+    begin_remove_rows: fn(*mut AttachmentsQObject, usize, usize),
+    end_remove_rows: fn(*mut AttachmentsQObject),
+}
+
+impl AttachmentsList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait AttachmentsTrait {
+    fn new(emit: AttachmentsEmitter, model: AttachmentsList) -> Self;
+    fn emit(&mut self) -> &mut AttachmentsEmitter;
+    fn msg_id(&self) -> Option<&[u8]>;
+    fn set_msg_id(&mut self, value: Option<&[u8]>);
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn attachment_path(&self, index: usize) -> &str;
+}
+
+#[no_mangle]
+pub extern "C" fn attachments_new(
+    attachments: *mut AttachmentsQObject,
+    attachments_msg_id_changed: fn(*mut AttachmentsQObject),
+    attachments_new_data_ready: fn(*mut AttachmentsQObject),
+    attachments_layout_about_to_be_changed: fn(*mut AttachmentsQObject),
+    attachments_layout_changed: fn(*mut AttachmentsQObject),
+    attachments_data_changed: fn(*mut AttachmentsQObject, usize, usize),
+    attachments_begin_reset_model: fn(*mut AttachmentsQObject),
+    attachments_end_reset_model: fn(*mut AttachmentsQObject),
+    attachments_begin_insert_rows: fn(*mut AttachmentsQObject, usize, usize),
+    attachments_end_insert_rows: fn(*mut AttachmentsQObject),
+    attachments_begin_move_rows: fn(*mut AttachmentsQObject, usize, usize, usize),
+    attachments_end_move_rows: fn(*mut AttachmentsQObject),
+    attachments_begin_remove_rows: fn(*mut AttachmentsQObject, usize, usize),
+    attachments_end_remove_rows: fn(*mut AttachmentsQObject),
+) -> *mut Attachments {
+    let attachments_emit = AttachmentsEmitter {
+        qobject: Arc::new(AtomicPtr::new(attachments)),
+        msg_id_changed: attachments_msg_id_changed,
+        new_data_ready: attachments_new_data_ready,
+    };
+    let model = AttachmentsList {
+        qobject: attachments,
+        layout_about_to_be_changed: attachments_layout_about_to_be_changed,
+        layout_changed: attachments_layout_changed,
+        data_changed: attachments_data_changed,
+        begin_reset_model: attachments_begin_reset_model,
+        end_reset_model: attachments_end_reset_model,
+        begin_insert_rows: attachments_begin_insert_rows,
+        end_insert_rows: attachments_end_insert_rows,
+        begin_move_rows: attachments_begin_move_rows,
+        end_move_rows: attachments_end_move_rows,
+        begin_remove_rows: attachments_begin_remove_rows,
+        end_remove_rows: attachments_end_remove_rows,
+    };
+    let d_attachments = Attachments::new(attachments_emit, model);
+    Box::into_raw(Box::new(d_attachments))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_free(ptr: *mut Attachments) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_msg_id_get(
+    ptr: *const Attachments,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.msg_id();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_msg_id_set(ptr: *mut Attachments, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_msg_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_msg_id_set_none(ptr: *mut Attachments) {
+    let o = &mut *ptr;
+    o.set_msg_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_row_count(ptr: *const Attachments) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+#[no_mangle]
+pub unsafe extern "C" fn attachments_insert_rows(ptr: *mut Attachments, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).insert_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn attachments_remove_rows(ptr: *mut Attachments, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).remove_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn attachments_can_fetch_more(ptr: *const Attachments) -> bool {
+    (&*ptr).can_fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn attachments_fetch_more(ptr: *mut Attachments) {
+    (&mut *ptr).fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn attachments_sort(
+    ptr: *mut Attachments,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_data_attachment_path(
+    ptr: *const Attachments, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.attachment_path(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
+}
+
 pub struct ConfigQObject {}
 
 pub struct ConfigEmitter {
@@ -1486,6 +1709,352 @@ pub unsafe extern "C" fn members_data_user_id(
     set(d, s, to_c_int(data.len()));
 }
 
+pub struct MessageBuilderQObject {}
+
+pub struct MessageBuilderEmitter {
+    qobject: Arc<AtomicPtr<MessageBuilderQObject>>,
+    body_changed: fn(*mut MessageBuilderQObject),
+    conversation_id_changed: fn(*mut MessageBuilderQObject),
+    replying_to_changed: fn(*mut MessageBuilderQObject),
+    new_data_ready: fn(*mut MessageBuilderQObject),
+}
+
+unsafe impl Send for MessageBuilderEmitter {}
+
+impl MessageBuilderEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> MessageBuilderEmitter {
+        MessageBuilderEmitter {
+            qobject: self.qobject.clone(),
+            body_changed: self.body_changed,
+            conversation_id_changed: self.conversation_id_changed,
+            replying_to_changed: self.replying_to_changed,
+            new_data_ready: self.new_data_ready,
+        }
+    }
+    fn clear(&self) {
+        let n: *const MessageBuilderQObject = null();
+        self.qobject.store(n as *mut MessageBuilderQObject, Ordering::SeqCst);
+    }
+    pub fn body_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.body_changed)(ptr);
+        }
+    }
+    pub fn conversation_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.conversation_id_changed)(ptr);
+        }
+    }
+    pub fn replying_to_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.replying_to_changed)(ptr);
+        }
+    }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct MessageBuilderList {
+    qobject: *mut MessageBuilderQObject,
+    layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
+    layout_changed: fn(*mut MessageBuilderQObject),
+    data_changed: fn(*mut MessageBuilderQObject, usize, usize),
+    begin_reset_model: fn(*mut MessageBuilderQObject),
+    end_reset_model: fn(*mut MessageBuilderQObject),
+    begin_insert_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    end_insert_rows: fn(*mut MessageBuilderQObject),
+    begin_move_rows: fn(*mut MessageBuilderQObject, usize, usize, usize),
+    end_move_rows: fn(*mut MessageBuilderQObject),
+    begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    end_remove_rows: fn(*mut MessageBuilderQObject),
+}
+
+impl MessageBuilderList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait MessageBuilderTrait {
+    fn new(emit: MessageBuilderEmitter, model: MessageBuilderList) -> Self;
+    fn emit(&mut self) -> &mut MessageBuilderEmitter;
+    fn body(&self) -> Option<&str>;
+    fn set_body(&mut self, value: Option<String>);
+    fn conversation_id(&self) -> Option<&[u8]>;
+    fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn replying_to(&self) -> Option<&[u8]>;
+    fn set_replying_to(&mut self, value: Option<&[u8]>);
+    fn add_attachment(&mut self, path: String) -> bool;
+    fn finalize(&mut self) -> ();
+    fn remove_attachment(&mut self, path: String) -> bool;
+    fn remove_attachment_by_index(&mut self, row_index: u64) -> bool;
+    fn remove_last(&mut self) -> ();
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn attachment_path(&self, index: usize) -> &str;
+}
+
+#[no_mangle]
+pub extern "C" fn message_builder_new(
+    message_builder: *mut MessageBuilderQObject,
+    message_builder_body_changed: fn(*mut MessageBuilderQObject),
+    message_builder_conversation_id_changed: fn(*mut MessageBuilderQObject),
+    message_builder_replying_to_changed: fn(*mut MessageBuilderQObject),
+    message_builder_new_data_ready: fn(*mut MessageBuilderQObject),
+    message_builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
+    message_builder_layout_changed: fn(*mut MessageBuilderQObject),
+    message_builder_data_changed: fn(*mut MessageBuilderQObject, usize, usize),
+    message_builder_begin_reset_model: fn(*mut MessageBuilderQObject),
+    message_builder_end_reset_model: fn(*mut MessageBuilderQObject),
+    message_builder_begin_insert_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    message_builder_end_insert_rows: fn(*mut MessageBuilderQObject),
+    message_builder_begin_move_rows: fn(*mut MessageBuilderQObject, usize, usize, usize),
+    message_builder_end_move_rows: fn(*mut MessageBuilderQObject),
+    message_builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    message_builder_end_remove_rows: fn(*mut MessageBuilderQObject),
+) -> *mut MessageBuilder {
+    let message_builder_emit = MessageBuilderEmitter {
+        qobject: Arc::new(AtomicPtr::new(message_builder)),
+        body_changed: message_builder_body_changed,
+        conversation_id_changed: message_builder_conversation_id_changed,
+        replying_to_changed: message_builder_replying_to_changed,
+        new_data_ready: message_builder_new_data_ready,
+    };
+    let model = MessageBuilderList {
+        qobject: message_builder,
+        layout_about_to_be_changed: message_builder_layout_about_to_be_changed,
+        layout_changed: message_builder_layout_changed,
+        data_changed: message_builder_data_changed,
+        begin_reset_model: message_builder_begin_reset_model,
+        end_reset_model: message_builder_end_reset_model,
+        begin_insert_rows: message_builder_begin_insert_rows,
+        end_insert_rows: message_builder_end_insert_rows,
+        begin_move_rows: message_builder_begin_move_rows,
+        end_move_rows: message_builder_end_move_rows,
+        begin_remove_rows: message_builder_begin_remove_rows,
+        end_remove_rows: message_builder_end_remove_rows,
+    };
+    let d_message_builder = MessageBuilder::new(message_builder_emit, model);
+    Box::into_raw(Box::new(d_message_builder))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_free(ptr: *mut MessageBuilder) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_body_get(
+    ptr: *const MessageBuilder,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.body();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_body_set(ptr: *mut MessageBuilder, v: *const c_ushort, len: c_int) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_body(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_body_set_none(ptr: *mut MessageBuilder) {
+    let o = &mut *ptr;
+    o.set_body(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_conversation_id_get(
+    ptr: *const MessageBuilder,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.conversation_id();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_conversation_id_set(ptr: *mut MessageBuilder, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_conversation_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_conversation_id_set_none(ptr: *mut MessageBuilder) {
+    let o = &mut *ptr;
+    o.set_conversation_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_replying_to_get(
+    ptr: *const MessageBuilder,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.replying_to();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_replying_to_set(ptr: *mut MessageBuilder, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_replying_to(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_replying_to_set_none(ptr: *mut MessageBuilder) {
+    let o = &mut *ptr;
+    o.set_replying_to(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_add_attachment(ptr: *mut MessageBuilder, path_str: *const c_ushort, path_len: c_int) -> bool {
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    let o = &mut *ptr;
+    let r = o.add_attachment(path);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_finalize(ptr: *mut MessageBuilder) -> () {
+    let o = &mut *ptr;
+    let r = o.finalize();
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_remove_attachment(ptr: *mut MessageBuilder, path_str: *const c_ushort, path_len: c_int) -> bool {
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    let o = &mut *ptr;
+    let r = o.remove_attachment(path);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_remove_attachment_by_index(ptr: *mut MessageBuilder, row_index: u64) -> bool {
+    let o = &mut *ptr;
+    let r = o.remove_attachment_by_index(row_index);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_remove_last(ptr: *mut MessageBuilder) -> () {
+    let o = &mut *ptr;
+    let r = o.remove_last();
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_row_count(ptr: *const MessageBuilder) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_insert_rows(ptr: *mut MessageBuilder, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).insert_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_remove_rows(ptr: *mut MessageBuilder, row: c_int, count: c_int) -> bool {
+    (&mut *ptr).remove_rows(to_usize(row), to_usize(count))
+}
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_can_fetch_more(ptr: *const MessageBuilder) -> bool {
+    (&*ptr).can_fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_fetch_more(ptr: *mut MessageBuilder) {
+    (&mut *ptr).fetch_more()
+}
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_sort(
+    ptr: *mut MessageBuilder,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_data_attachment_path(
+    ptr: *const MessageBuilder, row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.attachment_path(to_usize(row));
+    let s: *const c_char = data.as_ptr() as (*const c_char);
+    set(d, s, to_c_int(data.len()));
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {
@@ -1627,8 +2196,6 @@ pub trait MessagesTrait {
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
     fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn poll_update(&mut self) -> bool;
-    fn reply(&mut self, body: String, op: &[u8]) -> bool;
-    fn send_message(&mut self, body: String) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -1817,25 +2384,6 @@ pub unsafe extern "C" fn messages_poll_update(ptr: *mut Messages) -> bool {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_reply(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int, op_str: *const c_char, op_len: c_int) -> bool {
-    let mut body = String::new();
-    set_string_from_utf16(&mut body, body_str, body_len);
-    let op = { slice::from_raw_parts(op_str as *const u8, to_usize(op_len)) };
-    let o = &mut *ptr;
-    let r = o.reply(body, op);
-    r
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_send_message(ptr: *mut Messages, body_str: *const c_ushort, body_len: c_int) -> bool {
-    let mut body = String::new();
-    set_string_from_utf16(&mut body, body_str, body_len);
-    let o = &mut *ptr;
-    let r = o.send_message(body);
-    r
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_row_count(ptr: *const Messages) -> c_int {
     to_c_int((&*ptr).row_count())
 }
@@ -1933,7 +2481,6 @@ pub struct NetworkHandleEmitter {
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
     members_data_changed: fn(*mut NetworkHandleQObject),
-    msg_data_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -1951,7 +2498,6 @@ impl NetworkHandleEmitter {
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
             members_data_changed: self.members_data_changed,
-            msg_data_changed: self.msg_data_changed,
         }
     }
     fn clear(&self) {
@@ -1976,12 +2522,6 @@ impl NetworkHandleEmitter {
             (self.members_data_changed)(ptr);
         }
     }
-    pub fn msg_data_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.msg_data_changed)(ptr);
-        }
-    }
 }
 
 pub trait NetworkHandleTrait {
@@ -1990,7 +2530,6 @@ pub trait NetworkHandleTrait {
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
     fn members_data(&self) -> u8;
-    fn msg_data(&self) -> u8;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
@@ -2002,14 +2541,12 @@ pub extern "C" fn network_handle_new(
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
     network_handle_members_data_changed: fn(*mut NetworkHandleQObject),
-    network_handle_msg_data_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
         members_data_changed: network_handle_members_data_changed,
-        msg_data_changed: network_handle_msg_data_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -2033,11 +2570,6 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_members_data_get(ptr: *const NetworkHandle) -> u8 {
     (&*ptr).members_data()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_msg_data_get(ptr: *const NetworkHandle) -> u8 {
-    (&*ptr).msg_data()
 }
 
 #[no_mangle]
