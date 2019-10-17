@@ -57,13 +57,13 @@ impl Message {
 /// Builder for storing outbound messages
 pub struct OutboundMessageBuilder {
     /// Recipient user id
-    conversation: Option<ConversationId>,
+    pub conversation: Option<ConversationId>,
     /// Body of message
-    body: Option<MessageBody>,
+    pub body: Option<MessageBody>,
     /// Message id of the message being replied to
-    op: Option<MsgId>,
+    pub op: Option<MsgId>,
     /// Attachments
-    attachments: Vec<PathBuf>,
+    pub attachments: Vec<PathBuf>,
 }
 
 /// Values `OutboundMessageBuilder`'s `store_and_send` function
@@ -85,25 +85,25 @@ pub enum StoreAndSend {
 
 impl OutboundMessageBuilder {
     /// Set conversation id
-    pub fn conversation_id(mut self, conversation_id: ConversationId) -> Self {
+    pub fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
         self.conversation.replace(conversation_id);
         self
     }
 
     /// Set body
-    pub fn body(mut self, body: MessageBody) -> Self {
+    pub fn body(&mut self, body: MessageBody) -> &mut Self {
         self.body.replace(body);
         self
     }
 
     /// Set the id of the message being replied to, if this message is a reply
-    pub fn replying_to(mut self, op_msg_id: MsgId) -> Self {
-        self.op.replace(op_msg_id);
+    pub fn replying_to(&mut self, op_msg_id: Option<MsgId>) -> &mut Self {
+        self.op = op_msg_id;
         self
     }
 
     /// Add attachment
-    pub fn add_attachment(mut self, path: PathBuf) -> Self {
+    pub fn add_attachment(&mut self, path: PathBuf) -> &mut Self {
         self.attachments.push(path);
         self
     }
@@ -498,13 +498,13 @@ pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Dat
     use crate::womp;
     use std::convert::TryInto;
 
-    let out = OutboundMessageBuilder::default()
-        .conversation_id(conv)
-        .body(
-            "test"
-                .try_into()
-                .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
-        )
+    let mut builder = OutboundMessageBuilder::default();
+    builder.conversation_id(conv).body(
+        "test"
+            .try_into()
+            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
+    );
+    let out = builder
         .store_and_send_blocking()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 

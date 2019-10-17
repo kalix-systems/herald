@@ -51,14 +51,11 @@ impl Messages {
     fn raw_text_insert(&mut self, body: MessageBody, op: Option<MsgId>) -> Result<(), HErr> {
         let conversation_id = self.conversation_id.ok_or(NE!())?;
 
-        let mut builder = message::OutboundMessageBuilder::default()
+        let mut builder = message::OutboundMessageBuilder::default();
+        builder
             .conversation_id(conversation_id)
-            .body((&body).clone());
-
-        builder = match op {
-            Some(op) => builder.replying_to(op),
-            None => builder,
-        };
+            .body((&body).clone())
+            .replying_to(op);
 
         let (msg_tx, msg_rx) = unbounded();
         builder.store_and_send(move |m| {

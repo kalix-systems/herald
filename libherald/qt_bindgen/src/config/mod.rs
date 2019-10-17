@@ -1,4 +1,4 @@
-#![allow(unused)]
+// #![allow(unused)]
 use rust_qt_binding_generator::configuration::*;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -58,7 +58,9 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        members(),
        messages(),
        config_obj(),
-       conversation_builder()
+       conversation_builder(),
+       message_builder(),
+       attachments()
     }
 }
 
@@ -279,8 +281,6 @@ fn config_obj() -> Object {
 }
 
 fn conversation_builder() -> Object {
-    let props = props! {};
-
     let item_prop = item_props! {
         memberId: ItemProp::new(QString)
     };
@@ -295,6 +295,49 @@ fn conversation_builder() -> Object {
     };
 
     obj! {
-        ConversationBuilder: Obj::new().list().funcs(funcs).props(props).item_props(item_prop)
+        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+    }
+}
+
+fn message_builder() -> Object {
+    let props = props! {
+        // Conversation id
+        conversationId: conv_id_prop(),
+        // Message id of the message being replied to
+        replyingTo: Prop::new().simple(QByteArray).optional().write(),
+        // Body of the messagee
+        body: Prop::new().simple(QString).optional().write()
+    };
+
+    let item_props = item_props! {
+        attachmentPath: ItemProp::new(QString)
+    };
+
+    let funcs = functions! {
+        mut finalize() => Void,
+        mut addAttachment(path: QString) => Bool,
+        mut removeAttachment(path: QString) => Bool,
+        mut removeAttachmentByIndex(row_index: QUint64) => Bool,
+        mut removeLast() => Void,
+    };
+
+    obj! {
+        MessageBuilder: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+    }
+}
+
+fn attachments() -> Object {
+    let props = props! {
+        // the message id the attachments list is associated with
+        msgId: Prop::new().simple(QByteArray).optional().write()
+    };
+
+    let item_props = item_props! {
+        // Path the the attachment
+        attachmentPath: ItemProp::new(QString)
+    };
+
+    obj! {
+        Attachments: Obj::new().list().props(props).item_props(item_props)
     }
 }
