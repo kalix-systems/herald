@@ -1715,6 +1715,8 @@ pub struct MessageBuilderEmitter {
     qobject: Arc<AtomicPtr<MessageBuilderQObject>>,
     body_changed: fn(*mut MessageBuilderQObject),
     conversation_id_changed: fn(*mut MessageBuilderQObject),
+    is_media_message_changed: fn(*mut MessageBuilderQObject),
+    is_reply_changed: fn(*mut MessageBuilderQObject),
     replying_to_changed: fn(*mut MessageBuilderQObject),
     new_data_ready: fn(*mut MessageBuilderQObject),
 }
@@ -1733,6 +1735,8 @@ impl MessageBuilderEmitter {
             qobject: self.qobject.clone(),
             body_changed: self.body_changed,
             conversation_id_changed: self.conversation_id_changed,
+            is_media_message_changed: self.is_media_message_changed,
+            is_reply_changed: self.is_reply_changed,
             replying_to_changed: self.replying_to_changed,
             new_data_ready: self.new_data_ready,
         }
@@ -1751,6 +1755,18 @@ impl MessageBuilderEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.conversation_id_changed)(ptr);
+        }
+    }
+    pub fn is_media_message_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.is_media_message_changed)(ptr);
+        }
+    }
+    pub fn is_reply_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.is_reply_changed)(ptr);
         }
     }
     pub fn replying_to_changed(&mut self) {
@@ -1826,9 +1842,12 @@ pub trait MessageBuilderTrait {
     fn set_body(&mut self, value: Option<String>);
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn is_media_message(&self) -> bool;
+    fn is_reply(&self) -> bool;
     fn replying_to(&self) -> Option<&[u8]>;
     fn set_replying_to(&mut self, value: Option<&[u8]>);
     fn add_attachment(&mut self, path: String) -> bool;
+    fn clear_reply(&mut self) -> ();
     fn finalize(&mut self) -> ();
     fn remove_attachment(&mut self, path: String) -> bool;
     fn remove_attachment_by_index(&mut self, row_index: u64) -> bool;
@@ -1849,6 +1868,8 @@ pub extern "C" fn message_builder_new(
     message_builder: *mut MessageBuilderQObject,
     message_builder_body_changed: fn(*mut MessageBuilderQObject),
     message_builder_conversation_id_changed: fn(*mut MessageBuilderQObject),
+    message_builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
+    message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),
     message_builder_replying_to_changed: fn(*mut MessageBuilderQObject),
     message_builder_new_data_ready: fn(*mut MessageBuilderQObject),
     message_builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
@@ -1867,6 +1888,8 @@ pub extern "C" fn message_builder_new(
         qobject: Arc::new(AtomicPtr::new(message_builder)),
         body_changed: message_builder_body_changed,
         conversation_id_changed: message_builder_conversation_id_changed,
+        is_media_message_changed: message_builder_is_media_message_changed,
+        is_reply_changed: message_builder_is_reply_changed,
         replying_to_changed: message_builder_replying_to_changed,
         new_data_ready: message_builder_new_data_ready,
     };
@@ -1949,6 +1972,16 @@ pub unsafe extern "C" fn message_builder_conversation_id_set_none(ptr: *mut Mess
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn message_builder_is_media_message_get(ptr: *const MessageBuilder) -> bool {
+    (&*ptr).is_media_message()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_is_reply_get(ptr: *const MessageBuilder) -> bool {
+    (&*ptr).is_reply()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn message_builder_replying_to_get(
     ptr: *const MessageBuilder,
     p: *mut QByteArray,
@@ -1981,6 +2014,13 @@ pub unsafe extern "C" fn message_builder_add_attachment(ptr: *mut MessageBuilder
     set_string_from_utf16(&mut path, path_str, path_len);
     let o = &mut *ptr;
     let r = o.add_attachment(path);
+    r
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_clear_reply(ptr: *mut MessageBuilder) -> () {
+    let o = &mut *ptr;
+    let r = o.clear_reply();
     r
 }
 

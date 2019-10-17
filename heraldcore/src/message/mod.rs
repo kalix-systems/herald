@@ -108,6 +108,16 @@ impl OutboundMessageBuilder {
         self
     }
 
+    /// Parses the text as markdown, if possible, rendering it to HTML
+    pub fn parse_markdown(&mut self) -> &mut Self {
+        if let Some(body) = &self.body {
+            if let Ok(md) = body.parse_markdown() {
+                self.body.replace(md);
+            }
+        }
+        self
+    }
+
     /// Stores and sends the message
     pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
         self,

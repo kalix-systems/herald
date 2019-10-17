@@ -12,5 +12,5 @@ TextEdit {
     selectByMouse: true
     selectByKeyboard: true
     readOnly: true
-    color: outbound ? QmlCfg.palette.mainTextColor : QmlCfg.palette.iconFill
+    color: QmlCfg.palette.mainTextColor
 }

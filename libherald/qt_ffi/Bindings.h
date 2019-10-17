@@ -338,6 +338,8 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(bool isMediaMessage READ isMediaMessage NOTIFY isMediaMessageChanged FINAL)
+    Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
     Q_PROPERTY(QByteArray replyingTo READ replyingTo WRITE setReplyingTo NOTIFY replyingToChanged FINAL)
     explicit MessageBuilder(bool owned, QObject *parent);
 public:
@@ -347,9 +349,12 @@ public:
     void setBody(const QString& v);
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
+    bool isMediaMessage() const;
+    bool isReply() const;
     QByteArray replyingTo() const;
     void setReplyingTo(const QByteArray& v);
     Q_INVOKABLE bool addAttachment(const QString& path);
+    Q_INVOKABLE void clearReply();
     Q_INVOKABLE void finalize();
     Q_INVOKABLE bool removeAttachment(const QString& path);
     Q_INVOKABLE bool removeAttachmentByIndex(quint64 row_index);
@@ -383,6 +388,8 @@ private:
 Q_SIGNALS:
     void bodyChanged();
     void conversationIdChanged();
+    void isMediaMessageChanged();
+    void isReplyChanged();
     void replyingToChanged();
 };
 

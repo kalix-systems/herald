@@ -304,8 +304,10 @@ fn message_builder() -> Object {
         conversationId: conv_id_prop(),
         // Message id of the message being replied to
         replyingTo: Prop::new().simple(QByteArray).optional().write(),
+        isReply: Prop::new().simple(Bool),
         // Body of the messagee
-        body: Prop::new().simple(QString).optional().write()
+        body: Prop::new().simple(QString).optional().write(),
+        isMediaMessage: Prop::new().simple(Bool)
     };
 
     let item_props = item_props! {
@@ -314,6 +316,7 @@ fn message_builder() -> Object {
 
     let funcs = functions! {
         mut finalize() => Void,
+        mut clearReply() => Void,
         mut addAttachment(path: QString) => Bool,
         mut removeAttachment(path: QString) => Bool,
         mut removeAttachmentByIndex(row_index: QUint64) => Bool,

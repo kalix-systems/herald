@@ -3,7 +3,8 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
-import "../ChatBubble"
+import "qrc:/imports/ChatBubble" as CB
+import "qrc:/imports"
 import "." as CVUtils
 import "../common/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
@@ -40,6 +41,7 @@ Flickable {
         focus: true
         spacing: QmlCfg.padding
         topPadding: QmlCfg.padding
+        bottomPadding: QmlCfg.padding
         anchors {
             right: parent.right
             left: parent.left
@@ -56,9 +58,10 @@ Flickable {
                                                                 receiptStatus)
                 readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
                                                                            author)]
-
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
+                readonly property string authName: outbound ? "" : contactsModel.nameById(
+                                                                  author)
                 readonly property bool outbound: author === config.configId
                 // this is where scroll bar position needs to be set to instantiate in the right location
                 Component.onCompleted: chatScrollBar.position = 1.0
@@ -68,50 +71,50 @@ Flickable {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
-                    rightMargin: QmlCfg.margin
-                    leftMargin: QmlCfg.margin
+                    rightMargin: QmlCfg.margin * 2.0
+                    leftMargin: QmlCfg.margin * 2.0
                 }
                 rightPadding: QmlCfg.margin
 
                 Component {
                     id: std
-                    StandardBubble {
+                    CB.StandardBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        authorName: outbound ? "" : contactsModel.nameById(
-                                                   author)
+                        authorName: authName
                         receiptImage: proxyReceiptImage
                     }
                 }
 
                 Component {
                     id: reply
-                    ReplyBubble {
+                    CB.ReplyBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
+                        opBody: ownedConversation.messageBodyById(op)
                         receiptImage: proxyReceiptImage
                         opName: ownedConversation.messageAuthorById(op)
-                        opColor: opName === config.configId ? Qt.darker(
-                                                                  QmlCfg.palette.tertiaryColor,
-                                                                  1.3) : QmlCfg.avatarColors[contactsModel.colorById(opName)]
+                        opColor: QmlCfg.avatarColors[contactsModel.colorById(
+                                                         opName)]
+                        authorName: authName
                     }
                 }
 
                 Component {
                     id: image
-                    ImageBubble {
+                    CB.ImageBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
+                        authorName: authName
                     }
                 }
 
-                ChatBubble {
-                    ChatBubbleHover {
-                    }
-                    radius: 10
+                CB.ChatBubble {
+                    ChatBubbleHover {}
                     maxWidth: cvPane.width * 0.66
-                    color: outbound ? QmlCfg.palette.tertiaryColor : userColor
+                    color: QmlCfg.palette.tertiaryColor
+                    senderColor: userColor
                     content: if (false) {
                                  image
                              } else if (op.byteLength === 32) {
