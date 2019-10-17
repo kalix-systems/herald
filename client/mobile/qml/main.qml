@@ -6,13 +6,17 @@ import "./LoginPage" as LoginPage
 
 ApplicationWindow {
     visible: true
+    width: 300
+    height: 500
 
-    //    StackView {
-    //        id: mainView
-    //        anchors.fill: parent
-    //    }
-    Rectangle {
+    State.AppState {
+        id: appstate
+        view: LoginPage.LoginLandingPage {}
+    }
+
+    StackView {
+        id: mainView
         anchors.fill: parent
-        color: "orange"
+        initialItem: appstate.view
     }
 }
