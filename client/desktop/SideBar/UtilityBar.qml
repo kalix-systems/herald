@@ -28,7 +28,6 @@ Component {
             color: QmlCfg.palette.secondaryColor
         }
 
-
         RowLayout {
             anchors.fill: parent
 
@@ -44,10 +43,9 @@ Component {
                 pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
                 labelGap: 0
                 // JH: Bad margin semantics
-                size: parent.height - QmlCfg.margin
+                size: parent.height - 2 * QmlCfg.margin
                 isDefault: true
                 inLayout: true
-
             }
 
             //probably need a standard divider that also handles layouts
@@ -58,38 +56,39 @@ Component {
                 color: QmlCfg.palette.mainColor
             }
 
-        Text {
-            text: "Conversations"
-            font.pixelSize: QmlCfg.headerSize
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            color: QmlCfg.palette.mainTextColor
-        }
-
-        Item {
-            Layout.fillWidth: true
-        }
-
-        Common.ButtonForm {
-            id: searchButton
-            property bool searchRegex: false
-            Layout.leftMargin: QmlCfg.smallMargin
-            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-            //this is a vertical center offset
-            Layout.topMargin: 1
-            source: "qrc:/search-icon.svg"
-            //todo : add back in regex logic once ui is known
-            onClicked: {
-                convoPane.state = "conversationSearch"
+            Text {
+                text: "Conversations"
+                font.pixelSize: QmlCfg.headerSize
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                color: QmlCfg.palette.mainTextColor
             }
 
-        ///--- Add contact button
-        Common.ButtonForm {
-            id: newMessageButton
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-           // Layout.leftMargin: QmlCfg.margin
-           // Layout.rightMargin: QmlCfg.margin
-            source: "qrc:/pencil-icon-black.svg"
-            z: -1
+            Item {
+                Layout.fillWidth: true
+            }
+
+            Common.ButtonForm {
+                id: searchButton
+                property bool searchRegex: false
+                Layout.leftMargin: QmlCfg.smallMargin
+                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
+                //this is a vertical center offset
+                Layout.topMargin: 1
+                source: "qrc:/search-icon.svg"
+                //todo : add back in regex logic once ui is known
+                onClicked: {
+                    convoPane.state = "conversationSearch"
+                }
+            }
+
+            ///--- Add contact button
+            Common.ButtonForm {
+                id: newMessageButton
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
+                // Layout.leftMargin: QmlCfg.margin
+                // Layout.rightMargin: QmlCfg.margin
+                source: "qrc:/pencil-icon-black.svg"
+                z: -1
 
                 MouseArea {
                     anchors.fill: parent
@@ -99,32 +98,32 @@ Component {
                     }
                 }
             }
-        }
 
-        //placeholder new contact button
-        Common.ButtonForm {
-            id: newContactButton
+            //placeholder new contact button
+            Common.ButtonForm {
+                id: newContactButton
 
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-         //  Layout.leftMargin: QmlCfg.margin
-            Layout.rightMargin: QmlCfg.margin
-            source: "qrc:/options-icon.svg"
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                //  Layout.leftMargin: QmlCfg.margin
+                Layout.rightMargin: QmlCfg.margin
+                source: "qrc:/options-icon.svg"
 
-            MouseArea {
-                anchors.fill: parent
+                MouseArea {
+                    anchors.fill: parent
 
-                onClicked: {
-                    utilityOptionsMenu.open()
+                    onClicked: {
+                        utilityOptionsMenu.open()
+                    }
                 }
             }
 
-           Menu {
-               id: utilityOptionsMenu
-               MenuItem {
-                   text: "Add contact"
-                   onTriggered: convoPane.state = "newContactState"
-               }
-           }
+            Menu {
+                id: utilityOptionsMenu
+                MenuItem {
+                    text: "Add contact"
+                    onTriggered: convoPane.state = "newContactState"
+                }
+            }
         }
     }
 }
