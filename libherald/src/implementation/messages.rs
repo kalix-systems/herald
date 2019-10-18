@@ -340,7 +340,18 @@ impl MessagesTrait for Messages {
 
                     self.model.data_changed(ix, ix);
                 }
-                MsgUpdate::StoreDone(_mid) => {}
+                MsgUpdate::StoreDone(mid) => {
+                    let ix = ret_none!(
+                        self.list
+                            .iter()
+                            // search backwards,
+                            // it's probably fairly recent
+                            .rposition(|m| m.msg_id == mid),
+                        false
+                    );
+                    self.list[ix].data_saved = true;
+                    self.model.data_changed(ix, ix);
+                }
             }
         }
         true
