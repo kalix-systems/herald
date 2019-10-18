@@ -85,6 +85,8 @@ pub mod messages {
         Receipt(MsgId),
         /// A full message
         FullMsg(Message),
+        /// Send complete
+        Done(MsgId),
     }
 
     lazy_static! {

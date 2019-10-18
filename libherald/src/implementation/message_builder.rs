@@ -148,7 +148,7 @@ impl MessageBuilderTrait for MessageBuilder {
                     eprintln!("Error at {}", line_number);
                     ret_err!(Err(error))
                 }
-                Done => {
+                Done(_) => {
                     // TODO: send status?
                 }
             }

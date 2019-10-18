@@ -331,6 +331,7 @@ impl MessagesTrait for Messages {
 
                     self.model.data_changed(ix, ix);
                 }
+                _ => {}
             }
         }
         true
