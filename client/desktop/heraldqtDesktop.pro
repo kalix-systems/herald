@@ -13,14 +13,15 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # silence compiler warnings from Qt headers
 QMAKE_CXXFLAGS += -isystem $$[QT_INSTALL_HEADERS]
 # silence the project warning about unsuported SDK
-CONFIG+=sdk_no_version_check
+CONFIG += sdk_no_version_check
 
-RESOURCES += qml.qrc
+RESOURCES += \
+    qml.qrc
 
 SOURCES   += main.cpp
 
 # libherald headers, source, and libs
-include(../libHerald/libHerald.pri )
+include(../libHerald/libHerald.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
