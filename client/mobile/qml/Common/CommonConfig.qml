@@ -46,10 +46,24 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: units.iconSizes.large
+    property int avatarSize: iconSizes.large
     /// user settable cfg
     property int theme: 0
-    readonly property string mainTextFont: "Hevletica"
+    readonly property string mainTextFontFamily: "Hevletica"
+
+    property QtObject iconSizes: QtObject {
+        property int small: Math.floor(units.fontMetrics.roundedIconSize(
+                                           16 * units.devicePixelRatio))
+        property int smallMedium: Math.floor(units.fontMetrics.roundedIconSize(
+                                                 22 * units.devicePixelRatio))
+        property int medium: Math.floor(units.fontMetrics.roundedIconSize(
+                                            32 * units.devicePixelRatio))
+        property int large: Math.floor(units.fontMetrics.roundedIconSize(
+                                           48 * units.devicePixelRatio))
+        property int huge: Math.floor(units.fontMetrics.roundedIconSize(
+                                          64 * units.devicePixelRatio))
+        property int enormous: Math.floor(128 * units.devicePixelRatio)
+    }
 
     /// emoji skin color
     Settings {

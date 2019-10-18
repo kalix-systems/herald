@@ -17,12 +17,4 @@
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
     </qresource>
-    <qresource prefix="/">
-        <file>themes/Dark.qml</file>
-        <file>themes/EarthTones.qml</file>
-        <file>themes/Light.qml</file>
-        <file>themes/MetaThemes.qml</file>
-        <file>themes/SolarizedDark.qml</file>
-        <file>themes/SolarizedLight.qml</file>
-    </qresource>
 </RCC>

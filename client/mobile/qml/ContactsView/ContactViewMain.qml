@@ -14,9 +14,11 @@ Page {
         }
         RowLayout {
             CVToolButton {
+                tapCallback: print("hello")
                 imageSource: ""
             }
             CVToolButton {
+                tapCallback: print("hello")
                 imageSource: ""
             }
         }

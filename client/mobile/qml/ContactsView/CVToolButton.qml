@@ -3,32 +3,36 @@ import QtQuick 2.12
 import LibHerald 1.0
 
 ToolButton {
-    property var callback
+
+    property var tapCallback
+    property string imageSource: ""
+    property color color: QmlCfg.palette.iconMatte
 
     TapHandler {
-        onTapped: {
-
-        }
+        onTapped: tapCallback()
     }
 
     background: Image {
         id: icon
-        property color color: QmlCfg.palette.iconMatte
-    }
 
-    Animation {
-        id: cubicFade
-        NumberAnimation {
-            from: 0
-            to: 200
-            duration: 500
-            easing.type: Easing.InOutQuad
-        }
-        NumberAnimation {
-            from: 200
-            to: 0
-            duration: 500
-            easing.type: Easing.InOutQuad
+        anchors.fill: parent
+        sourceSize: Qt.size(QmlCfg.iconSizes.medium, QmlCfg.iconSizes.medium)
+        mipmap: true
+        layer.enabled: true
+        layer.samplerName: "maskSource"
+        layer.effect: ShaderEffect {
+            property color overlay: color
+            property var source: background
+            fragmentShader: "
+uniform lowp sampler2D source;
+uniform lowp sampler2D maskSource;
+uniform vec4 overlay;
+varying highp vec2 qt_TexCoord0;
+void main() {
+lowp vec4 tex = texture2D(source, qt_TexCoord0);
+lowp vec4 mask = texture2D(maskSource, qt_TexCoord0);
+gl_FragColor = overlay * mask.a;
+}"
         }
     }
 }
