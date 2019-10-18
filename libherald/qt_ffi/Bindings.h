@@ -422,7 +422,7 @@ public:
     QVariant lastStatus() const;
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
-    Q_INVOKABLE qint64 indexById(const QByteArray& msg_id) const;
+    Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
     Q_INVOKABLE bool pollUpdate();
@@ -445,6 +445,7 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
+    Q_INVOKABLE bool dataSaved(int row) const;
     Q_INVOKABLE qint64 epochTimestampMs(int row) const;
     Q_INVOKABLE bool hasAttachments(int row) const;
     Q_INVOKABLE bool isReply(int row) const;

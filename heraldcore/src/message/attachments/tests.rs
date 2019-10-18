@@ -9,8 +9,10 @@ fn make_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
 
-    let out_path = attach.save().expect(womp!());
-    std::fs::remove_dir_all(out_path).expect(womp!());
+    let mut path = PathBuf::from("attachments");
+    let out_path_suffix = attach.save().expect(womp!());
+    path.push(out_path_suffix);
+    std::fs::remove_dir_all(path).expect(womp!());
 }
 
 #[test]
@@ -60,10 +62,9 @@ fn inbound_message_attachment() {
         .conversation_id(other.pairwise_conversation);
     builder.store().expect(womp!());
 
-    let meta = super::get(&mid)
-        .expect(womp!())
-        .into_flat_strings()
-        .expect(womp!());
+    let meta = super::get(&mid).expect(womp!());
+    let meta = meta.into_flat_strings().expect(womp!());
+
     assert_eq!(meta.len(), 1);
 
     std::fs::remove_dir_all("attachments").expect(womp!());

@@ -247,7 +247,8 @@ fn messages() -> Object {
         op: ItemProp::new(QByteArray).optional(),
         isReply: ItemProp::new(Bool),
         hasAttachments: ItemProp::new(Bool),
-        receiptStatus: ItemProp::new(QUint32)
+        receiptStatus: ItemProp::new(QUint32),
+        dataSaved: ItemProp::new(Bool)
     };
 
     let funcs = functions! {
@@ -256,7 +257,7 @@ fn messages() -> Object {
         mut pollUpdate() => Bool,
         const messageBodyById(msg_id: QByteArray) => QString,
         const messageAuthorById(msg_id: QByteArray) => QString,
-        const indexById(msg_id: QByteArray) => Qint64,
+        const indexById(msg_id: QByteArray) => QUint64,
     };
 
     obj! {

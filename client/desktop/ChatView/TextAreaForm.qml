@@ -135,7 +135,7 @@ Rectangle {
         folder: shortcuts.home
         onSelectionAccepted: {
             builder.addAttachment(attachmentsDialogue.fileUrl)
-            //print(attachmentsDialogue.fileUrl)
+            print(attachmentsDialogue.fileUrl)
         }
     }
 

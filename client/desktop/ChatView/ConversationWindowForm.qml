@@ -108,10 +108,7 @@ Flickable {
                         receiptImage: proxyReceiptImage
                         authorName: authName
                         messageId: ownedConversation.messageId(index)
-                        imageSource: {
-                            messageAttachments.msgId = messageId;
-                            return Utils.safeToQrcURI(messageAttachments.attachmentPath(0));
-                        }
+
                     }
                 }
 
