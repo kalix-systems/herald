@@ -9,8 +9,7 @@ ColumnLayout {
     property string receiptImage: ""
     property string imageSource: ""
     property string authorName: ""
-    // property var messageId
-    property var messageAttachments
+    property Attachments messageAttachments: null
 
     spacing: 0
 
