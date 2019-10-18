@@ -106,7 +106,6 @@ Rectangle {
             height: item ? item.height: 0
             sourceComponent: AttachmentsComponent {}
             width: scrollView.width
-            onActiveChanged: print("hi")
         }
 
         ScrollView {
@@ -144,7 +143,6 @@ Rectangle {
         folder: shortcuts.home
         onSelectionAccepted: {
             builder.addAttachment(attachmentsDialogue.fileUrl)
-            print(attachmentsDialogue.fileUrl)
         }
     }
 

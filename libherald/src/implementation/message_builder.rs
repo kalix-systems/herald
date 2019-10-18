@@ -193,7 +193,7 @@ impl MessageBuilderTrait for MessageBuilder {
     fn remove_attachment_by_index(&mut self, row_index: u64) -> bool {
         let row_index = row_index as usize;
 
-        if row_index < self.inner.attachments.len() {
+        if row_index > self.inner.attachments.len() {
             return false;
         }
 

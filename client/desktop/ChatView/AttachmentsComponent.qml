@@ -26,8 +26,9 @@ import LibHerald 1.0
                  Rectangle {
                  height: 100
                  width: 100
-                 border.color: "black"
-                 border.width: 1
+                 border.color: image.focus ? "light blue" : "black"
+                 border.width: image.focus ? 2 : 1
+                 radius: QmlCfg.radius
                  clip: true
                      Image {
                      id: image
@@ -36,6 +37,13 @@ import LibHerald 1.0
                      source: "file:" + attachmentPath
                      fillMode: Image.PreserveAspectCrop
                      asynchronous: true
+
+                     MouseArea {
+                         anchors.fill: parent
+                         onClicked: {
+                             parent.focus = !parent.focus
+                         }
+                     }
 
                      Button {
                          anchors.top: parent.top
@@ -54,8 +62,8 @@ import LibHerald 1.0
                              sourceSize: Qt.size(25, 25)
                          }
                          onClicked: {
-                             builder.removeAttachmentByIndex(index)
-                             print("hi")
+                         builder.removeAttachmentByIndex(index)
+
                          }
                      }
                  }
