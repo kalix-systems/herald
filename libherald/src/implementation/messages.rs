@@ -259,10 +259,8 @@ impl MessagesTrait for Messages {
 
         ret_err!(conversation::delete_conversation(&id), false);
 
-        self.model.begin_remove_rows(
-            self.list.len().saturating_sub(1),
-            self.list.len().saturating_sub(1),
-        );
+        self.model
+            .begin_remove_rows(0, self.list.len().saturating_sub(1));
         self.list = Vec::new();
         self.map = HashMap::new();
         self.model.end_remove_rows();
