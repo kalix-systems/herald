@@ -4,13 +4,13 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Label {
-    property string senderName
     id: sender
-    // BNOTE: This boolean should be a property:w
+    property string senderName
+    readonly property bool emptyName: senderName === ""
     text: senderName
-    Layout.margins: senderName === "" ? 0 : QmlCfg.smallMargin
-    Layout.bottomMargin: senderName === "" ? QmlCfg.smallMargin : QmlCfg.margin
-    Layout.preferredHeight: senderName !== "" ? QmlCfg.margin : 0
+    Layout.margins: emptyName ? 0 : QmlCfg.smallMargin
+    Layout.bottomMargin: emptyName ? QmlCfg.smallMargin : QmlCfg.margin
+    Layout.preferredHeight: !emptyName ? QmlCfg.margin : 0
     font.bold: true
     color: QmlCfg.palette.mainTextColor
 }
