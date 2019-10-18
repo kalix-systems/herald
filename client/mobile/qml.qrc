@@ -18,5 +18,7 @@
         <file>qml/LoginPage/LoginField.qml</file>
         <file>qml/Common/StdText.qml</file>
         <file>qml/ContactsView/ContactViewMain.qml</file>
+        <file>qml/ContactsView/CVToolButton.qml</file>
+        <file>qml/State/js/transitions.js</file>
     </qresource>
 </RCC>
