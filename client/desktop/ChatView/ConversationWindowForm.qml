@@ -63,6 +63,10 @@ Flickable {
                 readonly property string authName: outbound ? "" : contactsModel.nameById(
                                                                   author)
                 readonly property bool outbound: author === config.configId
+
+                readonly property var attachmentsList: Attachments {
+                    msgId: messageId
+                }
                 // this is where scroll bar position needs to be set to instantiate in the right location
                 Component.onCompleted: chatScrollBar.position = 1.0
 
@@ -107,9 +111,10 @@ Flickable {
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
                         authorName: authName
-                        messageId: ownedConversation.messageId(index)
+                        messageAttachments: attachmentsList
 
                     }
+
                 }
 
                 CB.ChatBubble {
