@@ -1,4 +1,10 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared};
+use crate::{
+    ffi,
+    implementation::conversations::Conversations,
+    interface::*,
+    ret_err, ret_none,
+    shared::{self, UpdateBus},
+};
 use crossbeam_channel::*;
 use herald_common::*;
 use heraldcore::{
@@ -59,7 +65,7 @@ impl NotifHandler {
 
                 use crate::implementation::conversations::shared::*;
 
-                ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
                 use shared::messages::*;
@@ -87,11 +93,11 @@ impl NotifHandler {
                 ret_none!(push_user_update(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             NewConversation(cid) => {
                 use crate::implementation::conversations::shared::*;
-                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
                 use crate::implementation::conversations::shared::*;
@@ -102,7 +108,7 @@ impl NotifHandler {
 
                 // add conversation
                 if accepted {
-                    ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                    ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {

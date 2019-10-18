@@ -1,4 +1,10 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*, toasts::new_msg_toast};
+use crate::{
+    ffi,
+    interface::*,
+    ret_err, ret_none,
+    shared::{messages::*, UpdateBus},
+    toasts::new_msg_toast,
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -60,9 +66,8 @@ impl Messages {
 
         self.emit_last_changed();
 
-        use crate::implementation::conversations::shared::*;
-        // this should not return an error
-        ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)), Ok(()));
+        use crate::implementation::conversations::{shared::*, Conversations};
+        Conversations::push(ConvUpdates::NewActivity(cid))?;
 
         Ok(())
     }

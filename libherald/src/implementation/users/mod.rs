@@ -287,7 +287,7 @@ impl UsersTrait for Users {
     }
 
     fn poll_update(&mut self) -> bool {
-        for update in USER_CHANNEL.rx.try_recv() {
+        for update in USER_BUS.rx.try_recv() {
             match update {
                 UsersUpdates::NewUser(uid) => {
                     let new_contact = ret_err!(contact::by_user_id(uid), false);

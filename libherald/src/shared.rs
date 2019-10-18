@@ -2,7 +2,10 @@ use crate::interface::MessagesEmitter;
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use herald_common::UserId;
-use heraldcore::types::{ConversationId, MsgId};
+use heraldcore::{
+    errors::HErr,
+    types::{ConversationId, MsgId},
+};
 use lazy_static::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
@@ -101,4 +104,13 @@ pub mod messages {
         /// `Messages` object is dropped.
         pub static ref MSG_EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
     }
+}
+
+/// A bus interface for pushing updates
+pub trait UpdateBus {
+    /// The type of the update message
+    type Update: Send;
+
+    /// Pushes the update through the bus
+    fn push(update: Self::Update) -> Result<(), HErr>;
 }

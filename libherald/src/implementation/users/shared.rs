@@ -1,8 +1,9 @@
-use crate::interface::UsersEmitter as Emitter;
+use crate::{interface::UsersEmitter as Emitter, shared::UpdateBus};
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
 use heraldcore::contact;
+use heraldcore::{channel_send_err, NE};
 use lazy_static::*;
 use parking_lot::Mutex;
 
@@ -32,13 +33,13 @@ pub enum UsersUpdates {
 }
 
 /// Channel for global user list updates
-pub(super) struct UserChannel {
+pub(crate) struct UserBus {
     pub(super) rx: Receiver<UsersUpdates>,
     pub(super) tx: Sender<UsersUpdates>,
 }
 
-impl UserChannel {
-    /// Creates new `UserChannel`
+impl UserBus {
+    /// Creates new `UserBus`
     fn new() -> Self {
         let (tx, rx) = unbounded();
         Self { rx, tx }
@@ -48,14 +49,28 @@ impl UserChannel {
 lazy_static! {
     /// Statically initialized instance of `UsersUpdates` used to pass notifications
     /// from the network.
-    pub(super) static ref USER_CHANNEL: UserChannel = UserChannel::new();
+    pub(super) static ref USER_BUS: UserBus = UserBus::new();
 
     /// Users list emitter, filled in when the users list is constructed
     pub(super) static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 }
 
+impl UpdateBus for super::Users {
+    type Update = UsersUpdates;
+
+    fn push(update: Self::Update) -> Result<(), heraldcore::errors::HErr> {
+        USER_BUS
+            .tx
+            .clone()
+            .send(update)
+            .map_err(|_| channel_send_err!())?;
+        users_emit_new_data().ok_or(NE!())?;
+        Ok(())
+    }
+}
+
 pub fn push_user_update(update: UsersUpdates) -> Option<()> {
-    USER_CHANNEL.tx.send(update).ok()?;
+    USER_BUS.tx.clone().send(update).ok()?;
     users_emit_new_data()?;
     Some(())
 }

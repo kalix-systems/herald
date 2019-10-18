@@ -188,7 +188,7 @@ macro_rules! loc {
 macro_rules! channel_send_err {
     () => {{
         use $crate::loc;
-        HErr::ChannelSendError(loc!())
+        $crate::errors::HErr::ChannelSendError(loc!())
     }};
 }
 
@@ -197,7 +197,7 @@ macro_rules! channel_send_err {
 macro_rules! channel_recv_err {
     () => {{
         use $crate::loc;
-        HErr::ChannelRecvError(loc!())
+        $crate::errors::HErr::ChannelRecvError(loc!())
     }};
 }
 
