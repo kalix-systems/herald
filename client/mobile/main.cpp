@@ -24,8 +24,9 @@ int main(int argc, char* argv[])
   qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0,
                                        "ConversationBuilder");
-  qmlRegisterSingletonType(QUrl("qrc:///Common/CommonConfig.qml"), "LibHerald",
-                           1, 0, "QmlCfg");
+  qmlRegisterSingletonType(QUrl("qrc:/qml/Common/CommonConfig.qml"),
+                           "LibHerald", 1, 0, "QmlCfg");
+
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
 
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));

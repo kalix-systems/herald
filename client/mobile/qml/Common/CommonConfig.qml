@@ -18,6 +18,8 @@ Item {
     Imports.Units {
         id: units
     }
+
+    readonly property alias units: units
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: units.largeSpacing
     /// standard margin size used to interior objects
@@ -34,6 +36,9 @@ Item {
     property int chatTextSize: units.dp(12)
     /// standard header size
     property int headerSize: units.gu(3)
+    /// standard button text size
+    property int buttonTextSize: units.dp(16)
+
     /// standard z values
     property int overlayZ: 10
     property int topZ: 9
@@ -44,12 +49,12 @@ Item {
     property int avatarSize: units.iconSizes.large
     /// user settable cfg
     property int theme: 0
+    readonly property string mainTextFont: "Hevletica"
 
     /// emoji skin color
     Settings {
         id: settings
         property alias theme: cfg.theme
-        property alias skinSwatchIndex: cfg.skinSwatchIndex
     }
 
     Themes.MetaThemes {

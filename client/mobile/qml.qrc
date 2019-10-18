@@ -14,6 +14,8 @@
         <file>qml/Common/FilteredList.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/State/HeraldGlobals.qml</file>
-        <file>qml/LoginPage/LoginPageStyles.qml</file>
+        <file>qml/LoginPage/LoginButton.qml</file>
+        <file>qml/LoginPage/LoginField.qml</file>
+        <file>qml/Common/StdText.qml</file>
     </qresource>
 </RCC>
