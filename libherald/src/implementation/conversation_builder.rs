@@ -2,7 +2,7 @@ use crate::implementation::{
     conversations::{shared::ConvUpdates, Conversations},
     users::shared::user_in_cache,
 };
-use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::UpdateBus};
+use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::SingletonBus};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;

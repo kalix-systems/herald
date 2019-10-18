@@ -1,5 +1,5 @@
 use crate::interface::ConversationsEmitter as Emitter;
-use crate::shared::UpdateBus;
+use crate::shared::SingletonBus;
 use crossbeam_channel::*;
 use heraldcore::{channel_send_err, types::ConversationId, NE};
 use lazy_static::*;
@@ -38,7 +38,7 @@ lazy_static! {
     pub(super) static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 }
 
-impl UpdateBus for super::Conversations {
+impl SingletonBus for super::Conversations {
     type Update = ConvUpdates;
 
     fn push(update: Self::Update) -> Result<(), heraldcore::errors::HErr> {

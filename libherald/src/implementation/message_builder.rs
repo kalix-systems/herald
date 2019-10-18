@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus};
 use heraldcore::message::*;
 use std::convert::TryInto;
 use std::path::PathBuf;
@@ -121,27 +121,12 @@ impl MessageBuilderTrait for MessageBuilder {
         let cid = ret_none!(builder.conversation);
 
         ret_err!(builder.store_and_send(move |m| {
-            use crate::shared::messages::*;
-            use crossbeam_channel::*;
+            use crate::implementation::messages::{shared::MsgUpdate, *};
             use heraldcore::message::StoreAndSend::*;
 
             match m {
                 Msg(msg) => {
-                    let tx = match MSG_TXS.get(&cid) {
-                        Some(tx) => tx.clone(),
-                        None => {
-                            let (tx, rx) = unbounded();
-
-                            MSG_TXS.insert(cid, tx);
-                            MSG_RXS.insert(cid, rx);
-                            ret_none!(MSG_TXS.get(&cid)).clone()
-                        }
-                    };
-
-                    ret_err!(tx.send(MsgUpdate::FullMsg(msg)));
-                    if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                        emitter.new_data_ready();
-                    }
+                    ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
                 }
                 Error { error, line_number } => {
                     // TODO better line number usage
@@ -149,21 +134,7 @@ impl MessageBuilderTrait for MessageBuilder {
                     ret_err!(Err(error))
                 }
                 StoreDone(mid) => {
-                    let tx = match MSG_TXS.get(&cid) {
-                        Some(tx) => tx.clone(),
-                        None => {
-                            let (tx, rx) = unbounded();
-
-                            MSG_TXS.insert(cid, tx);
-                            MSG_RXS.insert(cid, rx);
-                            ret_none!(MSG_TXS.get(&cid)).clone()
-                        }
-                    };
-
-                    ret_err!(tx.send(MsgUpdate::StoreDone(mid)));
-                    if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                        emitter.new_data_ready();
-                    }
+                    ret_err!(Messages::push(cid, MsgUpdate::StoreDone(mid)));
                 }
                 SendDone(_) => {
                     // TODO: send status?

@@ -1,9 +1,9 @@
 use crate::{
     ffi,
-    implementation::conversations::Conversations,
+    implementation::{conversations::Conversations, messages},
     interface::*,
     ret_err, ret_none,
-    shared::{self, UpdateBus},
+    shared::{self, AddressedBus, SingletonBus},
 };
 use crossbeam_channel::*;
 use herald_common::*;
@@ -43,52 +43,21 @@ pub struct NotifHandler {
 
 impl NotifHandler {
     fn send(&mut self, notif: Notification) {
+        use crate::implementation::conversations::shared::*;
+        use crate::implementation::users::shared::*;
+        use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
+
         match notif {
             NewMsg(msg_id, cid) => {
-                use shared::messages::*;
-                let tx = match MSG_TXS.get(&cid) {
-                    Some(tx) => tx.clone(),
-                    None => {
-                        let (tx, rx) = unbounded();
-
-                        MSG_TXS.insert(cid, tx);
-                        MSG_RXS.insert(cid, rx);
-                        ret_none!(MSG_TXS.get(&cid)).clone()
-                    }
-                };
-
-                ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                    emitter.new_data_ready();
-                }
-
-                use crate::implementation::conversations::shared::*;
+                ret_err!(Messages::push(cid, MsgUpdate::Msg(msg_id)));
 
                 ret_err!(Conversations::push(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
-                use shared::messages::*;
-                let tx = match MSG_TXS.get(&cid) {
-                    Some(tx) => tx.clone(),
-                    None => {
-                        let (tx, rx) = unbounded();
-
-                        MSG_TXS.insert(cid, tx);
-                        MSG_RXS.insert(cid, rx);
-                        ret_none!(MSG_TXS.get(&cid)).clone()
-                    }
-                };
-
-                ret_err!(tx.send(MsgUpdate::Receipt(mid)));
-                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                    emitter.new_data_ready();
-                }
+                ret_err!(Messages::push(cid, MsgUpdate::Receipt(mid)));
             }
             NewContact(uid, cid) => {
-                use crate::implementation::conversations::shared::*;
-                use crate::implementation::users::shared::*;
-
                 // add user
                 ret_none!(push_user_update(UsersUpdates::NewUser(uid)));
 
@@ -96,13 +65,9 @@ impl NotifHandler {
                 ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             NewConversation(cid) => {
-                use crate::implementation::conversations::shared::*;
                 ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
-                use crate::implementation::conversations::shared::*;
-                use crate::implementation::users::shared::*;
-
                 // handle response
                 ret_none!(push_user_update(UsersUpdates::ReqResp(uid, accepted)));
 

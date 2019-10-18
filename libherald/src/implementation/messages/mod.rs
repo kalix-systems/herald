@@ -1,10 +1,4 @@
-use crate::{
-    ffi,
-    interface::*,
-    ret_err, ret_none,
-    shared::{messages::*, UpdateBus},
-    toasts::new_msg_toast,
-};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -20,6 +14,9 @@ use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
 };
+
+pub(crate) mod shared;
+use shared::*;
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;

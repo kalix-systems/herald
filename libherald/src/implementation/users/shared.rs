@@ -1,4 +1,4 @@
-use crate::{interface::UsersEmitter as Emitter, shared::UpdateBus};
+use crate::{interface::UsersEmitter as Emitter, shared::SingletonBus};
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
@@ -55,7 +55,7 @@ lazy_static! {
     pub(super) static ref USER_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
 }
 
-impl UpdateBus for super::Users {
+impl SingletonBus for super::Users {
     type Update = UsersUpdates;
 
     fn push(update: Self::Update) -> Result<(), heraldcore::errors::HErr> {
