@@ -2254,7 +2254,7 @@ pub trait MessagesTrait {
     fn last_status(&self) -> Option<u32>;
     fn clear_conversation_history(&mut self) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
-    fn index_by_id(&self, msg_id: &[u8]) -> i64;
+    fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
     fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn poll_update(&mut self) -> bool;
@@ -2268,6 +2268,7 @@ pub trait MessagesTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn author(&self, index: usize) -> &str;
     fn body(&self, index: usize) -> Option<&str>;
+    fn data_saved(&self, index: usize) -> bool;
     fn epoch_timestamp_ms(&self, index: usize) -> i64;
     fn has_attachments(&self, index: usize) -> bool;
     fn is_reply(&self, index: usize) -> bool;
@@ -2415,7 +2416,7 @@ pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int) -> i64 {
+pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int) -> u64 {
     let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
     let o = &*ptr;
     let r = o.index_by_id(msg_id);
@@ -2500,6 +2501,12 @@ pub unsafe extern "C" fn messages_data_body(
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_data_saved(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.data_saved(to_usize(row)).into()
 }
 
 #[no_mangle]

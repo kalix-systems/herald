@@ -1226,6 +1226,7 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
+    bool messages_data_data_saved(const Messages::Private*, int);
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     bool messages_data_has_attachments(const Messages::Private*, int);
     bool messages_data_is_reply(const Messages::Private*, int);
@@ -1315,6 +1316,11 @@ QString Messages::body(int row) const
     return s;
 }
 
+bool Messages::dataSaved(int row) const
+{
+    return messages_data_data_saved(m_d, row);
+}
+
 qint64 Messages::epochTimestampMs(int row) const
 {
     return messages_data_epoch_timestamp_ms(m_d, row);
@@ -1360,16 +1366,18 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return cleanNullQVariant(QVariant::fromValue(body(index.row())));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(epochTimestampMs(index.row()));
+            return QVariant::fromValue(dataSaved(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(hasAttachments(index.row()));
+            return QVariant::fromValue(epochTimestampMs(index.row()));
         case Qt::UserRole + 4:
-            return QVariant::fromValue(isReply(index.row()));
+            return QVariant::fromValue(hasAttachments(index.row()));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(messageId(index.row()));
+            return QVariant::fromValue(isReply(index.row()));
         case Qt::UserRole + 6:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return QVariant::fromValue(messageId(index.row()));
         case Qt::UserRole + 7:
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+        case Qt::UserRole + 8:
             return QVariant::fromValue(receiptStatus(index.row()));
         }
         break;
@@ -1392,12 +1400,13 @@ QHash<int, QByteArray> Messages::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
-    names.insert(Qt::UserRole + 2, "epochTimestampMs");
-    names.insert(Qt::UserRole + 3, "hasAttachments");
-    names.insert(Qt::UserRole + 4, "isReply");
-    names.insert(Qt::UserRole + 5, "messageId");
-    names.insert(Qt::UserRole + 6, "op");
-    names.insert(Qt::UserRole + 7, "receiptStatus");
+    names.insert(Qt::UserRole + 2, "dataSaved");
+    names.insert(Qt::UserRole + 3, "epochTimestampMs");
+    names.insert(Qt::UserRole + 4, "hasAttachments");
+    names.insert(Qt::UserRole + 5, "isReply");
+    names.insert(Qt::UserRole + 6, "messageId");
+    names.insert(Qt::UserRole + 7, "op");
+    names.insert(Qt::UserRole + 8, "receiptStatus");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -1441,7 +1450,7 @@ extern "C" {
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_clear_conversation_history(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
-    qint64 messages_index_by_id(const Messages::Private*, const char*, int);
+    quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     bool messages_poll_update(Messages::Private*);
@@ -2566,7 +2575,7 @@ bool Messages::deleteMessage(quint64 row_index)
 {
     return messages_delete_message(m_d, row_index);
 }
-qint64 Messages::indexById(const QByteArray& msg_id) const
+quint64 Messages::indexById(const QByteArray& msg_id) const
 {
     return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
 }

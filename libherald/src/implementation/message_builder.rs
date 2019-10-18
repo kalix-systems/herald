@@ -148,7 +148,24 @@ impl MessageBuilderTrait for MessageBuilder {
                     eprintln!("Error at {}", line_number);
                     ret_err!(Err(error))
                 }
-                Done(_) => {
+                StoreDone(mid) => {
+                    let tx = match MSG_TXS.get(&cid) {
+                        Some(tx) => tx.clone(),
+                        None => {
+                            let (tx, rx) = unbounded();
+
+                            MSG_TXS.insert(cid, tx);
+                            MSG_RXS.insert(cid, rx);
+                            ret_none!(MSG_TXS.get(&cid)).clone()
+                        }
+                    };
+
+                    ret_err!(tx.send(MsgUpdate::StoreDone(mid)));
+                    if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
+                        emitter.new_data_ready();
+                    }
+                }
+                SendDone(_) => {
                     // TODO: send status?
                 }
             }

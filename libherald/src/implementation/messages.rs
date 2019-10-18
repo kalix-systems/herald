@@ -22,6 +22,7 @@ type List = MessagesList;
 /// A thin wrapper around a `MsgId`
 pub struct Message {
     msg_id: MsgId,
+    data_saved: bool,
 }
 
 /// A wrapper around a vector of `Message`s with additional fields
@@ -48,12 +49,12 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn raw_insert(&mut self, msg: Msg) -> Result<(), HErr> {
+    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
         let msg_id = msg.message_id;
         let cid = self.conversation_id.ok_or(NE!())?;
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Message { msg_id });
+        self.list.push(Message { msg_id, data_saved });
         self.map.insert(msg_id, msg);
         self.model.end_insert_rows();
 
@@ -105,22 +106,21 @@ impl MessagesTrait for Messages {
         Some(self.last_msg()?.timestamp.timestamp_millis())
     }
 
-    /// Returns index of a message given its id. Returns `-1` if the message
-    /// cannot be found or `msg_id` is invalid.
-    fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> i64 {
-        let msg_id = ret_err!(msg_id.try_into(), -1);
+    /// Returns index of a message given its id.
+    fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> u64 {
+        let msg_id = ret_err!(msg_id.try_into(), std::u32::MAX as u64);
 
         // sanity check
         if !self.map.contains_key(&msg_id) {
-            return -1;
+            return std::u64::MAX;
         }
 
         // search backwards
         self.list
             .iter()
             .rposition(|mid| msg_id == mid.msg_id)
-            .map(|ix| ix as i64)
-            .unwrap_or(-1)
+            .map(|ix| ix as u64)
+            .unwrap_or(std::u32::MAX as u64)
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
@@ -139,7 +139,10 @@ impl MessagesTrait for Messages {
                         .map(|m| {
                             let mid = m.message_id;
                             self.map.insert(mid, m);
-                            Message { msg_id: mid }
+                            Message {
+                                msg_id: mid,
+                                data_saved: true,
+                            }
                         })
                         .collect();
 
@@ -161,6 +164,10 @@ impl MessagesTrait for Messages {
 
     fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
         self.conversation_id.as_ref().map(|c| c.as_slice())
+    }
+
+    fn data_saved(&self, row_index: usize) -> bool {
+        ret_none!(self.list.get(row_index), false).data_saved
     }
 
     fn author(&self, row_index: usize) -> ffi::UserIdRef {
@@ -290,6 +297,7 @@ impl MessagesTrait for Messages {
                         .begin_insert_rows(self.list.len(), self.list.len());
                     self.list.push(Message {
                         msg_id: new.message_id,
+                        data_saved: true,
                     });
                     self.map.insert(new.message_id, new);
                     self.model.end_insert_rows();
@@ -297,7 +305,7 @@ impl MessagesTrait for Messages {
                     self.emit_last_changed();
                 }
                 MsgUpdate::FullMsg(msg) => {
-                    ret_err!(self.raw_insert(msg), false);
+                    ret_err!(self.raw_insert(msg, false), false);
                 }
                 MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {
@@ -331,7 +339,18 @@ impl MessagesTrait for Messages {
 
                     self.model.data_changed(ix, ix);
                 }
-                _ => {}
+                MsgUpdate::StoreDone(mid) => {
+                    let ix = ret_none!(
+                        self.list
+                            .iter()
+                            // search backwards,
+                            // it's probably fairly recent
+                            .rposition(|m| m.msg_id == mid),
+                        false
+                    );
+                    self.list[ix].data_saved = true;
+                    self.model.data_changed(ix, ix);
+                }
             }
         }
         true

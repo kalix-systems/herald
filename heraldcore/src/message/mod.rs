@@ -10,7 +10,7 @@ pub mod attachments;
 use attachments::*;
 
 /// Message
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Message {
     /// Local message id
     pub message_id: MsgId,
@@ -74,6 +74,7 @@ pub struct OutboundMessageBuilder {
 /// Values `OutboundMessageBuilder`'s `store_and_send` function
 /// can pass into the callback.
 #[allow(clippy::large_enum_variant)]
+#[derive(Debug)]
 pub enum StoreAndSend {
     /// The message being stored and sent
     Msg(Message),
@@ -84,8 +85,10 @@ pub enum StoreAndSend {
         /// The line number the error occured on
         line_number: u32,
     },
-    /// A signal that the process has completed successfully
-    Done(MsgId),
+    /// A signal that the message has been stored successfully
+    StoreDone(MsgId),
+    /// A signal that the message has been sent
+    SendDone(MsgId),
 }
 
 impl OutboundMessageBuilder {
@@ -237,6 +240,8 @@ impl OutboundMessageBuilder {
 
             e!(tx.commit());
 
+            callback(StoreAndSend::StoreDone(msg_id));
+
             let content = cmessages::Message { body, attachments };
             let msg = cmessages::Msg {
                 mid: msg_id,
@@ -245,7 +250,7 @@ impl OutboundMessageBuilder {
             };
             e!(crate::network::send_normal_message(conversation_id, msg));
 
-            callback(StoreAndSend::Done(msg_id));
+            callback(StoreAndSend::SendDone(msg_id));
         })?;
 
         Ok(())
@@ -255,7 +260,7 @@ impl OutboundMessageBuilder {
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
         use crossbeam_channel::*;
 
-        let (tx, rx) = bounded(2);
+        let (tx, rx) = unbounded();
         self.store_and_send(move |m| {
             tx.send(m)
                 .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
@@ -265,18 +270,22 @@ impl OutboundMessageBuilder {
             StoreAndSend::Msg(msg) => msg,
             // TODO use line number
             StoreAndSend::Error { error, .. } => return Err(error),
-            StoreAndSend::Done(msg_id) => {
-                panic!("Unexpected `Done` variant with {:?}", msg_id);
+            other => {
+                panic!("Unexpected  variant {:?}", other);
             }
         };
 
         match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::Done(_) => Ok(out),
-            StoreAndSend::Error { error, line_number } => {
-                panic!("error {} at {}", error, line_number);
+            StoreAndSend::StoreDone(_) => {}
+            other => {
+                panic!("Unexpected variant {:?}", other);
             }
-            StoreAndSend::Msg(_) => {
-                panic!("Message should not be sent twice");
+        }
+
+        match rx.recv().map_err(|_| channel_recv_err!())? {
+            StoreAndSend::SendDone(_) => Ok(out),
+            other => {
+                panic!("Unexpected variant {:?}", other);
             }
         }
     }
