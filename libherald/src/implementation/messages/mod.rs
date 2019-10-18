@@ -39,37 +39,6 @@ pub struct Messages {
     conversation_id: Option<ConversationId>,
 }
 
-impl Messages {
-    fn last_msg(&self) -> Option<&Msg> {
-        let mid = self.list.last()?.msg_id;
-        self.map.get(&mid)
-    }
-
-    fn emit_last_changed(&mut self) {
-        self.emit.last_author_changed();
-        self.emit.last_body_changed();
-        self.emit.last_epoch_timestamp_ms_changed();
-        self.emit.last_status_changed();
-    }
-
-    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
-        let msg_id = msg.message_id;
-        let cid = self.conversation_id.ok_or(NE!())?;
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Message { msg_id, data_saved });
-        self.map.insert(msg_id, msg);
-        self.model.end_insert_rows();
-
-        self.emit_last_changed();
-
-        use crate::implementation::conversations::{shared::*, Conversations};
-        Conversations::push(ConvUpdates::NewActivity(cid))?;
-
-        Ok(())
-    }
-}
-
 impl MessagesTrait for Messages {
     fn new(emit: Emitter, model: List) -> Self {
         Messages {
@@ -126,41 +95,36 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
-        match (conversation_id, self.conversation_id) {
-            (Some(id), None) => {
-                let conversation_id = ret_err!(ConversationId::try_from(id));
+        if let (Some(id), None) = (conversation_id, self.conversation_id) {
+            let conversation_id = ret_err!(ConversationId::try_from(id));
 
-                EMITTERS.insert(conversation_id, self.emit().clone());
+            EMITTERS.insert(conversation_id, self.emit().clone());
 
-                self.conversation_id = Some(conversation_id);
-                self.emit.conversation_id_changed();
+            self.conversation_id = Some(conversation_id);
+            self.emit.conversation_id_changed();
 
-                let messages: Vec<Message> =
-                    ret_err!(conversation::conversation_messages(&conversation_id))
-                        .into_iter()
-                        .map(|m| {
-                            let mid = m.message_id;
-                            self.map.insert(mid, m);
-                            Message {
-                                msg_id: mid,
-                                data_saved: true,
-                            }
-                        })
-                        .collect();
+            let messages: Vec<Message> =
+                ret_err!(conversation::conversation_messages(&conversation_id))
+                    .into_iter()
+                    .map(|m| {
+                        let mid = m.message_id;
+                        self.map.insert(mid, m);
+                        Message {
+                            msg_id: mid,
+                            data_saved: true,
+                        }
+                    })
+                    .collect();
 
-                if messages.is_empty() {
-                    return;
-                }
-
-                self.model
-                    .begin_insert_rows(0, messages.len().saturating_sub(1));
-                self.list = messages;
-                self.model.end_insert_rows();
-                self.emit_last_changed();
-            }
-            _ => {
+            if messages.is_empty() {
                 return;
             }
+
+            self.model
+                .begin_insert_rows(0, messages.len().saturating_sub(1));
+            self.list = messages;
+            self.model.end_insert_rows();
+            self.emit_last_changed();
         }
     }
 
@@ -368,17 +332,43 @@ impl MessagesTrait for Messages {
     }
 }
 
+impl Messages {
+    fn last_msg(&self) -> Option<&Msg> {
+        let mid = self.list.last()?.msg_id;
+        self.map.get(&mid)
+    }
+
+    fn emit_last_changed(&mut self) {
+        self.emit.last_author_changed();
+        self.emit.last_body_changed();
+        self.emit.last_epoch_timestamp_ms_changed();
+        self.emit.last_status_changed();
+    }
+
+    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
+        let msg_id = msg.message_id;
+        let cid = self.conversation_id.ok_or(NE!())?;
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(Message { msg_id, data_saved });
+        self.map.insert(msg_id, msg);
+        self.model.end_insert_rows();
+
+        self.emit_last_changed();
+
+        use crate::implementation::conversations::{shared::*, Conversations};
+        Conversations::push(ConvUpdates::NewActivity(cid))?;
+
+        Ok(())
+    }
+}
+
 impl Drop for Messages {
     fn drop(&mut self) {
-        let cid = match self.conversation_id {
-            Some(cid) => cid,
-            None => {
-                return;
-            }
-        };
-
-        EMITTERS.remove(&cid);
-        TXS.remove(&cid);
-        RXS.remove(&cid);
+        if let Some(cid) = self.conversation_id {
+            EMITTERS.remove(&cid);
+            TXS.remove(&cid);
+            RXS.remove(&cid);
+        }
     }
 }

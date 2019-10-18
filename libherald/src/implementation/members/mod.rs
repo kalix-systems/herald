@@ -1,7 +1,10 @@
 use crate::{ffi, implementation::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{abort_err, contact, types::*, utils::SearchPattern};
-use std::convert::{TryFrom, TryInto};
+use std::{
+    convert::{TryFrom, TryInto},
+    ops::Drop,
+};
 
 type Emitter = MembersEmitter;
 type List = MembersList;
@@ -50,35 +53,25 @@ impl MembersTrait for Members {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
-        if self.conversation_id.is_some() {
-            eprintln!("Cannot modify conversation id");
-            return;
+        if let (Some(id), None) = (conversation_id, self.conversation_id) {
+            let conversation_id = ret_err!(ConversationId::try_from(id));
+
+            shared::EMITTERS.insert(conversation_id, self.emit().clone());
+            let list = ret_err!(contact::conversation_members(&conversation_id));
+
+            self.model
+                .begin_insert_rows(0, list.len().saturating_sub(1));
+            self.list = list
+                .into_iter()
+                .map(|u| {
+                    let id = u.id;
+                    User { id, matched: true }
+                })
+                .collect();
+            self.model.end_insert_rows();
+
+            self.emit.conversation_id_changed();
         }
-
-        let new_list = match conversation_id {
-            Some(conv_id) => {
-                let conv_id = ret_err!(ConversationId::try_from(conv_id));
-
-                ret_err!(contact::conversation_members(&conv_id))
-            }
-            None => {
-                return;
-            }
-        };
-
-        self.model
-            .begin_insert_rows(0, new_list.len().saturating_sub(1));
-        let list = new_list
-            .into_iter()
-            .map(|u| {
-                let id = u.id;
-                User { id, matched: true }
-            })
-            .collect();
-        self.list = list;
-        self.model.end_insert_rows();
-
-        self.emit.conversation_id_changed();
     }
 
     /// Returns user id.
@@ -267,5 +260,16 @@ impl Members {
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
+    }
+}
+
+impl Drop for Members {
+    fn drop(&mut self) {
+        use shared::*;
+        if let Some(cid) = self.conversation_id {
+            EMITTERS.remove(&cid);
+            TXS.remove(&cid);
+            RXS.remove(&cid);
+        }
     }
 }
