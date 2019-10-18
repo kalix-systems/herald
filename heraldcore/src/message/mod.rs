@@ -85,7 +85,7 @@ pub enum StoreAndSend {
         line_number: u32,
     },
     /// A signal that the process has completed successfully
-    Done,
+    Done(MsgId),
 }
 
 impl OutboundMessageBuilder {
@@ -245,7 +245,7 @@ impl OutboundMessageBuilder {
             };
             e!(crate::network::send_normal_message(conversation_id, msg));
 
-            callback(StoreAndSend::Done);
+            callback(StoreAndSend::Done(msg_id));
         })?;
 
         Ok(())
@@ -265,15 +265,18 @@ impl OutboundMessageBuilder {
             StoreAndSend::Msg(msg) => msg,
             // TODO use line number
             StoreAndSend::Error { error, .. } => return Err(error),
-            StoreAndSend::Done => {
-                panic!("Unexpected `Done` variant");
+            StoreAndSend::Done(msg_id) => {
+                panic!("Unexpected `Done` variant with {:?}", msg_id);
             }
         };
 
         match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::Done => Ok(out),
-            _ => {
-                panic!("Unexpected `Done` variant");
+            StoreAndSend::Done(_) => Ok(out),
+            StoreAndSend::Error { error, line_number } => {
+                panic!("error {} at {}", error, line_number);
+            }
+            StoreAndSend::Msg(_) => {
+                panic!("Message should not be sent twice");
             }
         }
     }
@@ -386,7 +389,7 @@ impl InboundMessageBuilder {
             tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
         }
 
-        if !attachment_paths.is_empty() {
+        if has_attachments {
             attachments::add_db(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
         }
 

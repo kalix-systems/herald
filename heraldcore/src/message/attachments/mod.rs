@@ -46,7 +46,7 @@ impl Attachment {
 
         archive.unpack(&path)?;
 
-        Ok(path)
+        Ok(self.hash_dir().to_path_buf())
     }
 }
 
@@ -78,22 +78,22 @@ pub fn get(msg_id: &MsgId) -> Result<AttachmentMeta, HErr> {
 }
 
 /// Attachments
+#[derive(Debug)]
 pub struct AttachmentMeta(Vec<PathBuf>);
 
 impl AttachmentMeta {
     /// Converts `AttachmentMeta` into a vector of `String`s
     pub fn into_flat_strings(self) -> Result<Vec<String>, HErr> {
-        self.0
-            .into_iter()
-            .map(|p| -> Result<_, HErr> {
-                let mut path = PathBuf::from("attachments");
-                path.push(p);
-                Ok(read_dir(path)?.map(|entry| -> Result<_, HErr> { Ok(entry?.path()) }))
-            })
-            .flatten()
-            .flatten()
-            .map(|p| Ok(p?.into_os_string().into_string()?))
-            .collect()
+        let mut out = Vec::with_capacity(self.0.len());
+        for p in self.0 {
+            let mut path = PathBuf::from("attachments");
+            path.push(p);
+            for entry in read_dir(path)? {
+                out.push(entry?.path().into_os_string().into_string()?);
+            }
+        }
+
+        Ok(out)
     }
 }
 
