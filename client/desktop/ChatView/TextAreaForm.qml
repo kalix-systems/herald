@@ -100,6 +100,15 @@ Rectangle {
             width: scrollView.width
         }
 
+        Loader {
+            id: attachmentLoader
+            active: false
+            height: item ? item.height: 0
+            sourceComponent: AttachmentsComponent {}
+            width: scrollView.width
+            onActiveChanged: print("hi")
+        }
+
         ScrollView {
             id: scrollView
             height: scrollHeight
@@ -152,6 +161,16 @@ Rectangle {
                 focus: true
             }
         },
+
+        State {
+            name: "attachmentstate"
+            when: builder.isMediaMessage
+            PropertyChanges {
+                target: attachmentLoader
+                active: true
+            }
+        },
+
         State {
             name: "default"
             PropertyChanges {

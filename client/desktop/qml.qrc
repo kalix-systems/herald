@@ -47,5 +47,6 @@
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/SidePane.qml</file>
+        <file>ChatView/AttachmentsComponent.qml</file>
     </qresource>
 </RCC>
