@@ -10,13 +10,18 @@ ApplicationWindow {
     width: 300
     height: 500
 
+    property alias heraldState: heraldGlobals.heraldState
+    property alias networkHandle: heraldGlobals.networkHandle
+    property alias heraldUtils: heraldGlobals.heraldUtils
+
     State.HeraldGlobals {
         id: heraldGlobals
     }
 
     State.AppState {
         id: appstate
-        view: heraldGlobals.heraldState.configInit ? appstate.cvMain : appstate.lpMain
+        view: heraldState.configInit ? appstate.cvMain : appstate.lpMain
+        stackView: mainView
     }
 
     StackView {

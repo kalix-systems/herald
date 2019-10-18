@@ -10,7 +10,7 @@ Page {
         fill: parent
     }
 
-    //property color bgEndColor: "#5c7598"
+    property color bgEndColor: "#5c7598"
     property color bgStartColor: "#5c7598"
 
     background: Rectangle {
@@ -18,11 +18,13 @@ Page {
     }
 
     LoginField {
+        id: entryField
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: newAccButton.top
             bottomMargin: QmlCfg.units.gu(3)
         }
+        Keys.onEnterPressed: registerUser()
     }
 
     LoginButton {
@@ -35,6 +37,14 @@ Page {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
             bottomMargin: QmlCfg.units.gu(12)
+        }
+
+        onClicked: registerUser()
+    }
+
+    function registerUser() {
+        if (networkHandle.registerNewUser(entryField.text.trim())) {
+            heraldState.configInit = true
         }
     }
 }
