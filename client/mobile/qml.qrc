@@ -17,5 +17,6 @@
         <file>qml/LoginPage/LoginButton.qml</file>
         <file>qml/LoginPage/LoginField.qml</file>
         <file>qml/Common/StdText.qml</file>
+        <file>qml/ContactsView/ContactViewMain.qml</file>
     </qresource>
 </RCC>
