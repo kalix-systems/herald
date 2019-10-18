@@ -69,12 +69,6 @@ impl SingletonBus for super::Users {
     }
 }
 
-pub fn push_user_update(update: UsersUpdates) -> Option<()> {
-    USER_BUS.tx.clone().send(update).ok()?;
-    users_emit_new_data()?;
-    Some(())
-}
-
 /// Emits a signal to the QML runtime, returns `None` on failure.
 #[must_use]
 fn users_emit_new_data() -> Option<()> {

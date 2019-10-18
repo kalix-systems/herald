@@ -478,21 +478,18 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
     ~NetworkHandle();
     bool connectionPending() const;
     bool connectionUp() const;
-    quint8 membersData() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void membersDataChanged();
 };
 
 class Users : public QAbstractItemModel

@@ -2565,7 +2565,6 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    members_data_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -2582,7 +2581,6 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            members_data_changed: self.members_data_changed,
         }
     }
     fn clear(&self) {
@@ -2601,12 +2599,6 @@ impl NetworkHandleEmitter {
             (self.connection_up_changed)(ptr);
         }
     }
-    pub fn members_data_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.members_data_changed)(ptr);
-        }
-    }
 }
 
 pub trait NetworkHandleTrait {
@@ -2614,7 +2606,6 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn members_data(&self) -> u8;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
@@ -2625,13 +2616,11 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_members_data_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        members_data_changed: network_handle_members_data_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -2650,11 +2639,6 @@ pub unsafe extern "C" fn network_handle_connection_pending_get(ptr: *const Netwo
 #[no_mangle]
 pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHandle) -> bool {
     (&*ptr).connection_up()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_members_data_get(ptr: *const NetworkHandle) -> u8 {
-    (&*ptr).members_data()
 }
 
 #[no_mangle]

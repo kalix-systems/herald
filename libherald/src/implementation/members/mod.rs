@@ -1,13 +1,12 @@
-use crate::{
-    ffi, implementation::users::shared::get_user, interface::*, ret_err, ret_none,
-    shared::members::*,
-};
+use crate::{ffi, implementation::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{abort_err, contact, types::*, utils::SearchPattern};
 use std::convert::{TryFrom, TryInto};
 
 type Emitter = MembersEmitter;
 type List = MembersList;
+
+pub(crate) mod shared;
 
 #[derive(Clone)]
 /// Thin wrapper around `heraldcore::contact::Contact`,
@@ -219,9 +218,10 @@ impl MembersTrait for Members {
 
     fn poll_update(&mut self) -> bool {
         let cid = &ret_none!(self.conversation_id, false);
-        let rx = ret_none!(MEMBER_RXS.get(cid), false);
+        let rx = ret_none!(shared::RXS.get(cid), false);
 
-        use MemberUpdate::*;
+        use shared::MemberUpdate::*;
+
         for update in rx.try_iter() {
             match update {
                 ReqResp(uid, accepted) => {

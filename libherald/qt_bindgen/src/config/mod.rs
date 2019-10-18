@@ -159,8 +159,7 @@ fn conversations() -> Object {
 fn network_handle() -> Object {
     let props = props! {
         connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool),
-        membersData: Prop::new().simple(QUint8)
+        connectionPending: Prop::new().simple(Bool)
     };
 
     let funcs = functions! {

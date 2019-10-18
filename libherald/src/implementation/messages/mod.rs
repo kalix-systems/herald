@@ -130,7 +130,7 @@ impl MessagesTrait for Messages {
             (Some(id), None) => {
                 let conversation_id = ret_err!(ConversationId::try_from(id));
 
-                MSG_EMITTERS.insert(conversation_id, self.emit().clone());
+                EMITTERS.insert(conversation_id, self.emit().clone());
 
                 self.conversation_id = Some(conversation_id);
                 self.emit.conversation_id_changed();
@@ -283,7 +283,7 @@ impl MessagesTrait for Messages {
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, false);
 
-        let rx = match MSG_RXS.get(&conv_id) {
+        let rx = match RXS.get(&conv_id) {
             Some(rx) => rx,
             // it's not a problem if the model doesn't have a receiver yet
             None => return true,
@@ -377,8 +377,8 @@ impl Drop for Messages {
             }
         };
 
-        MSG_EMITTERS.remove(&cid);
-        MSG_RXS.remove(&cid);
-        MSG_TXS.remove(&cid);
+        EMITTERS.remove(&cid);
+        TXS.remove(&cid);
+        RXS.remove(&cid);
     }
 }

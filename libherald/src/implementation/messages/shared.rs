@@ -20,14 +20,14 @@ pub enum MsgUpdate {
 lazy_static! {
     /// Concurrent hash map from `ConversationId`s to an event stream.
     /// This is used to route message related notifications that arrive from the network.
-    pub static ref MSG_RXS: DashMap<ConversationId, Receiver<MsgUpdate>> = DashMap::default();
+    pub(super) static ref RXS: DashMap<ConversationId, Receiver<MsgUpdate>> = DashMap::default();
 
-    /// Concurrent hash map from `ConversationId`s to an event stream.
+    /// Concurrent hash map from `ConversationId`s to a channel sender.
     /// This is used to route message related notifications that arrive from the network.
-    pub static ref MSG_TXS: DashMap<ConversationId, Sender<MsgUpdate>> = DashMap::default();
+    pub(super) static ref TXS: DashMap<ConversationId, Sender<MsgUpdate>> = DashMap::default();
     /// Concurrent hash map of `MessagesEmitter`. These are removed when the
-    /// `Messages` object is dropped.
-    pub static ref MSG_EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
+    /// associated `Messages` object is dropped.
+    pub(super) static ref EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
 }
 
 impl AddressedBus for Messages {
@@ -35,19 +35,19 @@ impl AddressedBus for Messages {
     type Update = MsgUpdate;
 
     fn push(to: Self::Addr, update: Self::Update) -> Result<(), HErr> {
-        let tx = match MSG_TXS.get(&to) {
+        let tx = match TXS.get(&to) {
             Some(tx) => tx.clone(),
             None => {
                 let (tx, rx) = unbounded();
 
-                MSG_TXS.insert(to, (&tx).clone());
-                MSG_RXS.insert(to, rx);
+                TXS.insert(to, (&tx).clone());
+                RXS.insert(to, rx);
                 tx
             }
         };
 
         tx.send(update).map_err(|_| channel_send_err!())?;
-        if let Some(mut emitter) = MSG_EMITTERS.get_mut(&to) {
+        if let Some(mut emitter) = EMITTERS.get_mut(&to) {
             emitter.new_data_ready();
         }
         Ok(())

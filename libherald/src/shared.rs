@@ -1,7 +1,5 @@
 use crossbeam_channel::*;
-use dashmap::DashMap;
-use herald_common::UserId;
-use heraldcore::{errors::HErr, types::ConversationId};
+use heraldcore::errors::HErr;
 use lazy_static::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
@@ -51,23 +49,6 @@ pub mod errors {
         ERROR_TRY_POLL.fetch_add(1, Ordering::Acquire);
         emitter.try_poll_changed();
         Some(())
-    }
-}
-
-/// Shared state related to conversation members
-pub mod members {
-    use super::*;
-
-    /// Conversation member related updates
-    pub enum MemberUpdate {
-        /// Response to a conversation add request
-        ReqResp(UserId, bool),
-    }
-
-    lazy_static! {
-        /// Concurrent hash map from `ConversationId`s to an event stream.
-        /// This is used to route conversation members related notifications that arrive from the network.
-        pub static ref MEMBER_RXS: DashMap<ConversationId, Receiver<MemberUpdate>> = DashMap::default();
     }
 }
 
