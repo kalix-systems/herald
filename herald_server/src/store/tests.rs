@@ -178,7 +178,7 @@ fn valid_keys() {
 #[test]
 #[serial]
 fn add_get_expire_pending() {
-    for i in 0..100 {
+    for i in 0..10 {
         let mut conn = open_conn();
 
         let kp = sig::KeyPair::gen_new();
@@ -192,19 +192,19 @@ fn add_get_expire_pending() {
 
         let push1 = Push {
             tag: PushTag::User,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"a"),
         };
-        std::thread::sleep(std::time::Duration::from_micros(10));
+        std::thread::sleep(std::time::Duration::from_secs(1));
         let push2 = Push {
             tag: PushTag::User,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"b"),
         };
-        std::thread::sleep(std::time::Duration::from_micros(10));
+        std::thread::sleep(std::time::Duration::from_secs(1));
         let push3 = Push {
             tag: PushTag::User,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"c"),
         };
 

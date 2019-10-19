@@ -110,7 +110,7 @@ impl State {
         let push_users::Req { to, exc, msg } = req;
         let msg = Push {
             tag: PushTag::User,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg,
         };
 
@@ -142,7 +142,7 @@ impl State {
         let push_devices::Req { to, msg } = req;
         let msg = Push {
             tag: PushTag::Device,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg,
         };
 

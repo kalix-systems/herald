@@ -57,18 +57,18 @@ fn unique_violation_to_redundant<T>(query_res: QueryResult<T>) -> Result<PKIResp
 type RawPkMeta = (
     Vec<u8>,
     Vec<u8>,
-    DateTime<Utc>,
+    i64,
     Option<Vec<u8>>,
     Option<Vec<u8>>,
-    Option<DateTime<Utc>>,
+    Option<i64>,
 );
 
 type RawKeyAndMeta = (
     Vec<u8>,
     Vec<u8>,
-    DateTime<Utc>,
+    i64,
     Vec<u8>,
-    Option<DateTime<Utc>>,
+    Option<i64>,
     Option<Vec<u8>>,
     Option<Vec<u8>>,
 );
@@ -156,7 +156,7 @@ impl Conn {
                 .values((
                     keys::key.eq(key.data().as_ref()),
                     keys::signed_by.eq(key.signed_by().as_ref()),
-                    keys::ts.eq(key.timestamp()),
+                    keys::ts.eq(key.timestamp().0),
                     keys::signature.eq(key.sig().as_ref()),
                 ))
                 .execute(&self.0)?;
@@ -197,7 +197,7 @@ impl Conn {
                 .values((
                     keys::key.eq(new_key.data().as_ref()),
                     keys::signed_by.eq(new_key.signed_by().as_ref()),
-                    keys::ts.eq(new_key.timestamp()),
+                    keys::ts.eq(new_key.timestamp().0),
                     keys::signature.eq(new_key.sig().as_ref()),
                 ))
                 .execute(&self.0);
@@ -230,12 +230,12 @@ impl Conn {
 
         let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
         let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
-        let sig_meta = SigMeta::new(sig, signed_by, ts);
+        let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
         let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
 
         let dep_sig_meta = if dep_is_some {
-            let dep_ts = dep_ts.ok_or(MissingData)?;
+            let dep_ts = dep_ts.ok_or(MissingData)?.into();
 
             let dep_signed_by =
                 sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
@@ -281,7 +281,7 @@ impl Conn {
 
             let num_updated = update(to_dep)
                 .set((
-                    dep_ts.eq(meta.timestamp().naive_utc()),
+                    dep_ts.eq(meta.timestamp().0),
                     dep_signed_by.eq(meta.signed_by().as_ref()),
                     dep_signature.eq(meta.sig().as_ref()),
                 ))
@@ -359,7 +359,7 @@ impl Conn {
                 )| {
                     let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
                     let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
-                    let timestamp = creation_ts;
+                    let timestamp = creation_ts.into();
                     let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
 
                     let dep_is_some = deprecation_ts.is_some()
@@ -375,7 +375,7 @@ impl Conn {
                             sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
                                 .ok_or(InvalidKey)?;
 
-                        let dep_ts = deprecation_ts.ok_or(MissingData)?;
+                        let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
 
                         Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
                     } else {
@@ -413,7 +413,7 @@ impl Conn {
                     let push_timestamp = msg.timestamp;
                     let push_vec = serde_cbor::to_vec(msg)?;
                     insert_into(pushes)
-                        .values((push_data.eq(push_vec), push_ts.eq(push_timestamp)))
+                        .values((push_data.eq(push_vec), push_ts.eq(push_timestamp.0)))
                         .returning(push_id)
                         .get_result(&self.0)?
                 };

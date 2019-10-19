@@ -17,7 +17,6 @@ futures-preview = "0.3.0-alpha.19"
 
 
 bytes           = { version = "0.4",            features = ["serde"] }
-chrono          = { version = "0.4",            features = ["serde"] }
 diesel          = { version = "1.0.0",          features = ["postgres", "r2d2"] }
 serde           = { version = "1.0",            features = ["derive"] }
 warp            = { git = "https://github.com/udoprog/warp.git" }

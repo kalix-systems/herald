@@ -161,7 +161,7 @@ impl SigMeta {
                 signer_time,
                 verify_time,
             }
-        } else if sign::verify_detached(&self.sig, &signed, &self.signed_by) {
+        } else if !sign::verify_detached(&self.sig, &signed, &self.signed_by) {
             SigValid::BadSign
         } else {
             SigValid::Yes
