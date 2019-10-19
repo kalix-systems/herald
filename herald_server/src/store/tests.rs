@@ -177,7 +177,89 @@ fn valid_keys() {
 
 #[test]
 #[serial]
-fn add_get_expire_pending() {
+fn add_get_expire_pending_ts() {
+    let mut conn = open_conn();
+
+    let kp = sig::KeyPair::gen_new();
+    let user_id = "Hello".try_into().unwrap();
+
+    let signed_pk = kp.sign(*kp.public_key());
+    conn.register_user(user_id, signed_pk).unwrap();
+
+    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+    assert_eq!(pending.len(), 0);
+
+    let push1 = Push {
+        tag: PushTag::User,
+        timestamp: Time::now(),
+        msg: bytes::Bytes::from_static(b"a"),
+    };
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    let push2 = Push {
+        tag: PushTag::User,
+        timestamp: Time::now(),
+        msg: bytes::Bytes::from_static(b"b"),
+    };
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    let push3 = Push {
+        tag: PushTag::User,
+        timestamp: Time::now(),
+        msg: bytes::Bytes::from_static(b"c"),
+    };
+
+    let addf = |p: Push| {
+        let pk = *kp.public_key();
+        std::thread::spawn(move || {
+            let mut conn = Conn(POOL.get().expect("failed to get connection"));
+            assert!(conn.add_pending(vec![pk], [p].iter()).is_ok());
+        })
+    };
+
+    let h1 = addf(push1.clone());
+    let h2 = addf(push2.clone());
+    let h3 = addf(push3.clone());
+
+    h1.join().expect("first insert failed");
+    h2.join().expect("second insert failed");
+    h3.join().expect("third insert failed");
+
+    let mut pushes = vec![push1, push2, push3];
+    let pushes_unsorted = pushes.clone();
+    pushes.sort_unstable_by_key(|p| p.timestamp);
+    assert_eq!(pushes, pushes_unsorted);
+
+    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[..1]);
+
+    let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[..2]);
+
+    let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[..3]);
+
+    let pending = conn.get_pending(*kp.public_key(), 4).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[..3]);
+
+    assert!(conn.expire_pending(*kp.public_key(), 1).is_ok());
+
+    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[1..2]);
+
+    let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+    let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+    assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+    assert!(conn.expire_pending(*kp.public_key(), 2).is_ok());
+
+    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+    assert!(pending.is_empty());
+}
+
+#[test]
+#[serial]
+fn add_get_expire_pending_id() {
     for i in 0..10 {
         let mut conn = open_conn();
 
@@ -195,39 +277,24 @@ fn add_get_expire_pending() {
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"a"),
         };
-        std::thread::sleep(std::time::Duration::from_secs(1));
         let push2 = Push {
             tag: PushTag::User,
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"b"),
         };
-        std::thread::sleep(std::time::Duration::from_secs(1));
         let push3 = Push {
             tag: PushTag::User,
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"c"),
         };
 
-        let addf = |p: Push| {
-            let pk = *kp.public_key();
-            std::thread::spawn(move || {
-                let mut conn = Conn(POOL.get().expect("failed to get connection"));
-                assert!(conn.add_pending(vec![pk], [p].iter()).is_ok());
-            })
-        };
-
-        let h1 = addf(push1.clone());
-        let h2 = addf(push2.clone());
-        let h3 = addf(push3.clone());
-
-        h1.join().expect("first insert failed");
-        h2.join().expect("second insert failed");
-        h3.join().expect("third insert failed");
-
         let mut pushes = vec![push1, push2, push3];
         let pushes_unsorted = pushes.clone();
-        pushes.sort_unstable_by_key(|p| p.timestamp);
+        pushes.sort_by_key(|p| p.timestamp);
         assert_eq!(pushes, pushes_unsorted);
+
+        conn.add_pending(vec![*kp.public_key()], pushes.iter())
+            .expect("failed to add pushes");
 
         let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
         assert_eq!(pending.as_slice(), &pushes[..1]);
@@ -260,7 +327,6 @@ fn add_get_expire_pending() {
         dbg!(i);
     }
 }
-
 #[test]
 #[serial]
 fn add_and_get_prekey() {
