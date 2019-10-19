@@ -436,7 +436,7 @@ impl Conn {
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_data)
-            .order(pushes::push_ts.asc())
+            .order((pushes::push_ts.asc(), pushes::push_id.asc()))
             .limit(limit as i64)
             .get_results(self.deref_mut())?;
 
@@ -454,7 +454,7 @@ impl Conn {
             .inner_join(pushes::table)
             .filter(pending::key.eq(key.as_ref()))
             .select(pushes::push_id)
-            .order(pushes::push_ts.asc())
+            .order((pushes::push_ts.asc(), pushes::push_id.asc()))
             .limit(limit as i64);
 
         delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref_mut())?;
