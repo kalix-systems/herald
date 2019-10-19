@@ -1,5 +1,4 @@
 use crate::{channel_recv_err, db::Database, errors::HErr, loc, types::*, utils};
-use chrono::{DateTime, TimeZone, Utc};
 use herald_common::*;
 use rusqlite::params;
 use std::collections::HashMap;
@@ -21,7 +20,7 @@ pub struct Message {
     /// Body of message
     pub body: Option<MessageBody>,
     /// Time the message was sent (if outbound) or received at the server (if inbound).
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: Time,
     /// Message id of the message being replied to
     pub op: Option<MsgId>,
     /// Send status
@@ -45,10 +44,7 @@ impl Message {
             conversation: row.get(2)?,
             body: row.get(3)?,
             op: row.get(4)?,
-            timestamp: Utc
-                .timestamp_opt(row.get(5)?, 0)
-                .single()
-                .unwrap_or_else(Utc::now),
+            timestamp: row.get(5)?,
             receipts,
             send_status: row.get(7)?,
             has_attachments: row.get(8)?,
@@ -154,7 +150,7 @@ impl OutboundMessageBuilder {
 
         let conversation_id = conversation.ok_or(MissingConversationId)?;
         let msg_id: MsgId = utils::rand_id().into();
-        let timestamp = Utc::now();
+        let timestamp = Time::now();
         let author = crate::config::Config::static_id()?;
         let send_status = MessageSendStatus::NoAck;
 
@@ -217,13 +213,13 @@ impl OutboundMessageBuilder {
                     send_status,
                     receipts_bytes,
                     has_attachments,
-                    timestamp.timestamp(),
+                    timestamp,
                 ],
             ));
 
             e!(tx.execute(
                 include_str!("../conversation/sql/update_last_active.sql"),
-                params![timestamp.timestamp(), conversation_id],
+                params![timestamp, conversation_id],
             ));
 
             if let Some(op) = op {
@@ -302,7 +298,7 @@ pub(crate) struct InboundMessageBuilder {
     /// Body of message
     body: Option<MessageBody>,
     /// Time the message was sent (if outbound) or received at the server (if inbound).
-    timestamp: Option<DateTime<Utc>>,
+    timestamp: Option<Time>,
     /// Message id of the message being replied to
     op: Option<MsgId>,
     attachments: Vec<attachments::Attachment>,
@@ -329,7 +325,7 @@ impl InboundMessageBuilder {
         self
     }
 
-    pub(crate) fn timestamp(&mut self, ts: DateTime<Utc>) -> &mut Self {
+    pub(crate) fn timestamp(&mut self, ts: Time) -> &mut Self {
         self.timestamp.replace(ts);
         self
     }
@@ -385,13 +381,13 @@ impl InboundMessageBuilder {
                 send_status,
                 receipts,
                 has_attachments,
-                timestamp.timestamp(),
+                timestamp,
             ],
         )?;
 
         tx.execute(
             include_str!("../conversation/sql/update_last_active.sql"),
-            params![Utc::now().timestamp(), conversation_id],
+            params![Time::now(), conversation_id],
         )?;
 
         if let Some(op) = op {
@@ -534,7 +530,7 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
 
 #[allow(unused)]
 /// Testing utility
-pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, DateTime<Utc>) {
+pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
     use crate::womp;
     use std::convert::TryInto;
 

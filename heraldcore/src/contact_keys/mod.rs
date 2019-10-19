@@ -22,7 +22,7 @@ pub(crate) fn add_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<
                 key.as_ref(),
                 meta.signed_by().as_ref(),
                 meta.sig().as_ref(),
-                meta.timestamp().timestamp(),
+                meta.timestamp(),
             ])?;
         }
     }
@@ -72,7 +72,7 @@ pub(crate) fn deprecate_keys(keys: &[Signed<sign::PublicKey>]) -> Result<(), HEr
                 key.as_ref(),
                 meta.signed_by().as_ref(),
                 meta.sig().as_ref(),
-                meta.timestamp().timestamp()
+                meta.timestamp()
             ])?;
         }
     }

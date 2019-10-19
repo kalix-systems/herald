@@ -1,4 +1,5 @@
 use crate::errors::HErr;
+use herald_common::*;
 use image::{self, FilterType, ImageFormat};
 use lazy_static::*;
 use std::path::{Path, PathBuf};
@@ -13,7 +14,7 @@ lazy_static! {
 /// Determines path of profile picture for user id.
 pub fn profile_picture_path(id: &str) -> PathBuf {
     let mut image_path = IMAGE_PATH.clone();
-    image_path.push(format!("{}_{}", id, chrono::Utc::now()));
+    image_path.push(format!("{}_{}", id, Time::now().0));
     image_path.set_extension("png");
     image_path
 }

@@ -5,7 +5,6 @@ use crate::{
     types::*,
 };
 use chainmail::block::*;
-use chrono::prelude::*;
 use herald_common::*;
 use lazy_static::*;
 use std::{
@@ -350,7 +349,7 @@ impl Default for Event {
     }
 }
 
-fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, HErr> {
+fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
@@ -430,7 +429,7 @@ fn handle_cmessage(ts: DateTime<Utc>, cm: ConversationMessage) -> Result<Event, 
     Ok(ev)
 }
 
-fn handle_dmessage(_: DateTime<Utc>, msg: DeviceMessage) -> Result<Event, HErr> {
+fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
     let (from, msg) = msg.open()?;

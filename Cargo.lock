@@ -701,7 +701,6 @@ name = "heraldcore"
 version = "0.1.0"
 dependencies = [
  "chainmail 0.1.0 (git+https://github.com/kalix-systems/chainmail.git)",
- "chrono 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
