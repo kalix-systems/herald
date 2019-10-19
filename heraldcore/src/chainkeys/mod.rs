@@ -11,7 +11,7 @@ lazy_static! {
         let mut conn = abort_err!(rusqlite::Connection::open("ck.sqlite3"));
         let tx = abort_err!(conn.transaction());
         abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
-        drop(tx);
+        abort_err!(tx.commit());
         Mutex::new(conn)
     };
 }
