@@ -3,7 +3,6 @@ CREATE TABLE IF NOT EXISTS chainkeys(
   hash BLOB NOT NULL,
   used INTEGER NOT NULL DEFAULT(0),
   conversation_id BLOB NOT NULL,
-  FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   PRIMARY KEY(chainkey, hash)
 );
 
