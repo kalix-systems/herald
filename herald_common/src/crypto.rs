@@ -334,7 +334,3 @@ pub fn hash_slice(slice: &[u8]) -> Option<[u8; 32]> {
     out.copy_from_slice(digest.as_ref());
     Some(out)
 }
-
-pub fn hash_and_hex(slice: &[u8]) -> Option<String> {
-    hash_slice(slice).map(|h| format!("{:x?}", h))
-}
