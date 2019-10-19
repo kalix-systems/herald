@@ -1,8 +1,20 @@
-use crate::{db::Database, errors::HErr, types::ConversationId};
+use crate::{abort_err, errors::HErr, types::ConversationId};
 use chainmail::{block::*, errors::ChainError};
 use herald_common::GlobalId;
+use lazy_static::*;
+use parking_lot::Mutex;
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
+
+lazy_static! {
+    static ref CK_CONN: Mutex<rusqlite::Connection> = {
+        let mut conn = abort_err!(rusqlite::Connection::open("ck.sqlite3"));
+        let tx = abort_err!(conn.transaction());
+        abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
+        drop(tx);
+        Mutex::new(conn)
+    };
+}
 
 type RawBlock = Vec<u8>;
 type RawSigner = Vec<u8>;
@@ -174,7 +186,7 @@ impl BlockStore for ConversationId {
         hash: BlockHash,
         key: ChainKey,
     ) -> Result<Vec<(Block, Self::Signer)>, Self::Error> {
-        let mut db = Database::get()?;
+        let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
         let blocks = store_key(&tx, *self, hash, key);
         tx.commit()?;
@@ -187,7 +199,7 @@ impl BlockStore for ConversationId {
         &mut self,
         blocks: I,
     ) -> Result<(), Self::Error> {
-        let mut db = Database::get()?;
+        let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
 
         mark_used(&tx, *self, blocks)?;
@@ -199,12 +211,12 @@ impl BlockStore for ConversationId {
         &self,
         blocks: I,
     ) -> Result<FoundKeys, Self::Error> {
-        let db = Database::get()?;
+        let db = CK_CONN.lock();
         get_keys(&db, *self, blocks)
     }
 
     fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
-        let db = Database::get()?;
+        let db = CK_CONN.lock();
         get_unused(&db, *self)
     }
 
@@ -214,7 +226,7 @@ impl BlockStore for ConversationId {
         block: Block,
         awaiting: Vec<BlockHash>,
     ) -> Result<(), Self::Error> {
-        let mut db = Database::get()?;
+        let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
 
         let block_bytes = serde_cbor::to_vec(&block)?;

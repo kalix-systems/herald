@@ -15,10 +15,8 @@ SOURCES += \
 debug {
  RUST_BUILD_TYPE = debug
 }
-else {
-  release | profile {
-   RUST_BUILD_TYPE = release
-  }
+release | profile {
+    RUST_BUILD_TYPE = release
 }
 
 # untested, may need -lsqlite3

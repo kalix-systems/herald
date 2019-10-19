@@ -2,10 +2,21 @@ use super::*;
 use crate::{conversation::ConversationBuilder, womp};
 use serial_test_derive::serial;
 
+fn reset() {
+    let mut conn = CK_CONN.lock();
+    let tx = conn.transaction().expect(womp!());
+    tx.execute_batch(include_str!("sql/drop.sql"))
+        .expect(womp!());
+    tx.execute_batch(include_str!("sql/create.sql"))
+        .expect(womp!());
+    tx.commit().expect(womp!());
+}
+
 #[test]
 #[serial]
 fn raw_pending() {
-    Database::reset_all().expect(womp!());
+    reset();
+
     let cid = ConversationId::from(crate::utils::rand_id());
 
     ConversationBuilder::new()
@@ -13,8 +24,8 @@ fn raw_pending() {
         .add()
         .expect(womp!());
 
-    let mut db = Database::get().expect(womp!());
-    let tx = db.transaction().expect(womp!());
+    let mut conn = CK_CONN.lock();
+    let tx = conn.transaction().expect(womp!());
 
     let blockhash1 = BlockHash::from_slice(&[1; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash2 = BlockHash::from_slice(&[2; BLOCKHASH_BYTES]).expect(womp!());
@@ -97,7 +108,8 @@ fn raw_pending() {
 #[test]
 #[serial]
 fn blockstore() {
-    Database::reset_all().expect(womp!());
+    reset();
+
     let mut cid1 = ConversationId::from(crate::utils::rand_id());
     let mut cid2 = ConversationId::from(crate::utils::rand_id());
 
