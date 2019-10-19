@@ -6,6 +6,7 @@ mod types;
 pub use types::*;
 #[macro_use]
 mod newtype_macros;
+pub mod time;
 
 pub use bytes::Bytes;
 pub use chainmail::block::*;
