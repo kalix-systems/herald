@@ -70,7 +70,7 @@ fn add_and_get() {
     builder1
         .id(mid1)
         .author(author)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .conversation_id(conversation)
         .body("1".try_into().expect(womp!()));
     builder1.store().expect(womp!());
@@ -80,7 +80,7 @@ fn add_and_get() {
     builder2
         .id(mid2)
         .author(author)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .conversation_id(conversation)
         .body("2".try_into().expect(womp!()));
     builder2.store().expect(womp!());
@@ -251,7 +251,7 @@ fn delete_message() {
         .id(mid)
         .author(author)
         .conversation_id(conversation)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()));
     builder.store().expect(womp!());
 
@@ -282,7 +282,7 @@ fn delete_conversation() {
     builder1
         .id(mid1)
         .author(author)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .conversation_id(conversation)
         .body("1".try_into().expect(womp!()));
     builder1.store().expect(womp!());
@@ -292,7 +292,7 @@ fn delete_conversation() {
     builder2
         .id(mid2)
         .author(author)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .conversation_id(conversation)
         .body("2".try_into().expect(womp!()));
     builder2.store().expect(womp!());
@@ -344,7 +344,7 @@ fn convo_message_order() {
         .id(mid)
         .author(author)
         .conversation_id(conv_id1)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()));
     builder.store().expect(womp!());
 

@@ -1,4 +1,4 @@
-use crate::{crypto::sig::*, types::*};
+use crate::{crypto::sig::*, time::Time, types::*};
 use rusqlite::{types as sql_types, ToSql};
 use std::convert::TryFrom;
 
@@ -28,5 +28,19 @@ impl ToSql for KeyPair {
 impl sql_types::FromSql for KeyPair {
     fn column_result(value: sql_types::ValueRef) -> sql_types::FromSqlResult<Self> {
         serde_cbor::from_slice(value.as_blob()?).map_err(|_| sql_types::FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for Time {
+    fn to_sql(&self) -> Result<sql_types::ToSqlOutput, rusqlite::Error> {
+        use sql_types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Integer(self.0)))
+    }
+}
+
+impl sql_types::FromSql for Time {
+    fn column_result(value: sql_types::ValueRef) -> sql_types::FromSqlResult<Self> {
+        Ok(value.as_i64()?.into())
     }
 }

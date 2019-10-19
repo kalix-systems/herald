@@ -57,7 +57,7 @@ fn inbound_message_attachment() {
     builder
         .id(mid)
         .author(other.id)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .attachments(vec![attach])
         .conversation_id(other.pairwise_conversation);
     builder.store().expect(womp!());

@@ -49,10 +49,6 @@ version          = "0.22.1"
 default_features = false
 features         = ["jpeg", "png_codec"]
 
-[dependencies.chrono]
-version          = "0.4.7"
-default_features = false
-
 [dependencies.pulldown-cmark]
 version  = "0.6.0"
 # optional = true

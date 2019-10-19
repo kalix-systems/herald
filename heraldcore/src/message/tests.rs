@@ -106,7 +106,7 @@ fn receipt_before_message() {
     builder
         .id(msg_id)
         .conversation_id(conversation_id)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
         .author(author);
     builder.store().expect(womp!());
