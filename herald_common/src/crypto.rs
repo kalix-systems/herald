@@ -78,6 +78,28 @@ fn compute_signing_data(slice: &[u8], ts: Time) -> Vec<u8> {
     out
 }
 
+fn verify_sig(
+    slice: &[u8],
+    signer_time: Time,
+    sig: sign::Signature,
+    signed_by: sign::PublicKey,
+) -> SigValid {
+    let verify_time = Time::now();
+    let dat = compute_signing_data(slice, signer_time);
+    let ts_valid =
+        (signer_time <= verify_time) || ((verify_time.0 - signer_time.0).abs() <= TIMESTAMP_FUZZ);
+    if !ts_valid {
+        SigValid::BadTime {
+            signer_time,
+            verify_time,
+        }
+    } else if !sign::verify_detached(&sig, &dat, &signed_by) {
+        SigValid::BadSign
+    } else {
+        SigValid::Yes
+    }
+}
+
 impl<T: AsRef<[u8]>> Signed<T> {
     pub fn into_data(self) -> T {
         self.split().0
@@ -111,28 +133,12 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        let verify_time = Time::now();
-        let signer_time = self.timestamp;
-        let dat = compute_signing_data(self.data.as_ref(), signer_time);
-        if !check_ts(signer_time, verify_time) {
-            SigValid::BadTime {
-                signer_time,
-                verify_time,
-            }
-        } else if !sign::verify_detached(&self.sig, &dat, &self.signed_by) {
-            SigValid::BadSign
-        } else {
-            SigValid::Yes
-        }
+        verify_sig(self.data.as_ref(), self.timestamp, self.sig, self.signed_by)
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
         &self.signed_by
     }
-}
-
-fn check_ts(signer_time: Time, verify_time: Time) -> bool {
-    (signer_time <= verify_time) || ((verify_time.0 - signer_time.0).abs() <= TIMESTAMP_FUZZ)
 }
 
 impl SigMeta {
@@ -153,19 +159,7 @@ impl SigMeta {
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
-        let verify_time = Time::now();
-        let signer_time = self.timestamp;
-        let signed = compute_signing_data(msg, signer_time);
-        if !check_ts(signer_time, verify_time) {
-            SigValid::BadTime {
-                signer_time,
-                verify_time,
-            }
-        } else if !sign::verify_detached(&self.sig, &signed, &self.signed_by) {
-            SigValid::BadSign
-        } else {
-            SigValid::Yes
-        }
+        verify_sig(msg, self.timestamp, self.sig, self.signed_by)
     }
 
     pub fn signed_by(&self) -> &sign::PublicKey {
