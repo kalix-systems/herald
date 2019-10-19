@@ -21,10 +21,6 @@ features = ["serde-1"]
 version = "0.4"
 features = ["serde"]
 
-[dependencies.chrono]
-version = "0.4"
-features = ["serde"]
-
 [dependencies.rusqlite]
 version = "0.20.0"
 optional = true

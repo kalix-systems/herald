@@ -1,7 +1,6 @@
 #![allow(clippy::new_without_default)]
 
 use crate::*;
-pub use chrono::prelude::*;
 pub use serde::*;
 pub use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
 
@@ -25,8 +24,8 @@ impl UQ {
 pub enum SigValid {
     Yes,
     BadTime {
-        signer_time: DateTime<Utc>,
-        verify_time: DateTime<Utc>,
+        signer_time: Time,
+        verify_time: Time,
     },
     BadSign,
 }
@@ -41,14 +40,14 @@ pub const TIMESTAMP_FUZZ: i64 = 3600;
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Signed<T: AsRef<[u8]>> {
     data: T,
-    timestamp: DateTime<Utc>,
+    timestamp: Time,
     sig: sign::Signature,
     signed_by: sign::PublicKey,
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SigMeta {
-    timestamp: DateTime<Utc>,
+    timestamp: Time,
     sig: sign::Signature,
     signed_by: sign::PublicKey,
 }
@@ -72,10 +71,10 @@ impl<T: AsRef<[u8]>> From<(T, SigMeta)> for Signed<T> {
     }
 }
 
-fn compute_signing_data<Tz: TimeZone>(slice: &[u8], ts: DateTime<Tz>) -> Vec<u8> {
+fn compute_signing_data(slice: &[u8], ts: Time) -> Vec<u8> {
     let mut out = Vec::with_capacity(slice.len() + 8);
     out.extend_from_slice(slice);
-    out.extend_from_slice(&i64::to_le_bytes(ts.timestamp()));
+    out.extend_from_slice(&i64::to_le_bytes(ts.0));
     out
 }
 
@@ -107,12 +106,12 @@ impl<T: AsRef<[u8]>> Signed<T> {
         &self.data
     }
 
-    pub fn timestamp(&self) -> &DateTime<Utc> {
+    pub fn timestamp(&self) -> &Time {
         &self.timestamp
     }
 
     pub fn verify_sig(&self) -> SigValid {
-        let verify_time = Utc::now();
+        let verify_time = Time::now();
         let signer_time = self.timestamp;
         let dat = compute_signing_data(self.data.as_ref(), signer_time);
         if !check_ts(signer_time, verify_time) {
@@ -132,13 +131,12 @@ impl<T: AsRef<[u8]>> Signed<T> {
     }
 }
 
-fn check_ts<Tz: TimeZone>(signer_time: DateTime<Tz>, verify_time: DateTime<Tz>) -> bool {
-    (signer_time <= verify_time)
-        || ((verify_time.timestamp() - signer_time.timestamp()).abs() <= TIMESTAMP_FUZZ)
+fn check_ts(signer_time: Time, verify_time: Time) -> bool {
+    (signer_time <= verify_time) || ((verify_time.0 - signer_time.0).abs() <= TIMESTAMP_FUZZ)
 }
 
 impl SigMeta {
-    pub fn new(sig: sign::Signature, signed_by: sign::PublicKey, timestamp: DateTime<Utc>) -> Self {
+    pub fn new(sig: sign::Signature, signed_by: sign::PublicKey, timestamp: Time) -> Self {
         Self {
             sig,
             signed_by,
@@ -146,7 +144,7 @@ impl SigMeta {
         }
     }
 
-    pub fn timestamp(&self) -> &DateTime<Utc> {
+    pub fn timestamp(&self) -> &Time {
         &self.timestamp
     }
 
@@ -155,7 +153,7 @@ impl SigMeta {
     }
 
     pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
-        let verify_time = Utc::now();
+        let verify_time = Time::now();
         let signer_time = self.timestamp;
         let signed = compute_signing_data(msg, signer_time);
         if !check_ts(signer_time, verify_time) {
@@ -245,7 +243,7 @@ pub mod sig {
         }
 
         pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
-            let timestamp = Utc::now();
+            let timestamp = Time::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
             let signed = Signed {
@@ -263,7 +261,7 @@ pub mod sig {
         }
 
         pub fn sign_detached(&self, data: &[u8]) -> SigMeta {
-            let timestamp = Utc::now();
+            let timestamp = Time::now();
             let to_sign = compute_signing_data(data, timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
             let meta = SigMeta {
