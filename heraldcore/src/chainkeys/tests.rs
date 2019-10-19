@@ -1,5 +1,5 @@
 use super::*;
-use crate::{conversation::ConversationBuilder, womp};
+use crate::womp;
 use serial_test_derive::serial;
 
 fn reset() {
@@ -18,11 +18,6 @@ fn raw_pending() {
     reset();
 
     let cid = ConversationId::from(crate::utils::rand_id());
-
-    ConversationBuilder::new()
-        .conversation_id(cid)
-        .add()
-        .expect(womp!());
 
     let mut conn = CK_CONN.lock();
     let tx = conn.transaction().expect(womp!());
@@ -112,15 +107,6 @@ fn blockstore() {
 
     let mut cid1 = ConversationId::from(crate::utils::rand_id());
     let mut cid2 = ConversationId::from(crate::utils::rand_id());
-
-    ConversationBuilder::new()
-        .conversation_id(cid1)
-        .add()
-        .expect(womp!());
-    ConversationBuilder::new()
-        .conversation_id(cid2)
-        .add()
-        .expect(womp!());
 
     let blockhash11 = BlockHash::from_slice(&[11; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash12 = BlockHash::from_slice(&[12; BLOCKHASH_BYTES]).expect(womp!());
