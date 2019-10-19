@@ -68,7 +68,12 @@ impl Database {
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
             Ok(conn) => {
-                conn.busy_timeout(std::time::Duration::from_secs(6000))?;
+                // conn.busy_timeout(std::time::Duration::from_secs(6000))?;
+                fn busy_handler(_: i32) -> bool {
+                    true
+                }
+
+                conn.busy_handler(Some(busy_handler))?;
 
                 // `NormalPattern`
                 conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
