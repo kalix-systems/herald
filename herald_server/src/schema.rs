@@ -2,9 +2,9 @@ table! {
     keys (key) {
         key -> Bytea,
         signed_by -> Bytea,
-        ts -> Timestamptz,
+        ts -> Int8,
         signature -> Bytea,
-        dep_ts -> Nullable<Timestamptz>,
+        dep_ts -> Nullable<Int8>,
         dep_signed_by -> Nullable<Bytea>,
         dep_signature -> Nullable<Bytea>,
     }
@@ -27,7 +27,7 @@ table! {
 table! {
     pushes (push_id) {
         push_id -> Int8,
-        push_ts -> Timestamptz,
+        push_ts -> Int8,
         push_data -> Bytea,
     }
 }
