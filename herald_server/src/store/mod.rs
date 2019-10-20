@@ -148,41 +148,33 @@ impl Conn {
         Ok(out)
     }
 
-    //pub async fn pop_prekeys(
-    //    &mut self,
-    //    keys: &[sig::PublicKey],
-    //) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
-    //    let builder = self.build_transaction().deferrable();
+    pub async fn pop_prekeys(
+        &mut self,
+        keys: &[sig::PublicKey],
+    ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
+        let mut client = get_client().await?;
 
-    //    builder.run(|| {
-    //        keys.iter()
-    //            .map(|k| {
-    //                // TODO I think this can be simplified using a RETURNING clause but diesel
-    //                // doesn't support this syntax ¯\_(ツ)_/¯, fix it when we switch to tokio-postgres
-    //                let raw_pk: Option<Vec<u8>> = prekeys::table
-    //                    .filter(prekeys::signing_key.eq(k.as_ref()))
-    //                    .select(prekeys::sealed_key)
-    //                    .limit(1)
-    //                    .get_result(&self.0)
-    //                    .optional()?;
+        let stmt = client
+            .prepare_typed(
+                include_str!("sql/pop_prekey.sql"),
+                &[Type::BYTEA],
+            )
+            .await?;
 
-    //                match raw_pk {
-    //                    Some(raw) => {
-    //                        diesel::delete(
-    //                            prekeys::table
-    //                                .filter(prekeys::signing_key.eq(k.as_ref()))
-    //                                .filter(prekeys::sealed_key.eq(&raw)),
-    //                        )
-    //                        .execute(&self.0)?;
+        let mut prekeys = Vec::with_capacity(keys.len());
 
-    //                        Ok(Some(serde_cbor::from_slice(raw.as_slice())?))
-    //                    }
-    //                    None => Ok(None),
-    //                }
-    //            })
-    //            .collect()
-    //    })
-    //}
+        for k in keys {
+            let val: Option<Vec<u8>> = client.query_one(&stmt, &[&k.as_ref()]).await?.get(0);
+            let prekey = match val {
+                Some(val) => serde_cbor::from_slice(&val)?,
+                None => None,
+            };
+
+            prekeys.push(prekey);
+        }
+
+        Ok(prekeys)
+    }
 
     //pub async fn register_user(
     //    &mut self,
