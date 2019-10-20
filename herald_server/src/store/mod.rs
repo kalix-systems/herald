@@ -185,7 +185,11 @@ impl Conn {
             .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
             .await?;
 
-        if tx.query_one(&exists_stmt, &[&user_id.as_str()]).await?.get(0) {
+        if tx
+            .query_one(&exists_stmt, &[&user_id.as_str()])
+            .await?
+            .get(0)
+        {
             return Ok(register::Res::UIDTaken);
         }
 
@@ -214,54 +218,71 @@ impl Conn {
             )
             .await?;
 
-        tx.execute(&add_user_key_stmt, &[&user_id.as_str(), &key.data().as_ref()]).await?;
+        tx.execute(
+            &add_user_key_stmt,
+            &[&user_id.as_str(), &key.data().as_ref()],
+        )
+        .await?;
         tx.commit().await?;
 
         return Ok(register::Res::Success);
     }
 
-    //pub async fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
-    //    let builder = self.build_transaction().deferrable();
+    pub async fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
+        let mut client = get_client().await?;
+        let tx = client.transaction().await?;
 
-    //    builder.run(|| {
-    //        let user_id: String = match keys::table
-    //            .filter(keys::key.eq(new_key.signed_by().as_ref()))
-    //            .filter(keys::dep_signature.is_null())
-    //            .filter(keys::dep_signed_by.is_null())
-    //            .filter(keys::dep_ts.is_null())
-    //            .inner_join(userkeys::table)
-    //            .select(userkeys::user_id)
-    //            .get_result(&self.0)
-    //            .optional()?
-    //        {
-    //            None => {
-    //                // TODO test this branch
-    //                return Ok(PKIResponse::DeadKey);
-    //            }
-    //            Some(uid) => uid,
-    //        };
+        let user_id_stmt = tx
+            .prepare_typed(include_str!("sql/get_user_id_by_key.sql"), &[Type::BYTEA])
+            .await?;
 
-    //        let res = diesel::insert_into(keys::table)
-    //            .values((
-    //                keys::key.eq(new_key.data().as_ref()),
-    //                keys::signed_by.eq(new_key.signed_by().as_ref()),
-    //                keys::ts.eq(new_key.timestamp().0),
-    //                keys::signature.eq(new_key.sig().as_ref()),
-    //            ))
-    //            .execute(&self.0);
+        let user_id = match tx
+            .query_one(&user_id_stmt, &[&key.signed_by().as_ref()])
+            .await?
+            .get::<_, Option<String>>(0)
+        {
+            Some(uid) => uid,
+            None => {
+                return Ok(PKIResponse::DeadKey);
+            }
+        };
 
-    //        unique_violation_to_redundant(res)?;
+        let add_key_stmt = tx
+            .prepare_typed(
+                include_str!("sql/add_key.sql"),
+                &[Type::BYTEA, Type::BYTEA, Type::INT8, Type::BYTEA],
+            )
+            .await?;
 
-    //        let res = diesel::insert_into(userkeys::table)
-    //            .values((
-    //                userkeys::user_id.eq(user_id.as_str()),
-    //                userkeys::key.eq(new_key.data().as_ref()),
-    //            ))
-    //            .execute(&self.0);
+        let res = tx
+            .execute(
+                &add_key_stmt,
+                &[
+                    &key.data().as_ref(),
+                    &key.signed_by().as_ref(),
+                    &key.timestamp().0,
+                    &key.sig().as_ref(),
+                ],
+            )
+            .await;
 
-    //        unique_violation_to_redundant(res)
-    //    })
-    //}
+        unique_violation_to_redundant(res)?;
+
+        let add_user_key_stmt = tx
+            .prepare_typed(
+                include_str!("sql/add_user_key.sql"),
+                &[Type::TEXT, Type::BYTEA],
+            )
+            .await?;
+        let res = tx
+            .execute(
+                &add_user_key_stmt,
+                &[&user_id.as_str(), &key.data().as_ref()],
+            )
+            .await;
+
+        unique_violation_to_redundant(res)
+    }
 
     //pub async fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
     //    let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = keys::table
