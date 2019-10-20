@@ -474,7 +474,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
         let mut db = chainkeys::CK_CONN.lock();
         let mut tx = db.transaction()?;
-        debug_assert_eq!(store_key(&mut tx, cid, hash, key)?, Vec::new());
+        debug_assert_eq!(chainkeys::store_key(&mut tx, cid, hash, key)?, Vec::new());
         // TODO: replace used with probably_used here
         // in general we probably want a slightly smarter system for dealing with scenarios where
         // we thought a message wasn't sent but it was
