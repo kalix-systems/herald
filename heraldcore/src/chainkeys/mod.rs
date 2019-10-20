@@ -7,7 +7,7 @@ use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 lazy_static! {
-    static ref CK_CONN: Mutex<rusqlite::Connection> = {
+    pub static ref CK_CONN: Mutex<rusqlite::Connection> = {
         let mut conn = abort_err!(rusqlite::Connection::open("ck.sqlite3"));
         let tx = abort_err!(conn.transaction());
         abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
@@ -70,7 +70,7 @@ fn raw_pop_unblocked_blocks(
     res
 }
 
-fn store_key(
+pub fn store_key(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
@@ -94,7 +94,7 @@ fn store_key(
         .collect()
 }
 
-fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
@@ -108,7 +108,7 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     Ok(())
 }
 
-fn mark_unused(
+pub fn mark_unused(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: &BTreeSet<BlockHash>,
@@ -209,10 +209,10 @@ impl ConversationId {
     ) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let mut db = CK_CONN.lock();
         let mut tx = db.transaction()?;
-        let blocks = store_key(&mut tx, *self, hash, key);
+        let blocks = store_key(&mut tx, *self, hash, key)?;
         tx.commit()?;
 
-        blocks
+        Ok(blocks)
     }
 
     // TODO GC strategy

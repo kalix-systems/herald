@@ -1,4 +1,5 @@
 use crate::{
+    chainkeys,
     config::Config,
     errors::HErr::{self, *},
     pending,
@@ -469,11 +470,11 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
         let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
+
+        debug_assert_eq!(cid.store_key(hash, key)?, Vec::new());
+
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => {
-                cid.store_key(hash, key)?;
-                Ok(())
-            }
+            Ok(push_users::Res::Success) => Ok(()),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
@@ -489,14 +490,11 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
                 CAUGHT_UP.store(false, Ordering::Release);
 
-                // TODO: make chainmail API return hash on sealing so this won't be necessary
-                let hash = cm
-                    .body()
-                    .compute_hash()
-                    .expect("failed to compute block hash");
-
-                cid.store_key(hash, key)?;
-                cid.mark_used([hash].iter())?;
+                let mut db = chainkeys::CK_CONN.lock();
+                let mut tx = db.transaction()?;
+                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                chainkeys::mark_unused(&mut tx, cid, cm.body().parent_hashes())?;
+                tx.commit()?;
 
                 pending::add_to_pending(cid, content)
             }
