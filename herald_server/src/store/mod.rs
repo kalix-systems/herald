@@ -71,7 +71,7 @@ fn unique_violation_to_redundant(query_res: Result<u64, PgError>) -> Result<PKIR
     Ok(query_res.map(|_| PKIResponse::Success)?)
 }
 
-async fn get_client() -> Result<Conn, PgError> {
+pub async fn get_client() -> Result<Conn, PgError> {
     let (client, connection) = tokio_postgres::connect(&database_url(), NoTls).await?;
 
     // The connection object performs the actual communication with the database,
