@@ -111,7 +111,7 @@ impl Database {
     }
 
     /// Resets all tables in database
-    #[allow(unused)]
+    #[cfg(test)]
     pub(crate) fn reset_all() -> Result<(), HErr> {
         let mut db = Self::get()?;
         let tx = db.transaction()?;
