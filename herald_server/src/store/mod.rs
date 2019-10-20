@@ -284,41 +284,38 @@ impl Conn {
         unique_violation_to_redundant(res)
     }
 
-    //pub async fn read_key(&mut self, key_arg: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-    //    let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = keys::table
-    //        .filter(keys::key.eq(key_arg.as_ref()))
-    //        .select((
-    //            keys::signed_by,
-    //            keys::signature,
-    //            keys::ts,
-    //            keys::dep_signed_by,
-    //            keys::dep_signature,
-    //            keys::dep_ts,
-    //        ))
-    //        .get_result(self.deref_mut())?;
+    pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+        let client = get_client().await?;
+        let stmt = client.prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA]).await?;
 
-    //    let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
-    //    let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
-    //    let sig_meta = SigMeta::new(sig, signed_by, ts.into());
+        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = {
+            let row = client.query_one(&stmt, &[&key.as_ref()]).await?;
 
-    //    let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
+            (row.get(0), row.get(1), row.get(2), row.get(3), row.get(4), row.get(5))
+        };
 
-    //    let dep_sig_meta = if dep_is_some {
-    //        let dep_ts = dep_ts.ok_or(MissingData)?.into();
+        let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
+        let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
+        let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
-    //        let dep_signed_by =
-    //            sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
+        let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
 
-    //        let dep_signature =
-    //            sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
+        let dep_sig_meta = if dep_is_some {
+            let dep_ts = dep_ts.ok_or(MissingData)?.into();
 
-    //        Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
-    //    } else {
-    //        None
-    //    };
+            let dep_signed_by =
+                sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
 
-    //    Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
-    //}
+            let dep_signature =
+                sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
+
+            Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
+        } else {
+            None
+        };
+
+        Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
+    }
 
     //pub async fn deprecate_key(
     //    &mut self,
