@@ -375,17 +375,16 @@ impl Conn {
         Ok(row.get(0))
     }
 
-    //pub async fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
-    //    use crate::schema::keys::dsl::*;
+    pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
+        let client = get_client().await?;
+        let stmt = client
+            .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
+            .await?;
 
-    //    let query = keys
-    //        .filter(key.eq(key_arg.as_ref()))
-    //        .filter(dep_ts.is_null())
-    //        .filter(dep_signed_by.is_null())
-    //        .filter(dep_signature.is_null());
+        let row = client.query_one(&stmt, &[&key.as_ref()]).await?;
 
-    //    Ok(select(exists(query)).get_result(self.deref_mut())?)
-    //}
+        Ok(row.get(0))
+    }
 
     //pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
     //    let keys: Vec<Vec<u8>> = userkeys::table
