@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use dotenv::dotenv;
-use futures::FutureExt;
+use futures::{FutureExt, Stream, StreamExt};
 use herald_common::*;
 use lazy_pond::LazyPond;
 use std::{
@@ -120,26 +120,33 @@ impl Conn {
         Ok(row.get(0))
     }
 
-        pub async fn add_prekeys(&mut self, pres: &[sealed::PublicKey]) -> Result<Vec<PKIResponse>, Error> {
-            let mut client = get_client().await?;
-            let tx = client.transaction().await?;
-    
-            let stmt = tx.prepare_typed(include_str!("sql/add_prekey.sql"), &[BYTEA, BYTEA]).await?;
-    
-            pres.iter().map(|pre| {
-                        stmt.execute( 
-                        let res = diesel::insert_into(prekeys)
-                            .values((
-                                signing_key.eq(pre.signed_by().as_ref()),
-                                sealed_key.eq(serde_cbor::to_vec(&pre)?),
-                            ))
-                            .execute(&self.0);
-    
-                        unique_violation_to_redundant(res)
-                    })
-                    .collect()
-            })
-        
+    pub async fn add_prekeys(
+        &mut self,
+        pres: &[sealed::PublicKey],
+    ) -> Result<Vec<PKIResponse>, Error> {
+        let mut client = get_client().await?;
+
+        let stmt = client
+            .prepare_typed(
+                include_str!("sql/add_prekey.sql"),
+                &[Type::BYTEA, Type::BYTEA],
+            )
+            .await?;
+
+        let mut out = Vec::with_capacity(pres.len());
+        for pre in pres {
+                let res = client
+                    .execute(
+                        &stmt,
+                        &[&pre.signed_by().as_ref(), &serde_cbor::to_vec(&pre)?],
+                    )
+                    .await;
+
+                out.push(unique_violation_to_redundant(res)?);
+        }
+
+        Ok(out)
+    }
 
     //pub async fn pop_prekeys(
     //    &mut self,
@@ -488,18 +495,21 @@ impl Conn {
     //    Ok(out)
     //}
 
-    //pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
-    //    let push_ids = pending::table
-    //        .inner_join(pushes::table)
-    //        .filter(pending::key.eq(key.as_ref()))
-    //        .select(pushes::push_id)
-    //        .order((pushes::push_ts.asc(), pushes::push_id.asc()))
-    //        .limit(limit as i64);
+    pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
+        let text = format!(include_str!("sql/expire_pending.sql"), limit=limit);
+        let mut client = get_client().await?;
 
-    //    delete(pushes::table.filter(pushes::push_id.eq_any(push_ids))).execute(self.deref_mut())?;
+        let stmt = client
+            .prepare_typed(
+                &text,
+                &[Type::BYTEA, Type::BYTEA],
+            )
+            .await?;
+        self.execute(&stmt, &[&key.as_ref()]).await?;
 
-    //    Ok(())
-    //}
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
