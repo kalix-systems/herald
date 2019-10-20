@@ -6,13 +6,9 @@ use crate::{config::test_config, womp};
 
 /// Testing utility
 fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-    use crate::womp;
-    use std::convert::TryInto;
-
     let mut builder = OutboundMessageBuilder::default();
     builder.conversation_id(conv).body(
-        "test"
-            .try_into()
+        msg.try_into()
             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
     );
     let out = builder

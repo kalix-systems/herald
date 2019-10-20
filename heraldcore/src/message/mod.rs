@@ -1,4 +1,4 @@
-use crate::{channel_recv_err, db::Database, errors::HErr, loc, types::*, utils};
+use crate::{db::Database, errors::HErr, types::*, utils};
 use herald_common::*;
 use rusqlite::params;
 use std::collections::HashMap;
@@ -253,7 +253,9 @@ impl OutboundMessageBuilder {
     }
 
     // NOTE: This function should probably remain only public to the crate.
+    #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
+        use crate::{channel_recv_err, loc};
         use crossbeam_channel::*;
 
         let (tx, rx) = unbounded();

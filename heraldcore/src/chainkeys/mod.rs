@@ -202,7 +202,7 @@ fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
 }
 
 impl ConversationId {
-    pub fn store_key(
+    pub(crate) fn store_key(
         &self,
         hash: BlockHash,
         key: ChainKey,
@@ -216,7 +216,10 @@ impl ConversationId {
     }
 
     // TODO GC strategy
-    pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(&self, blocks: I) -> Result<(), HErr> {
+    pub(crate) fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+        &self,
+        blocks: I,
+    ) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
         let mut tx = db.transaction()?;
 
@@ -225,7 +228,9 @@ impl ConversationId {
         Ok(())
     }
 
-    pub fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
+    #[allow(unused)]
+    // TODO use this
+    pub(crate) fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
         let mut tx = db.transaction()?;
 
@@ -234,7 +239,7 @@ impl ConversationId {
         Ok(())
     }
 
-    pub fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
+    pub(crate) fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
         &self,
         blocks: I,
     ) -> Result<FoundKeys, HErr> {
@@ -242,12 +247,12 @@ impl ConversationId {
         get_keys(&db, *self, blocks)
     }
 
-    pub fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
+    pub(crate) fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
         let db = CK_CONN.lock();
         get_unused(&db, *self)
     }
 
-    pub fn add_pending(
+    pub(crate) fn add_pending(
         &self,
         signer: &GlobalId,
         block: Block,
@@ -268,7 +273,11 @@ impl ConversationId {
         Ok(())
     }
 
-    pub fn open_block(&self, signer: &GlobalId, block: Block) -> Result<DecryptionResult, HErr> {
+    pub(crate) fn open_block(
+        &self,
+        signer: &GlobalId,
+        block: Block,
+    ) -> Result<DecryptionResult, HErr> {
         let hashes = block.parent_hashes().clone();
         match self.get_keys(hashes.iter())? {
             FoundKeys::Found(parent_keys) => {
@@ -284,7 +293,7 @@ impl ConversationId {
         }
     }
 
-    pub fn store_genesis(&self, gen: &Genesis) -> Result<Vec<(Block, GlobalId)>, HErr> {
+    pub(crate) fn store_genesis(&self, gen: &Genesis) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let hash = gen.compute_hash().ok_or(ChainError::CryptoError)?;
         let key = gen.key().clone();
         self.store_key(hash, key)
