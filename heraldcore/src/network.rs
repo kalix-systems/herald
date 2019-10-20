@@ -472,16 +472,28 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
 
-        debug_assert_eq!(cid.store_key(hash, key)?, Vec::new());
-        cid.mark_used(cm.body().parent_hashes().iter())?;
+        let mut db = chainkeys::CK_CONN.lock();
+        let mut tx = db.transaction()?;
+        debug_assert_eq!(store_key(&mut tx, cid, hash, key)?, Vec::new());
+        // TODO: replace used with probably_used here
+        // in general we probably want a slightly smarter system for dealing with scenarios where
+        // we thought a message wasn't sent but it was
+        chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Success) => {
+                tx.commit()?;
+                Ok(())
+            }
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
             ))),
             Err(e) => {
+                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                chainkeys::mark_unused(&mut tx, cid, cm.body().parent_hashes())?;
+                tx.commit()?;
+
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
                 eprintln!(
@@ -491,12 +503,6 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
                 );
 
                 CAUGHT_UP.store(false, Ordering::Release);
-
-                let mut db = chainkeys::CK_CONN.lock();
-                let mut tx = db.transaction()?;
-                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
-                chainkeys::mark_unused(&mut tx, cid, cm.body().parent_hashes())?;
-                tx.commit()?;
 
                 pending::add_to_pending(cid, content)
             }
