@@ -462,11 +462,7 @@ impl ConversationMessage {
 
     /// Opens the message.
     pub fn open(self) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
-        let ConversationMessage {
-            mut cid,
-            from,
-            body,
-        } = self;
+        let ConversationMessage { cid, from, body } = self;
 
         let mut out = Vec::new();
 

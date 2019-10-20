@@ -364,7 +364,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             AddedToConvo(ac) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
-                let mut cid = ac.cid;
+                let cid = ac.cid;
 
                 let title = ac.title;
 
@@ -436,7 +436,7 @@ fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
 
     match msg {
         DeviceMessageBody::ContactReq(cr) => {
-            let dmessages::ContactReq { gen, mut cid } = cr;
+            let dmessages::ContactReq { gen, cid } = cr;
             if gen.verify_sig(&from.did) {
                 crate::contact::ContactBuilder::new(from.uid)
                     .pairwise_conversation(cid)
@@ -552,7 +552,7 @@ fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, mut cid: ConversationId) -> Result<(), HErr> {
+pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let kp = Config::static_keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
@@ -581,7 +581,7 @@ pub fn start_conversation(
         conv_builder.title(title.clone());
     }
 
-    let mut cid = conv_builder.add_with_tx(&tx)?;
+    let cid = conv_builder.add_with_tx(&tx)?;
 
     crate::members::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
