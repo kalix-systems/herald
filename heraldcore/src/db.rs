@@ -53,11 +53,9 @@ impl DerefMut for Database {
 
 /// Initializes storage
 pub fn init() -> Result<(), HErr> {
-    let mut db = Database::get()?;
+    let db = Database::get()?;
 
-    let tx = db.transaction()?;
-    tx.execute_batch(include_str!("sql/create_all.sql"))?;
-    tx.commit()?;
+    db.execute_batch(include_str!("sql/create_all.sql"))?;
 
     Ok(())
 }
