@@ -159,9 +159,16 @@ impl Conn {
         let mut prekeys = Vec::with_capacity(keys.len());
 
         for k in keys {
-            let val: Option<Vec<u8>> = client.query_one(&stmt, &[&k.as_ref()]).await?.get(0);
-            let prekey = match val {
-                Some(val) => serde_cbor::from_slice(&val)?,
+            let prekey = match client
+                .query(&stmt, &[&k.as_ref()])
+                .await?
+                .into_iter()
+                .next()
+            {
+                Some(row) => {
+                    let val = row.get::<_, Vec<u8>>(0);
+                    serde_cbor::from_slice(&val)?
+                }
                 None => None,
             };
 
@@ -422,9 +429,7 @@ impl Conn {
         let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
         let client = get_client().await?;
 
-        let stmt = client
-            .prepare_typed(&text, &[Type::BYTEA])
-            .await?;
+        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
         client.execute(&stmt, &[&key.as_ref()]).await?;
 
         Ok(())
