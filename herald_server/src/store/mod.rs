@@ -540,6 +540,15 @@ impl Conn {
         Ok(())
     }
 
+    pub async fn setup(&mut self) -> Result<(), Error> {
+        // create
+        self.batch_execute(include_str!(
+            "../../migrations/2019-09-21-221007_herald/up.sql"
+        ))
+        .await?;
+        Ok(())
+    }
+
     pub async fn reset_all(&mut self) -> Result<(), Error> {
         let tx = self.transaction().await?;
 
