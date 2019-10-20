@@ -29,7 +29,7 @@ features         = ["rusqlite_"]
 path = "../lazy_pond"
 
 [dependencies.chainmail]
-path = "../../chainmail"
+git = "https://github.com/kalix-systems/chainmail"
 
 [dependencies.websocket]
 version          = "0.23"
