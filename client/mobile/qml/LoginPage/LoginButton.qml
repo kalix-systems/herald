@@ -8,16 +8,12 @@ Button {
     property string lbText: ""
 
     text: lbText
-    font.pixelSize: QmlCfg.buttonTextSize
+    font.pixelSize: QmlCfg.mainTextSize
 
     background: Rectangle {
         id: bg
         color: Qt.darker(lbColor, parent.pressed ? 1.5 : 1.3)
         radius: QmlCfg.radius
-        anchors {
-            margins: QmlCfg.smallMargin
-            centerIn: parent
-            fill: parent
-        }
+        anchors.margins: QmlCfg.smallMargin
     }
 }

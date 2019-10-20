@@ -17,8 +17,13 @@
         <file>qml/LoginPage/LoginButton.qml</file>
         <file>qml/LoginPage/LoginField.qml</file>
         <file>qml/Common/StdText.qml</file>
-        <file>qml/ContactsView/ContactViewMain.qml</file>
-        <file>qml/ContactsView/CVToolButton.qml</file>
         <file>qml/State/js/transitions.js</file>
+        <file>qml/Errors/ErrorHandler.qml</file>
+        <file>qml/Errors/ErrorPopup.qml</file>
+        <file>qml/ConversationView/Controls/CVHeader.qml</file>
+        <file>qml/ConversationView/Controls/CVListItem.qml</file>
+        <file>qml/ConversationView/ConversationViewMain.qml</file>
+        <file>qml/SearchView/SearchViewHeader.qml</file>
+        <file>qml/SearchView/SearchViewMain.qml</file>
     </qresource>
 </RCC>

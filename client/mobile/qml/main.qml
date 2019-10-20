@@ -1,9 +1,11 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
-import "./ContactsView" as Contactview
+import LibHerald 1.0
+import "./ConversationView" as CVView
 import "./ChatView" as ChatView
-import "./State" as State
+import "./Errors" as Errors
 import "./LoginPage" as LoginPage
+import "./State" as State
 
 ApplicationWindow {
     visible: true
@@ -20,6 +22,18 @@ ApplicationWindow {
     // around the code base
     property alias heraldUtils: heraldGlobals.heraldUtils
 
+    Loader {
+        id: configLoader
+        active: heraldState.configInit
+        sourceComponent: Config {
+            id: config
+        }
+    }
+
+    // displays error dialog upon output from
+    // libherald, meant as a debugging tool
+    Errors.ErrorHandler {}
+
     // initializer for LibHerald models
     State.HeraldGlobals {
         id: heraldGlobals
@@ -28,14 +42,13 @@ ApplicationWindow {
     // handles transitions for the main stack view, initializes all
     // views, and sets properties to the correct values.
     State.AppState {
-        id: appstate
-        view: heraldState.configInit ? appstate.cvMain : appstate.lpMain
+        id: appState
         stackView: mainView
     }
 
     StackView {
         id: mainView
         anchors.fill: parent
-        initialItem: appstate.view
+        initialItem: appState.lpMain
     }
 }

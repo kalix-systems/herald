@@ -1,24 +1,24 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
-import "../ContactsView" as ContactView
+import "../ConversationView" as CVView
 import "../LoginPage" as LoginPage
 
 Item {
-    property Component view
     property StackView stackView
-    property Component cvMain: ContactView.ContactViewMain {}
     property Component lpMain: LoginPage.LoginLandingPage {}
-
-    state: "setup"
+    property Component cvMain: CVView.ConversationViewMain {}
 
     states: [
         State {
+            when: !heraldState.configInit
             name: "setup"
-            PropertyChanges {}
         },
         State {
+            when: heraldState.configInit
             name: "contact"
-            PropertyChanges {}
+            StateChangeScript {
+                script: stackView.replace(cvMain)
+            }
         },
         State {
             name: "config"

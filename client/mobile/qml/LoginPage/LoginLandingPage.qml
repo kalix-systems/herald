@@ -6,10 +6,6 @@ import QtQuick.Controls 2.12
 Page {
     id: loginLandingPage
 
-    anchors {
-        fill: parent
-    }
-
     property color bgEndColor: "#5c7598"
     property color bgStartColor: "#5c7598"
 
@@ -22,9 +18,8 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: newAccButton.top
-            bottomMargin: QmlCfg.units.gu(3)
+            bottomMargin: QmlCfg.units.dp(30)
         }
-        Keys.onEnterPressed: registerUser()
     }
 
     LoginButton {
@@ -36,7 +31,7 @@ Page {
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
-            bottomMargin: QmlCfg.units.gu(12)
+            bottomMargin: loginLandingPage.height / 3
         }
 
         onClicked: registerUser()

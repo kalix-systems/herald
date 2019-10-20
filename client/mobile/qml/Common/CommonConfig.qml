@@ -21,23 +21,23 @@ Item {
 
     readonly property alias units: units
     /// edge rounding for all rectangles that use the radius property
-    readonly property int radius: units.largeSpacing
+    readonly property real radius: units.largeSpacing
     /// standard margin size used to interior objects
-    readonly property int margin: units.largeSpacing
+    readonly property real margin: units.largeSpacing
     /// standard half margin
-    readonly property int smallMargin: units.smallSpacing
+    readonly property real smallMargin: units.smallSpacing
     /// standard half padding unit
-    readonly property int smallPadding: units.smallSpacing
+    readonly property real smallPadding: units.smallSpacing
     /// standard padding unit
-    readonly property int padding: units.smallSpacing
+    readonly property real padding: units.smallSpacing
     /// standard toolbar height
-    readonly property int toolbarHeight: units.dp(40)
+    readonly property real toolbarHeight: units.dp(40)
     /// standard chat text size
-    property int chatTextSize: units.dp(12)
+    property int chatTextSize: 20
     /// standard header size
-    property int headerSize: units.gu(3)
+    property int headerTextSize: 20
     /// standard button text size
-    property int buttonTextSize: units.dp(16)
+    property int buttonTextSize: 16
 
     /// standard z values
     property int overlayZ: 10
@@ -52,17 +52,12 @@ Item {
     readonly property string mainTextFontFamily: "Hevletica"
 
     property QtObject iconSizes: QtObject {
-        property int small: Math.floor(units.fontMetrics.roundedIconSize(
-                                           16 * units.devicePixelRatio))
-        property int smallMedium: Math.floor(units.fontMetrics.roundedIconSize(
-                                                 22 * units.devicePixelRatio))
-        property int medium: Math.floor(units.fontMetrics.roundedIconSize(
-                                            32 * units.devicePixelRatio))
-        property int large: Math.floor(units.fontMetrics.roundedIconSize(
-                                           48 * units.devicePixelRatio))
-        property int huge: Math.floor(units.fontMetrics.roundedIconSize(
-                                          64 * units.devicePixelRatio))
-        property int enormous: Math.floor(128 * units.devicePixelRatio)
+        property int small: units.dp(16)
+        property int smallMedium: units.dp(24)
+        property int medium: units.dp(32)
+        property int large: units.dp(48)
+        property int huge: units.dp(64)
+        property int enormous: units.dp(164)
     }
 
     /// emoji skin color
