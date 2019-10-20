@@ -30,7 +30,7 @@ type RawBlock = Vec<u8>;
 type RawSigner = Vec<u8>;
 
 fn raw_store_key(
-    tx: &rusqlite::Transaction,
+    tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     hash_bytes: &[u8],
     key_bytes: &[u8],
@@ -41,7 +41,7 @@ fn raw_store_key(
 }
 
 fn raw_remove_block_dependencies(
-    tx: &rusqlite::Transaction,
+    tx: &mut rusqlite::Transaction,
     hash_bytes: &[u8],
 ) -> Result<(), HErr> {
     let mut remove_deps_stmt = tx.prepare(include_str!("sql/remove_block_dependencies.sql"))?;
@@ -50,7 +50,7 @@ fn raw_remove_block_dependencies(
 }
 
 fn raw_pop_unblocked_blocks(
-    tx: &rusqlite::Transaction,
+    tx: &mut rusqlite::Transaction,
 ) -> Result<Vec<(RawBlock, RawSigner)>, HErr> {
     let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
 
@@ -70,20 +70,20 @@ fn raw_pop_unblocked_blocks(
     res
 }
 
-pub fn store_key(
-    tx: &rusqlite::Transaction,
+fn store_key(
+    tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
     key: ChainKey,
 ) -> Result<Vec<(Block, GlobalId)>, HErr> {
     // store key
-    raw_store_key(&tx, cid, hash.as_ref(), key.as_ref())?;
+    raw_store_key(tx, cid, hash.as_ref(), key.as_ref())?;
 
     // remove key as blocking dependency
-    raw_remove_block_dependencies(&tx, hash.as_ref())?;
+    raw_remove_block_dependencies(tx, hash.as_ref())?;
 
     // get blocks that are now available
-    raw_pop_unblocked_blocks(&tx)?
+    raw_pop_unblocked_blocks(tx)?
         .into_iter()
         .map(|(block_bytes, signer_bytes)| {
             Ok((
@@ -94,8 +94,8 @@ pub fn store_key(
         .collect()
 }
 
-pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-    tx: &rusqlite::Transaction,
+fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+    tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
 ) -> Result<(), HErr> {
@@ -109,7 +109,7 @@ pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
 }
 
 fn mark_unused(
-    tx: &rusqlite::Transaction,
+    tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: &BTreeSet<BlockHash>,
 ) -> Result<(), HErr> {
@@ -208,8 +208,8 @@ impl ConversationId {
         key: ChainKey,
     ) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let mut db = CK_CONN.lock();
-        let tx = db.transaction()?;
-        let blocks = store_key(&tx, *self, hash, key);
+        let mut tx = db.transaction()?;
+        let blocks = store_key(&mut tx, *self, hash, key);
         tx.commit()?;
 
         blocks
@@ -218,18 +218,18 @@ impl ConversationId {
     // TODO GC strategy
     pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(&self, blocks: I) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
-        let tx = db.transaction()?;
+        let mut tx = db.transaction()?;
 
-        mark_used(&tx, *self, blocks)?;
+        mark_used(&mut tx, *self, blocks)?;
         tx.commit()?;
         Ok(())
     }
 
     pub fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
-        let tx = db.transaction()?;
+        let mut tx = db.transaction()?;
 
-        mark_unused(&tx, *self, blocks)?;
+        mark_unused(&mut tx, *self, blocks)?;
         tx.commit()?;
         Ok(())
     }
@@ -251,14 +251,14 @@ impl ConversationId {
         awaiting: Vec<BlockHash>,
     ) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
-        let tx = db.transaction()?;
+        let mut tx = db.transaction()?;
 
         let block_bytes = serde_cbor::to_vec(&block)?;
         let signer_bytes = serde_cbor::to_vec(&signer)?;
 
-        let block_id = raw_add_pending_block(&tx, signer_bytes, block_bytes)?;
+        let block_id = raw_add_pending_block(&mut tx, signer_bytes, block_bytes)?;
 
-        raw_add_block_dependencies(&tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
+        raw_add_block_dependencies(&mut tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
 
         tx.commit()?;
 
