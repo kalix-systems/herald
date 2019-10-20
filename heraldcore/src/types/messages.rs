@@ -1,5 +1,6 @@
 use super::*;
 use crate::{config::*, errors::HErr::*, message::attachments::Attachment};
+use chainmail::block::*;
 use std::{convert::AsRef, fmt};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
