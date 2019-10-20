@@ -477,23 +477,24 @@ impl Conn {
     //    })
     //}
 
-    //pub async fn get_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<Vec<Push>, Error> {
-    //    let pushes: Vec<Vec<u8>> = pending::table
-    //        .inner_join(pushes::table)
-    //        .filter(pending::key.eq(key.as_ref()))
-    //        .select(pushes::push_data)
-    //        .order((pushes::push_ts.asc(), pushes::push_id.asc()))
-    //        .limit(limit as i64)
-    //        .get_results(self.deref_mut())?;
+    pub async fn get_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<Vec<Push>, Error> {
+        let text = format!(include_str!("sql/get_pending.sql"), limit=limit);
+        let client = get_client().await?;
+        let stmt = client
+            .prepare_typed(&text, &[Type::BYTEA])
+            .await?;
 
-    //    let mut out = Vec::with_capacity(pushes.len());
 
-    //    for p in pushes.into_iter() {
-    //        out.push(serde_cbor::from_slice(&p)?);
-    //    }
+        let rows = client.query(&stmt, &[&key.as_ref()]).await?;
 
-    //    Ok(out)
-    //}
+        let mut out = Vec::with_capacity(rows.len());
+        for row in rows {
+            let p: Vec<u8> = row.get(0);
+            out.push(serde_cbor::from_slice(&p)?);
+        }
+
+        Ok(out)
+    }
 
     pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
         let text = format!(include_str!("sql/expire_pending.sql"), limit=limit);
