@@ -237,7 +237,7 @@ impl Config {
     }
 }
 
-#[allow(unused)]
+#[cfg(test)]
 pub(crate) fn test_config() -> crate::config::Config {
     use std::convert::TryInto;
     let uid = "userid".try_into().expect("Bad user id");

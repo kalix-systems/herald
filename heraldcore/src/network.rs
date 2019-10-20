@@ -1,4 +1,5 @@
 use crate::{
+    chainkeys,
     config::Config,
     errors::HErr::{self, *},
     pending,
@@ -364,7 +365,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             AddedToConvo(ac) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
-                let mut cid = ac.cid;
+                let cid = ac.cid;
 
                 let title = ac.title;
 
@@ -379,7 +380,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
                 crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
                 tx.commit()?;
 
-                cid.store_genesis(ac.gen)?;
+                cid.store_genesis(&ac.gen)?;
 
                 ev.notifications.push(Notification::NewConversation(cid));
             }
@@ -436,13 +437,13 @@ fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
 
     match msg {
         DeviceMessageBody::ContactReq(cr) => {
-            let dmessages::ContactReq { gen, mut cid } = cr;
+            let dmessages::ContactReq { gen, cid } = cr;
             if gen.verify_sig(&from.did) {
                 crate::contact::ContactBuilder::new(from.uid)
                     .pairwise_conversation(cid)
                     .add()?;
 
-                cid.store_genesis(gen)?;
+                cid.store_genesis(&gen)?;
 
                 ev.notifications
                     .push(Notification::NewContact(from.uid, cid));
@@ -462,20 +463,37 @@ pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> R
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 
-fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = ConversationMessage::seal(cid, &content)?;
+        let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
+
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
+
+        let mut db = chainkeys::CK_CONN.lock();
+        let mut tx = db.transaction()?;
+        debug_assert_eq!(chainkeys::store_key(&mut tx, cid, hash, key)?, Vec::new());
+        // TODO: replace used with probably_used here
+        // in general we probably want a slightly smarter system for dealing with scenarios where
+        // we thought a message wasn't sent but it was
+        chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
+
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Success) => {
+                tx.commit()?;
+                Ok(())
+            }
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
             ))),
             Err(e) => {
+                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                chainkeys::mark_unused(&mut tx, cid, cm.body().parent_hashes())?;
+                tx.commit()?;
+
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
                 eprintln!(
@@ -485,14 +503,6 @@ fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> 
                 );
 
                 CAUGHT_UP.store(false, Ordering::Release);
-
-                // TODO: make chainmail API return hash on sealing so this won't be necessary
-                let hash = cm
-                    .body()
-                    .compute_hash()
-                    .expect("failed to compute block hash");
-
-                cid.mark_used([hash].iter())?;
 
                 pending::add_to_pending(cid, content)
             }
@@ -548,12 +558,12 @@ fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, mut cid: ConversationId) -> Result<(), HErr> {
+pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let kp = Config::static_keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(gen.clone())?;
+    cid.store_genesis(&gen)?;
 
     let req = dmessages::ContactReq { gen, cid };
 
@@ -577,14 +587,14 @@ pub fn start_conversation(
         conv_builder.title(title.clone());
     }
 
-    let mut cid = conv_builder.add_with_tx(&tx)?;
+    let cid = conv_builder.add_with_tx(&tx)?;
 
     crate::members::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
 
     let kp = crate::config::Config::static_keypair()?;
     let gen = Genesis::new(kp.secret_key());
-    cid.store_genesis(gen.clone())?;
+    cid.store_genesis(&gen)?;
 
     let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
         members: Vec::from(members),

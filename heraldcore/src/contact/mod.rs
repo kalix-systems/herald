@@ -454,9 +454,8 @@ impl Contact {
     }
 }
 
-#[allow(unused)]
+#[cfg(test)]
 pub(crate) fn test_contact(user_id: &str) -> Contact {
-    use crate::womp;
     let receiver = user_id
         .try_into()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));

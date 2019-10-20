@@ -1,4 +1,4 @@
-use crate::{channel_recv_err, db::Database, errors::HErr, loc, types::*, utils};
+use crate::{db::Database, errors::HErr, types::*, utils};
 use herald_common::*;
 use rusqlite::params;
 use std::collections::HashMap;
@@ -253,7 +253,9 @@ impl OutboundMessageBuilder {
     }
 
     // NOTE: This function should probably remain only public to the crate.
+    #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
+        use crate::{channel_recv_err, loc};
         use crossbeam_channel::*;
 
         let (tx, rx) = unbounded();
@@ -526,25 +528,6 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
     db.execute(include_str!("sql/delete_message.sql"), params![id])?;
     Ok(())
-}
-
-#[allow(unused)]
-/// Testing utility
-pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-    use crate::womp;
-    use std::convert::TryInto;
-
-    let mut builder = OutboundMessageBuilder::default();
-    builder.conversation_id(conv).body(
-        "test"
-            .try_into()
-            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
-    );
-    let out = builder
-        .store_and_send_blocking()
-        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
-
-    (out.message_id, out.timestamp)
 }
 
 #[cfg(test)]

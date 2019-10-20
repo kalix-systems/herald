@@ -1,5 +1,8 @@
 use super::*;
-use crate::{config::*, errors::HErr::*, message::attachments::Attachment};
+use crate::{
+    chainkeys::DecryptionResult, config::*, errors::HErr::*, message::attachments::Attachment,
+};
+use chainmail::{block::*, errors::ChainError::CryptoError};
 use std::{convert::AsRef, fmt};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -433,23 +436,30 @@ impl ConversationMessage {
     /// Seals the messages.
     pub fn seal(
         // note: this is only mut because BlockStore thinks it should be
-        mut cid: ConversationId,
+        cid: ConversationId,
         content: &ConversationMessageBody,
-    ) -> Result<ConversationMessage, HErr> {
+    ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
         let cbytes = serde_cbor::to_vec(content)?;
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
-        let body = cid.seal_block(kp.secret_key(), cbytes)?;
-        Ok(ConversationMessage { cid, from, body })
+        let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
+        let SealData { block, key } =
+            Block::seal(kp.secret_key(), &keys, hashes, cbytes).ok_or(CryptoError)?;
+        let hash = block.compute_hash().ok_or(CryptoError)?;
+        Ok((
+            ConversationMessage {
+                cid,
+                from,
+                body: block,
+            },
+            hash,
+            key,
+        ))
     }
 
     /// Opens the message.
     pub fn open(self) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
-        let ConversationMessage {
-            mut cid,
-            from,
-            body,
-        } = self;
+        let ConversationMessage { cid, from, body } = self;
 
         let mut out = Vec::new();
 

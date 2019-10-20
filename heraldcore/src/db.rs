@@ -53,11 +53,9 @@ impl DerefMut for Database {
 
 /// Initializes storage
 pub fn init() -> Result<(), HErr> {
-    let mut db = Database::get()?;
+    let db = Database::get()?;
 
-    let tx = db.transaction()?;
-    tx.execute_batch(include_str!("sql/create_all.sql"))?;
-    tx.commit()?;
+    db.execute_batch(include_str!("sql/create_all.sql"))?;
 
     Ok(())
 }
@@ -68,7 +66,6 @@ impl Database {
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
         match Connection::open(path) {
             Ok(conn) => {
-                // conn.busy_timeout(std::time::Duration::from_secs(6000))?;
                 fn busy_handler(_: i32) -> bool {
                     true
                 }
@@ -111,7 +108,7 @@ impl Database {
     }
 
     /// Resets all tables in database
-    #[allow(unused)]
+    #[cfg(test)]
     pub(crate) fn reset_all() -> Result<(), HErr> {
         let mut db = Self::get()?;
         let tx = db.transaction()?;

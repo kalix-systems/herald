@@ -2,9 +2,9 @@
 DROP INDEX IF EXISTS reply_op;
 -- drop tables
 DROP TABLE IF EXISTS msg_attachments;
+DROP TABLE IF EXISTS replies;
 DROP TABLE IF EXISTS messages;
 DROP TABLE IF EXISTS pending_out;
-DROP TABLE IF EXISTS replies;
 DROP TABLE IF EXISTS conversation_members;
 DROP TABLE IF EXISTS key_creations;
 DROP TABLE IF EXISTS key_deprecations;

@@ -7,7 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chainmail   = { git = "https://github.com/kalix-systems/chainmail.git" }
 crc32fast   = "1.2"
 serde_cbor  = "0.10"
 serde_bytes = "0.11"

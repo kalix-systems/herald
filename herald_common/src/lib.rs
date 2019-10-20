@@ -10,7 +10,6 @@ mod time;
 pub use time::*;
 
 pub use bytes::Bytes;
-pub use chainmail::block::*;
 pub use serde_cbor;
 pub use std::collections::BTreeMap;
 
