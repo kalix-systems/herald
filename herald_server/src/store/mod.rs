@@ -436,70 +436,80 @@ impl Conn {
             .map(|row| {
                 let raw = row.get(0);
                 sig::PublicKey::from_slice(raw).ok_or(Error::InvalidKey)
-            }).collect()
+            })
+            .collect()
     }
 
-    //pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
-    //    let keys: Vec<RawKeyAndMeta> = userkeys::table
-    //        .filter(userkeys::user_id.eq(uid.as_str()))
-    //        .inner_join(keys::table)
-    //        .select((
-    //            keys::key,
-    //            keys::signed_by,
-    //            keys::ts,
-    //            keys::signature,
-    //            keys::dep_ts,
-    //            keys::dep_signed_by,
-    //            keys::dep_signature,
-    //        ))
-    //        .get_results(self.deref_mut())?;
+    pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
+        let client = get_client().await?;
 
-    //    let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = keys
-    //        .into_iter()
-    //        .map(
-    //            |(
-    //                key,
-    //                signed_by,
-    //                creation_ts,
-    //                signature,
-    //                deprecation_ts,
-    //                dep_signed_by,
-    //                dep_signature,
-    //            )| {
-    //                let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
-    //                let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
-    //                let timestamp = creation_ts.into();
-    //                let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
+        let stmt = client
+            .prepare_typed(include_str!("sql/read_meta.sql"), &[Type::TEXT])
+            .await?;
 
-    //                let dep_is_some = deprecation_ts.is_some()
-    //                    || dep_signed_by.is_some()
-    //                    || dep_signature.is_some();
+        let keys: Vec<RawKeyAndMeta> = client
+            .query(&stmt, &[&uid.as_str()])
+            .await?
+            .into_iter()
+            .map(|row| {
+                (
+                    row.get(0),
+                    row.get(1),
+                    row.get(2),
+                    row.get(3),
+                    row.get(4),
+                    row.get(5),
+                    row.get(6),
+                )
+            })
+            .collect();
 
-    //                let dep_sig_meta = if dep_is_some {
-    //                    let dep_sig =
-    //                        sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
-    //                            .ok_or(InvalidSig)?;
+        let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = keys
+            .into_iter()
+            .map(
+                |(
+                    key,
+                    signed_by,
+                    creation_ts,
+                    signature,
+                    deprecation_ts,
+                    dep_signed_by,
+                    dep_signature,
+                )| {
+                    let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
+                    let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
+                    let timestamp = creation_ts.into();
+                    let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
 
-    //                    let dep_signed_by =
-    //                        sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
-    //                            .ok_or(InvalidKey)?;
+                    let dep_is_some = deprecation_ts.is_some()
+                        || dep_signed_by.is_some()
+                        || dep_signature.is_some();
 
-    //                    let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
+                    let dep_sig_meta = if dep_is_some {
+                        let dep_sig =
+                            sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
+                                .ok_or(InvalidSig)?;
 
-    //                    Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
-    //                } else {
-    //                    None
-    //                };
+                        let dep_signed_by =
+                            sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
+                                .ok_or(InvalidKey)?;
 
-    //                let sig_meta = SigMeta::new(signature, signed_by, timestamp);
-    //                let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
-    //                Ok((key, pkmeta))
-    //            },
-    //        )
-    //        .collect();
+                        let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
 
-    //    Ok(UserMeta { keys: meta_inner? })
-    //}
+                        Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
+                    } else {
+                        None
+                    };
+
+                    let sig_meta = SigMeta::new(signature, signed_by, timestamp);
+                    let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
+                    Ok((key, pkmeta))
+                },
+            )
+            .collect();
+
+        Ok(UserMeta { keys: meta_inner? })
+    }
 
     //pub async fn add_pending<'a, M: Iterator<Item = &'a Push>>(
     //    &mut self,
