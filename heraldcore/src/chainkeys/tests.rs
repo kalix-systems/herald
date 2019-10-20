@@ -20,7 +20,7 @@ fn raw_pending() {
     let cid = ConversationId::from(crate::utils::rand_id());
 
     let mut conn = CK_CONN.lock();
-    let tx = conn.transaction().expect(womp!());
+    let mut tx = conn.transaction().expect(womp!());
 
     let blockhash1 = BlockHash::from_slice(&[1; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash2 = BlockHash::from_slice(&[2; BLOCKHASH_BYTES]).expect(womp!());
@@ -35,47 +35,47 @@ fn raw_pending() {
     let dummy_signer_bytes3 = &[2; 32];
 
     let block_id1 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes1.to_vec(),
         dummy_block_bytes1.to_vec(),
     )
     .expect(womp!());
 
-    raw_add_block_dependencies(&tx, block_id1, vec![blockhash1.as_ref()].into_iter())
+    raw_add_block_dependencies(&mut tx, block_id1, vec![blockhash1.as_ref()].into_iter())
         .expect(womp!());
 
     let block_id2 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes2.to_vec(),
         dummy_block_bytes2.to_vec(),
     )
     .expect(womp!());
     raw_add_block_dependencies(
-        &tx,
+        &mut tx,
         block_id2,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
     )
     .expect(womp!());
 
     let block_id3 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes3.to_vec(),
         dummy_block_bytes3.to_vec(),
     )
     .expect(womp!());
 
     raw_add_block_dependencies(
-        &tx,
+        &mut tx,
         block_id3,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
     )
     .expect(womp!());
 
     // free dummy_block_bytes1
-    raw_store_key(&tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&tx, blockhash1.as_ref()).expect(womp!());
+    raw_store_key(&mut tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&mut tx, blockhash1.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 1);
     assert_eq!(
         blocks[0],
@@ -83,10 +83,10 @@ fn raw_pending() {
     );
 
     // free dummy_block_bytes2 and dummy_block_bytes3
-    raw_store_key(&tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&tx, blockhash2.as_ref()).expect(womp!());
+    raw_store_key(&mut tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&mut tx, blockhash2.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 2);
     assert_eq!(
         blocks[0],
@@ -105,8 +105,8 @@ fn raw_pending() {
 fn blockstore() {
     reset();
 
-    let mut cid1 = ConversationId::from(crate::utils::rand_id());
-    let mut cid2 = ConversationId::from(crate::utils::rand_id());
+    let cid1 = ConversationId::from(crate::utils::rand_id());
+    let cid2 = ConversationId::from(crate::utils::rand_id());
 
     let blockhash11 = BlockHash::from_slice(&[11; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash12 = BlockHash::from_slice(&[12; BLOCKHASH_BYTES]).expect(womp!());

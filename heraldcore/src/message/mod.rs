@@ -528,24 +528,5 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     Ok(())
 }
 
-// #[allow(unused)]
-// /// Testing utility
-// pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-//     use crate::womp;
-//     use std::convert::TryInto;
-
-//     let mut builder = OutboundMessageBuilder::default();
-//     builder.conversation_id(conv).body(
-//         "test"
-//             .try_into()
-//             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
-//     );
-//     let out = builder
-//         .store_and_send_blocking()
-//         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
-
-//     (out.message_id, out.timestamp)
-// }
-
 #[cfg(test)]
 mod tests;

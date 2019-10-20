@@ -4,6 +4,24 @@ use std::convert::TryInto;
 
 use crate::{config::test_config, womp};
 
+/// Testing utility
+fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+    use crate::womp;
+    use std::convert::TryInto;
+
+    let mut builder = OutboundMessageBuilder::default();
+    builder.conversation_id(conv).body(
+        "test"
+            .try_into()
+            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
+    );
+    let out = builder
+        .store_and_send_blocking()
+        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
+
+    (out.message_id, out.timestamp)
+}
+
 #[test]
 #[serial]
 fn delete_get_message() {

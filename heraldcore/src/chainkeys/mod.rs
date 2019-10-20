@@ -122,10 +122,10 @@ pub fn mark_unused(
     Ok(())
 }
 
-fn get_keys(
+fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     db: &rusqlite::Connection,
     cid: ConversationId,
-    blocks: &BTreeSet<BlockHash>,
+    blocks: I,
 ) -> Result<FoundKeys, HErr> {
     let mut stmt = db.prepare(include_str!("sql/get_keys.sql"))?;
 
@@ -234,7 +234,10 @@ impl ConversationId {
         Ok(())
     }
 
-    pub fn get_keys(&self, blocks: &BTreeSet<BlockHash>) -> Result<FoundKeys, HErr> {
+    pub fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
+        &self,
+        blocks: I,
+    ) -> Result<FoundKeys, HErr> {
         let db = CK_CONN.lock();
         get_keys(&db, *self, blocks)
     }
@@ -267,7 +270,7 @@ impl ConversationId {
 
     pub fn open_block(&self, signer: &GlobalId, block: Block) -> Result<DecryptionResult, HErr> {
         let hashes = block.parent_hashes().clone();
-        match self.get_keys(&hashes)? {
+        match self.get_keys(hashes.iter())? {
             FoundKeys::Found(parent_keys) => {
                 let OpenData { msg, hash, key } = block.open(&signer.did, &parent_keys)?;
                 let unlocked = self.store_key(hash, key)?;

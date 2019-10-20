@@ -1,9 +1,6 @@
 use super::*;
 use crate::{
-    chainkeys::{DecryptionResult, FoundKeys},
-    config::*,
-    errors::HErr::*,
-    message::attachments::Attachment,
+    chainkeys::DecryptionResult, config::*, errors::HErr::*, message::attachments::Attachment,
 };
 use chainmail::{block::*, errors::ChainError::CryptoError};
 use std::{convert::AsRef, fmt};
