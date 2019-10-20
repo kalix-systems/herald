@@ -379,7 +379,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
                 crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
                 tx.commit()?;
 
-                cid.store_genesis(ac.gen)?;
+                cid.store_genesis(&ac.gen)?;
 
                 ev.notifications.push(Notification::NewConversation(cid));
             }
@@ -442,7 +442,7 @@ fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
                     .pairwise_conversation(cid)
                     .add()?;
 
-                cid.store_genesis(gen)?;
+                cid.store_genesis(&gen)?;
 
                 ev.notifications
                     .push(Notification::NewContact(from.uid, cid));
@@ -462,15 +462,18 @@ pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> R
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 
-fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = ConversationMessage::seal(cid, &content)?;
+        let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Success) => {
+                cid.store_key(hash, key)?;
+                Ok(())
+            }
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
@@ -492,6 +495,7 @@ fn send_cmessage(mut cid: ConversationId, content: &ConversationMessageBody) -> 
                     .compute_hash()
                     .expect("failed to compute block hash");
 
+                cid.store_key(hash, key)?;
                 cid.mark_used([hash].iter())?;
 
                 pending::add_to_pending(cid, content)
@@ -553,7 +557,7 @@ pub fn send_contact_req(uid: UserId, mut cid: ConversationId) -> Result<(), HErr
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(gen.clone())?;
+    cid.store_genesis(&gen)?;
 
     let req = dmessages::ContactReq { gen, cid };
 
@@ -584,7 +588,7 @@ pub fn start_conversation(
 
     let kp = crate::config::Config::static_keypair()?;
     let gen = Genesis::new(kp.secret_key());
-    cid.store_genesis(gen.clone())?;
+    cid.store_genesis(&gen)?;
 
     let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
         members: Vec::from(members),

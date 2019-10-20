@@ -16,6 +16,16 @@ lazy_static! {
     };
 }
 
+pub enum FoundKeys {
+    Found(BTreeSet<ChainKey>),
+    Missing(Vec<BlockHash>),
+}
+
+pub enum DecryptionResult {
+    Success(Vec<u8>, Vec<(Block, GlobalId)>),
+    Pending,
+}
+
 type RawBlock = Vec<u8>;
 type RawSigner = Vec<u8>;
 
@@ -60,7 +70,7 @@ fn raw_pop_unblocked_blocks(
     res
 }
 
-fn store_key(
+pub fn store_key(
     tx: &rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
@@ -84,7 +94,7 @@ fn store_key(
         .collect()
 }
 
-fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     tx: &rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
@@ -98,17 +108,17 @@ fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     Ok(())
 }
 
-fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
+fn get_keys(
     db: &rusqlite::Connection,
     cid: ConversationId,
-    blocks: I,
+    blocks: &BTreeSet<BlockHash>,
 ) -> Result<FoundKeys, HErr> {
     let mut stmt = db.prepare(include_str!("sql/get_keys.sql"))?;
 
     let mut keys: BTreeSet<ChainKey> = BTreeSet::new();
     let mut missing: Vec<BlockHash> = Vec::new();
 
-    for block in blocks.copied() {
+    for block in blocks {
         match stmt
             .query_map(params![cid, block.as_ref()], |row| row.get::<_, Vec<u8>>(0))?
             .next()
@@ -117,7 +127,7 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
                 keys.insert(ChainKey::from_slice(k?.as_slice()).unwrap());
             }
             None => {
-                missing.push(block);
+                missing.push(block.clone());
             }
         }
     }
@@ -177,15 +187,12 @@ fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
     Ok(())
 }
 
-impl BlockStore for ConversationId {
-    type Error = HErr;
-    type Signer = GlobalId;
-
-    fn store_key(
-        &mut self,
+impl ConversationId {
+    pub fn store_key(
+        &self,
         hash: BlockHash,
         key: ChainKey,
-    ) -> Result<Vec<(Block, Self::Signer)>, Self::Error> {
+    ) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
         let blocks = store_key(&tx, *self, hash, key);
@@ -195,10 +202,7 @@ impl BlockStore for ConversationId {
     }
 
     // TODO GC strategy
-    fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-        &mut self,
-        blocks: I,
-    ) -> Result<(), Self::Error> {
+    pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(&self, blocks: I) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
 
@@ -207,25 +211,22 @@ impl BlockStore for ConversationId {
         Ok(())
     }
 
-    fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
-        &self,
-        blocks: I,
-    ) -> Result<FoundKeys, Self::Error> {
+    pub fn get_keys(&self, blocks: &BTreeSet<BlockHash>) -> Result<FoundKeys, HErr> {
         let db = CK_CONN.lock();
         get_keys(&db, *self, blocks)
     }
 
-    fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
+    pub fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
         let db = CK_CONN.lock();
         get_unused(&db, *self)
     }
 
-    fn add_pending(
+    pub fn add_pending(
         &self,
-        signer: &Self::Signer,
+        signer: &GlobalId,
         block: Block,
         awaiting: Vec<BlockHash>,
-    ) -> Result<(), Self::Error> {
+    ) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
         let tx = db.transaction()?;
 
@@ -239,6 +240,28 @@ impl BlockStore for ConversationId {
         tx.commit()?;
 
         Ok(())
+    }
+
+    pub fn open_block(&self, signer: &GlobalId, block: Block) -> Result<DecryptionResult, HErr> {
+        let hashes = block.parent_hashes().clone();
+        match self.get_keys(&hashes)? {
+            FoundKeys::Found(parent_keys) => {
+                let OpenData { msg, hash, key } = block.open(&signer.did, &parent_keys)?;
+                let unlocked = self.store_key(hash, key)?;
+                self.mark_used(hashes.iter())?;
+                Ok(DecryptionResult::Success(msg, unlocked))
+            }
+            FoundKeys::Missing(missing_keys) => {
+                self.add_pending(signer, block, missing_keys)?;
+                Ok(DecryptionResult::Pending)
+            }
+        }
+    }
+
+    pub fn store_genesis(&self, gen: &Genesis) -> Result<Vec<(Block, GlobalId)>, HErr> {
+        let hash = gen.compute_hash().ok_or(ChainError::CryptoError)?;
+        let key = gen.key().clone();
+        self.store_key(hash, key)
     }
 }
 

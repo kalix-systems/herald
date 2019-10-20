@@ -122,169 +122,169 @@ impl OutboundMessageBuilder {
         self
     }
 
-    /// Stores and sends the message
-    pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
-        self,
-        mut callback: F,
-    ) -> Result<(), HErr> {
-        let Self {
-            conversation,
-            mut body,
-            op,
-            attachments,
-            parse_markdown,
-        } = self;
+    // /// Stores and sends the message
+    // pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
+    //     self,
+    //     mut callback: F,
+    // ) -> Result<(), HErr> {
+    //     let Self {
+    //         conversation,
+    //         mut body,
+    //         op,
+    //         attachments,
+    //         parse_markdown,
+    //     } = self;
 
-        use MissingOutboundMessageField::*;
+    //     use MissingOutboundMessageField::*;
 
-        if parse_markdown {
-            body = match body {
-                Some(body) => Some(body.parse_markdown()?),
-                None => None,
-            };
-        }
+    //     if parse_markdown {
+    //         body = match body {
+    //             Some(body) => Some(body.parse_markdown()?),
+    //             None => None,
+    //         };
+    //     }
 
-        if attachments.is_empty() && body.is_none() {
-            return Err(MissingBody.into());
-        }
+    //     if attachments.is_empty() && body.is_none() {
+    //         return Err(MissingBody.into());
+    //     }
 
-        let conversation_id = conversation.ok_or(MissingConversationId)?;
-        let msg_id: MsgId = utils::rand_id().into();
-        let timestamp = Time::now();
-        let author = crate::config::Config::static_id()?;
-        let send_status = MessageSendStatus::NoAck;
+    //     let conversation_id = conversation.ok_or(MissingConversationId)?;
+    //     let msg_id: MsgId = utils::rand_id().into();
+    //     let timestamp = Time::now();
+    //     let author = crate::config::Config::static_id()?;
+    //     let send_status = MessageSendStatus::NoAck;
 
-        let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
-        let receipts_bytes = serde_cbor::to_vec(&receipts)?;
-        let has_attachments = !attachments.is_empty();
+    //     let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
+    //     let receipts_bytes = serde_cbor::to_vec(&receipts)?;
+    //     let has_attachments = !attachments.is_empty();
 
-        let msg = Message {
-            message_id: msg_id,
-            author,
-            body: (&body).clone(),
-            op,
-            conversation: conversation_id,
-            timestamp,
-            send_status,
-            receipts,
-            has_attachments,
-        };
+    //     let msg = Message {
+    //         message_id: msg_id,
+    //         author,
+    //         body: (&body).clone(),
+    //         op,
+    //         conversation: conversation_id,
+    //         timestamp,
+    //         send_status,
+    //         receipts,
+    //         has_attachments,
+    //     };
 
-        callback(StoreAndSend::Msg(msg));
+    //     callback(StoreAndSend::Msg(msg));
 
-        macro_rules! e {
-            ($res: expr) => {
-                match $res {
-                    Ok(val) => val,
-                    Err(e) => {
-                        callback(StoreAndSend::Error {
-                            error: e.into(),
-                            line_number: line!(),
-                        });
-                        return;
-                    }
-                }
-            };
-        }
+    //     macro_rules! e {
+    //         ($res: expr) => {
+    //             match $res {
+    //                 Ok(val) => val,
+    //                 Err(e) => {
+    //                     callback(StoreAndSend::Error {
+    //                         error: e.into(),
+    //                         line_number: line!(),
+    //                     });
+    //                     return;
+    //                 }
+    //             }
+    //         };
+    //     }
 
-        std::thread::Builder::new().spawn(move || {
-            let attachments: Result<Vec<Attachment>, HErr> = attachments
-                .into_iter()
-                .map(|path| {
-                    let attach: Attachment = Attachment::new(&path)?;
+    //     std::thread::Builder::new().spawn(move || {
+    //         let attachments: Result<Vec<Attachment>, HErr> = attachments
+    //             .into_iter()
+    //             .map(|path| {
+    //                 let attach: Attachment = Attachment::new(&path)?;
 
-                    attach.save()?;
+    //                 attach.save()?;
 
-                    Ok(attach)
-                })
-                .collect();
-            let attachments = e!(attachments);
+    //                 Ok(attach)
+    //             })
+    //             .collect();
+    //         let attachments = e!(attachments);
 
-            let mut db = e!(Database::get());
-            let tx = e!(db.transaction());
+    //         let mut db = e!(Database::get());
+    //         let tx = e!(db.transaction());
 
-            e!(tx.execute(
-                include_str!("sql/add.sql"),
-                params![
-                    msg_id,
-                    author,
-                    conversation_id,
-                    body,
-                    send_status,
-                    receipts_bytes,
-                    has_attachments,
-                    timestamp,
-                ],
-            ));
+    //         e!(tx.execute(
+    //             include_str!("sql/add.sql"),
+    //             params![
+    //                 msg_id,
+    //                 author,
+    //                 conversation_id,
+    //                 body,
+    //                 send_status,
+    //                 receipts_bytes,
+    //                 has_attachments,
+    //                 timestamp,
+    //             ],
+    //         ));
 
-            e!(tx.execute(
-                include_str!("../conversation/sql/update_last_active.sql"),
-                params![timestamp, conversation_id],
-            ));
+    //         e!(tx.execute(
+    //             include_str!("../conversation/sql/update_last_active.sql"),
+    //             params![timestamp, conversation_id],
+    //         ));
 
-            if let Some(op) = op {
-                e!(tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]));
-            }
+    //         if let Some(op) = op {
+    //             e!(tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]));
+    //         }
 
-            if !attachments.is_empty() {
-                e!(attachments::add_db(
-                    &tx,
-                    &msg_id,
-                    attachments.iter().map(|a| a.hash_dir())
-                ));
-            }
+    //         if !attachments.is_empty() {
+    //             e!(attachments::add_db(
+    //                 &tx,
+    //                 &msg_id,
+    //                 attachments.iter().map(|a| a.hash_dir())
+    //             ));
+    //         }
 
-            e!(tx.commit());
+    //         e!(tx.commit());
 
-            callback(StoreAndSend::StoreDone(msg_id));
+    //         callback(StoreAndSend::StoreDone(msg_id));
 
-            let content = cmessages::Message { body, attachments };
-            let msg = cmessages::Msg {
-                mid: msg_id,
-                content,
-                op,
-            };
-            e!(crate::network::send_normal_message(conversation_id, msg));
+    //         let content = cmessages::Message { body, attachments };
+    //         let msg = cmessages::Msg {
+    //             mid: msg_id,
+    //             content,
+    //             op,
+    //         };
+    //         e!(crate::network::send_normal_message(conversation_id, msg));
 
-            callback(StoreAndSend::SendDone(msg_id));
-        })?;
+    //         callback(StoreAndSend::SendDone(msg_id));
+    //     })?;
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    // NOTE: This function should probably remain only public to the crate.
-    pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
-        use crossbeam_channel::*;
+    // // NOTE: This function should probably remain only public to the crate.
+    // pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
+    //     use crossbeam_channel::*;
 
-        let (tx, rx) = unbounded();
-        self.store_and_send(move |m| {
-            tx.send(m)
-                .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
-        })?;
+    //     let (tx, rx) = unbounded();
+    //     self.store_and_send(move |m| {
+    //         tx.send(m)
+    //             .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
+    //     })?;
 
-        let out = match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::Msg(msg) => msg,
-            // TODO use line number
-            StoreAndSend::Error { error, .. } => return Err(error),
-            other => {
-                panic!("Unexpected  variant {:?}", other);
-            }
-        };
+    //     let out = match rx.recv().map_err(|_| channel_recv_err!())? {
+    //         StoreAndSend::Msg(msg) => msg,
+    //         // TODO use line number
+    //         StoreAndSend::Error { error, .. } => return Err(error),
+    //         other => {
+    //             panic!("Unexpected  variant {:?}", other);
+    //         }
+    //     };
 
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::StoreDone(_) => {}
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
+    //     match rx.recv().map_err(|_| channel_recv_err!())? {
+    //         StoreAndSend::StoreDone(_) => {}
+    //         other => {
+    //             panic!("Unexpected variant {:?}", other);
+    //         }
+    //     }
 
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::SendDone(_) => Ok(out),
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
-    }
+    //     match rx.recv().map_err(|_| channel_recv_err!())? {
+    //         StoreAndSend::SendDone(_) => Ok(out),
+    //         other => {
+    //             panic!("Unexpected variant {:?}", other);
+    //         }
+    //     }
+    // }
 }
 
 #[derive(Default)]
@@ -528,24 +528,24 @@ pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     Ok(())
 }
 
-#[allow(unused)]
-/// Testing utility
-pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-    use crate::womp;
-    use std::convert::TryInto;
+// #[allow(unused)]
+// /// Testing utility
+// pub(crate) fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+//     use crate::womp;
+//     use std::convert::TryInto;
 
-    let mut builder = OutboundMessageBuilder::default();
-    builder.conversation_id(conv).body(
-        "test"
-            .try_into()
-            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
-    );
-    let out = builder
-        .store_and_send_blocking()
-        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
+//     let mut builder = OutboundMessageBuilder::default();
+//     builder.conversation_id(conv).body(
+//         "test"
+//             .try_into()
+//             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
+//     );
+//     let out = builder
+//         .store_and_send_blocking()
+//         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
-    (out.message_id, out.timestamp)
-}
+//     (out.message_id, out.timestamp)
+// }
 
 #[cfg(test)]
 mod tests;
