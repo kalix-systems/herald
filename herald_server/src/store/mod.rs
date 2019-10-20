@@ -106,14 +106,12 @@ type RawKeyAndMeta = (
 );
 
 impl Conn {
-    // TODO read about postgres performance
     pub async fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
-        let client = get_client().await?;
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/device_exists.sql"), &[Type::BYTEA])
             .await?;
 
-        let row = client.query_one(&stmt, &[&pk.as_ref()]).await?;
+        let row = self.query_one(&stmt, &[&pk.as_ref()]).await?;
 
         Ok(row.get(0))
     }
@@ -122,9 +120,7 @@ impl Conn {
         &mut self,
         pres: &[sealed::PublicKey],
     ) -> Result<Vec<PKIResponse>, Error> {
-        let client = get_client().await?;
-
-        let stmt = client
+        let stmt = self
             .prepare_typed(
                 include_str!("sql/add_prekey.sql"),
                 &[Type::BYTEA, Type::BYTEA],
@@ -133,7 +129,7 @@ impl Conn {
 
         let mut out = Vec::with_capacity(pres.len());
         for pre in pres {
-            let res = client
+            let res = self
                 .execute(
                     &stmt,
                     &[&pre.signed_by().as_ref(), &serde_cbor::to_vec(&pre)?],
@@ -150,21 +146,14 @@ impl Conn {
         &mut self,
         keys: &[sig::PublicKey],
     ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
-        let client = get_client().await?;
-
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/pop_prekey.sql"), &[Type::BYTEA])
             .await?;
 
         let mut prekeys = Vec::with_capacity(keys.len());
 
         for k in keys {
-            let prekey = match client
-                .query(&stmt, &[&k.as_ref()])
-                .await?
-                .into_iter()
-                .next()
-            {
+            let prekey = match self.query(&stmt, &[&k.as_ref()]).await?.into_iter().next() {
                 Some(row) => {
                     let val = row.get::<_, Vec<u8>>(0);
                     serde_cbor::from_slice(&val)?
@@ -183,8 +172,7 @@ impl Conn {
         user_id: UserId,
         key: Signed<sig::PublicKey>,
     ) -> Result<register::Res, Error> {
-        let mut client = get_client().await?;
-        let tx = client.transaction().await?;
+        let tx = self.transaction().await?;
 
         let exists_stmt = tx
             .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
@@ -234,8 +222,7 @@ impl Conn {
     }
 
     pub async fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
-        let mut client = get_client().await?;
-        let tx = client.transaction().await?;
+        let tx = self.transaction().await?;
 
         let user_id_stmt = tx
             .prepare_typed(include_str!("sql/get_user_id_by_key.sql"), &[Type::BYTEA])
@@ -292,13 +279,12 @@ impl Conn {
     }
 
     pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
-        let client = get_client().await?;
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA])
             .await?;
 
         let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = {
-            let row = client.query_one(&stmt, &[&key.as_ref()]).await?;
+            let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
 
             (
                 row.get(0),
@@ -340,8 +326,7 @@ impl Conn {
         let (data, meta) = signed_key.split();
         let signer_key = meta.signed_by();
 
-        let mut client = get_client().await?;
-        let tx = client.transaction().await?;
+        let tx = self.transaction().await?;
 
         let signer_key_exists_stmt = tx
             .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
@@ -384,23 +369,21 @@ impl Conn {
     }
 
     pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
-        let client = get_client().await?;
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
             .await?;
 
-        let row = client.query_one(&stmt, &[&uid.as_str()]).await?;
+        let row = self.query_one(&stmt, &[&uid.as_str()]).await?;
 
         Ok(row.get(0))
     }
 
     pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
-        let client = get_client().await?;
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
             .await?;
 
-        let row = client.query_one(&stmt, &[&key.as_ref()]).await?;
+        let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
 
         Ok(row.get(0))
     }
@@ -411,10 +394,9 @@ impl Conn {
         limit: u32,
     ) -> Result<Vec<Push>, Error> {
         let text = format!(include_str!("sql/get_pending.sql"), limit = limit);
-        let client = get_client().await?;
-        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
+        let stmt = self.prepare_typed(&text, &[Type::BYTEA]).await?;
 
-        let rows = client.query(&stmt, &[&key.as_ref()]).await?;
+        let rows = self.query(&stmt, &[&key.as_ref()]).await?;
 
         let mut out = Vec::with_capacity(rows.len());
         for row in rows {
@@ -427,25 +409,22 @@ impl Conn {
 
     pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
         let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
-        let client = get_client().await?;
 
-        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
-        client.execute(&stmt, &[&key.as_ref()]).await?;
+        let stmt = self.prepare_typed(&text, &[Type::BYTEA]).await?;
+        self.execute(&stmt, &[&key.as_ref()]).await?;
 
         Ok(())
     }
 
     pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
-        let client = get_client().await?;
-        let stmt = client
+        let stmt = self
             .prepare_typed(
                 include_str!("sql/get_valid_keys_by_user_id.sql"),
                 &[Type::TEXT],
             )
             .await?;
 
-        client
-            .query(&stmt, &[&uid.as_str()])
+        self.query(&stmt, &[&uid.as_str()])
             .await?
             .into_iter()
             .map(|row| {
@@ -456,13 +435,11 @@ impl Conn {
     }
 
     pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
-        let client = get_client().await?;
-
-        let stmt = client
+        let stmt = self
             .prepare_typed(include_str!("sql/read_meta.sql"), &[Type::TEXT])
             .await?;
 
-        let keys: Vec<RawKeyAndMeta> = client
+        let keys: Vec<RawKeyAndMeta> = self
             .query(&stmt, &[&uid.as_str()])
             .await?
             .into_iter()
@@ -531,8 +508,7 @@ impl Conn {
         keys: Vec<sig::PublicKey>,
         msgs: M,
     ) -> Result<(), Error> {
-        let mut client = get_client().await?;
-        let tx = client.transaction().await?;
+        let tx = self.transaction().await?;
 
         let push_stmt = tx
             .prepare_typed(include_str!("sql/add_push.sql"), &[Type::BYTEA, Type::INT8])
@@ -560,6 +536,24 @@ impl Conn {
                     .await?;
             }
         }
+        tx.commit().await?;
+        Ok(())
+    }
+
+    pub(crate) async fn reset_all(&mut self) -> Result<(), Error> {
+        let tx = self.transaction().await?;
+
+        // drop
+        tx.batch_execute(include_str!(
+            "../../migrations/2019-09-21-221007_herald/down.sql"
+        ))
+        .await?;
+
+        // create
+        tx.batch_execute(include_str!(
+            "../../migrations/2019-09-21-221007_herald/up.sql"
+        ))
+        .await?;
         tx.commit().await?;
         Ok(())
     }

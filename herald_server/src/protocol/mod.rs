@@ -119,10 +119,10 @@ impl State {
         let mut con = self.new_connection()?;
 
         for user in to {
-            if !con.user_exists(&user)? {
+            if !con.user_exists(&user).await? {
                 missing_users.push(user);
             } else {
-                for dev in con.valid_keys(&user)? {
+                for dev in con.valid_keys(&user).await? {
                     if dev != exc {
                         to_devs.push(dev);
                     }
@@ -150,7 +150,7 @@ impl State {
         let mut missing_devs = Vec::new();
 
         for dev in to.iter() {
-            if !con.device_exists(dev)? {
+            if !con.device_exists(dev).await? {
                 missing_devs.push(*dev);
             }
         }
@@ -169,7 +169,7 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), [msg].iter())?;
+        con.add_pending(to_devs.clone(), [msg].iter()).await?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
@@ -246,7 +246,7 @@ async fn catchup(
     use catchup::*;
 
     loop {
-        let pending = s.get_pending(did, CHUNK_SIZE)?;
+        let pending = s.get_pending(did, CHUNK_SIZE).await?;
         if pending.is_empty() {
             break;
         } else {
@@ -257,7 +257,7 @@ async fn catchup(
                 write_msg(&msg, wtx, rrx).await?;
 
                 if CatchupAck(len) == read_msg(rrx).await? {
-                    s.expire_pending(did, len as u32)?;
+                    s.expire_pending(did, len as u32).await?;
                     break;
                 }
             }

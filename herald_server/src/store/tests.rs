@@ -17,6 +17,12 @@ macro_rules! b {
     }};
 }
 
+macro_rules! w {
+    ($maybe_val: expr) => {
+        $maybe_val.expect(womp!())
+    };
+}
+
 macro_rules! c {
     ($fut: expr) => {{
         let mut rt = Runtime::new().expect(womp!());
@@ -54,17 +60,37 @@ fn open_conn() -> Conn {
 #[test]
 #[serial]
 fn device_exists() {
-    let mut conn = open_conn();
+    let mut rt = Runtime::new().expect(womp!());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().expect(womp!());
+    rt.block_on(async {
+        let mut client = w!(get_client().await);
 
-    let signed_pk = kp.sign(*kp.public_key());
-    assert!(!b!(conn.device_exists(kp.public_key())));
+        // drop
+        client
+            .batch_execute(include_str!(
+                "../../migrations/2019-09-21-221007_herald/down.sql"
+            ))
+            .await
+            .expect(womp!());
 
-    b!(conn.register_user(user_id, signed_pk));
+        // create
+        client
+            .batch_execute(include_str!(
+                "../../migrations/2019-09-21-221007_herald/up.sql"
+            ))
+            .await
+            .expect(womp!());
 
-    assert!(b!(conn.device_exists(kp.public_key())));
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
+
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!w!(client.device_exists(kp.public_key()).await));
+
+        w!(client.register_user(user_id, signed_pk).await);
+
+        assert!(w!(client.device_exists(kp.public_key()).await));
+    });
 }
 
 #[test]
