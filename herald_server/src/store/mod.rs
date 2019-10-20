@@ -286,12 +286,21 @@ impl Conn {
 
     pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let client = get_client().await?;
-        let stmt = client.prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA]).await?;
+        let stmt = client
+            .prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA])
+            .await?;
 
         let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = {
             let row = client.query_one(&stmt, &[&key.as_ref()]).await?;
 
-            (row.get(0), row.get(1), row.get(2), row.get(3), row.get(4), row.get(5))
+            (
+                row.get(0),
+                row.get(1),
+                row.get(2),
+                row.get(3),
+                row.get(4),
+                row.get(5),
+            )
         };
 
         let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
@@ -317,49 +326,57 @@ impl Conn {
         Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
     }
 
-    //pub async fn deprecate_key(
-    //    &mut self,
-    //    signed_key: Signed<sig::PublicKey>,
-    //) -> Result<PKIResponse, Error> {
-    //    use crate::schema::keys::dsl::*;
+    pub async fn deprecate_key(
+        &mut self,
+        signed_key: Signed<sig::PublicKey>,
+    ) -> Result<PKIResponse, Error> {
+        let (data, meta) = signed_key.split();
+        let signer_key = meta.signed_by();
 
-    //    let (data, meta) = signed_key.split();
+        let mut client = get_client().await?;
+        let tx = client.transaction().await?;
 
-    //    let to_dep = keys
-    //        .filter(key.eq(data.as_ref()))
-    //        .filter(dep_ts.is_null())
-    //        .filter(dep_signature.is_null())
-    //        .filter(dep_signed_by.is_null());
+        let signer_key_exists_stmt = tx
+            .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
+            .await?;
 
-    //    let signer_key = meta.signed_by();
-    //    let signed_by_filter = keys
-    //        .filter(key.eq(signer_key.as_ref()))
-    //        .filter(dep_ts.is_null())
-    //        .filter(dep_signature.is_null())
-    //        .filter(dep_signed_by.is_null());
+        //let to_dep = keys
+        //    .filter(key.eq(data.as_ref()))
+        //    .filter(dep_ts.is_null())
+        //    .filter(dep_signature.is_null())
+        //    .filter(dep_signed_by.is_null());
 
-    //    let builder = self.build_transaction().deferrable();
+        //let signed_by_filter = keys
+        //    .filter(key.eq(signer_key.as_ref()))
+        //    .filter(dep_ts.is_null())
+        //    .filter(dep_signature.is_null())
+        //    .filter(dep_signed_by.is_null());
 
-    //    builder.run(|| {
-    //        if !select(exists(signed_by_filter)).get_result(&self.0)? {
-    //            return Ok(PKIResponse::DeadKey);
-    //        }
+        let signer_key_exists: bool = tx
+            .query_one(&signer_key_exists_stmt, &[&signer_key.as_ref()])
+            .await?
+            .get(0);
 
-    //        let num_updated = update(to_dep)
-    //            .set((
-    //                dep_ts.eq(meta.timestamp().0),
-    //                dep_signed_by.eq(meta.signed_by().as_ref()),
-    //                dep_signature.eq(meta.sig().as_ref()),
-    //            ))
-    //            .execute(&self.0)?;
+        if !signer_key_exists {
+            return Ok(PKIResponse::DeadKey);
+        }
 
-    //        if num_updated != 1 {
-    //            return Ok(PKIResponse::Redundant);
-    //        }
+        let dep_stmt = tx
+            .prepare_typed(
+                include_str!("sql/deprecate_key.sql"),
+                &[Type::INT8, Type::BYTEA, Type::BYTEA],
+            )
+            .await?;
 
-    //        Ok(PKIResponse::Success)
-    //    })
-    //}
+        let num_updated = tx.execute(&dep_stmt, &[&data.as_ref()]).await?;
+
+        if num_updated != 1 {
+            return Ok(PKIResponse::Redundant);
+        }
+
+        tx.commit().await?;
+        Ok(PKIResponse::Success)
+    }
 
     pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
         let client = get_client().await?;
