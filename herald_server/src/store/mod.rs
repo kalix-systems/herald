@@ -1,13 +1,12 @@
 use crate::prelude::*;
 use dotenv::dotenv;
-use futures::{FutureExt, Stream, StreamExt};
+use futures::FutureExt;
 use herald_common::*;
-use lazy_pond::LazyPond;
 use std::{
     env,
     ops::{Deref, DerefMut},
 };
-use tokio_postgres::{types::Type, Client, Connection, Error as PgError, NoTls, Row};
+use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
 //pub type Pool = LazyPond;
 //
@@ -73,8 +72,7 @@ fn unique_violation_to_redundant(query_res: Result<u64, PgError>) -> Result<PKIR
 }
 
 async fn get_client() -> Result<Conn, PgError> {
-    let (client, connection) =
-        tokio_postgres::connect("host=localhost user=postgres", NoTls).await?;
+    let (client, connection) = tokio_postgres::connect(&database_url(), NoTls).await?;
 
     // The connection object performs the actual communication with the database,
     // so spawn it off to run on its own.
@@ -124,7 +122,7 @@ impl Conn {
         &mut self,
         pres: &[sealed::PublicKey],
     ) -> Result<Vec<PKIResponse>, Error> {
-        let mut client = get_client().await?;
+        let client = get_client().await?;
 
         let stmt = client
             .prepare_typed(
@@ -152,7 +150,7 @@ impl Conn {
         &mut self,
         keys: &[sig::PublicKey],
     ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
-        let mut client = get_client().await?;
+        let client = get_client().await?;
 
         let stmt = client
             .prepare_typed(include_str!("sql/pop_prekey.sql"), &[Type::BYTEA])
@@ -307,7 +305,7 @@ impl Conn {
         let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
         let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
-        let dep_is_some = (&dep_signature, &dep_ts, &dep_signed_by) != (&None, &None, &None);
+        let dep_is_some = dep_ts.is_some() || dep_signed_by.is_some() || dep_signature.is_some();
 
         let dep_sig_meta = if dep_is_some {
             let dep_ts = dep_ts.ok_or(MissingData)?.into();
@@ -410,7 +408,7 @@ impl Conn {
 
     pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
         let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
-        let mut client = get_client().await?;
+        let client = get_client().await?;
 
         let stmt = client
             .prepare_typed(&text, &[Type::BYTEA, Type::BYTEA])
@@ -511,44 +509,43 @@ impl Conn {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    //pub async fn add_pending<'a, M: Iterator<Item = &'a Push>>(
-    //    &mut self,
-    //    key_arg: Vec<sig::PublicKey>,
-    //    msgs: M,
-    //) -> Result<(), Error> {
-    //    let builder = self.build_transaction().deferrable();
+    pub async fn add_pending<'a, M: Iterator<Item = &'a Push>>(
+        &mut self,
+        keys: Vec<sig::PublicKey>,
+        msgs: M,
+    ) -> Result<(), Error> {
+        let mut client = get_client().await?;
+        let tx = client.transaction().await?;
 
-    //    let key_arg: Vec<_> = key_arg
-    //        .into_iter()
-    //        .map(|k| k.as_ref().to_vec()) // borrow checker appeasement
-    //        .map(|k| pending::key.eq(k))
-    //        .collect();
+        let push_stmt = tx
+            .prepare_typed(include_str!("sql/add_push.sql"), &[Type::BYTEA, Type::INT8])
+            .await?;
 
-    //    builder.run(|| {
-    //        for msg in msgs {
-    //            let push_row_id: i64 = {
-    //                use crate::schema::pushes::dsl::*;
+        let pending_stmt = tx
+            .prepare_typed(
+                include_str!("sql/add_pending.sql"),
+                &[Type::BYTEA, Type::INT8],
+            )
+            .await?;
 
-    //                let push_timestamp = msg.timestamp;
-    //                let push_vec = serde_cbor::to_vec(msg)?;
-    //                insert_into(pushes)
-    //                    .values((push_data.eq(push_vec), push_ts.eq(push_timestamp.0)))
-    //                    .returning(push_id)
-    //                    .get_result(&self.0)?
-    //            };
+        for msg in msgs {
+            let push_row_id: i64 = {
+                let push_timestamp = msg.timestamp;
+                let push_vec = serde_cbor::to_vec(msg)?;
 
-    //            use crate::schema::pending::dsl::*;
+                tx.query_one(&push_stmt, &[&push_vec, &push_timestamp.0])
+                    .await?
+                    .get(0)
+            };
 
-    //            let keys: Vec<_> = key_arg
-    //                .iter()
-    //                .map(|k| (k, push_id.eq(push_row_id)))
-    //                .collect();
-
-    //            insert_into(pending).values(keys).execute(&self.0)?;
-    //        }
-    //        Ok(())
-    //    })
-    //}
+            for k in keys.iter() {
+                tx.execute(&pending_stmt, &[&k.as_ref(), &push_row_id])
+                    .await?;
+            }
+        }
+        Ok(())
+        //})
+    }
 }
 
 #[cfg(test)]
