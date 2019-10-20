@@ -340,18 +340,6 @@ impl Conn {
             .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
             .await?;
 
-        //let to_dep = keys
-        //    .filter(key.eq(data.as_ref()))
-        //    .filter(dep_ts.is_null())
-        //    .filter(dep_signature.is_null())
-        //    .filter(dep_signed_by.is_null());
-
-        //let signed_by_filter = keys
-        //    .filter(key.eq(signer_key.as_ref()))
-        //    .filter(dep_ts.is_null())
-        //    .filter(dep_signature.is_null())
-        //    .filter(dep_signed_by.is_null());
-
         let signer_key_exists: bool = tx
             .query_one(&signer_key_exists_stmt, &[&signer_key.as_ref()])
             .await?
@@ -400,20 +388,56 @@ impl Conn {
         Ok(row.get(0))
     }
 
-    //pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
-    //    let keys: Vec<Vec<u8>> = userkeys::table
-    //        .filter(userkeys::user_id.eq(uid.as_str()))
-    //        .inner_join(keys::table)
-    //        .filter(keys::dep_ts.is_null())
-    //        .filter(keys::dep_signed_by.is_null())
-    //        .filter(keys::dep_signature.is_null())
-    //        .select(keys::key)
-    //        .get_results(self.deref_mut())?;
+    pub async fn get_pending(
+        &mut self,
+        key: sig::PublicKey,
+        limit: u32,
+    ) -> Result<Vec<Push>, Error> {
+        let text = format!(include_str!("sql/get_pending.sql"), limit = limit);
+        let client = get_client().await?;
+        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
 
-    //    keys.iter()
-    //        .map(|raw| sig::PublicKey::from_slice(raw).ok_or(Error::InvalidKey))
-    //        .collect()
-    //}
+        let rows = client.query(&stmt, &[&key.as_ref()]).await?;
+
+        let mut out = Vec::with_capacity(rows.len());
+        for row in rows {
+            let p: Vec<u8> = row.get(0);
+            out.push(serde_cbor::from_slice(&p)?);
+        }
+
+        Ok(out)
+    }
+
+    pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
+        let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
+        let mut client = get_client().await?;
+
+        let stmt = client
+            .prepare_typed(&text, &[Type::BYTEA, Type::BYTEA])
+            .await?;
+        self.execute(&stmt, &[&key.as_ref()]).await?;
+
+        Ok(())
+    }
+
+    pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
+        let client = get_client().await?;
+        let stmt = client
+            .prepare_typed(
+                include_str!("sql/get_valid_keys_by_user_id.sql"),
+                &[Type::TEXT],
+            )
+            .await?;
+
+        client
+            .query(&stmt, &[&uid.as_str()])
+            .await?
+            .into_iter()
+            .map(|row| {
+                let raw = row.get(0);
+                sig::PublicKey::from_slice(raw).ok_or(Error::InvalidKey)
+            }).collect()
+    }
 
     //pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
     //    let keys: Vec<RawKeyAndMeta> = userkeys::table
@@ -515,38 +539,6 @@ impl Conn {
     //        Ok(())
     //    })
     //}
-
-    pub async fn get_pending(
-        &mut self,
-        key: sig::PublicKey,
-        limit: u32,
-    ) -> Result<Vec<Push>, Error> {
-        let text = format!(include_str!("sql/get_pending.sql"), limit = limit);
-        let client = get_client().await?;
-        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
-
-        let rows = client.query(&stmt, &[&key.as_ref()]).await?;
-
-        let mut out = Vec::with_capacity(rows.len());
-        for row in rows {
-            let p: Vec<u8> = row.get(0);
-            out.push(serde_cbor::from_slice(&p)?);
-        }
-
-        Ok(out)
-    }
-
-    pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
-        let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
-        let mut client = get_client().await?;
-
-        let stmt = client
-            .prepare_typed(&text, &[Type::BYTEA, Type::BYTEA])
-            .await?;
-        self.execute(&stmt, &[&key.as_ref()]).await?;
-
-        Ok(())
-    }
 }
 
 #[cfg(test)]
