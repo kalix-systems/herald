@@ -333,13 +333,16 @@ impl Conn {
     //    })
     //}
 
-    //pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
-    //    use crate::schema::userkeys::dsl::*;
+    pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
+        let client = get_client().await?;
+        let stmt = client
+            .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
+            .await?;
 
-    //    let query = userkeys.filter(user_id.eq(uid.as_str()));
+        let row = client.query_one(&stmt, &[&uid.as_str()]).await?;
 
-    //    Ok(select(exists(query)).get_result(self.deref_mut())?)
-    //}
+        Ok(row.get(0))
+    }
 
     //pub async fn key_is_valid(&mut self, key_arg: sig::PublicKey) -> Result<bool, Error> {
     //    use crate::schema::keys::dsl::*;
