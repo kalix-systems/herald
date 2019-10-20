@@ -272,6 +272,7 @@ impl Conn {
                 &[Type::TEXT, Type::BYTEA],
             )
             .await?;
+
         let res = tx
             .execute(
                 &add_user_key_stmt,
@@ -279,6 +280,7 @@ impl Conn {
             )
             .await;
 
+        tx.commit().await?;
         unique_violation_to_redundant(res)
     }
 
@@ -350,11 +352,21 @@ impl Conn {
         let dep_stmt = tx
             .prepare_typed(
                 include_str!("sql/deprecate_key.sql"),
-                &[Type::INT8, Type::BYTEA, Type::BYTEA],
+                &[Type::INT8, Type::BYTEA, Type::BYTEA, Type::BYTEA],
             )
             .await?;
 
-        let num_updated = tx.execute(&dep_stmt, &[&data.as_ref()]).await?;
+        let num_updated = tx
+            .execute(
+                &dep_stmt,
+                &[
+                    &meta.timestamp().0,
+                    &signer_key.as_ref(),
+                    &meta.sig().as_ref(),
+                    &data.as_ref(),
+                ],
+            )
+            .await?;
 
         if num_updated != 1 {
             return Ok(PKIResponse::Redundant);
@@ -411,9 +423,9 @@ impl Conn {
         let client = get_client().await?;
 
         let stmt = client
-            .prepare_typed(&text, &[Type::BYTEA, Type::BYTEA])
+            .prepare_typed(&text, &[Type::BYTEA])
             .await?;
-        self.execute(&stmt, &[&key.as_ref()]).await?;
+        client.execute(&stmt, &[&key.as_ref()]).await?;
 
         Ok(())
     }
@@ -543,8 +555,8 @@ impl Conn {
                     .await?;
             }
         }
+        tx.commit().await?;
         Ok(())
-        //})
     }
 }
 

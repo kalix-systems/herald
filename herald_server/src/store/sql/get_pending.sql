@@ -5,5 +5,5 @@ FROM
 WHERE
   pending.key = $1
 ORDER BY
-  push_ts ASC, push_id ASC
+  push_ts ASC, pending.push_id ASC
 LIMIT {limit}

@@ -1,9 +1,9 @@
 SELECT
   userkeys.user_id
 FROM
-  keys INNER JOIN userkeys ON userkeys.key = keys.key
+  userkeys INNER JOIN keys ON userkeys.key = keys.key
 WHERE
-  user_id = $1 AND
-  dep_signature IS NULL AND
-  dep_signed_by IS NULL AND
-  dep_ts IS NULL
+  userkeys.key = $1 AND
+  keys.dep_signature IS NULL AND
+  keys.dep_signed_by IS NULL AND
+  keys.dep_ts IS NULL
