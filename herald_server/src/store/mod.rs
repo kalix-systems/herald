@@ -135,14 +135,14 @@ impl Conn {
 
         let mut out = Vec::with_capacity(pres.len());
         for pre in pres {
-                let res = client
-                    .execute(
-                        &stmt,
-                        &[&pre.signed_by().as_ref(), &serde_cbor::to_vec(&pre)?],
-                    )
-                    .await;
+            let res = client
+                .execute(
+                    &stmt,
+                    &[&pre.signed_by().as_ref(), &serde_cbor::to_vec(&pre)?],
+                )
+                .await;
 
-                out.push(unique_violation_to_redundant(res)?);
+            out.push(unique_violation_to_redundant(res)?);
         }
 
         Ok(out)
@@ -155,10 +155,7 @@ impl Conn {
         let mut client = get_client().await?;
 
         let stmt = client
-            .prepare_typed(
-                include_str!("sql/pop_prekey.sql"),
-                &[Type::BYTEA],
-            )
+            .prepare_typed(include_str!("sql/pop_prekey.sql"), &[Type::BYTEA])
             .await?;
 
         let mut prekeys = Vec::with_capacity(keys.len());
@@ -176,39 +173,52 @@ impl Conn {
         Ok(prekeys)
     }
 
-    //pub async fn register_user(
-    //    &mut self,
-    //    user_id: UserId,
-    //    key: Signed<sig::PublicKey>,
-    //) -> Result<register::Res, Error> {
-    //    let builder = self.build_transaction().deferrable();
+    pub async fn register_user(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::Res, Error> {
+        let mut client = get_client().await?;
+        let tx = client.transaction().await?;
 
-    //    let query = userkeys::table.filter(userkeys::user_id.eq(user_id.as_str()));
+        let exists_stmt = tx
+            .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
+            .await?;
 
-    //    builder.run(|| {
-    //        if select(exists(query)).get_result(&self.0)? {
-    //            return Ok(register::Res::UIDTaken);
-    //        }
+        if tx.query_one(&exists_stmt, &[&user_id.as_str()]).await?.get(0) {
+            return Ok(register::Res::UIDTaken);
+        }
 
-    //        diesel::insert_into(keys::table)
-    //            .values((
-    //                keys::key.eq(key.data().as_ref()),
-    //                keys::signed_by.eq(key.signed_by().as_ref()),
-    //                keys::ts.eq(key.timestamp().0),
-    //                keys::signature.eq(key.sig().as_ref()),
-    //            ))
-    //            .execute(&self.0)?;
+        let add_key_stmt = tx
+            .prepare_typed(
+                include_str!("sql/add_key.sql"),
+                &[Type::BYTEA, Type::BYTEA, Type::INT8, Type::BYTEA],
+            )
+            .await?;
 
-    //        diesel::insert_into(userkeys::table)
-    //            .values((
-    //                userkeys::user_id.eq(user_id.as_str()),
-    //                userkeys::key.eq(key.data().as_ref()),
-    //            ))
-    //            .execute(&self.0)?;
+        tx.execute(
+            &add_key_stmt,
+            &[
+                &key.data().as_ref(),
+                &key.signed_by().as_ref(),
+                &key.timestamp().0,
+                &key.sig().as_ref(),
+            ],
+        )
+        .await?;
 
-    //        return Ok(register::Res::Success);
-    //    })
-    //}
+        let add_user_key_stmt = tx
+            .prepare_typed(
+                include_str!("sql/add_user_key.sql"),
+                &[Type::TEXT, Type::BYTEA],
+            )
+            .await?;
+
+        tx.execute(&add_user_key_stmt, &[&user_id.as_str(), &key.data().as_ref()]).await?;
+        tx.commit().await?;
+
+        return Ok(register::Res::Success);
+    }
 
     //pub async fn add_key(&mut self, new_key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
     //    let builder = self.build_transaction().deferrable();
@@ -472,13 +482,14 @@ impl Conn {
     //    })
     //}
 
-    pub async fn get_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<Vec<Push>, Error> {
-        let text = format!(include_str!("sql/get_pending.sql"), limit=limit);
+    pub async fn get_pending(
+        &mut self,
+        key: sig::PublicKey,
+        limit: u32,
+    ) -> Result<Vec<Push>, Error> {
+        let text = format!(include_str!("sql/get_pending.sql"), limit = limit);
         let client = get_client().await?;
-        let stmt = client
-            .prepare_typed(&text, &[Type::BYTEA])
-            .await?;
-
+        let stmt = client.prepare_typed(&text, &[Type::BYTEA]).await?;
 
         let rows = client.query(&stmt, &[&key.as_ref()]).await?;
 
@@ -492,17 +503,13 @@ impl Conn {
     }
 
     pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
-        let text = format!(include_str!("sql/expire_pending.sql"), limit=limit);
+        let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
         let mut client = get_client().await?;
 
         let stmt = client
-            .prepare_typed(
-                &text,
-                &[Type::BYTEA, Type::BYTEA],
-            )
+            .prepare_typed(&text, &[Type::BYTEA, Type::BYTEA])
             .await?;
         self.execute(&stmt, &[&key.as_ref()]).await?;
-
 
         Ok(())
     }
