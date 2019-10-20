@@ -108,6 +108,20 @@ pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     Ok(())
 }
 
+fn mark_unused(
+    tx: &rusqlite::Transaction,
+    cid: ConversationId,
+    blocks: &BTreeSet<BlockHash>,
+) -> Result<(), HErr> {
+    let mut mark_stmt = tx.prepare(include_str!("sql/mark_unused.sql"))?;
+
+    for block in blocks {
+        mark_stmt.execute(params![cid, block.as_ref()])?;
+    }
+
+    Ok(())
+}
+
 fn get_keys(
     db: &rusqlite::Connection,
     cid: ConversationId,
@@ -207,6 +221,15 @@ impl ConversationId {
         let tx = db.transaction()?;
 
         mark_used(&tx, *self, blocks)?;
+        tx.commit()?;
+        Ok(())
+    }
+
+    pub fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
+        let mut db = CK_CONN.lock();
+        let tx = db.transaction()?;
+
+        mark_unused(&tx, *self, blocks)?;
         tx.commit()?;
         Ok(())
     }
