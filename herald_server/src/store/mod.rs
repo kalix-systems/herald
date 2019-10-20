@@ -540,7 +540,7 @@ impl Conn {
         Ok(())
     }
 
-    pub(crate) async fn reset_all(&mut self) -> Result<(), Error> {
+    pub async fn reset_all(&mut self) -> Result<(), Error> {
         let tx = self.transaction().await?;
 
         // drop
