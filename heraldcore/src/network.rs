@@ -466,12 +466,14 @@ pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> R
 fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
+
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
 
         debug_assert_eq!(cid.store_key(hash, key)?, Vec::new());
+        cid.mark_used(cm.body().parent_hashes().iter())?;
 
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => Ok(()),
