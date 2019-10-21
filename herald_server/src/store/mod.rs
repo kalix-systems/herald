@@ -11,7 +11,7 @@ use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 macro_rules! sql {
     ($path: literal) => {
         include_str!(concat!("sql/", $path))
-    }
+    };
 }
 
 fn database_url() -> String {
@@ -100,10 +100,7 @@ impl Conn {
         pres: &[sealed::PublicKey],
     ) -> Result<Vec<PKIResponse>, Error> {
         let stmt = self
-            .prepare_typed(
-                sql!("add_prekey.sql"),
-                &[Type::BYTEA, Type::BYTEA],
-            )
+            .prepare_typed(sql!("add_prekey.sql"), &[Type::BYTEA, Type::BYTEA])
             .await?;
 
         let mut out = Vec::with_capacity(pres.len());
@@ -185,10 +182,7 @@ impl Conn {
         .await?;
 
         let add_user_key_stmt = tx
-            .prepare_typed(
-                sql!("add_user_key.sql"),
-                &[Type::TEXT, Type::BYTEA],
-            )
+            .prepare_typed(sql!("add_user_key.sql"), &[Type::TEXT, Type::BYTEA])
             .await?;
 
         tx.execute(
@@ -241,10 +235,7 @@ impl Conn {
         unique_violation_to_redundant(res)?;
 
         let add_user_key_stmt = tx
-            .prepare_typed(
-                sql!("add_user_key.sql"),
-                &[Type::TEXT, Type::BYTEA],
-            )
+            .prepare_typed(sql!("add_user_key.sql"), &[Type::TEXT, Type::BYTEA])
             .await?;
 
         let res = tx
@@ -393,10 +384,7 @@ impl Conn {
 
     pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
         let stmt = self
-            .prepare_typed(
-                sql!("get_valid_keys_by_user_id.sql"),
-                &[Type::TEXT],
-            )
+            .prepare_typed(sql!("get_valid_keys_by_user_id.sql"), &[Type::TEXT])
             .await?;
 
         self.query(&stmt, &[&uid.as_str()])
@@ -468,10 +456,7 @@ impl Conn {
             .await?;
 
         let pending_stmt = tx
-            .prepare_typed(
-                sql!("add_pending.sql"),
-                &[Type::BYTEA, Type::INT8],
-            )
+            .prepare_typed(sql!("add_pending.sql"), &[Type::BYTEA, Type::INT8])
             .await?;
 
         for msg in msgs {
