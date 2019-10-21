@@ -8,6 +8,12 @@ use std::{
 };
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
+macro_rules! sql {
+    ($path: literal) => {
+        include_str!(concat!("sql/", $path))
+    }
+}
+
 fn database_url() -> String {
     dotenv().expect("Invalid dotenv");
     env::var("DATABASE_URL").expect("DATABASE_URL must be set")
@@ -81,7 +87,7 @@ type RawPkMeta<'a> = (
 impl Conn {
     pub async fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/device_exists.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("device_exists.sql"), &[Type::BYTEA])
             .await?;
 
         let row = self.query_one(&stmt, &[&pk.as_ref()]).await?;
@@ -95,12 +101,13 @@ impl Conn {
     ) -> Result<Vec<PKIResponse>, Error> {
         let stmt = self
             .prepare_typed(
-                include_str!("sql/add_prekey.sql"),
+                sql!("add_prekey.sql"),
                 &[Type::BYTEA, Type::BYTEA],
             )
             .await?;
 
         let mut out = Vec::with_capacity(pres.len());
+
         for pre in pres {
             let res = self
                 .execute(
@@ -120,7 +127,7 @@ impl Conn {
         keys: &[sig::PublicKey],
     ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/pop_prekey.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("pop_prekey.sql"), &[Type::BYTEA])
             .await?;
 
         let mut prekeys = Vec::with_capacity(keys.len());
@@ -148,7 +155,7 @@ impl Conn {
         let tx = self.transaction().await?;
 
         let exists_stmt = tx
-            .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
+            .prepare_typed(sql!("user_exists.sql"), &[Type::TEXT])
             .await?;
 
         if tx
@@ -161,7 +168,7 @@ impl Conn {
 
         let add_key_stmt = tx
             .prepare_typed(
-                include_str!("sql/add_key.sql"),
+                sql!("add_key.sql"),
                 &[Type::BYTEA, Type::BYTEA, Type::INT8, Type::BYTEA],
             )
             .await?;
@@ -179,7 +186,7 @@ impl Conn {
 
         let add_user_key_stmt = tx
             .prepare_typed(
-                include_str!("sql/add_user_key.sql"),
+                sql!("add_user_key.sql"),
                 &[Type::TEXT, Type::BYTEA],
             )
             .await?;
@@ -198,7 +205,7 @@ impl Conn {
         let tx = self.transaction().await?;
 
         let user_id_stmt = tx
-            .prepare_typed(include_str!("sql/get_user_id_by_key.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("get_user_id_by_key.sql"), &[Type::BYTEA])
             .await?;
 
         let user_id = match tx
@@ -214,7 +221,7 @@ impl Conn {
 
         let add_key_stmt = tx
             .prepare_typed(
-                include_str!("sql/add_key.sql"),
+                sql!("add_key.sql"),
                 &[Type::BYTEA, Type::BYTEA, Type::INT8, Type::BYTEA],
             )
             .await?;
@@ -235,7 +242,7 @@ impl Conn {
 
         let add_user_key_stmt = tx
             .prepare_typed(
-                include_str!("sql/add_user_key.sql"),
+                sql!("add_user_key.sql"),
                 &[Type::TEXT, Type::BYTEA],
             )
             .await?;
@@ -253,7 +260,7 @@ impl Conn {
 
     pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("get_pk_meta.sql"), &[Type::BYTEA])
             .await?;
 
         let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
@@ -297,7 +304,7 @@ impl Conn {
         let tx = self.transaction().await?;
 
         let signer_key_exists_stmt = tx
-            .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("key_is_valid.sql"), &[Type::BYTEA])
             .await?;
 
         let signer_key_exists: bool = tx
@@ -311,7 +318,7 @@ impl Conn {
 
         let dep_stmt = tx
             .prepare_typed(
-                include_str!("sql/deprecate_key.sql"),
+                sql!("deprecate_key.sql"),
                 &[Type::INT8, Type::BYTEA, Type::BYTEA, Type::BYTEA],
             )
             .await?;
@@ -338,7 +345,7 @@ impl Conn {
 
     pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/user_exists.sql"), &[Type::TEXT])
+            .prepare_typed(sql!("user_exists.sql"), &[Type::TEXT])
             .await?;
 
         let row = self.query_one(&stmt, &[&uid.as_str()]).await?;
@@ -348,7 +355,7 @@ impl Conn {
 
     pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/key_is_valid.sql"), &[Type::BYTEA])
+            .prepare_typed(sql!("key_is_valid.sql"), &[Type::BYTEA])
             .await?;
 
         let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
@@ -361,7 +368,7 @@ impl Conn {
         key: sig::PublicKey,
         limit: u32,
     ) -> Result<Vec<Push>, Error> {
-        let text = format!(include_str!("sql/get_pending.sql"), limit = limit);
+        let text = format!(sql!("get_pending.sql"), limit = limit);
         let stmt = self.prepare_typed(&text, &[Type::BYTEA]).await?;
 
         let rows = self.query(&stmt, &[&key.as_ref()]).await?;
@@ -376,7 +383,7 @@ impl Conn {
     }
 
     pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
-        let text = format!(include_str!("sql/expire_pending.sql"), limit = limit);
+        let text = format!(sql!("expire_pending.sql"), limit = limit);
 
         let stmt = self.prepare_typed(&text, &[Type::BYTEA]).await?;
         self.execute(&stmt, &[&key.as_ref()]).await?;
@@ -387,7 +394,7 @@ impl Conn {
     pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
         let stmt = self
             .prepare_typed(
-                include_str!("sql/get_valid_keys_by_user_id.sql"),
+                sql!("get_valid_keys_by_user_id.sql"),
                 &[Type::TEXT],
             )
             .await?;
@@ -404,7 +411,7 @@ impl Conn {
 
     pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
         let stmt = self
-            .prepare_typed(include_str!("sql/read_meta.sql"), &[Type::TEXT])
+            .prepare_typed(sql!("read_meta.sql"), &[Type::TEXT])
             .await?;
 
         let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = self
@@ -457,12 +464,12 @@ impl Conn {
         let tx = self.transaction().await?;
 
         let push_stmt = tx
-            .prepare_typed(include_str!("sql/add_push.sql"), &[Type::BYTEA, Type::INT8])
+            .prepare_typed(sql!("add_push.sql"), &[Type::BYTEA, Type::INT8])
             .await?;
 
         let pending_stmt = tx
             .prepare_typed(
-                include_str!("sql/add_pending.sql"),
+                sql!("add_pending.sql"),
                 &[Type::BYTEA, Type::INT8],
             )
             .await?;
