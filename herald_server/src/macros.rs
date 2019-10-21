@@ -6,7 +6,7 @@ macro_rules! mk_filter {
             .and_then(move |b| {
                 async move {
                     $this
-                        .req_handler(b, $f)
+                        .req_handler_store(b, $f)
                         .await
                         .map_err(|e| warp::reject::custom(format!("{:?}", e)))
                         //.unwrap_or_else(|e| format!("{:?}", e).into())
