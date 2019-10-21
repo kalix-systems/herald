@@ -89,7 +89,7 @@ impl ConfigBuilder {
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
         let db = Database::get()?;
-        db::add(db, self)
+        self.add_db(db)
     }
 }
 
