@@ -1668,7 +1668,7 @@ dependencies = [
 [[package]]
 name = "rust_qt_binding_generator"
 version = "0.3.4"
-source = "git+https://github.com/kalix-systems/rust-qt-binding-generator#9c03f7cbc5fce2f5ce6ffe0509f7d67db8d2f40d"
+source = "git+https://github.com/kalix-systems/rust-qt-binding-generator#3842037d20cc7012e3532b2a9be0f07600f8f3aa"
 dependencies = [
  "cc 1.0.46 (registry+https://github.com/rust-lang/crates.io-index)",
  "clap 2.33.0 (registry+https://github.com/rust-lang/crates.io-index)",
