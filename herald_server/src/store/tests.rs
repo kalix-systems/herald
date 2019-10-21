@@ -1,275 +1,208 @@
 use super::*;
-use lazy_static::*;
 use serial_test_derive::serial;
 use std::convert::TryInto;
+use tokio::runtime::current_thread::Runtime;
 use womp::*;
 
-lazy_static! {
-    static ref POOL: Pool = init_pool();
+macro_rules! w {
+    ($maybe_val: expr) => {
+        $maybe_val.expect(womp!())
+    };
 }
 
-fn open_conn() -> Conn {
-    let conn = POOL.get().expect("Failed to get connection");
-    diesel::delete(pending::table)
-        .execute(conn.deref())
-        .expect(womp!());
-    diesel::delete(pushes::table)
-        .execute(conn.deref())
-        .expect(womp!());
-    diesel::delete(prekeys::table)
-        .execute(conn.deref())
-        .expect(womp!());
-    diesel::delete(userkeys::table)
-        .execute(conn.deref())
-        .expect(womp!());
-    diesel::delete(keys::table)
-        .execute(conn.deref())
-        .expect(womp!());
+macro_rules! wa {
+    ($maybe_fut: expr) => {
+        w!($maybe_fut.await)
+    };
+}
 
-    Conn(conn)
+macro_rules! a {
+    ($block: block) => {
+        let mut rt = Runtime::new().expect(womp!());
+
+        rt.block_on(async { $block });
+    };
 }
 
 #[test]
 #[serial]
 fn device_exists() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
-    assert!(!conn.device_exists(kp.public_key()).unwrap());
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!wa!(client.device_exists(kp.public_key())));
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    assert!(conn.device_exists(kp.public_key()).unwrap());
+        assert!(wa!(client.device_exists(kp.public_key())));
+    }}
 }
 
 #[test]
 #[serial]
 fn register_and_add() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp1 = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk1 = kp1.sign(*kp1.public_key());
-    assert!(!conn.device_exists(kp1.public_key()).unwrap());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
+        assert!(!wa!(client.device_exists(kp1.public_key())));
 
-    conn.register_user(user_id, signed_pk1).unwrap();
+        wa!(client.register_user(user_id, signed_pk1));
 
-    assert!(conn.device_exists(kp1.public_key()).unwrap());
+        assert!(wa!(client.device_exists(kp1.public_key())));
 
-    let kp2 = sig::KeyPair::gen_new();
-    let signed_pk2 = kp1.sign(*kp2.public_key());
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-    assert!(conn.device_exists(kp1.public_key()).unwrap());
-    assert!(!conn.device_exists(kp2.public_key()).unwrap());
+        assert!(wa!(client.device_exists(kp1.public_key())));
 
-    conn.add_key(signed_pk2).unwrap();
+        assert!(!wa!(client.device_exists(kp2.public_key())));
 
-    assert!(conn.device_exists(kp2.public_key()).unwrap());
+        wa!(client.add_key(signed_pk2));
+
+        assert!(wa!(client.device_exists(kp2.public_key())));
+    }}
 }
 
 #[test]
 #[serial]
 fn register_twice() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk = kp.sign(*kp.public_key());
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    let kp = sig::KeyPair::gen_new();
-    let signed_pk = kp.sign(*kp.public_key());
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
 
-    match conn.register_user(user_id, signed_pk) {
-        Ok(register::Res::UIDTaken) => {}
-        _ => panic!(),
-    }
+        match client.register_user(user_id, signed_pk).await {
+            Ok(register::Res::UIDTaken) => {}
+            _ => panic!(),
+        }
+    }}
 }
 
 #[test]
 #[serial]
 fn read_key() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    assert!(conn.read_key(*kp.public_key()).is_err());
+        assert!(client.read_key(*kp.public_key()).await.is_err());
 
-    let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk = kp.sign(*kp.public_key());
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    assert!(conn.key_is_valid(*kp.public_key()).unwrap());
+        assert!(wa!(client.key_is_valid(*kp.public_key())));
 
-    let meta = conn
-        .read_key(*kp.public_key())
-        .expect("Couldn't read key meta");
+        let meta = wa!(client.read_key(*kp.public_key()));
 
-    assert!(meta.key_is_valid(*kp.public_key()));
+        assert!(meta.key_is_valid(*kp.public_key()));
 
-    conn.deprecate_key(signed_pk).unwrap();
+        wa!(client.deprecate_key(signed_pk));
 
-    let meta = conn
-        .read_key(*kp.public_key())
-        .expect("Couldn't read key meta");
+        let meta = wa!(client.read_key(*kp.public_key()));
 
-    assert!(!meta.key_is_valid(*kp.public_key()));
+        assert!(!meta.key_is_valid(*kp.public_key()));
+    }}
 }
 
 #[test]
 #[serial]
 fn user_exists() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
-    assert!(!conn.user_exists(&user_id).unwrap());
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!wa!(client.user_exists(&user_id)));
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    assert!(conn.user_exists(&user_id).unwrap());
+        assert!(wa!(client.user_exists(&user_id)));
+    }}
 }
 
 #[test]
 #[serial]
 fn read_meta() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk = kp.sign(*kp.public_key());
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    let keys = conn.read_meta(&user_id).unwrap().keys;
-    assert_eq!(keys.len(), 1);
+        let keys = wa!(client.read_meta(&user_id)).keys;
+        assert_eq!(keys.len(), 1);
+    }}
 }
 
 #[test]
 #[serial]
 fn valid_keys() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk = kp.sign(*kp.public_key());
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    let keys = conn.valid_keys(&user_id).unwrap();
-    assert_eq!(keys.len(), 1);
+        let keys = wa!(client.valid_keys(&user_id));
+        assert_eq!(keys.len(), 1);
 
-    conn.deprecate_key(signed_pk).unwrap();
-    let keys = conn.valid_keys(&user_id).unwrap();
-    assert_eq!(keys.len(), 0);
+        wa!(client.deprecate_key(signed_pk));
+        let keys = wa!(client.valid_keys(&user_id));
+        assert_eq!(keys.len(), 0);
+    }}
 }
 
 #[test]
 #[serial]
 fn add_get_expire_pending_ts() {
-    let mut conn = open_conn();
-
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
-
-    let signed_pk = kp.sign(*kp.public_key());
-    conn.register_user(user_id, signed_pk).unwrap();
-
-    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
-    assert_eq!(pending.len(), 0);
-
-    let push1 = Push {
-        tag: PushTag::User,
-        timestamp: Time::now(),
-        msg: bytes::Bytes::from_static(b"a"),
-    };
-    std::thread::sleep(std::time::Duration::from_secs(1));
-    let push2 = Push {
-        tag: PushTag::User,
-        timestamp: Time::now(),
-        msg: bytes::Bytes::from_static(b"b"),
-    };
-    std::thread::sleep(std::time::Duration::from_secs(1));
-    let push3 = Push {
-        tag: PushTag::User,
-        timestamp: Time::now(),
-        msg: bytes::Bytes::from_static(b"c"),
-    };
-
-    let addf = |p: Push| {
-        let pk = *kp.public_key();
-        std::thread::spawn(move || {
-            let mut conn = Conn(POOL.get().expect("failed to get connection"));
-            assert!(conn.add_pending(vec![pk], [p].iter()).is_ok());
-        })
-    };
-
-    let h1 = addf(push1.clone());
-    let h2 = addf(push2.clone());
-    let h3 = addf(push3.clone());
-
-    h1.join().expect("first insert failed");
-    h2.join().expect("second insert failed");
-    h3.join().expect("third insert failed");
-
-    let mut pushes = vec![push1, push2, push3];
-    let pushes_unsorted = pushes.clone();
-    pushes.sort_unstable_by_key(|p| p.timestamp);
-    assert_eq!(pushes, pushes_unsorted);
-
-    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[..1]);
-
-    let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[..2]);
-
-    let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[..3]);
-
-    let pending = conn.get_pending(*kp.public_key(), 4).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[..3]);
-
-    assert!(conn.expire_pending(*kp.public_key(), 1).is_ok());
-
-    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[1..2]);
-
-    let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[1..3]);
-
-    let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
-    assert_eq!(pending.as_slice(), &pushes[1..3]);
-
-    assert!(conn.expire_pending(*kp.public_key(), 2).is_ok());
-
-    let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
-    assert!(pending.is_empty());
-}
-
-#[test]
-#[serial]
-fn add_get_expire_pending_id() {
-    for i in 0..10 {
-        let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
         let kp = sig::KeyPair::gen_new();
-        let user_id = "Hello".try_into().unwrap();
+        let user_id = "Hello".try_into().expect(womp!());
 
         let signed_pk = kp.sign(*kp.public_key());
-        conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 1));
+
         assert_eq!(pending.len(), 0);
 
         let push1 = Push {
@@ -277,152 +210,261 @@ fn add_get_expire_pending_id() {
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"a"),
         };
+
+        std::thread::sleep(std::time::Duration::from_secs(1));
+
         let push2 = Push {
             tag: PushTag::User,
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"b"),
         };
+
+        std::thread::sleep(std::time::Duration::from_secs(1));
+
         let push3 = Push {
             tag: PushTag::User,
             timestamp: Time::now(),
             msg: bytes::Bytes::from_static(b"c"),
         };
 
+        let addf = |p: Push| {
+            let pk = *kp.public_key();
+            std::thread::spawn(move || {
+                let mut rt = w!(Runtime::new());
+                rt.block_on(async {
+                    let mut client = wa!(get_client());
+                    assert!(client.add_pending(vec![pk], [p].iter()).await.is_ok());
+                });
+            })
+        };
+
+        let h1 = addf(push1.clone());
+        let h2 = addf(push2.clone());
+        let h3 = addf(push3.clone());
+
+        h1.join().expect(womp!("first insert failed"));
+        h2.join().expect(womp!("second insert failed"));
+        h3.join().expect(womp!("third insert failed"));
+
         let mut pushes = vec![push1, push2, push3];
         let pushes_unsorted = pushes.clone();
-        pushes.sort_by_key(|p| p.timestamp);
+        pushes.sort_unstable_by_key(|p| p.timestamp);
         assert_eq!(pushes, pushes_unsorted);
 
-        conn.add_pending(vec![*kp.public_key()], pushes.iter())
-            .expect("failed to add pushes");
-
-        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 1));
         assert_eq!(pending.as_slice(), &pushes[..1]);
 
-        let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 2));
         assert_eq!(pending.as_slice(), &pushes[..2]);
 
-        let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 3));
+
         assert_eq!(pending.as_slice(), &pushes[..3]);
 
-        let pending = conn.get_pending(*kp.public_key(), 4).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 4));
+
         assert_eq!(pending.as_slice(), &pushes[..3]);
 
-        assert!(conn.expire_pending(*kp.public_key(), 1).is_ok());
+        wa!(client.expire_pending(*kp.public_key(), 1));
 
-        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 1));
+
         assert_eq!(pending.as_slice(), &pushes[1..2]);
 
-        let pending = conn.get_pending(*kp.public_key(), 2).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 2));
+
         assert_eq!(pending.as_slice(), &pushes[1..3]);
 
-        let pending = conn.get_pending(*kp.public_key(), 3).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 3));
+
         assert_eq!(pending.as_slice(), &pushes[1..3]);
 
-        assert!(conn.expire_pending(*kp.public_key(), 2).is_ok());
+        assert!(client.expire_pending(*kp.public_key(), 2).await.is_ok());
 
-        let pending = conn.get_pending(*kp.public_key(), 1).unwrap();
+        let pending = wa!(client.get_pending(*kp.public_key(), 1));
         assert!(pending.is_empty());
-
-        dbg!(i);
-    }
+    }}
 }
+
+#[test]
+#[serial]
+fn add_get_expire_pending_id() {
+    a! {{
+        for _ in 0..10 {
+            let mut client = wa!(get_client());
+            wa!(client.reset_all());
+
+            let kp = sig::KeyPair::gen_new();
+            let user_id = "Hello".try_into().expect(womp!());
+
+            let signed_pk = kp.sign(*kp.public_key());
+            wa!(client.register_user(user_id, signed_pk));
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 1));
+            assert_eq!(pending.len(), 0);
+
+            let push1 = Push {
+                tag: PushTag::User,
+                timestamp: Time::now(),
+                msg: bytes::Bytes::from_static(b"a"),
+            };
+            let push2 = Push {
+                tag: PushTag::User,
+                timestamp: Time::now(),
+                msg: bytes::Bytes::from_static(b"b"),
+            };
+            let push3 = Push {
+                tag: PushTag::User,
+                timestamp: Time::now(),
+                msg: bytes::Bytes::from_static(b"c"),
+            };
+
+            let mut pushes = vec![push1, push2, push3];
+            let pushes_unsorted = pushes.clone();
+            pushes.sort_by_key(|p| p.timestamp);
+            assert_eq!(pushes, pushes_unsorted);
+
+            wa!(client.add_pending(vec![*kp.public_key()], pushes.iter()));
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 1));
+            assert_eq!(pending.as_slice(), &pushes[..1]);
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 2));
+            assert_eq!(pending.as_slice(), &pushes[..2]);
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 3));
+            assert_eq!(pending.as_slice(), &pushes[..3]);
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 4));
+            assert_eq!(pending.as_slice(), &pushes[..3]);
+
+            assert!(client.expire_pending(*kp.public_key(), 1).await.is_ok());
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 1));
+            assert_eq!(pending.as_slice(), &pushes[1..2]);
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 2));
+            assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 3));
+            assert_eq!(pending.as_slice(), &pushes[1..3]);
+
+            assert!(client.expire_pending(*kp.public_key(), 2).await.is_ok());
+
+            let pending = wa!(client.get_pending(*kp.public_key(), 1));
+            assert!(pending.is_empty());
+        }
+    }}
+}
+
 #[test]
 #[serial]
 fn add_and_get_prekey() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let signed_pk = kp.sign(*kp.public_key());
-    let user_id = "Hello".try_into().unwrap();
-    conn.register_user(user_id, signed_pk).unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let signed_pk = kp.sign(*kp.public_key());
+        let user_id = "Hello".try_into().expect(womp!());
+        wa!(client.register_user(user_id, signed_pk));
 
-    let sealed_kp1 = sealed::KeyPair::gen_new();
-    let sealed_kp2 = sealed::KeyPair::gen_new();
+        let sealed_kp1 = sealed::KeyPair::gen_new();
+        let sealed_kp2 = sealed::KeyPair::gen_new();
 
-    let sealed_pk1 = sealed_kp1.sign_pub(&kp);
-    let sealed_pk2 = sealed_kp2.sign_pub(&kp);
+        let sealed_pk1 = sealed_kp1.sign_pub(&kp);
+        let sealed_pk2 = sealed_kp2.sign_pub(&kp);
 
-    conn.add_prekeys(&[sealed_pk1, sealed_pk2]).unwrap();
+        wa!(client.add_prekeys(&[sealed_pk1, sealed_pk2]));
 
-    let retrieved = conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].unwrap();
-    assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+        let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
+        assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
 
-    let retrieved = conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].unwrap();
-    assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+        let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
+        assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
 
-    assert!(conn.pop_prekeys(&[*kp.public_key()]).unwrap()[0].is_none());
+        assert!(wa!(client.pop_prekeys(&[*kp.public_key()]))[0].is_none());
+    }}
 }
 
 #[test]
 #[serial]
 fn key_is_valid() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let user_id = "Hello".try_into().unwrap();
+        let kp = sig::KeyPair::gen_new();
+        let user_id = "Hello".try_into().expect(womp!());
 
-    let signed_pk = kp.sign(*kp.public_key());
-    assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
+        let signed_pk = kp.sign(*kp.public_key());
+        assert!(!wa!(client.key_is_valid(*kp.public_key())));
 
-    conn.register_user(user_id, signed_pk).unwrap();
+        wa!(client.register_user(user_id, signed_pk));
 
-    assert!(conn.key_is_valid(*kp.public_key()).unwrap());
+        assert!(wa!(client.key_is_valid(*kp.public_key())));
 
-    let signed_pk = kp.sign(*kp.public_key());
+        let signed_pk = kp.sign(*kp.public_key());
 
-    conn.deprecate_key(signed_pk).unwrap();
+        wa!(client.deprecate_key(signed_pk));
 
-    assert!(!conn.key_is_valid(*kp.public_key()).unwrap());
+        assert!(!wa!(client.key_is_valid(*kp.public_key())));
+    }}
 }
 
 #[test]
 #[serial]
 fn double_deprecation() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp1 = sig::KeyPair::gen_new();
-    let user_id = "hello".try_into().unwrap();
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().expect(womp!());
 
-    let signed_pk1 = kp1.sign(*kp1.public_key());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
 
-    conn.register_user(user_id, signed_pk1).unwrap();
+        wa!(client.register_user(user_id, signed_pk1));
 
-    let kp2 = sig::KeyPair::gen_new();
-    let signed_pk2 = kp1.sign(*kp2.public_key());
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-    conn.add_key(signed_pk2).unwrap();
+        wa!(client.add_key(signed_pk2));
 
-    conn.deprecate_key(signed_pk2).unwrap();
+        wa!(client.deprecate_key(signed_pk2));
 
-    match conn.deprecate_key(signed_pk2) {
-        Ok(PKIResponse::Redundant) => {}
-        // ok(pkiresponse::deadkey) => {}
-        _ => panic!(),
-    }
+        match client.deprecate_key(signed_pk2).await {
+            Ok(PKIResponse::Redundant) => {}
+            _ => panic!(),
+        }
+
+    }}
 }
 
 #[test]
 #[serial]
 fn invalid_deprecation() {
-    let mut conn = open_conn();
+    a! {{
+        let mut client = wa!(get_client());
+        wa!(client.reset_all());
 
-    let kp1 = sig::KeyPair::gen_new();
-    let user_id = "hello".try_into().unwrap();
+        let kp1 = sig::KeyPair::gen_new();
+        let user_id = "hello".try_into().expect(womp!());
 
-    let signed_pk1 = kp1.sign(*kp1.public_key());
+        let signed_pk1 = kp1.sign(*kp1.public_key());
 
-    conn.register_user(user_id, signed_pk1).unwrap();
+        wa!(client.register_user(user_id, signed_pk1));
 
-    let kp2 = sig::KeyPair::gen_new();
-    let signed_pk2 = kp1.sign(*kp2.public_key());
+        let kp2 = sig::KeyPair::gen_new();
+        let signed_pk2 = kp1.sign(*kp2.public_key());
 
-    conn.add_key(signed_pk2).unwrap();
+        wa!(client.add_key(signed_pk2));
 
-    conn.deprecate_key(signed_pk1).unwrap();
+        wa!(client.deprecate_key(signed_pk1));
 
-    match conn.deprecate_key(signed_pk2) {
-        Ok(PKIResponse::DeadKey) => {}
-        _ => panic!(),
-    }
+        match client.deprecate_key(signed_pk2).await {
+            Ok(PKIResponse::DeadKey) => {}
+            _ => panic!(),
+        }
+    }}
 }
