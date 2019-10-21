@@ -264,6 +264,8 @@ impl Conn {
     }
 
     pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+        use sig::*;
+
         let stmt = self
             .prepare_typed(sql!("get_pk_meta"), types![BYTEA])
             .await?;
@@ -279,25 +281,25 @@ impl Conn {
             row.get(5),
         );
 
-        let sig = sig::Signature::from_slice(sig).ok_or(InvalidSig)?;
-        let signed_by = sig::PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
+        let sig = Signature::from_slice(sig).ok_or(InvalidSig)?;
+        let signed_by = PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
         let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
         let dep_sig_meta = if dep_is_some(dep_ts, dep_signed_by, dep_signature) {
             let dep_ts = dep_ts.ok_or(MissingData)?.into();
 
             let dep_signed_by =
-                sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
+                PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
 
             let dep_signature =
-                sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
+                Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
 
             Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
         } else {
             None
         };
 
-        Ok(sig::PKMeta::new(sig_meta, dep_sig_meta))
+        Ok(PKMeta::new(sig_meta, dep_sig_meta))
     }
 
     pub async fn deprecate_key(
