@@ -12,20 +12,19 @@ Item {
     property string lastTimestamp
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
-    // labeling constants
-    readonly property real topTextMargin: QmlCfg.units.dp(5)
-    readonly property real bottomTextMargin: QmlCfg.units.dp(2)
 
+    // labeling constants
     anchors.fill: parent
 
     Label {
         id: uid
         anchors {
-            topMargin: topTextMargin
             top: parent.top
             right: ts.left
             left: parent.left
         }
+        font.bold: true
+        font.pointSize: 17
         elide: "ElideRight"
         text: contactName
         color: "white"
@@ -34,11 +33,10 @@ Item {
     Label {
         id: ts
         anchors {
-            topMargin: topTextMargin
-            top: parent.top
+            bottom: uid.bottom
             right: parent.right
         }
-
+        font.pointSize: 13
         text: lastTimestamp
         color: "white"
     }
@@ -50,6 +48,7 @@ Item {
             right: receiptImage.right
             bottom: parent.bottom
         }
+        font.pointSize: 15
         elide: "ElideRight"
         text: lastBody
         color: "white"

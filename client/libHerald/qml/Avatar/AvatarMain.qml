@@ -22,40 +22,42 @@ Item {
     //        }
     //```
     property Component labelComponent: ConversationLabel {}
-
     readonly property real topTextMargin: QmlCfg.units.dp(6)
     readonly property real bottomTextMargin: QmlCfg.units.dp(5)
     readonly property real innerMargins: QmlCfg.smallSpacer
 
-    anchors {
-        fill: parent
-    }
+    anchors.fill: parent
 
     AvatarIcon {
         id: avatarIcon
-
-        anchors {
-            margins: innerMargins
-            top: parent.top
-            left: parent.left
-        }
-
         color: iconColor
         height: QmlCfg.avatarSize
         width: height
         pfpUrl: pfpPath
+        anchors {
+            verticalCenter: parent.verticalCenter
+            left: parent.left
+            margins: QmlCfg.units.dp(12)
+        }
     }
 
-    Loader {
-        id: labelContent
+    Item {
         anchors {
             top: parent.top
             bottom: parent.bottom
-            right: parent.right
             left: avatarIcon.right
-            margins: innerMargins
-            topMargin: 0
+            right: parent.right
         }
-        sourceComponent: labelComponent
+        Loader {
+            id: labelContent
+            anchors {
+                fill: parent
+                leftMargin: QmlCfg.units.dp(12)
+                rightMargin: QmlCfg.units.dp(12)
+                topMargin: topTextMargin
+                bottomMargin: bottomTextMargin
+            }
+            sourceComponent: labelComponent
+        }
     }
 }

@@ -17,7 +17,7 @@ Rectangle {
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
 
-    height: QmlCfg.units.dp(50)
+    height: QmlCfg.units.dp(60)
     color: QmlCfg.palette.mainColor
     border.color: QmlCfg.palette.secondaryColor
 
@@ -30,7 +30,7 @@ Rectangle {
 
     AvatarMain {
         iconColor: QmlCfg.avatarColors[colorCode]
-
+        anchors.verticalCenter: parent.verticalCenter
         labelComponent: ConversationLabel {
             contactName: "George"
             lastBody: "Body"
@@ -39,6 +39,8 @@ Rectangle {
         }
     }
 
+    // background item which gets manipulated
+    // during the on tap animation
     Rectangle {
         id: splash
         width: 0
