@@ -1,13 +1,8 @@
 use super::*;
-// use lazy_static::*;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 use tokio::runtime::current_thread::Runtime;
 use womp::*;
-
-//lazy_static! {
-//    static ref POOL: Pool = init_pool();
-//}
 
 macro_rules! w {
     ($maybe_val: expr) => {
