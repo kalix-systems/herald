@@ -227,7 +227,7 @@ impl Conn {
         .await?;
         tx.commit().await?;
 
-        return Ok(register::Res::Success);
+        Ok(register::Res::Success)
     }
 
     pub async fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
