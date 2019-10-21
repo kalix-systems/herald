@@ -11,7 +11,7 @@ Well alright then.
 The first time you run the server, you'll want to run these commands:
 
 ```bash
-echo DATABASE_URL="host=/var/run/postgresql user=postgres" > .env &\
+echo 'DATABASE_URL="host=/var/run/postgresql user=postgres"' > .env &\
 docker-compose up -d &\
 cargo run --bin setup_db &\
 docker-compose down
@@ -31,7 +31,7 @@ You can do this by adding a line setting `DATABASE_URL` to `.env`.
 If you're using the local dev server (you probably are), this is the command to run:
 
 ```bash
-echo DATABASE_URL="host=/var/run/postgresql user=postgres" > .env
+echo 'DATABASE_URL="host=/var/run/postgresql user=postgres"' > .env
 ```
 
 # Setting up the development Postgres server
