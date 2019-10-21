@@ -25,5 +25,6 @@
         <file>qml/ConversationView/ConversationViewMain.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
+        <file>qml/ConversationView/Controls/CVFloatingButton.qml</file>
     </qresource>
 </RCC>

@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Assets/emojione.ttc</file>
+    </qresource>
+</RCC>

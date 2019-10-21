@@ -20,5 +20,19 @@ Page {
         anchors.fill: parent
         model: 20
         delegate: CVListItem {}
+        ScrollBar.vertical: ScrollBar {}
+    }
+
+    // floating pencil button to trigger
+    // new message flow
+    CVFloatingButton {
+
+        anchors {
+            bottom: parent.bottom
+            right: parent.right
+            margins: QmlCfg.margin * 2
+        }
+
+        iconSource: "qrc:/pencil-icon-black.svg"
     }
 }

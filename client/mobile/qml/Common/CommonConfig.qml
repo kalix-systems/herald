@@ -32,6 +32,11 @@ Item {
     readonly property real padding: units.smallSpacing
     /// standard toolbar height
     readonly property real toolbarHeight: units.dp(40)
+    /// gap used for tool bars, avatar margins, etc
+    readonly property real smallSpacer: units.dp(8)
+    /// gap used for larger spacings in tool bars.
+    readonly property real largeSpacer: units.dp(12)
+
     /// standard chat text size
     property int chatTextSize: 20
     /// standard header size
@@ -46,7 +51,7 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: iconSizes.large
+    property int avatarSize: units.dp(32)
     /// user settable cfg
     property int theme: 0
     readonly property string mainTextFontFamily: "Hevletica"

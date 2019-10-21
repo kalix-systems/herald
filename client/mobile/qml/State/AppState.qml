@@ -23,6 +23,9 @@ Item {
         State {
             name: "config"
             PropertyChanges {}
+        },
+        State {
+            name: "Search"
         }
     ]
 }

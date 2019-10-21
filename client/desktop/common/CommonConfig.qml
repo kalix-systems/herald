@@ -74,7 +74,7 @@ Item {
     Themes.MetaThemes {
         id: metaTheme
     }
-    /// palette :
+    // palette :
     property QtObject palette: metaTheme.themes[theme]
     property var avatarColors: palette.avatarColors
 }

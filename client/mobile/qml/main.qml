@@ -49,6 +49,6 @@ ApplicationWindow {
     StackView {
         id: mainView
         anchors.fill: parent
-        initialItem: appState.lpMain
+        initialItem: appState.cvMain
     }
 }

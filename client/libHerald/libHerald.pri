@@ -21,13 +21,7 @@ else {
   }
 }
 
-android {
-    # QMAKE_LFLAGS += -nostdlib++
-   ANDROID_NDK_PLATFORM = android-28
-   ANDROID_API_VERSION = 28
-   #LIBS +=  $${PWD}/../../target/x86_64-linux-android/$${RUST_BUILD_TYPE}/libherald.a
-   LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
-}
+
 
 
 
@@ -41,11 +35,20 @@ macx {
 }
 
 linux {
- # LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.so
+android {
+    # QMAKE_LFLAGS += -nostdlib++
+   ANDROID_NDK_PLATFORM = android-28
+   ANDROID_API_VERSION = 28
+   #LIBS +=  $${PWD}/../../target/x86_64-linux-android/$${RUST_BUILD_TYPE}/libherald.a
+   LIBS +=  $${PWD}/../../target/armv7-linux-androideabi/$${RUST_BUILD_TYPE}/libherald.a
+} else {
+    LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.so
+}
 }
 
 RESOURCES += \
     $$PWD/icons/icons.qrc \
     $$PWD/qml/commonQml.qrc
+
 
 
