@@ -31,8 +31,9 @@ Rectangle {
     AvatarMain {
         iconColor: QmlCfg.avatarColors[colorCode]
         anchors.verticalCenter: parent.verticalCenter
+        initials: initialize("George Michael")
         labelComponent: ConversationLabel {
-            contactName: "George"
+            contactName: "George Michael"
             lastBody: "Body"
             lastTimestamp: "Wed 2:30"
             lastReceipt: 2
@@ -80,5 +81,14 @@ Rectangle {
             splash.y = eventPoint.position.y
             splashAnim.running = true
         }
+    }
+
+    function initialize(name) {
+        const tokens = name.split(' ').slice(0, 3)
+        var str = ""
+        tokens.forEach(function anon(string) {
+            str += string[0].toUpperCase()
+        })
+        return str
     }
 }
