@@ -3,6 +3,7 @@ name = "herald_server"
 version = "0.1.0"
 authors = ["theseriousadult <jack@gallabytes.com>", "Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
+default-run = "herald_server"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -29,3 +30,4 @@ lazy_pond     = { path = "../lazy_pond" }
 [dev-dependencies]
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
+
