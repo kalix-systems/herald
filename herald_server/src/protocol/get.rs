@@ -1,6 +1,6 @@
 use super::*;
 
-pub async fn keys_of(store: &mut Conn, req: keys_of::Req) -> Result<keys_of::Res, Error> {
+pub async fn keys_of(mut store: Conn, req: keys_of::Req) -> Result<keys_of::Res, Error> {
     use keys_of::*;
 
     let mut map = Vec::with_capacity(req.0.len());
@@ -13,7 +13,7 @@ pub async fn keys_of(store: &mut Conn, req: keys_of::Req) -> Result<keys_of::Res
     Ok(Res(map))
 }
 
-pub async fn key_info(store: &mut Conn, req: key_info::Req) -> Result<key_info::Res, Error> {
+pub async fn key_info(mut store: Conn, req: key_info::Req) -> Result<key_info::Res, Error> {
     use key_info::*;
 
     let mut map = Vec::with_capacity(req.0.len());
@@ -26,7 +26,7 @@ pub async fn key_info(store: &mut Conn, req: key_info::Req) -> Result<key_info::
     Ok(Res(map))
 }
 
-pub async fn keys_exist(store: &mut Conn, req: keys_exist::Req) -> Result<keys_exist::Res, Error> {
+pub async fn keys_exist(mut store: Conn, req: keys_exist::Req) -> Result<keys_exist::Res, Error> {
     use keys_exist::*;
 
     let mut vec = Vec::with_capacity(req.0.len());
@@ -38,7 +38,7 @@ pub async fn keys_exist(store: &mut Conn, req: keys_exist::Req) -> Result<keys_e
     Ok(Res(vec))
 }
 
-pub async fn users_exist(store: &mut Conn, req: users_exist::Req) -> Result<users_exist::Res, Error> {
+pub async fn users_exist(mut store: Conn, req: users_exist::Req) -> Result<users_exist::Res, Error> {
     use users_exist::*;
 
     let mut vec = Vec::with_capacity(req.0.len());

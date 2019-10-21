@@ -175,17 +175,18 @@ impl State {
         Ok(())
     }
 
-    pub(crate) async fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
+    pub(crate) async fn req_handler<B, I, O, F, Fut>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
     where
         B: Buf,
         I: for<'a> Deserialize<'a>,
         O: Serialize,
-        F: FnOnce(&mut Conn, I) -> Result<O, Error>,
+        F: FnOnce(Conn, I) -> Fut,
+        Fut: Future<Output = Result<O, Error>>,
     {
-        let mut con = self.new_connection().await?;
+        let con = self.new_connection().await?;
         let buf: Vec<u8> = req.collect();
         let req = serde_cbor::from_slice(&buf)?;
-        let res = f(&mut con, req)?;
+        let res = f(con, req).await?;
         let res_ser = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }

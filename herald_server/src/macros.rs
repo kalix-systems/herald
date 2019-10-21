@@ -3,11 +3,13 @@ macro_rules! mk_filter {
     ($this: expr, $f: ident) => {
         warp::path(stringify!($f))
             .and(warp::filters::body::concat())
-            .map(move |b| {
+            .and_then(move |b| {
                 async move {
                     $this
                         .req_handler(b, $f)
-                        .unwrap_or_else(|e| format!("{:?}", e).into())
+                        .await
+                        .map_err(|e| warp::reject::custom(format!("{:?}", e)))
+                        //.unwrap_or_else(|e| format!("{:?}", e).into())
                 }
             })
     };
