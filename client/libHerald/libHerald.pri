@@ -12,13 +12,13 @@ SOURCES += \
 
 
 # set build type for Rust library
-debug {
- RUST_BUILD_TYPE = debug
+CONFIG(debug, debug|profile|release) {
+    RUST_BUILD_TYPE = debug
 }
-release {
+CONFIG(profile, debug|profile|release) {
     RUST_BUILD_TYPE = release
 }
-profile {
+CONFIG(release, debug|profile|release) {
     RUST_BUILD_TYPE = release
 }
 
@@ -44,5 +44,3 @@ linux {
 RESOURCES += \
     $$PWD/icons/icons.qrc \
     $$PWD/qml/commonQml.qrc
-
-
