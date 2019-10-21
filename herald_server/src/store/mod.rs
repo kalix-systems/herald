@@ -50,6 +50,10 @@ fn unique_violation_to_redundant(query_res: Result<u64, PgError>) -> Result<PKIR
     Ok(query_res.map(|_| PKIResponse::Success)?)
 }
 
+fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) -> bool {
+    ts.is_some() || signed_by.is_some() || sig.is_some()
+}
+
 pub async fn get_client() -> Result<Conn, PgError> {
     let (client, connection) = tokio_postgres::connect(&database_url(), NoTls).await?;
 
@@ -266,9 +270,7 @@ impl Conn {
         let signed_by = sig::PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
         let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
-        let dep_is_some = dep_ts.is_some() || dep_signed_by.is_some() || dep_signature.is_some();
-
-        let dep_sig_meta = if dep_is_some {
+        let dep_sig_meta = if dep_is_some(dep_ts, dep_signed_by, dep_signature) {
             let dep_ts = dep_ts.ok_or(MissingData)?.into();
 
             let dep_signed_by =
@@ -367,7 +369,7 @@ impl Conn {
         let mut out = Vec::with_capacity(rows.len());
         for row in rows {
             let p: &[u8] = row.get(0);
-            out.push(serde_cbor::from_slice(&p)?);
+            out.push(serde_cbor::from_slice(p)?);
         }
 
         Ok(out)
@@ -423,10 +425,7 @@ impl Conn {
                 let timestamp = creation_ts.into();
                 let signature = sig::Signature::from_slice(signature).ok_or(InvalidSig)?;
 
-                let dep_is_some =
-                    deprecation_ts.is_some() || dep_signed_by.is_some() || dep_signature.is_some();
-
-                let dep_sig_meta = if dep_is_some {
+                let dep_sig_meta = if dep_is_some(deprecation_ts, dep_signed_by, dep_signature) {
                     let dep_sig = sig::Signature::from_slice(dep_signature.ok_or(MissingData)?)
                         .ok_or(InvalidSig)?;
 
