@@ -17,7 +17,7 @@ macro_rules! w {
 
 macro_rules! wa {
     ($maybe_fut: expr) => {
-        $maybe_fut.await.expect(womp!())
+        w!($maybe_fut.await)
     };
 }
 
