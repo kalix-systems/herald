@@ -72,6 +72,25 @@ fn unique_violation_to_redundant(query_res: Result<u64, PgError>) -> Result<PKIR
     Ok(query_res.map(|_| PKIResponse::Success)?)
 }
 
+fn dep_check(
+    ts: Option<i64>,
+    signed_by: Option<&[u8]>,
+    signature: Option<&[u8]>,
+) -> Result<Option<SigMeta>, Error> {
+    use sig::*;
+    if dep_is_some(ts, signed_by, signature) {
+        let ts = ts.ok_or(MissingData)?.into();
+
+        let signed_by = PublicKey::from_slice(signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
+
+        let signature = Signature::from_slice(signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
+
+        Ok(Some(SigMeta::new(signature, signed_by, ts)))
+    } else {
+        Ok(None)
+    }
+}
+
 fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) -> bool {
     ts.is_some() || signed_by.is_some() || sig.is_some()
 }
@@ -146,7 +165,12 @@ impl Conn {
         let mut prekeys = Vec::with_capacity(keys.len());
 
         for k in keys {
-            let prekey = match self.query(&stmt, params![k.as_ref()]).await?.into_iter().next() {
+            let prekey = match self
+                .query(&stmt, params![k.as_ref()])
+                .await?
+                .into_iter()
+                .next()
+            {
                 Some(row) => {
                     let val = row.get::<_, &[u8]>(0);
                     serde_cbor::from_slice(val)?
@@ -178,10 +202,7 @@ impl Conn {
         }
 
         let add_key_stmt = tx
-            .prepare_typed(
-                sql!("add_key"),
-                types![BYTEA, BYTEA, INT8, BYTEA],
-            )
+            .prepare_typed(sql!("add_key"), types![BYTEA, BYTEA, INT8, BYTEA])
             .await?;
 
         tx.execute(
@@ -228,10 +249,7 @@ impl Conn {
         };
 
         let add_key_stmt = tx
-            .prepare_typed(
-                sql!("add_key"),
-                types![BYTEA, BYTEA, INT8, BYTEA],
-            )
+            .prepare_typed(sql!("add_key"), types![BYTEA, BYTEA, INT8, BYTEA])
             .await?;
 
         let res = tx
@@ -285,19 +303,7 @@ impl Conn {
         let signed_by = PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
         let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
-        let dep_sig_meta = if dep_is_some(dep_ts, dep_signed_by, dep_signature) {
-            let dep_ts = dep_ts.ok_or(MissingData)?.into();
-
-            let dep_signed_by =
-                PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?).ok_or(InvalidKey)?;
-
-            let dep_signature =
-                Signature::from_slice(&dep_signature.ok_or(MissingData)?).ok_or(InvalidSig)?;
-
-            Some(SigMeta::new(dep_signature, dep_signed_by, dep_ts))
-        } else {
-            None
-        };
+        let dep_sig_meta = dep_check(dep_ts, dep_signed_by, dep_signature)?;
 
         Ok(PKMeta::new(sig_meta, dep_sig_meta))
     }
@@ -325,10 +331,7 @@ impl Conn {
         }
 
         let dep_stmt = tx
-            .prepare_typed(
-                sql!("deprecate_key"),
-                types![INT8, BYTEA, BYTEA, BYTEA],
-            )
+            .prepare_typed(sql!("deprecate_key"), types![INT8, BYTEA, BYTEA, BYTEA])
             .await?;
 
         let num_updated = tx
@@ -435,21 +438,7 @@ impl Conn {
                 let timestamp = creation_ts.into();
                 let signature = sig::Signature::from_slice(signature).ok_or(InvalidSig)?;
 
-                let dep_sig_meta = if dep_is_some(deprecation_ts, dep_signed_by, dep_signature) {
-                    let dep_sig = sig::Signature::from_slice(dep_signature.ok_or(MissingData)?)
-                        .ok_or(InvalidSig)?;
-
-                    let dep_signed_by =
-                        sig::PublicKey::from_slice(dep_signed_by.ok_or(MissingData)?)
-                            .ok_or(InvalidKey)?;
-
-                    let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
-
-                    Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
-                } else {
-                    None
-                };
-
+                let dep_sig_meta = dep_check(deprecation_ts, dep_signed_by, dep_signature)?;
                 let sig_meta = SigMeta::new(signature, signed_by, timestamp);
                 let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
                 Ok((key, pkmeta))
