@@ -128,34 +128,6 @@ impl ConversationBuilder {
         self
     }
 
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-
-        tx.execute(
-            include_str!("sql/add_conversation.sql"),
-            params![
-                id,
-                self.title,
-                self.picture,
-                color,
-                pairwise,
-                muted,
-                Time::now()
-            ],
-        )?;
-        Ok(id)
-    }
-
     /// Adds conversation
     pub fn add(&mut self) -> Result<ConversationId, HErr> {
         let mut db = Database::get()?;
