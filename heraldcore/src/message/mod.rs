@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 /// Message attachments
 pub mod attachments;
+mod db;
 use attachments::*;
 
 /// Message
@@ -125,131 +126,10 @@ impl OutboundMessageBuilder {
     /// Stores and sends the message
     pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
         self,
-        mut callback: F,
+        callback: F,
     ) -> Result<(), HErr> {
-        let Self {
-            conversation,
-            mut body,
-            op,
-            attachments,
-            parse_markdown,
-        } = self;
-
-        use MissingOutboundMessageField::*;
-
-        if parse_markdown {
-            body = match body {
-                Some(body) => Some(body.parse_markdown()?),
-                None => None,
-            };
-        }
-
-        if attachments.is_empty() && body.is_none() {
-            return Err(MissingBody.into());
-        }
-
-        let conversation_id = conversation.ok_or(MissingConversationId)?;
-        let msg_id: MsgId = utils::rand_id().into();
-        let timestamp = Time::now();
-        let author = crate::config::Config::static_id()?;
-        let send_status = MessageSendStatus::NoAck;
-
-        let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
-        let receipts_bytes = serde_cbor::to_vec(&receipts)?;
-        let has_attachments = !attachments.is_empty();
-
-        let msg = Message {
-            message_id: msg_id,
-            author,
-            body: (&body).clone(),
-            op,
-            conversation: conversation_id,
-            timestamp,
-            send_status,
-            receipts,
-            has_attachments,
-        };
-
-        callback(StoreAndSend::Msg(msg));
-
-        macro_rules! e {
-            ($res: expr) => {
-                match $res {
-                    Ok(val) => val,
-                    Err(e) => {
-                        callback(StoreAndSend::Error {
-                            error: e.into(),
-                            line_number: line!(),
-                        });
-                        return;
-                    }
-                }
-            };
-        }
-
-        std::thread::Builder::new().spawn(move || {
-            let attachments: Result<Vec<Attachment>, HErr> = attachments
-                .into_iter()
-                .map(|path| {
-                    let attach: Attachment = Attachment::new(&path)?;
-
-                    attach.save()?;
-
-                    Ok(attach)
-                })
-                .collect();
-            let attachments = e!(attachments);
-
-            let mut db = e!(Database::get());
-            let tx = e!(db.transaction());
-
-            e!(tx.execute(
-                include_str!("sql/add.sql"),
-                params![
-                    msg_id,
-                    author,
-                    conversation_id,
-                    body,
-                    send_status,
-                    receipts_bytes,
-                    has_attachments,
-                    timestamp,
-                ],
-            ));
-
-            e!(tx.execute(
-                include_str!("../conversation/sql/update_last_active.sql"),
-                params![timestamp, conversation_id],
-            ));
-
-            if let Some(op) = op {
-                e!(tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]));
-            }
-
-            if !attachments.is_empty() {
-                e!(attachments::add_db(
-                    &tx,
-                    &msg_id,
-                    attachments.iter().map(|a| a.hash_dir())
-                ));
-            }
-
-            e!(tx.commit());
-
-            callback(StoreAndSend::StoreDone(msg_id));
-
-            let content = cmessages::Message { body, attachments };
-            let msg = cmessages::Msg {
-                mid: msg_id,
-                content,
-                op,
-            };
-            e!(crate::network::send_normal_message(conversation_id, msg));
-
-            callback(StoreAndSend::SendDone(msg_id));
-        })?;
-
-        Ok(())
+        let db = Database::get()?;
+        self.store_and_send_db(db, callback)
     }
 
     // NOTE: This function should probably remain only public to the crate.
@@ -343,123 +223,27 @@ impl InboundMessageBuilder {
     }
 
     pub fn store(self) -> Result<(), HErr> {
-        let Self {
-            message_id,
-            author,
-            conversation,
-            body,
-            timestamp,
-            op,
-            attachments,
-        } = self;
-
-        use MissingInboundMessageField::*;
-
-        let conversation_id = conversation.ok_or(MissingConversationId)?;
-        let msg_id = message_id.ok_or(MissingMessageId)?;
-        let timestamp = timestamp.ok_or(MissingTimestamp)?;
-        let author = author.ok_or(MissingAuthor)?;
-
-        let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
-        let attachment_paths = res?;
-        let has_attachments = !attachment_paths.is_empty();
-
-        // this can be inferred from the fact that this message was received
-        let send_status = MessageSendStatus::Ack;
-
         let mut db = Database::get()?;
-        let tx = db.transaction()?;
-
-        let receipts = get_receipts(&tx, msg_id)?.unwrap_or_default();
-        let receipts = serde_cbor::to_vec(&receipts)?;
-
-        tx.execute(
-            include_str!("sql/add.sql"),
-            params![
-                msg_id,
-                author,
-                conversation_id,
-                body,
-                send_status,
-                receipts,
-                has_attachments,
-                timestamp,
-            ],
-        )?;
-
-        tx.execute(
-            include_str!("../conversation/sql/update_last_active.sql"),
-            params![Time::now(), conversation_id],
-        )?;
-
-        if let Some(op) = op {
-            tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
-        }
-
-        if has_attachments {
-            attachments::add_db(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
-        }
-
-        tx.commit()?;
-
-        Ok(())
+        self.store_db(&mut db)
     }
 }
 
 /// Get message by message id
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     let db = Database::get()?;
-    Ok(db.query_row(
-        include_str!("sql/get_message.sql"),
-        params![msg_id],
-        Message::from_db,
-    )?)
+    db::get_message(&db, msg_id)
 }
 
 /// Sets the message status of an item in the database
 pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
     let db = Database::get()?;
-    db.execute(
-        include_str!("sql/update_send_status.sql"),
-        params![status, msg_id],
-    )?;
-    Ok(())
+    db::update_send_status(&db, msg_id, status)
 }
 
 /// Get message read receipts by message id
 pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
-    get_message_receipts_db(&db, msg_id)
-}
-
-/// Get message read receipts by message id
-pub(crate) fn get_message_receipts_db(
-    conn: &rusqlite::Connection,
-    msg_id: &MsgId,
-) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
-    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: HashMap<UserId, MessageReceiptStatus> = {
-        let data = get_stmt.query_row(params![msg_id], |row| row.get::<_, Vec<u8>>(0))?;
-        serde_cbor::from_slice(&data)?
-    };
-    Ok(receipts)
-}
-
-pub(crate) fn get_receipts(
-    conn: &rusqlite::Connection,
-    msg_id: MsgId,
-) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
-    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
-
-    let mut res = get_stmt.query(params![msg_id])?;
-
-    match res.next()? {
-        Some(row) => match row.get::<_, Option<Vec<u8>>>(0)? {
-            Some(data) => Ok(Some(serde_cbor::from_slice(&data)?)),
-            None => Ok(None),
-        },
-        None => Ok(None),
-    }
+    db::get_message_receipts(&db, msg_id)
 }
 
 pub(crate) fn add_receipt(
@@ -468,66 +252,19 @@ pub(crate) fn add_receipt(
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
     let mut db = Database::get()?;
-    let tx = db.transaction()?;
-
-    // check if message exists yet
-    let mut receipts = get_receipts(&tx, msg_id)?;
-
-    match receipts {
-        Some(ref mut receipts) => {
-            // update receipts
-
-            match receipts.get(&recip) {
-                Some(old_status) => {
-                    if (*old_status as u8) < (receipt_status as u8) {
-                        receipts.insert(recip, receipt_status);
-                    }
-                }
-                None => {
-                    receipts.insert(recip, receipt_status);
-                }
-            }
-
-            receipts.insert(recip, receipt_status);
-            let data = serde_cbor::to_vec(&receipts)?;
-
-            let mut put_stmt = tx.prepare(include_str!("sql/set_receipts.sql"))?;
-            put_stmt.execute(params![data, msg_id])?;
-        }
-        None => {
-            let mut receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::new();
-            receipts.insert(recip, receipt_status);
-            let data = serde_cbor::to_vec(&receipts)?;
-
-            let mut put_pending_stmt = tx.prepare(include_str!("sql/add_pending_receipt.sql"))?;
-            put_pending_stmt.execute(params![msg_id, data])?;
-        }
-    }
-
-    tx.commit()?;
-
-    Ok(())
+    db::add_receipt(&mut db, msg_id, recip, receipt_status)
 }
 
 /// Gets messages by `MessageSendStatus`
 pub fn by_send_status(send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/by_send_status.sql"))?;
-    let res = stmt.query_map(&[send_status], Message::from_db)?;
-
-    let mut messages = Vec::new();
-    for msg in res {
-        messages.push(msg?);
-    }
-
-    Ok(messages)
+    db::by_send_status(&db, send_status)
 }
 
 /// Deletes a message
 pub fn delete_message(id: &MsgId) -> Result<(), HErr> {
     let db = Database::get()?;
-    db.execute(include_str!("sql/delete_message.sql"), params![id])?;
-    Ok(())
+    db::delete_message(&db, id)
 }
 
 #[cfg(test)]

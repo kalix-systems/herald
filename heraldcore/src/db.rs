@@ -25,12 +25,6 @@ lazy_static! {
 /// Thin wrapper around sqlite3 database connection.
 pub(crate) struct Database(Connection);
 
-impl Clone for Database {
-    fn clone(&self) -> Database {
-        abort_err!(Database::new(DB_PATH.as_str()))
-    }
-}
-
 impl Database {
     pub(crate) fn get<'a>() -> Result<Wrapper<'a, Database>, HErr> {
         DB_POOL.get().map_err(|_| HErr::LazyPondError)

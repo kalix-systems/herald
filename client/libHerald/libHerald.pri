@@ -15,7 +15,10 @@ SOURCES += \
 debug {
  RUST_BUILD_TYPE = debug
 }
-release | profile {
+release {
+    RUST_BUILD_TYPE = release
+}
+profile {
     RUST_BUILD_TYPE = release
 }
 
