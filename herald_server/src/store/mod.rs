@@ -8,34 +8,13 @@ use std::{
 };
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
-//pub type Pool = LazyPond;
-//
-//pub fn init_pool() -> Pool {
-//}
-
 fn database_url() -> String {
     dotenv().expect("Invalid dotenv");
     env::var("DATABASE_URL").expect("DATABASE_URL must be set")
 }
 
 pub struct Conn(pub Client);
-//
-//impl Default for Conn {
-//    fn default() ->  Self {
-//        let (mut client, connection) =
-//            tokio_postgres::connect("host=localhost user=postgres", NoTls).await?;
-//
-//        // The connection object performs the actual communication with the database,
-//        // so spawn it off to run on its own.
-//        let connection = connection.map(|r| {
-//            if let Err(e) = r {
-//                eprintln!("connection error: {}", e);
-//            }
-//        });
-//        tokio::spawn(connection);
-//    }
-//}
-//
+
 impl Deref for Conn {
     type Target = Client;
 
@@ -86,23 +65,13 @@ pub async fn get_client() -> Result<Conn, PgError> {
     Ok(Conn(client))
 }
 
-type RawPkMeta = (
-    Vec<u8>,
-    Vec<u8>,
+type RawPkMeta<'a> = (
+    &'a [u8],
+    &'a [u8],
     i64,
-    Option<Vec<u8>>,
-    Option<Vec<u8>>,
+    Option<&'a [u8]>,
+    Option<&'a [u8]>,
     Option<i64>,
-);
-
-type RawKeyAndMeta = (
-    Vec<u8>,
-    Vec<u8>,
-    i64,
-    Vec<u8>,
-    Option<i64>,
-    Option<Vec<u8>>,
-    Option<Vec<u8>>,
 );
 
 impl Conn {
@@ -155,8 +124,8 @@ impl Conn {
         for k in keys {
             let prekey = match self.query(&stmt, &[&k.as_ref()]).await?.into_iter().next() {
                 Some(row) => {
-                    let val = row.get::<_, Vec<u8>>(0);
-                    serde_cbor::from_slice(&val)?
+                    let val = row.get::<_, &[u8]>(0);
+                    serde_cbor::from_slice(val)?
                 }
                 None => None,
             };
@@ -283,21 +252,18 @@ impl Conn {
             .prepare_typed(include_str!("sql/get_pk_meta.sql"), &[Type::BYTEA])
             .await?;
 
-        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = {
-            let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
+        let row = self.query_one(&stmt, &[&key.as_ref()]).await?;
+        let (signed_by, sig, ts, dep_signed_by, dep_signature, dep_ts): RawPkMeta = (
+            row.get(0),
+            row.get(1),
+            row.get(2),
+            row.get(3),
+            row.get(4),
+            row.get(5),
+        );
 
-            (
-                row.get(0),
-                row.get(1),
-                row.get(2),
-                row.get(3),
-                row.get(4),
-                row.get(5),
-            )
-        };
-
-        let sig = sig::Signature::from_slice(sig.as_slice()).ok_or(InvalidSig)?;
-        let signed_by = sig::PublicKey::from_slice(signed_by.as_slice()).ok_or(InvalidKey)?;
+        let sig = sig::Signature::from_slice(sig).ok_or(InvalidSig)?;
+        let signed_by = sig::PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
         let sig_meta = SigMeta::new(sig, signed_by, ts.into());
 
         let dep_is_some = dep_ts.is_some() || dep_signed_by.is_some() || dep_signature.is_some();
@@ -400,7 +366,7 @@ impl Conn {
 
         let mut out = Vec::with_capacity(rows.len());
         for row in rows {
-            let p: Vec<u8> = row.get(0);
+            let p: &[u8] = row.get(0);
             out.push(serde_cbor::from_slice(&p)?);
         }
 
@@ -439,65 +405,46 @@ impl Conn {
             .prepare_typed(include_str!("sql/read_meta.sql"), &[Type::TEXT])
             .await?;
 
-        let keys: Vec<RawKeyAndMeta> = self
+        let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = self
             .query(&stmt, &[&uid.as_str()])
             .await?
             .into_iter()
             .map(|row| {
-                (
-                    row.get(0),
-                    row.get(1),
-                    row.get(2),
-                    row.get(3),
-                    row.get(4),
-                    row.get(5),
-                    row.get(6),
-                )
+                let key = row.get::<_, &[u8]>(0);
+                let signed_by = row.get::<_, &[u8]>(1);
+                let creation_ts = row.get::<_, i64>(2);
+                let signature = row.get::<_, &[u8]>(3);
+                let deprecation_ts = row.get::<_, Option<i64>>(4);
+                let dep_signed_by = row.get::<_, Option<&[u8]>>(5);
+                let dep_signature = row.get::<_, Option<&[u8]>>(6);
+
+                let key = sig::PublicKey::from_slice(key).ok_or(InvalidKey)?;
+                let signed_by = sig::PublicKey::from_slice(signed_by).ok_or(InvalidKey)?;
+                let timestamp = creation_ts.into();
+                let signature = sig::Signature::from_slice(signature).ok_or(InvalidSig)?;
+
+                let dep_is_some =
+                    deprecation_ts.is_some() || dep_signed_by.is_some() || dep_signature.is_some();
+
+                let dep_sig_meta = if dep_is_some {
+                    let dep_sig = sig::Signature::from_slice(dep_signature.ok_or(MissingData)?)
+                        .ok_or(InvalidSig)?;
+
+                    let dep_signed_by =
+                        sig::PublicKey::from_slice(dep_signed_by.ok_or(MissingData)?)
+                            .ok_or(InvalidKey)?;
+
+                    let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
+
+                    Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
+                } else {
+                    None
+                };
+
+                let sig_meta = SigMeta::new(signature, signed_by, timestamp);
+                let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
+                Ok((key, pkmeta))
             })
-            .collect();
-
-        let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = keys
-            .into_iter()
-            .map(
-                |(
-                    key,
-                    signed_by,
-                    creation_ts,
-                    signature,
-                    deprecation_ts,
-                    dep_signed_by,
-                    dep_signature,
-                )| {
-                    let key = sig::PublicKey::from_slice(&key).ok_or(InvalidKey)?;
-                    let signed_by = sig::PublicKey::from_slice(&signed_by).ok_or(InvalidKey)?;
-                    let timestamp = creation_ts.into();
-                    let signature = sig::Signature::from_slice(&signature).ok_or(InvalidSig)?;
-
-                    let dep_is_some = deprecation_ts.is_some()
-                        || dep_signed_by.is_some()
-                        || dep_signature.is_some();
-
-                    let dep_sig_meta = if dep_is_some {
-                        let dep_sig =
-                            sig::Signature::from_slice(&dep_signature.ok_or(MissingData)?)
-                                .ok_or(InvalidSig)?;
-
-                        let dep_signed_by =
-                            sig::PublicKey::from_slice(&dep_signed_by.ok_or(MissingData)?)
-                                .ok_or(InvalidKey)?;
-
-                        let dep_ts = deprecation_ts.ok_or(MissingData)?.into();
-
-                        Some(SigMeta::new(dep_sig, dep_signed_by, dep_ts))
-                    } else {
-                        None
-                    };
-
-                    let sig_meta = SigMeta::new(signature, signed_by, timestamp);
-                    let pkmeta = sig::PKMeta::new(sig_meta, dep_sig_meta);
-                    Ok((key, pkmeta))
-                },
-            )
             .collect();
 
         Ok(UserMeta { keys: meta_inner? })
