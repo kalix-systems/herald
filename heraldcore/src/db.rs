@@ -8,7 +8,7 @@ use std::{
 };
 
 lazy_static! {
-    static ref DB_POOL: LazyPond<Database> = LazyPond::new(Some(32));
+    static ref DB_POOL: LazyPond<Database> = LazyPond::new(Some(32), Box::new(Database::default));
 }
 
 lazy_static! {

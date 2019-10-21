@@ -14,17 +14,18 @@ macro_rules! NE {
     };
 }
 
-pub struct LazyPond<T: Default> {
+pub struct LazyPond<T> {
     connections: Mutex<Vec<T>>,
     max_size: usize,
+    ctor: Box<dyn Fn() -> T + Sync + 'static>,
 }
 
-pub struct Wrapper<'a, T: Default> {
+pub struct Wrapper<'a, T> {
     pond: &'a LazyPond<T>,
     conn: Option<T>,
 }
 
-impl<'a, T: Default> Deref for Wrapper<'a, T> {
+impl<'a, T> Deref for Wrapper<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -33,14 +34,14 @@ impl<'a, T: Default> Deref for Wrapper<'a, T> {
     }
 }
 
-impl<'a, T: Default> DerefMut for Wrapper<'a, T> {
+impl<'a, T> DerefMut for Wrapper<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         // this should not fail
         self.conn.as_mut().expect("Deref failed, unexpected `None`")
     }
 }
 
-impl<'a, T: Default> Drop for Wrapper<'a, T> {
+impl<'a, T> Drop for Wrapper<'a, T> {
     fn drop(&mut self) {
         let conn = match std::mem::replace(&mut self.conn, None) {
             Some(conn) => conn,
@@ -58,12 +59,13 @@ impl<'a, T: Default> Drop for Wrapper<'a, T> {
     }
 }
 
-impl<T: Default> LazyPond<T> {
-    pub fn new(max_size: Option<usize>) -> LazyPond<T> {
+impl<T> LazyPond<T> {
+    pub fn new(max_size: Option<usize>, ctor: Box<dyn Fn() -> T + Sync + 'static>) -> LazyPond<T> {
         let connections = Mutex::new(Vec::with_capacity(DEFAULT_SIZE));
         LazyPond {
             connections,
             max_size: max_size.unwrap_or(std::usize::MAX),
+            ctor,
         }
     }
 
@@ -72,7 +74,8 @@ impl<T: Default> LazyPond<T> {
         let conn = if !conns.is_empty() {
             conns.pop().ok_or(NE!())?
         } else {
-            T::default()
+            let ctor = &self.ctor;
+            ctor()
         };
 
         Ok(Wrapper {
