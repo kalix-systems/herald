@@ -23,7 +23,6 @@ type WTx = SplitSink<WebSocket, ws::Message>;
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<()>>,
-    pub pool: Pool,
 }
 
 pub mod get;
@@ -33,22 +32,17 @@ pub mod post;
 
 impl State {
     pub fn new() -> Self {
-        println!("starting pool");
-        let pool = init_pool();
-        println!("pool started");
         State {
             active: DashMap::default(),
-            pool,
         }
     }
 
-    fn new_connection(&self) -> Result<Conn, Error> {
-        // TODO add error type
-        Ok(Conn(self.pool.get().unwrap()))
+    async fn new_connection(&self) -> Result<Conn, Error> {
+        Ok(get_client().await?)
     }
 
     pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
-        let mut store = self.new_connection()?;
+        let mut store = self.new_connection().await?;
 
         // all the channels we'll need for plumbing
         // first we split the websocket
@@ -116,7 +110,7 @@ impl State {
 
         let mut missing_users = Vec::new();
         let mut to_devs = Vec::new();
-        let mut con = self.new_connection()?;
+        let mut con = self.new_connection().await?;
 
         for user in to {
             if !con.user_exists(&user).await? {
@@ -146,7 +140,7 @@ impl State {
             msg,
         };
 
-        let mut con = self.new_connection()?;
+        let mut con = self.new_connection().await?;
         let mut missing_devs = Vec::new();
 
         for dev in to.iter() {
@@ -181,14 +175,14 @@ impl State {
         Ok(())
     }
 
-    pub(crate) fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
+    pub(crate) async fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
     where
         B: Buf,
         I: for<'a> Deserialize<'a>,
         O: Serialize,
         F: FnOnce(&mut Conn, I) -> Result<O, Error>,
     {
-        let mut con = self.new_connection()?;
+        let mut con = self.new_connection().await?;
         let buf: Vec<u8> = req.collect();
         let req = serde_cbor::from_slice(&buf)?;
         let res = f(&mut con, req)?;

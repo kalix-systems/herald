@@ -2,7 +2,7 @@
 mod macros;
 
 pub mod errors;
-// pub mod protocol;
+pub mod protocol;
 pub mod store;
 mod utils;
 

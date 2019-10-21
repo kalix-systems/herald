@@ -4,9 +4,11 @@ macro_rules! mk_filter {
         warp::path(stringify!($f))
             .and(warp::filters::body::concat())
             .map(move |b| {
-                $this
-                    .req_handler(b, $f)
-                    .unwrap_or_else(|e| format!("{:?}", e).into())
+                async move {
+                    $this
+                        .req_handler(b, $f)
+                        .unwrap_or_else(|e| format!("{:?}", e).into())
+                }
             })
     };
 }
