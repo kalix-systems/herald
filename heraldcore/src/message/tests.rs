@@ -6,16 +6,8 @@ use crate::{config::test_config, womp};
 
 /// Testing utility
 fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-    let mut builder = OutboundMessageBuilder::default();
-    builder.conversation_id(conv).body(
-        msg.try_into()
-            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
-    );
-    let out = builder
-        .store_and_send_blocking()
-        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
-
-    (out.message_id, out.timestamp)
+    let conn = Database::get().expect(womp!());
+    db::test_outbound_text_db(conn, msg, conv)
 }
 
 #[test]

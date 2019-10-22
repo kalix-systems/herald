@@ -132,40 +132,10 @@ impl OutboundMessageBuilder {
         self.store_and_send_db(db, callback)
     }
 
-    // NOTE: This function should probably remain only public to the crate.
     #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
-        use crate::{channel_recv_err, loc};
-        use crossbeam_channel::*;
-
-        let (tx, rx) = unbounded();
-        self.store_and_send(move |m| {
-            tx.send(m)
-                .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
-        })?;
-
-        let out = match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::Msg(msg) => msg,
-            // TODO use line number
-            StoreAndSend::Error { error, .. } => return Err(error),
-            other => {
-                panic!("Unexpected  variant {:?}", other);
-            }
-        };
-
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::StoreDone(_) => {}
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
-
-        match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::SendDone(_) => Ok(out),
-            other => {
-                panic!("Unexpected variant {:?}", other);
-            }
-        }
+        let db = Database::get()?;
+        self.store_and_send_blocking_db(db)
     }
 }
 

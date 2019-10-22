@@ -102,7 +102,10 @@ pub(crate) fn add_receipt(
 }
 
 /// Gets messages by `MessageSendStatus`
-pub fn by_send_status(conn: &Conn, send_status: MessageSendStatus) -> Result<Vec<Message>, HErr> {
+pub(crate) fn by_send_status(
+    conn: &Conn,
+    send_status: MessageSendStatus,
+) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/by_send_status.sql"))?;
     let res = stmt.query_map(&[send_status], Message::from_db)?;
 
@@ -115,9 +118,30 @@ pub fn by_send_status(conn: &Conn, send_status: MessageSendStatus) -> Result<Vec
 }
 
 /// Deletes a message
-pub fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
+pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
     conn.execute(include_str!("sql/delete_message.sql"), params![id])?;
     Ok(())
+}
+
+/// Testing utility
+#[cfg(test)]
+pub(crate) fn test_outbound_text_db<D>(db: D, msg: &str, conv: ConversationId) -> (MsgId, Time)
+where
+    D: Deref<Target = Database> + DerefMut + Send + 'static,
+{
+    use std::convert::TryInto;
+
+    let mut builder = OutboundMessageBuilder::default();
+
+    builder.conversation_id(conv).body(
+        msg.try_into()
+            .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
+    );
+    let out = builder
+        .store_and_send_blocking_db(db)
+        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
+
+    (out.message_id, out.timestamp)
 }
 
 impl OutboundMessageBuilder {
@@ -251,6 +275,44 @@ impl OutboundMessageBuilder {
         })?;
 
         Ok(())
+    }
+
+    #[cfg(test)]
+    pub(crate) fn store_and_send_blocking_db<D>(self, db: D) -> Result<Message, HErr>
+    where
+        D: Deref<Target = Database> + DerefMut + Send + 'static,
+    {
+        use crate::{channel_recv_err, loc};
+        use crossbeam_channel::*;
+
+        let (tx, rx) = unbounded();
+        self.store_and_send_db(db, move |m| {
+            tx.send(m)
+                .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
+        })?;
+
+        let out = match rx.recv().map_err(|_| channel_recv_err!())? {
+            StoreAndSend::Msg(msg) => msg,
+            // TODO use line number
+            StoreAndSend::Error { error, .. } => return Err(error),
+            other => {
+                panic!("Unexpected  variant {:?}", other);
+            }
+        };
+
+        match rx.recv().map_err(|_| channel_recv_err!())? {
+            StoreAndSend::StoreDone(_) => {}
+            other => {
+                panic!("Unexpected variant {:?}", other);
+            }
+        }
+
+        match rx.recv().map_err(|_| channel_recv_err!())? {
+            StoreAndSend::SendDone(_) => Ok(out),
+            other => {
+                panic!("Unexpected variant {:?}", other);
+            }
+        }
     }
 }
 
