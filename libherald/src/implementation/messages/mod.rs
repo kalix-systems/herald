@@ -242,9 +242,12 @@ impl MessagesTrait for Messages {
     }
 
     fn can_fetch_more(&self) -> bool {
-        let conv_id = ret_none!(self.conversation_id, false);
+        let conv_id = match &self.conversation_id {
+            Some(cid) => cid,
+            None => return false,
+        };
 
-        let rx = match RXS.get(&conv_id) {
+        let rx = match RXS.get(conv_id) {
             Some(rx) => rx,
             // it's not a problem if the model doesn't have a receiver yet
             None => return false,
