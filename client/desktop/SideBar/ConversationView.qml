@@ -38,8 +38,6 @@ ListView {
 
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
-
-            onNewDataReady: messageModel.pollUpdate()
         }
 
         property var childChatView: Component {
@@ -52,7 +50,6 @@ ListView {
         Members {
             id: convoItemMembers
             conversationId: conversationIdProxy
-            onNewDataReady: pollUpdate()
         }
 
         visible: matched

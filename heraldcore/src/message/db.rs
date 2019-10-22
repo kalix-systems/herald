@@ -252,7 +252,7 @@ impl OutboundMessageBuilder {
             }
 
             if !attachments.is_empty() {
-                e!(attachments::add_db(
+                e!(attachments::db::add(
                     &tx,
                     &msg_id,
                     attachments.iter().map(|a| a.hash_dir())
@@ -371,7 +371,7 @@ impl InboundMessageBuilder {
         }
 
         if has_attachments {
-            attachments::add_db(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
+            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
         }
 
         tx.commit()?;

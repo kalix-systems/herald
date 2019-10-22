@@ -286,11 +286,15 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
-    fn poll_update(&mut self) -> bool {
+    fn can_fetch_more(&self) -> bool {
+        !USER_BUS.rx.is_empty()
+    }
+
+    fn fetch_more(&mut self) {
         for update in USER_BUS.rx.try_recv() {
             match update {
                 UsersUpdates::NewUser(uid) => {
-                    let new_contact = ret_err!(contact::by_user_id(uid), false);
+                    let new_contact = ret_err!(contact::by_user_id(uid));
 
                     let new_user = User {
                         matched: new_contact.matches(&self.filter),
@@ -298,7 +302,7 @@ impl UsersTrait for Users {
                     };
 
                     let pos = match self.list.binary_search(&new_user) {
-                        Ok(_) => return true, // this should never happen
+                        Ok(_) => return, // this should never happen
                         Err(pos) => pos,
                     };
 
@@ -316,8 +320,6 @@ impl UsersTrait for Users {
                 }
             }
         }
-
-        true
     }
 }
 

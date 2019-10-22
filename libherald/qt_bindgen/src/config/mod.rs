@@ -142,7 +142,6 @@ fn conversations() -> Object {
 
     let funcs = functions! {
         mut removeConversation(row_index: QUint64) => Bool,
-        mut pollUpdate() => Bool,
         mut toggleFilterRegex() => Bool,
     };
 
@@ -183,7 +182,6 @@ fn users() -> Object {
 
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
-        mut pollUpdate() => Bool,
         mut toggleFilterRegex() => Bool,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
@@ -215,7 +213,6 @@ fn members() -> Object {
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
-        mut pollUpdate() => Bool,
         mut  toggleFilterRegex() => Bool,
     };
 
@@ -248,7 +245,6 @@ fn messages() -> Object {
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
-        mut pollUpdate() => Bool,
         const messageBodyById(msg_id: QByteArray) => QString,
         const messageAuthorById(msg_id: QByteArray) => QString,
         const indexById(msg_id: QByteArray) => QUint64,

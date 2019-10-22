@@ -842,7 +842,6 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
-    fn poll_update(&mut self) -> bool;
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -942,12 +941,6 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_poll_update(ptr: *mut Conversations) -> bool {
-    let o = &mut *ptr;
-    o.poll_update()
 }
 
 #[no_mangle]
@@ -1436,7 +1429,6 @@ pub trait MembersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add_to_conversation(&mut self, id: String) -> bool;
-    fn poll_update(&mut self) -> bool;
     fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -1569,12 +1561,6 @@ pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: 
     set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
     o.add_to_conversation(id)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_poll_update(ptr: *mut Members) -> bool {
-    let o = &mut *ptr;
-    o.poll_update()
 }
 
 #[no_mangle]
@@ -2236,7 +2222,6 @@ pub trait MessagesTrait {
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn message_author_by_id(&self, msg_id: &[u8]) -> String;
     fn message_body_by_id(&self, msg_id: &[u8]) -> String;
-    fn poll_update(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -2415,12 +2400,6 @@ pub unsafe extern "C" fn messages_message_body_by_id(ptr: *const Messages, msg_i
     let r = o.message_body_by_id(msg_id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_poll_update(ptr: *mut Messages) -> bool {
-    let o = &mut *ptr;
-    o.poll_update()
 }
 
 #[no_mangle]
@@ -2751,7 +2730,6 @@ pub trait UsersTrait {
     fn add(&mut self, id: String) -> Vec<u8>;
     fn color_by_id(&self, id: String) -> u32;
     fn name_by_id(&self, id: String) -> String;
-    fn poll_update(&mut self) -> bool;
     fn profile_picture_by_id(&self, id: String) -> String;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -2879,12 +2857,6 @@ pub unsafe extern "C" fn users_name_by_id(ptr: *const Users, id_str: *const c_us
     let r = o.name_by_id(id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_poll_update(ptr: *mut Users) -> bool {
-    let o = &mut *ptr;
-    o.poll_update()
 }
 
 #[no_mangle]

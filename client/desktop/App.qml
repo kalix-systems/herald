@@ -20,14 +20,10 @@ Item {
 
     Users {
         id: contactsModel
-
-        onNewDataReady: pollUpdate()
     }
 
     Conversations {
         id: conversationsModel
-
-        onNewDataReady: pollUpdate()
     }
 
     Popups.ConfigPopup {

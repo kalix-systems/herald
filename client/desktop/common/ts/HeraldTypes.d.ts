@@ -85,7 +85,6 @@ declare class Conversations {
   toggleFilterRegex(): boolean;
   addConversation(): ByteArray;
   removeConversation(rowIndex: number): boolean;
-  pollUpdate(): boolean;
 }
 
 declare class ConversationBuilder {

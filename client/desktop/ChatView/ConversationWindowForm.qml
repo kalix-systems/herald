@@ -55,7 +55,7 @@ Flickable {
             delegate: Column {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
-                                                                receiptStatus)
+                                                       receiptStatus)
                 readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
@@ -85,7 +85,6 @@ Flickable {
                         authorName: authName
                         receiptImage: proxyReceiptImage
                     }
-
                 }
 
                 Component {
@@ -99,7 +98,6 @@ Flickable {
                         opColor: QmlCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
-
                     }
                 }
 
@@ -112,15 +110,13 @@ Flickable {
                         authorName: authName
                         messageAttachments: Attachments {
                             msgId: messageId
-
                         }
-
                     }
-
                 }
 
                 CB.ChatBubble {
-                    ChatBubbleHover {}
+                    ChatBubbleHover {
+                    }
                     maxWidth: cvPane.width * 0.66
                     color: QmlCfg.palette.tertiaryColor
                     senderColor: userColor
