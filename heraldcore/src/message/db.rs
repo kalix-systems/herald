@@ -125,7 +125,7 @@ pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
 
 /// Testing utility
 #[cfg(test)]
-pub(crate) fn test_outbound_text_db<D>(db: D, msg: &str, conv: ConversationId) -> (MsgId, Time)
+pub(crate) fn test_outbound_text<D>(db: D, msg: &str, conv: ConversationId) -> (MsgId, Time)
 where
     D: Deref<Target = Database> + DerefMut + Send + 'static,
 {

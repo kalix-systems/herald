@@ -259,14 +259,14 @@ impl ConversationId {
         awaiting: Vec<BlockHash>,
     ) -> Result<(), HErr> {
         let mut db = CK_CONN.lock();
-        let mut tx = db.transaction()?;
+        let tx = db.transaction()?;
 
         let block_bytes = serde_cbor::to_vec(&block)?;
         let signer_bytes = serde_cbor::to_vec(&signer)?;
 
-        let block_id = raw_add_pending_block(&mut tx, signer_bytes, block_bytes)?;
+        let block_id = raw_add_pending_block(&tx, signer_bytes, block_bytes)?;
 
-        raw_add_block_dependencies(&mut tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
+        raw_add_block_dependencies(&tx, block_id, awaiting.iter().map(|hash| hash.as_ref()))?;
 
         tx.commit()?;
 
