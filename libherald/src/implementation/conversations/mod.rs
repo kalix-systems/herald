@@ -208,6 +208,10 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
+    fn can_fetch_more(&self) -> bool {
+        !CONV_BUS.rx.is_empty()
+    }
+
     fn fetch_more(&mut self) {
         use ConvUpdates::*;
         for update in CONV_BUS.rx.try_iter() {

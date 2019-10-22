@@ -241,6 +241,18 @@ impl MessagesTrait for Messages {
         ret_none!(self.map.get(&mid), 0).timestamp.0 * 1000
     }
 
+    fn can_fetch_more(&self) -> bool {
+        let conv_id = ret_none!(self.conversation_id, false);
+
+        let rx = match RXS.get(&conv_id) {
+            Some(rx) => rx,
+            // it's not a problem if the model doesn't have a receiver yet
+            None => return false,
+        };
+
+        !rx.is_empty()
+    }
+
     /// Polls for updates
     fn fetch_more(&mut self) {
         let conv_id = ret_none!(self.conversation_id);

@@ -286,6 +286,10 @@ impl UsersTrait for Users {
         self.list.len()
     }
 
+    fn can_fetch_more(&self) -> bool {
+        !USER_BUS.rx.is_empty()
+    }
+
     fn fetch_more(&mut self) {
         for update in USER_BUS.rx.try_recv() {
             match update {
