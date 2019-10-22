@@ -241,20 +241,32 @@ impl MessagesTrait for Messages {
         ret_none!(self.map.get(&mid), 0).timestamp.0 * 1000
     }
 
-    /// Polls for updates
-    fn poll_update(&mut self) -> bool {
+    fn can_fetch_more(&self) -> bool {
         let conv_id = ret_none!(self.conversation_id, false);
 
         let rx = match RXS.get(&conv_id) {
             Some(rx) => rx,
             // it's not a problem if the model doesn't have a receiver yet
-            None => return true,
+            None => return false,
+        };
+
+        !rx.is_empty()
+    }
+
+    /// Polls for updates
+    fn fetch_more(&mut self) {
+        let conv_id = ret_none!(self.conversation_id);
+
+        let rx = match RXS.get(&conv_id) {
+            Some(rx) => rx,
+            // it's not a problem if the model doesn't have a receiver yet
+            None => return,
         };
 
         for update in rx.try_iter() {
             match update {
                 MsgUpdate::Msg(mid) => {
-                    let new = ret_err!(message::get_message(&mid), false);
+                    let new = ret_err!(message::get_message(&mid));
 
                     new_msg_toast(&new);
 
@@ -270,7 +282,7 @@ impl MessagesTrait for Messages {
                     self.emit_last_changed();
                 }
                 MsgUpdate::FullMsg(msg) => {
-                    ret_err!(self.raw_insert(msg, false), false);
+                    ret_err!(self.raw_insert(msg, false));
                 }
                 MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {
@@ -290,35 +302,30 @@ impl MessagesTrait for Messages {
                     // It is probably trivial, but may reflect something
                     // deeply wrong with our understanding of the program's
                     // concurrency.
-                    let ix = ret_none!(
-                        self.list
-                            .iter()
-                            // search backwards,
-                            // it's probably fairly recent
-                            .rposition(|m| m.msg_id == mid),
-                        false
-                    );
+                    let ix = ret_none!(self
+                        .list
+                        .iter()
+                        // search backwards,
+                        // it's probably fairly recent
+                        .rposition(|m| m.msg_id == mid));
 
-                    let receipts = ret_err!(message::get_message_receipts(&mid), false);
+                    let receipts = ret_err!(message::get_message_receipts(&mid));
                     msg.receipts = receipts;
 
                     self.model.data_changed(ix, ix);
                 }
                 MsgUpdate::StoreDone(mid) => {
-                    let ix = ret_none!(
-                        self.list
-                            .iter()
-                            // search backwards,
-                            // it's probably fairly recent
-                            .rposition(|m| m.msg_id == mid),
-                        false
-                    );
+                    let ix = ret_none!(self
+                        .list
+                        .iter()
+                        // search backwards,
+                        // it's probably fairly recent
+                        .rposition(|m| m.msg_id == mid));
                     self.list[ix].data_saved = true;
                     self.model.data_changed(ix, ix);
                 }
             }
         }
-        true
     }
 
     fn emit(&mut self) -> &mut Emitter {

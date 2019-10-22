@@ -209,9 +209,20 @@ impl MembersTrait for Members {
         true
     }
 
-    fn poll_update(&mut self) -> bool {
+    fn can_fetch_more(&self) -> bool {
         let cid = &ret_none!(self.conversation_id, false);
-        let rx = ret_none!(shared::RXS.get(cid), false);
+        let rx = match shared::RXS.get(&cid) {
+            Some(rx) => rx,
+            // it's not a problem if the model doesn't have a receiver yet
+            None => return false,
+        };
+
+        !rx.is_empty()
+    }
+
+    fn fetch_more(&mut self) {
+        let cid = &ret_none!(self.conversation_id);
+        let rx = ret_none!(shared::RXS.get(cid));
 
         use shared::MemberUpdate::*;
 
@@ -232,7 +243,6 @@ impl MembersTrait for Members {
                 }
             }
         }
-        true
     }
 }
 

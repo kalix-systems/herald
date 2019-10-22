@@ -213,3 +213,13 @@ impl ContactBuilder {
         Ok(contact)
     }
 }
+
+#[cfg(test)]
+pub(crate) fn test_contact(conn: &mut rusqlite::Connection, user_id: &str) -> Contact {
+    let receiver = user_id
+        .try_into()
+        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
+    ContactBuilder::new(receiver)
+        .add_db(conn)
+        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()))
+}

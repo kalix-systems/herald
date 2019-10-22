@@ -11,44 +11,79 @@ fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
 }
 
 #[test]
-#[serial]
 fn delete_get_message() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
-    let conf = test_config();
-    let conv_id = conf.nts_conversation;
+    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
 
-    let (msg_id, _) = test_outbound_text("test", conv_id);
+    let conv = receiver.pairwise_conversation;
 
-    let message = super::get_message(&msg_id).expect(womp!("unable to get message"));
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
 
-    assert_eq!(message.body.expect(womp!()).as_str(), "test");
+    builder.store_db(&mut conn).expect(womp!());
 
-    super::delete_message(&msg_id).expect(womp!("failed to delete message"));
+    let message = db::get_message(&conn, &msg_id).expect(womp!("unable to get message"));
 
-    assert!(super::get_message(&msg_id).is_err());
+    assert_eq!(message.body.expect(womp!()).as_str(), "hi");
+
+    db::delete_message(&conn, &msg_id).expect(womp!("failed to delete message"));
+
+    assert!(db::get_message(&conn, &msg_id).is_err());
 }
 
 #[test]
-#[serial]
 fn reply() {
-    Database::reset_all().expect(womp!());
-    let conf = test_config();
-    let conv_id = conf.nts_conversation;
+    let mut conn = Database::in_memory().expect(womp!());
 
-    let (op, _) = test_outbound_text("test", conv_id);
+    let author = "Hello".try_into().unwrap();
+    crate::contact::ContactBuilder::new(author)
+        .add_db(&mut conn)
+        .expect(womp!());
 
-    let mut builder = OutboundMessageBuilder::default();
+    let conversation = [1; 32].into();
+
+    crate::conversation::ConversationBuilder::new()
+        .conversation_id(conversation)
+        .add_db(&mut conn)
+        .expect(womp!("Failed to create conversation"));
+
+    let mid1 = [0; 32].into();
+    let mid2 = [1; 32].into();
+    let mut builder = InboundMessageBuilder::default();
 
     builder
-        .replying_to(Some(op))
+        .id(mid1)
+        .author(author)
+        .conversation_id(conversation)
+        .timestamp(Time::now())
+        .body("1".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    let mut builder = InboundMessageBuilder::default();
+
+    builder
+        .id(mid2)
+        .author(author)
+        .replying_to(mid1)
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
-        .conversation_id(conv_id);
+        .conversation_id(conversation);
 
-    let reply = builder.store_and_send_blocking().unwrap();
+    builder.store_db(&mut conn).expect(womp!());
 
-    assert_eq!(reply.op.unwrap(), op);
+    let reply = db::get_message(&conn, &mid2).unwrap();
+
+    assert_eq!(reply.op.unwrap(), mid1);
 }
+
 #[test]
 #[serial]
 fn message_send_status_updates() {
@@ -85,48 +120,75 @@ fn message_send_status_updates() {
 }
 
 #[test]
-#[serial]
 fn message_receipt_status_updates() {
-    use crate::contact::test_contact;
+    let mut conn = Database::in_memory().expect(womp!());
 
-    Database::reset_all().expect(womp!());
-    test_config();
-
-    let receiver = test_contact("receiver");
+    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 
-    let (msg_id, _) = test_outbound_text("msg", conv);
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
 
-    add_receipt(msg_id, receiver.id, MessageReceiptStatus::Read).expect(womp!());
+    builder.store_db(&mut conn).expect(womp!());
+
+    db::add_receipt(
+        &mut conn,
+        msg_id,
+        receiver.id,
+        MessageReceiptStatus::Received,
+    )
+    .expect(womp!());
+
+    let receipts = db::get_receipts(&conn, msg_id)
+        .expect(womp!())
+        .expect(womp!());
+
+    let receipt = receipts.get(&receiver.id).expect(womp!());
+    assert_eq!(*receipt, MessageReceiptStatus::Received);
+
+    db::add_receipt(&mut conn, msg_id, receiver.id, MessageReceiptStatus::Read).expect(womp!());
+
+    let receipts = db::get_receipts(&conn, msg_id)
+        .expect(womp!())
+        .expect(womp!());
+    let receipt = receipts.get(&receiver.id).expect(womp!());
+    assert_eq!(*receipt, MessageReceiptStatus::Read);
 }
 
 #[test]
-#[serial]
 fn receipt_before_message() {
     use crate::contact::ContactBuilder;
 
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
     let author = "Hello".try_into().expect(womp!());
 
     let receiver = "World".try_into().expect(womp!());
-    ContactBuilder::new(receiver).add().expect(womp!());
+    ContactBuilder::new(receiver)
+        .add_db(&mut conn)
+        .expect(womp!());
 
     let conversation_id = [0; 32].into();
 
     crate::conversation::ConversationBuilder::new()
         .conversation_id(conversation_id)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
 
     crate::contact::ContactBuilder::new(author)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
-    crate::members::add_member(&conversation_id, author).expect(womp!());
+    crate::members::db::add_member(&conn, &conversation_id, author).expect(womp!());
 
     let msg_id = [1; 32].into();
-    add_receipt(msg_id, receiver, MessageReceiptStatus::Read).expect(womp!());
+    db::add_receipt(&mut conn, msg_id, receiver, MessageReceiptStatus::Read).expect(womp!());
 
     let mut builder = InboundMessageBuilder::default();
     builder
@@ -135,9 +197,9 @@ fn receipt_before_message() {
         .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
         .author(author);
-    builder.store().expect(womp!());
+    builder.store_db(&mut conn).expect(womp!());
 
-    let msg = get_message(&msg_id).expect(womp!());
+    let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
     assert_eq!(
         msg.receipts.get(&receiver).expect(womp!()),

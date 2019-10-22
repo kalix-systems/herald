@@ -24,13 +24,14 @@ ApplicationWindow {
     Errors {
         id: errorQueue
         onTryPollChanged: {
-            const errMsg = errorQueue.nextError()
+            var errMsg = errorQueue.nextError()
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {}
+        property var errPopup: ErrorUtils.ErrorDialog {
+        }
     }
 
     HeraldUtils {

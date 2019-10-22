@@ -33,9 +33,9 @@ Rectangle {
     property alias chatText: chatText
     // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
-    // camera button
-   // property alias cameraButton: cameraButton
 
+    // camera button
+    // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
     property bool owned: replyUid === config.configId
@@ -63,6 +63,7 @@ Rectangle {
     }
 
     //this doesn't exist anymore
+
     /**
     Common.ButtonForm {
         id: cameraButton
@@ -87,7 +88,6 @@ Rectangle {
 
         topPadding: QmlCfg.smallMargin
 
-
         Loader {
             id: replyLoader
             property string opName: replyName
@@ -103,8 +103,9 @@ Rectangle {
         Loader {
             id: attachmentLoader
             active: false
-            height: item ? item.height: 0
-            sourceComponent: AttachmentsComponent {}
+            height: item ? item.height : 0
+            sourceComponent: AttachmentsComponent {
+            }
             width: scrollView.width
         }
 

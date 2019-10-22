@@ -6,7 +6,8 @@ use std::path::PathBuf;
 
 /// Message attachments
 pub mod attachments;
-mod db;
+
+pub(crate) mod db;
 use attachments::*;
 
 /// Message

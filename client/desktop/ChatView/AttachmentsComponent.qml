@@ -5,70 +5,66 @@ import QtQuick.Layouts 1.12
 import "../common" as Common
 import LibHerald 1.0
 
- ScrollView {
-     width: parent.width
-     height: wrapperRow.height
+ScrollView {
+    width: parent.width
+    height: wrapperRow.height
     // ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
-     ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
 
-     Row {
-         id: wrapperRow
-         height: 100
-         Layout.margins: 10
-         width: parent.width
-         spacing: 5
-         Repeater {
-             id: imageRepeater
-             model: builder
-             delegate:
+    Row {
+        id: wrapperRow
+        height: 100
+        Layout.margins: 10
+        width: parent.width
+        spacing: 5
+        Repeater {
+            id: imageRepeater
+            model: builder
+            delegate: Rectangle {
+                height: 100
+                width: 100
+                border.color: image.focus ? "light blue" : "black"
+                border.width: image.focus ? 2 : 1
+                radius: QmlCfg.radius
+                clip: true
+                Image {
+                    id: image
+                    anchors.fill: parent
+                    anchors.margins: QmlCfg.smallMargin
+                    source: "file:" + attachmentPath
+                    fillMode: Image.PreserveAspectCrop
+                    asynchronous: true
 
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: {
+                            parent.focus = !parent.focus
+                        }
+                    }
 
-                 Rectangle {
-                 height: 100
-                 width: 100
-                 border.color: image.focus ? "light blue" : "black"
-                 border.width: image.focus ? 2 : 1
-                 radius: QmlCfg.radius
-                 clip: true
-                     Image {
-                     id: image
-                     anchors.fill: parent
-                     anchors.margins: QmlCfg.smallMargin
-                     source: "file:" + attachmentPath
-                     fillMode: Image.PreserveAspectCrop
-                     asynchronous: true
+                    Button {
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        anchors.margins: QmlCfg.smallMargin
+                        background: Rectangle {
+                            color: "transparent"
+                            width: x.width
+                            height: x.height
+                        }
 
-                     MouseArea {
-                         anchors.fill: parent
-                         onClicked: {
-                             parent.focus = !parent.focus
-                         }
-                     }
-
-                     Button {
-                         anchors.top: parent.top
-                         anchors.right: parent.right
-                         anchors.margins: QmlCfg.smallMargin
-                         background: Rectangle {
-                             color: "transparent"
-                             width: x.width
-                             height: x.height
-                         }
-
-                         Image {
-                             id: x
-                             source: "qrc:/x-icon.svg"
-                             anchors.centerIn: parent
-                             sourceSize: Qt.size(25, 25)
-                         }
-                         onClicked: {
-                         builder.removeAttachmentByIndex(index)
-
-                         }
-                     }
-                 }
-         }
-         }
-     }
-     bottomPadding: 5
- }
+                        Image {
+                            id: x
+                            source: "qrc:/x-icon.svg"
+                            anchors.centerIn: parent
+                            sourceSize: Qt.size(25, 25)
+                        }
+                        onClicked: {
+                            builder.removeAttachmentByIndex(index)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    bottomPadding: 5
+}

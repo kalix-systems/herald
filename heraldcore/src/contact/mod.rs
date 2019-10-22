@@ -323,14 +323,4 @@ impl Contact {
 }
 
 #[cfg(test)]
-pub(crate) fn test_contact(user_id: &str) -> Contact {
-    let receiver = user_id
-        .try_into()
-        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
-    ContactBuilder::new(receiver)
-        .add()
-        .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()))
-}
-
-#[cfg(test)]
 mod tests;
