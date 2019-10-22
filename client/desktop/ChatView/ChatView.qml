@@ -18,7 +18,7 @@ Pane {
 
     background: Rectangle {
         anchors.fill: parent
-        color: QmlCfg.palette.mainColor
+        color: CmnCfg.palette.mainColor
     }
 
     /// bar at the top that displays the avatar
@@ -98,7 +98,7 @@ Pane {
 
     Common.Divider {
         height: 1
-        color: QmlCfg.palette.borderColor
+        color: CmnCfg.palette.borderColor
         bottomAnchor: chatTextArea.top
     }
 
@@ -110,10 +110,10 @@ Pane {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: QmlCfg.margin
-            topMargin: QmlCfg.margin
-            rightMargin: QmlCfg.margin
-            bottomMargin: QmlCfg.smallMargin
+            leftMargin: CmnCfg.margin
+            topMargin: CmnCfg.margin
+            rightMargin: CmnCfg.margin
+            bottomMargin: CmnCfg.smallMargin
         }
 
         keysProxy: Item {

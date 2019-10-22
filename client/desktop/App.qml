@@ -87,7 +87,7 @@ Item {
 
         handle: Rectangle {
             implicitWidth: 1.1
-            color: QmlCfg.palette.borderColor
+            color: CmnCfg.palette.borderColor
         }
     }
 

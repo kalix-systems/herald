@@ -10,17 +10,17 @@ Rectangle {
     property alias text: innerText.text
     property string userId: ""
     property alias xButton: xButton
-    width: innerText.width + QmlCfg.margin * 3
-    height: innerText.height + QmlCfg.margin
+    width: innerText.width + CmnCfg.margin * 3
+    height: innerText.height + CmnCfg.margin
     color: defaultColor
-    radius: QmlCfg.radius
+    radius: CmnCfg.radius
 
     Text {
         id: innerText
         anchors {
             left: parent.left
             verticalCenter: parent.verticalCenter
-            leftMargin: QmlCfg.smallMargin
+            leftMargin: CmnCfg.smallMargin
         }
         color: "white"
         font.bold: true
@@ -32,10 +32,10 @@ Rectangle {
             verticalCenter: innerText.verticalCenter
             right: parent.right
             top: parent.top
-            margins: QmlCfg.smallMargin
+            margins: CmnCfg.smallMargin
         }
         padding: 0
         source: "qrc:/x-icon-white.svg"
-        fill: QmlCfg.palette.iconFill
+        fill: CmnCfg.palette.iconFill
     }
 }

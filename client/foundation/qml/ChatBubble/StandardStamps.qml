@@ -4,12 +4,12 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 RowLayout {
-    Layout.margins: QmlCfg.smallMargin
+    Layout.margins: CmnCfg.smallMargin
     Label {
         font.pixelSize: 10
         text: friendlyTimestamp
         id: timestamp
-        color: QmlCfg.palette.mainTextColor
+        color: CmnCfg.palette.mainTextColor
     }
 
     Item {
@@ -23,7 +23,7 @@ RowLayout {
         layer.enabled: true
         layer.samplerName: "maskSource"
         layer.effect: ShaderEffect {
-            property color overlay: QmlCfg.palette.iconMatte
+            property color overlay: CmnCfg.palette.iconMatte
             property var source: background
             fragmentShader: "
 uniform lowp sampler2D source;

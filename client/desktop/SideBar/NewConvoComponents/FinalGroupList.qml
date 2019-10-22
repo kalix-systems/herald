@@ -13,27 +13,27 @@ ListView {
     delegate: Item {
         id: memberItem
 
-        height: QmlCfg.convoHeight
+        height: CmnCfg.convoHeight
         width: parent.width
 
         Rectangle {
             id: bgBox
 
             Common.Divider {
-                color: QmlCfg.palette.secondaryColor
+                color: CmnCfg.palette.secondaryColor
                 bottomAnchor: parent.bottom
             }
 
             anchors.fill: parent
 
-            color: QmlCfg.palette.mainColor
+            color: CmnCfg.palette.mainColor
         }
 
         Common.Avatar {
-            size: QmlCfg.avatarSize
+            size: CmnCfg.avatarSize
             id: memberAvatar
             avatarLabel: contactsModel.nameById(memberId)
-            labelGap: QmlCfg.smallMargin
+            labelGap: CmnCfg.smallMargin
             secondaryText: "@" + memberId
             colorHash: contactsModel.colorById(memberId)
             pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(

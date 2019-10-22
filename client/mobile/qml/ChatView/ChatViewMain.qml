@@ -14,7 +14,7 @@ Page {
     }
 
     background: Rectangle {
-        color: QmlCfg.palette.mainColor
+        color: CmnCfg.palette.mainColor
     }
 
     TextMessageList {

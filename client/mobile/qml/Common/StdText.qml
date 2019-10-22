@@ -3,6 +3,6 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 
 Text {
-    font.pixelSize: QmlCfg.mainText
-    //    font.family: QmlCfg.mainTextFont
+    font.pixelSize: CmnCfg.mainText
+    //    font.family: CmnCfg.mainTextFont
 }

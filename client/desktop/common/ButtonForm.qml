@@ -7,7 +7,7 @@ import LibHerald 1.0
 Button {
     property string source
     property alias scale: background.scale
-    property color fill: QmlCfg.palette.iconMatte
+    property color fill: CmnCfg.palette.iconMatte
     height: 25
     width: height
 

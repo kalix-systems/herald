@@ -6,8 +6,8 @@ Column {
     id: textMessageCol
     property Messages model: value
 
-    topPadding: QmlCfg.padding
-    bottomPadding: QmlCfg.padding
+    topPadding: CmnCfg.padding
+    bottomPadding: CmnCfg.padding
     anchors {
         right: parent.right
         left: parent.left
@@ -22,7 +22,7 @@ Column {
             readonly property string proxyBody: body
             property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                    receiptStatus)
-            readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
+            readonly property color userColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                                        author)]
             readonly property string timestamp: Utils.friendlyTimestamp(
                                                     epochTimestampMs)
@@ -39,10 +39,10 @@ Column {
                 // This is okay as a ternary, the types are enforced by QML.
                 right: outbound ? parent.right : undefined
                 left: !outbound ? parent.left : undefined
-                rightMargin: QmlCfg.margin * 2.0
-                leftMargin: QmlCfg.margin * 2.0
+                rightMargin: CmnCfg.margin * 2.0
+                leftMargin: CmnCfg.margin * 2.0
             }
-            rightPadding: QmlCfg.margin
+            rightPadding: CmnCfg.margin
 
             Component {
                 id: std
@@ -56,7 +56,7 @@ Column {
 
             CB.ChatBubble {
                 maxWidth: cvPane.width * 0.66
-                color: QmlCfg.palette.tertiaryColor
+                color: CmnCfg.palette.tertiaryColor
                 senderColor: userColor
                 content: std
             }

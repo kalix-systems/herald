@@ -8,9 +8,9 @@ Component {
     id: finalizeGroupComponent
 
     Rectangle {
-        height: QmlCfg.toolbarHeight
+        height: CmnCfg.toolbarHeight
         width: parent.width
-        color: QmlCfg.palette.mainColor
+        color: CmnCfg.palette.mainColor
         Common.ButtonForm {
             id: finalizegroupbutton
             source: "qrc:/single-check-receipt-icon.svg"
@@ -38,10 +38,10 @@ Component {
             anchors.right: finalizegroupbutton.left
 
             placeholderText: "Group title"
-            color: QmlCfg.palette.mainTextColor
+            color: CmnCfg.palette.mainTextColor
             verticalAlignment: TextEdit.AlignVCenter
             background: Rectangle {
-                color: QmlCfg.palette.mainColor
+                color: CmnCfg.palette.mainColor
                 anchors.fill: parent
             }
 

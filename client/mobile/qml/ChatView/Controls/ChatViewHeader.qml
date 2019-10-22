@@ -9,17 +9,17 @@ ToolBar {
 
     property string title
     clip: true
-    height: QmlCfg.toolbarHeight
+    height: CmnCfg.toolbarHeight
 
     background: Rectangle {
-        color: QmlCfg.palette.secondaryColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     RowLayout {
         anchors {
             fill: parent
-            rightMargin: QmlCfg.margin
-            leftMargin: QmlCfg.margin
+            rightMargin: CmnCfg.margin
+            leftMargin: CmnCfg.margin
         }
 
         IconButton {
@@ -35,10 +35,10 @@ ToolBar {
             Layout.alignment: Qt.AlignCenter
             Label {
                 text: title
-                font.pointSize: QmlCfg.chatPreviewSize
-                font.family: QmlCfg.chatFont.name
+                font.pointSize: CmnCfg.chatPreviewSize
+                font.family: CmnCfg.chatFont.name
                 anchors.verticalCenter: parent.verticalCenter
-                color: QmlCfg.palette.iconMatte
+                color: CmnCfg.palette.iconMatte
             }
         }
 

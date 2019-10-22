@@ -5,19 +5,19 @@ import LibHerald 1.0
 import "../../Common"
 
 RowLayout {
-    readonly property real textareaHeight: QmlCfg.units.dp(36)
+    readonly property real textareaHeight: CmnCfg.units.dp(36)
     TextArea {
         id: cta
         Layout.fillWidth: true
         height: textareaHeight
         font {
-            pointSize: QmlCfg.chatPreviewSize
-            family: QmlCfg.chatFont.name
+            pointSize: CmnCfg.chatPreviewSize
+            family: CmnCfg.chatFont.name
         }
-        color: QmlCfg.palette.mainTextColor
+        color: CmnCfg.palette.mainTextColor
         background: Rectangle {
             anchors.fill: parent
-            color: QmlCfg.palette.secondaryColor
+            color: CmnCfg.palette.secondaryColor
         }
     }
 

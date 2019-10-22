@@ -28,8 +28,8 @@ Pane {
     height: parent.height
 
     background: Rectangle {
-        border.color: QmlCfg.palette.secondaryColor
-        color: QmlCfg.palette.mainColor
+        border.color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.mainColor
     }
 
     //this does not exist anymore

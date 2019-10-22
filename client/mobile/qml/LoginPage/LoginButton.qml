@@ -8,12 +8,12 @@ Button {
     property string lbText: ""
 
     text: lbText
-    font.pixelSize: QmlCfg.mainTextSize
+    font.pixelSize: CmnCfg.mainTextSize
 
     background: Rectangle {
         id: bg
         color: Qt.darker(lbColor, parent.pressed ? 1.5 : 1.3)
-        radius: QmlCfg.radius
-        anchors.margins: QmlCfg.smallMargin
+        radius: CmnCfg.radius
+        anchors.margins: CmnCfg.smallMargin
     }
 }

@@ -11,14 +11,14 @@ Component {
 
     TextArea {
       id: searchText
-      height: QmlCfg.toolbarHeight
+      height: CmnCfg.toolbarHeight
 
       placeholderText: searchLoader.searchPlaceholder
-      color: QmlCfg.palette.mainTextColor
+      color: CmnCfg.palette.mainTextColor
       verticalAlignment: TextEdit.AlignVCenter
 
       background: Rectangle {
-          color: QmlCfg.palette.mainColor
+          color: CmnCfg.palette.mainColor
           anchors.fill: parent
       }
 

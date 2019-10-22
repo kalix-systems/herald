@@ -23,8 +23,8 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: Qt.lighter(QmlCfg.palette.tertiaryColor, 1.3)
-        Layout.margins: QmlCfg.smallMargin
+        color: Qt.lighter(CmnCfg.palette.tertiaryColor, 1.3)
+        Layout.margins: CmnCfg.smallMargin
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
 
@@ -38,10 +38,10 @@ ColumnLayout {
                 id: opLabel
                 text: opName
                 font.bold: true
-                Layout.margins: QmlCfg.smallMargin
+                Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
-                color: QmlCfg.palette.mainTextColor
+                color: CmnCfg.palette.mainTextColor
             }
 
             TextMetrics {

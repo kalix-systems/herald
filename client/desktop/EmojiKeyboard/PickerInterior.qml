@@ -9,7 +9,7 @@ Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
         anchors.top: parent.top
-        anchors.topMargin: QmlCfg.margin
+        anchors.topMargin: CmnCfg.margin
         anchors.right: parent.right
         anchors.left: parent.left
 
@@ -40,7 +40,7 @@ Item {
                     top: parent.top
                     bottom: parent.bottom
                     right: parent.right
-                    margins: QmlCfg.smallMargin - 1 // magic
+                    margins: CmnCfg.smallMargin - 1 // magic
                 }
                 width: height
                 onClicked: emoKeysPopup.active = false
@@ -57,7 +57,7 @@ Item {
             }
 
             color: "#33000000" // transparent
-            radius: QmlCfg.radius
+            radius: CmnCfg.radius
             border.color: "white"
             border.width: 0.5
             height: 25
@@ -67,11 +67,11 @@ Item {
         ComboBox {
             id: menu
             anchors.right: parent.right
-            anchors.margins: QmlCfg.margin
+            anchors.margins: CmnCfg.margin
             anchors.verticalCenter: taBox.verticalCenter
             height: 20
             width: 20
-            currentIndex: QmlCfg.skinSwatchIndex
+            currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
             indicator: Item {
             }
@@ -84,7 +84,7 @@ Item {
             }
 
             onCurrentIndexChanged: {
-                QmlCfg.skinSwatchIndex = currentIndex
+                CmnCfg.skinSwatchIndex = currentIndex
             }
 
             contentItem: Rectangle {
@@ -121,10 +121,10 @@ Item {
                 id: innerCol
                 Repeater {
                     id: innerRepeater
-                    model: searchTextArea.text.length ? [] : QmlCfg.emojiModel
+                    model: searchTextArea.text.length ? [] : CmnCfg.emojiModel
                     Column {
                         Text {
-                            padding: QmlCfg.smallMargin
+                            padding: CmnCfg.smallMargin
                             text: modelData.sectionName
                             font.bold: true
                         }
@@ -171,11 +171,11 @@ Item {
 
         Row {
             anchors {
-                topMargin: QmlCfg.margin
+                topMargin: CmnCfg.margin
                 top: hr.bottom
                 horizontalCenter: hr.horizontalCenter
             }
-            spacing: QmlCfg.margin
+            spacing: CmnCfg.margin
             AnchorButton {
                 lowlight: lowlight
                 anchorIndex: 0

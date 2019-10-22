@@ -17,7 +17,7 @@ Column {
     readonly property color tertiaryColor: "grey"
     // the model containing data displayed in the column
     readonly property ListModel teamModel: dummyList
-    // the width of the margin, should be QmlCfg.margin
+    // the width of the margin, should be CmnCfg.margin
     readonly property real marginWidth: 10
     // the size of team icons
     readonly property real teamIconsSize: 50

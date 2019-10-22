@@ -8,13 +8,13 @@ ToolButton {
         throw "undefined callback"
     }
     property string imageSource: ""
-    property color color: QmlCfg.palette.iconMatte
+    property color color: CmnCfg.palette.iconMatte
 
-    property size iconSize: Qt.size(QmlCfg.iconSizes.smallMedium,
-                                    QmlCfg.iconSizes.smallMedium)
+    property size iconSize: Qt.size(CmnCfg.iconSizes.smallMedium,
+                                    CmnCfg.iconSizes.smallMedium)
     background: Rectangle {
         id: splash
-        color: QmlCfg.palette.iconMatte
+        color: CmnCfg.palette.iconMatte
         anchors.centerIn: parent
         opacity: 0
         height: width
@@ -40,7 +40,7 @@ ToolButton {
             property: "width"
             from: parent.height
             to: parent.height * 1.5
-            duration: QmlCfg.units.shortDuration
+            duration: CmnCfg.units.shortDuration
             easing.type: Easing.InQuad
         }
         NumberAnimation {
@@ -48,7 +48,7 @@ ToolButton {
             property: "opacity"
             from: 0.5
             to: 0
-            duration: QmlCfg.units.shortDuration
+            duration: CmnCfg.units.shortDuration
             easing.type: Easing.InQuad
         }
         onFinished: {

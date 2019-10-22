@@ -16,20 +16,20 @@ Rectangle {
     // is true if it's a contact, false if it's a conversation
     property bool isContact
     id: bgBox
-    color: QmlCfg.palette.mainColor
+    color: CmnCfg.palette.mainColor
     anchors.fill: parent
 
     Common.Divider {
-        color: QmlCfg.palette.secondaryColor
+        color: CmnCfg.palette.secondaryColor
         bottomAnchor: parent.bottom
         height: 2
     }
 
     Common.Avatar {
         id: conversationItemAvatar
-        size: QmlCfg.avatarSize
+        size: CmnCfg.avatarSize
         labeled: isContact
-        labelGap: QmlCfg.smallMargin
+        labelGap: CmnCfg.smallMargin
         avatarLabel: boxTitle
         colorHash: Utils.unwrapOr(boxColor, 0)
         pfpUrl: Utils.safeStringOrDefault(picture)
@@ -42,7 +42,7 @@ Rectangle {
             name: "hovering"
             PropertyChanges {
                 target: bgBox
-                color: QmlCfg.palette.secondaryColor
+                color: CmnCfg.palette.secondaryColor
             }
         },
         State {
@@ -50,7 +50,7 @@ Rectangle {
             name: "selected"
             PropertyChanges {
                 target: bgBox
-                color: QmlCfg.palette.tertiaryColor
+                color: CmnCfg.palette.tertiaryColor
             }
         }
     ]

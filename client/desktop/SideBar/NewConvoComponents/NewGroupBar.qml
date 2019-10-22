@@ -9,30 +9,30 @@ Rectangle {
     width: parent.width
     height: visible ? 30 : 0
 
-    property color hoverColor: QmlCfg.palette.secondaryColor
-    color: QmlCfg.palette.mainColor
+    property color hoverColor: CmnCfg.palette.secondaryColor
+    color: CmnCfg.palette.mainColor
 
     Common.ButtonForm {
         id: groupIcon
         //when group icon works this will be that instead
         source: "qrc:/add-contact-icon.svg"
         anchors.left: parent.left
-        anchors.margins: QmlCfg.margin
+        anchors.margins: CmnCfg.margin
         anchors.verticalCenter: parent.verticalCenter
     }
 
     Text {
         text: "New group"
         anchors.left: groupIcon.right
-        anchors.margins: QmlCfg.margin
+        anchors.margins: CmnCfg.margin
         anchors.verticalCenter: parent.verticalCenter
-        color: QmlCfg.palette.mainTextColor
+        color: CmnCfg.palette.mainTextColor
     }
 
     Common.Divider {
         anchors.verticalCenter: parent.bottom
         height: 2
-        color: QmlCfg.palette.secondaryColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     MouseArea {

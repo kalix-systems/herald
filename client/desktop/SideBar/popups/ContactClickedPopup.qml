@@ -86,8 +86,8 @@ Item {
     Popup {
         id: renameContactDialogue
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        width: QmlCfg.popupWidth
-        height: QmlCfg.popupHeight
+        width: CmnCfg.popupWidth
+        height: CmnCfg.popupHeight
 
         TextArea {
             id: entryField

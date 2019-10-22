@@ -29,7 +29,7 @@ Flickable {
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
-        width: QmlCfg.padding
+        width: CmnCfg.padding
     }
 
     Component.onCompleted: {
@@ -39,9 +39,9 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-        spacing: QmlCfg.padding
-        topPadding: QmlCfg.padding
-        bottomPadding: QmlCfg.padding
+        spacing: CmnCfg.padding
+        topPadding: CmnCfg.padding
+        bottomPadding: CmnCfg.padding
         anchors {
             right: parent.right
             left: parent.left
@@ -56,7 +56,7 @@ Flickable {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                        receiptStatus)
-                readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
+                readonly property color userColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
@@ -72,10 +72,10 @@ Flickable {
                     // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
-                    rightMargin: QmlCfg.margin * 2.0
-                    leftMargin: QmlCfg.margin * 2.0
+                    rightMargin: CmnCfg.margin * 2.0
+                    leftMargin: CmnCfg.margin * 2.0
                 }
-                rightPadding: QmlCfg.margin
+                rightPadding: CmnCfg.margin
 
                 Component {
                     id: std
@@ -95,7 +95,7 @@ Flickable {
                         opBody: ownedConversation.messageBodyById(op)
                         receiptImage: proxyReceiptImage
                         opName: ownedConversation.messageAuthorById(op)
-                        opColor: QmlCfg.avatarColors[contactsModel.colorById(
+                        opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
                     }
@@ -118,7 +118,7 @@ Flickable {
                     ChatBubbleHover {
                     }
                     maxWidth: cvPane.width * 0.66
-                    color: QmlCfg.palette.tertiaryColor
+                    color: CmnCfg.palette.tertiaryColor
                     senderColor: userColor
                     content: if (hasAttachments && dataSaved) {
                                  image

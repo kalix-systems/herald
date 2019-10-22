@@ -6,8 +6,8 @@ import QtQuick.Window 2.13
 
 Window {
     id: colorWindow
-    width: QmlCfg.popupWidth
-    height: QmlCfg.popupHeight
+    width: CmnCfg.popupWidth
+    height: CmnCfg.popupHeight
     maximumHeight: height
     minimumHeight: height
     maximumWidth: width
@@ -17,21 +17,21 @@ Window {
     property int selectedIndex: -1
 
     GridLayout {
-        width: QmlCfg.popupWidth
+        width: CmnCfg.popupWidth
         height: width
         columns: 3
         rows: 3
-        anchors.margins: QmlCfg.smallMargin
+        anchors.margins: CmnCfg.smallMargin
 
         Repeater {
-            model: QmlCfg.avatarColors
+            model: CmnCfg.avatarColors
 
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 color: modelData
                 radius: width / 2
-                border.color: QmlCfg.palette.tertiaryColor
+                border.color: CmnCfg.palette.tertiaryColor
                 border.width: focus ? 2 : 0
 
                 MouseArea {

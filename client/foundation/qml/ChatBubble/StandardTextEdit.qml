@@ -5,12 +5,12 @@ import LibHerald 1.0
 TextEdit {
     text: body
     Layout.maximumWidth: maxWidth
-    Layout.margins: QmlCfg.smallMargin
-    Layout.bottomMargin: QmlCfg.smallMargin
+    Layout.margins: CmnCfg.smallMargin
+    Layout.bottomMargin: CmnCfg.smallMargin
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     Layout.alignment: Qt.AlignLeft
     selectByMouse: true
     selectByKeyboard: true
     readOnly: true
-    color: QmlCfg.palette.mainTextColor
+    color: CmnCfg.palette.mainTextColor
 }
