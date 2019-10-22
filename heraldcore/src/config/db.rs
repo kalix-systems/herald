@@ -1,5 +1,4 @@
 use super::*;
-use std::ops::{Deref, DerefMut};
 
 impl Config {
     pub(crate) fn set_name_db(
@@ -57,10 +56,7 @@ impl Config {
 
 impl ConfigBuilder {
     /// Adds configuration.
-    pub(crate) fn add_db<D>(self, mut conn: D) -> Result<Config, HErr>
-    where
-        D: Deref<Target = Database> + DerefMut,
-    {
+    pub(crate) fn add_db(self, conn: &mut rusqlite::Connection) -> Result<Config, HErr> {
         let ConfigBuilder {
             id,
             keypair,
@@ -114,10 +110,7 @@ impl ConfigBuilder {
 }
 
 /// Gets the user's configuration
-pub(crate) fn get<D>(conn: D) -> Result<Config, HErr>
-where
-    D: Deref<Target = Database> + DerefMut,
-{
+pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
     let (id, name, profile_picture, color, colorscheme, nts_conversation, keypair) = conn
         .query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
             Ok((
@@ -143,18 +136,12 @@ where
 }
 
 /// Gets user id directly from database.
-pub(crate) fn static_id<D>(conn: &D) -> Result<UserId, HErr>
-where
-    D: Deref<Target = Database> + DerefMut,
-{
+pub(crate) fn static_id(conn: &rusqlite::Connection) -> Result<UserId, HErr> {
     Ok(conn.query_row(include_str!("sql/get_id.sql"), NO_PARAMS, |row| row.get(0))?)
 }
 
 /// Gets the current user's kepair directly from the database.
-pub(crate) fn static_keypair<D>(conn: &D) -> Result<sig::KeyPair, HErr>
-where
-    D: Deref<Target = Database> + DerefMut,
-{
+pub(crate) fn static_keypair(conn: &rusqlite::Connection) -> Result<sig::KeyPair, HErr> {
     Ok(
         conn.query_row(include_str!("sql/get_keypair.sql"), NO_PARAMS, |row| {
             row.get(0)
@@ -163,20 +150,14 @@ where
 }
 
 /// Gets the current user's GlobalId
-pub(crate) fn static_gid<D>(conn: &D) -> Result<GlobalId, HErr>
-where
-    D: Deref<Target = Database> + DerefMut,
-{
+pub(crate) fn static_gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> {
     let uid = static_id(conn)?;
     let did = *static_keypair(conn)?.public_key();
     Ok(GlobalId { uid, did })
 }
 
 #[cfg(test)]
-pub(crate) fn test_config<D>(conn: D) -> crate::config::Config
-where
-    D: Deref<Target = Database> + DerefMut,
-{
+pub(crate) fn test_config(conn: &mut rusqlite::Connection) -> crate::config::Config {
     use std::convert::TryInto;
     let uid = "userid".try_into().expect("Bad user id");
     crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new())

@@ -88,8 +88,8 @@ impl ConfigBuilder {
 
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
-        let db = Database::get()?;
-        self.add_db(db)
+        let mut db = Database::get()?;
+        self.add_db(&mut db)
     }
 }
 
@@ -97,7 +97,7 @@ impl Config {
     /// Gets the user's configuration
     pub fn get() -> Result<Config, HErr> {
         let db = Database::get()?;
-        db::get(db)
+        db::get(&db)
     }
 
     /// Gets user id
@@ -150,8 +150,8 @@ impl Config {
 
 #[cfg(test)]
 pub(crate) fn test_config() -> crate::config::Config {
-    let db = Database::get().expect("failed to get database");
-    db::test_config(db)
+    let mut db = Database::get().expect("failed to get database");
+    db::test_config(&mut db)
 }
 
 #[cfg(test)]

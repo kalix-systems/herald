@@ -5,24 +5,29 @@ use serial_test_derive::serial;
 use std::convert::TryInto;
 
 #[test]
-#[serial]
-fn add_get_set_config() {
-    Database::reset_all().expect(womp!());
+fn simple_add_get_set_config() {
+    let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
 
     let kp = KeyPair::gen_new();
-    ConfigBuilder::new(id, kp).add().expect(womp!());
+    ConfigBuilder::new(id, kp).add_db(&mut conn).expect(womp!());
 
-    let config = Config::get().expect(womp!());
+    let config = db::get(&conn).expect(womp!());
     assert_eq!(config.id(), id);
     assert_eq!(config.colorscheme, 0);
     assert_eq!(config.color, crate::utils::id_to_color(id));
     assert_eq!(config.color, crate::utils::id_to_color(id));
     assert_eq!(config.name.as_str(), id.as_str());
     assert!(config.profile_picture.is_none());
+}
 
+#[test]
+#[serial]
+fn complicated_add_get_set_config() {
     Database::reset_all().expect(womp!());
+
+    let id = "HelloWorld".try_into().expect(womp!());
 
     let name = "stuff";
     let profile_picture = "stuff";
@@ -80,43 +85,44 @@ fn add_get_set_config() {
 }
 
 #[test]
-#[serial]
 fn two_configs() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
     let kp1 = KeyPair::gen_new();
     let id1 = "1".try_into().expect(womp!());
     let kp2 = KeyPair::gen_new();
     let id2 = "2".try_into().expect(womp!());
 
-    ConfigBuilder::new(id1, kp1).add().expect(womp!());
+    ConfigBuilder::new(id1, kp1)
+        .add_db(&mut conn)
+        .expect(womp!());
 
-    assert!(ConfigBuilder::new(id2, kp2).add().is_err());
+    assert!(ConfigBuilder::new(id2, kp2).add_db(&mut conn).is_err());
 }
 
 #[test]
-#[serial]
 fn get_id() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new(id, kp).add().expect(womp!());
+    let config = ConfigBuilder::new(id, kp).add_db(&mut conn).expect(womp!());
 
-    let static_id = Config::static_id().expect(womp!());
+    let static_id = db::static_id(&conn).expect(womp!());
     assert_eq!(config.id, id);
     assert_eq!(config.id, static_id);
 }
 
 #[test]
-#[serial]
 fn get_kp() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
     let kp = KeyPair::gen_new();
-    let config = ConfigBuilder::new(id, kp.clone()).add().expect(womp!());
+    let config = ConfigBuilder::new(id, kp.clone())
+        .add_db(&mut conn)
+        .expect(womp!());
 
-    let static_keypair = Config::static_keypair().expect(womp!());
+    let static_keypair = db::static_keypair(&conn).expect(womp!());
     assert_eq!(config.keypair, kp);
     assert_eq!(config.keypair, static_keypair);
 }
