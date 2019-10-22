@@ -153,7 +153,7 @@ impl OutboundMessageBuilder {
         let conversation_id = conversation.ok_or(MissingConversationId)?;
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Time::now();
-        let author = crate::config::Config::static_id()?;
+        let author = crate::config::db::static_id(&db)?;
         let send_status = MessageSendStatus::NoAck;
 
         let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
