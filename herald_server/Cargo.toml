@@ -1,8 +1,9 @@
 [package]
 name = "herald_server"
 version = "0.1.0"
-authors = ["theseriousadult <jack@gallabytes.com>"]
+authors = ["theseriousadult <jack@gallabytes.com>", "Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
+default-run = "herald_server"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,18 +15,17 @@ serde_cbor      = "0.10"
 sodiumoxide     = "0.2"
 tokio           = "0.2.0-alpha.6"
 futures-preview = "0.3.0-alpha.19"
+tokio-postgres  = "0.5.0-alpha.1"
 
 
 bytes           = { version = "0.4",            features = ["serde"] }
-chrono          = { version = "0.4",            features = ["serde"] }
-diesel          = { version = "1.0.0",          features = ["postgres", "chrono", "r2d2"] }
 serde           = { version = "1.0",            features = ["derive"] }
 warp            = { git = "https://github.com/udoprog/warp.git" }
 
-womp          = { git  = "https://github.com/kalix-systems/womp"}
 herald_common = { path = "../herald_common" }
 
 
 [dev-dependencies]
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
+womp          = { git  = "https://github.com/kalix-systems/womp"}

@@ -210,7 +210,7 @@ impl ConversationsTrait for Conversations {
 
     fn poll_update(&mut self) -> bool {
         use ConvUpdates::*;
-        for update in CONV_CHANNEL.rx.try_iter() {
+        for update in CONV_BUS.rx.try_iter() {
             match update {
                 NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
                 BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),

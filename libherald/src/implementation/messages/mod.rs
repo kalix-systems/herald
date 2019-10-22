@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::messages::*, toasts::new_msg_toast};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -14,6 +14,9 @@ use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
 };
+
+pub(crate) mod shared;
+use shared::*;
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;
@@ -34,38 +37,6 @@ pub struct Messages {
     map: HashMap<MsgId, Msg>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
-}
-
-impl Messages {
-    fn last_msg(&self) -> Option<&Msg> {
-        let mid = self.list.last()?.msg_id;
-        self.map.get(&mid)
-    }
-
-    fn emit_last_changed(&mut self) {
-        self.emit.last_author_changed();
-        self.emit.last_body_changed();
-        self.emit.last_epoch_timestamp_ms_changed();
-        self.emit.last_status_changed();
-    }
-
-    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
-        let msg_id = msg.message_id;
-        let cid = self.conversation_id.ok_or(NE!())?;
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Message { msg_id, data_saved });
-        self.map.insert(msg_id, msg);
-        self.model.end_insert_rows();
-
-        self.emit_last_changed();
-
-        use crate::implementation::conversations::shared::*;
-        // this should not return an error
-        ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)), Ok(()));
-
-        Ok(())
-    }
 }
 
 impl MessagesTrait for Messages {
@@ -103,7 +74,7 @@ impl MessagesTrait for Messages {
     }
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
-        Some(self.last_msg()?.timestamp.timestamp_millis())
+        Some(self.last_msg()?.timestamp.0 * 1000)
     }
 
     /// Returns index of a message given its id.
@@ -124,41 +95,36 @@ impl MessagesTrait for Messages {
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
-        match (conversation_id, self.conversation_id) {
-            (Some(id), None) => {
-                let conversation_id = ret_err!(ConversationId::try_from(id));
+        if let (Some(id), None) = (conversation_id, self.conversation_id) {
+            let conversation_id = ret_err!(ConversationId::try_from(id));
 
-                MSG_EMITTERS.insert(conversation_id, self.emit().clone());
+            EMITTERS.insert(conversation_id, self.emit().clone());
 
-                self.conversation_id = Some(conversation_id);
-                self.emit.conversation_id_changed();
+            self.conversation_id = Some(conversation_id);
+            self.emit.conversation_id_changed();
 
-                let messages: Vec<Message> =
-                    ret_err!(conversation::conversation_messages(&conversation_id))
-                        .into_iter()
-                        .map(|m| {
-                            let mid = m.message_id;
-                            self.map.insert(mid, m);
-                            Message {
-                                msg_id: mid,
-                                data_saved: true,
-                            }
-                        })
-                        .collect();
+            let messages: Vec<Message> =
+                ret_err!(conversation::conversation_messages(&conversation_id))
+                    .into_iter()
+                    .map(|m| {
+                        let mid = m.message_id;
+                        self.map.insert(mid, m);
+                        Message {
+                            msg_id: mid,
+                            data_saved: true,
+                        }
+                    })
+                    .collect();
 
-                if messages.is_empty() {
-                    return;
-                }
-
-                self.model
-                    .begin_insert_rows(0, messages.len().saturating_sub(1));
-                self.list = messages;
-                self.model.end_insert_rows();
-                self.emit_last_changed();
-            }
-            _ => {
+            if messages.is_empty() {
                 return;
             }
+
+            self.model
+                .begin_insert_rows(0, messages.len().saturating_sub(1));
+            self.list = messages;
+            self.model.end_insert_rows();
+            self.emit_last_changed();
         }
     }
 
@@ -259,10 +225,11 @@ impl MessagesTrait for Messages {
 
         ret_err!(conversation::delete_conversation(&id), false);
 
-        self.model.begin_reset_model();
+        self.model
+            .begin_remove_rows(0, self.list.len().saturating_sub(1));
         self.list = Vec::new();
         self.map = HashMap::new();
-        self.model.end_reset_model();
+        self.model.end_remove_rows();
 
         self.emit_last_changed();
         true
@@ -271,16 +238,14 @@ impl MessagesTrait for Messages {
     fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
         let mid = ret_none!(self.list.get(row_index), 0).msg_id;
 
-        ret_none!(self.map.get(&mid), 0)
-            .timestamp
-            .timestamp_millis()
+        ret_none!(self.map.get(&mid), 0).timestamp.0 * 1000
     }
 
     /// Polls for updates
     fn poll_update(&mut self) -> bool {
         let conv_id = ret_none!(self.conversation_id, false);
 
-        let rx = match MSG_RXS.get(&conv_id) {
+        let rx = match RXS.get(&conv_id) {
             Some(rx) => rx,
             // it's not a problem if the model doesn't have a receiver yet
             None => return true,
@@ -365,17 +330,43 @@ impl MessagesTrait for Messages {
     }
 }
 
+impl Messages {
+    fn last_msg(&self) -> Option<&Msg> {
+        let mid = self.list.last()?.msg_id;
+        self.map.get(&mid)
+    }
+
+    fn emit_last_changed(&mut self) {
+        self.emit.last_author_changed();
+        self.emit.last_body_changed();
+        self.emit.last_epoch_timestamp_ms_changed();
+        self.emit.last_status_changed();
+    }
+
+    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
+        let msg_id = msg.message_id;
+        let cid = self.conversation_id.ok_or(NE!())?;
+        self.model
+            .begin_insert_rows(self.row_count(), self.row_count());
+        self.list.push(Message { msg_id, data_saved });
+        self.map.insert(msg_id, msg);
+        self.model.end_insert_rows();
+
+        self.emit_last_changed();
+
+        use crate::implementation::conversations::{shared::*, Conversations};
+        Conversations::push(ConvUpdates::NewActivity(cid))?;
+
+        Ok(())
+    }
+}
+
 impl Drop for Messages {
     fn drop(&mut self) {
-        let cid = match self.conversation_id {
-            Some(cid) => cid,
-            None => {
-                return;
-            }
-        };
-
-        MSG_EMITTERS.remove(&cid);
-        MSG_RXS.remove(&cid);
-        MSG_TXS.remove(&cid);
+        if let Some(cid) = self.conversation_id {
+            EMITTERS.remove(&cid);
+            TXS.remove(&cid);
+            RXS.remove(&cid);
+        }
     }
 }

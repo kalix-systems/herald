@@ -1,7 +1,7 @@
 [package]
 name    = "heraldcore"
 version = "0.1.0"
-authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
+authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>", "mobile-bungalow <pwmay@ucsc.edu>", "theseriousadult <jack@kalix.io>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,6 +18,7 @@ serde_cbor        = "0.10.1"
 sodiumoxide       = "0.2.4"
 tar               = "0.4.26"
 url               = "2.1"
+parking_lot = "0.9.0"
 
 [dependencies.herald_common]
 path             = "../herald_common"
@@ -48,10 +49,6 @@ features         = ["functions","bundled"]
 version          = "0.22.1"
 default_features = false
 features         = ["jpeg", "png_codec"]
-
-[dependencies.chrono]
-version          = "0.4.7"
-default_features = false
 
 [dependencies.pulldown-cmark]
 version  = "0.6.0"

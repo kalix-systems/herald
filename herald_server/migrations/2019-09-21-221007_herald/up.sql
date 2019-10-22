@@ -4,18 +4,18 @@ CREATE TABLE keys (
   -- signed by, 32 bytes
   signed_by BYTEA NOT NULL,
   -- timestamp of creation
-  ts TIMESTAMPTZ NOT NULL,
+  ts BIGINT NOT NULL,
   -- signature, 64 bytes
   signature BYTEA NOT NULL,
   -- timestamp of the deprecation
-  dep_ts TIMESTAMPTZ DEFAULT NULL,
+  dep_ts BIGINT DEFAULT NULL,
   dep_signed_by BYTEA DEFAULT NULL,
   dep_signature BYTEA DEFAULT NULL
 );
 
 CREATE TABLE pushes (
   push_id BIGSERIAL PRIMARY KEY,
-  push_ts TIMESTAMPTZ NOT NULL,
+  push_ts BIGINT NOT NULL,
   push_data BYTEA NOT NULL
 );
 

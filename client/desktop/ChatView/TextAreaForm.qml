@@ -100,6 +100,14 @@ Rectangle {
             width: scrollView.width
         }
 
+        Loader {
+            id: attachmentLoader
+            active: false
+            height: item ? item.height: 0
+            sourceComponent: AttachmentsComponent {}
+            width: scrollView.width
+        }
+
         ScrollView {
             id: scrollView
             height: scrollHeight
@@ -135,7 +143,6 @@ Rectangle {
         folder: shortcuts.home
         onSelectionAccepted: {
             builder.addAttachment(attachmentsDialogue.fileUrl)
-            print(attachmentsDialogue.fileUrl)
         }
     }
 
@@ -152,6 +159,16 @@ Rectangle {
                 focus: true
             }
         },
+
+        State {
+            name: "attachmentstate"
+            when: builder.isMediaMessage
+            PropertyChanges {
+                target: attachmentLoader
+                active: true
+            }
+        },
+
         State {
             name: "default"
             PropertyChanges {

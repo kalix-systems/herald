@@ -12,7 +12,7 @@ pub enum Error {
     CommandFailed,
     BadData,
     RedundantDeprecation,
-    DieselError(diesel::result::Error),
+    PgError(tokio_postgres::Error),
     UnknownUser(UserId),
     CatchupFailed,
     LoginFailed,
@@ -35,7 +35,7 @@ macro_rules! from_fn {
 }
 
 from_fn!(Error, std::io::Error, Error::IO);
-from_fn!(Error, diesel::result::Error, Error::DieselError);
+from_fn!(Error, tokio_postgres::Error, Error::PgError);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
 from_fn!(Error, warp::Error, Error::Warp);
 from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);

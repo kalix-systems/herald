@@ -13,11 +13,6 @@ declare class NetworkHandle {
   connectionUp: boolean;
   connectionPending: boolean;
 
-  msgData: number;
-  usersData: number;
-  membersData: number;
-  convData: number;
-
   sendAddRequest(userid: UserId, conversationID: ConversationID): boolean;
   registerNewUser(userid: UserId): boolean;
   login(): boolean;

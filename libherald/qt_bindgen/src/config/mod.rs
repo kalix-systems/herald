@@ -20,10 +20,6 @@ pub(crate) fn get() -> Config {
     let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let parent_dir = crate_dir.parent().unwrap();
 
-    // ignore this
-    let mut config_file = parent_dir.clone().to_path_buf();
-    config_file.push("bindings.json");
-
     let cpp_file = PathBuf::from("qt_ffi/Bindings.cpp");
 
     let objects = objects();
@@ -36,8 +32,7 @@ pub(crate) fn get() -> Config {
     let overwrite_implementation = false;
 
     Config {
-        // ignore this
-        config_file,
+        out_dir: parent_dir.to_path_buf(),
         rust_edition,
         cpp_file,
         overwrite_implementation,
@@ -159,8 +154,7 @@ fn conversations() -> Object {
 fn network_handle() -> Object {
     let props = props! {
         connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool),
-        membersData: Prop::new().simple(QUint8)
+        connectionPending: Prop::new().simple(Bool)
     };
 
     let funcs = functions! {

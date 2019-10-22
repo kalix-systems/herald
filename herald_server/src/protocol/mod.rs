@@ -23,7 +23,6 @@ type WTx = SplitSink<WebSocket, ws::Message>;
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<()>>,
-    pub pool: Pool,
 }
 
 pub mod get;
@@ -33,22 +32,17 @@ pub mod post;
 
 impl State {
     pub fn new() -> Self {
-        println!("starting pool");
-        let pool = init_pool();
-        println!("pool started");
         State {
             active: DashMap::default(),
-            pool,
         }
     }
 
-    fn new_connection(&self) -> Result<Conn, Error> {
-        // TODO add error type
-        Ok(Conn(self.pool.get().unwrap()))
+    async fn new_connection(&self) -> Result<Conn, Error> {
+        Ok(get_client().await?)
     }
 
     pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
-        let mut store = self.new_connection()?;
+        let mut store = self.new_connection().await?;
 
         // all the channels we'll need for plumbing
         // first we split the websocket
@@ -110,19 +104,19 @@ impl State {
         let push_users::Req { to, exc, msg } = req;
         let msg = Push {
             tag: PushTag::User,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg,
         };
 
         let mut missing_users = Vec::new();
         let mut to_devs = Vec::new();
-        let mut con = self.new_connection()?;
+        let mut con = self.new_connection().await?;
 
         for user in to {
-            if !con.user_exists(&user)? {
+            if !con.user_exists(&user).await? {
                 missing_users.push(user);
             } else {
-                for dev in con.valid_keys(&user)? {
+                for dev in con.valid_keys(&user).await? {
                     if dev != exc {
                         to_devs.push(dev);
                     }
@@ -142,15 +136,15 @@ impl State {
         let push_devices::Req { to, msg } = req;
         let msg = Push {
             tag: PushTag::Device,
-            timestamp: Utc::now(),
+            timestamp: Time::now(),
             msg,
         };
 
-        let mut con = self.new_connection()?;
+        let mut con = self.new_connection().await?;
         let mut missing_devs = Vec::new();
 
         for dev in to.iter() {
-            if !con.device_exists(dev)? {
+            if !con.device_exists(dev).await? {
                 missing_devs.push(*dev);
             }
         }
@@ -169,7 +163,7 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), [msg].iter())?;
+        con.add_pending(to_devs.clone(), [msg].iter()).await?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
@@ -181,17 +175,22 @@ impl State {
         Ok(())
     }
 
-    pub(crate) fn req_handler<B, I, O, F>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
+    pub(crate) async fn req_handler_store<B, I, O, F, Fut>(
+        &self,
+        req: B,
+        f: F,
+    ) -> Result<Vec<u8>, Error>
     where
         B: Buf,
         I: for<'a> Deserialize<'a>,
         O: Serialize,
-        F: FnOnce(&mut Conn, I) -> Result<O, Error>,
+        F: FnOnce(Conn, I) -> Fut,
+        Fut: Future<Output = Result<O, Error>>,
     {
-        let mut con = self.new_connection()?;
+        let con = self.new_connection().await?;
         let buf: Vec<u8> = req.collect();
         let req = serde_cbor::from_slice(&buf)?;
-        let res = f(&mut con, req)?;
+        let res = f(con, req).await?;
         let res_ser = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }
@@ -246,7 +245,7 @@ async fn catchup(
     use catchup::*;
 
     loop {
-        let pending = s.get_pending(did, CHUNK_SIZE)?;
+        let pending = s.get_pending(did, CHUNK_SIZE).await?;
         if pending.is_empty() {
             break;
         } else {
@@ -257,7 +256,7 @@ async fn catchup(
                 write_msg(&msg, wtx, rrx).await?;
 
                 if CatchupAck(len) == read_msg(rrx).await? {
-                    s.expire_pending(did, len as u32)?;
+                    s.expire_pending(did, len as u32).await?;
                     break;
                 }
             }

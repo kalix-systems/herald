@@ -4,6 +4,12 @@ use std::convert::TryInto;
 
 use crate::{config::test_config, womp};
 
+/// Testing utility
+fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+    let conn = Database::get().expect(womp!());
+    db::test_outbound_text(conn, msg, conv)
+}
+
 #[test]
 #[serial]
 fn delete_get_message() {
@@ -23,6 +29,26 @@ fn delete_get_message() {
     assert!(super::get_message(&msg_id).is_err());
 }
 
+#[test]
+#[serial]
+fn reply() {
+    Database::reset_all().expect(womp!());
+    let conf = test_config();
+    let conv_id = conf.nts_conversation;
+
+    let (op, _) = test_outbound_text("test", conv_id);
+
+    let mut builder = OutboundMessageBuilder::default();
+
+    builder
+        .replying_to(Some(op))
+        .body("1".try_into().expect(womp!()))
+        .conversation_id(conv_id);
+
+    let reply = builder.store_and_send_blocking().unwrap();
+
+    assert_eq!(reply.op.unwrap(), op);
+}
 #[test]
 #[serial]
 fn message_send_status_updates() {
@@ -106,7 +132,7 @@ fn receipt_before_message() {
     builder
         .id(msg_id)
         .conversation_id(conversation_id)
-        .timestamp(Utc::now())
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
         .author(author);
     builder.store().expect(womp!());

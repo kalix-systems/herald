@@ -41,7 +41,7 @@ fn add_tx() {
     let mut db = Database::get().expect(womp!());
     let tx = db.transaction().expect(womp!());
 
-    add_members_with_tx(&tx, cid, &[uid1, uid2]).expect(womp!());
+    db::add_members_with_tx(&tx, cid, &[uid1, uid2]).expect(womp!());
     tx.commit().expect(womp!());
 
     let mems = members(&cid).expect(womp!());

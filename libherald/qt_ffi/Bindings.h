@@ -30,7 +30,7 @@ private:
     explicit Attachments(bool owned, QObject *parent);
 public:
     explicit Attachments(QObject *parent = nullptr);
-    ~Attachments();
+    ~Attachments() override;
     QByteArray msgId() const;
     void setMsgId(const QByteArray& v);
 
@@ -79,7 +79,7 @@ private:
     explicit Config(bool owned, QObject *parent);
 public:
     explicit Config(QObject *parent = nullptr);
-    ~Config();
+    ~Config() override;
     quint32 color() const;
     void setColor(quint32 v);
     quint32 colorscheme() const;
@@ -108,7 +108,7 @@ private:
     explicit ConversationBuilder(bool owned, QObject *parent);
 public:
     explicit ConversationBuilder(QObject *parent = nullptr);
-    ~ConversationBuilder();
+    ~ConversationBuilder() override;
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
@@ -157,7 +157,7 @@ private:
     explicit Conversations(bool owned, QObject *parent);
 public:
     explicit Conversations(QObject *parent = nullptr);
-    ~Conversations();
+    ~Conversations() override;
     QString filter() const;
     void setFilter(const QString& v);
     bool filterRegex() const;
@@ -220,7 +220,7 @@ private:
     explicit Errors(bool owned, QObject *parent);
 public:
     explicit Errors(QObject *parent = nullptr);
-    ~Errors();
+    ~Errors() override;
     quint8 tryPoll() const;
     Q_INVOKABLE QString nextError();
 Q_SIGNALS:
@@ -239,7 +239,7 @@ private:
     explicit HeraldState(bool owned, QObject *parent);
 public:
     explicit HeraldState(QObject *parent = nullptr);
-    ~HeraldState();
+    ~HeraldState() override;
     bool configInit() const;
     void setConfigInit(bool v);
 Q_SIGNALS:
@@ -257,7 +257,7 @@ private:
     explicit HeraldUtils(bool owned, QObject *parent);
 public:
     explicit HeraldUtils(QObject *parent = nullptr);
-    ~HeraldUtils();
+    ~HeraldUtils() override;
     Q_INVOKABLE bool compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const;
     Q_INVOKABLE bool isValidRandId(const QByteArray& bs) const;
 Q_SIGNALS:
@@ -277,7 +277,7 @@ private:
     explicit Members(bool owned, QObject *parent);
 public:
     explicit Members(QObject *parent = nullptr);
-    ~Members();
+    ~Members() override;
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
     QString filter() const;
@@ -345,7 +345,7 @@ private:
     explicit MessageBuilder(bool owned, QObject *parent);
 public:
     explicit MessageBuilder(QObject *parent = nullptr);
-    ~MessageBuilder();
+    ~MessageBuilder() override;
     QString body() const;
     void setBody(const QString& v);
     QByteArray conversationId() const;
@@ -413,7 +413,7 @@ private:
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
-    ~Messages();
+    ~Messages() override;
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
     QString lastAuthor() const;
@@ -478,21 +478,18 @@ private:
     bool m_ownsPrivate;
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    Q_PROPERTY(quint8 membersData READ membersData NOTIFY membersDataChanged FINAL)
     explicit NetworkHandle(bool owned, QObject *parent);
 public:
     explicit NetworkHandle(QObject *parent = nullptr);
-    ~NetworkHandle();
+    ~NetworkHandle() override;
     bool connectionPending() const;
     bool connectionUp() const;
-    quint8 membersData() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
     Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
-    void membersDataChanged();
 };
 
 class Users : public QAbstractItemModel
@@ -508,7 +505,7 @@ private:
     explicit Users(bool owned, QObject *parent);
 public:
     explicit Users(QObject *parent = nullptr);
-    ~Users();
+    ~Users() override;
     QString filter() const;
     void setFilter(const QString& v);
     bool filterRegex() const;

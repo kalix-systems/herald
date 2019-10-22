@@ -54,7 +54,7 @@ Flickable {
 
             delegate: Column {
                 readonly property string proxyBody: body
-                readonly property string proxyReceiptImage: CUtils.receiptStatusSwitch(
+                property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                                 receiptStatus)
                 readonly property color userColor: QmlCfg.avatarColors[contactsModel.colorById(
                                                                            author)]
@@ -63,6 +63,7 @@ Flickable {
                 readonly property string authName: outbound ? "" : contactsModel.nameById(
                                                                   author)
                 readonly property bool outbound: author === config.configId
+
                 // this is where scroll bar position needs to be set to instantiate in the right location
                 Component.onCompleted: chatScrollBar.position = 1.0
 
@@ -84,6 +85,7 @@ Flickable {
                         authorName: authName
                         receiptImage: proxyReceiptImage
                     }
+
                 }
 
                 Component {
@@ -97,6 +99,7 @@ Flickable {
                         opColor: QmlCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
+
                     }
                 }
 
@@ -107,9 +110,13 @@ Flickable {
                         friendlyTimestamp: timestamp
                         receiptImage: proxyReceiptImage
                         authorName: authName
-                        messageId: ownedConversation.messageId(index)
+                        messageAttachments: Attachments {
+                            msgId: messageId
+
+                        }
 
                     }
+
                 }
 
                 CB.ChatBubble {
@@ -117,7 +124,7 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: QmlCfg.palette.tertiaryColor
                     senderColor: userColor
-                    content: if (hasAttachments) {
+                    content: if (hasAttachments && dataSaved) {
                                  image
                              } else if (isReply) {
                                  reply

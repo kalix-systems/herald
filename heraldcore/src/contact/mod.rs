@@ -3,44 +3,30 @@ use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
 
+pub(crate) mod db;
+
 /// Gets a contact's name by their `id`.
 pub fn name(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_name.sql"))?;
-
-    Ok(stmt.query_row(params![id], |row| row.get(0))?)
+    db::name(&db, id)
 }
 
 /// Change name of contact by their `id`
 pub fn set_name(id: UserId, name: &str) -> Result<(), HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/update_name.sql"))?;
-
-    stmt.execute(params![name, id])?;
-    Ok(())
+    db::set_name(&db, id, name)
 }
 
 /// Gets a contact's profile picture by their `id`.
 pub fn profile_picture(id: UserId) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_profile_picture.sql"))?;
-
-    Ok(stmt.query_row(params![id], |row| row.get(0))?)
+    db::profile_picture(&db, id)
 }
 
 /// Returns all members of a conversation.
 pub fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_by_conversation.sql"))?;
-
-    let rows = stmt.query_map(params![conversation_id], Contact::from_db)?;
-
-    let mut contacts: Vec<Contact> = Vec::new();
-    for contact in rows {
-        contacts.push(contact?);
-    }
-
-    Ok(contacts)
+    db::conversation_members(&db, conversation_id)
 }
 
 /// Updates a contact's profile picture.
@@ -49,104 +35,50 @@ pub fn set_profile_picture(
     profile_picture: Option<String>,
     old_path: Option<&str>,
 ) -> Result<Option<String>, HErr> {
-    let profile_picture = match profile_picture {
-        Some(path) => {
-            let path_string =
-                image_utils::save_profile_picture(id.as_str(), path, old_path.map(|p| p.into()))?
-                    .into_os_string()
-                    .into_string()?;
-            Some(path_string)
-        }
-        None => None,
-    };
-
     let db = Database::get()?;
-    db.execute(
-        include_str!("sql/update_profile_picture.sql"),
-        params![profile_picture, id],
-    )?;
-    Ok(profile_picture)
+    db::set_profile_picture(&db, id, profile_picture, old_path)
 }
 
 /// Sets a contact's color
 pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
     let db = Database::get()?;
-    db.execute(include_str!("sql/update_color.sql"), params![color, id])?;
-    Ok(())
+    db::set_color(&db, id, color)
 }
 
 /// Indicates whether contact exists
 pub fn contact_exists(id: UserId) -> Result<bool, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/contact_exists.sql"))?;
-    Ok(stmt.exists(&[id])?)
+    db::contact_exists(&db, id)
 }
 
 /// Sets contact status
 pub fn set_status(id: UserId, status: ContactStatus) -> Result<(), HErr> {
-    use ContactStatus::*;
     let mut db = Database::get()?;
-    match status {
-        Deleted => {
-            let tx = db.transaction()?;
-            tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
-            tx.execute(
-                include_str!("../message/sql/delete_pairwise_conversation.sql"),
-                params![id],
-            )?;
-            tx.commit()?;
-        }
-        _ => {
-            db.execute(include_str!("sql/set_status.sql"), params![status, id])?;
-        }
-    }
-    Ok(())
+    db::set_status(&mut db, id, status)
 }
 
 /// Gets contact status
 pub fn status(id: UserId) -> Result<ContactStatus, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_status.sql"))?;
-
-    Ok(stmt.query_row(&[id], |row| row.get(0))?)
+    db::status(&db, id)
 }
 
 /// Returns all contacts
 pub fn all() -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_all.sql"))?;
-
-    let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
-
-    let mut names: Vec<Contact> = Vec::new();
-    for name_res in rows {
-        names.push(name_res?);
-    }
-
-    Ok(names)
+    db::all(&db)
 }
 
 /// Returns a single contact by `user_id`
 pub fn by_user_id(user_id: UserId) -> Result<Contact, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_by_id.sql"))?;
-
-    Ok(stmt.query_row(params![user_id], Contact::from_db)?)
+    db::by_user_id(&db, user_id)
 }
 
 /// Returns all contacts with the specified `status`
 pub fn get_by_status(status: ContactStatus) -> Result<Vec<Contact>, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("sql/get_by_status.sql"))?;
-
-    let rows = stmt.query_map(params![status], Contact::from_db)?;
-
-    let mut names: Vec<Contact> = Vec::new();
-    for name_res in rows {
-        names.push(name_res?);
-    }
-
-    Ok(names)
+    db::get_by_status(&db, status)
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -328,71 +260,7 @@ impl ContactBuilder {
     /// Adds contact to database
     pub fn add(self) -> Result<Contact, HErr> {
         let mut db = Database::get()?;
-
-        let tx = db.transaction()?;
-        let contact = Self::add_with_tx(self, &tx);
-        tx.commit()?;
-        contact
-    }
-
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<Contact, HErr> {
-        use crate::conversation::ConversationBuilder;
-
-        let mut conv_builder = ConversationBuilder::new();
-        conv_builder.pairwise(true);
-
-        let color = self
-            .color
-            .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
-
-        conv_builder.color(color);
-
-        let name = self.name.clone().unwrap_or_else(|| self.id.to_string());
-
-        let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
-
-        let title = if let ContactType::Local = contact_type {
-            crate::config::NTS_CONVERSATION_NAME
-        } else {
-            name.as_str()
-        };
-
-        conv_builder.title(title.to_owned());
-
-        if let Some(cid) = self.pairwise_conversation {
-            conv_builder.conversation_id(cid);
-        }
-
-        let pairwise_conversation = conv_builder.add_with_tx(&tx)?;
-
-        let contact = Contact {
-            id: self.id,
-            name,
-            profile_picture: self.profile_picture,
-            color,
-            status: self.status.unwrap_or(ContactStatus::Active),
-            pairwise_conversation,
-            contact_type,
-        };
-
-        tx.execute(
-            include_str!("sql/add.sql"),
-            params![
-                contact.id,
-                contact.name,
-                contact.profile_picture,
-                contact.color,
-                contact.status,
-                contact.pairwise_conversation,
-                contact.contact_type
-            ],
-        )?;
-        tx.execute(
-            include_str!("../members/sql/add_member.sql"),
-            params![contact.pairwise_conversation, contact.id],
-        )?;
-
-        Ok(contact)
+        self.add_db(&mut db)
     }
 }
 
@@ -454,9 +322,8 @@ impl Contact {
     }
 }
 
-#[allow(unused)]
+#[cfg(test)]
 pub(crate) fn test_contact(user_id: &str) -> Contact {
-    use crate::womp;
     let receiver = user_id
         .try_into()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));

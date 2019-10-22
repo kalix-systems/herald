@@ -655,22 +655,19 @@ pub unsafe extern "C" fn conversation_builder_add_member(ptr: *mut ConversationB
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.add_member(user_id);
-    r
+    o.add_member(user_id)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder) -> () {
+pub unsafe extern "C" fn conversation_builder_finalize(ptr: *mut ConversationBuilder) {
     let o = &mut *ptr;
-    let r = o.finalize();
-    r
+    o.finalize()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_remove_last(ptr: *mut ConversationBuilder) -> () {
+pub unsafe extern "C" fn conversation_builder_remove_last(ptr: *mut ConversationBuilder) {
     let o = &mut *ptr;
-    let r = o.remove_last();
-    r
+    o.remove_last()
 }
 
 #[no_mangle]
@@ -678,24 +675,21 @@ pub unsafe extern "C" fn conversation_builder_remove_member_by_id(ptr: *mut Conv
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.remove_member_by_id(user_id);
-    r
+    o.remove_member_by_id(user_id)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn conversation_builder_remove_member_by_index(ptr: *mut ConversationBuilder, index: u64) -> bool {
     let o = &mut *ptr;
-    let r = o.remove_member_by_index(index);
-    r
+    o.remove_member_by_index(index)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversation_builder_set_title(ptr: *mut ConversationBuilder, title_str: *const c_ushort, title_len: c_int) -> () {
+pub unsafe extern "C" fn conversation_builder_set_title(ptr: *mut ConversationBuilder, title_str: *const c_ushort, title_len: c_int) {
     let mut title = String::new();
     set_string_from_utf16(&mut title, title_str, title_len);
     let o = &mut *ptr;
-    let r = o.set_title(title);
-    r
+    o.set_title(title)
 }
 
 #[no_mangle]
@@ -953,22 +947,19 @@ pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations,
 #[no_mangle]
 pub unsafe extern "C" fn conversations_poll_update(ptr: *mut Conversations) -> bool {
     let o = &mut *ptr;
-    let r = o.poll_update();
-    r
+    o.poll_update()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn conversations_remove_conversation(ptr: *mut Conversations, row_index: u64) -> bool {
     let o = &mut *ptr;
-    let r = o.remove_conversation(row_index);
-    r
+    o.remove_conversation(row_index)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn conversations_toggle_filter_regex(ptr: *mut Conversations) -> bool {
     let o = &mut *ptr;
-    let r = o.toggle_filter_regex();
-    r
+    o.toggle_filter_regex()
 }
 
 #[no_mangle]
@@ -1003,7 +994,7 @@ pub unsafe extern "C" fn conversations_sort(
 #[no_mangle]
 pub unsafe extern "C" fn conversations_data_color(ptr: *const Conversations, row: c_int) -> u32 {
     let o = &*ptr;
-    o.color(to_usize(row)).into()
+    o.color(to_usize(row))
 }
 
 #[no_mangle]
@@ -1029,7 +1020,7 @@ pub unsafe extern "C" fn conversations_data_conversation_id(
 #[no_mangle]
 pub unsafe extern "C" fn conversations_data_matched(ptr: *const Conversations, row: c_int) -> bool {
     let o = &*ptr;
-    o.matched(to_usize(row)).into()
+    o.matched(to_usize(row))
 }
 
 #[no_mangle]
@@ -1043,7 +1034,7 @@ pub unsafe extern "C" fn conversations_set_data_matched(
 #[no_mangle]
 pub unsafe extern "C" fn conversations_data_muted(ptr: *const Conversations, row: c_int) -> bool {
     let o = &*ptr;
-    o.muted(to_usize(row)).into()
+    o.muted(to_usize(row))
 }
 
 #[no_mangle]
@@ -1057,7 +1048,7 @@ pub unsafe extern "C" fn conversations_set_data_muted(
 #[no_mangle]
 pub unsafe extern "C" fn conversations_data_pairwise(ptr: *const Conversations, row: c_int) -> bool {
     let o = &*ptr;
-    o.pairwise(to_usize(row)).into()
+    o.pairwise(to_usize(row))
 }
 
 #[no_mangle]
@@ -1315,16 +1306,14 @@ pub unsafe extern "C" fn herald_utils_compare_byte_array(ptr: *const HeraldUtils
     let bs1 = { slice::from_raw_parts(bs1_str as *const u8, to_usize(bs1_len)) };
     let bs2 = { slice::from_raw_parts(bs2_str as *const u8, to_usize(bs2_len)) };
     let o = &*ptr;
-    let r = o.compare_byte_array(bs1, bs2);
-    r
+    o.compare_byte_array(bs1, bs2)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn herald_utils_is_valid_rand_id(ptr: *const HeraldUtils, bs_str: *const c_char, bs_len: c_int) -> bool {
     let bs = { slice::from_raw_parts(bs_str as *const u8, to_usize(bs_len)) };
     let o = &*ptr;
-    let r = o.is_valid_rand_id(bs);
-    r
+    o.is_valid_rand_id(bs)
 }
 
 pub struct MembersQObject {}
@@ -1579,29 +1568,25 @@ pub unsafe extern "C" fn members_add_to_conversation(ptr: *mut Members, id_str: 
     let mut id = String::new();
     set_string_from_utf16(&mut id, id_str, id_len);
     let o = &mut *ptr;
-    let r = o.add_to_conversation(id);
-    r
+    o.add_to_conversation(id)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn members_poll_update(ptr: *mut Members) -> bool {
     let o = &mut *ptr;
-    let r = o.poll_update();
-    r
+    o.poll_update()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn members_remove_from_conversation_by_index(ptr: *mut Members, row_index: u64) -> bool {
     let o = &mut *ptr;
-    let r = o.remove_from_conversation_by_index(row_index);
-    r
+    o.remove_from_conversation_by_index(row_index)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn members_toggle_filter_regex(ptr: *mut Members) -> bool {
     let o = &mut *ptr;
-    let r = o.toggle_filter_regex();
-    r
+    o.toggle_filter_regex()
 }
 
 #[no_mangle]
@@ -1636,13 +1621,13 @@ pub unsafe extern "C" fn members_sort(
 #[no_mangle]
 pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> u32 {
     let o = &*ptr;
-    o.color(to_usize(row)).into()
+    o.color(to_usize(row))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
     let o = &*ptr;
-    o.matched(to_usize(row)).into()
+    o.matched(to_usize(row))
 }
 
 #[no_mangle]
@@ -1694,7 +1679,7 @@ pub unsafe extern "C" fn members_data_profile_picture(
 #[no_mangle]
 pub unsafe extern "C" fn members_data_status(ptr: *const Members, row: c_int) -> u8 {
     let o = &*ptr;
-    o.status(to_usize(row)).into()
+    o.status(to_usize(row))
 }
 
 #[no_mangle]
@@ -2035,22 +2020,19 @@ pub unsafe extern "C" fn message_builder_add_attachment(ptr: *mut MessageBuilder
     let mut path = String::new();
     set_string_from_utf16(&mut path, path_str, path_len);
     let o = &mut *ptr;
-    let r = o.add_attachment(path);
-    r
+    o.add_attachment(path)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_clear_reply(ptr: *mut MessageBuilder) -> () {
+pub unsafe extern "C" fn message_builder_clear_reply(ptr: *mut MessageBuilder) {
     let o = &mut *ptr;
-    let r = o.clear_reply();
-    r
+    o.clear_reply()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_finalize(ptr: *mut MessageBuilder) -> () {
+pub unsafe extern "C" fn message_builder_finalize(ptr: *mut MessageBuilder) {
     let o = &mut *ptr;
-    let r = o.finalize();
-    r
+    o.finalize()
 }
 
 #[no_mangle]
@@ -2058,22 +2040,19 @@ pub unsafe extern "C" fn message_builder_remove_attachment(ptr: *mut MessageBuil
     let mut path = String::new();
     set_string_from_utf16(&mut path, path_str, path_len);
     let o = &mut *ptr;
-    let r = o.remove_attachment(path);
-    r
+    o.remove_attachment(path)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn message_builder_remove_attachment_by_index(ptr: *mut MessageBuilder, row_index: u64) -> bool {
     let o = &mut *ptr;
-    let r = o.remove_attachment_by_index(row_index);
-    r
+    o.remove_attachment_by_index(row_index)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_remove_last(ptr: *mut MessageBuilder) -> () {
+pub unsafe extern "C" fn message_builder_remove_last(ptr: *mut MessageBuilder) {
     let o = &mut *ptr;
-    let r = o.remove_last();
-    r
+    o.remove_last()
 }
 
 #[no_mangle]
@@ -2404,23 +2383,20 @@ pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COpti
 #[no_mangle]
 pub unsafe extern "C" fn messages_clear_conversation_history(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
-    let r = o.clear_conversation_history();
-    r
+    o.clear_conversation_history()
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: u64) -> bool {
     let o = &mut *ptr;
-    let r = o.delete_message(row_index);
-    r
+    o.delete_message(row_index)
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int) -> u64 {
     let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
     let o = &*ptr;
-    let r = o.index_by_id(msg_id);
-    r
+    o.index_by_id(msg_id)
 }
 
 #[no_mangle]
@@ -2444,8 +2420,7 @@ pub unsafe extern "C" fn messages_message_body_by_id(ptr: *const Messages, msg_i
 #[no_mangle]
 pub unsafe extern "C" fn messages_poll_update(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
-    let r = o.poll_update();
-    r
+    o.poll_update()
 }
 
 #[no_mangle]
@@ -2506,25 +2481,25 @@ pub unsafe extern "C" fn messages_data_body(
 #[no_mangle]
 pub unsafe extern "C" fn messages_data_data_saved(ptr: *const Messages, row: c_int) -> bool {
     let o = &*ptr;
-    o.data_saved(to_usize(row)).into()
+    o.data_saved(to_usize(row))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, row: c_int) -> i64 {
     let o = &*ptr;
-    o.epoch_timestamp_ms(to_usize(row)).into()
+    o.epoch_timestamp_ms(to_usize(row))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_data_has_attachments(ptr: *const Messages, row: c_int) -> bool {
     let o = &*ptr;
-    o.has_attachments(to_usize(row)).into()
+    o.has_attachments(to_usize(row))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int) -> bool {
     let o = &*ptr;
-    o.is_reply(to_usize(row)).into()
+    o.is_reply(to_usize(row))
 }
 
 #[no_mangle]
@@ -2556,7 +2531,7 @@ pub unsafe extern "C" fn messages_data_op(
 #[no_mangle]
 pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row: c_int) -> u32 {
     let o = &*ptr;
-    o.receipt_status(to_usize(row)).into()
+    o.receipt_status(to_usize(row))
 }
 
 pub struct NetworkHandleQObject {}
@@ -2565,7 +2540,6 @@ pub struct NetworkHandleEmitter {
     qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
     connection_pending_changed: fn(*mut NetworkHandleQObject),
     connection_up_changed: fn(*mut NetworkHandleQObject),
-    members_data_changed: fn(*mut NetworkHandleQObject),
 }
 
 unsafe impl Send for NetworkHandleEmitter {}
@@ -2582,7 +2556,6 @@ impl NetworkHandleEmitter {
             qobject: self.qobject.clone(),
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
-            members_data_changed: self.members_data_changed,
         }
     }
     fn clear(&self) {
@@ -2601,12 +2574,6 @@ impl NetworkHandleEmitter {
             (self.connection_up_changed)(ptr);
         }
     }
-    pub fn members_data_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.members_data_changed)(ptr);
-        }
-    }
 }
 
 pub trait NetworkHandleTrait {
@@ -2614,7 +2581,6 @@ pub trait NetworkHandleTrait {
     fn emit(&mut self) -> &mut NetworkHandleEmitter;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn members_data(&self) -> u8;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
     fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
@@ -2625,13 +2591,11 @@ pub extern "C" fn network_handle_new(
     network_handle: *mut NetworkHandleQObject,
     network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
     network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-    network_handle_members_data_changed: fn(*mut NetworkHandleQObject),
 ) -> *mut NetworkHandle {
     let network_handle_emit = NetworkHandleEmitter {
         qobject: Arc::new(AtomicPtr::new(network_handle)),
         connection_pending_changed: network_handle_connection_pending_changed,
         connection_up_changed: network_handle_connection_up_changed,
-        members_data_changed: network_handle_members_data_changed,
     };
     let d_network_handle = NetworkHandle::new(network_handle_emit);
     Box::into_raw(Box::new(d_network_handle))
@@ -2653,15 +2617,9 @@ pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHan
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn network_handle_members_data_get(ptr: *const NetworkHandle) -> u8 {
-    (&*ptr).members_data()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn network_handle_login(ptr: *mut NetworkHandle) -> bool {
     let o = &mut *ptr;
-    let r = o.login();
-    r
+    o.login()
 }
 
 #[no_mangle]
@@ -2669,8 +2627,7 @@ pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandl
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
-    let r = o.register_new_user(user_id);
-    r
+    o.register_new_user(user_id)
 }
 
 #[no_mangle]
@@ -2679,8 +2636,7 @@ pub unsafe extern "C" fn network_handle_send_add_request(ptr: *const NetworkHand
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
     let o = &*ptr;
-    let r = o.send_add_request(user_id, conversation_id);
-    r
+    o.send_add_request(user_id, conversation_id)
 }
 
 pub struct UsersQObject {}
@@ -2912,8 +2868,7 @@ pub unsafe extern "C" fn users_color_by_id(ptr: *const Users, id_str: *const c_u
     let mut id = String::new();
     set_string_from_utf16(&mut id, id_str, id_len);
     let o = &*ptr;
-    let r = o.color_by_id(id);
-    r
+    o.color_by_id(id)
 }
 
 #[no_mangle]
@@ -2929,8 +2884,7 @@ pub unsafe extern "C" fn users_name_by_id(ptr: *const Users, id_str: *const c_us
 #[no_mangle]
 pub unsafe extern "C" fn users_poll_update(ptr: *mut Users) -> bool {
     let o = &mut *ptr;
-    let r = o.poll_update();
-    r
+    o.poll_update()
 }
 
 #[no_mangle]
@@ -2946,8 +2900,7 @@ pub unsafe extern "C" fn users_profile_picture_by_id(ptr: *const Users, id_str: 
 #[no_mangle]
 pub unsafe extern "C" fn users_toggle_filter_regex(ptr: *mut Users) -> bool {
     let o = &mut *ptr;
-    let r = o.toggle_filter_regex();
-    r
+    o.toggle_filter_regex()
 }
 
 #[no_mangle]
@@ -2982,7 +2935,7 @@ pub unsafe extern "C" fn users_sort(
 #[no_mangle]
 pub unsafe extern "C" fn users_data_color(ptr: *const Users, row: c_int) -> u32 {
     let o = &*ptr;
-    o.color(to_usize(row)).into()
+    o.color(to_usize(row))
 }
 
 #[no_mangle]
@@ -2996,7 +2949,7 @@ pub unsafe extern "C" fn users_set_data_color(
 #[no_mangle]
 pub unsafe extern "C" fn users_data_matched(ptr: *const Users, row: c_int) -> bool {
     let o = &*ptr;
-    o.matched(to_usize(row)).into()
+    o.matched(to_usize(row))
 }
 
 #[no_mangle]
@@ -3075,7 +3028,7 @@ pub unsafe extern "C" fn users_set_data_profile_picture_none(ptr: *mut Users, ro
 #[no_mangle]
 pub unsafe extern "C" fn users_data_status(ptr: *const Users, row: c_int) -> u8 {
     let o = &*ptr;
-    o.status(to_usize(row)).into()
+    o.status(to_usize(row))
 }
 
 #[no_mangle]

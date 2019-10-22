@@ -35,6 +35,10 @@ impl AttachmentsTrait for Attachments {
         match (msg_id, self.msg_id) {
             (Some(msg_id), None) => {
                 let msg_id = ret_err!(msg_id.try_into());
+
+                self.msg_id = Some(msg_id);
+                self.emit.msg_id_changed();
+
                 let attachments = ret_err!(attachments::get(&msg_id));
                 let attachment_strings = ret_err!(attachments.into_flat_strings());
 

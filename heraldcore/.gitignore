@@ -1,3 +1,3 @@
 profile_pictures
-store.sqlite3*
+*.sqlite3*
 ./attachments

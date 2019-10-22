@@ -52,6 +52,7 @@ ListView {
         Members {
             id: convoItemMembers
             conversationId: conversationIdProxy
+            onNewDataReady: pollUpdate()
         }
 
         visible: matched

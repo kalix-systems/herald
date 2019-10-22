@@ -1,8 +1,5 @@
-use crate::interface::MessagesEmitter;
 use crossbeam_channel::*;
-use dashmap::DashMap;
-use herald_common::UserId;
-use heraldcore::types::{ConversationId, MsgId};
+use heraldcore::errors::HErr;
 use lazy_static::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
@@ -55,50 +52,23 @@ pub mod errors {
     }
 }
 
-/// Shared state related to conversation members
-pub mod members {
-    use super::*;
+/// A bus interface for pushing updates to singleton objects
+pub trait SingletonBus {
+    /// The type of the update message
+    type Update: Send;
 
-    /// Conversation member related updates
-    pub enum MemberUpdate {
-        /// Response to a conversation add request
-        ReqResp(UserId, bool),
-    }
-
-    lazy_static! {
-        /// Concurrent hash map from `ConversationId`s to an event stream.
-        /// This is used to route conversation members related notifications that arrive from the network.
-        pub static ref MEMBER_RXS: DashMap<ConversationId, Receiver<MemberUpdate>> = DashMap::default();
-    }
+    /// Pushes the update through the bus
+    fn push(update: Self::Update) -> Result<(), HErr>;
 }
 
-/// Shared state related to messages
-pub mod messages {
-    use super::*;
-    use heraldcore::message::Message;
+/// A bus interface for pushing updates to dynamically created objects
+pub trait AddressedBus {
+    /// The type of the update message
+    type Update: Send;
 
-    /// Message related conversation updates
-    pub enum MsgUpdate {
-        /// A new message
-        Msg(MsgId),
-        /// A message has been acknowledged
-        Receipt(MsgId),
-        /// A full message
-        FullMsg(Message),
-        /// Save is complete
-        StoreDone(MsgId),
-    }
+    /// The type used to address the objects
+    type Addr: std::hash::Hash;
 
-    lazy_static! {
-        /// Concurrent hash map from `ConversationId`s to an event stream.
-        /// This is used to route message related notifications that arrive from the network.
-        pub static ref MSG_RXS: DashMap<ConversationId, Receiver<MsgUpdate>> = DashMap::default();
-
-        /// Concurrent hash map from `ConversationId`s to an event stream.
-        /// This is used to route message related notifications that arrive from the network.
-        pub static ref MSG_TXS: DashMap<ConversationId, Sender<MsgUpdate>> = DashMap::default();
-        /// Concurrent hash map of `MessagesEmitter`. These are removed when the
-        /// `Messages` object is dropped.
-        pub static ref MSG_EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
-    }
+    /// Pushes the update through the bus, to the object addressed by `to`
+    fn push(to: Self::Addr, update: Self::Update) -> Result<(), HErr>;
 }

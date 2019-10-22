@@ -1,15 +1,16 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared};
-use crossbeam_channel::*;
-use herald_common::*;
-use heraldcore::{
-    network::{self, Notification},
-    types::*,
+use crate::{
+    ffi,
+    implementation::{conversations::Conversations, messages},
+    interface::*,
+    ret_err,
+    shared::{AddressedBus, SingletonBus},
 };
+use herald_common::*;
+use heraldcore::network::{self, Notification};
 use std::{
-    collections::HashMap,
     convert::{TryFrom, TryInto},
     sync::{
-        atomic::{AtomicBool, AtomicU8, Ordering},
+        atomic::{AtomicBool, Ordering},
         Arc,
     },
     thread,
@@ -22,116 +23,60 @@ type Emitter = NetworkHandleEmitter;
 pub struct EffectsFlags {
     net_online: AtomicBool,
     net_pending: AtomicBool,
-    // Note: these are `AtomicU8`s because it's not obvious
-    // how to atomically negate an `AtomicBool`.
-    members_data: AtomicU8,
 }
 
-/// A bundle of channel senders. This is passed inside of a callback to the login function,
+/// This is passed inside of a callback to the login function,
 /// and sends signals and notifications to the QML runtime.
 pub struct NotifHandler {
-    members_senders: HashMap<ConversationId, Sender<shared::members::MemberUpdate>>,
-    effects_flags: Arc<EffectsFlags>,
-    emit: Emitter,
+    _effects_flags: Arc<EffectsFlags>,
+    _emit: Emitter,
 }
 
 impl NotifHandler {
     fn send(&mut self, notif: Notification) {
+        use crate::implementation::conversations::shared::*;
+        use crate::implementation::users::{shared::*, Users};
+        use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
+
         match notif {
             NewMsg(msg_id, cid) => {
-                use shared::messages::*;
-                let tx = match MSG_TXS.get(&cid) {
-                    Some(tx) => tx.clone(),
-                    None => {
-                        let (tx, rx) = unbounded();
+                ret_err!(Messages::push(cid, MsgUpdate::Msg(msg_id)));
 
-                        MSG_TXS.insert(cid, tx);
-                        MSG_RXS.insert(cid, rx);
-                        ret_none!(MSG_TXS.get(&cid)).clone()
-                    }
-                };
-
-                ret_err!(tx.send(MsgUpdate::Msg(msg_id)));
-                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                    emitter.new_data_ready();
-                }
-
-                use crate::implementation::conversations::shared::*;
-
-                ret_none!(push_conv_update(ConvUpdates::NewActivity(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
-                use shared::messages::*;
-                let tx = match MSG_TXS.get(&cid) {
-                    Some(tx) => tx.clone(),
-                    None => {
-                        let (tx, rx) = unbounded();
-
-                        MSG_TXS.insert(cid, tx);
-                        MSG_RXS.insert(cid, rx);
-                        ret_none!(MSG_TXS.get(&cid)).clone()
-                    }
-                };
-
-                ret_err!(tx.send(MsgUpdate::Receipt(mid)));
-                if let Some(mut emitter) = MSG_EMITTERS.get_mut(&cid) {
-                    emitter.new_data_ready();
-                }
+                ret_err!(Messages::push(cid, MsgUpdate::Receipt(mid)));
             }
             NewContact(uid, cid) => {
-                use crate::implementation::conversations::shared::*;
-                use crate::implementation::users::shared::*;
-
                 // add user
-                ret_none!(push_user_update(UsersUpdates::NewUser(uid)));
+                ret_err!(Users::push(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             NewConversation(cid) => {
-                use crate::implementation::conversations::shared::*;
-                ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
-                use crate::implementation::conversations::shared::*;
-                use crate::implementation::users::shared::*;
-
                 // handle response
-                ret_none!(push_user_update(UsersUpdates::ReqResp(uid, accepted)));
+                ret_err!(Users::push(UsersUpdates::ReqResp(uid, accepted)));
 
                 // add conversation
                 if accepted {
-                    ret_none!(push_conv_update(ConvUpdates::NewConversation(cid)));
+                    ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
-                use shared::members::*;
-
-                let tx = match self.members_senders.get(&cid) {
-                    Some(tx) => tx,
-                    None => {
-                        let (tx, rx) = unbounded();
-
-                        self.members_senders.insert(cid, tx);
-                        MEMBER_RXS.insert(cid, rx);
-                        ret_none!(self.members_senders.get(&cid))
-                    }
-                };
-
-                ret_err!(tx.send(MemberUpdate::ReqResp(uid, accepted)));
-                self.effects_flags
-                    .members_data
-                    .fetch_add(1, Ordering::Acquire);
-                self.emit.members_data_changed();
+                use crate::implementation::members::{shared::*, Members};
+                ret_err!(Members::push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
         }
     }
-    fn new(mut emit: Emitter, effects_flags: Arc<EffectsFlags>) -> Self {
+    fn new(emit: Emitter, _effects_flags: Arc<EffectsFlags>) -> Self {
         Self {
-            members_senders: HashMap::new(),
-            effects_flags,
-            emit: emit.clone(),
+            _effects_flags,
+            _emit: emit,
         }
     }
 }
@@ -142,7 +87,6 @@ impl EffectsFlags {
         EffectsFlags {
             net_online: AtomicBool::new(false),
             net_pending: AtomicBool::new(false),
-            members_data: AtomicU8::new(0),
         }
     }
 }
@@ -225,10 +169,6 @@ impl NetworkHandleTrait for NetworkHandle {
 
     fn connection_pending(&self) -> bool {
         self.effects_flags.net_pending.load(Ordering::Relaxed)
-    }
-
-    fn members_data(&self) -> u8 {
-        self.effects_flags.members_data.load(Ordering::Relaxed)
     }
 
     fn emit(&mut self) -> &mut Emitter {

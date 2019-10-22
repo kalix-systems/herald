@@ -3,12 +3,8 @@ version: '3'
 services:
   postgres:
     image: "postgres"
-    ports:
-      - "5432:5432"
     volumes:
-      - pg-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_PASSWORD: docker
+      - "/var/run/postgresql:/var/run/postgresql"
 
 volumes:
   pg-data:

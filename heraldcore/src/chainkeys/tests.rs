@@ -1,20 +1,26 @@
 use super::*;
-use crate::{conversation::ConversationBuilder, womp};
+use crate::womp;
 use serial_test_derive::serial;
+
+fn reset() {
+    let mut conn = CK_CONN.lock();
+    let tx = conn.transaction().expect(womp!());
+    tx.execute_batch(include_str!("sql/drop.sql"))
+        .expect(womp!());
+    tx.execute_batch(include_str!("sql/create.sql"))
+        .expect(womp!());
+    tx.commit().expect(womp!());
+}
 
 #[test]
 #[serial]
 fn raw_pending() {
-    Database::reset_all().expect(womp!());
+    reset();
+
     let cid = ConversationId::from(crate::utils::rand_id());
 
-    ConversationBuilder::new()
-        .conversation_id(cid)
-        .add()
-        .expect(womp!());
-
-    let mut db = Database::get().expect(womp!());
-    let tx = db.transaction().expect(womp!());
+    let mut conn = CK_CONN.lock();
+    let mut tx = conn.transaction().expect(womp!());
 
     let blockhash1 = BlockHash::from_slice(&[1; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash2 = BlockHash::from_slice(&[2; BLOCKHASH_BYTES]).expect(womp!());
@@ -29,47 +35,47 @@ fn raw_pending() {
     let dummy_signer_bytes3 = &[2; 32];
 
     let block_id1 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes1.to_vec(),
         dummy_block_bytes1.to_vec(),
     )
     .expect(womp!());
 
-    raw_add_block_dependencies(&tx, block_id1, vec![blockhash1.as_ref()].into_iter())
+    raw_add_block_dependencies(&mut tx, block_id1, vec![blockhash1.as_ref()].into_iter())
         .expect(womp!());
 
     let block_id2 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes2.to_vec(),
         dummy_block_bytes2.to_vec(),
     )
     .expect(womp!());
     raw_add_block_dependencies(
-        &tx,
+        &mut tx,
         block_id2,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
     )
     .expect(womp!());
 
     let block_id3 = raw_add_pending_block(
-        &tx,
+        &mut tx,
         dummy_signer_bytes3.to_vec(),
         dummy_block_bytes3.to_vec(),
     )
     .expect(womp!());
 
     raw_add_block_dependencies(
-        &tx,
+        &mut tx,
         block_id3,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
     )
     .expect(womp!());
 
     // free dummy_block_bytes1
-    raw_store_key(&tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&tx, blockhash1.as_ref()).expect(womp!());
+    raw_store_key(&mut tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&mut tx, blockhash1.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 1);
     assert_eq!(
         blocks[0],
@@ -77,10 +83,10 @@ fn raw_pending() {
     );
 
     // free dummy_block_bytes2 and dummy_block_bytes3
-    raw_store_key(&tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&tx, blockhash2.as_ref()).expect(womp!());
+    raw_store_key(&mut tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
+    raw_remove_block_dependencies(&mut tx, blockhash2.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&tx).expect(womp!());
+    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 2);
     assert_eq!(
         blocks[0],
@@ -97,18 +103,10 @@ fn raw_pending() {
 #[test]
 #[serial]
 fn blockstore() {
-    Database::reset_all().expect(womp!());
-    let mut cid1 = ConversationId::from(crate::utils::rand_id());
-    let mut cid2 = ConversationId::from(crate::utils::rand_id());
+    reset();
 
-    ConversationBuilder::new()
-        .conversation_id(cid1)
-        .add()
-        .expect(womp!());
-    ConversationBuilder::new()
-        .conversation_id(cid2)
-        .add()
-        .expect(womp!());
+    let cid1 = ConversationId::from(crate::utils::rand_id());
+    let cid2 = ConversationId::from(crate::utils::rand_id());
 
     let blockhash11 = BlockHash::from_slice(&[11; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash12 = BlockHash::from_slice(&[12; BLOCKHASH_BYTES]).expect(womp!());

@@ -16,10 +16,10 @@ pub async fn login<T>(
     if active.contains_key(&g.did) {
         write_msg(&SignAsResponse::SessionExists, wtx, rrx).await?;
         return Err(LoginFailed);
-    } else if !store.key_is_valid(g.did)? {
+    } else if !store.key_is_valid(g.did).await? {
         write_msg(&SignAsResponse::KeyDeprecated, wtx, rrx).await?;
         return Err(LoginFailed);
-    } else if !store.user_exists(&g.uid)? {
+    } else if !store.user_exists(&g.uid).await? {
         write_msg(&SignAsResponse::MissingUID, wtx, rrx).await?;
         return Err(LoginFailed);
     } else {
