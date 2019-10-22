@@ -2,6 +2,7 @@ use crate::prelude::*;
 use dotenv::dotenv;
 use futures::FutureExt;
 use herald_common::*;
+use lazy_static::*;
 use std::{
     env,
     ops::{Deref, DerefMut},
@@ -30,9 +31,11 @@ macro_rules! params {
     }
 }
 
-fn database_url() -> String {
-    dotenv().expect("Invalid dotenv");
-    env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+lazy_static! {
+    static ref DATABASE_URL: String = {
+        dotenv().expect("Invalid dotenv");
+        env::var("DATABASE_URL").expect("DATABASE_URL must be set")
+    };
 }
 
 pub struct Conn(pub Client);
@@ -96,7 +99,7 @@ fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) ->
 }
 
 pub async fn get_client() -> Result<Conn, PgError> {
-    let (client, connection) = tokio_postgres::connect(&database_url(), NoTls).await?;
+    let (client, connection) = tokio_postgres::connect(&DATABASE_URL, NoTls).await?;
 
     // The connection object performs the actual communication with the database,
     // so spawn it off to run on its own.

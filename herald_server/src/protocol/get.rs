@@ -38,7 +38,10 @@ pub async fn keys_exist(mut store: Conn, req: keys_exist::Req) -> Result<keys_ex
     Ok(Res(vec))
 }
 
-pub async fn users_exist(mut store: Conn, req: users_exist::Req) -> Result<users_exist::Res, Error> {
+pub async fn users_exist(
+    mut store: Conn,
+    req: users_exist::Req,
+) -> Result<users_exist::Res, Error> {
     use users_exist::*;
 
     let mut vec = Vec::with_capacity(req.0.len());

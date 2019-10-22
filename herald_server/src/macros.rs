@@ -9,7 +9,6 @@ macro_rules! mk_filter {
                         .req_handler_store(b, $f)
                         .await
                         .map_err(|e| warp::reject::custom(format!("{:?}", e)))
-                        //.unwrap_or_else(|e| format!("{:?}", e).into())
                 }
             })
     };
