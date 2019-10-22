@@ -12,14 +12,18 @@ fn reset() {
     tx.commit().expect(womp!());
 }
 
-#[test]
-#[serial]
-fn raw_pending() {
-    reset();
+fn in_memory() -> rusqlite::Connection {
+    let conn = rusqlite::Connection::open_in_memory().expect(womp!());
+    conn.execute_batch(include_str!("sql/create.sql"))
+        .expect(womp!());
+    conn
+}
 
+#[test]
+fn raw_pending() {
+    let mut conn = in_memory();
     let cid = ConversationId::from(crate::utils::rand_id());
 
-    let mut conn = CK_CONN.lock();
     let mut tx = conn.transaction().expect(womp!());
 
     let blockhash1 = BlockHash::from_slice(&[1; BLOCKHASH_BYTES]).expect(womp!());
