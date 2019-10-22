@@ -25,7 +25,7 @@ fn simple_add_get_set_config() {
 #[test]
 #[serial]
 fn complicated_add_get_set_config() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
 
@@ -39,14 +39,14 @@ fn complicated_add_get_set_config() {
         .color(2)
         .profile_picture(profile_picture.into())
         .nts_conversation(nts_id)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
 
-    let meta = crate::conversation::meta(&config.nts_conversation).expect(womp!());
+    let meta = crate::conversation::db::meta(&conn, &config.nts_conversation).expect(womp!());
 
     assert_eq!(meta.title.expect(womp!()), NTS_CONVERSATION_NAME);
 
-    let db_config = Config::get().expect(womp!());
+    let db_config = db::get(&conn).expect(womp!());
 
     assert_eq!(config.nts_conversation, db_config.nts_conversation);
     assert_eq!(db_config.id(), id);
@@ -59,26 +59,30 @@ fn complicated_add_get_set_config() {
         profile_picture
     );
 
-    let mut db_config = Config::get().expect(womp!());
-    db_config.set_name("test".to_owned()).expect(womp!());
+    let mut db_config = db::get(&conn).expect(womp!());
+    db_config
+        .set_name_db(&conn, "test".to_owned())
+        .expect(womp!());
     assert_eq!(db_config.name, "test");
 
-    db_config.set_name("hello".to_owned()).expect(womp!());
+    db_config
+        .set_name_db(&conn, "hello".to_owned())
+        .expect(womp!());
 
-    let mut db_config = Config::get().expect(womp!());
+    let mut db_config = db::get(&conn).expect(womp!());
     assert_eq!(db_config.name, "hello");
 
-    db_config.set_colorscheme(1).expect(womp!());
-    db_config.set_color(0).expect(womp!());
+    db_config.set_colorscheme_db(&conn, 1).expect(womp!());
+    db_config.set_color_db(&conn, 0).expect(womp!());
 
-    let mut db_config = Config::get().expect(womp!());
+    let mut db_config = db::get(&conn).expect(womp!());
     assert_eq!(db_config.color, 0);
     assert_eq!(db_config.colorscheme, 1);
 
     let test_picture = "test_resources/maryland.png";
 
     db_config
-        .set_profile_picture(Some(test_picture.to_string()))
+        .set_profile_picture_db(&conn, Some(test_picture.to_string()))
         .expect(womp!("failed to set picture"));
 
     std::fs::remove_dir_all("profile_pictures").expect(womp!());
