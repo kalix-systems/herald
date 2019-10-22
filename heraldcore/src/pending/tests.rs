@@ -1,9 +1,7 @@
 use super::*;
 use crate::{types, womp};
-use serial_test_derive::serial;
 
 #[test]
-#[serial]
 fn add_get_delete() {
     let mut conn = Database::in_memory().expect(womp!());
 

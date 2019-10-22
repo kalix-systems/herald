@@ -1,11 +1,9 @@
 use super::*;
 use crate::{contact::ContactBuilder, womp};
 use herald_common::sig;
-use serial_test_derive::serial;
 use std::convert::TryFrom;
 
 #[test]
-#[serial]
 fn add_and_deprecate() {
     let mut conn = Database::in_memory().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());
@@ -19,7 +17,6 @@ fn add_and_deprecate() {
 }
 
 #[test]
-#[serial]
 fn get_valid_deprecated() {
     let mut conn = Database::in_memory().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());

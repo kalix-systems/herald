@@ -1,10 +1,8 @@
 use super::*;
 use crate::{contact::ContactBuilder, conversation::ConversationBuilder, womp};
-use serial_test_derive::serial;
 use std::convert::TryInto;
 
 #[test]
-#[serial]
 fn add_remove_member() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -26,7 +24,6 @@ fn add_remove_member() {
 }
 
 #[test]
-#[serial]
 fn add_tx() {
     let mut conn = Database::in_memory().expect(womp!());
 

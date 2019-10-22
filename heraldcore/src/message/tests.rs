@@ -102,31 +102,32 @@ fn message_receipt_status_updates() {
 }
 
 #[test]
-#[serial]
 fn receipt_before_message() {
     use crate::contact::ContactBuilder;
 
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
     let author = "Hello".try_into().expect(womp!());
 
     let receiver = "World".try_into().expect(womp!());
-    ContactBuilder::new(receiver).add().expect(womp!());
+    ContactBuilder::new(receiver)
+        .add_db(&mut conn)
+        .expect(womp!());
 
     let conversation_id = [0; 32].into();
 
     crate::conversation::ConversationBuilder::new()
         .conversation_id(conversation_id)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
 
     crate::contact::ContactBuilder::new(author)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
-    crate::members::add_member(&conversation_id, author).expect(womp!());
+    crate::members::db::add_member(&conn, &conversation_id, author).expect(womp!());
 
     let msg_id = [1; 32].into();
-    add_receipt(msg_id, receiver, MessageReceiptStatus::Read).expect(womp!());
+    db::add_receipt(&mut conn, msg_id, receiver, MessageReceiptStatus::Read).expect(womp!());
 
     let mut builder = InboundMessageBuilder::default();
     builder
@@ -135,9 +136,9 @@ fn receipt_before_message() {
         .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
         .author(author);
-    builder.store().expect(womp!());
+    builder.store_db(&mut conn).expect(womp!());
 
-    let msg = get_message(&msg_id).expect(womp!());
+    let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
     assert_eq!(
         msg.receipts.get(&receiver).expect(womp!()),

@@ -4,7 +4,6 @@ use serial_test_derive::serial;
 use std::convert::TryInto;
 
 #[test]
-#[serial]
 fn conv_id_length() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -18,7 +17,6 @@ fn conv_id_length() {
 }
 
 #[test]
-#[serial]
 fn add_conversation() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -51,7 +49,6 @@ fn add_conversation() {
 }
 
 #[test]
-#[serial]
 fn add_and_get() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -95,7 +92,6 @@ fn add_and_get() {
 }
 
 #[test]
-#[serial]
 fn matches() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -136,7 +132,6 @@ fn set_prof_pic() {
 }
 
 #[test]
-#[serial]
 fn set_muted_test() {
     let mut conn = Database::in_memory().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);
@@ -160,7 +155,6 @@ fn set_muted_test() {
 }
 
 #[test]
-#[serial]
 fn set_get_meta() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -197,7 +191,6 @@ fn set_get_meta() {
 }
 
 #[test]
-#[serial]
 fn add_remove_member() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -238,7 +231,6 @@ fn add_remove_member() {
 }
 
 #[test]
-#[serial]
 fn delete_message() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -272,7 +264,6 @@ fn delete_message() {
 }
 
 #[test]
-#[serial]
 fn delete_conversation() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -316,7 +307,6 @@ fn delete_conversation() {
 }
 
 #[test]
-#[serial]
 fn pairwise_cids() {
     let mut conn = Database::in_memory().expect(womp!());
 
@@ -336,7 +326,6 @@ fn pairwise_cids() {
 }
 
 #[test]
-#[serial]
 fn convo_message_order() {
     let mut conn = Database::in_memory().expect(womp!());
 
