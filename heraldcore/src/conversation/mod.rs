@@ -2,7 +2,7 @@ use crate::{db::Database, errors::HErr, message::Message, types::*, utils};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
-mod db;
+pub(crate) mod db;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.

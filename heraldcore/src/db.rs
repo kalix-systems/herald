@@ -58,47 +58,54 @@ impl Database {
     /// Connect to database at path `P`.
     /// Creates a database if one does not exist.
     fn new<P: AsRef<Path>>(path: P) -> Result<Database, HErr> {
-        match Connection::open(path) {
-            Ok(conn) => {
-                fn busy_handler(_: i32) -> bool {
-                    true
-                }
+        let conn = Connection::open(path)?;
+        Self::setup(conn)
+    }
 
-                conn.busy_handler(Some(busy_handler))?;
-
-                // `NormalPattern`
-                conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
-                    let pattern = ctx.get::<String>(0)?;
-                    let value = ctx.get::<String>(1)?;
-
-                    let re = SearchPattern::new_normal(pattern)
-                        .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
-
-                    Ok(re.is_match(value.as_str()))
-                })?;
-
-                // `RegexPattern`
-                conn.create_scalar_function("regex_pattern", 2, true, |ctx| {
-                    let pattern = ctx.get::<String>(0)?;
-                    let value = ctx.get::<String>(1)?;
-
-                    let re = SearchPattern::new_regex(pattern)
-                        .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
-
-                    Ok(re.is_match(value.as_str()))
-                })?;
-
-                // set foreign key constraint
-                conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;
-
-                // enable WAL
-                conn.query_row("PRAGMA journal_mode = WAL", NO_PARAMS, |_| Ok(()))?;
-
-                let db = Database(conn);
-                Ok(db)
-            }
-            Err(e) => Err(e.into()),
+    fn setup(conn: Connection) -> Result<Self, HErr> {
+        fn busy_handler(_: i32) -> bool {
+            true
         }
+
+        conn.busy_handler(Some(busy_handler))?;
+
+        // `NormalPattern`
+        conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
+            let pattern = ctx.get::<String>(0)?;
+            let value = ctx.get::<String>(1)?;
+
+            let re = SearchPattern::new_normal(pattern)
+                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
+
+            Ok(re.is_match(value.as_str()))
+        })?;
+
+        // `RegexPattern`
+        conn.create_scalar_function("regex_pattern", 2, true, |ctx| {
+            let pattern = ctx.get::<String>(0)?;
+            let value = ctx.get::<String>(1)?;
+
+            let re = SearchPattern::new_regex(pattern)
+                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
+
+            Ok(re.is_match(value.as_str()))
+        })?;
+
+        // set foreign key constraint
+        conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;
+
+        // enable WAL
+        conn.query_row("PRAGMA journal_mode = WAL", NO_PARAMS, |_| Ok(()))?;
+
+        let db = Database(conn);
+        Ok(db)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn in_memory() -> Result<Self, HErr> {
+        let conn = Connection::open_in_memory()?;
+        conn.execute_batch(include_str!("sql/create_all.sql"))?;
+        Self::setup(conn)
     }
 
     /// Resets all tables in database

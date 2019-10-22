@@ -15,7 +15,7 @@ pub(crate) fn add_members_with_tx(
 }
 
 /// Add a user with `member_id` to the conversation with `conversation_id`.
-pub fn add_member_db(
+pub fn add_member(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     member_id: UserId,
@@ -28,7 +28,7 @@ pub fn add_member_db(
 }
 
 /// Remove a user with `member_id` to the conversation with `conversation_id`.
-pub fn remove_member_db(
+pub fn remove_member(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     member_id: UserId,
@@ -41,7 +41,7 @@ pub fn remove_member_db(
 }
 
 /// Gets the members of a conversation.
-pub fn members_db(
+pub fn members(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<Vec<UserId>, HErr> {
