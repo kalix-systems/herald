@@ -1,6 +1,5 @@
 use super::*;
 use crate::womp;
-use serial_test_derive::serial;
 
 fn reset() {
     let mut conn = CK_CONN.lock();
@@ -105,7 +104,6 @@ fn raw_pending() {
 }
 
 #[test]
-#[serial]
 fn blockstore() {
     reset();
 
