@@ -3,7 +3,8 @@ use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
 
-mod db;
+/// db mod
+pub mod db;
 
 /// Gets a contact's name by their `id`.
 pub fn name(id: UserId) -> Result<Option<String>, HErr> {
