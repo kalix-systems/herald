@@ -162,7 +162,6 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
-    Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -285,7 +284,6 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE bool addToConversation(const QString& id);
-    Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE bool removeFromConversationByIndex(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -425,7 +423,6 @@ public:
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
     Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
-    Q_INVOKABLE bool pollUpdate();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -513,7 +510,6 @@ public:
     Q_INVOKABLE QByteArray add(const QString& id);
     Q_INVOKABLE quint32 colorById(const QString& id) const;
     Q_INVOKABLE QString nameById(const QString& id) const;
-    Q_INVOKABLE bool pollUpdate();
     Q_INVOKABLE QString profilePictureById(const QString& id) const;
     Q_INVOKABLE bool toggleFilterRegex();
 
