@@ -5,16 +5,16 @@ use serial_test_derive::serial;
 #[test]
 #[serial]
 fn add_get_delete() {
-    Database::reset_all().expect(womp!());
+    let mut conn = Database::in_memory().expect(womp!());
 
-    let pending = get_pending().expect(womp!());
+    let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 0);
 
     let conv_id = [0; 32].into();
 
     crate::conversation::ConversationBuilder::new()
         .conversation_id(conv_id)
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
 
     let msg = types::cmessages::Ack {
@@ -24,12 +24,12 @@ fn add_get_delete() {
 
     let body = ConversationMessageBody::Ack(msg);
 
-    add_to_pending(conv_id, &body).expect(womp!());
-    let pending = get_pending().expect(womp!());
+    db::add_to_pending(&conn, conv_id, &body).expect(womp!());
+    let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 1);
 
-    remove_pending(pending[0].0).expect(womp!());
+    db::remove_pending(&conn, pending[0].0).expect(womp!());
 
-    let pending = get_pending().expect(womp!());
+    let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 0);
 }
