@@ -7,6 +7,7 @@ import "../../Common"
 ToolBar {
     id: conversationViewHeader
 
+    property string title
     clip: true
     height: QmlCfg.toolbarHeight
 
@@ -27,6 +28,17 @@ ToolBar {
             imageSource: "qrc:/back-arrow-icon.svg"
             tapCallback: function () {
                 appState.state = "contact"
+            }
+        }
+
+        Row {
+            Layout.alignment: Qt.AlignCenter
+            Label {
+                text: title
+                font.pointSize: QmlCfg.chatPreviewSize
+                font.family: QmlCfg.chatFont.name
+                anchors.verticalCenter: parent.verticalCenter
+                color: QmlCfg.palette.iconMatte
             }
         }
 

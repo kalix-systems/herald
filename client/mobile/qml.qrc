@@ -28,5 +28,7 @@
         <file>qml/ConversationView/Controls/CVFloatingButton.qml</file>
         <file>qml/ConversationView/js/CVViewUtils.js</file>
         <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
+        <file>qml/ChatView/Controls/TextMessageList.qml</file>
+        <file>qml/ChatView/Controls/ChatTextArea.qml</file>
     </qresource>
 </RCC>

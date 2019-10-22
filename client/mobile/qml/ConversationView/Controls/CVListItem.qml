@@ -21,9 +21,8 @@ Rectangle {
     // may be reset upon forking a conversation
     property Messages ownedMessages
 
-    height: QmlCfg.units.dp(60)
+    height: QmlCfg.avatarHeight
     color: QmlCfg.palette.mainColor
-    border.color: QmlCfg.palette.secondaryColor
 
     // prevent animation spill over
     clip: true
@@ -34,6 +33,7 @@ Rectangle {
     }
 
     AvatarMain {
+        id: avatar
         iconColor: QmlCfg.avatarColors[colorCode]
         anchors.verticalCenter: parent.verticalCenter
         initials: CVJS.initialize(title)
@@ -91,6 +91,7 @@ Rectangle {
             splash.y = eventPoint.position.y
             splashAnim.running = true
             // set the chat to the selected item
+            appState.chatMain.headerTitle = title
             appState.chatMain.ownedMessages = contactItem.ownedMessages
             // callback implicity called at the end of the animation
         }

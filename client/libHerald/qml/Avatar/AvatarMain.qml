@@ -24,23 +24,21 @@ Item {
     property Component labelComponent: ConversationLabel {}
     // the initials to display in the icon
     property string initials
-    readonly property real topTextMargin: QmlCfg.units.dp(6)
-    readonly property real bottomTextMargin: QmlCfg.units.dp(5)
     readonly property real innerMargins: QmlCfg.smallSpacer
-
+    property real topTextMargin: QmlCfg.units.dp(4)
+    property real bottomTextMargin: QmlCfg.units.dp(4)
     anchors.fill: parent
 
     AvatarIcon {
         id: avatarIcon
         color: iconColor
         initials: parent.initials
-        height: QmlCfg.avatarSize
+        height: QmlCfg.avatarHeight
         width: height
         pfpUrl: pfpPath
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
-            margins: QmlCfg.units.dp(12)
         }
     }
 

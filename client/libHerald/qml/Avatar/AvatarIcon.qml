@@ -12,7 +12,8 @@ Item {
     }
 
     Rectangle {
-        anchors.fill: parent
+        height: QmlCfg.avatarHeight
+        width: height
         radius: groupAvatar ? 0 : width
         color: parent.color
         Text {

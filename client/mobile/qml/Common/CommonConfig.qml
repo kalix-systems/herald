@@ -57,7 +57,10 @@ Item {
     property int avatarSize: units.dp(44)
     /// user settable cfg
     property int theme: 0
-    readonly property string mainTextFontFamily: "Hevletica"
+    ///
+    property real avatarHeight: units.dp(48)
+
+    property FontLoader chatFont: metaTheme.chatFont
 
     property QtObject iconSizes: QtObject {
         property int small: units.dp(16)

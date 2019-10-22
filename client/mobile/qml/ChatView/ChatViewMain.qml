@@ -1,17 +1,34 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "./Controls"
 
 Page {
     //swappable message model, set by the appstate
     property Messages ownedMessages
-    header: ChatViewHeader {}
-    TextArea {
-        background: Rectangle {
-            color: "grey"
-        }
+    property string headerTitle
 
+    header: ChatViewHeader {
+        title: headerTitle
+    }
+
+    background: Rectangle {
+        color: QmlCfg.palette.mainColor
+    }
+
+    TextMessageList {
+        model: ownedMessages
+        anchors {
+            top: parent.top
+            right: parent.right
+            left: parent.left
+            bottom: chatTextArea.top
+        }
+    }
+
+    ChatTextArea {
+        id: chatTextArea
         anchors {
             bottom: parent.bottom
             right: parent.right

@@ -18,13 +18,19 @@ Page {
         id: cvListView
         clip: true
         boundsBehavior: ListView.StopAtBounds
+
+        anchors.margins: QmlCfg.units.dp(12)
+        spacing: QmlCfg.units.dp(16)
+
         anchors.fill: parent
         model: conversationsModel
+
         delegate: CVListItem {
             ownedMessages: Messages {
                 conversationId: conversationId
             }
         }
+
         ScrollBar.vertical: ScrollBar {}
     }
 
@@ -35,7 +41,7 @@ Page {
         anchors {
             bottom: parent.bottom
             right: parent.right
-            margins: QmlCfg.margin * 2
+            margins: QmlCfg.units.dp(12)
         }
 
         iconSource: "qrc:/pencil-icon-black.svg"

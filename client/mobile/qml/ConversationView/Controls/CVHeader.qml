@@ -16,39 +16,40 @@ ToolBar {
     }
 
     RowLayout {
-        anchors {
-            fill: parent
-            rightMargin: QmlCfg.margin
-            leftMargin: QmlCfg.margin
-        }
-        IconButton {
-            id: drawerButton
+        anchors.fill: parent
+        Row {
             Layout.alignment: Qt.AlignLeft
-            imageSource: "qrc:/hamburger-icon.svg"
-        }
-
-        Label {
-            id: stateLabel
-            text: "Messages"
-            font.pointSize: QmlCfg.headerTextSize
-            Layout.alignment: Qt.AlignHCenter
-            color: QmlCfg.palette.iconMatte
+            Layout.leftMargin: QmlCfg.units.dp(12)
+            spacing: QmlCfg.units.dp(16)
+            IconButton {
+                id: drawerButton
+                imageSource: "qrc:/hamburger-icon.svg"
+            }
+            Label {
+                id: stateLabel
+                text: "Messages"
+                font {
+                    pointSize: QmlCfg.chatPreviewSize
+                    family: QmlCfg.chatFont.name
+                }
+                anchors.verticalCenter: parent.verticalCenter
+                color: QmlCfg.palette.iconMatte
+            }
         }
 
         Row {
             Layout.alignment: Qt.AlignRight
+            Layout.rightMargin: QmlCfg.units.dp(12)
             spacing: QmlCfg.units.dp(12)
 
             IconButton {
                 id: searchButton
-                Layout.alignment: Qt.AlignRight
                 tapCallback: CVJS.searchBarTr
                 imageSource: "qrc:/search-icon.svg"
             }
 
             IconButton {
                 id: configButton
-                Layout.alignment: Qt.AlignRight
                 imageSource: "qrc:/options-icon.svg"
             }
         }

@@ -9,8 +9,9 @@ ToolButton {
     }
     property string imageSource: ""
     property color color: QmlCfg.palette.iconMatte
-    property size iconSize: Qt.size(QmlCfg.iconSizes.small,
-                                    QmlCfg.iconSizes.small)
+
+    property size iconSize: Qt.size(QmlCfg.iconSizes.smallMedium,
+                                    QmlCfg.iconSizes.smallMedium)
     background: Rectangle {
         id: splash
         color: QmlCfg.palette.iconMatte
@@ -26,6 +27,7 @@ ToolButton {
         }
     }
 
+    padding: 0
     icon.source: imageSource
     icon.color: color
     icon.width: iconSize.width

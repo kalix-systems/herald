@@ -18,7 +18,6 @@ Item {
     property string lastTimestamp
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
-
     // labeling constants
     anchors.fill: parent
 
@@ -30,8 +29,11 @@ Item {
             right: ts.left
             rightMargin: QmlCfg.margin
         }
-        font.bold: true
-        font.pointSize: 17
+        font {
+            bold: true
+            family: QmlCfg.chatFont.name
+            pointSize: 17
+        }
         elide: "ElideRight"
         text: contactName
         color: QmlCfg.palette.mainTextColor
@@ -43,7 +45,10 @@ Item {
             bottom: uid.bottom
             right: parent.right
         }
-        font.pointSize: 13
+        font {
+            family: QmlCfg.chatFont.name
+            pointSize: 13
+        }
         text: lastTimestamp
         color: QmlCfg.palette.secondaryTextColor
     }
@@ -56,7 +61,10 @@ Item {
             bottom: parent.bottom
             rightMargin: QmlCfg.margin
         }
-        font.pointSize: 15
+        font {
+            family: QmlCfg.chatFont.name
+            pointSize: 15
+        }
         elide: "ElideRight"
         text: lastBody
         color: QmlCfg.palette.secondaryTextColor
