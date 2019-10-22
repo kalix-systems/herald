@@ -30,24 +30,49 @@ fn delete_get_message() {
 }
 
 #[test]
-#[serial]
 fn reply() {
-    Database::reset_all().expect(womp!());
-    let conf = test_config();
-    let conv_id = conf.nts_conversation;
+    let mut conn = Database::in_memory().expect(womp!());
 
-    let (op, _) = test_outbound_text("test", conv_id);
+    let author = "Hello".try_into().unwrap();
+    crate::contact::ContactBuilder::new(author)
+        .add_db(&mut conn)
+        .expect(womp!());
 
-    let mut builder = OutboundMessageBuilder::default();
+    let conversation = [1; 32].into();
+
+    crate::conversation::ConversationBuilder::new()
+        .conversation_id(conversation)
+        .add_db(&mut conn)
+        .expect(womp!("Failed to create conversation"));
+
+    let mid1 = [0; 32].into();
+    let mid2 = [1; 32].into();
+    let mut builder = InboundMessageBuilder::default();
 
     builder
-        .replying_to(Some(op))
+        .id(mid1)
+        .author(author)
+        .conversation_id(conversation)
+        .timestamp(Time::now())
+        .body("1".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    let mut builder = InboundMessageBuilder::default();
+
+    builder
+        .id(mid2)
+        .author(author)
+        .replying_to(mid1)
+        .timestamp(Time::now())
         .body("1".try_into().expect(womp!()))
-        .conversation_id(conv_id);
+        .conversation_id(conversation);
 
-    let reply = builder.store_and_send_blocking().unwrap();
+    builder.store_db(&mut conn).expect(womp!());
 
-    assert_eq!(reply.op.unwrap(), op);
+    let reply = db::get_message(&conn, &mid2).unwrap();
+
+    assert_eq!(reply.op.unwrap(), mid1);
 }
 #[test]
 #[serial]

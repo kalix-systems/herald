@@ -258,7 +258,7 @@ fn delete_message() {
 
     crate::message::db::delete_message(&conn, &mid).expect(womp!());
 
-    assert!(super::conversation_messages(&conversation)
+    assert!(super::db::conversation_messages(&conn, &conversation)
         .expect(womp!())
         .is_empty());
 }
@@ -301,7 +301,7 @@ fn delete_conversation() {
 
     super::db::delete_conversation(&conn, &conversation).expect(womp!());
 
-    assert!(super::conversation_messages(&conversation)
+    assert!(super::db::conversation_messages(&conn, &conversation)
         .expect(womp!())
         .is_empty());
 }
