@@ -21,6 +21,8 @@ ApplicationWindow {
     // utility code, meant to reduce the amount of js laying
     // around the code base
     property alias heraldUtils: heraldGlobals.heraldUtils
+    // list of conversations
+    property alias conversationsModel: heraldGlobals.conversationsModel
 
     Loader {
         id: configLoader
@@ -49,6 +51,6 @@ ApplicationWindow {
     StackView {
         id: mainView
         anchors.fill: parent
-        initialItem: appState.cvMain
+        initialItem: appState.lpMain
     }
 }

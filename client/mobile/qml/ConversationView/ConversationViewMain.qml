@@ -2,6 +2,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
+// Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
 
 Page {
@@ -18,8 +19,12 @@ Page {
         clip: true
         boundsBehavior: ListView.StopAtBounds
         anchors.fill: parent
-        model: 20
-        delegate: CVListItem {}
+        model: conversationsModel
+        delegate: CVListItem {
+            ownedMessages: Messages {
+                conversationId: conversationId
+            }
+        }
         ScrollBar.vertical: ScrollBar {}
     }
 

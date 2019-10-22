@@ -3,21 +3,24 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../../Common"
+import "../js/CVViewUtils.js" as CVJS
 
 ToolBar {
     id: conversationViewHeader
 
     clip: true
     height: QmlCfg.toolbarHeight
-    state: parent.state
 
     background: Rectangle {
         color: QmlCfg.palette.secondaryColor
     }
 
     RowLayout {
-        anchors.fill: parent
-
+        anchors {
+            fill: parent
+            rightMargin: QmlCfg.margin
+            leftMargin: QmlCfg.margin
+        }
         IconButton {
             id: drawerButton
             Layout.alignment: Qt.AlignLeft
@@ -39,7 +42,7 @@ ToolBar {
             IconButton {
                 id: searchButton
                 Layout.alignment: Qt.AlignRight
-                tapCallback: searchBarTr
+                tapCallback: CVJS.searchBarTr
                 imageSource: "qrc:/search-icon.svg"
             }
 
@@ -49,9 +52,5 @@ ToolBar {
                 imageSource: "qrc:/options-icon.svg"
             }
         }
-    }
-
-    function searchBarTr() {
-        appState.state = "search"
     }
 }

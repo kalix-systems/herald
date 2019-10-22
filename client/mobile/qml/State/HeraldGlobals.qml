@@ -7,6 +7,7 @@ Item {
     property alias heraldUtils: heraldUtils
     property alias heraldState: heraldState
     property alias networkHandle: networkHandle
+    property alias conversationsModel: conversationsModel
 
     HeraldUtils {
         id: heraldUtils
@@ -18,5 +19,9 @@ Item {
 
     NetworkHandle {
         id: networkHandle
+    }
+
+    Conversations {
+        id: conversationsModel
     }
 }

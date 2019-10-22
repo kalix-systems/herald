@@ -20,7 +20,7 @@ Item {
             font.bold: true
             font.pixelSize: parent.width / initials.length
             anchors.centerIn: parent
-            color: QmlCfg.palette.iconMatte
+            color: QmlCfg.palette.iconFill
         }
     }
 }

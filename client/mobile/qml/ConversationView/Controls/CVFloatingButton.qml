@@ -11,14 +11,13 @@ Button {
 
     icon.source: iconSource
     icon.color: pressed ? Qt.lighter(iconColor, 1.3) : iconColor
-    icon.height: height
-    icon.width: width
+    icon.height: height - QmlCfg.margin
+    icon.width: height - QmlCfg.margin
 
     background: Rectangle {
-        color: pressed ? Qt.lighter(
-                             QmlCfg.palette.tertiaryColor) : QmlCfg.palette.tertiaryColor
+        color: pressed ? Qt.lighter(QmlCfg.palette.secondaryColor,
+                                    1.3) : QmlCfg.palette.secondaryColor
         anchors.fill: parent
         radius: height
-        Image {}
     }
 }

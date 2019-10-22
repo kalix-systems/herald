@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "qrc:/imports/Avatar"
+import "../js/CVViewUtils.js" as CVJS
 
 Rectangle {
     id: contactItem
@@ -16,11 +17,15 @@ Rectangle {
     property int lastReceipt: 0
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
+    // the owned conversation model corresponding to this conversation id
+    // may be reset upon forking a conversation
+    property Messages ownedMessages
 
     height: QmlCfg.units.dp(60)
     color: QmlCfg.palette.mainColor
     border.color: QmlCfg.palette.secondaryColor
 
+    // prevent animation spill over
     clip: true
     // fill parent width
     anchors {
@@ -31,12 +36,12 @@ Rectangle {
     AvatarMain {
         iconColor: QmlCfg.avatarColors[colorCode]
         anchors.verticalCenter: parent.verticalCenter
-        initials: initialize("George Michael")
+        initials: CVJS.initialize(title)
         labelComponent: ConversationLabel {
-            contactName: "George Michael"
-            lastBody: "Body"
-            lastTimestamp: "Wed 2:30"
-            lastReceipt: 2
+            contactName: title
+            lastBody: lastBody
+            lastTimestamp: lastTimestamp
+            lastReceipt: lastReceipt
         }
     }
 
@@ -46,7 +51,7 @@ Rectangle {
         id: splash
         width: 0
         height: width
-        color: "#aaaaaa"
+        color: QmlCfg.palette.iconMatte
         opacity: 0
         radius: width
         transform: Translate {
@@ -73,6 +78,11 @@ Rectangle {
             from: 0.2
             to: 0
         }
+        onRunningChanged: {
+            if (!!!running) {
+                appState.state = "chat"
+            }
+        }
     }
 
     TapHandler {
@@ -80,15 +90,9 @@ Rectangle {
             splash.x = eventPoint.position.x
             splash.y = eventPoint.position.y
             splashAnim.running = true
+            // set the chat to the selected item
+            appState.chatMain.ownedMessages = contactItem.ownedMessages
+            // callback implicity called at the end of the animation
         }
-    }
-
-    function initialize(name) {
-        const tokens = name.split(' ').slice(0, 3)
-        var str = ""
-        tokens.forEach(function anon(string) {
-            str += string[0].toUpperCase()
-        })
-        return str
     }
 }

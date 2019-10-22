@@ -2,8 +2,8 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 
+// PAUL TODO : paramaterize the 12 dp margins
 Item {
-
     // weather or not the AvatarIcon is square.
     property bool groupAvatar: false
     // path to the profile picture, or the empty string
@@ -46,20 +46,18 @@ Item {
 
     Item {
         anchors {
-            top: parent.top
-            bottom: parent.bottom
+            top: avatarIcon.top
+            bottom: avatarIcon.bottom
             left: avatarIcon.right
             right: parent.right
+            topMargin: topTextMargin
+            bottomMargin: bottomTextMargin
+            leftMargin: QmlCfg.units.dp(12)
+            rightMargin: QmlCfg.units.dp(12)
         }
         Loader {
             id: labelContent
-            anchors {
-                fill: parent
-                leftMargin: QmlCfg.units.dp(12)
-                rightMargin: QmlCfg.units.dp(12)
-                topMargin: topTextMargin
-                bottomMargin: bottomTextMargin
-            }
+            anchors.fill: parent
             sourceComponent: labelComponent
         }
     }

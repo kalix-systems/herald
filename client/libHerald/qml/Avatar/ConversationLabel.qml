@@ -3,6 +3,12 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 
+// TODO:
+// there are some loose magic numbers
+// hanging around in the font sizes. move those to CmnCfg
+// TODO:
+// move the property translation functions into
+// some common js directory , receipt urls are not numbers, nor are timestamps
 Item {
     // the group name or displayName of the conversation
     property string contactName
@@ -20,14 +26,15 @@ Item {
         id: uid
         anchors {
             top: parent.top
-            right: ts.left
             left: parent.left
+            right: ts.left
+            rightMargin: QmlCfg.margin
         }
         font.bold: true
         font.pointSize: 17
         elide: "ElideRight"
         text: contactName
-        color: "white"
+        color: QmlCfg.palette.mainTextColor
     }
 
     Label {
@@ -38,20 +45,21 @@ Item {
         }
         font.pointSize: 13
         text: lastTimestamp
-        color: "white"
+        color: QmlCfg.palette.secondaryTextColor
     }
 
     Label {
         id: bodyText
         anchors {
             left: parent.left
-            right: receiptImage.right
+            right: receiptImage.left
             bottom: parent.bottom
+            rightMargin: QmlCfg.margin
         }
         font.pointSize: 15
         elide: "ElideRight"
         text: lastBody
-        color: "white"
+        color: QmlCfg.palette.secondaryTextColor
     }
 
     Image {
@@ -61,7 +69,25 @@ Item {
             right: parent.right
         }
         // in the future this should be some function call from common
-        source: "qrc:/check-icon-white.svg"
+        source: lastReceipt
         sourceSize: Qt.size(QmlCfg.units.dp(12), QmlCfg.units.dp(12))
+        mipmap: true
+        layer.enabled: true
+        layer.samplerName: "maskSource"
+        layer.effect: ShaderEffect {
+            property color overlay: QmlCfg.palette.mainTextColor
+            property var source: receiptImage
+            fragmentShader: "
+uniform lowp sampler2D source;
+uniform lowp sampler2D maskSource;
+uniform vec4 overlay;
+varying highp vec2 qt_TexCoord0;
+void main() {
+lowp vec4 tex = texture2D(source, qt_TexCoord0);
+lowp vec4 mask = texture2D(maskSource, qt_TexCoord0);
+gl_FragColor = overlay * mask.a;
+}
+"
+        }
     }
 }
