@@ -377,7 +377,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
                 }
 
                 conv_builder.add_with_tx(&tx)?;
-                crate::members::add_members_with_tx(&tx, cid, &ac.members)?;
+                crate::members::db::add_members_with_tx(&tx, cid, &ac.members)?;
                 tx.commit()?;
 
                 cid.store_genesis(&ac.gen)?;
@@ -390,7 +390,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             NewMembers(nm) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
-                crate::members::add_members_with_tx(&tx, cid, &nm.0)?;
+                crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
                 tx.commit()?;
             }
             Msg(msg) => {
@@ -589,7 +589,7 @@ pub fn start_conversation(
 
     let cid = conv_builder.add_with_tx(&tx)?;
 
-    crate::members::add_members_with_tx(&tx, cid, members)?;
+    crate::members::db::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;
 
     let kp = crate::config::Config::static_keypair()?;
