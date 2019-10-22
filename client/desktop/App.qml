@@ -18,16 +18,18 @@ Item {
 
     anchors.fill: parent.fill
 
+    TopMenuBar {
+        Popups.ConfigPopup {
+            id: preferencesPopup
+        }
+    }
+
     Users {
         id: contactsModel
     }
 
     Conversations {
         id: conversationsModel
-    }
-
-    Popups.ConfigPopup {
-        id: preferencesPopup
     }
 
     Popups.ColorPicker {

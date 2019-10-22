@@ -19,8 +19,6 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    TopMenuBar {}
-
     Errors {
         id: errorQueue
         onTryPollChanged: {
@@ -30,8 +28,7 @@ ApplicationWindow {
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
+        property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
     HeraldUtils {
