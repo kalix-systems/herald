@@ -1,6 +1,60 @@
 use super::*;
 use std::ops::{Deref, DerefMut};
 
+impl Config {
+    pub(crate) fn set_name_db(
+        &mut self,
+        conn: &rusqlite::Connection,
+        name: String,
+    ) -> Result<(), HErr> {
+        crate::contact::db::set_name(conn, self.id, name.as_str())?;
+
+        self.name = name;
+        Ok(())
+    }
+
+    pub(crate) fn set_profile_picture_db(
+        &mut self,
+        conn: &rusqlite::Connection,
+        profile_picture: Option<String>,
+    ) -> Result<(), HErr> {
+        let path = crate::contact::db::set_profile_picture(
+            conn,
+            self.id,
+            profile_picture,
+            self.profile_picture.as_ref().map(|s| s.as_str()),
+        )?;
+
+        self.profile_picture = path;
+
+        Ok(())
+    }
+
+    /// Update user's color
+    pub(crate) fn set_color_db(
+        &mut self,
+        conn: &rusqlite::Connection,
+        color: u32,
+    ) -> Result<(), HErr> {
+        crate::contact::db::set_color(conn, self.id, color)?;
+        self.color = color;
+
+        Ok(())
+    }
+
+    pub(crate) fn set_colorscheme_db(
+        &mut self,
+        conn: &rusqlite::Connection,
+        colorscheme: u32,
+    ) -> Result<(), HErr> {
+        conn.execute(include_str!("sql/update_colorscheme.sql"), &[colorscheme])?;
+
+        self.colorscheme = colorscheme;
+
+        Ok(())
+    }
+}
+
 impl ConfigBuilder {
     /// Adds configuration.
     pub(crate) fn add_db<D>(self, mut conn: D) -> Result<Config, HErr>

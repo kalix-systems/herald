@@ -125,41 +125,26 @@ impl Config {
 
     /// Updates user's display name
     pub fn set_name(&mut self, name: String) -> Result<(), HErr> {
-        crate::contact::set_name(self.id, name.as_str())?;
-
-        self.name = name;
-        Ok(())
+        let db = Database::get()?;
+        self.set_name_db(&db, name)
     }
 
     /// Updates user's profile picture
     pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-        let path = crate::contact::set_profile_picture(
-            self.id,
-            profile_picture,
-            self.profile_picture.as_ref().map(|s| s.as_str()),
-        )?;
-
-        self.profile_picture = path;
-
-        Ok(())
+        let db = Database::get()?;
+        self.set_profile_picture_db(&db, profile_picture)
     }
 
     /// Update user's color
     pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-        crate::contact::set_color(self.id, color)?;
-        self.color = color;
-
-        Ok(())
+        let db = Database::get()?;
+        self.set_color_db(&db, color)
     }
 
     /// Update user's colorscheme
     pub fn set_colorscheme(&mut self, colorscheme: u32) -> Result<(), HErr> {
         let db = Database::get()?;
-        db.execute(include_str!("sql/update_colorscheme.sql"), &[colorscheme])?;
-
-        self.colorscheme = colorscheme;
-
-        Ok(())
+        self.set_colorscheme_db(&db, colorscheme)
     }
 }
 

@@ -8,7 +8,7 @@ pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<Str
 }
 
 /// Change name of contact by their `id`
-pub fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> Result<(), HErr> {
+pub(crate) fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/update_name.sql"))?;
 
     stmt.execute(params![name, id])?;
