@@ -1,10 +1,13 @@
 use super::*;
-use crate::{config::test_config, womp};
+use crate::{
+    config::{self, test_config},
+    womp,
+};
 use serial_test_derive::serial;
 use std::str::FromStr;
 
 #[test]
-#[serial]
+#[serial(attach)]
 fn make_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
@@ -38,17 +41,18 @@ fn outbound_message_attachment() {
 }
 
 #[test]
-#[serial]
+#[serial(attach)]
 fn inbound_message_attachment() {
     use crate::contact::ContactBuilder;
     use std::convert::TryInto;
 
-    Database::reset_all().expect(womp!());
-    test_config();
+    let mut conn = Database::in_memory().expect(womp!());
+    config::db::test_config(&mut conn);
 
     let other = ContactBuilder::new("hi".try_into().expect(womp!()))
-        .add()
+        .add_db(&mut conn)
         .expect(womp!());
+
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
 
@@ -60,9 +64,9 @@ fn inbound_message_attachment() {
         .timestamp(Time::now())
         .attachments(vec![attach])
         .conversation_id(other.pairwise_conversation);
-    builder.store().expect(womp!());
+    builder.store_db(&mut conn).expect(womp!());
 
-    let meta = super::get(&mid).expect(womp!());
+    let meta = db::get(&conn, &mid).expect(womp!());
     let meta = meta.into_flat_strings().expect(womp!());
 
     assert_eq!(meta.len(), 1);

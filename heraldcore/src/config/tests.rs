@@ -23,7 +23,7 @@ fn simple_add_get_set_config() {
 }
 
 #[test]
-#[serial]
+#[serial(fs)]
 fn complicated_add_get_set_config() {
     let mut conn = Database::in_memory().expect(womp!());
 

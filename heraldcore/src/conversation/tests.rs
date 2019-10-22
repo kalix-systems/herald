@@ -113,7 +113,7 @@ fn matches() {
 }
 
 #[test]
-#[serial]
+#[serial(fs)]
 fn set_prof_pic() {
     let mut conn = Database::in_memory().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);

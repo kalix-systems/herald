@@ -8,6 +8,8 @@ use std::{
 };
 use tar::{Archive, Builder};
 
+pub(crate) mod db;
+
 /// A message attachmentent
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
@@ -50,31 +52,10 @@ impl Attachment {
     }
 }
 
-pub(super) fn add_db<'a, A: Iterator<Item = &'a Path>>(
-    conn: &rusqlite::Connection,
-    msg_id: &MsgId,
-    attachments: A,
-) -> Result<(), HErr> {
-    let mut stmt = conn.prepare(include_str!("../sql/add_attachment.sql"))?;
-    for (ix, a) in attachments.enumerate() {
-        let hash_dir = a.to_str().ok_or(NE!())?;
-        let ix = ix as i64;
-        stmt.execute(params![msg_id, ix, hash_dir])?;
-    }
-    Ok(())
-}
-
 /// Gets all attachments associated with a message id
 pub fn get(msg_id: &MsgId) -> Result<AttachmentMeta, HErr> {
     let db = Database::get()?;
-    let mut stmt = db.prepare(include_str!("../sql/get_attachments.sql"))?;
-
-    let attachments: Result<Vec<PathBuf>, HErr> = stmt
-        .query_map(params![msg_id], |row| row.get::<_, String>(0))?
-        .map(|path_string| Ok(PathBuf::from(path_string?)))
-        .collect();
-
-    Ok(AttachmentMeta(attachments?))
+    db::get(&db, msg_id)
 }
 
 /// Attachments
@@ -83,6 +64,8 @@ pub struct AttachmentMeta(Vec<PathBuf>);
 
 impl AttachmentMeta {
     /// Converts `AttachmentMeta` into a vector of `String`s
+    ///
+    /// Note: this will ignore empty top level directories.
     pub fn into_flat_strings(self) -> Result<Vec<String>, HErr> {
         let mut out = Vec::with_capacity(self.0.len());
         for p in self.0 {

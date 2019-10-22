@@ -60,7 +60,7 @@ fn contact_profile_picture() {
 }
 
 #[test]
-#[serial]
+#[serial(fs)]
 fn fs_profile_picture() {
     let mut conn = Database::in_memory().expect(womp!());
 
