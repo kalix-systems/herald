@@ -209,9 +209,9 @@ impl MembersTrait for Members {
         true
     }
 
-    fn poll_update(&mut self) -> bool {
-        let cid = &ret_none!(self.conversation_id, false);
-        let rx = ret_none!(shared::RXS.get(cid), false);
+    fn fetch_more(&mut self) {
+        let cid = &ret_none!(self.conversation_id);
+        let rx = ret_none!(shared::RXS.get(cid));
 
         use shared::MemberUpdate::*;
 
@@ -232,7 +232,6 @@ impl MembersTrait for Members {
                 }
             }
         }
-        true
     }
 }
 

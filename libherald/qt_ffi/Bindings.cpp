@@ -792,7 +792,6 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
-    bool conversations_poll_update(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -1053,7 +1052,6 @@ extern "C" {
     bool members_filter_regex_get(const Members::Private*);
     void members_filter_regex_set(Members::Private*, bool);
     bool members_add_to_conversation(Members::Private*, const ushort*, int);
-    bool members_poll_update(Members::Private*);
     bool members_remove_from_conversation_by_index(Members::Private*, quint64);
     bool members_toggle_filter_regex(Members::Private*);
 };
@@ -1449,7 +1447,6 @@ extern "C" {
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
     void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
-    bool messages_poll_update(Messages::Private*);
 };
 
 extern "C" {
@@ -1769,7 +1766,6 @@ extern "C" {
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
-    bool users_poll_update(Users::Private*);
     void users_profile_picture_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     bool users_toggle_filter_regex(Users::Private*);
 };
@@ -2091,10 +2087,6 @@ bool Conversations::filterRegex() const
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
 }
-bool Conversations::pollUpdate()
-{
-    return conversations_poll_update(m_d);
-}
 bool Conversations::removeConversation(quint64 row_index)
 {
     return conversations_remove_conversation(m_d, row_index);
@@ -2287,10 +2279,6 @@ void Members::setFilterRegex(bool v) {
 bool Members::addToConversation(const QString& id)
 {
     return members_add_to_conversation(m_d, id.utf16(), id.size());
-}
-bool Members::pollUpdate()
-{
-    return members_poll_update(m_d);
 }
 bool Members::removeFromConversationByIndex(quint64 row_index)
 {
@@ -2586,10 +2574,6 @@ QString Messages::messageBodyById(const QByteArray& msg_id) const
     messages_message_body_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
     return s;
 }
-bool Messages::pollUpdate()
-{
-    return messages_poll_update(m_d);
-}
 NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
     QObject(parent),
     m_d(nullptr),
@@ -2729,10 +2713,6 @@ QString Users::nameById(const QString& id) const
     QString s;
     users_name_by_id(m_d, id.utf16(), id.size(), &s, set_qstring);
     return s;
-}
-bool Users::pollUpdate()
-{
-    return users_poll_update(m_d);
 }
 QString Users::profilePictureById(const QString& id) const
 {

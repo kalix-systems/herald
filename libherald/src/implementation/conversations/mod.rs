@@ -208,24 +208,22 @@ impl ConversationsTrait for Conversations {
         self.inner_filter();
     }
 
-    fn poll_update(&mut self) -> bool {
+    fn fetch_more(&mut self) {
         use ConvUpdates::*;
         for update in CONV_BUS.rx.try_iter() {
             match update {
-                NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
-                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid), false),
+                NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
+                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
                 NewActivity(cid) => {
-                    let pos = ret_none!(
-                        self.list
-                            .iter()
-                            .position(|c| c.inner.conversation_id == cid),
-                        false
-                    );
+                    let pos = ret_none!(self
+                        .list
+                        .iter()
+                        .position(|c| c.inner.conversation_id == cid));
 
                     // NOTE: This is very important. If this check isn't here,
                     // the program will crash.
                     if pos == 0 {
-                        return true;
+                        return;
                     }
 
                     self.model.begin_move_rows(pos, pos, 0);
@@ -235,7 +233,6 @@ impl ConversationsTrait for Conversations {
                 }
             }
         }
-        true
     }
 
     /// Indicates whether regex search is activated
