@@ -175,7 +175,11 @@ impl State {
         Ok(())
     }
 
-    pub(crate) async fn req_handler_store<B, I, O, F, Fut>(&self, req: B, f: F) -> Result<Vec<u8>, Error>
+    pub(crate) async fn req_handler_store<B, I, O, F, Fut>(
+        &self,
+        req: B,
+        f: F,
+    ) -> Result<Vec<u8>, Error>
     where
         B: Buf,
         I: for<'a> Deserialize<'a>,
