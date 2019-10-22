@@ -33,6 +33,7 @@ Pane {
     }
 
     //this does not exist anymore
+
     /**
     ///--- Username and Settings gear button
     SBUtils.ConfigBar {
@@ -40,11 +41,10 @@ Pane {
     }
     **/
 
-
     ///--- SearchBar for contacts, add contact button
     Column {
         id: utilityBar
-       // anchors.top: toolBar.bottom
+        // anchors.top: toolBar.bottom
         width: parent.width
         Loader {
             property string searchPlaceholder: ""

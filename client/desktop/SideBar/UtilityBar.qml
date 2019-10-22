@@ -117,8 +117,6 @@ Component {
                 }
             }
 
-
-
             Menu {
                 id: utilityOptionsMenu
                 MenuItem {
