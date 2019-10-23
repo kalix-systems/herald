@@ -100,3 +100,4 @@ lines[-2] = "\n".join(parts)
 
 with open("qml.qrc", "w") as f:
     f.write("\n".join(lines))
+    f.write("\n")
