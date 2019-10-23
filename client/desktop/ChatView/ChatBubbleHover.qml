@@ -6,7 +6,7 @@ import QtQuick.Layouts 1.12
 
 MouseArea {
     id: chatBubbleHitbox
-    z: QmlCfg.underlayZ
+    z: CmnCfg.underlayZ
     propagateComposedEvents: true
     hoverEnabled: true
     // KAAVYA: there has to be a better way to do this.
@@ -28,11 +28,11 @@ MouseArea {
             // Ternary is okay, types are enforced, cases are explicit.
             left: outbound ? parent.left : undefined
             right: !outbound ? parent.right : undefined
-            margins: QmlCfg.margin
+            margins: CmnCfg.margin
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/options-icon.svg"
-        z: QmlCfg.overlayZ
+        z: CmnCfg.overlayZ
 
         onClicked: messageOptionsMenu.open()
 
@@ -55,7 +55,7 @@ MouseArea {
             // Ternary is okay, types are enforced, cases are explicit.
             right: outbound ? messageOptionsButton.left : undefined
             left: !outbound ? messageOptionsButton.right : undefined
-            margins: QmlCfg.margin
+            margins: CmnCfg.margin
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/reply-icon.svg"

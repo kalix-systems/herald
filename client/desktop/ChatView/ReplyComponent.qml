@@ -17,10 +17,10 @@ import LibHerald 1.0
 //NPB: just looks kind bad
 Rectangle {
     id: wrapper
-    radius: QmlCfg.radius
+    radius: CmnCfg.radius
     color: startColor
     width: parent.width
-    height: Math.max(textCol.height + QmlCfg.margin, 20)
+    height: Math.max(textCol.height + CmnCfg.margin, 20)
 
     property color startColor
     property string opText: parent.opText
@@ -30,7 +30,7 @@ Rectangle {
         id: exitButton
 
         anchors {
-            margins: QmlCfg.smallMargin
+            margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
@@ -51,7 +51,7 @@ Rectangle {
             ColorOverlay {
                 anchors.fill: x
                 source: x
-                color: QmlCfg.palette.iconMatte
+                color: CmnCfg.palette.iconMatte
             }
         }
 
@@ -67,30 +67,30 @@ Rectangle {
         Label {
             id: sender
             text: opName
-            Layout.margins: QmlCfg.smallMargin
-            Layout.bottomMargin: QmlCfg.smallMargin
-            Layout.preferredHeight: QmlCfg.margin
+            Layout.margins: CmnCfg.smallMargin
+            Layout.bottomMargin: CmnCfg.smallMargin
+            Layout.preferredHeight: CmnCfg.margin
             font.bold: true
-            color: QmlCfg.palette.mainTextColor
+            color: CmnCfg.palette.mainTextColor
         }
 
         TextMetrics {
             id: opTextMetrics
             text: opText
-            elideWidth: (wrapper.width - QmlCfg.smallMargin) * 2
+            elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
 
         TextEdit {
             text: opTextMetrics.elidedText
-            Layout.maximumWidth: wrapper.width - QmlCfg.smallMargin
-            Layout.margins: QmlCfg.smallMargin
+            Layout.maximumWidth: wrapper.width - CmnCfg.smallMargin
+            Layout.margins: CmnCfg.smallMargin
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             Layout.alignment: Qt.AlignLeft
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color: QmlCfg.palette.mainTextColor
+            color: CmnCfg.palette.mainTextColor
         }
     }
 

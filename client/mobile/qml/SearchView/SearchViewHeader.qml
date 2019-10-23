@@ -6,8 +6,8 @@ import "../Common"
 
 RowLayout {
     anchors.fill: parent
-    anchors.margins: QmlCfg.units.dp(12)
-    spacing: QmlCfg.units.dp(12)
+    anchors.margins: CmnCfg.units.dp(12)
+    spacing: CmnCfg.units.dp(12)
 
     IconButton {
         id: backButton

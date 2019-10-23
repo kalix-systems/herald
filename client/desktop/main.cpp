@@ -21,9 +21,8 @@ int main(int argc, char* argv[])
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
 
-
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
-                           1, 0, "QmlCfg");
+                           1, 0, "CmnCfg");
 
   app.setOrganizationName("Kalix Systems");
   app.setOrganizationDomain("kalix.io");

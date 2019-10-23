@@ -16,7 +16,7 @@ Item {
     //  AvatarMain {
     //      labelComponent: ConversationLabel
     //           {
-    //              color : QmlCfg.avatarColors[colorCode]
+    //              color : CmnCfg.avatarColors[colorCode]
     //              ...
     //            }
     //        }
@@ -24,16 +24,16 @@ Item {
     property Component labelComponent: ConversationLabel {}
     // the initials to display in the icon
     property string initials
-    readonly property real innerMargins: QmlCfg.smallSpacer
-    property real topTextMargin: QmlCfg.units.dp(4)
-    property real bottomTextMargin: QmlCfg.units.dp(4)
+    readonly property real innerMargins: CmnCfg.smallSpacer
+    property real topTextMargin: CmnCfg.units.dp(4)
+    property real bottomTextMargin: CmnCfg.units.dp(4)
     anchors.fill: parent
 
     AvatarIcon {
         id: avatarIcon
         color: iconColor
         initials: parent.initials
-        height: QmlCfg.avatarHeight
+        height: CmnCfg.avatarHeight
         width: height
         pfpUrl: pfpPath
         anchors {
@@ -50,8 +50,8 @@ Item {
             right: parent.right
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-            leftMargin: QmlCfg.units.dp(12)
-            rightMargin: QmlCfg.units.dp(12)
+            leftMargin: CmnCfg.units.dp(12)
+            rightMargin: CmnCfg.units.dp(12)
         }
         Loader {
             id: labelContent

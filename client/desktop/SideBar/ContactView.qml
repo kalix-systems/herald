@@ -30,7 +30,7 @@ ListView {
         id: contactItem
 
         // This ternary is okay, types are enforced by QML
-        height: visible ? QmlCfg.convoHeight : 0
+        height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
         visible: matched
 
@@ -43,7 +43,7 @@ ListView {
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
-                z: QmlCfg.overlayZ
+                z: CmnCfg.overlayZ
                 anchors.fill: parent
                 onClicked: {
                     if (convoPane.state == "newGroupState") {

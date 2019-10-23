@@ -31,10 +31,10 @@ Row {
     property bool isDefault: true
     property bool inLayout: false
 
-    spacing: QmlCfg.padding
+    spacing: CmnCfg.padding
 
     ///--- Circle with initial
-    leftPadding: QmlCfg.margin
+    leftPadding: CmnCfg.margin
     anchors.verticalCenter: inLayout ? undefined : parent.verticalCenter
     anchors.top: inLayout ? undefined : parent.top
     Loader {
@@ -49,7 +49,7 @@ Row {
     Column {
         id: textCol
         anchors {
-            topMargin: QmlCfg.margin
+            topMargin: CmnCfg.margin
             verticalCenter: parent.verticalCenter
             top: labelGap === 0 ? undefined : wrapperRow.top
         }
@@ -61,14 +61,14 @@ Row {
             visible: labeled
             text: avatarLabel
             font.bold: true
-            color: !isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.mainTextColor
+            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.mainTextColor
         }
 
         Text {
             id: userName
             visible: labeled
             text: secondaryText
-            color: !isDefault ? QmlCfg.palette.iconFill : QmlCfg.palette.secondaryTextColor
+            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.secondaryTextColor
 
             elide: Text.ElideRight
         }
@@ -82,13 +82,13 @@ Row {
             height: size
             anchors.verticalCenter: parent.verticalCenter
 
-            readonly property color startColor: !!!isDefault ? QmlCfg.palette.iconFill : QmlCfg.avatarColors[colorHash]
+            readonly property color startColor: !!!isDefault ? CmnCfg.palette.iconFill : CmnCfg.avatarColors[colorHash]
             color: startColor
             radius: shape
             Text {
                 text: qsTr(avatarLabel[0].toUpperCase())
                 font.bold: true
-                color: !isDefault ? QmlCfg.avatarColors[colorHash] : QmlCfg.palette.iconFill
+                color: !isDefault ? CmnCfg.avatarColors[colorHash] : CmnCfg.palette.iconFill
 
                 anchors.centerIn: parent
                 font.pixelSize: size * 2 / 3
@@ -100,7 +100,7 @@ Row {
         id: imageAvatar
         Item {
             Rectangle {
-                color: QmlCfg.palette.mainColor
+                color: CmnCfg.palette.mainColor
                 width: size
                 height: size
                 radius: shape

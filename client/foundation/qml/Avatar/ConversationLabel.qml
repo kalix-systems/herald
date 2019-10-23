@@ -27,16 +27,16 @@ Item {
             top: parent.top
             left: parent.left
             right: ts.left
-            rightMargin: QmlCfg.margin
+            rightMargin: CmnCfg.margin
         }
         font {
             bold: true
-            family: QmlCfg.chatFont.name
+            family: CmnCfg.chatFont.name
             pointSize: 17
         }
         elide: "ElideRight"
         text: contactName
-        color: QmlCfg.palette.mainTextColor
+        color: CmnCfg.palette.mainTextColor
     }
 
     Label {
@@ -46,11 +46,11 @@ Item {
             right: parent.right
         }
         font {
-            family: QmlCfg.chatFont.name
+            family: CmnCfg.chatFont.name
             pointSize: 13
         }
         text: lastTimestamp
-        color: QmlCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryTextColor
     }
 
     Label {
@@ -59,15 +59,15 @@ Item {
             left: parent.left
             right: receiptImage.left
             bottom: parent.bottom
-            rightMargin: QmlCfg.margin
+            rightMargin: CmnCfg.margin
         }
         font {
-            family: QmlCfg.chatFont.name
+            family: CmnCfg.chatFont.name
             pointSize: 15
         }
         elide: "ElideRight"
         text: lastBody
-        color: QmlCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryTextColor
     }
 
     Image {
@@ -78,12 +78,12 @@ Item {
         }
         // in the future this should be some function call from common
         source: lastReceipt
-        sourceSize: Qt.size(QmlCfg.units.dp(12), QmlCfg.units.dp(12))
+        sourceSize: Qt.size(CmnCfg.units.dp(12), CmnCfg.units.dp(12))
         mipmap: true
         layer.enabled: true
         layer.samplerName: "maskSource"
         layer.effect: ShaderEffect {
-            property color overlay: QmlCfg.palette.mainTextColor
+            property color overlay: CmnCfg.palette.mainTextColor
             property var source: receiptImage
             fragmentShader: "
 uniform lowp sampler2D source;

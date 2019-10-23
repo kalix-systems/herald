@@ -14,27 +14,27 @@ Item {
         text: label
         font.bold: true
         clip: true
-        color: QmlCfg.palette.mainTextColor
+        color: CmnCfg.palette.mainTextColor
         elide: Text.ElideRight
         anchors {
             top: parent.top
             left: parent.left
             right: timestampLabel.left
-            margins: QmlCfg.margin
+            margins: CmnCfg.margin
         }
     }
 
     Text {
         id: summary
         text: summaryText.trim().split("\n")[0]
-        color: QmlCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryTextColor
         elide: Text.ElideRight
         anchors {
             top: displayName.bottom
             left: parent.left
             right: receiptIcon.left
-            margins: QmlCfg.margin
-            topMargin: QmlCfg.smallMargin
+            margins: CmnCfg.margin
+            topMargin: CmnCfg.smallMargin
         }
     }
 
@@ -42,11 +42,11 @@ Item {
         id: timestampLabel
         text: Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
         font.pixelSize: 10
-        color: QmlCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryTextColor
         anchors {
             top: parent.top
             right: parent.right
-            margins: QmlCfg.margin
+            margins: CmnCfg.margin
         }
     }
 
@@ -60,8 +60,8 @@ Item {
         anchors {
             right: parent.right
             bottom: parent.bottom
-            margins: QmlCfg.margin
-            bottomMargin: QmlCfg.smallMargin
+            margins: CmnCfg.margin
+            bottomMargin: CmnCfg.smallMargin
         }
     }
 }

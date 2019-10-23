@@ -18,7 +18,7 @@ Page {
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
             bottom: newAccButton.top
-            bottomMargin: QmlCfg.units.dp(30)
+            bottomMargin: CmnCfg.units.dp(30)
         }
     }
 

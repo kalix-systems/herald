@@ -12,7 +12,7 @@ Item {
     }
 
     Rectangle {
-        height: QmlCfg.avatarHeight
+        height: CmnCfg.avatarHeight
         width: height
         radius: groupAvatar ? 0 : width
         color: parent.color
@@ -21,7 +21,7 @@ Item {
             font.bold: true
             font.pixelSize: parent.width / initials.length
             anchors.centerIn: parent
-            color: QmlCfg.palette.iconFill
+            color: CmnCfg.palette.iconFill
         }
     }
 }

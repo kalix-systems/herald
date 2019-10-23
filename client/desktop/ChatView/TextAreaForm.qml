@@ -43,7 +43,7 @@ Rectangle {
 
     property var replyId
 
-    color: QmlCfg.palette.mainColor
+    color: CmnCfg.palette.mainColor
     clip: true
 
     height: containerCol.height
@@ -69,7 +69,7 @@ Rectangle {
         id: cameraButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.leftMargin: QmlCfg.margin
+        anchors.leftMargin: CmnCfg.margin
         source: "qrc:/camera-icon.svg"
     }
     **/
@@ -81,12 +81,12 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            leftMargin: QmlCfg.smallMargin
-            rightMargin: QmlCfg.smallMargin
-            topMargin: QmlCfg.smallMargin
+            leftMargin: CmnCfg.smallMargin
+            rightMargin: CmnCfg.smallMargin
+            topMargin: CmnCfg.smallMargin
         }
 
-        topPadding: QmlCfg.smallMargin
+        topPadding: CmnCfg.smallMargin
 
         Loader {
             id: replyLoader
@@ -95,7 +95,7 @@ Rectangle {
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
-                startColor: owned ? QmlCfg.palette.tertiaryColor : QmlCfg.avatarColors[contactsModel.colorById(replyUid)]
+                startColor: owned ? CmnCfg.palette.tertiaryColor : CmnCfg.avatarColors[contactsModel.colorById(replyUid)]
             }
             width: scrollView.width
         }
@@ -118,18 +118,18 @@ Rectangle {
             TextArea {
                 id: chatText
                 background: Rectangle {
-                    color: QmlCfg.palette.mainColor
+                    color: CmnCfg.palette.mainColor
                     anchors {
                         fill: parent
                         horizontalCenter: parent.horizontalCenter
                         bottom: parent.bottom
                     }
-                    radius: QmlCfg.radius
+                    radius: CmnCfg.radius
                     Keys.forwardTo: keysProxy
                     Keys.onEscapePressed: focus = false
                 }
-                selectionColor: QmlCfg.palette.tertiaryColor
-                color: QmlCfg.palette.mainTextColor
+                selectionColor: CmnCfg.palette.tertiaryColor
+                color: CmnCfg.palette.mainTextColor
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Send a Message ..."

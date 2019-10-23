@@ -18,7 +18,7 @@ import "../common/js/utils.mjs" as Utils
 ToolBar {
     property var currentAvatar
     clip: true
-    height: QmlCfg.toolbarHeight
+    height: CmnCfg.toolbarHeight
     // JH: factor z values into the config
     z: 5
 
@@ -28,14 +28,14 @@ ToolBar {
     }
 
     background: Rectangle {
-        color: QmlCfg.avatarColors[chatBarAvatar.colorHash]
+        color: CmnCfg.avatarColors[chatBarAvatar.colorHash]
     }
 
     Common.Avatar {
         id: chatBarAvatar
         anchors.left: parent.left
         // JH: Margin fudging
-        size: QmlCfg.toolbarHeight - QmlCfg.margin
+        size: CmnCfg.toolbarHeight - CmnCfg.margin
         pfpUrl: currentAvatar.pfpUrl
         avatarLabel: currentAvatar.avatarLabel
         colorHash: currentAvatar.colorHash
@@ -70,7 +70,7 @@ ToolBar {
     }
 
     Popup {
-        width: QmlCfg.popupWidth
+        width: CmnCfg.popupWidth
         height: 150
         id: newMemberPopup
         TextArea {

@@ -9,7 +9,7 @@ Page {
     id: cvMainView
     header: CVHeader {}
     background: Rectangle {
-        color: QmlCfg.palette.mainColor
+        color: CmnCfg.palette.mainColor
     }
 
     // the body of this entire element
@@ -19,8 +19,8 @@ Page {
         clip: true
         boundsBehavior: ListView.StopAtBounds
 
-        anchors.margins: QmlCfg.units.dp(12)
-        spacing: QmlCfg.units.dp(16)
+        anchors.margins: CmnCfg.units.dp(12)
+        spacing: CmnCfg.units.dp(16)
 
         anchors.fill: parent
         model: conversationsModel
@@ -41,7 +41,7 @@ Page {
         anchors {
             bottom: parent.bottom
             right: parent.right
-            margins: QmlCfg.units.dp(12)
+            margins: CmnCfg.units.dp(12)
         }
 
         iconSource: "qrc:/pencil-icon-black.svg"

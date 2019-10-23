@@ -8,9 +8,9 @@ Label {
     property string senderName
     readonly property bool emptyName: senderName === ""
     text: senderName
-    Layout.margins: emptyName ? 0 : QmlCfg.smallMargin
-    Layout.bottomMargin: emptyName ? QmlCfg.smallMargin : QmlCfg.margin
-    Layout.preferredHeight: !emptyName ? QmlCfg.margin : 0
+    Layout.margins: emptyName ? 0 : CmnCfg.smallMargin
+    Layout.bottomMargin: emptyName ? CmnCfg.smallMargin : CmnCfg.margin
+    Layout.preferredHeight: !emptyName ? CmnCfg.margin : 0
     font.bold: true
-    color: QmlCfg.palette.mainTextColor
+    color: CmnCfg.palette.mainTextColor
 }

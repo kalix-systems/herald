@@ -13,7 +13,7 @@ Component {
         height: groupFlow.height
         width: parent.width
         id: wrapperRect
-        color: QmlCfg.palette.mainColor
+        color: CmnCfg.palette.mainColor
 
         Common.ButtonForm {
             id: backbutton
@@ -35,13 +35,13 @@ Component {
 
         Flow {
 
-            topPadding: QmlCfg.smallMargin
-            leftPadding: QmlCfg.smallMargin
+            topPadding: CmnCfg.smallMargin
+            leftPadding: CmnCfg.smallMargin
             anchors.left: backbutton.right
             anchors.right: frontbutton.left
 
             id: groupFlow
-            spacing: QmlCfg.smallMargin / 2
+            spacing: CmnCfg.smallMargin / 2
 
             Repeater {
                 id: contactBubbleRepeater
@@ -51,7 +51,7 @@ Component {
                 ContactBubble {
                     text: contactsModel.nameById(memberId)
                     userId: memberId
-                    defaultColor: QmlCfg.avatarColors[contactsModel.colorById(
+                    defaultColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                           memberId)]
 
                     Layout.alignment: Qt.AlignLeft
@@ -63,12 +63,12 @@ Component {
             TextArea {
                 id: searchText
                 focus: true
-                leftPadding: QmlCfg.smallMargin
+                leftPadding: CmnCfg.smallMargin
                 // replace this with a working length property
                 placeholderText: "Add people"
                 verticalAlignment: TextEdit.AlignVCenter
                 background: Rectangle {
-                    color: QmlCfg.palette.mainColor
+                    color: CmnCfg.palette.mainColor
                 }
 
                 //PAUL: move this logic to C++

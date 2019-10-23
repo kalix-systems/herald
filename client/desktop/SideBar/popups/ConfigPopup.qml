@@ -10,8 +10,8 @@ import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {
     id: configPopup
-    width: QmlCfg.configWidth
-    height: QmlCfg.configHeight
+    width: CmnCfg.configWidth
+    height: CmnCfg.configHeight
     maximumHeight: height
     minimumHeight: height
     maximumWidth: width
@@ -68,7 +68,7 @@ Window {
                     enabled: false //!config.configId
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.configId
-                    selectionColor: QmlCfg.palette.tertiaryColor
+                    selectionColor: CmnCfg.palette.tertiaryColor
                 }
 
                 TextField {
@@ -76,7 +76,7 @@ Window {
                     maximumLength: 256
                     property bool usernameValid: true
                     placeholderText: "Enter Username"
-                    selectionColor: QmlCfg.palette.tertiaryColor
+                    selectionColor: CmnCfg.palette.tertiaryColor
                 }
             }
 
@@ -97,7 +97,7 @@ Window {
             id: uiPreferences
             Button {
                 text: "toggle solarized dark"
-                onClicked: QmlCfg.theme = QmlCfg.theme === 1 ? 0 : 1
+                onClicked: CmnCfg.theme = CmnCfg.theme === 1 ? 0 : 1
             }
         }
         Item {

@@ -21,11 +21,11 @@ Component {
         id: utilityBar
         anchors.left: parent.left
         anchors.right: parent.right
-        height: QmlCfg.toolbarHeight
+        height: CmnCfg.toolbarHeight
 
         background: Rectangle {
             anchors.fill: parent
-            color: QmlCfg.palette.secondaryColor
+            color: CmnCfg.palette.secondaryColor
         }
 
         RowLayout {
@@ -33,9 +33,9 @@ Component {
 
             Common.Avatar {
                 id: configAvatar
-                Layout.topMargin: QmlCfg.smallMargin
-                Layout.rightMargin: QmlCfg.smallMargin
-                Layout.leftMargin: QmlCfg.smallMargin
+                Layout.topMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
+                Layout.leftMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft | Qt.AlignHCenter
                 avatarLabel: config.name
                 labeled: false
@@ -43,7 +43,7 @@ Component {
                 pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
                 labelGap: 0
                 // JH: Bad margin semantics
-                size: parent.height - 2 * QmlCfg.margin
+                size: parent.height - 2 * CmnCfg.margin
                 isDefault: true
                 inLayout: true
             }
@@ -53,14 +53,14 @@ Component {
                 Layout.alignment: Qt.AlignHCenter
                 height: parent.height
                 width: 2
-                color: QmlCfg.palette.mainColor
+                color: CmnCfg.palette.mainColor
             }
 
             Text {
                 text: "Conversations"
-                font.pixelSize: QmlCfg.headerSize
+                font.pixelSize: CmnCfg.headerSize
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                color: QmlCfg.palette.mainTextColor
+                color: CmnCfg.palette.mainTextColor
             }
 
             Item {
@@ -70,7 +70,7 @@ Component {
             Common.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
-                Layout.leftMargin: QmlCfg.smallMargin
+                Layout.leftMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 //this is a vertical center offset
                 Layout.topMargin: 1
@@ -85,8 +85,8 @@ Component {
             Common.ButtonForm {
                 id: newMessageButton
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                // Layout.leftMargin: QmlCfg.margin
-                // Layout.rightMargin: QmlCfg.margin
+                // Layout.leftMargin: CmnCfg.margin
+                // Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/pencil-icon-black.svg"
                 z: -1
 
@@ -104,8 +104,8 @@ Component {
                 id: newContactButton
 
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                //  Layout.leftMargin: QmlCfg.margin
-                Layout.rightMargin: QmlCfg.margin
+                //  Layout.leftMargin: CmnCfg.margin
+                Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/options-icon.svg"
 
                 MouseArea {

@@ -25,12 +25,12 @@ ScrollView {
                 width: 100
                 border.color: image.focus ? "light blue" : "black"
                 border.width: image.focus ? 2 : 1
-                radius: QmlCfg.radius
+                radius: CmnCfg.radius
                 clip: true
                 Image {
                     id: image
                     anchors.fill: parent
-                    anchors.margins: QmlCfg.smallMargin
+                    anchors.margins: CmnCfg.smallMargin
                     source: "file:" + attachmentPath
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
@@ -45,7 +45,7 @@ ScrollView {
                     Button {
                         anchors.top: parent.top
                         anchors.right: parent.right
-                        anchors.margins: QmlCfg.smallMargin
+                        anchors.margins: CmnCfg.smallMargin
                         background: Rectangle {
                             color: "transparent"
                             width: x.width

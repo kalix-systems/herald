@@ -21,7 +21,7 @@ RESOURCES += \
 SOURCES   += main.cpp
 
 # libherald headers, source, and libs
-include(../libHerald/libHerald.pri)
+include(../foundation/foundation.pri)
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

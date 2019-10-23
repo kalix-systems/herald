@@ -7,10 +7,10 @@ TextField {
 
     placeholderText: "Enter Username..."
 
-    width: QmlCfg.units.gu(15)
+    width: CmnCfg.units.gu(15)
 
     background: Rectangle {
         color: "#FFFFFF"
-        radius: QmlCfg.radius
+        radius: CmnCfg.radius
     }
 }

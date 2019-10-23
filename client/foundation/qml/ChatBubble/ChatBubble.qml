@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 Rectangle {
     id: background
-    property color bubbleColor: QmlCfg.palette.secondaryColor
+    property color bubbleColor: CmnCfg.palette.secondaryColor
     property color senderColor: "white"
     property string receiptImage: ""
     property string friendlyTimestamp: ""
@@ -22,7 +22,7 @@ Rectangle {
         anchors.right: !outbound ? contentLoader.left : undefined
         anchors.left: outbound ? contentLoader.right : undefined
         height: parent.height
-        width: QmlCfg.margin
+        width: CmnCfg.margin
         color: senderColor
     }
 

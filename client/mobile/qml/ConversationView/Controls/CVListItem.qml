@@ -21,8 +21,8 @@ Rectangle {
     // may be reset upon forking a conversation
     property Messages ownedMessages
 
-    height: QmlCfg.avatarHeight
-    color: QmlCfg.palette.mainColor
+    height: CmnCfg.avatarHeight
+    color: CmnCfg.palette.mainColor
 
     // prevent animation spill over
     clip: true
@@ -34,7 +34,7 @@ Rectangle {
 
     AvatarMain {
         id: avatar
-        iconColor: QmlCfg.avatarColors[colorCode]
+        iconColor: CmnCfg.avatarColors[colorCode]
         anchors.verticalCenter: parent.verticalCenter
         initials: CVJS.initialize(title)
         labelComponent: ConversationLabel {
@@ -51,7 +51,7 @@ Rectangle {
         id: splash
         width: 0
         height: width
-        color: QmlCfg.palette.iconMatte
+        color: CmnCfg.palette.iconMatte
         opacity: 0
         radius: width
         transform: Translate {
@@ -65,7 +65,7 @@ Rectangle {
         NumberAnimation {
             target: splash
             property: "width"
-            duration: QmlCfg.units.longDuration
+            duration: CmnCfg.units.longDuration
             easing.type: Easing.InOutQuad
             from: parent.width / 2
             to: parent.width * 2
@@ -73,7 +73,7 @@ Rectangle {
         NumberAnimation {
             target: splash
             property: "opacity"
-            duration: QmlCfg.units.longDuration
+            duration: CmnCfg.units.longDuration
             easing.type: Easing.InOutQuad
             from: 0.2
             to: 0

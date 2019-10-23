@@ -6,7 +6,7 @@ import LibHerald 1.0
 Button {
     property bool takesModifier: false
     property string baseEmoji: ""
-    property string emoji: takesModifier ? baseEmoji + QmlCfg.skinSwatchList[QmlCfg.skinSwatchIndex] : baseEmoji
+    property string emoji: takesModifier ? baseEmoji + CmnCfg.skinSwatchList[CmnCfg.skinSwatchIndex] : baseEmoji
     property color lowlight: "light gray"
 
     onClicked: maskShape.send(emoji)

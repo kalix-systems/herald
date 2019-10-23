@@ -9,18 +9,18 @@ ToolBar {
     id: conversationViewHeader
 
     clip: true
-    height: QmlCfg.toolbarHeight
+    height: CmnCfg.toolbarHeight
 
     background: Rectangle {
-        color: QmlCfg.palette.secondaryColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     RowLayout {
         anchors.fill: parent
         Row {
             Layout.alignment: Qt.AlignLeft
-            Layout.leftMargin: QmlCfg.units.dp(12)
-            spacing: QmlCfg.units.dp(16)
+            Layout.leftMargin: CmnCfg.units.dp(12)
+            spacing: CmnCfg.units.dp(16)
             IconButton {
                 id: drawerButton
                 imageSource: "qrc:/hamburger-icon.svg"
@@ -29,18 +29,18 @@ ToolBar {
                 id: stateLabel
                 text: "Messages"
                 font {
-                    pointSize: QmlCfg.chatPreviewSize
-                    family: QmlCfg.chatFont.name
+                    pointSize: CmnCfg.chatPreviewSize
+                    family: CmnCfg.chatFont.name
                 }
                 anchors.verticalCenter: parent.verticalCenter
-                color: QmlCfg.palette.iconMatte
+                color: CmnCfg.palette.iconMatte
             }
         }
 
         Row {
             Layout.alignment: Qt.AlignRight
-            Layout.rightMargin: QmlCfg.units.dp(12)
-            spacing: QmlCfg.units.dp(12)
+            Layout.rightMargin: CmnCfg.units.dp(12)
+            spacing: CmnCfg.units.dp(12)
 
             IconButton {
                 id: searchButton
