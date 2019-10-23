@@ -39,7 +39,7 @@ by modifying `tsconfig.json`.
 To compile the files, rename them, and add new files to `qml.qrc` run:
 
 ```bash
-$ ./run_tsc.py
+$ ./run_tsc
 ```
 
 from the `heraldqtDesktop` root directory.
