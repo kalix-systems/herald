@@ -14,8 +14,6 @@
         <file>qml/Common/FilteredList.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/State/HeraldGlobals.qml</file>
-        <file>qml/LoginPage/LoginButton.qml</file>
-        <file>qml/LoginPage/LoginField.qml</file>
         <file>qml/Common/StdText.qml</file>
         <file>qml/State/js/transitions.js</file>
         <file>qml/Errors/ErrorHandler.qml</file>
@@ -30,5 +28,7 @@
         <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
         <file>qml/ChatView/Controls/TextMessageList.qml</file>
         <file>qml/ChatView/Controls/ChatTextArea.qml</file>
+        <file>qml/LoginPage/Controls/LoginButton.qml</file>
+        <file>qml/LoginPage/Controls/LoginField.qml</file>
     </qresource>
 </RCC>

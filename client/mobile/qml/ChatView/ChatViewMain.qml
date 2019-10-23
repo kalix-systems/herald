@@ -35,4 +35,10 @@ Page {
             left: parent.left
         }
     }
+
+    Rectangle {
+        anchors.fill: chatTextArea
+        color: CmnCfg.palette.secondaryColor
+        z: -1
+    }
 }

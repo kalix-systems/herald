@@ -1,11 +1,11 @@
 import QtQuick 2.12
 import LibHerald 1.0
+import "qrc:/qml/Common"
 import "qrc:/imports/ChatBubble" as CB
 
 Column {
     id: textMessageCol
     property Messages model: value
-
     topPadding: CmnCfg.padding
     bottomPadding: CmnCfg.padding
     anchors {
