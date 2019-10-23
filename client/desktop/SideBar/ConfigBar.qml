@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "popups" as Popups
 import "../common" as Common
-import "../common/js/utils.mjs" as Utils
+import "../../foundation/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
