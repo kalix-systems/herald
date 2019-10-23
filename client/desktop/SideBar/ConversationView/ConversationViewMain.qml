@@ -30,14 +30,17 @@ ListView {
     delegate: Item {
         id: conversationItem
 
+        readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }
+
+
         property var childChatView: Component {
             CV.ChatView {
-                conversationAvatar: convoRectangle.conversationItemAvatar
+                conversationItem: conversationData
                 ownedConversation: messageModel
             }
         }
@@ -57,9 +60,7 @@ ListView {
             boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
 
-            Av.ConversationLabel {
-
-            }
+            Av.ConversationLabel {}
 
             MouseArea {
                 id: hoverHandler

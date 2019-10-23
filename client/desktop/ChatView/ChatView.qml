@@ -12,8 +12,8 @@ import "../common" as Common
 
 Page {
     id: chatPane
-    property alias messageBar: messageBar
-    property var conversationAvatar
+
+    property var conversationItem
     property Messages ownedConversation
 
     background: Rectangle {
@@ -23,7 +23,7 @@ Page {
 
     header: CVUtils.ChatBar {
         id: messageBar
-        currentAvatar: conversationAvatar
+        conversationTitle: conversationItem.title
     }
 
     Common.Divider {

@@ -16,7 +16,9 @@ import "../../foundation/js/utils.mjs" as Utils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
-    property var currentAvatar
+    property string conversationTitle
+    property Messages ownedConversation: parent.ownedConversation
+
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
@@ -27,10 +29,9 @@ ToolBar {
     Common.Avatar {
         id: chatBarAvatar
         anchors.left: parent.left
+        avatarLabel: conversationTitle
         size: CmnCfg.toolbarHeight - CmnCfg.margin
-        pfpUrl: currentAvatar.pfpUrl
-        avatarLabel: currentAvatar.avatarLabel
-        colorHash: currentAvatar.colorHash
+        colorHash: 3
         isDefault: false
     }
 
