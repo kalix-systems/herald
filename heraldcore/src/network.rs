@@ -9,7 +9,6 @@ use chainmail::block::*;
 use herald_common::*;
 use lazy_static::*;
 use std::{
-    env,
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
 };
@@ -19,12 +18,12 @@ const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
-    static ref SERVER_ADDR: SocketAddr = match env::var("SERVER_ADDR") {
-        Ok(addr) => addr.parse().unwrap_or_else(|e| {
+    static ref SERVER_ADDR: SocketAddr = match option_env!("SERVER_ADDR") {
+        Some(addr) => addr.parse().unwrap_or_else(|e| {
             eprintln!("Provided address {} is invalid: {}", addr, e);
             std::process::abort();
         }),
-        Err(_) => SocketAddr::V4(SocketAddrV4::new(
+        None => SocketAddr::V4(SocketAddrV4::new(
             DEFAULT_SERVER_IP_ADDR.into(),
             DEFAULT_PORT
         )),
