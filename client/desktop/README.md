@@ -45,3 +45,17 @@ $ ./run_tsc.py
 from the `heraldqtDesktop` root directory.
 
 Now simply [import the modules into QML](https://doc.qt.io/qt-5/qtqml-javascript-imports.html).
+
+# Renaming files
+
+To rename QML resource files, you can use the `qmv` script.
+
+Its usage is as follows:
+
+```bash
+./qmv SOURCE DEST QRC_PATH
+```
+
+Where `SOURCE` is the file or directory to be renamed, `DEST` is the name new, and `QRC_PATH` is
+the path to the `qrc` file that should be updated. This will move the directories and update
+the `qrc` file.
