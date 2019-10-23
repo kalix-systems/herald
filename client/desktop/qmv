@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+
+import xml.etree.cElementTree as ET
+from pathlib import Path
+from os import listdir, renames
+import sys
+
+if len(sys.argv) != 4:
+    print("Expected three arguments, found", len(sys.argv) - 1)
+    print("Usage: ./qmv SOURCE DEST QRC_PATH")
+    exit(1)
+
+src, dest, qrc = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
+
+if not (src.exists()):
+    print("%s not found" % src)
+
+if not (qrc.exists()):
+    print("No qrc file found at", qrc)
+    exit(1)
+
+with qrc.open() as f:
+    root = ET.fromstring(f.read())
+
+for file_name in root.iter("file"):
+    file_name.text = file_name.text.replace(str(src), str(dest))
+
+renames(src, dest)
+
+with qrc.open("w") as f:
+    out = ET.tostring(root, encoding="unicode")
+    f.write(out)
