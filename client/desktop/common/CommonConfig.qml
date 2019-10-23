@@ -65,6 +65,15 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
+    ///
+    property alias units: importUnits
+
+    Imports.Units {
+        id: importUnits
+    }
+
+    property FontLoader chatFont: metaTheme.chatFont
+
     Settings {
         id: settings
         property alias theme: cfg.theme

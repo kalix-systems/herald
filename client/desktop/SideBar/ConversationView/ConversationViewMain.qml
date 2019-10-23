@@ -3,11 +3,11 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
+import "qrc:/imports/Avatar" as Av
 import "../../../foundation/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
-import "Controls"
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -57,12 +57,8 @@ ListView {
             boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
 
-            ConversationLabel {
-                anchors.left: parent.conversationItemAvatar.right
-                anchors.right: parent.right
-                label: parent.boxTitle
-                summaryText: JS.formatSummary(messageModel.lastAuthor,
-                                              messageModel.lastBody)
+            Av.ConversationLabel {
+
             }
 
             MouseArea {

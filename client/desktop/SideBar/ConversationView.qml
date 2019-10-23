@@ -56,14 +56,6 @@ ListView {
             boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
 
-            ConversationLabel {
-                anchors.left: parent.conversationItemAvatar.right
-                anchors.right: parent.right
-                label: parent.boxTitle
-                summaryText: JS.formatSummary(messageModel.lastAuthor,
-                                              messageModel.lastBody)
-            }
-
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true
