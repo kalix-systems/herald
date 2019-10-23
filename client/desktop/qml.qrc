@@ -48,5 +48,7 @@
         <file>common/js/Avatar.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
+        <file>SideBar/ConversationView/ConversationViewMain.qml</file>
+        <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
     </qresource>
 </RCC>

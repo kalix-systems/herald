@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "../SideBar" as SBUtils
+import "./ConversationView"
 import "../SideBar/NewConvoComponents" as ConvUtils
 
 Pane {
@@ -22,7 +22,7 @@ Pane {
 
     Component {
         id: contactslvComponent
-        SBUtils.ContactView {
+        ContactView {
             id: contactsListView
             anchors.fill: parent
             model: contactsModel
@@ -31,7 +31,7 @@ Pane {
 
     Component {
         id: convoslvComponent
-        SBUtils.ConversationView {
+        ConversationViewMain {
             id: conversationsListView
             anchors.fill: parent
             model: conversationsModel
