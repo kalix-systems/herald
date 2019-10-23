@@ -17,9 +17,6 @@ import "popups" as Popups
 // Factor Component: FC
 
 /// --- displays a list of conversations
-
-// PAUL: this can be refactored into a filterable list component.
-// we will need this for filtering raw text as well, lets not repeat code.
 ListView {
     id: conversationList
     clip: true
@@ -27,19 +24,16 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     //PAUL: , lets write our own QML formatter so that this is a one liner
-    ScrollBar.vertical: ScrollBar {
-    }
+    ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: conversationItem
 
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }
-
         property var childChatView: Component {
             CV.ChatView {
                 conversationAvatar: convoRectangle.conversationItemAvatar
@@ -69,6 +63,7 @@ ListView {
                 summaryText: JS.formatSummary(messageModel.lastAuthor,
                                               messageModel.lastBody)
             }
+
             MouseArea {
                 id: hoverHandler
                 hoverEnabled: true

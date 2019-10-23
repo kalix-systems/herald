@@ -33,16 +33,13 @@ Component {
 
             Common.Avatar {
                 id: configAvatar
-                Layout.topMargin: CmnCfg.smallMargin
-                Layout.rightMargin: CmnCfg.smallMargin
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignTop | Qt.AlignLeft | Qt.AlignHCenter
+                Layout.margins: CmnCfg.smallMargin
+                Layout.alignment: Qt.AlignCenter
                 avatarLabel: config.name
                 labeled: false
                 colorHash: config.color
                 pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
                 labelGap: 0
-                // JH: Bad margin semantics
                 size: parent.height - 2 * CmnCfg.margin
                 isDefault: true
                 inLayout: true
@@ -92,7 +89,6 @@ Component {
 
                 MouseArea {
                     anchors.fill: parent
-
                     onClicked: {
                         convoPane.state = "newConversationState"
                     }

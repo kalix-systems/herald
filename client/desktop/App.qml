@@ -5,7 +5,6 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "common/js/utils.mjs" as Utils
-import QtQml 2.13
 
 Item {
     id: appRoot
@@ -34,23 +33,6 @@ Item {
 
     Popups.ColorPicker {
         id: avatarColorPicker
-
-        //PAUL 0:  button is here to know index of contact clicked
-        // move this inside the color picker after refactor
-        Button {
-            id: colorSubmissionButton
-            text: "Submit"
-            anchors {
-                right: parent.right
-                bottom: parent.bottom
-            }
-
-            onClicked: {
-                contactsModel.setColor(gsSelectedIndex,
-                                       avatarColorPicker.colorIndex)
-                avatarColorPicker.close()
-            }
-        }
     }
 
     Popups.ConfigPopup {
@@ -86,7 +68,8 @@ Item {
         }
 
         handle: Rectangle {
-            implicitWidth: 1.1
+            id: handle
+            implicitWidth: 1
             color: CmnCfg.palette.borderColor
         }
     }

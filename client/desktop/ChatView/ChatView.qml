@@ -10,9 +10,8 @@ import "./Controls/ConvoTextArea"
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 
-Pane {
+Page {
     id: chatPane
-    padding: 0
     property alias messageBar: messageBar
     property var conversationAvatar
     property Messages ownedConversation
@@ -22,23 +21,22 @@ Pane {
         color: CmnCfg.palette.mainColor
     }
 
-    /// bar at the top that displays the avatar
-    CVUtils.ChatBar {
+    header: CVUtils.ChatBar {
         id: messageBar
         currentAvatar: conversationAvatar
     }
 
     Common.Divider {
-        bottomAnchor: messageBar.bottom
+        anchors.top: parent.top
         color: "black"
+        z: messageBar.z
     }
 
-    /// chat view, shows messages
     CVUtils.ConversationWindowForm {
         id: convWindow
         focus: true
         anchors {
-            top: messageBar.bottom
+            top: parent.top
             bottom: chatTextArea.top
             left: parent.left
             right: parent.right
@@ -58,22 +56,17 @@ Pane {
         id: emojiPickerComp
         EK.EmojiPicker {
             id: emojiPicker
-            window: parent.window
+            z: exit.z + 1
+            window: convWindow
             Component.onCompleted: {
-                // PAUL : Do this whole conneciton from c++ with a lambda.
                 emojiPicker.send.connect(function anon(emoji) {
                     JS.appendToTextArea(emoji, chatTextArea.chatText)
                 })
             }
-            MouseArea {
-                id: block
-                z: exit.z + 1
-                anchors.fill: parent
-                // just blocks input to exit
-            }
         }
     }
 
+    // This should be spawned by the EK
     MouseArea {
         id: exit
         enabled: emoKeysPopup.active
@@ -84,14 +77,10 @@ Pane {
         }
     }
 
-    /// Q: why is this not a popup?
-    /// A: We don't actually want to load 1000 emojis
-    /// in a repeater everytime we open a chat.
     Loader {
         id: emoKeysPopup
         clip: true
         active: false
-        property var window: convWindow
         sourceComponent: emojiPickerComp
         anchors.bottom: chatTextArea.top
         anchors.left: chatTextArea.left

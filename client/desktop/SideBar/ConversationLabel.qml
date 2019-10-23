@@ -5,7 +5,6 @@ import LibHerald 1.0
 
 // KAAVYA 1: this is bad, and paul watches jimmy neutron.
 Item {
-
     property string label: "unknown"
     property string summaryText: ""
 

@@ -17,15 +17,8 @@ import "../common/js/utils.mjs" as Utils
 // FS: Fix scoping
 ToolBar {
     property var currentAvatar
-    clip: true
     height: CmnCfg.toolbarHeight
-    // JH: factor z values into the config
-    z: 5
-
-    anchors {
-        left: parent.left
-        right: parent.right
-    }
+    z: CmnCfg.middleZ
 
     background: Rectangle {
         color: CmnCfg.avatarColors[chatBarAvatar.colorHash]
@@ -34,7 +27,6 @@ ToolBar {
     Common.Avatar {
         id: chatBarAvatar
         anchors.left: parent.left
-        // JH: Margin fudging
         size: CmnCfg.toolbarHeight - CmnCfg.margin
         pfpUrl: currentAvatar.pfpUrl
         avatarLabel: currentAvatar.avatarLabel
@@ -63,7 +55,6 @@ ToolBar {
             MenuItem {
                 text: "Add Member"
                 visible: !isPairwise
-
                 onTriggered: newMemberPopup.open()
             }
         }
