@@ -6,15 +6,11 @@ from os import listdir, renames
 import sys
 
 if len(sys.argv) != 4:
-    print("Expected four arguments, found", len(sys.argv))
+    print("Expected three arguments, found", len(sys.argv) - 1)
     print("Usage: ./qmv SOURCE DEST QRC_PATH")
     exit(1)
 
-src, dest, qrc = sys.argv[1], sys.argv[2], sys.argv[3]
-
-qrc = Path(qrc)
-src = Path(src)
-dest = Path(dest)
+src, dest, qrc = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 
 if not (src.exists()):
     print("%s not found" % src)
@@ -33,5 +29,4 @@ renames(src, dest)
 
 with qrc.open("w") as f:
     out = ET.tostring(root, encoding="unicode")
-    print(out)
     f.write(out)
