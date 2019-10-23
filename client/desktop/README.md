@@ -16,7 +16,7 @@ from the `heraldqtDesktop` root directory.
 ## Configuration files
 
 The compiler options for the TypeScript compiler are specified in
-`tsconfig.json`. `tsc` will run in strict mode targeting ES7/ES2019 and
+`tsconfig.json`. `tsc` will run in strict mode targeting ES2016 (i.e., "ES7") and
 generate corresponding declaration files.
 
 An `eslint` configuration for TypeScript is also included in the file
@@ -39,10 +39,10 @@ by modifying `tsconfig.json`.
 To compile the files, rename them, and add new files to `qml.qrc` run:
 
 ```bash
-$ ./run_tsc
+$ ../scripts/run_tsc
 ```
 
-from the `heraldqtDesktop` root directory.
+from the `desktop` root directory.
 
 Now simply [import the modules into QML](https://doc.qt.io/qt-5/qtqml-javascript-imports.html).
 
@@ -53,7 +53,7 @@ To rename QML resource files, you can use the `qmv` script.
 Its usage is as follows:
 
 ```bash
-./qmv SOURCE DEST QRC_PATH
+../scripts/qmv SOURCE DEST QRC_PATH
 ```
 
 Where `SOURCE` is the file or directory to be renamed, `DEST` is the name new, and `QRC_PATH` is
