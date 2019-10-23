@@ -3,25 +3,19 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 
 Item {
-
-    property alias heraldUtils: heraldUtils
-    property alias heraldState: heraldState
-    property alias networkHandle: networkHandle
     property alias conversationsModel: conversationsModel
-
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    HeraldState {
-        id: heraldState
-    }
-
-    NetworkHandle {
-        id: networkHandle
-    }
+    property alias usersModel: usersModel
+    property alias configModel: configModel
 
     Conversations {
         id: conversationsModel
+    }
+
+    Users {
+        id: usersModel
+    }
+
+    Config {
+        id: configModel
     }
 }

@@ -10,6 +10,8 @@ Page {
     property color bgEndColor: "#5c7598"
     property color bgStartColor: "#5c7598"
 
+    anchors.fill: parent
+
     background: Rectangle {
         color: bgStartColor
     }

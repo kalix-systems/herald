@@ -30,5 +30,6 @@
         <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
+        <file>qml/App.qml</file>
     </qresource>
 </RCC>

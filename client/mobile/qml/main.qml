@@ -8,49 +8,53 @@ import "./LoginPage" as LoginPage
 import "./State" as State
 
 ApplicationWindow {
+    id: root
+
     visible: true
     width: 300
     height: 500
 
-    // contains back end state. Login status,
-    // and boolean configuration init status
-    property alias heraldState: heraldGlobals.heraldState
-    // handles all network polling, emit tryPollUpdate upon
-    // receiving and update
-    property alias networkHandle: heraldGlobals.networkHandle
     // utility code, meant to reduce the amount of js laying
     // around the code base
-    property alias heraldUtils: heraldGlobals.heraldUtils
-    // list of conversations
-    property alias conversationsModel: heraldGlobals.conversationsModel
+    HeraldUtils {
+        id: heraldUtils
+    }
 
-    Loader {
-        id: configLoader
-        active: heraldState.configInit
-        sourceComponent: Config {
-            id: config
-        }
+    // contains back end state. Login status,
+    // and boolean configuration init status
+    HeraldState {
+        id: heraldState
+    }
+
+    // handles all network polling, emit tryPollUpdate upon
+    // receiving and update
+    NetworkHandle {
+        id: networkHandle
     }
 
     // displays error dialog upon output from
     // libherald, meant as a debugging tool
     Errors.ErrorHandler {}
 
-    // initializer for LibHerald models
-    State.HeraldGlobals {
-        id: heraldGlobals
-    }
-
-    // handles transitions for the main stack view, initializes all
-    // views, and sets properties to the correct values.
-    State.AppState {
-        id: appState
-        stackView: mainView
-    }
-
-    StackView {
-        id: mainView
+    Loader {
+        id: loginPageLoader
+        active: !heraldState.configInit
         anchors.fill: parent
-        initialItem: appState.lpMain
+        // windows cannot be filled, unless reffered to as parent
+
+        sourceComponent: LoginPage.LoginLandingPage {
+            id: lpMain
+            anchors.fill: parent
+        }
+    }
+
+    Loader {
+        id: appLoader
+        active: heraldState.configInit
+        anchors.fill: parent
+
+        sourceComponent: App {
+            id: appRoot
+        }
     }
 }

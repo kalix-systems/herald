@@ -6,16 +6,20 @@ import "../LoginPage" as LoginPage
 
 Item {
     property StackView stackView
-    property Component lpMain: LoginPage.LoginLandingPage {}
+    // property Component lpMain: LoginPage.LoginLandingPage {}
     property Component cvMain: CVView.ConversationViewMain {}
     property ChatView.ChatViewMain chatMain: ChatView.ChatViewMain {}
 
-    states: [
-        State {
-            when: !heraldState.configInit
-            name: "setup"
+    // list of conversations
+    property alias conversationsModel: heraldGlobals.conversationsModel
+    property alias usersModel: heraldGlobals.usersModel
+    property alias configModel: heraldGlobals.configModel
 
-        },
+    HeraldGlobals {
+        id: heraldGlobals
+    }
+
+    states: [
         State {
             when: heraldState.configInit
             name: "contact"
