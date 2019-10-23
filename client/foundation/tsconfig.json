@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "strict": true,
+        "target": "ES2017"
+    },
+    "files": [
+        "ts/HeraldTypes.d.ts",
+        "ts/HeraldUITypes.d.ts",
+        "ts/QtTypes.d.ts",
+        "ts/utils.ts"
+    ]
+}

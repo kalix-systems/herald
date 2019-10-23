@@ -5,7 +5,7 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 import "../common" as Common
-import "../common/js/utils.mjs" as Utils
+import "../../foundation/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD

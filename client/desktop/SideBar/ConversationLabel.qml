@@ -1,6 +1,6 @@
 import QtQuick 2.13
 import "./js/ContactView.mjs" as JS
-import "../common/js/utils.mjs" as Utils
+import "../../foundation/js/utils.mjs" as Utils
 import LibHerald 1.0
 
 // KAAVYA 1: this is bad, and paul watches jimmy neutron.

@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
 import "js/Avatar.mjs" as JS
-import "js/utils.mjs" as Utils
+import "../foundation/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD

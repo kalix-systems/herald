@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports"
 import "." as CVUtils
-import "../common/js/utils.mjs" as Utils
+import "../../foundation/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
 // Reveiw Key
