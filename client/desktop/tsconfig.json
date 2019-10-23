@@ -5,8 +5,8 @@
         "target": "ES2017"
     },
     "files": [
-        "ChatView/ts/ChatTextAreaUtils.ts",
-        "ChatView/ts/ChatViewTypes.d.ts",
+        "ChatView/Controls/ts/ChatTextAreaUtils.ts",
+        "ChatView/Controls/ts/ChatViewTypes.d.ts",
         "SideBar/ts/ContactView.ts",
         "SideBar/ts/ContactViewTypes.d.ts",
         "SideBar/popups/ts/ConfigPopupSubmission.ts",

@@ -5,7 +5,8 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import "." as CVUtils
 import "../common/js/utils.mjs" as Utils
-import "./js/ChatTextAreaUtils.mjs" as CTUtils
+import "./Controls/js/ChatTextAreaUtils.mjs" as JS
+import "./Controls/ConvoTextArea"
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 
@@ -61,7 +62,7 @@ Pane {
             Component.onCompleted: {
                 // PAUL : Do this whole conneciton from c++ with a lambda.
                 emojiPicker.send.connect(function anon(emoji) {
-                    CTUtils.appendToTextArea(emoji, chatTextArea.chatText)
+                    JS.appendToTextArea(emoji, chatTextArea.chatText)
                 })
             }
             MouseArea {
@@ -103,16 +104,14 @@ Pane {
     }
 
     ///--- Text entry area, for typing
-    CVUtils.TextAreaForm {
+    ConvoTextArea {
         id: chatTextArea
 
         anchors {
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: CmnCfg.margin
-            topMargin: CmnCfg.margin
-            rightMargin: CmnCfg.margin
+            margins: CmnCfg.margin
             bottomMargin: CmnCfg.smallMargin
         }
 
@@ -120,7 +119,7 @@ Pane {
             MessageBuilder {
                 id: builder
             }
-            Keys.onReturnPressed: CTUtils.enterKeyHandler(
+            Keys.onReturnPressed: JS.enterKeyHandler(
                                       event, chatTextArea.chatText, builder,
                                       // this is actually a text area TODO rename
                                       ownedConversation, chatTextArea)
