@@ -23,7 +23,7 @@ Page {
 
     header: CVUtils.ChatBar {
         id: messageBar
-        conversationTitle: conversationItem.title
+        conversationItem: parent.conversationItem
     }
 
     Common.Divider {

@@ -17,7 +17,6 @@
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>RegistrationPage.qml</file>
         <file>SideBar.qml</file>
-        <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.qml</file>
         <file>SideBar/ConversationLabel.qml</file>
         <file>SideBar/ConversationView.qml</file>

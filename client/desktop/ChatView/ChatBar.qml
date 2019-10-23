@@ -16,22 +16,22 @@ import "../../foundation/js/utils.mjs" as Utils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
-    property string conversationTitle
+    property var conversationItem
     property Messages ownedConversation: parent.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
     background: Rectangle {
-        color: CmnCfg.avatarColors[chatBarAvatar.colorHash]
+        color: CmnCfg.avatarColors[conversationItem.color]
     }
 
     Common.Avatar {
         id: chatBarAvatar
         anchors.left: parent.left
-        avatarLabel: conversationTitle
+        avatarLabel: conversationItem.title
         size: CmnCfg.toolbarHeight - CmnCfg.margin
-        colorHash: 3
+        colorHash: conversationItem.color
         isDefault: false
     }
 

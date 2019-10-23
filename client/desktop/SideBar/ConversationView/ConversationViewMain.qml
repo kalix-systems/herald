@@ -7,6 +7,7 @@ import "qrc:/imports/Avatar" as Av
 import "../../../foundation/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
+import "Controls"
 import "../popups" as Popups
 
 // Reveiw Key
@@ -33,10 +34,10 @@ ListView {
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
+
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }
-
 
         property var childChatView: Component {
             CV.ChatView {
@@ -45,14 +46,14 @@ ListView {
             }
         }
 
+        visible: matched
+        height: visible ? CmnCfg.convoHeight : 0
+        width: parent.width
+
         Members {
             id: convoItemMembers
             conversationId: conversationIdProxy
         }
-
-        visible: matched
-        height: visible ? CmnCfg.convoHeight : 0
-        width: parent.width
 
         Common.PlatonicRectangle {
             id: convoRectangle
@@ -60,7 +61,13 @@ ListView {
             boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
 
-            Av.ConversationLabel {}
+            ConversationLabel {
+                anchors.left: parent.conversationItemAvatar.right
+                anchors.right: parent.right
+                label: parent.boxTitle
+                summaryText: JS.formatSummary(messageModel.lastAuthor,
+                                              messageModel.lastBody)
+            }
 
             MouseArea {
                 id: hoverHandler

@@ -8,6 +8,7 @@ import "../SideBar" as SideBar
 
 // Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
+    property alias conversationItemAvatar: conversationItemAvatar
     // color of the contact/convo
     property int boxColor
     // title of the contact/convo
@@ -22,6 +23,17 @@ Rectangle {
         color: CmnCfg.palette.secondaryColor
         bottomAnchor: parent.bottom
         height: 2
+    }
+
+    Common.Avatar {
+        id: conversationItemAvatar
+        size: CmnCfg.avatarSize
+        labeled: isContact
+        labelGap: CmnCfg.smallMargin
+        avatarLabel: boxTitle
+        colorHash: Utils.unwrapOr(boxColor, 0)
+        pfpUrl: Utils.safeStringOrDefault(picture)
+        secondaryText: isContact ? "@" + userId : ""
     }
 
     states: [
