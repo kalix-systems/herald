@@ -11,7 +11,7 @@ To install the necessary dependencies, run:
 $ npm install
 ```
 
-from the `heraldqtDesktop` root directory.
+from the `client` root directory.
 
 ## Configuration files
 
@@ -20,7 +20,7 @@ The compiler options for the TypeScript compiler are specified in
 generate corresponding declaration files.
 
 An `eslint` configuration for TypeScript is also included in the file
-`.eslintrc.js`.
+`client/.eslintrc.js`.
 
 ## Naming conventions
 
@@ -59,3 +59,5 @@ Its usage is as follows:
 Where `SOURCE` is the file or directory to be renamed, `DEST` is the name new, and `QRC_PATH` is
 the path to the `qrc` file that should be updated. This will move the directories and update
 the `qrc` file.
+
+Don't expect this to be too smart, it assumes you're running it from the same directory as `QRC_PATH`.

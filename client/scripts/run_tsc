@@ -51,7 +51,7 @@ for file in set(tsfiles):
 
 
 # run the compiler
-subprocess.run(["./node_modules/typescript/bin/tsc"], shell=True, check=True)
+subprocess.run(["../node_modules/typescript/bin/tsc"], shell=True, check=True)
 
 for src, dest in src_to_dest.items():
     # renames rather than rename so intermediate
