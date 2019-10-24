@@ -28,13 +28,16 @@ Item {
     readonly property real innerMargins: CmnCfg.smallMargin
     property real topTextMargin: CmnCfg.units.dp(4)
     property real bottomTextMargin: CmnCfg.units.dp(4)
+    property color textColor
+
     anchors.fill: parent
 
     AvatarIcon {
         id: avatarIcon
         color: iconColor
+        textColor: parent.textColor
         initials: parent.initials
-        height: size
+        height: parent.size
         width: height
         pfpUrl: pfpPath
         anchors {

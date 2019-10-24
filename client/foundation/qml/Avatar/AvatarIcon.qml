@@ -5,10 +5,11 @@ Item {
     property string pfpUrl
     property bool groupAvatar: false
     property color color
+    property color textColor: CmnCfg.palette.iconFill
     property string initials
 
     Rectangle {
-        height: CmnCfg.avatarSize
+        height: parent.height
         width: height
         radius: groupAvatar ? 0 : width
         color: parent.color
@@ -17,7 +18,7 @@ Item {
             font.bold: true
             font.pixelSize: parent.width / initials.length
             anchors.centerIn: parent
-            color: CmnCfg.palette.iconFill
+            color: textColor
         }
     }
 }

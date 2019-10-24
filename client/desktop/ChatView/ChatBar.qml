@@ -29,8 +29,12 @@ ToolBar {
 
     AvatarMain {
         iconColor: CmnCfg.palette.iconFill
+        textColor: CmnCfg.avatarColors[conversationItem.color]
         size: CmnCfg.units.dp(36)
-        initials: "JK"
+        initials: conversationItem.title[0].toUpperCase()
+        anchors {
+            margins: CmnCfg.units.dp(18)
+        }
     }
 
     Common.ButtonForm {

@@ -24,6 +24,7 @@ MouseArea {
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
+
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
             left: outbound ? parent.left : undefined
@@ -31,6 +32,7 @@ MouseArea {
             margins: CmnCfg.margin
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
+
         source: "qrc:/options-icon.svg"
         z: CmnCfg.overlayZ
 
