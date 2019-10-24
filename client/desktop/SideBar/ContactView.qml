@@ -6,6 +6,7 @@ import "../common" as Common
 import "../../foundation/js/utils.mjs" as Utils
 import "./js/ContactView.mjs" as JS
 import "popups" as Popups
+import "qrc:/imports/Avatar" as Av
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -27,6 +28,7 @@ ListView {
 
     delegate: Item {
         id: contactItem
+        property var contactData: model
 
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
@@ -34,9 +36,12 @@ ListView {
 
         Common.PlatonicRectangle {
             id: contactRectangle
-            boxColor: contactsModel.color(index)
-            boxTitle: contactsModel.name(index)
             isContact: true
+            boxColor: contactData.color
+            boxTitle: contactData.name
+
+            labelComponent:
+                Av.ConversationLabel { contactName: contactData.name}
 
             MouseArea {
                 id: hoverHandler

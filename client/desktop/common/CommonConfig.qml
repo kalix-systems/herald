@@ -51,9 +51,9 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: 45
+    property int avatarSize: 44
     /// standard conversation/contact height
-    property int convoHeight: 64
+    property int convoHeight: 56
 
     property real minChatViewWidth: 300
     property real minContactsWidth: 300

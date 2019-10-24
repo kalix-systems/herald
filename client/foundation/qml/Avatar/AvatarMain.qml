@@ -22,12 +22,12 @@ Item {
     //            }
     //        }
     //```
-    property Component labelComponent: ConversationLabel {}
+    property Component labelComponent
     // the initials to display in the icon
     property string initials
     readonly property real innerMargins: CmnCfg.smallMargin
-    property real topTextMargin: CmnCfg.units.dp(4)
-    property real bottomTextMargin: CmnCfg.units.dp(4)
+    property real topTextMargin: 5
+    property real bottomTextMargin: 5
     property color textColor
 
     anchors.fill: parent
@@ -54,8 +54,8 @@ Item {
             right: parent.right
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
-            leftMargin: CmnCfg.units.dp(12)
-            rightMargin: CmnCfg.units.dp(12)
+            leftMargin: 12
+            rightMargin: 12
         }
         Loader {
             id: labelContent

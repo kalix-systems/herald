@@ -19,6 +19,7 @@ Item {
     property string lastTimestamp
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
+    property string lastAuthor
     // labeling constants
     anchors.fill: parent
 
@@ -35,7 +36,7 @@ Item {
         font {
             bold: true
             family: CmnCfg.chatFont.name
-            pointSize: 17
+            pixelSize: 14
         }
 
         elide: "ElideRight"
@@ -46,12 +47,12 @@ Item {
     Label {
         id: ts
         anchors {
-            bottom: uid.bottom
+            top: parent.top
             right: parent.right
         }
         font {
             family: CmnCfg.chatFont.name
-            pointSize: 13
+            pixelSize: 11
         }
         text: lastTimestamp
         color: CmnCfg.palette.secondaryColor
@@ -62,15 +63,16 @@ Item {
         anchors {
             left: parent.left
             right: receiptImage.left
+            topMargin: CmnCfg.margin
             bottom: parent.bottom
             rightMargin: CmnCfg.margin
         }
         font {
             family: CmnCfg.chatFont.name
-            pointSize: 15
+            pixelSize: 13
         }
         elide: "ElideRight"
-        text: lastBody
+        text: lastAuthor + ": " + lastBody
         color: CmnCfg.palette.secondaryColor
     }
 

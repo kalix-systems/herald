@@ -10,27 +10,26 @@ import "qrc:/imports/Avatar"
 // Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
-    property int boxColor
-    // title of the contact/convo
-    property string boxTitle
-    // is true if it's a contact, false if it's a conversation
     property bool isContact
     id: bgBox
     color: CmnCfg.palette.paneColor
     anchors.fill: parent
+    property string boxTitle
+    property int boxColor
+    property alias labelComponent: conversationItemAvatar.labelComponent
 
 
     AvatarMain {
         id: conversationItemAvatar
-        iconColor: CmnCfg.avatarColors[Utils.unwrapOr(boxColor, 0)]
+        iconColor: CmnCfg.avatarColors[boxColor]
         textColor: CmnCfg.palette.iconFill
         size: 42
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         anchors {
             margins: 6
-        }
 
+        }
 
     }
 

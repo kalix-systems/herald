@@ -39,7 +39,7 @@ Component {
                 colorHash: config.color
                 pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
                 labelGap: 0
-                size: CmnCfg.units.dp(36)
+                size: 28
                 isDefault: true
                 inLayout: true
             }

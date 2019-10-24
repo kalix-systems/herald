@@ -57,16 +57,16 @@ ListView {
 
         Common.PlatonicRectangle {
             id: convoRectangle
-            boxColor: conversationsModel.color(index)
-            boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
+            boxTitle: title
+            boxColor: conversationData.color
+            //this is in here instead of platonic rectangle bc different for contact and convo
+            labelComponent: Av.ConversationLabel {
+                contactName: title
+                lastBody: messageModel.lastBody
+                lastAuthor: messageModel.lastAuthor
+                lastTimestamp: Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
 
-            ConversationLabel {
-                anchors.left: parent.conversationItemAvatar.right
-                anchors.right: parent.right
-                label: parent.boxTitle
-                summaryText: JS.formatSummary(messageModel.lastAuthor,
-                                              messageModel.lastBody)
             }
 
             MouseArea {
