@@ -1,6 +1,16 @@
 use super::*;
 use crate::womp;
 
+impl ConversationId {
+    fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
+        &self,
+        blocks: I,
+    ) -> Result<FoundKeys, HErr> {
+        let mut db = CK_CONN.lock();
+        get_keys(&mut db, *self, blocks)
+    }
+}
+
 fn reset() {
     let mut conn = CK_CONN.lock();
     let tx = conn.transaction().expect(womp!());
@@ -121,16 +131,12 @@ fn blockstore() {
     let chainkey22 = ChainKey::from_slice(&[22; CHAINKEY_BYTES]).expect(womp!());
 
     // cid1 keys
-    cid1.store_key(blockhash11, (&chainkey11).clone())
-        .expect(womp!());
-    cid1.store_key(blockhash12, (&chainkey12).clone())
-        .expect(womp!());
+    cid1.store_key(blockhash11, &chainkey11).expect(womp!());
+    cid1.store_key(blockhash12, &chainkey12).expect(womp!());
 
     // cid2 keys
-    cid2.store_key(blockhash21, (&chainkey21).clone())
-        .expect(womp!());
-    cid2.store_key(blockhash22, (&chainkey22).clone())
-        .expect(womp!());
+    cid2.store_key(blockhash21, &chainkey21).expect(womp!());
+    cid2.store_key(blockhash22, &chainkey22).expect(womp!());
 
     // cid1 known keys
     let known_keys1: BTreeSet<ChainKey> = vec![(&chainkey11).clone(), (&chainkey12).clone()]

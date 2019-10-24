@@ -1,4 +1,4 @@
-use crate::{abort_err, errors::HErr, types::ConversationId};
+use crate::{abort_err, errors::HErr, types::ConversationId, NE};
 use chainmail::{block::*, errors::ChainError};
 use herald_common::GlobalId;
 use lazy_static::*;
@@ -28,6 +28,16 @@ pub enum DecryptionResult {
 
 type RawBlock = Vec<u8>;
 type RawSigner = Vec<u8>;
+
+fn store_channel_key(
+    tx: &mut rusqlite::Transaction,
+    cid: ConversationId,
+    channel_key: &ChannelKey,
+) -> Result<(), HErr> {
+    let mut store_stmt = tx.prepare(include_str!("sql/add_channelkey.sql"))?;
+    store_stmt.execute(params![cid, channel_key.as_ref()])?;
+    Ok(())
+}
 
 fn raw_store_key(
     tx: &mut rusqlite::Transaction,
@@ -70,11 +80,11 @@ fn raw_pop_unblocked_blocks(
     res
 }
 
-pub fn store_key(
+pub(crate) fn store_key(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     hash: BlockHash,
-    key: ChainKey,
+    key: &ChainKey,
 ) -> Result<Vec<(Block, GlobalId)>, HErr> {
     // store key
     raw_store_key(tx, cid, hash.as_ref(), key.as_ref())?;
@@ -94,7 +104,7 @@ pub fn store_key(
         .collect()
 }
 
-pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+pub(crate) fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: I,
@@ -108,7 +118,7 @@ pub fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
     Ok(())
 }
 
-pub fn mark_unused(
+pub(crate) fn mark_unused(
     tx: &mut rusqlite::Transaction,
     cid: ConversationId,
     blocks: &BTreeSet<BlockHash>,
@@ -151,6 +161,19 @@ fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
     } else {
         FoundKeys::Found(keys)
     })
+}
+
+fn get_channel_key(db: &rusqlite::Connection, cid: ConversationId) -> Result<ChannelKey, HErr> {
+    let mut stmt = db.prepare(include_str!("sql/get_channel_key.sql"))?;
+
+    let raw_key = stmt
+        .query_map(params![cid], |row| row.get::<_, Vec<u8>>(0))?
+        .next()
+        .ok_or(NE!())??;
+
+    let key = ChannelKey::from_slice(raw_key.as_slice()).ok_or(NE!())?;
+
+    Ok(key)
 }
 
 fn get_unused(
@@ -205,7 +228,7 @@ impl ConversationId {
     pub(crate) fn store_key(
         &self,
         hash: BlockHash,
-        key: ChainKey,
+        key: &ChainKey,
     ) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let mut db = CK_CONN.lock();
         let mut tx = db.transaction()?;
@@ -238,13 +261,9 @@ impl ConversationId {
         tx.commit()?;
         Ok(())
     }
-
-    pub(crate) fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
-        &self,
-        blocks: I,
-    ) -> Result<FoundKeys, HErr> {
-        let db = CK_CONN.lock();
-        get_keys(&db, *self, blocks)
+    pub(crate) fn get_channel_key(&self) -> Result<ChannelKey, HErr> {
+        let mut db = CK_CONN.lock();
+        get_channel_key(&mut db, *self)
     }
 
     pub(crate) fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
@@ -279,10 +298,17 @@ impl ConversationId {
         block: Block,
     ) -> Result<DecryptionResult, HErr> {
         let hashes = block.parent_hashes().clone();
-        match self.get_keys(hashes.iter())? {
+
+        let mut db = CK_CONN.lock();
+        let mut tx = db.transaction()?;
+
+        // TODO: consider storing pending for these too?
+        let channel_key = get_channel_key(&mut tx, *self)?;
+        match get_keys(&mut tx, *self, block.parent_hashes().iter())? {
             FoundKeys::Found(parent_keys) => {
-                let OpenData { msg, hash, key } = block.open(&signer.did, &parent_keys)?;
-                let unlocked = self.store_key(hash, key)?;
+                let OpenData { msg, hash, key } =
+                    block.open(&channel_key, &signer.did, &parent_keys)?;
+                let unlocked = self.store_key(hash, &key)?;
                 self.mark_used(hashes.iter())?;
                 Ok(DecryptionResult::Success(msg, unlocked))
             }
@@ -295,8 +321,16 @@ impl ConversationId {
 
     pub(crate) fn store_genesis(&self, gen: &Genesis) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let hash = gen.compute_hash().ok_or(ChainError::CryptoError)?;
-        let key = gen.key().clone();
-        self.store_key(hash, key)
+
+        let mut db = CK_CONN.lock();
+        let mut tx = db.transaction()?;
+
+        store_channel_key(&mut tx, *self, gen.channel_key())?;
+        let out = store_key(&mut tx, *self, hash, gen.root())?;
+
+        tx.commit()?;
+
+        Ok(out)
     }
 }
 
