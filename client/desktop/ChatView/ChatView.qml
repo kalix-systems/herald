@@ -52,20 +52,6 @@ Page {
         }
     }
 
-    Component {
-        id: emojiPickerComp
-        EK.EmojiPicker {
-            id: emojiPicker
-            z: exit.z + 1
-            window: convWindow
-            Component.onCompleted: {
-                emojiPicker.send.connect(function anon(emoji) {
-                    JS.appendToTextArea(emoji, chatTextArea.chatText)
-                })
-            }
-        }
-    }
-
     // This should be spawned by the EK
     MouseArea {
         id: exit
@@ -81,7 +67,16 @@ Page {
         id: emoKeysPopup
         clip: true
         active: false
-        sourceComponent: emojiPickerComp
+        sourceComponent: EK.EmojiPicker {
+            id: emojiPicker
+            z: exit.z + 1
+            window: convWindow
+            Component.onCompleted: {
+                emojiPicker.send.connect(function anon(emoji) {
+                    JS.appendToTextArea(emoji, chatTextArea.chatText)
+                })
+            }
+        }
         anchors.bottom: chatTextArea.top
         anchors.left: chatTextArea.left
     }

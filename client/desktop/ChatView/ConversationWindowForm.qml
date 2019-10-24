@@ -51,7 +51,6 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
-
             delegate: Column {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
@@ -115,8 +114,7 @@ Flickable {
                 }
 
                 CB.ChatBubble {
-                    ChatBubbleHover {
-                    }
+                    ChatBubbleHover {}
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.tertiaryColor
                     senderColor: userColor
