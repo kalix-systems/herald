@@ -29,6 +29,7 @@ path = "../lazy_pond"
 
 [dependencies.chainmail]
 git = "https://github.com/kalix-systems/chainmail"
+# path = "../../chainmail"
 
 [dependencies.websocket]
 version          = "0.23"
