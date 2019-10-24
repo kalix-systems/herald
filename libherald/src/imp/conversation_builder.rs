@@ -1,4 +1,4 @@
-use crate::implementation::{
+use crate::imp::{
     conversations::{shared::ConvUpdates, Conversations},
     users::shared::user_in_cache,
 };

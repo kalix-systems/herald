@@ -1,4 +1,4 @@
-use crate::{ffi, implementation::users::shared::get_user, interface::*, ret_err, ret_none};
+use crate::{ffi, imp::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{abort_err, contact, types::*, utils::SearchPattern};
 use std::{

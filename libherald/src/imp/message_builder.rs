@@ -121,7 +121,7 @@ impl MessageBuilderTrait for MessageBuilder {
         let cid = ret_none!(builder.conversation);
 
         ret_err!(builder.store_and_send(move |m| {
-            use crate::implementation::messages::{shared::MsgUpdate, *};
+            use crate::imp::messages::{shared::MsgUpdate, *};
             use heraldcore::message::StoreAndSend::*;
 
             match m {

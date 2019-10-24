@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::ptr::null;
 
-use crate::implementation::*;
+use crate::imp::*;
 
 
 #[repr(C)]

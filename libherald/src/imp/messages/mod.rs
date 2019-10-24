@@ -364,7 +364,7 @@ impl Messages {
 
         self.emit_last_changed();
 
-        use crate::implementation::conversations::{shared::*, Conversations};
+        use crate::imp::conversations::{shared::*, Conversations};
         Conversations::push(ConvUpdates::NewActivity(cid))?;
 
         Ok(())
