@@ -62,19 +62,6 @@ Rectangle {
         source: "qrc:/emoji-icon.svg"
     }
 
-    //this doesn't exist anymore
-
-
-    /**
-    Common.ButtonForm {
-        id: cameraButton
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.leftMargin: CmnCfg.margin
-        source: "qrc:/camera-icon.svg"
-    }
-    **/
-
     // wrapper column so replies load
     Column {
         id: containerCol
@@ -111,7 +98,7 @@ Rectangle {
 
         ScrollView {
             id: scrollView
-            height: scrollHeight
+            height: Math.min(contentHeight, 100)
             implicitWidth: containerCol.width
             focus: true
 

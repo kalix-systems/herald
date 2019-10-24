@@ -111,6 +111,5 @@ Page {
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
-        scrollHeight: Math.min(contentHeight, 100)
     }
 }
