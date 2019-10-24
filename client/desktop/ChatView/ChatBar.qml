@@ -60,24 +60,4 @@ ToolBar {
             }
         }
     }
-
-    Popup {
-        width: CmnCfg.popupWidth
-        height: 150
-        id: newMemberPopup
-        TextArea {
-            id: userIdText
-            placeholderText: "Enter user ID"
-        }
-        Button {
-            height: 50
-            text: "Submit"
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            onClicked: {
-                convoItemMembers.addToConversation(userIdText.text)
-                newMemberPopup.close()
-            }
-        }
-    }
 }

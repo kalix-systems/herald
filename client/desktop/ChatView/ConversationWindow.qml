@@ -21,7 +21,6 @@ Flickable {
     id: cvPane
     property alias chatScrollBar: chatScrollBar
     property alias chatListView: chatListView
-
     clip: true
     interactive: true
     boundsBehavior: Flickable.StopAtBounds

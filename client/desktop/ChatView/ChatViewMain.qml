@@ -28,11 +28,11 @@ Page {
 
     Common.Divider {
         anchors.top: parent.top
-        color: "black"
+        color: CmnCfg.palette.borderColor
         z: messageBar.z
     }
 
-    CVUtils.ConversationWindowForm {
+    CVUtils.ConversationWindow {
         id: convWindow
         focus: true
         anchors {

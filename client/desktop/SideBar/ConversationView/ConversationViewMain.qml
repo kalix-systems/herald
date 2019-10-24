@@ -40,7 +40,7 @@ ListView {
         }
 
         property var childChatView: Component {
-            CV.ChatView {
+            CV.ChatViewMain {
                 conversationItem: conversationData
                 ownedConversation: messageModel
             }

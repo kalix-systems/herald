@@ -3,6 +3,7 @@ import "../common" as Common
 import Qt.labs.platform 1.1
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import "Popups" as Popups
 
 MouseArea {
     id: chatBubbleHitbox
@@ -35,17 +36,10 @@ MouseArea {
         z: CmnCfg.overlayZ
 
         onClicked: messageOptionsMenu.open()
+    }
 
-        Menu {
-            id: messageOptionsMenu
-            MenuItem {
-                text: "Delete Message"
-                onTriggered: ownedConversation.deleteMessage(index)
-            }
-            MenuItem {
-                text: "More Info..."
-            }
-        }
+    Popups.MessageOptionsPopup {
+        id: messageOptionsMenu
     }
 
     Common.ButtonForm {
@@ -67,7 +61,6 @@ MouseArea {
             chatTextArea.replyUid = author
             chatTextArea.replyName = contactsModel.nameById(author)
             builder.replyingTo = messageId
-            // chatTextArea.state = "replystate"
         }
     }
 }

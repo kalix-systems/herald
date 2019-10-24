@@ -4,12 +4,12 @@
         <file>App.qml</file>
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
-        <file>ChatView/ChatView.qml</file>
+        <file>ChatView/ChatViewMain.qml</file>
         <file>ChatView/Controls/ConvoTextArea/AttachmentsComponent.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ConvoTextArea.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ReplyComponent.qml</file>
         <file>ChatView/Controls/js/ChatTextAreaUtils.mjs</file>
-        <file>ChatView/ConversationWindowForm.qml</file>
+        <file>ChatView/ConversationWindow.qml</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>EmojiKeyboard/EmojiButton.qml</file>
         <file>EmojiKeyboard/EmojiPicker.qml</file>
@@ -48,5 +48,6 @@
         <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
+        <file>ChatView/Popups/MessageOptionsPopup.qml</file>
     </qresource>
 </RCC>
