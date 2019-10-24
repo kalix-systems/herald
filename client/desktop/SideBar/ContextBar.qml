@@ -6,7 +6,6 @@ import "popups" as Popups
 import "../common" as Common
 import "../../foundation/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
-import Qt.labs.platform 1.1
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -83,13 +82,8 @@ Component {
                 id: newMessageButton
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 source: "qrc:/pencil-icon-black.svg"
-                z: -1
-
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        sideBarState.state = "newConversationState"
-                    }
+                onClicked: {
+                    sideBarState.state = "newConversationState"
                 }
             }
 
@@ -101,26 +95,13 @@ Component {
                 Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/options-icon.svg"
 
-                MouseArea {
-                    anchors.fill: parent
-
-                    onClicked: {
-                        utilityOptionsMenu.open()
-                    }
+                onClicked: {
+                    contextOptionsMenu.open()
                 }
             }
 
-            Menu {
-                id: utilityOptionsMenu
-                MenuItem {
-                    text: "Add contact"
-                    onTriggered: sideBarState.state = "newContactState"
-                }
-
-                MenuItem {
-                    text: "Config settings"
-                    onTriggered: configPopup.show()
-                }
+            Popups.ContextOptionsMenu {
+                id: contextOptionsMenu
             }
         }
     }

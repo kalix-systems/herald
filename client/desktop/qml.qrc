@@ -47,5 +47,6 @@
         <file>SideBar/ConversationView/ConversationViewMain.qml</file>
         <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
         <file>SideBar/SideBarMain.qml</file>
+        <file>SideBar/popups/ContextOptionsMenu.qml</file>
     </qresource>
 </RCC>

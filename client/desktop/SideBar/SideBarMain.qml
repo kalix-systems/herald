@@ -13,7 +13,7 @@ import "qrc:/common" as Common
 // Needs polish badly: NPB
 // Factor Component: FC
 Pane {
-    id: contactPane
+    id: sideBar
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
     // maximum width, where root is ApplicationWindow
@@ -29,6 +29,10 @@ Pane {
     background: Rectangle {
         border.color: CmnCfg.palette.secondaryColor
         color: CmnCfg.palette.mainColor
+    }
+
+    SideBarState {
+        id: sideBarState
     }
 
     ///--- SearchBar for contacts, add contact button
@@ -78,9 +82,5 @@ Pane {
 
     Loader {
         id: convoBuilderLoader
-    }
-
-    SideBarState {
-        id: sideBarState
     }
 }
