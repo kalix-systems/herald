@@ -20,6 +20,8 @@ Item {
     // the value of the latest read receipt according to the ReceiptStatus enum
     property int lastReceipt: 0
     property string lastAuthor
+    property color labelColor
+    property int labelSize
     // labeling constants
     anchors.fill: parent
 
@@ -36,12 +38,12 @@ Item {
         font {
             bold: true
             family: CmnCfg.chatFont.name
-            pixelSize: 14
+            pixelSize: labelSize
         }
 
         elide: "ElideRight"
         text: contactName
-        color: CmnCfg.palette.secondaryColor
+        color: labelColor
     }
 
     Label {
@@ -72,7 +74,7 @@ Item {
             pixelSize: 13
         }
         elide: "ElideRight"
-        text: lastAuthor + ": " + lastBody
+        text: lastBody
         color: CmnCfg.palette.secondaryColor
     }
 

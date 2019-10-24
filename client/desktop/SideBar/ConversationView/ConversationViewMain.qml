@@ -66,6 +66,8 @@ ListView {
                 lastBody: messageModel.lastBody
                 lastAuthor: messageModel.lastAuthor
                 lastTimestamp: Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
+                labelColor: CmnCfg.palette.secondaryColor
+                labelSize: 14
 
             }
 
