@@ -23,13 +23,11 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    ScrollBar.vertical: ScrollBar {
-    }
+    ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: contactItem
 
-        // This ternary is okay, types are enforced by QML
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
         visible: matched

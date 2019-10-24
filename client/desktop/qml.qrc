@@ -16,10 +16,7 @@
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>RegistrationPage.qml</file>
-        <file>SideBar.qml</file>
         <file>SideBar/ContactView.qml</file>
-        <file>SideBar/ConversationLabel.qml</file>
-        <file>SideBar/ConversationView.qml</file>
         <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
         <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
         <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
@@ -27,8 +24,8 @@
         <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
         <file>SideBar/SearchComponent.qml</file>
-        <file>SideBar/SidePane.qml</file>
-        <file>SideBar/UtilityBar.qml</file>
+        <file>SideBar/SideBarState.qml</file>
+        <file>SideBar/ContextBar.qml</file>
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
@@ -49,5 +46,6 @@
         <file>main.qml</file>
         <file>SideBar/ConversationView/ConversationViewMain.qml</file>
         <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
+        <file>SideBar/SideBarMain.qml</file>
     </qresource>
 </RCC>

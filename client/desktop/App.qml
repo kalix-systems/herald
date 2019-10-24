@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
+import "./SideBar"
 import "../foundation/js/utils.mjs" as Utils
 
 Item {
@@ -58,7 +59,7 @@ Item {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
-        SideBar {
+        SideBarMain {
             id: sideBar
         }
 
