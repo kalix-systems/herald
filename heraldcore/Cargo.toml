@@ -17,6 +17,7 @@ serde_cbor        = "0.10.1"
 sodiumoxide       = "0.2.4"
 tar               = "0.4.26"
 url               = "2.1"
+toml = "0.5.3"
 
 [dependencies.herald_common]
 path             = "../herald_common"

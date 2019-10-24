@@ -18,7 +18,7 @@ const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
-    static ref SERVER_ADDR: SocketAddr = match option_env!("SERVER_ADDR") {
+    static ref SERVER_ADDR: SocketAddr = match &crate::utils::CONF.server_addr {
         Some(addr) => addr.parse().unwrap_or_else(|e| {
             eprintln!("Provided address {} is invalid: {}", addr, e);
             std::process::abort();
