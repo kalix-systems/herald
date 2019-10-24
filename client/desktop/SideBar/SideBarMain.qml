@@ -31,20 +31,9 @@ Pane {
         color: CmnCfg.palette.mainColor
     }
 
-    //this does not exist anymore
-
-
-    /**
-    ///--- Username and Settings gear button
-    SBUtils.ConfigBar {
-        id: toolBar
-    }
-    **/
-
     ///--- SearchBar for contacts, add contact button
     Column {
-        id: utilityBar
-        // anchors.top: toolBar.bottom
+        id: contextBar
         width: parent.width
         Loader {
             property string searchPlaceholder: ""
@@ -77,14 +66,14 @@ Pane {
     ///--- Border between SearchBar and the Pane Contents (contacts)
     Common.Divider {
         id: searchBarBorder
-        anchors.top: utilityBar.bottom
-        color: "black"
+        anchors.top: contextBar.bottom
+        color: CmnCfg.palette.borderColor
     }
 
     ConvUtils.NewGroupBar {
         id: newGroupBar
         anchors.top: searchBarBorder.bottom
-        visible: convoPane.state === "newConversationState"
+        visible: sideBarState.state === "newConversationState"
     }
 
     Loader {
@@ -92,6 +81,6 @@ Pane {
     }
 
     SideBarState {
-        id: convoPane
+        id: sideBarState
     }
 }

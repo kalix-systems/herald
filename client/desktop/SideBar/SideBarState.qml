@@ -6,7 +6,7 @@ import "./ConversationView"
 import "../SideBar/NewConvoComponents" as ConvUtils
 
 Pane {
-    id: convoPane
+    id: sideBarStateLoader
     padding: 0
     anchors {
         right: parent.right
@@ -57,7 +57,7 @@ Pane {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: convoPane
+                target: sideBarStateLoader
                 visible: false
             }
             PropertyChanges {

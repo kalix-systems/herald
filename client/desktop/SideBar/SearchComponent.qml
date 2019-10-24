@@ -35,7 +35,7 @@ Component {
           anchors.right: parent.right
           anchors.verticalCenter: parent.verticalCenter
           onClicked: {
-              convoPane.state = ""
+              sideBarState.state = ""
           }
       }
 
@@ -54,9 +54,9 @@ Component {
       }
 
       Keys.onReturnPressed: {
-          if (convoPane.state == "newContactState") {
+          if (sideBarState.state == "newContactState") {
               JS.insertContact(searchText, contactsModel, networkHandle, conversationsModel)
-              convoPane.state = ""
+              sideBarState.state = ""
           }
       }
 }

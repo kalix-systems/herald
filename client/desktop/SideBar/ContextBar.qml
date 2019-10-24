@@ -18,7 +18,7 @@ import Qt.labs.platform 1.1
 // FS: Fix scoping
 Component {
     ToolBar {
-        id: utilityBar
+        id: contextBar
         anchors.left: parent.left
         anchors.right: parent.right
         height: CmnCfg.toolbarHeight
@@ -74,7 +74,7 @@ Component {
                 source: "qrc:/search-icon.svg"
                 //todo : add back in regex logic once ui is known
                 onClicked: {
-                    convoPane.state = "conversationSearch"
+                    sideBarState.state = "conversationSearch"
                 }
             }
 
@@ -82,15 +82,13 @@ Component {
             Common.ButtonForm {
                 id: newMessageButton
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
-                // Layout.leftMargin: CmnCfg.margin
-                // Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/pencil-icon-black.svg"
                 z: -1
 
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
-                        convoPane.state = "newConversationState"
+                        sideBarState.state = "newConversationState"
                     }
                 }
             }
@@ -100,7 +98,6 @@ Component {
                 id: newContactButton
 
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                //  Layout.leftMargin: CmnCfg.margin
                 Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/options-icon.svg"
 
@@ -117,7 +114,7 @@ Component {
                 id: utilityOptionsMenu
                 MenuItem {
                     text: "Add contact"
-                    onTriggered: convoPane.state = "newContactState"
+                    onTriggered: sideBarState.state = "newContactState"
                 }
 
                 MenuItem {
