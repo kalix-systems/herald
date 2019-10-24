@@ -24,7 +24,7 @@ ToolBar {
     z: CmnCfg.middleZ
 
     background: Rectangle {
-        color: CmnCfg.avatarColors[conversationItem.color]
+        color: CmnCfg.palette.secondaryColor
     }
 
     AvatarMain {
@@ -37,6 +37,7 @@ ToolBar {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
         anchors.right: parent.right
+        fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
         Menu {

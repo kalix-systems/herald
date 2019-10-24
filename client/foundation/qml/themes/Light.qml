@@ -2,18 +2,19 @@ import QtQuick 2.13
 
 QtObject {
     readonly property color mainColor: "white"
-    readonly property color secondaryColor: "lightgrey"
+    readonly property color paneColor: "#EFEFEF"
+    readonly property color secondaryColor: "#27292A"
     readonly property color tertiaryColor: "lightsteelblue"
     readonly property color tertiaryComplement: "lightsalmon"
     readonly property color mainTextColor: "black"
-    readonly property color secondaryTextColor: "grey"
+    readonly property color secondaryTextColor: "#676C6F"
     readonly property color activeTextColor: "light blue"
     readonly property color visitedColor: "purple"
     readonly property color alertTextColor: "red"
     readonly property color iconFill: "white"
     readonly property color iconMatte: "black"
     readonly property color borderColor: "black"
-
+    readonly property color sideBarHighlightColor: "#D6D6D6"
     property color highlightColor: tertiaryColor
     property color highlightedTextColor: mainColor
     property color backgroundColor: mainColor

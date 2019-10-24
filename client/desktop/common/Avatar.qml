@@ -61,14 +61,14 @@ Row {
             visible: labeled
             text: avatarLabel
             font.bold: true
-            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.mainTextColor
+            color: !isDefault ? CmnCfg.palette.paneColor : CmnCfg.palette.secondaryColor
         }
 
         Text {
             id: userName
             visible: labeled
             text: secondaryText
-            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.secondaryTextColor
+            color: !isDefault ? CmnCfg.palette.paneColor : CmnCfg.palette.secondaryColor
 
             elide: Text.ElideRight
         }
