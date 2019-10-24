@@ -49,5 +49,6 @@
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
+        <file>ChatView/Popups/EmojiPopup.qml</file>
     </qresource>
 </RCC>

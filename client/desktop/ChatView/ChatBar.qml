@@ -52,12 +52,6 @@ ToolBar {
                 text: "Clear History"
                 onTriggered: ownedConversation.clearConversationHistory()
             }
-
-            MenuItem {
-                text: "Add Member"
-                visible: !isPairwise
-                onTriggered: newMemberPopup.open()
-            }
         }
     }
 }

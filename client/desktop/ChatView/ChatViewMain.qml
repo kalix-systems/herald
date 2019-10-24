@@ -9,6 +9,7 @@ import "./Controls/js/ChatTextAreaUtils.mjs" as JS
 import "./Controls/ConvoTextArea"
 import "../EmojiKeyboard" as EK
 import "../common" as Common
+import "Popups" as Popups
 
 Page {
     id: chatPane
@@ -63,20 +64,8 @@ Page {
         }
     }
 
-    Loader {
+    Popups.EmojiPopup {
         id: emoKeysPopup
-        clip: true
-        active: false
-        sourceComponent: EK.EmojiPicker {
-            id: emojiPicker
-            z: exit.z + 1
-            window: convWindow
-            Component.onCompleted: {
-                emojiPicker.send.connect(function anon(emoji) {
-                    JS.appendToTextArea(emoji, chatTextArea.chatText)
-                })
-            }
-        }
         anchors.bottom: chatTextArea.top
         anchors.left: chatTextArea.left
     }
