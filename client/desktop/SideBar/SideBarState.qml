@@ -7,13 +7,8 @@ import "../SideBar/NewConvoComponents" as ConvUtils
 
 Pane {
     id: sideBarStateLoader
+    anchors.fill: parent
     padding: 0
-    anchors {
-        right: parent.right
-        left: parent.left
-        top: newGroupBar.bottom
-        bottom: parent.bottom
-    }
 
     background: Rectangle {
         anchors.fill: parent

@@ -15,62 +15,59 @@ import "../SideBar" as SideBar
 // Needs polish badly: NPB
 // Factor Component: FC
 // FS: Fix scoping
-Component {
-    ToolBar {
-        id: contextBar
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: CmnCfg.toolbarHeight
+ToolBar {
+    id: contextBar
+    height: CmnCfg.toolbarHeight
+    background: Rectangle {
+        color: CmnCfg.palette.secondaryColor
+    }
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: CmnCfg.palette.secondaryColor
+    RowLayout {
+        anchors.fill: parent
+
+        Common.Avatar {
+            id: configAvatar
+            Layout.margins: CmnCfg.smallMargin
+            Layout.alignment: Qt.AlignCenter
+            avatarLabel: config.name
+            labeled: false
+            colorHash: config.color
+            pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
+            labelGap: 0
+            size: 28
+            isDefault: true
+            inLayout: true
         }
 
-        RowLayout {
-            anchors.fill: parent
+        //probably need a standard divider that also handles layouts
+        Rectangle {
+            Layout.alignment: Qt.AlignHCenter
+            height: parent.height
+            width: 2
+            color: CmnCfg.palette.mainColor
+        }
 
-            Common.Avatar {
-                id: configAvatar
-                Layout.margins: CmnCfg.smallMargin
-                Layout.alignment: Qt.AlignCenter
-                avatarLabel: config.name
-                labeled: false
-                colorHash: config.color
-                pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-                labelGap: 0
-                size: 28
-                isDefault: true
-                inLayout: true
-            }
+        Text {
+            text: "Conversations"
+            font.pixelSize: CmnCfg.headerSize
+            font.family: CmnCfg.chatFont.name
+            font.bold: true
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+            color: CmnCfg.palette.mainColor
+        }
 
-            //probably need a standard divider that also handles layouts
-            Rectangle {
-                Layout.alignment: Qt.AlignHCenter
-                height: parent.height
-                width: 2
-                color: CmnCfg.palette.mainColor
-            }
+        Item {
+            Layout.fillWidth: true
+        }
 
-            Text {
-                text: "Conversations"
-                font.pixelSize: CmnCfg.headerSize
-                font.family: CmnCfg.chatFont.name
-                font.bold: true
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                color: CmnCfg.palette.mainColor
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
+        Row {
+            spacing: 8
+            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
 
             Common.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
                 fill: CmnCfg.palette.paneColor
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 //this is a vertical center offset
                 Layout.topMargin: 1
                 source: "qrc:/search-icon.svg"
@@ -83,7 +80,6 @@ Component {
             ///--- Add contact button
             Common.ButtonForm {
                 id: newMessageButton
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 source: "qrc:/pencil-icon-black.svg"
                 fill: CmnCfg.palette.paneColor
                 onClicked: {
@@ -95,18 +91,15 @@ Component {
             Common.ButtonForm {
                 id: newContactButton
                 fill: CmnCfg.palette.paneColor
-                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/options-icon.svg"
-
                 onClicked: {
                     contextOptionsMenu.open()
                 }
             }
+        }
 
-            Popups.ContextOptionsMenu {
-                id: contextOptionsMenu
-            }
+        Popups.ContextOptionsMenu {
+            id: contextOptionsMenu
         }
     }
 }

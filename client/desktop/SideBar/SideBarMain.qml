@@ -12,7 +12,7 @@ import "qrc:/common" as Common
 // Type Script: TS
 // Needs polish badly: NPB
 // Factor Component: FC
-Pane {
+Page {
     id: sideBar
     property real windowFraction: width / root.width
     readonly property real maxWindowFraction: 0.66
@@ -24,7 +24,6 @@ Pane {
     property alias groupMemberSelect: convoBuilderLoader.item
 
     padding: 0 // All Interior Elements span the entire pane
-    height: parent.height
 
     background: Rectangle {
         border.color: CmnCfg.palette.secondaryColor
@@ -34,22 +33,17 @@ Pane {
     SideBarState {
         id: sideBarState
     }
-
     ///--- SearchBar for contacts, add contact button
-    Column {
-        id: contextBar
-        width: parent.width
-        Loader {
-            property string searchPlaceholder: ""
-            property bool contactsSearch: false
-            id: searchLoader
-            sourceComponent: contextBarComponent
-            width: parent.width
+    header: Loader {
+        property string searchPlaceholder: ""
+        property bool contactsSearch: false
+        id: searchLoader
+        sourceComponent: ContextBar {
+            id: contextBarComponent
         }
-    }
-
-    ContextBar {
-        id: contextBarComponent
+        Common.Divider {
+            anchors.top: parent.bottom
+        }
     }
 
     //search component loaded to search convos and contacts
@@ -67,16 +61,9 @@ Pane {
         id: finalizeGroupComponent
     }
 
-    ///--- Border between SearchBar and the Pane Contents (contacts)
-    Common.Divider {
-        id: searchBarBorder
-        anchors.top: contextBar.bottom
-        color: CmnCfg.palette.borderColor
-    }
-
     ConvUtils.NewGroupBar {
         id: newGroupBar
-        anchors.top: searchBarBorder.bottom
+        anchors.top: parent.bottom
         visible: sideBarState.state === "newConversationState"
     }
 

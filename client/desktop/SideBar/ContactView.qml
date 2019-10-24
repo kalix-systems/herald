@@ -23,7 +23,6 @@ ListView {
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
-
     ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
@@ -40,8 +39,9 @@ ListView {
             boxColor: contactData.color
             boxTitle: contactData.name
 
-            labelComponent:
-                Av.ConversationLabel { contactName: contactData.name}
+            labelComponent: Av.ConversationLabel {
+                contactName: contactData.name
+            }
 
             MouseArea {
                 id: hoverHandler
@@ -49,7 +49,7 @@ ListView {
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
                 onClicked: {
-                    if (convoPane.state == "newGroupState") {
+                    if (convoPane.state === "newGroupState") {
                         groupMemberSelect.addMember(userId)
                     }
                 }
