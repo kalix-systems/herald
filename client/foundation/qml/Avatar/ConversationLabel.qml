@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
+import "qrc:/imports/js/utils.mjs" as JS
 
 // TODO:
 // there are some loose magic numbers
@@ -23,17 +24,20 @@ Item {
 
     Label {
         id: uid
+
         anchors {
             top: parent.top
             left: parent.left
             right: ts.left
             rightMargin: CmnCfg.margin
         }
+
         font {
             bold: true
             family: CmnCfg.chatFont.name
             pointSize: 17
         }
+
         elide: "ElideRight"
         text: contactName
         color: CmnCfg.palette.mainTextColor
@@ -77,8 +81,8 @@ Item {
             right: parent.right
         }
         // in the future this should be some function call from common
-        source: lastReceipt
-        sourceSize: Qt.size(CmnCfg.units.dp(12), CmnCfg.units.dp(12))
+        source: JS.receiptStatusSwitch(lastReceipt)
+        sourceSize: Qt.size(CmnCfg.units.dp(16), CmnCfg.units.dp(16))
         mipmap: true
         layer.enabled: true
         layer.samplerName: "maskSource"

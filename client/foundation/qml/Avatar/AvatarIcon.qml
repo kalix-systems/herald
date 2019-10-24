@@ -24,4 +24,8 @@ Item {
             color: CmnCfg.palette.iconFill
         }
     }
+
+    Image {
+        source: pfpUrl
+    }
 }
