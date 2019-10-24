@@ -30,10 +30,10 @@ ToolBar {
     AvatarMain {
         iconColor: CmnCfg.palette.iconFill
         textColor: CmnCfg.avatarColors[conversationItem.color]
-        size: CmnCfg.units.dp(36)
+        size: 36
         initials: conversationItem.title[0].toUpperCase()
         anchors {
-            margins: CmnCfg.units.dp(18)
+            margins: 28
         }
 
     }

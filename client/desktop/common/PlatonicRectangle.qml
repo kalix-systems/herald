@@ -24,12 +24,13 @@ Rectangle {
         id: conversationItemAvatar
         iconColor: CmnCfg.avatarColors[Utils.unwrapOr(boxColor, 0)]
         textColor: CmnCfg.palette.iconFill
-        size: CmnCfg.units.dp(48)
+        size: 42
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         anchors {
-            margins: CmnCfg.units.dp(6)
+            margins: 6
         }
+
 
     }
 

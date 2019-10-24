@@ -33,7 +33,7 @@ Item {
     /// standard padding unit
     readonly property int padding: 10
     /// standard toolbar height
-    readonly property int toolbarHeight: units.dp(50)
+    readonly property int toolbarHeight: 40
     /// standard chat text size
     property int chatTextSize: 10
     /// standard header size
@@ -53,7 +53,7 @@ Item {
     /// standard avatar size
     property int avatarSize: 45
     /// standard conversation/contact height
-    property int convoHeight: units.dp(64)
+    property int convoHeight: 64
 
     property real minChatViewWidth: 300
     property real minContactsWidth: 300

@@ -81,6 +81,7 @@ Flickable {
                         friendlyTimestamp: timestamp
                         authorName: authName
                         receiptImage: proxyReceiptImage
+                        authorColor: userColor
                     }
                 }
 
@@ -95,6 +96,7 @@ Flickable {
                         opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
+                        authorColor: userColor
                     }
                 }
 
@@ -108,6 +110,7 @@ Flickable {
                         messageAttachments: Attachments {
                             msgId: messageId
                         }
+                        authorColor: userColor
                     }
                 }
 

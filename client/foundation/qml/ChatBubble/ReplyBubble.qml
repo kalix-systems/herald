@@ -14,10 +14,12 @@ ColumnLayout {
     property color opColor: "gray"
     property string authorName: ""
     property int spacing: 0
+    property color authorColor
 
     ChatLabel {
         id: sender
         senderName: authorName
+        senderColor: authorColor
     }
 
     Rectangle {

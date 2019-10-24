@@ -10,9 +10,11 @@ ColumnLayout {
     property string friendlyTimestamp: ""
     property string receiptImage: ""
     property string authorName: ""
+    property color authorColor
     spacing: 0
     ChatLabel {
         senderName: authorName
+        senderColor: authorColor
     }
     StandardTextEdit {
     }

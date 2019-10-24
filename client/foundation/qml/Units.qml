@@ -87,8 +87,7 @@ QtObject {
     property real devicePixelRatio: Screen.devicePixelRatio
 
     function dp(dips) {
-        return Math.round(
-                    dips / devicePixelRatio)
+        return dips
     }
 
 
