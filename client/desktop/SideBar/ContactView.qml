@@ -41,7 +41,9 @@ ListView {
             boxTitle: contactData.name
 
             labelComponent:
-                Av.ConversationLabel { contactName: contactData.name}
+                Av.ConversationLabel { contactName: contactData.name
+            labelColor:  CmnCfg.palette.secondaryColor
+            labelSize: 14}
 
             MouseArea {
                 id: hoverHandler

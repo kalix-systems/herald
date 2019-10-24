@@ -30,11 +30,16 @@ ToolBar {
     AvatarMain {
         iconColor: CmnCfg.palette.iconFill
         textColor: CmnCfg.avatarColors[conversationItem.color]
-        size: 36
+        size: 32
         initials: conversationItem.title[0].toUpperCase()
         anchors {
-            margins: 28
+            margins: 16
         }
+
+
+        labelComponent: ConversationLabel {contactName: conversationItem.title
+        labelColor: CmnCfg.palette.paneColor
+        labelSize: 18}
 
     }
 
