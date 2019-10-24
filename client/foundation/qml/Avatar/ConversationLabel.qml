@@ -40,7 +40,7 @@ Item {
 
         elide: "ElideRight"
         text: contactName
-        color: CmnCfg.palette.mainTextColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     Label {
@@ -54,7 +54,7 @@ Item {
             pointSize: 13
         }
         text: lastTimestamp
-        color: CmnCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     Label {
@@ -71,7 +71,7 @@ Item {
         }
         elide: "ElideRight"
         text: lastBody
-        color: CmnCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryColor
     }
 
     Image {

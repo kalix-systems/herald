@@ -17,7 +17,7 @@ Pane {
 
     background: Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.paneColor
     }
 
     Component {

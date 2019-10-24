@@ -28,7 +28,7 @@ Pane {
 
     background: Rectangle {
         border.color: CmnCfg.palette.secondaryColor
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.paneColor
     }
 
     SideBarState {

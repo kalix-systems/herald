@@ -114,7 +114,7 @@ Flickable {
                 CB.ChatBubble {
                     ChatBubbleHover {}
                     maxWidth: cvPane.width * 0.66
-                    color: CmnCfg.palette.tertiaryColor
+                    color: CmnCfg.palette.paneColor
                     senderColor: userColor
                     content: if (hasAttachments && dataSaved) {
                                  image

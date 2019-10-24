@@ -55,8 +55,10 @@ Component {
             Text {
                 text: "Conversations"
                 font.pixelSize: CmnCfg.headerSize
+                font.family: CmnCfg.chatFont.name
+                font.bold: true
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                color: CmnCfg.palette.mainTextColor
+                color: CmnCfg.palette.mainColor
             }
 
             Item {
@@ -66,6 +68,7 @@ Component {
             Common.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
+                fill: CmnCfg.palette.paneColor
                 Layout.leftMargin: CmnCfg.smallMargin
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 //this is a vertical center offset
@@ -82,6 +85,7 @@ Component {
                 id: newMessageButton
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
                 source: "qrc:/pencil-icon-black.svg"
+                fill: CmnCfg.palette.paneColor
                 onClicked: {
                     sideBarState.state = "newConversationState"
                 }
@@ -90,7 +94,7 @@ Component {
             //placeholder new contact button
             Common.ButtonForm {
                 id: newContactButton
-
+                fill: CmnCfg.palette.paneColor
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
                 Layout.rightMargin: CmnCfg.margin
                 source: "qrc:/options-icon.svg"

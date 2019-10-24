@@ -13,7 +13,7 @@ Item {
         text: label
         font.bold: true
         clip: true
-        color: CmnCfg.palette.mainTextColor
+        color: CmnCfg.palette.secondaryColor
         elide: Text.ElideRight
         anchors {
             top: parent.top
@@ -26,7 +26,7 @@ Item {
     Text {
         id: summary
         text: summaryText.trim().split("\n")[0]
-        color: CmnCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryColor
         elide: Text.ElideRight
         anchors {
             top: displayName.bottom

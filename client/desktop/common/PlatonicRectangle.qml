@@ -16,14 +16,8 @@ Rectangle {
     // is true if it's a contact, false if it's a conversation
     property bool isContact
     id: bgBox
-    color: CmnCfg.palette.mainColor
+    color: CmnCfg.palette.paneColor
     anchors.fill: parent
-
-    Common.Divider {
-        color: CmnCfg.palette.secondaryColor
-        bottomAnchor: parent.bottom
-        height: 2
-    }
 
     Common.Avatar {
         id: conversationItemAvatar
@@ -42,7 +36,7 @@ Rectangle {
             name: "hovering"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.sideBarHighlightColor
             }
         },
         State {
@@ -50,7 +44,7 @@ Rectangle {
             name: "selected"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.tertiaryColor
+                color: CmnCfg.palette.sideBarHighlightColor
             }
         }
     ]
