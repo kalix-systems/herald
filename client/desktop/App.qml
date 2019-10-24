@@ -68,14 +68,10 @@ Item {
             sourceComponent: splash
         }
 
-        handle: Item {Rectangle {
+        handle: Rectangle {
             id: handle
             implicitWidth: 1
             color: CmnCfg.palette.borderColor
-        }
-            Rectangle {
-
-            }
         }
     }
 
