@@ -57,7 +57,7 @@ Flickable {
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
-                readonly property string authName: outbound ? "" : contactsModel.nameById(
+                readonly property string authName: contactsModel.nameById(
                                                                   author)
                 readonly property bool outbound: author === config.configId
 

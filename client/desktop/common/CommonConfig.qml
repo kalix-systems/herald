@@ -53,7 +53,7 @@ Item {
     /// standard avatar size
     property int avatarSize: 45
     /// standard conversation/contact height
-    property int convoHeight: 55
+    property int convoHeight: units.dp(64)
 
     property real minChatViewWidth: 300
     property real minContactsWidth: 300

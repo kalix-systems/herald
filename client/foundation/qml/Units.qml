@@ -85,11 +85,10 @@ QtObject {
      * The devicePixelRatio follows the definition of "device independent pixel" by Microsoft.
      */
     property real devicePixelRatio: Screen.devicePixelRatio
-    property real multiplier: 1.4 //default multiplier, but can be changed by user
 
     function dp(dips) {
         return Math.round(
-                    dips * ((Screen.pixelDensity * 25.4) / 160) * multiplier)
+                    dips / devicePixelRatio)
     }
 
 

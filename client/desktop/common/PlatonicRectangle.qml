@@ -5,11 +5,11 @@ import QtQuick.Dialogs 1.3
 import "../common" as Common
 import "../../foundation/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
+import "qrc:/imports/Avatar"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
-    // color of the contact/convo
     property int boxColor
     // title of the contact/convo
     property string boxTitle
@@ -19,15 +19,18 @@ Rectangle {
     color: CmnCfg.palette.paneColor
     anchors.fill: parent
 
-    Common.Avatar {
+
+    AvatarMain {
         id: conversationItemAvatar
-        size: CmnCfg.avatarSize
-        labeled: isContact
-        labelGap: CmnCfg.smallMargin
-        avatarLabel: boxTitle
-        colorHash: Utils.unwrapOr(boxColor, 0)
-        pfpUrl: Utils.safeStringOrDefault(picture)
-        secondaryText: isContact ? "@" + userId : ""
+        iconColor: CmnCfg.avatarColors[Utils.unwrapOr(boxColor, 0)]
+        textColor: CmnCfg.palette.iconFill
+        size: CmnCfg.units.dp(48)
+        initials: boxTitle[0].toUpperCase()
+        pfpPath: Utils.safeStringOrDefault(picture)
+        anchors {
+            margins: CmnCfg.units.dp(6)
+        }
+
     }
 
     states: [

@@ -35,6 +35,7 @@ ToolBar {
         anchors {
             margins: CmnCfg.units.dp(18)
         }
+
     }
 
     Common.ButtonForm {
