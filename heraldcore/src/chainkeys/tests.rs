@@ -1,5 +1,6 @@
 use super::*;
 use crate::womp;
+use serial_test_derive::*;
 
 impl ConversationId {
     fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
@@ -113,6 +114,59 @@ fn raw_pending() {
     tx.commit().expect(womp!());
 }
 
+#[serial(CK)]
+#[test]
+fn channel_keys() {
+    reset();
+
+    let kp = herald_common::sig::KeyPair::gen_new();
+
+    let cid1 = ConversationId::from(crate::utils::rand_id());
+    let cid2 = ConversationId::from(crate::utils::rand_id());
+
+    assert_ne!(cid1, cid2);
+
+    let g1 = Genesis::new(kp.secret_key());
+    let g2 = Genesis::new(kp.secret_key());
+
+    assert_ne!(g1, g2);
+
+    let h1 = g1.compute_hash().expect("failed to compute hash for g1");
+    let h2 = g2.compute_hash().expect("failed to compute hash for g2");
+
+    assert_ne!(h1, h2);
+
+    cid1.store_genesis(&g1)
+        .expect("failed to store genesis block for cid1");
+    cid2.store_genesis(&g2)
+        .expect("failed to store genesis block for cid2");
+
+    let u1 = cid1
+        .get_unused()
+        .expect("failed to get unused keys for cid1");
+    let u2 = cid2
+        .get_unused()
+        .expect("failed to get unused keys for cid2");
+
+    assert_eq!(u1, vec![(h1, g1.root().clone())]);
+    assert_eq!(u2, vec![(h2, g2.root().clone())]);
+
+    assert_ne!(u1, u2);
+
+    let ck1 = cid1
+        .get_channel_key()
+        .expect("failed to ge channel key for cid1");
+    let ck2 = cid2
+        .get_channel_key()
+        .expect("failed to ge channel key for cid2");
+
+    assert_eq!(&ck1, g1.channel_key());
+    assert_eq!(&ck2, g2.channel_key());
+
+    assert_ne!(ck1, ck2);
+}
+
+#[serial(CK)]
 #[test]
 fn blockstore() {
     reset();
