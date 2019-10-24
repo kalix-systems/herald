@@ -21,7 +21,7 @@ Rectangle {
     // may be reset upon forking a conversation
     property Messages ownedMessages
 
-    height: CmnCfg.avatarHeight
+    height: CmnCfg.avatarSize
     color: CmnCfg.palette.mainColor
 
     // prevent animation spill over

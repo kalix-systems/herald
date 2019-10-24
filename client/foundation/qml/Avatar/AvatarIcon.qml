@@ -7,12 +7,8 @@ Item {
     property color color
     property string initials
 
-    Image {
-        source: pfpUrl
-    }
-
     Rectangle {
-        height: CmnCfg.avatarHeight
+        height: CmnCfg.avatarSize
         width: height
         radius: groupAvatar ? 0 : width
         color: parent.color
@@ -23,9 +19,5 @@ Item {
             anchors.centerIn: parent
             color: CmnCfg.palette.iconFill
         }
-    }
-
-    Image {
-        source: pfpUrl
     }
 }

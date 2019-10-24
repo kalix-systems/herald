@@ -54,11 +54,9 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: units.dp(44)
+    property int avatarSize: units.dp(48)
     /// user settable cfg
     property int theme: 0
-    ///
-    property real avatarHeight: units.dp(48)
 
     property FontLoader chatFont: metaTheme.chatFont
 

@@ -5,6 +5,7 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 import "../common" as Common
+import "qrc:/imports/Avatar"
 import "../../foundation/js/utils.mjs" as Utils
 
 // Reveiw Key
@@ -26,13 +27,10 @@ ToolBar {
         color: CmnCfg.avatarColors[conversationItem.color]
     }
 
-    Common.Avatar {
-        id: chatBarAvatar
-        anchors.left: parent.left
-        avatarLabel: conversationItem.title
-        size: CmnCfg.toolbarHeight - CmnCfg.margin
-        colorHash: conversationItem.color
-        isDefault: false
+    AvatarMain {
+        iconColor: CmnCfg.palette.iconFill
+        size: CmnCfg.units.dp(36)
+        initials: "JK"
     }
 
     Common.ButtonForm {

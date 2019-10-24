@@ -10,6 +10,7 @@ Item {
     property string pfpPath
     // the color with which to fill the icon if there is not profile picture
     property color iconColor
+    property real size: CmnCfg.avatarSize
     // the label, must be one of the sibling components in this directory with the Label suffix
     // for example
     //```
@@ -24,7 +25,7 @@ Item {
     property Component labelComponent: ConversationLabel {}
     // the initials to display in the icon
     property string initials
-    readonly property real innerMargins: CmnCfg.smallSpacer
+    readonly property real innerMargins: CmnCfg.smallMargin
     property real topTextMargin: CmnCfg.units.dp(4)
     property real bottomTextMargin: CmnCfg.units.dp(4)
     anchors.fill: parent
@@ -33,7 +34,7 @@ Item {
         id: avatarIcon
         color: iconColor
         initials: parent.initials
-        height: CmnCfg.avatarHeight
+        height: size
         width: height
         pfpUrl: pfpPath
         anchors {
