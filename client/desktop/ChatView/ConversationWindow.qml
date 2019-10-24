@@ -2,7 +2,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import QtQuick 2.13
 import LibHerald 1.0
-import QtQuick.Dialogs 1.3
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports"
 import "." as CVUtils

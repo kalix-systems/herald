@@ -1,6 +1,5 @@
 import QtQuick 2.13
 import "../common" as Common
-import Qt.labs.platform 1.1
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "Popups" as Popups
