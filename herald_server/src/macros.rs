@@ -8,7 +8,7 @@ macro_rules! mk_filter {
                     $this
                         .req_handler_store(b, $f)
                         .await
-                        .map_err(|e| warp::reject::custom(format!("{:?}", dbg!(e))))
+                        .map_err(|e| warp::reject::custom(format!("{:?}", e)))
                 }
             })
     };
@@ -24,7 +24,7 @@ macro_rules! push_filter {
                     $this
                         .req_handler_async(b, State::$f)
                         .await
-                        .map_err(|e| warp::reject::custom(format!("{:?}", dbg!(e))))
+                        .map_err(|e| warp::reject::custom(format!("{:?}", e)))
                 }
             })
     };
