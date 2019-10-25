@@ -39,18 +39,11 @@ ToolBar {
             margins: 16
         }
 
-<<<<<<< HEAD
-        labelComponent: ConversationLabel {contactName: conversationItem.title
-        labelColor: CmnCfg.palette.paneColor
-        labelSize: 18}
-
-=======
         labelComponent: ConversationLabel {
             contactName: conversationItem.title
             labelColor: CmnCfg.palette.paneColor
             labelSize: 18
         }
->>>>>>> fe343d227c3245ce3e729f4f77148cb7474debb4
     }
     }
 
