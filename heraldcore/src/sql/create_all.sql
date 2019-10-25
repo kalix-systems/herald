@@ -13,12 +13,19 @@ CREATE TABLE IF NOT EXISTS messages (
   expiration_date TEXT DEFAULT NULL,
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
-  -- read receipts as a map from user ids to receipt status, encoded as CBOR
-  receipts BLOB,
   has_attachments INTEGER NOT NULL DEFAULT(0),
   known INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
+);
+
+CREATE TABLE IF NOT EXISTS read_receipts (
+  -- message id receipt is associated with
+  msg_id BLOB NOT NULL,
+  -- user id of the user that sent the receipt
+  user_id TEXT NOT NULL,
+  -- type of receipt that was sent
+  receipt_status INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS replies (

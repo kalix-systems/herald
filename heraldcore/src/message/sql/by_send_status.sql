@@ -5,7 +5,6 @@ SELECT
   body,
   op_msg_id,
   ts,
-  receipts,
   send_status,
   has_attachments
 FROM

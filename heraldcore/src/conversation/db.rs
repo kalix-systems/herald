@@ -80,7 +80,21 @@ pub(crate) fn conversation_messages(
     conversation_id: &ConversationId,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
-    let res = stmt.query_map(&[conversation_id], Message::from_db)?;
+    let res = stmt.query_map(params![conversation_id], |row| {
+        let message_id = row.get(0)?;
+        let receipts = crate::message::db::get_receipts(conn, &message_id)?;
+        Ok(Message {
+            message_id,
+            author: row.get(1)?,
+            conversation: row.get(2)?,
+            body: row.get(3)?,
+            op: row.get(4)?,
+            timestamp: row.get(5)?,
+            send_status: row.get(6)?,
+            has_attachments: row.get(7)?,
+            receipts,
+        })
+    })?;
 
     let mut messages = Vec::new();
     for msg in res {

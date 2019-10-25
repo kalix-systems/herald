@@ -2,25 +2,26 @@ use super::*;
 use rusqlite::Connection as Conn;
 use std::ops::{Deref, DerefMut};
 
-/// Get message read receipts by message id
-pub(crate) fn get_message_receipts(
-    conn: &Conn,
-    msg_id: &MsgId,
-) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
-    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
-    let receipts: HashMap<UserId, MessageReceiptStatus> = {
-        let data = get_stmt.query_row(params![msg_id], |row| row.get::<_, Vec<u8>>(0))?;
-        serde_cbor::from_slice(&data)?
-    };
-    Ok(receipts)
-}
-
 /// Get message by message id
 pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
+    let receipts = get_receipts(conn, msg_id)?;
+
     Ok(conn.query_row(
         include_str!("sql/get_message.sql"),
         params![msg_id],
-        Message::from_db,
+        |row| {
+            Ok(Message {
+                message_id: row.get(0)?,
+                author: row.get(1)?,
+                conversation: row.get(2)?,
+                body: row.get(3)?,
+                op: row.get(4)?,
+                timestamp: row.get(5)?,
+                send_status: row.get(6)?,
+                has_attachments: row.get(7)?,
+                receipts,
+            })
+        },
     )?)
 }
 
@@ -39,65 +40,22 @@ pub(crate) fn update_send_status(
 
 pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
-    msg_id: MsgId,
-) -> Result<Option<HashMap<UserId, MessageReceiptStatus>>, HErr> {
+    msg_id: &MsgId,
+) -> Result<HashMap<UserId, MessageReceiptStatus>, rusqlite::Error> {
     let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
 
-    let mut res = get_stmt.query(params![msg_id])?;
-
-    match res.next()? {
-        Some(row) => match row.get::<_, Option<Vec<u8>>>(0)? {
-            Some(data) => Ok(Some(serde_cbor::from_slice(&data)?)),
-            None => Ok(None),
-        },
-        None => Ok(None),
-    }
+    let res = get_stmt.query_map(params![msg_id], |row| Ok((row.get(0)?, row.get(1)?)))?;
+    res.collect()
 }
 
 pub(crate) fn add_receipt(
-    conn: &mut Conn,
+    conn: &Conn,
     msg_id: MsgId,
     recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
-    let tx = conn.transaction()?;
-
-    // check if message exists yet
-    let mut receipts = get_receipts(&tx, msg_id)?;
-
-    match receipts {
-        Some(ref mut receipts) => {
-            // update receipts
-
-            match receipts.get(&recip) {
-                Some(old_status) => {
-                    if (*old_status as u8) < (receipt_status as u8) {
-                        receipts.insert(recip, receipt_status);
-                    }
-                }
-                None => {
-                    receipts.insert(recip, receipt_status);
-                }
-            }
-
-            receipts.insert(recip, receipt_status);
-            let data = serde_cbor::to_vec(&receipts)?;
-
-            let mut put_stmt = tx.prepare(include_str!("sql/set_receipts.sql"))?;
-            put_stmt.execute(params![data, msg_id])?;
-        }
-        None => {
-            let mut receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::new();
-            receipts.insert(recip, receipt_status);
-            let data = serde_cbor::to_vec(&receipts)?;
-
-            let mut put_pending_stmt = tx.prepare(include_str!("sql/add_pending_receipt.sql"))?;
-            put_pending_stmt.execute(params![msg_id, data])?;
-        }
-    }
-
-    tx.commit()?;
-
+    let mut stmt = conn.prepare(include_str!("sql/add_receipt.sql"))?;
+    stmt.execute(params![msg_id, recip, receipt_status])?;
     Ok(())
 }
 
@@ -107,7 +65,22 @@ pub(crate) fn by_send_status(
     send_status: MessageSendStatus,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/by_send_status.sql"))?;
-    let res = stmt.query_map(&[send_status], Message::from_db)?;
+    let res = stmt.query_map(&[send_status], |row| {
+        let message_id = row.get(0)?;
+        let receipts = get_receipts(conn, &message_id)?;
+
+        Ok(Message {
+            message_id,
+            author: row.get(1)?,
+            conversation: row.get(2)?,
+            body: row.get(3)?,
+            op: row.get(4)?,
+            timestamp: row.get(5)?,
+            send_status: row.get(6)?,
+            has_attachments: row.get(7)?,
+            receipts,
+        })
+    })?;
 
     let mut messages = Vec::new();
     for msg in res {
@@ -180,8 +153,6 @@ impl OutboundMessageBuilder {
         let author = crate::config::db::static_id(&db)?;
         let send_status = MessageSendStatus::NoAck;
 
-        let receipts: HashMap<UserId, MessageReceiptStatus> = HashMap::default();
-        let receipts_bytes = serde_cbor::to_vec(&receipts)?;
         let has_attachments = !attachments.is_empty();
 
         let msg = Message {
@@ -192,7 +163,7 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             timestamp,
             send_status,
-            receipts,
+            receipts: get_receipts(&db, &msg_id)?,
             has_attachments,
         };
 
@@ -236,7 +207,6 @@ impl OutboundMessageBuilder {
                     conversation_id,
                     body,
                     send_status,
-                    receipts_bytes,
                     has_attachments,
                     timestamp,
                 ],
@@ -344,9 +314,6 @@ impl InboundMessageBuilder {
 
         let tx = conn.transaction()?;
 
-        let receipts = get_receipts(&tx, msg_id)?.unwrap_or_default();
-        let receipts = serde_cbor::to_vec(&receipts)?;
-
         tx.execute(
             include_str!("sql/add.sql"),
             params![
@@ -355,7 +322,6 @@ impl InboundMessageBuilder {
                 conversation_id,
                 body,
                 send_status,
-                receipts,
                 has_attachments,
                 timestamp,
             ],

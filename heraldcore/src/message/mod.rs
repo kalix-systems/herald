@@ -34,24 +34,24 @@ pub struct Message {
 }
 
 impl Message {
-    pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let data = row.get::<_, Vec<u8>>(6)?;
-        let receipts = serde_cbor::from_slice(&data).map_err(|e| {
-            rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Blob, Box::new(e))
-        })?;
-
-        Ok(Message {
-            message_id: row.get(0)?,
-            author: row.get(1)?,
-            conversation: row.get(2)?,
-            body: row.get(3)?,
-            op: row.get(4)?,
-            timestamp: row.get(5)?,
-            receipts,
-            send_status: row.get(7)?,
-            has_attachments: row.get(8)?,
-        })
-    }
+    //    pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
+    //        let data = row.get::<_, Vec<u8>>(6)?;
+    //        let receipts = serde_cbor::from_slice(&data).map_err(|e| {
+    //            rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Blob, Box::new(e))
+    //        })?;
+    //
+    //        Ok(Message {
+    //            message_id: row.get(0)?,
+    //            author: row.get(1)?,
+    //            conversation: row.get(2)?,
+    //            body: row.get(3)?,
+    //            op: row.get(4)?,
+    //            timestamp: row.get(5)?,
+    //            receipts,
+    //            send_status: row.get(7)?,
+    //            has_attachments: row.get(8)?,
+    //        })
+    //    }
 }
 
 #[derive(Default)]
@@ -214,7 +214,7 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
 /// Get message read receipts by message id
 pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
-    db::get_message_receipts(&db, msg_id)
+    Ok(db::get_receipts(&db, msg_id)?)
 }
 
 pub(crate) fn add_receipt(

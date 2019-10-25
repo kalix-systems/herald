@@ -146,18 +146,14 @@ fn message_receipt_status_updates() {
     )
     .expect(womp!());
 
-    let receipts = db::get_receipts(&conn, msg_id)
-        .expect(womp!())
-        .expect(womp!());
+    let receipts = db::get_receipts(&conn, &msg_id).expect(womp!());
 
     let receipt = receipts.get(&receiver.id).expect(womp!());
     assert_eq!(*receipt, MessageReceiptStatus::Received);
 
     db::add_receipt(&mut conn, msg_id, receiver.id, MessageReceiptStatus::Read).expect(womp!());
 
-    let receipts = db::get_receipts(&conn, msg_id)
-        .expect(womp!())
-        .expect(womp!());
+    let receipts = db::get_receipts(&conn, &msg_id).expect(womp!());
     let receipt = receipts.get(&receiver.id).expect(womp!());
     assert_eq!(*receipt, MessageReceiptStatus::Read);
 }
