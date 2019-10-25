@@ -7,6 +7,7 @@ import Qt.labs.platform 1.1
 import "../common" as Common
 import "qrc:/imports/Avatar"
 import "../../foundation/js/utils.mjs" as Utils
+import "Controls" as CVUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -44,10 +45,36 @@ ToolBar {
         }
     }
 
+    Row {
+        id: buttonRow
+        height: parent.height
+        anchors.right: parent.right
+        spacing: 12
+
+        Common.ButtonForm {
+            id: searchButton
+            source: "qrc:/search-icon.svg"
+            fill: CmnCfg.palette.paneColor
+            anchors.verticalCenter: parent.verticalCenter
+            topPadding: 1
+        }
+
+    Common.ButtonForm {
+        id: timerButton
+        source: (timerMenu.chosenTimer == "") ? "qrc:/timer-icons/1y.svg" : timerMenu.chosenTimer
+        fill: CmnCfg.palette.paneColor
+        anchors.verticalCenter: parent.verticalCenter
+        topPadding: 1
+        onClicked: timerMenu.open()
+    }
+
+    CVUtils.TimerOptions {
+        id: timerMenu
+    }
+
     Common.ButtonForm {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
-        anchors.right: parent.right
         fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
@@ -63,5 +90,7 @@ ToolBar {
                 onTriggered: ownedConversation.clearConversationHistory()
             }
         }
+    }
+
     }
 }
