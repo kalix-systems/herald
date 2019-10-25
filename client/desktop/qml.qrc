@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>../foundation/js/utils.mjs</file>
         <file>App.qml</file>
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>

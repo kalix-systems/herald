@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 import "../../common" as Common
 import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
-import "../../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 
 ListView {
     id: groupList

@@ -4,7 +4,7 @@ import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "qrc:/common" as Common
 import "qrc:/imports/Avatar" as Av
-import "../../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "Controls"
@@ -25,7 +25,6 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    //PAUL: , lets write our own QML formatter so that this is a one liner
     ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
@@ -65,10 +64,10 @@ ListView {
                 contactName: title
                 lastBody: messageModel.lastBody
                 lastAuthor: messageModel.lastAuthor
-                lastTimestamp: Utils.friendlyTimestamp(messageModel.lastEpochTimestampMs)
+                lastTimestamp: Utils.friendlyTimestamp(
+                                   messageModel.lastEpochTimestampMs)
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
-
             }
 
             MouseArea {

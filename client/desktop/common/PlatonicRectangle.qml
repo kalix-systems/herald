@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 

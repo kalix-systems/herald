@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
 import "../../common" as Common
-import "../../../foundation/js/utils.mjs" as Utils
 import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {

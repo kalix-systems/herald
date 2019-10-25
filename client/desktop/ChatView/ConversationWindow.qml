@@ -5,7 +5,7 @@ import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
 import "." as CVUtils
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
 // Reveiw Key
@@ -115,11 +115,12 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    opacity: !head ? 1 : 0
+                    opacity: head && !outbound ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
+                        bottomMargin: 0
                     }
                 }
 
@@ -141,7 +142,7 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    opacity: head ? 1 : 0
+                    opacity: head && outbound ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom

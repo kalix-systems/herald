@@ -6,7 +6,7 @@ import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 import "../common" as Common
 import "qrc:/imports/Avatar"
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "Controls" as CVUtils
 
 // Reveiw Key
@@ -28,69 +28,84 @@ ToolBar {
         color: CmnCfg.palette.secondaryColor
     }
 
-    AvatarMain {
-        anchors.fill: parent
-        iconColor: CmnCfg.palette.iconFill
-        textColor: CmnCfg.avatarColors[conversationItem.color]
-        size: 32
-        initials: conversationItem.title[0].toUpperCase()
-        anchors {
-            margins: 16
-        }
-
-        labelComponent: ConversationLabel {
-            contactName: conversationItem.title
-            labelColor: CmnCfg.palette.paneColor
-            labelSize: 18
-        }
-    }
-
-    Row {
+    RowLayout {
         id: buttonRow
-        height: parent.height
-        anchors.right: parent.right
+
         spacing: 12
 
-        Common.ButtonForm {
-            id: searchButton
-            source: "qrc:/search-icon.svg"
-            fill: CmnCfg.palette.paneColor
-            anchors.verticalCenter: parent.verticalCenter
-            topPadding: 1
+        anchors {
+            fill: parent
+            leftMargin: CmnCfg.margin
         }
 
-    Common.ButtonForm {
-        id: timerButton
-        source: (timerMenu.chosenTimer == "") ? "qrc:/timer-icons/1y.svg" : timerMenu.chosenTimer
-        fill: CmnCfg.palette.paneColor
-        anchors.verticalCenter: parent.verticalCenter
-        topPadding: 1
-        onClicked: timerMenu.open()
-    }
+        AvatarMain {
 
-    CVUtils.TimerOptions {
-        id: timerMenu
-    }
-
-    Common.ButtonForm {
-        id: convOptionsButton
-        source: "qrc:/options-icon.svg"
-        fill: CmnCfg.palette.paneColor
-        anchors.verticalCenter: parent.verticalCenter
-        onClicked: convOptionsMenu.open()
-        Menu {
-            id: convOptionsMenu
-
-            MenuItem {
-                text: "Archive"
-            }
-
-            MenuItem {
-                text: "Clear History"
-                onTriggered: ownedConversation.clearConversationHistory()
+            size: 32
+            iconColor: CmnCfg.palette.iconFill
+            textColor: CmnCfg.avatarColors[conversationItem.color]
+            initials: conversationItem.title[0].toUpperCase()
+            Layout.alignment: Qt.AlignLeft
+            anchors {
+                margins: 16
             }
         }
-    }
 
+        Label {
+            id: uid
+            font {
+                bold: true
+                family: CmnCfg.chatFont.name
+                pixelSize: 18
+            }
+            Layout.alignment: Qt.AlignLeft
+            Layout.fillWidth: true
+            elide: "ElideRight"
+            text: conversationItem.title
+            color: "white"
+        }
+
+        Row {
+            spacing: CmnCfg.margin
+            Layout.alignment: Qt.AlignRight
+
+            Common.ButtonForm {
+                id: searchButton
+                source: "qrc:/search-icon.svg"
+                fill: CmnCfg.palette.paneColor
+                topPadding: 1
+            }
+
+            Common.ButtonForm {
+                id: timerButton
+                source: timerMenu.chosenTimer
+                fill: CmnCfg.palette.paneColor
+                topPadding: 1
+                onClicked: timerMenu.open()
+            }
+
+            CVUtils.TimerOptions {
+                id: timerMenu
+            }
+
+            Common.ButtonForm {
+                id: convOptionsButton
+                source: "qrc:/options-icon.svg"
+                fill: CmnCfg.palette.paneColor
+                onClicked: convOptionsMenu.open()
+                Menu {
+                    id: convOptionsMenu
+
+                    MenuItem {
+                        text: "Archive"
+                    }
+
+                    MenuItem {
+                        text: "Clear History"
+                        onTriggered: ownedConversation.clearConversationHistory(
+                                         )
+                    }
+                }
+            }
+        }
     }
 }

@@ -4,7 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "popups" as Popups
 import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 
 // Reveiw Key

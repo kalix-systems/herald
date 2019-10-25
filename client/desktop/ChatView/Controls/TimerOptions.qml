@@ -7,7 +7,7 @@ import QtQuick.Controls 2.5
 import Qt.labs.platform 1.0
 
 Menu {
-    property string chosenTimer: ""
+    property string chosenTimer: "qrc:/timer-icons/1w.svg"
     ListModel {
         id: timerModel
         ListElement {
@@ -40,14 +40,13 @@ Menu {
     Instantiator {
         model: timerModel
 
-    MenuItem {
-        text: name
-        onTriggered: {
-            chosenTimer = path
+        MenuItem {
+            text: name
+            onTriggered: {
+                chosenTimer = path
+            }
         }
-     }
 
-   onObjectAdded: optMenu.insertItem(index, object)
-   }
+        onObjectAdded: optMenu.insertItem(index, object)
+    }
 }
-
