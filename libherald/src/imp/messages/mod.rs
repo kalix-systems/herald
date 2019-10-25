@@ -174,19 +174,22 @@ impl MessagesTrait for Messages {
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
         let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
 
-        ret_none!(
-            &ret_none!(self.map.get(&msg_id), "".to_owned()).body,
-            "".to_owned()
-        )
-        .to_string()
+        match self.map.get(&msg_id) {
+            Some(msg) => match msg.body.as_ref() {
+                Some(body) => body.to_string(),
+                None => "".to_owned(),
+            },
+            None => "".to_owned(),
+        }
     }
 
     fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
         let msg_id = ret_err!(MsgId::try_from(msg_id), ffi::NULL_USER_ID.to_string());
 
-        ret_none!(self.map.get(&msg_id), ffi::NULL_USER_ID.to_string())
-            .author
-            .to_string()
+        match self.map.get(&msg_id) {
+            Some(msg) => msg.author.to_string(),
+            None => "UNKNOWN".to_owned(),
+        }
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
