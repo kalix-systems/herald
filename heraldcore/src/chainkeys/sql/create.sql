@@ -19,10 +19,4 @@ CREATE TABLE IF NOT EXISTS block_dependencies(
   PRIMARY KEY(block_id, parent_hash)
 );
 
-CREATE TABLE IF NOT EXISTS channel_keys(
-  conversation_id BLOB NOT NULL,
-  channel_key BLOB NOT NULL,
-  PRIMARY KEY(conversation_id)
-);
-
 CREATE INDEX IF NOT EXISTS block_dep_parent ON block_dependencies(parent_hash);

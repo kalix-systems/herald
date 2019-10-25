@@ -18,7 +18,7 @@ const DEFAULT_PORT: u16 = 8080;
 const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
-    static ref SERVER_ADDR: SocketAddr = match &crate::utils::CONF.server_addr {
+    static ref SERVER_ADDR: SocketAddr = match option_env!("SERVER_ADDR") {
         Some(addr) => addr.parse().unwrap_or_else(|e| {
             eprintln!("Provided address {} is invalid: {}", addr, e);
             std::process::abort();
@@ -473,8 +473,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
         let mut db = chainkeys::CK_CONN.lock();
         let mut tx = db.transaction()?;
-        let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
-        debug_assert!(unlocked.is_empty());
+        debug_assert_eq!(chainkeys::store_key(&mut tx, cid, hash, key)?, Vec::new());
         // TODO: replace used with probably_used here
         // in general we probably want a slightly smarter system for dealing with scenarios where
         // we thought a message wasn't sent but it was
