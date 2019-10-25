@@ -30,8 +30,8 @@ pub enum SigValid {
     BadSign,
 }
 
-/// How far in the future a signature can be stamped and still considered valid, in seconds.
-pub const TIMESTAMP_FUZZ: i64 = 3600;
+/// How far in the future a signature can be stamped and still considered valid, in milliseconds.
+pub const TIMESTAMP_FUZZ: i64 = 3_600_000;
 
 /// A signed and dated piece of data.
 /// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
@@ -86,8 +86,7 @@ fn verify_sig(
 ) -> SigValid {
     let verify_time = Time::now();
     let dat = compute_signing_data(slice, signer_time);
-    let ts_valid =
-        (signer_time <= verify_time) || ((verify_time.0 - signer_time.0).abs() <= TIMESTAMP_FUZZ);
+    let ts_valid = signer_time <= verify_time || signer_time.within(TIMESTAMP_FUZZ, &verify_time);
     if !ts_valid {
         SigValid::BadTime {
             signer_time,
