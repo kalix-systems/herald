@@ -16,7 +16,6 @@ Page {
     property Messages ownedConversation
 
     background: Rectangle {
-        anchors.fill: parent
         color: CmnCfg.palette.mainColor
     }
 

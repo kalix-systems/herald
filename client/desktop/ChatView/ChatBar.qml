@@ -43,7 +43,6 @@ ToolBar {
             labelSize: 18
         }
     }
-    }
 
     Row {
         id: buttonRow
@@ -75,7 +74,6 @@ ToolBar {
     Common.ButtonForm {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
-        anchors.right: parent.right
         fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
@@ -91,5 +89,7 @@ ToolBar {
                 onTriggered: ownedConversation.clearConversationHistory()
             }
         }
+    }
+
     }
 }
