@@ -68,10 +68,26 @@ Item {
             sourceComponent: splash
         }
 
-        handle: Rectangle {
+        handle: Item {
             id: handle
             implicitWidth: 1
-            color: CmnCfg.palette.borderColor
+            Rectangle {
+                id: toolBarHandle
+                implicitWidth: 1
+                color: "white"
+                height: CmnCfg.toolbarHeight
+                anchors {
+                    top: parent.top
+                }
+            }
+            Rectangle {
+                implicitWidth: 1
+                color: CmnCfg.palette.borderColor
+                anchors {
+                    top: toolBarHandle.bottom
+                    bottom: parent.bottom
+                }
+            }
         }
     }
 

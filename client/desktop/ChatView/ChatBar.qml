@@ -19,7 +19,6 @@ import "../../foundation/js/utils.mjs" as Utils
 ToolBar {
     property var conversationItem
     property Messages ownedConversation: parent.ownedConversation
-
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
@@ -36,11 +35,11 @@ ToolBar {
             margins: 16
         }
 
-
-        labelComponent: ConversationLabel {contactName: conversationItem.title
-        labelColor: CmnCfg.palette.paneColor
-        labelSize: 18}
-
+        labelComponent: ConversationLabel {
+            contactName: conversationItem.title
+            labelColor: CmnCfg.palette.paneColor
+            labelSize: 18
+        }
     }
 
     Common.ButtonForm {
