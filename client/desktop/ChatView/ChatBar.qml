@@ -7,6 +7,7 @@ import Qt.labs.platform 1.1
 import "../common" as Common
 import "qrc:/imports/Avatar"
 import "../../foundation/js/utils.mjs" as Utils
+import "Controls" as CVUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -63,10 +64,15 @@ ToolBar {
 
     Common.ButtonForm {
         id: timerButton
-        source: "qrc:/timer-icons/1y.svg"
+        source: (timerMenu.chosenTimer == "") ? "qrc:/timer-icons/1y.svg" : timerMenu.chosenTimer
         fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         topPadding: 1
+        onClicked: timerMenu.open()
+    }
+
+    CVUtils.TimerOptions {
+        id: timerMenu
     }
 
 

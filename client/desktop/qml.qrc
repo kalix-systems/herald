@@ -50,5 +50,6 @@
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
+        <file>ChatView/Controls/TimerOptions.qml</file>
     </qresource>
 </RCC>
