@@ -443,9 +443,12 @@ impl ConversationMessage {
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
         let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
+        let channel_key = cid.get_channel_key()?;
+
         let SealData { block, key } =
-            Block::seal(kp.secret_key(), &keys, hashes, cbytes).ok_or(CryptoError)?;
+            Block::seal(kp.secret_key(), &channel_key, &keys, hashes, cbytes).ok_or(CryptoError)?;
         let hash = block.compute_hash().ok_or(CryptoError)?;
+
         Ok((
             ConversationMessage {
                 cid,
