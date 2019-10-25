@@ -43,7 +43,7 @@ ToolBar {
         Rectangle {
             Layout.alignment: Qt.AlignHCenter
             height: parent.height
-            width: 2
+            width: 1
             color: CmnCfg.palette.mainColor
         }
 
