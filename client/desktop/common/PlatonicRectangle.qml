@@ -18,19 +18,14 @@ Rectangle {
     property int boxColor
     property alias labelComponent: conversationItemAvatar.labelComponent
 
-
     AvatarMain {
         id: conversationItemAvatar
         iconColor: CmnCfg.avatarColors[boxColor]
-        textColor: CmnCfg.palette.iconFill
-        size: 42
         initials: boxTitle[0].toUpperCase()
         pfpPath: Utils.safeStringOrDefault(picture)
         anchors {
             margins: 6
-
         }
-
     }
 
     states: [

@@ -20,6 +20,7 @@ import "Controls" as CVUtils
 ToolBar {
     property var conversationItem
     property Messages ownedConversation: parent.ownedConversation
+
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
@@ -27,10 +28,6 @@ ToolBar {
         color: CmnCfg.palette.secondaryColor
     }
 
-    Item {
-        anchors.left: parent.left
-        anchors.right: buttonRow.left
-        height: parent.height
     AvatarMain {
         iconColor: CmnCfg.palette.iconFill
         textColor: CmnCfg.avatarColors[conversationItem.color]
@@ -75,14 +72,13 @@ ToolBar {
         id: timerMenu
     }
 
-
     Common.ButtonForm {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
+        anchors.right: parent.right
         fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
-        rightPadding: 12
         Menu {
             id: convOptionsMenu
 
@@ -95,6 +91,5 @@ ToolBar {
                 onTriggered: ownedConversation.clearConversationHistory()
             }
         }
-    }
     }
 }
