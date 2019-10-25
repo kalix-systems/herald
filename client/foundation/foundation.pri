@@ -50,3 +50,15 @@ android {
 RESOURCES += \
     $$PWD/icons/icons.qrc \
     $$PWD/qml/commonQml.qrc
+
+DISTFILES += \
+    $$PWD/icons/timer-icons/10s.svg \
+    $$PWD/icons/timer-icons/12h.svg \
+    $$PWD/icons/timer-icons/1d.svg \
+    $$PWD/icons/timer-icons/1h.svg \
+    $$PWD/icons/timer-icons/1min.svg \
+    $$PWD/icons/timer-icons/1mo.svg \
+    $$PWD/icons/timer-icons/1w.svg \
+    $$PWD/icons/timer-icons/1y.svg \
+    $$PWD/icons/timer-icons/30min.svg \
+    $$PWD/icons/timer-icons/off.svg
