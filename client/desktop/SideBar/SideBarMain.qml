@@ -26,7 +26,6 @@ Page {
     padding: 0 // All Interior Elements span the entire pane
 
     background: Rectangle {
-        border.color: CmnCfg.palette.secondaryColor
         color: CmnCfg.palette.paneColor
     }
 

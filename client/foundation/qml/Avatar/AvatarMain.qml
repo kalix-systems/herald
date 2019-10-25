@@ -47,6 +47,7 @@ Item {
     }
 
     Item {
+        id: labelItem
         anchors {
             top: avatarIcon.top
             bottom: avatarIcon.bottom

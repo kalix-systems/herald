@@ -61,7 +61,7 @@ ToolBar {
         }
 
         Row {
-            spacing: 8
+            spacing: 12
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
 
             Common.ButtonForm {

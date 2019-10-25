@@ -30,8 +30,6 @@ ColumnLayout {
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
 
-        Rectangle {}
-
         ColumnLayout {
             id: reply
             spacing: 1

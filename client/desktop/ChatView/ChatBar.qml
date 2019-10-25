@@ -27,6 +27,10 @@ ToolBar {
         color: CmnCfg.palette.secondaryColor
     }
 
+    Item {
+        anchors.left: parent.left
+        anchors.right: buttonRow.left
+        height: parent.height
     AvatarMain {
         iconColor: CmnCfg.palette.iconFill
         textColor: CmnCfg.avatarColors[conversationItem.color]
@@ -36,20 +40,43 @@ ToolBar {
             margins: 16
         }
 
-
         labelComponent: ConversationLabel {contactName: conversationItem.title
         labelColor: CmnCfg.palette.paneColor
         labelSize: 18}
 
     }
+    }
+
+    Row {
+        id: buttonRow
+        height: parent.height
+        anchors.right: parent.right
+        spacing: 12
+
+        Common.ButtonForm {
+            id: searchButton
+            source: "qrc:/search-icon.svg"
+            fill: CmnCfg.palette.paneColor
+            anchors.verticalCenter: parent.verticalCenter
+            topPadding: 1
+        }
+
+    Common.ButtonForm {
+        id: timerButton
+        source: "qrc:/timer-icons/1y.svg"
+        fill: CmnCfg.palette.paneColor
+        anchors.verticalCenter: parent.verticalCenter
+        topPadding: 1
+    }
+
 
     Common.ButtonForm {
         id: convOptionsButton
         source: "qrc:/options-icon.svg"
-        anchors.right: parent.right
         fill: CmnCfg.palette.paneColor
         anchors.verticalCenter: parent.verticalCenter
         onClicked: convOptionsMenu.open()
+        rightPadding: 12
         Menu {
             id: convOptionsMenu
 
@@ -62,5 +89,6 @@ ToolBar {
                 onTriggered: ownedConversation.clearConversationHistory()
             }
         }
+    }
     }
 }
