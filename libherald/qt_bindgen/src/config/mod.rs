@@ -25,7 +25,7 @@ pub(crate) fn get() -> Config {
     let objects = objects();
     let rust = Rust {
         dir: parent_dir.to_path_buf(),
-        implementation_module: "implementation".into(),
+        implementation_module: "imp".into(),
         interface_module: "interface".into(),
     };
     let rust_edition = RustEdition::Rust2018;

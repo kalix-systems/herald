@@ -74,7 +74,7 @@ impl MessagesTrait for Messages {
     }
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
-        Some(self.last_msg()?.timestamp.0 * 1000)
+        Some(self.last_msg()?.timestamp.0)
     }
 
     /// Returns index of a message given its id.
@@ -174,19 +174,22 @@ impl MessagesTrait for Messages {
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
         let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
 
-        ret_none!(
-            &ret_none!(self.map.get(&msg_id), "".to_owned()).body,
-            "".to_owned()
-        )
-        .to_string()
+        match self.map.get(&msg_id) {
+            Some(msg) => match msg.body.as_ref() {
+                Some(body) => body.to_string(),
+                None => "".to_owned(),
+            },
+            None => "".to_owned(),
+        }
     }
 
     fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
         let msg_id = ret_err!(MsgId::try_from(msg_id), ffi::NULL_USER_ID.to_string());
 
-        ret_none!(self.map.get(&msg_id), ffi::NULL_USER_ID.to_string())
-            .author
-            .to_string()
+        match self.map.get(&msg_id) {
+            Some(msg) => msg.author.to_string(),
+            None => "UNKNOWN".to_owned(),
+        }
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
@@ -238,7 +241,7 @@ impl MessagesTrait for Messages {
     fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
         let mid = ret_none!(self.list.get(row_index), 0).msg_id;
 
-        ret_none!(self.map.get(&mid), 0).timestamp.0 * 1000
+        ret_none!(self.map.get(&mid), 0).timestamp.0
     }
 
     fn can_fetch_more(&self) -> bool {
@@ -364,7 +367,7 @@ impl Messages {
 
         self.emit_last_changed();
 
-        use crate::implementation::conversations::{shared::*, Conversations};
+        use crate::imp::conversations::{shared::*, Conversations};
         Conversations::push(ConvUpdates::NewActivity(cid))?;
 
         Ok(())

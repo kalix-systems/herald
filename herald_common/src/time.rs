@@ -8,7 +8,7 @@ use std::{
 #[derive(Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
 pub struct Time(pub i64);
 
-fn u64_as_i64(u: u64) -> i64 {
+fn u128_as_i64(u: u128) -> i64 {
     match u.try_into() {
         Ok(i) => i,
         Err(_) => i64::max_value(),
@@ -20,11 +20,15 @@ impl Time {
         let now = SystemTime::now();
 
         let secs = match now.duration_since(UNIX_EPOCH) {
-            Ok(d) => u64_as_i64(d.as_secs()),
-            Err(d) => -u64_as_i64(d.duration().as_secs()),
+            Ok(d) => u128_as_i64(d.as_millis()),
+            Err(d) => -u128_as_i64(d.duration().as_millis()),
         };
 
         Time(secs)
+    }
+
+    pub fn within(&self, fuzz: i64, other: &Time) -> bool {
+        (self.0 - other.0).abs() <= fuzz
     }
 }
 

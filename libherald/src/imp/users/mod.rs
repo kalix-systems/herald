@@ -182,7 +182,7 @@ impl UsersTrait for Users {
     /// Returns name if it is set, otherwise returns the user's id.
     fn color_by_id(&self, id: ffi::UserId) -> u32 {
         let uid = &ret_err!(id.as_str().try_into(), 0);
-        ret_none!(color(&uid), 0)
+        color(&uid).unwrap_or(0)
     }
 
     /// Sets color

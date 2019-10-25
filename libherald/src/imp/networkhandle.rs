@@ -1,6 +1,6 @@
 use crate::{
     ffi,
-    implementation::{conversations::Conversations, messages},
+    imp::{conversations::Conversations, messages},
     interface::*,
     ret_err,
     shared::{AddressedBus, SingletonBus},
@@ -34,8 +34,8 @@ pub struct NotifHandler {
 
 impl NotifHandler {
     fn send(&mut self, notif: Notification) {
-        use crate::implementation::conversations::shared::*;
-        use crate::implementation::users::{shared::*, Users};
+        use crate::imp::conversations::shared::*;
+        use crate::imp::users::{shared::*, Users};
         use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
 
@@ -68,7 +68,7 @@ impl NotifHandler {
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
-                use crate::implementation::members::{shared::*, Members};
+                use crate::imp::members::{shared::*, Members};
                 ret_err!(Members::push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
         }

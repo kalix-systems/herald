@@ -8,6 +8,9 @@ stats/
 ## qtcreator
 *.user.pro*
 
+## heraldcore config file
+.heraldcore_conf.toml
+
 ## profiling data
 callgrind.out*
 cachegrind.out*
