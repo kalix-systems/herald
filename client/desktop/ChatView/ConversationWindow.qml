@@ -37,7 +37,7 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-        spacing: 8
+        spacing: CmnCfg.smallMargin
         topPadding: CmnCfg.padding
         bottomPadding: CmnCfg.padding
         anchors {
@@ -68,8 +68,8 @@ Flickable {
                 anchors {
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
-                    rightMargin: CmnCfg.largeMargin
-                    leftMargin: CmnCfg.largeMargin
+                    rightMargin: CmnCfg.margin
+                    leftMargin: CmnCfg.smallMargin
                 }
 
                 Component {
@@ -115,7 +115,7 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    visible: !head
+                    opacity: !head ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom
@@ -141,7 +141,7 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    visible: head
+                    opacity: head ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom

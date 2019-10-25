@@ -34,7 +34,7 @@ Row {
     spacing: CmnCfg.padding
 
     ///--- Circle with initial
-    leftPadding: CmnCfg.margin
+    leftPadding: CmnCfg.smallMargin
     anchors.verticalCenter: inLayout ? undefined : parent.verticalCenter
     anchors.top: inLayout ? undefined : parent.top
     Loader {

@@ -24,11 +24,10 @@ ToolBar {
 
     RowLayout {
         anchors.fill: parent
-
         Common.Avatar {
             id: configAvatar
-            Layout.margins: CmnCfg.smallMargin
             Layout.alignment: Qt.AlignCenter
+            Layout.rightMargin: CmnCfg.smallMargin / 2
             avatarLabel: config.name
             labeled: false
             colorHash: config.color

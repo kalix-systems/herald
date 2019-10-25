@@ -69,12 +69,11 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            leftMargin: CmnCfg.smallMargin
-            rightMargin: CmnCfg.smallMargin
-            topMargin: CmnCfg.smallMargin
+            leftMargin: CmnCfg.smallMargin / 2
+            rightMargin: CmnCfg.smallMargin / 2
         }
 
-        topPadding: CmnCfg.smallMargin
+        topPadding: CmnCfg.smallMargin / 2
 
         Loader {
             id: replyLoader
@@ -99,21 +98,13 @@ Rectangle {
         ScrollView {
             id: scrollView
             height: Math.min(contentHeight, 100)
-            implicitWidth: containerCol.width
+            width: containerCol.width
             focus: true
 
             TextArea {
                 id: chatText
                 background: Rectangle {
                     color: CmnCfg.palette.mainColor
-                    anchors {
-                        fill: parent
-                        horizontalCenter: parent.horizontalCenter
-                        bottom: parent.bottom
-                    }
-                    radius: CmnCfg.radius
-                    Keys.forwardTo: keysProxy
-                    Keys.onEscapePressed: focus = false
                 }
                 selectionColor: CmnCfg.palette.tertiaryColor
                 color: CmnCfg.palette.mainTextColor

@@ -21,7 +21,7 @@ Rectangle {
         id: verticalAccent
         anchors.right: !outbound ? contentLoader.left : undefined
         anchors.left: outbound ? contentLoader.right : undefined
-        height: parent.height
+        height: contentLoader.height
         width: CmnCfg.smallMargin / 2
         color: senderColor
     }
@@ -30,5 +30,9 @@ Rectangle {
         id: contentLoader
         property int maxWidth: parent.maxWidth
         sourceComponent: content
+    }
+
+    Item {
+        anchors.bottom: parent.bottom
     }
 }
