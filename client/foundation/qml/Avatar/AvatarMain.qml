@@ -26,9 +26,9 @@ Item {
     // the initials to display in the icon
     property string initials
     readonly property real innerMargins: CmnCfg.smallMargin
-    property real topTextMargin: 5
-    property real bottomTextMargin: 5
-    property color textColor
+    property color textColor: CmnCfg.palette.iconFill
+    property real topTextMargin: 3
+    property real bottomTextMargin: 4
 
     anchors.fill: parent
 
@@ -46,22 +46,20 @@ Item {
         }
     }
 
-    Item {
-        id: labelItem
+    Loader {
+        id: labelContent
         anchors {
-            top: avatarIcon.top
-            bottom: avatarIcon.bottom
-            left: avatarIcon.right
-            right: parent.right
-            topMargin: topTextMargin
-            bottomMargin: bottomTextMargin
+
             leftMargin: 12
             rightMargin: 12
+            topMargin: topTextMargin
+            bottomMargin: bottomTextMargin
+
+            left: avatarIcon.right
+            right: parent.right
+            top: avatarIcon.top
+            bottom: avatarIcon.bottom
         }
-        Loader {
-            id: labelContent
-            anchors.fill: parent
-            sourceComponent: labelComponent
-        }
+        sourceComponent: labelComponent
     }
 }
