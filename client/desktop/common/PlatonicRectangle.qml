@@ -19,6 +19,7 @@ Rectangle {
     property alias labelComponent: conversationItemAvatar.labelComponent
 
     AvatarMain {
+        anchors.fill: parent
         id: conversationItemAvatar
         iconColor: CmnCfg.avatarColors[boxColor]
         initials: boxTitle[0].toUpperCase()

@@ -8,9 +8,9 @@ Label {
     property string senderName
     property color senderColor
     text: senderName
-    Layout.margins: CmnCfg.smallMargin
-    Layout.bottomMargin: CmnCfg.margin
-    Layout.preferredHeight: CmnCfg.margin
+    Layout.margins: CmnCfg.smallMargin / 2
+    Layout.bottomMargin: CmnCfg.smallMargin / 2
+    Layout.preferredHeight: CmnCfg.smallMargin
     font.bold: true
     color: senderColor
 }

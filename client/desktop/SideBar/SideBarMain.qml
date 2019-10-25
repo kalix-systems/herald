@@ -20,9 +20,7 @@ Page {
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: root.width * windowFraction
-
     property alias groupMemberSelect: convoBuilderLoader.item
-
     padding: 0 // All Interior Elements span the entire pane
 
     background: Rectangle {

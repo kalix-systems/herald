@@ -29,8 +29,8 @@ Item {
         id: labelGrid
         rows: 2
         columns: 2
-        columnSpacing: 6
-        anchors.fill: parent
+        width: parent.width
+        height: parent.height
 
         Label {
             id: uid
@@ -41,6 +41,7 @@ Item {
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
             Layout.preferredHeight: labelGrid.height / 4
+            Layout.maximumWidth: parent.width
             elide: "ElideRight"
             text: contactName
             color: labelColor
@@ -66,6 +67,7 @@ Item {
             }
             elide: "ElideRight"
             text: lastBody
+            Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             color: CmnCfg.palette.secondaryColor
         }

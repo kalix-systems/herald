@@ -22,7 +22,7 @@ Rectangle {
         anchors.right: !outbound ? contentLoader.left : undefined
         anchors.left: outbound ? contentLoader.right : undefined
         height: parent.height
-        width: CmnCfg.margin
+        width: CmnCfg.smallMargin / 2
         color: senderColor
     }
 

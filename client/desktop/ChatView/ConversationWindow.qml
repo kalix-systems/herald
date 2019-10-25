@@ -3,7 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.13
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
-import "qrc:/imports"
+import "qrc:/imports/Avatar"
 import "." as CVUtils
 import "../../foundation/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
@@ -37,7 +37,7 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-        spacing: CmnCfg.padding
+        spacing: 8
         topPadding: CmnCfg.padding
         bottomPadding: CmnCfg.padding
         anchors {
@@ -49,7 +49,7 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
-            delegate: Column {
+            delegate: Row {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                        receiptStatus)
@@ -58,21 +58,19 @@ Flickable {
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
                 readonly property string authName: contactsModel.nameById(
-                                                                  author)
+                                                       author)
                 readonly property bool outbound: author === config.configId
 
-                // this is where scroll bar position needs to be set to instantiate in the right location
-                Component.onCompleted: chatScrollBar.position = 1.0
-
+                spacing: CmnCfg.margin
+                // message is from same sender as the next
+                property bool head: true
                 // column is most correct to resize for extra content
                 anchors {
-                    // This is okay as a ternary, the types are enforced by QML.
                     right: outbound ? parent.right : undefined
                     left: !outbound ? parent.left : undefined
-                    rightMargin: CmnCfg.margin * 2.0
-                    leftMargin: CmnCfg.margin * 2.0
+                    rightMargin: CmnCfg.largeMargin
+                    leftMargin: CmnCfg.largeMargin
                 }
-                rightPadding: CmnCfg.margin
 
                 Component {
                     id: std
@@ -114,8 +112,19 @@ Flickable {
                     }
                 }
 
+                AvatarMain {
+                    iconColor: userColor
+                    initials: authName[0].toUpperCase()
+                    visible: !head
+                    size: 32
+                    anchors {
+                        bottom: parent.bottom
+                        margins: CmnCfg.margin
+                    }
+                }
+
                 CB.ChatBubble {
-                    ChatBubbleHover {}
+                    id: bubbleActual
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.paneColor
                     senderColor: userColor
@@ -126,6 +135,19 @@ Flickable {
                              } else {
                                  std
                              }
+                    ChatBubbleHover {}
+                }
+
+                AvatarMain {
+                    iconColor: userColor
+                    initials: authName[0].toUpperCase()
+                    visible: head
+                    size: 32
+                    anchors {
+                        bottom: parent.bottom
+                        margins: CmnCfg.margin
+                        bottomMargin: 0
+                    }
                 }
             } //bubble wrapper
         } // Repeater

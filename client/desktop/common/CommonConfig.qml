@@ -23,11 +23,12 @@ Item {
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
-    readonly property int margin: units.largeSpacing
     /// fitzpatrick emoji swatch codes
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
-    /// standard half margin
-    readonly property int smallMargin: 5
+    readonly property int smallMargin: 8
+    readonly property int margin: 12
+    readonly property int mediumMargin: 16
+    readonly property int largeMargin: 20
     /// standard half padding unit
     readonly property int smallPadding: 5
     /// standard padding unit
@@ -65,7 +66,6 @@ Item {
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
 
-    ///
     property alias units: importUnits
 
     Imports.Units {

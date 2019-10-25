@@ -28,6 +28,7 @@ ToolBar {
     }
 
     AvatarMain {
+        anchors.fill: parent
         iconColor: CmnCfg.palette.iconFill
         textColor: CmnCfg.avatarColors[conversationItem.color]
         size: 32

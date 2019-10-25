@@ -19,7 +19,6 @@ import "qrc:/imports/Avatar" as Av
 /// --- displays a list of contacts
 ListView {
     id: contactList
-
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds

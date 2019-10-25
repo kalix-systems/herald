@@ -30,7 +30,8 @@ Item {
     property real topTextMargin: 3
     property real bottomTextMargin: 4
 
-    anchors.fill: parent
+    height: size
+    width: size
 
     AvatarIcon {
         id: avatarIcon
@@ -49,9 +50,8 @@ Item {
     Loader {
         id: labelContent
         anchors {
-
-            leftMargin: 12
-            rightMargin: 12
+            leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.margin
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
 
