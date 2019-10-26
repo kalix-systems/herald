@@ -62,6 +62,12 @@ pub struct Pool {
     rx: Receiver<Client>,
 }
 
+impl std::default::Default for Pool {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Pool {
     pub fn new() -> Pool {
         let (tx, rx) = unbounded();

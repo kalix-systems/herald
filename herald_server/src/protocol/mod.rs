@@ -1,7 +1,9 @@
-use crate::{prelude::*, store::*};
+use crate::prelude::*;
 use bytes::Buf;
 use dashmap::DashMap;
 use futures::stream::*;
+use server_errors::*;
+use server_store::*;
 use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
@@ -21,6 +23,7 @@ use warp::{
 
 type WTx = SplitSink<WebSocket, ws::Message>;
 
+#[derive(Default)]
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<()>>,
     pub pool: Pool,
@@ -62,16 +65,12 @@ impl State {
         // we know the gid
         tokio::spawn(async move {
             while let Some(Ok(m)) = wrx.next().await {
-                if m.is_close() {
+                if m.is_close() || (m.is_binary() && rtx.send(m.into_bytes()).await.is_err()) {
                     break;
-                } else if m.is_binary() {
-                    if rtx.send(m.into_bytes()).await.is_err() {
-                        break;
-                    }
                 }
             }
 
-            drop(close.send(()));
+            close.send(()).ok();
         });
 
         let gid = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;

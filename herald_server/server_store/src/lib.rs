@@ -1,9 +1,7 @@
-use crate::prelude::*;
-use dotenv::dotenv;
 use futures::FutureExt;
 use herald_common::*;
-use lazy_static::*;
-use std::env;
+use server_errors::{Error, Error::*};
+use tokio;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
 mod pool;
@@ -31,12 +29,8 @@ macro_rules! params {
     }
 }
 
-lazy_static! {
-    static ref DATABASE_URL: String = {
-        dotenv().expect("Invalid dotenv");
-        env::var("DATABASE_URL").expect("DATABASE_URL must be set")
-    };
-}
+
+const DATABASE_URL: &str = "postgres://postgres:docker@127.0.0.1:5432";
 
 fn is_unique_violation(query_res: &Result<u64, PgError>) -> bool {
     use tokio_postgres::error::SqlState;
@@ -457,7 +451,7 @@ impl Conn {
     pub async fn setup(&mut self) -> Result<(), Error> {
         // create
         self.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/up.sql"
+            "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
         Ok(())
@@ -468,13 +462,13 @@ impl Conn {
 
         // drop
         tx.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/down.sql"
+            "../migrations/2019-09-21-221007_herald/down.sql"
         ))
         .await?;
 
         // create
         tx.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/up.sql"
+            "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
         tx.commit().await?;

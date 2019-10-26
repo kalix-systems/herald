@@ -1,4 +1,4 @@
-use herald_server::store::*;
+use server_store::*;
 
 #[tokio::main]
 async fn main() {

@@ -11,9 +11,10 @@ Well alright then.
 The first time you run the server, you'll want to run these commands:
 
 ```bash
-echo DATABASE_URL=postgres://postgres:docker@127.0.0.1:5432 > .env &\
 docker-compose up -d &\
-cargo run --bin setup_db &\
+cd server_store &\
+cargo run --bin setup_db &\ 
+cd .. &\
 docker-compose down
 ```
 
@@ -22,16 +23,6 @@ Then you can run the server with these commands:
 ```bash
 docker-compose up -d &\
 cargo run --release
-```
-
-# Setting the database url
-
-You'll need to tell the server where the database is.
-You can do this by adding a line setting `DATABASE_URL` to `.env`.
-If you're using the local dev server (you probably are), this is the command to run:
-
-```bash
-echo DATABASE_URL=postgres://postgres:docker@127.0.0.1:5432 > .env
 ```
 
 # Setting up the development Postgres server
