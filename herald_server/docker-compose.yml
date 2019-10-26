@@ -6,12 +6,9 @@ services:
     command: postgres -c 'max_connections=10000' -c 'shared_buffers=2048MB'
     stdin_open: true
     tty: true
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_PASSWORD: docker
     volumes:
       - pg-data:/var/lib/postgresql/data
+      - "/var/run/postgresql:/var/run/postgresql"
 
 volumes:
   pg-data:

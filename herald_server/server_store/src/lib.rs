@@ -29,8 +29,7 @@ macro_rules! params {
     }
 }
 
-
-const DATABASE_URL: &str = "postgres://postgres:docker@127.0.0.1:5432";
+const DATABASE_URL: &str = "host=/var/run/postgresql user=postgres";
 
 fn is_unique_violation(query_res: &Result<u64, PgError>) -> bool {
     use tokio_postgres::error::SqlState;
