@@ -3,11 +3,11 @@ use dotenv::dotenv;
 use futures::FutureExt;
 use herald_common::*;
 use lazy_static::*;
-use std::{
-    env,
-    ops::{Deref, DerefMut},
-};
+use std::env;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
+
+mod pool;
+pub use pool::*;
 
 macro_rules! sql {
     ($path: literal) => {
@@ -36,22 +36,6 @@ lazy_static! {
         dotenv().expect("Invalid dotenv");
         env::var("DATABASE_URL").expect("DATABASE_URL must be set")
     };
-}
-
-pub struct Conn(pub Client);
-
-impl Deref for Conn {
-    type Target = Client;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Conn {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
 }
 
 fn is_unique_violation(query_res: &Result<u64, PgError>) -> bool {
@@ -96,21 +80,6 @@ fn dep_check(
 
 fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) -> bool {
     ts.is_some() || signed_by.is_some() || sig.is_some()
-}
-
-pub async fn get_client() -> Result<Conn, PgError> {
-    let (client, connection) = tokio_postgres::connect(&DATABASE_URL, NoTls).await?;
-
-    // The connection object performs the actual communication with the database,
-    // so spawn it off to run on its own.
-    let connection = connection.map(|r| {
-        if let Err(e) = r {
-            eprintln!("connection error: {}", e);
-        }
-    });
-    tokio::spawn(connection);
-
-    Ok(Conn(client))
 }
 
 type RawPkMeta<'a> = (

@@ -23,6 +23,7 @@ type WTx = SplitSink<WebSocket, ws::Message>;
 
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<()>>,
+    pub pool: Pool,
 }
 
 pub mod get;
@@ -34,11 +35,12 @@ impl State {
     pub fn new() -> Self {
         State {
             active: DashMap::default(),
+            pool: Pool::new(),
         }
     }
 
     async fn new_connection(&self) -> Result<Conn, Error> {
-        Ok(get_client().await?)
+        Ok(self.pool.get().await?)
     }
 
     pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {

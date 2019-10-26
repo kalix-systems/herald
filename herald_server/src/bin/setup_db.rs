@@ -1,8 +1,10 @@
-use herald_server::store::get_client;
+use herald_server::store::*;
 
 #[tokio::main]
 async fn main() {
-    let mut client = get_client()
+    let pool = Pool::new();
+    let mut client = pool
+        .get()
         .await
         .expect("Failed to get client while trying to reset database");
     client.setup().await.expect("Failed to reset database");
