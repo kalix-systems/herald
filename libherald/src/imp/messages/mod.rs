@@ -1,5 +1,5 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
-use herald_common::{Time, UserId};
+use herald_common::UserId;
 use heraldcore::{
     abort_err,
     config::Config,
@@ -11,42 +11,18 @@ use heraldcore::{
 };
 use im_rc::vector::Vector;
 use std::{
-    cmp::Ordering,
     collections::HashMap,
     convert::{TryFrom, TryInto},
     ops::Drop,
 };
 
 pub(crate) mod shared;
+pub(crate) mod types;
 use shared::*;
+use types::*;
 
 type Emitter = MessagesEmitter;
 type List = MessagesList;
-
-#[derive(Clone, PartialEq, Eq)]
-/// A thin wrapper around a `MsgId`
-pub struct Message {
-    msg_id: MsgId,
-    data_saved: bool,
-    insertion_time: Time,
-}
-
-impl PartialOrd for Message {
-    fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
-        self.insertion_time.0.partial_cmp(&rhs.insertion_time.0)
-    }
-}
-
-impl Ord for Message {
-    fn cmp(&self, rhs: &Self) -> Ordering {
-        match self.partial_cmp(rhs) {
-            Some(ord) => {
-                return ord;
-            }
-            None => self.msg_id.cmp(&rhs.msg_id),
-        }
-    }
-}
 
 /// A wrapper around a vector of `Message`s with additional fields
 /// to facilitate interaction with QML.
@@ -54,7 +30,7 @@ pub struct Messages {
     emit: Emitter,
     model: List,
     list: Vector<Message>,
-    map: HashMap<MsgId, Msg>,
+    map: HashMap<MsgId, MsgData>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
 }
@@ -101,17 +77,13 @@ impl MessagesTrait for Messages {
     fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> u64 {
         let msg_id = ret_err!(msg_id.try_into(), std::u32::MAX as u64);
 
-        // sanity check
-        if !self.map.contains_key(&msg_id) {
-            return std::u64::MAX;
-        }
+        let insertion_time = ret_none!(self.map.get(&msg_id)).time.insertion;
+        let m = Message {
+            msg_id,
+            insertion_time,
+        };
 
-        // search backwards
-        self.list
-            .iter()
-            .rposition(|mid| msg_id == mid.msg_id)
-            .map(|ix| ix as u64)
-            .unwrap_or(std::u32::MAX as u64)
+        ret_err!(self.list.binary_search(&m), std::u64::MAX) as u64
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
@@ -127,14 +99,9 @@ impl MessagesTrait for Messages {
                 ret_err!(conversation::conversation_messages(&conversation_id))
                     .into_iter()
                     .map(|m| {
-                        let mid = m.message_id;
-                        let insertion_time = m.time.insertion;
-                        self.map.insert(mid, m);
-                        Message {
-                            msg_id: mid,
-                            data_saved: true,
-                            insertion_time,
-                        }
+                        let (message, data) = Message::split_msg(m, SaveStatus::Saved);
+                        self.map.insert(message.msg_id, data);
+                        message
                     })
                     .collect();
 
@@ -155,7 +122,8 @@ impl MessagesTrait for Messages {
     }
 
     fn data_saved(&self, row_index: usize) -> bool {
-        ret_none!(self.list.get(row_index), false).data_saved
+        let mid = ret_none!(self.list.get(row_index), false).msg_id;
+        ret_none!(self.map.get(&mid), false).save_status == SaveStatus::Saved
     }
 
     fn author(&self, row_index: usize) -> ffi::UserIdRef {
@@ -298,20 +266,10 @@ impl MessagesTrait for Messages {
 
                     new_msg_toast(&new);
 
-                    self.model
-                        .begin_insert_rows(self.list.len(), self.list.len());
-                    self.list.push_back(Message {
-                        msg_id: new.message_id,
-                        data_saved: true,
-                        insertion_time: new.time.insertion,
-                    });
-                    self.map.insert(new.message_id, new);
-                    self.model.end_insert_rows();
-
-                    self.emit_last_changed();
+                    ret_err!(self.raw_insert(new, SaveStatus::Saved));
                 }
                 MsgUpdate::FullMsg(msg) => {
-                    ret_err!(self.raw_insert(msg, false));
+                    ret_err!(self.raw_insert(msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {
@@ -344,13 +302,15 @@ impl MessagesTrait for Messages {
                     self.model.data_changed(ix, ix);
                 }
                 MsgUpdate::StoreDone(mid) => {
+                    let data = ret_none!(self.map.get_mut(&mid));
+
+                    data.save_status = SaveStatus::Saved;
                     let ix = ret_none!(self
                         .list
                         .iter()
                         // search backwards,
                         // it's probably fairly recent
                         .rposition(|m| m.msg_id == mid));
-                    self.list[ix].data_saved = true;
                     self.model.data_changed(ix, ix);
                 }
             }
@@ -367,7 +327,7 @@ impl MessagesTrait for Messages {
 }
 
 impl Messages {
-    fn last_msg(&self) -> Option<&Msg> {
+    fn last_msg(&self) -> Option<&MsgData> {
         let mid = self.list.last()?.msg_id;
         self.map.get(&mid)
     }
@@ -379,18 +339,38 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
-        let msg_id = msg.message_id;
-        let insertion_time = msg.time.insertion;
+    fn raw_insert(&mut self, msg: Msg, save_status: SaveStatus) -> Result<(), HErr> {
+        let (message, data) = Message::split_msg(msg, save_status);
+
+        let msg_id = message.msg_id;
         let cid = self.conversation_id.ok_or(NE!())?;
-        self.model
-            .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push_back(Message {
-            msg_id,
-            data_saved,
-            insertion_time,
-        });
-        self.map.insert(msg_id, msg);
+
+        let ix = if self
+            .list
+            .last()
+            .map(|last| last.insertion_time)
+            .unwrap_or(message.insertion_time)
+            <= message.insertion_time
+        {
+            self.list.len()
+        } else {
+            match self.list.binary_search(&message) {
+                Ok(_) => {
+                    eprintln!(
+                        "WARNING: tried to insert duplicate message at {file}:{line}:{col}",
+                        file = file!(),
+                        line = line!(),
+                        col = column!()
+                    );
+                    return Ok(());
+                }
+                Err(ix) => ix,
+            }
+        };
+
+        self.model.begin_insert_rows(ix, ix);
+        self.list.insert(ix, message);
+        self.map.insert(msg_id, data);
         self.model.end_insert_rows();
 
         self.emit_last_changed();
