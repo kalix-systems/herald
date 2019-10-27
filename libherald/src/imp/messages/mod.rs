@@ -74,7 +74,7 @@ impl MessagesTrait for Messages {
     }
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
-        Some(self.last_msg()?.timestamp.0)
+        Some(self.last_msg()?.time.insertion.0)
     }
 
     /// Returns index of a message given its id.
@@ -241,7 +241,7 @@ impl MessagesTrait for Messages {
     fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
         let mid = ret_none!(self.list.get(row_index), 0).msg_id;
 
-        ret_none!(self.map.get(&mid), 0).timestamp.0
+        ret_none!(self.map.get(&mid), 0).time.insertion.0
     }
 
     fn can_fetch_more(&self) -> bool {

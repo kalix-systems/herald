@@ -1,11 +1,10 @@
 use super::*;
+use crate::message::MessageTime;
+use rusqlite::named_params;
 
 impl ConversationBuilder {
     ///Adds conversation
-    pub(crate) fn add_db(
-        &mut self,
-        conn: &mut rusqlite::Connection,
-    ) -> Result<ConversationId, HErr> {
+    pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
         let id = match self.conversation_id {
             Some(id) => id.to_owned(),
             None => {
@@ -34,31 +33,7 @@ impl ConversationBuilder {
     }
 
     pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-
-        tx.execute(
-            include_str!("sql/add_conversation.sql"),
-            params![
-                id,
-                self.title,
-                self.picture,
-                color,
-                pairwise,
-                muted,
-                Time::now()
-            ],
-        )?;
-        Ok(id)
+        self.add_db(tx)
     }
 }
 
@@ -80,21 +55,32 @@ pub(crate) fn conversation_messages(
     conversation_id: &ConversationId,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
-    let res = stmt.query_map(params![conversation_id], |row| {
-        let message_id = row.get(0)?;
-        let receipts = crate::message::db::get_receipts(conn, &message_id)?;
-        Ok(Message {
-            message_id,
-            author: row.get(1)?,
-            conversation: row.get(2)?,
-            body: row.get(3)?,
-            op: row.get(4)?,
-            timestamp: row.get(5)?,
-            send_status: row.get(6)?,
-            has_attachments: row.get(7)?,
-            receipts,
-        })
-    })?;
+    let res = stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            let message_id = row.get("msg_id")?;
+            let receipts = crate::message::db::get_receipts(conn, &message_id)?;
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            Ok(Message {
+                message_id,
+                author: row.get("author")?,
+                conversation: *conversation_id,
+                body: row.get("body")?,
+                op: row.get("op_msg_id")?,
+                time,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                receipts,
+            })
+        },
+    )?;
 
     let mut messages = Vec::new();
     for msg in res {

@@ -4,12 +4,14 @@ SELECT
   conversation_id,
   body,
   op_msg_id,
-  ts,
+  insertion_ts,
+  server_ts,
+  expiration_ts,
   send_status,
   has_attachments
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE
-  send_status = ?
+  send_status = @send_status
 ORDER BY
-  ts DESC
+  insertion_ts DESC

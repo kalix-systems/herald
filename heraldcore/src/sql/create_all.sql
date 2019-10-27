@@ -7,13 +7,19 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB,
   -- text of message
   body TEXT,
+
   -- timestamp associated with message
-  ts INTEGER,
+  insertion_ts INTEGER DEFAULT NULL,
+  -- timestamp the message was inserted into the database
+  server_ts INTEGER DEFAULT NULL,
   -- time when message self-destructs
-  expiration_date TEXT DEFAULT NULL,
+  expiration_ts INTEGER DEFAULT NULL,
+
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
+  -- does the message have attachments?
   has_attachments INTEGER NOT NULL DEFAULT(0),
+  -- is the message known?
   known INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
@@ -139,6 +145,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   muted INTEGER DEFAULT(0),
   -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
   pairwise INTEGER DEFAULT(0),
+  -- Duration in milliseconds until a message in this conversation expires.
+  expiration_period INTEGER DEFAULT NULL,
   -- Time of last important activity
   last_active_ts INTEGER NOT NULL
 );

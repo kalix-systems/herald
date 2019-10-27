@@ -1,4 +1,4 @@
-REPLACE INTO
+INSERT INTO
   messages(
     msg_id,
     author,
@@ -6,7 +6,20 @@ REPLACE INTO
     body,
     send_status,
     has_attachments,
-    ts,
+    insertion_ts,
+    server_ts,
+    expiration_ts,
     known
   )
-VALUES(@1, @2, @3, @4, @5, @6, @7, 1)
+VALUES(
+  @msg_id,
+  @author,
+  @conversation_id,
+  @body,
+  @send_status,
+  @has_attachments,
+  @insertion_ts,
+  @server_ts,
+  @expiration_ts,
+  1
+)

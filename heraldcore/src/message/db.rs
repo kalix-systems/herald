@@ -1,24 +1,33 @@
 use super::*;
-use rusqlite::Connection as Conn;
+use crate::message::MessageTime;
+use rusqlite::{named_params, Connection as Conn};
 use std::ops::{Deref, DerefMut};
 
 /// Get message by message id
 pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
     let receipts = get_receipts(conn, msg_id)?;
 
-    Ok(conn.query_row(
+    Ok(conn.query_row_named(
         include_str!("sql/get_message.sql"),
-        params![msg_id],
+        named_params! {
+            "@msg_id": msg_id
+        },
         |row| {
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
             Ok(Message {
-                message_id: row.get(0)?,
-                author: row.get(1)?,
-                conversation: row.get(2)?,
-                body: row.get(3)?,
-                op: row.get(4)?,
-                timestamp: row.get(5)?,
-                send_status: row.get(6)?,
-                has_attachments: row.get(7)?,
+                message_id: row.get("msg_id")?,
+                author: row.get("author")?,
+                conversation: row.get("conversation_id")?,
+                body: row.get("body")?,
+                op: row.get("op_msg_id")?,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                time,
                 receipts,
             })
         },
@@ -65,19 +74,24 @@ pub(crate) fn by_send_status(
     send_status: MessageSendStatus,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/by_send_status.sql"))?;
-    let res = stmt.query_map(&[send_status], |row| {
-        let message_id = row.get(0)?;
+    let res = stmt.query_map_named(named_params! { "@send_status": send_status }, |row| {
+        let message_id = row.get("msg_id")?;
         let receipts = get_receipts(conn, &message_id)?;
+        let time = MessageTime {
+            insertion: row.get("insertion_ts")?,
+            server: row.get("server_ts")?,
+            expiration: row.get("expiration_ts")?,
+        };
 
         Ok(Message {
             message_id,
-            author: row.get(1)?,
-            conversation: row.get(2)?,
-            body: row.get(3)?,
-            op: row.get(4)?,
-            timestamp: row.get(5)?,
-            send_status: row.get(6)?,
-            has_attachments: row.get(7)?,
+            author: row.get("author")?,
+            conversation: row.get("conversation_id")?,
+            body: row.get("body")?,
+            op: row.get("op_msg_id")?,
+            send_status: row.get("send_status")?,
+            has_attachments: row.get("has_attachments")?,
+            time,
             receipts,
         })
     })?;
@@ -114,7 +128,7 @@ where
         .store_and_send_blocking_db(db)
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
-    (out.message_id, out.timestamp)
+    (out.message_id, out.time.insertion)
 }
 
 impl OutboundMessageBuilder {
@@ -155,13 +169,19 @@ impl OutboundMessageBuilder {
 
         let has_attachments = !attachments.is_empty();
 
+        let time = MessageTime {
+            server: None,
+            expiration: None,
+            insertion: timestamp,
+        };
+
         let msg = Message {
             message_id: msg_id,
             author,
             body: (&body).clone(),
             op,
             conversation: conversation_id,
-            timestamp,
+            time,
             send_status,
             receipts: get_receipts(&db, &msg_id)?,
             has_attachments,
@@ -199,16 +219,18 @@ impl OutboundMessageBuilder {
 
             let tx = e!(db.transaction());
 
-            e!(tx.execute(
+            e!(tx.execute_named(
                 include_str!("sql/add.sql"),
-                params![
-                    msg_id,
-                    author,
-                    conversation_id,
-                    body,
-                    send_status,
-                    has_attachments,
-                    timestamp,
+                named_params![
+                    "@msg_id": msg_id,
+                    "@author": author,
+                    "@conversation_id": conversation_id,
+                    "@body": body,
+                    "@send_status": send_status,
+                    "@has_attachments": has_attachments,
+                    "@insertion_ts": time.insertion,
+                    "@server_ts": time.server,
+                    "@expiration_ts": time.expiration,
                 ],
             ));
 
@@ -302,7 +324,7 @@ impl InboundMessageBuilder {
 
         let conversation_id = conversation.ok_or(MissingConversationId)?;
         let msg_id = message_id.ok_or(MissingMessageId)?;
-        let timestamp = timestamp.ok_or(MissingTimestamp)?;
+        let server_timestamp = timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
 
         let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
@@ -312,19 +334,27 @@ impl InboundMessageBuilder {
         // this can be inferred from the fact that this message was received
         let send_status = MessageSendStatus::Ack;
 
+        let time = MessageTime {
+            insertion: Time::now(),
+            server: Some(server_timestamp),
+            expiration: None,
+        };
+
         let tx = conn.transaction()?;
 
-        tx.execute(
+        tx.execute_named(
             include_str!("sql/add.sql"),
-            params![
-                msg_id,
-                author,
-                conversation_id,
-                body,
-                send_status,
-                has_attachments,
-                timestamp,
-            ],
+            named_params! {
+                "@msg_id": msg_id,
+                "@author": author,
+                "@conversation_id": conversation_id,
+                "@body": body,
+                "@send_status": send_status,
+                "@has_attachments": has_attachments,
+                "@insertion_ts": time.insertion,
+                "@server_ts": time.server,
+                "@expiration_ts": time.expiration,
+            },
         )?;
 
         tx.execute(

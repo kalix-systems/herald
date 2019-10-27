@@ -10,6 +10,17 @@ pub mod attachments;
 pub(crate) mod db;
 use attachments::*;
 
+#[derive(Clone, Copy, Debug)]
+/// Time data relating to messages
+pub struct MessageTime {
+    /// The `Time` the message reached the server, if applicable.
+    pub server: Option<Time>,
+    /// The `Time` the message was saved on this device
+    pub insertion: Time,
+    /// The `Time` the message will expire, if applicable
+    pub expiration: Option<Time>,
+}
+
 /// Message
 #[derive(Clone, Debug)]
 pub struct Message {
@@ -21,8 +32,8 @@ pub struct Message {
     pub conversation: ConversationId,
     /// Body of message
     pub body: Option<MessageBody>,
-    /// Time the message was sent (if outbound) or received at the server (if inbound).
-    pub timestamp: Time,
+    /// Message time information
+    pub time: MessageTime,
     /// Message id of the message being replied to
     pub op: Option<MsgId>,
     /// Send status
@@ -31,27 +42,6 @@ pub struct Message {
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     /// Indicates whether the message has attachments
     pub has_attachments: bool,
-}
-
-impl Message {
-    //    pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-    //        let data = row.get::<_, Vec<u8>>(6)?;
-    //        let receipts = serde_cbor::from_slice(&data).map_err(|e| {
-    //            rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Blob, Box::new(e))
-    //        })?;
-    //
-    //        Ok(Message {
-    //            message_id: row.get(0)?,
-    //            author: row.get(1)?,
-    //            conversation: row.get(2)?,
-    //            body: row.get(3)?,
-    //            op: row.get(4)?,
-    //            timestamp: row.get(5)?,
-    //            receipts,
-    //            send_status: row.get(7)?,
-    //            has_attachments: row.get(8)?,
-    //        })
-    //    }
 }
 
 #[derive(Default)]

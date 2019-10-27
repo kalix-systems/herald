@@ -3,9 +3,10 @@ UPDATE
 SET
   author = NULL,
   body = NULL,
-  ts = NULL,
+  expiration_ts = NULL,
+  insertion_ts = NULL,
+  server_ts = NULL,
   send_status = 0,
-  expiration_date = NULL,
   has_attachments = 0,
   known = 0
 WHERE
