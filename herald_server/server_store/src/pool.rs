@@ -1,5 +1,5 @@
 use super::*;
-use crossbeam_channel::{unbounded, Receiver, Sender};
+use crossbeam_channel::{bounded, Receiver, Sender};
 use std::ops::{Deref, DerefMut, Drop};
 
 pub struct Conn {
@@ -70,7 +70,7 @@ impl std::default::Default for Pool {
 
 impl Pool {
     pub fn new() -> Pool {
-        let (tx, rx) = unbounded();
+        let (tx, rx) = bounded(10_000);
         Pool { tx, rx }
     }
 

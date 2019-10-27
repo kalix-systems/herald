@@ -23,4 +23,6 @@ path = "../../herald_common"
 [dev-dependencies]
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
-womp          = { git  = "https://github.com/kalix-systems/womp"}
+
+[dev-dependencies.womp]
+git  = "https://github.com/kalix-systems/womp"
