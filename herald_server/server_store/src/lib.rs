@@ -453,6 +453,7 @@ impl Conn {
             "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
+        self.execute(sql!("user_exists_func"), params![]).await?;
         Ok(())
     }
 
@@ -470,6 +471,7 @@ impl Conn {
             "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
+        tx.execute(sql!("user_exists_func"), params![]).await?;
         tx.commit().await?;
         Ok(())
     }
