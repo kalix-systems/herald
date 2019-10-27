@@ -158,10 +158,10 @@ impl Conn {
 
         let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
 
-        if tx
-            .query_one(&exists_stmt, params![user_id.as_str()])
+        if !tx
+            .query(&exists_stmt, params![user_id.as_str()])
             .await?
-            .get(0)
+            .is_empty()
         {
             return Ok(register::Res::UIDTaken);
         }
@@ -324,9 +324,9 @@ impl Conn {
             .prepare_typed(sql!("user_exists"), types![TEXT])
             .await?;
 
-        let row = self.query_one(&stmt, params![uid.as_str()]).await?;
+        let res = self.query(&stmt, params![uid.as_str()]).await?;
 
-        Ok(row.get(0))
+        Ok(!res.is_empty())
     }
 
     pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {

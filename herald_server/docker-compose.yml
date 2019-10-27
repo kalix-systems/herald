@@ -6,6 +6,7 @@ services:
     command: >- 
             postgres
              -c 'max_connections=10000'
+             -c 'effective_cache_size=4096MB'
              -c 'shared_buffers=2048MB'
              -c 'enable_partitionwise_aggregate=true'
              -c 'enable_partitionwise_join=true'
