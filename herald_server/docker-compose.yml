@@ -3,7 +3,16 @@ version: '3'
 services:
   postgres:
     image: "postgres"
-    command: postgres -c 'max_connections=10000' -c 'shared_buffers=2048MB'
+    command: >- 
+            postgres
+             -c 'max_connections=10000'
+             -c 'shared_buffers=2048MB'
+             -c 'enable_partitionwise_aggregate=true'
+             -c 'enable_partitionwise_join=true'
+             -c 'checkpoint_completion_target=0.9'
+             -c 'shared_preload_libraries=pg_stat_statements'
+             -c 'maintenance_work_mem=128MB'
+             -c 'random_page_cost=1'
     stdin_open: true
     tty: true
     volumes:
@@ -12,4 +21,3 @@ services:
 
 volumes:
   pg-data:
-
