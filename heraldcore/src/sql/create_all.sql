@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS read_receipts (
   receipt_status INTEGER NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS msg_id_receipt_ix ON read_receipts(msg_id);
+
 CREATE TABLE IF NOT EXISTS replies (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,
