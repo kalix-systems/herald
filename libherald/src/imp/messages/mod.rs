@@ -1,5 +1,5 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
-use herald_common::UserId;
+use herald_common::{Time, UserId};
 use heraldcore::{
     abort_err,
     config::Config,
@@ -9,10 +9,12 @@ use heraldcore::{
     types::*,
     NE,
 };
-use std::ops::Drop;
+use im_rc::vector::Vector;
 use std::{
+    cmp::Ordering,
     collections::HashMap,
     convert::{TryFrom, TryInto},
+    ops::Drop,
 };
 
 pub(crate) mod shared;
@@ -21,11 +23,29 @@ use shared::*;
 type Emitter = MessagesEmitter;
 type List = MessagesList;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 /// A thin wrapper around a `MsgId`
 pub struct Message {
     msg_id: MsgId,
     data_saved: bool,
+    insertion_time: Time,
+}
+
+impl PartialOrd for Message {
+    fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
+        self.insertion_time.0.partial_cmp(&rhs.insertion_time.0)
+    }
+}
+
+impl Ord for Message {
+    fn cmp(&self, rhs: &Self) -> Ordering {
+        match self.partial_cmp(rhs) {
+            Some(ord) => {
+                return ord;
+            }
+            None => self.msg_id.cmp(&rhs.msg_id),
+        }
+    }
 }
 
 /// A wrapper around a vector of `Message`s with additional fields
@@ -33,7 +53,7 @@ pub struct Message {
 pub struct Messages {
     emit: Emitter,
     model: List,
-    list: Vec<Message>,
+    list: Vector<Message>,
     map: HashMap<MsgId, Msg>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
@@ -42,7 +62,7 @@ pub struct Messages {
 impl MessagesTrait for Messages {
     fn new(emit: Emitter, model: List) -> Self {
         Messages {
-            list: Vec::new(),
+            list: Vector::new(),
             map: HashMap::new(),
             model,
             emit,
@@ -103,15 +123,17 @@ impl MessagesTrait for Messages {
             self.conversation_id = Some(conversation_id);
             self.emit.conversation_id_changed();
 
-            let messages: Vec<Message> =
+            let messages: Vector<Message> =
                 ret_err!(conversation::conversation_messages(&conversation_id))
                     .into_iter()
                     .map(|m| {
                         let mid = m.message_id;
+                        let insertion_time = m.time.insertion;
                         self.map.insert(mid, m);
                         Message {
                             msg_id: mid,
                             data_saved: true,
+                            insertion_time,
                         }
                     })
                     .collect();
@@ -177,9 +199,9 @@ impl MessagesTrait for Messages {
         match self.map.get(&msg_id) {
             Some(msg) => match msg.body.as_ref() {
                 Some(body) => body.to_string(),
-                None => "".to_owned(),
+                None => "REDACTED".to_owned(),
             },
-            None => "".to_owned(),
+            None => "REDACTED".to_owned(),
         }
     }
 
@@ -230,7 +252,7 @@ impl MessagesTrait for Messages {
 
         self.model
             .begin_remove_rows(0, self.list.len().saturating_sub(1));
-        self.list = Vec::new();
+        self.list = Vector::new();
         self.map = HashMap::new();
         self.model.end_remove_rows();
 
@@ -278,9 +300,10 @@ impl MessagesTrait for Messages {
 
                     self.model
                         .begin_insert_rows(self.list.len(), self.list.len());
-                    self.list.push(Message {
+                    self.list.push_back(Message {
                         msg_id: new.message_id,
                         data_saved: true,
+                        insertion_time: new.time.insertion,
                     });
                     self.map.insert(new.message_id, new);
                     self.model.end_insert_rows();
@@ -358,10 +381,15 @@ impl Messages {
 
     fn raw_insert(&mut self, msg: Msg, data_saved: bool) -> Result<(), HErr> {
         let msg_id = msg.message_id;
+        let insertion_time = msg.time.insertion;
         let cid = self.conversation_id.ok_or(NE!())?;
         self.model
             .begin_insert_rows(self.row_count(), self.row_count());
-        self.list.push(Message { msg_id, data_saved });
+        self.list.push_back(Message {
+            msg_id,
+            data_saved,
+            insertion_time,
+        });
         self.map.insert(msg_id, msg);
         self.model.end_insert_rows();
 
