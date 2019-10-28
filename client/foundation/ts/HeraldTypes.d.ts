@@ -3,6 +3,16 @@ declare class ByteArray {}
 declare class ConversationID extends ByteArray {}
 declare class MessageId extends ByteArray {}
 
+declare const enum ExpirationPeriod {
+  Never = 0,
+  OneMinute = 1,
+  OneHour = 2,
+  OneDay = 3,
+  OneWeek = 4,
+  OneMonth = 5,
+  OneYear = 6
+}
+
 declare type UserId = string;
 
 declare class HeraldState {
@@ -88,8 +98,8 @@ declare class Conversations {
 }
 
 declare class ConversationBuilder {
-  addMember(user_id: UserId): boolean;
-  removeMemberByID(user_id: UserId): boolean;
+  addMember(userId: UserId): boolean;
+  removeMemberById(userId: UserId): boolean;
   removeMemberByIndex(rowIndex: number): boolean;
   removeLast(): void;
   finalize(): ByteArray;

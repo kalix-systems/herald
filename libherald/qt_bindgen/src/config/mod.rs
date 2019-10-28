@@ -135,6 +135,7 @@ fn conversations() -> Object {
        title: ItemProp::new(QString).write().optional(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
+       expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop().write(),
        picture: picture_item_prop().write(),
        color: color_item_prop().write()

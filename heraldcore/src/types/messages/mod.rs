@@ -11,23 +11,28 @@ pub(crate) mod cmessages;
 pub(crate) mod dmessages;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[repr(u8)]
 /// Expiration period for messages
 pub enum ExpirationPeriod {
     /// Messages never expire
-    Never,
+    Never = 0,
+    /// Messages expire after one minute
+    OneMinute = 1,
+    /// Messages expire after one hour
+    OneHour = 2,
     /// Messages expire after one day
-    OneDay,
+    OneDay = 3,
     /// Message expire after one week
-    OneWeek,
+    OneWeek = 4,
     /// Messages expire after one month
-    OneMonth,
+    OneMonth = 5,
     /// Messages expire after one year
-    OneYear,
-    /// Message expire after a custom duration
-    Custom(std::time::Duration),
+    OneYear = 6,
 }
 
-const DAY_SECS: u64 = 3600 * 24;
+const MIN_SECS: u64 = 60;
+const HOUR_SECS: u64 = MIN_SECS * 60;
+const DAY_SECS: u64 = HOUR_SECS * 24;
 const WEEK_SECS: u64 = DAY_SECS * 7;
 const MONTH_SECS: u64 = WEEK_SECS * 4;
 const YEAR_SECS: u64 = WEEK_SECS * 52;
@@ -37,12 +42,29 @@ impl ExpirationPeriod {
     pub fn to_duration(&self) -> Option<Duration> {
         use ExpirationPeriod::*;
         match self {
-            Custom(d) => Some(*d),
+            OneMinute => Some(Duration::from_secs(MIN_SECS)),
+            OneHour => Some(Duration::from_secs(HOUR_SECS)),
             OneDay => Some(Duration::from_secs(DAY_SECS)),
             OneWeek => Some(Duration::from_secs(WEEK_SECS)),
             OneMonth => Some(Duration::from_secs(MONTH_SECS)),
             OneYear => Some(Duration::from_secs(YEAR_SECS)),
             Never => None,
+        }
+    }
+}
+
+impl From<u8> for ExpirationPeriod {
+    fn from(val: u8) -> Self {
+        use ExpirationPeriod::*;
+        match val {
+            0 => Never,
+            1 => OneMinute,
+            2 => OneHour,
+            3 => OneDay,
+            4 => OneWeek,
+            5 => OneMonth,
+            6 => OneYear,
+            _ => Never,
         }
     }
 }

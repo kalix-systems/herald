@@ -855,6 +855,8 @@ pub trait ConversationsTrait {
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn conversation_id(&self, index: usize) -> &[u8];
+    fn expiration_period(&self, index: usize) -> u8;
+    fn set_expiration_period(&mut self, index: usize, _: u8) -> bool;
     fn matched(&self, index: usize) -> bool;
     fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn muted(&self, index: usize) -> bool;
@@ -1008,6 +1010,20 @@ pub unsafe extern "C" fn conversations_data_conversation_id(
     let data = o.conversation_id(to_usize(row));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_data_expiration_period(ptr: *const Conversations, row: c_int) -> u8 {
+    let o = &*ptr;
+    o.expiration_period(to_usize(row))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_set_data_expiration_period(
+    ptr: *mut Conversations, row: c_int,
+    v: u8,
+) -> bool {
+    (&mut *ptr).set_expiration_period(to_usize(row), v)
 }
 
 #[no_mangle]

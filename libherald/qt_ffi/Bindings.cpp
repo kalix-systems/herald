@@ -502,6 +502,8 @@ extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
+    quint8 conversations_data_expiration_period(const Conversations::Private*, int);
+    bool conversations_set_data_expiration_period(Conversations::Private*, int, quint8);
     bool conversations_data_matched(const Conversations::Private*, int);
     bool conversations_set_data_matched(Conversations::Private*, int, bool);
     bool conversations_data_muted(const Conversations::Private*, int);
@@ -608,6 +610,22 @@ QByteArray Conversations::conversationId(int row) const
     return b;
 }
 
+quint8 Conversations::expirationPeriod(int row) const
+{
+    return conversations_data_expiration_period(m_d, row);
+}
+
+bool Conversations::setExpirationPeriod(int row, quint8 value)
+{
+    bool set = false;
+    set = conversations_set_data_expiration_period(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 bool Conversations::matched(int row) const
 {
     return conversations_data_matched(m_d, row);
@@ -700,14 +718,16 @@ QVariant Conversations::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(conversationId(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(matched(index.row()));
+            return QVariant::fromValue(expirationPeriod(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(muted(index.row()));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
-            return QVariant::fromValue(pairwise(index.row()));
+            return QVariant::fromValue(muted(index.row()));
         case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+            return QVariant::fromValue(pairwise(index.row()));
         case Qt::UserRole + 6:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 7:
             return cleanNullQVariant(QVariant::fromValue(title(index.row())));
         }
         break;
@@ -730,11 +750,12 @@ QHash<int, QByteArray> Conversations::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "conversationId");
-    names.insert(Qt::UserRole + 2, "matched");
-    names.insert(Qt::UserRole + 3, "muted");
-    names.insert(Qt::UserRole + 4, "pairwise");
-    names.insert(Qt::UserRole + 5, "picture");
-    names.insert(Qt::UserRole + 6, "title");
+    names.insert(Qt::UserRole + 2, "expirationPeriod");
+    names.insert(Qt::UserRole + 3, "matched");
+    names.insert(Qt::UserRole + 4, "muted");
+    names.insert(Qt::UserRole + 5, "pairwise");
+    names.insert(Qt::UserRole + 6, "picture");
+    names.insert(Qt::UserRole + 7, "title");
     return names;
 }
 QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
@@ -763,21 +784,26 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
             }
         }
         if (role == Qt::UserRole + 2) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setMatched(index.row(), value.value<bool>());
+            if (value.canConvert(qMetaTypeId<quint8>())) {
+                return setExpirationPeriod(index.row(), value.value<quint8>());
             }
         }
         if (role == Qt::UserRole + 3) {
             if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 4) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMuted(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setPicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 6) {
+        if (role == Qt::UserRole + 7) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setTitle(index.row(), value.value<QString>());
             }

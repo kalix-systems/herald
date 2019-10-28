@@ -185,6 +185,8 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QByteArray conversationId(int row) const;
+    Q_INVOKABLE quint8 expirationPeriod(int row) const;
+    Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE bool muted(int row) const;
