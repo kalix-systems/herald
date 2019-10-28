@@ -57,6 +57,8 @@ CREATE TABLE IF NOT EXISTS msg_attachments (
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
 );
 
+CREATE INDEX IF NOT EXISTS hash_dir_ix on msg_attachments(hash_dir);
+
 CREATE TABLE IF NOT EXISTS contacts (
   -- user id
   user_id TEXT PRIMARY KEY NOT NULL,

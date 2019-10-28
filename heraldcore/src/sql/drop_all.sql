@@ -1,6 +1,7 @@
 -- drop indices
 DROP INDEX IF EXISTS msg_id_receipt_ix;
 DROP INDEX IF EXISTS reply_op;
+DROP INDEX IF EXISTS hash_dir_ix;
 -- drop tables
 DROP TABLE IF EXISTS msg_attachments;
 DROP TABLE IF EXISTS replies;
