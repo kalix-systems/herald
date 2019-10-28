@@ -394,7 +394,11 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             }
             Msg(msg) => {
                 let cmessages::Msg { mid, content, op } = msg;
-                let cmessages::Message { body, attachments } = content;
+                let cmessages::Message {
+                    body,
+                    attachments,
+                    expiration,
+                } = content;
 
                 let mut builder = crate::message::InboundMessageBuilder::default();
 
@@ -411,6 +415,10 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
 
                 if let Some(op) = op {
                     builder.replying_to(op);
+                }
+
+                if let Some(expiration) = expiration {
+                    builder.expiration(expiration);
                 }
 
                 builder.store()?;

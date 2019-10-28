@@ -129,6 +129,7 @@ fn message_receipt_status_updates() {
 
     let mut builder = InboundMessageBuilder::default();
     let msg_id = [0; 32].into();
+
     builder
         .id(msg_id)
         .author(receiver.id)
@@ -159,46 +160,71 @@ fn message_receipt_status_updates() {
 }
 
 #[test]
-fn receipt_before_message() {
-    use crate::contact::ContactBuilder;
-
+fn reply_to_unknown_message() {
     let mut conn = Database::in_memory().expect(womp!());
 
-    let author = "Hello".try_into().expect(womp!());
+    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
 
-    let receiver = "World".try_into().expect(womp!());
-    ContactBuilder::new(receiver)
-        .add_db(&mut conn)
-        .expect(womp!());
-
-    let conversation_id = [0; 32].into();
-
-    crate::conversation::ConversationBuilder::new()
-        .conversation_id(conversation_id)
-        .add_db(&mut conn)
-        .expect(womp!());
-
-    crate::contact::ContactBuilder::new(author)
-        .add_db(&mut conn)
-        .expect(womp!());
-    crate::members::db::add_member(&conn, &conversation_id, author).expect(womp!());
-
-    let msg_id = [1; 32].into();
-    db::add_receipt(&mut conn, msg_id, receiver, MessageReceiptStatus::Read).expect(womp!());
+    let conv = receiver.pairwise_conversation;
 
     let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+
     builder
         .id(msg_id)
-        .conversation_id(conversation_id)
+        .author(receiver.id)
+        .conversation_id(conv)
         .timestamp(Time::now())
-        .body("1".try_into().expect(womp!()))
-        .author(author);
+        .replying_to([1; 32].into())
+        .body("hi".try_into().expect(womp!()));
+
     builder.store_db(&mut conn).expect(womp!());
 
     let msg = db::get_message(&conn, &msg_id).expect(womp!());
 
-    assert_eq!(
-        msg.receipts.get(&receiver).expect(womp!()),
-        &MessageReceiptStatus::Read
-    );
+    assert!(msg.op.is_dangling());
+}
+
+#[test]
+fn delete_op() {
+    let mut conn = Database::in_memory().expect(womp!());
+
+    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mid0 = [0; 32].into();
+
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid0)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    let mid1 = [1; 32].into();
+
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid1)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .replying_to(mid0)
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    let msg = db::get_message(&conn, &mid1).expect(womp!());
+
+    assert!(msg.op.is_known());
+
+    db::delete_message(&conn, &mid0).expect(womp!());
+
+    let msg = db::get_message(&conn, &mid1).expect(womp!());
+
+    assert!(msg.op.is_dangling());
 }

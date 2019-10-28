@@ -9,7 +9,7 @@ INSERT INTO
     insertion_ts,
     server_ts,
     expiration_ts,
-    known
+    is_reply
   )
 VALUES(
   @msg_id,
@@ -21,5 +21,5 @@ VALUES(
   @insertion_ts,
   @server_ts,
   @expiration_ts,
-  1
+  @is_reply
 )

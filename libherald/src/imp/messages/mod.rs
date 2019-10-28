@@ -24,6 +24,9 @@ use types::*;
 type Emitter = MessagesEmitter;
 type List = MessagesList;
 
+const UNKNOWN_BODY: &str = "Unknown message";
+const UNKNOWN_AUTHOR: &str = "Unknown";
+
 /// A wrapper around a vector of `Message`s with additional fields
 /// to facilitate interaction with QML.
 pub struct Messages {
@@ -158,32 +161,43 @@ impl MessagesTrait for Messages {
     }
 
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
-        let msg_id = ret_err!(MsgId::try_from(msg_id), "".into());
+        if msg_id == &[] {
+            return UNKNOWN_BODY.to_owned();
+        }
+
+        let msg_id = ret_err!(MsgId::try_from(msg_id), UNKNOWN_BODY.to_owned());
 
         match self.map.get(&msg_id) {
             Some(msg) => match msg.body.as_ref() {
                 Some(body) => body.to_string(),
-                None => "REDACTED".to_owned(),
+                None => UNKNOWN_BODY.to_owned(),
             },
-            None => "REDACTED".to_owned(),
+            None => UNKNOWN_BODY.to_owned(),
         }
     }
 
     fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
+        if msg_id == &[] {
+            return UNKNOWN_AUTHOR.to_owned();
+        }
+
         let msg_id = ret_err!(MsgId::try_from(msg_id), ffi::NULL_USER_ID.to_string());
 
         match self.map.get(&msg_id) {
             Some(msg) => msg.author.to_string(),
-            None => "UNKNOWN".to_owned(),
+            None => UNKNOWN_AUTHOR.to_owned(),
         }
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
-        Some(self.msg_data(row_index)?.op.as_ref()?.as_slice())
+        match self.msg_data(row_index)?.op {
+            ReplyId::Known(ref mid) => Some(mid.as_slice()),
+            _ => None,
+        }
     }
 
     fn is_reply(&self, row_index: usize) -> Option<bool> {
-        Some(self.msg_data(row_index)?.op.is_some())
+        Some(!self.msg_data(row_index)?.op.is_none())
     }
 
     fn is_head(&self, row_index: usize) -> Option<bool> {

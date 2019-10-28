@@ -44,6 +44,8 @@ pub struct Message {
     pub body: Option<MessageBody>,
     /// Attachments
     pub attachments: Vec<Attachment>,
+    /// Expiration time of the message
+    pub expiration: Option<Time>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]

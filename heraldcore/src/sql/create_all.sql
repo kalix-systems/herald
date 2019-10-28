@@ -4,12 +4,12 @@ CREATE TABLE IF NOT EXISTS messages (
   -- id of message author
   author TEXT,
   -- id of conversation
-  conversation_id BLOB,
+  conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
 
   -- timestamp associated with message
-  insertion_ts INTEGER DEFAULT NULL,
+  insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database
   server_ts INTEGER DEFAULT NULL,
   -- time when message self-destructs
@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS messages (
   send_status INTEGER NOT NULL DEFAULT(0),
   -- does the message have attachments?
   has_attachments INTEGER NOT NULL DEFAULT(0),
-  -- is the message known?
-  known INTEGER NOT NULL DEFAULT(0),
+  -- is the message a reply?
+  is_reply INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
@@ -31,7 +31,8 @@ CREATE TABLE IF NOT EXISTS read_receipts (
   -- user id of the user that sent the receipt
   user_id TEXT NOT NULL,
   -- type of receipt that was sent
-  receipt_status INTEGER NOT NULL
+  receipt_status INTEGER NOT NULL,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS msg_id_receipt_ix ON read_receipts(msg_id);
@@ -40,9 +41,9 @@ CREATE TABLE IF NOT EXISTS replies (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,
   -- message id of message being replied to
-  op_msg_id INTEGER,
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id),
-  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id)
+  op_msg_id BLOB,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
+  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS reply_op ON replies(op_msg_id);

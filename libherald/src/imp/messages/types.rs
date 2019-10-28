@@ -1,6 +1,5 @@
 use super::*;
 use herald_common::{Time, UserId};
-use heraldcore::message::MessageTime;
 use std::{cmp::Ordering, collections::HashMap};
 
 const FLURRY_FUZZ: i64 = 5 * 60_000;
@@ -10,7 +9,7 @@ pub(super) struct MsgData {
     pub(super) author: UserId,
     pub(super) body: Option<MessageBody>,
     pub(super) time: MessageTime,
-    pub(super) op: Option<MsgId>,
+    pub(super) op: ReplyId,
     pub(super) receipts: HashMap<UserId, MessageReceiptStatus>,
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,

@@ -25,7 +25,7 @@ pub struct Message {
     /// Message time information
     pub time: MessageTime,
     /// Message id of the message being replied to
-    pub op: Option<MsgId>,
+    pub op: ReplyId,
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
@@ -130,8 +130,10 @@ pub(crate) struct InboundMessageBuilder {
     conversation: Option<ConversationId>,
     /// Body of message
     body: Option<MessageBody>,
-    /// Time the message was sent (if outbound) or received at the server (if inbound).
-    timestamp: Option<Time>,
+    /// Time the was received at the server.
+    server_timestamp: Option<Time>,
+    /// Time the message expires
+    expiration: Option<Time>,
     /// Message id of the message being replied to
     op: Option<MsgId>,
     attachments: Vec<attachments::Attachment>,
@@ -159,7 +161,7 @@ impl InboundMessageBuilder {
     }
 
     pub(crate) fn timestamp(&mut self, ts: Time) -> &mut Self {
-        self.timestamp.replace(ts);
+        self.server_timestamp.replace(ts);
         self
     }
 
@@ -170,6 +172,11 @@ impl InboundMessageBuilder {
 
     pub(crate) fn attachments(&mut self, attachments: Vec<attachments::Attachment>) -> &mut Self {
         self.attachments = attachments;
+        self
+    }
+
+    pub(crate) fn expiration(&mut self, expiration: Time) -> &mut Self {
+        self.expiration.replace(expiration);
         self
     }
 

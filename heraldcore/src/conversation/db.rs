@@ -70,12 +70,17 @@ pub(crate) fn conversation_messages(
                 expiration: row.get("expiration_ts")?,
             };
 
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
             Ok(Message {
                 message_id,
                 author: row.get("author")?,
                 conversation: *conversation_id,
                 body: row.get("body")?,
-                op: row.get("op_msg_id")?,
+                op,
                 time,
                 send_status: row.get("send_status")?,
                 has_attachments: row.get("has_attachments")?,

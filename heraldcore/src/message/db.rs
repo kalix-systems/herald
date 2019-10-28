@@ -20,12 +20,17 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
                 expiration: row.get("expiration_ts")?,
             };
 
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
             Ok(Message {
                 message_id: row.get("msg_id")?,
                 author: row.get("author")?,
                 conversation: row.get("conversation_id")?,
                 body: row.get("body")?,
-                op: row.get("op_msg_id")?,
+                op,
                 send_status: row.get("send_status")?,
                 has_attachments: row.get("has_attachments")?,
                 time,
@@ -84,12 +89,17 @@ pub(crate) fn by_send_status(
             expiration: row.get("expiration_ts")?,
         };
 
+        let is_reply: bool = row.get("is_reply")?;
+        let op: Option<MsgId> = row.get("op_msg_id")?;
+
+        let op = (op, is_reply).into();
+
         Ok(Message {
             message_id,
             author: row.get("author")?,
             conversation: row.get("conversation_id")?,
             body: row.get("body")?,
-            op: row.get("op_msg_id")?,
+            op,
             send_status: row.get("send_status")?,
             has_attachments: row.get("has_attachments")?,
             time,
@@ -107,7 +117,10 @@ pub(crate) fn by_send_status(
 
 /// Deletes a message
 pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
-    conn.execute(include_str!("sql/delete_message.sql"), params![id])?;
+    conn.execute_named(
+        include_str!("sql/delete_message.sql"),
+        named_params! { "@msg_id": id },
+    )?;
     Ok(())
 }
 
@@ -187,7 +200,7 @@ impl OutboundMessageBuilder {
             message_id: msg_id,
             author,
             body: (&body).clone(),
-            op,
+            op: op.into(),
             conversation: conversation_id,
             time,
             send_status,
@@ -239,6 +252,7 @@ impl OutboundMessageBuilder {
                     "@insertion_ts": time.insertion,
                     "@server_ts": time.server,
                     "@expiration_ts": time.expiration,
+                    "@is_reply": op.is_some()
                 ],
             ));
 
@@ -248,7 +262,10 @@ impl OutboundMessageBuilder {
             ));
 
             if let Some(op) = op {
-                e!(tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]));
+                e!(tx.execute_named(
+                    include_str!("sql/add_reply.sql"),
+                    named_params! { "@msg_id": msg_id, "@op": op}
+                ));
             }
 
             if !attachments.is_empty() {
@@ -263,7 +280,11 @@ impl OutboundMessageBuilder {
 
             callback(StoreAndSend::StoreDone(msg_id));
 
-            let content = cmessages::Message { body, attachments };
+            let content = cmessages::Message {
+                body,
+                attachments,
+                expiration,
+            };
             let msg = cmessages::Msg {
                 mid: msg_id,
                 content,
@@ -323,16 +344,24 @@ impl InboundMessageBuilder {
             author,
             conversation,
             body,
-            timestamp,
+            server_timestamp,
+            expiration,
             op,
             attachments,
         } = self;
 
         use MissingInboundMessageField::*;
 
+        if let Some(expiration) = expiration {
+            // short circuit if message has already expired
+            if expiration.0 < Time::now().0 {
+                return Ok(());
+            }
+        }
+
         let conversation_id = conversation.ok_or(MissingConversationId)?;
         let msg_id = message_id.ok_or(MissingMessageId)?;
-        let server_timestamp = timestamp.ok_or(MissingTimestamp)?;
+        let server_timestamp = server_timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
 
         let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
@@ -345,10 +374,10 @@ impl InboundMessageBuilder {
         let time = MessageTime {
             insertion: Time::now(),
             server: Some(server_timestamp),
-            expiration: None,
+            expiration: expiration,
         };
 
-        let tx = conn.transaction()?;
+        let mut tx = conn.transaction()?;
 
         tx.execute_named(
             include_str!("sql/add.sql"),
@@ -362,6 +391,7 @@ impl InboundMessageBuilder {
                 "@insertion_ts": time.insertion,
                 "@server_ts": time.server,
                 "@expiration_ts": time.expiration,
+                "@is_reply": op.is_some()
             },
         )?;
 
@@ -371,7 +401,22 @@ impl InboundMessageBuilder {
         )?;
 
         if let Some(op) = op {
-            tx.execute(include_str!("sql/add_reply.sql"), params![msg_id, op])?;
+            // what if you receive a reply to message you don't have?
+            let sp = tx.savepoint()?;
+
+            // this succeeds in the happy case
+            let res = sp.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]);
+
+            // if it doesn't try making it a dangling reply
+            if let Err(rusqlite::Error::SqliteFailure(..)) = res {
+                let none_msg_id: Option<MsgId> = None;
+                sp.execute(
+                    include_str!("sql/add_reply.sql"),
+                    params![msg_id, none_msg_id],
+                )?;
+            }
+
+            sp.commit()?;
         }
 
         if has_attachments {

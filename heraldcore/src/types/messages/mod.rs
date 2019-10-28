@@ -11,6 +11,67 @@ pub(crate) mod cmessages;
 pub(crate) mod dmessages;
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+/// In order to support expiring messages, it is necessary to indicate
+/// that a message is a reply without necessarily knowing
+pub enum ReplyId {
+    /// Not a reply
+    None,
+    /// It is a reply, but the original message could not be located
+    Dangling,
+    /// The message id is known
+    Known(MsgId),
+}
+
+impl ReplyId {
+    /// Indicates whether `ReplyId` is `None`
+    pub fn is_none(&self) -> bool {
+        self == &ReplyId::None
+    }
+
+    /// Indicates whether `ReplyId` is `Dangling`
+    pub fn is_dangling(&self) -> bool {
+        self == &ReplyId::Dangling
+    }
+
+    /// Indicates whether `ReplyId` is `Known`
+    pub fn is_known(&self) -> bool {
+        if let ReplyId::Known(_) = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn unwrap(self) -> MsgId {
+        match self {
+            ReplyId::Known(mid) => mid,
+            ReplyId::Dangling => panic!("Tried to unwrap `Dangling` `ReplyId`"),
+            ReplyId::None => panic!("Tried to unwrap `None` `ReplyId`"),
+        }
+    }
+}
+
+impl From<Option<MsgId>> for ReplyId {
+    fn from(maybe_mid: Option<MsgId>) -> Self {
+        match maybe_mid {
+            Some(mid) => ReplyId::Known(mid),
+            None => ReplyId::None,
+        }
+    }
+}
+
+impl From<(Option<MsgId>, bool)> for ReplyId {
+    fn from(val: (Option<MsgId>, bool)) -> Self {
+        match val {
+            (Some(mid), true) => ReplyId::Known(mid),
+            (None, true) => ReplyId::Dangling,
+            _ => ReplyId::None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
 #[repr(u8)]
 /// Expiration period for messages
 pub enum ExpirationPeriod {

@@ -3,4 +3,4 @@ INSERT OR IGNORE INTO
     msg_id,
     op_msg_id
   )
-VALUES(@1, @2)
+VALUES(@msg_id, @op)
