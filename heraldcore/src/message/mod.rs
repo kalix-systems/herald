@@ -8,18 +8,8 @@ use std::path::PathBuf;
 pub mod attachments;
 
 pub(crate) mod db;
+pub use crate::types::MessageTime;
 use attachments::*;
-
-#[derive(Clone, Copy, Debug)]
-/// Time data relating to messages
-pub struct MessageTime {
-    /// The `Time` the message reached the server, if applicable.
-    pub server: Option<Time>,
-    /// The `Time` the message was saved on this device
-    pub insertion: Time,
-    /// The `Time` the message will expire, if applicable
-    pub expiration: Option<Time>,
-}
 
 /// Message
 #[derive(Clone, Debug)]

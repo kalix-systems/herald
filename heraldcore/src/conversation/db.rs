@@ -16,6 +16,7 @@ impl ConversationBuilder {
         let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         let pairwise = self.pairwise.unwrap_or(false);
         let muted = self.muted.unwrap_or(false);
+        let expiration_period = self.expiration_period.unwrap_or_default();
 
         conn.execute_named(
             include_str!("sql/add_conversation.sql"),
@@ -27,7 +28,7 @@ impl ConversationBuilder {
                 "@pairwise": pairwise,
                 "@muted": muted,
                 "@last_active_ts": Time::now(),
-                "@expiration_period": self.expiration_period
+                "@expiration_period": expiration_period
             },
         )?;
         Ok(id)
@@ -204,7 +205,7 @@ pub(crate) fn get_pairwise_conversations(
 pub(crate) fn set_expiration_period(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    expiration_period: Option<Time>,
+    expiration_period: ExpirationPeriod,
 ) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/update_expiration_period.sql"))?;
 

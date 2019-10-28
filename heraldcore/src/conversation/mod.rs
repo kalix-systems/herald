@@ -22,7 +22,7 @@ pub struct ConversationMeta {
     /// Last notable activity
     pub last_active: Time,
     /// Time until message expiration
-    pub expiration_period: Option<Time>,
+    pub expiration_period: ExpirationPeriod,
 }
 
 impl ConversationMeta {
@@ -88,7 +88,7 @@ pub struct ConversationBuilder {
     /// Indicates whether the conversation is a canonical pairwise conversation
     pairwise: Option<bool>,
     /// How long until a message expires
-    expiration_period: Option<Time>,
+    expiration_period: Option<ExpirationPeriod>,
 }
 
 impl ConversationBuilder {
@@ -134,7 +134,7 @@ impl ConversationBuilder {
     }
 
     /// Sets expiration period
-    pub fn expiration_period(&mut self, expiration_period: Time) -> &mut Self {
+    pub fn expiration_period(&mut self, expiration_period: ExpirationPeriod) -> &mut Self {
         self.expiration_period.replace(expiration_period);
         self
     }
@@ -195,7 +195,7 @@ pub fn set_picture(
 /// Sets expiration period for a conversation
 pub fn set_expiration_period(
     conversation_id: &ConversationId,
-    expiration_period: Option<Time>,
+    expiration_period: ExpirationPeriod,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_expiration_period(&db, conversation_id, expiration_period)
