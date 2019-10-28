@@ -104,6 +104,20 @@ pub(crate) fn meta(
     )?)
 }
 
+/// Gets expiration period for a conversation
+pub(crate) fn expiration_period(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<ExpirationPeriod, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/expiration_period.sql"))?;
+    Ok(stmt.query_row_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| row.get("expiration_period"),
+    )?)
+}
+
 /// Sets color for a conversation
 pub(crate) fn set_color(
     conn: &rusqlite::Connection,

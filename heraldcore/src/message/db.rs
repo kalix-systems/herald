@@ -1,4 +1,5 @@
 use super::*;
+use crate::conversation::db::expiration_period;
 use crate::message::MessageTime;
 use rusqlite::{named_params, Connection as Conn};
 use std::ops::{Deref, DerefMut};
@@ -165,13 +166,20 @@ impl OutboundMessageBuilder {
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Time::now();
         let author = crate::config::db::static_id(&db)?;
+        let expiration_period = expiration_period(&db, &conversation_id)?;
+
+        let expiration = match expiration_period.to_millis() {
+            Some(period) => Some(Time(timestamp.0 + period.0)),
+            None => None,
+        };
+
         let send_status = MessageSendStatus::NoAck;
 
         let has_attachments = !attachments.is_empty();
 
         let time = MessageTime {
             server: None,
-            expiration: None,
+            expiration,
             insertion: timestamp,
         };
 

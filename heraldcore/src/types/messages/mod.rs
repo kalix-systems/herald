@@ -51,6 +51,14 @@ impl ExpirationPeriod {
             Never => None,
         }
     }
+
+    /// Converts an `ExpirationPeriod` to milliseconds
+    pub fn to_millis(&self) -> Option<Time> {
+        match self.to_duration() {
+            Some(d) => Some((d.as_millis() as i64).into()),
+            None => None,
+        }
+    }
 }
 
 impl From<u8> for ExpirationPeriod {
@@ -64,7 +72,7 @@ impl From<u8> for ExpirationPeriod {
             4 => OneWeek,
             5 => OneMonth,
             6 => OneYear,
-            _ => Never,
+            _ => Self::default(),
         }
     }
 }
