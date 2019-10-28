@@ -3,6 +3,8 @@ use herald_common::{Time, UserId};
 use heraldcore::message::MessageTime;
 use std::{cmp::Ordering, collections::HashMap};
 
+const FLURRY_FUZZ: i64 = 5 * 60_000;
+
 #[derive(Clone, Debug)]
 pub(super) struct MsgData {
     pub(super) author: UserId,
@@ -13,6 +15,13 @@ pub(super) struct MsgData {
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
+}
+
+impl MsgData {
+    pub(super) fn same_flurry(&self, rhs: &Self) -> bool {
+        (self.author == rhs.author)
+            && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

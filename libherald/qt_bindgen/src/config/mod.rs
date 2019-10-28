@@ -239,7 +239,10 @@ fn messages() -> Object {
         isReply: ItemProp::new(Bool),
         hasAttachments: ItemProp::new(Bool),
         receiptStatus: ItemProp::new(QUint32),
-        dataSaved: ItemProp::new(Bool)
+        dataSaved: ItemProp::new(Bool),
+        isHead: ItemProp::new(Bool).optional(),
+        isTail: ItemProp::new(Bool).optional()
+
     };
 
     let funcs = functions! {

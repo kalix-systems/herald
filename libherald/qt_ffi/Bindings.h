@@ -445,7 +445,9 @@ public:
     Q_INVOKABLE bool dataSaved(int row) const;
     Q_INVOKABLE qint64 epochTimestampMs(int row) const;
     Q_INVOKABLE bool hasAttachments(int row) const;
+    Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE bool isReply(int row) const;
+    Q_INVOKABLE QVariant isTail(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE quint32 receiptStatus(int row) const;

@@ -75,15 +75,20 @@ impl MessagesTrait for Messages {
 
     /// Returns index of a message given its id.
     fn index_by_id(&self, msg_id: ffi::MsgIdRef) -> u64 {
-        let msg_id = ret_err!(msg_id.try_into(), std::u32::MAX as u64);
+        let ret_val = std::u32::MAX as u64;
 
-        let insertion_time = ret_none!(self.map.get(&msg_id)).time.insertion;
+        let msg_id = ret_err!(msg_id.try_into(), ret_val);
+
+        let insertion_time = ret_none!(self.map.get(&msg_id), ret_val).time.insertion;
         let m = Message {
             msg_id,
             insertion_time,
         };
 
-        ret_err!(self.list.binary_search(&m), std::u64::MAX) as u64
+        match self.list.binary_search(&m) {
+            Ok(ix) => ix as u64,
+            _ => ret_val,
+        }
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
@@ -122,20 +127,17 @@ impl MessagesTrait for Messages {
     }
 
     fn data_saved(&self, row_index: usize) -> bool {
-        let mid = ret_none!(self.list.get(row_index), false).msg_id;
-        ret_none!(self.map.get(&mid), false).save_status == SaveStatus::Saved
+        ret_none!(self.msg_data(row_index), false).save_status == SaveStatus::Saved
     }
 
     fn author(&self, row_index: usize) -> ffi::UserIdRef {
-        let mid = ret_none!(self.list.get(row_index), ffi::NULL_USER_ID).msg_id;
-        ret_none!(self.map.get(&mid), ffi::NULL_USER_ID)
+        ret_none!(self.msg_data(row_index), ffi::NULL_USER_ID)
             .author
             .as_str()
     }
 
     fn body(&self, row_index: usize) -> Option<&str> {
-        let mid = self.list.get(row_index)?.msg_id;
-        Some(self.map.get(&mid)?.body.as_ref()?.as_str())
+        Some(self.msg_data(row_index)?.body.as_ref()?.as_str())
     }
 
     fn message_id(&self, row_index: usize) -> ffi::MsgIdRef {
@@ -183,33 +185,82 @@ impl MessagesTrait for Messages {
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
-        let mid = self.list.get(row_index)?.msg_id;
-
-        Some(self.map.get(&mid)?.op.as_ref()?.as_slice())
+        Some(self.msg_data(row_index)?.op.as_ref()?.as_slice())
     }
 
     fn is_reply(&self, row_index: usize) -> bool {
-        self.op(row_index).is_some()
+        ret_none!(self.msg_data(row_index), false).op.is_some()
+    }
+
+    fn is_head(&self, row_index: usize) -> Option<bool> {
+        if self.list.is_empty() {
+            return None;
+        }
+
+        // Case where message is first message in conversation
+        if row_index == 0 {
+            return Some(true);
+        }
+
+        // other cases
+        let (msg, prev) = (self.msg_data(row_index)?, self.msg_data(row_index - 1)?);
+
+        Some(!msg.same_flurry(prev))
+    }
+
+    fn is_tail(&self, row_index: usize) -> Option<bool> {
+        if self.list.is_empty() {
+            return None;
+        }
+
+        // Case where message is last message in conversation
+        if row_index == self.list.len().saturating_sub(1) {
+            return Some(true);
+        }
+
+        // other cases
+        let (msg, succ) = (self.msg_data(row_index)?, self.msg_data(row_index + 1)?);
+
+        Some(!msg.same_flurry(succ))
+    }
+
+    fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
+        let mid = ret_none!(self.list.get(row_index), 0).msg_id;
+
+        ret_none!(self.map.get(&mid), 0).time.insertion.0
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {
-        let row_index = row_index as usize;
+        let ix = row_index as usize;
 
-        let id = ret_none!(self.list.get(row_index), false).msg_id;
+        let id = ret_none!(self.list.get(ix), false).msg_id;
 
-        match message::delete_message(&id) {
-            Ok(_) => {
-                self.model.begin_remove_rows(row_index, row_index);
-                self.list.remove(row_index);
-                self.map.remove(&id);
-                self.model.end_remove_rows();
-                true
-            }
-            Err(e) => {
-                eprintln!("Error: {}", e);
-                false
-            }
+        ret_err!(message::delete_message(&id), false);
+
+        let init_prev_state = if ix > 0 {
+            (self.is_tail(ix - 1), self.is_head(ix - 1))
+        } else {
+            (None, None)
+        };
+
+        let init_succ_state = (self.is_tail(ix), self.is_head(ix));
+
+        self.model.begin_remove_rows(ix, ix);
+        self.list.remove(ix);
+        self.map.remove(&id);
+        self.model.end_remove_rows();
+
+        if ix > 0 && init_prev_state != (self.is_head(ix - 1), self.is_tail(ix - 1)) {
+            self.model.data_changed(ix - 1, ix - 1);
         }
+
+        if ix + 1 < self.list.len()
+            && init_succ_state != (self.is_head(ix - 1), self.is_tail(ix + 1))
+        {
+            self.model.data_changed(ix + 1, ix + 1);
+        }
+
+        true
     }
 
     /// Deletes all messages in the current conversation.
@@ -226,12 +277,6 @@ impl MessagesTrait for Messages {
 
         self.emit_last_changed();
         true
-    }
-
-    fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
-        let mid = ret_none!(self.list.get(row_index), 0).msg_id;
-
-        ret_none!(self.map.get(&mid), 0).time.insertion.0
     }
 
     fn can_fetch_more(&self) -> bool {
@@ -332,6 +377,11 @@ impl Messages {
         self.map.get(&mid)
     }
 
+    fn msg_data(&self, index: usize) -> Option<&MsgData> {
+        let msg = self.list.get(index);
+        self.map.get(&msg?.msg_id)
+    }
+
     fn emit_last_changed(&mut self) {
         self.emit.last_author_changed();
         self.emit.last_body_changed();
@@ -368,12 +418,26 @@ impl Messages {
             }
         };
 
+        let init_prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
+
+        let init_succ_state = self.is_tail(ix);
+
         self.model.begin_insert_rows(ix, ix);
         self.list.insert(ix, message);
         self.map.insert(msg_id, data);
         self.model.end_insert_rows();
 
-        self.emit_last_changed();
+        if ix + 1 == self.list.len() {
+            self.emit_last_changed();
+        }
+
+        if ix > 0 && init_prev_state != self.is_tail(ix - 1) {
+            self.model.data_changed(ix - 1, ix - 1);
+        }
+
+        if ix + 1 < self.list.len() && init_succ_state != self.is_tail(ix + 1) {
+            self.model.data_changed(ix + 1, ix + 1);
+        }
 
         use crate::imp::conversations::{shared::*, Conversations};
         Conversations::push(ConvUpdates::NewActivity(cid))?;

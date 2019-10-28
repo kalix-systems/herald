@@ -3,6 +3,19 @@
 
 namespace {
 
+    struct option_bool {
+    public:
+        bool value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_bool>::value, "option_bool must be a POD type.");
+
     struct option_qint64 {
     public:
         qint64 value;
@@ -1223,7 +1236,9 @@ extern "C" {
     bool messages_data_data_saved(const Messages::Private*, int);
     qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
     bool messages_data_has_attachments(const Messages::Private*, int);
+    option_bool messages_data_is_head(const Messages::Private*, int);
     bool messages_data_is_reply(const Messages::Private*, int);
+    option_bool messages_data_is_tail(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     quint32 messages_data_receipt_status(const Messages::Private*, int);
@@ -1325,9 +1340,23 @@ bool Messages::hasAttachments(int row) const
     return messages_data_has_attachments(m_d, row);
 }
 
+QVariant Messages::isHead(int row) const
+{
+    QVariant v;
+    v = messages_data_is_head(m_d, row);
+    return v;
+}
+
 bool Messages::isReply(int row) const
 {
     return messages_data_is_reply(m_d, row);
+}
+
+QVariant Messages::isTail(int row) const
+{
+    QVariant v;
+    v = messages_data_is_tail(m_d, row);
+    return v;
 }
 
 QByteArray Messages::messageId(int row) const
@@ -1366,12 +1395,16 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 4:
             return QVariant::fromValue(hasAttachments(index.row()));
         case Qt::UserRole + 5:
-            return QVariant::fromValue(isReply(index.row()));
+            return isHead(index.row());
         case Qt::UserRole + 6:
-            return QVariant::fromValue(messageId(index.row()));
+            return QVariant::fromValue(isReply(index.row()));
         case Qt::UserRole + 7:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return isTail(index.row());
         case Qt::UserRole + 8:
+            return QVariant::fromValue(messageId(index.row()));
+        case Qt::UserRole + 9:
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+        case Qt::UserRole + 10:
             return QVariant::fromValue(receiptStatus(index.row()));
         }
         break;
@@ -1397,10 +1430,12 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 2, "dataSaved");
     names.insert(Qt::UserRole + 3, "epochTimestampMs");
     names.insert(Qt::UserRole + 4, "hasAttachments");
-    names.insert(Qt::UserRole + 5, "isReply");
-    names.insert(Qt::UserRole + 6, "messageId");
-    names.insert(Qt::UserRole + 7, "op");
-    names.insert(Qt::UserRole + 8, "receiptStatus");
+    names.insert(Qt::UserRole + 5, "isHead");
+    names.insert(Qt::UserRole + 6, "isReply");
+    names.insert(Qt::UserRole + 7, "isTail");
+    names.insert(Qt::UserRole + 8, "messageId");
+    names.insert(Qt::UserRole + 9, "op");
+    names.insert(Qt::UserRole + 10, "receiptStatus");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
