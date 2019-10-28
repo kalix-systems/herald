@@ -87,6 +87,8 @@ pub struct ConversationBuilder {
     muted: Option<bool>,
     /// Indicates whether the conversation is a canonical pairwise conversation
     pairwise: Option<bool>,
+    /// How long until a message expires
+    expiration_period: Option<Time>,
 }
 
 impl ConversationBuilder {
@@ -128,6 +130,12 @@ impl ConversationBuilder {
     /// Sets muted status
     pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
         self.pairwise.replace(pairwise);
+        self
+    }
+
+    /// Sets expiration period
+    pub fn expiration_period(&mut self, expiration_period: Time) -> &mut Self {
+        self.expiration_period.replace(expiration_period);
         self
     }
 

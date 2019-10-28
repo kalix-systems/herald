@@ -1,3 +1,21 @@
 INSERT INTO
-  conversations(conversation_id, title, picture, color, pairwise, muted, last_active_ts)
-VALUES(@1, @2, @3, @4, @5, @6, @7)
+  conversations(
+    conversation_id,
+    title,
+    picture,
+    color,
+    pairwise,
+    muted,
+    last_active_ts,
+    expiration_period
+  )
+VALUES(
+  @conversation_id,
+  @title,
+  @picture,
+  @color,
+  @pairwise,
+  @muted,
+  @last_active_ts,
+  @expiration_period
+)
