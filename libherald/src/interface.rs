@@ -2230,17 +2230,17 @@ pub trait MessagesTrait {
     }
     fn fetch_more(&mut self) {}
     fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn author(&self, index: usize) -> &str;
+    fn author(&self, index: usize) -> Option<&str>;
     fn body(&self, index: usize) -> Option<&str>;
-    fn data_saved(&self, index: usize) -> bool;
-    fn epoch_timestamp_ms(&self, index: usize) -> i64;
-    fn has_attachments(&self, index: usize) -> bool;
+    fn data_saved(&self, index: usize) -> Option<bool>;
+    fn epoch_timestamp_ms(&self, index: usize) -> Option<i64>;
+    fn has_attachments(&self, index: usize) -> Option<bool>;
     fn is_head(&self, index: usize) -> Option<bool>;
-    fn is_reply(&self, index: usize) -> bool;
+    fn is_reply(&self, index: usize) -> Option<bool>;
     fn is_tail(&self, index: usize) -> Option<bool>;
-    fn message_id(&self, index: usize) -> &[u8];
+    fn message_id(&self, index: usize) -> Option<&[u8]>;
     fn op(&self, index: usize) -> Option<&[u8]>;
-    fn receipt_status(&self, index: usize) -> u32;
+    fn receipt_status(&self, index: usize) -> Option<u32>;
 }
 
 #[no_mangle]
@@ -2441,8 +2441,10 @@ pub unsafe extern "C" fn messages_data_author(
 ) {
     let o = &*ptr;
     let data = o.author(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -2460,21 +2462,21 @@ pub unsafe extern "C" fn messages_data_body(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_data_saved(ptr: *const Messages, row: c_int) -> bool {
+pub unsafe extern "C" fn messages_data_data_saved(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
-    o.data_saved(to_usize(row))
+    o.data_saved(to_usize(row)).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, row: c_int) -> i64 {
+pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, row: c_int) -> COption<i64> {
     let o = &*ptr;
-    o.epoch_timestamp_ms(to_usize(row))
+    o.epoch_timestamp_ms(to_usize(row)).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_has_attachments(ptr: *const Messages, row: c_int) -> bool {
+pub unsafe extern "C" fn messages_data_has_attachments(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
-    o.has_attachments(to_usize(row))
+    o.has_attachments(to_usize(row)).into()
 }
 
 #[no_mangle]
@@ -2484,9 +2486,9 @@ pub unsafe extern "C" fn messages_data_is_head(ptr: *const Messages, row: c_int)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int) -> bool {
+pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
-    o.is_reply(to_usize(row))
+    o.is_reply(to_usize(row)).into()
 }
 
 #[no_mangle]
@@ -2503,8 +2505,10 @@ pub unsafe extern "C" fn messages_data_message_id(
 ) {
     let o = &*ptr;
     let data = o.message_id(to_usize(row));
-    let s: *const c_char = data.as_ptr() as (*const c_char);
-    set(d, s, to_c_int(data.len()));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -2522,9 +2526,9 @@ pub unsafe extern "C" fn messages_data_op(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row: c_int) -> u32 {
+pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row: c_int) -> COption<u32> {
     let o = &*ptr;
-    o.receipt_status(to_usize(row))
+    o.receipt_status(to_usize(row)).into()
 }
 
 pub struct NetworkHandleQObject {}

@@ -231,18 +231,17 @@ fn messages() -> Object {
     };
 
     let item_props = item_props! {
-        messageId: ItemProp::new(QByteArray),
-        author: ItemProp::new(QString),
+        messageId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
         body: ItemProp::new(QString).optional(),
-        epochTimestampMs: ItemProp::new(Qint64),
+        epochTimestampMs: ItemProp::new(Qint64).optional(),
         op: ItemProp::new(QByteArray).optional(),
-        isReply: ItemProp::new(Bool),
-        hasAttachments: ItemProp::new(Bool),
-        receiptStatus: ItemProp::new(QUint32),
-        dataSaved: ItemProp::new(Bool),
+        isReply: ItemProp::new(Bool).optional(),
+        hasAttachments: ItemProp::new(Bool).optional(),
+        receiptStatus: ItemProp::new(QUint32).optional(),
+        dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional()
-
     };
 
     let funcs = functions! {

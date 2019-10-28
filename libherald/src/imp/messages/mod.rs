@@ -126,41 +126,35 @@ impl MessagesTrait for Messages {
         self.conversation_id.as_ref().map(|c| c.as_slice())
     }
 
-    fn data_saved(&self, row_index: usize) -> bool {
-        ret_none!(self.msg_data(row_index), false).save_status == SaveStatus::Saved
+    fn data_saved(&self, row_index: usize) -> Option<bool> {
+        Some(self.msg_data(row_index)?.save_status == SaveStatus::Saved)
     }
 
-    fn author(&self, row_index: usize) -> ffi::UserIdRef {
-        ret_none!(self.msg_data(row_index), ffi::NULL_USER_ID)
-            .author
-            .as_str()
+    fn author(&self, row_index: usize) -> Option<ffi::UserIdRef> {
+        Some(self.msg_data(row_index)?.author.as_str())
     }
 
     fn body(&self, row_index: usize) -> Option<&str> {
         Some(self.msg_data(row_index)?.body.as_ref()?.as_str())
     }
 
-    fn message_id(&self, row_index: usize) -> ffi::MsgIdRef {
-        ret_none!(self.list.get(row_index), &ffi::NULL_MSG_ID)
-            .msg_id
-            .as_slice()
+    fn message_id(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
+        Some(self.list.get(row_index)?.msg_id.as_slice())
     }
 
-    fn has_attachments(&self, row_index: usize) -> bool {
-        let mid = ret_none!(self.list.get(row_index), false).msg_id;
-        ret_none!(self.map.get(&mid), false).has_attachments
+    fn has_attachments(&self, row_index: usize) -> Option<bool> {
+        Some(self.msg_data(row_index)?.has_attachments)
     }
 
-    fn receipt_status(&self, row_index: usize) -> u32 {
-        let mid = ret_none!(self.list.get(row_index), MessageReceiptStatus::NoAck as u32).msg_id;
-        let inner = ret_none!(self.map.get(&mid), MessageReceiptStatus::NoAck as u32);
-
-        inner
-            .receipts
-            .values()
-            .map(|r| *r as u32)
-            .max()
-            .unwrap_or(MessageReceiptStatus::NoAck as u32)
+    fn receipt_status(&self, row_index: usize) -> Option<u32> {
+        Some(
+            self.msg_data(row_index)?
+                .receipts
+                .values()
+                .map(|r| *r as u32)
+                .max()
+                .unwrap_or(MessageReceiptStatus::NoAck as u32),
+        )
     }
 
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
@@ -188,8 +182,8 @@ impl MessagesTrait for Messages {
         Some(self.msg_data(row_index)?.op.as_ref()?.as_slice())
     }
 
-    fn is_reply(&self, row_index: usize) -> bool {
-        ret_none!(self.msg_data(row_index), false).op.is_some()
+    fn is_reply(&self, row_index: usize) -> Option<bool> {
+        Some(self.msg_data(row_index)?.op.is_some())
     }
 
     fn is_head(&self, row_index: usize) -> Option<bool> {
@@ -224,10 +218,8 @@ impl MessagesTrait for Messages {
         Some(!msg.same_flurry(succ))
     }
 
-    fn epoch_timestamp_ms(&self, row_index: usize) -> i64 {
-        let mid = ret_none!(self.list.get(row_index), 0).msg_id;
-
-        ret_none!(self.map.get(&mid), 0).time.insertion.0
+    fn epoch_timestamp_ms(&self, row_index: usize) -> Option<i64> {
+        Some(self.list.get(row_index)?.insertion_time.0)
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {

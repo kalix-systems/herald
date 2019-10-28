@@ -1233,15 +1233,15 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
-    bool messages_data_data_saved(const Messages::Private*, int);
-    qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
-    bool messages_data_has_attachments(const Messages::Private*, int);
+    option_bool messages_data_data_saved(const Messages::Private*, int);
+    option_qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
+    option_bool messages_data_has_attachments(const Messages::Private*, int);
     option_bool messages_data_is_head(const Messages::Private*, int);
-    bool messages_data_is_reply(const Messages::Private*, int);
+    option_bool messages_data_is_reply(const Messages::Private*, int);
     option_bool messages_data_is_tail(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
-    quint32 messages_data_receipt_status(const Messages::Private*, int);
+    option_quint32 messages_data_receipt_status(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -1325,19 +1325,25 @@ QString Messages::body(int row) const
     return s;
 }
 
-bool Messages::dataSaved(int row) const
+QVariant Messages::dataSaved(int row) const
 {
-    return messages_data_data_saved(m_d, row);
+    QVariant v;
+    v = messages_data_data_saved(m_d, row);
+    return v;
 }
 
-qint64 Messages::epochTimestampMs(int row) const
+QVariant Messages::epochTimestampMs(int row) const
 {
-    return messages_data_epoch_timestamp_ms(m_d, row);
+    QVariant v;
+    v = messages_data_epoch_timestamp_ms(m_d, row);
+    return v;
 }
 
-bool Messages::hasAttachments(int row) const
+QVariant Messages::hasAttachments(int row) const
 {
-    return messages_data_has_attachments(m_d, row);
+    QVariant v;
+    v = messages_data_has_attachments(m_d, row);
+    return v;
 }
 
 QVariant Messages::isHead(int row) const
@@ -1347,9 +1353,11 @@ QVariant Messages::isHead(int row) const
     return v;
 }
 
-bool Messages::isReply(int row) const
+QVariant Messages::isReply(int row) const
 {
-    return messages_data_is_reply(m_d, row);
+    QVariant v;
+    v = messages_data_is_reply(m_d, row);
+    return v;
 }
 
 QVariant Messages::isTail(int row) const
@@ -1373,9 +1381,11 @@ QByteArray Messages::op(int row) const
     return b;
 }
 
-quint32 Messages::receiptStatus(int row) const
+QVariant Messages::receiptStatus(int row) const
 {
-    return messages_data_receipt_status(m_d, row);
+    QVariant v;
+    v = messages_data_receipt_status(m_d, row);
+    return v;
 }
 
 QVariant Messages::data(const QModelIndex &index, int role) const
@@ -1385,27 +1395,27 @@ QVariant Messages::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(author(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(author(index.row())));
         case Qt::UserRole + 1:
             return cleanNullQVariant(QVariant::fromValue(body(index.row())));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(dataSaved(index.row()));
+            return dataSaved(index.row());
         case Qt::UserRole + 3:
-            return QVariant::fromValue(epochTimestampMs(index.row()));
+            return epochTimestampMs(index.row());
         case Qt::UserRole + 4:
-            return QVariant::fromValue(hasAttachments(index.row()));
+            return hasAttachments(index.row());
         case Qt::UserRole + 5:
             return isHead(index.row());
         case Qt::UserRole + 6:
-            return QVariant::fromValue(isReply(index.row()));
+            return isReply(index.row());
         case Qt::UserRole + 7:
             return isTail(index.row());
         case Qt::UserRole + 8:
-            return QVariant::fromValue(messageId(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
         case Qt::UserRole + 9:
             return cleanNullQVariant(QVariant::fromValue(op(index.row())));
         case Qt::UserRole + 10:
-            return QVariant::fromValue(receiptStatus(index.row()));
+            return receiptStatus(index.row());
         }
         break;
     }

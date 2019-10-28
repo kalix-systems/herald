@@ -442,15 +442,15 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE bool dataSaved(int row) const;
-    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
-    Q_INVOKABLE bool hasAttachments(int row) const;
+    Q_INVOKABLE QVariant dataSaved(int row) const;
+    Q_INVOKABLE QVariant epochTimestampMs(int row) const;
+    Q_INVOKABLE QVariant hasAttachments(int row) const;
     Q_INVOKABLE QVariant isHead(int row) const;
-    Q_INVOKABLE bool isReply(int row) const;
+    Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
-    Q_INVOKABLE quint32 receiptStatus(int row) const;
+    Q_INVOKABLE QVariant receiptStatus(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
