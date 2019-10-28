@@ -117,9 +117,9 @@ pub(crate) fn by_send_status(
 
 /// Deletes a message
 pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
+    super::attachments::db::delete_unique(conn, id)?;
     let mut stmt = conn.prepare(include_str!("sql/delete_message.sql"))?;
     stmt.execute_named(named_params! { "@msg_id": id })?;
-    super::attachments::db::delete_unique(conn, id)?;
     Ok(())
 }
 
