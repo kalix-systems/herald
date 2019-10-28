@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+  "chainmail",
   "herald_common",
   "herald_server",
   "herald_server/server_store",
