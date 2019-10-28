@@ -161,7 +161,7 @@ impl MessagesTrait for Messages {
     }
 
     fn message_body_by_id(&self, msg_id: ffi::MsgIdRef) -> String {
-        if msg_id == &[] {
+        if msg_id == &ffi::NULL_MSG_ID {
             return UNKNOWN_BODY.to_owned();
         }
 
@@ -177,7 +177,7 @@ impl MessagesTrait for Messages {
     }
 
     fn message_author_by_id(&self, msg_id: ffi::MsgIdRef) -> ffi::UserId {
-        if msg_id == &[] {
+        if msg_id == &ffi::NULL_MSG_ID {
             return UNKNOWN_AUTHOR.to_owned();
         }
 
