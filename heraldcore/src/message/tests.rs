@@ -6,8 +6,8 @@ use crate::{config::test_config, womp};
 
 /// Testing utility
 fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
-    let conn = Database::get().expect(womp!());
-    db::test_outbound_text(conn, msg, conv)
+    let mut conn = Database::get().expect(womp!());
+    db::test_outbound_text(&mut conn, msg, conv)
 }
 
 #[test]

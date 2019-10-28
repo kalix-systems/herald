@@ -109,14 +109,15 @@ impl OutboundMessageBuilder {
         self,
         callback: F,
     ) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.store_and_send_db(db, callback)
+        let mut db = Database::get()?;
+        self.store_and_send_db(&mut db, callback);
+        Ok(())
     }
 
     #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
-        let db = Database::get()?;
-        self.store_and_send_blocking_db(db)
+        let mut db = Database::get()?;
+        self.store_and_send_blocking_db(&mut db)
     }
 }
 

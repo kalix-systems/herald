@@ -2,7 +2,6 @@ use super::*;
 use crate::conversation::db::expiration_period;
 use crate::message::MessageTime;
 use rusqlite::{named_params, Connection as Conn};
-use std::ops::{Deref, DerefMut};
 
 /// Get message by message id
 pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
@@ -125,10 +124,7 @@ pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
 
 /// Testing utility
 #[cfg(test)]
-pub(crate) fn test_outbound_text<D>(db: D, msg: &str, conv: ConversationId) -> (MsgId, Time)
-where
-    D: Deref<Target = Database> + DerefMut + Send + 'static,
-{
+pub(crate) fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId) -> (MsgId, Time) {
     use std::convert::TryInto;
 
     let mut builder = OutboundMessageBuilder::default();
@@ -145,14 +141,26 @@ where
 }
 
 impl OutboundMessageBuilder {
-    pub(crate) fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static, D>(
+    pub(crate) fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static>(
         self,
-        mut db: D,
+        db: &mut Conn,
         mut callback: F,
-    ) -> Result<(), HErr>
-    where
-        D: Deref<Target = Database> + DerefMut + Send + 'static,
-    {
+    ) {
+        macro_rules! e {
+            ($res: expr) => {
+                match $res {
+                    Ok(val) => val,
+                    Err(e) => {
+                        callback(StoreAndSend::Error {
+                            error: e.into(),
+                            line_number: line!(),
+                        });
+                        return;
+                    }
+                }
+            };
+        }
+
         let Self {
             conversation,
             mut body,
@@ -165,20 +173,20 @@ impl OutboundMessageBuilder {
 
         if parse_markdown {
             body = match body {
-                Some(body) => Some(body.parse_markdown()?),
+                Some(body) => Some(e!(body.parse_markdown())),
                 None => None,
             };
         }
 
         if attachments.is_empty() && body.is_none() {
-            return Err(MissingBody.into());
+            return e!(Err(MissingBody));
         }
 
-        let conversation_id = conversation.ok_or(MissingConversationId)?;
+        let conversation_id = e!(conversation.ok_or(MissingConversationId));
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Time::now();
-        let author = crate::config::db::static_id(&db)?;
-        let expiration_period = expiration_period(&db, &conversation_id)?;
+        let author = e!(crate::config::db::static_id(&db));
+        let expiration_period = e!(expiration_period(&db, &conversation_id));
 
         let expiration = match expiration_period.to_millis() {
             Some(period) => Some(Time(timestamp.0 + period.0)),
@@ -203,105 +211,83 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             time,
             send_status,
-            receipts: get_receipts(&db, &msg_id)?,
+            receipts: e!(get_receipts(&db, &msg_id)),
             has_attachments,
         };
 
         callback(StoreAndSend::Msg(msg));
 
-        macro_rules! e {
-            ($res: expr) => {
-                match $res {
-                    Ok(val) => val,
-                    Err(e) => {
-                        callback(StoreAndSend::Error {
-                            error: e.into(),
-                            line_number: line!(),
-                        });
-                        return;
-                    }
-                }
-            };
+        let attachments: Result<Vec<Attachment>, HErr> = attachments
+            .into_iter()
+            .map(|path| {
+                let attach: Attachment = Attachment::new(&path)?;
+
+                attach.save()?;
+
+                Ok(attach)
+            })
+            .collect();
+        let attachments = e!(attachments);
+
+        let tx = e!(db.transaction());
+
+        e!(tx.execute_named(
+            include_str!("sql/add.sql"),
+            named_params![
+                "@msg_id": msg_id,
+                "@author": author,
+                "@conversation_id": conversation_id,
+                "@body": body,
+                "@send_status": send_status,
+                "@has_attachments": has_attachments,
+                "@insertion_ts": time.insertion,
+                "@server_ts": time.server,
+                "@expiration_ts": time.expiration,
+                "@is_reply": op.is_some()
+            ],
+        ));
+
+        e!(tx.execute(
+            include_str!("../conversation/sql/update_last_active.sql"),
+            params![timestamp, conversation_id],
+        ));
+
+        if let Some(op) = op {
+            e!(tx.execute_named(
+                include_str!("sql/add_reply.sql"),
+                named_params! { "@msg_id": msg_id, "@op": op}
+            ));
         }
 
-        std::thread::Builder::new().spawn(move || {
-            let attachments: Result<Vec<Attachment>, HErr> = attachments
-                .into_iter()
-                .map(|path| {
-                    let attach: Attachment = Attachment::new(&path)?;
-
-                    attach.save()?;
-
-                    Ok(attach)
-                })
-                .collect();
-            let attachments = e!(attachments);
-
-            let tx = e!(db.transaction());
-
-            e!(tx.execute_named(
-                include_str!("sql/add.sql"),
-                named_params![
-                    "@msg_id": msg_id,
-                    "@author": author,
-                    "@conversation_id": conversation_id,
-                    "@body": body,
-                    "@send_status": send_status,
-                    "@has_attachments": has_attachments,
-                    "@insertion_ts": time.insertion,
-                    "@server_ts": time.server,
-                    "@expiration_ts": time.expiration,
-                    "@is_reply": op.is_some()
-                ],
+        if !attachments.is_empty() {
+            e!(attachments::db::add(
+                &tx,
+                &msg_id,
+                attachments.iter().map(|a| a.hash_dir())
             ));
+        }
 
-            e!(tx.execute(
-                include_str!("../conversation/sql/update_last_active.sql"),
-                params![timestamp, conversation_id],
-            ));
+        e!(tx.commit());
 
-            if let Some(op) = op {
-                e!(tx.execute_named(
-                    include_str!("sql/add_reply.sql"),
-                    named_params! { "@msg_id": msg_id, "@op": op}
-                ));
-            }
+        callback(StoreAndSend::StoreDone(msg_id));
 
-            if !attachments.is_empty() {
-                e!(attachments::db::add(
-                    &tx,
-                    &msg_id,
-                    attachments.iter().map(|a| a.hash_dir())
-                ));
-            }
+        let content = cmessages::Message {
+            body,
+            attachments,
+            expiration,
+        };
+        let msg = cmessages::Msg {
+            mid: msg_id,
+            content,
+            op,
+        };
+        e!(crate::network::send_normal_message(conversation_id, msg));
 
-            e!(tx.commit());
-
-            callback(StoreAndSend::StoreDone(msg_id));
-
-            let content = cmessages::Message {
-                body,
-                attachments,
-                expiration,
-            };
-            let msg = cmessages::Msg {
-                mid: msg_id,
-                content,
-                op,
-            };
-            e!(crate::network::send_normal_message(conversation_id, msg));
-
-            callback(StoreAndSend::SendDone(msg_id));
-        })?;
-
-        Ok(())
+        callback(StoreAndSend::SendDone(msg_id));
     }
 
     #[cfg(test)]
-    pub(crate) fn store_and_send_blocking_db<D>(self, db: D) -> Result<Message, HErr>
-    where
-        D: Deref<Target = Database> + DerefMut + Send + 'static,
-    {
+    pub(crate) fn store_and_send_blocking_db(self, db: &mut Conn) -> Result<Message, HErr> {
         use crate::{channel_recv_err, loc};
         use crossbeam_channel::*;
 
@@ -309,7 +295,7 @@ impl OutboundMessageBuilder {
         self.store_and_send_db(db, move |m| {
             tx.send(m)
                 .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
-        })?;
+        });
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {
             StoreAndSend::Msg(msg) => msg,

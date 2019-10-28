@@ -120,27 +120,29 @@ impl MessageBuilderTrait for MessageBuilder {
 
         let cid = ret_none!(builder.conversation);
 
-        ret_err!(builder.store_and_send(move |m| {
-            use crate::imp::messages::{shared::MsgUpdate, *};
-            use heraldcore::message::StoreAndSend::*;
+        ret_err!(
+            std::thread::Builder::new().spawn(move || builder.store_and_send(move |m| {
+                use crate::imp::messages::{shared::MsgUpdate, *};
+                use heraldcore::message::StoreAndSend::*;
 
-            match m {
-                Msg(msg) => {
-                    ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
+                match m {
+                    Msg(msg) => {
+                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
+                    }
+                    Error { error, line_number } => {
+                        // TODO better line number usage
+                        eprintln!("Error at {}", line_number);
+                        ret_err!(Err(error))
+                    }
+                    StoreDone(mid) => {
+                        ret_err!(Messages::push(cid, MsgUpdate::StoreDone(mid)));
+                    }
+                    SendDone(_) => {
+                        // TODO: send status?
+                    }
                 }
-                Error { error, line_number } => {
-                    // TODO better line number usage
-                    eprintln!("Error at {}", line_number);
-                    ret_err!(Err(error))
-                }
-                StoreDone(mid) => {
-                    ret_err!(Messages::push(cid, MsgUpdate::StoreDone(mid)));
-                }
-                SendDone(_) => {
-                    // TODO: send status?
-                }
-            }
-        }));
+            }))
+        );
     }
 
     fn remove_attachment(&mut self, path: String) -> bool {

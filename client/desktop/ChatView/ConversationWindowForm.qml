@@ -92,9 +92,9 @@ Flickable {
                     CB.ReplyBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        opBody: ownedConversation.messageBodyById(op)
+                        opBody: op !== undefined ? ownedConversation.messageBodyById(op) : ""
                         receiptImage: proxyReceiptImage
-                        opName: ownedConversation.messageAuthorById(op)
+                        opName: op !== undefined ? ownedConversation.messageAuthorById(op) : ""
                         opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
