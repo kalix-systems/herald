@@ -192,6 +192,15 @@ pub fn set_picture(
     db::set_picture(&db, conversation_id, picture, old_pic)
 }
 
+/// Sets expiration period for a conversation
+pub fn set_expiration_period(
+    conversation_id: &ConversationId,
+    expiration_period: Option<Time>,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_expiration_period(&db, conversation_id, expiration_period)
+}
+
 /// Get metadata of all conversations
 pub fn all_meta() -> Result<Vec<ConversationMeta>, HErr> {
     let db = Database::get()?;
