@@ -5,7 +5,8 @@ SELECT
   color,
   muted,
   pairwise,
-  last_active_ts
+  last_active_ts,
+  expiration_period
 FROM
   conversations
 WHERE

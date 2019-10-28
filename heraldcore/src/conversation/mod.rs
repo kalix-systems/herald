@@ -21,18 +21,21 @@ pub struct ConversationMeta {
     pub pairwise: bool,
     /// Last notable activity
     pub last_active: Time,
+    /// Time until message expiration
+    pub expiration_period: Option<Time>,
 }
 
 impl ConversationMeta {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         Ok(ConversationMeta {
-            conversation_id: row.get(0)?,
-            title: row.get(1)?,
-            picture: row.get(2)?,
-            color: row.get(3)?,
-            muted: row.get(4)?,
-            pairwise: row.get(5)?,
-            last_active: row.get(6)?,
+            conversation_id: row.get("conversation_id")?,
+            title: row.get("title")?,
+            picture: row.get("picture")?,
+            color: row.get("color")?,
+            muted: row.get("muted")?,
+            pairwise: row.get("pairwise")?,
+            last_active: row.get("last_active_ts")?,
+            expiration_period: row.get("expiration_period")?,
         })
     }
 
