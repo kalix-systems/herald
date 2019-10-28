@@ -444,6 +444,7 @@ public:
     Q_INVOKABLE QString body(int row) const;
     Q_INVOKABLE QVariant dataSaved(int row) const;
     Q_INVOKABLE QVariant epochTimestampMs(int row) const;
+    Q_INVOKABLE QVariant expirationTimestampMs(int row) const;
     Q_INVOKABLE QVariant hasAttachments(int row) const;
     Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE QVariant isReply(int row) const;
@@ -451,6 +452,7 @@ public:
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;
+    Q_INVOKABLE QVariant serverTimestampMs(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

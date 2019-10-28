@@ -2234,6 +2234,7 @@ pub trait MessagesTrait {
     fn body(&self, index: usize) -> Option<&str>;
     fn data_saved(&self, index: usize) -> Option<bool>;
     fn epoch_timestamp_ms(&self, index: usize) -> Option<i64>;
+    fn expiration_timestamp_ms(&self, index: usize) -> Option<i64>;
     fn has_attachments(&self, index: usize) -> Option<bool>;
     fn is_head(&self, index: usize) -> Option<bool>;
     fn is_reply(&self, index: usize) -> Option<bool>;
@@ -2241,6 +2242,7 @@ pub trait MessagesTrait {
     fn message_id(&self, index: usize) -> Option<&[u8]>;
     fn op(&self, index: usize) -> Option<&[u8]>;
     fn receipt_status(&self, index: usize) -> Option<u32>;
+    fn server_timestamp_ms(&self, index: usize) -> Option<i64>;
 }
 
 #[no_mangle]
@@ -2474,6 +2476,12 @@ pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(ptr: *const Messages, 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_expiration_timestamp_ms(ptr: *const Messages, row: c_int) -> COption<i64> {
+    let o = &*ptr;
+    o.expiration_timestamp_ms(to_usize(row)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_has_attachments(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
     o.has_attachments(to_usize(row)).into()
@@ -2529,6 +2537,12 @@ pub unsafe extern "C" fn messages_data_op(
 pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row: c_int) -> COption<u32> {
     let o = &*ptr;
     o.receipt_status(to_usize(row)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_server_timestamp_ms(ptr: *const Messages, row: c_int) -> COption<i64> {
+    let o = &*ptr;
+    o.server_timestamp_ms(to_usize(row)).into()
 }
 
 pub struct NetworkHandleQObject {}

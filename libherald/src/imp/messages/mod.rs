@@ -222,6 +222,14 @@ impl MessagesTrait for Messages {
         Some(self.list.get(row_index)?.insertion_time.0)
     }
 
+    fn expiration_timestamp_ms(&self, row_index: usize) -> Option<i64> {
+        Some(self.msg_data(row_index)?.time.expiration?.0)
+    }
+
+    fn server_timestamp_ms(&self, row_index: usize) -> Option<i64> {
+        Some(self.msg_data(row_index)?.time.server?.0)
+    }
+
     fn delete_message(&mut self, row_index: u64) -> bool {
         let ix = row_index as usize;
 

@@ -235,6 +235,8 @@ fn messages() -> Object {
         author: ItemProp::new(QString).optional(),
         body: ItemProp::new(QString).optional(),
         epochTimestampMs: ItemProp::new(Qint64).optional(),
+        serverTimestampMs: ItemProp::new(Qint64).optional(),
+        expirationTimestampMs: ItemProp::new(Qint64).optional(),
         op: ItemProp::new(QByteArray).optional(),
         isReply: ItemProp::new(Bool).optional(),
         hasAttachments: ItemProp::new(Bool).optional(),

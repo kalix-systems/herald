@@ -1235,6 +1235,7 @@ extern "C" {
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     option_bool messages_data_data_saved(const Messages::Private*, int);
     option_qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
+    option_qint64 messages_data_expiration_timestamp_ms(const Messages::Private*, int);
     option_bool messages_data_has_attachments(const Messages::Private*, int);
     option_bool messages_data_is_head(const Messages::Private*, int);
     option_bool messages_data_is_reply(const Messages::Private*, int);
@@ -1242,6 +1243,7 @@ extern "C" {
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     option_quint32 messages_data_receipt_status(const Messages::Private*, int);
+    option_qint64 messages_data_server_timestamp_ms(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -1339,6 +1341,13 @@ QVariant Messages::epochTimestampMs(int row) const
     return v;
 }
 
+QVariant Messages::expirationTimestampMs(int row) const
+{
+    QVariant v;
+    v = messages_data_expiration_timestamp_ms(m_d, row);
+    return v;
+}
+
 QVariant Messages::hasAttachments(int row) const
 {
     QVariant v;
@@ -1388,6 +1397,13 @@ QVariant Messages::receiptStatus(int row) const
     return v;
 }
 
+QVariant Messages::serverTimestampMs(int row) const
+{
+    QVariant v;
+    v = messages_data_server_timestamp_ms(m_d, row);
+    return v;
+}
+
 QVariant Messages::data(const QModelIndex &index, int role) const
 {
     Q_ASSERT(rowCount(index.parent()) > index.row());
@@ -1403,19 +1419,23 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 3:
             return epochTimestampMs(index.row());
         case Qt::UserRole + 4:
-            return hasAttachments(index.row());
+            return expirationTimestampMs(index.row());
         case Qt::UserRole + 5:
-            return isHead(index.row());
+            return hasAttachments(index.row());
         case Qt::UserRole + 6:
-            return isReply(index.row());
+            return isHead(index.row());
         case Qt::UserRole + 7:
-            return isTail(index.row());
+            return isReply(index.row());
         case Qt::UserRole + 8:
-            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
+            return isTail(index.row());
         case Qt::UserRole + 9:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
         case Qt::UserRole + 10:
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+        case Qt::UserRole + 11:
             return receiptStatus(index.row());
+        case Qt::UserRole + 12:
+            return serverTimestampMs(index.row());
         }
         break;
     }
@@ -1439,13 +1459,15 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 1, "body");
     names.insert(Qt::UserRole + 2, "dataSaved");
     names.insert(Qt::UserRole + 3, "epochTimestampMs");
-    names.insert(Qt::UserRole + 4, "hasAttachments");
-    names.insert(Qt::UserRole + 5, "isHead");
-    names.insert(Qt::UserRole + 6, "isReply");
-    names.insert(Qt::UserRole + 7, "isTail");
-    names.insert(Qt::UserRole + 8, "messageId");
-    names.insert(Qt::UserRole + 9, "op");
-    names.insert(Qt::UserRole + 10, "receiptStatus");
+    names.insert(Qt::UserRole + 4, "expirationTimestampMs");
+    names.insert(Qt::UserRole + 5, "hasAttachments");
+    names.insert(Qt::UserRole + 6, "isHead");
+    names.insert(Qt::UserRole + 7, "isReply");
+    names.insert(Qt::UserRole + 8, "isTail");
+    names.insert(Qt::UserRole + 9, "messageId");
+    names.insert(Qt::UserRole + 10, "op");
+    names.insert(Qt::UserRole + 11, "receiptStatus");
+    names.insert(Qt::UserRole + 12, "serverTimestampMs");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
