@@ -64,7 +64,6 @@ impl ConfigBuilder {
             colorscheme,
             name,
             nts_conversation,
-            profile_picture,
         } = self;
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
@@ -78,10 +77,6 @@ impl ConfigBuilder {
 
         if let Some(pairwise_conversation) = nts_conversation {
             contact_builder = contact_builder.pairwise_conversation(pairwise_conversation);
-        }
-
-        if let Some(picture) = profile_picture {
-            contact_builder = contact_builder.profile_picture(picture);
         }
 
         contact_builder = contact_builder.color(color);

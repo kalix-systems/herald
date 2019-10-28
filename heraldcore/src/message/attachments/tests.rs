@@ -20,7 +20,7 @@ fn make_attachment() {
 }
 
 #[test]
-#[serial]
+#[serial(attach)]
 fn outbound_message_attachment() {
     Database::reset_all().expect(womp!());
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
@@ -84,6 +84,7 @@ fn delete_message_with_attachment() {
 
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
+    let attach_path = Path::new("attachments").join(attach.hash_dir());
 
     let conv = receiver.pairwise_conversation;
 
@@ -113,11 +114,15 @@ fn delete_message_with_attachment() {
 
     builder.store_db(&mut conn).expect(womp!());
 
+    assert!(attach_path.exists());
+
     crate::message::db::delete_message(&conn, &mid0).expect(womp!());
 
-    // assert!(attach.hash_dir().exists());
+    assert!(attach_path.exists());
 
     crate::message::db::delete_message(&conn, &mid1).expect(womp!());
 
-    // assert!(!attach.hash_dir().exists());
+    assert!(!attach_path.exists());
+
+    std::fs::remove_dir_all("attachments").expect(womp!());
 }

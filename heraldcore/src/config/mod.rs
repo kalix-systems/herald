@@ -34,8 +34,6 @@ pub struct ConfigBuilder {
     colorscheme: Option<u32>,
     /// Name of the local user
     name: Option<String>,
-    /// Profile picture of the local user
-    profile_picture: Option<String>,
     /// Color of the local user
     color: Option<u32>,
     nts_conversation: Option<ConversationId>,
@@ -50,7 +48,6 @@ impl ConfigBuilder {
             name: None,
             color: None,
             colorscheme: None,
-            profile_picture: None,
             nts_conversation: None,
         }
     }
@@ -70,12 +67,6 @@ impl ConfigBuilder {
     /// Sets name.
     pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
-        self
-    }
-
-    /// Set profile picture.
-    pub fn profile_picture(mut self, profile_picture: String) -> Self {
-        self.profile_picture = Some(profile_picture);
         self
     }
 

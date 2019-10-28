@@ -32,12 +32,13 @@ pub(crate) fn delete_unique(conn: &rusqlite::Connection, msg_id: &MsgId) -> Resu
     let mut stmt = conn.prepare(include_str!("../sql/get_unique.sql"))?;
 
     let results = stmt.query_map_named(named_params! {"@msg_id": msg_id}, |row| {
-        row.get::<_, String>("hash_dir")
+        row.get::<_, String>("hd")
     })?;
 
     for res in results {
         if let Ok(path) = res {
-            std::fs::remove_dir_all(path).ok();
+            std::fs::remove_dir_all(Path::new("attachments").join(path))
+                .expect("failed to remove attachment");
         }
     }
 

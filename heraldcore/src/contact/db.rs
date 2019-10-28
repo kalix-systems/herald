@@ -187,7 +187,7 @@ impl ContactBuilder {
         let contact = Contact {
             id: self.id,
             name,
-            profile_picture: self.profile_picture,
+            profile_picture: None,
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,
