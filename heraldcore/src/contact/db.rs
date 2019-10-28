@@ -1,4 +1,5 @@
 use super::*;
+use rusqlite::named_params;
 
 /// Gets a contact's name by their `id`.
 pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
@@ -87,9 +88,9 @@ pub fn set_status(
         Deleted => {
             let tx = conn.transaction()?;
             tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
-            tx.execute(
+            tx.execute_named(
                 include_str!("../message/sql/delete_pairwise_conversation.sql"),
-                params![id],
+                named_params! {"@user_id": id},
             )?;
             tx.commit()?;
         }
@@ -186,7 +187,7 @@ impl ContactBuilder {
         let contact = Contact {
             id: self.id,
             name,
-            profile_picture: self.profile_picture,
+            profile_picture: None,
             color,
             status: self.status.unwrap_or(ContactStatus::Active),
             pairwise_conversation,

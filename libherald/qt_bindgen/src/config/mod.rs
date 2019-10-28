@@ -135,6 +135,7 @@ fn conversations() -> Object {
        title: ItemProp::new(QString).write().optional(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
+       expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop().write(),
        picture: picture_item_prop().write(),
        color: color_item_prop().write()
@@ -231,15 +232,19 @@ fn messages() -> Object {
     };
 
     let item_props = item_props! {
-        messageId: ItemProp::new(QByteArray),
-        author: ItemProp::new(QString),
+        messageId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
         body: ItemProp::new(QString).optional(),
-        epochTimestampMs: ItemProp::new(Qint64),
+        epochTimestampMs: ItemProp::new(Qint64).optional(),
+        serverTimestampMs: ItemProp::new(Qint64).optional(),
+        expirationTimestampMs: ItemProp::new(Qint64).optional(),
         op: ItemProp::new(QByteArray).optional(),
-        isReply: ItemProp::new(Bool),
-        hasAttachments: ItemProp::new(Bool),
-        receiptStatus: ItemProp::new(QUint32),
-        dataSaved: ItemProp::new(Bool)
+        isReply: ItemProp::new(Bool).optional(),
+        hasAttachments: ItemProp::new(Bool).optional(),
+        receiptStatus: ItemProp::new(QUint32).optional(),
+        dataSaved: ItemProp::new(Bool).optional(),
+        isHead: ItemProp::new(Bool).optional(),
+        isTail: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {

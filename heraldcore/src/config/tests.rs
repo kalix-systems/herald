@@ -30,14 +30,12 @@ fn complicated_add_get_set_config() {
     let id = "HelloWorld".try_into().expect(womp!());
 
     let name = "stuff";
-    let profile_picture = "stuff";
     let nts_id = [0u8; 32].into();
     let kp = KeyPair::gen_new();
     let config = ConfigBuilder::new(id, kp)
         .name(name.into())
         .colorscheme(1)
         .color(2)
-        .profile_picture(profile_picture.into())
         .nts_conversation(nts_id)
         .add_db(&mut conn)
         .expect(womp!());
@@ -54,10 +52,6 @@ fn complicated_add_get_set_config() {
     assert_eq!(db_config.nts_conversation, nts_id);
     assert_eq!(db_config.colorscheme, 1);
     assert_eq!(db_config.color, 2);
-    assert_eq!(
-        db_config.profile_picture.as_ref().expect(womp!()),
-        profile_picture
-    );
 
     let mut db_config = db::get(&conn).expect(womp!());
     db_config

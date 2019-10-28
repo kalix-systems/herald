@@ -21,18 +21,21 @@ pub struct ConversationMeta {
     pub pairwise: bool,
     /// Last notable activity
     pub last_active: Time,
+    /// Time until message expiration
+    pub expiration_period: ExpirationPeriod,
 }
 
 impl ConversationMeta {
     fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
         Ok(ConversationMeta {
-            conversation_id: row.get(0)?,
-            title: row.get(1)?,
-            picture: row.get(2)?,
-            color: row.get(3)?,
-            muted: row.get(4)?,
-            pairwise: row.get(5)?,
-            last_active: row.get(6)?,
+            conversation_id: row.get("conversation_id")?,
+            title: row.get("title")?,
+            picture: row.get("picture")?,
+            color: row.get("color")?,
+            muted: row.get("muted")?,
+            pairwise: row.get("pairwise")?,
+            last_active: row.get("last_active_ts")?,
+            expiration_period: row.get("expiration_period")?,
         })
     }
 
@@ -84,6 +87,8 @@ pub struct ConversationBuilder {
     muted: Option<bool>,
     /// Indicates whether the conversation is a canonical pairwise conversation
     pairwise: Option<bool>,
+    /// How long until a message expires
+    expiration_period: Option<ExpirationPeriod>,
 }
 
 impl ConversationBuilder {
@@ -125,6 +130,12 @@ impl ConversationBuilder {
     /// Sets muted status
     pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
         self.pairwise.replace(pairwise);
+        self
+    }
+
+    /// Sets expiration period
+    pub fn expiration_period(&mut self, expiration_period: ExpirationPeriod) -> &mut Self {
+        self.expiration_period.replace(expiration_period);
         self
     }
 
@@ -179,6 +190,15 @@ pub fn set_picture(
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_picture(&db, conversation_id, picture, old_pic)
+}
+
+/// Sets expiration period for a conversation
+pub fn set_expiration_period(
+    conversation_id: &ConversationId,
+    expiration_period: ExpirationPeriod,
+) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_expiration_period(&db, conversation_id, expiration_period)
 }
 
 /// Get metadata of all conversations

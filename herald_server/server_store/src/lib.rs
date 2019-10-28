@@ -1,13 +1,11 @@
-use crate::prelude::*;
-use dotenv::dotenv;
 use futures::FutureExt;
 use herald_common::*;
-use lazy_static::*;
-use std::{
-    env,
-    ops::{Deref, DerefMut},
-};
+use server_errors::{Error, Error::*};
+use tokio;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
+
+mod pool;
+pub use pool::*;
 
 macro_rules! sql {
     ($path: literal) => {
@@ -31,28 +29,7 @@ macro_rules! params {
     }
 }
 
-lazy_static! {
-    static ref DATABASE_URL: String = {
-        dotenv().expect("Invalid dotenv");
-        env::var("DATABASE_URL").expect("DATABASE_URL must be set")
-    };
-}
-
-pub struct Conn(pub Client);
-
-impl Deref for Conn {
-    type Target = Client;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for Conn {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
+const DATABASE_URL: &str = "host=/var/run/postgresql user=postgres";
 
 fn is_unique_violation(query_res: &Result<u64, PgError>) -> bool {
     use tokio_postgres::error::SqlState;
@@ -96,21 +73,6 @@ fn dep_check(
 
 fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) -> bool {
     ts.is_some() || signed_by.is_some() || sig.is_some()
-}
-
-pub async fn get_client() -> Result<Conn, PgError> {
-    let (client, connection) = tokio_postgres::connect(&DATABASE_URL, NoTls).await?;
-
-    // The connection object performs the actual communication with the database,
-    // so spawn it off to run on its own.
-    let connection = connection.map(|r| {
-        if let Err(e) = r {
-            eprintln!("connection error: {}", e);
-        }
-    });
-    tokio::spawn(connection);
-
-    Ok(Conn(client))
 }
 
 type RawPkMeta<'a> = (
@@ -196,10 +158,10 @@ impl Conn {
 
         let exists_stmt = tx.prepare_typed(sql!("user_exists"), types![TEXT]).await?;
 
-        if tx
-            .query_one(&exists_stmt, params![user_id.as_str()])
+        if !tx
+            .query(&exists_stmt, params![user_id.as_str()])
             .await?
-            .get(0)
+            .is_empty()
         {
             return Ok(register::Res::UIDTaken);
         }
@@ -362,9 +324,9 @@ impl Conn {
             .prepare_typed(sql!("user_exists"), types![TEXT])
             .await?;
 
-        let row = self.query_one(&stmt, params![uid.as_str()]).await?;
+        let res = self.query(&stmt, params![uid.as_str()]).await?;
 
-        Ok(row.get(0))
+        Ok(!res.is_empty())
     }
 
     pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
@@ -488,9 +450,10 @@ impl Conn {
     pub async fn setup(&mut self) -> Result<(), Error> {
         // create
         self.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/up.sql"
+            "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
+        self.execute(sql!("user_exists_func"), params![]).await?;
         Ok(())
     }
 
@@ -499,15 +462,16 @@ impl Conn {
 
         // drop
         tx.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/down.sql"
+            "../migrations/2019-09-21-221007_herald/down.sql"
         ))
         .await?;
 
         // create
         tx.batch_execute(include_str!(
-            "../../migrations/2019-09-21-221007_herald/up.sql"
+            "../migrations/2019-09-21-221007_herald/up.sql"
         ))
         .await?;
+        tx.execute(sql!("user_exists_func"), params![]).await?;
         tx.commit().await?;
         Ok(())
     }

@@ -3,7 +3,175 @@ use crate::{
     chainkeys::DecryptionResult, config::*, errors::HErr::*, message::attachments::Attachment,
 };
 use chainmail::{block::*, errors::ChainError::CryptoError};
-use std::{convert::AsRef, fmt};
+use std::{convert::AsRef, fmt, time::Duration};
+
+/// Types relevant to [`ConversationMessage`]s
+pub(crate) mod cmessages;
+/// Types associated with [`DeviceMessage`]s
+pub(crate) mod dmessages;
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+/// In order to support expiring messages, it is necessary to indicate
+/// that a message is a reply without necessarily knowing
+pub enum ReplyId {
+    /// Not a reply
+    None,
+    /// It is a reply, but the original message could not be located
+    Dangling,
+    /// The message id is known
+    Known(MsgId),
+}
+
+impl ReplyId {
+    /// Indicates whether `ReplyId` is `None`
+    pub fn is_none(&self) -> bool {
+        self == &ReplyId::None
+    }
+
+    /// Indicates whether `ReplyId` is `Dangling`
+    pub fn is_dangling(&self) -> bool {
+        self == &ReplyId::Dangling
+    }
+
+    /// Indicates whether `ReplyId` is `Known`
+    pub fn is_known(&self) -> bool {
+        if let ReplyId::Known(_) = self {
+            true
+        } else {
+            false
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn unwrap(self) -> MsgId {
+        match self {
+            ReplyId::Known(mid) => mid,
+            ReplyId::Dangling => panic!("Tried to unwrap `Dangling` `ReplyId`"),
+            ReplyId::None => panic!("Tried to unwrap `None` `ReplyId`"),
+        }
+    }
+}
+
+impl From<Option<MsgId>> for ReplyId {
+    fn from(maybe_mid: Option<MsgId>) -> Self {
+        match maybe_mid {
+            Some(mid) => ReplyId::Known(mid),
+            None => ReplyId::None,
+        }
+    }
+}
+
+impl From<(Option<MsgId>, bool)> for ReplyId {
+    fn from(val: (Option<MsgId>, bool)) -> Self {
+        match val {
+            (Some(mid), true) => ReplyId::Known(mid),
+            (None, true) => ReplyId::Dangling,
+            _ => ReplyId::None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[repr(u8)]
+/// Expiration period for messages
+pub enum ExpirationPeriod {
+    /// Messages never expire
+    Never = 0,
+    /// Messages expire after one minute
+    OneMinute = 1,
+    /// Messages expire after one hour
+    OneHour = 2,
+    /// Messages expire after one day
+    OneDay = 3,
+    /// Message expire after one week
+    OneWeek = 4,
+    /// Messages expire after one month
+    OneMonth = 5,
+    /// Messages expire after one year
+    OneYear = 6,
+}
+
+const MIN_SECS: u64 = 60;
+const HOUR_SECS: u64 = MIN_SECS * 60;
+const DAY_SECS: u64 = HOUR_SECS * 24;
+const WEEK_SECS: u64 = DAY_SECS * 7;
+const MONTH_SECS: u64 = WEEK_SECS * 4;
+const YEAR_SECS: u64 = WEEK_SECS * 52;
+
+impl ExpirationPeriod {
+    /// Converts an `ExpirationPeriod` to a `Duration`
+    pub fn to_duration(&self) -> Option<Duration> {
+        use ExpirationPeriod::*;
+        match self {
+            OneMinute => Some(Duration::from_secs(MIN_SECS)),
+            OneHour => Some(Duration::from_secs(HOUR_SECS)),
+            OneDay => Some(Duration::from_secs(DAY_SECS)),
+            OneWeek => Some(Duration::from_secs(WEEK_SECS)),
+            OneMonth => Some(Duration::from_secs(MONTH_SECS)),
+            OneYear => Some(Duration::from_secs(YEAR_SECS)),
+            Never => None,
+        }
+    }
+
+    /// Converts an `ExpirationPeriod` to milliseconds
+    pub fn to_millis(&self) -> Option<Time> {
+        match self.to_duration() {
+            Some(d) => Some((d.as_millis() as i64).into()),
+            None => None,
+        }
+    }
+}
+
+impl From<u8> for ExpirationPeriod {
+    fn from(val: u8) -> Self {
+        use ExpirationPeriod::*;
+        match val {
+            0 => Never,
+            1 => OneMinute,
+            2 => OneHour,
+            3 => OneDay,
+            4 => OneWeek,
+            5 => OneMonth,
+            6 => OneYear,
+            _ => Self::default(),
+        }
+    }
+}
+
+impl Default for ExpirationPeriod {
+    fn default() -> Self {
+        ExpirationPeriod::OneYear
+    }
+}
+
+impl FromSql for ExpirationPeriod {
+    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
+        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+            .map_err(|_| FromSqlError::InvalidType)
+    }
+}
+
+impl ToSql for ExpirationPeriod {
+    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
+        use types::*;
+
+        Ok(ToSqlOutput::Owned(Value::Blob(
+            serde_cbor::to_vec(self)
+                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
+        )))
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+/// Time data relating to messages
+pub struct MessageTime {
+    /// The `Time` the message reached the server, if applicable.
+    pub server: Option<Time>,
+    /// The `Time` the message was saved on this device
+    pub insertion: Time,
+    /// The `Time` the message will expire, if applicable
+    pub expiration: Option<Time>,
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A message body
@@ -308,66 +476,6 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
     }
 }
 
-/// Types relevant to [`ConversationMessage`]s
-pub mod cmessages {
-    use super::*;
-
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// A new, signed key.
-    pub struct NewKey(pub Signed<sig::PublicKey>);
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// A key that is to be marked as deprecated.
-    pub struct DepKey(pub Signed<sig::PublicKey>);
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// Members that have just been added to a conversation.
-    pub struct NewMembers(pub Vec<UserId>);
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// A message received by a user when they are addeded to a conversation.
-    pub struct AddedToConvo {
-        /// The current members in that conversation.
-        pub members: Vec<UserId>,
-        /// The [`ConversationId`]
-        pub cid: ConversationId,
-        /// The conversation's title.
-        pub title: Option<String>,
-        /// The genesis block for the new conversation
-        pub gen: Genesis,
-    }
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// An acknowledgement of a contact request, with a bool to indicate whether the
-    /// request was accepted.
-    pub struct ContactReqAck(pub bool);
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// A normal message to the conversation.
-    pub struct Msg {
-        /// The message id. Globally unique.
-        pub mid: MsgId,
-        /// The content of the message.
-        pub content: Message,
-        /// The message id of the message being replied to, if this
-        /// message is a reply.
-        pub op: Option<MsgId>,
-    }
-
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// Variants of messages.
-    pub struct Message {
-        /// Body of the message
-        pub body: Option<MessageBody>,
-        /// Attachments
-        pub attachments: Vec<Attachment>,
-    }
-
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// An acknowledgement that a message was received.
-    pub struct Ack {
-        /// The message id.
-        pub of: MsgId,
-        /// The receipt status of the message.
-        pub stat: MessageReceiptStatus,
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// The body of a [`ConversationMessage`]
 pub enum ConversationMessageBody {
@@ -489,20 +597,6 @@ impl ConversationMessage {
         }
 
         Ok(out)
-    }
-}
-
-/// Types associated with [`DeviceMessage`]s
-pub mod dmessages {
-    use super::*;
-
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-    /// A contact request.
-    pub struct ContactReq {
-        /// The genesis block for the conversation.
-        pub gen: Genesis,
-        /// The proposed conversation id.
-        pub cid: ConversationId,
     }
 }
 

@@ -4,30 +4,46 @@ CREATE TABLE IF NOT EXISTS messages (
   -- id of message author
   author TEXT,
   -- id of conversation
-  conversation_id BLOB,
+  conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
+
   -- timestamp associated with message
-  ts INTEGER,
+  insertion_ts INTEGER NOT NULL,
+  -- timestamp the message was inserted into the database
+  server_ts INTEGER DEFAULT NULL,
   -- time when message self-destructs
-  expiration_date TEXT DEFAULT NULL,
+  expiration_ts INTEGER DEFAULT NULL,
+
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
-  -- read receipts as a map from user ids to receipt status, encoded as CBOR
-  receipts BLOB,
+  -- does the message have attachments?
   has_attachments INTEGER NOT NULL DEFAULT(0),
-  known INTEGER NOT NULL DEFAULT(0),
+  -- is the message a reply?
+  is_reply INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
+
+CREATE TABLE IF NOT EXISTS read_receipts (
+  -- message id receipt is associated with
+  msg_id BLOB NOT NULL,
+  -- user id of the user that sent the receipt
+  user_id TEXT NOT NULL,
+  -- type of receipt that was sent
+  receipt_status INTEGER NOT NULL,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS msg_id_receipt_ix ON read_receipts(msg_id);
 
 CREATE TABLE IF NOT EXISTS replies (
   -- message id
   msg_id BLOB PRIMARY KEY NOT NULL,
   -- message id of message being replied to
-  op_msg_id INTEGER,
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id),
-  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id)
+  op_msg_id BLOB,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE CASCADE,
+  FOREIGN KEY(op_msg_id) REFERENCES messages(msg_id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS reply_op ON replies(op_msg_id);
@@ -40,6 +56,8 @@ CREATE TABLE IF NOT EXISTS msg_attachments (
   msg_id BLOB NOT NULL,
   FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
 );
+
+CREATE INDEX IF NOT EXISTS hash_dir_ix on msg_attachments(hash_dir);
 
 CREATE TABLE IF NOT EXISTS contacts (
   -- user id
@@ -130,6 +148,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   muted INTEGER DEFAULT(0),
   -- Indicates whether a conversation is a canonical pairwise conversation, defaults to false
   pairwise INTEGER DEFAULT(0),
+  -- Duration in milliseconds until a message in this conversation expires.
+  expiration_period INTEGER DEFAULT NULL,
   -- Time of last important activity
   last_active_ts INTEGER NOT NULL
 );

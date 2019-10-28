@@ -8,6 +8,7 @@ use std::path::PathBuf;
 pub mod attachments;
 
 pub(crate) mod db;
+pub use crate::types::MessageTime;
 use attachments::*;
 
 /// Message
@@ -21,37 +22,16 @@ pub struct Message {
     pub conversation: ConversationId,
     /// Body of message
     pub body: Option<MessageBody>,
-    /// Time the message was sent (if outbound) or received at the server (if inbound).
-    pub timestamp: Time,
+    /// Message time information
+    pub time: MessageTime,
     /// Message id of the message being replied to
-    pub op: Option<MsgId>,
+    pub op: ReplyId,
     /// Send status
     pub send_status: MessageSendStatus,
     /// Receipts
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     /// Indicates whether the message has attachments
     pub has_attachments: bool,
-}
-
-impl Message {
-    pub(crate) fn from_db(row: &rusqlite::Row) -> Result<Self, rusqlite::Error> {
-        let data = row.get::<_, Vec<u8>>(6)?;
-        let receipts = serde_cbor::from_slice(&data).map_err(|e| {
-            rusqlite::Error::FromSqlConversionFailure(6, rusqlite::types::Type::Blob, Box::new(e))
-        })?;
-
-        Ok(Message {
-            message_id: row.get(0)?,
-            author: row.get(1)?,
-            conversation: row.get(2)?,
-            body: row.get(3)?,
-            op: row.get(4)?,
-            timestamp: row.get(5)?,
-            receipts,
-            send_status: row.get(7)?,
-            has_attachments: row.get(8)?,
-        })
-    }
 }
 
 #[derive(Default)]
@@ -129,14 +109,15 @@ impl OutboundMessageBuilder {
         self,
         callback: F,
     ) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.store_and_send_db(db, callback)
+        let mut db = Database::get()?;
+        self.store_and_send_db(&mut db, callback);
+        Ok(())
     }
 
     #[cfg(test)]
     pub(crate) fn store_and_send_blocking(self) -> Result<Message, HErr> {
-        let db = Database::get()?;
-        self.store_and_send_blocking_db(db)
+        let mut db = Database::get()?;
+        self.store_and_send_blocking_db(&mut db)
     }
 }
 
@@ -150,8 +131,10 @@ pub(crate) struct InboundMessageBuilder {
     conversation: Option<ConversationId>,
     /// Body of message
     body: Option<MessageBody>,
-    /// Time the message was sent (if outbound) or received at the server (if inbound).
-    timestamp: Option<Time>,
+    /// Time the was received at the server.
+    server_timestamp: Option<Time>,
+    /// Time the message expires
+    expiration: Option<Time>,
     /// Message id of the message being replied to
     op: Option<MsgId>,
     attachments: Vec<attachments::Attachment>,
@@ -179,7 +162,7 @@ impl InboundMessageBuilder {
     }
 
     pub(crate) fn timestamp(&mut self, ts: Time) -> &mut Self {
-        self.timestamp.replace(ts);
+        self.server_timestamp.replace(ts);
         self
     }
 
@@ -190,6 +173,11 @@ impl InboundMessageBuilder {
 
     pub(crate) fn attachments(&mut self, attachments: Vec<attachments::Attachment>) -> &mut Self {
         self.attachments = attachments;
+        self
+    }
+
+    pub(crate) fn expiration(&mut self, expiration: Time) -> &mut Self {
+        self.expiration.replace(expiration);
         self
     }
 
@@ -214,7 +202,7 @@ pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<()
 /// Get message read receipts by message id
 pub fn get_message_receipts(msg_id: &MsgId) -> Result<HashMap<UserId, MessageReceiptStatus>, HErr> {
     let db = Database::get()?;
-    db::get_message_receipts(&db, msg_id)
+    Ok(db::get_receipts(&db, msg_id)?)
 }
 
 pub(crate) fn add_receipt(

@@ -42,8 +42,6 @@ impl NotifHandler {
         match notif {
             NewMsg(msg_id, cid) => {
                 ret_err!(Messages::push(cid, MsgUpdate::Msg(msg_id)));
-
-                ret_err!(Conversations::push(ConvUpdates::NewActivity(cid)));
             }
             MsgReceipt { mid, cid } => {
                 ret_err!(Messages::push(cid, MsgUpdate::Receipt(mid)));

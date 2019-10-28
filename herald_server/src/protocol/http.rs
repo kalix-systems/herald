@@ -5,10 +5,14 @@ impl State {
         use warp::filters::method;
         let route_get = {
             use get::*;
-            mk_filter!(self, keys_of)
-                .or(mk_filter!(self, key_info))
-                .or(mk_filter!(self, keys_exist))
-                .or(mk_filter!(self, users_exist))
+
+            (warp::path("echo")
+                .and(warp::filters::body::concat())
+                .map(|b: warp::body::FullBody| b.bytes().to_vec()))
+            .or(mk_filter!(self, keys_of))
+            .or(mk_filter!(self, key_info))
+            .or(mk_filter!(self, keys_exist))
+            .or(mk_filter!(self, users_exist))
         };
         let route_post = {
             use post::*;

@@ -1,8 +1,11 @@
 [workspace]
 
 members = [
+  "chainmail",
   "herald_common",
   "herald_server",
+  "herald_server/server_store",
+  "herald_server/server_errors",
   "heraldcore",
   "libherald",
   "lazy_pond",

@@ -3,6 +3,19 @@
 
 namespace {
 
+    struct option_bool {
+    public:
+        bool value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_bool>::value, "option_bool must be a POD type.");
+
     struct option_qint64 {
     public:
         qint64 value;
@@ -489,6 +502,8 @@ extern "C" {
     quint32 conversations_data_color(const Conversations::Private*, int);
     bool conversations_set_data_color(Conversations::Private*, int, quint32);
     void conversations_data_conversation_id(const Conversations::Private*, int, QByteArray*, qbytearray_set);
+    quint8 conversations_data_expiration_period(const Conversations::Private*, int);
+    bool conversations_set_data_expiration_period(Conversations::Private*, int, quint8);
     bool conversations_data_matched(const Conversations::Private*, int);
     bool conversations_set_data_matched(Conversations::Private*, int, bool);
     bool conversations_data_muted(const Conversations::Private*, int);
@@ -595,6 +610,22 @@ QByteArray Conversations::conversationId(int row) const
     return b;
 }
 
+quint8 Conversations::expirationPeriod(int row) const
+{
+    return conversations_data_expiration_period(m_d, row);
+}
+
+bool Conversations::setExpirationPeriod(int row, quint8 value)
+{
+    bool set = false;
+    set = conversations_set_data_expiration_period(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
 bool Conversations::matched(int row) const
 {
     return conversations_data_matched(m_d, row);
@@ -687,14 +718,16 @@ QVariant Conversations::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 1:
             return QVariant::fromValue(conversationId(index.row()));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(matched(index.row()));
+            return QVariant::fromValue(expirationPeriod(index.row()));
         case Qt::UserRole + 3:
-            return QVariant::fromValue(muted(index.row()));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 4:
-            return QVariant::fromValue(pairwise(index.row()));
+            return QVariant::fromValue(muted(index.row()));
         case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+            return QVariant::fromValue(pairwise(index.row()));
         case Qt::UserRole + 6:
+            return cleanNullQVariant(QVariant::fromValue(picture(index.row())));
+        case Qt::UserRole + 7:
             return cleanNullQVariant(QVariant::fromValue(title(index.row())));
         }
         break;
@@ -717,11 +750,12 @@ QHash<int, QByteArray> Conversations::roleNames() const {
     QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
     names.insert(Qt::UserRole + 0, "color");
     names.insert(Qt::UserRole + 1, "conversationId");
-    names.insert(Qt::UserRole + 2, "matched");
-    names.insert(Qt::UserRole + 3, "muted");
-    names.insert(Qt::UserRole + 4, "pairwise");
-    names.insert(Qt::UserRole + 5, "picture");
-    names.insert(Qt::UserRole + 6, "title");
+    names.insert(Qt::UserRole + 2, "expirationPeriod");
+    names.insert(Qt::UserRole + 3, "matched");
+    names.insert(Qt::UserRole + 4, "muted");
+    names.insert(Qt::UserRole + 5, "pairwise");
+    names.insert(Qt::UserRole + 6, "picture");
+    names.insert(Qt::UserRole + 7, "title");
     return names;
 }
 QVariant Conversations::headerData(int section, Qt::Orientation orientation, int role) const
@@ -750,21 +784,26 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
             }
         }
         if (role == Qt::UserRole + 2) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setMatched(index.row(), value.value<bool>());
+            if (value.canConvert(qMetaTypeId<quint8>())) {
+                return setExpirationPeriod(index.row(), value.value<quint8>());
             }
         }
         if (role == Qt::UserRole + 3) {
             if (value.canConvert(qMetaTypeId<bool>())) {
+                return setMatched(index.row(), value.value<bool>());
+            }
+        }
+        if (role == Qt::UserRole + 4) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMuted(index.row(), value.value<bool>());
             }
         }
-        if (role == Qt::UserRole + 5) {
+        if (role == Qt::UserRole + 6) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setPicture(index.row(), value.value<QString>());
             }
         }
-        if (role == Qt::UserRole + 6) {
+        if (role == Qt::UserRole + 7) {
             if (!value.isValid() || value.isNull() ||value.canConvert(qMetaTypeId<QString>())) {
                 return setTitle(index.row(), value.value<QString>());
             }
@@ -1220,13 +1259,17 @@ extern "C" {
 extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
-    bool messages_data_data_saved(const Messages::Private*, int);
-    qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
-    bool messages_data_has_attachments(const Messages::Private*, int);
-    bool messages_data_is_reply(const Messages::Private*, int);
+    option_bool messages_data_data_saved(const Messages::Private*, int);
+    option_qint64 messages_data_epoch_timestamp_ms(const Messages::Private*, int);
+    option_qint64 messages_data_expiration_timestamp_ms(const Messages::Private*, int);
+    option_bool messages_data_has_attachments(const Messages::Private*, int);
+    option_bool messages_data_is_head(const Messages::Private*, int);
+    option_bool messages_data_is_reply(const Messages::Private*, int);
+    option_bool messages_data_is_tail(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
-    quint32 messages_data_receipt_status(const Messages::Private*, int);
+    option_quint32 messages_data_receipt_status(const Messages::Private*, int);
+    option_qint64 messages_data_server_timestamp_ms(const Messages::Private*, int);
     void messages_sort(Messages::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
 
     int messages_row_count(const Messages::Private*);
@@ -1310,24 +1353,53 @@ QString Messages::body(int row) const
     return s;
 }
 
-bool Messages::dataSaved(int row) const
+QVariant Messages::dataSaved(int row) const
 {
-    return messages_data_data_saved(m_d, row);
+    QVariant v;
+    v = messages_data_data_saved(m_d, row);
+    return v;
 }
 
-qint64 Messages::epochTimestampMs(int row) const
+QVariant Messages::epochTimestampMs(int row) const
 {
-    return messages_data_epoch_timestamp_ms(m_d, row);
+    QVariant v;
+    v = messages_data_epoch_timestamp_ms(m_d, row);
+    return v;
 }
 
-bool Messages::hasAttachments(int row) const
+QVariant Messages::expirationTimestampMs(int row) const
 {
-    return messages_data_has_attachments(m_d, row);
+    QVariant v;
+    v = messages_data_expiration_timestamp_ms(m_d, row);
+    return v;
 }
 
-bool Messages::isReply(int row) const
+QVariant Messages::hasAttachments(int row) const
 {
-    return messages_data_is_reply(m_d, row);
+    QVariant v;
+    v = messages_data_has_attachments(m_d, row);
+    return v;
+}
+
+QVariant Messages::isHead(int row) const
+{
+    QVariant v;
+    v = messages_data_is_head(m_d, row);
+    return v;
+}
+
+QVariant Messages::isReply(int row) const
+{
+    QVariant v;
+    v = messages_data_is_reply(m_d, row);
+    return v;
+}
+
+QVariant Messages::isTail(int row) const
+{
+    QVariant v;
+    v = messages_data_is_tail(m_d, row);
+    return v;
 }
 
 QByteArray Messages::messageId(int row) const
@@ -1344,9 +1416,18 @@ QByteArray Messages::op(int row) const
     return b;
 }
 
-quint32 Messages::receiptStatus(int row) const
+QVariant Messages::receiptStatus(int row) const
 {
-    return messages_data_receipt_status(m_d, row);
+    QVariant v;
+    v = messages_data_receipt_status(m_d, row);
+    return v;
+}
+
+QVariant Messages::serverTimestampMs(int row) const
+{
+    QVariant v;
+    v = messages_data_server_timestamp_ms(m_d, row);
+    return v;
 }
 
 QVariant Messages::data(const QModelIndex &index, int role) const
@@ -1356,23 +1437,31 @@ QVariant Messages::data(const QModelIndex &index, int role) const
     case 0:
         switch (role) {
         case Qt::UserRole + 0:
-            return QVariant::fromValue(author(index.row()));
+            return cleanNullQVariant(QVariant::fromValue(author(index.row())));
         case Qt::UserRole + 1:
             return cleanNullQVariant(QVariant::fromValue(body(index.row())));
         case Qt::UserRole + 2:
-            return QVariant::fromValue(dataSaved(index.row()));
+            return dataSaved(index.row());
         case Qt::UserRole + 3:
-            return QVariant::fromValue(epochTimestampMs(index.row()));
+            return epochTimestampMs(index.row());
         case Qt::UserRole + 4:
-            return QVariant::fromValue(hasAttachments(index.row()));
+            return expirationTimestampMs(index.row());
         case Qt::UserRole + 5:
-            return QVariant::fromValue(isReply(index.row()));
+            return hasAttachments(index.row());
         case Qt::UserRole + 6:
-            return QVariant::fromValue(messageId(index.row()));
+            return isHead(index.row());
         case Qt::UserRole + 7:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return isReply(index.row());
         case Qt::UserRole + 8:
-            return QVariant::fromValue(receiptStatus(index.row()));
+            return isTail(index.row());
+        case Qt::UserRole + 9:
+            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
+        case Qt::UserRole + 10:
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+        case Qt::UserRole + 11:
+            return receiptStatus(index.row());
+        case Qt::UserRole + 12:
+            return serverTimestampMs(index.row());
         }
         break;
     }
@@ -1396,11 +1485,15 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 1, "body");
     names.insert(Qt::UserRole + 2, "dataSaved");
     names.insert(Qt::UserRole + 3, "epochTimestampMs");
-    names.insert(Qt::UserRole + 4, "hasAttachments");
-    names.insert(Qt::UserRole + 5, "isReply");
-    names.insert(Qt::UserRole + 6, "messageId");
-    names.insert(Qt::UserRole + 7, "op");
-    names.insert(Qt::UserRole + 8, "receiptStatus");
+    names.insert(Qt::UserRole + 4, "expirationTimestampMs");
+    names.insert(Qt::UserRole + 5, "hasAttachments");
+    names.insert(Qt::UserRole + 6, "isHead");
+    names.insert(Qt::UserRole + 7, "isReply");
+    names.insert(Qt::UserRole + 8, "isTail");
+    names.insert(Qt::UserRole + 9, "messageId");
+    names.insert(Qt::UserRole + 10, "op");
+    names.insert(Qt::UserRole + 11, "receiptStatus");
+    names.insert(Qt::UserRole + 12, "serverTimestampMs");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const

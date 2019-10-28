@@ -1,11 +1,10 @@
 use super::*;
+use crate::message::MessageTime;
+use rusqlite::named_params;
 
 impl ConversationBuilder {
     ///Adds conversation
-    pub(crate) fn add_db(
-        &mut self,
-        conn: &mut rusqlite::Connection,
-    ) -> Result<ConversationId, HErr> {
+    pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
         let id = match self.conversation_id {
             Some(id) => id.to_owned(),
             None => {
@@ -17,48 +16,26 @@ impl ConversationBuilder {
         let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         let pairwise = self.pairwise.unwrap_or(false);
         let muted = self.muted.unwrap_or(false);
+        let expiration_period = self.expiration_period.unwrap_or_default();
 
-        conn.execute(
+        conn.execute_named(
             include_str!("sql/add_conversation.sql"),
-            params![
-                id,
-                self.title,
-                self.picture,
-                color,
-                pairwise,
-                muted,
-                Time::now()
-            ],
+            named_params! {
+               "@conversation_id": id,
+                "@title": self.title,
+                "@picture": self.picture,
+                "@color": color,
+                "@pairwise": pairwise,
+                "@muted": muted,
+                "@last_active_ts": Time::now(),
+                "@expiration_period": expiration_period
+            },
         )?;
         Ok(id)
     }
 
     pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-
-        tx.execute(
-            include_str!("sql/add_conversation.sql"),
-            params![
-                id,
-                self.title,
-                self.picture,
-                color,
-                pairwise,
-                muted,
-                Time::now()
-            ],
-        )?;
-        Ok(id)
+        self.add_db(tx)
     }
 }
 
@@ -80,7 +57,37 @@ pub(crate) fn conversation_messages(
     conversation_id: &ConversationId,
 ) -> Result<Vec<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
-    let res = stmt.query_map(&[conversation_id], Message::from_db)?;
+    let res = stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            let message_id = row.get("msg_id")?;
+            let receipts = crate::message::db::get_receipts(conn, &message_id)?;
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
+            Ok(Message {
+                message_id,
+                author: row.get("author")?,
+                conversation: *conversation_id,
+                body: row.get("body")?,
+                op,
+                time,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                receipts,
+            })
+        },
+    )?;
 
     let mut messages = Vec::new();
     for msg in res {
@@ -99,6 +106,20 @@ pub(crate) fn meta(
         include_str!("sql/get_conversation_meta.sql"),
         params![conversation_id],
         ConversationMeta::from_db,
+    )?)
+}
+
+/// Gets expiration period for a conversation
+pub(crate) fn expiration_period(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<ExpirationPeriod, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/expiration_period.sql"))?;
+    Ok(stmt.query_row_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| row.get("expiration_period"),
     )?)
 }
 
@@ -198,4 +219,18 @@ pub(crate) fn get_pairwise_conversations(
         .map(|uid| stmt.query_row(params![uid], |row| Ok(row.get(0)?)))
         .map(|res| Ok(res?))
         .collect()
+}
+
+pub(crate) fn set_expiration_period(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+    expiration_period: ExpirationPeriod,
+) -> Result<(), HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/update_expiration_period.sql"))?;
+
+    stmt.execute_named(named_params! {
+        "@conversation_id": conversation_id,
+        "@expiration_period": expiration_period,
+    })?;
+    Ok(())
 }

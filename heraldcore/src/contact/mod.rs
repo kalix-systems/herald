@@ -196,8 +196,6 @@ pub struct ContactBuilder {
     id: UserId,
     /// Contact name
     name: Option<String>,
-    /// Path of profile picture
-    profile_picture: Option<String>,
     /// User set color for user
     color: Option<u32>,
     /// Indicates whether user is archived
@@ -213,7 +211,6 @@ impl ContactBuilder {
     pub fn new(id: UserId) -> Self {
         Self {
             id,
-            profile_picture: None,
             name: None,
             color: None,
             status: None,
@@ -225,12 +222,6 @@ impl ContactBuilder {
     /// Sets the name of the contact being built.
     pub fn name(mut self, name: String) -> Self {
         self.name = Some(name);
-        self
-    }
-
-    /// Sets the profile picture of the contact being built.
-    pub fn profile_picture(mut self, profile_picture: String) -> Self {
-        self.profile_picture = Some(profile_picture);
         self
     }
 

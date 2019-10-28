@@ -186,8 +186,6 @@ fn set_get_meta() {
     let all_meta = super::db::all_meta(&conn).expect(womp!("Failed to get all metadata"));
 
     assert_eq!(all_meta.len(), 2);
-
-    assert_eq!(all_meta[1].conversation_id, conv_id2);
 }
 
 #[test]
@@ -331,7 +329,8 @@ fn convo_message_order() {
 
     let conv_id1 = ConversationId::from([0; 32]);
     let author = "Hello".try_into().unwrap();
-    let conv = ContactBuilder::new(author)
+
+    let contact = ContactBuilder::new(author)
         .add_db(&mut conn)
         .expect(womp!());
 
@@ -341,6 +340,11 @@ fn convo_message_order() {
         .expect(womp!("failed to add conversation"));
 
     let mid = [1; 32].into();
+
+    // this is our time resolution
+    std::thread::sleep(std::time::Duration::from_millis(1));
+
+    // conv_id1 should be the most recent conversation
     let mut builder = InboundMessageBuilder::default();
     builder
         .id(mid)
@@ -352,5 +356,5 @@ fn convo_message_order() {
 
     let meta = super::db::all_meta(&conn).expect(womp!("Failed to get metadata"));
 
-    assert_eq!(meta[0].conversation_id, conv.pairwise_conversation);
+    assert_eq!(meta[1].conversation_id, contact.pairwise_conversation);
 }

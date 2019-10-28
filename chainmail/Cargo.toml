@@ -1,0 +1,27 @@
+[package]
+name = "chainmail"
+version = "0.2.0"
+license = "AGPL-3.0"
+authors = ["theseriousadult <jack@kalix.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.sodiumoxide]
+version = "^0.2.5"
+default-features = false
+features = ["std"]
+
+[dependencies.serde]
+version = "1.0"
+features = ["derive"]
+optional = true
+
+[dependencies.serde_bytes]
+version = "0.11"
+optional = true
+
+[features]
+default = ["serde_support"]
+serde_support = ["serde", "serde_bytes", "sodiumoxide/serde"]
+use-pkg-config = ["sodiumoxide/use-pkg-config"]

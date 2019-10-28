@@ -4,6 +4,7 @@ use crate::{
     womp,
 };
 use serial_test_derive::serial;
+use std::convert::TryInto;
 use std::str::FromStr;
 
 #[test]
@@ -19,7 +20,7 @@ fn make_attachment() {
 }
 
 #[test]
-#[serial]
+#[serial(attach)]
 fn outbound_message_attachment() {
     Database::reset_all().expect(womp!());
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
@@ -70,6 +71,58 @@ fn inbound_message_attachment() {
     let meta = meta.into_flat_strings().expect(womp!());
 
     assert_eq!(meta.len(), 1);
+
+    std::fs::remove_dir_all("attachments").expect(womp!());
+}
+
+#[test]
+#[serial(attach)]
+fn delete_message_with_attachment() {
+    let mut conn = Database::in_memory().expect(womp!());
+
+    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+
+    let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
+    let attach = Attachment::new(&path).expect(womp!());
+    let attach_path = Path::new("attachments").join(attach.hash_dir());
+
+    let conv = receiver.pairwise_conversation;
+
+    let mid0 = [0; 32].into();
+
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid0)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .attachments(vec![(&attach).clone()])
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    let mid1 = [1; 32].into();
+
+    let mut builder = InboundMessageBuilder::default();
+    builder
+        .id(mid1)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .attachments(vec![(&attach).clone()])
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    builder.store_db(&mut conn).expect(womp!());
+
+    assert!(attach_path.exists());
+
+    crate::message::db::delete_message(&conn, &mid0).expect(womp!());
+
+    assert!(attach_path.exists());
+
+    crate::message::db::delete_message(&conn, &mid1).expect(womp!());
+
+    assert!(!attach_path.exists());
 
     std::fs::remove_dir_all("attachments").expect(womp!());
 }

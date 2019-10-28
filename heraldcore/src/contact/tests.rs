@@ -39,27 +39,6 @@ fn get_contact_name() {
 }
 
 #[test]
-fn contact_profile_picture() {
-    let mut conn = Database::in_memory().expect(womp!());
-
-    let id = "HelloWorld".try_into().expect(womp!());
-    let profile_picture = "picture";
-
-    ContactBuilder::new(id)
-        .profile_picture(profile_picture.into())
-        .add_db(&mut conn)
-        .expect("Failed to add contact");
-
-    assert_eq!(
-        db::profile_picture(&conn, id)
-            .expect("Failed to get profile picture")
-            .expect(womp!())
-            .as_str(),
-        profile_picture
-    );
-}
-
-#[test]
 #[serial(fs)]
 fn fs_profile_picture() {
     let mut conn = Database::in_memory().expect(womp!());

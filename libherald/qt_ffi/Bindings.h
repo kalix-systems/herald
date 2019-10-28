@@ -185,6 +185,8 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE QByteArray conversationId(int row) const;
+    Q_INVOKABLE quint8 expirationPeriod(int row) const;
+    Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
     Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE bool muted(int row) const;
@@ -442,13 +444,17 @@ public:
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
-    Q_INVOKABLE bool dataSaved(int row) const;
-    Q_INVOKABLE qint64 epochTimestampMs(int row) const;
-    Q_INVOKABLE bool hasAttachments(int row) const;
-    Q_INVOKABLE bool isReply(int row) const;
+    Q_INVOKABLE QVariant dataSaved(int row) const;
+    Q_INVOKABLE QVariant epochTimestampMs(int row) const;
+    Q_INVOKABLE QVariant expirationTimestampMs(int row) const;
+    Q_INVOKABLE QVariant hasAttachments(int row) const;
+    Q_INVOKABLE QVariant isHead(int row) const;
+    Q_INVOKABLE QVariant isReply(int row) const;
+    Q_INVOKABLE QVariant isTail(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
-    Q_INVOKABLE quint32 receiptStatus(int row) const;
+    Q_INVOKABLE QVariant receiptStatus(int row) const;
+    Q_INVOKABLE QVariant serverTimestampMs(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()

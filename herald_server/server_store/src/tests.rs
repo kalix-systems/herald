@@ -24,6 +24,11 @@ macro_rules! a {
     };
 }
 
+async fn get_client() -> Result<Conn, Error> {
+    let pool = Pool::new();
+    pool.get().await
+}
+
 #[test]
 #[serial]
 fn device_exists() {

@@ -3,7 +3,7 @@ use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
     errors::HErr,
-    types::ConversationId,
+    types::{ConversationId, ExpirationPeriod},
     utils::SearchPattern,
 };
 use im_rc::vector::Vector;
@@ -94,6 +94,25 @@ impl ConversationsTrait for Conversations {
             .inner
             .conversation_id
             .as_slice()
+    }
+
+    fn expiration_period(&self, index: usize) -> u8 {
+        ret_none!(self.list.get(index), ExpirationPeriod::default() as u8)
+            .inner
+            .expiration_period as u8
+    }
+
+    fn set_expiration_period(&mut self, index: usize, val: u8) -> bool {
+        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
+        let val = val.into();
+        ret_err!(
+            conversation::set_expiration_period(&meta.conversation_id, val),
+            false
+        );
+
+        meta.expiration_period = val;
+
+        true
     }
 
     fn muted(&self, index: usize) -> bool {
