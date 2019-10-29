@@ -62,8 +62,6 @@ Flickable {
                 readonly property bool outbound: author === config.configId
 
                 spacing: CmnCfg.margin
-                // message is from same sender as the next
-                property bool head: true
                 // column is most correct to resize for extra content
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -88,9 +86,11 @@ Flickable {
                     CB.ReplyBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        opBody: op !== undefined ? ownedConversation.messageBodyById(op) : ""
+                        opBody: op !== undefined ? ownedConversation.messageBodyById(
+                                                       op) : ""
                         receiptImage: proxyReceiptImage
-                        opName: op !== undefined ? ownedConversation.messageAuthorById(op) : ""
+                        opName: op !== undefined ? ownedConversation.messageAuthorById(
+                                                       op) : ""
                         opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                          opName)]
                         authorName: authName
@@ -115,7 +115,7 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    opacity: head && !outbound ? 1 : 0
+                    opacity: isTail && !outbound ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom
@@ -142,7 +142,7 @@ Flickable {
                 AvatarMain {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
-                    opacity: head && outbound ? 1 : 0
+                    opacity: isTail && outbound ? 1 : 0
                     size: 32
                     anchors {
                         bottom: parent.bottom
