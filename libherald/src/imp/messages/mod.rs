@@ -99,6 +99,9 @@ impl MessagesTrait for Messages {
             let conversation_id = ret_err!(ConversationId::try_from(id));
 
             EMITTERS.insert(conversation_id, self.emit().clone());
+            // remove left over channel from previous session
+            RXS.remove(&conversation_id);
+            TXS.remove(&conversation_id);
 
             self.conversation_id = Some(conversation_id);
             self.emit.conversation_id_changed();
