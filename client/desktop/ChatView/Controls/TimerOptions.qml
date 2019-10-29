@@ -7,9 +7,16 @@ import QtQuick.Controls 2.5
 import Qt.labs.platform 1.0
 
 Menu {
-    property string chosenTimer: "qrc:/timer-icons/1w.svg"
+    property int chosenPeriod: conversationItem.expirationPeriod
+    property string chosenTimer: timerModel.get(chosenPeriod).path
     ListModel {
         id: timerModel
+
+        ListElement {
+            name: "Off"
+            path: "qrc:/timer-icons/off.svg"
+        }
+
         ListElement {
             name: "1 minute"
             path: "qrc:/timer-icons/1min.svg"
@@ -43,7 +50,7 @@ Menu {
         MenuItem {
             text: name
             onTriggered: {
-                chosenTimer = path
+                conversationItem.expirationPeriod = index
             }
         }
 

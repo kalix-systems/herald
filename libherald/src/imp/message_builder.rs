@@ -181,6 +181,9 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn remove_last(&mut self) {
+        if self.inner.attachments.is_empty() {
+            return;
+        }
         self.model.begin_remove_rows(
             self.inner.attachments.len().saturating_sub(1),
             self.inner.attachments.len().saturating_sub(1),
