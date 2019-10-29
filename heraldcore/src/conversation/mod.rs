@@ -141,8 +141,8 @@ impl ConversationBuilder {
 
     /// Adds conversation
     pub fn add(&mut self) -> Result<ConversationId, HErr> {
-        let mut db = Database::get()?;
-        self.add_db(&mut db)
+        let db = Database::get()?;
+        self.add_db(&db)
     }
 }
 

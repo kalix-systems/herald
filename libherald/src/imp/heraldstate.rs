@@ -12,6 +12,12 @@ pub struct HeraldState {
 impl HeraldStateTrait for HeraldState {
     fn new(emit: HeraldStateEmitter) -> Self {
         let config_init = if Config::static_id().is_ok() {
+            // If this fails, it's because a thread couldn't be spawned.
+            // This implies the OS is in a very bad place.
+            // We should possibly report this error and continue anyway.
+            drop(gc::init(move |update| {
+                gc_handler(update);
+            }));
             true
         } else {
             // If this fails, the file system is in a very bad place.
@@ -22,12 +28,6 @@ impl HeraldStateTrait for HeraldState {
             // to the UI.
             abort_err!(db::init(), "Couldn't setup database");
 
-            // If this fails, it's because a thread couldn't be spawned.
-            // This implies the OS is in a very bad place.
-            // We should possibly report this error and continue anyway.
-            drop(gc::init(move |update| {
-                gc_handler(update);
-            }));
             false
         };
 
@@ -53,10 +53,10 @@ fn gc_handler(update: gc::GCUpdate) {
     use crate::shared::AddressedBus;
     use gc::GCUpdate::*;
     match update {
-        StaleConversations(cids) => {
-            for cid in cids {
+        StaleConversations(convs) => {
+            for (cid, mids) in convs {
                 // TODO: push error to error queue
-                drop(Messages::push(cid, MsgUpdate::ExpiredMessages));
+                drop(Messages::push(cid, MsgUpdate::ExpiredMessages(mids)));
             }
         }
         GCError(e) => {

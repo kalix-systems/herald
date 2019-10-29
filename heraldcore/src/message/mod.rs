@@ -212,8 +212,8 @@ pub(crate) fn add_receipt(
     recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
-    let mut db = Database::get()?;
-    db::add_receipt(&mut db, msg_id, recip, receipt_status)
+    let db = Database::get()?;
+    db::add_receipt(&db, msg_id, recip, receipt_status)
 }
 
 /// Gets messages by `MessageSendStatus`

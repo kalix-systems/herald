@@ -188,7 +188,7 @@ impl OutboundMessageBuilder {
         let author = e!(crate::config::db::static_id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
-        let expiration = match expiration_period.to_millis() {
+        let expiration = match expiration_period.into_millis() {
             Some(period) => Some(Time(timestamp.0 + period.0)),
             None => None,
         };
@@ -362,7 +362,7 @@ impl InboundMessageBuilder {
         let time = MessageTime {
             insertion: Time::now(),
             server: Some(server_timestamp),
-            expiration: expiration,
+            expiration,
         };
 
         let mut tx = conn.transaction()?;

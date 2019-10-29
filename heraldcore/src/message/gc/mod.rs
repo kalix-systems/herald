@@ -10,16 +10,18 @@ mod tests;
 /// Currently set to 10 seconds.
 const POLL_INTERVAL: u64 = 10 * 60 * 1000;
 
+type ConvMessages = HashMap<ConversationId, Vec<MsgId>>;
+
 /// Values passed into the callback provided to `init`
 pub enum GCUpdate {
     /// A vector of conversations with unexpired messages
-    StaleConversations(Vec<ConversationId>),
+    StaleConversations(ConvMessages),
     /// An error has occured.
     GCError(HErr),
 }
 
 /// Returns a vector of conversation id's with expired messages.
-pub fn get_stale_conversations() -> Result<Vec<ConversationId>, HErr> {
+pub fn get_stale_conversations() -> Result<ConvMessages, HErr> {
     let db = Database::get()?;
     db::get_stale_conversations(&db)
 }
@@ -45,7 +47,10 @@ pub fn init<F: FnMut(GCUpdate) + Send + 'static>(mut f: F) -> Result<(), HErr> {
         loop {
             match get_stale_conversations() {
                 Ok(cids) => {
-                    f(StaleConversations(cids));
+                    // only send update if not empty
+                    if !cids.is_empty() {
+                        f(StaleConversations(cids));
+                    }
                 }
                 Err(e) => {
                     f(GCError(e));

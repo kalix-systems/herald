@@ -33,7 +33,7 @@ fn get_and_delete_stale() {
     let stale = db::get_stale_conversations(&conn).expect(womp!());
 
     assert_eq!(stale.len(), 1);
-    assert_eq!(stale[0], conv);
+    assert_eq!(stale.get(&conv).expect(womp!()), &[msg_id]);
 
     db::delete_expired(&conn).expect(womp!());
 
