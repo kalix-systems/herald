@@ -18,7 +18,7 @@ services:
     tty: true
     volumes:
       - pg-data:/var/lib/postgresql/data
-      - "/var/run/postgresql:/var/run/postgresql"
+      - /var/run/postgresql:/var/run/postgresql
 
 volumes:
   pg-data:
