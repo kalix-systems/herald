@@ -11,7 +11,7 @@ pub async fn login<T>(
 
     let bytes = UQ::new();
 
-    let g = read_msg::<SignAs>(rrx).await?.0;
+    let g: GlobalId = read_msg::<SignAs>(rrx).await?.0;
 
     if active.contains_key(&g.did) {
         write_msg(&SignAsResponse::SessionExists, wtx, rrx).await?;
@@ -27,7 +27,7 @@ pub async fn login<T>(
         write_msg(&res, wtx, rrx).await?;
     };
 
-    let s = read_msg::<LoginToken>(rrx).await?.0;
+    let s: sign::Signature = read_msg::<LoginToken>(rrx).await?.0;
 
     if !sign::verify_detached(&s, bytes.as_ref(), &g.did) {
         write_msg(&LoginTokenResponse::BadSig, wtx, rrx).await?;
