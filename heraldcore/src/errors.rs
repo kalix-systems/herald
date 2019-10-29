@@ -2,7 +2,6 @@ use crate::types::{EmptyMessageBody, MissingInboundMessageField, MissingOutbound
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;
-use lazy_pond::LazyError;
 use regex;
 use std::fmt;
 
@@ -37,8 +36,6 @@ pub enum HErr {
     HeraldError(String),
     /// Database error.
     DatabaseError(rusqlite::Error),
-    /// Error from connection pool
-    LazyPondError,
     /// Invalid `UserId`
     InvalidUserId,
     /// Invalid `MsgId`
@@ -93,7 +90,6 @@ impl fmt::Display for HErr {
             RegexError(e) => write!(f, "RegexError: {}", e),
             InvalidMessageId => write!(f, "InvalidMessageId"),
             InvalidConversationId => write!(f, "InvalidConversationId"),
-            LazyPondError => write!(f, "LazyPondError"),
             ChainError(e) => write!(f, "ChainError: {}", e),
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
@@ -152,12 +148,6 @@ herr!(std::ffi::OsString, BadPath);
 impl From<EmptyMessageBody> for HErr {
     fn from(_: EmptyMessageBody) -> Self {
         HErr::EmptyMessageBody
-    }
-}
-
-impl From<LazyError> for HErr {
-    fn from(_: LazyError) -> Self {
-        HErr::LazyPondError
     }
 }
 
