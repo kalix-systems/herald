@@ -110,6 +110,10 @@ impl ConversationsTrait for Conversations {
             false
         );
 
+        let update = conversation::settings::SettingsUpdate::Expiration(period);
+        // TODO this should not block
+        ret_err!(update.send_update(&meta.conversation_id), false);
+
         meta.expiration_period = period;
 
         true

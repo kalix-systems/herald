@@ -13,6 +13,13 @@ impl SettingsUpdate {
         let conn = Database::get()?;
         self.apply_db(&conn, cid)
     }
+
+    /// Sends the update to the conversation
+    pub fn send_update(&self, cid: &ConversationId) -> Result<(), HErr> {
+        use crate::network::send_conversation_settings_update;
+
+        send_conversation_settings_update(*cid, *self)
+    }
 }
 
 pub(crate) mod db {

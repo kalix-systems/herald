@@ -476,6 +476,13 @@ pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> R
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 
+pub(crate) fn send_conversation_settings_update(
+    cid: ConversationId,
+    update: settings::SettingsUpdate,
+) -> Result<(), HErr> {
+    send_cmessage(cid, &ConversationMessageBody::Settings(update))
+}
+
 fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
