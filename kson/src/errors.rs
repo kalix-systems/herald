@@ -13,7 +13,7 @@ pub struct Error {
 pub enum Variant {}
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(&self, _f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.variant {}
     }
 }
