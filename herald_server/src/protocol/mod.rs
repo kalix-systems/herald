@@ -47,17 +47,17 @@ impl State {
     }
 
     pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
-        let mut store = self.new_connection().await?;
+        let mut store: Conn = self.new_connection().await?;
 
         // all the channels we'll need for plumbing
         // first we split the websocket
         let (mut wtx, mut wrx) = ws.split();
         // bytevec messages received from the socket
-        let (mut rtx, mut rrx) = channel();
+        let (mut rtx, mut rrx) = channel::<Vec<u8>>();
         // push emitter which will be stored in the active sessions dashmap
-        let (ptx, prx) = channel();
+        let (ptx, prx) = channel::<()>();
         // session-close emitter
-        let (close, closed) = oneshot::channel();
+        let (close, closed) = oneshot::channel::<()>();
 
         // on graceful exit, notify runtime to close channel
         // we set things up this way so that the rrx channel
@@ -73,7 +73,7 @@ impl State {
             close.send(()).ok();
         });
 
-        let gid = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
+        let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
         self.active.insert(gid.did, ptx);
 
@@ -89,7 +89,7 @@ impl State {
             .await
             .is_ok()
         {
-            let mut prx = prx.timeout(Duration::from_secs(60));
+            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
             drop(
                 self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                     .await,
@@ -103,21 +103,21 @@ impl State {
 
     pub async fn push_users(&self, req: push_users::Req) -> Result<push_users::Res, Error> {
         let push_users::Req { to, exc, msg } = req;
-        let msg = Push {
+        let msg: Push = Push {
             tag: PushTag::User,
             timestamp: Time::now(),
             msg,
         };
 
-        let mut missing_users = Vec::new();
-        let mut to_devs = Vec::new();
-        let mut con = self.new_connection().await?;
+        let mut missing_users: Vec<UserId> = Vec::new();
+        let mut to_devs: Vec<sig::PublicKey> = Vec::new();
+        let mut conn: Conn = self.new_connection().await?;
 
         for user in to {
-            if !con.user_exists(&user).await? {
+            if !conn.user_exists(&user).await? {
                 missing_users.push(user);
             } else {
-                for dev in con.valid_keys(&user).await? {
+                for dev in conn.valid_keys(&user).await? {
                     if dev != exc {
                         to_devs.push(dev);
                     }
@@ -128,7 +128,7 @@ impl State {
         Ok(if !missing_users.is_empty() {
             push_users::Res::Missing(missing_users)
         } else {
-            self.send_push_to_devices(&mut con, to_devs, msg).await?;
+            self.send_push_to_devices(&mut conn, to_devs, msg).await?;
             push_users::Res::Success
         })
     }
@@ -141,11 +141,11 @@ impl State {
             msg,
         };
 
-        let mut con = self.new_connection().await?;
-        let mut missing_devs = Vec::new();
+        let mut conn = self.new_connection().await?;
+        let mut missing_devs: Vec<sig::PublicKey> = Vec::new();
 
         for dev in to.iter() {
-            if !con.device_exists(dev).await? {
+            if !conn.device_exists(dev).await? {
                 missing_devs.push(*dev);
             }
         }
@@ -153,7 +153,7 @@ impl State {
         Ok(if !missing_devs.is_empty() {
             push_devices::Res::Missing(missing_devs)
         } else {
-            self.send_push_to_devices(&mut con, to, msg).await?;
+            self.send_push_to_devices(&mut conn, to, msg).await?;
             push_devices::Res::Success
         })
     }
@@ -188,11 +188,11 @@ impl State {
         F: FnOnce(Conn, I) -> Fut,
         Fut: Future<Output = Result<O, Error>>,
     {
-        let con = self.new_connection().await?;
+        let con: Conn = self.new_connection().await?;
         let buf: Vec<u8> = req.collect();
-        let req = serde_cbor::from_slice(&buf)?;
-        let res = f(con, req).await?;
-        let res_ser = serde_cbor::to_vec(&res)?;
+        let req: I = serde_cbor::from_slice(&buf)?;
+        let res: O = f(con, req).await?;
+        let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }
 
@@ -209,9 +209,9 @@ impl State {
         Fut: Future<Output = Result<O, Error>>,
     {
         let buf: Vec<u8> = req.collect();
-        let req = serde_cbor::from_slice(&buf)?;
-        let res = f(self, req).await?;
-        let res_ser = serde_cbor::to_vec(&res)?;
+        let req: I = serde_cbor::from_slice(&buf)?;
+        let res: O = f(self, req).await?;
+        let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
         Ok(res_ser)
     }
 
@@ -246,7 +246,7 @@ async fn catchup(
     use catchup::*;
 
     loop {
-        let pending = s.get_pending(did, CHUNK_SIZE).await?;
+        let pending: Vec<Push> = s.get_pending(did, CHUNK_SIZE).await?;
         if pending.is_empty() {
             break;
         } else {
