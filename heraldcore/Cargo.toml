@@ -24,9 +24,6 @@ path             = "../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
-[dependencies.lazy_pond]
-path = "../lazy_pond"
-
 [dependencies.chainmail]
 path = "../chainmail"
 

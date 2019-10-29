@@ -1,5 +1,4 @@
-use crate::{abort_err, errors::*, utils::SearchPattern};
-use lazy_pond::*;
+use crate::{errors::*, utils::SearchPattern};
 use lazy_static::*;
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
@@ -7,8 +6,11 @@ use std::{
     path::Path,
 };
 
+mod pool;
+use pool::*;
+
 lazy_static! {
-    static ref DB_POOL: LazyPond<Database> = LazyPond::new(Some(32));
+    static ref DB_POOL: Pool = Pool::new();
 }
 
 lazy_static! {
@@ -26,8 +28,8 @@ lazy_static! {
 pub(crate) struct Database(Connection);
 
 impl Database {
-    pub(crate) fn get<'a>() -> Result<Wrapper<'a, Database>, HErr> {
-        DB_POOL.get().map_err(|_| HErr::LazyPondError)
+    pub(crate) fn get() -> Result<Wrapper, HErr> {
+        DB_POOL.get()
     }
 }
 
@@ -49,7 +51,7 @@ impl DerefMut for Database {
 pub fn init() -> Result<(), HErr> {
     let db = Database::get()?;
 
-    db.execute_batch(include_str!("sql/create_all.sql"))?;
+    db.execute_batch(include_str!("../sql/create_all.sql"))?;
 
     Ok(())
 }
@@ -104,7 +106,7 @@ impl Database {
     #[cfg(test)]
     pub(crate) fn in_memory() -> Result<Self, HErr> {
         let conn = Connection::open_in_memory()?;
-        conn.execute_batch(include_str!("sql/create_all.sql"))?;
+        conn.execute_batch(include_str!("../sql/create_all.sql"))?;
         Self::setup(conn)
     }
 
@@ -115,18 +117,11 @@ impl Database {
         let tx = db.transaction()?;
 
         // drop
-        tx.execute_batch(include_str!("sql/drop_all.sql"))?;
+        tx.execute_batch(include_str!("../sql/drop_all.sql"))?;
 
         // create
-        tx.execute_batch(include_str!("sql/create_all.sql"))?;
+        tx.execute_batch(include_str!("../sql/create_all.sql"))?;
         tx.commit()?;
         Ok(())
-    }
-}
-
-impl Default for Database {
-    /// Establish connection with canonical database.
-    fn default() -> Self {
-        abort_err!(Self::new(DB_PATH.as_str()))
     }
 }
