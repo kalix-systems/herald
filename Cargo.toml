@@ -9,5 +9,6 @@ members = [
   "heraldcore",
   "libherald",
   "lazy_pond",
-  "libherald/qt_bindgen"
+  "libherald/qt_bindgen",
+  "kson"
 ]
