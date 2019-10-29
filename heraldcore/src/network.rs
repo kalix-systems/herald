@@ -1,6 +1,7 @@
 use crate::{
     chainkeys,
     config::Config,
+    conversation::settings,
     errors::HErr::{self, *},
     pending,
     types::*,
@@ -56,6 +57,8 @@ pub enum Notification {
     AddContactResponse(ConversationId, UserId, bool),
     /// Response to request to join conversation.
     AddConversationResponse(ConversationId, UserId, bool),
+    /// The conversation settings have been updated
+    Settings(ConversationId, settings::SettingsUpdate),
 }
 
 mod helper {
@@ -430,6 +433,9 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
                 crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
                 ev.notifications
                     .push(Notification::MsgReceipt { mid: ack.of, cid });
+            }
+            Settings(update) => {
+                update.apply(&cid)?;
             }
         }
     }

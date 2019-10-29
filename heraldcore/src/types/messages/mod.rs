@@ -493,6 +493,8 @@ pub enum ConversationMessageBody {
     Msg(cmessages::Msg),
     /// An acknowledgement of a normal message.
     Ack(cmessages::Ack),
+    /// An update to the conversation settings
+    Settings(crate::conversation::settings::SettingsUpdate),
 }
 
 impl FromSql for ConversationMessageBody {

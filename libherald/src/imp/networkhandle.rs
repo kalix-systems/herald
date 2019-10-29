@@ -69,6 +69,9 @@ impl NotifHandler {
                 use crate::imp::members::{shared::*, Members};
                 ret_err!(Members::push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
+            Settings(cid, settings) => {
+                ret_err!(Conversations::push(ConvUpdates::Settings(cid, settings)));
+            }
         }
     }
     fn new(emit: Emitter, _effects_flags: Arc<EffectsFlags>) -> Self {

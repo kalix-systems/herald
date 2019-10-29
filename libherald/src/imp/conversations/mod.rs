@@ -233,6 +233,7 @@ impl ConversationsTrait for Conversations {
 
     fn fetch_more(&mut self) {
         use ConvUpdates::*;
+        // TODO these ret_err's should probably just push to the error queue
         for update in CONV_BUS.rx.try_iter() {
             match update {
                 NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
@@ -253,6 +254,20 @@ impl ConversationsTrait for Conversations {
                     let conv = self.list.remove(pos);
                     self.list.push_front(conv);
                     self.model.end_move_rows();
+                }
+                Settings(cid, settings) => {
+                    let pos = ret_none!(self
+                        .list
+                        .iter()
+                        .position(|c| c.inner.conversation_id == cid));
+
+                    use conversation::settings::SettingsUpdate;
+                    match settings {
+                        SettingsUpdate::Expiration(period) => {
+                            self.list[pos].inner.expiration_period = period;
+                            self.model.data_changed(pos, pos);
+                        }
+                    }
                 }
             }
         }
