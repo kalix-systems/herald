@@ -3,6 +3,8 @@ use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 pub(crate) mod db;
+/// Functionality related to changes in conversation settings
+pub mod settings;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
@@ -195,7 +197,7 @@ pub fn set_picture(
 /// Sets expiration period for a conversation
 pub fn set_expiration_period(
     conversation_id: &ConversationId,
-    expiration_period: ExpirationPeriod,
+    expiration_period: &ExpirationPeriod,
 ) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_expiration_period(&db, conversation_id, expiration_period)

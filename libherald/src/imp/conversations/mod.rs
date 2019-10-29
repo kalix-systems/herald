@@ -102,15 +102,15 @@ impl ConversationsTrait for Conversations {
             .expiration_period as u8
     }
 
-    fn set_expiration_period(&mut self, index: usize, val: u8) -> bool {
+    fn set_expiration_period(&mut self, index: usize, period: u8) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let val = val.into();
+        let period = period.into();
         ret_err!(
-            conversation::set_expiration_period(&meta.conversation_id, val),
+            conversation::set_expiration_period(&meta.conversation_id, &period),
             false
         );
 
-        meta.expiration_period = val;
+        meta.expiration_period = period;
 
         true
     }

@@ -224,7 +224,7 @@ pub(crate) fn get_pairwise_conversations(
 pub(crate) fn set_expiration_period(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    expiration_period: ExpirationPeriod,
+    expiration_period: &ExpirationPeriod,
 ) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/update_expiration_period.sql"))?;
 
