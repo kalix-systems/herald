@@ -436,6 +436,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             }
             Settings(update) => {
                 update.apply(&cid)?;
+                ev.notifications.push(Notification::Settings(cid, update));
             }
         }
     }
