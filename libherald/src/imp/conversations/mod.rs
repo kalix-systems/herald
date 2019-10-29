@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, push_err, ret_err, ret_none};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
@@ -237,16 +237,19 @@ impl ConversationsTrait for Conversations {
 
     fn fetch_more(&mut self) {
         use ConvUpdates::*;
-        // TODO these ret_err's should probably just push to the error queue
         for update in CONV_BUS.rx.try_iter() {
             match update {
-                NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
-                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
+                NewConversation(cid) => push_err!(self.raw_fetch_and_insert(cid)),
+                BuilderFinished(cid) => push_err!(self.raw_fetch_and_insert(cid)),
                 NewActivity(cid) => {
-                    let pos = ret_none!(self
+                    let pos = match self
                         .list
                         .iter()
-                        .position(|c| c.inner.conversation_id == cid));
+                        .position(|c| c.inner.conversation_id == cid)
+                    {
+                        Some(pos) => pos,
+                        None => continue,
+                    };
 
                     // NOTE: This is very important. If this check isn't here,
                     // the program will crash.

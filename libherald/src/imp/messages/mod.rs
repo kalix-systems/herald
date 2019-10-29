@@ -351,7 +351,6 @@ impl MessagesTrait for Messages {
                             self.raw_list_remove(ix, &mid);
                         }
                     }
-                    // TODO update messages list upon expiration
                 }
             }
         }
