@@ -7,6 +7,8 @@ use std::sync::{
     Arc,
 };
 
+// TODO implement SingletonBus for errors
+
 type Emitter = ErrorsEmitter;
 
 /// Errors

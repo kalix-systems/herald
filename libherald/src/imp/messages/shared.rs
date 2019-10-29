@@ -15,6 +15,8 @@ pub enum MsgUpdate {
     FullMsg(Message),
     /// Save is complete
     StoreDone(MsgId),
+    /// There are expired messages that need to be pruned
+    ExpiredMessages,
 }
 
 lazy_static! {

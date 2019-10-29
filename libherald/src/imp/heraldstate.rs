@@ -1,5 +1,5 @@
 use crate::interface::*;
-use heraldcore::{abort_err, config::Config};
+use heraldcore::{abort_err, config::Config, db, message::gc};
 
 /// Global state for the application that can't easily be included
 /// in another model. Currently only used to distinguish initial registration
@@ -14,7 +14,20 @@ impl HeraldStateTrait for HeraldState {
         let config_init = if Config::static_id().is_ok() {
             true
         } else {
-            abort_err!(heraldcore::db::init());
+            // If this fails, the file system is in a very bad place.
+            // This probably cannot be recovered from, and there's not meaningful
+            // sense in which the application can work.
+            //
+            // TODO Still, crashing is a bad look and we should at least report this
+            // to the UI.
+            abort_err!(db::init(), "Couldn't setup database");
+
+            // If this fails, it's because a thread couldn't be spawned.
+            // This implies the OS is in a very bad place.
+            // We should possibly report this error and continue anyway.
+            drop(gc::init(move |update| {
+                gc_handler(update);
+            }));
             false
         };
 
@@ -32,5 +45,23 @@ impl HeraldStateTrait for HeraldState {
 
     fn emit(&mut self) -> &mut HeraldStateEmitter {
         &mut self.emit
+    }
+}
+
+fn gc_handler(update: gc::GCUpdate) {
+    use crate::imp::messages::{shared::MsgUpdate, Messages};
+    use crate::shared::AddressedBus;
+    use gc::GCUpdate::*;
+    match update {
+        StaleConversations(cids) => {
+            for cid in cids {
+                // TODO: push error to error queue
+                drop(Messages::push(cid, MsgUpdate::ExpiredMessages));
+            }
+        }
+        GCError(e) => {
+            // TODO push to error queue
+            eprintln!("{}", e);
+        }
     }
 }
