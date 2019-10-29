@@ -7,8 +7,8 @@ mod tests;
 
 /// Polling interval for the GC thread in milliseconds.
 ///
-/// Currently set to 10 seconds.
-const POLL_INTERVAL: u64 = 10 * 60 * 1000;
+/// Currently set to five seconds.
+const POLL_INTERVAL: u64 = 5_000;
 
 type ConvMessages = HashMap<ConversationId, Vec<MsgId>>;
 
