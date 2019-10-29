@@ -163,3 +163,57 @@ impl Serializer {
         }
     }
 }
+
+macro_rules! trivial_ser_copy {
+    ($ty: tt, $method: tt) => {
+        impl Ser for $ty {
+            fn ser(&self, into: &mut Serializer) {
+                into.$method(*self);
+            }
+        }
+    };
+}
+
+trivial_ser_copy!(bool, write_bool);
+
+trivial_ser_copy!(u8, write_u8);
+trivial_ser_copy!(u16, write_u16);
+trivial_ser_copy!(u32, write_u32);
+trivial_ser_copy!(u64, write_u64);
+trivial_ser_copy!(u128, write_u128);
+
+trivial_ser_copy!(i8, write_i8);
+trivial_ser_copy!(i16, write_i16);
+trivial_ser_copy!(i32, write_i32);
+trivial_ser_copy!(i64, write_i64);
+trivial_ser_copy!(i128, write_i128);
+
+macro_rules! trivial_ser {
+    ($ty: tt, $method: tt) => {
+        impl Ser for $ty {
+            fn ser(&self, into: &mut Serializer) {
+                into.$method(self);
+            }
+        }
+    };
+}
+
+trivial_ser!([u8], write_bytes);
+trivial_ser!(str, write_string);
+
+impl AtomicSer for bool {}
+
+impl AtomicSer for u8 {}
+impl AtomicSer for u16 {}
+impl AtomicSer for u32 {}
+impl AtomicSer for u64 {}
+impl AtomicSer for u128 {}
+
+impl AtomicSer for i8 {}
+impl AtomicSer for i16 {}
+impl AtomicSer for i32 {}
+impl AtomicSer for i64 {}
+impl AtomicSer for i128 {}
+
+impl AtomicSer for str {}
+impl AtomicSer for [u8] {}
