@@ -281,8 +281,8 @@ impl ConversationId {
     }
 
     pub(crate) fn get_channel_key(&self) -> Result<ChannelKey, HErr> {
-        let mut db = CK_CONN.lock();
-        get_channel_key(&mut db, *self)
+        let db = CK_CONN.lock();
+        get_channel_key(&db, *self)
     }
 
     pub(crate) fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
@@ -301,8 +301,8 @@ impl ConversationId {
         let mut tx = db.transaction()?;
 
         // TODO: consider storing pending for these too?
-        let channel_key = get_channel_key(&mut tx, *self)?;
-        let res = match get_keys(&mut tx, *self, block.parent_hashes().iter())? {
+        let channel_key = get_channel_key(&tx, *self)?;
+        let res = match get_keys(&tx, *self, block.parent_hashes().iter())? {
             FoundKeys::Found(parent_keys) => {
                 let OpenData { msg, hash, key } =
                     block.open(&channel_key, &signer.did, &parent_keys)?;

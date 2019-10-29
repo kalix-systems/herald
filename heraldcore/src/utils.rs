@@ -37,14 +37,13 @@ impl Conf {
             }
         };
 
-        let conf = match toml::de::from_str(&file) {
+        match toml::de::from_str(&file) {
             Ok(conf) => conf,
             Err(e) => {
                 eprintln!("Error reading heraldcore configuration file: {}", e);
-                return Self::default();
+                Self::default()
             }
-        };
-        conf
+        }
     }
 }
 

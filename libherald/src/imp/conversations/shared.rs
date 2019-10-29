@@ -1,18 +1,23 @@
 use crate::interface::ConversationsEmitter as Emitter;
 use crate::shared::SingletonBus;
 use crossbeam_channel::*;
-use heraldcore::{channel_send_err, types::ConversationId, NE};
+use heraldcore::{
+    channel_send_err, conversation::settings::SettingsUpdate, types::ConversationId, NE,
+};
 use lazy_static::*;
 use parking_lot::Mutex;
 
 /// Conversation list updates
+#[derive(Debug)]
 pub enum ConvUpdates {
     /// A new conversation has been added
     NewConversation(ConversationId),
-    /// A conversation builder can been finalized
+    /// A conversation builder has been finalized
     BuilderFinished(ConversationId),
     /// New activity
     NewActivity(ConversationId),
+    /// Conversataion settings has been updated
+    Settings(ConversationId, SettingsUpdate),
 }
 
 /// Channel for global conversation list updates

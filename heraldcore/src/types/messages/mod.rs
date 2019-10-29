@@ -100,7 +100,7 @@ const YEAR_SECS: u64 = WEEK_SECS * 52;
 
 impl ExpirationPeriod {
     /// Converts an `ExpirationPeriod` to a `Duration`
-    pub fn to_duration(&self) -> Option<Duration> {
+    pub fn into_duration(self) -> Option<Duration> {
         use ExpirationPeriod::*;
         match self {
             OneMinute => Some(Duration::from_secs(MIN_SECS)),
@@ -114,8 +114,8 @@ impl ExpirationPeriod {
     }
 
     /// Converts an `ExpirationPeriod` to milliseconds
-    pub fn to_millis(&self) -> Option<Time> {
-        match self.to_duration() {
+    pub fn into_millis(self) -> Option<Time> {
+        match self.into_duration() {
             Some(d) => Some((d.as_millis() as i64).into()),
             None => None,
         }
@@ -493,6 +493,8 @@ pub enum ConversationMessageBody {
     Msg(cmessages::Msg),
     /// An acknowledgement of a normal message.
     Ack(cmessages::Ack),
+    /// An update to the conversation settings
+    Settings(crate::conversation::settings::SettingsUpdate),
 }
 
 impl FromSql for ConversationMessageBody {

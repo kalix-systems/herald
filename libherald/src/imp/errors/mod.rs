@@ -1,11 +1,12 @@
-use crate::{
-    interface::*,
-    shared::errors::{ERROR_EMITTER, ERROR_QUEUE, ERROR_TRY_POLL},
-};
+use crate::interface::*;
 use std::sync::{
     atomic::{AtomicU8, Ordering},
     Arc,
 };
+
+/// Shared state related to error handling
+pub(crate) mod shared;
+use shared::*;
 
 type Emitter = ErrorsEmitter;
 
@@ -29,7 +30,7 @@ impl ErrorsTrait for Errors {
     }
 
     fn next_error(&mut self) -> String {
-        match ERROR_QUEUE.rx.try_recv() {
+        match ERROR_BUS.rx.try_recv() {
             Ok(e) => e,
             Err(_) => {
                 eprintln!("Couldn't receive error");

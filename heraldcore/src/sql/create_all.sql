@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS messages (
   FOREIGN KEY(author) REFERENCES contacts(user_id)
 );
 
+CREATE INDEX IF NOT EXISTS expiration_ts_ix ON messages(expiration_ts);
+
 CREATE TABLE IF NOT EXISTS read_receipts (
   -- message id receipt is associated with
   msg_id BLOB NOT NULL,
