@@ -375,6 +375,9 @@ impl MessagesTrait for Messages {
                         .rposition(|m| m.msg_id == mid));
                     self.model.data_changed(ix, ix);
                 }
+                MsgUpdate::ExpiredMessages => {
+                    // TODO update messages list upon expiration
+                }
             }
         }
     }

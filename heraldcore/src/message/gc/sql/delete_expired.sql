@@ -1,4 +1,4 @@
 DELETE FROM
   messages
 WHERE
-  expired_ts < @time
+  expiration_ts < @time
