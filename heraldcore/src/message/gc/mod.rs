@@ -2,6 +2,9 @@ use super::*;
 use std::{thread, time::Duration};
 pub(crate) mod db;
 
+#[cfg(test)]
+mod tests;
+
 /// Polling interval for the GC thread in milliseconds.
 ///
 /// Currently set to 10 seconds.
@@ -29,6 +32,9 @@ pub fn delete_expired() -> Result<(), HErr> {
 
 /// Initializes the garbage collection thread, taking a callback that is called
 /// when stale conversations are found.
+///
+/// This function should not be called until the rest of the application state is
+/// properly initialized.
 ///
 /// Returns an error if the thread cannot be spawned.
 pub fn init<F: FnMut(GCUpdate) + Send + 'static>(mut f: F) -> Result<(), HErr> {

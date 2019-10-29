@@ -337,10 +337,13 @@ impl InboundMessageBuilder {
 
         use MissingInboundMessageField::*;
 
-        if let Some(expiration) = expiration {
-            // short circuit if message has already expired
-            if expiration.0 < Time::now().0 {
-                return Ok(());
+        #[cfg(not(test))]
+        {
+            if let Some(expiration) = expiration {
+                // short circuit if message has already expired
+                if expiration.0 < Time::now().0 {
+                    return Ok(());
+                }
             }
         }
 
