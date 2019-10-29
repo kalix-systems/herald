@@ -6,13 +6,13 @@ impl State {
         let route_get = {
             use get::*;
 
-            (warp::path("echo")
+            warp::path("echo")
                 .and(warp::filters::body::concat())
-                .map(|b: warp::body::FullBody| b.bytes().to_vec()))
-            .or(mk_filter!(self, keys_of))
-            .or(mk_filter!(self, key_info))
-            .or(mk_filter!(self, keys_exist))
-            .or(mk_filter!(self, users_exist))
+                .map(|b: warp::body::FullBody| b.bytes().to_vec())
+                .or(mk_filter!(self, keys_of))
+                .or(mk_filter!(self, key_info))
+                .or(mk_filter!(self, keys_exist))
+                .or(mk_filter!(self, users_exist))
         };
         let route_post = {
             use post::*;
@@ -27,11 +27,11 @@ impl State {
             .and(route_get)
             .or(method::post2().and(route_post))
             .or(warp::path("login").and(ws::ws2()).map(move |w: ws::Ws2| {
-                w.on_upgrade(move |w| {
+                w.on_upgrade(move |w: ws::WebSocket| {
                     async move {
-                        self.handle_login(w)
-                            .await
-                            .unwrap_or_else(|e| eprintln!("connection died, error was: {:?}", e))
+                        self.handle_login(w).await.unwrap_or_else(|e: Error| {
+                            eprintln!("connection died, error was: {:?}", e)
+                        })
                     }
                 })
             }));
