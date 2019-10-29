@@ -16,6 +16,7 @@ pub const MASK_TYPE: u8 = 0b1110_0000;
 pub const TYPE_OFFS: u8 = 5;
 
 #[repr(u8)]
+#[derive(Copy, Clone)]
 pub enum Type {
     Special = 0 << TYPE_OFFS,
     Unsigned = 1 << TYPE_OFFS,
@@ -42,3 +43,30 @@ pub enum SignedType {
 pub const BYTES_ARE_UTF8: u8 = 0b0000_1000;
 
 pub const COLLECTION_IS_MAP: u8 = 0b0000_1000;
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn types_fit() {
+        let types = [
+            Type::Special,
+            Type::Unsigned,
+            Type::Signed,
+            Type::Bytes,
+            Type::Cons,
+            Type::Collection,
+        ];
+
+        for ty in &types {
+            assert!(MASK_TYPE | *ty as u8 == MASK_TYPE);
+        }
+    }
+
+    #[test]
+    fn true_false_typed_corr() {
+        assert_eq!(FALSE_BYTE & MASK_TYPE, Type::Special as u8);
+        assert_eq!(TRUE_BYTE & MASK_TYPE, Type::Special as u8);
+    }
+}
