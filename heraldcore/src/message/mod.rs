@@ -8,6 +8,8 @@ use std::path::PathBuf;
 pub mod attachments;
 
 pub(crate) mod db;
+/// Runs message garbage collection tasks such as removing expired messages
+pub mod gc;
 pub use crate::types::MessageTime;
 use attachments::*;
 
