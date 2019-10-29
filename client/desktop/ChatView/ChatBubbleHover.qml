@@ -20,7 +20,6 @@ MouseArea {
         top: parent.top
     }
 
-    // PAUL : this should be a row
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
