@@ -13,10 +13,11 @@ pub mod utils;
 pub mod value;
 
 pub const MASK_TYPE: u8 = 0b1110_0000;
+
 pub const TYPE_OFFS: u8 = 5;
 
 #[repr(u8)]
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum Type {
     Special = 0 << TYPE_OFFS,
     Unsigned = 1 << TYPE_OFFS,
