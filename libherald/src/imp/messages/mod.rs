@@ -267,6 +267,7 @@ impl MessagesTrait for Messages {
         self.model.end_remove_rows();
 
         self.emit_last_changed();
+        self.emit.is_empty_changed();
         true
     }
 
