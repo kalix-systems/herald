@@ -50,5 +50,6 @@
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
         <file>ChatView/Controls/TimerOptions.qml</file>
+        <file>../foundation/js/utils.mjs</file>
     </qresource>
 </RCC>
