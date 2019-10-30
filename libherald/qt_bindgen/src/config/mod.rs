@@ -144,6 +144,7 @@ fn conversations() -> Object {
     let funcs = functions! {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
     };
 
     obj! {
@@ -184,6 +185,7 @@ fn users() -> Object {
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,

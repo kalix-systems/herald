@@ -831,6 +831,7 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
+    void conversations_clear_filter(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -1857,6 +1858,7 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    void users_clear_filter(Users::Private*);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     void users_profile_picture_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -2179,6 +2181,10 @@ bool Conversations::filterRegex() const
 }
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
+}
+void Conversations::clearFilter()
+{
+    return conversations_clear_filter(m_d);
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
@@ -2796,6 +2802,10 @@ QByteArray Users::add(const QString& id)
     QByteArray s;
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
+}
+void Users::clearFilter()
+{
+    return users_clear_filter(m_d);
 }
 quint32 Users::colorById(const QString& id) const
 {

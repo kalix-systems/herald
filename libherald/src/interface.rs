@@ -842,6 +842,7 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
+    fn clear_filter(&mut self) -> ();
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -943,6 +944,12 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_clear_filter(ptr: *mut Conversations) {
+    let o = &mut *ptr;
+    o.clear_filter()
 }
 
 #[no_mangle]
@@ -2776,6 +2783,7 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn clear_filter(&mut self) -> ();
     fn color_by_id(&self, id: String) -> u32;
     fn name_by_id(&self, id: String) -> String;
     fn profile_picture_by_id(&self, id: String) -> String;
@@ -2887,6 +2895,12 @@ pub unsafe extern "C" fn users_add(ptr: *mut Users, id_str: *const c_ushort, id_
     let r = o.add(id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_clear_filter(ptr: *mut Users) {
+    let o = &mut *ptr;
+    o.clear_filter()
 }
 
 #[no_mangle]

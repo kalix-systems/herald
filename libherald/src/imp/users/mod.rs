@@ -321,9 +321,7 @@ impl UsersTrait for Users {
             }
         }
     }
-}
 
-impl Users {
     fn clear_filter(&mut self) {
         for contact in self.list.iter_mut() {
             contact.matched = true;
@@ -339,7 +337,9 @@ impl Users {
 
         self.emit.filter_changed();
     }
+}
 
+impl Users {
     fn inner_filter(&mut self) {
         for contact in self.list.iter_mut() {
             let inner = ret_none!(get_user(&contact.id));
