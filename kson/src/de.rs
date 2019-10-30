@@ -7,7 +7,7 @@ pub struct Deserializer {
 }
 
 pub trait De: Sized {
-    fn de(from: &mut Deserializer) -> Result<Self, Error>;
+    fn de(from: &mut Deserializer) -> Result<Self, KsonError>;
 }
 
 pub struct TagByte {
@@ -24,7 +24,7 @@ impl Deserializer {
 macro_rules! tag_reader_method {
     ($fname: ident, $type: tt, $message: expr) => {
         impl Deserializer {
-            pub fn $fname(&mut self) -> Result<TagByte, Error> {
+            pub fn $fname(&mut self) -> Result<TagByte, KsonError> {
                 if self.remaining() == 0 {
                     e!(
                         LengthError {
@@ -69,7 +69,7 @@ tag_reader_method!(read_bytes_tag, Bytes, "failed to read byte tag");
 macro_rules! read_uint_from_tag {
     ($fname: ident, $type: tt, $len: expr) => {
         impl Deserializer {
-            pub fn $fname(&mut self, tag: TagByte) -> Result<$type, Error> {
+            pub fn $fname(&mut self, tag: TagByte) -> Result<$type, KsonError> {
                 if !tag.is_big {
                     return Ok(tag.val as $type);
                 } else if tag.val > $len {

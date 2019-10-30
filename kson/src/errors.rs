@@ -1,6 +1,8 @@
 use backtrace::Backtrace;
 use bytes::Bytes;
-use std::fmt;
+use std::{fmt, sync::Arc};
+
+pub type KsonError = Arc<Error>;
 
 #[derive(Debug, Clone)]
 pub struct Error {
@@ -97,7 +99,7 @@ macro_rules! loc {
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        $crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::Error {
             backtrace: ::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -107,11 +109,11 @@ macro_rules! E {
                 $var
             },
             message: Some(format!($($t),*))
-        }
+        })
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        $crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::Error {
             backtrace: ::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -121,17 +123,17 @@ macro_rules! E {
                 $var
             },
             message: None,
-        }
+        })
     };
 }
 
 #[macro_export]
 macro_rules! e {
     ($var: expr, $byt: expr, $offset: expr, $($t:tt),*) => {
-        Err::<(), $crate::errors::Error>(E!($var, $byt, $offset, $($t),*))?
+        Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset, $($t),*))?
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        Err::<(), $crate::errors::Error>(E!($var, $byt, $offset))?
+        Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset))?
     };
 }
