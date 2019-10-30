@@ -1,20 +1,13 @@
-use crate::errors::HErr;
+use crate::{errors::HErr, platform_dirs::PROFILE_PICTURES_DIR};
 use herald_common::*;
 use image::{self, FilterType, ImageFormat};
-use lazy_static::*;
 use std::path::{Path, PathBuf};
 
 const IMAGE_SIZE: u32 = 300;
-const PROFILE_PICTURE: &str = "profile_pictures";
-
-lazy_static! {
-    static ref IMAGE_PATH: PathBuf = PathBuf::from(PROFILE_PICTURE);
-}
 
 /// Determines path of profile picture for user id.
 pub fn profile_picture_path(id: &str) -> PathBuf {
-    let mut image_path = IMAGE_PATH.clone();
-    image_path.push(format!("{}_{}", id, Time::now().0));
+    let mut image_path = PROFILE_PICTURES_DIR.join(format!("{}_{}", id, Time::now().0));
     image_path.set_extension("png");
     image_path
 }
@@ -25,8 +18,7 @@ pub fn save_profile_picture<P>(id: &str, source: P, old_path: Option<P>) -> Resu
 where
     P: AsRef<Path> + std::fmt::Debug,
 {
-    std::fs::create_dir_all(PROFILE_PICTURE)?;
-
+    std::fs::create_dir_all(PROFILE_PICTURES_DIR.as_path())?;
     if let Some(old_path) = old_path {
         if let Err(e) = std::fs::remove_file(old_path) {
             eprintln!("{}", e);

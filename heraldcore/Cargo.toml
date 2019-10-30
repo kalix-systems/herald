@@ -24,6 +24,10 @@ path             = "../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
+[dependencies.directories]
+version = "2.0.2"
+optional = true
+
 [dependencies.chainmail]
 path = "../chainmail"
 
@@ -50,8 +54,10 @@ features         = ["jpeg", "png_codec"]
 version  = "0.6.0"
 # optional = true
 
-#[features]
+[features]
+deploy_desktop = ["directories"]
 #markdown = ["pulldown-cmark"]
+
 
 [dev-dependencies]
 serial_test        = "0.2.0"

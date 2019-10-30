@@ -1,9 +1,9 @@
-use crate::{errors::*, utils::SearchPattern};
+use crate::{errors::*, platform_dirs::DB_DIR, utils::SearchPattern};
 use lazy_static::*;
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
     ops::{Deref, DerefMut},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 mod pool;
@@ -17,11 +17,7 @@ lazy_static! {
     /// this can be set by the user so
     /// that during testing, two instances of
     /// herald may have different databases.
-    static ref DB_PATH: String = match std::env::var("HERALD_DB_PATH") {
-        Ok(path) =>  if cfg!(debug_assertions) { path }
-                     else { "store.sqlite3".to_owned() },
-        Err(_) => "store.sqlite3".to_owned(),
-    };
+    static ref DB_PATH: PathBuf = DB_DIR.join("store.sqlite3");
 }
 
 /// Thin wrapper around sqlite3 database connection.

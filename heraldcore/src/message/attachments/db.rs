@@ -35,7 +35,7 @@ pub(crate) fn gc(conn: &rusqlite::Connection) -> Result<(), HErr> {
 
     for res in results {
         if let Ok(path) = res {
-            drop(std::fs::remove_dir_all(Path::new("attachments").join(path)));
+            drop(std::fs::remove_dir_all(ATTACHMENTS_DIR.join(path)));
         }
     }
 

@@ -54,7 +54,7 @@ impl Pool {
     pub fn get(&self) -> Result<Wrapper, HErr> {
         let conn = match self.rx.try_recv() {
             Ok(db) => db,
-            Err(_) => Database::new(DB_PATH.as_str())?,
+            Err(_) => Database::new(DB_PATH.as_path())?,
         };
 
         Ok(Wrapper {

@@ -1,4 +1,4 @@
-use crate::{abort_err, errors::HErr, types::ConversationId, NE};
+use crate::{abort_err, errors::HErr, platform_dirs::DB_DIR, types::ConversationId, NE};
 use chainmail::{block::*, errors::ChainError};
 use herald_common::GlobalId;
 use lazy_static::*;
@@ -6,9 +6,12 @@ use parking_lot::Mutex;
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
+// FIXME initialization can be done more cleanly
+// A lot of this is redundant
 lazy_static! {
     pub static ref CK_CONN: Mutex<rusqlite::Connection> = {
-        let mut conn = abort_err!(rusqlite::Connection::open("ck.sqlite3"));
+        let path = DB_DIR.join("ck.sqlite3");
+        let mut conn = abort_err!(rusqlite::Connection::open(path));
         let tx = abort_err!(conn.transaction());
         abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
         abort_err!(tx.commit());

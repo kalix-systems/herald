@@ -170,6 +170,7 @@ pub(crate) fn set_picture(
     old_pic: Option<&str>,
 ) -> Result<(), HErr> {
     use crate::image_utils;
+
     let path = match picture {
         Some(path) => Some(
             image_utils::save_profile_picture(
