@@ -50,6 +50,10 @@ impl MessagesTrait for Messages {
         }
     }
 
+    fn is_empty(&self) -> bool {
+        self.list.is_empty()
+    }
+
     fn last_author(&self) -> Option<ffi::UserIdRef> {
         let last = self.last_msg()?;
 

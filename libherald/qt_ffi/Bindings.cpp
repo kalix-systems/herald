@@ -157,6 +157,10 @@ namespace {
     {
         Q_EMIT o->conversationIdChanged();
     }
+    inline void messagesIsEmptyChanged(Messages* o)
+    {
+        Q_EMIT o->isEmptyChanged();
+    }
     inline void messagesLastAuthorChanged(Messages* o)
     {
         Q_EMIT o->lastAuthorChanged();
@@ -1515,7 +1519,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1532,6 +1536,7 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    bool messages_is_empty_get(const Messages::Private*);
     void messages_last_author_get(const Messages::Private*, QString*, qstring_set);
     void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
@@ -2547,6 +2552,7 @@ Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
         messagesConversationIdChanged,
+        messagesIsEmptyChanged,
         messagesLastAuthorChanged,
         messagesLastBodyChanged,
         messagesLastEpochTimestampMsChanged,
@@ -2617,6 +2623,10 @@ void Messages::setConversationId(const QByteArray& v) {
     } else {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
+}
+bool Messages::isEmpty() const
+{
+    return messages_is_empty_get(m_d);
 }
 QString Messages::lastAuthor() const
 {

@@ -230,7 +230,8 @@ fn messages() -> Object {
         lastAuthor: Prop::new().simple(QString).optional(),
         lastBody: Prop::new().simple(QString).optional(),
         lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
-        lastStatus: Prop::new().simple(QUint32).optional()
+        lastStatus: Prop::new().simple(QUint32).optional(),
+        isEmpty: Prop::new().simple(Bool)
     };
 
     let item_props = item_props! {

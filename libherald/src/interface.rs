@@ -2110,6 +2110,7 @@ pub struct MessagesQObject {}
 pub struct MessagesEmitter {
     qobject: Arc<AtomicPtr<MessagesQObject>>,
     conversation_id_changed: fn(*mut MessagesQObject),
+    is_empty_changed: fn(*mut MessagesQObject),
     last_author_changed: fn(*mut MessagesQObject),
     last_body_changed: fn(*mut MessagesQObject),
     last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
@@ -2130,6 +2131,7 @@ impl MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
             conversation_id_changed: self.conversation_id_changed,
+            is_empty_changed: self.is_empty_changed,
             last_author_changed: self.last_author_changed,
             last_body_changed: self.last_body_changed,
             last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
@@ -2145,6 +2147,12 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.conversation_id_changed)(ptr);
+        }
+    }
+    pub fn is_empty_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.is_empty_changed)(ptr);
         }
     }
     pub fn last_author_changed(&mut self) {
@@ -2236,6 +2244,7 @@ pub trait MessagesTrait {
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn is_empty(&self) -> bool;
     fn last_author(&self) -> Option<&str>;
     fn last_body(&self) -> Option<&str>;
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
@@ -2272,6 +2281,7 @@ pub trait MessagesTrait {
 pub extern "C" fn messages_new(
     messages: *mut MessagesQObject,
     messages_conversation_id_changed: fn(*mut MessagesQObject),
+    messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_author_changed: fn(*mut MessagesQObject),
     messages_last_body_changed: fn(*mut MessagesQObject),
     messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
@@ -2292,6 +2302,7 @@ pub extern "C" fn messages_new(
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
         conversation_id_changed: messages_conversation_id_changed,
+        is_empty_changed: messages_is_empty_changed,
         last_author_changed: messages_last_author_changed,
         last_body_changed: messages_last_body_changed,
         last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
@@ -2346,6 +2357,11 @@ pub unsafe extern "C" fn messages_conversation_id_set(ptr: *mut Messages, v: *co
 pub unsafe extern "C" fn messages_conversation_id_set_none(ptr: *mut Messages) {
     let o = &mut *ptr;
     o.set_conversation_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_is_empty_get(ptr: *const Messages) -> bool {
+    (&*ptr).is_empty()
 }
 
 #[no_mangle]

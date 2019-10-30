@@ -31,6 +31,7 @@ declare class Messages {
   conversationId?: ConversationID;
   lastAuthor: string;
   lastBody: string;
+  isEmpty: string;
   lastEpochTimestampMs: number;
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
