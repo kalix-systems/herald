@@ -59,8 +59,7 @@ Component {
 
         Keys.onReturnPressed: {
             if (sideBarState.state == "newContactState") {
-                JS.insertContact(searchText, contactsModel, networkHandle,
-                                 conversationsModel)
+                JS.insertContact(searchText, contactsModel, networkHandle)
                 sideBarState.state = ""
             }
         }

@@ -1,8 +1,7 @@
 export function insertContact(
   entryArea: TextArea,
   contactsModel: Users,
-  networkHandle: NetworkHandle,
-  conversationsModel: Conversations
+  networkHandle: NetworkHandle
 ): void {
   const trimmedText = entryArea.text.trim();
   if (trimmedText.length === 0) {
