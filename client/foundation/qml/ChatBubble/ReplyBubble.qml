@@ -30,6 +30,15 @@ ColumnLayout {
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
 
+        Rectangle {
+            id: verticalAccent
+            anchors.right: !outbound ? replyWrapper.left : undefined
+            anchors.left: outbound ? replyWrapper.right : undefined
+            height: replyWrapper.height
+            width: CmnCfg.smallMargin / 2
+            color: opColor
+        }
+
         ColumnLayout {
             id: reply
             spacing: 1
@@ -41,7 +50,7 @@ ColumnLayout {
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
                 Layout.preferredHeight: opName !== "" ? implicitHeight : 0
-                color: CmnCfg.palette.mainTextColor
+                color: opColor
             }
 
             TextMetrics {
