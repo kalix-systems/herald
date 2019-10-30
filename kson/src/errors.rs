@@ -1,6 +1,6 @@
 use backtrace::Backtrace;
 use bytes::Bytes;
-use std::{fmt, sync::Arc};
+use std::{fmt, str::Utf8Error, sync::Arc};
 
 pub type KsonError = Arc<Error>;
 
@@ -16,9 +16,23 @@ pub struct Error {
 
 #[derive(Debug, Clone)]
 pub enum Variant {
-    LengthError { expected: usize, remaining: usize },
-    WrongType { expected: crate::Type, found: u8 },
-    IntTooShort { tag_len: u8, max_len: u8 },
+    LengthError {
+        expected: usize,
+        remaining: usize,
+    },
+    WrongType {
+        expected: crate::Type,
+        found: u8,
+    },
+    IntTooShort {
+        tag_len: u8,
+        max_len: u8,
+    },
+    WrongMinorType {
+        expected: &'static str,
+        found: &'static str,
+    },
+    BadUtf8String(Utf8Error),
 }
 
 use Variant::*;
@@ -55,6 +69,10 @@ impl fmt::Display for Error {
                     "tried to deserialize int of length {} as type with max len {}",
                     tag_len, max_len
                 ),
+                WrongMinorType { expected, found } => {
+                    format!("expected minor type {} but found {}", expected, found)
+                }
+                BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
             }),
             self.backtrace
         )

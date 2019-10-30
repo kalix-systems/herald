@@ -42,7 +42,6 @@ pub enum SignedType {
 }
 
 pub const BYTES_ARE_UTF8: u8 = 0b0000_1000;
-
 pub const COLLECTION_IS_MAP: u8 = 0b0000_1000;
 
 #[cfg(test)]
