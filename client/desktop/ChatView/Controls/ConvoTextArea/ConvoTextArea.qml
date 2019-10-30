@@ -106,6 +106,7 @@ Rectangle {
                 background: Rectangle {
                     color: CmnCfg.palette.mainColor
                 }
+                bottomPadding: CmnCfg.smallMargin / 2
                 selectionColor: CmnCfg.palette.tertiaryColor
                 color: CmnCfg.palette.mainTextColor
                 selectByMouse: true
