@@ -50,6 +50,9 @@ pub fn init<F: FnMut(GCUpdate) + Send + 'static>(mut f: F) -> Result<(), HErr> {
                     // only send update if not empty
                     if !cids.is_empty() {
                         f(StaleConversations(cids));
+                        if let Ok(db) = Database::get() {
+                            drop(super::attachments::db::gc(&db));
+                        }
                     }
                 }
                 Err(e) => {

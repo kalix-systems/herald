@@ -55,8 +55,8 @@ CREATE TABLE IF NOT EXISTS msg_attachments (
   hash_dir TEXT NOT NULL,
   -- number of the attachment
   pos INTEGER NOT NULL,
-  msg_id BLOB NOT NULL,
-  FOREIGN KEY(msg_id) REFERENCES messages(msg_id)
+  msg_id BLOB,
+  FOREIGN KEY(msg_id) REFERENCES messages(msg_id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS hash_dir_ix on msg_attachments(hash_dir);
