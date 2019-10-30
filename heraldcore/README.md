@@ -8,7 +8,7 @@ The path of the configuration file can be set by setting the environment variabl
 `HERALDCORE_CONF` to the path of the configuration file. For example,
 
 ```
-HERALDCORE_CONF = $HOME/.heraldcore.conf
+HERALDCORE_CONF = $HOME/.heraldcore_conf.toml
 ```
 
 If `HERALDCORE_CONF` is not set, the default values will be used.
