@@ -1,5 +1,8 @@
 use super::*;
-use crate::{contact::ContactBuilder, db::Database, message::InboundMessageBuilder, womp};
+use crate::{
+    contact::ContactBuilder, db::Database, message::InboundMessageBuilder,
+    platform_dirs::PROFILE_PICTURES_DIR, womp,
+};
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -128,7 +131,7 @@ fn set_prof_pic() {
     super::db::set_picture(&conn, &conv_id, Some(&test_picture), None)
         .expect(womp!("failed to set picture"));
 
-    std::fs::remove_dir_all("profile_pictures").expect(womp!());
+    std::fs::remove_dir_all(PROFILE_PICTURES_DIR.as_path()).expect(womp!());
 }
 
 #[test]

@@ -8,7 +8,6 @@ members = [
   "herald_server/server_errors",
   "heraldcore",
   "libherald",
-  "lazy_pond",
   "libherald/qt_bindgen",
   "kson"
 ]

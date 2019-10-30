@@ -1,6 +1,6 @@
 import QtQuick 2.13
-import "./js/ContactView.mjs" as JS
-import "../../foundation/js/utils.mjs" as Utils
+import "../../js/ContactView.mjs" as JS
+import "../../../../foundation/js/utils.mjs" as Utils
 import LibHerald 1.0
 
 // KAAVYA 1: this is bad, and paul watches jimmy neutron.
@@ -13,7 +13,7 @@ Item {
         text: label
         font.bold: true
         clip: true
-        color: CmnCfg.palette.mainTextColor
+        color: CmnCfg.palette.secondaryColor
         elide: Text.ElideRight
         anchors {
             top: parent.top
@@ -26,7 +26,7 @@ Item {
     Text {
         id: summary
         text: summaryText.trim().split("\n")[0]
-        color: CmnCfg.palette.secondaryTextColor
+        color: CmnCfg.palette.secondaryColor
         elide: Text.ElideRight
         anchors {
             top: displayName.bottom

@@ -2,37 +2,35 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import QtQuick.Dialogs 1.3
 import "." as CVUtils
-import "../../foundation/js/utils.mjs" as Utils
 import "./Controls/js/ChatTextAreaUtils.mjs" as JS
 import "./Controls/ConvoTextArea"
 import "../EmojiKeyboard" as EK
 import "../common" as Common
+import "Popups" as Popups
 
 Page {
     id: chatPane
-    property alias messageBar: messageBar
-    property var conversationAvatar
+
+    property var conversationItem
     property Messages ownedConversation
 
     background: Rectangle {
-        anchors.fill: parent
         color: CmnCfg.palette.mainColor
     }
 
     header: CVUtils.ChatBar {
         id: messageBar
-        currentAvatar: conversationAvatar
+        conversationItem: parent.conversationItem
     }
 
     Common.Divider {
         anchors.top: parent.top
-        color: "black"
+        color: CmnCfg.palette.borderColor
         z: messageBar.z
     }
 
-    CVUtils.ConversationWindowForm {
+    CVUtils.ConversationWindow {
         id: convWindow
         focus: true
         anchors {
@@ -52,20 +50,6 @@ Page {
         }
     }
 
-    Component {
-        id: emojiPickerComp
-        EK.EmojiPicker {
-            id: emojiPicker
-            z: exit.z + 1
-            window: convWindow
-            Component.onCompleted: {
-                emojiPicker.send.connect(function anon(emoji) {
-                    JS.appendToTextArea(emoji, chatTextArea.chatText)
-                })
-            }
-        }
-    }
-
     // This should be spawned by the EK
     MouseArea {
         id: exit
@@ -77,11 +61,8 @@ Page {
         }
     }
 
-    Loader {
+    Popups.EmojiPopup {
         id: emoKeysPopup
-        clip: true
-        active: false
-        sourceComponent: emojiPickerComp
         anchors.bottom: chatTextArea.top
         anchors.left: chatTextArea.left
     }
@@ -116,6 +97,5 @@ Page {
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active
         atcButton.onClicked: chatTextArea.attachmentsDialogue.open()
-        scrollHeight: Math.min(contentHeight, 100)
     }
 }

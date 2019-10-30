@@ -5,7 +5,9 @@ import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/Avatar"
+import "qrc:/imports/js/utils.mjs" as Utils
+import "Controls" as CVUtils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -16,66 +18,93 @@ import "../../foundation/js/utils.mjs" as Utils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
-    property var currentAvatar
+    property var conversationItem
+    property Messages ownedConversation: parent.ownedConversation
+
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
 
     background: Rectangle {
-        color: CmnCfg.avatarColors[chatBarAvatar.colorHash]
+        color: CmnCfg.palette.secondaryColor
     }
 
-    Common.Avatar {
-        id: chatBarAvatar
-        anchors.left: parent.left
-        size: CmnCfg.toolbarHeight - CmnCfg.margin
-        pfpUrl: currentAvatar.pfpUrl
-        avatarLabel: currentAvatar.avatarLabel
-        colorHash: currentAvatar.colorHash
-        isDefault: false
-    }
+    RowLayout {
+        id: buttonRow
 
-    Common.ButtonForm {
-        id: convOptionsButton
-        source: "qrc:/options-icon.svg"
-        anchors.right: parent.right
-        anchors.verticalCenter: parent.verticalCenter
-        onClicked: convOptionsMenu.open()
-        Menu {
-            id: convOptionsMenu
+        spacing: 12
 
-            MenuItem {
-                text: "Archive"
-            }
+        anchors {
+            fill: parent
+            leftMargin: CmnCfg.margin
+        }
 
-            MenuItem {
-                text: "Clear History"
-                onTriggered: ownedConversation.clearConversationHistory()
-            }
+        AvatarMain {
 
-            MenuItem {
-                text: "Add Member"
-                visible: !isPairwise
-                onTriggered: newMemberPopup.open()
+            size: 32
+            iconColor: CmnCfg.palette.iconFill
+            textColor: CmnCfg.avatarColors[conversationItem.color]
+            initials: conversationItem.title[0].toUpperCase()
+            Layout.alignment: Qt.AlignLeft
+            anchors {
+                margins: 16
             }
         }
-    }
 
-    Popup {
-        width: CmnCfg.popupWidth
-        height: 150
-        id: newMemberPopup
-        TextArea {
-            id: userIdText
-            placeholderText: "Enter user ID"
+        Label {
+            id: uid
+            font {
+                bold: true
+                family: CmnCfg.chatFont.name
+                pixelSize: 18
+            }
+            Layout.alignment: Qt.AlignLeft
+            Layout.fillWidth: true
+            elide: "ElideRight"
+            text: conversationItem.title
+            color: "white"
         }
-        Button {
-            height: 50
-            text: "Submit"
-            anchors.bottom: parent.bottom
-            anchors.right: parent.right
-            onClicked: {
-                convoItemMembers.addToConversation(userIdText.text)
-                newMemberPopup.close()
+
+        Row {
+            spacing: CmnCfg.margin
+            Layout.alignment: Qt.AlignRight
+
+            Common.ButtonForm {
+                id: searchButton
+                source: "qrc:/search-icon.svg"
+                fill: CmnCfg.palette.paneColor
+                topPadding: 1
+            }
+
+            Common.ButtonForm {
+                id: timerButton
+                source: timerMenu.chosenTimer
+                fill: CmnCfg.palette.paneColor
+                topPadding: 1
+                onClicked: timerMenu.open()
+            }
+
+            CVUtils.TimerOptions {
+                id: timerMenu
+            }
+
+            Common.ButtonForm {
+                id: convOptionsButton
+                source: "qrc:/options-icon.svg"
+                fill: CmnCfg.palette.paneColor
+                onClicked: convOptionsMenu.open()
+                Menu {
+                    id: convOptionsMenu
+
+                    MenuItem {
+                        text: "Archive"
+                    }
+
+                    MenuItem {
+                        text: "Clear History"
+                        onTriggered: ownedConversation.clearConversationHistory(
+                                         )
+                    }
+                }
             }
         }
     }

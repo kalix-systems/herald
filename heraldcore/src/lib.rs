@@ -30,3 +30,5 @@ pub mod pending;
 pub mod types;
 /// Utils
 pub mod utils;
+
+mod platform_dirs;

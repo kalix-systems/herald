@@ -23,11 +23,12 @@ Item {
     /// edge rounding for all rectangles that use the radius property
     readonly property int radius: 10
     /// standard margin size used to interior objects
-    readonly property int margin: units.largeSpacing
     /// fitzpatrick emoji swatch codes
     readonly property var skinSwatchList: ["", "🏻", "🏼", "🏽", "🏾", "🏿"]
-    /// standard half margin
-    readonly property int smallMargin: 5
+    readonly property int smallMargin: 8
+    readonly property int margin: 12
+    readonly property int mediumMargin: 16
+    readonly property int largeMargin: 20
     /// standard half padding unit
     readonly property int smallPadding: 5
     /// standard padding unit
@@ -51,9 +52,9 @@ Item {
     property int bottomZ: 1
     property int underlayZ: -1
     /// standard avatar size
-    property int avatarSize: 45
+    property int avatarSize: 44
     /// standard conversation/contact height
-    property int convoHeight: 55
+    property int convoHeight: 56
 
     property real minChatViewWidth: 300
     property real minContactsWidth: 300
@@ -64,6 +65,14 @@ Item {
     property int skinSwatchIndex: 0
     /// persistent most common emojis
     readonly property var emojiModel: JSON.emojiJson
+
+    property alias units: importUnits
+
+    Imports.Units {
+        id: importUnits
+    }
+
+    property FontLoader chatFont: metaTheme.chatFont
 
     Settings {
         id: settings

@@ -3,7 +3,7 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.0
 import QtQuick.Controls 2.13
 import "js/Avatar.mjs" as JS
-import "../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -34,7 +34,7 @@ Row {
     spacing: CmnCfg.padding
 
     ///--- Circle with initial
-    leftPadding: CmnCfg.margin
+    leftPadding: CmnCfg.smallMargin
     anchors.verticalCenter: inLayout ? undefined : parent.verticalCenter
     anchors.top: inLayout ? undefined : parent.top
     Loader {
@@ -61,14 +61,14 @@ Row {
             visible: labeled
             text: avatarLabel
             font.bold: true
-            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.mainTextColor
+            color: !isDefault ? CmnCfg.palette.paneColor : CmnCfg.palette.secondaryColor
         }
 
         Text {
             id: userName
             visible: labeled
             text: secondaryText
-            color: !isDefault ? CmnCfg.palette.iconFill : CmnCfg.palette.secondaryTextColor
+            color: !isDefault ? CmnCfg.palette.paneColor : CmnCfg.palette.secondaryColor
 
             elide: Text.ElideRight
         }

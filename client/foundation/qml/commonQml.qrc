@@ -16,10 +16,11 @@
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
-        <file>../Assets/IBMPlexSans-Regular.ttf</file>
-        <file>../Assets/Monoid-Regular.ttf</file>
+        <file alias="/Assets/IBMPlexSans-Regular.ttf">../Assets/IBMPlexSans-Regular.ttf</file>
+        <file alias="/Assets/Monoid-Regular.ttf">../Assets/Monoid-Regular.ttf</file>
         <file>Avatar/AvatarIcon.qml</file>
         <file>Avatar/ConversationLabel.qml</file>
         <file>Avatar/AvatarMain.qml</file>
+        <file alias="js/utils.mjs" >../js/utils.mjs</file>
     </qresource>
 </RCC>

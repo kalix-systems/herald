@@ -11,7 +11,7 @@ fn get_and_delete_stale() {
 
     let conv = receiver.pairwise_conversation;
 
-    set_expiration_period(&conn, &conv, ExpirationPeriod::OneMinute).expect(womp!());
+    set_expiration_period(&conn, &conv, &ExpirationPeriod::OneMinute).expect(womp!());
 
     let mut builder = InboundMessageBuilder::default();
     let msg_id = [0; 32].into();
@@ -33,7 +33,7 @@ fn get_and_delete_stale() {
     let stale = db::get_stale_conversations(&conn).expect(womp!());
 
     assert_eq!(stale.len(), 1);
-    assert_eq!(stale[0], conv);
+    assert_eq!(stale.get(&conv).expect(womp!()), &[msg_id]);
 
     db::delete_expired(&conn).expect(womp!());
 

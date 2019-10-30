@@ -3,37 +3,30 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
+import "qrc:/imports/Avatar"
 
 // Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
-    // color of the contact/convo
-    property int boxColor
-    // title of the contact/convo
-    property string boxTitle
-    // is true if it's a contact, false if it's a conversation
     property bool isContact
     id: bgBox
-    color: CmnCfg.palette.mainColor
+    color: CmnCfg.palette.paneColor
     anchors.fill: parent
+    property string boxTitle
+    property int boxColor
+    property alias labelComponent: conversationItemAvatar.labelComponent
 
-    Common.Divider {
-        color: CmnCfg.palette.secondaryColor
-        bottomAnchor: parent.bottom
-        height: 2
-    }
-
-    Common.Avatar {
+    AvatarMain {
+        anchors.fill: parent
         id: conversationItemAvatar
-        size: CmnCfg.avatarSize
-        labeled: isContact
-        labelGap: CmnCfg.smallMargin
-        avatarLabel: boxTitle
-        colorHash: Utils.unwrapOr(boxColor, 0)
-        pfpUrl: Utils.safeStringOrDefault(picture)
-        secondaryText: isContact ? "@" + userId : ""
+        iconColor: CmnCfg.avatarColors[boxColor]
+        initials: boxTitle[0].toUpperCase()
+        pfpPath: Utils.safeStringOrDefault(picture)
+        anchors {
+            margins: 6
+        }
     }
 
     states: [
@@ -42,7 +35,7 @@ Rectangle {
             name: "hovering"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.sideBarHighlightColor
             }
         },
         State {
@@ -50,7 +43,7 @@ Rectangle {
             name: "selected"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.tertiaryColor
+                color: CmnCfg.palette.sideBarHighlightColor
             }
         }
     ]

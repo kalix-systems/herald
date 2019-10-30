@@ -13,10 +13,9 @@ fn make_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
 
-    let mut path = PathBuf::from("attachments");
-    let out_path_suffix = attach.save().expect(womp!());
-    path.push(out_path_suffix);
+    let path = ATTACHMENTS_DIR.join(attach.save().expect(womp!()));
     std::fs::remove_dir_all(path).expect(womp!());
+    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
 }
 
 #[test]
@@ -38,7 +37,7 @@ fn outbound_message_attachment() {
         .expect(womp!());
 
     assert_eq!(meta.len(), 1);
-    std::fs::remove_dir_all("attachments").expect(womp!());
+    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
 }
 
 #[test]
@@ -72,7 +71,7 @@ fn inbound_message_attachment() {
 
     assert_eq!(meta.len(), 1);
 
-    std::fs::remove_dir_all("attachments").expect(womp!());
+    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
 }
 
 #[test]
@@ -83,8 +82,9 @@ fn delete_message_with_attachment() {
     let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
 
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
+
     let attach = Attachment::new(&path).expect(womp!());
-    let attach_path = Path::new("attachments").join(attach.hash_dir());
+    let attach_path = ATTACHMENTS_DIR.join(attach.hash_dir());
 
     let conv = receiver.pairwise_conversation;
 
@@ -124,5 +124,5 @@ fn delete_message_with_attachment() {
 
     assert!(!attach_path.exists());
 
-    std::fs::remove_dir_all("attachments").expect(womp!());
+    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
 }

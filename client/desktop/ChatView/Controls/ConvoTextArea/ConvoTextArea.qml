@@ -62,19 +62,6 @@ Rectangle {
         source: "qrc:/emoji-icon.svg"
     }
 
-    //this doesn't exist anymore
-
-
-    /**
-    Common.ButtonForm {
-        id: cameraButton
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.leftMargin: CmnCfg.margin
-        source: "qrc:/camera-icon.svg"
-    }
-    **/
-
     // wrapper column so replies load
     Column {
         id: containerCol
@@ -82,12 +69,11 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            leftMargin: CmnCfg.smallMargin
-            rightMargin: CmnCfg.smallMargin
-            topMargin: CmnCfg.smallMargin
+            leftMargin: CmnCfg.smallMargin / 2
+            rightMargin: CmnCfg.smallMargin / 2
         }
 
-        topPadding: CmnCfg.smallMargin
+        topPadding: CmnCfg.smallMargin / 2
 
         Loader {
             id: replyLoader
@@ -111,28 +97,20 @@ Rectangle {
 
         ScrollView {
             id: scrollView
-            height: scrollHeight
-            implicitWidth: containerCol.width
+            height: Math.min(contentHeight, 100)
+            width: containerCol.width
             focus: true
 
             TextArea {
                 id: chatText
                 background: Rectangle {
                     color: CmnCfg.palette.mainColor
-                    anchors {
-                        fill: parent
-                        horizontalCenter: parent.horizontalCenter
-                        bottom: parent.bottom
-                    }
-                    radius: CmnCfg.radius
-                    Keys.forwardTo: keysProxy
-                    Keys.onEscapePressed: focus = false
                 }
                 selectionColor: CmnCfg.palette.tertiaryColor
                 color: CmnCfg.palette.mainTextColor
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: "Send a Message ..."
+                placeholderText: "Message " + conversationItem.title
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
             }

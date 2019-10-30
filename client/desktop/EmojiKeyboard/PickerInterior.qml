@@ -40,7 +40,7 @@ Item {
                     top: parent.top
                     bottom: parent.bottom
                     right: parent.right
-                    margins: CmnCfg.smallMargin - 1 // magic
+                    margins: CmnCfg.margin - 5
                 }
                 width: height
                 onClicked: emoKeysPopup.active = false
@@ -73,8 +73,7 @@ Item {
             width: 20
             currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
-            indicator: Item {
-            }
+            indicator: Item {}
             delegate: ItemDelegate {
                 height: menu.height
                 Rectangle {
@@ -114,8 +113,7 @@ Item {
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            ScrollBar.vertical: ScrollBar {
-            }
+            ScrollBar.vertical: ScrollBar {}
             contentHeight: innerCol.height
             Column {
                 id: innerCol
@@ -175,7 +173,7 @@ Item {
                 top: hr.bottom
                 horizontalCenter: hr.horizontalCenter
             }
-            spacing: CmnCfg.margin
+            spacing: CmnCfg.smallMargin
             AnchorButton {
                 lowlight: lowlight
                 anchorIndex: 0

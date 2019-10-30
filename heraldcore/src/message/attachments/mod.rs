@@ -1,5 +1,5 @@
 use super::*;
-use crate::NE;
+use crate::{platform_dirs::ATTACHMENTS_DIR, NE};
 use herald_common::hash_slice;
 use hex::encode;
 use std::{
@@ -43,8 +43,7 @@ impl Attachment {
     pub fn save(&self) -> Result<PathBuf, HErr> {
         let mut archive = Archive::new(self.data.as_slice());
 
-        let mut path = PathBuf::from("attachments");
-        path.push(self.hash_dir());
+        let path = ATTACHMENTS_DIR.join(self.hash_dir());
 
         archive.unpack(&path)?;
 
@@ -69,7 +68,7 @@ impl AttachmentMeta {
     pub fn into_flat_strings(self) -> Result<Vec<String>, HErr> {
         let mut out = Vec::with_capacity(self.0.len());
         for p in self.0 {
-            let mut path = PathBuf::from("attachments");
+            let mut path = ATTACHMENTS_DIR.to_path_buf();
             path.push(p);
             for entry in read_dir(path)? {
                 out.push(entry?.path().into_os_string().into_string()?);

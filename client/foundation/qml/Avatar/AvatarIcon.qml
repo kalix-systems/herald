@@ -5,23 +5,20 @@ Item {
     property string pfpUrl
     property bool groupAvatar: false
     property color color
+    property color textColor: CmnCfg.palette.iconFill
     property string initials
 
-    Image {
-        source: pfpUrl
-    }
-
     Rectangle {
-        height: CmnCfg.avatarHeight
+        height: parent.height
         width: height
         radius: groupAvatar ? 0 : width
         color: parent.color
         Text {
             text: initials
             font.bold: true
-            font.pixelSize: parent.width / initials.length
+            font.pixelSize: 2/ 3 * parent.width / initials.length
             anchors.centerIn: parent
-            color: CmnCfg.palette.iconFill
+            color: textColor
         }
     }
 }

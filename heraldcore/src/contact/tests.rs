@@ -1,5 +1,5 @@
 use super::*;
-use crate::{db::Database, womp};
+use crate::{db::Database, platform_dirs::PROFILE_PICTURES_DIR, womp};
 use serial_test_derive::serial;
 
 #[test]
@@ -49,12 +49,12 @@ fn fs_profile_picture() {
 
     ContactBuilder::new(id)
         .add_db(&mut conn)
-        .expect("Failed to add contact");
+        .expect(womp!("Failed to add contact"));
 
     db::set_profile_picture(&conn, id, Some(test_picture.into()), None)
-        .expect("Failed to set profile picture");
+        .expect(womp!("Failed to set profile picture"));
 
-    std::fs::remove_dir_all("profile_pictures").expect(womp!());
+    std::fs::remove_dir_all(PROFILE_PICTURES_DIR.as_path()).expect(womp!());
 }
 
 #[test]

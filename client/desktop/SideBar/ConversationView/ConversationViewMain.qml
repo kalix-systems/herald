@@ -2,11 +2,13 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
-import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
-import "../ChatView" as CV
-import "./js/ContactView.mjs" as JS
-import "popups" as Popups
+import "qrc:/common" as Common
+import "qrc:/imports/Avatar" as Av
+import "qrc:/imports/js/utils.mjs" as Utils
+import "../../ChatView" as CV
+import ".././js/ContactView.mjs" as JS
+import "Controls"
+import "../popups" as Popups
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -23,45 +25,49 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
 
-    //PAUL: , lets write our own QML formatter so that this is a one liner
     ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: conversationItem
 
+        readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
+
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }
+
         property var childChatView: Component {
-            CV.ChatView {
-                conversationAvatar: convoRectangle.conversationItemAvatar
+            CV.ChatViewMain {
+                conversationItem: conversationData
                 ownedConversation: messageModel
             }
-        }
-
-        Members {
-            id: convoItemMembers
-            conversationId: conversationIdProxy
         }
 
         visible: matched
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
 
+        Members {
+            id: convoItemMembers
+            conversationId: conversationIdProxy
+        }
+
         Common.PlatonicRectangle {
             id: convoRectangle
-            boxColor: conversationsModel.color(index)
-            boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
-
-            ConversationLabel {
-                anchors.left: parent.conversationItemAvatar.right
-                anchors.right: parent.right
-                label: parent.boxTitle
-                summaryText: JS.formatSummary(messageModel.lastAuthor,
-                                              messageModel.lastBody)
+            boxTitle: title
+            boxColor: conversationData.color
+            //this is in here instead of platonic rectangle bc different for contact and convo
+            labelComponent: Av.ConversationLabel {
+                contactName: title
+                lastBody: messageModel.lastBody
+                lastAuthor: messageModel.lastAuthor
+                lastTimestamp: Utils.friendlyTimestamp(
+                                   messageModel.lastEpochTimestampMs)
+                labelColor: CmnCfg.palette.secondaryColor
+                labelSize: 14
             }
 
             MouseArea {

@@ -3,9 +3,10 @@ import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
 import "../common" as Common
-import "../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "./js/ContactView.mjs" as JS
 import "popups" as Popups
+import "qrc:/imports/Avatar" as Av
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -18,27 +19,30 @@ import "popups" as Popups
 /// --- displays a list of contacts
 ListView {
     id: contactList
-
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
-
-    ScrollBar.vertical: ScrollBar {
-    }
+    ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: contactItem
+        property var contactData: model
 
-        // This ternary is okay, types are enforced by QML
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
         visible: matched
 
         Common.PlatonicRectangle {
             id: contactRectangle
-            boxColor: contactsModel.color(index)
-            boxTitle: contactsModel.name(index)
             isContact: true
+            boxColor: contactData.color
+            boxTitle: contactData.name
+
+            labelComponent: Av.ConversationLabel {
+                contactName: contactData.name
+                labelColor: CmnCfg.palette.secondaryColor
+                labelSize: 14
+            }
 
             MouseArea {
                 id: hoverHandler
@@ -46,7 +50,7 @@ ListView {
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
                 onClicked: {
-                    if (convoPane.state == "newGroupState") {
+                    if (convoPane.state === "newGroupState") {
                         groupMemberSelect.addMember(userId)
                     }
                 }

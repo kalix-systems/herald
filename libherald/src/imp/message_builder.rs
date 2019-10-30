@@ -33,11 +33,10 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn set_conversation_id(&mut self, cid: Option<ffi::ConversationIdRef>) {
-        if self.inner.conversation.is_some() {
-            return;
+        if let (None, Some(cid)) = (self.inner.conversation, cid) {
+            let cid = ret_err!(cid.try_into());
+            self.inner.conversation_id(cid);
         }
-        let cid = ret_err!(ret_none!(cid).try_into());
-        self.inner.conversation_id(cid);
     }
 
     fn replying_to(&self) -> Option<ffi::MsgIdRef> {
@@ -182,6 +181,9 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn remove_last(&mut self) {
+        if self.inner.attachments.is_empty() {
+            return;
+        }
         self.model.begin_remove_rows(
             self.inner.attachments.len().saturating_sub(1),
             self.inner.attachments.len().saturating_sub(1),

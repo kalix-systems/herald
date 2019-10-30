@@ -3,6 +3,21 @@ pub fn strip_qrc(mut path: String) -> String {
     path.split_off(7)
 }
 
+pub(crate) fn err_string_msg(
+    e: &dyn std::error::Error,
+    file: &str,
+    line: u32,
+    msg: &'static str,
+) -> String {
+    format!(
+        "{msg}: {error} at {file}:{line}",
+        msg = msg,
+        error = e,
+        file = file,
+        line = line,
+    )
+}
+
 pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
     format!(
         "{error} at {file}:{line}",
@@ -22,17 +37,29 @@ macro_rules! ret_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
+                use $crate::shared::SingletonBus;
                 let err_string = crate::utils::ret_err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
-                if crate::shared::errors::ERROR_QUEUE
-                    .tx
-                    .send(err_string)
-                    .is_ok()
-                {
-                    crate::shared::errors::error_emit_try_poll();
-                }
+                $crate::imp::errors::Errors::push(err_string).ok();
                 return $retval;
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// If the value passed is an error, ushes an errors to the error queue without an early return.
+macro_rules! push_err {
+    ($maybe: expr, $msg: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                use $crate::shared::SingletonBus;
+                let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
+
+                eprintln!("{}", err_string);
+                $crate::imp::errors::Errors::push(err_string).ok();
             }
         }
     };
@@ -56,16 +83,11 @@ macro_rules! ret_none {
         match $maybe {
             Some(val) => val,
             None => {
-                let err_string = crate::utils::ret_none_string(file!(), line!());
+                use $crate::shared::SingletonBus;
+                let err_string = $crate::utils::ret_none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
-                if crate::shared::errors::ERROR_QUEUE
-                    .tx
-                    .send(err_string)
-                    .is_ok()
-                {
-                    crate::shared::errors::error_emit_try_poll();
-                }
+                $crate::imp::errors::Errors::push(err_string).ok();
                 return $retval;
             }
         }
@@ -91,17 +113,11 @@ macro_rules! bounds_chk {
     ($slf: expr, $ix: expr, $retval: expr) => {
         if $slf.list.len().saturating_sub(1) < $ix {
             let err_string =
-                crate::utils::bounds_chk_string($ix, $slf.list.len(), file!(), line!());
+                $crate::utils::bounds_chk_string($ix, $slf.list.len(), file!(), line!());
 
             eprint!("{}", err_string);
 
-            if crate::shared::errors::ERROR_QUEUE
-                .tx
-                .send(err_string)
-                .is_ok()
-            {
-                crate::shared::errors::error_emit_try_poll();
-            }
+            $crate::imp::errors::Errors::push(err_string).ok();
             return $retval;
         }
     };

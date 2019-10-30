@@ -116,9 +116,9 @@ pub(crate) fn by_send_status(
 
 /// Deletes a message
 pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
-    super::attachments::db::delete_unique(conn, id)?;
     let mut stmt = conn.prepare(include_str!("sql/delete_message.sql"))?;
     stmt.execute_named(named_params! { "@msg_id": id })?;
+    super::attachments::db::gc(conn)?;
     Ok(())
 }
 
@@ -188,7 +188,7 @@ impl OutboundMessageBuilder {
         let author = e!(crate::config::db::static_id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
-        let expiration = match expiration_period.to_millis() {
+        let expiration = match expiration_period.into_millis() {
             Some(period) => Some(Time(timestamp.0 + period.0)),
             None => None,
         };
@@ -362,7 +362,7 @@ impl InboundMessageBuilder {
         let time = MessageTime {
             insertion: Time::now(),
             server: Some(server_timestamp),
-            expiration: expiration,
+            expiration,
         };
 
         let mut tx = conn.transaction()?;

@@ -6,11 +6,11 @@ import LibHerald 1.0
 Label {
     id: sender
     property string senderName
-    readonly property bool emptyName: senderName === ""
+    property color senderColor
     text: senderName
-    Layout.margins: emptyName ? 0 : CmnCfg.smallMargin
-    Layout.bottomMargin: emptyName ? CmnCfg.smallMargin : CmnCfg.margin
-    Layout.preferredHeight: !emptyName ? CmnCfg.margin : 0
+    Layout.margins: CmnCfg.smallMargin / 2
+    Layout.bottomMargin: CmnCfg.smallMargin / 2
+    Layout.preferredHeight: CmnCfg.smallMargin
     font.bold: true
-    color: CmnCfg.palette.mainTextColor
+    color: senderColor
 }

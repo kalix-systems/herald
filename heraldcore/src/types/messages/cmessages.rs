@@ -3,12 +3,15 @@ use super::*;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
 pub struct NewKey(pub Signed<sig::PublicKey>);
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A key that is to be marked as deprecated.
 pub struct DepKey(pub Signed<sig::PublicKey>);
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A message received by a user when they are addeded to a conversation.
 pub struct AddedToConvo {
@@ -21,10 +24,12 @@ pub struct AddedToConvo {
     /// The genesis block for the new conversation
     pub gen: Genesis,
 }
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement of a contact request, with a bool to indicate whether the
 /// request was accepted.
 pub struct ContactReqAck(pub bool);
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A normal message to the conversation.
 pub struct Msg {

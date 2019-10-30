@@ -10,12 +10,14 @@ ColumnLayout {
     property string imageSource: ""
     property string authorName: ""
     property Attachments messageAttachments: null
+     property color authorColor
 
     spacing: 0
 
     ChatLabel {
         id: sender
         senderName: authorName
+        senderColor: authorColor
     }
 
     Repeater {

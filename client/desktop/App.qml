@@ -4,16 +4,10 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
-import "../foundation/js/utils.mjs" as Utils
+import "./SideBar"
 
 Item {
     id: appRoot
-
-    // TODO this can be passed as an argument wherever it's needed
-    // PAUL 0: this can be passed as an argument to a C++ helper function.
-    // currently the issue is with scoping, instead we can just pass
-    // this index like an argument with a dynamic property in C++
-    property int gsSelectedIndex: -1
 
     anchors.fill: parent.fill
 
@@ -58,7 +52,7 @@ Item {
         anchors.fill: parent
         orientation: Qt.Horizontal
 
-        SideBar {
+        SideBarMain {
             id: sideBar
         }
 
@@ -67,10 +61,26 @@ Item {
             sourceComponent: splash
         }
 
-        handle: Rectangle {
+        handle: Item {
             id: handle
             implicitWidth: 1
-            color: CmnCfg.palette.borderColor
+            Rectangle {
+                id: toolBarHandle
+                implicitWidth: 1
+                color: "white"
+                height: CmnCfg.toolbarHeight
+                anchors {
+                    top: parent.top
+                }
+            }
+            Rectangle {
+                implicitWidth: 1
+                color: CmnCfg.palette.borderColor
+                anchors {
+                    top: toolBarHandle.bottom
+                    bottom: parent.bottom
+                }
+            }
         }
     }
 
