@@ -490,7 +490,6 @@ public:
     bool connectionUp() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
-    Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();

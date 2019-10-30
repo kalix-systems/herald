@@ -161,7 +161,7 @@ fn network_handle() -> Object {
     let funcs = functions! {
         mut registerNewUser(user_id: QString) => Bool,
         mut login() => Bool,
-        const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
+        // const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
     };
 
     obj! {

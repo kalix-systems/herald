@@ -8,7 +8,7 @@ use crate::{
 use herald_common::*;
 use heraldcore::network::{self, Notification};
 use std::{
-    convert::{TryFrom, TryInto},
+    convert::TryFrom,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
@@ -106,20 +106,6 @@ impl NetworkHandleTrait for NetworkHandle {
             effects_flags: Arc::new(EffectsFlags::new()),
         };
         handle
-    }
-
-    fn send_add_request(&self, user_id: ffi::UserId, cid: ffi::ConversationIdRef) -> bool {
-        let uid = ret_err!(user_id.as_str().try_into(), false);
-        let cid = ret_err!(cid.try_into(), false);
-
-        ret_err!(
-            thread::Builder::new().spawn(move || {
-                ret_err!(network::send_contact_req(uid, cid));
-            }),
-            false
-        );
-
-        true
     }
 
     fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {

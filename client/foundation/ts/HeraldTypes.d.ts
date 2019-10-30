@@ -23,7 +23,6 @@ declare class NetworkHandle {
   connectionUp: boolean;
   connectionPending: boolean;
 
-  sendAddRequest(userid: UserId, conversationID: ConversationID): boolean;
   registerNewUser(userid: UserId): boolean;
   login(): boolean;
 }

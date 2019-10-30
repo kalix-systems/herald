@@ -3,6 +3,7 @@ use herald_common::UserId;
 use heraldcore::{
     abort_err,
     contact::{self, ContactBuilder, ContactStatus},
+    network,
     utils::SearchPattern,
 };
 use std::convert::{TryFrom, TryInto};
@@ -101,6 +102,13 @@ impl UsersTrait for Users {
         self.list.insert(pos, user);
         shared::USER_DATA.insert(contact.id, contact);
         self.model.end_insert_rows();
+
+        ret_err!(
+            std::thread::Builder::new().spawn(move || {
+                ret_err!(network::send_contact_req(id, pairwise_conversation));
+            }),
+            ffi::NULL_CONV_ID.to_vec()
+        );
 
         pairwise_conversation.to_vec()
     }

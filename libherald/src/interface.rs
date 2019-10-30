@@ -2617,7 +2617,6 @@ pub trait NetworkHandleTrait {
     fn connection_up(&self) -> bool;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
-    fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
 }
 
 #[no_mangle]
@@ -2662,15 +2661,6 @@ pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandl
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     o.register_new_user(user_id)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_send_add_request(ptr: *const NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
-    let o = &*ptr;
-    o.send_add_request(user_id, conversation_id)
 }
 
 pub struct UsersQObject {}

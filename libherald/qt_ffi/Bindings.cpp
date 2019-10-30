@@ -1550,7 +1550,6 @@ extern "C" {
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
 };
 
 extern "C" {
@@ -2709,10 +2708,6 @@ bool NetworkHandle::login()
 bool NetworkHandle::registerNewUser(const QString& user_id)
 {
     return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
-}
-bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
-{
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
