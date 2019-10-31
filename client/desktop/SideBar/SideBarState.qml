@@ -84,6 +84,12 @@ Pane {
                 searchPlaceholder: "Enter contact name"
                 contactsSearch: true
             }
+
+            PropertyChanges {
+                target: newGroupBar
+                visible: true
+            }
+
         },
 
         State {

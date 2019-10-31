@@ -50,7 +50,7 @@ ListView {
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
                 onClicked: {
-                    if (convoPane.state === "newGroupState") {
+                    if (sideBarState.state === "newGroupState") {
                         groupMemberSelect.addMember(userId)
                     }
                 }

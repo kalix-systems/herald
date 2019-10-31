@@ -21,7 +21,7 @@ Component {
             anchors.left: parent.left
             height: 20
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "newConversationState"
+            onClicked: sideBarState.state = "newConversationState"
         }
 
         Common.ButtonForm {
@@ -30,7 +30,7 @@ Component {
             anchors.right: parent.right
             height: 20
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "finalizeGroupState"
+            onClicked: sideBarState.state = "finalizeGroupState"
         }
 
         Flow {
@@ -83,7 +83,7 @@ Component {
                     }
 
                     if (event.key === Qt.Key_Return) {
-                        convoPane.state = "finalizeGroupState"
+                        sideBarState.state = "finalizeGroupState"
                     }
                 }
 
