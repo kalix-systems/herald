@@ -106,6 +106,7 @@ macro_rules! tag_reader_method {
 tag_reader_method!(read_uint_tag, Unsigned, "failed to read uint tag");
 tag_reader_method!(read_int_tag, Signed, "failed to read int tag");
 tag_reader_method!(read_bytes_tag, Bytes, "failed to read byte tag");
+tag_reader_method!(read_coll_tag, Collection, "failed to read collection tag");
 
 macro_rules! read_raw_uint {
     ($fname: ident, $type: tt, $len: expr) => {
@@ -270,5 +271,45 @@ impl Deserializer {
             Ok(s) => Ok(s.into()),
             Err(e) => Err(E!(BadUtf8String(e), self.data.clone(), ix)),
         }
+    }
+
+    pub fn read_array_len(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        if tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP {
+            e!(
+                WrongMinorType {
+                    expected: "array",
+                    found: "map"
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
+        Ok(if !tag.is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen)? as usize
+        })
+    }
+
+    pub fn read_map_len(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        if tag.val & COLLECTION_IS_MAP != COLLECTION_IS_MAP {
+            e!(
+                WrongMinorType {
+                    expected: "map",
+                    found: "array"
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
+        Ok(if !tag.is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen)? as usize
+        })
     }
 }
