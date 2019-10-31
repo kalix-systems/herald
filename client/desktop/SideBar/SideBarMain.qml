@@ -27,17 +27,16 @@ Page {
         color: CmnCfg.palette.paneColor
     }
 
-    SideBarState {
-        id: sideBarState
-    }
     ///--- SearchBar for contacts, add contact button
     header: Loader {
+        id: searchLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
-        id: searchLoader
+
         sourceComponent: ContextBar {
             id: contextBarComponent
         }
+
         Common.Divider {
             anchors.top: parent.bottom
         }
@@ -60,11 +59,21 @@ Page {
 
     ConvUtils.NewGroupBar {
         id: newGroupBar
-        anchors.top: parent.bottom
         visible: sideBarState.state === "newConversationState"
+        anchors.top: parent.top
     }
 
     Loader {
         id: convoBuilderLoader
+    }
+
+    SideBarState {
+        id: sideBarState
+        anchors {
+            top: newGroupBar.bottom
+            bottom: parent.bottom
+            right: parent.right
+            left: parent.left
+        }
     }
 }

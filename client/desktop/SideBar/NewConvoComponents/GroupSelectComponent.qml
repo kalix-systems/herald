@@ -14,7 +14,6 @@ Component {
         width: parent.width
         id: wrapperRect
         color: CmnCfg.palette.mainColor
-
         Common.ButtonForm {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"

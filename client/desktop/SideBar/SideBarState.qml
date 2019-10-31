@@ -5,13 +5,11 @@ import LibHerald 1.0
 import "./ConversationView"
 import "../SideBar/NewConvoComponents" as ConvUtils
 
-Pane {
+Page {
     id: sideBarStateLoader
-    anchors.fill: parent
     padding: 0
 
     background: Rectangle {
-        anchors.fill: parent
         color: CmnCfg.palette.paneColor
     }
 
