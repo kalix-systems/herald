@@ -51,6 +51,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        users(),
        members(),
        messages(),
+       message_preview(),
        config_obj(),
        conversation_builder(),
        message_builder(),
@@ -161,7 +162,6 @@ fn network_handle() -> Object {
     let funcs = functions! {
         mut registerNewUser(user_id: QString) => Bool,
         mut login() => Bool,
-        // const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
     };
 
     obj! {
@@ -221,6 +221,21 @@ fn members() -> Object {
 
     obj! {
         Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+    }
+}
+
+fn message_preview() -> Object {
+    let props = props! {
+         messageId: Prop::new().simple(QByteArray).optional().write(),
+         author: Prop::new().simple(QString).optional(),
+         body: Prop::new().simple(QString).optional(),
+         epochTimestampMs: Prop::new().simple(Qint64).optional(),
+         isDangling: Prop::new().simple(Bool),
+         msgIdSet: Prop::new().simple(Bool)
+    };
+
+    obj! {
+       MessagePreview: Obj::new().props(props)
     }
 }
 

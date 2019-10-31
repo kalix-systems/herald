@@ -153,6 +153,30 @@ namespace {
     {
         Q_EMIT o->replyingToChanged();
     }
+    inline void messagePreviewAuthorChanged(MessagePreview* o)
+    {
+        Q_EMIT o->authorChanged();
+    }
+    inline void messagePreviewBodyChanged(MessagePreview* o)
+    {
+        Q_EMIT o->bodyChanged();
+    }
+    inline void messagePreviewEpochTimestampMsChanged(MessagePreview* o)
+    {
+        Q_EMIT o->epochTimestampMsChanged();
+    }
+    inline void messagePreviewIsDanglingChanged(MessagePreview* o)
+    {
+        Q_EMIT o->isDanglingChanged();
+    }
+    inline void messagePreviewMessageIdChanged(MessagePreview* o)
+    {
+        Q_EMIT o->messageIdChanged();
+    }
+    inline void messagePreviewMsgIdSetChanged(MessagePreview* o)
+    {
+        Q_EMIT o->msgIdSetChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -1259,6 +1283,19 @@ extern "C" {
     bool message_builder_remove_attachment(MessageBuilder::Private*, const ushort*, int);
     bool message_builder_remove_attachment_by_index(MessageBuilder::Private*, quint64);
     void message_builder_remove_last(MessageBuilder::Private*);
+};
+
+extern "C" {
+    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*));
+    void message_preview_free(MessagePreview::Private*);
+    void message_preview_author_get(const MessagePreview::Private*, QString*, qstring_set);
+    void message_preview_body_get(const MessagePreview::Private*, QString*, qstring_set);
+    option_qint64 message_preview_epoch_timestamp_ms_get(const MessagePreview::Private*);
+    bool message_preview_is_dangling_get(const MessagePreview::Private*);
+    void message_preview_message_id_get(const MessagePreview::Private*, QByteArray*, qbytearray_set);
+    void message_preview_message_id_set(MessagePreview::Private*, const char* bytes, int len);
+    void message_preview_message_id_set_none(MessagePreview::Private*);
+    bool message_preview_msg_id_set_get(const MessagePreview::Private*);
 };
 
 extern "C" {
@@ -2539,6 +2576,73 @@ bool MessageBuilder::removeAttachmentByIndex(quint64 row_index)
 void MessageBuilder::removeLast()
 {
     return message_builder_remove_last(m_d);
+}
+MessagePreview::MessagePreview(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+MessagePreview::MessagePreview(QObject *parent):
+    QObject(parent),
+    m_d(message_preview_new(this,
+        messagePreviewAuthorChanged,
+        messagePreviewBodyChanged,
+        messagePreviewEpochTimestampMsChanged,
+        messagePreviewIsDanglingChanged,
+        messagePreviewMessageIdChanged,
+        messagePreviewMsgIdSetChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+MessagePreview::~MessagePreview() {
+    if (m_ownsPrivate) {
+        message_preview_free(m_d);
+    }
+}
+QString MessagePreview::author() const
+{
+    QString v;
+    message_preview_author_get(m_d, &v, set_qstring);
+    return v;
+}
+QString MessagePreview::body() const
+{
+    QString v;
+    message_preview_body_get(m_d, &v, set_qstring);
+    return v;
+}
+QVariant MessagePreview::epochTimestampMs() const
+{
+    QVariant v;
+    auto r = message_preview_epoch_timestamp_ms_get(m_d);
+    if (r.some) {
+        v.setValue(r.value);
+    }
+    return r;
+}
+bool MessagePreview::isDangling() const
+{
+    return message_preview_is_dangling_get(m_d);
+}
+QByteArray MessagePreview::messageId() const
+{
+    QByteArray v;
+    message_preview_message_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void MessagePreview::setMessageId(const QByteArray& v) {
+    if (v.isNull()) {
+        message_preview_message_id_set_none(m_d);
+    } else {
+    message_preview_message_id_set(m_d, v.data(), v.size());
+    }
+}
+bool MessagePreview::msgIdSet() const
+{
+    return message_preview_msg_id_set_get(m_d);
 }
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

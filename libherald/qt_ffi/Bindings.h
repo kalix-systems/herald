@@ -14,6 +14,7 @@ class HeraldState;
 class HeraldUtils;
 class Members;
 class MessageBuilder;
+class MessagePreview;
 class Messages;
 class NetworkHandle;
 class Users;
@@ -396,6 +397,40 @@ Q_SIGNALS:
     void isReplyChanged();
     void parseMarkdownChanged();
     void replyingToChanged();
+};
+
+class MessagePreview : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString author READ author NOTIFY authorChanged FINAL)
+    Q_PROPERTY(QString body READ body NOTIFY bodyChanged FINAL)
+    Q_PROPERTY(QVariant epochTimestampMs READ epochTimestampMs NOTIFY epochTimestampMsChanged FINAL)
+    Q_PROPERTY(bool isDangling READ isDangling NOTIFY isDanglingChanged FINAL)
+    Q_PROPERTY(QByteArray messageId READ messageId WRITE setMessageId NOTIFY messageIdChanged FINAL)
+    Q_PROPERTY(bool msgIdSet READ msgIdSet NOTIFY msgIdSetChanged FINAL)
+    explicit MessagePreview(bool owned, QObject *parent);
+public:
+    explicit MessagePreview(QObject *parent = nullptr);
+    ~MessagePreview() override;
+    QString author() const;
+    QString body() const;
+    QVariant epochTimestampMs() const;
+    bool isDangling() const;
+    QByteArray messageId() const;
+    void setMessageId(const QByteArray& v);
+    bool msgIdSet() const;
+Q_SIGNALS:
+    void authorChanged();
+    void bodyChanged();
+    void epochTimestampMsChanged();
+    void isDanglingChanged();
+    void messageIdChanged();
+    void msgIdSetChanged();
 };
 
 class Messages : public QAbstractItemModel
