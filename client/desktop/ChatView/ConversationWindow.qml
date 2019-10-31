@@ -64,6 +64,8 @@ Flickable {
                                                        author)
 
                 spacing: CmnCfg.margin
+                readonly property string pfpUrl: outbound ? config.profilePicture
+                                                          : contactsModel.profilePictureById(author)
                 // column is most correct to resize for extra content
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -122,6 +124,7 @@ Flickable {
                         margins: CmnCfg.margin
                         bottomMargin: parent.bottomPadding
                     }
+                    pfpPath: parent.pfpUrl
                 }
 
                 CB.ChatBubble {
@@ -149,6 +152,7 @@ Flickable {
                         margins: CmnCfg.margin
                         bottomMargin: parent.bottomPadding
                     }
+                    pfpPath: parent.pfpUrl
                 }
             } //bubble wrapper
         } // Repeater
