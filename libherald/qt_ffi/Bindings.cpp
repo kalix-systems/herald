@@ -1590,8 +1590,6 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
-    void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
-    void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
 };
 
 extern "C" {
@@ -2796,18 +2794,6 @@ bool Messages::deleteMessage(quint64 row_index)
 quint64 Messages::indexById(const QByteArray& msg_id) const
 {
     return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
-}
-QString Messages::messageAuthorById(const QByteArray& msg_id) const
-{
-    QString s;
-    messages_message_author_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
-    return s;
-}
-QString Messages::messageBodyById(const QByteArray& msg_id) const
-{
-    QString s;
-    messages_message_body_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
-    return s;
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

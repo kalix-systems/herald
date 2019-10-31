@@ -98,7 +98,11 @@ impl MessageBuilderTrait for MessageBuilder {
     fn set_body(&mut self, body: Option<String>) {
         match body {
             Some(body) => {
-                self.inner.body(ret_err!(body.try_into()));
+                if !body.is_empty() {
+                    self.inner.body(ret_err!(body.try_into()));
+                } else {
+                    self.inner.body = None;
+                }
             }
             None => {
                 self.inner.body = None;

@@ -21,4 +21,5 @@ Item {
             color: textColor
         }
     }
+
 }

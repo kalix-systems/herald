@@ -51,7 +51,7 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: !replyPreview.isDangling ? replyPreview.author : ""
+                text: !replyPreview.isDangling ? contactsModel.nameById(replyPreview.author) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0

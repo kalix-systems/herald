@@ -2503,8 +2503,6 @@ pub trait MessagesTrait {
     fn clear_conversation_history(&mut self) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
-    fn message_author_by_id(&self, msg_id: &[u8]) -> String;
-    fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -2676,24 +2674,6 @@ pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: 
     let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
     let o = &*ptr;
     o.index_by_id(msg_id)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_message_author_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
-    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &*ptr;
-    let r = o.message_author_by_id(msg_id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_message_body_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
-    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &*ptr;
-    let r = o.message_body_by_id(msg_id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
 }
 
 #[no_mangle]
