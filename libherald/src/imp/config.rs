@@ -28,9 +28,8 @@ impl ConfigTrait for Config {
     /// Sets the name of the current user. If `name` is None, this
     /// clears the name.
     fn set_name(&mut self, name: String) {
-        match self.inner.set_name(name) {
-            Ok(()) => self.emit.name_changed(),
-            Err(e) => eprintln!("{}", e),
+        if !name.is_empty() {
+            ret_err!(self.inner.set_name(name));
         }
     }
 
