@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 // PAUL TODO : paramaterize the 12 dp margins
 Item {
-    // weather or not the AvatarIcon is square.
+    // whether or not the AvatarIcon is square.
     property bool groupAvatar: false
     // path to the profile picture, or the empty string
     property string pfpPath
@@ -45,6 +45,8 @@ Item {
             verticalCenter: parent.verticalCenter
             left: parent.left
         }
+
+
     }
 
     Loader {
@@ -62,4 +64,5 @@ Item {
         }
         sourceComponent: labelComponent
     }
+
 }
