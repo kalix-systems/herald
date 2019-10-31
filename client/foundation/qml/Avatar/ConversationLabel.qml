@@ -75,8 +75,8 @@ Item {
         Image {
             id: receiptImage
             // in the future this should be some function call from common
-            source: JS.receiptStatusSwitch(lastReceipt)
-            sourceSize: Qt.size(CmnCfg.units.dp(16), CmnCfg.units.dp(16))
+            source: JS.receiptCodeSwitch(lastReceipt)
+            sourceSize: Qt.size(16, 16)
             mipmap: true
             layer.enabled: true
             layer.samplerName: "maskSource"
