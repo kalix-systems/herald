@@ -1,3 +1,7 @@
 export function submit(config, usernameField) {
-    config.name = usernameField.text.trim();
+    const newName = usernameField.text.trim();
+    if (newName === "") {
+        return;
+    }
+    config.name = newName;
 }
