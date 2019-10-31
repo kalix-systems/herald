@@ -11,6 +11,6 @@ ToolButton {
     padding: 0
     icon.source: source
     icon.color: fill
-    icon.width: 20
-    icon.height: 20
+    icon.width: 22
+    icon.height: 22
 }

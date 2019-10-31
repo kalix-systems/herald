@@ -41,6 +41,34 @@ pub enum SignedType {
     I128 = 4,
 }
 
+impl SignedType {
+    pub fn as_len(&self) -> usize {
+        use SignedType::*;
+        match self {
+            I8 => 1,
+            I16 => 2,
+            I32 => 4,
+            I64 => 8,
+            I128 => 16,
+        }
+    }
+}
+
+impl std::convert::TryFrom<u8> for SignedType {
+    type Error = u8;
+    fn try_from(input: u8) -> Result<Self, u8> {
+        use SignedType::*;
+        match input {
+            0 => Ok(I8),
+            1 => Ok(I16),
+            2 => Ok(I32),
+            3 => Ok(I64),
+            4 => Ok(I128),
+            u => Err(u),
+        }
+    }
+}
+
 pub const BYTES_ARE_UTF8: u8 = 0b0000_1000;
 pub const COLLECTION_IS_MAP: u8 = 0b0000_1000;
 

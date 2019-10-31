@@ -84,5 +84,5 @@ Item {
         }
     }
 
-    Component.onCompleted: networkHandle.login()
+    Component.onCompleted: heraldState.login()
 }

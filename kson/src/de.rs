@@ -1,5 +1,6 @@
 use super::{errors::*, *};
 use bytes::Bytes;
+use std::convert::TryFrom;
 
 pub struct Deserializer {
     pub data: Bytes,
@@ -16,8 +17,48 @@ pub struct TagByte {
 }
 
 impl Deserializer {
+    pub fn new(source: Bytes) -> Self {
+        Deserializer {
+            data: source,
+            ix: 0,
+        }
+    }
     pub fn remaining(&self) -> usize {
         self.data.len().saturating_sub(self.ix)
+    }
+
+    pub fn read_raw_slice(&mut self, len: usize) -> Result<&[u8], KsonError> {
+        if self.remaining() < len {
+            e!(
+                LengthError {
+                    expected: len,
+                    remaining: self.remaining()
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+        let out = &self.data[self.ix..self.ix + len];
+        self.ix += len;
+        Ok(out)
+    }
+
+    pub fn read_raw_bytes(&mut self, len: usize) -> Result<Bytes, KsonError> {
+        if self.remaining() < len {
+            e!(
+                LengthError {
+                    expected: len,
+                    remaining: self.remaining()
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let out = self.data.slice(self.ix, self.ix + len);
+        self.ix += len;
+
+        Ok(out)
     }
 }
 
@@ -65,6 +106,8 @@ macro_rules! tag_reader_method {
 tag_reader_method!(read_uint_tag, Unsigned, "failed to read uint tag");
 tag_reader_method!(read_int_tag, Signed, "failed to read int tag");
 tag_reader_method!(read_bytes_tag, Bytes, "failed to read byte tag");
+tag_reader_method!(read_coll_tag, Collection, "failed to read collection tag");
+tag_reader_method!(read_cons_tag, Cons, "failed to read cons tag");
 
 macro_rules! read_raw_uint {
     ($fname: ident, $type: tt, $len: expr) => {
@@ -79,19 +122,9 @@ macro_rules! read_raw_uint {
                         self.data.clone(),
                         self.ix
                     )
-                } else if len as usize > self.remaining() {
-                    e!(
-                        LengthError {
-                            expected: len as usize,
-                            remaining: self.remaining(),
-                        },
-                        self.data.clone(),
-                        self.ix
-                    )
                 }
 
-                let bytes = &self.data[self.ix..self.ix + len as usize];
-                self.ix += len as usize;
+                let bytes = self.read_raw_slice(len as usize)?;
 
                 let mut buf = [0u8; $len];
                 unsafe {
@@ -118,8 +151,7 @@ macro_rules! read_uint_from_tag {
                 if !tag.is_big {
                     return Ok(tag.val as $type);
                 }
-                let len = tag.val + 1;
-                self.$rawname(len)
+                self.$rawname(tag.val + 1)
             }
         }
     };
@@ -131,25 +163,62 @@ read_uint_from_tag!(read_u32_from_tag, read_raw_u32, u32);
 read_uint_from_tag!(read_u64_from_tag, read_raw_u64, u64);
 read_uint_from_tag!(read_u128_from_tag, read_raw_u128, u128);
 
-impl Deserializer {
-    pub fn read_raw_bytes(&mut self, len: usize) -> Result<Bytes, KsonError> {
-        if self.remaining() < len {
-            e!(
-                LengthError {
-                    expected: len,
-                    remaining: self.remaining()
-                },
-                self.data.clone(),
-                self.ix
-            )
+macro_rules! read_int_from_tag {
+    ($fname: ident, $type: tt, $len: expr) => {
+        impl Deserializer {
+            pub fn $fname(&mut self, tag: TagByte) -> Result<$type, KsonError> {
+                if !tag.is_big {
+                    return Ok(tag.val as $type);
+                }
+
+                let len = SignedType::try_from(tag.val)
+                    .map_err(|u| {
+                        E!(
+                            WrongMinorType {
+                                expected: "signed integer",
+                                found: "unknown",
+                            },
+                            self.data.clone(),
+                            self.ix,
+                            "tried to read signed integer,\
+                             but tag value was not a signed integer type {}",
+                            u
+                        )
+                    })?
+                    .as_len();
+
+                if len > $len {
+                    e!(
+                        IntTooShort {
+                            tag_len: len as u8,
+                            max_len: $len
+                        },
+                        self.data.clone(),
+                        self.ix
+                    )
+                }
+
+                let bytes = self.read_raw_slice(len)?;
+
+                let mut buf = [0u8; $len];
+                unsafe {
+                    std::ptr::copy_nonoverlapping(bytes.as_ptr(), buf.as_mut_ptr(), len as usize);
+                }
+                let out = $type::from_le_bytes(buf);
+
+                Ok(out)
+            }
         }
+    };
+}
 
-        let out = self.data.slice(self.ix, self.ix + len);
-        self.ix += len;
+read_int_from_tag!(read_i8_from_tag, i8, 1);
+read_int_from_tag!(read_i16_from_tag, i16, 2);
+read_int_from_tag!(read_i32_from_tag, i32, 4);
+read_int_from_tag!(read_i64_from_tag, i64, 8);
+read_int_from_tag!(read_i128_from_tag, i128, 16);
 
-        Ok(out)
-    }
-
+impl Deserializer {
     pub fn read_bytes_from_tag(&mut self, tag: TagByte) -> Result<Bytes, KsonError> {
         if tag.val & BYTES_ARE_UTF8 == BYTES_ARE_UTF8 {
             e!(
@@ -197,11 +266,75 @@ impl Deserializer {
         };
 
         let ix = self.ix;
-        let bytes = self.read_raw_bytes(len)?;
+        let bytes = self.read_raw_slice(len)?;
 
-        match std::str::from_utf8(&bytes) {
+        match std::str::from_utf8(bytes) {
             Ok(s) => Ok(s.into()),
             Err(e) => Err(E!(BadUtf8String(e), self.data.clone(), ix)),
         }
+    }
+
+    pub fn read_array_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        if tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP {
+            e!(
+                WrongMinorType {
+                    expected: "array",
+                    found: "map"
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
+        Ok(if !tag.is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen)? as usize
+        })
+    }
+
+    pub fn read_map_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        if tag.val & COLLECTION_IS_MAP != COLLECTION_IS_MAP {
+            e!(
+                WrongMinorType {
+                    expected: "map",
+                    found: "array"
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
+        Ok(if !tag.is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen)? as usize
+        })
+    }
+
+    pub fn read_cons_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        Ok(if !tag.is_big {
+            tag.val as usize
+        } else {
+            self.read_raw_u64(tag.val)? as usize
+        })
+    }
+
+    pub fn read_cons<Car, F, Cdr, G>(
+        &mut self,
+        car_reader: F,
+        cdr_reader: G,
+    ) -> Result<Cdr, KsonError>
+    where
+        F: FnOnce(&mut Self, usize) -> Result<Car, KsonError>,
+        G: FnOnce(&mut Self, Car) -> Result<Cdr, KsonError>,
+    {
+        let tag = self.read_cons_tag()?;
+        let len = self.read_cons_len_from_tag(tag)?;
+        let car = car_reader(self, len)?;
+        let cdr = cdr_reader(self, car)?;
+        Ok(cdr)
     }
 }

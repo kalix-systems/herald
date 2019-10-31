@@ -13,13 +13,13 @@ int main(int argc, char* argv[])
   qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
   qmlRegisterType<Conversations>("LibHerald", 1, 0, "Conversations");
   qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
-  qmlRegisterType<NetworkHandle>("LibHerald", 1, 0, "NetworkHandle");
   qmlRegisterType<HeraldState>("LibHerald", 1, 0, "HeraldState");
   qmlRegisterType<HeraldUtils>("LibHerald", 1, 0, "HeraldUtils");
   qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
+  qmlRegisterType<MessagePreview>("LibHerald", 1, 0, "MessagePreview");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");

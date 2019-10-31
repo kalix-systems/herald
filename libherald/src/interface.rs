@@ -1204,6 +1204,8 @@ pub struct HeraldStateQObject {}
 pub struct HeraldStateEmitter {
     qobject: Arc<AtomicPtr<HeraldStateQObject>>,
     config_init_changed: fn(*mut HeraldStateQObject),
+    connection_pending_changed: fn(*mut HeraldStateQObject),
+    connection_up_changed: fn(*mut HeraldStateQObject),
 }
 
 unsafe impl Send for HeraldStateEmitter {}
@@ -1219,6 +1221,8 @@ impl HeraldStateEmitter {
         HeraldStateEmitter {
             qobject: self.qobject.clone(),
             config_init_changed: self.config_init_changed,
+            connection_pending_changed: self.connection_pending_changed,
+            connection_up_changed: self.connection_up_changed,
         }
     }
     fn clear(&self) {
@@ -1231,6 +1235,18 @@ impl HeraldStateEmitter {
             (self.config_init_changed)(ptr);
         }
     }
+    pub fn connection_pending_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_pending_changed)(ptr);
+        }
+    }
+    pub fn connection_up_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_up_changed)(ptr);
+        }
+    }
 }
 
 pub trait HeraldStateTrait {
@@ -1238,16 +1254,24 @@ pub trait HeraldStateTrait {
     fn emit(&mut self) -> &mut HeraldStateEmitter;
     fn config_init(&self) -> bool;
     fn set_config_init(&mut self, value: bool);
+    fn connection_pending(&self) -> bool;
+    fn connection_up(&self) -> bool;
+    fn login(&mut self) -> bool;
+    fn register_new_user(&mut self, user_id: String) -> bool;
 }
 
 #[no_mangle]
 pub extern "C" fn herald_state_new(
     herald_state: *mut HeraldStateQObject,
     herald_state_config_init_changed: fn(*mut HeraldStateQObject),
+    herald_state_connection_pending_changed: fn(*mut HeraldStateQObject),
+    herald_state_connection_up_changed: fn(*mut HeraldStateQObject),
 ) -> *mut HeraldState {
     let herald_state_emit = HeraldStateEmitter {
         qobject: Arc::new(AtomicPtr::new(herald_state)),
         config_init_changed: herald_state_config_init_changed,
+        connection_pending_changed: herald_state_connection_pending_changed,
+        connection_up_changed: herald_state_connection_up_changed,
     };
     let d_herald_state = HeraldState::new(herald_state_emit);
     Box::into_raw(Box::new(d_herald_state))
@@ -1266,6 +1290,30 @@ pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -
 #[no_mangle]
 pub unsafe extern "C" fn herald_state_config_init_set(ptr: *mut HeraldState, v: bool) {
     (&mut *ptr).set_config_init(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_connection_pending_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).connection_pending()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_connection_up_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).connection_up()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_login(ptr: *mut HeraldState) -> bool {
+    let o = &mut *ptr;
+    o.login()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_register_new_user(ptr: *mut HeraldState, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let o = &mut *ptr;
+    o.register_new_user(user_id)
 }
 
 pub struct HeraldUtilsQObject {}
@@ -2105,6 +2153,209 @@ pub unsafe extern "C" fn message_builder_data_attachment_path(
     set(d, s, to_c_int(data.len()));
 }
 
+pub struct MessagePreviewQObject {}
+
+pub struct MessagePreviewEmitter {
+    qobject: Arc<AtomicPtr<MessagePreviewQObject>>,
+    author_changed: fn(*mut MessagePreviewQObject),
+    body_changed: fn(*mut MessagePreviewQObject),
+    epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
+    has_attachments_changed: fn(*mut MessagePreviewQObject),
+    is_dangling_changed: fn(*mut MessagePreviewQObject),
+    message_id_changed: fn(*mut MessagePreviewQObject),
+    msg_id_set_changed: fn(*mut MessagePreviewQObject),
+}
+
+unsafe impl Send for MessagePreviewEmitter {}
+
+impl MessagePreviewEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> MessagePreviewEmitter {
+        MessagePreviewEmitter {
+            qobject: self.qobject.clone(),
+            author_changed: self.author_changed,
+            body_changed: self.body_changed,
+            epoch_timestamp_ms_changed: self.epoch_timestamp_ms_changed,
+            has_attachments_changed: self.has_attachments_changed,
+            is_dangling_changed: self.is_dangling_changed,
+            message_id_changed: self.message_id_changed,
+            msg_id_set_changed: self.msg_id_set_changed,
+        }
+    }
+    fn clear(&self) {
+        let n: *const MessagePreviewQObject = null();
+        self.qobject.store(n as *mut MessagePreviewQObject, Ordering::SeqCst);
+    }
+    pub fn author_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.author_changed)(ptr);
+        }
+    }
+    pub fn body_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.body_changed)(ptr);
+        }
+    }
+    pub fn epoch_timestamp_ms_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.epoch_timestamp_ms_changed)(ptr);
+        }
+    }
+    pub fn has_attachments_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.has_attachments_changed)(ptr);
+        }
+    }
+    pub fn is_dangling_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.is_dangling_changed)(ptr);
+        }
+    }
+    pub fn message_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.message_id_changed)(ptr);
+        }
+    }
+    pub fn msg_id_set_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.msg_id_set_changed)(ptr);
+        }
+    }
+}
+
+pub trait MessagePreviewTrait {
+    fn new(emit: MessagePreviewEmitter) -> Self;
+    fn emit(&mut self) -> &mut MessagePreviewEmitter;
+    fn author(&self) -> Option<&str>;
+    fn body(&self) -> Option<&str>;
+    fn epoch_timestamp_ms(&self) -> Option<i64>;
+    fn has_attachments(&self) -> bool;
+    fn is_dangling(&self) -> bool;
+    fn message_id(&self) -> Option<&[u8]>;
+    fn set_message_id(&mut self, value: Option<&[u8]>);
+    fn msg_id_set(&self) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn message_preview_new(
+    message_preview: *mut MessagePreviewQObject,
+    message_preview_author_changed: fn(*mut MessagePreviewQObject),
+    message_preview_body_changed: fn(*mut MessagePreviewQObject),
+    message_preview_epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
+    message_preview_has_attachments_changed: fn(*mut MessagePreviewQObject),
+    message_preview_is_dangling_changed: fn(*mut MessagePreviewQObject),
+    message_preview_message_id_changed: fn(*mut MessagePreviewQObject),
+    message_preview_msg_id_set_changed: fn(*mut MessagePreviewQObject),
+) -> *mut MessagePreview {
+    let message_preview_emit = MessagePreviewEmitter {
+        qobject: Arc::new(AtomicPtr::new(message_preview)),
+        author_changed: message_preview_author_changed,
+        body_changed: message_preview_body_changed,
+        epoch_timestamp_ms_changed: message_preview_epoch_timestamp_ms_changed,
+        has_attachments_changed: message_preview_has_attachments_changed,
+        is_dangling_changed: message_preview_is_dangling_changed,
+        message_id_changed: message_preview_message_id_changed,
+        msg_id_set_changed: message_preview_msg_id_set_changed,
+    };
+    let d_message_preview = MessagePreview::new(message_preview_emit);
+    Box::into_raw(Box::new(d_message_preview))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_free(ptr: *mut MessagePreview) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_author_get(
+    ptr: *const MessagePreview,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.author();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_body_get(
+    ptr: *const MessagePreview,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.body();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_epoch_timestamp_ms_get(ptr: *const MessagePreview) -> COption<i64> {
+    match (&*ptr).epoch_timestamp_ms() {
+        Some(value) => COption { data: value, some: true },
+        None => COption { data: i64::default(), some: false}
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_has_attachments_get(ptr: *const MessagePreview) -> bool {
+    (&*ptr).has_attachments()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_is_dangling_get(ptr: *const MessagePreview) -> bool {
+    (&*ptr).is_dangling()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_message_id_get(
+    ptr: *const MessagePreview,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.message_id();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_message_id_set(ptr: *mut MessagePreview, v: *const c_char, len: c_int) {
+    let o = &mut *ptr;
+    let v = slice::from_raw_parts(v as *const u8, to_usize(len));
+    o.set_message_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_message_id_set_none(ptr: *mut MessagePreview) {
+    let o = &mut *ptr;
+    o.set_message_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_msg_id_set_get(ptr: *const MessagePreview) -> bool {
+    (&*ptr).msg_id_set()
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {
@@ -2582,101 +2833,6 @@ pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row:
 pub unsafe extern "C" fn messages_data_server_timestamp_ms(ptr: *const Messages, row: c_int) -> COption<i64> {
     let o = &*ptr;
     o.server_timestamp_ms(to_usize(row)).into()
-}
-
-pub struct NetworkHandleQObject {}
-
-pub struct NetworkHandleEmitter {
-    qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
-    connection_pending_changed: fn(*mut NetworkHandleQObject),
-    connection_up_changed: fn(*mut NetworkHandleQObject),
-}
-
-unsafe impl Send for NetworkHandleEmitter {}
-
-impl NetworkHandleEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> NetworkHandleEmitter {
-        NetworkHandleEmitter {
-            qobject: self.qobject.clone(),
-            connection_pending_changed: self.connection_pending_changed,
-            connection_up_changed: self.connection_up_changed,
-        }
-    }
-    fn clear(&self) {
-        let n: *const NetworkHandleQObject = null();
-        self.qobject.store(n as *mut NetworkHandleQObject, Ordering::SeqCst);
-    }
-    pub fn connection_pending_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.connection_pending_changed)(ptr);
-        }
-    }
-    pub fn connection_up_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.connection_up_changed)(ptr);
-        }
-    }
-}
-
-pub trait NetworkHandleTrait {
-    fn new(emit: NetworkHandleEmitter) -> Self;
-    fn emit(&mut self) -> &mut NetworkHandleEmitter;
-    fn connection_pending(&self) -> bool;
-    fn connection_up(&self) -> bool;
-    fn login(&mut self) -> bool;
-    fn register_new_user(&mut self, user_id: String) -> bool;
-}
-
-#[no_mangle]
-pub extern "C" fn network_handle_new(
-    network_handle: *mut NetworkHandleQObject,
-    network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
-    network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-) -> *mut NetworkHandle {
-    let network_handle_emit = NetworkHandleEmitter {
-        qobject: Arc::new(AtomicPtr::new(network_handle)),
-        connection_pending_changed: network_handle_connection_pending_changed,
-        connection_up_changed: network_handle_connection_up_changed,
-    };
-    let d_network_handle = NetworkHandle::new(network_handle_emit);
-    Box::into_raw(Box::new(d_network_handle))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_free(ptr: *mut NetworkHandle) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_connection_pending_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).connection_pending()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).connection_up()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_login(ptr: *mut NetworkHandle) -> bool {
-    let o = &mut *ptr;
-    o.login()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let o = &mut *ptr;
-    o.register_new_user(user_id)
 }
 
 pub struct UsersQObject {}

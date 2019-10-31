@@ -47,10 +47,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        errors(),
        herald_utils(),
        conversations(),
-       network_handle(),
        users(),
        members(),
        messages(),
+       message_preview(),
        config_obj(),
        conversation_builder(),
        message_builder(),
@@ -60,11 +60,18 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
 fn herald_state() -> Object {
     let properties = props! {
-        configInit: Prop::new().simple(Bool).write()
+        configInit: Prop::new().simple(Bool).write(),
+        connectionUp: Prop::new().simple(Bool),
+        connectionPending: Prop::new().simple(Bool)
+    };
+
+    let funcs = functions! {
+        mut registerNewUser(user_id: QString) => Bool,
+        mut login() => Bool,
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties)
+        HeraldState : Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -152,22 +159,21 @@ fn conversations() -> Object {
     }
 }
 
-fn network_handle() -> Object {
-    let props = props! {
-        connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool)
-    };
-
-    let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Bool,
-        mut login() => Bool,
-        // const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
-    };
-
-    obj! {
-        NetworkHandle: Obj::new().props(props).funcs(funcs)
-    }
-}
+//fn network_handle() -> Object {
+//    let props = props! {
+//        connectionUp: Prop::new().simple(Bool),
+//        connectionPending: Prop::new().simple(Bool)
+//    };
+//
+//    let funcs = functions! {
+//        mut registerNewUser(user_id: QString) => Bool,
+//        mut login() => Bool,
+//    };
+//
+//    obj! {
+//        NetworkHandle: Obj::new().props(props).funcs(funcs)
+//    }
+//}
 
 fn users() -> Object {
     let props = filter_props();
@@ -221,6 +227,22 @@ fn members() -> Object {
 
     obj! {
         Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+    }
+}
+
+fn message_preview() -> Object {
+    let props = props! {
+         messageId: Prop::new().simple(QByteArray).optional().write(),
+         author: Prop::new().simple(QString).optional(),
+         body: Prop::new().simple(QString).optional(),
+         epochTimestampMs: Prop::new().simple(Qint64).optional(),
+         isDangling: Prop::new().simple(Bool),
+         hasAttachments: Prop::new().simple(Bool),
+         msgIdSet: Prop::new().simple(Bool)
+    };
+
+    obj! {
+       MessagePreview: Obj::new().props(props)
     }
 }
 

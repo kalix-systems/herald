@@ -39,10 +39,6 @@ ApplicationWindow {
         id: heraldState
     }
 
-    NetworkHandle {
-        id: networkHandle
-    }
-
     Loader {
         id: appLoader
         active: heraldState.configInit

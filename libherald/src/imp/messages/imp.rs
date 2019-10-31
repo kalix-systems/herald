@@ -43,7 +43,8 @@ impl Messages {
             self.model.data_changed(ix - 1, ix - 1);
         }
 
-        if ix + 1 < self.list.len()
+        if ix > 0
+            && ix + 1 < self.list.len()
             && init_succ_state != (self.is_head(ix - 1), self.is_tail(ix + 1))
         {
             self.model.data_changed(ix + 1, ix + 1);

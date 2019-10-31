@@ -14,8 +14,8 @@ class HeraldState;
 class HeraldUtils;
 class Members;
 class MessageBuilder;
+class MessagePreview;
 class Messages;
-class NetworkHandle;
 class Users;
 
 class Attachments : public QAbstractItemModel
@@ -238,14 +238,22 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(bool configInit READ configInit WRITE setConfigInit NOTIFY configInitChanged FINAL)
+    Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
+    Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     explicit HeraldState(bool owned, QObject *parent);
 public:
     explicit HeraldState(QObject *parent = nullptr);
     ~HeraldState() override;
     bool configInit() const;
     void setConfigInit(bool v);
+    bool connectionPending() const;
+    bool connectionUp() const;
+    Q_INVOKABLE bool login();
+    Q_INVOKABLE bool registerNewUser(const QString& user_id);
 Q_SIGNALS:
     void configInitChanged();
+    void connectionPendingChanged();
+    void connectionUpChanged();
 };
 
 class HeraldUtils : public QObject
@@ -398,6 +406,43 @@ Q_SIGNALS:
     void replyingToChanged();
 };
 
+class MessagePreview : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString author READ author NOTIFY authorChanged FINAL)
+    Q_PROPERTY(QString body READ body NOTIFY bodyChanged FINAL)
+    Q_PROPERTY(QVariant epochTimestampMs READ epochTimestampMs NOTIFY epochTimestampMsChanged FINAL)
+    Q_PROPERTY(bool hasAttachments READ hasAttachments NOTIFY hasAttachmentsChanged FINAL)
+    Q_PROPERTY(bool isDangling READ isDangling NOTIFY isDanglingChanged FINAL)
+    Q_PROPERTY(QByteArray messageId READ messageId WRITE setMessageId NOTIFY messageIdChanged FINAL)
+    Q_PROPERTY(bool msgIdSet READ msgIdSet NOTIFY msgIdSetChanged FINAL)
+    explicit MessagePreview(bool owned, QObject *parent);
+public:
+    explicit MessagePreview(QObject *parent = nullptr);
+    ~MessagePreview() override;
+    QString author() const;
+    QString body() const;
+    QVariant epochTimestampMs() const;
+    bool hasAttachments() const;
+    bool isDangling() const;
+    QByteArray messageId() const;
+    void setMessageId(const QByteArray& v);
+    bool msgIdSet() const;
+Q_SIGNALS:
+    void authorChanged();
+    void bodyChanged();
+    void epochTimestampMsChanged();
+    void hasAttachmentsChanged();
+    void isDanglingChanged();
+    void messageIdChanged();
+    void msgIdSetChanged();
+};
+
 class Messages : public QAbstractItemModel
 {
     Q_OBJECT
@@ -473,29 +518,6 @@ Q_SIGNALS:
     void lastBodyChanged();
     void lastEpochTimestampMsChanged();
     void lastStatusChanged();
-};
-
-class NetworkHandle : public QObject
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
-    Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    explicit NetworkHandle(bool owned, QObject *parent);
-public:
-    explicit NetworkHandle(QObject *parent = nullptr);
-    ~NetworkHandle() override;
-    bool connectionPending() const;
-    bool connectionUp() const;
-    Q_INVOKABLE bool login();
-    Q_INVOKABLE bool registerNewUser(const QString& user_id);
-Q_SIGNALS:
-    void connectionPendingChanged();
-    void connectionUpChanged();
 };
 
 class Users : public QAbstractItemModel

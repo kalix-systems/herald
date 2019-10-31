@@ -39,6 +39,47 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
     )?)
 }
 
+/// Get message by message id
+pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Message>, HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/get_message.sql"))?;
+
+    let mut res = stmt.query_map_named(
+        named_params! {
+            "@msg_id": msg_id
+        },
+        |row| {
+            let receipts = get_receipts(conn, msg_id)?;
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
+            Ok(Message {
+                message_id: row.get("msg_id")?,
+                author: row.get("author")?,
+                conversation: row.get("conversation_id")?,
+                body: row.get("body")?,
+                op,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                time,
+                receipts,
+            })
+        },
+    )?;
+
+    match res.next() {
+        Some(res) => Ok(Some(res?)),
+        None => Ok(None),
+    }
+}
+
 /// Sets the message status of an item in the database
 pub(crate) fn update_send_status(
     conn: &Conn,
