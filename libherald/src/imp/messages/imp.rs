@@ -20,6 +20,8 @@ impl Messages {
     }
 
     pub(super) fn raw_list_remove(&mut self, ix: usize, id: &MsgId) {
+        let len = self.list.len();
+
         let init_prev_state = if ix > 0 {
             (self.is_tail(ix - 1), self.is_head(ix - 1))
         } else {
@@ -33,6 +35,10 @@ impl Messages {
         self.map.remove(&id);
         self.model.end_remove_rows();
 
+        if ix + 1 == len {
+            self.emit.is_empty_changed();
+        }
+
         if ix > 0 && init_prev_state != (self.is_head(ix - 1), self.is_tail(ix - 1)) {
             self.model.data_changed(ix - 1, ix - 1);
         }
@@ -42,6 +48,8 @@ impl Messages {
         {
             self.model.data_changed(ix + 1, ix + 1);
         }
+
+        self.emit.is_empty_changed();
     }
 
     pub(super) fn raw_insert(&mut self, msg: Msg, save_status: SaveStatus) -> Result<(), HErr> {
@@ -84,6 +92,10 @@ impl Messages {
 
         if ix + 1 == self.list.len() {
             self.emit_last_changed();
+        }
+
+        if self.list.len() == 1 {
+            self.emit.is_empty_changed();
         }
 
         if ix > 0 && init_prev_state != self.is_tail(ix - 1) {

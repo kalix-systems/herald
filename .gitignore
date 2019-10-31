@@ -10,6 +10,7 @@ stats/
 
 ## heraldcore config file
 .heraldcore_conf.toml
+.heraldcore.toml
 
 ## profiling data
 callgrind.out*

@@ -51,6 +51,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        users(),
        members(),
        messages(),
+       message_preview(),
        config_obj(),
        conversation_builder(),
        message_builder(),
@@ -144,6 +145,7 @@ fn conversations() -> Object {
     let funcs = functions! {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
     };
 
     obj! {
@@ -160,7 +162,6 @@ fn network_handle() -> Object {
     let funcs = functions! {
         mut registerNewUser(user_id: QString) => Bool,
         mut login() => Bool,
-        const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
     };
 
     obj! {
@@ -184,6 +185,7 @@ fn users() -> Object {
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -222,13 +224,30 @@ fn members() -> Object {
     }
 }
 
+fn message_preview() -> Object {
+    let props = props! {
+         messageId: Prop::new().simple(QByteArray).optional().write(),
+         author: Prop::new().simple(QString).optional(),
+         body: Prop::new().simple(QString).optional(),
+         epochTimestampMs: Prop::new().simple(Qint64).optional(),
+         isDangling: Prop::new().simple(Bool),
+         hasAttachments: Prop::new().simple(Bool),
+         msgIdSet: Prop::new().simple(Bool)
+    };
+
+    obj! {
+       MessagePreview: Obj::new().props(props)
+    }
+}
+
 fn messages() -> Object {
     let props = props! {
         conversationId: conv_id_prop(),
         lastAuthor: Prop::new().simple(QString).optional(),
         lastBody: Prop::new().simple(QString).optional(),
         lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
-        lastStatus: Prop::new().simple(QUint32).optional()
+        lastStatus: Prop::new().simple(QUint32).optional(),
+        isEmpty: Prop::new().simple(Bool)
     };
 
     let item_props = item_props! {

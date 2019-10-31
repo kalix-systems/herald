@@ -14,6 +14,7 @@ class HeraldState;
 class HeraldUtils;
 class Members;
 class MessageBuilder;
+class MessagePreview;
 class Messages;
 class NetworkHandle;
 class Users;
@@ -162,6 +163,7 @@ public:
     void setFilter(const QString& v);
     bool filterRegex() const;
     void setFilterRegex(bool v);
+    Q_INVOKABLE void clearFilter();
     Q_INVOKABLE bool removeConversation(quint64 row_index);
     Q_INVOKABLE bool toggleFilterRegex();
 
@@ -397,6 +399,43 @@ Q_SIGNALS:
     void replyingToChanged();
 };
 
+class MessagePreview : public QObject
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString author READ author NOTIFY authorChanged FINAL)
+    Q_PROPERTY(QString body READ body NOTIFY bodyChanged FINAL)
+    Q_PROPERTY(QVariant epochTimestampMs READ epochTimestampMs NOTIFY epochTimestampMsChanged FINAL)
+    Q_PROPERTY(bool hasAttachments READ hasAttachments NOTIFY hasAttachmentsChanged FINAL)
+    Q_PROPERTY(bool isDangling READ isDangling NOTIFY isDanglingChanged FINAL)
+    Q_PROPERTY(QByteArray messageId READ messageId WRITE setMessageId NOTIFY messageIdChanged FINAL)
+    Q_PROPERTY(bool msgIdSet READ msgIdSet NOTIFY msgIdSetChanged FINAL)
+    explicit MessagePreview(bool owned, QObject *parent);
+public:
+    explicit MessagePreview(QObject *parent = nullptr);
+    ~MessagePreview() override;
+    QString author() const;
+    QString body() const;
+    QVariant epochTimestampMs() const;
+    bool hasAttachments() const;
+    bool isDangling() const;
+    QByteArray messageId() const;
+    void setMessageId(const QByteArray& v);
+    bool msgIdSet() const;
+Q_SIGNALS:
+    void authorChanged();
+    void bodyChanged();
+    void epochTimestampMsChanged();
+    void hasAttachmentsChanged();
+    void isDanglingChanged();
+    void messageIdChanged();
+    void msgIdSetChanged();
+};
+
 class Messages : public QAbstractItemModel
 {
     Q_OBJECT
@@ -406,6 +445,7 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
+    Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
     Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
     Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
     Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
@@ -416,6 +456,7 @@ public:
     ~Messages() override;
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
+    bool isEmpty() const;
     QString lastAuthor() const;
     QString lastBody() const;
     QVariant lastEpochTimestampMs() const;
@@ -465,6 +506,7 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void conversationIdChanged();
+    void isEmptyChanged();
     void lastAuthorChanged();
     void lastBodyChanged();
     void lastEpochTimestampMsChanged();
@@ -489,7 +531,6 @@ public:
     bool connectionUp() const;
     Q_INVOKABLE bool login();
     Q_INVOKABLE bool registerNewUser(const QString& user_id);
-    Q_INVOKABLE bool sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const;
 Q_SIGNALS:
     void connectionPendingChanged();
     void connectionUpChanged();
@@ -514,6 +555,7 @@ public:
     bool filterRegex() const;
     void setFilterRegex(bool v);
     Q_INVOKABLE QByteArray add(const QString& id);
+    Q_INVOKABLE void clearFilter();
     Q_INVOKABLE quint32 colorById(const QString& id) const;
     Q_INVOKABLE QString nameById(const QString& id) const;
     Q_INVOKABLE QString profilePictureById(const QString& id) const;
