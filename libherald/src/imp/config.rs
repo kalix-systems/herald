@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*};
+use crate::{ffi, interface::*, ret_err};
 use heraldcore::{abort_err, config::Config as Core};
 
 /// Thin wrapper around heraldcore::config::Config,
@@ -43,12 +43,11 @@ impl ConfigTrait for Config {
     /// Sets the profile picture of the current user to the picture at the specified path.
     /// If `picture` is None, this clears the user's profile picture.
     fn set_profile_picture(&mut self, picture: Option<String>) {
-        match self.inner.set_profile_picture(picture) {
-            Ok(()) => self.emit.profile_picture_changed(),
-            Err(e) => eprintln!("{}", e),
-        }
+        ret_err!(self
+            .inner
+            .set_profile_picture(picture.map(crate::utils::strip_qrc)));
+        self.emit.profile_picture_changed();
     }
-
     /// Returns the color of the current user.
     fn color(&self) -> u32 {
         self.inner.color
@@ -56,10 +55,8 @@ impl ConfigTrait for Config {
 
     /// Sets the color of the current user.
     fn set_color(&mut self, color: u32) {
-        match self.inner.set_color(color) {
-            Ok(()) => self.emit.color_changed(),
-            Err(e) => eprintln!("{}", e),
-        }
+        ret_err!(self.inner.set_color(color));
+        self.emit.color_changed();
     }
 
     /// Returns of the colorscheme of the current user.
