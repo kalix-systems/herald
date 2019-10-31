@@ -7,6 +7,7 @@ import "../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
+import QtGraphicalEffects 1.0
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -29,6 +30,7 @@ ToolBar {
         anchors.fill: parent
 
         AvatarMain {
+            id: configAvatar
             iconColor: CmnCfg.palette.avatarColors[config.color]
             initials: config.name[0].toUpperCase()
             size: 28
@@ -39,8 +41,25 @@ ToolBar {
             MouseArea {
                 anchors.fill: parent
                 id: avatarHoverHandler
-                onClicked: configPopup.show()
+                onPressed: {
+                    overlay.visible = true
+                }
+                onReleased: {
+                    overlay.visible = false
+                }
+                onClicked: { configPopup.show()
+                }
             }
+            ColorOverlay {
+                id: overlay
+                visible: false
+                    anchors.fill: parent
+                    source: parent
+                    // hexquad black + transparent
+                    color: "#40000000"
+                    smooth: true
+                }
+
         }
 
         Text {
