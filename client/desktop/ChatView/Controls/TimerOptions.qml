@@ -49,6 +49,8 @@ Menu {
 
         MenuItem {
             text: name
+            checkable: true
+            checked: conversationItem.expirationPeriod === index
             onTriggered: {
                 conversationItem.expirationPeriod = index
             }
