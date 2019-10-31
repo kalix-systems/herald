@@ -57,9 +57,11 @@ Flickable {
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
-                readonly property string authName: contactsModel.nameById(
-                                                       author)
+
                 readonly property bool outbound: author === config.configId
+
+                readonly property string authName: outbound ? config.name : contactsModel.nameById(
+                                                       author)
 
                 spacing: CmnCfg.margin
                 // column is most correct to resize for extra content
