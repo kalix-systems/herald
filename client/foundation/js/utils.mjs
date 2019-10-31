@@ -90,23 +90,24 @@ export function safeStringOrDefault(maybeString, fallback) {
     }
     return "";
 }
-
-export function receiptStatusSwitch(receiptStatus) {
-  switch (receiptStatus) {
-    case 0: {
-      // animated svg in the future
-      return ""
+/*
+* returns the uri of an icon corresponding to the
+* receipt code
+* */
+export function receiptCodeSwitch(receiptCode) {
+    switch (receiptCode) {
+        case 0: {
+            return "";
+        }
+        case 1: {
+            return "qrc:/single-check-receipt-icon.svg";
+        }
+        case 2: {
+            return "qrc:/double-check-receipt-icon.svg";
+        }
+        case 3: {
+            return "qrc:/single-check-receipt-icon.svg";
+        }
     }
-    case 1: {
-      return "qrc:/single-check-receipt-icon.svg"
-    }
-    case 2: {
-      return "qrc:/double-check-receipt-icon.svg"
-    }
-    case 3: {
-      return "qrc:/single-check-receipt-icon.svg"
-    }
-  }
-  return ""
+    return "";
 }
-

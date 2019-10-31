@@ -842,6 +842,7 @@ pub trait ConversationsTrait {
     fn set_filter(&mut self, value: String);
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
+    fn clear_filter(&mut self) -> ();
     fn remove_conversation(&mut self, row_index: u64) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
@@ -943,6 +944,12 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 #[no_mangle]
 pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
     (&mut *ptr).set_filter_regex(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_clear_filter(ptr: *mut Conversations) {
+    let o = &mut *ptr;
+    o.clear_filter()
 }
 
 #[no_mangle]
@@ -2103,6 +2110,7 @@ pub struct MessagesQObject {}
 pub struct MessagesEmitter {
     qobject: Arc<AtomicPtr<MessagesQObject>>,
     conversation_id_changed: fn(*mut MessagesQObject),
+    is_empty_changed: fn(*mut MessagesQObject),
     last_author_changed: fn(*mut MessagesQObject),
     last_body_changed: fn(*mut MessagesQObject),
     last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
@@ -2123,6 +2131,7 @@ impl MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
             conversation_id_changed: self.conversation_id_changed,
+            is_empty_changed: self.is_empty_changed,
             last_author_changed: self.last_author_changed,
             last_body_changed: self.last_body_changed,
             last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
@@ -2138,6 +2147,12 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.conversation_id_changed)(ptr);
+        }
+    }
+    pub fn is_empty_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.is_empty_changed)(ptr);
         }
     }
     pub fn last_author_changed(&mut self) {
@@ -2229,6 +2244,7 @@ pub trait MessagesTrait {
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn is_empty(&self) -> bool;
     fn last_author(&self) -> Option<&str>;
     fn last_body(&self) -> Option<&str>;
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
@@ -2265,6 +2281,7 @@ pub trait MessagesTrait {
 pub extern "C" fn messages_new(
     messages: *mut MessagesQObject,
     messages_conversation_id_changed: fn(*mut MessagesQObject),
+    messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_author_changed: fn(*mut MessagesQObject),
     messages_last_body_changed: fn(*mut MessagesQObject),
     messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
@@ -2285,6 +2302,7 @@ pub extern "C" fn messages_new(
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
         conversation_id_changed: messages_conversation_id_changed,
+        is_empty_changed: messages_is_empty_changed,
         last_author_changed: messages_last_author_changed,
         last_body_changed: messages_last_body_changed,
         last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
@@ -2339,6 +2357,11 @@ pub unsafe extern "C" fn messages_conversation_id_set(ptr: *mut Messages, v: *co
 pub unsafe extern "C" fn messages_conversation_id_set_none(ptr: *mut Messages) {
     let o = &mut *ptr;
     o.set_conversation_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_is_empty_get(ptr: *const Messages) -> bool {
+    (&*ptr).is_empty()
 }
 
 #[no_mangle]
@@ -2610,7 +2633,6 @@ pub trait NetworkHandleTrait {
     fn connection_up(&self) -> bool;
     fn login(&mut self) -> bool;
     fn register_new_user(&mut self, user_id: String) -> bool;
-    fn send_add_request(&self, user_id: String, conversation_id: &[u8]) -> bool;
 }
 
 #[no_mangle]
@@ -2655,15 +2677,6 @@ pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandl
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     o.register_new_user(user_id)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_send_add_request(ptr: *const NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int, conversation_id_str: *const c_char, conversation_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let conversation_id = { slice::from_raw_parts(conversation_id_str as *const u8, to_usize(conversation_id_len)) };
-    let o = &*ptr;
-    o.send_add_request(user_id, conversation_id)
 }
 
 pub struct UsersQObject {}
@@ -2776,6 +2789,7 @@ pub trait UsersTrait {
     fn filter_regex(&self) -> bool;
     fn set_filter_regex(&mut self, value: bool);
     fn add(&mut self, id: String) -> Vec<u8>;
+    fn clear_filter(&mut self) -> ();
     fn color_by_id(&self, id: String) -> u32;
     fn name_by_id(&self, id: String) -> String;
     fn profile_picture_by_id(&self, id: String) -> String;
@@ -2887,6 +2901,12 @@ pub unsafe extern "C" fn users_add(ptr: *mut Users, id_str: *const c_ushort, id_
     let r = o.add(id);
     let s: *const c_char = r.as_ptr() as (*const c_char);
     set(d, s, r.len() as i32);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_clear_filter(ptr: *mut Users) {
+    let o = &mut *ptr;
+    o.clear_filter()
 }
 
 #[no_mangle]

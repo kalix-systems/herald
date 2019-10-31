@@ -157,6 +157,10 @@ namespace {
     {
         Q_EMIT o->conversationIdChanged();
     }
+    inline void messagesIsEmptyChanged(Messages* o)
+    {
+        Q_EMIT o->isEmptyChanged();
+    }
     inline void messagesLastAuthorChanged(Messages* o)
     {
         Q_EMIT o->lastAuthorChanged();
@@ -831,6 +835,7 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
+    void conversations_clear_filter(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -1514,7 +1519,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1531,6 +1536,7 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    bool messages_is_empty_get(const Messages::Private*);
     void messages_last_author_get(const Messages::Private*, QString*, qstring_set);
     void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
@@ -1549,7 +1555,6 @@ extern "C" {
     bool network_handle_connection_up_get(const NetworkHandle::Private*);
     bool network_handle_login(NetworkHandle::Private*);
     bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
 };
 
 extern "C" {
@@ -1857,6 +1862,7 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    void users_clear_filter(Users::Private*);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     void users_profile_picture_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -2179,6 +2185,10 @@ bool Conversations::filterRegex() const
 }
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
+}
+void Conversations::clearFilter()
+{
+    return conversations_clear_filter(m_d);
 }
 bool Conversations::removeConversation(quint64 row_index)
 {
@@ -2542,6 +2552,7 @@ Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
         messagesConversationIdChanged,
+        messagesIsEmptyChanged,
         messagesLastAuthorChanged,
         messagesLastBodyChanged,
         messagesLastEpochTimestampMsChanged,
@@ -2612,6 +2623,10 @@ void Messages::setConversationId(const QByteArray& v) {
     } else {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
+}
+bool Messages::isEmpty() const
+{
+    return messages_is_empty_get(m_d);
 }
 QString Messages::lastAuthor() const
 {
@@ -2704,10 +2719,6 @@ bool NetworkHandle::registerNewUser(const QString& user_id)
 {
     return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
-bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
-{
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
-}
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -2796,6 +2807,10 @@ QByteArray Users::add(const QString& id)
     QByteArray s;
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
+}
+void Users::clearFilter()
+{
+    return users_clear_filter(m_d);
 }
 quint32 Users::colorById(const QString& id) const
 {

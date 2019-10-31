@@ -8,5 +8,5 @@ edition = "2018"
 
 [dependencies]
 bytes = "0.4.12"
-byteorder = "1.3.2"
 arrayvec = "0.5.1"
+backtrace = "0.3.40"

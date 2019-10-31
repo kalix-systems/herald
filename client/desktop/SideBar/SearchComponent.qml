@@ -51,16 +51,14 @@ Component {
             }
         }
 
-        // PAUL 8: expose API for this Baeo.
         Component.onDestruction: {
-            contactsModel.filter = ""
-            conversationsModel.filter = ""
+            contactsModel.clearFilter()
+            conversationsModel.clearFilter()
         }
 
         Keys.onReturnPressed: {
             if (sideBarState.state == "newContactState") {
-                JS.insertContact(searchText, contactsModel, networkHandle,
-                                 conversationsModel)
+                JS.insertContact(searchText, contactsModel, networkHandle)
                 sideBarState.state = ""
             }
         }

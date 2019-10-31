@@ -3,6 +3,21 @@ pub fn strip_qrc(mut path: String) -> String {
     path.split_off(7)
 }
 
+pub(crate) fn err_string_msg(
+    e: &dyn std::error::Error,
+    file: &str,
+    line: u32,
+    msg: &'static str,
+) -> String {
+    format!(
+        "{msg}: {error} at {file}:{line}",
+        msg = msg,
+        error = e,
+        file = file,
+        line = line,
+    )
+}
+
 pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
     format!(
         "{error} at {file}:{line}",
@@ -36,12 +51,12 @@ macro_rules! ret_err {
 #[macro_export]
 /// If the value passed is an error, ushes an errors to the error queue without an early return.
 macro_rules! push_err {
-    ($maybe: expr) => {
+    ($maybe: expr, $msg: expr) => {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
                 use $crate::shared::SingletonBus;
-                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+                let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
                 eprintln!("{}", err_string);
                 $crate::imp::errors::Errors::push(err_string).ok();

@@ -239,8 +239,14 @@ impl ConversationsTrait for Conversations {
         use ConvUpdates::*;
         for update in CONV_BUS.rx.try_iter() {
             match update {
-                NewConversation(cid) => push_err!(self.raw_fetch_and_insert(cid)),
-                BuilderFinished(cid) => push_err!(self.raw_fetch_and_insert(cid)),
+                NewConversation(cid) => push_err!(
+                    self.raw_fetch_and_insert(cid),
+                    "Failed to add new conversation"
+                ),
+                BuilderFinished(cid) => push_err!(
+                    self.raw_fetch_and_insert(cid),
+                    "Failed to create new conversation"
+                ),
                 NewActivity(cid) => {
                     let pos = match self
                         .list
@@ -305,9 +311,7 @@ impl ConversationsTrait for Conversations {
         self.set_filter_regex(toggled);
         toggled
     }
-}
 
-impl Conversations {
     fn clear_filter(&mut self) {
         for conv in self.list.iter_mut() {
             conv.matched = true;
@@ -323,7 +327,9 @@ impl Conversations {
 
         self.emit.filter_changed();
     }
+}
 
+impl Conversations {
     fn inner_filter(&mut self) {
         for conv in self.list.iter_mut() {
             conv.matched = conv.inner.matches(&self.filter);

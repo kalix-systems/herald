@@ -62,7 +62,7 @@ ListView {
             //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
-                lastBody: messageModel.lastBody
+                lastBody: !messageModel.isEmpty ? lastAuthor + ": " + messageModel.lastBody : ""
                 lastAuthor: messageModel.lastAuthor
                 lastTimestamp: Utils.friendlyTimestamp(
                                    messageModel.lastEpochTimestampMs)
