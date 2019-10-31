@@ -24,11 +24,13 @@ ToolBar {
     property alias headerText: headerText.text
 
     RowLayout {
+
         anchors.fill: parent
+
         Common.Avatar {
             id: configAvatar
             Layout.alignment: Qt.AlignCenter
-            Layout.rightMargin: CmnCfg.smallMargin / 2
+            Layout.rightMargin: 12
             avatarLabel: config.name
             labeled: false
             colorHash: config.color
@@ -37,14 +39,6 @@ ToolBar {
             size: 28
             isDefault: true
             inLayout: true
-        }
-
-        //probably need a standard divider that also handles layouts
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            height: parent.height
-            width: 1
-            color: CmnCfg.palette.mainColor
         }
 
         Text {
