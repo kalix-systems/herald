@@ -471,8 +471,6 @@ public:
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
-    Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
-    Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;

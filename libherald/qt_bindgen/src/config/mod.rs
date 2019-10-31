@@ -275,8 +275,6 @@ fn messages() -> Object {
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
-        const messageBodyById(msg_id: QByteArray) => QString,
-        const messageAuthorById(msg_id: QByteArray) => QString,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
