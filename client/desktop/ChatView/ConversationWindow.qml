@@ -37,8 +37,8 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-     //   spacing: CmnCfg.smallMargin
 
+        //   spacing: CmnCfg.smallMargin
         anchors {
             right: parent.right
             left: parent.left
@@ -61,7 +61,7 @@ Flickable {
                 readonly property bool outbound: author === config.configId
 
                 readonly property string authName: outbound ? config.name : contactsModel.nameById(
-                                                       author)
+                                                                  author)
 
                 spacing: CmnCfg.margin
                 // column is most correct to resize for extra content
@@ -70,7 +70,6 @@ Flickable {
                     left: !outbound ? parent.left : undefined
                     rightMargin: CmnCfg.margin
                     leftMargin: CmnCfg.smallMargin
-
                 }
                 bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
                 topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
@@ -116,7 +115,7 @@ Flickable {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
                     opacity: isTail && !outbound ? 1 : 0
-                    size: 32
+                    size: 28
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
@@ -143,7 +142,7 @@ Flickable {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
                     opacity: isTail && outbound ? 1 : 0
-                    size: 32
+                    size: 28
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin

@@ -16,10 +16,27 @@ ColumnLayout {
     property color authorColor
     property var replyId
 
-    ChatLabel {
-        id: sender
-        senderName: authorName
-        senderColor: authorColor
+    Row {
+        Layout.margins: CmnCfg.smallMargin / 2
+        Layout.bottomMargin: 0
+        spacing: CmnCfg.smallMargin / 2
+
+        ChatLabel {
+            id: uname
+            senderName: authorName
+            senderColor: authorColor
+        }
+
+        Label {
+            id: timestamp
+            text: friendlyTimestamp
+            color: CmnCfg.palette.secondaryTextColor
+            font.pixelSize: 10
+            anchors {
+                top: parent.top
+                topMargin: 3
+            }
+        }
     }
 
     MessagePreview {
@@ -51,7 +68,8 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: !replyPreview.isDangling ? contactsModel.nameById(replyPreview.author) : ""
+                text: !replyPreview.isDangling ? contactsModel.nameById(
+                                                     replyPreview.author) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
@@ -80,6 +98,5 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

@@ -9,7 +9,6 @@ MouseArea {
     z: CmnCfg.underlayZ
     propagateComposedEvents: true
     hoverEnabled: true
-    // KAAVYA: there has to be a better way to do this.
     width: parent.width + 50
 
     anchors {
@@ -31,10 +30,8 @@ MouseArea {
             margins: CmnCfg.margin
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
-
         source: "qrc:/options-icon.svg"
         z: CmnCfg.overlayZ
-
         onClicked: messageOptionsMenu.open()
     }
 
@@ -53,7 +50,7 @@ MouseArea {
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/reply-icon.svg"
-        z: 10
+        z: CmnCfg.overlayZ
 
         onClicked: {
             chatTextArea.replyText = body
