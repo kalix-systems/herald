@@ -28,9 +28,15 @@ impl ConfigTrait for Config {
     /// Sets the name of the current user. If `name` is None, this
     /// clears the name.
     fn set_name(&mut self, name: String) {
-        if !name.is_empty() {
-            ret_err!(self.inner.set_name(name));
-        }
+        let name = if name.is_empty() {
+            self.inner.id.as_str().to_owned()
+        } else {
+            name
+        };
+
+        ret_err!(self.inner.set_name(name));
+
+        self.emit.name_changed();
     }
 
     /// Returns the path to the current users profile picture, if it is set.
