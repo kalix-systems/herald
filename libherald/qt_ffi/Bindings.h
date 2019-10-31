@@ -410,6 +410,7 @@ private:
     Q_PROPERTY(QString author READ author NOTIFY authorChanged FINAL)
     Q_PROPERTY(QString body READ body NOTIFY bodyChanged FINAL)
     Q_PROPERTY(QVariant epochTimestampMs READ epochTimestampMs NOTIFY epochTimestampMsChanged FINAL)
+    Q_PROPERTY(bool hasAttachments READ hasAttachments NOTIFY hasAttachmentsChanged FINAL)
     Q_PROPERTY(bool isDangling READ isDangling NOTIFY isDanglingChanged FINAL)
     Q_PROPERTY(QByteArray messageId READ messageId WRITE setMessageId NOTIFY messageIdChanged FINAL)
     Q_PROPERTY(bool msgIdSet READ msgIdSet NOTIFY msgIdSetChanged FINAL)
@@ -420,6 +421,7 @@ public:
     QString author() const;
     QString body() const;
     QVariant epochTimestampMs() const;
+    bool hasAttachments() const;
     bool isDangling() const;
     QByteArray messageId() const;
     void setMessageId(const QByteArray& v);
@@ -428,6 +430,7 @@ Q_SIGNALS:
     void authorChanged();
     void bodyChanged();
     void epochTimestampMsChanged();
+    void hasAttachmentsChanged();
     void isDanglingChanged();
     void messageIdChanged();
     void msgIdSetChanged();

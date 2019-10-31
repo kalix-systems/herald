@@ -2112,6 +2112,7 @@ pub struct MessagePreviewEmitter {
     author_changed: fn(*mut MessagePreviewQObject),
     body_changed: fn(*mut MessagePreviewQObject),
     epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
+    has_attachments_changed: fn(*mut MessagePreviewQObject),
     is_dangling_changed: fn(*mut MessagePreviewQObject),
     message_id_changed: fn(*mut MessagePreviewQObject),
     msg_id_set_changed: fn(*mut MessagePreviewQObject),
@@ -2132,6 +2133,7 @@ impl MessagePreviewEmitter {
             author_changed: self.author_changed,
             body_changed: self.body_changed,
             epoch_timestamp_ms_changed: self.epoch_timestamp_ms_changed,
+            has_attachments_changed: self.has_attachments_changed,
             is_dangling_changed: self.is_dangling_changed,
             message_id_changed: self.message_id_changed,
             msg_id_set_changed: self.msg_id_set_changed,
@@ -2157,6 +2159,12 @@ impl MessagePreviewEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.epoch_timestamp_ms_changed)(ptr);
+        }
+    }
+    pub fn has_attachments_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.has_attachments_changed)(ptr);
         }
     }
     pub fn is_dangling_changed(&mut self) {
@@ -2185,6 +2193,7 @@ pub trait MessagePreviewTrait {
     fn author(&self) -> Option<&str>;
     fn body(&self) -> Option<&str>;
     fn epoch_timestamp_ms(&self) -> Option<i64>;
+    fn has_attachments(&self) -> bool;
     fn is_dangling(&self) -> bool;
     fn message_id(&self) -> Option<&[u8]>;
     fn set_message_id(&mut self, value: Option<&[u8]>);
@@ -2197,6 +2206,7 @@ pub extern "C" fn message_preview_new(
     message_preview_author_changed: fn(*mut MessagePreviewQObject),
     message_preview_body_changed: fn(*mut MessagePreviewQObject),
     message_preview_epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
+    message_preview_has_attachments_changed: fn(*mut MessagePreviewQObject),
     message_preview_is_dangling_changed: fn(*mut MessagePreviewQObject),
     message_preview_message_id_changed: fn(*mut MessagePreviewQObject),
     message_preview_msg_id_set_changed: fn(*mut MessagePreviewQObject),
@@ -2206,6 +2216,7 @@ pub extern "C" fn message_preview_new(
         author_changed: message_preview_author_changed,
         body_changed: message_preview_body_changed,
         epoch_timestamp_ms_changed: message_preview_epoch_timestamp_ms_changed,
+        has_attachments_changed: message_preview_has_attachments_changed,
         is_dangling_changed: message_preview_is_dangling_changed,
         message_id_changed: message_preview_message_id_changed,
         msg_id_set_changed: message_preview_msg_id_set_changed,
@@ -2253,6 +2264,11 @@ pub unsafe extern "C" fn message_preview_epoch_timestamp_ms_get(ptr: *const Mess
         Some(value) => COption { data: value, some: true },
         None => COption { data: i64::default(), some: false}
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_has_attachments_get(ptr: *const MessagePreview) -> bool {
+    (&*ptr).has_attachments()
 }
 
 #[no_mangle]

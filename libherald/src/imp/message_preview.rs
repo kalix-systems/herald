@@ -16,6 +16,7 @@ pub struct MessagePreview {
     author: Option<UserId>,
     time: Option<Time>,
     is_dangling: bool,
+    has_attachments: bool,
 }
 
 impl MessagePreviewTrait for MessagePreview {
@@ -27,6 +28,7 @@ impl MessagePreviewTrait for MessagePreview {
             author: None,
             time: None,
             is_dangling: true,
+            has_attachments: true,
         }
     }
 
@@ -50,6 +52,10 @@ impl MessagePreviewTrait for MessagePreview {
         self.is_dangling
     }
 
+    fn has_attachments(&self) -> bool {
+        self.has_attachments
+    }
+
     fn message_id(&self) -> Option<ffi::MsgIdRef> {
         Some(self.msg_id.as_ref()?.as_slice())
     }
@@ -60,9 +66,15 @@ impl MessagePreviewTrait for MessagePreview {
             self.msg_id.replace(mid);
 
             if let Some(Message {
-                time, body, author, ..
+                time,
+                body,
+                author,
+                has_attachments,
+                ..
             }) = ret_err!(get_message_opt(&mid))
             {
+                self.is_dangling = false;
+                self.has_attachments = has_attachments;
                 self.time.replace(time.insertion);
                 self.author.replace(author);
                 self.body = body;
@@ -72,6 +84,11 @@ impl MessagePreviewTrait for MessagePreview {
                 self.emit.body_changed();
                 self.emit.author_changed();
                 self.emit.epoch_timestamp_ms_changed();
+                self.emit.is_dangling_changed();
+
+                if self.has_attachments {
+                    self.emit.has_attachments_changed();
+                }
             }
         }
     }

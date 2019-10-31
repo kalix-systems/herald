@@ -165,6 +165,10 @@ namespace {
     {
         Q_EMIT o->epochTimestampMsChanged();
     }
+    inline void messagePreviewHasAttachmentsChanged(MessagePreview* o)
+    {
+        Q_EMIT o->hasAttachmentsChanged();
+    }
     inline void messagePreviewIsDanglingChanged(MessagePreview* o)
     {
         Q_EMIT o->isDanglingChanged();
@@ -1286,11 +1290,12 @@ extern "C" {
 };
 
 extern "C" {
-    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*));
+    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*));
     void message_preview_free(MessagePreview::Private*);
     void message_preview_author_get(const MessagePreview::Private*, QString*, qstring_set);
     void message_preview_body_get(const MessagePreview::Private*, QString*, qstring_set);
     option_qint64 message_preview_epoch_timestamp_ms_get(const MessagePreview::Private*);
+    bool message_preview_has_attachments_get(const MessagePreview::Private*);
     bool message_preview_is_dangling_get(const MessagePreview::Private*);
     void message_preview_message_id_get(const MessagePreview::Private*, QByteArray*, qbytearray_set);
     void message_preview_message_id_set(MessagePreview::Private*, const char* bytes, int len);
@@ -2590,6 +2595,7 @@ MessagePreview::MessagePreview(QObject *parent):
         messagePreviewAuthorChanged,
         messagePreviewBodyChanged,
         messagePreviewEpochTimestampMsChanged,
+        messagePreviewHasAttachmentsChanged,
         messagePreviewIsDanglingChanged,
         messagePreviewMessageIdChanged,
         messagePreviewMsgIdSetChanged)),
@@ -2622,6 +2628,10 @@ QVariant MessagePreview::epochTimestampMs() const
         v.setValue(r.value);
     }
     return r;
+}
+bool MessagePreview::hasAttachments() const
+{
+    return message_preview_has_attachments_get(m_d);
 }
 bool MessagePreview::isDangling() const
 {

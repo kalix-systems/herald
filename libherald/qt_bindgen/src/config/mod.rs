@@ -231,6 +231,7 @@ fn message_preview() -> Object {
          body: Prop::new().simple(QString).optional(),
          epochTimestampMs: Prop::new().simple(Qint64).optional(),
          isDangling: Prop::new().simple(Bool),
+         hasAttachments: Prop::new().simple(Bool),
          msgIdSet: Prop::new().simple(Bool)
     };
 
