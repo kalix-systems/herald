@@ -37,9 +37,8 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-        spacing: CmnCfg.smallMargin
-        topPadding: CmnCfg.padding
-        bottomPadding: CmnCfg.padding
+     //   spacing: CmnCfg.smallMargin
+
         anchors {
             right: parent.right
             left: parent.left
@@ -49,6 +48,7 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
+
             delegate: Row {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
@@ -68,7 +68,10 @@ Flickable {
                     left: !outbound ? parent.left : undefined
                     rightMargin: CmnCfg.margin
                     leftMargin: CmnCfg.smallMargin
+
                 }
+                bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
+                topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
                 Component {
                     id: std
@@ -86,15 +89,10 @@ Flickable {
                     CB.ReplyBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        opBody: op !== undefined ? ownedConversation.messageBodyById(
-                                                       op) : ""
                         receiptImage: proxyReceiptImage
-                        opName: op !== undefined ? ownedConversation.messageAuthorById(
-                                                       op) : ""
-                        opColor: CmnCfg.avatarColors[contactsModel.colorById(
-                                                         opName)]
                         authorName: authName
                         authorColor: userColor
+                        replyId: op
                     }
                 }
 
@@ -120,7 +118,7 @@ Flickable {
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
-                        bottomMargin: 0
+                        bottomMargin: parent.bottomPadding
                     }
                 }
 
@@ -147,7 +145,7 @@ Flickable {
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
-                        bottomMargin: 0
+                        bottomMargin: parent.bottomPadding
                     }
                 }
             } //bubble wrapper

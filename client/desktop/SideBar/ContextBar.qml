@@ -21,6 +21,7 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.secondaryColor
     }
+    property alias headerText: headerText.text
 
     RowLayout {
         anchors.fill: parent
@@ -47,6 +48,7 @@ ToolBar {
         }
 
         Text {
+            id: headerText
             text: "Conversations"
             font.pixelSize: CmnCfg.headerSize
             font.family: CmnCfg.chatFont.name
