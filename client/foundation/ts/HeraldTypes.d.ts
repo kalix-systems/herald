@@ -17,9 +17,7 @@ declare type UserId = string;
 
 declare class HeraldState {
   configInit: boolean;
-}
 
-declare class NetworkHandle {
   connectionUp: boolean;
   connectionPending: boolean;
 

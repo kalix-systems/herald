@@ -117,6 +117,14 @@ namespace {
     {
         Q_EMIT o->configInitChanged();
     }
+    inline void heraldStateConnectionPendingChanged(HeraldState* o)
+    {
+        Q_EMIT o->connectionPendingChanged();
+    }
+    inline void heraldStateConnectionUpChanged(HeraldState* o)
+    {
+        Q_EMIT o->connectionUpChanged();
+    }
     inline void membersConversationIdChanged(Members* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -204,14 +212,6 @@ namespace {
     inline void messagesLastStatusChanged(Messages* o)
     {
         Q_EMIT o->lastStatusChanged();
-    }
-    inline void networkHandleConnectionPendingChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->connectionPendingChanged();
-    }
-    inline void networkHandleConnectionUpChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->connectionUpChanged();
     }
     inline void usersFilterChanged(Users* o)
     {
@@ -876,10 +876,14 @@ extern "C" {
 };
 
 extern "C" {
-    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
+    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*), void (*)(HeraldState*), void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
     void herald_state_config_init_set(HeraldState::Private*, bool);
+    bool herald_state_connection_pending_get(const HeraldState::Private*);
+    bool herald_state_connection_up_get(const HeraldState::Private*);
+    bool herald_state_login(HeraldState::Private*);
+    bool herald_state_register_new_user(HeraldState::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -1591,15 +1595,6 @@ extern "C" {
 };
 
 extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*));
-    void network_handle_free(NetworkHandle::Private*);
-    bool network_handle_connection_pending_get(const NetworkHandle::Private*);
-    bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    bool network_handle_login(NetworkHandle::Private*);
-    bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
-};
-
-extern "C" {
     quint32 users_data_color(const Users::Private*, int);
     bool users_set_data_color(Users::Private*, int, quint32);
     bool users_data_matched(const Users::Private*, int);
@@ -2280,7 +2275,9 @@ HeraldState::HeraldState(bool /*owned*/, QObject *parent):
 HeraldState::HeraldState(QObject *parent):
     QObject(parent),
     m_d(herald_state_new(this,
-        heraldStateConfigInitChanged)),
+        heraldStateConfigInitChanged,
+        heraldStateConnectionPendingChanged,
+        heraldStateConnectionUpChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -2296,6 +2293,22 @@ bool HeraldState::configInit() const
 }
 void HeraldState::setConfigInit(bool v) {
     herald_state_config_init_set(m_d, v);
+}
+bool HeraldState::connectionPending() const
+{
+    return herald_state_connection_pending_get(m_d);
+}
+bool HeraldState::connectionUp() const
+{
+    return herald_state_connection_up_get(m_d);
+}
+bool HeraldState::login()
+{
+    return herald_state_login(m_d);
+}
+bool HeraldState::registerNewUser(const QString& user_id)
+{
+    return herald_state_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
 HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -2795,43 +2808,6 @@ QString Messages::messageBodyById(const QByteArray& msg_id) const
     QString s;
     messages_message_body_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
     return s;
-}
-NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
-    QObject(parent),
-    m_d(nullptr),
-    m_ownsPrivate(false)
-{
-}
-
-NetworkHandle::NetworkHandle(QObject *parent):
-    QObject(parent),
-    m_d(network_handle_new(this,
-        networkHandleConnectionPendingChanged,
-        networkHandleConnectionUpChanged)),
-    m_ownsPrivate(true)
-{
-}
-
-NetworkHandle::~NetworkHandle() {
-    if (m_ownsPrivate) {
-        network_handle_free(m_d);
-    }
-}
-bool NetworkHandle::connectionPending() const
-{
-    return network_handle_connection_pending_get(m_d);
-}
-bool NetworkHandle::connectionUp() const
-{
-    return network_handle_connection_up_get(m_d);
-}
-bool NetworkHandle::login()
-{
-    return network_handle_login(m_d);
-}
-bool NetworkHandle::registerNewUser(const QString& user_id)
-{
-    return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

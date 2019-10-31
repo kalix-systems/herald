@@ -64,7 +64,7 @@ Rectangle {
             }
 
             Keys.onReturnPressed: {
-                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                if (heraldState.registerNewUser(entryField.text.trim())) {
                     heraldState.configInit = true
                 }
             }
@@ -84,7 +84,7 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                if (heraldState.registerNewUser(entryField.text.trim())) {
                     heraldState.configInit = true
                 }
             }
