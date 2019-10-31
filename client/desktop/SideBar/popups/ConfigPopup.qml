@@ -74,7 +74,7 @@ Window {
                     id: cfgUname
                     maximumLength: 256
                     property bool usernameValid: true
-                    placeholderText: "Enter Username"
+                    text: config.name
                     selectionColor: CmnCfg.palette.tertiaryColor
                 }
             }
