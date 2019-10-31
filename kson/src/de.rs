@@ -107,6 +107,7 @@ tag_reader_method!(read_uint_tag, Unsigned, "failed to read uint tag");
 tag_reader_method!(read_int_tag, Signed, "failed to read int tag");
 tag_reader_method!(read_bytes_tag, Bytes, "failed to read byte tag");
 tag_reader_method!(read_coll_tag, Collection, "failed to read collection tag");
+tag_reader_method!(read_cons_tag, Cons, "failed to read cons tag");
 
 macro_rules! read_raw_uint {
     ($fname: ident, $type: tt, $len: expr) => {
@@ -273,7 +274,7 @@ impl Deserializer {
         }
     }
 
-    pub fn read_array_len(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+    pub fn read_array_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
         if tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP {
             e!(
                 WrongMinorType {
@@ -293,7 +294,7 @@ impl Deserializer {
         })
     }
 
-    pub fn read_map_len(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+    pub fn read_map_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
         if tag.val & COLLECTION_IS_MAP != COLLECTION_IS_MAP {
             e!(
                 WrongMinorType {
@@ -311,5 +312,29 @@ impl Deserializer {
         } else {
             self.read_raw_u64(prelen)? as usize
         })
+    }
+
+    pub fn read_cons_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        Ok(if !tag.is_big {
+            tag.val as usize
+        } else {
+            self.read_raw_u64(tag.val)? as usize
+        })
+    }
+
+    pub fn read_cons<Car, F, Cdr, G>(
+        &mut self,
+        car_reader: F,
+        cdr_reader: G,
+    ) -> Result<Cdr, KsonError>
+    where
+        F: FnOnce(&mut Self, usize) -> Result<Car, KsonError>,
+        G: FnOnce(&mut Self, Car) -> Result<Cdr, KsonError>,
+    {
+        let tag = self.read_cons_tag()?;
+        let len = self.read_cons_len_from_tag(tag)?;
+        let car = car_reader(self, len)?;
+        let cdr = cdr_reader(self, car)?;
+        Ok(cdr)
     }
 }
