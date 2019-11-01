@@ -9,5 +9,6 @@ members = [
   "heraldcore",
   "libherald",
   "libherald/qt_bindgen",
-  "kson"
+  "kson",
+  "kson/kson_derive"
 ]

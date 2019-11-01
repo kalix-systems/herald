@@ -1,0 +1,77 @@
+use proc_macro2::Literal;
+use quote::quote;
+use syn::*;
+
+pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
+    let impl_ser = match data.fields {
+        // C-style structs
+        Fields::Named(fields) => {
+            let field_idents: Vec<Ident> = Fields::Named(fields)
+                .iter()
+                .map(|field| field.ident.clone().unwrap())
+                .collect();
+            let field_strs: Vec<String> = field_idents
+                .iter()
+                .map(std::string::ToString::to_string)
+                .collect();
+
+            let ident_string = name.to_string();
+
+            let length = field_idents.len();
+
+            let pairs = field_idents
+                .iter()
+                .zip(field_strs.iter())
+                .map(|(ident, ident_string)| quote! { #ident_string, &self.#ident });
+
+            quote! {
+                s.start_cons(true, #length);
+
+                s.put_cons_tag(#ident_string);
+
+                #(s.put_cons_pair(#pairs);)*
+            }
+        }
+        // Tuple structs
+        Fields::Unnamed(fields) => {
+            let fields: Vec<Type> = Fields::Unnamed(fields)
+                .iter()
+                .map(|field| field.ty.clone())
+                .collect();
+            let seq_len: usize = fields.len();
+
+            let ident_string = name.to_string();
+
+            let kargs = (0..fields.len())
+                .map(Literal::usize_unsuffixed)
+                .map(|index| quote! {self.#index});
+
+            quote! {
+                s.start_cons(false, #seq_len);
+
+                // name
+                s.put_cons_tag(#ident_string);
+
+                // fields
+                #(s.put_cons_item(&#kargs);)*
+            }
+        }
+        // Unit-like structs
+        Fields::Unit => {
+            let ident_string = name.to_string();
+
+            quote! {
+                s.start_cons(false, 0);
+                s.put_cons_tag(#ident_string);
+            }
+        }
+    };
+
+    quote! {
+        impl Ser for #name {
+            fn ser<S: Serializer>(self, s: &mut S) {
+                #impl_ser
+            }
+        }
+    }
+}

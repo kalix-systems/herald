@@ -176,7 +176,7 @@ macro_rules! read_int_from_tag {
                         E!(
                             WrongMinorType {
                                 expected: "signed integer",
-                                found: "unknown",
+                                found: "unknown".into(),
                             },
                             self.data.clone(),
                             self.ix,
@@ -224,7 +224,7 @@ impl Deserializer {
             e!(
                 WrongMinorType {
                     expected: "bytes",
-                    found: "string"
+                    found: "string".into()
                 },
                 self.data.clone(),
                 self.ix
@@ -244,12 +244,12 @@ impl Deserializer {
     }
 
     // TODO: replace this with string-y wrapper around bytes
-    pub fn read_string_from_tag(&mut self, tag: TagByte) -> Result<String, KsonError> {
+    pub fn read_str_from_tag(&mut self, tag: TagByte) -> Result<&str, KsonError> {
         if tag.val & BYTES_ARE_UTF8 != BYTES_ARE_UTF8 {
             e!(
                 WrongMinorType {
                     expected: "string",
-                    found: "bytes"
+                    found: "bytes".into()
                 },
                 self.data.clone(),
                 self.ix
@@ -266,12 +266,15 @@ impl Deserializer {
         };
 
         let ix = self.ix;
+        let err_data = self.data.clone();
         let bytes = self.read_raw_slice(len)?;
 
-        match std::str::from_utf8(bytes) {
-            Ok(s) => Ok(s.into()),
-            Err(e) => Err(E!(BadUtf8String(e), self.data.clone(), ix)),
-        }
+        std::str::from_utf8(bytes).map_err(|e| E!(BadUtf8String(e), err_data, ix))
+    }
+
+    pub fn read_str(&mut self) -> Result<&str, KsonError> {
+        let tag = self.read_bytes_tag()?;
+        self.read_str_from_tag(tag)
     }
 
     pub fn read_array_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
@@ -279,7 +282,7 @@ impl Deserializer {
             e!(
                 WrongMinorType {
                     expected: "array",
-                    found: "map"
+                    found: "map".into()
                 },
                 self.data.clone(),
                 self.ix
@@ -299,7 +302,7 @@ impl Deserializer {
             e!(
                 WrongMinorType {
                     expected: "map",
-                    found: "array"
+                    found: "array".into()
                 },
                 self.data.clone(),
                 self.ix
@@ -314,12 +317,17 @@ impl Deserializer {
         })
     }
 
-    pub fn read_cons_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
-        Ok(if !tag.is_big {
-            tag.val as usize
-        } else {
-            self.read_raw_u64(tag.val)? as usize
-        })
+    pub fn read_cons_meta_from_tag(&mut self, tag: TagByte) -> Result<(bool, usize), KsonError> {
+        let is_map = tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP;
+        let prelen = tag.val & !COLLECTION_IS_MAP;
+        Ok((
+            is_map,
+            if !tag.is_big {
+                prelen as usize
+            } else {
+                self.read_raw_u64(prelen)? as usize
+            },
+        ))
     }
 
     pub fn read_cons<Car, F, Cdr, G>(
@@ -328,13 +336,36 @@ impl Deserializer {
         cdr_reader: G,
     ) -> Result<Cdr, KsonError>
     where
-        F: FnOnce(&mut Self, usize) -> Result<Car, KsonError>,
+        F: FnOnce(&mut Self, bool, usize) -> Result<Car, KsonError>,
         G: FnOnce(&mut Self, Car) -> Result<Cdr, KsonError>,
     {
         let tag = self.read_cons_tag()?;
-        let len = self.read_cons_len_from_tag(tag)?;
-        let car = car_reader(self, len)?;
+        let (is_map, len) = self.read_cons_meta_from_tag(tag)?;
+        let car = car_reader(self, is_map, len)?;
         let cdr = cdr_reader(self, car)?;
         Ok(cdr)
+    }
+
+    pub fn check_entry<V: De>(&mut self, key_should_be: &'static str) -> Result<V, KsonError> {
+        let err_data = self.data.clone();
+        let err_ix = self.ix;
+        let key = self.read_str()?;
+
+        if key != key_should_be {
+            e!(
+                WrongStructKey {
+                    expected: key_should_be,
+                    found: key.into()
+                },
+                err_data,
+                err_ix
+            )
+        }
+
+        V::de(self)
+    }
+
+    pub fn take_val<V: De>(&mut self) -> Result<V, KsonError> {
+        V::de(self)
     }
 }

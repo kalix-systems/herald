@@ -30,7 +30,18 @@ pub enum Variant {
     },
     WrongMinorType {
         expected: &'static str,
-        found: &'static str,
+        found: String,
+    },
+    WrongEnumVariant {
+        found: String,
+    },
+    WrongConsSize {
+        expected: usize,
+        found: usize,
+    },
+    WrongConsKey {
+        expected: &'static str,
+        found: String,
     },
     BadUtf8String(Utf8Error),
 }
@@ -54,7 +65,7 @@ impl fmt::Display for Error {
              ",
             self.bytes,
             self.offset,
-            (match self.variant {
+            (match &self.variant {
                 LengthError {
                     expected,
                     remaining,
@@ -72,6 +83,14 @@ impl fmt::Display for Error {
                 WrongMinorType { expected, found } => {
                     format!("expected minor type {} but found {}", expected, found)
                 }
+                WrongConsSize { expected, found } => format!(
+                    "cons had wrong size - expected {} fields but only found {}",
+                    expected, found
+                ),
+                WrongConsKey { expected, found } => format!(
+                    "cons had wrong keys - expected {}, found {}",
+                    expected, found
+                ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
             }),
             self.backtrace

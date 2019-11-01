@@ -162,6 +162,38 @@ impl Serializer {
             self.put_map_pair(k, v);
         }
     }
+
+    pub fn start_cons<F, I>(&mut self, is_map: bool, len: usize) {
+        let major_type = Type::Collection as u8;
+        let minor_type = if is_map { COLLECTION_IS_MAP } else { 0 };
+        let mut tag = major_type | minor_type;
+        if len < COLLECTION_IS_MAP as usize {
+            tag |= len as u8;
+            self.0.push(tag);
+        } else {
+            tag |= BIG_BIT;
+
+            let digs = bytes_of_u64(len as u64 - 1);
+            debug_assert!(digs.len() < BIG_BIT as usize);
+            tag |= digs.len() as u8;
+
+            self.0.push(tag);
+            self.0.extend_from_slice(&digs);
+        }
+    }
+
+    pub fn put_cons_tag<T: AtomicSer>(&mut self, item: &T) {
+        item.ser(self);
+    }
+
+    pub fn put_cons_item<T: Ser>(&mut self, item: &T) {
+        item.ser(self);
+    }
+
+    pub fn put_cons_pair<K: AtomicSer, V: Ser>(&mut self, key: &K, val: &V) {
+        key.ser(self);
+        val.ser(self);
+    }
 }
 
 macro_rules! trivial_ser_copy {
