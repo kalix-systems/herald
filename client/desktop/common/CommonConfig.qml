@@ -38,7 +38,7 @@ Item {
     /// standard chat text size
     property int chatTextSize: 10
     /// standard header size
-    property int headerSize: 14
+    property int headerSize: 18
     /// standard popup height and width
     property int popupWidth: 200
     property int popupHeight: 250

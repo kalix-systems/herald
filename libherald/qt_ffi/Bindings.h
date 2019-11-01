@@ -16,7 +16,6 @@ class Members;
 class MessageBuilder;
 class MessagePreview;
 class Messages;
-class NetworkHandle;
 class Users;
 
 class Attachments : public QAbstractItemModel
@@ -239,14 +238,22 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(bool configInit READ configInit WRITE setConfigInit NOTIFY configInitChanged FINAL)
+    Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
+    Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     explicit HeraldState(bool owned, QObject *parent);
 public:
     explicit HeraldState(QObject *parent = nullptr);
     ~HeraldState() override;
     bool configInit() const;
     void setConfigInit(bool v);
+    bool connectionPending() const;
+    bool connectionUp() const;
+    Q_INVOKABLE bool login();
+    Q_INVOKABLE bool registerNewUser(const QString& user_id);
 Q_SIGNALS:
     void configInitChanged();
+    void connectionPendingChanged();
+    void connectionUpChanged();
 };
 
 class HeraldUtils : public QObject
@@ -464,8 +471,6 @@ public:
     Q_INVOKABLE bool clearConversationHistory();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
-    Q_INVOKABLE QString messageAuthorById(const QByteArray& msg_id) const;
-    Q_INVOKABLE QString messageBodyById(const QByteArray& msg_id) const;
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -511,29 +516,6 @@ Q_SIGNALS:
     void lastBodyChanged();
     void lastEpochTimestampMsChanged();
     void lastStatusChanged();
-};
-
-class NetworkHandle : public QObject
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
-    Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-    explicit NetworkHandle(bool owned, QObject *parent);
-public:
-    explicit NetworkHandle(QObject *parent = nullptr);
-    ~NetworkHandle() override;
-    bool connectionPending() const;
-    bool connectionUp() const;
-    Q_INVOKABLE bool login();
-    Q_INVOKABLE bool registerNewUser(const QString& user_id);
-Q_SIGNALS:
-    void connectionPendingChanged();
-    void connectionUpChanged();
 };
 
 class Users : public QAbstractItemModel

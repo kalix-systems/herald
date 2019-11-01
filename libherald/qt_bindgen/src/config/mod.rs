@@ -47,7 +47,6 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        errors(),
        herald_utils(),
        conversations(),
-       network_handle(),
        users(),
        members(),
        messages(),
@@ -61,11 +60,18 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
 fn herald_state() -> Object {
     let properties = props! {
-        configInit: Prop::new().simple(Bool).write()
+        configInit: Prop::new().simple(Bool).write(),
+        connectionUp: Prop::new().simple(Bool),
+        connectionPending: Prop::new().simple(Bool)
+    };
+
+    let funcs = functions! {
+        mut registerNewUser(user_id: QString) => Bool,
+        mut login() => Bool,
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties)
+        HeraldState : Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -153,21 +159,21 @@ fn conversations() -> Object {
     }
 }
 
-fn network_handle() -> Object {
-    let props = props! {
-        connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool)
-    };
-
-    let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Bool,
-        mut login() => Bool,
-    };
-
-    obj! {
-        NetworkHandle: Obj::new().props(props).funcs(funcs)
-    }
-}
+//fn network_handle() -> Object {
+//    let props = props! {
+//        connectionUp: Prop::new().simple(Bool),
+//        connectionPending: Prop::new().simple(Bool)
+//    };
+//
+//    let funcs = functions! {
+//        mut registerNewUser(user_id: QString) => Bool,
+//        mut login() => Bool,
+//    };
+//
+//    obj! {
+//        NetworkHandle: Obj::new().props(props).funcs(funcs)
+//    }
+//}
 
 fn users() -> Object {
     let props = filter_props();
@@ -269,8 +275,6 @@ fn messages() -> Object {
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
-        const messageBodyById(msg_id: QByteArray) => QString,
-        const messageAuthorById(msg_id: QByteArray) => QString,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 

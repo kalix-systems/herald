@@ -1204,6 +1204,8 @@ pub struct HeraldStateQObject {}
 pub struct HeraldStateEmitter {
     qobject: Arc<AtomicPtr<HeraldStateQObject>>,
     config_init_changed: fn(*mut HeraldStateQObject),
+    connection_pending_changed: fn(*mut HeraldStateQObject),
+    connection_up_changed: fn(*mut HeraldStateQObject),
 }
 
 unsafe impl Send for HeraldStateEmitter {}
@@ -1219,6 +1221,8 @@ impl HeraldStateEmitter {
         HeraldStateEmitter {
             qobject: self.qobject.clone(),
             config_init_changed: self.config_init_changed,
+            connection_pending_changed: self.connection_pending_changed,
+            connection_up_changed: self.connection_up_changed,
         }
     }
     fn clear(&self) {
@@ -1231,6 +1235,18 @@ impl HeraldStateEmitter {
             (self.config_init_changed)(ptr);
         }
     }
+    pub fn connection_pending_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_pending_changed)(ptr);
+        }
+    }
+    pub fn connection_up_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.connection_up_changed)(ptr);
+        }
+    }
 }
 
 pub trait HeraldStateTrait {
@@ -1238,16 +1254,24 @@ pub trait HeraldStateTrait {
     fn emit(&mut self) -> &mut HeraldStateEmitter;
     fn config_init(&self) -> bool;
     fn set_config_init(&mut self, value: bool);
+    fn connection_pending(&self) -> bool;
+    fn connection_up(&self) -> bool;
+    fn login(&mut self) -> bool;
+    fn register_new_user(&mut self, user_id: String) -> bool;
 }
 
 #[no_mangle]
 pub extern "C" fn herald_state_new(
     herald_state: *mut HeraldStateQObject,
     herald_state_config_init_changed: fn(*mut HeraldStateQObject),
+    herald_state_connection_pending_changed: fn(*mut HeraldStateQObject),
+    herald_state_connection_up_changed: fn(*mut HeraldStateQObject),
 ) -> *mut HeraldState {
     let herald_state_emit = HeraldStateEmitter {
         qobject: Arc::new(AtomicPtr::new(herald_state)),
         config_init_changed: herald_state_config_init_changed,
+        connection_pending_changed: herald_state_connection_pending_changed,
+        connection_up_changed: herald_state_connection_up_changed,
     };
     let d_herald_state = HeraldState::new(herald_state_emit);
     Box::into_raw(Box::new(d_herald_state))
@@ -1266,6 +1290,30 @@ pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -
 #[no_mangle]
 pub unsafe extern "C" fn herald_state_config_init_set(ptr: *mut HeraldState, v: bool) {
     (&mut *ptr).set_config_init(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_connection_pending_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).connection_pending()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_connection_up_get(ptr: *const HeraldState) -> bool {
+    (&*ptr).connection_up()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_login(ptr: *mut HeraldState) -> bool {
+    let o = &mut *ptr;
+    o.login()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_register_new_user(ptr: *mut HeraldState, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
+    let mut user_id = String::new();
+    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
+    let o = &mut *ptr;
+    o.register_new_user(user_id)
 }
 
 pub struct HeraldUtilsQObject {}
@@ -2455,8 +2503,6 @@ pub trait MessagesTrait {
     fn clear_conversation_history(&mut self) -> bool;
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
-    fn message_author_by_id(&self, msg_id: &[u8]) -> String;
-    fn message_body_by_id(&self, msg_id: &[u8]) -> String;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool { false }
     fn remove_rows(&mut self, _row: usize, _count: usize) -> bool { false }
@@ -2631,24 +2677,6 @@ pub unsafe extern "C" fn messages_index_by_id(ptr: *const Messages, msg_id_str: 
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_message_author_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
-    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &*ptr;
-    let r = o.message_author_by_id(msg_id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_message_body_by_id(ptr: *const Messages, msg_id_str: *const c_char, msg_id_len: c_int, d: *mut QString, set: fn(*mut QString, str: *const c_char, len: c_int)) {
-    let msg_id = { slice::from_raw_parts(msg_id_str as *const u8, to_usize(msg_id_len)) };
-    let o = &*ptr;
-    let r = o.message_body_by_id(msg_id);
-    let s: *const c_char = r.as_ptr() as (*const c_char);
-    set(d, s, r.len() as i32);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_row_count(ptr: *const Messages) -> c_int {
     to_c_int((&*ptr).row_count())
 }
@@ -2785,101 +2813,6 @@ pub unsafe extern "C" fn messages_data_receipt_status(ptr: *const Messages, row:
 pub unsafe extern "C" fn messages_data_server_timestamp_ms(ptr: *const Messages, row: c_int) -> COption<i64> {
     let o = &*ptr;
     o.server_timestamp_ms(to_usize(row)).into()
-}
-
-pub struct NetworkHandleQObject {}
-
-pub struct NetworkHandleEmitter {
-    qobject: Arc<AtomicPtr<NetworkHandleQObject>>,
-    connection_pending_changed: fn(*mut NetworkHandleQObject),
-    connection_up_changed: fn(*mut NetworkHandleQObject),
-}
-
-unsafe impl Send for NetworkHandleEmitter {}
-
-impl NetworkHandleEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> NetworkHandleEmitter {
-        NetworkHandleEmitter {
-            qobject: self.qobject.clone(),
-            connection_pending_changed: self.connection_pending_changed,
-            connection_up_changed: self.connection_up_changed,
-        }
-    }
-    fn clear(&self) {
-        let n: *const NetworkHandleQObject = null();
-        self.qobject.store(n as *mut NetworkHandleQObject, Ordering::SeqCst);
-    }
-    pub fn connection_pending_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.connection_pending_changed)(ptr);
-        }
-    }
-    pub fn connection_up_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.connection_up_changed)(ptr);
-        }
-    }
-}
-
-pub trait NetworkHandleTrait {
-    fn new(emit: NetworkHandleEmitter) -> Self;
-    fn emit(&mut self) -> &mut NetworkHandleEmitter;
-    fn connection_pending(&self) -> bool;
-    fn connection_up(&self) -> bool;
-    fn login(&mut self) -> bool;
-    fn register_new_user(&mut self, user_id: String) -> bool;
-}
-
-#[no_mangle]
-pub extern "C" fn network_handle_new(
-    network_handle: *mut NetworkHandleQObject,
-    network_handle_connection_pending_changed: fn(*mut NetworkHandleQObject),
-    network_handle_connection_up_changed: fn(*mut NetworkHandleQObject),
-) -> *mut NetworkHandle {
-    let network_handle_emit = NetworkHandleEmitter {
-        qobject: Arc::new(AtomicPtr::new(network_handle)),
-        connection_pending_changed: network_handle_connection_pending_changed,
-        connection_up_changed: network_handle_connection_up_changed,
-    };
-    let d_network_handle = NetworkHandle::new(network_handle_emit);
-    Box::into_raw(Box::new(d_network_handle))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_free(ptr: *mut NetworkHandle) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_connection_pending_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).connection_pending()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_connection_up_get(ptr: *const NetworkHandle) -> bool {
-    (&*ptr).connection_up()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_login(ptr: *mut NetworkHandle) -> bool {
-    let o = &mut *ptr;
-    o.login()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn network_handle_register_new_user(ptr: *mut NetworkHandle, user_id_str: *const c_ushort, user_id_len: c_int) -> bool {
-    let mut user_id = String::new();
-    set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    let o = &mut *ptr;
-    o.register_new_user(user_id)
 }
 
 pub struct UsersQObject {}

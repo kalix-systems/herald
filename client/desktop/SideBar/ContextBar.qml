@@ -6,6 +6,8 @@ import "popups" as Popups
 import "../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
+import "qrc:/imports/Avatar"
+import QtGraphicalEffects 1.0
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -21,32 +23,47 @@ ToolBar {
     background: Rectangle {
         color: CmnCfg.palette.secondaryColor
     }
+    property alias headerText: headerText.text
 
     RowLayout {
-        anchors.fill: parent
-        Common.Avatar {
-            id: configAvatar
-            Layout.alignment: Qt.AlignCenter
-            Layout.rightMargin: CmnCfg.smallMargin / 2
-            avatarLabel: config.name
-            labeled: false
-            colorHash: config.color
-            pfpUrl: Utils.safeStringOrDefault(config.profilePicture, "")
-            labelGap: 0
-            size: 28
-            isDefault: true
-            inLayout: true
-        }
 
-        //probably need a standard divider that also handles layouts
-        Rectangle {
-            Layout.alignment: Qt.AlignHCenter
-            height: parent.height
-            width: 1
-            color: CmnCfg.palette.mainColor
+        anchors.fill: parent
+
+        AvatarMain {
+            id: configAvatar
+            iconColor: CmnCfg.palette.avatarColors[config.color]
+            initials: config.name[0].toUpperCase()
+            size: 28
+            pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
+            Layout.alignment: Qt.AlignCenter
+            Layout.leftMargin: 12
+            Layout.rightMargin: 12
+            MouseArea {
+                anchors.fill: parent
+                id: avatarHoverHandler
+                onPressed: {
+                    overlay.visible = true
+                }
+                onReleased: {
+                    overlay.visible = false
+                }
+                onClicked: { configPopup.show()
+                }
+            }
+            ColorOverlay {
+                id: overlay
+                visible: false
+                    anchors.fill: parent
+                    source: parent
+                    // hexquad black + transparent
+                    color: "#40000000"
+                    smooth: true
+                }
+
         }
 
         Text {
+            id: headerText
             text: "Conversations"
             font.pixelSize: CmnCfg.headerSize
             font.family: CmnCfg.chatFont.name

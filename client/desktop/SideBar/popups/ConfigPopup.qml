@@ -74,7 +74,7 @@ Window {
                     id: cfgUname
                     maximumLength: 256
                     property bool usernameValid: true
-                    placeholderText: "Enter Username"
+                    text: config.name
                     selectionColor: CmnCfg.palette.tertiaryColor
                 }
             }
@@ -87,7 +87,7 @@ Window {
             Button {
                 text: "Submit"
                 onClicked: {
-                    JS.submit(config, heraldState.configInit, cfgUid, cfgUname)
+                    JS.submit(config, cfgUname)
                     close()
                 }
             }

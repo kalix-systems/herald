@@ -5,21 +5,12 @@ import LibHerald 1.0
 
 RowLayout {
     Layout.margins: CmnCfg.smallMargin / 2
-    Label {
-        font.pixelSize: 10
-        text: friendlyTimestamp
-        id: timestamp
-        color: CmnCfg.palette.mainTextColor
-    }
-
-    Item {
-        Layout.fillWidth: true
-    }
 
     Image {
         id: receipt
         source: receiptImage
-        sourceSize: Qt.size(12, 12)
+        sourceSize: Qt.size(16, 16)
+        Layout.alignment: Qt.AlignRight
         layer.enabled: true
         layer.samplerName: "maskSource"
         layer.effect: ShaderEffect {

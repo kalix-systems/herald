@@ -69,6 +69,7 @@ Item {
             text: lastBody
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
+            Layout.maximumHeight: labelGrid.height / 2
             color: CmnCfg.palette.secondaryColor
         }
 

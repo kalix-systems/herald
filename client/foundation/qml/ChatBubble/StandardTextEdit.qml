@@ -12,5 +12,6 @@ TextEdit {
     selectByMouse: true
     selectByKeyboard: true
     readOnly: true
+    font.family: CmnCfg.chatFont.name
     color: CmnCfg.palette.mainTextColor
 }

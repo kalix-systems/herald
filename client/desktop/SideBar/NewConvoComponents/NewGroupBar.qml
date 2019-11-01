@@ -8,6 +8,7 @@ Rectangle {
     id: bgBar
     width: parent.width
     height: visible ? 30 : 0
+    z: 100
 
     property color hoverColor: CmnCfg.palette.secondaryColor
     color: CmnCfg.palette.mainColor
@@ -41,7 +42,7 @@ Rectangle {
         z: 10
         anchors.fill: parent
         onClicked: {
-            convoPane.state = "newGroupState"
+            sideBarState.state = "newGroupState"
         }
     }
 

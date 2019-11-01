@@ -20,8 +20,8 @@ pub mod message_builder;
 pub mod message_preview;
 /// Implementation of `crate::interface::MessagesTrait`.
 pub mod messages;
-/// Implementation of `crate::interface::NetworkHandleTrait`.
-pub mod networkhandle;
+///// Implementation of `crate::interface::NetworkHandleTrait`.
+//pub mod networkhandle;
 /// Implementation of `crate::interface::UsersTrait`.
 pub mod users;
 
@@ -36,5 +36,5 @@ pub use members::*;
 pub use message_builder::*;
 pub use message_preview::*;
 pub use messages::*;
-pub use networkhandle::*;
+//pub use networkhandle::*;
 pub use users::*;

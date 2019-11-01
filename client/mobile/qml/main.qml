@@ -26,12 +26,6 @@ ApplicationWindow {
         id: heraldState
     }
 
-    // handles all network polling, emit tryPollUpdate upon
-    // receiving and update
-    NetworkHandle {
-        id: networkHandle
-    }
-
     // displays error dialog upon output from
     // libherald, meant as a debugging tool
     Errors.ErrorHandler {}

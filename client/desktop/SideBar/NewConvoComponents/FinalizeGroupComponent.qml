@@ -19,7 +19,7 @@ Component {
             onClicked: {
                 groupMemberSelect.setTitle(groupTitle.text)
                 groupMemberSelect.finalize()
-                convoPane.state = ""
+                sideBarState.state = ""
             }
         }
 
@@ -28,7 +28,7 @@ Component {
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "newGroupState"
+            onClicked: sideBarState.state = "newGroupState"
         }
 
         TextArea {
@@ -56,7 +56,7 @@ Component {
                 if (event.key === Qt.Key_Return) {
                     groupMemberSelect.setTitle(groupTitle.text)
                     groupMemberSelect.finalize()
-                    convoPane.state = ""
+                    sideBarState.state = ""
                 }
             }
         }

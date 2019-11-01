@@ -37,9 +37,8 @@ Flickable {
     Column {
         id: textMessageCol
         focus: true
-        spacing: CmnCfg.smallMargin
-        topPadding: CmnCfg.padding
-        bottomPadding: CmnCfg.padding
+
+        //   spacing: CmnCfg.smallMargin
         anchors {
             right: parent.right
             left: parent.left
@@ -49,6 +48,7 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
+
             delegate: Row {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
@@ -57,11 +57,15 @@ Flickable {
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         epochTimestampMs)
-                readonly property string authName: contactsModel.nameById(
-                                                       author)
+
                 readonly property bool outbound: author === config.configId
 
+                readonly property string authName: outbound ? config.name : contactsModel.nameById(
+                                                                  author)
+
                 spacing: CmnCfg.margin
+                readonly property string pfpUrl: outbound ? config.profilePicture
+                                                          : contactsModel.profilePictureById(author)
                 // column is most correct to resize for extra content
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -69,6 +73,8 @@ Flickable {
                     rightMargin: CmnCfg.margin
                     leftMargin: CmnCfg.smallMargin
                 }
+                bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
+                topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
                 Component {
                     id: std
@@ -86,15 +92,10 @@ Flickable {
                     CB.ReplyBubble {
                         body: proxyBody
                         friendlyTimestamp: timestamp
-                        opBody: op !== undefined ? ownedConversation.messageBodyById(
-                                                       op) : ""
                         receiptImage: proxyReceiptImage
-                        opName: op !== undefined ? ownedConversation.messageAuthorById(
-                                                       op) : ""
-                        opColor: CmnCfg.avatarColors[contactsModel.colorById(
-                                                         opName)]
                         authorName: authName
                         authorColor: userColor
+                        replyId: op
                     }
                 }
 
@@ -116,12 +117,13 @@ Flickable {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
                     opacity: isTail && !outbound ? 1 : 0
-                    size: 32
+                    size: 28
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
-                        bottomMargin: 0
+                        bottomMargin: parent.bottomPadding
                     }
+                    pfpPath: parent.pfpUrl
                 }
 
                 CB.ChatBubble {
@@ -143,12 +145,13 @@ Flickable {
                     iconColor: userColor
                     initials: authName[0].toUpperCase()
                     opacity: isTail && outbound ? 1 : 0
-                    size: 32
+                    size: 28
                     anchors {
                         bottom: parent.bottom
                         margins: CmnCfg.margin
-                        bottomMargin: 0
+                        bottomMargin: parent.bottomPadding
                     }
+                    pfpPath: parent.pfpUrl
                 }
             } //bubble wrapper
         } // Repeater
