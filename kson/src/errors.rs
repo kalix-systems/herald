@@ -43,7 +43,12 @@ pub enum Variant {
         expected: &'static str,
         found: String,
     },
+    CollectionTooLarge {
+        max_len: usize,
+        found: usize,
+    },
     BadUtf8String(Utf8Error),
+    UnknownConst(u8),
 }
 
 use Variant::*;
@@ -94,7 +99,12 @@ impl fmt::Display for Error {
                     "cons had wrong keys - expected {}, found {}",
                     expected, found
                 ),
+                CollectionTooLarge { max_len, found } => format!(
+                    "collection was too large - had capacity for {} elements but {} were found",
+                    max_len, found
+                ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
+                UnknownConst(u) => format!("unknown constant with value {:x?}", u),
             }),
             self.backtrace
         )

@@ -99,7 +99,7 @@ impl Serializer {
         self.write_slice(true, string.as_bytes())
     }
 
-    pub fn start_arr(&mut self, len: usize) {
+    pub fn start_vec(&mut self, len: usize) {
         let major_type = Type::Collection as u8;
         let minor_type = 0;
         let mut tag = major_type | minor_type;
@@ -118,18 +118,18 @@ impl Serializer {
         }
     }
 
-    pub fn put_arr_item<T: Ser + ?Sized>(&mut self, item: &T) {
+    pub fn put_vec_item<T: Ser + ?Sized>(&mut self, item: &T) {
         item.ser(self);
     }
 
-    pub fn write_arr<'a, T, I>(&mut self, items: I)
+    pub fn write_vec<'a, T, I>(&mut self, items: I)
     where
         T: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = &'a T>,
     {
-        self.start_arr(items.len());
+        self.start_vec(items.len());
         for item in items {
-            self.put_arr_item(item);
+            self.put_vec_item(item);
         }
     }
 
@@ -267,4 +267,106 @@ pub fn into_vec<T: Ser + ?Sized>(t: &T) -> Vec<u8> {
     let mut out = Serializer::new();
     t.ser(&mut out);
     out.0
+}
+
+mod __impls {
+    use super::*;
+
+    mod __std {
+        use super::*;
+        use std::collections::*;
+
+        impl<T: Ser> Ser for Vec<T> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for i in self {
+                    i.ser(s);
+                }
+            }
+        }
+
+        impl<T: Ser> Ser for VecDeque<T> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for i in self {
+                    i.ser(s);
+                }
+            }
+        }
+
+        impl<T: Ser> Ser for BinaryHeap<T> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for i in self {
+                    i.ser(s);
+                }
+            }
+        }
+
+        impl<T: Ser> Ser for LinkedList<T> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for i in self {
+                    i.ser(s);
+                }
+            }
+        }
+
+        impl<K: AtomicSer, V: Ser, S: std::hash::BuildHasher> Ser for HashMap<K, V, S> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_map(self.len());
+                for (k, v) in self {
+                    s.put_map_pair(k, v);
+                }
+            }
+        }
+
+        impl<K: AtomicSer, V: Ser> Ser for BTreeMap<K, V> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_map(self.len());
+                for (k, v) in self {
+                    s.put_map_pair(k, v);
+                }
+            }
+        }
+
+        impl<T: Ser, S: std::hash::BuildHasher> Ser for HashSet<T, S> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for t in self {
+                    t.ser(s);
+                }
+            }
+        }
+
+        impl<T: Ser> Ser for BTreeSet<T> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+                for t in self {
+                    t.ser(s);
+                }
+            }
+        }
+    }
+
+    mod __arrayvec {
+        use super::*;
+        use arrayvec::*;
+
+        impl<T: Ser, A: Array<Item = T>> Ser for ArrayVec<A> {
+            fn ser(&self, s: &mut Serializer) {
+                s.start_vec(self.len());
+
+                for t in self {
+                    t.ser(s);
+                }
+            }
+        }
+
+        impl<A: Array<Item = u8> + Copy> Ser for ArrayString<A> {
+            fn ser(&self, s: &mut Serializer) {
+                s.write_string(self.as_str());
+            }
+        }
+    }
 }

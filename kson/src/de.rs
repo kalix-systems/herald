@@ -219,6 +219,25 @@ read_int_from_tag!(read_i64_from_tag, i64, 8);
 read_int_from_tag!(read_i128_from_tag, i128, 16);
 
 impl Deserializer {
+    pub fn read_bool(&mut self) -> Result<bool, KsonError> {
+        let tag = self.read_raw_u8(1)?;
+        if tag & MASK_TYPE == Type::Special as u8 {
+            match tag & !MASK_TYPE {
+                FALSE_BYTE => Ok(false),
+                TRUE_BYTE => Ok(true),
+                other => Err(E!(UnknownConst(other), self.data.clone(), self.ix)),
+            }
+        } else {
+            Err(E!(
+                WrongType {
+                    expected: Type::Special,
+                    found: tag & MASK_TYPE
+                },
+                self.data.clone(),
+                self.ix
+            ))
+        }
+    }
     pub fn read_bytes_from_tag(&mut self, tag: TagByte) -> Result<Bytes, KsonError> {
         if tag.val & BYTES_ARE_UTF8 == BYTES_ARE_UTF8 {
             e!(
@@ -414,3 +433,146 @@ trivial_de!(u64, read_u64);
 trivial_de!(u128, read_u128);
 trivial_de!(String, read_string);
 trivial_de!(Bytes, read_bytes);
+
+mod __impls {
+    use super::*;
+
+    mod __std {
+        use super::*;
+        use std::collections::*;
+
+        impl<T: De> De for Vec<T> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_array_len_from_tag(tag)?;
+
+                let mut out = Vec::with_capacity(len);
+                for _ in 0..len {
+                    out.push(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<T: De> De for LinkedList<T> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_array_len_from_tag(tag)?;
+
+                let mut out = LinkedList::new();
+                for _ in 0..len {
+                    out.push_back(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<T: De> De for VecDeque<T> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_array_len_from_tag(tag)?;
+
+                let mut out = VecDeque::with_capacity(len);
+                for _ in 0..len {
+                    out.push_back(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<T: De + Ord> De for BTreeSet<T> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_array_len_from_tag(tag)?;
+
+                let mut out = BTreeSet::new();
+                for _ in 0..len {
+                    out.insert(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<S: std::hash::BuildHasher + Default, T: De + std::hash::Hash + Eq> De for HashSet<T, S> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_array_len_from_tag(tag)?;
+
+                let mut out = HashSet::with_capacity_and_hasher(len, S::default());
+                for _ in 0..len {
+                    out.insert(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<K: De + Ord, V: De> De for BTreeMap<K, V> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_map_len_from_tag(tag)?;
+
+                let mut out = BTreeMap::new();
+                for _ in 0..len {
+                    let key = K::de(d)?;
+                    let val = V::de(d)?;
+                    out.insert(key, val);
+                }
+
+                Ok(out)
+            }
+        }
+
+        impl<S: std::hash::BuildHasher + Default, K: De + std::hash::Hash + Eq, V: De> De
+            for HashMap<K, V, S>
+        {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_map_len_from_tag(tag)?;
+
+                let mut out = HashMap::with_capacity_and_hasher(len, S::default());
+                for _ in 0..len {
+                    let key = K::de(d)?;
+                    let val = V::de(d)?;
+                    out.insert(key, val);
+                }
+
+                Ok(out)
+            }
+        }
+    }
+
+    mod __arrayvec {
+        use super::*;
+        use arrayvec::*;
+
+        impl<T: De, A: Array<Item = T>> De for ArrayVec<A> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let tag = d.read_coll_tag()?;
+                let len = d.read_map_len_from_tag(tag)?;
+
+                if len > A::CAPACITY {
+                    e!(
+                        CollectionTooLarge {
+                            max_len: A::CAPACITY,
+                            found: len
+                        },
+                        d.data.clone(),
+                        d.ix
+                    )
+                }
+
+                let mut out = ArrayVec::new();
+                for _ in 0..len {
+                    out.push(T::de(d)?);
+                }
+
+                Ok(out)
+            }
+        }
+    }
+}
