@@ -4,13 +4,14 @@ use kson::*;
 #[derive(Eq, PartialEq, Debug, Ser, De)]
 pub enum Variants {
     Unit,
-    Tuple(u8, u16, u32, u64, u128),
+    Tuple(u8, u16, u32, u64, u128, Bytes),
     Named {
         first: u8,
         second: u16,
         third: u32,
         fourth: u64,
         fifth: u128,
+        last: Bytes,
     },
 }
 
@@ -30,6 +31,7 @@ fn tuple_like_serde() {
         u32::max_value(),
         u64::max_value(),
         u128::max_value(),
+        Bytes::from_static(b"asdf"),
     );
     let as_vec = kson::ser::into_vec(&val);
     let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
@@ -44,6 +46,7 @@ fn struct_like_serde() {
         third: u32::max_value(),
         fourth: u64::max_value(),
         fifth: u128::max_value(),
+        last: Bytes::from_static(b"asdf"),
     };
     let as_vec = kson::ser::into_vec(&val);
     let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");

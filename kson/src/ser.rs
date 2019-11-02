@@ -1,4 +1,5 @@
 use super::{utils::*, *};
+use bytes::Bytes;
 
 pub struct Serializer(pub Vec<u8>);
 
@@ -237,7 +238,10 @@ macro_rules! trivial_ser {
 }
 
 trivial_ser!([u8], write_bytes);
+trivial_ser!(Bytes, write_bytes);
+
 trivial_ser!(str, write_string);
+trivial_ser!(String, write_string);
 
 impl AtomicSer for bool {}
 
@@ -254,7 +258,10 @@ impl AtomicSer for i64 {}
 impl AtomicSer for i128 {}
 
 impl AtomicSer for str {}
+impl AtomicSer for String {}
+
 impl AtomicSer for [u8] {}
+impl AtomicSer for Bytes {}
 
 pub fn into_vec<T: Ser + ?Sized>(t: &T) -> Vec<u8> {
     let mut out = Serializer::new();

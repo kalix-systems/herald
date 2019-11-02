@@ -17,7 +17,7 @@ fn ser_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
 
     let imp = quote! {
         mod #modname {
-            use super::#name;
+            use super::*;
             use ::kson::{
                 *,
                 de::{De, Deserializer},
@@ -39,7 +39,7 @@ fn de_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
 
     let imp = quote! {
         mod #modname {
-            use super::#name;
+            use super::*;
             use ::kson::{
                 *,
                 de::{De, Deserializer},
@@ -61,7 +61,7 @@ fn ser_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
 
     let imp = quote! {
         mod #modname {
-            use super::#name;
+            use super::*;
             use ::kson::{
                 *,
                 de::{De, Deserializer},
@@ -84,7 +84,7 @@ fn de_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
     let imp = quote! {
 
         mod #modname {
-            use super::#name;
+            use super::*;
             use ::kson::{
                 *,
                 de::{De, Deserializer},
