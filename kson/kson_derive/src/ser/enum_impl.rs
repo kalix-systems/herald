@@ -5,15 +5,21 @@ use syn::*;
 pub fn kson_ser(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
     let variant_id_fields: Vec<(Ident, Vec<Ident>, Fields, String)> = data
         .variants // variants of the enum
-        .iter()
+        .into_iter()
         .map(|variant| {
             // fields of the variant
-            let field_idents = match &variant.fields {
-                Fields::Named(_fields) => variant
-                    .fields
-                    .iter()
-                    .map(|field| field.ident.clone().unwrap())
-                    .collect(),
+            let field_idents: Vec<Ident> = match &variant.fields {
+                f @ Fields::Named(_) => {
+                    let mut field_stuff: Vec<(Ident, String)> = f
+                        .iter()
+                        .map(|f| f.ident.clone().unwrap())
+                        .map(|f| (f.clone(), f.to_string()))
+                        .collect();
+
+                    field_stuff.sort_unstable_by(|(_, k1), (_, k2)| k1.cmp(k2));
+
+                    field_stuff.into_iter().map(|(ident, _)| ident).collect()
+                }
                 _ => (0..variant.fields.iter().len())
                     .map(|i| Ident::new(&format!("field{}", i), Span::call_site()))
                     .collect(),
@@ -28,82 +34,67 @@ pub fn kson_ser(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
         .collect();
 
     // ser
-    let impl_ser = {
-        let branches =
-            variant_id_fields
-                .iter()
-                .map(|(variant, field_idents, fields, ident_string)| {
-                    match &fields {
-                        // C-style
-                        Fields::Named(_fields) => {
-                            let seq_len: usize = field_idents.len();
+    let branches = variant_id_fields
+        .iter()
+        .map(|(variant, field_idents, fields, ident_string)| {
+            match &fields {
+                // C-style
+                Fields::Named(_) => {
+                    let seq_len: usize = field_idents.len();
 
-                            let field_strs: Vec<String> = field_idents
-                                .iter()
-                                .map(std::string::ToString::to_string)
-                                .collect();
-                            let pairs = field_idents.iter().zip(field_strs.iter()).map(
-                                |(ident, ident_string)| {
-                                    quote! {
-                                        #ident_string, &#ident
-                                    }
-                                },
-                            );
+                    let field_strs: Vec<String> = field_idents
+                        .iter()
+                        .map(std::string::ToString::to_string)
+                        .collect();
 
-                            quote! {
-                                #name::#variant{ #(#field_idents),*} =>  {
-                                    s.start_cons(true, #seq_len);
+                    quote! {
+                        #name::#variant{ #(#field_idents),*} =>  {
+                            s.start_cons(true, #seq_len);
 
-                                    // name
-                                    s.put_cons_tag(#ident_string);
+                            // name
+                            s.put_cons_tag(#ident_string);
 
-                                    // fields
-                                    #(s.put_cons_pair(#pairs);)*
-                                }
-                            }
-                        }
-                        // Tuple
-                        Fields::Unnamed(_fields) => {
-                            let seq_len: usize = field_idents.len();
-
-                            let kargs = field_idents
-                                .iter()
-                                .map(|variant_ident| quote! {&#variant_ident});
-                            quote! {
-                                #name::#variant(#(#field_idents),*) => {
-                                    s.start_cons(false, #seq_len);
-
-                                    // name
-                                    s.put_cons_tag(#ident_string);
-
-                                    // fields
-                                    #(s.put_cons_item(#kargs);)*
-                                }
-                            }
-                        }
-                        // Unit-like
-                        Fields::Unit => {
-                            quote! {
-                                #name::#variant => {
-                                    s.start_cons(false, 0);
-                                    s.put_cons_tag(#ident_string);
-                                }
-                            }
+                            // fields
+                            #(s.put_cons_pair(#field_strs, #field_idents);)*
                         }
                     }
-                });
-        quote! {
-            fn ser<S: Serializer>(self, s: &mut S) {
+                }
+                // Tuple
+                Fields::Unnamed(_) => {
+                    let seq_len: usize = field_idents.len();
+
+                    let kargs = field_idents.iter();
+
+                    quote! {
+                        #name::#variant(#(#field_idents),*) => {
+                            s.start_cons(false, #seq_len);
+
+                            // name
+                            s.put_cons_tag(#ident_string);
+
+                            // fields
+                            #(s.put_cons_item(#kargs);)*
+                        }
+                    }
+                }
+                // Unit-like
+                Fields::Unit => {
+                    quote! {
+                        #name::#variant => {
+                            s.start_cons(false, 0);
+                            s.put_cons_tag(#ident_string);
+                        }
+                    }
+                }
+            }
+        });
+    quote! {
+        impl Ser for #name {
+            fn ser(&self, s: &mut Serializer) {
                 match self {
                     #(#branches)*
                 }
             }
-        }
-    };
-
-    quote! {
-        impl Ser for #name {
-            #impl_ser
         }
     }
 }

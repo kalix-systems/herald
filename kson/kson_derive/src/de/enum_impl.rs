@@ -38,12 +38,12 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
         };
 
         let read_cons_tag = quote! {
-            |d,is_map,len| {
-                let ident = d.read_str()?;
+            |d,is_map,num_fields| {
+                let id = d.read_string()?;
                 Ok(__fields_data {
-                    id: ident.into(),
+                    id,
                     is_map,
-                    num_fields: len,
+                    num_fields,
                 })
             }
         };
@@ -58,23 +58,23 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                         quote! {
                             #m_ident_string => {
                                 if is_map {
-                                    e!(
+                                    Err(E!(
                                         WrongMinorType {
                                             expected: "cons-array",
                                             found: "cons-map".into()
                                         },
                                         d.data.clone(),
                                         d.ix
-                                    )
+                                    ))
                                 } else if num_fields != 0 {
-                                    e!(
+                                    Err(E!(
                                         WrongConsSize {
                                             expected: 0,
                                             found: num_fields
                                         },
                                         d.data.clone(),
                                         d.ix
-                                    )
+                                    ))
                                 } else {
                                     Ok(#constructor)
                                 }
@@ -89,28 +89,25 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                         quote! {
                             #m_ident_string => {
                                 if is_map {
-                                    e!(
+                                    Err(E!(
                                         WrongMinorType {
                                             expected: "cons-array",
                                             found: "cons-map".into()
                                         },
                                         d.data.clone(),
                                         d.ix
-                                    )
+                                    ))
                                 } else if num_fields != #exp_len {
-                                    e!(WrongConsSize {
+                                    Err(E!(WrongConsSize {
                                         expected: #exp_len,
-                                        found: len
+                                        found: num_fields
                                     },
                                     d.data.clone(),
                                     d.ix
-                                    )
+                                    ))
+                                } else {
+                                    Ok(#constructor(#(#typ::de(d)?),*))
                                 }
-
-                                // evaluate the iterator
-                                let out = Ok(#constructor(#(#typ::de(d)?),*));
-
-                                out
                             }
                         }
                     }
@@ -132,28 +129,27 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                         quote! {
                             #m_ident_string => {
                                 if !is_map {
-                                    e!(
+                                    Err(E!(
                                         WrongMinorType {
                                             expected: "cons-array",
                                             found: "cons-map".into()
                                         },
                                         d.data.clone(),
                                         d.ix
-                                    )
+                                    ))
                                 } else if num_fields != #exp_len {
-                                    e!(WrongConsSize {
+                                    Err(E!(WrongConsSize {
                                         expected: #exp_len,
-                                        found: len
+                                        found: num_fields
                                     },
                                     d.data.clone(),
                                     d.ix
-                                    )
+                                    ))
+                                } else {
+                                    Ok(#constructor {
+                                        #(#field_names: d.check_entry(#field_strings)?,)*
+                                    })
                                 }
-
-                                Ok(#constructor {
-                                    #(#field_names: d.check_entry(#field_strings)?,)*
-                                })
-
                             }
                         }
                     }
@@ -166,15 +162,16 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
 
             d.read_cons(#read_cons_tag, |d, data| {
                 let __fields_data { id, is_map, num_fields } = data;
-                match id {
+                match id.as_str() {
                     #(#pairs)*
-                    unknown => Err(E!(
+                    _ =>
+                        Err(E!(
                             WrongEnumVariant {
-                                found: unknown
+                                found: id
                             },
                             d.data.clone(),
                             d.ix
-                    ))
+                        ))
                 }
             })
         }
