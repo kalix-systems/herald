@@ -6,14 +6,16 @@ pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
     let impl_ser = match data.fields {
         // C-style structs
         Fields::Named(fields) => {
-            let field_idents: Vec<Ident> = Fields::Named(fields)
+            let mut field_stuff: Vec<(Ident, String)> = Fields::Named(fields)
                 .iter()
                 .map(|field| field.ident.clone().unwrap())
+                .map(|field| (field.clone(), field.to_string()))
                 .collect();
-            let field_strs: Vec<String> = field_idents
-                .iter()
-                .map(std::string::ToString::to_string)
-                .collect();
+
+            field_stuff.sort_unstable_by(|(_, k1), (_, k2)| k1.cmp(k2));
+
+            let (field_idents, field_strs): (Vec<Ident>, Vec<String>) =
+                field_stuff.into_iter().unzip();
 
             let ident_string = name.to_string();
 
@@ -38,6 +40,7 @@ pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
                 .iter()
                 .map(|field| field.ty.clone())
                 .collect();
+
             let seq_len: usize = fields.len();
 
             let ident_string = name.to_string();
@@ -69,7 +72,7 @@ pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
 
     quote! {
         impl Ser for #name {
-            fn ser<S: Serializer>(self, s: &mut S) {
+            fn ser(&self, s: &mut Serializer) {
                 #impl_ser
             }
         }

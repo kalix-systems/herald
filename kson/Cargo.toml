@@ -7,6 +7,10 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bytes = "0.4.12"
 arrayvec = "0.5.1"
 backtrace = "0.3.40"
+bytes = "0.4.12"
+
+[dependencies.kson_derive]
+path = "./kson_derive"
+

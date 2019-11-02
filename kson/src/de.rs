@@ -261,7 +261,7 @@ impl Deserializer {
             if !tag.is_big {
                 prelen as usize
             } else {
-                self.read_raw_u64(prelen)? as usize
+                self.read_raw_u64(prelen + 1)? as usize
             }
         };
 
@@ -270,11 +270,6 @@ impl Deserializer {
         let bytes = self.read_raw_slice(len)?;
 
         std::str::from_utf8(bytes).map_err(|e| E!(BadUtf8String(e), err_data, ix))
-    }
-
-    pub fn read_str(&mut self) -> Result<&str, KsonError> {
-        let tag = self.read_bytes_tag()?;
-        self.read_str_from_tag(tag)
     }
 
     pub fn read_array_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
@@ -325,7 +320,7 @@ impl Deserializer {
             if !tag.is_big {
                 prelen as usize
             } else {
-                self.read_raw_u64(prelen)? as usize
+                self.read_raw_u64(prelen + 1)? as usize
             },
         ))
     }
@@ -353,7 +348,7 @@ impl Deserializer {
 
         if key != key_should_be {
             e!(
-                WrongStructKey {
+                WrongConsKey {
                     expected: key_should_be,
                     found: key.into()
                 },
@@ -369,3 +364,53 @@ impl Deserializer {
         V::de(self)
     }
 }
+
+pub fn from_bytes<T: De>(from: Bytes) -> Result<T, KsonError> {
+    T::de(&mut Deserializer::new(from))
+}
+
+macro_rules! read_tagged_val {
+    ($type: ty, $fname: ident, $tag_reader: tt, $val_reader: tt) => {
+        impl Deserializer {
+            pub fn $fname(&mut self) -> Result<$type, KsonError> {
+                let tag = self.$tag_reader()?;
+                let val = self.$val_reader(tag)?;
+                Ok(val)
+            }
+        }
+    };
+}
+
+read_tagged_val!(u8, read_u8, read_uint_tag, read_u8_from_tag);
+read_tagged_val!(u16, read_u16, read_uint_tag, read_u16_from_tag);
+read_tagged_val!(u32, read_u32, read_uint_tag, read_u32_from_tag);
+read_tagged_val!(u64, read_u64, read_uint_tag, read_u64_from_tag);
+read_tagged_val!(u128, read_u128, read_uint_tag, read_u128_from_tag);
+
+read_tagged_val!(&str, read_str, read_bytes_tag, read_str_from_tag);
+read_tagged_val!(Bytes, read_bytes, read_bytes_tag, read_bytes_from_tag);
+
+impl Deserializer {
+    pub fn read_string(&mut self) -> Result<String, KsonError> {
+        let borrowed = self.read_str()?;
+        Ok(borrowed.into())
+    }
+}
+
+macro_rules! trivial_de {
+    ($type: ty, $mname: ident) => {
+        impl De for $type {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                d.$mname()
+            }
+        }
+    };
+}
+
+trivial_de!(u8, read_u8);
+trivial_de!(u16, read_u16);
+trivial_de!(u32, read_u32);
+trivial_de!(u64, read_u64);
+trivial_de!(u128, read_u128);
+trivial_de!(String, read_string);
+trivial_de!(Bytes, read_bytes);

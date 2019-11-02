@@ -87,6 +87,9 @@ impl fmt::Display for Error {
                     "cons had wrong size - expected {} fields but only found {}",
                     expected, found
                 ),
+                WrongEnumVariant { found } => {
+                    format!("tried to parse nonexistent enum variant {}", found)
+                }
                 WrongConsKey { expected, found } => format!(
                     "cons had wrong keys - expected {}, found {}",
                     expected, found

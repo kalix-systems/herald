@@ -12,7 +12,7 @@ fn read_struct_tag(
         quote!(is_map)
     };
     quote! {
-        |(d,is_map,len)| {
+        |d,is_map,len| {
             if #map_cond {
                 e!(
                     WrongMinorType {
@@ -22,7 +22,7 @@ fn read_struct_tag(
                     d.data.clone(),
                     d.ix
                 )
-            } else if len == #exp_len {
+            } else if len != #exp_len {
                 e!(
                     WrongConsSize {
                         expected: #exp_len,
@@ -78,7 +78,7 @@ pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
             let read_items = quote! {
                 |d, ()| {
                     Ok(#name {
-                        #(#field_names: de::check_entry(#field_strings)?,)*
+                        #(#field_names: d.check_entry(#field_strings)?,)*
                     })
                 }
             };
@@ -123,7 +123,7 @@ pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
 
     quote! {
         impl De for #name {
-            fn de<D: Deserializer>(d: &mut D) -> Result<Self, Error> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 #impl_de
             }
         }

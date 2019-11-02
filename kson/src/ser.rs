@@ -2,6 +2,12 @@ use super::{utils::*, *};
 
 pub struct Serializer(pub Vec<u8>);
 
+impl Serializer {
+    pub fn new() -> Self {
+        Serializer(Vec::new())
+    }
+}
+
 pub trait Ser {
     fn ser(&self, into: &mut Serializer);
 }
@@ -73,9 +79,9 @@ impl Serializer {
         } else {
             tag |= BIG_BIT;
 
-            let digs = bytes_of_u64(raw.len() as u64 - 1);
-            debug_assert!(digs.len() < BYTES_ARE_UTF8 as usize);
-            tag |= digs.len() as u8;
+            let digs = bytes_of_u64(raw.len() as u64);
+            debug_assert!(digs.len() <= BYTES_ARE_UTF8 as usize);
+            tag |= digs.len() as u8 - 1;
 
             self.0.push(tag);
             self.0.extend_from_slice(&digs);
@@ -111,13 +117,13 @@ impl Serializer {
         }
     }
 
-    pub fn put_arr_item<T: Ser>(&mut self, item: &T) {
+    pub fn put_arr_item<T: Ser + ?Sized>(&mut self, item: &T) {
         item.ser(self);
     }
 
     pub fn write_arr<'a, T, I>(&mut self, items: I)
     where
-        T: 'a + Ser,
+        T: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = &'a T>,
     {
         self.start_arr(items.len());
@@ -145,15 +151,15 @@ impl Serializer {
         }
     }
 
-    pub fn put_map_pair<K: Ser, V: Ser>(&mut self, key: &K, val: &V) {
+    pub fn put_map_pair<K: AtomicSer + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
         key.ser(self);
         val.ser(self);
     }
 
     pub fn write_map<'a, K, V, I>(&mut self, items: I)
     where
-        K: 'a + Ser + AtomicSer,
-        V: 'a + Ser,
+        K: 'a + Ser + AtomicSer + ?Sized,
+        V: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = (&'a K, &'a V)>,
     {
         self.start_map(items.len());
@@ -163,8 +169,8 @@ impl Serializer {
         }
     }
 
-    pub fn start_cons<F, I>(&mut self, is_map: bool, len: usize) {
-        let major_type = Type::Collection as u8;
+    pub fn start_cons(&mut self, is_map: bool, len: usize) {
+        let major_type = Type::Cons as u8;
         let minor_type = if is_map { COLLECTION_IS_MAP } else { 0 };
         let mut tag = major_type | minor_type;
         if len < COLLECTION_IS_MAP as usize {
@@ -173,24 +179,24 @@ impl Serializer {
         } else {
             tag |= BIG_BIT;
 
-            let digs = bytes_of_u64(len as u64 - 1);
-            debug_assert!(digs.len() < BIG_BIT as usize);
-            tag |= digs.len() as u8;
+            let digs = bytes_of_u64(len as u64);
+            debug_assert!(digs.len() <= BIG_BIT as usize);
+            tag |= digs.len() as u8 - 1;
 
             self.0.push(tag);
             self.0.extend_from_slice(&digs);
         }
     }
 
-    pub fn put_cons_tag<T: AtomicSer>(&mut self, item: &T) {
+    pub fn put_cons_tag<T: AtomicSer + ?Sized>(&mut self, item: &T) {
         item.ser(self);
     }
 
-    pub fn put_cons_item<T: Ser>(&mut self, item: &T) {
+    pub fn put_cons_item<T: Ser + ?Sized>(&mut self, item: &T) {
         item.ser(self);
     }
 
-    pub fn put_cons_pair<K: AtomicSer, V: Ser>(&mut self, key: &K, val: &V) {
+    pub fn put_cons_pair<K: AtomicSer + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
         key.ser(self);
         val.ser(self);
     }
@@ -249,3 +255,9 @@ impl AtomicSer for i128 {}
 
 impl AtomicSer for str {}
 impl AtomicSer for [u8] {}
+
+pub fn into_vec<T: Ser + ?Sized>(t: &T) -> Vec<u8> {
+    let mut out = Serializer::new();
+    t.ser(&mut out);
+    out.0
+}

@@ -10,35 +10,43 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::*;
 
-fn struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
+fn ser_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
     let kser = ser::struct_impl::kson_ser(name.clone(), sd.clone());
-    let kde = de::struct_impl::kson_de(name.clone(), sd);
-    let modname = format!("__{}__kserde__", name.to_string());
+    let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
+        .expect("failed to parse module identifier");
 
     let imp = quote! {
         mod #modname {
             use super::#name;
-            use ::kson::{e,E,de::De,ser::Ser,errors::KsonError};
+            use ::kson::{
+                *,
+                de::{De, Deserializer},
+                ser::{Ser, Serializer},
+                errors::KsonError
+            };
 
             #kser
-            #kde
         }
     };
 
     imp.into()
 }
 
-fn enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
-    let kser = ser::enum_impl::kson_ser(name.clone(), sd.clone());
-    let kde = de::enum_impl::kson_de(name.clone(), sd);
-    let modname = format!("__{}__kserde__", name.to_string());
+fn de_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
+    let kde = de::struct_impl::kson_de(name.clone(), sd);
+    let modname = parse_str::<Ident>(&format!("__{}__kde__", name.to_string()))
+        .expect("failed to parse module identifier");
 
     let imp = quote! {
-        use super::#name;
-        use ::kson::{e,E,de::De,ser::Ser,errors::KsonError};
-
         mod #modname {
-            #kser
+            use super::#name;
+            use ::kson::{
+                *,
+                de::{De, Deserializer},
+                ser::{Ser, Serializer},
+                errors::KsonError
+            };
+
             #kde
         }
     };
@@ -46,22 +54,87 @@ fn enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
     imp.into()
 }
 
-#[proc_macro_derive(KSerDe)]
-pub fn kserde_derive(input: TokenStream) -> TokenStream {
+fn ser_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
+    let kser = ser::enum_impl::kson_ser(name.clone(), sd.clone());
+    let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
+        .expect("failed to parse module identifier");
+
+    let imp = quote! {
+        mod #modname {
+            use super::#name;
+            use ::kson::{
+                *,
+                de::{De, Deserializer},
+                ser::{Ser, Serializer},
+                errors::KsonError
+            };
+
+            #kser
+        }
+    };
+
+    imp.into()
+}
+
+fn de_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
+    let kde = de::enum_impl::kson_de(name.clone(), sd);
+    let modname = parse_str::<Ident>(&format!("__{}__kde__", name.to_string()))
+        .expect("failed to parse module identifier");
+
+    let imp = quote! {
+
+        mod #modname {
+            use super::#name;
+            use ::kson::{
+                *,
+                de::{De, Deserializer},
+                ser::{Ser, Serializer},
+                errors::KsonError
+            };
+
+            #kde
+        }
+    };
+
+    imp.into()
+}
+
+#[proc_macro_derive(Ser)]
+pub fn ser_derive(input: TokenStream) -> TokenStream {
     // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 
     // Build the trait implementation
-    impl_kserde_macro(&ast)
+    impl_kser_macro(&ast)
 }
 
-fn impl_kserde_macro(ast: &syn::DeriveInput) -> TokenStream {
+fn impl_kser_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = ast.ident.clone();
 
     match ast.data.clone() {
-        Data::Struct(sd) => struct_impl(name, sd),
-        Data::Enum(ed) => enum_impl(name, ed),
+        Data::Struct(sd) => ser_struct_impl(name, sd),
+        Data::Enum(ed) => ser_enum_impl(name, ed),
+        _ => quote! {}.into(),
+    }
+}
+
+#[proc_macro_derive(De)]
+pub fn de_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast = syn::parse(input).unwrap();
+
+    // Build the trait implementation
+    impl_kde_macro(&ast)
+}
+
+fn impl_kde_macro(ast: &syn::DeriveInput) -> TokenStream {
+    let name = ast.ident.clone();
+
+    match ast.data.clone() {
+        Data::Struct(sd) => de_struct_impl(name, sd),
+        Data::Enum(ed) => de_enum_impl(name, ed),
         _ => quote! {}.into(),
     }
 }

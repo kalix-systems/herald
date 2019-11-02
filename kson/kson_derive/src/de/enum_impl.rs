@@ -38,7 +38,7 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
         };
 
         let read_cons_tag = quote! {
-            |(d,is_map,len)| {
+            |d,is_map,len| {
                 let ident = d.read_str()?;
                 Ok(__fields_data {
                     id: ident.into(),
@@ -151,7 +151,7 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                                 }
 
                                 Ok(#constructor {
-                                    #(#field_names: de::check_entry(#field_strings)?,)*
+                                    #(#field_names: d.check_entry(#field_strings)?,)*
                                 })
 
                             }
@@ -182,7 +182,7 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
 
     quote! {
         impl De for #name {
-            fn de<D: Deserializer>(d: &mut D) -> Result<Self, Error> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 #impl_de
             }
         }
