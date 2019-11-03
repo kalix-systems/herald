@@ -238,6 +238,16 @@ impl Deserializer {
             ))
         }
     }
+
+    pub fn read_bytes_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | BYTES_ARE_UTF8);
+        Ok(if !tag.is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen + 1)? as usize
+        })
+    }
+
     pub fn read_bytes_from_tag(&mut self, tag: TagByte) -> Result<Bytes, KsonError> {
         if tag.val & BYTES_ARE_UTF8 == BYTES_ARE_UTF8 {
             e!(
@@ -250,14 +260,7 @@ impl Deserializer {
             )
         }
 
-        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | BYTES_ARE_UTF8);
-        let len = {
-            if !tag.is_big {
-                prelen as usize
-            } else {
-                self.read_raw_u64(prelen)? as usize
-            }
-        };
+        let len = self.read_bytes_len_from_tag(tag)?;
 
         self.read_raw_bytes(len)
     }
@@ -275,19 +278,12 @@ impl Deserializer {
             )
         }
 
-        let prelen = tag.val & !(MASK_TYPE | BIG_BIT | BYTES_ARE_UTF8);
-        let len = {
-            if !tag.is_big {
-                prelen as usize
-            } else {
-                self.read_raw_u64(prelen + 1)? as usize
-            }
-        };
+        let len = self.read_bytes_len_from_tag(tag)?;
 
         let ix = self.ix;
         let err_data = self.data.clone();
-        let bytes = self.read_raw_slice(len)?;
 
+        let bytes = self.read_raw_slice(len)?;
         std::str::from_utf8(bytes).map_err(|e| E!(BadUtf8String(e), err_data, ix))
     }
 

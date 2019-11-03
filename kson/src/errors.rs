@@ -49,6 +49,7 @@ pub enum Variant {
     },
     BadUtf8String(Utf8Error),
     UnknownConst(u8),
+    CustomError(String),
 }
 
 use Variant::*;
@@ -105,6 +106,7 @@ impl fmt::Display for Error {
                 ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
+                CustomError(s) => s.clone(),
             }),
             self.backtrace
         )
