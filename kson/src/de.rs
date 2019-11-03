@@ -574,5 +574,23 @@ mod __impls {
                 Ok(out)
             }
         }
+
+        impl<A: Array<Item = u8> + Copy> De for ArrayString<A> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let err_ix = d.ix;
+                let err_data = d.data.clone();
+                let slice = d.read_str()?;
+                ArrayString::from(slice).map_err(move |_| {
+                    E!(
+                        CollectionTooLarge {
+                            max_len: A::CAPACITY,
+                            found: slice.len()
+                        },
+                        err_data,
+                        err_ix
+                    )
+                })
+            }
+        }
     }
 }
