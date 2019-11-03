@@ -152,7 +152,7 @@ macro_rules! loc {
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
         ::std::sync::Arc::new($crate::errors::Error {
-            backtrace: ::backtrace::Backtrace::new(),
+            backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
             offset: $offset,
@@ -166,7 +166,7 @@ macro_rules! E {
 
     ($var: expr, $byt: expr, $offset: expr) => {
         ::std::sync::Arc::new($crate::errors::Error {
-            backtrace: ::backtrace::Backtrace::new(),
+            backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
             offset: $offset,
@@ -182,10 +182,16 @@ macro_rules! E {
 #[macro_export]
 macro_rules! e {
     ($var: expr, $byt: expr, $offset: expr, $($t:tt),*) => {
-        Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset, $($t),*))?
+        {
+            Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset, $($t),*))?;
+            unreachable!()
+        }
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset))?
+        {
+            Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset))?;
+            unreachable!()
+        }
     };
 }

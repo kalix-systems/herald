@@ -6,6 +6,12 @@
 //!    backends, but for now we only support `Vec<u8>`
 //! 2) Support deserializing from anything other than `Bytes`.
 
+pub mod prelude {
+    pub use crate::{de::*, errors::*, ser::*, *};
+
+    pub use backtrace;
+    pub use bytes::Bytes;
+}
 pub mod de;
 pub mod errors;
 pub mod ser;
