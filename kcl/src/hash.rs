@@ -62,7 +62,7 @@ pub struct Digest(pub ArrayVec<[u8; HASH_MAX_LEN]>);
 
 pub struct Hasher {
     out_len: usize,
-    state: crypto_generichash_state,
+    state: crypto_generichash_blake2b_state,
 }
 
 impl Hasher {
@@ -107,8 +107,8 @@ impl Hasher {
 impl Drop for Hasher {
     fn drop(&mut self) {
         let as_ptr = (&mut self.state) as *mut crypto_generichash_state;
-        let len = std::mem::size_of::<crypto_generichash_state>;
         unsafe {
+            let len = crypto_generichash_blake2b_statebytes();
             sodium_memzero(std::mem::transmute(as_ptr), len as usize);
         }
     }
