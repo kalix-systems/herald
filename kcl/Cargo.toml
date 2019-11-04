@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 libsodium-sys = "0.2.4"
+arrayvec = "0.5.1"
 
 [dependencies.kson]
 path = "../kson"
