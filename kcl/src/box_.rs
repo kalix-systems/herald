@@ -24,6 +24,42 @@ new_type! {
     public Mac(MAC_LEN)
 }
 
+new_type! {
+    secret Seed(SEED_LEN)
+}
+
+pub fn gen_keypair() -> (PublicKey, SecretKey) {
+    let mut pk_buf = [0u8; PUBLIC_KEY_LEN];
+    let mut sk_buf = [0u8; SECRET_KEY_LEN];
+
+    unsafe { crypto_box_keypair(pk_buf.as_mut_ptr(), sk_buf.as_mut_ptr()) };
+
+    (PublicKey(pk_buf), SecretKey(sk_buf))
+}
+
+impl Seed {
+    pub fn new() -> Self {
+        let mut seed = [0u8; SEED_LEN];
+        random::gen_into(&mut seed);
+        Seed(seed)
+    }
+
+    pub fn gen_keypair(&self) -> (PublicKey, SecretKey) {
+        let mut pk_buf = [0u8; PUBLIC_KEY_LEN];
+        let mut sk_buf = [0u8; SECRET_KEY_LEN];
+
+        unsafe {
+            crypto_box_seed_keypair(
+                pk_buf.as_mut_ptr(),
+                sk_buf.as_mut_ptr(),
+                self.as_ref().as_ptr(),
+            )
+        };
+
+        (PublicKey(pk_buf), SecretKey(sk_buf))
+    }
+}
+
 #[derive(Ser, De, Copy, Clone)]
 pub struct Tag(Mac, Nonce);
 
