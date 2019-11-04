@@ -1,9 +1,7 @@
 #[macro_use]
 mod newtype_macros;
 
-// pub mod aead;
-// pub mod box;
-// pub mod kdf;
+pub mod aead;
 pub mod box_;
 pub mod hash;
 pub mod random;
