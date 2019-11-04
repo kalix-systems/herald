@@ -8,6 +8,22 @@ pub const HASH_MIN_LEN: usize = crypto_generichash_blake2b_BYTES_MIN as usize;
 pub const HASH_MAX_LEN: usize = crypto_generichash_blake2b_BYTES_MAX as usize;
 pub const HASH_REC_LEN: usize = crypto_generichash_blake2b_BYTES as usize;
 
+pub fn simple_hash(msg: &[u8]) -> [u8; HASH_REC_LEN] {
+    let mut buf = [0u8; HASH_REC_LEN];
+    let res = unsafe {
+        crypto_generichash_blake2b(
+            buf.as_mut_ptr(),
+            HASH_REC_LEN,
+            msg.as_ptr(),
+            msg.len() as _,
+            std::ptr::null(),
+            0,
+        )
+    };
+    assert_eq!(res, 0);
+    buf
+}
+
 new_type! {
     secret Key(KEY_LEN)
 }
@@ -23,7 +39,7 @@ impl Key {
         assert!(HASH_MIN_LEN <= buf.len());
         assert!(buf.len() <= HASH_MAX_LEN);
         let result = unsafe {
-            crypto_generichash(
+            crypto_generichash_blake2b(
                 buf.as_mut_ptr(),
                 buf.len(),
                 msg.as_ptr(),
