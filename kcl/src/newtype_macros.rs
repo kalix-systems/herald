@@ -49,6 +49,54 @@ macro_rules! newtype_traits {
 
         impl ::std::cmp::Eq for $newtype {}
 
+        impl AsRef<[u8]> for $newtype {
+            #[inline]
+            fn as_ref(&self) -> &[u8] {
+                &self.0
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! public_newtype_traits {
+    ($newtype:ident, $len: expr) => {
+        impl ::std::cmp::PartialOrd for $newtype {
+            #[inline]
+            fn partial_cmp(&self, other: &$newtype) -> Option<::std::cmp::Ordering> {
+                ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
+            }
+            #[inline]
+            fn lt(&self, other: &$newtype) -> bool {
+                ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
+            }
+            #[inline]
+            fn le(&self, other: &$newtype) -> bool {
+                ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
+            }
+            #[inline]
+            fn ge(&self, other: &$newtype) -> bool {
+                ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
+            }
+            #[inline]
+            fn gt(&self, other: &$newtype) -> bool {
+                ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
+            }
+        }
+
+        impl ::std::cmp::Ord for $newtype {
+            #[inline]
+            fn cmp(&self, other: &$newtype) -> ::std::cmp::Ordering {
+                ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
+            }
+        }
+
+        impl ::std::hash::Hash for $newtype {
+            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+                ::std::hash::Hash::hash(self.as_ref(), state)
+            }
+        }
+
         impl ::kson::ser::Ser for $newtype {
             fn ser(&self, serializer: &mut ::kson::ser::Serializer) {
                 serializer.write_bytes(&self.as_ref());
@@ -84,50 +132,44 @@ macro_rules! newtype_traits {
                 }
             }
         }
-
-        impl AsRef<[u8]> for $newtype {
-            #[inline]
-            fn as_ref(&self) -> &[u8] {
-                &self.0
-            }
-        }
     };
 }
 
-#[macro_export]
-macro_rules! public_newtype_traits {
-    ($newtype:ident) => {
-        impl ::std::cmp::PartialOrd for $newtype {
-            #[inline]
-            fn partial_cmp(&self, other: &$newtype) -> Option<::std::cmp::Ordering> {
-                ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
-            }
-            #[inline]
-            fn lt(&self, other: &$newtype) -> bool {
-                ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
-            }
-            #[inline]
-            fn le(&self, other: &$newtype) -> bool {
-                ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
-            }
-            #[inline]
-            fn ge(&self, other: &$newtype) -> bool {
-                ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
-            }
-            #[inline]
-            fn gt(&self, other: &$newtype) -> bool {
-                ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
+macro_rules! secret_newtype_traits {
+    ($newtype: ident, $len: expr) => {
+        impl ::kson::ser::Ser for $newtype {
+            fn ser(&self, serializer: &mut ::kson::ser::Serializer) {
+                serializer.write_bytes(&self.as_ref());
             }
         }
-        impl ::std::cmp::Ord for $newtype {
-            #[inline]
-            fn cmp(&self, other: &$newtype) -> ::std::cmp::Ordering {
-                ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
-            }
-        }
-        impl ::std::hash::Hash for $newtype {
-            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
-                ::std::hash::Hash::hash(self.as_ref(), state)
+
+        impl ::kson::de::De for $newtype {
+            fn de(d: &mut ::kson::de::Deserializer) -> Result<Self, ::kson::errors::KsonError> {
+                use kson::prelude::*;
+
+                let tag = d.read_bytes_tag()?;
+                let len = d.read_bytes_len_from_tag(tag)?;
+
+                if len == $len {
+                    let bytes = d.read_raw_slice($len)?;
+                    let mut buf = [0u8; $len];
+                    unsafe {
+                        ::std::ptr::copy_nonoverlapping(bytes.as_ptr(), buf.as_mut_ptr(), $len);
+                    }
+                    Ok(Self(buf))
+                } else {
+                    e!(
+                        CustomError(format!(
+                            "failed to read type {}.\
+                             Expected bytestring of length {} but found {}",
+                            stringify!($newtype),
+                            $len,
+                            len
+                        )),
+                        d.data.clone(),
+                        d.ix
+                    )
+                }
             }
         }
     };
@@ -148,6 +190,7 @@ macro_rules! new_type {
 
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
+        secret_newtype_traits!($name, $bytes);
 
         impl $name {
             newtype_from_slice!($name, $bytes);
@@ -179,7 +222,7 @@ macro_rules! new_type {
 
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
-        public_newtype_traits!($name);
+        public_newtype_traits!($name, $bytes);
 
         impl $name {
             newtype_from_slice!($name, $bytes);
@@ -202,7 +245,7 @@ macro_rules! new_type {
 
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
-        public_newtype_traits!($name);
+        public_newtype_traits!($name, $bytes);
 
         impl $name {
             newtype_from_slice!($name, $bytes);
