@@ -75,12 +75,13 @@ impl SecretKey {
         random::gen_into(&mut nonce_buf);
 
         // take the hash code of their public key and the msg
+        // we'll then xor this with the nonce to ensure nonce uniqueness
+        // this makes encryption slightly slower but also harder to screw up
         let mut hasher = hash::Builder::new().out_len(NONCE_LEN).build();
         hasher.update(them.as_ref());
         hasher.update(msg);
         let hash = hasher.finalize();
 
-        // xor the hash code with the nonce to ensure nonce uniqueness
         for (n, h) in nonce_buf.iter_mut().zip(hash.0) {
             *n ^= h;
         }
