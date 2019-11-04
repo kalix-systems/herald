@@ -2,11 +2,11 @@ use crate::{hash, new_type, random};
 use kson::prelude::*;
 use libsodium_sys::*;
 
-pub const SECRET_KEY_LEN: usize = crypto_box_SECRETKEYBYTES as usize;
-pub const PUBLIC_KEY_LEN: usize = crypto_box_PUBLICKEYBYTES as usize;
-pub const SEED_LEN: usize = crypto_box_SEEDBYTES as usize;
-pub const NONCE_LEN: usize = crypto_box_NONCEBYTES as usize;
-pub const MAC_LEN: usize = crypto_box_MACBYTES as usize;
+pub const SECRET_KEY_LEN: usize = crypto_box_curve25519xchacha20poly1305_SECRETKEYBYTES as usize;
+pub const PUBLIC_KEY_LEN: usize = crypto_box_curve25519xchacha20poly1305_PUBLICKEYBYTES as usize;
+pub const SEED_LEN: usize = crypto_box_curve25519xchacha20poly1305_SEEDBYTES as usize;
+pub const NONCE_LEN: usize = crypto_box_curve25519xchacha20poly1305_NONCEBYTES as usize;
+pub const MAC_LEN: usize = crypto_box_curve25519xchacha20poly1305_MACBYTES as usize;
 
 new_type! {
     secret SecretKey(SECRET_KEY_LEN)
@@ -32,7 +32,9 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     let mut pk_buf = [0u8; PUBLIC_KEY_LEN];
     let mut sk_buf = [0u8; SECRET_KEY_LEN];
 
-    unsafe { crypto_box_keypair(pk_buf.as_mut_ptr(), sk_buf.as_mut_ptr()) };
+    unsafe {
+        crypto_box_curve25519xchacha20poly1305_keypair(pk_buf.as_mut_ptr(), sk_buf.as_mut_ptr())
+    };
 
     (PublicKey(pk_buf), SecretKey(sk_buf))
 }
@@ -49,7 +51,7 @@ impl Seed {
         let mut sk_buf = [0u8; SECRET_KEY_LEN];
 
         unsafe {
-            crypto_box_seed_keypair(
+            crypto_box_curve25519xchacha20poly1305_seed_keypair(
                 pk_buf.as_mut_ptr(),
                 sk_buf.as_mut_ptr(),
                 self.as_ref().as_ptr(),
@@ -87,7 +89,7 @@ impl SecretKey {
         }
 
         let res = unsafe {
-            crypto_box_detached(
+            crypto_box_curve25519xchacha20poly1305_detached(
                 msg.as_mut_ptr(),
                 mac_buf.as_mut_ptr(),
                 msg.as_ptr(),
@@ -110,7 +112,7 @@ impl SecretKey {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {
-            crypto_box_open_detached(
+            crypto_box_curve25519xchacha20poly1305_open_detached(
                 msg.as_mut_ptr(),
                 msg.as_ptr(),
                 mac.as_ref().as_ptr(),
