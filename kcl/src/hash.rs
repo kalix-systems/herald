@@ -24,6 +24,22 @@ pub fn simple_hash(msg: &[u8]) -> [u8; HASH_REC_LEN] {
     buf
 }
 
+pub fn simple_hash_into(buf: &mut [u8], msg: &[u8]) {
+    assert!(HASH_MIN_LEN <= buf.len());
+    assert!(buf.len() <= HASH_MAX_LEN);
+    let res = unsafe {
+        crypto_generichash_blake2b(
+            buf.as_mut_ptr(),
+            HASH_REC_LEN,
+            msg.as_ptr(),
+            msg.len() as _,
+            std::ptr::null(),
+            0,
+        )
+    };
+    assert_eq!(res, 0);
+}
+
 new_type! {
     secret Key(KEY_LEN)
 }

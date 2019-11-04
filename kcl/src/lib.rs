@@ -4,6 +4,7 @@ mod newtype_macros;
 // pub mod aead;
 // pub mod box;
 // pub mod kdf;
+pub mod box_;
 pub mod hash;
 pub mod random;
 pub mod sign;
