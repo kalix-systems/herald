@@ -2,7 +2,7 @@ use proc_macro2::Literal;
 use quote::quote;
 use syn::*;
 
-pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
+pub fn kson_ser(name: Ident, data: DataStruct, gens: Generics) -> proc_macro2::TokenStream {
     let impl_ser = match data.fields {
         // C-style structs
         Fields::Named(fields) => {
@@ -70,8 +70,9 @@ pub fn kson_ser(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
         }
     };
 
+    let (impl_generics, ty_generics, where_clause) = gens.split_for_impl();
     quote! {
-        impl Ser for #name {
+        impl #impl_generics Ser for #name #ty_generics #where_clause {
             fn ser(&self, s: &mut Serializer) {
                 #impl_ser
             }

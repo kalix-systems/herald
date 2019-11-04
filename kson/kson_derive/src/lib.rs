@@ -10,8 +10,8 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::*;
 
-fn ser_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
-    let kser = ser::struct_impl::kson_ser(name.clone(), sd.clone());
+fn ser_struct_impl(name: Ident, sd: DataStruct, gens: Generics) -> TokenStream {
+    let kser = ser::struct_impl::kson_ser(name.clone(), sd.clone(), gens);
     let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
         .expect("failed to parse module identifier");
 
@@ -32,8 +32,8 @@ fn ser_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
     imp.into()
 }
 
-fn de_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
-    let kde = de::struct_impl::kson_de(name.clone(), sd);
+fn de_struct_impl(name: Ident, sd: DataStruct, gens: Generics) -> TokenStream {
+    let kde = de::struct_impl::kson_de(name.clone(), sd, gens);
     let modname = parse_str::<Ident>(&format!("__{}__kde__", name.to_string()))
         .expect("failed to parse module identifier");
 
@@ -54,8 +54,8 @@ fn de_struct_impl(name: Ident, sd: DataStruct) -> TokenStream {
     imp.into()
 }
 
-fn ser_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
-    let kser = ser::enum_impl::kson_ser(name.clone(), sd.clone());
+fn ser_enum_impl(name: Ident, sd: DataEnum, gens: Generics) -> TokenStream {
+    let kser = ser::enum_impl::kson_ser(name.clone(), sd.clone(), gens);
     let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
         .expect("failed to parse module identifier");
 
@@ -76,8 +76,8 @@ fn ser_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
     imp.into()
 }
 
-fn de_enum_impl(name: Ident, sd: DataEnum) -> TokenStream {
-    let kde = de::enum_impl::kson_de(name.clone(), sd);
+fn de_enum_impl(name: Ident, sd: DataEnum, gens: Generics) -> TokenStream {
+    let kde = de::enum_impl::kson_de(name.clone(), sd, gens);
     let modname = parse_str::<Ident>(&format!("__{}__kde__", name.to_string()))
         .expect("failed to parse module identifier");
 
@@ -112,9 +112,20 @@ pub fn ser_derive(input: TokenStream) -> TokenStream {
 fn impl_kser_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = ast.ident.clone();
 
+    // calculate generics
+    let mut generics = ast.generics.clone();
+    let params: Vec<Ident> = generics.type_params().map(|t| t.ident.clone()).collect();
+    let clause = generics.make_where_clause();
+    for t in params {
+        let pred: WherePredicate = parse_quote! {
+            #t: Ser
+        };
+        clause.predicates.push(pred);
+    }
+
     match ast.data.clone() {
-        Data::Struct(sd) => ser_struct_impl(name, sd),
-        Data::Enum(ed) => ser_enum_impl(name, ed),
+        Data::Struct(sd) => ser_struct_impl(name, sd, generics),
+        Data::Enum(ed) => ser_enum_impl(name, ed, generics),
         _ => quote! {}.into(),
     }
 }
@@ -132,9 +143,29 @@ pub fn de_derive(input: TokenStream) -> TokenStream {
 fn impl_kde_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = ast.ident.clone();
 
+    // calculate generics
+    let mut generics = ast.generics.clone();
+    let params: Vec<Ident> = generics.type_params().map(|t| t.ident.clone()).collect();
+    let clause = generics.make_where_clause();
+    for t in params {
+        let pred: WherePredicate = parse_quote! {
+            #t: De
+        };
+        clause.predicates.push(pred);
+    }
+
+    // let (impl_gens, ty_gens, where_clause) = generics.split_for_impl();
+    // eprintln!(
+    //     "{:#?}",
+    //     quote! {
+    //         impl #impl_gens De for #name #ty_gens #where_clause {}
+    //     }
+    //     .to_string()
+    // );
+
     match ast.data.clone() {
-        Data::Struct(sd) => de_struct_impl(name, sd),
-        Data::Enum(ed) => de_enum_impl(name, ed),
+        Data::Struct(sd) => de_struct_impl(name, sd, generics),
+        Data::Enum(ed) => de_enum_impl(name, ed, generics),
         _ => quote! {}.into(),
     }
 }

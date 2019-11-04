@@ -52,3 +52,41 @@ fn struct_like_serde() {
     let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
+
+use std::collections::BTreeMap;
+
+#[derive(Eq, PartialEq, Debug, Ser, De)]
+pub enum Generic<K: ::kson::ser::AtomicSer + Ord, V> {
+    First(K),
+    Second(V),
+    Map(BTreeMap<K, V>),
+}
+
+#[test]
+fn generic_serde() {
+    type G = Generic<Bytes, u8>;
+
+    let v1 = G::Map(BTreeMap::new());
+    let as_vec = kson::ser::into_vec(&v1);
+    let v2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(v1, v2);
+
+    let mut map = std::collections::BTreeMap::new();
+    map.insert(Bytes::from_static(b"a"), 0u8);
+    map.insert(Bytes::from_static(b""), 0u8);
+
+    let v1 = G::Map(map);
+    let as_vec = kson::ser::into_vec(&v1);
+    let v2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(v1, v2);
+
+    let v1 = G::First(Bytes::from_static(b"a"));
+    let as_vec = kson::ser::into_vec(&v1);
+    let v2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(v1, v2);
+
+    let v1 = G::Second(0u8);
+    let as_vec = kson::ser::into_vec(&v1);
+    let v2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(v1, v2);
+}

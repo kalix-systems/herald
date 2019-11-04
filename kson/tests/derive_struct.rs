@@ -62,3 +62,25 @@ fn struct_serde() {
     let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
+
+#[derive(Eq, PartialEq, Debug, Ser, De)]
+pub struct Generic<T1, T2> {
+    in1: T1,
+    in2: T2,
+    rest: Bytes,
+}
+
+#[test]
+fn generic_serde() {
+    let mut map = std::collections::BTreeMap::new();
+    map.insert(0u8, 0u8);
+    map.insert(1u8, 0u8);
+    let val = Generic {
+        in1: vec![0u8],
+        in2: map,
+        rest: Bytes::from_static(b"asdf"),
+    };
+    let as_vec = kson::ser::into_vec(&val);
+    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(val, val2);
+}

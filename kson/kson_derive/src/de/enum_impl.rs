@@ -2,7 +2,7 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::*;
 
-pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
+pub fn kson_de(name: Ident, data: DataEnum, gens: Generics) -> proc_macro2::TokenStream {
     let variant_id_fields: Vec<(Ident, Vec<Ident>, Fields, String)> = data
         .variants // variants of the enum
         .iter()
@@ -84,7 +84,7 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                     // Named-tuple variant
                     Fields::Unnamed(_fields) => {
                         let exp_len = m_field_idents.len();
-                        let typ = m_fields.iter().map(|f| f.ty.clone());
+                        let params = (0..exp_len).map(|_| quote!(d.take_val()?));
 
                         quote! {
                             #m_ident_string => {
@@ -106,7 +106,7 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
                                     d.ix
                                     ))
                                 } else {
-                                    Ok(#constructor(#(#typ::de(d)?),*))
+                                    Ok(#constructor(#(#params,)*))
                                 }
                             }
                         }
@@ -177,8 +177,9 @@ pub fn kson_de(name: Ident, data: DataEnum) -> proc_macro2::TokenStream {
         }
     };
 
+    let (impl_generics, ty_generics, where_clause) = gens.split_for_impl();
     quote! {
-        impl De for #name {
+        impl #impl_generics De for #name #ty_generics #where_clause {
             fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 #impl_de
             }

@@ -53,7 +53,7 @@ fn read_struct_tag(
     }
 }
 
-pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
+pub fn kson_de(name: Ident, data: DataStruct, gens: Generics) -> proc_macro2::TokenStream {
     let impl_de = match data.fields {
         // C-style structs
         Fields::Named(fields) => {
@@ -89,11 +89,7 @@ pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
         }
         // Tuple structs
         Fields::Unnamed(fields) => {
-            let fields: Vec<Type> = Fields::Unnamed(fields)
-                .iter()
-                .map(|field| field.ty.clone())
-                .collect();
-            let fields_len: usize = fields.len();
+            let fields_len = fields.unnamed.len();
 
             // de
             let ident_string = name.to_string();
@@ -102,8 +98,10 @@ pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
 
             let read_tag = read_struct_tag(false, exp_len, &ident_string);
 
+            let params: Vec<_> = (0..fields_len).map(|_| quote! {d.take_val()?}).collect();
+
             let read_items = quote! {
-                |d,()| Ok(#name(#(#fields::de(d)?,)*))
+                |d,()| Ok(#name(#(#params,)*))
             };
 
             quote! {
@@ -121,8 +119,10 @@ pub fn kson_de(name: Ident, data: DataStruct) -> proc_macro2::TokenStream {
         }
     };
 
+    let (impl_generics, ty_generics, where_clause) = gens.split_for_impl();
+
     quote! {
-        impl De for #name {
+        impl #impl_generics De for #name #ty_generics #where_clause {
             fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
                 #impl_de
             }
