@@ -13,6 +13,12 @@ new_type! {
 }
 
 impl Key {
+    pub fn new() -> Self {
+        let mut buf = [0u8; KEY_LEN];
+        crate::random::gen_into(&mut buf);
+        Key(buf)
+    }
+
     pub fn hash_into(&self, buf: &mut [u8], msg: &[u8]) {
         assert!(HASH_MIN_LEN <= buf.len());
         assert!(buf.len() <= HASH_MAX_LEN);
