@@ -13,6 +13,7 @@ pub enum Variants {
         fifth: u128,
         last: Bytes,
     },
+    Recursive(Vec<Variants>),
 }
 
 #[test]
@@ -51,6 +52,31 @@ fn struct_like_serde() {
     let as_vec = kson::ser::into_vec(&val);
     let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
+}
+
+#[test]
+fn recursive_serde() {
+    let v1 = Variants::Unit;
+    let v2 = Variants::Tuple(
+        u8::max_value(),
+        u16::max_value(),
+        u32::max_value(),
+        u64::max_value(),
+        u128::max_value(),
+        Bytes::from_static(b"asdf"),
+    );
+    let v3 = Variants::Named {
+        first: u8::max_value(),
+        second: u16::max_value(),
+        third: u32::max_value(),
+        fourth: u64::max_value(),
+        fifth: u128::max_value(),
+        last: Bytes::from_static(b"asdf"),
+    };
+    let variants: Vec<_> = vec![v1, v2, v3];
+    let as_vec = kson::ser::into_vec(&variants);
+    let de: Vec<_> = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(variants, de);
 }
 
 use std::collections::BTreeMap;
