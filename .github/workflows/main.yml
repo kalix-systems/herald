@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Start postgres instance
-        run: docker-compose up -d -f herald_server/docker-compose.yml
+        run: docker-compose -f herald_server/docker-compose.yml up -d
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
