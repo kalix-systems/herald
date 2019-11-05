@@ -1,6 +1,7 @@
 use super::{utils::*, *};
 use bytes::Bytes;
 
+#[derive(Default)]
 pub struct Serializer(pub Vec<u8>);
 
 impl Serializer {

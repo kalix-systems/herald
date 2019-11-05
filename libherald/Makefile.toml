@@ -7,5 +7,7 @@ script = [
   '''
   cd qt_bindgen
   cargo run
+  cd ..
+  cargo fmt
   '''
 ]
