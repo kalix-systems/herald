@@ -147,7 +147,7 @@ impl Drop for Hasher {
         let as_ptr = (&mut self.state) as *mut crypto_generichash_blake2b_state;
         unsafe {
             let len = crypto_generichash_blake2b_statebytes();
-            sodium_memzero(std::mem::transmute(as_ptr), len as usize);
+            sodium_memzero(as_ptr as *mut std::ffi::c_void, len as usize);
         }
     }
 }

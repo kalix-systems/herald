@@ -183,15 +183,13 @@ macro_rules! E {
 macro_rules! e {
     ($var: expr, $byt: expr, $offset: expr, $($t:tt),*) => {
         {
-            Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset, $($t),*))?;
-            unreachable!()
+            return Err(E!($var, $byt, $offset, $($t),*));
         }
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
         {
-            Err::<(), $crate::errors::KsonError>(E!($var, $byt, $offset))?;
-            unreachable!()
+            return Err(E!($var, $byt, $offset));
         }
     };
 }
