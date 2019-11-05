@@ -589,4 +589,27 @@ mod __impls {
             }
         }
     }
+
+    mod __ptr {
+        use super::*;
+        use std::{rc::Rc, sync::Arc};
+
+        macro_rules! ptr_impl {
+            ($pt:ident, $($pts:tt),*) => {
+                ptr_impl!($pt);
+                ptr_impl!($($pts),*);
+            };
+            ($pt:ident) => {
+                impl<T: De> De for $pt<T> {
+                    fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                        <T as De>::de(d).map($pt::new)
+                    }
+
+                }
+            }
+
+        }
+
+        ptr_impl!(Box, Arc, Rc);
+    }
 }

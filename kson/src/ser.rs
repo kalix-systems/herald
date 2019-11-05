@@ -368,5 +368,39 @@ mod __impls {
                 s.write_string(self.as_str());
             }
         }
+
+        impl<A: Array<Item = u8> + Copy> AtomicSer for ArrayString<A> {}
+    }
+
+    mod __ptr {
+        use super::*;
+        use std::{rc::Rc, sync::Arc};
+
+        macro_rules! ptr_impl {
+            ($pt:ident, $($pts:tt),*) => {
+                ptr_impl!($pt);
+                ptr_impl!($($pts),*);
+            };
+            ($pt: ident) => {
+                impl<T: Ser + ?Sized> Ser for $pt<T> {
+                    fn ser(&self, s: &mut Serializer) {
+                        <T as Ser>::ser(self, s);
+                    }
+                }
+            };
+        }
+
+        ptr_impl!(Box, Arc, Rc);
+
+        impl<T: Ser + ?Sized> Ser for &T {
+            fn ser(&self, s: &mut Serializer) {
+                <T as Ser>::ser(self, s);
+            }
+        }
+        impl<T: Ser> Ser for &mut T {
+            fn ser(&self, s: &mut Serializer) {
+                <T as Ser>::ser(self, s);
+            }
+        }
     }
 }
