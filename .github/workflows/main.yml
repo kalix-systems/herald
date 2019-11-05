@@ -26,6 +26,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Start postgres instance
         run: docker-compose -f herald_server/docker-compose.yml up -d
+      - name: Setup database tables
+        run: cargo run --bin setup_db
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
