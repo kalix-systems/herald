@@ -98,8 +98,9 @@ fn generic_serde() {
     assert_eq!(v1, v2);
 
     let mut map = std::collections::BTreeMap::new();
-    map.insert(Bytes::from_static(b"a"), 0u8);
-    map.insert(Bytes::from_static(b""), 0u8);
+    for _ in 0..1000 {
+        map.insert(Bytes::from_static(b"a"), 0u8);
+    }
 
     let v1 = G::Map(map);
     let as_vec = kson::ser::into_vec(&v1);
