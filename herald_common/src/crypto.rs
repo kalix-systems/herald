@@ -86,7 +86,7 @@ fn verify_sig(
 ) -> SigValid {
     let verify_time = Time::now();
     let dat = compute_signing_data(slice, signer_time);
-    let ts_valid = signer_time <= verify_time || signer_time.within(TIMESTAMP_FUZZ, &verify_time);
+    let ts_valid = signer_time <= verify_time || signer_time.within(TIMESTAMP_FUZZ, verify_time);
     if !ts_valid {
         SigValid::BadTime {
             signer_time,
