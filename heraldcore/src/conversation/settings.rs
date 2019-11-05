@@ -1,3 +1,5 @@
+// NOTE: This only needs to be here until the settings update enum is fleshed out
+#![allow(clippy::trivially_copy_pass_by_ref)]
 use super::*;
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
@@ -33,7 +35,7 @@ pub(crate) mod db {
             use crate::conversation::db::*;
             use SettingsUpdate::*;
             match self {
-                Expiration(period) => Ok(set_expiration_period(&conn, cid, period)?),
+                Expiration(period) => Ok(set_expiration_period(&conn, cid, *period)?),
             }
         }
     }

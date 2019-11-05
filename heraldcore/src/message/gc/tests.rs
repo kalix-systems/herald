@@ -11,7 +11,7 @@ fn get_and_delete_stale() {
 
     let conv = receiver.pairwise_conversation;
 
-    set_expiration_period(&conn, &conv, &ExpirationPeriod::OneMinute).expect(womp!());
+    set_expiration_period(&conn, &conv, ExpirationPeriod::OneMinute).expect(womp!());
 
     let mut builder = InboundMessageBuilder::default();
     let msg_id = [0; 32].into();

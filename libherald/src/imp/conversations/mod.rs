@@ -106,7 +106,7 @@ impl ConversationsTrait for Conversations {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
         let period = period.into();
         ret_err!(
-            conversation::set_expiration_period(&meta.conversation_id, &period),
+            conversation::set_expiration_period(&meta.conversation_id, period),
             false
         );
 
