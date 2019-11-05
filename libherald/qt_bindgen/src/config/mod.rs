@@ -1,3 +1,4 @@
+use rust_qt_binding_generator::configuration::SimpleType::*;
 use rust_qt_binding_generator::configuration::*;
 use std::collections::BTreeMap;
 use std::path::PathBuf;

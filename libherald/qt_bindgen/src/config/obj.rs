@@ -9,6 +9,12 @@ pub struct Obj<'a> {
     properties: BTreeMap<String, Property>,
 }
 
+impl Default for Obj<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a> Obj<'a> {
     pub fn new() -> Self {
         Self {
