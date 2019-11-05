@@ -23,6 +23,7 @@ impl Deserializer {
             ix: 0,
         }
     }
+
     pub fn remaining(&self) -> usize {
         self.data.len().saturating_sub(self.ix)
     }
@@ -59,6 +60,27 @@ impl Deserializer {
         self.ix += len;
 
         Ok(out)
+    }
+
+    pub fn read_raw_len(&mut self, prelen: u8, is_big: bool) -> Result<usize, KsonError> {
+        let len = if !is_big {
+            prelen as usize
+        } else {
+            self.read_raw_u64(prelen + 1)? as usize
+        };
+
+        if len > self.remaining() {
+            Err(E!(
+                LengthError {
+                    expected: len,
+                    remaining: self.remaining()
+                },
+                self.data.clone(),
+                self.ix
+            ))
+        } else {
+            Ok(len)
+        }
     }
 }
 
@@ -241,24 +263,7 @@ impl Deserializer {
 
     pub fn read_bytes_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
         let prelen = tag.val & !(MASK_TYPE | BIG_BIT | BYTES_ARE_UTF8);
-        let len = if !tag.is_big {
-            prelen as usize
-        } else {
-            self.read_raw_u64(prelen + 1)? as usize
-        };
-
-        if len > self.remaining() {
-            Err(E!(
-                LengthError {
-                    expected: len,
-                    remaining: self.remaining()
-                },
-                self.data.clone(),
-                self.ix
-            ))
-        } else {
-            Ok(len)
-        }
+        self.read_raw_len(prelen, tag.is_big)
     }
 
     pub fn read_bytes_from_tag(&mut self, tag: TagByte) -> Result<Bytes, KsonError> {
@@ -313,24 +318,7 @@ impl Deserializer {
         }
 
         let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
-        let len = if !tag.is_big {
-            prelen as usize
-        } else {
-            self.read_raw_u64(prelen + 1)? as usize
-        };
-
-        if len > self.remaining() {
-            Err(E!(
-                LengthError {
-                    expected: len,
-                    remaining: self.remaining()
-                },
-                self.data.clone(),
-                self.ix
-            ))
-        } else {
-            Ok(len)
-        }
+        self.read_raw_len(prelen, tag.is_big)
     }
 
     pub fn read_map_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
@@ -346,37 +334,13 @@ impl Deserializer {
         }
 
         let prelen = tag.val & !(MASK_TYPE | BIG_BIT | COLLECTION_IS_MAP);
-        let len = if !tag.is_big {
-            prelen as usize
-        } else {
-            self.read_raw_u64(prelen + 1)? as usize
-        };
-
-        if len > self.remaining() {
-            Err(E!(
-                LengthError {
-                    expected: len,
-                    remaining: self.remaining()
-                },
-                self.data.clone(),
-                self.ix
-            ))
-        } else {
-            Ok(len)
-        }
+        self.read_raw_len(prelen, tag.is_big)
     }
 
     pub fn read_cons_meta_from_tag(&mut self, tag: TagByte) -> Result<(bool, usize), KsonError> {
         let is_map = tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP;
         let prelen = tag.val & !COLLECTION_IS_MAP;
-        Ok((
-            is_map,
-            if !tag.is_big {
-                prelen as usize
-            } else {
-                self.read_raw_u64(prelen + 1)? as usize
-            },
-        ))
+        Ok((is_map, self.read_raw_len(prelen, tag.is_big)?))
     }
 
     pub fn read_cons<Car, F, Cdr, G>(
@@ -390,16 +354,6 @@ impl Deserializer {
     {
         let tag = self.read_cons_tag()?;
         let (is_map, len) = self.read_cons_meta_from_tag(tag)?;
-        if len > self.remaining() {
-            e!(
-                LengthError {
-                    expected: len,
-                    remaining: self.remaining()
-                },
-                self.data.clone(),
-                self.ix
-            )
-        }
         let car = car_reader(self, is_map, len)?;
         let cdr = cdr_reader(self, car)?;
         Ok(cdr)
