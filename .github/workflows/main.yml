@@ -7,7 +7,7 @@ jobs:
     name: Check
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt install libdbus-1
+      - run: sudo apt install libdbus-glib-1-dev
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
@@ -22,7 +22,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt install libdbus-1
+      - run: sudo apt install libdbus-glib-1-dev
       - uses: actions/checkout@v1
       - name: Start postgres instance
         run: docker-compose -f herald_server/docker-compose.yml up -d
@@ -55,7 +55,7 @@ jobs:
     name: Clippy
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt install libdbus-1
+      - run: sudo apt install libdbus-glib-1-dev
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
         with:
