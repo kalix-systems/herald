@@ -4,24 +4,17 @@ use dashmap::DashMap;
 use futures::stream::*;
 use server_errors::*;
 use server_store::*;
-use sodiumoxide::crypto::sign;
+// use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
     prelude::*,
-    sync::{
-        mpsc::{
-            unbounded_channel as channel, UnboundedReceiver as Receiver, UnboundedSender as Sender,
-        },
-        oneshot,
+    sync::mpsc::{
+        // unbounded_channel as channel,
+        UnboundedReceiver as Receiver,
+        UnboundedSender as Sender,
     },
-    timer::Timeout,
+    // timer::Timeout,
 };
-use warp::{
-    filters::ws::{self, WebSocket},
-    Filter,
-};
-
-type WTx = SplitSink<WebSocket, ws::Message>;
 
 #[derive(Default)]
 pub struct State {
@@ -29,10 +22,9 @@ pub struct State {
     pub pool: Pool,
 }
 
-pub mod get;
-pub mod http;
-pub mod login;
-pub mod post;
+// pub mod http;
+// pub mod login;
+pub mod rpc_impl;
 
 impl State {
     pub fn new() -> Self {
@@ -46,60 +38,61 @@ impl State {
         Ok(self.pool.get().await?)
     }
 
-    pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
-        let mut store: Conn = self.new_connection().await?;
+    // pub async fn handle_login(&'static self) -> Result<(), Error> {
+    //     let mut store: Conn = self.new_connection().await?;
 
-        // all the channels we'll need for plumbing
-        // first we split the websocket
-        let (mut wtx, mut wrx) = ws.split();
-        // bytevec messages received from the socket
-        let (mut rtx, mut rrx) = channel::<Vec<u8>>();
-        // push emitter which will be stored in the active sessions dashmap
-        let (ptx, prx) = channel::<()>();
-        // session-close emitter
-        let (close, closed) = oneshot::channel::<()>();
+    //     // all the channels we'll need for plumbing
+    //     // first we split the websocket
+    //     let (mut wtx, mut wrx) = ws.split();
+    //     // bytevec messages received from the socket
+    //     let (mut rtx, mut rrx) = channel::<Vec<u8>>();
+    //     // push emitter which will be stored in the active sessions dashmap
+    //     let (ptx, prx) = channel::<()>();
+    //     // session-close emitter
+    //     let (close, closed) = oneshot::channel::<()>();
 
-        // on graceful exit, notify runtime to close channel
-        // we set things up this way so that the rrx channel
-        // will be populated before we call login, hence before
-        // we know the gid
-        tokio::spawn(async move {
-            while let Some(Ok(m)) = wrx.next().await {
-                if m.is_close() || (m.is_binary() && rtx.send(m.into_bytes()).await.is_err()) {
-                    break;
-                }
-            }
+    //     // on graceful exit, notify runtime to close channel
+    //     // we set things up this way so that the rrx channel
+    //     // will be populated before we call login, hence before
+    //     // we know the gid
+    //     tokio::spawn(async move {
+    //         while let Some(Ok(m)) = wrx.next().await {
+    //             if m.is_close() || (m.is_binary() && rtx.send(m.into_bytes()).await.is_err()) {
+    //                 break;
+    //             }
+    //         }
 
-            close.send(()).ok();
-        });
+    //         close.send(()).ok();
+    //     });
 
-        let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
+    //     // let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
+    //     let gid: GlobalId = unimplemented!();
 
-        self.active.insert(gid.did, ptx);
+    //     self.active.insert(gid.did, ptx);
 
-        // remove active session on graceful exit
-        tokio::spawn(async move {
-            drop(closed.await);
-            self.active.remove(&gid.did);
-        });
+    //     // remove active session on graceful exit
+    //     tokio::spawn(async move {
+    //         drop(closed.await);
+    //         self.active.remove(&gid.did);
+    //     });
 
-        // TODO: handle this error somehow?
-        // for now we're just dropping it
-        if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
-            .await
-            .is_ok()
-        {
-            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
-            drop(
-                self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
-                    .await,
-            );
-        }
+    //     // // TODO: handle this error somehow?
+    //     // // for now we're just dropping it
+    //     // if catchup(gid.did, &mut store, &mut wtx, &mut rrx)
+    //     //     .await
+    //     //     .is_ok()
+    //     // {
+    //     //     let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+    //     //     drop(
+    //     //         self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
+    //     //             .await,
+    //     //     );
+    //     // }
 
-        self.active.remove(&gid.did);
+    //     self.active.remove(&gid.did);
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
     pub async fn push_users(&self, req: push_users::Req) -> Result<push_users::Res, Error> {
         let push_users::Req { to, exc, msg } = req;
@@ -215,59 +208,59 @@ impl State {
         Ok(res_ser)
     }
 
-    async fn send_pushes(
-        &self,
-        store: &mut Conn,
-        wtx: &mut WTx,
-        rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Receiver<()>>,
-        did: sig::PublicKey,
-    ) -> Result<(), Error> {
-        while let Some(p) = rx.next().await {
-            if p.is_ok() {
-                catchup(did, store, wtx, rrx).await?;
-            } else {
-                wtx.send(ws::Message::ping(vec![0u8]))
-                    .timeout(Duration::from_secs(5))
-                    .await??;
-            }
-        }
+    // async fn send_pushes(
+    //     &self,
+    //     store: &mut Conn,
+    //     wtx: &mut WTx,
+    //     rrx: &mut Receiver<Vec<u8>>,
+    //     rx: &mut Timeout<Receiver<()>>,
+    //     did: sig::PublicKey,
+    // ) -> Result<(), Error> {
+    //     while let Some(p) = rx.next().await {
+    //         if p.is_ok() {
+    //             catchup(did, store, wtx, rrx).await?;
+    //         } else {
+    //             wtx.send(ws::Message::ping(vec![0u8]))
+    //                 .timeout(Duration::from_secs(5))
+    //                 .await??;
+    //         }
+    //     }
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 }
 
-async fn catchup(
-    did: sign::PublicKey,
-    s: &mut Conn,
-    wtx: &mut WTx,
-    rrx: &mut Receiver<Vec<u8>>,
-) -> Result<(), Error> {
-    use catchup::*;
+// async fn catchup(
+//     did: sign::PublicKey,
+//     s: &mut Conn,
+//     wtx: &mut WTx,
+//     rrx: &mut Receiver<Vec<u8>>,
+// ) -> Result<(), Error> {
+//     use catchup::*;
 
-    loop {
-        let pending: Vec<Push> = s.get_pending(did, CHUNK_SIZE).await?;
-        if pending.is_empty() {
-            break;
-        } else {
-            let len = pending.len() as u64;
-            let msg = Catchup::Messages(pending);
+//     loop {
+//         let pending: Vec<Push> = s.get_pending(did, CHUNK_SIZE).await?;
+//         if pending.is_empty() {
+//             break;
+//         } else {
+//             let len = pending.len() as u64;
+//             let msg = Catchup::Messages(pending);
 
-            loop {
-                write_msg(&msg, wtx, rrx).await?;
+//             loop {
+//                 write_msg(&msg, wtx, rrx).await?;
 
-                if CatchupAck(len) == read_msg(rrx).await? {
-                    s.expire_pending(did, len as u32).await?;
-                    break;
-                }
-            }
-        }
-    }
+//                 if CatchupAck(len) == read_msg(rrx).await? {
+//                     s.expire_pending(did, len as u32).await?;
+//                     break;
+//                 }
+//             }
+//         }
+//     }
 
-    write_msg(&Catchup::Done, wtx, rrx).await?;
+//     write_msg(&Catchup::Done, wtx, rrx).await?;
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
 
@@ -280,43 +273,43 @@ where
     Ok(t)
 }
 
-fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
-    Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
-}
+// fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
+//     Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
+// }
 
-async fn write_msg<T>(t: &T, wtx: &mut WTx, rrx: &mut Receiver<Vec<u8>>) -> Result<(), Error>
-where
-    T: Serialize,
-{
-    let bvec = Bytes::from(serde_cbor::to_vec(t)?);
-    let packets = Packet::from_bytes(bvec);
-    let len = packets.len() as u64;
+// async fn write_msg<T>(t: &T, wtx: &mut WTx, rrx: &mut Receiver<Vec<u8>>) -> Result<(), Error>
+// where
+//     T: Serialize,
+// {
+//     let bvec = Bytes::from(serde_cbor::to_vec(t)?);
+//     let packets = Packet::from_bytes(bvec);
+//     let len = packets.len() as u64;
 
-    loop {
-        wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+//     loop {
+//         wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
 
-        if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
-            wtx.send(ser_msg(&PacketResponse::Success)?)
-                .timeout(TIMEOUT_DUR)
-                .await??;
-            break;
-        } else {
-            wtx.send(ser_msg(&PacketResponse::Retry)?)
-                .timeout(TIMEOUT_DUR)
-                .await??;
-        }
-    }
+//         if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
+//             wtx.send(ser_msg(&PacketResponse::Success)?)
+//                 .timeout(TIMEOUT_DUR)
+//                 .await??;
+//             break;
+//         } else {
+//             wtx.send(ser_msg(&PacketResponse::Retry)?)
+//                 .timeout(TIMEOUT_DUR)
+//                 .await??;
+//         }
+//     }
 
-    loop {
-        for packet in packets.iter() {
-            wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
-        }
+//     loop {
+//         for packet in packets.iter() {
+//             wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+//         }
 
-        match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {
-            PacketResponse::Success => break,
-            PacketResponse::Retry => {}
-        }
-    }
+//         match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {
+//             PacketResponse::Success => break,
+//             PacketResponse::Retry => {}
+//         }
+//     }
 
-    Ok(())
-}
+//     Ok(())
+// }
