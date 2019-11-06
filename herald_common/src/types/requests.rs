@@ -151,13 +151,14 @@ pub trait HeraldService {
     async fn key_info(req: key_info::Req) -> Result<key_info::Res, RequestError>;
     async fn keys_exist(req: keys_exist::Req) -> Result<keys_exist::Res, RequestError>;
     async fn users_exist(req: users_exist::Req) -> Result<users_exist::Res, RequestError>;
-    // async fn push_users(req: push_users::Req) -> Result<push_users::Res, RequestError>;
-    // async fn push_devices(req: push_devices::Req) -> Result<push_devices::Res, RequestError>;
     async fn new_key(req: new_key::Req) -> Result<new_key::Res, RequestError>;
     async fn dep_key(req: dep_key::Req) -> Result<dep_key::Res, RequestError>;
     async fn register(req: register::Req) -> Result<register::Res, RequestError>;
     // async fn add_prekeys(req: add_prekeys::Req) -> Result<add_prekeys::Res, RequestError>;
     // async fn get_prekeys(req: get_prekeys::Req) -> Result<get_prekeys::Res, RequestError>;
+
+    async fn push_users(req: push_users::Req) -> Result<push_users::Res, RequestError>;
+    async fn push_devices(req: push_devices::Req) -> Result<push_devices::Res, RequestError>;
 }
 
 pub mod transport {

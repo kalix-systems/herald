@@ -101,6 +101,23 @@ macro_rules! serve_req {
             })
         }
     };
+    (self, $lifetime: tt, $tname:ident, $mname:ident) => {
+        type $tname = Fut<$lifetime, Result<$mname::Res, RequestError>>;
+        fn $mname(
+            self,
+            _cx: tarpc_lib::context::Context,
+            req: $mname::Req,
+        ) -> <Self as HeraldService>::$tname {
+            Box::pin(async move {
+                self.$mname(req).await.map_err(|e| match e {
+                    Error::PgError(p) => p
+                        .code()
+                        .map_or_else(|| UnknownError, |s| DbError(s.code().into())),
+                    _ => UnknownError,
+                })
+            })
+        }
+    };
 }
 
 impl<'a> HeraldService for &'a State {
@@ -114,28 +131,6 @@ impl<'a> HeraldService for &'a State {
     // serve_req!(store, 'a, AddPrekeysFut, add_prekeys);
     // serve_req!(store, 'a, GetPrekeysFut, get_prekeys);
 
-    // fn push_users(self, req: push_users::Req) -> Fut<'a, Result<push_users::Res, RequestError>> {
-    //     Box::pin(async move {
-    //         self.push_users(req).await.map_err(|e| match e {
-    //             Error::PgError(p) => p
-    //                 .code()
-    //                 .map_or_else(|s| DbError(s.code().into()), || UnknownError),
-    //             _ => UnknownError,
-    //         })
-    //     })
-    // }
-
-    // fn push_devices(
-    //     self,
-    //     req: push_devices::Req,
-    // ) -> Fut<'a, Result<push_devices::Res, RequestError>> {
-    //     Box::pin(async move {
-    //         self.push_devices(req).await.map_err(|e| match e {
-    //             Error::PgError(p) => p
-    //                 .code()
-    //                 .map_or_else(|s| DbError(s.code().into()), || UnknownError),
-    //             _ => UnknownError,
-    //         })
-    //     })
-    // }
+    serve_req!(self, 'a, PushUsersFut, push_users);
+    serve_req!(self, 'a, PushDevicesFut, push_devices);
 }
