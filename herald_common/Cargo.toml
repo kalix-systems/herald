@@ -28,5 +28,13 @@ optional = true
 version = "1.0"
 features = ["derive"]
 
+[dependencies.tarpc]
+git = "https://github.com/google/tarpc"
+commit = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+
+[dependencies.tarpc-bincode-transport]
+git = "https://github.com/google/tarpc"
+commit = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+
 [features]
 rusqlite_ = ["rusqlite"]
