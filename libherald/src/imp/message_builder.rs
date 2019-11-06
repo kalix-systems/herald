@@ -130,7 +130,7 @@ impl MessageBuilderTrait for MessageBuilder {
 
                 match m {
                     Msg(msg) => {
-                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
+                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(Box::new(msg))));
                     }
                     Error { error, line_number } => {
                         // TODO better line number usage

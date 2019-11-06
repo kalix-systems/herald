@@ -299,7 +299,7 @@ impl UsersTrait for Users {
     }
 
     fn fetch_more(&mut self) {
-        for update in USER_BUS.rx.try_recv() {
+        for update in USER_BUS.rx.try_iter() {
             match update {
                 UsersUpdates::NewUser(uid) => {
                     let new_contact = ret_err!(contact::by_user_id(uid));
