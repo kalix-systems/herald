@@ -7,7 +7,6 @@ import "qrc:/imports/Avatar" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
-import "Controls"
 import "../popups" as Popups
 
 // Reveiw Key

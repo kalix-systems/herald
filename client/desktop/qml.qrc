@@ -44,7 +44,6 @@
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/ConversationView/ConversationViewMain.qml</file>
-        <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
