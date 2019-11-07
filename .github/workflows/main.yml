@@ -55,7 +55,7 @@ jobs:
         with:
           command: test
 
-  macos_test:
+  windows_test:
     name: Windows Test
     runs-on: windows-latest
     steps:
