@@ -56,7 +56,7 @@ jobs:
           command: test
 
   macos_test:
-    name: Macos Test
+    name: Windows Test
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
