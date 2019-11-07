@@ -1,6 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    foundation
+    foundation \
+    libherald
 
 
