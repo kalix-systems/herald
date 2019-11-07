@@ -37,6 +37,42 @@ jobs:
         with:
           command: test
 
+  macos_test:
+    name: Macos Test
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Start postgres instance
+        run: docker-compose -f herald_server/docker-compose.yml up -d
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: beta
+          override: true
+      - name: Setup database tables
+        run: cargo run --bin setup_db
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+
+  macos_test:
+    name: Macos Test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Start postgres instance
+        run: docker-compose -f herald_server/docker-compose.yml up -d
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: beta
+          override: true
+      - name: Setup database tables
+        run: cargo run --bin setup_db
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
@@ -69,3 +105,4 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+  
