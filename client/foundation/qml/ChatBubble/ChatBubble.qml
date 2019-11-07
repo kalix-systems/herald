@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 Rectangle {
     id: background
-    property color bubbleColor: CmnCfg.palette.secondaryColor
+    property color bubbleColor: CmnCfg.palette.paneColor
     property color senderColor: "white"
     property string receiptImage: ""
     property string friendlyTimestamp: ""
@@ -21,8 +21,8 @@ Rectangle {
         id: verticalAccent
         anchors.right: !outbound ? contentLoader.left : undefined
         anchors.left: outbound ? contentLoader.right : undefined
-        height: parent.height
-        width: CmnCfg.margin
+        height: contentLoader.height
+        width: CmnCfg.smallMargin / 2
         color: senderColor
     }
 
@@ -30,5 +30,9 @@ Rectangle {
         id: contentLoader
         property int maxWidth: parent.maxWidth
         sourceComponent: content
+    }
+
+    Item {
+        anchors.bottom: parent.bottom
     }
 }

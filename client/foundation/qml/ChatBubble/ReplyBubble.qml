@@ -9,15 +9,39 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
-    property string opName: "@unknown"
-    property string opBody: ""
-    property color opColor: "gray"
+    property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
+                                                    replyPreview.author)]
     property string authorName: ""
     property int spacing: 0
+    property color authorColor
+    property var replyId
 
-    ChatLabel {
-        id: sender
-        senderName: authorName
+    Row {
+        Layout.margins: CmnCfg.smallMargin / 2
+        Layout.bottomMargin: 0
+        spacing: CmnCfg.smallMargin / 2
+
+        ChatLabel {
+            id: uname
+            senderName: authorName
+            senderColor: authorColor
+        }
+
+        Label {
+            id: timestamp
+            text: friendlyTimestamp
+            color: CmnCfg.palette.secondaryTextColor
+            font.pixelSize: 10
+            anchors {
+                top: parent.top
+                topMargin: 3
+            }
+        }
+    }
+
+    MessagePreview {
+        id: replyPreview
+        messageId: replyId === undefined ? null : replyId
     }
 
     Rectangle {
@@ -28,7 +52,15 @@ ColumnLayout {
         Layout.topMargin: 0
         Layout.minimumWidth: reply.width
 
-        Rectangle {}
+        Rectangle {
+            visible: !replyPreview.isDangling
+            id: verticalAccent
+            anchors.right: !outbound ? replyWrapper.left : undefined
+            anchors.left: outbound ? replyWrapper.right : undefined
+            height: replyWrapper.height
+            width: CmnCfg.smallMargin / 2
+            color: opColor
+        }
 
         ColumnLayout {
             id: reply
@@ -36,18 +68,20 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: opName
+                text: !replyPreview.isDangling ? contactsModel.nameById(
+                                                     replyPreview.author) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
-                Layout.preferredHeight: opName !== "" ? implicitHeight : 0
-                color: CmnCfg.palette.mainTextColor
+                Layout.leftMargin: CmnCfg.smallMargin / 2
+                Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
+                color: opColor
             }
 
             TextMetrics {
                 readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
-                text: opBody
+                text: !replyPreview.isDangling ? replyPreview.body : "Original message not found"
                 elideWidth: constWidth
                 elide: Text.ElideRight
             }
@@ -64,6 +98,5 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

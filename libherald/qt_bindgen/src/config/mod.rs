@@ -1,3 +1,4 @@
+use rust_qt_binding_generator::configuration::SimpleType::*;
 use rust_qt_binding_generator::configuration::*;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -47,10 +48,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        errors(),
        herald_utils(),
        conversations(),
-       network_handle(),
        users(),
        members(),
        messages(),
+       message_preview(),
        config_obj(),
        conversation_builder(),
        message_builder(),
@@ -60,11 +61,18 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
 fn herald_state() -> Object {
     let properties = props! {
-        configInit: Prop::new().simple(Bool).write()
+        configInit: Prop::new().simple(Bool).write(),
+        connectionUp: Prop::new().simple(Bool),
+        connectionPending: Prop::new().simple(Bool)
+    };
+
+    let funcs = functions! {
+        mut registerNewUser(user_id: QString) => Bool,
+        mut login() => Bool,
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties)
+        HeraldState : Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -144,6 +152,7 @@ fn conversations() -> Object {
     let funcs = functions! {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
     };
 
     obj! {
@@ -151,22 +160,21 @@ fn conversations() -> Object {
     }
 }
 
-fn network_handle() -> Object {
-    let props = props! {
-        connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool)
-    };
-
-    let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Bool,
-        mut login() => Bool,
-        const sendAddRequest(user_id: QString, conversation_id: QByteArray) => Bool,
-    };
-
-    obj! {
-        NetworkHandle: Obj::new().props(props).funcs(funcs)
-    }
-}
+//fn network_handle() -> Object {
+//    let props = props! {
+//        connectionUp: Prop::new().simple(Bool),
+//        connectionPending: Prop::new().simple(Bool)
+//    };
+//
+//    let funcs = functions! {
+//        mut registerNewUser(user_id: QString) => Bool,
+//        mut login() => Bool,
+//    };
+//
+//    obj! {
+//        NetworkHandle: Obj::new().props(props).funcs(funcs)
+//    }
+//}
 
 fn users() -> Object {
     let props = filter_props();
@@ -184,6 +192,7 @@ fn users() -> Object {
     let funcs = functions! {
         mut add(id: QString) => QByteArray,
         mut toggleFilterRegex() => Bool,
+        mut clearFilter() => Void,
         const colorById(id: QString) => QUint32,
         const nameById(id: QString) => QString,
         const profilePictureById(id: QString) => QString,
@@ -222,13 +231,30 @@ fn members() -> Object {
     }
 }
 
+fn message_preview() -> Object {
+    let props = props! {
+         messageId: Prop::new().simple(QByteArray).optional().write(),
+         author: Prop::new().simple(QString).optional(),
+         body: Prop::new().simple(QString).optional(),
+         epochTimestampMs: Prop::new().simple(Qint64).optional(),
+         isDangling: Prop::new().simple(Bool),
+         hasAttachments: Prop::new().simple(Bool),
+         msgIdSet: Prop::new().simple(Bool)
+    };
+
+    obj! {
+       MessagePreview: Obj::new().props(props)
+    }
+}
+
 fn messages() -> Object {
     let props = props! {
         conversationId: conv_id_prop(),
         lastAuthor: Prop::new().simple(QString).optional(),
         lastBody: Prop::new().simple(QString).optional(),
         lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
-        lastStatus: Prop::new().simple(QUint32).optional()
+        lastStatus: Prop::new().simple(QUint32).optional(),
+        isEmpty: Prop::new().simple(Bool)
     };
 
     let item_props = item_props! {
@@ -250,8 +276,6 @@ fn messages() -> Object {
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
-        const messageBodyById(msg_id: QByteArray) => QString,
-        const messageAuthorById(msg_id: QByteArray) => QString,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 

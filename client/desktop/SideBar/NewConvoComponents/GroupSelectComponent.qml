@@ -14,14 +14,13 @@ Component {
         width: parent.width
         id: wrapperRect
         color: CmnCfg.palette.mainColor
-
         Common.ButtonForm {
             id: backbutton
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
             height: 20
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "newConversationState"
+            onClicked: sideBarState.state = "newConversationState"
         }
 
         Common.ButtonForm {
@@ -30,7 +29,7 @@ Component {
             anchors.right: parent.right
             height: 20
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "finalizeGroupState"
+            onClicked: sideBarState.state = "finalizeGroupState"
         }
 
         Flow {
@@ -71,7 +70,6 @@ Component {
                     color: CmnCfg.palette.mainColor
                 }
 
-                //PAUL: move this logic to C++
                 Keys.onPressed: {
                     // NOTE: What is the first comparison doing?
                     // this makes sure that returns and tabs are not evaluated
@@ -83,11 +81,10 @@ Component {
                     }
 
                     if (event.key === Qt.Key_Return) {
-                        convoPane.state = "finalizeGroupState"
+                        sideBarState.state = "finalizeGroupState"
                     }
                 }
 
-                //PAUL: move this logic to C++
                 onTextChanged: {
                     if (contactsSearch) {
                         Qt.callLater(function (text) {

@@ -1,15 +1,14 @@
 import QtQuick 2.13
 import "../common" as Common
-import Qt.labs.platform 1.1
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import "Popups" as Popups
 
 MouseArea {
     id: chatBubbleHitbox
     z: CmnCfg.underlayZ
     propagateComposedEvents: true
     hoverEnabled: true
-    // KAAVYA: there has to be a better way to do this.
     width: parent.width + 50
 
     anchors {
@@ -20,10 +19,10 @@ MouseArea {
         top: parent.top
     }
 
-    // PAUL : this should be a row
     Common.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
+
         anchors {
             // Ternary is okay, types are enforced, cases are explicit.
             left: outbound ? parent.left : undefined
@@ -33,19 +32,11 @@ MouseArea {
         }
         source: "qrc:/options-icon.svg"
         z: CmnCfg.overlayZ
-
         onClicked: messageOptionsMenu.open()
+    }
 
-        Menu {
-            id: messageOptionsMenu
-            MenuItem {
-                text: "Delete Message"
-                onTriggered: ownedConversation.deleteMessage(index)
-            }
-            MenuItem {
-                text: "More Info..."
-            }
-        }
+    Popups.MessageOptionsPopup {
+        id: messageOptionsMenu
     }
 
     Common.ButtonForm {
@@ -59,7 +50,7 @@ MouseArea {
             verticalCenter: chatBubbleHitbox.verticalCenter
         }
         source: "qrc:/reply-icon.svg"
-        z: 10
+        z: CmnCfg.overlayZ
 
         onClicked: {
             chatTextArea.replyText = body
@@ -67,7 +58,6 @@ MouseArea {
             chatTextArea.replyUid = author
             chatTextArea.replyName = contactsModel.nameById(author)
             builder.replyingTo = messageId
-            // chatTextArea.state = "replystate"
         }
     }
 }

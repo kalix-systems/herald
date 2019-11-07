@@ -117,6 +117,14 @@ namespace {
     {
         Q_EMIT o->configInitChanged();
     }
+    inline void heraldStateConnectionPendingChanged(HeraldState* o)
+    {
+        Q_EMIT o->connectionPendingChanged();
+    }
+    inline void heraldStateConnectionUpChanged(HeraldState* o)
+    {
+        Q_EMIT o->connectionUpChanged();
+    }
     inline void membersConversationIdChanged(Members* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -153,9 +161,41 @@ namespace {
     {
         Q_EMIT o->replyingToChanged();
     }
+    inline void messagePreviewAuthorChanged(MessagePreview* o)
+    {
+        Q_EMIT o->authorChanged();
+    }
+    inline void messagePreviewBodyChanged(MessagePreview* o)
+    {
+        Q_EMIT o->bodyChanged();
+    }
+    inline void messagePreviewEpochTimestampMsChanged(MessagePreview* o)
+    {
+        Q_EMIT o->epochTimestampMsChanged();
+    }
+    inline void messagePreviewHasAttachmentsChanged(MessagePreview* o)
+    {
+        Q_EMIT o->hasAttachmentsChanged();
+    }
+    inline void messagePreviewIsDanglingChanged(MessagePreview* o)
+    {
+        Q_EMIT o->isDanglingChanged();
+    }
+    inline void messagePreviewMessageIdChanged(MessagePreview* o)
+    {
+        Q_EMIT o->messageIdChanged();
+    }
+    inline void messagePreviewMsgIdSetChanged(MessagePreview* o)
+    {
+        Q_EMIT o->msgIdSetChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
+    }
+    inline void messagesIsEmptyChanged(Messages* o)
+    {
+        Q_EMIT o->isEmptyChanged();
     }
     inline void messagesLastAuthorChanged(Messages* o)
     {
@@ -172,14 +212,6 @@ namespace {
     inline void messagesLastStatusChanged(Messages* o)
     {
         Q_EMIT o->lastStatusChanged();
-    }
-    inline void networkHandleConnectionPendingChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->connectionPendingChanged();
-    }
-    inline void networkHandleConnectionUpChanged(NetworkHandle* o)
-    {
-        Q_EMIT o->connectionUpChanged();
     }
     inline void usersFilterChanged(Users* o)
     {
@@ -831,6 +863,7 @@ extern "C" {
     void conversations_filter_set(Conversations::Private*, const ushort *str, int len);
     bool conversations_filter_regex_get(const Conversations::Private*);
     void conversations_filter_regex_set(Conversations::Private*, bool);
+    void conversations_clear_filter(Conversations::Private*);
     bool conversations_remove_conversation(Conversations::Private*, quint64);
     bool conversations_toggle_filter_regex(Conversations::Private*);
 };
@@ -843,10 +876,14 @@ extern "C" {
 };
 
 extern "C" {
-    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*));
+    HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*), void (*)(HeraldState*), void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
     void herald_state_config_init_set(HeraldState::Private*, bool);
+    bool herald_state_connection_pending_get(const HeraldState::Private*);
+    bool herald_state_connection_up_get(const HeraldState::Private*);
+    bool herald_state_login(HeraldState::Private*);
+    bool herald_state_register_new_user(HeraldState::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -1257,6 +1294,20 @@ extern "C" {
 };
 
 extern "C" {
+    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*));
+    void message_preview_free(MessagePreview::Private*);
+    void message_preview_author_get(const MessagePreview::Private*, QString*, qstring_set);
+    void message_preview_body_get(const MessagePreview::Private*, QString*, qstring_set);
+    option_qint64 message_preview_epoch_timestamp_ms_get(const MessagePreview::Private*);
+    bool message_preview_has_attachments_get(const MessagePreview::Private*);
+    bool message_preview_is_dangling_get(const MessagePreview::Private*);
+    void message_preview_message_id_get(const MessagePreview::Private*, QByteArray*, qbytearray_set);
+    void message_preview_message_id_set(MessagePreview::Private*, const char* bytes, int len);
+    void message_preview_message_id_set_none(MessagePreview::Private*);
+    bool message_preview_msg_id_set_get(const MessagePreview::Private*);
+};
+
+extern "C" {
     void messages_data_author(const Messages::Private*, int, QString*, qstring_set);
     void messages_data_body(const Messages::Private*, int, QString*, qstring_set);
     option_bool messages_data_data_saved(const Messages::Private*, int);
@@ -1514,7 +1565,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1531,6 +1582,7 @@ extern "C" {
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
+    bool messages_is_empty_get(const Messages::Private*);
     void messages_last_author_get(const Messages::Private*, QString*, qstring_set);
     void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
@@ -1538,18 +1590,6 @@ extern "C" {
     bool messages_clear_conversation_history(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
-    void messages_message_author_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
-    void messages_message_body_by_id(const Messages::Private*, const char*, int, QString*, qstring_set);
-};
-
-extern "C" {
-    NetworkHandle::Private* network_handle_new(NetworkHandle*, void (*)(NetworkHandle*), void (*)(NetworkHandle*));
-    void network_handle_free(NetworkHandle::Private*);
-    bool network_handle_connection_pending_get(const NetworkHandle::Private*);
-    bool network_handle_connection_up_get(const NetworkHandle::Private*);
-    bool network_handle_login(NetworkHandle::Private*);
-    bool network_handle_register_new_user(NetworkHandle::Private*, const ushort*, int);
-    bool network_handle_send_add_request(const NetworkHandle::Private*, const ushort*, int, const char*, int);
 };
 
 extern "C" {
@@ -1857,6 +1897,7 @@ extern "C" {
     bool users_filter_regex_get(const Users::Private*);
     void users_filter_regex_set(Users::Private*, bool);
     void users_add(Users::Private*, const ushort*, int, QByteArray*, qbytearray_set);
+    void users_clear_filter(Users::Private*);
     quint32 users_color_by_id(const Users::Private*, const ushort*, int);
     void users_name_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
     void users_profile_picture_by_id(const Users::Private*, const ushort*, int, QString*, qstring_set);
@@ -2180,6 +2221,10 @@ bool Conversations::filterRegex() const
 void Conversations::setFilterRegex(bool v) {
     conversations_filter_regex_set(m_d, v);
 }
+void Conversations::clearFilter()
+{
+    return conversations_clear_filter(m_d);
+}
 bool Conversations::removeConversation(quint64 row_index)
 {
     return conversations_remove_conversation(m_d, row_index);
@@ -2228,7 +2273,9 @@ HeraldState::HeraldState(bool /*owned*/, QObject *parent):
 HeraldState::HeraldState(QObject *parent):
     QObject(parent),
     m_d(herald_state_new(this,
-        heraldStateConfigInitChanged)),
+        heraldStateConfigInitChanged,
+        heraldStateConnectionPendingChanged,
+        heraldStateConnectionUpChanged)),
     m_ownsPrivate(true)
 {
 }
@@ -2244,6 +2291,22 @@ bool HeraldState::configInit() const
 }
 void HeraldState::setConfigInit(bool v) {
     herald_state_config_init_set(m_d, v);
+}
+bool HeraldState::connectionPending() const
+{
+    return herald_state_connection_pending_get(m_d);
+}
+bool HeraldState::connectionUp() const
+{
+    return herald_state_connection_up_get(m_d);
+}
+bool HeraldState::login()
+{
+    return herald_state_login(m_d);
+}
+bool HeraldState::registerNewUser(const QString& user_id)
+{
+    return herald_state_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
 HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent):
     QObject(parent),
@@ -2530,6 +2593,78 @@ void MessageBuilder::removeLast()
 {
     return message_builder_remove_last(m_d);
 }
+MessagePreview::MessagePreview(bool /*owned*/, QObject *parent):
+    QObject(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+}
+
+MessagePreview::MessagePreview(QObject *parent):
+    QObject(parent),
+    m_d(message_preview_new(this,
+        messagePreviewAuthorChanged,
+        messagePreviewBodyChanged,
+        messagePreviewEpochTimestampMsChanged,
+        messagePreviewHasAttachmentsChanged,
+        messagePreviewIsDanglingChanged,
+        messagePreviewMessageIdChanged,
+        messagePreviewMsgIdSetChanged)),
+    m_ownsPrivate(true)
+{
+}
+
+MessagePreview::~MessagePreview() {
+    if (m_ownsPrivate) {
+        message_preview_free(m_d);
+    }
+}
+QString MessagePreview::author() const
+{
+    QString v;
+    message_preview_author_get(m_d, &v, set_qstring);
+    return v;
+}
+QString MessagePreview::body() const
+{
+    QString v;
+    message_preview_body_get(m_d, &v, set_qstring);
+    return v;
+}
+QVariant MessagePreview::epochTimestampMs() const
+{
+    QVariant v;
+    auto r = message_preview_epoch_timestamp_ms_get(m_d);
+    if (r.some) {
+        v.setValue(r.value);
+    }
+    return r;
+}
+bool MessagePreview::hasAttachments() const
+{
+    return message_preview_has_attachments_get(m_d);
+}
+bool MessagePreview::isDangling() const
+{
+    return message_preview_is_dangling_get(m_d);
+}
+QByteArray MessagePreview::messageId() const
+{
+    QByteArray v;
+    message_preview_message_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void MessagePreview::setMessageId(const QByteArray& v) {
+    if (v.isNull()) {
+        message_preview_message_id_set_none(m_d);
+    } else {
+    message_preview_message_id_set(m_d, v.data(), v.size());
+    }
+}
+bool MessagePreview::msgIdSet() const
+{
+    return message_preview_msg_id_set_get(m_d);
+}
 Messages::Messages(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -2542,6 +2677,7 @@ Messages::Messages(QObject *parent):
     QAbstractItemModel(parent),
     m_d(messages_new(this,
         messagesConversationIdChanged,
+        messagesIsEmptyChanged,
         messagesLastAuthorChanged,
         messagesLastBodyChanged,
         messagesLastEpochTimestampMsChanged,
@@ -2613,6 +2749,10 @@ void Messages::setConversationId(const QByteArray& v) {
     messages_conversation_id_set(m_d, v.data(), v.size());
     }
 }
+bool Messages::isEmpty() const
+{
+    return messages_is_empty_get(m_d);
+}
 QString Messages::lastAuthor() const
 {
     QString v;
@@ -2654,59 +2794,6 @@ bool Messages::deleteMessage(quint64 row_index)
 quint64 Messages::indexById(const QByteArray& msg_id) const
 {
     return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
-}
-QString Messages::messageAuthorById(const QByteArray& msg_id) const
-{
-    QString s;
-    messages_message_author_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
-    return s;
-}
-QString Messages::messageBodyById(const QByteArray& msg_id) const
-{
-    QString s;
-    messages_message_body_by_id(m_d, msg_id.data(), msg_id.size(), &s, set_qstring);
-    return s;
-}
-NetworkHandle::NetworkHandle(bool /*owned*/, QObject *parent):
-    QObject(parent),
-    m_d(nullptr),
-    m_ownsPrivate(false)
-{
-}
-
-NetworkHandle::NetworkHandle(QObject *parent):
-    QObject(parent),
-    m_d(network_handle_new(this,
-        networkHandleConnectionPendingChanged,
-        networkHandleConnectionUpChanged)),
-    m_ownsPrivate(true)
-{
-}
-
-NetworkHandle::~NetworkHandle() {
-    if (m_ownsPrivate) {
-        network_handle_free(m_d);
-    }
-}
-bool NetworkHandle::connectionPending() const
-{
-    return network_handle_connection_pending_get(m_d);
-}
-bool NetworkHandle::connectionUp() const
-{
-    return network_handle_connection_up_get(m_d);
-}
-bool NetworkHandle::login()
-{
-    return network_handle_login(m_d);
-}
-bool NetworkHandle::registerNewUser(const QString& user_id)
-{
-    return network_handle_register_new_user(m_d, user_id.utf16(), user_id.size());
-}
-bool NetworkHandle::sendAddRequest(const QString& user_id, const QByteArray& conversation_id) const
-{
-    return network_handle_send_add_request(m_d, user_id.utf16(), user_id.size(), conversation_id.data(), conversation_id.size());
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -2796,6 +2883,10 @@ QByteArray Users::add(const QString& id)
     QByteArray s;
     users_add(m_d, id.utf16(), id.size(), &s, set_qbytearray);
     return s;
+}
+void Users::clearFilter()
+{
+    return users_clear_filter(m_d);
 }
 quint32 Users::colorById(const QString& id) const
 {

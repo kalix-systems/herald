@@ -3,6 +3,8 @@ use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 pub(crate) mod db;
+/// Functionality related to changes in conversation settings
+pub mod settings;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
@@ -141,8 +143,8 @@ impl ConversationBuilder {
 
     /// Adds conversation
     pub fn add(&mut self) -> Result<ConversationId, HErr> {
-        let mut db = Database::get()?;
-        self.add_db(&mut db)
+        let db = Database::get()?;
+        self.add_db(&db)
     }
 }
 

@@ -27,7 +27,7 @@ impl Time {
         Time(secs)
     }
 
-    pub fn within(&self, fuzz: i64, other: &Time) -> bool {
+    pub fn within(self, fuzz: i64, other: Time) -> bool {
         (self.0 - other.0).abs() <= fuzz
     }
 }

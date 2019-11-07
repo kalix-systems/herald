@@ -1,26 +1,21 @@
 <RCC>
     <qresource prefix="/">
-        <file>../foundation/js/utils.mjs</file>
         <file>App.qml</file>
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
-        <file>ChatView/ChatView.qml</file>
+        <file>ChatView/ChatViewMain.qml</file>
         <file>ChatView/Controls/ConvoTextArea/AttachmentsComponent.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ConvoTextArea.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ReplyComponent.qml</file>
         <file>ChatView/Controls/js/ChatTextAreaUtils.mjs</file>
-        <file>ChatView/ConversationWindowForm.qml</file>
+        <file>ChatView/ConversationWindow.qml</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>EmojiKeyboard/EmojiButton.qml</file>
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>RegistrationPage.qml</file>
-        <file>SideBar.qml</file>
-        <file>SideBar/ConfigBar.qml</file>
         <file>SideBar/ContactView.qml</file>
-        <file>SideBar/ConversationLabel.qml</file>
-        <file>SideBar/ConversationView.qml</file>
         <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
         <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
         <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
@@ -28,8 +23,8 @@
         <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
         <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
         <file>SideBar/SearchComponent.qml</file>
-        <file>SideBar/SidePane.qml</file>
-        <file>SideBar/UtilityBar.qml</file>
+        <file>SideBar/SideBarState.qml</file>
+        <file>SideBar/ContextBar.qml</file>
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
@@ -38,15 +33,19 @@
         <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/js/NewContactDialogue.mjs</file>
         <file>TopMenuBar.qml</file>
-        <file>common/Avatar.qml</file>
         <file>common/ButtonForm.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/Divider.qml</file>
         <file>common/EmojiJson.js</file>
-        <file>common/ImageAvatar.qml</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>common/js/Avatar.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
+        <file>SideBar/ConversationView/ConversationViewMain.qml</file>
+        <file>SideBar/SideBarMain.qml</file>
+        <file>SideBar/popups/ContextOptionsMenu.qml</file>
+        <file>ChatView/Popups/MessageOptionsPopup.qml</file>
+        <file>ChatView/Popups/EmojiPopup.qml</file>
+        <file>ChatView/Controls/TimerOptions.qml</file>
     </qresource>
 </RCC>

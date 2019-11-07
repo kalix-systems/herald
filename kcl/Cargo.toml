@@ -1,0 +1,14 @@
+[package]
+name = "kcl"
+version = "0.1.0"
+authors = ["theseriousadult <jack@kalix.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+libsodium-sys = "0.2.4"
+arrayvec = "0.5.1"
+
+[dependencies.kson]
+path = "../kson"

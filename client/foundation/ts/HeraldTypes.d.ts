@@ -17,13 +17,10 @@ declare type UserId = string;
 
 declare class HeraldState {
   configInit: boolean;
-}
 
-declare class NetworkHandle {
   connectionUp: boolean;
   connectionPending: boolean;
 
-  sendAddRequest(userid: UserId, conversationID: ConversationID): boolean;
   registerNewUser(userid: UserId): boolean;
   login(): boolean;
 }
@@ -32,6 +29,7 @@ declare class Messages {
   conversationId?: ConversationID;
   lastAuthor: string;
   lastBody: string;
+  isEmpty: string;
   lastEpochTimestampMs: number;
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;

@@ -5,7 +5,6 @@ import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
 import "../../common" as Common
-import "../../../foundation/js/utils.mjs" as Utils
 import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {
@@ -63,9 +62,7 @@ Window {
             RowLayout {
                 TextField {
                     id: cfgUid
-                    // BNOTE: This shouldn't even be loaded until this is true
-                    // yeah this doesn't even exist until you have a uid
-                    enabled: false //!config.configId
+                    enabled: false
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.configId
                     selectionColor: CmnCfg.palette.tertiaryColor
@@ -75,7 +72,7 @@ Window {
                     id: cfgUname
                     maximumLength: 256
                     property bool usernameValid: true
-                    placeholderText: "Enter Username"
+                    text: config.name
                     selectionColor: CmnCfg.palette.tertiaryColor
                 }
             }
@@ -88,7 +85,7 @@ Window {
             Button {
                 text: "Submit"
                 onClicked: {
-                    JS.submit(config, heraldState.configInit, cfgUid, cfgUname)
+                    JS.submit(config, cfgUname)
                     close()
                 }
             }

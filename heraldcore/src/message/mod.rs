@@ -8,6 +8,8 @@ use std::path::PathBuf;
 pub mod attachments;
 
 pub(crate) mod db;
+/// Runs message garbage collection tasks such as removing expired messages
+pub mod gc;
 pub use crate::types::MessageTime;
 use attachments::*;
 
@@ -193,6 +195,13 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     db::get_message(&db, msg_id)
 }
 
+/// Gets a message by message id. If the message cannot be found, it returns an option rather than
+/// an error.
+pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
+    let db = Database::get()?;
+    db::get_message_opt(&db, msg_id)
+}
+
 /// Sets the message status of an item in the database
 pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
     let db = Database::get()?;
@@ -210,8 +219,8 @@ pub(crate) fn add_receipt(
     recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
-    let mut db = Database::get()?;
-    db::add_receipt(&mut db, msg_id, recip, receipt_status)
+    let db = Database::get()?;
+    db::add_receipt(&db, msg_id, recip, receipt_status)
 }
 
 /// Gets messages by `MessageSendStatus`

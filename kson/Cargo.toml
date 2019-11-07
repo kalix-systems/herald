@@ -1,10 +1,16 @@
 [package]
 name = "kson"
 version = "0.1.0"
-authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
+authors = ["theseriousadult <jack@kalix.io>", "Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+arrayvec = "0.5.1"
+backtrace = "0.3.40"
 bytes = "0.4.12"
+
+[dependencies.kson_derive]
+path = "./kson_derive"
+

@@ -19,7 +19,7 @@ Component {
             onClicked: {
                 groupMemberSelect.setTitle(groupTitle.text)
                 groupMemberSelect.finalize()
-                convoPane.state = ""
+                sideBarState.state = ""
             }
         }
 
@@ -28,7 +28,7 @@ Component {
             source: "qrc:/back-arrow-icon.svg"
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            onClicked: convoPane.state = "newGroupState"
+            onClicked: sideBarState.state = "newGroupState"
         }
 
         TextArea {
@@ -45,7 +45,6 @@ Component {
                 anchors.fill: parent
             }
 
-            // PAUL: move this to C++
             Keys.onPressed: {
                 // NOTE: What is the first comparison doing?
                 // this makes sure that returns and tabs are not evaluated
@@ -56,7 +55,7 @@ Component {
                 if (event.key === Qt.Key_Return) {
                     groupMemberSelect.setTitle(groupTitle.text)
                     groupMemberSelect.finalize()
-                    convoPane.state = ""
+                    sideBarState.state = ""
                 }
             }
         }

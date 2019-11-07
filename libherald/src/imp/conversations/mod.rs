@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, push_err, ret_err, ret_none};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
@@ -102,15 +102,19 @@ impl ConversationsTrait for Conversations {
             .expiration_period as u8
     }
 
-    fn set_expiration_period(&mut self, index: usize, val: u8) -> bool {
+    fn set_expiration_period(&mut self, index: usize, period: u8) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let val = val.into();
+        let period = period.into();
         ret_err!(
-            conversation::set_expiration_period(&meta.conversation_id, val),
+            conversation::set_expiration_period(&meta.conversation_id, period),
             false
         );
 
-        meta.expiration_period = val;
+        let update = conversation::settings::SettingsUpdate::Expiration(period);
+        // TODO this should not block
+        ret_err!(update.send_update(&meta.conversation_id), false);
+
+        meta.expiration_period = period;
 
         true
     }
@@ -235,13 +239,23 @@ impl ConversationsTrait for Conversations {
         use ConvUpdates::*;
         for update in CONV_BUS.rx.try_iter() {
             match update {
-                NewConversation(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
-                BuilderFinished(cid) => ret_err!(self.raw_fetch_and_insert(cid)),
+                NewConversation(cid) => push_err!(
+                    self.raw_fetch_and_insert(cid),
+                    "Failed to add new conversation"
+                ),
+                BuilderFinished(cid) => push_err!(
+                    self.raw_fetch_and_insert(cid),
+                    "Failed to create new conversation"
+                ),
                 NewActivity(cid) => {
-                    let pos = ret_none!(self
+                    let pos = match self
                         .list
                         .iter()
-                        .position(|c| c.inner.conversation_id == cid));
+                        .position(|c| c.inner.conversation_id == cid)
+                    {
+                        Some(pos) => pos,
+                        None => continue,
+                    };
 
                     // NOTE: This is very important. If this check isn't here,
                     // the program will crash.
@@ -253,6 +267,20 @@ impl ConversationsTrait for Conversations {
                     let conv = self.list.remove(pos);
                     self.list.push_front(conv);
                     self.model.end_move_rows();
+                }
+                Settings(cid, settings) => {
+                    let pos = ret_none!(self
+                        .list
+                        .iter()
+                        .position(|c| c.inner.conversation_id == cid));
+
+                    use conversation::settings::SettingsUpdate;
+                    match settings {
+                        SettingsUpdate::Expiration(period) => {
+                            self.list[pos].inner.expiration_period = period;
+                            self.model.data_changed(pos, pos);
+                        }
+                    }
                 }
             }
         }
@@ -283,9 +311,7 @@ impl ConversationsTrait for Conversations {
         self.set_filter_regex(toggled);
         toggled
     }
-}
 
-impl Conversations {
     fn clear_filter(&mut self) {
         for conv in self.list.iter_mut() {
             conv.matched = true;
@@ -301,7 +327,9 @@ impl Conversations {
 
         self.emit.filter_changed();
     }
+}
 
+impl Conversations {
     fn inner_filter(&mut self) {
         for conv in self.list.iter_mut() {
             conv.matched = conv.inner.matches(&self.filter);

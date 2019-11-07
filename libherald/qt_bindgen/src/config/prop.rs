@@ -7,6 +7,12 @@ pub struct Prop {
     write: bool,
 }
 
+impl Default for Prop {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Prop {
     pub fn new() -> Self {
         Self {

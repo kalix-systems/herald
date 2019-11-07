@@ -33,11 +33,10 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn set_conversation_id(&mut self, cid: Option<ffi::ConversationIdRef>) {
-        if self.inner.conversation.is_some() {
-            return;
+        if let (None, Some(cid)) = (self.inner.conversation, cid) {
+            let cid = ret_err!(cid.try_into());
+            self.inner.conversation_id(cid);
         }
-        let cid = ret_err!(ret_none!(cid).try_into());
-        self.inner.conversation_id(cid);
     }
 
     fn replying_to(&self) -> Option<ffi::MsgIdRef> {
@@ -99,7 +98,11 @@ impl MessageBuilderTrait for MessageBuilder {
     fn set_body(&mut self, body: Option<String>) {
         match body {
             Some(body) => {
-                self.inner.body(ret_err!(body.try_into()));
+                if !body.is_empty() {
+                    self.inner.body(ret_err!(body.try_into()));
+                } else {
+                    self.inner.body = None;
+                }
             }
             None => {
                 self.inner.body = None;
@@ -127,7 +130,7 @@ impl MessageBuilderTrait for MessageBuilder {
 
                 match m {
                     Msg(msg) => {
-                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
+                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(Box::new(msg))));
                     }
                     Error { error, line_number } => {
                         // TODO better line number usage
@@ -182,6 +185,9 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn remove_last(&mut self) {
+        if self.inner.attachments.is_empty() {
+            return;
+        }
         self.model.begin_remove_rows(
             self.inner.attachments.len().saturating_sub(1),
             self.inner.attachments.len().saturating_sub(1),

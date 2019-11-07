@@ -3,8 +3,6 @@ import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.13
 import LibHerald 1.0
 
-// PAUL 3: this is a placeholder design, remove this comment and
-// redesign this.
 Rectangle {
     readonly property int heightUnit: root.minimumHeight / 3
     id: registrationPage
@@ -64,7 +62,7 @@ Rectangle {
             }
 
             Keys.onReturnPressed: {
-                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                if (heraldState.registerNewUser(entryField.text.trim())) {
                     heraldState.configInit = true
                 }
             }
@@ -84,7 +82,7 @@ Rectangle {
                 radius: 3
             }
             onClicked: {
-                if (networkHandle.registerNewUser(entryField.text.trim())) {
+                if (heraldState.registerNewUser(entryField.text.trim())) {
                     heraldState.configInit = true
                 }
             }

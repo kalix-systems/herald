@@ -39,6 +39,47 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
     )?)
 }
 
+/// Get message by message id
+pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Message>, HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/get_message.sql"))?;
+
+    let mut res = stmt.query_map_named(
+        named_params! {
+            "@msg_id": msg_id
+        },
+        |row| {
+            let receipts = get_receipts(conn, msg_id)?;
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
+
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
+
+            let op = (op, is_reply).into();
+
+            Ok(Message {
+                message_id: row.get("msg_id")?,
+                author: row.get("author")?,
+                conversation: row.get("conversation_id")?,
+                body: row.get("body")?,
+                op,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                time,
+                receipts,
+            })
+        },
+    )?;
+
+    match res.next() {
+        Some(res) => Ok(Some(res?)),
+        None => Ok(None),
+    }
+}
+
 /// Sets the message status of an item in the database
 pub(crate) fn update_send_status(
     conn: &Conn,
@@ -116,9 +157,9 @@ pub(crate) fn by_send_status(
 
 /// Deletes a message
 pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
-    super::attachments::db::delete_unique(conn, id)?;
     let mut stmt = conn.prepare(include_str!("sql/delete_message.sql"))?;
     stmt.execute_named(named_params! { "@msg_id": id })?;
+    super::attachments::db::gc(conn)?;
     Ok(())
 }
 
@@ -188,7 +229,7 @@ impl OutboundMessageBuilder {
         let author = e!(crate::config::db::static_id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
-        let expiration = match expiration_period.to_millis() {
+        let expiration = match expiration_period.into_millis() {
             Some(period) => Some(Time(timestamp.0 + period.0)),
             None => None,
         };
@@ -337,10 +378,13 @@ impl InboundMessageBuilder {
 
         use MissingInboundMessageField::*;
 
-        if let Some(expiration) = expiration {
-            // short circuit if message has already expired
-            if expiration.0 < Time::now().0 {
-                return Ok(());
+        #[cfg(not(test))]
+        {
+            if let Some(expiration) = expiration {
+                // short circuit if message has already expired
+                if expiration.0 < Time::now().0 {
+                    return Ok(());
+                }
             }
         }
 
@@ -359,7 +403,7 @@ impl InboundMessageBuilder {
         let time = MessageTime {
             insertion: Time::now(),
             server: Some(server_timestamp),
-            expiration: expiration,
+            expiration,
         };
 
         let mut tx = conn.transaction()?;

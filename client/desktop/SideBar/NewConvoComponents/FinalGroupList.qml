@@ -5,16 +5,20 @@ import QtQuick.Layouts 1.12
 import "../../common" as Common
 import "../popups/js/NewContactDialogue.mjs" as JS
 import "../../SideBar" as SBUtils
-import "../../../foundation/js/utils.mjs" as Utils
+import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports/Avatar" as Av
 
 ListView {
     id: groupList
 
     delegate: Item {
         id: memberItem
-
         height: CmnCfg.convoHeight
         width: parent.width
+        property string memberName: contactsModel.nameById(memberId)
+        property int memberColor: contactsModel.colorById(memberId)
+        property string memberPfp: contactsModel.profilePictureById(
+                                       memberId)
 
         Rectangle {
             id: bgBox
@@ -29,15 +33,21 @@ ListView {
             color: CmnCfg.palette.mainColor
         }
 
-        Common.Avatar {
-            size: CmnCfg.avatarSize
+
+        Av.AvatarMain {
+            anchors.fill: parent
             id: memberAvatar
-            avatarLabel: contactsModel.nameById(memberId)
-            labelGap: CmnCfg.smallMargin
-            secondaryText: "@" + memberId
-            colorHash: contactsModel.colorById(memberId)
-            pfpUrl: Utils.safeStringOrDefault(contactsModel.profilePictureById(
-                                                  memberId))
+            iconColor: CmnCfg.avatarColors[memberColor]
+            initials: memberName[0].toUpperCase()
+            pfpPath: Utils.safeStringOrDefault(memberPfp)
+            anchors {
+                margins: 6
+            }
+
+            labelComponent: Av.ConversationLabel {
+                contactName: memberName
+                lastBody: "@" + memberId
+            }
         }
     }
 }

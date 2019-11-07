@@ -79,8 +79,17 @@ impl ConfigBuilder {
 
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
+        use chainmail::block::Genesis;
         let mut db = Database::get()?;
-        self.add_db(&mut db)
+        let conf = self.add_db(&mut db)?;
+
+        // TODO this is weirdly special cased,
+        // but changing it without making testing awkward requires
+        // changing the chainmail API
+        let kp = Config::static_keypair()?;
+        let gen = Genesis::new(kp.secret_key());
+        conf.nts_conversation.store_genesis(&gen)?;
+        Ok(conf)
     }
 }
 

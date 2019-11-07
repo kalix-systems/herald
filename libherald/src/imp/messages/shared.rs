@@ -12,9 +12,11 @@ pub enum MsgUpdate {
     /// A message has been acknowledged
     Receipt(MsgId),
     /// A full message
-    FullMsg(Message),
+    FullMsg(Box<Message>),
     /// Save is complete
     StoreDone(MsgId),
+    /// There are expired messages that need to be pruned
+    ExpiredMessages(Vec<MsgId>),
 }
 
 lazy_static! {

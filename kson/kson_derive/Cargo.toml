@@ -1,0 +1,16 @@
+[package]
+name = "kson_derive"
+version = "0.1.0"
+authors = [ 
+  "theseriousadult <jack@gallabytes.com>",
+  "Baeo Maltinksy <baeo.maltinsky@gmail.com>"
+]
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "0.14"
+quote = "0.6"
+proc-macro2 = "0.4"

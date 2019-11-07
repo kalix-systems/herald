@@ -32,28 +32,23 @@ impl AttachmentsTrait for Attachments {
     }
 
     fn set_msg_id(&mut self, msg_id: Option<ffi::MsgIdRef>) {
-        match (msg_id, self.msg_id) {
-            (Some(msg_id), None) => {
-                let msg_id = ret_err!(msg_id.try_into());
+        if let (Some(msg_id), None) = (msg_id, self.msg_id) {
+            let msg_id = ret_err!(msg_id.try_into());
 
-                self.msg_id = Some(msg_id);
-                self.emit.msg_id_changed();
+            self.msg_id = Some(msg_id);
+            self.emit.msg_id_changed();
 
-                let attachments = ret_err!(attachments::get(&msg_id));
-                let attachment_strings = ret_err!(attachments.into_flat_strings());
+            let attachments = ret_err!(attachments::get(&msg_id));
+            let attachment_strings = ret_err!(attachments.into_flat_strings());
 
-                if attachment_strings.is_empty() {
-                    return;
-                }
-
-                self.model
-                    .begin_insert_rows(0, attachment_strings.len().saturating_sub(1));
-                self.inner = attachment_strings;
-                self.model.end_insert_rows();
-            }
-            _ => {
+            if attachment_strings.is_empty() {
                 return;
             }
+
+            self.model
+                .begin_insert_rows(0, attachment_strings.len().saturating_sub(1));
+            self.inner = attachment_strings;
+            self.model.end_insert_rows();
         }
     }
 
