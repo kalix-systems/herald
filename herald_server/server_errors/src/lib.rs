@@ -19,6 +19,7 @@ pub enum Error {
     RegistrationFailed,
     BadSessionType(u8),
     TimedOut(tokio::timer::timeout::Elapsed),
+    SendFailed(tokio::sync::mpsc::error::UnboundedSendError),
     StreamDied,
 }
 
@@ -39,3 +40,8 @@ from_fn!(Error, tokio_postgres::Error, Error::PgError);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
 from_fn!(Error, warp::Error, Error::Warp);
 from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);
+from_fn!(
+    Error,
+    tokio::sync::mpsc::error::UnboundedSendError,
+    SendFailed
+);

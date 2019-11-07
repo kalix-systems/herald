@@ -62,3 +62,9 @@ pub enum PacketResponse {
     Success,
     Retry,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ServerTransmission {
+    KeepAlive,
+    Packets(u64),
+}
