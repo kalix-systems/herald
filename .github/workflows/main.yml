@@ -51,7 +51,11 @@ jobs:
         with:
           command: test
           args: --manifest-path=libherald/Cargo.toml
-
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path=heraldcore/Cargo.toml
+          
   windows_test:
     name: Windows Test
     runs-on: windows-latest
@@ -66,6 +70,10 @@ jobs:
         with:
           command: test
           args: --manifest-path=libherald/Cargo.toml
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path=heraldcore/Cargo.toml
 
 
   fmt:
