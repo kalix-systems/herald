@@ -12,7 +12,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: beta
+          toolchain: stable
           override: true
       - uses: actions-rs/cargo@v1
         with:
@@ -29,7 +29,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: beta
+          toolchain: stable
           override: true
       - name: Setup database tables
         run: cargo run --bin setup_db
@@ -84,7 +84,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: beta
+          toolchain: stable
           override: true
       - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
@@ -101,7 +101,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: beta
+          toolchain: stable
           override: true
       - run: rustup component add clippy
       - uses: actions-rs/cargo@v1
