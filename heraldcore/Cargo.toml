@@ -50,6 +50,18 @@ version          = "0.22.1"
 default_features = false
 features         = ["jpeg", "png_codec"]
 
+[dependencies.tarpc]
+git = "https://github.com/google/tarpc"
+rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+
+[dependencies.tarpc-lib]
+git = "https://github.com/google/tarpc"
+rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+
+[dependencies.tarpc-bincode-transport]
+git = "https://github.com/google/tarpc"
+rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+
 [dependencies.pulldown-cmark]
 version  = "0.6.0"
 # optional = true
