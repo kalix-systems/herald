@@ -709,9 +709,9 @@ dependencies = [
  "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_cbor 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "tarpc 0.18.0 (git+https://github.com/google/tarpc)",
- "tarpc-bincode-transport 0.7.0 (git+https://github.com/google/tarpc)",
- "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc)",
+ "tarpc 0.18.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
+ "tarpc-bincode-transport 0.7.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
+ "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
 ]
 
 [[package]]
@@ -2098,16 +2098,16 @@ dependencies = [
 [[package]]
 name = "tarpc"
 version = "0.18.0"
-source = "git+https://github.com/google/tarpc#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
- "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc)",
- "tarpc-plugins 0.5.1 (git+https://github.com/google/tarpc)",
+ "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
+ "tarpc-plugins 0.5.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
 ]
 
 [[package]]
 name = "tarpc-bincode-transport"
 version = "0.7.0"
-source = "git+https://github.com/google/tarpc#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
  "async-bincode 0.4.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures 0.1.29 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2121,7 +2121,7 @@ dependencies = [
 [[package]]
 name = "tarpc-lib"
 version = "0.6.1"
-source = "git+https://github.com/google/tarpc#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
  "fnv 1.0.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "futures-preview 0.3.0-alpha.19 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2130,7 +2130,7 @@ dependencies = [
  "pin-project 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "raii-counter 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "tarpc-trace 0.2.0 (git+https://github.com/google/tarpc)",
+ "tarpc-trace 0.2.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
  "tokio 0.2.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-timer 0.3.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2138,7 +2138,7 @@ dependencies = [
 [[package]]
 name = "tarpc-plugins"
 version = "0.5.1"
-source = "git+https://github.com/google/tarpc#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
  "proc-macro2 0.4.30 (registry+https://github.com/rust-lang/crates.io-index)",
  "quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2148,7 +2148,7 @@ dependencies = [
 [[package]]
 name = "tarpc-trace"
 version = "0.2.0"
-source = "git+https://github.com/google/tarpc#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -3057,11 +3057,11 @@ dependencies = [
 "checksum synstructure 0.12.2 (registry+https://github.com/rust-lang/crates.io-index)" = "575be94ccb86e8da37efb894a87e2b660be299b41d8ef347f9d6d79fbe61b1ba"
 "checksum take_mut 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f764005d11ee5f36500a149ace24e00e3da98b0158b3e2d53a7495660d3f4d60"
 "checksum tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)" = "b3196bfbffbba3e57481b6ea32249fbaf590396a52505a2615adbb79d9d826d3"
-"checksum tarpc 0.18.0 (git+https://github.com/google/tarpc)" = "<none>"
-"checksum tarpc-bincode-transport 0.7.0 (git+https://github.com/google/tarpc)" = "<none>"
-"checksum tarpc-lib 0.6.1 (git+https://github.com/google/tarpc)" = "<none>"
-"checksum tarpc-plugins 0.5.1 (git+https://github.com/google/tarpc)" = "<none>"
-"checksum tarpc-trace 0.2.0 (git+https://github.com/google/tarpc)" = "<none>"
+"checksum tarpc 0.18.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)" = "<none>"
+"checksum tarpc-bincode-transport 0.7.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)" = "<none>"
+"checksum tarpc-lib 0.6.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)" = "<none>"
+"checksum tarpc-plugins 0.5.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)" = "<none>"
+"checksum tarpc-trace 0.2.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)" = "<none>"
 "checksum tempfile 3.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7a6e24d9338a0a5be79593e2fa15a648add6138caa803e2d5bc782c371732ca9"
 "checksum textwrap 0.11.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d326610f408c7a4eb6f51c37c330e496b08506c9457c9d34287ecc38809fb060"
 "checksum thread_local 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "c6b53e329000edc2b34dbe8545fd20e55a333362d0a321909685a19bd28c3f1b"
