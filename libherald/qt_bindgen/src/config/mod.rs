@@ -160,22 +160,6 @@ fn conversations() -> Object {
     }
 }
 
-//fn network_handle() -> Object {
-//    let props = props! {
-//        connectionUp: Prop::new().simple(Bool),
-//        connectionPending: Prop::new().simple(Bool)
-//    };
-//
-//    let funcs = functions! {
-//        mut registerNewUser(user_id: QString) => Bool,
-//        mut login() => Bool,
-//    };
-//
-//    obj! {
-//        NetworkHandle: Obj::new().props(props).funcs(funcs)
-//    }
-//}
-
 fn users() -> Object {
     let props = filter_props();
 
@@ -290,7 +274,8 @@ fn config_obj() -> Object {
         name: Prop::new().simple(QString).write(),
         profilePicture: Prop::new().simple(QString).write().optional(),
         color: Prop::new().simple(QUint32).write(),
-        colorscheme: Prop::new().simple(QUint32).write()
+        colorscheme: Prop::new().simple(QUint32).write(),
+        ntsConversationId: Prop::new().simple(QByteArray)
     };
 
     obj! {

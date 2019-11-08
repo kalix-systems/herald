@@ -97,6 +97,10 @@ namespace {
     {
         Q_EMIT o->nameChanged();
     }
+    inline void configNtsConversationIdChanged(Config* o)
+    {
+        Q_EMIT o->ntsConversationIdChanged();
+    }
     inline void configProfilePictureChanged(Config* o)
     {
         Q_EMIT o->profilePictureChanged();
@@ -368,7 +372,7 @@ extern "C" {
 };
 
 extern "C" {
-    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
+    Config::Private* config_new(Config*, void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*), void (*)(Config*));
     void config_free(Config::Private*);
     quint32 config_color_get(const Config::Private*);
     void config_color_set(Config::Private*, quint32);
@@ -377,6 +381,7 @@ extern "C" {
     void config_config_id_get(const Config::Private*, QString*, qstring_set);
     void config_name_get(const Config::Private*, QString*, qstring_set);
     void config_name_set(Config::Private*, const ushort *str, int len);
+    void config_nts_conversation_id_get(const Config::Private*, QByteArray*, qbytearray_set);
     void config_profile_picture_get(const Config::Private*, QString*, qstring_set);
     void config_profile_picture_set(Config::Private*, const ushort *str, int len);
     void config_profile_picture_set_none(Config::Private*);
@@ -1997,6 +2002,7 @@ Config::Config(QObject *parent):
         configColorschemeChanged,
         configConfigIdChanged,
         configNameChanged,
+        configNtsConversationIdChanged,
         configProfilePictureChanged)),
     m_ownsPrivate(true)
 {
@@ -2035,6 +2041,12 @@ QString Config::name() const
 }
 void Config::setName(const QString& v) {
     config_name_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+QByteArray Config::ntsConversationId() const
+{
+    QByteArray v;
+    config_nts_conversation_id_get(m_d, &v, set_qbytearray);
+    return v;
 }
 QString Config::profilePicture() const
 {
