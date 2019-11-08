@@ -71,17 +71,13 @@ void libherald::test_convo_messages_setup() {
 
 void libherald::test_convo_messages_deletion() {
     delete msg;
-    qDebug() << "delete message";
-    while (convos -> rowCount() > 0) {
-        qDebug() << "pre loop";
-        convos -> removeConversation(0);
-        qDebug() << "after loop";
+    for (qint64 i = 0; i < convos -> rowCount(); ++i) {
+        if (convos -> conversationId(i) != cfg -> ntsConversationId()) {
+            convos -> removeConversation(i);
+        }
     }
-    qDebug() << "delete convos loop";
     delete cfg;
-    qDebug() << "delete config";
     delete convos;
-    qDebug() << "delete convos";
 }
 
 QTEST_APPLESS_MAIN(libherald)
