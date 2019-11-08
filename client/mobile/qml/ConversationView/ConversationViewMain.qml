@@ -18,8 +18,6 @@ Page {
         id: cvListView
         clip: true
         boundsBehavior: ListView.StopAtBounds
-
-        anchors.margins: CmnCfg.units.dp(12)
         spacing: CmnCfg.units.dp(16)
 
         anchors.fill: parent

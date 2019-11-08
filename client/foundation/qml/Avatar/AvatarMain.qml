@@ -44,8 +44,6 @@ Item {
             verticalCenter: parent.verticalCenter
             left: parent.left
         }
-
-
     }
 
     Loader {

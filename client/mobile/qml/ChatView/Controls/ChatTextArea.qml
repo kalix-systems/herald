@@ -18,7 +18,7 @@ RowLayout {
         Layout.alignment: Qt.AlignBottom
         placeholderText: "Send a message..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        color: CmnCfg.palette.mainTextColor
+        color: CmnCfg.palette.iconFill
         font {
             pointSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
@@ -34,11 +34,13 @@ RowLayout {
 
         IconButton {
             Layout.alignment: Qt.AlignRight
+            color: CmnCfg.palette.iconFill
             imageSource: "qrc:/camera-icon.svg"
         }
 
         IconButton {
             Layout.alignment: Qt.AlignRight
+            color: CmnCfg.palette.iconFill
             tapCallback: send ? function () {} : function () {}
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
         }

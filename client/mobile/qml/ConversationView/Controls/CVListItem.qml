@@ -31,17 +31,23 @@ Rectangle {
         left: parent.left
         right: parent.right
     }
-
-    AvatarMain {
-        id: avatar
-        iconColor: CmnCfg.avatarColors[colorCode]
-        anchors.verticalCenter: parent.verticalCenter
-        initials: CVJS.initialize(title)
-        labelComponent: ConversationLabel {
-            contactName: title
-            lastBody: lastBody
-            lastTimestamp: lastTimestamp
-            lastReceipt: lastReceipt
+    Item {
+        anchors {
+            fill: parent
+            margins: CmnCfg.units.dp(12)
+        }
+        AvatarMain {
+            id: avatar
+            iconColor: CmnCfg.avatarColors[colorCode]
+            anchors.verticalCenter: parent.verticalCenter
+            initials: CVJS.initialize(title)
+            size: CmnCfg.units.dp(32)
+            labelComponent: ConversationLabel {
+                contactName: title
+                lastBody: lastBody
+                lastTimestamp: lastTimestamp
+                lastReceipt: lastReceipt
+            }
         }
     }
 

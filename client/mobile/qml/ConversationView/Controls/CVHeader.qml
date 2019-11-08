@@ -23,6 +23,7 @@ ToolBar {
             spacing: CmnCfg.units.dp(16)
             IconButton {
                 id: drawerButton
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/hamburger-icon.svg"
             }
             Label {
@@ -33,7 +34,7 @@ ToolBar {
                     family: CmnCfg.chatFont.name
                 }
                 anchors.verticalCenter: parent.verticalCenter
-                color: CmnCfg.palette.iconMatte
+                color: CmnCfg.palette.iconFill
             }
         }
 
@@ -45,11 +46,13 @@ ToolBar {
             IconButton {
                 id: searchButton
                 tapCallback: CVJS.searchBarTr
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/search-icon.svg"
             }
 
             IconButton {
                 id: configButton
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/options-icon.svg"
             }
         }

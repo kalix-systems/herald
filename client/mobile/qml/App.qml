@@ -4,15 +4,15 @@ import "./State" as State
 
 Component {
     Item {
-    StackView {
-        id: mainView
-        anchors.fill: parent
-        initialItem: appState.cvMain
-    }
+        StackView {
+            id: mainView
+            anchors.fill: parent
+            initialItem: appState.cvMain
+        }
 
-    State.AppState {
-        id: appState
-        stackView: mainView
-    }
+        State.AppState {
+            id: appState
+            stackView: mainView
+        }
     }
 }
