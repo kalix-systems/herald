@@ -75,6 +75,7 @@ private:
     Q_PROPERTY(quint32 colorscheme READ colorscheme WRITE setColorscheme NOTIFY colorschemeChanged FINAL)
     Q_PROPERTY(QString configId READ configId NOTIFY configIdChanged FINAL)
     Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
+    Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY ntsConversationIdChanged FINAL)
     Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture NOTIFY profilePictureChanged FINAL)
     explicit Config(bool owned, QObject *parent);
 public:
@@ -87,6 +88,7 @@ public:
     QString configId() const;
     QString name() const;
     void setName(const QString& v);
+    QByteArray ntsConversationId() const;
     QString profilePicture() const;
     void setProfilePicture(const QString& v);
 Q_SIGNALS:
@@ -94,6 +96,7 @@ Q_SIGNALS:
     void colorschemeChanged();
     void configIdChanged();
     void nameChanged();
+    void ntsConversationIdChanged();
     void profilePictureChanged();
 };
 
