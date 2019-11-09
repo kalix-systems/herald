@@ -45,6 +45,11 @@ impl ConfigTrait for Config {
         self.inner.profile_picture.as_ref().map(|s| s.as_str())
     }
 
+    /// Returns id of the "note to self" conversation
+    fn nts_conversation_id(&self) -> ffi::ConversationIdRef {
+        self.inner.nts_conversation.as_slice()
+    }
+
     /// Sets the profile picture of the current user to the picture at the specified path.
     /// If `picture` is None, this clears the user's profile picture.
     fn set_profile_picture(&mut self, picture: Option<String>) {

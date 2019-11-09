@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="22px" height="22px" viewBox="0 0 22 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 57.1 (83088) - https://sketch.com -->
+    <title>compose-icon-white</title>
+    <desc>Created with Sketch.</desc>
+    <g id="compose-icon-white" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Path" points="0 0 22 0 22 22 0 22"></polygon>
+        <rect id="Rectangle" stroke="#EFEFEF" stroke-width="1.6" x="4.3" y="6.3" width="11.4" height="11.4"></rect>
+        <path d="M9,10.7086516 L9,13 L11.2913484,13 L18.0492987,6.24204972 L15.7579503,3.95070129 L9,10.7086516 Z M19.8212748,4.4700736 C20.0595751,4.23177336 20.0595751,3.84682683 19.8212748,3.60852659 L18.3914734,2.17872518 C18.1531732,1.94042494 17.7682266,1.94042494 17.5299264,2.17872518 L16.4117484,3.29690321 L18.7030968,5.58825163 L19.8212748,4.4700736 Z" id="Shape" fill="#EFEFEF" fill-rule="nonzero"></path>
+    </g>
+</svg>

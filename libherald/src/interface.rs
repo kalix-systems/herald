@@ -328,6 +328,7 @@ pub struct ConfigEmitter {
     colorscheme_changed: fn(*mut ConfigQObject),
     config_id_changed: fn(*mut ConfigQObject),
     name_changed: fn(*mut ConfigQObject),
+    nts_conversation_id_changed: fn(*mut ConfigQObject),
     profile_picture_changed: fn(*mut ConfigQObject),
 }
 
@@ -347,6 +348,7 @@ impl ConfigEmitter {
             colorscheme_changed: self.colorscheme_changed,
             config_id_changed: self.config_id_changed,
             name_changed: self.name_changed,
+            nts_conversation_id_changed: self.nts_conversation_id_changed,
             profile_picture_changed: self.profile_picture_changed,
         }
     }
@@ -379,6 +381,12 @@ impl ConfigEmitter {
             (self.name_changed)(ptr);
         }
     }
+    pub fn nts_conversation_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.nts_conversation_id_changed)(ptr);
+        }
+    }
     pub fn profile_picture_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -397,6 +405,7 @@ pub trait ConfigTrait {
     fn config_id(&self) -> &str;
     fn name(&self) -> &str;
     fn set_name(&mut self, value: String);
+    fn nts_conversation_id(&self) -> &[u8];
     fn profile_picture(&self) -> Option<&str>;
     fn set_profile_picture(&mut self, value: Option<String>);
 }
@@ -408,6 +417,7 @@ pub extern "C" fn config_new(
     config_colorscheme_changed: fn(*mut ConfigQObject),
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
+    config_nts_conversation_id_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
 ) -> *mut Config {
     let config_emit = ConfigEmitter {
@@ -416,6 +426,7 @@ pub extern "C" fn config_new(
         colorscheme_changed: config_colorscheme_changed,
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
+        nts_conversation_id_changed: config_nts_conversation_id_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
     let d_config = Config::new(config_emit);
@@ -477,6 +488,18 @@ pub unsafe extern "C" fn config_name_set(ptr: *mut Config, v: *const c_ushort, l
     let mut s = String::new();
     set_string_from_utf16(&mut s, v, len);
     o.set_name(s);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn config_nts_conversation_id_get(
+    ptr: *const Config,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.nts_conversation_id();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
 }
 
 #[no_mangle]
