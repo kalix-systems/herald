@@ -26,6 +26,7 @@ ApplicationWindow {
         id: heraldState
     }
 
+
     // displays error dialog upon output from
     // libherald, meant as a debugging tool
     Errors.ErrorHandler {}

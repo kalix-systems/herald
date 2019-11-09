@@ -8,7 +8,7 @@ Item {
     property StackView stackView
     // property Component lpMain: LoginPage.LoginLandingPage {}
     property Component cvMain: CVView.ConversationViewMain {}
-    property ChatView.ChatViewMain chatMain: ChatView.ChatViewMain {}
+    property var chatMain: ChatView.ChatViewMain {}
 
     // list of conversations
     property alias conversationsModel: heraldGlobals.conversationsModel
@@ -24,7 +24,10 @@ Item {
             when: heraldState.configInit
             name: "contact"
             StateChangeScript {
-                script: stackView.replace(cvMain)
+                script: {
+                    stackView.replace(cvMain)
+                    chatMain.ownedMessages = null
+                }
             }
         },
         State {
@@ -35,7 +38,6 @@ Item {
             name: "chat"
             StateChangeScript {
                 script: {
-                    chatMain.ownedMessages = null
                     stackView.replace(chatMain)
                 }
             }

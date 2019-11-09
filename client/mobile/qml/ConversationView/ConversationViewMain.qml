@@ -24,8 +24,12 @@ Page {
         model: conversationsModel
 
         delegate: CVListItem {
-            ownedMessages: Messages {
-                conversationId: conversationId
+            readonly property var conversationIdProxy: conversationId
+            readonly property Messages ownedMessages: Messages {
+                conversationId: conversationIdProxy
+                onRowsInserted: {
+                    print("UWU", ownedMessages)
+                }
             }
         }
 

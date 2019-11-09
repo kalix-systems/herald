@@ -17,9 +17,6 @@ Rectangle {
     property int lastReceipt: 0
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    // the owned conversation model corresponding to this conversation id
-    // may be reset upon forking a conversation
-    property Messages ownedMessages
 
     height: CmnCfg.avatarSize
     color: CmnCfg.palette.mainColor
@@ -95,10 +92,11 @@ Rectangle {
         onTapped: {
             splash.x = eventPoint.position.x
             splash.y = eventPoint.position.y
-            splashAnim.running = true
             // set the chat to the selected item
+            print("print good: ", ownedMessages.conversationId, ownedMessages)
             appState.chatMain.headerTitle = title
-            appState.chatMain.ownedMessages = contactItem.ownedMessages
+            appState.chatMain.ownedMessages = ownedMessages
+            splashAnim.running = true
             // callback implicity called at the end of the animation
         }
     }
