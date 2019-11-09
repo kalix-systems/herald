@@ -2103,6 +2103,7 @@ name = "tarpc"
 version = "0.18.0"
 source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
+ "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
  "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
  "tarpc-plugins 0.5.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
 ]
@@ -2133,6 +2134,7 @@ dependencies = [
  "pin-project 0.4.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "raii-counter 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
  "tarpc-trace 0.2.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
  "tokio 0.2.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio-timer 0.3.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2154,6 +2156,7 @@ version = "0.2.0"
 source = "git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e#5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 dependencies = [
  "rand 0.7.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.102 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

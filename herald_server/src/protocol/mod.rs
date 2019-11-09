@@ -39,8 +39,8 @@ impl State {
         Ok(self.pool.get().await?)
     }
 
-    pub async fn handle_login<S: AsyncRead + AsyncWrite + Unpin + Send + 'static>(
-        &'static self,
+    pub async fn handle_login<S: AsyncRead + AsyncWrite + Unpin>(
+        &self,
         stream: S,
     ) -> Result<(), Error> {
         let mut stream = Framed::new(stream);
