@@ -5,7 +5,6 @@ use herald_common::UserId;
 pub enum Error {
     IO(std::io::Error),
     Cbor(serde_cbor::Error),
-    Warp(warp::Error),
     InvalidSig,
     InvalidKey,
     MissingData,
@@ -38,7 +37,6 @@ macro_rules! from_fn {
 from_fn!(Error, std::io::Error, Error::IO);
 from_fn!(Error, tokio_postgres::Error, Error::PgError);
 from_fn!(Error, serde_cbor::Error, Error::Cbor);
-from_fn!(Error, warp::Error, Error::Warp);
 from_fn!(Error, tokio::timer::timeout::Elapsed, TimedOut);
 from_fn!(
     Error,

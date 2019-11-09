@@ -2,7 +2,6 @@ use crate::prelude::*;
 use dashmap::DashMap;
 use server_errors::*;
 use server_store::*;
-// use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
     prelude::*,
@@ -21,7 +20,6 @@ pub struct State {
     pub pool: Pool,
 }
 
-// pub mod http;
 pub mod login;
 pub mod rpc_impl;
 

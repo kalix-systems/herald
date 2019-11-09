@@ -1,6 +1,3 @@
-#[macro_use]
-mod macros;
-
 pub mod protocol;
 mod utils;
 

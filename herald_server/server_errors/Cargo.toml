@@ -12,7 +12,3 @@ serde           = { version = "1.0",            features = ["derive"] }
 herald_common = { path = "../../herald_common" }
 tokio-postgres  = "0.5.0-alpha.1"
 tokio           = "0.2.0-alpha.6"
-
-[dependencies.warp]
-git = "https://github.com/seanmonstar/warp"
-rev = "5c26956"
