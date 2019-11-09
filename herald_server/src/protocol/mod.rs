@@ -1,7 +1,5 @@
 use crate::prelude::*;
-use bytes::Buf;
 use dashmap::DashMap;
-use futures::stream::*;
 use server_errors::*;
 use server_store::*;
 // use sodiumoxide::crypto::sign;
@@ -48,7 +46,6 @@ impl State {
 
         let gid: GlobalId = login::login(&self.active, &mut store, &mut stream).await?;
 
-        // all the channels we'll need for plumbing
         // push emitter which will be stored in the active sessions dashmap
         let (ptx, prx) = channel::<()>();
         self.active.insert(gid.did, ptx);

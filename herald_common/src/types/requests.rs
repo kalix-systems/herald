@@ -3,6 +3,10 @@ use super::*;
 pub use tarpc;
 pub use tarpc_lib;
 
+// these don't really belong here but I'm not sure where they should be
+pub const RPC_PORT: u16 = 8080;
+pub const TCP_PORT: u16 = 8081;
+
 // TODO: attach line numbers, etc?
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub enum RequestError {

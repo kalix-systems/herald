@@ -13,9 +13,6 @@ lazy_static! {
     static ref HANDLER: State = State::new();
 }
 
-pub const RPC_PORT: u16 = 8080;
-pub const TCP_PORT: u16 = 8081;
-
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let addr = IpAddr::from([0, 0, 0, 0]);
