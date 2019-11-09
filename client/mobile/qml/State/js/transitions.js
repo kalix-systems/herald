@@ -1,3 +1,0 @@
-function contactsConfigTr() {}
-
-function contactsChatTr() {}

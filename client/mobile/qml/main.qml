@@ -5,7 +5,6 @@ import "./ConversationView" as CVView
 import "./ChatView" as ChatView
 import "./Errors" as Errors
 import "./LoginPage" as LoginPage
-import "./State" as State
 
 ApplicationWindow {
     id: root
@@ -14,18 +13,31 @@ ApplicationWindow {
     width: 300
     height: 500
 
+    Component {
+        id: cvMain
+        CVView.ConversationViewMain {}
+    }
     // utility code, meant to reduce the amount of js laying
     // around the code base
     HeraldUtils {
         id: heraldUtils
     }
 
-    // contains back end state. Login status,
-    // and boolean configuration init status
+    Conversations {
+        id: conversationsModel
+    }
+
     HeraldState {
         id: heraldState
     }
 
+    Config {
+        id: configModel
+    }
+
+    Users {
+        id: usersModel
+    }
 
     // displays error dialog upon output from
     // libherald, meant as a debugging tool
@@ -36,20 +48,15 @@ ApplicationWindow {
         active: !heraldState.configInit
         anchors.fill: parent
         // windows cannot be filled, unless reffered to as parent
-
         sourceComponent: LoginPage.LoginLandingPage {
             id: lpMain
             anchors.fill: parent
         }
     }
 
-    Loader {
-        id: appLoader
-        active: heraldState.configInit
+    StackView {
+        id: mainView
         anchors.fill: parent
-
-        sourceComponent: App {
-            id: appRoot
-        }
+        initialItem: cvMain
     }
 }

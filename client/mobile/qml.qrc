@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>heraldqtMobile.pro</file>
         <file>qml/main.qml</file>
-        <file>qml/State/AppState.qml</file>
         <file>qml/ChatView/ChatViewMain.qml</file>
         <file>qml/LoginPage/AssociateDevice.qml</file>
         <file>qml/LoginPage/LoginLandingPage.qml</file>
@@ -13,9 +12,7 @@
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/FilteredList.qml</file>
         <file>qml/Common/IconButton.qml</file>
-        <file>qml/State/HeraldGlobals.qml</file>
         <file>qml/Common/StdText.qml</file>
-        <file>qml/State/js/transitions.js</file>
         <file>qml/Errors/ErrorHandler.qml</file>
         <file>qml/Errors/ErrorPopup.qml</file>
         <file>qml/ConversationView/Controls/CVHeader.qml</file>
@@ -30,6 +27,5 @@
         <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
-        <file>qml/App.qml</file>
     </qresource>
 </RCC>

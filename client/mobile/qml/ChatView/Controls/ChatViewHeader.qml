@@ -28,7 +28,7 @@ ToolBar {
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/back-arrow-icon.svg"
             tapCallback: function () {
-                appState.state = "contact"
+                mainView.pop()
             }
         }
 

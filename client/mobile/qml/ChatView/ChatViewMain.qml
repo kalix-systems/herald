@@ -17,8 +17,15 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
-    TextMessageList {
-        model: ownedMessages
+    ScrollView {
+        id: chatScrollView
+        clip: true
+        contentWidth: parent.width
+        TextMessageList {
+            model: ownedMessages
+            width: parent.width
+        }
+
         anchors {
             top: parent.top
             right: parent.right

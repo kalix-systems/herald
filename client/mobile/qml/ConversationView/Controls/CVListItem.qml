@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "qrc:/imports/Avatar"
+import "../../ChatView" as ChatView
 import "../js/CVViewUtils.js" as CVJS
 
 Rectangle {
@@ -17,6 +18,7 @@ Rectangle {
     property int lastReceipt: 0
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
+    property string proxyTitle: title
 
     height: CmnCfg.avatarSize
     color: CmnCfg.palette.mainColor
@@ -83,8 +85,16 @@ Rectangle {
         }
         onRunningChanged: {
             if (!!!running) {
-                appState.state = "chat"
+                mainView.push(ownedChatView)
             }
+        }
+    }
+
+    Component {
+        id: ownedChatView
+        ChatView.ChatViewMain {
+            ownedMessages: contactItem.ownedMessages
+            headerTitle: proxyTitle
         }
     }
 
@@ -93,9 +103,6 @@ Rectangle {
             splash.x = eventPoint.position.x
             splash.y = eventPoint.position.y
             // set the chat to the selected item
-            print("print good: ", ownedMessages.conversationId, ownedMessages)
-            appState.chatMain.headerTitle = title
-            appState.chatMain.ownedMessages = ownedMessages
             splashAnim.running = true
             // callback implicity called at the end of the animation
         }

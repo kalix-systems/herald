@@ -22,14 +22,10 @@ Page {
 
         anchors.fill: parent
         model: conversationsModel
-
         delegate: CVListItem {
             readonly property var conversationIdProxy: conversationId
             readonly property Messages ownedMessages: Messages {
                 conversationId: conversationIdProxy
-                onRowsInserted: {
-                    print("UWU", ownedMessages)
-                }
             }
         }
 

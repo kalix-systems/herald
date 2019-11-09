@@ -7,20 +7,11 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Column {
     id: textMessageCol
     property Messages model
-    topPadding: CmnCfg.padding
-    bottomPadding: CmnCfg.padding
     spacing: CmnCfg.margin
-
-    anchors {
-        right: parent.right
-        left: parent.left
-    }
 
     Repeater {
         id: chatListView
-        anchors.fill: parent
         model: parent.model
-
         delegate: Column {
             readonly property string proxyBody: body
 
@@ -34,7 +25,6 @@ Column {
 
             readonly property string authName: outbound ? "" : usersModel.nameById(
                                                               author)
-
             readonly property bool outbound: author === configModel.configId
 
             // column is most correct to resize for extra content
