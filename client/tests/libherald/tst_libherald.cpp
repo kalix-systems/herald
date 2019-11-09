@@ -15,6 +15,7 @@ public:
     ConversationBuilder* convobuilder = nullptr;
     Messages*   msg = nullptr;
     MessageBuilder*  msgbuilder =  nullptr;
+    Users*  user = nullptr;
     Errors* error = nullptr;
     libherald();
     ~libherald();
@@ -24,7 +25,8 @@ private slots:
   void test_config_set_color();
   void test_convo_messages_setup();
   void test_convo_messages_deletion();
-  void test_message_send();
+  void test_message_send_delete();
+  void test_convo_settings();
 
 };
 
@@ -83,7 +85,7 @@ void libherald::test_convo_messages_deletion() {
     delete convos;
 }
 
-void libherald::test_message_send() {
+void libherald::test_message_send_delete() {
     test_convo_messages_setup();
     auto cid = msg -> conversationId();
     QSignalSpy spy(msg, &Messages::newDataReady);
@@ -99,8 +101,23 @@ void libherald::test_message_send() {
     QCOMPARE(msg -> rowCount(), 1);
     //once also for data saved
     QCOMPARE(spy.count(), 2);
+
+    msg -> deleteMessage(0);
+    QCOMPARE(msg -> rowCount(), 0);
     test_convo_messages_deletion();
 }
+
+void libherald::test_convo_settings() {
+    test_convo_messages_setup();
+    convos -> setColor(0, 100);
+    convos -> setTitle(0, "Nyah");
+    convos -> setMuted(0, true);
+    QCOMPARE(convos -> title(0), "Nyah");
+    QCOMPARE(convos -> color(0), 100);
+    QCOMPARE(convos -> muted(0), true);
+}
+
+
 
 QTEST_APPLESS_MAIN(libherald)
 
