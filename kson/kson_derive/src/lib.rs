@@ -11,7 +11,7 @@ use quote::quote;
 use syn::*;
 
 fn ser_struct_impl(name: Ident, sd: DataStruct, gens: Generics) -> TokenStream {
-    let kser = ser::struct_impl::kson_ser(name.clone(), sd.clone(), gens);
+    let kser = ser::struct_impl::kson_ser(name.clone(), sd, gens);
     let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
         .expect("failed to parse module identifier");
 
@@ -55,7 +55,7 @@ fn de_struct_impl(name: Ident, sd: DataStruct, gens: Generics) -> TokenStream {
 }
 
 fn ser_enum_impl(name: Ident, sd: DataEnum, gens: Generics) -> TokenStream {
-    let kser = ser::enum_impl::kson_ser(name.clone(), sd.clone(), gens);
+    let kser = ser::enum_impl::kson_ser(name.clone(), sd, gens);
     let modname = parse_str::<Ident>(&format!("__{}__kser__", name.to_string()))
         .expect("failed to parse module identifier");
 

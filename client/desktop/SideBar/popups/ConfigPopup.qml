@@ -62,9 +62,7 @@ Window {
             RowLayout {
                 TextField {
                     id: cfgUid
-                    // BNOTE: This shouldn't even be loaded until this is true
-                    // yeah this doesn't even exist until you have a uid
-                    enabled: false //!config.configId
+                    enabled: false
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : config.configId
                     selectionColor: CmnCfg.palette.tertiaryColor

@@ -33,18 +33,15 @@
         <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/js/NewContactDialogue.mjs</file>
         <file>TopMenuBar.qml</file>
-        <file>common/Avatar.qml</file>
         <file>common/ButtonForm.qml</file>
         <file>common/CommonConfig.qml</file>
         <file>common/Divider.qml</file>
         <file>common/EmojiJson.js</file>
-        <file>common/ImageAvatar.qml</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>common/js/Avatar.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/ConversationView/ConversationViewMain.qml</file>
-        <file>SideBar/ConversationView/Controls/ConversationLabel.qml</file>
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>

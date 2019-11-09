@@ -42,6 +42,7 @@ ListView {
                 contactName: contactData.name
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
+                lastBody: "@" + contactData.userId
             }
 
             MouseArea {
@@ -57,4 +58,4 @@ ListView {
             }
         }
     }
-} // BNOTE: Oh Christmas Tree, Oh Christmas Tree// This is pretty factored out already i'm not sure how to fix
+}

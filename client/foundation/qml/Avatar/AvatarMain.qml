@@ -2,7 +2,6 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 
-// PAUL TODO : paramaterize the 12 dp margins
 Item {
     // whether or not the AvatarIcon is square.
     property bool groupAvatar: false

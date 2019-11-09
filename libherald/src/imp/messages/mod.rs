@@ -274,7 +274,7 @@ impl MessagesTrait for Messages {
                     ret_err!(self.raw_insert(new, SaveStatus::Saved));
                 }
                 MsgUpdate::FullMsg(msg) => {
-                    ret_err!(self.raw_insert(msg, SaveStatus::Unsaved));
+                    ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt(mid) => {
                     let mut msg = match self.map.get_mut(&mid) {

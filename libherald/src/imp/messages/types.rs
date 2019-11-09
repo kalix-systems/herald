@@ -79,9 +79,7 @@ impl PartialOrd for Message {
 impl Ord for Message {
     fn cmp(&self, rhs: &Self) -> Ordering {
         match self.partial_cmp(rhs) {
-            Some(ord) => {
-                return ord;
-            }
+            Some(ord) => ord,
             None => self.msg_id.cmp(&rhs.msg_id),
         }
     }

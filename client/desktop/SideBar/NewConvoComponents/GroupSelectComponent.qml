@@ -70,7 +70,6 @@ Component {
                     color: CmnCfg.palette.mainColor
                 }
 
-                //PAUL: move this logic to C++
                 Keys.onPressed: {
                     // NOTE: What is the first comparison doing?
                     // this makes sure that returns and tabs are not evaluated
@@ -86,7 +85,6 @@ Component {
                     }
                 }
 
-                //PAUL: move this logic to C++
                 onTextChanged: {
                     if (contactsSearch) {
                         Qt.callLater(function (text) {

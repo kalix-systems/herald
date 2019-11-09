@@ -41,8 +41,8 @@ ToolBar {
         AvatarMain {
 
             size: 32
-            iconColor: CmnCfg.palette.iconFill
-            textColor: CmnCfg.avatarColors[conversationItem.color]
+            iconColor: CmnCfg.avatarColors[conversationItem.color]
+            textColor: CmnCfg.palette.iconFill
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
             anchors {
