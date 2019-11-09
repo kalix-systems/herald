@@ -14,6 +14,8 @@ public:
     Conversations*  convos = nullptr;
     ConversationBuilder* convobuilder = nullptr;
     Messages*   msg = nullptr;
+    MessageBuilder*  msgbuilder =  nullptr;
+    Errors* error = nullptr;
     libherald();
     ~libherald();
 
@@ -22,6 +24,7 @@ private slots:
   void test_config_set_color();
   void test_convo_messages_setup();
   void test_convo_messages_deletion();
+  void test_message_send();
 
 };
 
@@ -32,6 +35,7 @@ libherald::libherald()
     herald_state = new HeraldState();
     herald_state -> registerNewUser("Boruto");
     herald_state -> setConfigInit(true);
+    error = new Errors();
 
 }
 
@@ -57,7 +61,6 @@ void libherald::test_config_set_color() {
 }
 
 void libherald::test_convo_messages_setup() {
-
     cfg = new Config();
     convos = new Conversations();
     convobuilder = new ConversationBuilder();
@@ -78,6 +81,25 @@ void libherald::test_convo_messages_deletion() {
     }
     delete cfg;
     delete convos;
+}
+
+void libherald::test_message_send() {
+    test_convo_messages_setup();
+    auto cid = msg -> conversationId();
+    QSignalSpy spy(msg, &Messages::newDataReady);
+    msgbuilder = new MessageBuilder();
+    msgbuilder -> setConversationId(cid);
+    msgbuilder -> setBody("test");
+    msgbuilder -> finalize();
+    QModelIndex testIndex = msg -> index(0,0);
+    //enough time to receive signal
+    std::this_thread::sleep_for (std::chrono::milliseconds(100));
+    // this needs to happen bc reasons
+    msg -> fetchMore(testIndex);
+    QCOMPARE(msg -> rowCount(), 1);
+    //once also for data saved
+    QCOMPARE(spy.count(), 2);
+    test_convo_messages_deletion();
 }
 
 QTEST_APPLESS_MAIN(libherald)
