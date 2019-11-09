@@ -61,7 +61,7 @@ impl Event {
         }
 
         for (cid, content) in replies {
-            send_cmessage(cid, &content)?;
+            // send_cmessage(cid, &content)?;
         }
 
         Ok(())

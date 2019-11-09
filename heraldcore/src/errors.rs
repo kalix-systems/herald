@@ -61,9 +61,6 @@ pub enum HErr {
     GIDSpecFailed(login::SignAsResponse),
     /// Failed to sign in - either signature or timestamp was invalid
     SignInFailed(login::LoginTokenResponse),
-    /// An HTTP request was dropped
-    /// Websocket issue
-    WebsocketError(websocket::result::WebSocketError),
     /// Unexpected `None`
     NoneError(&'static str, u32),
     /// An error occured sending a value through a channel
@@ -93,7 +90,6 @@ impl fmt::Display for HErr {
             ChainError(e) => write!(f, "ChainError: {}", e),
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
-            WebsocketError(e) => write!(f, "WebsocketError: {}", e),
             MissingOutboundMessageField(missing) => write!(f, "{}", missing),
             MissingInboundMessageField(missing) => write!(f, "{}", missing),
             NoneError(file, line) => write!(f, "Unexpected none in file {} on line {}", file, line),
@@ -113,7 +109,6 @@ impl std::error::Error for HErr {
             ImageError(s) => s,
             CborError(e) => e,
             RegexError(e) => e,
-            WebsocketError(e) => e,
             _ => return None,
         })
     }
@@ -141,7 +136,6 @@ herr!(ChainError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
 herr!(serde_cbor::Error, CborError);
-herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(regex::Error, RegexError);
 herr!(std::ffi::OsString, BadPath);
 

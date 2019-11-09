@@ -16,7 +16,6 @@ serde_bytes       = "0.11.2"
 serde_cbor        = "0.10.1"
 sodiumoxide       = "0.2.4"
 tar               = "0.4.26"
-url               = "2.1"
 toml = "0.5.3"
 
 [dependencies.herald_common]
@@ -30,15 +29,6 @@ optional = true
 
 [dependencies.chainmail]
 path = "../chainmail"
-
-[dependencies.websocket]
-version          = "0.23"
-default_features = false
-features         = ["sync"]
-
-[dependencies.ureq]
-version          = "0.11"
-default_features = false
 
 [dependencies.rusqlite]
 version          = "0.20.0"
