@@ -104,15 +104,19 @@ impl ConversationsTrait for Conversations {
 
     fn set_expiration_period(&mut self, index: usize, period: u8) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
+        let cid = meta.conversation_id;
+
         let period = period.into();
-        ret_err!(
-            conversation::set_expiration_period(&meta.conversation_id, period),
-            false
-        );
+        ret_err!(conversation::set_expiration_period(&cid, period), false);
 
         let update = conversation::settings::SettingsUpdate::Expiration(period);
-        // TODO this should not block
-        ret_err!(update.send_update(&meta.conversation_id), false);
+
+        ret_err! {
+            std::thread::Builder::new().spawn(move || {
+                ret_err!(update.send_update(&cid));
+            }),
+            false
+        };
 
         meta.expiration_period = period;
 
