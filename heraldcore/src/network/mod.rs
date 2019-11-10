@@ -34,7 +34,7 @@ mod helper {
 
     macro_rules! mk_request {
         ($method: tt, $path: tt) => {
-            pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
+            pub async fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
                 unimplemented!()
                 // let res_reader = ureq::$method(&server_url(stringify!($path)))
                 //     .send_bytes(&serde_cbor::to_vec(req)?)
@@ -59,8 +59,8 @@ mod helper {
 macro_rules! get_of_helper {
     ($name: tt, $of: ty, $to: ty) => {
         #[allow(missing_docs)]
-        pub fn $name(of: $of) -> Result<$to, HErr> {
-            Ok(helper::$name(&$name::Req(of))?.0)
+        pub async fn $name(of: $of) -> Result<$to, HErr> {
+            Ok(helper::$name(&$name::Req(of)).await?.0)
         }
     };
 }
@@ -75,25 +75,25 @@ get_of_helper!(keys_exist, Vec<sig::PublicKey>, Vec<bool>);
 get_of_helper!(users_exist, Vec<UserId>, Vec<bool>);
 
 /// Deprecates key on server.
-pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
+pub async fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
-    Ok(helper::dep_key(&req)?.0)
+    Ok(helper::dep_key(&req).await?.0)
 }
 
 /// Adds new key to the server's key registry.
-pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
+pub async fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
     let kp = Config::static_keypair()?;
     let req = new_key::Req(kp.sign(to_new));
-    Ok(helper::new_key(&req)?.0)
+    Ok(helper::new_key(&req).await?.0)
 }
 
 /// Registers new user on the server.
-pub fn register(uid: UserId) -> Result<register::Res, HErr> {
+pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
     let req = register::Req(uid, sig);
-    let res = helper::register(&req)?;
+    let res = helper::register(&req).await?;
     // TODO: retry if this fails?
     if let register::Res::Success = &res {
         crate::config::ConfigBuilder::new(uid, kp).add()?;
@@ -102,18 +102,21 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(res)
 }
 
-pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessageBody::Msg(msg))
+pub(crate) async fn send_normal_message(
+    cid: ConversationId,
+    msg: cmessages::Msg,
+) -> Result<(), HErr> {
+    send_cmessage(cid, &ConversationMessageBody::Msg(msg)).await
 }
 
-pub(crate) fn send_conversation_settings_update(
+pub(crate) async fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessageBody::Settings(update))
+    send_cmessage(cid, &ConversationMessageBody::Settings(update)).await
 }
 
-fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
+async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
         let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
 
@@ -131,7 +134,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
         // we thought a message wasn't sent but it was
         chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
-        match helper::push_users(&req) {
+        match helper::push_users(&req).await {
             Ok(push_users::Res::Success) => {
                 tx.commit()?;
                 Ok(())
@@ -162,13 +165,13 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
     }
 }
 
-fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
+async fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
     let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
 
     let req = push_devices::Req { to: vec![to], msg };
 
     // TODO retry logic? for now, things go to the void
-    match helper::push_devices(&req)? {
+    match helper::push_devices(&req).await? {
         push_devices::Res::Success => Ok(()),
         push_devices::Res::Missing(missing) => Err(HeraldError(format!(
             "tried to send messages to nonexistent keys {:?}",
@@ -177,8 +180,8 @@ fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr>
     }
 }
 
-fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
-    let meta = match keys_of(vec![uid])?.pop() {
+async fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
+    let meta = match keys_of(vec![uid]).await?.pop() {
         Some((u, m)) => {
             if u == uid {
                 Ok(m)
@@ -201,14 +204,14 @@ fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
 
     let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
     for key in keys {
-        send_dmessage(key, msg)?;
+        send_dmessage(key, msg).await?;
     }
 
     Ok(())
 }
 
 /// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
+pub async fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let kp = Config::static_keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
@@ -217,11 +220,11 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 
     let req = dmessages::ContactReq { gen, cid };
 
-    send_umessage(uid, &DeviceMessageBody::ContactReq(req))
+    send_umessage(uid, &DeviceMessageBody::ContactReq(req)).await
 }
 
 /// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
-pub fn start_conversation(
+pub async fn start_conversation(
     members: &[UserId],
     title: Option<String>,
 ) -> Result<ConversationId, HErr> {
@@ -254,7 +257,7 @@ pub fn start_conversation(
     }));
 
     for pw_cid in pairwise {
-        send_cmessage(pw_cid, &body)?;
+        send_cmessage(pw_cid, &body).await?;
     }
 
     Ok(cid)

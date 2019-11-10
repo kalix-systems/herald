@@ -41,7 +41,7 @@ impl Event {
 
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
     /// argument.
-    pub fn execute<F: FnMut(Notification), G: FnMut(HErr)>(
+    pub async fn execute<F: FnMut(Notification), G: FnMut(HErr)>(
         self,
         f: &mut F,
         g: &mut G,
@@ -61,7 +61,7 @@ impl Event {
         }
 
         for (cid, content) in replies {
-            // send_cmessage(cid, &content)?;
+            send_cmessage(cid, &content).await?;
         }
 
         Ok(())

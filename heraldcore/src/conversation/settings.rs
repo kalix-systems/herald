@@ -17,10 +17,10 @@ impl SettingsUpdate {
     }
 
     /// Sends the update to the conversation
-    pub fn send_update(&self, cid: &ConversationId) -> Result<(), HErr> {
+    pub async fn send_update(&self, cid: &ConversationId) -> Result<(), HErr> {
         use crate::network::send_conversation_settings_update;
 
-        send_conversation_settings_update(*cid, *self)
+        send_conversation_settings_update(*cid, *self).await
     }
 }
 

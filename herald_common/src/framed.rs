@@ -37,6 +37,7 @@ impl<S> Framed<S> {
     pub fn new(inner: S) -> Self {
         Framed { inner }
     }
+
     pub async fn write<T>(&mut self, t: &T) -> Result<(), FramedError>
     where
         T: Serialize,
@@ -46,6 +47,15 @@ impl<S> Framed<S> {
         let len_bytes = u64::to_le_bytes(msg.len() as u64);
         self.inner.write_all(&len_bytes).await?;
         self.inner.write_all(&msg).await?;
+        Ok(())
+    }
+
+    pub async fn write_timed<T>(&mut self, t: &T) -> Result<(), FramedError>
+    where
+        T: Serialize,
+        S: AsyncWrite + Unpin,
+    {
+        self.write(t).timeout(TIMEOUT_DUR).await??;
         Ok(())
     }
 
@@ -61,6 +71,14 @@ impl<S> Framed<S> {
         self.inner.read_exact(&mut buf).await?;
         let res = serde_cbor::from_slice(&buf)?;
         Ok(res)
+    }
+
+    pub async fn read_timed<T>(&mut self) -> Result<T, FramedError>
+    where
+        S: AsyncRead + Unpin,
+        T: serde::de::DeserializeOwned,
+    {
+        Ok(self.read().timeout(TIMEOUT_DUR).await??)
     }
 
     pub async fn read_packeted<T>(&mut self) -> Result<T, FramedError>

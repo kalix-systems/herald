@@ -71,6 +71,7 @@ pub enum HErr {
     ChainError(ChainError),
     /// Malformed path
     BadPath(std::ffi::OsString),
+    FramedError(FramedError),
 }
 
 impl fmt::Display for HErr {
@@ -96,6 +97,7 @@ impl fmt::Display for HErr {
             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
             EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
+            FramedError(e) => write!(f, "FramedError: {:?}", e),
         }
     }
 }
@@ -138,6 +140,7 @@ herr!(std::io::Error, IoError);
 herr!(serde_cbor::Error, CborError);
 herr!(regex::Error, RegexError);
 herr!(std::ffi::OsString, BadPath);
+herr!(FramedError, FramedError);
 
 impl From<EmptyMessageBody> for HErr {
     fn from(_: EmptyMessageBody) -> Self {

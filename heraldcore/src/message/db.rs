@@ -182,7 +182,7 @@ pub(crate) fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId)
 }
 
 impl OutboundMessageBuilder {
-    pub(crate) fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static>(
+    pub(crate) async fn store_and_send_db<F: FnMut(StoreAndSend) + Send + 'static>(
         self,
         db: &mut Conn,
         mut callback: F,
@@ -322,13 +322,13 @@ impl OutboundMessageBuilder {
             content,
             op,
         };
-        e!(crate::network::send_normal_message(conversation_id, msg));
+        e!(crate::network::send_normal_message(conversation_id, msg).await);
 
         callback(StoreAndSend::SendDone(msg_id));
     }
 
     #[cfg(test)]
-    pub(crate) fn store_and_send_blocking_db(self, db: &mut Conn) -> Result<Message, HErr> {
+    pub(crate) async fn store_and_send_blocking_db(self, db: &mut Conn) -> Result<Message, HErr> {
         use crate::{channel_recv_err, loc};
         use crossbeam_channel::*;
 
@@ -336,7 +336,8 @@ impl OutboundMessageBuilder {
         self.store_and_send_db(db, move |m| {
             tx.send(m)
                 .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
-        });
+        })
+        .await;
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {
             StoreAndSend::Msg(msg) => msg,

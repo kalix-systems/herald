@@ -1,22 +1,23 @@
 use super::*;
+use tokio::net::tcp::TcpStream;
 
 /// Attempts to login to the server, spawning a long-lived thread to handle messages pushed from
 /// the server.
 ///
 /// Takes a callback as an argument that is called whenever a message is received.
-pub fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
+pub async fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
 where
     F: FnMut(Notification) + Send + 'static,
     G: FnMut(HErr) + Send + 'static,
 {
     use login::*;
 
+    CAUGHT_UP.store(false, Ordering::Release);
+
     if sodiumoxide::init().is_err() {
         eprintln!("failed to init libsodium - what are you doing");
         std::process::abort()
     }
-
-    CAUGHT_UP.store(false, Ordering::Release);
 
     let uid = Config::static_id()?;
     let kp = Config::static_keypair()?;
@@ -25,75 +26,73 @@ where
         did: *kp.public_key(),
     };
 
-    // let wsurl = format!("ws://{}/login", *SERVER_ADDR);
-    // let mut ws = wsclient::ClientBuilder::new(&wsurl)
-    //     .expect("failed to parse server url")
-    //     .connect_insecure()?;
+    let mut stream = Framed::new(TcpStream::connect(SERVER_ADDR.deref()).await?);
 
-    // sock_send_msg(&mut ws, &SignAs(gid))?;
+    stream.write_timed(&SignAs(gid)).await?;
+    match stream.read_timed().await? {
+        SignAsResponse::Sign(u) => {
+            let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
+            stream.write_timed(&token).await?;
 
-    // match sock_get_msg(&mut ws)? {
-    //     SignAsResponse::Sign(u) => {
-    //         let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
-    //         sock_send_msg(&mut ws, &token)?;
+            match stream.read_timed().await? {
+                LoginTokenResponse::Success => {}
+                e => return Err(SignInFailed(e)),
+            }
+        }
+        e => return Err(GIDSpecFailed(e)),
+    }
 
-    //         match sock_get_msg(&mut ws)? {
-    //             LoginTokenResponse::Success => {}
-    //             e => return Err(SignInFailed(e)),
-    //         }
-    //     }
-    //     e => return Err(GIDSpecFailed(e)),
-    // }
-
-    // let ev = catchup(&mut ws)?;
+    let ev = catchup(&mut stream).await?;
 
     CAUGHT_UP.store(true, Ordering::Release);
 
     // clear pending
     for (tag, cid, content) in pending::get_pending()? {
-        send_cmessage(cid, &content)?;
+        send_cmessage(cid, &content).await?;
         pending::remove_pending(tag)?;
     }
 
-    // // send read receipts, etc
-    // ev.execute(&mut f, &mut g)?;
+    // send read receipts, etc
+    ev.execute(&mut f, &mut g).await?;
 
-    // std::thread::spawn(move || {
-    //     move || -> Result<(), HErr> {
-    //         loop {
-    //             catchup(&mut ws)?.execute(&mut f, &mut g)?;
-    //         }
-    //     }()
-    //     .unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
-    //     CAUGHT_UP.store(false, Ordering::Release);
-    // });
+    tokio::spawn(async move {
+        let comp: Result<(), HErr> = async move {
+            loop {
+                let ev = catchup(&mut stream).await?;
+                ev.execute(&mut f, &mut g).await?;
+            }
+        }
+            .await;
+        comp.unwrap_or_else(|e| eprintln!("login connection closed with message: {}", e));
+        CAUGHT_UP.store(false, Ordering::Release);
+    });
 
     unimplemented!()
 
     // Ok(())
 }
 
-// fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
-//     use catchup::*;
+async fn catchup(stream: &mut Framed<TcpStream>) -> Result<Event, HErr> {
+    use catchup::*;
 
-//     let mut ev = Event::default();
+    let mut ev = Event::default();
 
-//     while let Catchup::Messages(p) = sock_get_msg(ws)? {
-//         let len = p.len() as u64;
-//         for push in p.iter() {
-//             match handle_push(push) {
-//                 Ok(e2) => ev.merge(e2),
-//                 Err(e) => {
-//                     eprintln!("error while catching up, error was:\n{}", e);
-//                     ev.errors.push(e);
-//                 }
-//             }
-//         }
-//         sock_send_msg(ws, &CatchupAck(len))?;
-//     }
+    while let Catchup::Messages(p) = stream.read_packeted().await? {
+        let len = p.len() as u64;
+        for push in p.iter() {
+            match handle_push(push) {
+                Ok(e2) => ev.merge(e2),
+                Err(e) => {
+                    eprintln!("error while catching up, error was:\n{}", e);
+                    ev.errors.push(e);
+                }
+            }
+        }
+        stream.write_timed(&CatchupAck(len)).await?;
+    }
 
-//     Ok(ev)
-// }
+    Ok(ev)
+}
 
 // fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
 //     ws: &mut wsclient::Client<S>,
