@@ -8,14 +8,6 @@ import "../js/CVViewUtils.js" as CVJS
 Rectangle {
     id: contactItem
 
-    // the group name or displayName of the conversation
-    property string contactName
-    // the previous message of the conversation, or the empty string
-    property string body
-    // the previous latest human readable timestamp, or the empty string
-    property string timestamp
-    // the value of the latest read receipt according to the ReceiptStatus enum
-    property int lastReceipt: 0
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
     property string proxyTitle: title
@@ -43,9 +35,9 @@ Rectangle {
             size: CmnCfg.units.dp(32)
             labelComponent: ConversationLabel {
                 contactName: title
-                lastBody: lastBody
-                lastTimestamp: lastTimestamp
-                lastReceipt: lastReceipt
+                lastBody: ownedMessages.lastBody
+                lastTimestamp: ownedMessages.lastEpochTimestampMs
+                lastReceipt: ownedMessages.lastStatus === undefined ? 0 : ownedMessages.lastStatus
             }
         }
     }

@@ -30,9 +30,11 @@ Page {
         model: conversationsModel
         delegate: CVListItem {
             readonly property var conversationIdProxy: conversationId
+            readonly property int colorProxy: model.color
             readonly property Messages ownedMessages: Messages {
                 conversationId: conversationIdProxy
             }
+            colorCode: colorProxy
         }
     }
 
