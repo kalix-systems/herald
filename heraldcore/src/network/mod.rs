@@ -126,9 +126,8 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
         let req = push_users::Req { to, exc, msg };
 
         let mut db = chainkeys::CK_CONN.lock();
-        let tx = db.transaction()?;
-        let mut tmutex = parking_lot::Mutex::new(tx);
-        let mut tx = tmutex.lock();
+        let mut tx = db.transaction()?;
+
         let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
         debug_assert!(unlocked.is_empty());
         // TODO: replace used with probably_used here
@@ -136,9 +135,10 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
         // we thought a message wasn't sent but it was
         chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
+        let tmutex = parking_lot::Mutex::new(tx);
+
         match helper::push_users(&req).await {
             Ok(push_users::Res::Success) => {
-                drop(tx);
                 tmutex.into_inner().commit()?;
                 Ok(())
             }
@@ -147,9 +147,9 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
                 missing
             ))),
             Err(e) => {
+                let mut tx = tmutex.into_inner();
                 chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
-                drop(tx);
-                tmutex.into_inner().commit()?;
+                tx.commit()?;
 
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
