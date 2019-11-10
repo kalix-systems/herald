@@ -126,7 +126,9 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
         let req = push_users::Req { to, exc, msg };
 
         let mut db = chainkeys::CK_CONN.lock();
-        let mut tx = db.transaction()?;
+        let tx = db.transaction()?;
+        let mut tmutex = parking_lot::Mutex::new(tx);
+        let mut tx = tmutex.lock();
         let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
         debug_assert!(unlocked.is_empty());
         // TODO: replace used with probably_used here
@@ -136,7 +138,8 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
 
         match helper::push_users(&req).await {
             Ok(push_users::Res::Success) => {
-                tx.commit()?;
+                drop(tx);
+                tmutex.into_inner().commit()?;
                 Ok(())
             }
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
@@ -145,7 +148,8 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
             ))),
             Err(e) => {
                 chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
-                tx.commit()?;
+                drop(tx);
+                tmutex.into_inner().commit()?;
 
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
