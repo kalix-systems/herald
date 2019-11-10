@@ -5,9 +5,9 @@ use std::convert::TryInto;
 use crate::{config::test_config, womp};
 
 /// Testing utility
-fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+async fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
     let mut conn = Database::get().expect(womp!());
-    db::test_outbound_text(&mut conn, msg, conv)
+    db::test_outbound_text(&mut conn, msg, conv).await
 }
 
 #[test]
@@ -84,15 +84,15 @@ fn reply() {
     assert_eq!(reply.op.unwrap(), mid1);
 }
 
-#[test]
+#[tokio::test]
 #[serial]
-fn message_send_status_updates() {
+async fn message_send_status_updates() {
     Database::reset_all().expect(womp!());
 
     let conf = test_config();
     let conv_id = conf.nts_conversation;
 
-    let (msg_id, _) = test_outbound_text("test", conv_id);
+    let (msg_id, _) = test_outbound_text("test", conv_id).await;
     assert_eq!(
         super::get_message(&msg_id)
             .expect(womp!("failed to get conversation by author"))

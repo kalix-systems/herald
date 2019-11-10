@@ -18,9 +18,9 @@ fn make_attachment() {
     std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
 }
 
-#[test]
+#[tokio::test]
 #[serial(attach)]
-fn outbound_message_attachment() {
+async fn outbound_message_attachment() {
     Database::reset_all().expect(womp!());
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let config = test_config();
@@ -29,7 +29,7 @@ fn outbound_message_attachment() {
     builder
         .add_attachment((&path).clone())
         .conversation_id(config.nts_conversation);
-    let msg = builder.store_and_send_blocking().expect(womp!());
+    let msg = builder.store_and_send_blocking().await.expect(womp!());
 
     let meta = super::get(&msg.message_id)
         .expect(womp!())
