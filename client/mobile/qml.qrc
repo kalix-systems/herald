@@ -10,7 +10,6 @@
         <file>qml/Common/BusyIndicator.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
-        <file>qml/Common/FilteredList.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/Common/StdText.qml</file>
         <file>qml/Errors/ErrorHandler.qml</file>
@@ -27,5 +26,6 @@
         <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
+        <file>qml/Common/Drawer.qml</file>
     </qresource>
 </RCC>

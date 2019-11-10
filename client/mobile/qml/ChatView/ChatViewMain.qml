@@ -21,6 +21,11 @@ Page {
         id: chatScrollView
         clip: true
         contentWidth: parent.width
+        topPadding: CmnCfg.smallMargin
+        bottomPadding: CmnCfg.smallMargin
+        ScrollBar.vertical: ScrollBar {
+            id: scrollControl
+        }
         TextMessageList {
             model: ownedMessages
             width: parent.width
@@ -31,6 +36,13 @@ Page {
             right: parent.right
             left: parent.left
             bottom: chatTextArea.top
+        }
+
+        Connections {
+            target: ownedMessages
+            onRowsInserted: {
+                scrollControl.position = 1.0
+            }
         }
     }
 

@@ -4,12 +4,19 @@ import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
+import "../Common" as Common
 
 Page {
     id: cvMainView
+
     header: CVHeader {}
+
     background: Rectangle {
         color: CmnCfg.palette.mainColor
+    }
+
+    Common.Drawer {
+        id: contextDrawer
     }
 
     // the body of this entire element
@@ -19,7 +26,6 @@ Page {
         clip: true
         boundsBehavior: ListView.StopAtBounds
         spacing: CmnCfg.units.dp(16)
-
         anchors.fill: parent
         model: conversationsModel
         delegate: CVListItem {
@@ -28,8 +34,6 @@ Page {
                 conversationId: conversationIdProxy
             }
         }
-
-        ScrollBar.vertical: ScrollBar {}
     }
 
     // floating pencil button to trigger

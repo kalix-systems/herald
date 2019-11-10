@@ -25,6 +25,7 @@ ToolBar {
                 id: drawerButton
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/hamburger-icon.svg"
+                tapCallback: contextDrawer.open
             }
             Label {
                 id: stateLabel

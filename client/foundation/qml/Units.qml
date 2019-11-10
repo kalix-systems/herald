@@ -84,9 +84,11 @@ QtObject {
      * use theme.mSize(theme.defaultFont), units.smallSpacing and units.largeSpacing.
      * The devicePixelRatio follows the definition of "device independent pixel" by Microsoft.
      */
-    property real devicePixelRatio: Screen.devicePixelRatio
+    readonly property real devicePixelRatio: Screen.devicePixelRatio
+    readonly property real deviceDotsPerInch: Screen.pixelDensity * 25.4
 
     function dp(dips) {
+        const ref_dpi = deviceDotsPerInch
         return dips
     }
 

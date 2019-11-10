@@ -36,8 +36,6 @@ Column {
                 leftMargin: CmnCfg.margin * 2.0
             }
 
-            rightPadding: CmnCfg.margin
-
             Component {
                 id: std
                 CB.StandardBubble {
