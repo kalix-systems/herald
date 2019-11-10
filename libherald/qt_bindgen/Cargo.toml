@@ -8,4 +8,4 @@ license = "GPLv2"
 [dependencies.rust_qt_binding_generator]
 #path = "../../../rqbg"
 git = "https://github.com/kalix-systems/rust-qt-binding-generator"
-rev = "17cf7a2739e7faf650c6385885be846133fb425c" 
+rev = "e28081b83fbac56c9447f037e3815913584bf762" 
