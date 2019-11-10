@@ -63,6 +63,52 @@ impl<S> Framed<S> {
         Ok(res)
     }
 
+    pub async fn read_packeted<T>(&mut self) -> Result<T, FramedError>
+    where
+        T: serde::de::DeserializeOwned,
+        S: AsyncRead + AsyncWrite + Unpin,
+    {
+        let len: usize;
+
+        loop {
+            let maybe_len = self.read::<u64>().await?;
+            self.write(&maybe_len).timeout(TIMEOUT_DUR).await??;
+            match self.read().timeout(TIMEOUT_DUR).await?? {
+                PacketResponse::Success => {
+                    len = maybe_len as usize;
+                    break;
+                }
+                PacketResponse::Retry => {}
+            }
+        }
+
+        let mut packets = Vec::with_capacity(len);
+        let collected: Vec<u8>;
+
+        loop {
+            packets.clear();
+
+            for _ in 0..len {
+                let packet = self.read().timeout(TIMEOUT_DUR).await??;
+                packets.push(packet);
+            }
+
+            if let Some(bytes) = Packet::collect(&packets) {
+                self.write(&PacketResponse::Success)
+                    .timeout(TIMEOUT_DUR)
+                    .await??;
+                collected = bytes;
+                break;
+            } else {
+                self.write(&PacketResponse::Retry)
+                    .timeout(TIMEOUT_DUR)
+                    .await??;
+            }
+        }
+
+        Ok(serde_cbor::from_slice(&collected)?)
+    }
+
     pub async fn write_packeted<T>(&mut self, t: &T) -> Result<(), FramedError>
     where
         T: Serialize,
@@ -73,9 +119,7 @@ impl<S> Framed<S> {
         let len = packets.len() as u64;
 
         loop {
-            self.write(&ServerTransmission::Packets(len))
-                .timeout(TIMEOUT_DUR)
-                .await??;
+            self.write(&len).timeout(TIMEOUT_DUR).await??;
 
             if len == self.read::<u64>().timeout(TIMEOUT_DUR).await?? {
                 self.write(&PacketResponse::Success)
