@@ -8,19 +8,14 @@ default-run = "herald_server"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-dashmap         = "1.0"
-lazy_static     = "1.4"
-serde_cbor      = "0.10"
-sodiumoxide     = "0.2"
-tokio           = "0.2.0-alpha.6"
-futures-preview = "0.3.0-alpha.19"
-tokio-postgres  = "0.5.0-alpha.1"
-
-bytes           = { version = "0.4",            features = ["serde"] }
-serde           = { version = "1.0",            features = ["derive"] }
-
-herald_common = { path = "../herald_common" }
 crossbeam-channel = "0.3.9"
+dashmap           = "1.0"
+futures-preview   = "0.3.0-alpha.19"
+lazy_static       = "1.4"
+tokio-postgres    = "0.5.0-alpha.1"
+
+[dependencies.herald_common]
+path = "../herald_common"
 
 [dependencies.server_errors]
 path = "server_errors"

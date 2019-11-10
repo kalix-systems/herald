@@ -1,7 +1,7 @@
 use futures::FutureExt;
 use herald_common::*;
 use server_errors::{Error, Error::*};
-use tokio;
+use std::collections::BTreeMap;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
 mod pool;

@@ -13,9 +13,14 @@ pub use framed::*;
 pub use time::*;
 pub use types::*;
 
-pub use bytes::Bytes;
+pub use bytes::{self, Bytes};
+pub use serde;
+pub use serde_bytes;
 pub use serde_cbor;
-pub use std::collections::BTreeMap;
+pub use sodiumoxide;
+pub use tokio;
+
+use std::collections::BTreeMap;
 
 impl UserMeta {
     pub fn new() -> Self {
