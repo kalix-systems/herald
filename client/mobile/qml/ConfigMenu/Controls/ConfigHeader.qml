@@ -31,9 +31,9 @@ ToolBar {
         Label {
             text: "Settings"
             Layout.alignment: Qt.AlignCenter
+            Layout.fillWidth: true
             font.pointSize: CmnCfg.chatPreviewSize
             font.family: CmnCfg.chatFont.name
-            anchors.verticalCenter: parent.verticalCenter
             color: CmnCfg.palette.iconFill
         }
     }

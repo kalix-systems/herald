@@ -30,5 +30,6 @@
         <file>qml/ConfigMenu/ConfigMenuMain.qml</file>
         <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
         <file>qml/Common/HeaderText.qml</file>
+        <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
     </qresource>
 </RCC>

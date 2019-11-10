@@ -9,7 +9,6 @@ import "./LoginPage" as LoginPage
 
 ApplicationWindow {
     id: root
-
     visible: true
     width: 300
     height: 500
@@ -18,6 +17,7 @@ ApplicationWindow {
         id: cvMain
         CVView.ConversationViewMain {}
     }
+
     Component {
         id: configMain
         ConfigMenu.ConfigMenuMain {}

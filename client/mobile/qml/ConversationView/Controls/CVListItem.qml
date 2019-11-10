@@ -23,17 +23,27 @@ Rectangle {
         left: parent.left
         right: parent.right
     }
-    Item {
+
+    Rectangle {
+
         anchors {
             fill: parent
-            margins: CmnCfg.units.dp(12)
+            rightMargin: CmnCfg.units.dp(12)
+            leftMargin: CmnCfg.units.dp(12)
         }
+
         AvatarMain {
             id: avatar
             iconColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
             initials: CVJS.initialize(title)
             size: CmnCfg.units.dp(32)
+
+            anchors {
+                right: parent.right
+                left: parent.left
+            }
+
             labelComponent: ConversationLabel {
                 contactName: title
                 lastBody: ownedMessages.lastBody
