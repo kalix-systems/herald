@@ -11,9 +11,6 @@ use tokio::{
     timer::Timeout,
 };
 
-mod framed;
-pub use framed::*;
-
 #[derive(Default)]
 pub struct State {
     pub active: DashMap<sig::PublicKey, Sender<()>>,

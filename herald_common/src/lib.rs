@@ -1,13 +1,17 @@
-mod crypto;
-pub use crypto::*;
 #[cfg(feature = "rusqlite_")]
 mod rusqlite_impls;
-mod types;
-pub use types::*;
 #[macro_use]
 mod newtype_macros;
+
+mod crypto;
+mod framed;
 mod time;
+mod types;
+
+pub use crypto::*;
+pub use framed::*;
 pub use time::*;
+pub use types::*;
 
 pub use bytes::Bytes;
 pub use serde_cbor;

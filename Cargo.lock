@@ -631,6 +631,7 @@ dependencies = [
  "tarpc 0.18.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
  "tarpc-bincode-transport 0.7.0 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
  "tarpc-lib 0.6.1 (git+https://github.com/google/tarpc?rev=5f6c3d7d989b7d7267c19d4b89c658450e86614e)",
+ "tokio 0.2.0-alpha.6 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

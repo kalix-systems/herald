@@ -1,4 +1,31 @@
 use super::*;
+use std::time::Duration;
+use tokio::prelude::*;
+
+#[derive(Debug)]
+pub enum FramedError {
+    IO(std::io::Error),
+    Encoding(serde_cbor::Error),
+    TimedOut(tokio::timer::timeout::Elapsed),
+}
+
+macro_rules! from_fn {
+    ($to:ty, $from:ty, $fn:expr) => {
+        impl From<$from> for $to {
+            fn from(f: $from) -> $to {
+                $fn(f)
+            }
+        }
+    };
+}
+
+from_fn!(FramedError, std::io::Error, FramedError::IO);
+from_fn!(FramedError, serde_cbor::Error, FramedError::Encoding);
+from_fn!(
+    FramedError,
+    tokio::timer::timeout::Elapsed,
+    FramedError::TimedOut
+);
 
 pub struct Framed<S> {
     inner: S,
@@ -10,7 +37,7 @@ impl<S> Framed<S> {
     pub fn new(inner: S) -> Self {
         Framed { inner }
     }
-    pub async fn write<T>(&mut self, t: &T) -> Result<(), Error>
+    pub async fn write<T>(&mut self, t: &T) -> Result<(), FramedError>
     where
         T: Serialize,
         S: AsyncWrite + Unpin,
@@ -22,7 +49,7 @@ impl<S> Framed<S> {
         Ok(())
     }
 
-    pub async fn read<T>(&mut self) -> Result<T, Error>
+    pub async fn read<T>(&mut self) -> Result<T, FramedError>
     where
         S: AsyncRead + Unpin,
         T: serde::de::DeserializeOwned,
@@ -36,7 +63,7 @@ impl<S> Framed<S> {
         Ok(res)
     }
 
-    pub async fn write_packeted<T>(&mut self, t: &T) -> Result<(), Error>
+    pub async fn write_packeted<T>(&mut self, t: &T) -> Result<(), FramedError>
     where
         T: Serialize,
         S: AsyncRead + AsyncWrite + Unpin,

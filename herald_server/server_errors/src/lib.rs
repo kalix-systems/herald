@@ -20,6 +20,7 @@ pub enum Error {
     TimedOut(tokio::timer::timeout::Elapsed),
     SendFailed(tokio::sync::mpsc::error::UnboundedSendError),
     StreamDied,
+    FramedError(herald_common::FramedError),
 }
 
 pub use Error::*;
@@ -43,3 +44,4 @@ from_fn!(
     tokio::sync::mpsc::error::UnboundedSendError,
     SendFailed
 );
+from_fn!(Error, herald_common::FramedError, FramedError);
