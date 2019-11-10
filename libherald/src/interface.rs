@@ -91,8 +91,6 @@ pub struct AttachmentsEmitter {
     new_data_ready: fn(*mut AttachmentsQObject),
 }
 
-unsafe impl Send for AttachmentsEmitter {}
-
 impl AttachmentsEmitter {
     /// Clone the emitter
     ///
@@ -332,8 +330,6 @@ pub struct ConfigEmitter {
     profile_picture_changed: fn(*mut ConfigQObject),
 }
 
-unsafe impl Send for ConfigEmitter {}
-
 impl ConfigEmitter {
     /// Clone the emitter
     ///
@@ -540,8 +536,6 @@ pub struct ConversationBuilderEmitter {
     qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
     new_data_ready: fn(*mut ConversationBuilderQObject),
 }
-
-unsafe impl Send for ConversationBuilderEmitter {}
 
 impl ConversationBuilderEmitter {
     /// Clone the emitter
@@ -805,8 +799,6 @@ pub struct ConversationsEmitter {
     filter_regex_changed: fn(*mut ConversationsQObject),
     new_data_ready: fn(*mut ConversationsQObject),
 }
-
-unsafe impl Send for ConversationsEmitter {}
 
 impl ConversationsEmitter {
     /// Clone the emitter
@@ -1237,8 +1229,6 @@ pub struct ErrorsEmitter {
     try_poll_changed: fn(*mut ErrorsQObject),
 }
 
-unsafe impl Send for ErrorsEmitter {}
-
 impl ErrorsEmitter {
     /// Clone the emitter
     ///
@@ -1315,8 +1305,6 @@ pub struct HeraldStateEmitter {
     connection_pending_changed: fn(*mut HeraldStateQObject),
     connection_up_changed: fn(*mut HeraldStateQObject),
 }
-
-unsafe impl Send for HeraldStateEmitter {}
 
 impl HeraldStateEmitter {
     /// Clone the emitter
@@ -1435,8 +1423,6 @@ pub struct HeraldUtilsEmitter {
     qobject: Arc<AtomicPtr<HeraldUtilsQObject>>,
 }
 
-unsafe impl Send for HeraldUtilsEmitter {}
-
 impl HeraldUtilsEmitter {
     /// Clone the emitter
     ///
@@ -1511,8 +1497,6 @@ pub struct MembersEmitter {
     filter_regex_changed: fn(*mut MembersQObject),
     new_data_ready: fn(*mut MembersQObject),
 }
-
-unsafe impl Send for MembersEmitter {}
 
 impl MembersEmitter {
     /// Clone the emitter
@@ -1898,8 +1882,6 @@ pub struct MessageBuilderEmitter {
     replying_to_changed: fn(*mut MessageBuilderQObject),
     new_data_ready: fn(*mut MessageBuilderQObject),
 }
-
-unsafe impl Send for MessageBuilderEmitter {}
 
 impl MessageBuilderEmitter {
     /// Clone the emitter
@@ -2338,8 +2320,6 @@ pub struct MessagePreviewEmitter {
     msg_id_set_changed: fn(*mut MessagePreviewQObject),
 }
 
-unsafe impl Send for MessagePreviewEmitter {}
-
 impl MessagePreviewEmitter {
     /// Clone the emitter
     ///
@@ -2553,8 +2533,6 @@ pub struct MessagesEmitter {
     last_status_changed: fn(*mut MessagesQObject),
     new_data_ready: fn(*mut MessagesQObject),
 }
-
-unsafe impl Send for MessagesEmitter {}
 
 impl MessagesEmitter {
     /// Clone the emitter
@@ -3061,8 +3039,6 @@ pub struct UsersEmitter {
     filter_regex_changed: fn(*mut UsersQObject),
     new_data_ready: fn(*mut UsersQObject),
 }
-
-unsafe impl Send for UsersEmitter {}
 
 impl UsersEmitter {
     /// Clone the emitter
