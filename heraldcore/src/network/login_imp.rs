@@ -7,8 +7,8 @@ use tokio::net::tcp::TcpStream;
 /// Takes a callback as an argument that is called whenever a message is received.
 pub async fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
 where
-    F: FnMut(Notification) + Send + Sync + 'static,
-    G: FnMut(HErr) + Send + Sync + 'static,
+    F: FnMut(Notification) + Send + 'static,
+    G: FnMut(HErr) + Send + 'static,
 {
     use login::*;
 
