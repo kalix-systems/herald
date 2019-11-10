@@ -107,12 +107,12 @@ impl OutboundMessageBuilder {
     }
 
     /// Stores and sends the message
-    pub fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
+    pub async fn store_and_send<F: FnMut(StoreAndSend) + Send + 'static>(
         self,
         callback: F,
     ) -> Result<(), HErr> {
         let mut db = Database::get()?;
-        self.store_and_send_db(&mut db, callback);
+        self.store_and_send_db(&mut db, callback).await;
         Ok(())
     }
 
