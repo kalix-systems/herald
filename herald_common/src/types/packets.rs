@@ -46,7 +46,12 @@ impl Packet {
 
     pub fn collect(packets: &[Self]) -> Option<Vec<u8>> {
         if packets.iter().all(Packet::validate) {
-            let mut out = Vec::with_capacity(packets.iter().map(|p| p.content.len()).sum());
+            let capacity = if packets.len() <= 1 {
+                packets.iter().map(|p| p.content.len()).sum()
+            } else {
+                packets.len() * PACKET_SIZE
+            };
+            let mut out = Vec::with_capacity(capacity);
             for packet in packets {
                 out.extend_from_slice(&packet.content);
             }
