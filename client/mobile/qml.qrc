@@ -27,5 +27,8 @@
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/Common/Drawer.qml</file>
+        <file>qml/ConfigMenu/ConfigMenuMain.qml</file>
+        <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
+        <file>qml/Common/HeaderText.qml</file>
     </qresource>
 </RCC>

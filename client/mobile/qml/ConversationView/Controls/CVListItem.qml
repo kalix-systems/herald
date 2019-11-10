@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "qrc:/imports/Avatar"
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as ChatView
 import "../js/CVViewUtils.js" as CVJS
 
@@ -36,7 +37,8 @@ Rectangle {
             labelComponent: ConversationLabel {
                 contactName: title
                 lastBody: ownedMessages.lastBody
-                lastTimestamp: ownedMessages.lastEpochTimestampMs
+                lastTimestamp: Utils.friendlyTimestamp(
+                                   ownedMessages.lastEpochTimestampMs)
                 lastReceipt: ownedMessages.lastStatus === undefined ? 0 : ownedMessages.lastStatus
             }
         }

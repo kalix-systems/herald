@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import LibHerald 1.0
 import "./ConversationView" as CVView
 import "./ChatView" as ChatView
+import "./ConfigMenu" as ConfigMenu
 import "./Errors" as Errors
 import "./LoginPage" as LoginPage
 
@@ -16,6 +17,10 @@ ApplicationWindow {
     Component {
         id: cvMain
         CVView.ConversationViewMain {}
+    }
+    Component {
+        id: configMain
+        ConfigMenu.ConfigMenuMain {}
     }
     // utility code, meant to reduce the amount of js laying
     // around the code base
