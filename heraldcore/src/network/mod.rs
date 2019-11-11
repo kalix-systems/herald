@@ -135,11 +135,9 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
         // we thought a message wasn't sent but it was
         chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
-        let tmutex = parking_lot::Mutex::new(tx);
-
         match helper::push_users(&req).await {
             Ok(push_users::Res::Success) => {
-                tmutex.into_inner().commit()?;
+                tx.commit()?;
                 Ok(())
             }
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
@@ -147,7 +145,6 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
                 missing
             ))),
             Err(e) => {
-                let mut tx = tmutex.into_inner();
                 chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
                 tx.commit()?;
 
