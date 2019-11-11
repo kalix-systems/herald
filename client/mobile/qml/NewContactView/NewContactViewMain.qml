@@ -9,11 +9,39 @@ Page {
 
     header: NewContactHeader {}
 
-    Column {
+    ColumnLayout {
         anchors.fill: parent
-        Label {}
-        TextArea {}
-        Button {}
-        TextArea {}
+        spacing: CmnCfg.margin
+        anchors.leftMargin: parent.width * 0.1
+
+        Label {
+            text: "Request a New Contact"
+        }
+
+        TextArea {
+            Layout.preferredWidth: parent.width * 0.8
+            background: Rectangle {
+                border.color: CmnCfg.palette.borderColor
+            }
+            placeholderText: "Enter a UserName..."
+        }
+
+        TextArea {
+            Layout.alignment: Qt.AlignLeft
+            Layout.preferredWidth: parent.width * 0.8
+            Layout.preferredHeight: parent.height * 0.5
+            placeholderText: "Attach a message..."
+            background: Rectangle {
+                border.color: CmnCfg.palette.borderColor
+            }
+        }
+
+        Button {
+            text: "Send"
+        }
+
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }
