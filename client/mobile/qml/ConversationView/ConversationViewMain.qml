@@ -32,7 +32,6 @@ Page {
             id: cvListView
             clip: true
             boundsBehavior: ListView.StopAtBounds
-            spacing: CmnCfg.units.dp(16)
             anchors.fill: parent
             model: conversationsModel
             delegate: CVListItem {
@@ -67,7 +66,6 @@ Page {
             name: "search"
             PropertyChanges {
                 target: listViewLoader
-
             }
         }
     ]

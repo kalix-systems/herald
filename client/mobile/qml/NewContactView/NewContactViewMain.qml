@@ -19,6 +19,7 @@ Page {
         }
 
         TextArea {
+            id: usernameTextArea
             Layout.preferredWidth: parent.width * 0.8
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
@@ -38,6 +39,10 @@ Page {
 
         Button {
             text: "Send"
+            onClicked: {
+                usersModel.add(usernameTextArea.text.trim())
+                mainView.pop()
+            }
         }
 
         Item {
