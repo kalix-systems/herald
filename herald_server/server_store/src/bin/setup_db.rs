@@ -6,6 +6,6 @@ async fn main() {
     let mut client = pool
         .get()
         .await
-        .expect("Failed to get client while trying to reset database");
-    client.setup().await.expect("Failed to reset database");
+        .expect("Failed to get client while trying to setup database");
+    client.setup().await.expect("Failed to setup database");
 }
