@@ -53,7 +53,7 @@ ToolBar {
             }
 
             IconButton {
-                id: configButton
+                id: optionsButton
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/options-icon.svg"
                 tapCallback: function () {

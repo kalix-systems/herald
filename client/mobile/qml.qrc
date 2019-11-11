@@ -19,7 +19,7 @@
         <file>qml/ConversationView/ConversationViewMain.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
-        <file>qml/ConversationView/Controls/CVFloatingButton.qml</file>
+        <file>qml/ConversationView/Controls/ComposeButton.qml</file>
         <file>qml/ConversationView/js/CVViewUtils.js</file>
         <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
         <file>qml/ChatView/Controls/TextMessageList.qml</file>

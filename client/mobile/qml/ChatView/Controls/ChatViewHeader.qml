@@ -23,7 +23,7 @@ ToolBar {
         }
 
         IconButton {
-            id: drawerButton
+            id: backButton
             Layout.alignment: Qt.AlignLeft
             color: CmnCfg.palette.iconFill
             imageSource: "qrc:/back-arrow-icon.svg"

@@ -47,7 +47,7 @@ Page {
 
     // floating pencil button to trigger
     // new message flow
-    CVFloatingButton {
+    ComposeButton {
 
         anchors {
             bottom: parent.bottom
