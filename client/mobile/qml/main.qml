@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import "./ConversationView" as CVView
+import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
 import "./ConfigMenu" as ConfigMenu
 import "./Errors" as Errors
@@ -21,6 +22,11 @@ ApplicationWindow {
     Component {
         id: configMain
         ConfigMenu.ConfigMenuMain {}
+    }
+
+    Component {
+        id: newContactViewMain
+        NewContactView.NewContactViewMain {}
     }
     // utility code, meant to reduce the amount of js laying
     // around the code base

@@ -9,7 +9,10 @@ import "../Common" as Common
 Page {
     id: cvMainView
 
-    header: CVHeader {}
+    header: Loader {
+        id: headerLoader
+        sourceComponent: CVHeader {}
+    }
 
     background: Rectangle {
         color: CmnCfg.palette.mainColor
@@ -17,24 +20,29 @@ Page {
 
     Common.Drawer {
         id: contextDrawer
+        DrawerContents {}
     }
 
     // the body of this entire element
     // displays conversations
-    ListView {
-        id: cvListView
-        clip: true
-        boundsBehavior: ListView.StopAtBounds
-        spacing: CmnCfg.units.dp(16)
+    Loader {
+        id: listViewLoader
         anchors.fill: parent
-        model: conversationsModel
-        delegate: CVListItem {
-            readonly property var conversationIdProxy: conversationId
-            readonly property int colorProxy: model.color
-            readonly property Messages ownedMessages: Messages {
-                conversationId: conversationIdProxy
+        sourceComponent: ListView {
+            id: cvListView
+            clip: true
+            boundsBehavior: ListView.StopAtBounds
+            spacing: CmnCfg.units.dp(16)
+            anchors.fill: parent
+            model: conversationsModel
+            delegate: CVListItem {
+                readonly property var conversationIdProxy: conversationId
+                readonly property int colorProxy: model.color
+                readonly property Messages ownedMessages: Messages {
+                    conversationId: conversationIdProxy
+                }
+                colorCode: colorProxy
             }
-            colorCode: colorProxy
         }
     }
 
@@ -50,4 +58,17 @@ Page {
 
         iconSource: "qrc:/pencil-icon-black.svg"
     }
+
+    states: [
+        State {
+            name: "default"
+        },
+        State {
+            name: "search"
+            PropertyChanges {
+                target: listViewLoader
+
+            }
+        }
+    ]
 }

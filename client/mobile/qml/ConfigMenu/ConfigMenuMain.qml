@@ -15,6 +15,7 @@ Page {
         ConfigSection {
             title: "Account"
             content: Column {
+
                 Row {
                     Common.HeaderText {
                         font.pointSize: 18

@@ -31,5 +31,10 @@
         <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
         <file>qml/Common/HeaderText.qml</file>
         <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
+        <file>qml/ConversationView/DrawerContents.qml</file>
+        <file>qml/ConversationView/Controls/CVSearchHeader.qml</file>
+        <file>qml/ConversationView/Controls/CVSearchList.qml</file>
+        <file>qml/NewContactView/NewContactViewMain.qml</file>
+        <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
     </qresource>
 </RCC>
