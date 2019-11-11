@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>heraldqtMobile.pro</file>
         <file>qml/main.qml</file>
-        <file>qml/State/AppState.qml</file>
         <file>qml/ChatView/ChatViewMain.qml</file>
         <file>qml/LoginPage/AssociateDevice.qml</file>
         <file>qml/LoginPage/LoginLandingPage.qml</file>
@@ -11,11 +10,8 @@
         <file>qml/Common/BusyIndicator.qml</file>
         <file>qml/Common/CommonConfig.qml</file>
         <file>qml/Common/Divider.qml</file>
-        <file>qml/Common/FilteredList.qml</file>
         <file>qml/Common/IconButton.qml</file>
-        <file>qml/State/HeraldGlobals.qml</file>
         <file>qml/Common/StdText.qml</file>
-        <file>qml/State/js/transitions.js</file>
         <file>qml/Errors/ErrorHandler.qml</file>
         <file>qml/Errors/ErrorPopup.qml</file>
         <file>qml/ConversationView/Controls/CVHeader.qml</file>
@@ -23,13 +19,22 @@
         <file>qml/ConversationView/ConversationViewMain.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
-        <file>qml/ConversationView/Controls/CVFloatingButton.qml</file>
+        <file>qml/ConversationView/Controls/ComposeButton.qml</file>
         <file>qml/ConversationView/js/CVViewUtils.js</file>
         <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
         <file>qml/ChatView/Controls/TextMessageList.qml</file>
         <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
-        <file>qml/App.qml</file>
+        <file>qml/Common/Drawer.qml</file>
+        <file>qml/ConfigMenu/ConfigMenuMain.qml</file>
+        <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
+        <file>qml/Common/HeaderText.qml</file>
+        <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
+        <file>qml/ConversationView/DrawerContents.qml</file>
+        <file>qml/ConversationView/Controls/CVSearchHeader.qml</file>
+        <file>qml/ConversationView/Controls/CVSearchList.qml</file>
+        <file>qml/NewContactView/NewContactViewMain.qml</file>
+        <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
     </qresource>
 </RCC>
