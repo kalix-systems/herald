@@ -30,16 +30,19 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tarpc]
+# path = "/home/jack/repos/tarpc/tarpc"
 features = ["serde1"]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 
 [dependencies.tarpc-lib]
+# path = "/home/jack/repos/tarpc/rpc"
 features = ["serde1"]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 
 [dependencies.tarpc-bincode-transport]
+# path = "/home/jack/repos/tarpc/bincode-transport"
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 

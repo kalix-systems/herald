@@ -43,10 +43,12 @@ features         = ["jpeg", "png_codec"]
 [dependencies.tarpc]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+features = ["serde1"]
 
 [dependencies.tarpc-lib]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
+features = ["serde1"]
 
 [dependencies.tarpc-bincode-transport]
 git = "https://github.com/google/tarpc"
@@ -55,6 +57,11 @@ rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
 [dependencies.pulldown-cmark]
 version  = "0.6.0"
 # optional = true
+
+[dependencies.qutex]
+git = "https://github.com/GallagherCommaJack/qutex"
+rev = "5f102c24df801e2074538e84562f157530c67b3a"
+features = ["async_await"]
 
 [features]
 deploy_desktop = ["directories"]

@@ -87,7 +87,7 @@ pub async fn register(uid: UserId) -> Result<register::Res, HErr> {
     let res = helper::register(req).await?;
     // TODO: retry if this fails?
     if let register::Res::Success = &res {
-        crate::config::ConfigBuilder::new(uid, kp).add()?;
+        crate::config::ConfigBuilder::new(uid, kp).add().await?;
     }
 
     Ok(res)
@@ -107,69 +107,59 @@ pub(crate) async fn send_conversation_settings_update(
     send_cmessage(cid, &ConversationMessageBody::Settings(update)).await
 }
 
-fn bare_push_users() {
-    tokio::spawn(async {
-        let res = helper::push_users(unimplemented!()).await;
-    });
-}
-
 async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
+        let (cm, hash, key) = ConversationMessage::seal(cid, &content).await?;
 
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::Config::static_keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
 
-        let mut db = chainkeys::CK_CONN.lock();
-        let mut tx = db.transaction()?;
+        let mut db = chainkeys::get_conn().await?;
+        {
+            let mut tx = db.transaction()?;
+            let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
+            debug_assert!(unlocked.is_empty());
+            chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
+            tx.commit()?;
+        }
 
-        let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
-        debug_assert!(unlocked.is_empty());
-        // TODO: replace used with probably_used here
-        // in general we probably want a slightly smarter system for dealing with scenarios where
-        // we thought a message wasn't sent but it was
-        chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
-        drop(tx);
-        drop(db);
+        match helper::push_users(req).await {
+            Ok(r) => match r {
+                push_users::Res::Success => Ok(()),
+                push_users::Res::Missing(missing) => {
+                    let mut tx = db.transaction()?;
+                    chainkeys::mark_unused(&mut tx, cid, cm.body().parent_hashes())?;
+                    chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                    tx.commit()?;
 
-        // let res = helper::push_users(req).await;
-        unimplemented!()
-    // match helper::push_users(req).await {
-    //     Ok(r) => {
-    //         unimplemented!()
-    //         // match r {
-    //         // push_users::Res::Success => {
-    //         //     // tx.commit()?;
-    //         //     Ok(())
-    //         // }
-    //         // push_users::Res::Missing(missing) => Err(HeraldError(format!(
-    //         //     "tried to send messages to nonexistent users {:?}",
-    //         //     missing
-    //         // ))),
-    //     }
-    //     Err(e) => {
-    //         unimplemented!()
-    //         // chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
-    //         // tx.commit()?;
+                    Err(HeraldError(format!(
+                        "tried to send messages to nonexistent users {:?}",
+                        missing
+                    )))
+                }
+            },
+            Err(e) => {
+                let mut tx = db.transaction()?;
+                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                tx.commit()?;
 
-    //         // TODO: maybe try more than once?
-    //         // maybe have some mechanism to send a signal that more things have gone wrong?
-    //         // eprintln!(
-    //         //     "failed to send message, error was {}\n\
-    //         //      assuming failed session and adding to pending now",
-    //         //     e
-    //         // );
+                // TODO: maybe try more than once?
+                // maybe have some mechanism to send a signal that more things have gone wrong?
+                eprintln!(
+                    "failed to send message, error was {}\n\
+                     assuming failed session and adding to pending now",
+                    e
+                );
 
-    //         // CAUGHT_UP.store(false, Ordering::Release);
+                CAUGHT_UP.store(false, Ordering::Release);
 
-    //         // pending::add_to_pending(cid, content)
-    //     }
-    // }
+                pending::add_to_pending(cid, content)
+            }
+        }
     } else {
-        // pending::add_to_pending(cid, content)
-        Ok(())
+        pending::add_to_pending(cid, content)
     }
 }
 
@@ -224,7 +214,7 @@ pub async fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HE
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(&gen)?;
+    cid.store_genesis(&gen).await?;
 
     let req = dmessages::ContactReq { gen, cid };
 
@@ -255,7 +245,7 @@ pub async fn start_conversation(
 
     let kp = crate::config::Config::static_keypair()?;
     let gen = Genesis::new(kp.secret_key());
-    cid.store_genesis(&gen)?;
+    cid.store_genesis(&gen).await?;
 
     let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
         members: Vec::from(members),

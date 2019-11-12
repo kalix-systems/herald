@@ -544,7 +544,7 @@ impl ConversationMessage {
     }
 
     /// Seals the messages.
-    pub fn seal(
+    pub async fn seal(
         // note: this is only mut because BlockStore thinks it should be
         cid: ConversationId,
         content: &ConversationMessageBody,
@@ -552,8 +552,8 @@ impl ConversationMessage {
         let cbytes = serde_cbor::to_vec(content)?;
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
-        let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
-        let channel_key = cid.get_channel_key()?;
+        let (hashes, keys) = cid.get_unused().await?.into_iter().unzip();
+        let channel_key = cid.get_channel_key().await?;
 
         let SealData { block, key } =
             Block::seal(kp.secret_key(), &channel_key, &keys, hashes, cbytes).ok_or(CryptoError)?;
@@ -571,13 +571,13 @@ impl ConversationMessage {
     }
 
     /// Opens the message.
-    pub fn open(self) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
+    pub async fn open(self) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
         let ConversationMessage { cid, from, body } = self;
 
         let mut out = Vec::new();
 
         let mut blocks = {
-            match cid.open_block(&from, body)? {
+            match cid.open_block(&from, body).await? {
                 DecryptionResult::Success(bvec, unlocked) => {
                     out.push((serde_cbor::from_slice(&bvec)?, from));
                     unlocked
@@ -587,7 +587,7 @@ impl ConversationMessage {
         };
 
         while let Some((block, from)) = blocks.pop() {
-            match cid.open_block(&from, block)? {
+            match cid.open_block(&from, block).await? {
                 DecryptionResult::Success(bvec, mut unlocked) => {
                     blocks.append(&mut unlocked);
                     out.push((serde_cbor::from_slice(&bvec)?, from));

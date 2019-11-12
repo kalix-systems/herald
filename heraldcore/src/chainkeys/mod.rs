@@ -2,21 +2,27 @@ use crate::{abort_err, errors::HErr, platform_dirs::DB_DIR, types::ConversationI
 use chainmail::{block::*, errors::ChainError};
 use herald_common::GlobalId;
 use lazy_static::*;
-use parking_lot::Mutex;
+use qutex::{Guard, Qutex};
 use rusqlite::{params, NO_PARAMS};
 use std::collections::BTreeSet;
 
 // FIXME initialization can be done more cleanly
 // A lot of this is redundant
 lazy_static! {
-    pub static ref CK_CONN: Mutex<rusqlite::Connection> = {
+    pub static ref CK_CONN: Qutex<rusqlite::Connection> = {
         let path = DB_DIR.join("ck.sqlite3");
         let mut conn = abort_err!(rusqlite::Connection::open(path));
         let tx = abort_err!(conn.transaction());
         abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
         abort_err!(tx.commit());
-        Mutex::new(conn)
+        Qutex::new(conn)
     };
+}
+
+pub async fn get_conn() -> Result<Guard<rusqlite::Connection>, HErr> {
+    CK_CONN.clone().lock_async().await.map_err(|_| {
+        HErr::HeraldError("chainkeys mutex was cancelled - I wonder how that happened".into())
+    })
 }
 
 pub enum FoundKeys {
@@ -245,12 +251,12 @@ fn raw_add_block_dependencies<'a, I: Iterator<Item = &'a [u8]>>(
 
 impl ConversationId {
     #[cfg(test)]
-    pub(crate) fn store_key(
+    pub(crate) async fn store_key(
         &self,
         hash: BlockHash,
         key: &ChainKey,
     ) -> Result<Vec<(Block, GlobalId)>, HErr> {
-        let mut db = CK_CONN.lock();
+        let mut db = get_conn().await?;
         let mut tx = db.transaction()?;
         let blocks = store_key(&mut tx, *self, hash, key)?;
         tx.commit()?;
@@ -260,11 +266,11 @@ impl ConversationId {
 
     // TODO GC strategy
     #[cfg(test)]
-    pub(crate) fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
+    pub(crate) async fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
         &self,
         blocks: I,
     ) -> Result<(), HErr> {
-        let mut db = CK_CONN.lock();
+        let mut db = get_conn().await?;
         let mut tx = db.transaction()?;
 
         mark_used(&mut tx, *self, blocks)?;
@@ -274,8 +280,8 @@ impl ConversationId {
 
     #[allow(unused)]
     // TODO use this
-    pub(crate) fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
-        let mut db = CK_CONN.lock();
+    pub(crate) async fn mark_unused(&self, blocks: &BTreeSet<BlockHash>) -> Result<(), HErr> {
+        let mut db = get_conn().await?;
         let mut tx = db.transaction()?;
 
         mark_unused(&mut tx, *self, blocks)?;
@@ -283,24 +289,24 @@ impl ConversationId {
         Ok(())
     }
 
-    pub(crate) fn get_channel_key(&self) -> Result<ChannelKey, HErr> {
-        let db = CK_CONN.lock();
+    pub(crate) async fn get_channel_key(&self) -> Result<ChannelKey, HErr> {
+        let db = get_conn().await?;
         get_channel_key(&db, *self)
     }
 
-    pub(crate) fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
-        let db = CK_CONN.lock();
+    pub(crate) async fn get_unused(&self) -> Result<Vec<(BlockHash, ChainKey)>, HErr> {
+        let db = get_conn().await?;
         get_unused(&db, *self)
     }
 
-    pub(crate) fn open_block(
+    pub(crate) async fn open_block(
         &self,
         signer: &GlobalId,
         block: Block,
     ) -> Result<DecryptionResult, HErr> {
         let hashes = block.parent_hashes().clone();
 
-        let mut db = CK_CONN.lock();
+        let mut db = get_conn().await?;
         let mut tx = db.transaction()?;
 
         // TODO: consider storing pending for these too?
@@ -324,10 +330,13 @@ impl ConversationId {
         Ok(res)
     }
 
-    pub(crate) fn store_genesis(&self, gen: &Genesis) -> Result<Vec<(Block, GlobalId)>, HErr> {
+    pub(crate) async fn store_genesis(
+        &self,
+        gen: &Genesis,
+    ) -> Result<Vec<(Block, GlobalId)>, HErr> {
         let hash = gen.compute_hash().ok_or(ChainError::CryptoError)?;
 
-        let mut db = CK_CONN.lock();
+        let mut db = get_conn().await?;
         let mut tx = db.transaction()?;
 
         store_channel_key(&mut tx, *self, gen.channel_key())?;

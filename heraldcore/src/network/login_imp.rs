@@ -80,7 +80,7 @@ async fn catchup(stream: &mut Framed<TcpStream>) -> Result<Event, HErr> {
     while let Catchup::Messages(p) = stream.read_packeted().await? {
         let len = p.len() as u64;
         for push in p.iter() {
-            match handle_push(push) {
+            match handle_push(push).await {
                 Ok(e2) => ev.merge(e2),
                 Err(e) => {
                     eprintln!("error while catching up, error was:\n{}", e);
@@ -94,26 +94,26 @@ async fn catchup(stream: &mut Framed<TcpStream>) -> Result<Event, HErr> {
     Ok(ev)
 }
 
-fn handle_push(push: &Push) -> Result<Event, HErr> {
+async fn handle_push(push: &Push) -> Result<Event, HErr> {
     match push.tag {
         PushTag::User => {
             let umsg = serde_cbor::from_slice(&push.msg)?;
-            handle_cmessage(push.timestamp, umsg)
+            handle_cmessage(push.timestamp, umsg).await
         }
         PushTag::Device => {
             let dmsg = serde_cbor::from_slice(&push.msg)?;
-            handle_dmessage(push.timestamp, dmsg)
+            handle_dmessage(push.timestamp, dmsg).await
         }
     }
 }
 
-fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
+async fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
     let cid = cm.cid();
 
-    let msgs = cm.open()?;
+    let msgs = cm.open().await?;
 
     for (msg, from) in msgs {
         match msg {
@@ -121,23 +121,25 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
             DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
             AddedToConvo(ac) => {
                 let mut db = crate::db::Database::get()?;
-                let tx = db.transaction()?;
+                {
+                    let tx = db.transaction()?;
 
-                let cid = ac.cid;
-                let title = ac.title;
+                    let cid = ac.cid;
+                    let title = ac.title;
 
-                let mut conv_builder = crate::conversation::ConversationBuilder::new();
-                conv_builder.conversation_id(cid);
+                    let mut conv_builder = crate::conversation::ConversationBuilder::new();
+                    conv_builder.conversation_id(cid);
 
-                if let Some(title) = title {
-                    conv_builder.title(title);
+                    if let Some(title) = title {
+                        conv_builder.title(title);
+                    }
+
+                    conv_builder.add_with_tx(&tx)?;
+                    crate::members::db::add_members_with_tx(&tx, cid, &ac.members)?;
+                    tx.commit()?;
                 }
 
-                conv_builder.add_with_tx(&tx)?;
-                crate::members::db::add_members_with_tx(&tx, cid, &ac.members)?;
-                tx.commit()?;
-
-                cid.store_genesis(&ac.gen)?;
+                cid.store_genesis(&ac.gen).await?;
 
                 ev.notifications.push(Notification::NewConversation(cid));
             }
@@ -199,7 +201,7 @@ fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
     Ok(ev)
 }
 
-fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
+async fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
     let (from, msg) = msg.open()?;
@@ -212,7 +214,7 @@ fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
                     .pairwise_conversation(cid)
                     .add()?;
 
-                cid.store_genesis(&gen)?;
+                cid.store_genesis(&gen).await?;
 
                 ev.notifications
                     .push(Notification::NewContact(from.uid, cid));

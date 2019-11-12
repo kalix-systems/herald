@@ -78,7 +78,7 @@ impl ConfigBuilder {
     }
 
     /// Adds configuration.
-    pub fn add(self) -> Result<Config, HErr> {
+    pub async fn add(self) -> Result<Config, HErr> {
         use chainmail::block::Genesis;
         let mut db = Database::get()?;
         let conf = self.add_db(&mut db)?;
@@ -88,7 +88,7 @@ impl ConfigBuilder {
         // changing the chainmail API
         let kp = Config::static_keypair()?;
         let gen = Genesis::new(kp.secret_key());
-        conf.nts_conversation.store_genesis(&gen)?;
+        conf.nts_conversation.store_genesis(&gen).await?;
         Ok(conf)
     }
 }
