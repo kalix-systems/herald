@@ -60,7 +60,7 @@ where
         let comp: Result<(), HErr> = async move {
             loop {
                 let ev = catchup(&mut stream).await?;
-                // ev.execute(&mut f, &mut g).await?;
+                ev.execute(&mut f, &mut g).await?;
             }
         }
             .await;
@@ -69,9 +69,7 @@ where
         CAUGHT_UP.store(false, Ordering::Release);
     });
 
-    unimplemented!()
-
-    // Ok(())
+    Ok(())
 }
 
 async fn catchup(stream: &mut Framed<TcpStream>) -> Result<Event, HErr> {
@@ -100,13 +98,11 @@ fn handle_push(push: &Push) -> Result<Event, HErr> {
     match push.tag {
         PushTag::User => {
             let umsg = serde_cbor::from_slice(&push.msg)?;
-            // handle_cmessage(push.timestamp, umsg)
-            unimplemented!()
+            handle_cmessage(push.timestamp, umsg)
         }
         PushTag::Device => {
             let dmsg = serde_cbor::from_slice(&push.msg)?;
-            unimplemented!()
-            // handle_dmessage(push.timestamp, dmsg)
+            handle_dmessage(push.timestamp, dmsg)
         }
     }
 }

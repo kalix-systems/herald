@@ -30,14 +30,14 @@ version = "1.0"
 features = ["derive"]
 
 [dependencies.tarpc]
+features = ["serde1"]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
-features = ["serde1"]
 
 [dependencies.tarpc-lib]
+features = ["serde1"]
 git = "https://github.com/google/tarpc"
 rev = "5f6c3d7d989b7d7267c19d4b89c658450e86614e"
-features = ["serde1"]
 
 [dependencies.tarpc-bincode-transport]
 git = "https://github.com/google/tarpc"

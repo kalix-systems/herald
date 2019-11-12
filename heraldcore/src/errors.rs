@@ -73,6 +73,8 @@ pub enum HErr {
     BadPath(std::ffi::OsString),
     /// An issue occurred during framed read or write
     FramedError(FramedError),
+    /// An issue occured serverside during an RPC request
+    RPCError(RequestError),
 }
 
 impl fmt::Display for HErr {
@@ -99,6 +101,7 @@ impl fmt::Display for HErr {
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
             EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
             FramedError(e) => write!(f, "FramedError: {:?}", e),
+            RPCError(e) => write!(f, "RPCError: {:?}", e),
         }
     }
 }
@@ -142,6 +145,7 @@ herr!(serde_cbor::Error, CborError);
 herr!(regex::Error, RegexError);
 herr!(std::ffi::OsString, BadPath);
 herr!(FramedError, FramedError);
+herr!(RequestError, RPCError);
 
 impl From<EmptyMessageBody> for HErr {
     fn from(_: EmptyMessageBody) -> Self {
