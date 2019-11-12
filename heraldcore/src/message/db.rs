@@ -165,7 +165,7 @@ pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
 
 /// Testing utility
 #[cfg(test)]
-pub(crate) fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId) -> (MsgId, Time) {
+pub(crate) async fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId) -> (MsgId, Time) {
     use std::convert::TryInto;
 
     let mut builder = OutboundMessageBuilder::default();
@@ -175,7 +175,7 @@ pub(crate) fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId)
             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
     );
     let out = builder
-        .store_and_send_blocking_db(db)
+        .store_and_send_blocking_db(db).await
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
     (out.message_id, out.time.insertion)

@@ -71,6 +71,7 @@ pub enum HErr {
     ChainError(ChainError),
     /// Malformed path
     BadPath(std::ffi::OsString),
+    /// An issue occurred during framed read or write
     FramedError(FramedError),
 }
 
