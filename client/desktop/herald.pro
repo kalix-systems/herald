@@ -27,8 +27,24 @@ macx {
    ICON = ../foundation/icons/herald.icns
 }
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
+unix:!macx {
+    isEmpty(PREFIX) {
+        PREFIX = /usr
+    }
 
+    target.path = $$PREFIX/bin
+
+    shortcutfiles.files = herald.desktop
+    shortcutfiles.path = $$PREFIX/share/applications/
+    data.files += ../foundation/icons/herald.png
+    data.path = $$PREFIX/share/pixmaps/
+
+    INSTALLS += shortcutfiles
+    INSTALLS += data
+
+    INSTALLS += target
+
+    DISTFILES += \
+        herald.desktop \
+        ../foundation/icons/herald.png
+}

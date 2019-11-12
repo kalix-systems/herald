@@ -4,6 +4,7 @@ _build/
 *.install
 .direnv
 stats/
+.appimage
 
 ## qtcreator
 *.user.pro*

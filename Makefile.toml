@@ -1,0 +1,96 @@
+[env]
+LINUX_DEPLOY_DL = "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
+OUT_DIR = ".appimage"
+
+
+# Builds libherald with desktop deployment feature
+[tasks.build_libherald]
+private = true
+command = "cargo"
+args = ["build", "--release",
+	"-p", "herald",
+	"--features", "deploy_desktop"
+]
+
+
+# Creates AppImage build directory if it does not already exist
+[tasks.make_out_dir]
+private = true
+command = "mkdir"
+args = ["-p", "${OUT_DIR}"]
+
+
+# Installs the `linuxdeploy`
+[tasks.install_linuxdeploy]
+private = true
+install_script = [
+  '''
+  if ! [ -f "$OUT_DIR/linuxdeploy.AppImage" ]; then
+    wget "$LINUX_DEPLOY_DL" -O $OUT_DIR/linuxdeploy.AppImage
+    chmod +x $OUT_DIR/linuxdeploy.AppImage
+  fi
+  '''
+]
+dependencies = ["make_out_dir"]
+
+
+[tasks.check_qmake_installation]
+private = true
+script = [
+  '''
+  if ! [ -x "$(command -v qmake)" ]; then
+    echo "Error: qmake is not installed." >&2
+    exit 1
+  fi
+  '''
+]
+
+
+# Runs qmake
+[tasks.run_qmake]
+private = true
+command = "qmake"
+args = ["client/desktop/herald.pro",
+	"-spec", "linux-g++",
+	"CONFIG+=qtquickcompiler",
+	"-o", "${OUT_DIR}/Makefile"]
+dependencies = ["check_qmake_installation", "make_out_dir"]
+
+
+[tasks.setup_outdir]
+workspace = false
+dependencies = ["install_linuxdeploy", "build_libherald", "run_qmake"]
+
+
+[tasks.run_make]
+script = [
+  '''
+  make -C $OUT_DIR -j$(nproc)
+  '''
+]
+dependencies = ["setup_outdir"]
+
+
+[tasks.run_make_install]
+workspace = false
+command = "make"
+args = ["-C", "${OUT_DIR}",
+	"install", "INSTALL_ROOT=AppDir"]
+dependencies = ["run_make"]
+
+
+[tasks.build_appimage]
+workspace = false
+script = [
+  '''
+  cd $OUT_DIR
+  ./linuxdeploy.AppImage \
+    --appdir AppDir \
+    --output appimage \
+    -i ../client/foundation/icons/herald.png \
+    -d ../client/desktop/herald.desktop \
+    -l ../target/release/libherald.so \
+    -v 0
+  '''
+]
+dependencies = ["run_make_install"]
