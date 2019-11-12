@@ -8,7 +8,6 @@ use crate::{
 };
 use chainmail::block::*;
 use herald_common::*;
-use lazy_static::*;
 use std::sync::atomic::Ordering;
 
 mod login_imp;
@@ -23,12 +22,7 @@ pub use types::*;
 mod rpc;
 // use rpc::*;
 
-pub(crate) fn server_url(ext: &str) -> String {
-    format!("http://{}/{}", *SERVER_ADDR, ext)
-}
-
 mod helper {
-    use super::server_url;
     use crate::errors::*;
     use herald_common::*;
 

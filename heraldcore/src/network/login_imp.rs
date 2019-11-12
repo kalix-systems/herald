@@ -1,4 +1,5 @@
 use super::*;
+use std::ops::Deref;
 use tokio::net::tcp::TcpStream;
 
 /// Attempts to login to the server, spawning a long-lived thread to handle messages pushed from
@@ -26,7 +27,7 @@ where
         did: *kp.public_key(),
     };
 
-    let mut stream = Framed::new(TcpStream::connect(SERVER_ADDR.deref()).await?);
+    let mut stream = Framed::new(TcpStream::connect(SERVER_TCP_ADDR.deref()).await?);
 
     stream.write_timed(&SignAs(gid)).await?;
     match stream.read_timed().await? {
