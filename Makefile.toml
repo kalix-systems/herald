@@ -45,7 +45,6 @@ script = [
   '''
 ]
 
-
 # Runs qmake
 [tasks.run_qmake]
 private = true
@@ -56,10 +55,17 @@ args = ["client/desktop/herald.pro",
 	"-o", "${OUT_DIR}/Makefile"]
 dependencies = ["check_qmake_installation", "make_out_dir"]
 
+# Runs qmake on macos
+[tasks.run_qmake.mac]
+private = true
+command = "qmake"
+args = ["client/desktop/herald.pro",
+	"CONFIG+=qtquickcompiler",
+	"-o", "${OUT_DIR}/Makefile"]
 
 [tasks.setup_outdir]
 workspace = false
-dependencies = ["install_linuxdeploy", "build_libherald", "run_qmake"]
+dependencies = ["build_libherald", "run_qmake"]
 
 
 [tasks.run_make]
@@ -94,3 +100,24 @@ script = [
   '''
 ]
 dependencies = ["run_make_install"]
+
+[tasks.find_macdeploy]
+script = [
+'''
+if ! [ -x "$(command -v macdeployqt)" ]; then
+  printf "\n Could not find macdeployqt, exiting \n"
+  exit 1
+fi
+'''
+]
+# for all intense and purposes macos 
+# app bundles are the same step as app image building
+[tasks.build_appimage.mac]
+workspace = false
+script = [
+  '''
+  cd $OUT_DIR
+  macdeployqt herald.app -qmldir=../client/desktop
+  '''
+]
+dependencies = ["run_make_install","find_macdeploy"]
