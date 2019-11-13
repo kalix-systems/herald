@@ -19,9 +19,6 @@ use statics::*;
 mod types;
 pub use types::*;
 
-mod rpc;
-// use rpc::*;
-
 mod helper {
     use crate::errors::*;
     use herald_common::*;

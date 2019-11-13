@@ -1,8 +1,7 @@
 use super::*;
 use lazy_static::*;
-use parking_lot::RwLock;
 use std::{
-    net::{Ipv4Addr, SocketAddr, SocketAddrV4},
+    net::{Ipv4Addr, SocketAddr},
     sync::atomic::AtomicBool,
 };
 
@@ -21,10 +20,6 @@ lazy_static! {
 }
 
 pub(super) static CAUGHT_UP: AtomicBool = AtomicBool::new(false);
-
-// lazy_static! {
-//     pub(super) static ref RPC_CLIENT: RwLock<Option<HeraldServiceClient>> = RwLock::new(None);
-// }
 
 /// Attempts to load the cached client, and creates a new one if one doesn't already exist.
 pub(super) async fn get_client() -> Result<HeraldServiceClient, HErr> {
