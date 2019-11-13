@@ -738,6 +738,7 @@ dependencies = [
  "image",
  "lazy_static",
  "libsodium-sys",
+ "once_cell",
  "parking_lot",
  "pulldown-cmark",
  "qutex",
@@ -1176,6 +1177,12 @@ checksum = "c92d4ddb4bd7b50d730c215ff871754d0da6b2178849f8a2a2ab69712d0c073b"
 dependencies = [
  "objc",
 ]
+
+[[package]]
+name = "once_cell"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "891f486f630e5c5a4916c7e16c4b24a53e78c860b646e9f8e005e4f16847bfed"
 
 [[package]]
 name = "opaque-debug"
