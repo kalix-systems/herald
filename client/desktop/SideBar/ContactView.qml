@@ -37,6 +37,7 @@ ListView {
             isContact: true
             boxColor: contactData.color
             boxTitle: contactData.name
+            picture: contactData.profilePicture
 
             labelComponent: Av.ConversationLabel {
                 contactName: contactData.name

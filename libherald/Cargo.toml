@@ -32,8 +32,5 @@ version = "3.6.2"
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"
 
-[profile.release]
-panic = "abort"
-
 [features]
 deploy_desktop = ["heraldcore/deploy_desktop"]

@@ -2,24 +2,16 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "qrc:/imports/Avatar"
+import "qrc:/imports/js/utils.mjs" as Utils
+import "../../ChatView" as ChatView
 import "../js/CVViewUtils.js" as CVJS
 
 Rectangle {
     id: contactItem
 
-    // the group name or displayName of the conversation
-    property string contactName
-    // the previous message of the conversation, or the empty string
-    property string body
-    // the previous latest human readable timestamp, or the empty string
-    property string timestamp
-    // the value of the latest read receipt according to the ReceiptStatus enum
-    property int lastReceipt: 0
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
-    // the owned conversation model corresponding to this conversation id
-    // may be reset upon forking a conversation
-    property Messages ownedMessages
+    property string proxyTitle: title
 
     height: CmnCfg.avatarSize
     color: CmnCfg.palette.mainColor
@@ -32,16 +24,33 @@ Rectangle {
         right: parent.right
     }
 
-    AvatarMain {
-        id: avatar
-        iconColor: CmnCfg.avatarColors[colorCode]
-        anchors.verticalCenter: parent.verticalCenter
-        initials: CVJS.initialize(title)
-        labelComponent: ConversationLabel {
-            contactName: title
-            lastBody: lastBody
-            lastTimestamp: lastTimestamp
-            lastReceipt: lastReceipt
+    Rectangle {
+
+        anchors {
+            fill: parent
+            rightMargin: CmnCfg.units.dp(12)
+            leftMargin: CmnCfg.units.dp(12)
+        }
+
+        AvatarMain {
+            id: avatar
+            iconColor: CmnCfg.avatarColors[colorCode]
+            anchors.verticalCenter: parent.verticalCenter
+            initials: CVJS.initialize(title)
+            size: CmnCfg.units.dp(32)
+
+            anchors {
+                right: parent.right
+                left: parent.left
+            }
+
+            labelComponent: ConversationLabel {
+                contactName: title
+                lastBody: ownedMessages.lastBody
+                lastTimestamp: Utils.friendlyTimestamp(
+                                   ownedMessages.lastEpochTimestampMs)
+                lastReceipt: ownedMessages.lastStatus === undefined ? 0 : ownedMessages.lastStatus
+            }
         }
     }
 
@@ -80,8 +89,16 @@ Rectangle {
         }
         onRunningChanged: {
             if (!!!running) {
-                appState.state = "chat"
+                mainView.push(ownedChatView)
             }
+        }
+    }
+
+    Component {
+        id: ownedChatView
+        ChatView.ChatViewMain {
+            ownedMessages: contactItem.ownedMessages
+            headerTitle: proxyTitle
         }
     }
 
@@ -89,10 +106,8 @@ Rectangle {
         onTapped: {
             splash.x = eventPoint.position.x
             splash.y = eventPoint.position.y
-            splashAnim.running = true
             // set the chat to the selected item
-            appState.chatMain.headerTitle = title
-            appState.chatMain.ownedMessages = contactItem.ownedMessages
+            splashAnim.running = true
             // callback implicity called at the end of the animation
         }
     }

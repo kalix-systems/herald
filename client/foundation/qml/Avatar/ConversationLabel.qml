@@ -22,9 +22,8 @@ Item {
     property string lastAuthor
     property color labelColor
     property int labelSize
-    // labeling constants
-    anchors.fill: parent
 
+    // labeling constants
     GridLayout {
         id: labelGrid
         rows: 2
