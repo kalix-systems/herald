@@ -5,8 +5,10 @@ import LibHerald 1.0
 TextEdit {
     text: body
     Layout.maximumWidth: maxWidth
-    Layout.margins: CmnCfg.smallMargin / 2
-    Layout.bottomMargin: 0
+    Layout.topMargin: CmnCfg.margin / 2
+    Layout.leftMargin: CmnCfg.smallMargin
+    Layout.rightMargin: CmnCfg.smallMargin
+    Layout.bottomMargin: 5
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     Layout.alignment: Qt.AlignLeft
     selectByMouse: true

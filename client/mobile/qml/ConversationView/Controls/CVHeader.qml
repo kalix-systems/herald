@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 import "../../Common"
+import "../../ConfigMenu"
 import "../js/CVViewUtils.js" as CVJS
 
 ToolBar {
@@ -23,7 +24,9 @@ ToolBar {
             spacing: CmnCfg.units.dp(16)
             IconButton {
                 id: drawerButton
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/hamburger-icon.svg"
+                tapCallback: contextDrawer.open
             }
             Label {
                 id: stateLabel
@@ -33,7 +36,7 @@ ToolBar {
                     family: CmnCfg.chatFont.name
                 }
                 anchors.verticalCenter: parent.verticalCenter
-                color: CmnCfg.palette.iconMatte
+                color: CmnCfg.palette.iconFill
             }
         }
 
@@ -45,12 +48,17 @@ ToolBar {
             IconButton {
                 id: searchButton
                 tapCallback: CVJS.searchBarTr
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/search-icon.svg"
             }
 
             IconButton {
-                id: configButton
+                id: optionsButton
+                color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/options-icon.svg"
+                tapCallback: function () {
+                    mainView.push(configMain)
+                }
             }
         }
     }

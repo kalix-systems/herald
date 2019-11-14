@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none};
+use crate::{ffi, interface::*, push_err, ret_err, ret_none, runtime::spawn};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta},
@@ -112,8 +112,8 @@ impl ConversationsTrait for Conversations {
         let update = conversation::settings::SettingsUpdate::Expiration(period);
 
         ret_err! {
-            std::thread::Builder::new().spawn(move || {
-                ret_err!(update.send_update(&cid));
+            spawn(async move {
+                ret_err!(update.send_update(&cid).await);
             }),
             false
         };

@@ -50,5 +50,6 @@
         <file>timer-icons/30min.svg</file>
         <file>timer-icons/off.svg</file>
         <file>herald.icns</file>
+        <file>compose-icon-white.svg</file>
     </qresource>
 </RCC>

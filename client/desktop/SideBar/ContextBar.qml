@@ -96,7 +96,7 @@ ToolBar {
             ///--- Add contact button
             Common.ButtonForm {
                 id: newMessageButton
-                source: "qrc:/pencil-icon-black.svg"
+                source: "qrc:/compose-icon-white.svg"
                 fill: CmnCfg.palette.paneColor
                 onClicked: {
                     sideBarState.state = "newConversationState"

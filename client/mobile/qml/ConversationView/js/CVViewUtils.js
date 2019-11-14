@@ -9,6 +9,4 @@ function initialize(name) {
 
 function friendlyTimestamp(epochtimestamp_ms) {}
 
-function searchBarTr() {
-    appState.state = "search"
-}
+function searchBarTr() {}

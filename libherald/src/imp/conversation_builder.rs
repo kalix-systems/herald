@@ -1,8 +1,11 @@
-use crate::imp::{
-    conversations::{shared::ConvUpdates, Conversations},
-    users::shared::user_in_cache,
-};
 use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::SingletonBus};
+use crate::{
+    imp::{
+        conversations::{shared::ConvUpdates, Conversations},
+        users::shared::user_in_cache,
+    },
+    runtime::spawn,
+};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -102,12 +105,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
         let list = std::mem::replace(&mut self.list, vec![]);
         let title = self.title.take();
 
-        ret_err!(std::thread::Builder::new().spawn(move || {
-            let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
+        ret_err! {
+            spawn(async move {
+                let cid = ret_err!(heraldcore::network::start_conversation(&list, title).await);
 
-            // send update to Conversations list
-            ret_err!(Conversations::push(ConvUpdates::BuilderFinished(cid)));
-        }));
+                // send update to Conversations list
+                ret_err!(Conversations::push(ConvUpdates::BuilderFinished(cid)));
+            })
+        };
     }
 
     fn set_title(&mut self, title: String) {

@@ -4,39 +4,50 @@ import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
+import "../Common" as Common
 
 Page {
     id: cvMainView
-    header: CVHeader {}
+
+    header: Loader {
+        id: headerLoader
+        sourceComponent: CVHeader {}
+    }
+
     background: Rectangle {
         color: CmnCfg.palette.mainColor
     }
 
+    Common.Drawer {
+        id: contextDrawer
+        DrawerContents {}
+    }
+
     // the body of this entire element
     // displays conversations
-    ListView {
-        id: cvListView
-        clip: true
-        boundsBehavior: ListView.StopAtBounds
-
-        anchors.margins: CmnCfg.units.dp(12)
-        spacing: CmnCfg.units.dp(16)
-
+    Loader {
+        id: listViewLoader
         anchors.fill: parent
-        model: conversationsModel
-
-        delegate: CVListItem {
-            ownedMessages: Messages {
-                conversationId: conversationId
+        sourceComponent: ListView {
+            id: cvListView
+            clip: true
+            boundsBehavior: ListView.StopAtBounds
+            anchors.fill: parent
+            model: conversationsModel
+            delegate: CVListItem {
+                readonly property var conversationIdProxy: conversationId
+                readonly property int colorProxy: model.color
+                readonly property Messages ownedMessages: Messages {
+                    conversationId: conversationIdProxy
+                }
+                colorCode: colorProxy
             }
         }
-
-        ScrollBar.vertical: ScrollBar {}
     }
 
     // floating pencil button to trigger
     // new message flow
-    CVFloatingButton {
+    ComposeButton {
 
         anchors {
             bottom: parent.bottom
@@ -46,4 +57,16 @@ Page {
 
         iconSource: "qrc:/pencil-icon-black.svg"
     }
+
+    states: [
+        State {
+            name: "default"
+        },
+        State {
+            name: "search"
+            PropertyChanges {
+                target: listViewLoader
+            }
+        }
+    ]
 }

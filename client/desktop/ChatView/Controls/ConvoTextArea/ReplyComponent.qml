@@ -17,8 +17,7 @@ import LibHerald 1.0
 //NPB: just looks kind bad
 Rectangle {
     id: wrapper
-    radius: CmnCfg.radius
-    color: startColor
+    color: CmnCfg.palette.sideBarHighlightColor
     width: parent.width
     height: Math.max(textCol.height + CmnCfg.margin, 20)
 
@@ -26,39 +25,27 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    Button {
-        id: exitButton
+    Rectangle {
+        id: verticalAccent
+        anchors.right: wrapper.left
+        height: wrapper.height
+        width: CmnCfg.smallMargin / 2
+        color: startColor
+    }
 
+    Common.ButtonForm {
+        id: exitButton
         anchors {
             margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
-
-        background: Rectangle {
-            color: Qt.darker(startColor, 1.9)
-            height: 15
-            width: height
-            radius: height
-
-            // this icon is very slightly off center everywhere it's used, i think it needs to be fixed
-            Image {
-                id: x
-                source: "qrc:/x-icon-white.svg"
-                anchors.centerIn: parent
-                sourceSize: Qt.size(15, 15)
-            }
-            ColorOverlay {
-                anchors.fill: x
-                source: x
-                color: CmnCfg.palette.iconMatte
-            }
-        }
-
+        source: "qrc:/x-icon.svg"
+        scale: 0.8
         onClicked: {
             builder.clearReply()
-            //chatTextArea.state = "default"
         }
+
     }
 
     ColumnLayout {
@@ -67,11 +54,13 @@ Rectangle {
         Label {
             id: sender
             text: opName
-            Layout.margins: CmnCfg.smallMargin
-            Layout.bottomMargin: CmnCfg.smallMargin
-            Layout.preferredHeight: CmnCfg.margin
+            Layout.leftMargin: CmnCfg.smallMargin
+            Layout.rightMargin: CmnCfg.smallMargin
+            Layout.bottomMargin: CmnCfg.margin / 2
+            Layout.topMargin: CmnCfg.margin / 2
+            Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.mainTextColor
+            color: startColor
         }
 
         TextMetrics {
@@ -94,11 +83,4 @@ Rectangle {
         }
     }
 
-    Rectangle {
-        z: -1
-        color: startColor
-        height: 15
-        width: parent.width
-        anchors.verticalCenter: parent.bottom
-    }
 }

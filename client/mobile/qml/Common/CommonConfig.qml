@@ -25,7 +25,7 @@ Item {
     /// standard margin size used to interior objects
     readonly property real margin: units.largeSpacing
     /// standard half margin
-    readonly property real smallMargin: units.smallSpacing
+    readonly property real smallMargin: 8
     /// standard half padding unit
     readonly property real smallPadding: units.smallSpacing
     /// standard padding unit

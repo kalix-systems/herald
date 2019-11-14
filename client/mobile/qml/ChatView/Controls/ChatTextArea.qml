@@ -11,6 +11,10 @@ RowLayout {
     width: parent.width
     spacing: 0
 
+    MessageBuilder {
+        id: builder
+    }
+
     TextArea {
         id: cta
         height: textareaHeight
@@ -18,7 +22,7 @@ RowLayout {
         Layout.alignment: Qt.AlignBottom
         placeholderText: "Send a message..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        color: CmnCfg.palette.mainTextColor
+        color: CmnCfg.palette.iconFill
         font {
             pointSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
@@ -34,12 +38,19 @@ RowLayout {
 
         IconButton {
             Layout.alignment: Qt.AlignRight
+            color: CmnCfg.palette.iconFill
             imageSource: "qrc:/camera-icon.svg"
         }
 
         IconButton {
             Layout.alignment: Qt.AlignRight
-            tapCallback: send ? function () {} : function () {}
+            color: CmnCfg.palette.iconFill
+            tapCallback: send ? function () {
+                builder.body = cta.text
+                builder.conversationId = ownedMessages.conversationId
+                builder.finalize()
+                cta.clear()
+            } : function () {}
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
         }
     }

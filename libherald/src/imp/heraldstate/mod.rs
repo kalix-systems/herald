@@ -3,6 +3,7 @@ use crate::{
     imp::{conversations::Conversations, messages},
     interface::*,
     push_err, ret_err,
+    runtime::spawn,
     shared::{AddressedBus, SingletonBus},
 };
 use herald_common::*;
@@ -14,7 +15,6 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
-    thread,
 };
 
 type Emitter = HeraldStateEmitter;
@@ -73,21 +73,26 @@ impl HeraldStateTrait for HeraldState {
         use register::*;
 
         let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
-        match ret_err!(net::register(uid), false) {
-            Res::UIDTaken => {
-                eprintln!("UID taken!");
-                false
-            }
-            Res::KeyTaken => {
-                eprintln!("Key taken!");
-                false
-            }
-            Res::BadSig(s) => {
-                eprintln!("Bad sig: {:?}", s);
-                false
-            }
-            Res::Success => true,
-        }
+
+        ret_err!(
+            spawn(async move {
+                match ret_err!(net::register(uid).await) {
+                    Res::UIDTaken => {
+                        eprintln!("UID taken!");
+                    }
+                    Res::KeyTaken => {
+                        eprintln!("Key taken!");
+                    }
+                    Res::BadSig(s) => {
+                        eprintln!("Bad sig: {:?}", s);
+                    }
+                    Res::Success => (),
+                }
+            }),
+            false
+        );
+
+        false
     }
 
     fn login(&mut self) -> bool {
@@ -95,19 +100,21 @@ impl HeraldStateTrait for HeraldState {
 
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
-        ret_err!(
-            thread::Builder::new().spawn(move || {
-                ret_err!(net::login(
-                    move |notif: Notification| {
-                        handler.send(notif);
-                    },
-                    move |herr: HErr| {
-                        ret_err!(Err::<(), HErr>(herr));
-                    }
-                ))
+        ret_err! {
+            spawn(async move {
+                ret_err! {
+                    net::login(
+                        move |notif: Notification| {
+                            handler.send(notif);
+                        },
+                        move |herr: HErr| {
+                            ret_err!(Err::<(), HErr>(herr));
+                        }
+                    ).await
+                }
             }),
             false
-        );
+        };
         true
     }
 
