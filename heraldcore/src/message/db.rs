@@ -165,7 +165,11 @@ pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
 
 /// Testing utility
 #[cfg(test)]
-pub(crate) async fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId) -> (MsgId, Time) {
+pub(crate) async fn test_outbound_text(
+    db: &mut Conn,
+    msg: &str,
+    conv: ConversationId,
+) -> (MsgId, Time) {
     use std::convert::TryInto;
 
     let mut builder = OutboundMessageBuilder::default();
@@ -175,7 +179,8 @@ pub(crate) async fn test_outbound_text(db: &mut Conn, msg: &str, conv: Conversat
             .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!())),
     );
     let out = builder
-        .store_and_send_blocking_db(db).await
+        .store_and_send_blocking_db(db)
+        .await
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
 
     (out.message_id, out.time.insertion)
@@ -271,45 +276,45 @@ impl OutboundMessageBuilder {
         let attachments = e!(attachments);
 
         {
-        let tx = e!(db.transaction());
+            let tx = e!(db.transaction());
 
-        e!(tx.execute_named(
-            include_str!("sql/add.sql"),
-            named_params![
-                "@msg_id": msg_id,
-                "@author": author,
-                "@conversation_id": conversation_id,
-                "@body": body,
-                "@send_status": send_status,
-                "@has_attachments": has_attachments,
-                "@insertion_ts": time.insertion,
-                "@server_ts": time.server,
-                "@expiration_ts": time.expiration,
-                "@is_reply": op.is_some()
-            ],
-        ));
-
-        e!(tx.execute(
-            include_str!("../conversation/sql/update_last_active.sql"),
-            params![timestamp, conversation_id],
-        ));
-
-        if let Some(op) = op {
             e!(tx.execute_named(
-                include_str!("sql/add_reply.sql"),
-                named_params! { "@msg_id": msg_id, "@op": op}
+                include_str!("sql/add.sql"),
+                named_params![
+                    "@msg_id": msg_id,
+                    "@author": author,
+                    "@conversation_id": conversation_id,
+                    "@body": body,
+                    "@send_status": send_status,
+                    "@has_attachments": has_attachments,
+                    "@insertion_ts": time.insertion,
+                    "@server_ts": time.server,
+                    "@expiration_ts": time.expiration,
+                    "@is_reply": op.is_some()
+                ],
             ));
-        }
 
-        if !attachments.is_empty() {
-            e!(attachments::db::add(
-                &tx,
-                &msg_id,
-                attachments.iter().map(|a| a.hash_dir())
+            e!(tx.execute(
+                include_str!("../conversation/sql/update_last_active.sql"),
+                params![timestamp, conversation_id],
             ));
-        }
 
-        e!(tx.commit());
+            if let Some(op) = op {
+                e!(tx.execute_named(
+                    include_str!("sql/add_reply.sql"),
+                    named_params! { "@msg_id": msg_id, "@op": op}
+                ));
+            }
+
+            if !attachments.is_empty() {
+                e!(attachments::db::add(
+                    &tx,
+                    &msg_id,
+                    attachments.iter().map(|a| a.hash_dir())
+                ));
+            }
+
+            e!(tx.commit());
         }
 
         callback(StoreAndSend::StoreDone(msg_id));

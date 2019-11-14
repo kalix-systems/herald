@@ -1,6 +1,6 @@
 use super::*;
-use herald_common::*;
 use crate::womp;
+use herald_common::*;
 use serial_test_derive::*;
 
 impl ConversationId {
@@ -137,16 +137,20 @@ async fn channel_keys() {
 
     assert_ne!(h1, h2);
 
-    cid1.store_genesis(&g1).await
+    cid1.store_genesis(&g1)
+        .await
         .expect("failed to store genesis block for cid1");
-    cid2.store_genesis(&g2).await
+    cid2.store_genesis(&g2)
+        .await
         .expect("failed to store genesis block for cid2");
 
     let u1 = cid1
-        .get_unused().await
+        .get_unused()
+        .await
         .expect("failed to get unused keys for cid1");
     let u2 = cid2
-        .get_unused().await
+        .get_unused()
+        .await
         .expect("failed to get unused keys for cid2");
 
     assert_eq!(u1, vec![(h1, g1.root().clone())]);
@@ -155,11 +159,13 @@ async fn channel_keys() {
     assert_ne!(u1, u2);
 
     let ck1 = cid1
-        .get_channel_key().await
+        .get_channel_key()
+        .await
         .expect("failed to ge channel key for cid1");
 
     let ck2 = cid2
-        .get_channel_key().await
+        .get_channel_key()
+        .await
         .expect("failed to ge channel key for cid2");
 
     assert_eq!(&ck1, g1.channel_key());
@@ -187,12 +193,20 @@ async fn blockstore() {
     let chainkey22 = ChainKey::from_slice(&[22; CHAINKEY_BYTES]).expect(womp!());
 
     // cid1 keys
-    cid1.store_key(blockhash11, &chainkey11).await.expect(womp!());
-    cid1.store_key(blockhash12, &chainkey12).await.expect(womp!());
+    cid1.store_key(blockhash11, &chainkey11)
+        .await
+        .expect(womp!());
+    cid1.store_key(blockhash12, &chainkey12)
+        .await
+        .expect(womp!());
 
     // cid2 keys
-    cid2.store_key(blockhash21, &chainkey21).await.expect(womp!());
-    cid2.store_key(blockhash22, &chainkey22).await.expect(womp!());
+    cid2.store_key(blockhash21, &chainkey21)
+        .await
+        .expect(womp!());
+    cid2.store_key(blockhash22, &chainkey22)
+        .await
+        .expect(womp!());
 
     // cid1 known keys
     let known_keys1: BTreeSet<ChainKey> = vec![(&chainkey11).clone(), (&chainkey12).clone()]
@@ -231,17 +245,31 @@ async fn blockstore() {
     }
 
     // cid1 mark used
-    cid1.mark_used(vec![blockhash11].iter()).await.expect(womp!());
+    cid1.mark_used(vec![blockhash11].iter())
+        .await
+        .expect(womp!());
 
-    let unused1: Vec<_> = cid1.get_unused().await.expect(womp!()).into_iter().collect();
+    let unused1: Vec<_> = cid1
+        .get_unused()
+        .await
+        .expect(womp!())
+        .into_iter()
+        .collect();
 
     assert_eq!(unused1.len(), 1);
     assert_eq!(unused1, vec![(blockhash12, chainkey12)]);
 
     // cid2 mark used
-    cid2.mark_used(vec![blockhash21].iter()).await.expect(womp!());
+    cid2.mark_used(vec![blockhash21].iter())
+        .await
+        .expect(womp!());
 
-    let unused2: Vec<_> = cid2.get_unused().await.expect(womp!()).into_iter().collect();
+    let unused2: Vec<_> = cid2
+        .get_unused()
+        .await
+        .expect(womp!())
+        .into_iter()
+        .collect();
 
     assert_eq!(unused2.len(), 1);
     assert_eq!(unused2, vec![(blockhash22, chainkey22)]);
