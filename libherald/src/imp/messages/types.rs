@@ -22,6 +22,13 @@ impl MsgData {
         (self.author == rhs.author)
             && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
     }
+
+    pub(super) fn matches(&self, pattern: &heraldcore::utils::SearchPattern) -> bool {
+        match self.body.as_ref() {
+            Some(body) => pattern.is_match(body.as_str()),
+            None => false,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
