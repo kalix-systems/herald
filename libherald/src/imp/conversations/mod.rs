@@ -6,7 +6,7 @@ use heraldcore::{
     types::{ConversationId, ExpirationPeriod},
     utils::SearchPattern,
 };
-use im_rc::vector::Vector;
+use im::vector::Vector;
 
 pub(crate) mod shared;
 use shared::*;

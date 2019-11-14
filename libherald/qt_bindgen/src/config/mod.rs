@@ -240,7 +240,9 @@ fn messages() -> Object {
         lastStatus: Prop::new().simple(QUint32).optional(),
         isEmpty: Prop::new().simple(Bool),
         searchPattern: filter_prop(),
-        searchRegex: filter_regex_prop()
+        searchRegex: filter_regex_prop(),
+        searchActive: Prop::new().simple(Bool).write(),
+        searchNumMatches: Prop::new().simple(QUint64)
     };
 
     let item_props = item_props! {
@@ -256,14 +258,15 @@ fn messages() -> Object {
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
-        isTail: ItemProp::new(Bool).optional(),
-        matched: matched_item_prop()
+        isTail: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
+        mut nextSearchMatch() => Qint64,
+        mut prevSearchMatch() => Qint64,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
