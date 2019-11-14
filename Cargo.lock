@@ -718,6 +718,7 @@ dependencies = [
  "futures-preview",
  "herald_common",
  "lazy_static",
+ "scopeguard",
  "serial_test",
  "serial_test_derive",
  "server_errors",
