@@ -30,24 +30,14 @@ ApplicationWindow {
     }
     // utility code, meant to reduce the amount of js laying
     // around the code base
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    Conversations {
-        id: conversationsModel
-    }
-
     HeraldState {
         id: heraldState
     }
 
-    Config {
-        id: configModel
-    }
-
-    Users {
-        id: usersModel
+    Loader {
+        id: capitan
+        active: false
+        sourceComponent: Item {}
     }
 
     // displays error dialog upon output from
@@ -65,9 +55,30 @@ ApplicationWindow {
         }
     }
 
-    StackView {
-        id: mainView
+    Loader {
+        active: heraldState.configInit
         anchors.fill: parent
-        initialItem: cvMain
+        StackView {
+            id: mainView
+            anchors.fill: parent
+
+            HeraldUtils {
+                id: heraldUtils
+            }
+
+            Conversations {
+                id: conversationsModel
+            }
+
+            Config {
+                id: configModel
+            }
+
+            Users {
+                id: usersModel
+            }
+
+            initialItem: cvMain
+        }
     }
 }
