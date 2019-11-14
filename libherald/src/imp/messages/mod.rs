@@ -16,6 +16,8 @@ use std::{
     convert::{TryFrom, TryInto},
 };
 
+mod search;
+use search::*;
 mod container;
 use container::*;
 mod imp;
@@ -90,7 +92,6 @@ impl MessagesTrait for Messages {
         ret_none!(self.container.index_of(msg_id), ret_val) as u64
     }
 
-    // TODO spawn thread to catch panic
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
         if let (Some(id), None) = (conversation_id, self.conversation_id) {
             let conversation_id = ret_err!(ConversationId::try_from(id));
@@ -323,8 +324,10 @@ impl MessagesTrait for Messages {
         self.search.pattern = pattern;
         self.emit.search_regex_changed();
 
-        self.container
-            .apply_search(&self.search.pattern, &mut self.model);
+        self.search.matches = self
+            .container
+            .apply_search(&self.search, &mut self.model, &mut self.emit)
+            .unwrap_or_default();
     }
 
     /// Indicates whether regex search is activated
@@ -336,18 +339,45 @@ impl MessagesTrait for Messages {
     fn set_search_regex(&mut self, use_regex: bool) {
         if ret_err!(self.search.set_regex(use_regex)) == SearchChanged::Changed {
             self.emit.search_regex_changed();
-            self.container
-                .apply_search(&self.search.pattern, &mut self.model);
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
         }
     }
 
-    fn matched(&self, row_index: usize) -> bool {
-        ret_none!(self.container.msg_data(row_index), true).matched
+    /// Indicates whether search is active
+    fn search_active(&self) -> bool {
+        self.search.active
     }
 
+    /// Turns search on or off
+    fn set_search_active(&mut self, active: bool) {
+        self.search.active = active;
+        self.emit.search_active_changed();
+    }
+
+    /// Clears search
     fn clear_search(&mut self) {
-        self.container.clear_search(&mut self.model)
+        self.container.clear_search(&mut self.model);
+        self.search.clear_search(&mut self.emit);
+    }
+
+    fn search_num_matches(&self) -> u64 {
+        self.search.num_matches() as u64
+    }
+
+    fn next_search_match(&mut self) -> i64 {
+        match self.search.next() {
+            Some(Match { ix }) => *ix as i64,
+            None => -1,
+        }
+    }
+
+    fn prev_search_match(&mut self) -> i64 {
+        match self.search.prev() {
+            Some(Match { ix }) => *ix as i64,
+            None => -1,
+        }
     }
 }
-
-impl Messages {}

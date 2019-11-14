@@ -217,6 +217,14 @@ namespace {
     {
         Q_EMIT o->lastStatusChanged();
     }
+    inline void messagesSearchActiveChanged(Messages* o)
+    {
+        Q_EMIT o->searchActiveChanged();
+    }
+    inline void messagesSearchNumMatchesChanged(Messages* o)
+    {
+        Q_EMIT o->searchNumMatchesChanged();
+    }
     inline void messagesSearchPatternChanged(Messages* o)
     {
         Q_EMIT o->searchPatternChanged();
@@ -1285,7 +1293,6 @@ extern "C" {
     option_bool messages_data_is_head(const Messages::Private*, int);
     option_bool messages_data_is_reply(const Messages::Private*, int);
     option_bool messages_data_is_tail(const Messages::Private*, int);
-    bool messages_data_matched(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     option_quint32 messages_data_receipt_status(const Messages::Private*, int);
@@ -1422,11 +1429,6 @@ QVariant Messages::isTail(int row) const
     return v;
 }
 
-bool Messages::matched(int row) const
-{
-    return messages_data_matched(m_d, row);
-}
-
 QByteArray Messages::messageId(int row) const
 {
     QByteArray b;
@@ -1480,14 +1482,12 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 8:
             return isTail(index.row());
         case Qt::UserRole + 9:
-            return QVariant::fromValue(matched(index.row()));
-        case Qt::UserRole + 10:
             return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
-        case Qt::UserRole + 11:
+        case Qt::UserRole + 10:
             return cleanNullQVariant(QVariant::fromValue(op(index.row())));
-        case Qt::UserRole + 12:
+        case Qt::UserRole + 11:
             return receiptStatus(index.row());
-        case Qt::UserRole + 13:
+        case Qt::UserRole + 12:
             return serverTimestampMs(index.row());
         }
         break;
@@ -1517,11 +1517,10 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 6, "isHead");
     names.insert(Qt::UserRole + 7, "isReply");
     names.insert(Qt::UserRole + 8, "isTail");
-    names.insert(Qt::UserRole + 9, "matched");
-    names.insert(Qt::UserRole + 10, "messageId");
-    names.insert(Qt::UserRole + 11, "op");
-    names.insert(Qt::UserRole + 12, "receiptStatus");
-    names.insert(Qt::UserRole + 13, "serverTimestampMs");
+    names.insert(Qt::UserRole + 9, "messageId");
+    names.insert(Qt::UserRole + 10, "op");
+    names.insert(Qt::UserRole + 11, "receiptStatus");
+    names.insert(Qt::UserRole + 12, "serverTimestampMs");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -1542,7 +1541,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1564,6 +1563,9 @@ extern "C" {
     void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
     option_quint32 messages_last_status_get(const Messages::Private*);
+    bool messages_search_active_get(const Messages::Private*);
+    void messages_search_active_set(Messages::Private*, bool);
+    quint64 messages_search_num_matches_get(const Messages::Private*);
     void messages_search_pattern_get(const Messages::Private*, QString*, qstring_set);
     void messages_search_pattern_set(Messages::Private*, const ushort *str, int len);
     bool messages_search_regex_get(const Messages::Private*);
@@ -1572,6 +1574,8 @@ extern "C" {
     void messages_clear_search(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
+    qint64 messages_next_search_match(Messages::Private*);
+    qint64 messages_prev_search_match(Messages::Private*);
 };
 
 extern "C" {
@@ -2651,6 +2655,8 @@ Messages::Messages(QObject *parent):
         messagesLastBodyChanged,
         messagesLastEpochTimestampMsChanged,
         messagesLastStatusChanged,
+        messagesSearchActiveChanged,
+        messagesSearchNumMatchesChanged,
         messagesSearchPatternChanged,
         messagesSearchRegexChanged,
         [](const Messages* o) {
@@ -2754,6 +2760,17 @@ QVariant Messages::lastStatus() const
     }
     return r;
 }
+bool Messages::searchActive() const
+{
+    return messages_search_active_get(m_d);
+}
+void Messages::setSearchActive(bool v) {
+    messages_search_active_set(m_d, v);
+}
+quint64 Messages::searchNumMatches() const
+{
+    return messages_search_num_matches_get(m_d);
+}
 QString Messages::searchPattern() const
 {
     QString v;
@@ -2785,6 +2802,14 @@ bool Messages::deleteMessage(quint64 row_index)
 quint64 Messages::indexById(const QByteArray& msg_id) const
 {
     return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
+}
+qint64 Messages::nextSearchMatch()
+{
+    return messages_next_search_match(m_d);
+}
+qint64 Messages::prevSearchMatch()
+{
+    return messages_prev_search_match(m_d);
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

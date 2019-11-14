@@ -90,25 +90,44 @@ impl Container {
         self.map.insert(mid, data);
     }
 
-    pub(super) fn apply_search(&mut self, pattern: &SearchPattern, model: &mut List) -> Option<()> {
-        let _cnt: usize = self
-            .map
-            .values_mut()
-            .map(|data| {
+    pub(super) fn apply_search(
+        &mut self,
+        search: &SearchMachine,
+        model: &mut List,
+        emit: &mut Emitter,
+    ) -> Option<Vec<Match>> {
+        if !search.active {
+            return None;
+        }
+
+        let old_cnt = search.matches.len();
+
+        let pattern = &search.pattern;
+
+        // to help the borrow checker
+        let map = &mut self.map;
+
+        let matches: Vec<Match> = self
+            .list
+            .iter()
+            .enumerate()
+            .map(|(ix, Message { msg_id, .. })| (ix, msg_id))
+            .filter_map(|(ix, mid)| {
+                let data = map.get_mut(&mid)?;
                 let matches = data.matches(pattern);
                 data.matched = matches;
 
-                if matches {
-                    1
-                } else {
-                    0
-                }
+                Some(Match { ix })
             })
-            .sum();
+            .collect();
+
+        if old_cnt != matches.len() {
+            emit.search_num_matches_changed();
+        }
 
         model.data_changed(0, self.list.len().saturating_sub(1));
 
-        Some(())
+        Some(matches)
     }
 
     pub(super) fn clear_search(&mut self, model: &mut List) {

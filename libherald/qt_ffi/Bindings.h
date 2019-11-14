@@ -456,6 +456,8 @@ private:
     Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
     Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
     Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
+    Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY searchActiveChanged FINAL)
+    Q_PROPERTY(quint64 searchNumMatches READ searchNumMatches NOTIFY searchNumMatchesChanged FINAL)
     Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern NOTIFY searchPatternChanged FINAL)
     Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY searchRegexChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
@@ -469,6 +471,9 @@ public:
     QString lastBody() const;
     QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
+    bool searchActive() const;
+    void setSearchActive(bool v);
+    quint64 searchNumMatches() const;
     QString searchPattern() const;
     void setSearchPattern(const QString& v);
     bool searchRegex() const;
@@ -477,6 +482,8 @@ public:
     Q_INVOKABLE void clearSearch();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
+    Q_INVOKABLE qint64 nextSearchMatch();
+    Q_INVOKABLE qint64 prevSearchMatch();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -503,7 +510,6 @@ public:
     Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
-    Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;
@@ -523,6 +529,8 @@ Q_SIGNALS:
     void lastBodyChanged();
     void lastEpochTimestampMsChanged();
     void lastStatusChanged();
+    void searchActiveChanged();
+    void searchNumMatchesChanged();
     void searchPatternChanged();
     void searchRegexChanged();
 };

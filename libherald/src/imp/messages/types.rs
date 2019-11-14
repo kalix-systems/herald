@@ -2,50 +2,6 @@ use super::*;
 use herald_common::{Time, UserId};
 use std::{cmp::Ordering, collections::HashMap};
 
-#[derive(PartialEq)]
-pub(super) enum SearchChanged {
-    Changed,
-    NotChanged,
-}
-
-pub(super) struct SearchMachine {
-    pub(super) pattern: SearchPattern,
-    pub(super) active: bool,
-    pub(super) cursor: Option<usize>,
-}
-
-impl SearchMachine {
-    pub(super) fn new() -> Self {
-        Self {
-            pattern: abort_err!(SearchPattern::new_normal("".into())),
-            active: false,
-            cursor: None,
-        }
-    }
-
-    pub(super) fn is_regex(&self) -> bool {
-        match self.pattern {
-            SearchPattern::Normal { .. } => false,
-            SearchPattern::Regex { .. } => true,
-        }
-    }
-
-    pub(super) fn set_regex(&mut self, use_regex: bool) -> Result<SearchChanged, HErr> {
-        match (use_regex, self.is_regex()) {
-            (true, false) => {
-                self.pattern.regex_mode()?;
-            }
-            (false, true) => {
-                self.pattern.normal_mode()?;
-            }
-            _ => {
-                return Ok(SearchChanged::NotChanged);
-            }
-        }
-        Ok(SearchChanged::Changed)
-    }
-}
-
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
 #[derive(Clone, Debug)]
