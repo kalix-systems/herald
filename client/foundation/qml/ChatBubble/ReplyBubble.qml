@@ -53,6 +53,7 @@ ColumnLayout {
                 Layout.topMargin: CmnCfg.margin / 2
                 Layout.bottomMargin: 0
                 Layout.leftMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
                 Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
                 color: opColor
             }
@@ -73,7 +74,7 @@ ColumnLayout {
 
             Label {
                 Layout.leftMargin: CmnCfg.smallMargin
-                Layout.bottomMargin: 5
+                Layout.bottomMargin: CmnCfg.smallPadding
                 Layout.topMargin: 0
                 Layout.rightMargin: CmnCfg.smallMargin
                    font.pixelSize: 10

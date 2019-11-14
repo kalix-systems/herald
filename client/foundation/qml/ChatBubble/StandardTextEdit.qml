@@ -8,7 +8,7 @@ TextEdit {
     Layout.topMargin: CmnCfg.margin / 2
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
-    Layout.bottomMargin: 5
+    Layout.bottomMargin: CmnCfg.smallPadding
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     Layout.alignment: Qt.AlignLeft
     selectByMouse: true

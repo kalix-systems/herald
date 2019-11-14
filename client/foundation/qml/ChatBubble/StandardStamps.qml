@@ -7,7 +7,7 @@ RowLayout {
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
     Layout.topMargin: 0
-    Layout.bottomMargin: 5
+    Layout.bottomMargin: CmnCfg.smallPadding
 
     Label {
            font.pixelSize: 10

@@ -14,5 +14,5 @@ Label {
     Layout.bottomMargin: CmnCfg.margin / 2
     Layout.topMargin: CmnCfg.margin / 2
     Layout.preferredHeight: CmnCfg.smallMargin
-  font.bold: true
+    font.bold: true
 }
