@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
+import QtQuick.Layouts 1.12
 
 Label {
     id: sender
@@ -8,5 +9,11 @@ Label {
     property color senderColor
     text: senderName
     color: senderColor
-    font.family: CmnCfg.chatFont.name
+    //font.family: CmnCfg.chatFont.name
+    Layout.leftMargin: 8
+    Layout.rightMargin: 8
+    Layout.bottomMargin: 6
+    Layout.topMargin: 6
+    Layout.preferredHeight: CmnCfg.smallMargin
+  font.bold: true
 }

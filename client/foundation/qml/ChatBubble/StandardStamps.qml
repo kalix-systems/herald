@@ -4,7 +4,20 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 RowLayout {
-    Layout.margins: CmnCfg.smallMargin / 2
+    Layout.leftMargin: CmnCfg.smallMargin
+    Layout.topMargin: 0
+    Layout.bottomMargin: 5
+
+    Label {
+           font.pixelSize: 10
+           text: friendlyTimestamp
+           id: timestamp
+           color: CmnCfg.palette.secondaryTextColor
+       }
+
+       Item {
+           Layout.fillWidth: true
+       }
 
     Image {
         id: receipt
