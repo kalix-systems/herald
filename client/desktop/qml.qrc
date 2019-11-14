@@ -47,5 +47,7 @@
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
         <file>ChatView/Controls/TimerOptions.qml</file>
+        <file>SideBar/HeaderComponent.qml</file>
+        <file>SideBar/NewGroupComponent.qml</file>
     </qresource>
 </RCC>

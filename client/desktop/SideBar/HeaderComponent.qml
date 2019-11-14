@@ -2,30 +2,20 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "popups" as Popups
 import "../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
+import "popups" as Popups
 import QtGraphicalEffects 1.0
-import Qt.labs.platform 1.0
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
+Component {
 ToolBar {
-    id: contextBar
+    id: headerBarComponent
     height: CmnCfg.toolbarHeight
     background: Rectangle {
         color: CmnCfg.palette.secondaryColor
     }
-    property alias headerText: headerText.text
-
     RowLayout {
 
         anchors.fill: parent
@@ -53,6 +43,7 @@ ToolBar {
                 onClicked: { configPopup.show()
                 }
             }
+
             ColorOverlay {
                 id: overlay
                 visible: false
@@ -62,12 +53,11 @@ ToolBar {
                     color: "#40000000"
                     smooth: true
                 }
-
         }
 
         Text {
             id: headerText
-            text: "Conversations"
+            text: "New group"
             font.pixelSize: CmnCfg.headerSize
             font.family: CmnCfg.chatFont.name
             font.bold: true
@@ -79,56 +69,13 @@ ToolBar {
             Layout.fillWidth: true
         }
 
-        Row {
-            spacing: 12
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-
-            Common.ButtonForm {
-                id: searchButton
-                property bool searchRegex: false
-                fill: CmnCfg.palette.paneColor
-                //this is a vertical center offset
-                Layout.topMargin: 1
-                source: "qrc:/search-icon.svg"
-                //todo : add back in regex logic once ui is known
-                onClicked: {
-                    sideBarState.state = "conversationSearch"
-                }
-            }
-
-            ///--- Add contact button
-            Common.ButtonForm {
-                id: newMessageButton
-                source: "qrc:/compose-icon-white.svg"
-                fill: CmnCfg.palette.paneColor
-                onClicked: {
-                    convoMenu.open()
-
-
-                }
-            }
-
-            Menu {
-                id: convoMenu
-                MenuItem {
-                    text: "New group conversation"
-                     onTriggered: sideBarState.state = "newGroupState"
-                }
-            }
-
-            //placeholder new contact button
-            Common.ButtonForm {
-                id: newContactButton
-                fill: CmnCfg.palette.paneColor
-                source: "qrc:/options-icon.svg"
-                onClicked: {
-                    contextOptionsMenu.open()
-                }
-            }
-        }
-
-        Popups.ContextOptionsMenu {
-            id: contextOptionsMenu
+        Common.ButtonForm {
+            id: xButton
+            fill: CmnCfg.palette.paneColor
+            source: "qrc:/x-icon.svg"
+            scale: 0.8
+            onClicked: sideBarState.state = ""
         }
     }
+}
 }

@@ -98,8 +98,8 @@ Page {
             }
 
             PropertyChanges {
-                target: searchLoader
-                sourceComponent: groupSelectComponent
+                target: headerLoader
+                sourceComponent: headerBarComponent
                 contactsSearch: true
             }
             PropertyChanges {

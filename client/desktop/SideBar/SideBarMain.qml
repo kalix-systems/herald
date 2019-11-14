@@ -29,7 +29,7 @@ Page {
 
     ///--- SearchBar for contacts, add contact button
     header: Loader {
-        id: searchLoader
+        id: headerLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
 
@@ -40,6 +40,10 @@ Page {
         Common.Divider {
             anchors.top: parent.bottom
         }
+    }
+
+    HeaderComponent {
+        id: headerBarComponent
     }
 
     //search component loaded to search convos and contacts
