@@ -36,5 +36,6 @@
         <file>qml/ConversationView/Controls/CVSearchList.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
+        <file>qml/App.qml</file>
     </qresource>
 </RCC>
