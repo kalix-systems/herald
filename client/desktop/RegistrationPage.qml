@@ -61,11 +61,8 @@ Rectangle {
                 radius: 2
             }
 
-            Keys.onReturnPressed: {
-                if (heraldState.registerNewUser(entryField.text.trim())) {
-                    heraldState.configInit = true
-                }
-            }
+            Keys.onReturnPressed: heraldState.registerNewUser(entryField.text.trim())
+
         }
 
         Button {
@@ -81,11 +78,8 @@ Rectangle {
                 color: "steelblue"
                 radius: 3
             }
-            onClicked: {
-                if (heraldState.registerNewUser(entryField.text.trim())) {
-                    heraldState.configInit = true
-                }
-            }
+            onClicked: heraldState.registerNewUser(entryField.text.trim())
+
         }
     }
 

@@ -61,13 +61,13 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
 fn herald_state() -> Object {
     let properties = props! {
-        configInit: Prop::new().simple(Bool).write(),
+        configInit: Prop::new().simple(Bool),
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool)
     };
 
     let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Bool,
+        mut registerNewUser(user_id: QString) => Void,
         mut login() => Bool,
     };
 

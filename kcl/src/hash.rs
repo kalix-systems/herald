@@ -66,6 +66,15 @@ impl Key {
         };
         assert_eq!(result, 0);
     }
+
+    pub fn hash_into_many<'a, I: IntoIterator<Item = &'a mut [u8]>>(&self, msg: &[u8], keys: I) {
+        for (i, key_buf) in keys.into_iter().enumerate() {
+            let mut hasher = Builder::new().out_len(key_buf.len()).key(self).build();
+            hasher.update(msg);
+            hasher.update(&u64::to_le_bytes(i as u64));
+            hasher.finalize_into(key_buf);
+        }
+    }
 }
 
 pub struct Builder<'a> {
@@ -139,6 +148,15 @@ impl Hasher {
             buf.set_len(self.out_len);
         };
         Digest(buf)
+    }
+
+    pub fn finalize_into(mut self, buf: &mut [u8]) {
+        assert!(buf.len() == self.out_len);
+        unsafe {
+            let res =
+                crypto_generichash_blake2b_final(&mut self.state, buf.as_mut_ptr(), buf.len());
+            assert_eq!(res, 0);
+        };
     }
 }
 
