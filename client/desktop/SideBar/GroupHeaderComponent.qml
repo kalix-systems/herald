@@ -45,7 +45,7 @@ Rectangle  {
     FileDialog {
         id: groupPicDialogue
         folder: shortcuts.home
-        nameFilters: ["Image File (*.png *.jpg *.bmp)"]
+        nameFilters: ["Image File (*.jpg *.png *.jpeg)"]
         selectedNameFilter: "Image File"
 
         onSelectionAccepted: {
