@@ -117,7 +117,7 @@ fn filter_regex_prop() -> Prop {
 }
 
 fn matched_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::Bool).write()
+    ItemProp::new(SimpleType::Bool)
 }
 
 fn filter_props() -> BTreeMap<String, Property> {
@@ -144,7 +144,7 @@ fn conversations() -> Object {
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
-       matched: matched_item_prop().write(),
+       matched: matched_item_prop(),
        picture: picture_item_prop().write(),
        color: color_item_prop().write()
     };
@@ -238,7 +238,9 @@ fn messages() -> Object {
         lastBody: Prop::new().simple(QString).optional(),
         lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
-        isEmpty: Prop::new().simple(Bool)
+        isEmpty: Prop::new().simple(Bool),
+        searchPattern: filter_prop(),
+        searchRegex: filter_regex_prop()
     };
 
     let item_props = item_props! {
@@ -254,12 +256,14 @@ fn messages() -> Object {
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
-        isTail: ItemProp::new(Bool).optional()
+        isTail: ItemProp::new(Bool).optional(),
+        matched: matched_item_prop()
     };
 
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
+        mut clearSearch() => Void,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 

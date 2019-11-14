@@ -69,6 +69,7 @@ impl UsersTrait for Users {
         let global_emit = emit.clone();
 
         shared::USER_EMITTER.lock().replace(global_emit);
+
         // this should *really* never fail
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
@@ -231,11 +232,6 @@ impl UsersTrait for Users {
 
     fn matched(&self, row_index: usize) -> bool {
         ret_none!(self.list.get(row_index), true).matched
-    }
-
-    fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
-        ret_none!(self.list.get_mut(row_index), false).matched = value;
-        true
     }
 
     fn filter(&self) -> &str {

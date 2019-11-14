@@ -952,7 +952,6 @@ pub trait ConversationsTrait {
     fn expiration_period(&self, index: usize) -> u8;
     fn set_expiration_period(&mut self, index: usize, _: u8) -> bool;
     fn matched(&self, index: usize) -> bool;
-    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn muted(&self, index: usize) -> bool;
     fn set_muted(&mut self, index: usize, _: bool) -> bool;
     fn pairwise(&self, index: usize) -> bool;
@@ -1158,15 +1157,6 @@ pub unsafe extern "C" fn conversations_set_data_expiration_period(
 pub unsafe extern "C" fn conversations_data_matched(ptr: *const Conversations, row: c_int) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversations_set_data_matched(
-    ptr: *mut Conversations,
-    row: c_int,
-    v: bool,
-) -> bool {
-    (&mut *ptr).set_matched(to_usize(row).unwrap_or(0), v)
 }
 
 #[no_mangle]
@@ -1660,7 +1650,6 @@ pub trait MembersTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn matched(&self, index: usize) -> bool;
-    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
     fn profile_picture(&self, index: usize) -> Option<String>;
@@ -1851,11 +1840,6 @@ pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> 
 pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_set_data_matched(ptr: *mut Members, row: c_int, v: bool) -> bool {
-    (&mut *ptr).set_matched(to_usize(row).unwrap_or(0), v)
 }
 
 #[no_mangle]
@@ -2590,6 +2574,8 @@ pub struct MessagesEmitter {
     last_body_changed: fn(*mut MessagesQObject),
     last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     last_status_changed: fn(*mut MessagesQObject),
+    search_pattern_changed: fn(*mut MessagesQObject),
+    search_regex_changed: fn(*mut MessagesQObject),
     new_data_ready: fn(*mut MessagesQObject),
 }
 
@@ -2609,6 +2595,8 @@ impl MessagesEmitter {
             last_body_changed: self.last_body_changed,
             last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
             last_status_changed: self.last_status_changed,
+            search_pattern_changed: self.search_pattern_changed,
+            search_regex_changed: self.search_regex_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -2651,6 +2639,18 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.last_status_changed)(ptr);
+        }
+    }
+    pub fn search_pattern_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.search_pattern_changed)(ptr);
+        }
+    }
+    pub fn search_regex_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.search_regex_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -2723,7 +2723,12 @@ pub trait MessagesTrait {
     fn last_body(&self) -> Option<&str>;
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
     fn last_status(&self) -> Option<u32>;
+    fn search_pattern(&self) -> &str;
+    fn set_search_pattern(&mut self, value: String);
+    fn search_regex(&self) -> bool;
+    fn set_search_regex(&mut self, value: bool);
     fn clear_conversation_history(&mut self) -> bool;
+    fn clear_search(&mut self) -> ();
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn row_count(&self) -> usize;
@@ -2747,6 +2752,7 @@ pub trait MessagesTrait {
     fn is_head(&self, index: usize) -> Option<bool>;
     fn is_reply(&self, index: usize) -> Option<bool>;
     fn is_tail(&self, index: usize) -> Option<bool>;
+    fn matched(&self, index: usize) -> bool;
     fn message_id(&self, index: usize) -> Option<&[u8]>;
     fn op(&self, index: usize) -> Option<&[u8]>;
     fn receipt_status(&self, index: usize) -> Option<u32>;
@@ -2762,6 +2768,8 @@ pub extern "C" fn messages_new(
     messages_last_body_changed: fn(*mut MessagesQObject),
     messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     messages_last_status_changed: fn(*mut MessagesQObject),
+    messages_search_pattern_changed: fn(*mut MessagesQObject),
+    messages_search_regex_changed: fn(*mut MessagesQObject),
     messages_new_data_ready: fn(*mut MessagesQObject),
     messages_layout_about_to_be_changed: fn(*mut MessagesQObject),
     messages_layout_changed: fn(*mut MessagesQObject),
@@ -2783,6 +2791,8 @@ pub extern "C" fn messages_new(
         last_body_changed: messages_last_body_changed,
         last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
         last_status_changed: messages_last_status_changed,
+        search_pattern_changed: messages_search_pattern_changed,
+        search_regex_changed: messages_search_regex_changed,
         new_data_ready: messages_new_data_ready,
     };
     let model = MessagesList {
@@ -2903,9 +2913,49 @@ pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COpti
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_search_pattern_get(
+    ptr: *const Messages,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.search_pattern();
+    let s: *const c_char = v.as_ptr() as (*const c_char);
+    set(p, s, to_c_int(v.len()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_search_pattern_set(
+    ptr: *mut Messages,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_search_pattern(s);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_search_regex_get(ptr: *const Messages) -> bool {
+    (&*ptr).search_regex()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_search_regex_set(ptr: *mut Messages, v: bool) {
+    (&mut *ptr).set_search_regex(v);
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_clear_conversation_history(ptr: *mut Messages) -> bool {
     let o = &mut *ptr;
     o.clear_conversation_history()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_clear_search(ptr: *mut Messages) {
+    let o = &mut *ptr;
+    o.clear_search()
 }
 
 #[no_mangle]
@@ -3051,6 +3101,12 @@ pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int
 pub unsafe extern "C" fn messages_data_is_tail(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
     o.is_tail(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_matched(ptr: *const Messages, row: c_int) -> bool {
+    let o = &*ptr;
+    o.matched(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
@@ -3229,7 +3285,6 @@ pub trait UsersTrait {
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
     fn matched(&self, index: usize) -> bool;
-    fn set_matched(&mut self, index: usize, _: bool) -> bool;
     fn name(&self, index: usize) -> String;
     fn set_name(&mut self, index: usize, _: String) -> bool;
     fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
@@ -3440,11 +3495,6 @@ pub unsafe extern "C" fn users_set_data_color(ptr: *mut Users, row: c_int, v: u3
 pub unsafe extern "C" fn users_data_matched(ptr: *const Users, row: c_int) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn users_set_data_matched(ptr: *mut Users, row: c_int, v: bool) -> bool {
-    (&mut *ptr).set_matched(to_usize(row).unwrap_or(0), v)
 }
 
 #[no_mangle]
