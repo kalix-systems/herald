@@ -26,7 +26,7 @@ use network::*;
 /// in another model. Currently only used to distinguish initial registration
 /// from logins.
 pub struct HeraldState {
-    config_init: bool,
+    config_init: Arc<AtomicBool>,
     emit: HeraldStateEmitter,
     effects_flags: Arc<EffectsFlags>,
 }
@@ -43,14 +43,14 @@ impl HeraldStateTrait for HeraldState {
                 "Couldn't start GC thread"
             );
 
-            true
+            Arc::new(AtomicBool::new(true))
         } else {
             // If this fails, the file system is in a very bad place.
             // This probably cannot be recovered from, and there's not meaningful
             // sense in which the application can work.
             push_err!(db::init(), "Couldn't initialize storage");
 
-            false
+            Arc::new(AtomicBool::new(false))
         };
 
         HeraldState {
@@ -61,33 +61,34 @@ impl HeraldStateTrait for HeraldState {
     }
 
     fn config_init(&self) -> bool {
-        self.config_init
+        self.config_init.load(Ordering::Acquire)
     }
 
-    fn set_config_init(&mut self, val: bool) {
-        self.config_init |= val;
-        self.emit.config_init_changed();
-    }
-
-    fn register_new_user(&mut self, user_id: ffi::UserId) -> bool {
+    fn register_new_user(&mut self, user_id: ffi::UserId) {
         use register::*;
 
-        let uid = ret_err!(UserId::try_from(user_id.as_str()), false);
-        match ret_err!(net::register(uid), false) {
-            Res::UIDTaken => {
-                eprintln!("UID taken!");
-                false
-            }
-            Res::KeyTaken => {
-                eprintln!("Key taken!");
-                false
-            }
-            Res::BadSig(s) => {
-                eprintln!("Bad sig: {:?}", s);
-                false
-            }
-            Res::Success => true,
-        }
+        let uid = ret_err!(UserId::try_from(user_id.as_str()));
+
+        let config_init = self.config_init.clone();
+        let mut emit = self.emit.clone();
+
+        ret_err! {
+            thread::Builder::new().spawn(move || match ret_err!(net::register(uid)) {
+                Res::UIDTaken => {
+                    eprintln!("UID taken!");
+                }
+                Res::KeyTaken => {
+                    eprintln!("Key taken!");
+                }
+                Res::BadSig(s) => {
+                    eprintln!("Bad sig: {:?}", s);
+                }
+                Res::Success => {
+                   config_init.fetch_xor(true, Ordering::Acquire);
+                   emit.config_init_changed();
+                },
+            })
+        };
     }
 
     fn login(&mut self) -> bool {

@@ -192,7 +192,6 @@ public:
     Q_INVOKABLE quint8 expirationPeriod(int row) const;
     Q_INVOKABLE bool setExpirationPeriod(int row, quint8 value);
     Q_INVOKABLE bool matched(int row) const;
-    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE bool muted(int row) const;
     Q_INVOKABLE bool setMuted(int row, bool value);
     Q_INVOKABLE bool pairwise(int row) const;
@@ -240,7 +239,7 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(bool configInit READ configInit WRITE setConfigInit NOTIFY configInitChanged FINAL)
+    Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     explicit HeraldState(bool owned, QObject *parent);
@@ -248,11 +247,10 @@ public:
     explicit HeraldState(QObject *parent = nullptr);
     ~HeraldState() override;
     bool configInit() const;
-    void setConfigInit(bool v);
     bool connectionPending() const;
     bool connectionUp() const;
     Q_INVOKABLE bool login();
-    Q_INVOKABLE bool registerNewUser(const QString& user_id);
+    Q_INVOKABLE void registerNewUser(const QString& user_id);
 Q_SIGNALS:
     void configInitChanged();
     void connectionPendingChanged();
@@ -317,10 +315,8 @@ public:
     bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
     Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool matched(int row) const;
-    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;
     Q_INVOKABLE QString profilePicture(int row) const;
@@ -460,6 +456,8 @@ private:
     Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
     Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
     Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
+    Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern NOTIFY searchPatternChanged FINAL)
+    Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY searchRegexChanged FINAL)
     explicit Messages(bool owned, QObject *parent);
 public:
     explicit Messages(QObject *parent = nullptr);
@@ -471,7 +469,12 @@ public:
     QString lastBody() const;
     QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
+    QString searchPattern() const;
+    void setSearchPattern(const QString& v);
+    bool searchRegex() const;
+    void setSearchRegex(bool v);
     Q_INVOKABLE bool clearConversationHistory();
+    Q_INVOKABLE void clearSearch();
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
 
@@ -500,6 +503,7 @@ public:
     Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;
@@ -519,6 +523,8 @@ Q_SIGNALS:
     void lastBodyChanged();
     void lastEpochTimestampMsChanged();
     void lastStatusChanged();
+    void searchPatternChanged();
+    void searchRegexChanged();
 };
 
 class Users : public QAbstractItemModel
@@ -566,7 +572,6 @@ public:
     Q_INVOKABLE quint32 color(int row) const;
     Q_INVOKABLE bool setColor(int row, quint32 value);
     Q_INVOKABLE bool matched(int row) const;
-    Q_INVOKABLE bool setMatched(int row, bool value);
     Q_INVOKABLE QString name(int row) const;
     Q_INVOKABLE bool setName(int row, const QString& value);
     Q_INVOKABLE QByteArray pairwiseConversationId(int row) const;

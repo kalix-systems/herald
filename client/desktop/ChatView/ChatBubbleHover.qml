@@ -53,10 +53,6 @@ MouseArea {
         z: CmnCfg.overlayZ
 
         onClicked: {
-            chatTextArea.replyText = body
-            chatTextArea.replyId = messageId
-            chatTextArea.replyUid = author
-            chatTextArea.replyName = contactsModel.nameById(author)
             builder.replyingTo = messageId
         }
     }
