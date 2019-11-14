@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import "../js/utils.mjs" as Utils
 
 ColumnLayout {
 
@@ -12,32 +13,10 @@ ColumnLayout {
     property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                     replyPreview.author)]
     property string authorName: ""
-    property int spacing: 0
+    spacing: 0
     property color authorColor
     property var replyId
 
-    Row {
-        Layout.margins: CmnCfg.smallMargin / 2
-        Layout.bottomMargin: 0
-        spacing: CmnCfg.smallMargin / 2
-
-        ChatLabel {
-            id: uname
-            senderName: authorName
-            senderColor: authorColor
-        }
-
-        Label {
-            id: timestamp
-            text: friendlyTimestamp
-            color: CmnCfg.palette.secondaryTextColor
-            font.pixelSize: 10
-            anchors {
-                top: parent.top
-                topMargin: 3
-            }
-        }
-    }
 
     MessagePreview {
         id: replyPreview
@@ -47,9 +26,8 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: Qt.lighter(CmnCfg.palette.tertiaryColor, 1.3)
-        Layout.margins: CmnCfg.smallMargin
-        Layout.topMargin: 0
+        color: CmnCfg.palette.sideBarHighlightColor
+        Layout.margins: CmnCfg.margin / 2
         Layout.minimumWidth: reply.width
 
         Rectangle {
@@ -58,22 +36,23 @@ ColumnLayout {
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
-            width: CmnCfg.smallMargin / 2
+            width: CmnCfg.smallMargin / 4
             color: opColor
         }
 
         ColumnLayout {
             id: reply
-            spacing: 1
+            spacing: 0
+            Layout.rightMargin: CmnCfg.smallMargin
 
             Label {
                 id: opLabel
                 text: !replyPreview.isDangling ? contactsModel.nameById(
                                                      replyPreview.author) : ""
                 font.bold: true
-                Layout.margins: CmnCfg.smallMargin
+                Layout.topMargin: CmnCfg.margin / 2
                 Layout.bottomMargin: 0
-                Layout.leftMargin: CmnCfg.smallMargin / 2
+                Layout.leftMargin: CmnCfg.smallMargin
                 Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
                 color: opColor
             }
@@ -91,7 +70,25 @@ ColumnLayout {
                 text: opBodyTextMetrics.elidedText
                 Layout.minimumWidth: messageBody.width
             }
+
+            Label {
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.bottomMargin: 5
+                Layout.topMargin: 0
+                Layout.rightMargin: CmnCfg.smallMargin
+                   font.pixelSize: 10
+                   text: !replyPreview.isDangling ?
+                             Utils.friendlyTimestamp(
+                             replyPreview.epochTimestampMs) : ""
+                   color: CmnCfg.palette.secondaryTextColor
+               }
         }
+    }
+
+    ChatLabel {
+        id: uname
+        senderName: authorName
+        senderColor: authorColor
     }
 
     StandardTextEdit {

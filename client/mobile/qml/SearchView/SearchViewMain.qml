@@ -5,8 +5,7 @@ import LibHerald 1.0
 
 Page {
     id: contactViewMain
-    header: SearcViewHeader {}
-
+    header: SearchViewHeader {}
     background: Rectangle {
         color: CmnCfg.palette.mainColor
     }

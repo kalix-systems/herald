@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 Button {
     property string iconSource: ""
-    property color iconColor: CmnCfg.palette.iconMatte
+    property color iconColor: CmnCfg.palette.iconFill
 
     height: CmnCfg.units.dp(56)
     width: height
