@@ -55,7 +55,6 @@ ListView {
 
         Common.PlatonicRectangle {
             id: convoRectangle
-            isContact: false
             boxTitle: title
             boxColor: conversationData.color
             //this is in here instead of platonic rectangle bc different for contact and convo

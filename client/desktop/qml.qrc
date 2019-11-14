@@ -49,5 +49,7 @@
         <file>ChatView/Controls/TimerOptions.qml</file>
         <file>SideBar/HeaderComponent.qml</file>
         <file>SideBar/NewGroupComponent.qml</file>
+        <file>SideBar/ContactSearchComponent.qml</file>
+        <file>SideBar/GroupHeaderComponent.qml</file>
     </qresource>
 </RCC>
