@@ -17,6 +17,7 @@ Rectangle {
     property string boxTitle
     property int boxColor
     property alias labelComponent: conversationItemAvatar.labelComponent
+    property string picture
 
     AvatarMain {
         anchors.fill: parent

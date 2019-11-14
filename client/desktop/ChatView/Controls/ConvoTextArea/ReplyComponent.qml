@@ -20,7 +20,7 @@ Rectangle {
     id: wrapper
     color: CmnCfg.palette.sideBarHighlightColor
     width: parent.width
-    height: Math.max(textCol.height + CmnCfg.margin, 20)
+    height: Math.max(textCol.height, 20)
 
     property color startColor
     property string opText: parent.opText
@@ -35,14 +35,14 @@ Rectangle {
         id: verticalAccent
         anchors.right: wrapper.left
         height: wrapper.height
-        width: CmnCfg.smallMargin / 2
-        color: startColor
+        width: CmnCfg.smallMargin / 4
+        color: CmnCfg.palette.avatarColors[contactsModel.colorById(replyCompPreview.author)]
     }
 
     Common.ButtonForm {
         id: exitButton
         anchors {
-            margins: CmnCfg.smallMargin
+          //  margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
