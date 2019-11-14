@@ -9,11 +9,10 @@ Label {
     property color senderColor
     text: senderName
     color: senderColor
-    //font.family: CmnCfg.chatFont.name
-    Layout.leftMargin: 8
-    Layout.rightMargin: 8
-    Layout.bottomMargin: 6
-    Layout.topMargin: 6
+    Layout.leftMargin: CmnCfg.smallMargin
+    Layout.rightMargin: CmnCfg.smallMargin
+    Layout.bottomMargin: CmnCfg.margin / 2
+    Layout.topMargin: CmnCfg.margin / 2
     Layout.preferredHeight: CmnCfg.smallMargin
   font.bold: true
 }

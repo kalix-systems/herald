@@ -28,7 +28,6 @@ ColumnLayout {
         Layout.preferredHeight: reply.implicitHeight
         color: CmnCfg.palette.sideBarHighlightColor
         Layout.margins: CmnCfg.margin / 2
-       // Layout.topMargin: 0
         Layout.minimumWidth: reply.width
 
         Rectangle {
@@ -44,6 +43,7 @@ ColumnLayout {
         ColumnLayout {
             id: reply
             spacing: 0
+            Layout.rightMargin: CmnCfg.smallMargin
 
             Label {
                 id: opLabel
@@ -72,9 +72,10 @@ ColumnLayout {
             }
 
             Label {
-                Layout.leftMargin: 8
+                Layout.leftMargin: CmnCfg.smallMargin
                 Layout.bottomMargin: 5
                 Layout.topMargin: 0
+                Layout.rightMargin: CmnCfg.smallMargin
                    font.pixelSize: 10
                    text: !replyPreview.isDangling ?
                              Utils.friendlyTimestamp(
