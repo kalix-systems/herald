@@ -2,7 +2,6 @@
 LINUX_DEPLOY_DL = "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
 OUT_DIR = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "build", mapping = {"linux" = ".appimage", "unknown"="build", "macos" = "build", "windows"="build"} }
 
-
 # Builds libherald with desktop deployment feature
 [tasks.build_libherald]
 private = true
@@ -18,14 +17,16 @@ private = true
 command = "mkdir"
 args = ["-p", "${OUT_DIR}"]
 
-# Installs the `linuxdeploy`
+
+# Installs the `linuxdeploy` tool, and plugins
 [tasks.install_linuxdeploy]
 private = true
 install_script = [
   '''
-  if ! [ -f "$OUT_DIR/linuxdeploy.AppImage" ]; then
-    wget "$LINUX_DEPLOY_DL" -O $OUT_DIR/linuxdeploy.AppImage
-    chmod +x $OUT_DIR/linuxdeploy.AppImage
+  if ! [ -f "$OUT_DIR/linuxdeploy-x86_64.AppImage" ]; then
+    wget "$LINUX_DEPLOY_DL" -O $OUT_DIR/linuxdeploy-x86_64.AppImage
+    wget "$QT_PLUGIN_DL" -O $OUT_DIR/linuxdeploy-plugin-qt-x86_64.AppImage
+    chmod +x $OUT_DIR/linuxdeploy*.AppImage
   fi
   '''
 ]
@@ -87,10 +88,13 @@ dependencies = ["run_make"]
 workspace = false
 script = [
   '''
+  QML_SOURCES_PATHS=../client/desktop
+
   cd $OUT_DIR
-  ./linuxdeploy.AppImage \
+  ./linuxdeploy-x86_64.AppImage \
     --appdir AppDir \
     --output appimage \
+    --plugin qt \
     -i ../client/foundation/icons/herald.png \
     -d ../client/desktop/herald.desktop \
     -l ../target/release/libherald.so \
