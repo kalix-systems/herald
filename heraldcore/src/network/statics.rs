@@ -27,27 +27,22 @@ static RPC_IS_BEING_INIT: AtomicBool = AtomicBool::new(false);
 
 /// Attempts to load the cached client, and creates a new one if one doesn't already exist.
 pub(super) async fn get_client() -> Result<HeraldServiceClient, HErr> {
-    if let Some(r) = RPC_CLIENT.get() {
-        Ok(r.clone())
-    } else {
-        if !RPC_IS_BEING_INIT.swap(true, Ordering::SeqCst) {
+    loop {
+        if let Some(r) = RPC_CLIENT.get() {
+            return Ok(r.clone());
+        } else if !RPC_IS_BEING_INIT.swap(true, Ordering::SeqCst) {
+            scopeguard::guard((), |()| RPC_IS_BEING_INIT.store(false, Ordering::SeqCst));
+
             let transport = transport::connect(&SERVER_RPC_ADDR).await?;
             let client =
                 HeraldServiceClient::new(tarpc::client::Config::default(), transport).spawn()?;
+
             RPC_CLIENT
                 .set(client.clone())
                 .expect("failed to set client");
-            Ok(client)
-        } else {
-            // spin until it's ready
-            // 10 seconds really should be long enough
-            for _ in 0..100 {
-                tokio::timer::delay_for(std::time::Duration::from_millis(100)).await;
-                if let Some(r) = RPC_CLIENT.get() {
-                    return Ok(r.clone());
-                }
-            }
-            Err(HeraldError("failed to init rpc client".into()))
+
+            return Ok(client);
         }
+        tokio::timer::delay_for(std::time::Duration::from_millis(100)).await;
     }
 }

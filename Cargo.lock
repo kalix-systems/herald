@@ -744,6 +744,7 @@ dependencies = [
  "qutex",
  "regex",
  "rusqlite",
+ "scopeguard",
  "serde",
  "serde_bytes",
  "serde_cbor",
