@@ -1393,11 +1393,10 @@ pub trait HeraldStateTrait {
     fn new(emit: HeraldStateEmitter) -> Self;
     fn emit(&mut self) -> &mut HeraldStateEmitter;
     fn config_init(&self) -> bool;
-    fn set_config_init(&mut self, value: bool);
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
     fn login(&mut self) -> bool;
-    fn register_new_user(&mut self, user_id: String) -> bool;
+    fn register_new_user(&mut self, user_id: String) -> ();
 }
 
 #[no_mangle]
@@ -1428,11 +1427,6 @@ pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_config_init_set(ptr: *mut HeraldState, v: bool) {
-    (&mut *ptr).set_config_init(v);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn herald_state_connection_pending_get(ptr: *const HeraldState) -> bool {
     (&*ptr).connection_pending()
 }
@@ -1453,7 +1447,7 @@ pub unsafe extern "C" fn herald_state_register_new_user(
     ptr: *mut HeraldState,
     user_id_str: *const c_ushort,
     user_id_len: c_int,
-) -> bool {
+) {
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;

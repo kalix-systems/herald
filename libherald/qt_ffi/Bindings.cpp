@@ -884,11 +884,10 @@ extern "C" {
     HeraldState::Private* herald_state_new(HeraldState*, void (*)(HeraldState*), void (*)(HeraldState*), void (*)(HeraldState*));
     void herald_state_free(HeraldState::Private*);
     bool herald_state_config_init_get(const HeraldState::Private*);
-    void herald_state_config_init_set(HeraldState::Private*, bool);
     bool herald_state_connection_pending_get(const HeraldState::Private*);
     bool herald_state_connection_up_get(const HeraldState::Private*);
     bool herald_state_login(HeraldState::Private*);
-    bool herald_state_register_new_user(HeraldState::Private*, const ushort*, int);
+    void herald_state_register_new_user(HeraldState::Private*, const ushort*, int);
 };
 
 extern "C" {
@@ -2301,9 +2300,6 @@ bool HeraldState::configInit() const
 {
     return herald_state_config_init_get(m_d);
 }
-void HeraldState::setConfigInit(bool v) {
-    herald_state_config_init_set(m_d, v);
-}
 bool HeraldState::connectionPending() const
 {
     return herald_state_connection_pending_get(m_d);
@@ -2316,7 +2312,7 @@ bool HeraldState::login()
 {
     return herald_state_login(m_d);
 }
-bool HeraldState::registerNewUser(const QString& user_id)
+void HeraldState::registerNewUser(const QString& user_id)
 {
     return herald_state_register_new_user(m_d, user_id.utf16(), user_id.size());
 }

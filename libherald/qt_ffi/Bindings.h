@@ -240,7 +240,7 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
-    Q_PROPERTY(bool configInit READ configInit WRITE setConfigInit NOTIFY configInitChanged FINAL)
+    Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
     Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY connectionPendingChanged FINAL)
     Q_PROPERTY(bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
     explicit HeraldState(bool owned, QObject *parent);
@@ -248,11 +248,10 @@ public:
     explicit HeraldState(QObject *parent = nullptr);
     ~HeraldState() override;
     bool configInit() const;
-    void setConfigInit(bool v);
     bool connectionPending() const;
     bool connectionUp() const;
     Q_INVOKABLE bool login();
-    Q_INVOKABLE bool registerNewUser(const QString& user_id);
+    Q_INVOKABLE void registerNewUser(const QString& user_id);
 Q_SIGNALS:
     void configInitChanged();
     void connectionPendingChanged();
