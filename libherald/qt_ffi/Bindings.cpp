@@ -217,6 +217,14 @@ namespace {
     {
         Q_EMIT o->lastStatusChanged();
     }
+    inline void messagesSearchPatternChanged(Messages* o)
+    {
+        Q_EMIT o->searchPatternChanged();
+    }
+    inline void messagesSearchRegexChanged(Messages* o)
+    {
+        Q_EMIT o->searchRegexChanged();
+    }
     inline void usersFilterChanged(Users* o)
     {
         Q_EMIT o->filterChanged();
@@ -542,7 +550,6 @@ extern "C" {
     quint8 conversations_data_expiration_period(const Conversations::Private*, int);
     bool conversations_set_data_expiration_period(Conversations::Private*, int, quint8);
     bool conversations_data_matched(const Conversations::Private*, int);
-    bool conversations_set_data_matched(Conversations::Private*, int, bool);
     bool conversations_data_muted(const Conversations::Private*, int);
     bool conversations_set_data_muted(Conversations::Private*, int, bool);
     bool conversations_data_pairwise(const Conversations::Private*, int);
@@ -666,17 +673,6 @@ bool Conversations::setExpirationPeriod(int row, quint8 value)
 bool Conversations::matched(int row) const
 {
     return conversations_data_matched(m_d, row);
-}
-
-bool Conversations::setMatched(int row, bool value)
-{
-    bool set = false;
-    set = conversations_set_data_matched(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 bool Conversations::muted(int row) const
@@ -825,11 +821,6 @@ bool Conversations::setData(const QModelIndex &index, const QVariant &value, int
                 return setExpirationPeriod(index.row(), value.value<quint8>());
             }
         }
-        if (role == Qt::UserRole + 3) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setMatched(index.row(), value.value<bool>());
-            }
-        }
         if (role == Qt::UserRole + 4) {
             if (value.canConvert(qMetaTypeId<bool>())) {
                 return setMuted(index.row(), value.value<bool>());
@@ -900,7 +891,6 @@ extern "C" {
 extern "C" {
     quint32 members_data_color(const Members::Private*, int);
     bool members_data_matched(const Members::Private*, int);
-    bool members_set_data_matched(Members::Private*, int, bool);
     void members_data_name(const Members::Private*, int, QString*, qstring_set);
     void members_data_pairwise_conversation_id(const Members::Private*, int, QByteArray*, qbytearray_set);
     void members_data_profile_picture(const Members::Private*, int, QString*, qstring_set);
@@ -972,9 +962,6 @@ void Members::sort(int column, Qt::SortOrder order)
 Qt::ItemFlags Members::flags(const QModelIndex &i) const
 {
     auto flags = QAbstractItemModel::flags(i);
-    if (i.column() == 0) {
-        flags |= Qt::ItemIsEditable;
-    }
     return flags;
 }
 
@@ -986,17 +973,6 @@ quint32 Members::color(int row) const
 bool Members::matched(int row) const
 {
     return members_data_matched(m_d, row);
-}
-
-bool Members::setMatched(int row, bool value)
-{
-    bool set = false;
-    set = members_set_data_matched(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 QString Members::name(int row) const
@@ -1095,18 +1071,6 @@ bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVar
     }
     m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
     return true;
-}
-
-bool Members::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (index.column() == 0) {
-        if (role == Qt::UserRole + 1) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setMatched(index.row(), value.value<bool>());
-            }
-        }
-    }
-    return false;
 }
 
 extern "C" {
@@ -1321,6 +1285,7 @@ extern "C" {
     option_bool messages_data_is_head(const Messages::Private*, int);
     option_bool messages_data_is_reply(const Messages::Private*, int);
     option_bool messages_data_is_tail(const Messages::Private*, int);
+    bool messages_data_matched(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     option_quint32 messages_data_receipt_status(const Messages::Private*, int);
@@ -1457,6 +1422,11 @@ QVariant Messages::isTail(int row) const
     return v;
 }
 
+bool Messages::matched(int row) const
+{
+    return messages_data_matched(m_d, row);
+}
+
 QByteArray Messages::messageId(int row) const
 {
     QByteArray b;
@@ -1510,12 +1480,14 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 8:
             return isTail(index.row());
         case Qt::UserRole + 9:
-            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
+            return QVariant::fromValue(matched(index.row()));
         case Qt::UserRole + 10:
-            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
         case Qt::UserRole + 11:
-            return receiptStatus(index.row());
+            return cleanNullQVariant(QVariant::fromValue(op(index.row())));
         case Qt::UserRole + 12:
+            return receiptStatus(index.row());
+        case Qt::UserRole + 13:
             return serverTimestampMs(index.row());
         }
         break;
@@ -1545,10 +1517,11 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 6, "isHead");
     names.insert(Qt::UserRole + 7, "isReply");
     names.insert(Qt::UserRole + 8, "isTail");
-    names.insert(Qt::UserRole + 9, "messageId");
-    names.insert(Qt::UserRole + 10, "op");
-    names.insert(Qt::UserRole + 11, "receiptStatus");
-    names.insert(Qt::UserRole + 12, "serverTimestampMs");
+    names.insert(Qt::UserRole + 9, "matched");
+    names.insert(Qt::UserRole + 10, "messageId");
+    names.insert(Qt::UserRole + 11, "op");
+    names.insert(Qt::UserRole + 12, "receiptStatus");
+    names.insert(Qt::UserRole + 13, "serverTimestampMs");
     return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation, int role) const
@@ -1569,7 +1542,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1591,7 +1564,12 @@ extern "C" {
     void messages_last_body_get(const Messages::Private*, QString*, qstring_set);
     option_qint64 messages_last_epoch_timestamp_ms_get(const Messages::Private*);
     option_quint32 messages_last_status_get(const Messages::Private*);
+    void messages_search_pattern_get(const Messages::Private*, QString*, qstring_set);
+    void messages_search_pattern_set(Messages::Private*, const ushort *str, int len);
+    bool messages_search_regex_get(const Messages::Private*);
+    void messages_search_regex_set(Messages::Private*, bool);
     bool messages_clear_conversation_history(Messages::Private*);
+    void messages_clear_search(Messages::Private*);
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
 };
@@ -1600,7 +1578,6 @@ extern "C" {
     quint32 users_data_color(const Users::Private*, int);
     bool users_set_data_color(Users::Private*, int, quint32);
     bool users_data_matched(const Users::Private*, int);
-    bool users_set_data_matched(Users::Private*, int, bool);
     void users_data_name(const Users::Private*, int, QString*, qstring_set);
     bool users_set_data_name(Users::Private*, int, const ushort* s, int len);
     void users_data_pairwise_conversation_id(const Users::Private*, int, QByteArray*, qbytearray_set);
@@ -1701,17 +1678,6 @@ bool Users::setColor(int row, quint32 value)
 bool Users::matched(int row) const
 {
     return users_data_matched(m_d, row);
-}
-
-bool Users::setMatched(int row, bool value)
-{
-    bool set = false;
-    set = users_set_data_matched(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
 }
 
 QString Users::name(int row) const
@@ -1855,11 +1821,6 @@ bool Users::setData(const QModelIndex &index, const QVariant &value, int role)
         if (role == Qt::UserRole + 0) {
             if (value.canConvert(qMetaTypeId<quint32>())) {
                 return setColor(index.row(), value.value<quint32>());
-            }
-        }
-        if (role == Qt::UserRole + 1) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setMatched(index.row(), value.value<bool>());
             }
         }
         if (role == Qt::UserRole + 2) {
@@ -2690,6 +2651,8 @@ Messages::Messages(QObject *parent):
         messagesLastBodyChanged,
         messagesLastEpochTimestampMsChanged,
         messagesLastStatusChanged,
+        messagesSearchPatternChanged,
+        messagesSearchRegexChanged,
         [](const Messages* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -2791,9 +2754,29 @@ QVariant Messages::lastStatus() const
     }
     return r;
 }
+QString Messages::searchPattern() const
+{
+    QString v;
+    messages_search_pattern_get(m_d, &v, set_qstring);
+    return v;
+}
+void Messages::setSearchPattern(const QString& v) {
+    messages_search_pattern_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+}
+bool Messages::searchRegex() const
+{
+    return messages_search_regex_get(m_d);
+}
+void Messages::setSearchRegex(bool v) {
+    messages_search_regex_set(m_d, v);
+}
 bool Messages::clearConversationHistory()
 {
     return messages_clear_conversation_history(m_d);
+}
+void Messages::clearSearch()
+{
+    return messages_clear_search(m_d);
 }
 bool Messages::deleteMessage(quint64 row_index)
 {

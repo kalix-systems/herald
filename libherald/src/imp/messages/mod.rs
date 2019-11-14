@@ -7,6 +7,7 @@ use heraldcore::{
     errors::HErr,
     message::{self, Message as Msg},
     types::*,
+    utils::SearchPattern,
     NE,
 };
 use im_rc::vector::Vector;
@@ -33,10 +34,14 @@ pub struct Messages {
     map: HashMap<MsgId, MsgData>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
+    search_pattern: SearchPattern,
+    search_regex: bool,
 }
 
 impl MessagesTrait for Messages {
     fn new(emit: Emitter, model: List) -> Self {
+        let search_pattern: SearchPattern = abort_err!(SearchPattern::new_normal("".into()));
+
         Messages {
             list: Vector::new(),
             map: HashMap::new(),
@@ -44,6 +49,8 @@ impl MessagesTrait for Messages {
             emit,
             conversation_id: None,
             local_id: abort_err!(Config::static_id()),
+            search_regex: false,
+            search_pattern,
         }
     }
 
@@ -336,4 +343,53 @@ impl MessagesTrait for Messages {
     fn row_count(&self) -> usize {
         self.list.len()
     }
+
+    fn search_pattern(&self) -> &str {
+        self.search_pattern.raw()
+    }
+
+    fn set_search_pattern(&mut self, pattern: String) {
+        if pattern.is_empty() {
+            self.clear_search();
+            return;
+        }
+
+        let pattern = if self.search_regex() {
+            ret_err!(SearchPattern::new_regex(pattern))
+        } else {
+            ret_err!(SearchPattern::new_normal(pattern))
+        };
+
+        self.search_pattern = pattern;
+        self.emit.search_regex_changed();
+
+        self.inner_search();
+    }
+
+    /// Indicates whether regex search is activated
+    fn search_regex(&self) -> bool {
+        self.search_regex
+    }
+
+    /// Sets search mode
+    fn set_search_regex(&mut self, use_regex: bool) {
+        if use_regex {
+            ret_err!(self.search_pattern.regex_mode());
+        } else {
+            ret_err!(self.search_pattern.normal_mode());
+        }
+        self.search_regex = use_regex;
+        self.emit.search_regex_changed();
+        self.inner_search();
+    }
+
+    fn matched(&self, row_index: usize) -> bool {
+        ret_none!(self.msg_data(row_index), true).matched
+    }
+
+    fn clear_search(&mut self) {}
+}
+
+impl Messages {
+    fn inner_search(&mut self) {}
 }
