@@ -45,14 +45,14 @@ impl State {
         let (ptx, prx) = channel::<()>();
         self.active.insert(gid.did, ptx);
 
-        // TODO: handle this error somehow?
-        // for now we're just dropping it
-        if catchup(gid.did, &mut store, &mut stream).await.is_ok() {
-            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
-            drop(self.send_pushes(&mut stream, &mut prx, gid.did).await);
-        }
+        let _guard = scopeguard::guard((), |()| {
+            self.active.remove(&gid.did);
+        });
 
-        self.active.remove(&gid.did);
+        catchup(gid.did, &mut store, &mut stream).await?;
+
+        let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+        self.send_pushes(&mut stream, &mut prx, gid.did).await?;
 
         Ok(())
     }

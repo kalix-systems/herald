@@ -115,10 +115,6 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
                 }
             },
             Err(e) => {
-                let mut tx = db.transaction()?;
-                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
-                tx.commit()?;
-
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
                 eprintln!(
@@ -128,6 +124,10 @@ async fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -
                 );
 
                 CAUGHT_UP.store(false, Ordering::Release);
+
+                let mut tx = db.transaction()?;
+                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                tx.commit()?;
 
                 pending::add_to_pending(cid, content)
             }

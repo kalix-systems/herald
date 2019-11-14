@@ -13,6 +13,7 @@ dashmap           = "1.0"
 futures-preview   = "0.3.0-alpha.19"
 lazy_static       = "1.4"
 tokio-postgres    = "0.5.0-alpha.1"
+scopeguard = "1.0.0"
 
 [dependencies.herald_common]
 path = "../herald_common"
