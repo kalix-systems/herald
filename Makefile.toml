@@ -109,6 +109,17 @@ fi
 '''
 ]
 
+
+
+[tasks.build_dmg]
+workspace = false
+script = [
+'''
+echo You are not on a darwin or macos platform, exiting
+exit 1
+'''
+]
+
 [tasks.build_app_bundle]
 workspace = false
 script = [
@@ -118,8 +129,6 @@ exit 1
 '''
 ]
 
-# for all intense and purposes macos 
-# app bundles are the same step as app image building
 [tasks.build_app_bundle.mac]
 workspace = false
 script = [
@@ -129,3 +138,16 @@ script = [
   '''
 ]
 dependencies = ["run_make_install","find_macdeploy"]
+
+
+[tasks.build_dmg.mac]
+workspace = false
+script = [
+  '''
+  cd $OUT_DIR
+  macdeployqt herald.app -dmg -qmldir=../client/desktop
+  '''
+]
+dependencies = ["run_make_install","find_macdeploy"]
+
+
