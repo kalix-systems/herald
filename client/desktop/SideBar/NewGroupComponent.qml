@@ -5,13 +5,16 @@ import QtQuick.Layouts 1.12
 import "../common" as Common
 
 Component {
-Column {
+// this uses a rectangle and anchors instead of a layout because that manages the
+// spacing behaviour better. (there is no change in layout on resize, anchors more correct)
+Rectangle {
     anchors.fill: parent
-
     Rectangle  {
+        id: topRect
+        anchors.top: parent.top
         height: 70
         width: parent.width
-        color: CmnCfg.palette.paneColor
+        color: "transparent"
 
         Rectangle {
             anchors.top: parent.top
@@ -30,48 +33,45 @@ Column {
     }
 
     TextArea {
+        id: titleText
+        anchors.top: topRect.bottom
         leftPadding: 12
         placeholderText: "Group title"
     }
 
     Rectangle {
+        anchors.top: titleText.bottom
+        id: divider
         height: 2
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
     }
-    Item {
-        height: 20
-        width: parent.width
-    }
 
     Rectangle {
+        anchors.top: divider.bottom
+        anchors.topMargin: 20
+        id: bigDivider
         height: 1
         width: parent.width
         color: CmnCfg.palette.secondaryTextColor
     }
 
-    Item {
-        height: 20
-        width: parent.width
-    }
 
     TextArea {
+        id: groupSelectText
+        anchors.top: bigDivider.bottom
+        anchors.topMargin: 20
         leftPadding: 12
         placeholderText: "Add members"
     }
 
     Rectangle {
+        anchors.top: groupSelectText.bottom
         height: 2
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
     }
-
-    Item {
-        height: 20
-        width: parent.width
-    }
-
 }
 }
