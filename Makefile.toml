@@ -1,6 +1,6 @@
 [env]
 LINUX_DEPLOY_DL = "https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage"
-OUT_DIR = ".appimage"
+OUT_DIR = { source = "${CARGO_MAKE_RUST_TARGET_OS}", default_value = "build", mapping = {"linux" = ".appimage", "unknown"="build", "macos" = "build", "windows"="build"} }
 
 
 # Builds libherald with desktop deployment feature
@@ -12,13 +12,11 @@ args = ["build", "--release",
 	"--features", "deploy_desktop"
 ]
 
-
 # Creates AppImage build directory if it does not already exist
 [tasks.make_out_dir]
 private = true
 command = "mkdir"
 args = ["-p", "${OUT_DIR}"]
-
 
 # Installs the `linuxdeploy`
 [tasks.install_linuxdeploy]
@@ -110,9 +108,19 @@ if ! [ -x "$(command -v macdeployqt)" ]; then
 fi
 '''
 ]
+
+[tasks.build_app_bundle]
+workspace = false
+script = [
+'''
+echo You are not on a darwin or macos platform, exiting
+exit 1
+'''
+]
+
 # for all intense and purposes macos 
 # app bundles are the same step as app image building
-[tasks.build_appimage.mac]
+[tasks.build_app_bundle.mac]
 workspace = false
 script = [
   '''
