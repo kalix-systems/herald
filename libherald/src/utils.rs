@@ -123,6 +123,9 @@ macro_rules! bounds_chk {
     };
 }
 
+//#[macro_export]
+///// Convenience macro for sp
+
 #[cfg(test)]
 mod tests {
     #[test]
