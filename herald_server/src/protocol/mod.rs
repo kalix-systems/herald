@@ -42,7 +42,7 @@ impl State {
         let gid: GlobalId = login::login(&self.active, &mut store, &mut stream).await?;
 
         // push emitter which will be stored in the active sessions dashmap
-        let (ptx, prx) = channel::<()>();
+        let (ptx, mut prx) = channel::<()>();
         self.active.insert(gid.did, ptx);
 
         let _guard = scopeguard::guard((), |()| {
@@ -51,8 +51,13 @@ impl State {
 
         catchup(gid.did, &mut store, &mut stream).await?;
 
-        let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
-        self.send_pushes(&mut stream, &mut prx, gid.did).await?;
+        // let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+
+        while let Some(()) = prx.next().await {
+            let mut conn = self.new_connection().await?;
+            catchup(gid.did, &mut conn, &mut stream).await?;
+        }
+        // self.send_pushes(&mut stream, &mut prx, gid.did).await?;
 
         Ok(())
     }
