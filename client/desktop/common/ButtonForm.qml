@@ -13,4 +13,11 @@ ToolButton {
     icon.color: fill
     icon.width: 22
     icon.height: 22
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        onPressed: mouse.accepted = false
+        cursorShape: Qt.PointingHandCursor
+    }
 }

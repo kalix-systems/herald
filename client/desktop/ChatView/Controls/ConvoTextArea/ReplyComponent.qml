@@ -4,6 +4,7 @@ import QtGraphicalEffects 1.13
 import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
+import "qrc:/imports/js/utils.mjs" as Utils
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -19,24 +20,29 @@ Rectangle {
     id: wrapper
     color: CmnCfg.palette.sideBarHighlightColor
     width: parent.width
-    height: Math.max(textCol.height + CmnCfg.margin, 20)
+    height: Math.max(textCol.height, 20)
 
     property color startColor
     property string opText: parent.opText
     property string opName: parent.opName
 
+    MessagePreview {
+        id: replyCompPreview
+        messageId: builder.replyingTo
+    }
+
     Rectangle {
         id: verticalAccent
         anchors.right: wrapper.left
         height: wrapper.height
-        width: CmnCfg.smallMargin / 2
-        color: startColor
+        width: CmnCfg.smallMargin / 4
+        color: CmnCfg.palette.avatarColors[contactsModel.colorById(replyCompPreview.author)]
     }
 
     Common.ButtonForm {
         id: exitButton
         anchors {
-            margins: CmnCfg.smallMargin
+          //  margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
@@ -53,19 +59,19 @@ Rectangle {
 
         Label {
             id: sender
-            text: opName
+            text: contactsModel.nameById(replyCompPreview.author)
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.rightMargin: CmnCfg.smallMargin
             Layout.bottomMargin: CmnCfg.margin / 2
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: startColor
+            color: CmnCfg.palette.avatarColors[contactsModel.colorById(replyCompPreview.author)]
         }
 
         TextMetrics {
             id: opTextMetrics
-            text: opText
+            text: replyCompPreview.body
             elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
@@ -73,7 +79,10 @@ Rectangle {
         TextEdit {
             text: opTextMetrics.elidedText
             Layout.maximumWidth: wrapper.width - CmnCfg.smallMargin
-            Layout.margins: CmnCfg.smallMargin
+            Layout.topMargin: CmnCfg.margin / 2
+            Layout.leftMargin: CmnCfg.smallMargin
+            Layout.rightMargin: CmnCfg.smallMargin
+            Layout.bottomMargin: CmnCfg.smallPadding
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             Layout.alignment: Qt.AlignLeft
             selectByMouse: true
@@ -81,6 +90,17 @@ Rectangle {
             readOnly: true
             color: CmnCfg.palette.mainTextColor
         }
+
+        Label {
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.bottomMargin: CmnCfg.smallPadding
+                Layout.topMargin: 0
+                Layout.rightMargin: CmnCfg.smallMargin
+               font.pixelSize: 10
+               text: Utils.friendlyTimestamp(replyCompPreview.epochTimestampMs)
+               id: timestamp
+               color: CmnCfg.palette.secondaryTextColor
+           }
     }
 
 }
