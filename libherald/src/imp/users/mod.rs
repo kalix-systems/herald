@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, ret_err, ret_none, runtime::spawn};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -104,8 +104,8 @@ impl UsersTrait for Users {
         self.model.end_insert_rows();
 
         ret_err!(
-            std::thread::Builder::new().spawn(move || {
-                ret_err!(network::send_contact_req(id, pairwise_conversation));
+            spawn(async move {
+                ret_err!(network::send_contact_req(id, pairwise_conversation).await);
             }),
             ffi::NULL_CONV_ID.to_vec()
         );

@@ -204,18 +204,21 @@ pub async fn start_conversation(
 
     let pairwise = conversation::get_pairwise_conversations(members)?;
 
-    let mut db = crate::db::Database::get()?;
-    let tx = db.transaction()?;
+    let cid = {
+        let mut db = crate::db::Database::get()?;
+        let tx = db.transaction()?;
 
-    let mut conv_builder = conversation::ConversationBuilder::new();
-    if let Some(title) = title.as_ref() {
-        conv_builder.title(title.clone());
-    }
+        let mut conv_builder = conversation::ConversationBuilder::new();
+        if let Some(title) = title.as_ref() {
+            conv_builder.title(title.clone());
+        }
 
-    let cid = conv_builder.add_with_tx(&tx)?;
+        let cid = conv_builder.add_with_tx(&tx)?;
 
-    crate::members::db::add_members_with_tx(&tx, cid, members)?;
-    tx.commit()?;
+        crate::members::db::add_members_with_tx(&tx, cid, members)?;
+        tx.commit()?;
+        cid
+    };
 
     let kp = crate::config::Config::static_keypair()?;
     let gen = Genesis::new(kp.secret_key());

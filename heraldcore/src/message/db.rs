@@ -270,6 +270,7 @@ impl OutboundMessageBuilder {
             .collect();
         let attachments = e!(attachments);
 
+        {
         let tx = e!(db.transaction());
 
         e!(tx.execute_named(
@@ -309,6 +310,7 @@ impl OutboundMessageBuilder {
         }
 
         e!(tx.commit());
+        }
 
         callback(StoreAndSend::StoreDone(msg_id));
 

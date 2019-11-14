@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus};
+use crate::{ffi, interface::*, ret_err, ret_none, runtime::spawn, shared::AddressedBus};
 use heraldcore::message::*;
 use std::convert::TryInto;
 use std::path::PathBuf;
@@ -123,27 +123,35 @@ impl MessageBuilderTrait for MessageBuilder {
 
         let cid = ret_none!(builder.conversation);
 
-        builder.store_and_send(move |m| {
-            use crate::imp::messages::{shared::MsgUpdate, *};
-            use heraldcore::message::StoreAndSend::*;
+        ret_err! {
+            spawn(async move {
+                ret_err! {
+                    builder
+                        .store_and_send(move |m| {
+                            use crate::imp::messages::{shared::MsgUpdate, *};
+                            use heraldcore::message::StoreAndSend::*;
 
-            match m {
-                Msg(msg) => {
-                    ret_err!(Messages::push(cid, MsgUpdate::FullMsg(Box::new(msg))));
-                }
-                Error { error, line_number } => {
-                    // TODO better line number usage
-                    eprintln!("Error at {}", line_number);
-                    ret_err!(Err(error))
-                }
-                StoreDone(mid) => {
-                    ret_err!(Messages::push(cid, MsgUpdate::StoreDone(mid)));
-                }
-                SendDone(_) => {
-                    // TODO: send status?
-                }
-            }
-        });
+                            match m {
+                                Msg(msg) => {
+                                    ret_err!(Messages::push(cid, MsgUpdate::FullMsg(Box::new(msg))));
+                                }
+                                Error { error, line_number } => {
+                                    // TODO better line number usage
+                                    eprintln!("Error at {}", line_number);
+                                    ret_err!(Err(error))
+                                }
+                                StoreDone(mid) => {
+                                    ret_err!(Messages::push(cid, MsgUpdate::StoreDone(mid)));
+                                }
+                                SendDone(_) => {
+                                    // TODO: send status?
+                                }
+                            }
+                        })
+                    .await
+                };
+            })
+        };
     }
 
     fn remove_attachment(&mut self, path: String) -> bool {
