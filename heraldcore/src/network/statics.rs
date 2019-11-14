@@ -31,7 +31,8 @@ pub(super) async fn get_client() -> Result<HeraldServiceClient, HErr> {
         if let Some(r) = RPC_CLIENT.get() {
             return Ok(r.clone());
         } else if !RPC_IS_BEING_INIT.swap(true, Ordering::SeqCst) {
-            scopeguard::guard((), |()| RPC_IS_BEING_INIT.store(false, Ordering::SeqCst));
+            let _guard =
+                scopeguard::guard((), |()| RPC_IS_BEING_INIT.store(false, Ordering::SeqCst));
 
             let transport = transport::connect(&SERVER_RPC_ADDR).await?;
             let client =

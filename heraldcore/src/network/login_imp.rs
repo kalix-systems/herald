@@ -13,8 +13,6 @@ where
 {
     use login::*;
 
-    CAUGHT_UP.store(false, Ordering::Release);
-
     if sodiumoxide::init().is_err() {
         eprintln!("failed to init libsodium - what are you doing");
         std::process::abort()
@@ -46,6 +44,7 @@ where
     let ev = catchup(&mut stream).await?;
 
     CAUGHT_UP.store(true, Ordering::Release);
+    let guard = scopeguard::guard((), |()| CAUGHT_UP.store(false, Ordering::Acquire));
 
     // clear pending
     for (tag, cid, content) in pending::get_pending()? {
@@ -58,6 +57,7 @@ where
 
     tokio::spawn(async move {
         let comp: Result<(), HErr> = async move {
+            let _guard = guard;
             loop {
                 let ev = catchup(&mut stream).await?;
                 ev.execute(&mut f, &mut g).await?;
@@ -65,8 +65,6 @@ where
         }
             .await;
         comp.unwrap_or_else(|e| eprintln!("connection failed with message {}", e));
-
-        CAUGHT_UP.store(false, Ordering::Release);
     });
 
     Ok(())
