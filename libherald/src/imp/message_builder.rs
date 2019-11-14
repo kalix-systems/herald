@@ -60,7 +60,6 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn set_replying_to(&mut self, op_msg_id: Option<ffi::MsgIdRef>) {
-        dbg!();
         match (op_msg_id, self.inner.op) {
             (Some(op_msg_id), _) => {
                 let op_msg_id = ret_err!(op_msg_id.try_into());
