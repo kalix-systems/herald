@@ -41,8 +41,10 @@ ToolBar {
             MouseArea {
                 anchors.fill: parent
                 id: avatarHoverHandler
+                cursorShape: Qt.PointingHandCursor
                 onPressed: {
                     overlay.visible = true
+
                 }
                 onReleased: {
                     overlay.visible = false
