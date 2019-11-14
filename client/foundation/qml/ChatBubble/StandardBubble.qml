@@ -19,7 +19,6 @@ ColumnLayout {
         senderColor: authorColor
     }
 
-
     StandardTextEdit {}
     StandardStamps {}
 }
