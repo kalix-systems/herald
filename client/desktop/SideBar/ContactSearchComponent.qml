@@ -8,7 +8,6 @@ import "qrc:/imports/js/utils.mjs" as Utils
 
 Column {
     width: parent.width
-    Component.onCompleted: print(height)
 
     TextArea {
         id: groupSelectText
