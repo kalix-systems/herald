@@ -16,9 +16,10 @@ pub fn profile_picture_path(id: &str) -> PathBuf {
 /// herald's storage.
 pub fn save_profile_picture<P>(id: &str, source: P, old_path: Option<P>) -> Result<PathBuf, HErr>
 where
-    P: AsRef<Path> + std::fmt::Debug,
+    P: AsRef<Path>,
 {
     std::fs::create_dir_all(PROFILE_PICTURES_DIR.as_path())?;
+
     if let Some(old_path) = old_path {
         if let Err(e) = std::fs::remove_file(old_path) {
             eprintln!("{}", e);
