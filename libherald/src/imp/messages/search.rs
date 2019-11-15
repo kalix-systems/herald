@@ -85,7 +85,7 @@ impl SearchMachine {
         }
 
         let prev = loop {
-            let match_val = self.matches.pop_front()?;
+            let match_val = self.matches.pop_back()?;
             if container.contains(&match_val.mid) {
                 break match_val;
             }
