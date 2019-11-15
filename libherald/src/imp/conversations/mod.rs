@@ -146,6 +146,11 @@ impl ConversationsTrait for Conversations {
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
+
+        if meta.pairwise {
+            return false;
+        }
+
         ret_err!(
             conversation::set_picture(
                 &meta.conversation_id,

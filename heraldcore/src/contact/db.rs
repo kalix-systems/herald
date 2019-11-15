@@ -1,6 +1,9 @@
 use super::*;
 use rusqlite::named_params;
 
+// TODO: this should be a struct
+type PathStr<'a> = &'a str;
+
 /// Gets a contact's name by their `id`.
 pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_name.sql"))?;
@@ -45,7 +48,7 @@ pub fn set_profile_picture(
     conn: &rusqlite::Connection,
     id: UserId,
     profile_picture: Option<String>,
-    old_path: Option<&str>,
+    old_path: Option<PathStr>,
 ) -> Result<Option<String>, HErr> {
     let profile_picture = match profile_picture {
         Some(path) => {
@@ -54,8 +57,16 @@ pub fn set_profile_picture(
                 .into_string()?;
             Some(path_string)
         }
-        None => None,
+        None => {
+            if let Some(old) = old_path {
+                std::fs::remove_file(old).ok();
+            }
+            None
+        }
     };
+
+    let mut stmt = conn.prepare(include_str!("sql/set_conversation_picture.sql"))?;
+    stmt.execute_named(named_params! {"@picture": profile_picture, "@user_id": id})?;
 
     conn.execute(
         include_str!("sql/update_profile_picture.sql"),
