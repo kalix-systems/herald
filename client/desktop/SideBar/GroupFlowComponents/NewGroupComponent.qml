@@ -13,6 +13,7 @@ Rectangle {
     anchors.fill: parent
     color: CmnCfg.palette.paneColor
 
+    //header includes group title and picture settings
     GroupHeaderComponent {
         id: topRect
     }
@@ -42,13 +43,15 @@ Rectangle {
         color: CmnCfg.palette.secondaryTextColor
     }
 
-
+    //component for searching contacts to add
     ContactSearchComponent {
         id: groupSelectText
         anchors.top: bigDivider.bottom
         anchors.topMargin: 20
     }
 
+
+    //create group button
     Common.ButtonForm {
         anchors.top: groupSelectText.bottom
         anchors.right: parent.right
@@ -66,12 +69,12 @@ Rectangle {
             text: "CREATE"
             anchors.centerIn: parent
             color: "white"
+            font.family: CmnCfg.chatFont.name
         }
             onClicked: { groupMemberSelect.setTitle(titleText.text)
             groupMemberSelect.finalize()
                 sideBarState.state = ""
             }
     }
-
 }
 }

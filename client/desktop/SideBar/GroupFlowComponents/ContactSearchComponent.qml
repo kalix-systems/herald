@@ -39,6 +39,9 @@ Column {
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
             height: CmnCfg.smallMargin / 2
+
+            //this and indicator are invisible, we don't want the combo box
+            //controls to be visible
             background: Rectangle {
                 height: 0
                 width: 0
@@ -84,6 +87,7 @@ Column {
             }
         }
         }
+    //component for selected group members
     FinalGroupList {
 
     }

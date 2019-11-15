@@ -25,6 +25,7 @@ ListView {
         boxTitle: contactsModel.nameById(memberId)
         picture: Utils.safeStringOrDefault(contactsModel.profilePictureById(memberId), "")
 
+        //no hover state
         states: []
 
         labelComponent: Av.ConversationLabel {
