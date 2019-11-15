@@ -31,11 +31,10 @@ pub struct OutboundMessageBuilder {
 
 /// Values `OutboundMessageBuilder`'s `store_and_send` function
 /// can pass into the callback.
-#[allow(clippy::large_enum_variant)]
 #[derive(Debug)]
 pub enum StoreAndSend {
     /// The message being stored and sent
-    Msg(Message),
+    Msg(Box<Message>),
     /// An error accompanied by the line number it occured on
     Error {
         /// The error
