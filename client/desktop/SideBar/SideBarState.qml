@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "./ConversationView"
 import "../SideBar/NewConvoComponents" as ConvUtils
+import "../SideBar/GroupFlowComponents" as GroupFlow
 
 Page {
     id: sideBarStateLoader
@@ -31,7 +32,7 @@ Page {
         }
     }
 
-   NewGroupComponent {
+   GroupFlow.NewGroupComponent {
        id: newGroupComponent
    }
 

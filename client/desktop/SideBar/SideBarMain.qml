@@ -51,16 +51,6 @@ Page {
         id: searchBarComponent
     }
 
-    //component loaded when selecting a new group
-    ConvUtils.GroupSelectComponent {
-        id: groupSelectComponent
-    }
-
-    //component loaded when finalizing new group
-    ConvUtils.FinalizeGroupComponent {
-        id: finalizeGroupComponent
-    }
-
     ConvUtils.NewGroupBar {
         id: newGroupBar
         visible: sideBarState.state === "newConversationState"
