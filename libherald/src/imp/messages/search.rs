@@ -1,4 +1,6 @@
 use super::*;
+use std::collections::VecDeque;
+use std::ops::Not;
 
 #[derive(PartialEq)]
 pub(super) enum SearchChanged {
@@ -8,14 +10,13 @@ pub(super) enum SearchChanged {
 
 #[derive(Clone, Copy)]
 pub(super) struct Match {
-    pub(super) ix: usize,
+    pub(super) mid: MsgId,
 }
 
 pub(super) struct SearchMachine {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
-    pub(super) cursor: Option<usize>,
-    pub(super) matches: Vec<Match>,
+    pub(super) matches: VecDeque<Match>,
 }
 
 impl SearchMachine {
@@ -23,8 +24,7 @@ impl SearchMachine {
         Self {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
             active: false,
-            cursor: None,
-            matches: Vec::new(),
+            matches: VecDeque::new(),
         }
     }
 
@@ -56,42 +56,31 @@ impl SearchMachine {
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) {
         self.active = false;
-        self.cursor = None;
 
-        self.matches = Vec::new();
+        self.matches = VecDeque::new();
 
         emit.search_active_changed();
         emit.search_num_matches_changed();
     }
 
-    fn init_cursor(&self) -> Option<usize> {
-        Some(self.matches.last()?.ix)
+    pub(super) fn next(&mut self) -> Option<Match> {
+        if self.active.not() {
+            return None;
+        }
+
+        let next = self.matches.pop_front()?;
+        self.matches.push_back(next.clone());
+        Some(next)
     }
 
-    pub(super) fn next(&mut self) -> Option<&Match> {
-        let init_cursor = self.init_cursor()?;
-        self.cursor = Some(self.cursor.unwrap_or(init_cursor));
+    pub(super) fn prev(&mut self) -> Option<Match> {
+        if self.active.not() {
+            return None;
+        }
 
-        self.cursor = if self.cursor.unwrap_or(init_cursor) == self.matches.len().saturating_sub(1)
-        {
-            Some(0)
-        } else {
-            Some(self.cursor?.saturating_add(1))
-        };
+        let prev = self.matches.pop_back()?;
+        self.matches.push_front(prev.clone());
 
-        self.matches.get(self.cursor?)
-    }
-
-    pub(super) fn prev(&mut self) -> Option<&Match> {
-        let init_cursor = self.init_cursor()?;
-        self.cursor = Some(self.cursor.unwrap_or(init_cursor));
-
-        self.cursor = if self.cursor.unwrap_or(init_cursor) == 0 {
-            Some(self.matches.len().saturating_sub(1))
-        } else {
-            Some(self.cursor?.saturating_sub(1))
-        };
-
-        self.matches.get(self.cursor?)
+        Some(prev)
     }
 }

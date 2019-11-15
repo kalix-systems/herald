@@ -1,5 +1,6 @@
 use super::*;
 use heraldcore::{channel_recv_err, channel_send_err};
+use std::{collections::VecDeque, ops::Not};
 
 #[derive(Default)]
 pub(super) struct Container {
@@ -95,38 +96,28 @@ impl Container {
         search: &SearchMachine,
         model: &mut List,
         emit: &mut Emitter,
-    ) -> Option<Vec<Match>> {
-        if !search.active || search.pattern.raw().is_empty() {
+    ) -> Option<VecDeque<Match>> {
+        if search.active.not() || search.pattern.raw().is_empty() {
             return None;
         }
 
         let pattern = &search.pattern;
 
-        // to help the borrow checker
-        let map = &mut self.map;
+        let mut matches: VecDeque<Match> = VecDeque::new();
 
-        let matches: Vec<Match> = self
-            .list
-            .iter()
-            .enumerate()
-            .map(|(ix, Message { msg_id, .. })| (ix, msg_id))
-            .filter_map(|(ix, mid)| {
-                let data = map.get_mut(&mid)?;
-                let matches = data.matches(pattern);
-                data.matched = matches;
-                if !matches {
-                    return None;
-                };
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(msg_id)?;
+            let matched = data.matches(pattern);
 
-                if !matches {
-                    return None;
-                }
+            data.matched = matched;
 
-                Some(Match { ix })
-            })
-            .collect();
+            if !matched {
+                continue;
+            };
 
-        model.data_changed(0, self.list.len().saturating_sub(1));
+            model.data_changed(ix, ix);
+            matches.push_back(Match { mid: *msg_id })
+        }
 
         emit.search_num_matches_changed();
 
