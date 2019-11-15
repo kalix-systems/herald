@@ -15,12 +15,12 @@ type Emitter = UsersEmitter;
 type List = UsersList;
 
 #[derive(Clone, Eq, PartialEq, PartialOrd, Ord)]
-/// Thin wrapper around `heraldcore::contact::Contact`,
+/// Thin wrapper around a `UserId`,
 /// with an additional field to facilitate filtering
 /// in the UI.
 pub struct User {
-    id: UserId,
-    matched: bool,
+    pub(crate) id: UserId,
+    pub(crate) matched: bool,
 }
 
 /// A wrapper around a vector of `User`s, with additional
@@ -33,17 +33,17 @@ pub struct Users {
     list: Vec<User>,
 }
 
-fn color(uid: &UserId) -> Option<u32> {
+pub(crate) fn color(uid: &UserId) -> Option<u32> {
     Some(get_user(&uid)?.color)
 }
 
-fn name(uid: &UserId) -> Option<String> {
+pub(crate) fn name(uid: &UserId) -> Option<String> {
     let inner = get_user(uid)?;
 
     Some(inner.name.clone())
 }
 
-fn profile_picture(uid: &UserId) -> Option<String> {
+pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
     let inner = get_user(uid)?;
 
     inner.profile_picture.clone()

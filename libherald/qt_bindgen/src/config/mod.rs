@@ -54,6 +54,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
+       conversation_builder_users(),
        message_builder(),
        attachments()
     }
@@ -72,7 +73,7 @@ fn herald_state() -> Object {
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties).funcs(funcs)
+        HeraldState: Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -306,6 +307,29 @@ fn conversation_builder() -> Object {
 
     obj! {
         ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+    }
+}
+
+fn conversation_builder_users() -> Object {
+    let props = props! {
+        filter: Prop::new().simple(SimpleType::QString).write().optional()
+    };
+
+    let item_props = item_props! {
+       userId: ItemProp::new(QString).optional(),
+       name: ItemProp::new(QString).get_by_value().optional(),
+       profilePicture: picture_item_prop().get_by_value().optional(),
+       color: color_item_prop().optional(),
+       selected: ItemProp::new(Bool).write(),
+       matched: matched_item_prop()
+    };
+
+    let funcs = functions! {
+        mut clearFilter() => Void,
+    };
+
+    obj! {
+        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 
