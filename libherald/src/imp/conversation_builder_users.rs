@@ -110,7 +110,7 @@ impl ConversationBuilderUsersTrait for ConversationBuilderUsers {
                     self.clear_filter();
                     return;
                 }
-                let pattern = ret_err!(SearchPattern::new_regex(pattern));
+                let pattern = ret_err!(SearchPattern::new_normal(pattern));
                 self.filter = Some(pattern);
                 self.inner_filter();
                 self.emit.filter_changed();
