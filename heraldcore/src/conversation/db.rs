@@ -2,6 +2,9 @@ use super::*;
 use crate::message::MessageTime;
 use rusqlite::named_params;
 
+// TODO: this should be a struct
+type PathStr<'a> = &'a str;
+
 impl ConversationBuilder {
     ///Adds conversation
     pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
@@ -166,20 +169,16 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<&str>,
-    old_pic: Option<&str>,
+    picture: Option<PathStr>,
+    old_pic: Option<PathStr>,
 ) -> Result<(), HErr> {
     use crate::image_utils;
 
     let path = match picture {
         Some(path) => Some(
-            image_utils::save_profile_picture(
-                format!("{:x?}", conversation_id.as_slice()).as_str(),
-                path,
-                old_pic,
-            )?
-            .into_os_string()
-            .into_string()?,
+            image_utils::update_picture(path, old_pic)?
+                .into_os_string()
+                .into_string()?,
         ),
         None => {
             if let Some(old) = old_pic {

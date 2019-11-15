@@ -1,5 +1,5 @@
 use super::*;
-use crate::{db::Database, platform_dirs::PROFILE_PICTURES_DIR, womp};
+use crate::{db::Database, platform_dirs::PICTURES_DIR, womp};
 use serial_test_derive::serial;
 
 #[test]
@@ -54,7 +54,7 @@ fn fs_profile_picture() {
     db::set_profile_picture(&conn, id, Some(test_picture.into()), None)
         .expect(womp!("Failed to set profile picture"));
 
-    std::fs::remove_dir_all(PROFILE_PICTURES_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(PICTURES_DIR.as_path()).expect(womp!());
 }
 
 #[test]

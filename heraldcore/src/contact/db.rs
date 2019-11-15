@@ -49,10 +49,9 @@ pub fn set_profile_picture(
 ) -> Result<Option<String>, HErr> {
     let profile_picture = match profile_picture {
         Some(path) => {
-            let path_string =
-                image_utils::save_profile_picture(id.as_str(), path, old_path.map(|p| p.into()))?
-                    .into_os_string()
-                    .into_string()?;
+            let path_string = image_utils::update_picture(path, old_path.map(|p| p.into()))?
+                .into_os_string()
+                .into_string()?;
             Some(path_string)
         }
         None => None,
