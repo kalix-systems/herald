@@ -12,6 +12,7 @@ Rectangle  {
     height: 70
     width: parent.width
    color: CmnCfg.palette.paneColor
+   property alias profPic: groupImageLoader.imageSource
 
     Rectangle {
         anchors.top: parent.top
