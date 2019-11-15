@@ -570,6 +570,7 @@ public:
     Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
+    Q_INVOKABLE QVariant matched(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;

@@ -259,7 +259,8 @@ fn messages() -> Object {
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
-        isTail: ItemProp::new(Bool).optional()
+        isTail: ItemProp::new(Bool).optional(),
+        matched: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {

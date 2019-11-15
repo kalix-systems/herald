@@ -157,6 +157,10 @@ impl MessagesTrait for Messages {
         )
     }
 
+    fn matched(&self, row_index: usize) -> Option<bool> {
+        Some(self.container.msg_data(row_index)?.matched)
+    }
+
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
         match self.container.msg_data(row_index)?.op {
             ReplyId::Known(ref mid) => Some(mid.as_slice()),
