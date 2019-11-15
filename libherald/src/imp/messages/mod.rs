@@ -318,19 +318,12 @@ impl MessagesTrait for Messages {
             return;
         }
 
-        let pattern = if self.search_regex() {
-            ret_err!(SearchPattern::new_regex(pattern))
-        } else {
-            ret_err!(SearchPattern::new_normal(pattern))
-        };
-
-        self.search.pattern = pattern;
-        self.emit.search_regex_changed();
-
-        self.search.matches = self
-            .container
-            .apply_search(&self.search, &mut self.model, &mut self.emit)
-            .unwrap_or_default();
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
+        }
     }
 
     /// Indicates whether regex search is activated
@@ -340,7 +333,7 @@ impl MessagesTrait for Messages {
 
     /// Sets search mode
     fn set_search_regex(&mut self, use_regex: bool) {
-        if ret_err!(self.search.set_regex(use_regex)) == SearchChanged::Changed {
+        if ret_err!(self.search.set_regex(use_regex)).changed() {
             self.emit.search_regex_changed();
             self.search.matches = self
                 .container

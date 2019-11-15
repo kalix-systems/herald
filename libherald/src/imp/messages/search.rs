@@ -8,6 +8,12 @@ pub(super) enum SearchChanged {
     NotChanged,
 }
 
+impl SearchChanged {
+    pub(super) fn changed(&self) -> bool {
+        self == &SearchChanged::Changed
+    }
+}
+
 #[derive(Clone, Copy)]
 pub(super) struct Match {
     pub(super) mid: MsgId,
@@ -33,6 +39,26 @@ impl SearchMachine {
             SearchPattern::Normal { .. } => false,
             SearchPattern::Regex { .. } => true,
         }
+    }
+
+    pub(super) fn set_pattern(
+        &mut self,
+        pattern: String,
+        emit: &mut Emitter,
+    ) -> Result<SearchChanged, HErr> {
+        if pattern == self.pattern.raw() {
+            return Ok(SearchChanged::NotChanged);
+        }
+
+        self.pattern = if self.is_regex() {
+            SearchPattern::new_regex(pattern)?
+        } else {
+            SearchPattern::new_normal(pattern)?
+        };
+
+        emit.search_pattern_changed();
+
+        Ok(SearchChanged::Changed)
     }
 
     pub(super) fn set_regex(&mut self, use_regex: bool) -> Result<SearchChanged, HErr> {
