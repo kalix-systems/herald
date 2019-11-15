@@ -37,9 +37,9 @@ jobs:
         with:
           command: test
 
-  macos_test:
-    name: MacOS Test
-    runs-on: macos-latest
+  platform_tests:
+    name: Libherald Platform Tests
+    runs-on: [ macos-latest, windows-latest ]
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -56,26 +56,27 @@ jobs:
           command: test
           args: --manifest-path=heraldcore/Cargo.toml
 
-  windows_test:
-    name: Windows Test
-    runs-on: windows-latest
+  integration:
+    name: Integration Tests
+    using: 'docker'
+    image: '/client/tests/Dockerfile'
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
+      - uses: actions/install-qt-action@v0.1.1
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          packages: 'qt.qt5.5124.gcc_64'
+      - uses: actions-rs/cargo@v1
+        command: build
+      - name: Run Server  
+        run: pg_ctl -D psdb -p 5432 start
       - uses: actions-rs/cargo@v1
         with:
-          command: test
-          args: --manifest-path=libherald/Cargo.toml
-      - uses: actions-rs/cargo@v1
-        with:
-          command: test
-          args: --manifest-path=heraldcore/Cargo.toml
-
-
+          command: run
+          args: --mainifes-path=herald_server/Cargo.toml
+      - name: Run Tests
+        run: /Qt/5.12.4/gcc_64/bin/qmake client/tests/tests.pro
+        run: ./tests
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
