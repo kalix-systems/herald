@@ -1,7 +1,6 @@
-use crate::prelude::*;
-use bytes::Buf;
 use dashmap::DashMap;
 use futures::stream::*;
+use herald_common::*;
 use server_errors::*;
 use server_store::*;
 use sodiumoxide::crypto::sign;
@@ -16,10 +15,7 @@ use tokio::{
     },
     timer::Timeout,
 };
-use warp::{
-    filters::ws::{self, WebSocket},
-    Filter,
-};
+use warp::filters::ws::{self, WebSocket};
 
 type WTx = SplitSink<WebSocket, ws::Message>;
 
@@ -30,7 +26,6 @@ pub struct State {
 }
 
 pub mod get;
-pub mod http;
 pub mod login;
 pub mod post;
 
@@ -42,7 +37,7 @@ impl State {
         }
     }
 
-    async fn new_connection(&self) -> Result<Conn, Error> {
+    pub async fn new_connection(&self) -> Result<Conn, Error> {
         Ok(self.pool.get().await?)
     }
 
@@ -174,45 +169,6 @@ impl State {
         }
 
         Ok(())
-    }
-
-    pub(crate) async fn req_handler_store<B, I, O, F, Fut>(
-        &self,
-        req: B,
-        f: F,
-    ) -> Result<Vec<u8>, Error>
-    where
-        B: Buf,
-        I: for<'a> Deserialize<'a>,
-        O: Serialize,
-        F: FnOnce(Conn, I) -> Fut,
-        Fut: Future<Output = Result<O, Error>>,
-    {
-        let con: Conn = self.new_connection().await?;
-        let buf: Vec<u8> = req.collect();
-        let req: I = serde_cbor::from_slice(&buf)?;
-        let res: O = f(con, req).await?;
-        let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
-        Ok(res_ser)
-    }
-
-    pub(crate) async fn req_handler_async<'a, B, I, O, F, Fut>(
-        &'a self,
-        req: B,
-        f: F,
-    ) -> Result<Vec<u8>, Error>
-    where
-        B: Buf,
-        I: for<'b> Deserialize<'b>,
-        O: Serialize,
-        F: FnOnce(&'a Self, I) -> Fut,
-        Fut: Future<Output = Result<O, Error>>,
-    {
-        let buf: Vec<u8> = req.collect();
-        let req: I = serde_cbor::from_slice(&buf)?;
-        let res: O = f(self, req).await?;
-        let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
-        Ok(res_ser)
     }
 
     async fn send_pushes(

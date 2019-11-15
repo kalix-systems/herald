@@ -7,6 +7,7 @@ members = [
   "herald_server",
   "herald_server/server_store",
   "herald_server/server_errors",
+  "herald_server/server_protocol",
   "heraldcore",
   "libherald",
   "libherald/qt_bindgen",
