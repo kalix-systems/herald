@@ -14,12 +14,20 @@ pub(super) struct MsgData {
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
+    pub(super) matched: bool,
 }
 
 impl MsgData {
     pub(super) fn same_flurry(&self, rhs: &Self) -> bool {
         (self.author == rhs.author)
             && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
+    }
+
+    pub(super) fn matches(&self, pattern: &heraldcore::utils::SearchPattern) -> bool {
+        match self.body.as_ref() {
+            Some(body) => pattern.is_match(body.as_str()),
+            None => false,
+        }
     }
 }
 
@@ -59,6 +67,7 @@ impl Message {
             time,
             send_status,
             save_status,
+            matched: true,
         };
 
         let message = Message {

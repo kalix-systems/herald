@@ -34,10 +34,9 @@ ListView {
 
         Common.PlatonicRectangle {
             id: contactRectangle
-            isContact: true
             boxColor: contactData.color
             boxTitle: contactData.name
-            picture: contactData.profilePicture
+            picture: Utils.safeStringOrDefault(contactData.profilePicture, "")
 
             labelComponent: Av.ConversationLabel {
                 contactName: contactData.name

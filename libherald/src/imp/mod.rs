@@ -4,6 +4,8 @@ pub mod attachments;
 pub mod config;
 /// Implementation of `crate::interface::ConvBuilderTrait`
 pub mod conversation_builder;
+/// Implementation of `crate::interface::ConversationBuilderUsersTrait`.
+pub mod conversation_builder_users;
 /// Implementation of `crate::interface::ConversationsTrait`.
 pub mod conversations;
 /// Implementation of `crate::interface::ErrorsTrait`.
@@ -26,6 +28,7 @@ pub mod users;
 pub use attachments::*;
 pub use config::*;
 pub use conversation_builder::*;
+pub use conversation_builder_users::*;
 pub use conversations::*;
 pub use errors::*;
 pub use heraldstate::*;

@@ -29,7 +29,7 @@ Page {
 
     ///--- SearchBar for contacts, add contact button
     header: Loader {
-        id: searchLoader
+        id: headerLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
 
@@ -42,19 +42,13 @@ Page {
         }
     }
 
+    HeaderComponent {
+        id: headerBarComponent
+    }
+
     //search component loaded to search convos and contacts
     SearchComponent {
         id: searchBarComponent
-    }
-
-    //component loaded when selecting a new group
-    ConvUtils.GroupSelectComponent {
-        id: groupSelectComponent
-    }
-
-    //component loaded when finalizing new group
-    ConvUtils.FinalizeGroupComponent {
-        id: finalizeGroupComponent
     }
 
     ConvUtils.NewGroupBar {
@@ -65,6 +59,7 @@ Page {
 
     Loader {
         id: convoBuilderLoader
+        onLoaded: print("true")
     }
 
     SideBarState {

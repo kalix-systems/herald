@@ -120,11 +120,6 @@ impl MembersTrait for Members {
         ret_none!(self.list.get(row_index), true).matched
     }
 
-    fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
-        ret_none!(self.list.get_mut(row_index), false).matched = value;
-        true
-    }
-
     fn filter(&self) -> &str {
         self.filter.raw()
     }

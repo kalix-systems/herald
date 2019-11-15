@@ -6,7 +6,7 @@ use heraldcore::{
     types::{ConversationId, ExpirationPeriod},
     utils::SearchPattern,
 };
-use im_rc::vector::Vector;
+use im::vector::Vector;
 
 pub(crate) mod shared;
 use shared::*;
@@ -206,11 +206,6 @@ impl ConversationsTrait for Conversations {
 
     fn matched(&self, row_index: usize) -> bool {
         ret_none!(self.list.get(row_index), true).matched
-    }
-
-    fn set_matched(&mut self, row_index: usize, value: bool) -> bool {
-        ret_none!(self.list.get_mut(row_index), false).matched = value;
-        true
     }
 
     fn filter(&self) -> &str {

@@ -73,6 +73,7 @@ ToolBar {
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.paneColor
                 topPadding: 1
+                onClicked: messageBar.sourceComponent = chatSearchComponent
             }
 
             Common.ButtonForm {

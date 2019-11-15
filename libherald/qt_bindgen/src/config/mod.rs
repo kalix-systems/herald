@@ -54,6 +54,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
+       conversation_builder_users(),
        message_builder(),
        attachments()
     }
@@ -61,18 +62,18 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
 fn herald_state() -> Object {
     let properties = props! {
-        configInit: Prop::new().simple(Bool).write(),
+        configInit: Prop::new().simple(Bool),
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool)
     };
 
     let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Bool,
+        mut registerNewUser(user_id: QString) => Void,
         mut login() => Bool,
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties).funcs(funcs)
+        HeraldState: Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -117,7 +118,7 @@ fn filter_regex_prop() -> Prop {
 }
 
 fn matched_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::Bool).write()
+    ItemProp::new(SimpleType::Bool)
 }
 
 fn filter_props() -> BTreeMap<String, Property> {
@@ -144,7 +145,7 @@ fn conversations() -> Object {
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
-       matched: matched_item_prop().write(),
+       matched: matched_item_prop(),
        picture: picture_item_prop().write(),
        color: color_item_prop().write()
     };
@@ -238,7 +239,11 @@ fn messages() -> Object {
         lastBody: Prop::new().simple(QString).optional(),
         lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
-        isEmpty: Prop::new().simple(Bool)
+        isEmpty: Prop::new().simple(Bool),
+        searchPattern: filter_prop(),
+        searchRegex: filter_regex_prop(),
+        searchActive: Prop::new().simple(Bool).write(),
+        searchNumMatches: Prop::new().simple(QUint64)
     };
 
     let item_props = item_props! {
@@ -260,6 +265,9 @@ fn messages() -> Object {
     let funcs = functions! {
         mut deleteMessage(row_index: QUint64) => Bool,
         mut clearConversationHistory() => Bool,
+        mut clearSearch() => Void,
+        mut nextSearchMatch() => Qint64,
+        mut prevSearchMatch() => Qint64,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
@@ -299,6 +307,29 @@ fn conversation_builder() -> Object {
 
     obj! {
         ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+    }
+}
+
+fn conversation_builder_users() -> Object {
+    let props = props! {
+        filter: Prop::new().simple(SimpleType::QString).write().optional()
+    };
+
+    let item_props = item_props! {
+       userId: ItemProp::new(QString).optional(),
+       name: ItemProp::new(QString).get_by_value().optional(),
+       profilePicture: picture_item_prop().get_by_value().optional(),
+       color: color_item_prop().optional(),
+       selected: ItemProp::new(Bool).write(),
+       matched: matched_item_prop()
+    };
+
+    let funcs = functions! {
+        mut clearFilter() => Void,
+    };
+
+    obj! {
+        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 
