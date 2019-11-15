@@ -96,7 +96,7 @@ impl Container {
         model: &mut List,
         emit: &mut Emitter,
     ) -> Option<Vec<Match>> {
-        if !search.active {
+        if !search.active || search.pattern.raw().is_empty() {
             return None;
         }
 
