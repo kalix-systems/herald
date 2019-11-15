@@ -595,6 +595,7 @@ pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 pub fn start_conversation(
     members: &[UserId],
     title: Option<String>,
+    picture: Option<String>,
 ) -> Result<ConversationId, HErr> {
     use crate::conversation;
 
@@ -604,8 +605,13 @@ pub fn start_conversation(
     let tx = db.transaction()?;
 
     let mut conv_builder = conversation::ConversationBuilder::new();
+
     if let Some(title) = title.as_ref() {
         conv_builder.title(title.clone());
+    }
+
+    if let Some(picture) = picture.as_ref() {
+        conv_builder.picture(picture.clone());
     }
 
     let cid = conv_builder.add_with_tx(&tx)?;

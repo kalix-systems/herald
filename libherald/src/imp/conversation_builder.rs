@@ -103,9 +103,12 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         let list = std::mem::replace(&mut self.list, vec![]);
         let title = self.title.take();
+        let picture = self.picture.take();
 
         ret_err!(std::thread::Builder::new().spawn(move || {
-            let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
+            let cid = ret_err!(heraldcore::network::start_conversation(
+                &list, title, picture
+            ));
 
             // send update to Conversations list
             ret_err!(Conversations::push(ConvUpdates::BuilderFinished(cid)));
