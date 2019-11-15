@@ -72,6 +72,7 @@ Rectangle {
             font.family: CmnCfg.chatFont.name
         }
             onClicked: { groupMemberSelect.setTitle(titleText.text)
+                groupMemberSelect.picture = topRect.profPic
             groupMemberSelect.finalize()
                 sideBarState.state = ""
             }
