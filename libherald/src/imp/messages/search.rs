@@ -82,7 +82,7 @@ impl SearchMachine {
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) {
         self.active = false;
-
+        self.pattern = abort_err!(SearchPattern::new_normal("".into()));
         self.matches = VecDeque::new();
 
         emit.search_active_changed();
