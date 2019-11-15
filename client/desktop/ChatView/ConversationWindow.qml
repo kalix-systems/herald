@@ -8,14 +8,6 @@ import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
 Flickable {
     id: cvPane
     property alias chatScrollBar: chatScrollBar

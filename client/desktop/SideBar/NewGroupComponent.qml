@@ -11,6 +11,7 @@ Component {
 // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
 Rectangle {
     anchors.fill: parent
+    color: CmnCfg.palette.paneColor
 
     GroupHeaderComponent {
         id: topRect
@@ -46,6 +47,30 @@ Rectangle {
         id: groupSelectText
         anchors.top: bigDivider.bottom
         anchors.topMargin: 20
+    }
+
+    Common.ButtonForm {
+        anchors.top: groupSelectText.bottom
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.largeMargin / 2
+
+        width: 60
+        height: 30
+
+        background: Rectangle {
+            anchors.fill: parent
+            color: CmnCfg.palette.secondaryColor
+        }
+
+        Text {
+            text: "CREATE"
+            anchors.centerIn: parent
+            color: "white"
+        }
+            onClicked: { groupMemberSelect.setTitle(titleText.text)
+            groupMemberSelect.finalize()
+                sideBarState.state = ""
+            }
     }
 
 }

@@ -116,6 +116,9 @@ impl Container {
                 let data = map.get_mut(&mid)?;
                 let matches = data.matches(pattern);
                 data.matched = matches;
+                if !matches {
+                    return None;
+                };
 
                 Some(Match { ix })
             })

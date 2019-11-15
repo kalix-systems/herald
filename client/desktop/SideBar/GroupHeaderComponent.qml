@@ -11,7 +11,7 @@ Rectangle  {
     anchors.top: parent.top
     height: 70
     width: parent.width
-    color: "transparent"
+   color: CmnCfg.palette.paneColor
 
     Rectangle {
         anchors.top: parent.top

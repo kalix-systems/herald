@@ -51,5 +51,6 @@
         <file>SideBar/NewGroupComponent.qml</file>
         <file>SideBar/ContactSearchComponent.qml</file>
         <file>SideBar/GroupHeaderComponent.qml</file>
+        <file>ChatView/ChatSearchComponent.qml</file>
     </qresource>
 </RCC>

@@ -69,6 +69,7 @@ Page {
 
     Loader {
         id: convoBuilderLoader
+        onLoaded: print("true")
     }
 
     SideBarState {
