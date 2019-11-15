@@ -541,6 +541,8 @@ public:
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE qint64 nextSearchMatch();
+    Q_INVOKABLE qint64 peekNextSearchMatch();
+    Q_INVOKABLE qint64 peekPrevSearchMatch();
     Q_INVOKABLE qint64 prevSearchMatch();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;

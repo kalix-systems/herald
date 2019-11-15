@@ -267,7 +267,9 @@ fn messages() -> Object {
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
+        mut peekNextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
+        mut peekPrevSearchMatch() => Qint64,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 

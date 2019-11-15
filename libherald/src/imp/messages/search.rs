@@ -89,6 +89,23 @@ impl SearchMachine {
         emit.search_num_matches_changed();
     }
 
+    pub(super) fn peek_next(&mut self, container: &Container) -> Option<Match> {
+        if self.active.not() {
+            return None;
+        }
+
+        let peek = loop {
+            let match_val = *self.matches.front()?;
+            if container.contains(&match_val.mid) {
+                break match_val;
+            } else {
+                self.matches.pop_front()?;
+            }
+        };
+
+        Some(peek)
+    }
+
     pub(super) fn next(&mut self, container: &Container) -> Option<Match> {
         if self.active.not() {
             return None;
@@ -101,8 +118,25 @@ impl SearchMachine {
             }
         };
 
-        self.matches.push_back(next.clone());
+        self.matches.push_back(next);
         Some(next)
+    }
+
+    pub(super) fn peek_prev(&mut self, container: &Container) -> Option<Match> {
+        if self.active.not() {
+            return None;
+        }
+
+        let peek = loop {
+            let match_val = *self.matches.back()?;
+            if container.contains(&match_val.mid) {
+                break match_val;
+            } else {
+                self.matches.pop_back()?;
+            }
+        };
+
+        Some(peek)
     }
 
     pub(super) fn prev(&mut self, container: &Container) -> Option<Match> {
@@ -117,7 +151,7 @@ impl SearchMachine {
             }
         };
 
-        self.matches.push_front(prev.clone());
+        self.matches.push_front(prev);
 
         Some(prev)
     }
