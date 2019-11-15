@@ -17,6 +17,10 @@ impl Container {
         self.list.len()
     }
 
+    pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
+        self.map.contains_key(msg_id)
+    }
+
     pub(super) fn get(&self, ix: usize) -> Option<&Message> {
         self.list.get(ix)
     }

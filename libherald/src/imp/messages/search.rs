@@ -63,22 +63,34 @@ impl SearchMachine {
         emit.search_num_matches_changed();
     }
 
-    pub(super) fn next(&mut self) -> Option<Match> {
+    pub(super) fn next(&mut self, container: &Container) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let next = self.matches.pop_front()?;
+        let next = loop {
+            let match_val = self.matches.pop_front()?;
+            if container.contains(&match_val.mid) {
+                break match_val;
+            }
+        };
+
         self.matches.push_back(next.clone());
         Some(next)
     }
 
-    pub(super) fn prev(&mut self) -> Option<Match> {
+    pub(super) fn prev(&mut self, container: &Container) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let prev = self.matches.pop_back()?;
+        let prev = loop {
+            let match_val = self.matches.pop_front()?;
+            if container.contains(&match_val.mid) {
+                break match_val;
+            }
+        };
+
         self.matches.push_front(prev.clone());
 
         Some(prev)

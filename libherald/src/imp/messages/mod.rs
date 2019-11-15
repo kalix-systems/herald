@@ -368,7 +368,7 @@ impl MessagesTrait for Messages {
     }
 
     fn next_search_match(&mut self) -> i64 {
-        match self.search.next() {
+        match self.search.next(&self.container) {
             Some(Match { mid }) => self
                 .container
                 .index_of(mid)
@@ -379,7 +379,7 @@ impl MessagesTrait for Messages {
     }
 
     fn prev_search_match(&mut self) -> i64 {
-        match self.search.prev() {
+        match self.search.prev(&self.container) {
             Some(Match { mid }) => self
                 .container
                 .index_of(mid)
