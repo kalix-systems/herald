@@ -296,6 +296,10 @@ fn conversation_builder() -> Object {
         memberId: ItemProp::new(QString)
     };
 
+    let prop = props! {
+        picture: Prop::new().simple(QString).write().optional()
+    };
+
     let funcs = functions! {
         mut addMember(user_id: QString) => Bool,
         mut removeMemberById(user_id: QString) => Bool,
@@ -306,7 +310,7 @@ fn conversation_builder() -> Object {
     };
 
     obj! {
-        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop).props(prop)
     }
 }
 

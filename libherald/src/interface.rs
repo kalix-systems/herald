@@ -555,6 +555,7 @@ pub struct ConversationBuilderQObject {}
 
 pub struct ConversationBuilderEmitter {
     qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
+    picture_changed: fn(*mut ConversationBuilderQObject),
     new_data_ready: fn(*mut ConversationBuilderQObject),
 }
 
@@ -568,6 +569,7 @@ impl ConversationBuilderEmitter {
     pub fn clone(&mut self) -> ConversationBuilderEmitter {
         ConversationBuilderEmitter {
             qobject: self.qobject.clone(),
+            picture_changed: self.picture_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -575,6 +577,12 @@ impl ConversationBuilderEmitter {
         let n: *const ConversationBuilderQObject = null();
         self.qobject
             .store(n as *mut ConversationBuilderQObject, Ordering::SeqCst);
+    }
+    pub fn picture_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.picture_changed)(ptr);
+        }
     }
     pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -639,6 +647,8 @@ impl ConversationBuilderList {
 pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
+    fn picture(&self) -> Option<&str>;
+    fn set_picture(&mut self, value: Option<String>);
     fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
@@ -663,6 +673,7 @@ pub trait ConversationBuilderTrait {
 #[no_mangle]
 pub extern "C" fn conversation_builder_new(
     conversation_builder: *mut ConversationBuilderQObject,
+    conversation_builder_picture_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_new_data_ready: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_changed: fn(*mut ConversationBuilderQObject),
@@ -678,6 +689,7 @@ pub extern "C" fn conversation_builder_new(
 ) -> *mut ConversationBuilder {
     let conversation_builder_emit = ConversationBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_builder)),
+        picture_changed: conversation_builder_picture_changed,
         new_data_ready: conversation_builder_new_data_ready,
     };
     let model = ConversationBuilderList {
@@ -701,6 +713,38 @@ pub extern "C" fn conversation_builder_new(
 #[no_mangle]
 pub unsafe extern "C" fn conversation_builder_free(ptr: *mut ConversationBuilder) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_get(
+    ptr: *const ConversationBuilder,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.picture();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_set(
+    ptr: *mut ConversationBuilder,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_picture(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_set_none(ptr: *mut ConversationBuilder) {
+    let o = &mut *ptr;
+    o.set_picture(None);
 }
 
 #[no_mangle]

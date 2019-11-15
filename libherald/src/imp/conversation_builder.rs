@@ -17,6 +17,7 @@ pub struct ConversationBuilder {
     list: Vec<UserId>,
     title: Option<String>,
     local_id: UserId,
+    picture: Option<String>,
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
@@ -27,6 +28,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             list: Vec::new(),
             title: None,
             local_id: abort_err!(heraldcore::config::Config::static_id()),
+            picture: None,
         }
     }
 
@@ -112,6 +114,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
     fn set_title(&mut self, title: String) {
         self.title.replace(title);
+    }
+
+    fn picture(&self) -> Option<&str> {
+        Some(self.picture.as_ref()?.as_str())
+    }
+
+    fn set_picture(&mut self, picture: Option<String>) {
+        self.picture = picture;
     }
 
     fn row_count(&self) -> usize {

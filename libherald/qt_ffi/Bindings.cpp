@@ -105,6 +105,10 @@ namespace {
     {
         Q_EMIT o->profilePictureChanged();
     }
+    inline void conversationBuilderPictureChanged(ConversationBuilder* o)
+    {
+        Q_EMIT o->pictureChanged();
+    }
     inline void conversationBuilderUsersFilterChanged(ConversationBuilderUsers* o)
     {
         Q_EMIT o->filterChanged();
@@ -533,7 +537,7 @@ bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation
 }
 
 extern "C" {
-    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*,
+    ConversationBuilder::Private* conversation_builder_new(ConversationBuilder*, void (*)(ConversationBuilder*),
         void (*)(const ConversationBuilder*),
         void (*)(ConversationBuilder*),
         void (*)(ConversationBuilder*),
@@ -547,6 +551,9 @@ extern "C" {
         void (*)(ConversationBuilder*, int, int),
         void (*)(ConversationBuilder*));
     void conversation_builder_free(ConversationBuilder::Private*);
+    void conversation_builder_picture_get(const ConversationBuilder::Private*, QString*, qstring_set);
+    void conversation_builder_picture_set(ConversationBuilder::Private*, const ushort *str, int len);
+    void conversation_builder_picture_set_none(ConversationBuilder::Private*);
     bool conversation_builder_add_member(ConversationBuilder::Private*, const ushort*, int);
     void conversation_builder_finalize(ConversationBuilder::Private*);
     void conversation_builder_remove_last(ConversationBuilder::Private*);
@@ -2264,6 +2271,7 @@ ConversationBuilder::ConversationBuilder(bool /*owned*/, QObject *parent):
 ConversationBuilder::ConversationBuilder(QObject *parent):
     QAbstractItemModel(parent),
     m_d(conversation_builder_new(this,
+        conversationBuilderPictureChanged,
         [](const ConversationBuilder* o) {
             Q_EMIT o->newDataReady(QModelIndex());
         },
@@ -2317,6 +2325,19 @@ ConversationBuilder::~ConversationBuilder() {
     }
 }
 void ConversationBuilder::initHeaderData() {
+}
+QString ConversationBuilder::picture() const
+{
+    QString v;
+    conversation_builder_picture_get(m_d, &v, set_qstring);
+    return v;
+}
+void ConversationBuilder::setPicture(const QString& v) {
+    if (v.isNull()) {
+        conversation_builder_picture_set_none(m_d);
+    } else {
+    conversation_builder_picture_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+    }
 }
 bool ConversationBuilder::addMember(const QString& user_id)
 {

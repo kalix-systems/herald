@@ -109,10 +109,13 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString picture READ picture WRITE setPicture NOTIFY pictureChanged FINAL)
     explicit ConversationBuilder(bool owned, QObject *parent);
 public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder() override;
+    QString picture() const;
+    void setPicture(const QString& v);
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
@@ -146,6 +149,7 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void pictureChanged();
 };
 
 class ConversationBuilderUsers : public QAbstractItemModel
