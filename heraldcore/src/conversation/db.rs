@@ -21,12 +21,21 @@ impl ConversationBuilder {
         let muted = self.muted.unwrap_or(false);
         let expiration_period = self.expiration_period.unwrap_or_default();
 
+        let picture = match &self.picture {
+            Some(picture) => {
+                // TODO Give more specific error
+                let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
+                path.into_os_string().into_string().ok()
+            }
+            None => None,
+        };
+
         conn.execute_named(
             include_str!("sql/add_conversation.sql"),
             named_params! {
                "@conversation_id": id,
                 "@title": self.title,
-                "@picture": self.picture,
+                "@picture": picture,
                 "@color": color,
                 "@pairwise": pairwise,
                 "@muted": muted,
