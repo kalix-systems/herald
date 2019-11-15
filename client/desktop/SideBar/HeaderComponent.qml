@@ -9,7 +9,9 @@ import "qrc:/imports/Avatar"
 import "popups" as Popups
 import QtGraphicalEffects 1.0
 
+//header component loaded during new group & new contact flow
 Component {
+
 ToolBar {
     id: headerBarComponent
     height: CmnCfg.toolbarHeight

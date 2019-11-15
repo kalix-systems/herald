@@ -110,27 +110,9 @@ Page {
             }
             PropertyChanges {
                 target: convoBuilderLoader
-                source: "NewConvoComponents/ConvoBuilder.qml"
-            }
-        },
-
-        State {
-            name: "finalizeGroupState"
-
-            PropertyChanges {
-                target: headerLoader
-                sourceComponent: finalizeGroupComponent
-            }
-
-            PropertyChanges {
-                target: convoBuilderLoader
-                source: "../SideBar/NewConvoComponents/ConvoBuilder.qml"
-            }
-
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: convoFinalGroup
+                source: "GroupFlowComponents/ConvoBuilder.qml"
             }
         }
+
     ]
 }

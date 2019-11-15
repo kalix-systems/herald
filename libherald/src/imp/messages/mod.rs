@@ -369,14 +369,22 @@ impl MessagesTrait for Messages {
 
     fn next_search_match(&mut self) -> i64 {
         match self.search.next() {
-            Some(Match { ix }) => *ix as i64,
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
     }
 
     fn prev_search_match(&mut self) -> i64 {
         match self.search.prev() {
-            Some(Match { ix }) => *ix as i64,
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
     }
