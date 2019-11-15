@@ -178,6 +178,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "channel_ratchet"
+version = "0.1.0"
+dependencies = [
+ "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kcl 0.1.0",
+ "kson 0.1.0",
+]
+
+[[package]]
 name = "chrono"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
