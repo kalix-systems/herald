@@ -121,7 +121,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn set_picture(&mut self, picture: Option<String>) {
-        self.picture = picture;
+        self.picture = picture.map(crate::utils::strip_qrc);
     }
 
     fn row_count(&self) -> usize {
