@@ -100,8 +100,6 @@ impl Container {
             return None;
         }
 
-        let old_cnt = search.matches.len();
-
         let pattern = &search.pattern;
 
         // to help the borrow checker
@@ -117,15 +115,17 @@ impl Container {
                 let matches = data.matches(pattern);
                 data.matched = matches;
 
+                if !matches {
+                    return None;
+                }
+
                 Some(Match { ix })
             })
             .collect();
 
-        if old_cnt != matches.len() {
-            emit.search_num_matches_changed();
-        }
-
         model.data_changed(0, self.list.len().saturating_sub(1));
+
+        emit.search_num_matches_changed();
 
         Some(matches)
     }
