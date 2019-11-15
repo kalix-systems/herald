@@ -96,11 +96,9 @@ impl Container {
         model: &mut List,
         emit: &mut Emitter,
     ) -> Option<Vec<Match>> {
-        if !search.active {
+        if !search.active || search.pattern.raw().is_empty() {
             return None;
         }
-
-        let old_cnt = search.matches.len();
 
         let pattern = &search.pattern;
 
@@ -120,15 +118,17 @@ impl Container {
                     return None;
                 };
 
+                if !matches {
+                    return None;
+                }
+
                 Some(Match { ix })
             })
             .collect();
 
-        if old_cnt != matches.len() {
-            emit.search_num_matches_changed();
-        }
-
         model.data_changed(0, self.list.len().saturating_sub(1));
+
+        emit.search_num_matches_changed();
 
         Some(matches)
     }

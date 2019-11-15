@@ -64,8 +64,16 @@ impl SearchMachine {
         emit.search_num_matches_changed();
     }
 
+    fn init_cursor(&self) -> Option<usize> {
+        Some(self.matches.last()?.ix)
+    }
+
     pub(super) fn next(&mut self) -> Option<&Match> {
-        self.cursor = if self.cursor? == self.matches.len().saturating_sub(1) {
+        let init_cursor = self.init_cursor()?;
+        self.cursor = Some(self.cursor.unwrap_or(init_cursor));
+
+        self.cursor = if self.cursor.unwrap_or(init_cursor) == self.matches.len().saturating_sub(1)
+        {
             Some(0)
         } else {
             Some(self.cursor?.saturating_add(1))
@@ -75,7 +83,10 @@ impl SearchMachine {
     }
 
     pub(super) fn prev(&mut self) -> Option<&Match> {
-        self.cursor = if self.cursor? == 0 {
+        let init_cursor = self.init_cursor()?;
+        self.cursor = Some(self.cursor.unwrap_or(init_cursor));
+
+        self.cursor = if self.cursor.unwrap_or(init_cursor) == 0 {
             Some(self.matches.len().saturating_sub(1))
         } else {
             Some(self.cursor?.saturating_sub(1))
