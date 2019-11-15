@@ -67,7 +67,6 @@ Component {
         onTextChanged: {
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
-
             print(ownedConversation.searchNumMatches, ownedConversation.prevSearchMatch())
         }
 
