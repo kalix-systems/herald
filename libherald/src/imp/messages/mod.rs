@@ -5,7 +5,10 @@ use heraldcore::{
     config::Config,
     conversation,
     errors::HErr,
-    message::{self, Message as Msg},
+    message::{
+        self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
+        ReplyId,
+    },
     types::*,
     utils::SearchPattern,
     NE,

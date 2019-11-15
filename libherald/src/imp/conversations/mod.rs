@@ -1,9 +1,9 @@
 use crate::{ffi, interface::*, push_err, ret_err, ret_none};
 use heraldcore::{
     abort_err,
-    conversation::{self, ConversationMeta},
+    conversation::{self, ConversationMeta, ExpirationPeriod},
     errors::HErr,
-    types::{ConversationId, ExpirationPeriod},
+    types::ConversationId,
     utils::SearchPattern,
 };
 use im::vector::Vector;

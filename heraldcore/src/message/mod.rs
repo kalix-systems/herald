@@ -10,31 +10,9 @@ pub mod attachments;
 pub(crate) mod db;
 /// Runs message garbage collection tasks such as removing expired messages
 pub mod gc;
-pub use crate::types::MessageTime;
+mod types;
 use attachments::*;
-
-/// Message
-#[derive(Clone, Debug)]
-pub struct Message {
-    /// Local message id
-    pub message_id: MsgId,
-    /// Author user id
-    pub author: UserId,
-    /// Recipient user id
-    pub conversation: ConversationId,
-    /// Body of message
-    pub body: Option<MessageBody>,
-    /// Message time information
-    pub time: MessageTime,
-    /// Message id of the message being replied to
-    pub op: ReplyId,
-    /// Send status
-    pub send_status: MessageSendStatus,
-    /// Receipts
-    pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    /// Indicates whether the message has attachments
-    pub has_attachments: bool,
-}
+pub use types::*;
 
 #[derive(Default)]
 /// Builder for storing outbound messages

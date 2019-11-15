@@ -1,5 +1,5 @@
 use super::*;
-use crate::{types, womp};
+use crate::{message::MessageReceiptStatus, types, womp};
 
 #[test]
 fn add_get_delete() {
@@ -17,7 +17,7 @@ fn add_get_delete() {
 
     let msg = types::cmessages::Ack {
         of: [1; 32].into(),
-        stat: types::MessageReceiptStatus::NoAck,
+        stat: MessageReceiptStatus::NoAck,
     };
 
     let body = ConversationMessageBody::Ack(msg);

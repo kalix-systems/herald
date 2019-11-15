@@ -2,8 +2,8 @@ use crate::{ffi, interface::*, ret_err};
 use herald_common::{Time, UserId};
 use heraldcore::{
     channel_send_err,
-    message::{get_message_opt, Message},
-    types::{MessageBody, MsgId},
+    message::{get_message_opt, Message, MessageBody},
+    types::MsgId,
 };
 use std::convert::TryInto;
 

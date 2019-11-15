@@ -3,6 +3,7 @@ use crate::{
     config::Config,
     conversation::settings,
     errors::HErr::{self, *},
+    message::MessageReceiptStatus,
     pending,
     types::*,
 };
