@@ -24,4 +24,5 @@ declare class TextAreaForm {
 
 declare class ConversationWindow {
   contentY: number;
+  height: number;
 }

@@ -2,6 +2,9 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls.Styles 1.0
+import "Controls/" as CVUtils
 import "../common" as Common
 import "../SideBar" as SBUtils
 import "qrc:/imports/Avatar" as Avatar
@@ -59,10 +62,16 @@ Component {
     TextArea {
         id: searchText
         height: CmnCfg.toolbarHeight
-        Layout.fillWidth: true
+       // Layout.fillWidth: true
 
         placeholderText: "Search conversation..."
-        color: CmnCfg.palette.mainTextColor
+        font.pixelSize: 14
+        color: "white"
+        background: Rectangle {
+            anchors.fill: parent
+            color: CmnCfg.palette.secondaryColor
+        }
+
         verticalAlignment: TextEdit.AlignVCenter
         Layout.alignment: Qt.AlignLeft
 
@@ -72,7 +81,7 @@ Component {
 
             if (ownedConversation.searchNumMatches > 0) {
                 searchToolBar.state = "searchActiveState"
-
+                convWindow.state = "searchState"
                 var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView, chatPane, false)
 
                 if (!isOnscreen) {
@@ -88,10 +97,6 @@ Component {
                 }
                 }
 
-        background: Rectangle {
-            anchors.fill: parent
-            color: "white"
-        }
     }
 
     Common.ButtonForm {
@@ -113,6 +118,7 @@ Component {
        enabled: searchToolBar.state === "searchActiveState"
        onClicked: {
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, false)
+           convWindow.returnToBounds()
        }
     }
 
@@ -125,9 +131,20 @@ Component {
 
        onClicked: {
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
+           convWindow.returnToBounds()
        }
     }
 
+    }
+
+    Rectangle {
+        height: 1
+        anchors.right: parent.right
+        anchors.rightMargin: 84
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: CmnCfg.smallMargin / 2
+        width: searchText.width + 20
+        color: CmnCfg.palette.paneColor
     }
 
     states: State {

@@ -19,14 +19,6 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
-    Rectangle {
-        x: 478
-        y: 47
-        color: "red"
-        height: 10
-        width: height
-    }
-
     header: Loader {
         id: messageBar
         property var conversationItem: parent.conversationItem

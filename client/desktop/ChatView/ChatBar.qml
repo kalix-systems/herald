@@ -68,6 +68,8 @@ ToolBar {
             spacing: CmnCfg.margin
             Layout.alignment: Qt.AlignRight
 
+
+
             Common.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
