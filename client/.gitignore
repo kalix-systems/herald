@@ -1,3 +1,5 @@
 herald_builds/*
 *.pro.user*
 kirigami/
+debug*
+*autosave
