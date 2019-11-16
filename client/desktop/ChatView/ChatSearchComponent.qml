@@ -62,7 +62,6 @@ Component {
     TextArea {
         id: searchText
         height: CmnCfg.toolbarHeight
-       // Layout.fillWidth: true
 
         placeholderText: "Search conversation..."
         font.pixelSize: 14
@@ -96,7 +95,6 @@ Component {
                 searchToolBar.state = ""
                 }
                 }
-
     }
 
     Common.ButtonForm {
@@ -105,6 +103,7 @@ Component {
        fill: CmnCfg.palette.paneColor
         onClicked: {
             ownedConversation.clearSearch()
+            ownedConversation.searchActive = false
             messageBar.sourceComponent = chatBarComponent
         }
         scale: 0.8
@@ -134,7 +133,6 @@ Component {
            convWindow.returnToBounds()
        }
     }
-
     }
 
     Rectangle {
@@ -146,7 +144,6 @@ Component {
         width: searchText.width + 20
         color: CmnCfg.palette.paneColor
     }
-
     states: State {
         name: "searchActiveState"
     }
