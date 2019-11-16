@@ -14,8 +14,6 @@ pub trait Ser {
     fn ser(&self, into: &mut Serializer);
 }
 
-pub trait AtomicSer: Ser {}
-
 macro_rules! write_uint {
     ($fname: ident, $ty: tt, $digs: ident) => {
         impl Serializer {
@@ -64,8 +62,16 @@ write_int!(write_i64, i64, I64);
 write_int!(write_i128, i128, I128);
 
 impl Serializer {
+    pub fn write_null(&mut self) {
+        let mut byte = Type::Special as u8;
+        byte |= Constants::Null as u8;
+        self.0.push(byte);
+    }
+
     pub fn write_bool(&mut self, b: bool) {
-        self.0.push(if b { 1 } else { 0 })
+        let mut byte = Type::Special as u8;
+        byte |= Constants::from(b) as u8;
+        self.0.push(byte);
     }
 
     fn write_slice(&mut self, is_utf8: bool, raw: &[u8]) {
@@ -153,14 +159,14 @@ impl Serializer {
         }
     }
 
-    pub fn put_map_pair<K: AtomicSer + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
+    pub fn put_map_pair<K: Ser + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
         key.ser(self);
         val.ser(self);
     }
 
     pub fn write_map<'a, K, V, I>(&mut self, items: I)
     where
-        K: 'a + Ser + AtomicSer + ?Sized,
+        K: 'a + Ser + Ser + ?Sized,
         V: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = (&'a K, &'a V)>,
     {
@@ -190,7 +196,7 @@ impl Serializer {
         }
     }
 
-    pub fn put_cons_tag<T: AtomicSer + ?Sized>(&mut self, item: &T) {
+    pub fn put_cons_tag<T: Ser + ?Sized>(&mut self, item: &T) {
         item.ser(self);
     }
 
@@ -198,9 +204,15 @@ impl Serializer {
         item.ser(self);
     }
 
-    pub fn put_cons_pair<K: AtomicSer + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
+    pub fn put_cons_pair<K: Ser + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
         key.ser(self);
         val.ser(self);
+    }
+}
+
+impl Ser for () {
+    fn ser(&self, into: &mut Serializer) {
+        into.write_null()
     }
 }
 
@@ -243,26 +255,6 @@ trivial_ser!(Bytes, write_bytes);
 
 trivial_ser!(str, write_string);
 trivial_ser!(String, write_string);
-
-impl AtomicSer for bool {}
-
-impl AtomicSer for u8 {}
-impl AtomicSer for u16 {}
-impl AtomicSer for u32 {}
-impl AtomicSer for u64 {}
-impl AtomicSer for u128 {}
-
-impl AtomicSer for i8 {}
-impl AtomicSer for i16 {}
-impl AtomicSer for i32 {}
-impl AtomicSer for i64 {}
-impl AtomicSer for i128 {}
-
-impl AtomicSer for str {}
-impl AtomicSer for String {}
-
-impl AtomicSer for [u8] {}
-impl AtomicSer for Bytes {}
 
 pub fn into_vec<T: Ser + ?Sized>(t: &T) -> Vec<u8> {
     let mut out = Serializer::new();
@@ -313,7 +305,7 @@ mod __impls {
             }
         }
 
-        impl<K: AtomicSer, V: Ser, S: std::hash::BuildHasher> Ser for HashMap<K, V, S> {
+        impl<K: Ser, V: Ser, S: std::hash::BuildHasher> Ser for HashMap<K, V, S> {
             fn ser(&self, s: &mut Serializer) {
                 s.start_map(self.len());
                 for (k, v) in self {
@@ -322,7 +314,7 @@ mod __impls {
             }
         }
 
-        impl<K: AtomicSer, V: Ser> Ser for BTreeMap<K, V> {
+        impl<K: Ser, V: Ser> Ser for BTreeMap<K, V> {
             fn ser(&self, s: &mut Serializer) {
                 s.start_map(self.len());
                 for (k, v) in self {
@@ -348,6 +340,22 @@ mod __impls {
                 }
             }
         }
+
+        impl<T: Ser> Ser for Option<T> {
+            fn ser(&self, s: &mut Serializer) {
+                match self {
+                    None => {
+                        s.start_cons(false, 0);
+                        s.put_cons_tag(stringify!(None));
+                    }
+                    Some(t) => {
+                        s.start_cons(false, 1);
+                        s.put_cons_tag(stringify!(Some));
+                        s.put_cons_item(t);
+                    }
+                }
+            }
+        }
     }
 
     mod __arrayvec {
@@ -369,8 +377,6 @@ mod __impls {
                 s.write_string(self.as_str());
             }
         }
-
-        impl<A: Array<Item = u8> + Copy> AtomicSer for ArrayString<A> {}
     }
 
     mod __ptr {
@@ -403,5 +409,36 @@ mod __impls {
                 <T as Ser>::ser(self, s);
             }
         }
+    }
+
+    mod __tuple {
+        use super::*;
+
+        macro_rules! tuple_ser {
+            ($len: expr, $($typ:ident),*) => {
+                #[allow(non_snake_case)]
+                impl<$($typ: Ser),*> Ser for ($($typ,)*) {
+                    fn ser(&self, s: &mut Serializer) {
+                        s.start_cons(false, $len);
+                        s.put_cons_tag(&());
+                        let ($($typ,)*) = self;
+                        $($typ.ser(s);)*
+                    }
+                }
+            }
+        }
+
+        tuple_ser!(1, A);
+        tuple_ser!(2, A, B);
+        tuple_ser!(3, A, B, C);
+        tuple_ser!(4, A, B, C, D);
+        tuple_ser!(5, A, B, C, D, E);
+        tuple_ser!(6, A, B, C, D, E, F);
+        tuple_ser!(7, A, B, C, D, E, F, G);
+        tuple_ser!(8, A, B, C, D, E, F, G, H);
+        tuple_ser!(9, A, B, C, D, E, F, G, H, I);
+        tuple_ser!(10, A, B, C, D, E, F, G, H, I, J);
+        tuple_ser!(11, A, B, C, D, E, F, G, H, I, J, K);
+        tuple_ser!(12, A, B, C, D, E, F, G, H, I, J, K, L);
     }
 }

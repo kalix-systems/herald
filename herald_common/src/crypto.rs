@@ -1,26 +1,10 @@
 #![allow(clippy::new_without_default)]
 
 use crate::*;
-pub use serde::*;
-pub use sodiumoxide::crypto::{box_, generichash as hash, sealedbox, sign};
+use kcl::*;
+use kson::*;
 
-new_type! {
-    /// A unique identifier
-    public UQ(32)
-}
-
-impl UQ {
-    /// Generate a new `[UQ]`. Guaranteed never to collide with another instance.
-    pub fn new() -> Self {
-        use sodiumoxide::randombytes::randombytes_into;
-        sodiumoxide::init().expect("failed to init libsodium - what have you done");
-        let mut buf = [0u8; 32];
-        randombytes_into(&mut buf);
-        UQ(buf)
-    }
-}
-
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SigValid {
     Yes,
     BadTime {
@@ -37,7 +21,7 @@ pub const TIMESTAMP_FUZZ: i64 = 3_600_000;
 /// A `Signed{data, timestamp, signer, sig}` is valid if and only if `sig` is a valid signature for
 /// the device with id `signer` of a bytestring consisting of `data` followed by
 /// `timestamp.timestamp`
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Signed<T: AsRef<[u8]>> {
     data: T,
     timestamp: Time,
@@ -45,7 +29,7 @@ pub struct Signed<T: AsRef<[u8]>> {
     signed_by: sign::PublicKey,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SigMeta {
     timestamp: Time,
     sig: sign::Signature,
@@ -92,7 +76,7 @@ fn verify_sig(
             signer_time,
             verify_time,
         }
-    } else if !sign::verify_detached(&sig, &dat, &signed_by) {
+    } else if !signed_by.verify(&dat, sig) {
         SigValid::BadSign
     } else {
         SigValid::Yes
@@ -170,10 +154,10 @@ pub mod sig {
     use super::*;
     pub use sign::{PublicKey, Signature};
 
-    pub const PUBLIC_KEY_BYTES: usize = sign::PUBLICKEYBYTES;
-    pub const SIGNATURE_BYTES: usize = sign::SIGNATUREBYTES;
+    pub const PUBLIC_KEY_BYTES: usize = sign::PUBLIC_KEY_LEN;
+    pub const SIGNATURE_BYTES: usize = sign::SIGNATURE_LEN;
 
-    #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+    #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
         sig: SigMeta,
         deprecated: Option<SigMeta>,
@@ -213,7 +197,7 @@ pub mod sig {
         }
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct KeyPair {
         public: sign::PublicKey,
         secret: sign::SecretKey,
@@ -221,7 +205,6 @@ pub mod sig {
 
     impl KeyPair {
         pub fn gen_new() -> Self {
-            sodiumoxide::init().expect("failed to init libsodium");
             let (public, secret) = sign::gen_keypair();
             KeyPair { public, secret }
         }
@@ -238,7 +221,7 @@ pub mod sig {
         pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
             let timestamp = Time::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);
-            let sig = sign::sign_detached(&to_sign, &self.secret);
+            let sig = self.secret.sign(&to_sign);
             let signed = Signed {
                 data,
                 timestamp,
@@ -249,14 +232,10 @@ pub mod sig {
             signed
         }
 
-        pub fn raw_sign_detached(&self, data: &[u8]) -> Signature {
-            sign::sign_detached(data, &self.secret)
-        }
-
         pub fn sign_detached(&self, data: &[u8]) -> SigMeta {
             let timestamp = Time::now();
             let to_sign = compute_signing_data(data, timestamp);
-            let sig = sign::sign_detached(&to_sign, &self.secret);
+            let sig = self.secret.sign(&to_sign);
             let meta = SigMeta {
                 timestamp,
                 sig,
@@ -268,62 +247,50 @@ pub mod sig {
     }
 }
 
-pub mod sealed {
-    use super::*;
-    use std::ops::Deref;
+// pub mod sealed {
+//     use super::*;
+//     use std::ops::Deref;
 
-    #[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct PublicKey(pub Signed<box_::PublicKey>);
+//     #[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+//     pub struct PublicKey(pub Signed<box_::PublicKey>);
 
-    impl Deref for PublicKey {
-        type Target = Signed<box_::PublicKey>;
-        fn deref(&self) -> &Self::Target {
-            &self.0
-        }
-    }
+//     impl Deref for PublicKey {
+//         type Target = Signed<box_::PublicKey>;
+//         fn deref(&self) -> &Self::Target {
+//             &self.0
+//         }
+//     }
 
-    impl PublicKey {
-        pub fn seal(&self, msg: &[u8]) -> Vec<u8> {
-            sealedbox::seal(msg, &self.0.data)
-        }
-    }
+//     impl PublicKey {
+//         pub fn seal(&self, msg: &[u8]) -> Vec<u8> {
+//             sealedbox::seal(msg, &self.0.data)
+//         }
+//     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone)]
-    pub struct KeyPair {
-        sealed: box_::PublicKey,
-        sk: box_::SecretKey,
-    }
+//     #[derive(Ser, De, Debug, Clone)]
+//     pub struct KeyPair {
+//         sealed: box_::PublicKey,
+//         sk: box_::SecretKey,
+//     }
 
-    impl KeyPair {
-        pub fn gen_new() -> Self {
-            sodiumoxide::init().expect("failed to init libsodium");
-            let (sealed, sk) = box_::gen_keypair();
-            KeyPair { sealed, sk }
-        }
+//     impl KeyPair {
+//         pub fn gen_new() -> Self {
+//             sodiumoxide::init().expect("failed to init libsodium");
+//             let (sealed, sk) = box_::gen_keypair();
+//             KeyPair { sealed, sk }
+//         }
 
-        pub fn public_key(&self) -> &box_::PublicKey {
-            &self.sealed
-        }
+//         pub fn public_key(&self) -> &box_::PublicKey {
+//             &self.sealed
+//         }
 
-        // TODO: figure out if this will ever fail
-        pub fn sign_pub(&self, pair: &sig::KeyPair) -> PublicKey {
-            PublicKey(pair.sign(self.sealed))
-        }
+//         // TODO: figure out if this will ever fail
+//         pub fn sign_pub(&self, pair: &sig::KeyPair) -> PublicKey {
+//             PublicKey(pair.sign(self.sealed))
+//         }
 
-        pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
-            sealedbox::open(msg, &self.sealed, &self.sk).ok()
-        }
-    }
-}
-
-pub fn hash_slice(slice: &[u8]) -> Option<[u8; 32]> {
-    let mut state = hash::State::new(32, None).ok()?;
-    state.update(slice).ok()?;
-    let digest = state.finalize().ok()?;
-    if digest.as_ref().len() != 32 {
-        return None;
-    }
-    let mut out = [0u8; 32];
-    out.copy_from_slice(digest.as_ref());
-    Some(out)
-}
+//         pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
+//             sealedbox::open(msg, &self.sealed, &self.sk).ok()
+//         }
+//     }
+// }

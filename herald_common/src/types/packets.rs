@@ -3,7 +3,7 @@ use crc32fast::Hasher;
 
 pub const PACKET_SIZE: usize = 1024;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Packet {
     pub content: Bytes,
     pub checksum: u32,
@@ -57,7 +57,7 @@ impl Packet {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PacketResponse {
     Success,
     Retry,

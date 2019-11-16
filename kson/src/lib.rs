@@ -9,8 +9,9 @@
 pub mod prelude {
     pub use crate::{de::*, errors::*, ser::*, *};
 
+    pub use arrayvec;
     pub use backtrace;
-    pub use bytes::Bytes;
+    pub use bytes::{self, Bytes};
 }
 pub mod de;
 pub mod errors;
@@ -18,6 +19,7 @@ pub mod ser;
 pub mod utils;
 pub mod value;
 pub use kson_derive::*;
+use std::convert::TryFrom;
 
 pub const MASK_TYPE: u8 = 0b1110_0000;
 
@@ -34,8 +36,36 @@ pub enum Type {
     Collection = 5 << TYPE_OFFS,
 }
 
-pub const FALSE_BYTE: u8 = 0b0000_0000;
-pub const TRUE_BYTE: u8 = 0b0000_0001;
+#[repr(u8)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+pub enum Constants {
+    False = 0,
+    True = 1,
+    Null = 2,
+}
+
+impl TryFrom<u8> for Constants {
+    type Error = u8;
+    fn try_from(of: u8) -> Result<Constants, u8> {
+        match of {
+            0 => Ok(Constants::False),
+            1 => Ok(Constants::True),
+            2 => Ok(Constants::Null),
+            _ => Err(of),
+        }
+    }
+}
+
+impl From<bool> for Constants {
+    fn from(of: bool) -> Constants {
+        // does the compiler optimize this? can check later
+        if of {
+            Constants::True
+        } else {
+            Constants::False
+        }
+    }
+}
 
 pub const BIG_BIT: u8 = 0b0001_0000;
 

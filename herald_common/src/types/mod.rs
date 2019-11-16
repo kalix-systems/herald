@@ -1,10 +1,8 @@
-use crate::{crypto::*, *};
+use super::*;
 use arrayvec::ArrayString;
 use bytes::Bytes;
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    convert::TryFrom,
-};
+use kson::*;
+use std::convert::TryFrom;
 
 mod requests;
 pub use requests::*;
@@ -17,7 +15,7 @@ pub use pushes::*;
 
 type UserIdInner = [u8; 32];
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
+#[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Copy)]
 pub struct UserId(ArrayString<UserIdInner>);
 
 impl std::ops::Deref for UserId {
@@ -66,12 +64,12 @@ impl TryFrom<&str> for UserId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq, Default)]
 pub struct UserMeta {
     pub keys: BTreeMap<sig::PublicKey, sig::PKMeta>,
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GlobalId {
     pub uid: UserId,
     pub did: sig::PublicKey,
@@ -83,7 +81,7 @@ impl std::convert::AsRef<sig::PublicKey> for GlobalId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PKIResponse {
     Success,
     BadSig(SigValid),
