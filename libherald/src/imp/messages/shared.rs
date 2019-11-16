@@ -11,8 +11,8 @@ pub enum MsgUpdate {
     Msg(MsgId),
     /// A message has been acknowledged
     Receipt(MsgId),
-    /// A full message
-    FullMsg(Box<Message>),
+    /// A rendered message from the `MessageBuilder`
+    BuilderMsg(Box<Message>),
     /// Save is complete
     StoreDone(MsgId),
     /// There are expired messages that need to be pruned

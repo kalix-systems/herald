@@ -276,7 +276,7 @@ impl MessagesTrait for Messages {
 
                     ret_err!(self.raw_insert(new, SaveStatus::Saved));
                 }
-                MsgUpdate::FullMsg(msg) => {
+                MsgUpdate::BuilderMsg(msg) => {
                     ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt(mid) => {

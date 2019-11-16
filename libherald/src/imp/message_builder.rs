@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus};
+use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus, spawn};
 use heraldcore::message::*;
 use std::convert::TryInto;
 use std::path::PathBuf;
@@ -126,14 +126,14 @@ impl MessageBuilderTrait for MessageBuilder {
 
         let cid = ret_none!(builder.conversation);
 
-        ret_err!(
-            std::thread::Builder::new().spawn(move || builder.store_and_send(move |m| {
+        spawn!({
+            builder.store_and_send(move |m| {
                 use crate::imp::messages::{shared::MsgUpdate, *};
                 use heraldcore::message::StoreAndSend::*;
 
                 match m {
                     Msg(msg) => {
-                        ret_err!(Messages::push(cid, MsgUpdate::FullMsg(msg)));
+                        ret_err!(Messages::push(cid, MsgUpdate::BuilderMsg(msg)));
                     }
                     Error { error, line_number } => {
                         // TODO better line number usage
@@ -147,8 +147,8 @@ impl MessageBuilderTrait for MessageBuilder {
                         // TODO: send status?
                     }
                 }
-            }))
-        );
+            })
+        });
     }
 
     fn remove_attachment(&mut self, path: String) -> bool {
