@@ -2,7 +2,7 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 use super::*;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Copy, Clone, PartialEq, Eq)]
 /// A change in the settings for a conversation
 pub enum SettingsUpdate {
     /// A change in the expiring messages setting

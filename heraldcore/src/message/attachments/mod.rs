@@ -11,7 +11,7 @@ use tar::{Archive, Builder};
 pub(crate) mod db;
 
 /// A message attachmentent
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     data: Vec<u8>,
     hash_dir: PathBuf,

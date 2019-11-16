@@ -9,11 +9,11 @@ pub use messages::*;
 /// Lenght of randomly generated unique ids
 pub const UID_LEN: usize = 32;
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize, PartialOrd, Ord)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De, PartialOrd, Ord)]
 /// Message ID
 pub struct MsgId([u8; UID_LEN]);
 
-#[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+#[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
 /// Conversation ID
 pub struct ConversationId([u8; UID_LEN]);
 

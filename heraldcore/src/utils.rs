@@ -4,7 +4,7 @@ use regex::{escape, Regex, RegexBuilder};
 use serde::*;
 use toml;
 
-#[derive(Deserialize, Default)]
+#[derive(De, Default)]
 pub(crate) struct Conf {
     /// Server address, e.g., `127.0.0.1:8080`
     pub server_addr: Option<String>,

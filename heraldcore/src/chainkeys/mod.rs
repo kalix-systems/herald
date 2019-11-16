@@ -100,8 +100,8 @@ pub(crate) fn store_key(
         .into_iter()
         .map(|(block_bytes, signer_bytes)| {
             Ok((
-                serde_cbor::from_slice(&block_bytes)?,
-                serde_cbor::from_slice(&signer_bytes)?,
+                kson::from_slice(&block_bytes)?,
+                kson::from_slice(&signer_bytes)?,
             ))
         })
         .collect()
@@ -141,8 +141,8 @@ pub(crate) fn add_pending(
     block: &Block,
     awaiting: &[BlockHash],
 ) -> Result<(), HErr> {
-    let block_bytes = serde_cbor::to_vec(block)?;
-    let signer_bytes = serde_cbor::to_vec(signer)?;
+    let block_bytes = kson::to_vec(block)?;
+    let signer_bytes = kson::to_vec(signer)?;
 
     let block_id = raw_add_pending_block(tx, signer_bytes, block_bytes)?;
 

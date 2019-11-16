@@ -28,8 +28,8 @@ features         = ["rusqlite_"]
 version = "2.0.2"
 optional = true
 
-[dependencies.chainmail]
-path = "../chainmail"
+# [dependencies.chainmail]
+# path = "../chainmail"
 
 [dependencies.websocket]
 version          = "0.23"

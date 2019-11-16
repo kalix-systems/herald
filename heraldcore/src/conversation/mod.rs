@@ -6,7 +6,7 @@ pub(crate) mod db;
 /// Functionality related to changes in conversation settings
 pub mod settings;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
 pub struct ConversationMeta {
     /// Conversation id

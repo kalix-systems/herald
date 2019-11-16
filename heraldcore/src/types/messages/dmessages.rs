@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A contact request.
 pub struct ContactReq {
     /// The genesis block for the conversation.

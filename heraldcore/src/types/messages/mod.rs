@@ -10,7 +10,7 @@ pub(crate) mod cmessages;
 /// Types associated with [`DeviceMessage`]s
 pub(crate) mod dmessages;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
 /// that a message is a reply without necessarily knowing
 pub enum ReplyId {
@@ -71,7 +71,7 @@ impl From<(Option<MsgId>, bool)> for ReplyId {
     }
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 #[repr(u8)]
 /// Expiration period for messages
 pub enum ExpirationPeriod {
@@ -146,7 +146,7 @@ impl Default for ExpirationPeriod {
 
 impl FromSql for ExpirationPeriod {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+        kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
             .map_err(|_| FromSqlError::InvalidType)
     }
 }
@@ -156,8 +156,7 @@ impl ToSql for ExpirationPeriod {
         use types::*;
 
         Ok(ToSqlOutput::Owned(Value::Blob(
-            serde_cbor::to_vec(self)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
+            kson::to_vec(self).map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
         )))
     }
 }
@@ -173,7 +172,7 @@ pub struct MessageTime {
     pub expiration: Option<Time>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message body
 pub struct MessageBody(String);
 
@@ -380,20 +379,20 @@ impl std::convert::TryFrom<i64> for MessageSendStatus {
     }
 }
 
-impl Serialize for MessageSendStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
+impl Ser for MessageSendStatus {
+    fn ser(&self, s: &mut Serializer) {
+        (*self as u8).ser(s)
     }
 }
 
-impl<'de> Deserialize<'de> for MessageSendStatus {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
+impl De for MessageSendStatus {
+    fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+        let u = u8::de(d)?;
         u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 2).as_str(),
+            E!(
+                CustomError(format!("expected a value between {} and {}", 0, 2)),
+                d.data.clone(),
+                d.ix
             )
         })
     }
@@ -457,26 +456,26 @@ impl FromSql for MessageReceiptStatus {
     }
 }
 
-impl Serialize for MessageReceiptStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
+impl Ser for MessageReceiptStatus {
+    fn ser(&self, s: &mut Serializer) {
+        (*self as u8).ser(s)
     }
 }
 
-impl<'de> Deserialize<'de> for MessageReceiptStatus {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
+impl De for MessageReceiptStatus {
+    fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+        let u = u8::de(d)?;
         u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 3).as_str(),
+            E!(
+                CustomError(format!("expected a value between {} and {}", 0, 3)),
+                d.data.clone(),
+                d.ix
             )
         })
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// The body of a [`ConversationMessage`]
 pub enum ConversationMessageBody {
     /// A new key
@@ -499,7 +498,7 @@ pub enum ConversationMessageBody {
 
 impl FromSql for ConversationMessageBody {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+        kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
             .map_err(|_| FromSqlError::InvalidType)
     }
 }
@@ -509,13 +508,12 @@ impl ToSql for ConversationMessageBody {
         use types::*;
 
         Ok(ToSqlOutput::Owned(Value::Blob(
-            serde_cbor::to_vec(self)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
+            kson::to_vec(self).map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
         )))
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A conversation message
 pub struct ConversationMessage {
     /// The ciphertext of the message. After decryption, this should deserialize as a
@@ -549,7 +547,7 @@ impl ConversationMessage {
         cid: ConversationId,
         content: &ConversationMessageBody,
     ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
-        let cbytes = serde_cbor::to_vec(content)?;
+        let cbytes = kson::to_vec(content)?;
         let kp = Config::static_keypair()?;
         let from = Config::static_gid()?;
         let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
@@ -579,7 +577,7 @@ impl ConversationMessage {
         let mut blocks = {
             match cid.open_block(&from, body)? {
                 DecryptionResult::Success(bvec, unlocked) => {
-                    out.push((serde_cbor::from_slice(&bvec)?, from));
+                    out.push((kson::from_slice(&bvec)?, from));
                     unlocked
                 }
                 DecryptionResult::Pending => Vec::new(),
@@ -590,7 +588,7 @@ impl ConversationMessage {
             match cid.open_block(&from, block)? {
                 DecryptionResult::Success(bvec, mut unlocked) => {
                     blocks.append(&mut unlocked);
-                    out.push((serde_cbor::from_slice(&bvec)?, from));
+                    out.push((kson::from_slice(&bvec)?, from));
                 }
                 DecryptionResult::Pending => {
                     panic!("this should never happen");
@@ -602,14 +600,14 @@ impl ConversationMessage {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Types of device message.
 pub enum DeviceMessageBody {
     /// A contact request
     ContactReq(dmessages::ContactReq),
 }
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
 /// A message sent to a specific device.
 pub struct DeviceMessage {
     /// The sender of the message
@@ -664,7 +662,7 @@ impl DeviceMessage {
         to: &sig::PublicKey,
         content: &DeviceMessageBody,
     ) -> Result<DeviceMessage, HErr> {
-        let mut content = serde_cbor::to_vec(content)?;
+        let mut content = kson::to_vec(content)?;
 
         let pk = spk_to_epk(to)?;
 
@@ -704,7 +702,7 @@ impl DeviceMessage {
         box_::open_detached(&mut content, &tag, &nonce, &pk, &sk)
             .map_err(|_| HeraldError("Failed to decrypt message to device".into()))?;
 
-        let dm = serde_cbor::from_slice(&content)?;
+        let dm = kson::from_slice(&content)?;
 
         Ok((from, dm))
     }

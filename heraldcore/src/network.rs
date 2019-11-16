@@ -70,9 +70,9 @@ mod helper {
         ($method: tt, $path: tt) => {
             pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
                 let res_reader = ureq::$method(&server_url(stringify!($path)))
-                    .send_bytes(&serde_cbor::to_vec(req)?)
+                    .send_bytes(&kson::to_vec(req)?)
                     .into_reader();
-                let res = serde_cbor::from_reader(res_reader)?;
+                let res = kson::from_reader(res_reader)?;
                 Ok(res)
             }
         };
@@ -228,7 +228,7 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
     Ok(ev)
 }
 
-fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> De<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
     let len;
@@ -257,7 +257,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
                 // after the server receives this, it *will* delete the message,
                 // so I'm inclined to be damn sure we're done with it
                 sock_send_msg(ws, &PacketResponse::Success)?;
-                return Ok(serde_cbor::from_slice(&v)?);
+                return Ok(kson::from_slice(&v)?);
             }
             None => {
                 sock_send_msg(ws, &PacketResponse::Retry)?;
@@ -266,21 +266,21 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     }
 }
 
-fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+fn sock_get_block<S: websocket::stream::Stream, T: for<'a> De<'a>>(
     ws: &mut wsclient::Client<S>,
 ) -> Result<T, HErr> {
     loop {
         if let WMessage::Binary(v) = ws.recv_message()? {
-            return Ok(serde_cbor::from_slice(&v)?);
+            return Ok(kson::from_slice(&v)?);
         }
     }
 }
 
-fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
+fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
+    let m = WMessage::Binary(kson::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
 }
@@ -288,11 +288,11 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
 fn handle_push(push: &Push) -> Result<Event, HErr> {
     match push.tag {
         PushTag::User => {
-            let umsg = serde_cbor::from_slice(&push.msg)?;
+            let umsg = kson::from_slice(&push.msg)?;
             handle_cmessage(push.timestamp, umsg)
         }
         PushTag::Device => {
-            let dmsg = serde_cbor::from_slice(&push.msg)?;
+            let dmsg = kson::from_slice(&push.msg)?;
             handle_dmessage(push.timestamp, dmsg)
         }
     }
@@ -490,7 +490,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::Config::static_keypair()?.public_key();
-        let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+        let msg = Bytes::from(kson::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
 
         let mut db = chainkeys::CK_CONN.lock();
@@ -534,7 +534,7 @@ fn send_cmessage(cid: ConversationId, content: &ConversationMessageBody) -> Resu
 }
 
 fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
+    let msg = Bytes::from(kson::to_vec(&DeviceMessage::seal(&to, dm)?)?);
 
     let req = push_devices::Req { to: vec![to], msg };
 

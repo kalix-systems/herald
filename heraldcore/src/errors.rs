@@ -56,7 +56,7 @@ pub enum HErr {
     RegexError(regex::Error),
     /// Serialization or deserialization
     /// error
-    CborError(serde_cbor::Error),
+    CborError(kson::Error),
     /// Global ID was either already active or involved a nonexistent user
     GIDSpecFailed(login::SignAsResponse),
     /// Failed to sign in - either signature or timestamp was invalid
@@ -140,7 +140,7 @@ herr!(MissingInboundMessageField, MissingInboundMessageField);
 herr!(ChainError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
-herr!(serde_cbor::Error, CborError);
+herr!(kson::Error, CborError);
 herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(regex::Error, RegexError);
 herr!(std::ffi::OsString, BadPath);
