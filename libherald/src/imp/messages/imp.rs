@@ -12,7 +12,7 @@ impl Messages {
     fn unfocus(&mut self, match_val: Match) -> Option<()> {
         let Match { mid } = match_val;
 
-        self.container.get_data_mut(&mid)?.matched = MatchStatus::Matched;
+        self.container.get_data_mut(&mid)?.match_status = MatchStatus::Matched;
         let ix = self.container.index_of(mid)?;
         self.model.data_changed(ix, ix);
 
@@ -35,7 +35,7 @@ impl Messages {
             Some(Match { mid }) => {
                 let ix = self.container.index_of(mid)?;
                 let data = self.container.get_data_mut(&mid)?;
-                data.matched = MatchStatus::Focused;
+                data.match_status = MatchStatus::Focused;
                 self.model.data_changed(ix, ix);
 
                 Some(ix)
@@ -50,7 +50,7 @@ impl Messages {
             Some(Match { mid }) => {
                 let ix = self.container.index_of(mid)?;
                 let data = self.container.get_data_mut(&mid)?;
-                data.matched = MatchStatus::Focused;
+                data.match_status = MatchStatus::Focused;
                 self.model.data_changed(ix, ix);
 
                 Some(ix)

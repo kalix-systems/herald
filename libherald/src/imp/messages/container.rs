@@ -121,7 +121,11 @@ impl Container {
             let data = self.map.get_mut(msg_id)?;
             let matched = data.matches(pattern);
 
-            data.matched = MatchStatus::Matched;
+            data.match_status = if matched {
+                MatchStatus::Matched
+            } else {
+                MatchStatus::NotMatched
+            };
 
             if !matched {
                 continue;
@@ -138,7 +142,7 @@ impl Container {
 
     pub(super) fn clear_search(&mut self, model: &mut List) {
         for data in self.map.values_mut() {
-            data.matched = MatchStatus::NotMatched;
+            data.match_status = MatchStatus::NotMatched;
         }
 
         model.data_changed(0, self.list.len().saturating_sub(1));

@@ -157,8 +157,8 @@ impl MessagesTrait for Messages {
         )
     }
 
-    fn matched(&self, row_index: usize) -> Option<u8> {
-        Some(self.container.msg_data(row_index)?.matched as u8)
+    fn match_status(&self, row_index: usize) -> Option<u8> {
+        Some(self.container.msg_data(row_index)?.match_status as u8)
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {

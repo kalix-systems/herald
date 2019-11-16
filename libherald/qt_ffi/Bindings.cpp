@@ -1753,7 +1753,7 @@ extern "C" {
     option_bool messages_data_is_head(const Messages::Private*, int);
     option_bool messages_data_is_reply(const Messages::Private*, int);
     option_bool messages_data_is_tail(const Messages::Private*, int);
-    option_quint8 messages_data_matched(const Messages::Private*, int);
+    option_quint8 messages_data_match_status(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     option_quint32 messages_data_receipt_status(const Messages::Private*, int);
@@ -1890,10 +1890,10 @@ QVariant Messages::isTail(int row) const
     return v;
 }
 
-QVariant Messages::matched(int row) const
+QVariant Messages::match_status(int row) const
 {
     QVariant v;
-    v = messages_data_matched(m_d, row);
+    v = messages_data_match_status(m_d, row);
     return v;
 }
 
@@ -1950,7 +1950,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 8:
             return isTail(index.row());
         case Qt::UserRole + 9:
-            return matched(index.row());
+            return match_status(index.row());
         case Qt::UserRole + 10:
             return cleanNullQVariant(QVariant::fromValue(messageId(index.row())));
         case Qt::UserRole + 11:
@@ -1987,7 +1987,7 @@ QHash<int, QByteArray> Messages::roleNames() const {
     names.insert(Qt::UserRole + 6, "isHead");
     names.insert(Qt::UserRole + 7, "isReply");
     names.insert(Qt::UserRole + 8, "isTail");
-    names.insert(Qt::UserRole + 9, "matched");
+    names.insert(Qt::UserRole + 9, "match_status");
     names.insert(Qt::UserRole + 10, "messageId");
     names.insert(Qt::UserRole + 11, "op");
     names.insert(Qt::UserRole + 12, "receiptStatus");

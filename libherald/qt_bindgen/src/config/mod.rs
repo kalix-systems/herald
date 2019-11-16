@@ -264,7 +264,7 @@ fn messages() -> Object {
         // 0 => Not matched,
         // 1 => Matched,
         // 2 => Matched and selected
-        matched: ItemProp::new(QUint8).optional()
+        match_status: ItemProp::new(QUint8).optional()
     };
 
     let funcs = functions! {

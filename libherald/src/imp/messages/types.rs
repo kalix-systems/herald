@@ -14,7 +14,7 @@ pub(super) struct MsgData {
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
-    pub(super) matched: MatchStatus,
+    pub(super) match_status: MatchStatus,
 }
 
 #[repr(u8)]
@@ -75,7 +75,7 @@ impl Message {
             time,
             send_status,
             save_status,
-            matched: MatchStatus::NotMatched,
+            match_status: MatchStatus::NotMatched,
         };
 
         let message = Message {
