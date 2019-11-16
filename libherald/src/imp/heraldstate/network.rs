@@ -32,10 +32,10 @@ impl NotifHandler {
                 ret_err!(Users::push(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
             }
             NewConversation(cid) => {
-                ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
+                ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
             }
             AddContactResponse(cid, uid, accepted) => {
                 // handle response
@@ -43,7 +43,7 @@ impl NotifHandler {
 
                 // add conversation
                 if accepted {
-                    ret_err!(Conversations::push(ConvUpdates::NewConversation(cid)));
+                    ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -51,7 +51,7 @@ impl NotifHandler {
                 ret_err!(Members::push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
-                ret_err!(Conversations::push(ConvUpdates::Settings(cid, settings)));
+                ret_err!(Conversations::push(ConvUpdate::Settings(cid, settings)));
             }
         }
     }

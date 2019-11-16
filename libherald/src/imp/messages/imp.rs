@@ -145,7 +145,7 @@ impl Messages {
         }
 
         use crate::imp::conversations::{shared::*, Conversations};
-        Conversations::push(ConvUpdates::NewActivity(cid))?;
+        Conversations::push(ConvUpdate::NewActivity(cid))?;
 
         Ok(())
     }

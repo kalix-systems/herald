@@ -49,6 +49,24 @@ macro_rules! ret_err {
 }
 
 #[macro_export]
+/// Continue on error
+macro_rules! cont_err {
+    ($maybe: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                use $crate::shared::SingletonBus;
+                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+
+                eprintln!("{}", err_string);
+                $crate::imp::errors::Errors::push(err_string).ok();
+                continue;
+            }
+        }
+    };
+}
+
+#[macro_export]
 /// If the value passed is an error, ushes an errors to the error queue without an early return.
 macro_rules! push_err {
     ($maybe: expr, $msg: expr) => {
@@ -89,6 +107,24 @@ macro_rules! ret_none {
                 eprintln!("{}", err_string);
                 $crate::imp::errors::Errors::push(err_string).ok();
                 return $retval;
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Continue  on unexpected `None`
+macro_rules! cont_none {
+    ($maybe: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                use $crate::shared::SingletonBus;
+                let err_string = $crate::utils::ret_none_string(file!(), line!());
+
+                eprintln!("{}", err_string);
+                $crate::imp::errors::Errors::push(err_string).ok();
+                continue;
             }
         }
     };

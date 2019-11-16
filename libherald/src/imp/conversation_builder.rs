@@ -1,5 +1,5 @@
 use crate::imp::{
-    conversations::{shared::ConvUpdates, Conversations},
+    conversations::{shared::ConvUpdate, Conversations},
     users::shared::user_in_cache,
 };
 use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::SingletonBus};
@@ -111,7 +111,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             ));
 
             // send update to Conversations list
-            ret_err!(Conversations::push(ConvUpdates::BuilderFinished(cid)));
+            ret_err!(Conversations::push(ConvUpdate::BuilderFinished(cid)));
         }));
     }
 

@@ -1,4 +1,6 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none, spawn};
+use crate::{
+    cont_none, ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus, spawn,
+};
 use heraldcore::{
     abort_err,
     conversation::{self, ConversationMeta, ExpirationPeriod},
@@ -10,11 +12,12 @@ use im::vector::Vector;
 
 pub(crate) mod shared;
 use shared::*;
+mod imp;
 
 /// Thin wrapper around `ConversationMeta`,
 /// with an additional field to facilitate filtering
 /// in the UI.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Conversation {
     inner: ConversationMeta,
     matched: bool,
@@ -32,26 +35,21 @@ pub struct Conversations {
 
 impl ConversationsTrait for Conversations {
     fn new(mut emit: ConversationsEmitter, model: ConversationsList) -> Self {
-        let list = abort_err!(conversation::all_meta())
-            .into_iter()
-            .map(|inner| Conversation {
-                inner,
-                matched: true,
-            })
-            .collect();
-
         let filter = abort_err!(SearchPattern::new_normal("".into()));
 
         let global_emit = emit.clone();
 
         CONV_EMITTER.lock().replace(global_emit);
 
+        // start loading conversations in another thread
+        imp::init();
+
         Self {
             emit,
             filter,
             filter_regex: false,
             model,
-            list,
+            list: Vector::new(),
         }
     }
 
@@ -134,12 +132,12 @@ impl ConversationsTrait for Conversations {
     }
 
     fn picture(&self, index: usize) -> Option<&str> {
-        // Note: this should not be using the `?` operator
-        ret_none!(self.list.get(index), None)
+        self.list
+            .get(index)?
             .inner
             .picture
             .as_ref()
-            .map(|p| p.as_str())
+            .map(String::as_str)
     }
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
@@ -252,7 +250,7 @@ impl ConversationsTrait for Conversations {
     }
 
     fn fetch_more(&mut self) {
-        use ConvUpdates::*;
+        use ConvUpdate::*;
         for update in CONV_BUS.rx.try_iter() {
             match update {
                 NewConversation(cid) => push_err!(
@@ -285,7 +283,7 @@ impl ConversationsTrait for Conversations {
                     self.model.end_move_rows();
                 }
                 Settings(cid, settings) => {
-                    let pos = ret_none!(self
+                    let pos = cont_none!(self
                         .list
                         .iter()
                         .position(|c| c.inner.conversation_id == cid));
@@ -293,16 +291,21 @@ impl ConversationsTrait for Conversations {
                     use conversation::settings::SettingsUpdate;
                     match settings {
                         SettingsUpdate::Expiration(period) => {
-                            self.list[pos].inner.expiration_period = period;
+                            cont_none!(self.list.get_mut(pos)).inner.expiration_period = period;
                         }
                         SettingsUpdate::Color(color) => {
-                            self.list[pos].inner.color = color;
+                            cont_none!(self.list.get_mut(pos)).inner.color = color;
                         }
                         SettingsUpdate::Title(title) => {
-                            self.list[pos].inner.title = title;
+                            cont_none!(self.list.get_mut(pos)).inner.title = title;
                         }
                     }
                     self.model.data_changed(pos, pos);
+                }
+                Init(contents) => {
+                    self.model.begin_reset_model();
+                    self.list = contents;
+                    self.model.end_reset_model();
                 }
             }
         }
