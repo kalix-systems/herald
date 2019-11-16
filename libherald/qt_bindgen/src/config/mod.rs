@@ -261,7 +261,10 @@ fn messages() -> Object {
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
-        matched: ItemProp::new(Bool).optional()
+        // 0 => Not matched,
+        // 1 => Matched,
+        // 2 => Matched and selected
+        matched: ItemProp::new(QUint8).optional()
     };
 
     let funcs = functions! {

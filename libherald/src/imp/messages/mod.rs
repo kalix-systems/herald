@@ -157,8 +157,8 @@ impl MessagesTrait for Messages {
         )
     }
 
-    fn matched(&self, row_index: usize) -> Option<bool> {
-        Some(self.container.msg_data(row_index)?.matched)
+    fn matched(&self, row_index: usize) -> Option<u8> {
+        Some(self.container.msg_data(row_index)?.matched as u8)
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
@@ -369,11 +369,11 @@ impl MessagesTrait for Messages {
 
     fn next_search_match(&mut self) -> i64 {
         match self.search.next(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
+            Some(Match { mid }) => {
+                let ix = self.container.index_of(mid);
+
+                ix.map(|ix| ix as i64).unwrap_or(-1)
+            }
             None => -1,
         }
     }
@@ -390,25 +390,15 @@ impl MessagesTrait for Messages {
     }
 
     fn peek_next_search_match(&mut self) -> i64 {
-        match self.search.peek_next(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
+        self.next_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     fn peek_prev_search_match(&mut self) -> i64 {
-        match self.search.peek_prev(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
+        self.prev_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 
     fn next_would_loop(&mut self) -> bool {

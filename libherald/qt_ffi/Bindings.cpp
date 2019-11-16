@@ -42,6 +42,19 @@ namespace {
     };
     static_assert(std::is_pod<option_quint32>::value, "option_quint32 must be a POD type.");
 
+    struct option_quint8 {
+    public:
+        quint8 value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_quint8>::value, "option_quint8 must be a POD type.");
+
     struct option_quintptr {
     public:
         quintptr value;
@@ -1740,7 +1753,7 @@ extern "C" {
     option_bool messages_data_is_head(const Messages::Private*, int);
     option_bool messages_data_is_reply(const Messages::Private*, int);
     option_bool messages_data_is_tail(const Messages::Private*, int);
-    option_bool messages_data_matched(const Messages::Private*, int);
+    option_quint8 messages_data_matched(const Messages::Private*, int);
     void messages_data_message_id(const Messages::Private*, int, QByteArray*, qbytearray_set);
     void messages_data_op(const Messages::Private*, int, QByteArray*, qbytearray_set);
     option_quint32 messages_data_receipt_status(const Messages::Private*, int);

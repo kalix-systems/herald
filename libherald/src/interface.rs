@@ -3551,7 +3551,7 @@ pub trait MessagesTrait {
     fn is_head(&self, index: usize) -> Option<bool>;
     fn is_reply(&self, index: usize) -> Option<bool>;
     fn is_tail(&self, index: usize) -> Option<bool>;
-    fn matched(&self, index: usize) -> Option<bool>;
+    fn matched(&self, index: usize) -> Option<u8>;
     fn message_id(&self, index: usize) -> Option<&[u8]>;
     fn op(&self, index: usize) -> Option<&[u8]>;
     fn receipt_status(&self, index: usize) -> Option<u32>;
@@ -3958,7 +3958,7 @@ pub unsafe extern "C" fn messages_data_is_tail(ptr: *const Messages, row: c_int)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_matched(ptr: *const Messages, row: c_int) -> COption<bool> {
+pub unsafe extern "C" fn messages_data_matched(ptr: *const Messages, row: c_int) -> COption<u8> {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0)).into()
 }

@@ -29,10 +29,14 @@ impl Container {
         self.map.get(msg_id)
     }
 
+    pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
+        self.map.get_mut(msg_id)
+    }
+
     pub(super) fn new(cid: ConversationId) -> Result<Self, HErr> {
         let (tx, rx) = crossbeam_channel::bounded(0);
 
-        // for exception safety
+        // for exception safety, although this could be made non-blocking
         std::thread::Builder::new().spawn(move || {
             let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
                 ret_err!(conversation::conversation_messages(&cid))
@@ -117,7 +121,7 @@ impl Container {
             let data = self.map.get_mut(msg_id)?;
             let matched = data.matches(pattern);
 
-            data.matched = matched;
+            data.matched = MatchStatus::Matched;
 
             if !matched {
                 continue;
@@ -134,7 +138,7 @@ impl Container {
 
     pub(super) fn clear_search(&mut self, model: &mut List) {
         for data in self.map.values_mut() {
-            data.matched = false;
+            data.matched = MatchStatus::NotMatched;
         }
 
         model.data_changed(0, self.list.len().saturating_sub(1));

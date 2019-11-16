@@ -13,6 +13,12 @@ declare const enum ExpirationPeriod {
   OneYear = 6
 }
 
+declare const enum MatchStatus {
+  NotMatched = 0,
+  Matched = 1,
+  Focused = 2
+}
+
 declare type UserId = string;
 
 declare class HeraldState {

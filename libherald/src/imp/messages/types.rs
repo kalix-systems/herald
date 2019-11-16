@@ -14,7 +14,15 @@ pub(super) struct MsgData {
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
-    pub(super) matched: bool,
+    pub(super) matched: MatchStatus,
+}
+
+#[repr(u8)]
+#[derive(Debug, Clone, Copy)]
+pub(super) enum MatchStatus {
+    NotMatched = 0,
+    Matched = 1,
+    Focused = 2,
 }
 
 impl MsgData {
@@ -67,7 +75,7 @@ impl Message {
             time,
             send_status,
             save_status,
-            matched: true,
+            matched: MatchStatus::NotMatched,
         };
 
         let message = Message {
