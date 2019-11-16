@@ -2,13 +2,13 @@ use crate::{
     cont_none, ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus, spawn,
 };
 use heraldcore::{
-    abort_err,
     conversation::{self, ConversationMeta, ExpirationPeriod},
     errors::HErr,
     types::ConversationId,
     utils::SearchPattern,
 };
 use im::vector::Vector;
+use std::ops::Not;
 
 pub(crate) mod shared;
 use shared::*;
@@ -28,14 +28,14 @@ pub struct Conversation {
 pub struct Conversations {
     emit: ConversationsEmitter,
     model: ConversationsList,
-    filter: SearchPattern,
+    filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vector<Conversation>,
 }
 
 impl ConversationsTrait for Conversations {
     fn new(mut emit: ConversationsEmitter, model: ConversationsList) -> Self {
-        let filter = abort_err!(SearchPattern::new_normal("".into()));
+        let filter = SearchPattern::new_normal("".into()).ok();
 
         let global_emit = emit.clone();
 
@@ -224,7 +224,7 @@ impl ConversationsTrait for Conversations {
     }
 
     fn filter(&self) -> &str {
-        self.filter.raw()
+        self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
     fn set_filter(&mut self, pattern: String) {
@@ -239,7 +239,7 @@ impl ConversationsTrait for Conversations {
             ret_err!(SearchPattern::new_normal(pattern))
         };
 
-        self.filter = pattern;
+        self.filter.replace(pattern);
         self.emit.filter_changed();
 
         self.inner_filter();
@@ -319,10 +319,19 @@ impl ConversationsTrait for Conversations {
     /// Sets filter mode
     fn set_filter_regex(&mut self, use_regex: bool) {
         if use_regex {
-            ret_err!(self.filter.regex_mode());
+            ret_err!(self
+                .filter
+                .as_mut()
+                .map(SearchPattern::regex_mode)
+                .transpose());
         } else {
-            ret_err!(self.filter.normal_mode());
+            ret_err!(self
+                .filter
+                .as_mut()
+                .map(SearchPattern::normal_mode)
+                .transpose());
         }
+
         self.filter_regex = use_regex;
         self.emit.filter_regex_changed();
         self.inner_filter();
@@ -338,16 +347,15 @@ impl ConversationsTrait for Conversations {
     }
 
     fn clear_filter(&mut self) {
-        for conv in self.list.iter_mut() {
-            conv.matched = true;
+        for (ix, conv) in self.list.iter_mut().enumerate() {
+            if conv.matched.not() {
+                conv.matched = true;
+                self.model.data_changed(ix, ix);
+            }
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
 
-        if self.filter_regex {
-            self.filter = ret_err!(SearchPattern::new_regex("".to_owned()));
-        } else {
-            self.filter = ret_err!(SearchPattern::new_normal("".to_owned()));
+        if let Some(filter) = self.filter.as_mut() {
+            ret_err!(filter.set_pattern("".to_owned()));
         }
 
         self.emit.filter_changed();
@@ -355,20 +363,31 @@ impl ConversationsTrait for Conversations {
 }
 
 impl Conversations {
-    fn inner_filter(&mut self) {
-        for conv in self.list.iter_mut() {
-            conv.matched = conv.inner.matches(&self.filter);
+    fn inner_filter(&mut self) -> Option<()> {
+        let filter = &self.filter.as_ref()?;
+
+        for (ix, conv) in self.list.iter_mut().enumerate() {
+            let matched = conv.inner.matches(filter);
+
+            if conv.matched != matched {
+                conv.matched = matched;
+                self.model.data_changed(ix, ix);
+            }
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
+
+        Some(())
     }
 
     fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
-        let meta = conversation::meta(&cid)?;
-        let conv = Conversation {
-            matched: meta.matches(&self.filter),
-            inner: meta,
+        let inner = conversation::meta(&cid)?;
+
+        let matched = match self.filter.as_ref() {
+            Some(filter) => inner.matches(filter),
+            None => true,
         };
+
+        let conv = Conversation { matched, inner };
+
         self.model.begin_insert_rows(0, 0);
         self.list.push_front(conv);
         self.model.end_insert_rows();
