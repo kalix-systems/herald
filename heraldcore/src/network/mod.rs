@@ -33,7 +33,7 @@ use event::*;
 
 mod helper;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 /// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
     /// A new message has been received.
