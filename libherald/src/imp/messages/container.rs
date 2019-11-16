@@ -1,9 +1,11 @@
 use super::*;
-use heraldcore::{channel_recv_err, channel_send_err};
+use crate::{shared::AddressedBus, spawn};
 use std::{collections::VecDeque, ops::Not};
 
 #[derive(Default)]
-pub(super) struct Container {
+/// A container type for messages backed by an RRB-tree vector
+/// and a hash map.
+pub struct Container {
     list: Vector<Message>,
     map: HashMap<MsgId, MsgData>,
 }
@@ -33,11 +35,8 @@ impl Container {
         self.map.get_mut(msg_id)
     }
 
-    pub(super) fn new(cid: ConversationId) -> Result<Self, HErr> {
-        let (tx, rx) = crossbeam_channel::bounded(0);
-
-        // for exception safety, although this could be made non-blocking
-        std::thread::Builder::new().spawn(move || {
+    pub(super) fn fill(cid: ConversationId) {
+        spawn!({
             let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
                 ret_err!(conversation::conversation_messages(&cid))
                     .into_iter()
@@ -49,11 +48,11 @@ impl Container {
                     })
                     .unzip();
 
-            ret_err!(tx.send(Self { list, map }).map_err(|_| channel_send_err!()));
-        })?;
-
-        rx.recv_timeout(std::time::Duration::from_secs(1))
-            .map_err(|_| channel_recv_err!())
+            ret_err!(Messages::push(
+                cid,
+                MsgUpdate::Container(Self { list, map })
+            ));
+        });
     }
 
     pub(super) fn last_msg(&self) -> Option<&MsgData> {

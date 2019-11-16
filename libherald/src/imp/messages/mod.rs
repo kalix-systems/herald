@@ -107,17 +107,7 @@ impl MessagesTrait for Messages {
             self.conversation_id = Some(conversation_id);
             self.emit.conversation_id_changed();
 
-            let container = ret_err!(Container::new(conversation_id));
-
-            if container.is_empty() {
-                return;
-            }
-
-            self.model
-                .begin_insert_rows(0, container.len().saturating_sub(1));
-            self.container = container;
-            self.model.end_insert_rows();
-            self.emit_last_changed();
+            Container::fill(conversation_id);
         }
     }
 
@@ -299,6 +289,17 @@ impl MessagesTrait for Messages {
                             self.raw_list_remove(ix);
                         }
                     }
+                }
+                MsgUpdate::Container(container) => {
+                    if container.is_empty() {
+                        continue;
+                    }
+
+                    self.model
+                        .begin_insert_rows(0, container.len().saturating_sub(1));
+                    self.container = container;
+                    self.model.end_insert_rows();
+                    self.emit_last_changed();
                 }
             }
         }

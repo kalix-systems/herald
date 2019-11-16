@@ -17,6 +17,8 @@ pub enum MsgUpdate {
     StoreDone(MsgId),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
+    /// The container contents, sent when the conversation id is first set.
+    Container(Container),
 }
 
 lazy_static! {

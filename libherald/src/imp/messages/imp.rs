@@ -31,32 +31,30 @@ impl Messages {
 
     pub(super) fn prev_search_match_helper(&mut self) -> Option<usize> {
         self.unfocus_ends()?;
-        match self.search.prev(&self.container) {
-            Some(Match { mid }) => {
-                let ix = self.container.index_of(mid)?;
-                let data = self.container.get_data_mut(&mid)?;
-                data.match_status = MatchStatus::Focused;
-                self.model.data_changed(ix, ix);
 
-                Some(ix)
-            }
-            None => None,
-        }
+        let Match { mid } = self.search.prev(&self.container)?;
+
+        let data = self.container.get_data_mut(&mid)?;
+        data.match_status = MatchStatus::Focused;
+
+        let ix = self.container.index_of(mid)?;
+        self.model.data_changed(ix, ix);
+
+        Some(ix)
     }
 
     pub(super) fn next_search_match_helper(&mut self) -> Option<usize> {
         self.unfocus_ends()?;
-        match self.search.next(&self.container) {
-            Some(Match { mid }) => {
-                let ix = self.container.index_of(mid)?;
-                let data = self.container.get_data_mut(&mid)?;
-                data.match_status = MatchStatus::Focused;
-                self.model.data_changed(ix, ix);
 
-                Some(ix)
-            }
-            None => None,
-        }
+        let Match { mid } = self.search.next(&self.container)?;
+
+        let data = self.container.get_data_mut(&mid)?;
+        data.match_status = MatchStatus::Focused;
+
+        let ix = self.container.index_of(mid)?;
+        self.model.data_changed(ix, ix);
+
+        Some(ix)
     }
 
     pub(super) fn raw_list_remove(&mut self, ix: usize) {
