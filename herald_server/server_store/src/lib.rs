@@ -88,7 +88,7 @@ type RawPkMeta<'a> = (
 );
 
 impl Conn {
-    pub async fn device_exists(&mut self, pk: &sign::PublicKey) -> Result<bool, Error> {
+    pub async fn device_exists(&mut self, pk: &sig::PublicKey) -> Result<bool, Error> {
         let stmt = self
             .prepare_typed(sql!("device_exists"), types![BYTEA])
             .await?;
@@ -98,59 +98,56 @@ impl Conn {
         Ok(row.get(0))
     }
 
-    pub async fn add_prekeys(
-        &mut self,
-        pres: &[sealed::PublicKey],
-    ) -> Result<Vec<PKIResponse>, Error> {
-        let stmt = self
-            .prepare_typed(sql!("add_prekey"), types![BYTEA, BYTEA])
-            .await?;
+    // pub async fn add_prekeys(
+    //     &mut self,
+    //     pres: &[sealed::PublicKey],
+    // ) -> Result<Vec<PKIResponse>, Error> {
+    //     let stmt = self
+    //         .prepare_typed(sql!("add_prekey"), types![BYTEA, BYTEA])
+    //         .await?;
 
-        let mut out = Vec::with_capacity(pres.len());
+    //     let mut out = Vec::with_capacity(pres.len());
 
-        for pre in pres {
-            let res = self
-                .execute(
-                    &stmt,
-                    params![pre.signed_by().as_ref(), serde_cbor::to_vec(&pre)?],
-                )
-                .await;
+    //     for pre in pres {
+    //         let res = self
+    //             .execute(&stmt, params![pre.signed_by().as_ref(), kson::to_vec(&pre)])
+    //             .await;
 
-            out.push(unique_violation_to_redundant(res)?);
-        }
+    //         out.push(unique_violation_to_redundant(res)?);
+    //     }
 
-        Ok(out)
-    }
+    //     Ok(out)
+    // }
 
-    pub async fn pop_prekeys(
-        &mut self,
-        keys: &[sig::PublicKey],
-    ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
-        let stmt = self
-            .prepare_typed(sql!("pop_prekey"), types![BYTEA])
-            .await?;
+    // pub async fn pop_prekeys(
+    //     &mut self,
+    //     keys: &[sig::PublicKey],
+    // ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
+    //     let stmt = self
+    //         .prepare_typed(sql!("pop_prekey"), types![BYTEA])
+    //         .await?;
 
-        let mut prekeys = Vec::with_capacity(keys.len());
+    //     let mut prekeys = Vec::with_capacity(keys.len());
 
-        for k in keys {
-            let prekey = match self
-                .query(&stmt, params![k.as_ref()])
-                .await?
-                .into_iter()
-                .next()
-            {
-                Some(row) => {
-                    let val = row.get::<_, &[u8]>(0);
-                    serde_cbor::from_slice(val)?
-                }
-                None => None,
-            };
+    //     for k in keys {
+    //         let prekey = match self
+    //             .query(&stmt, params![k.as_ref()])
+    //             .await?
+    //             .into_iter()
+    //             .next()
+    //         {
+    //             Some(row) => {
+    //                 let val = row.get::<_, &[u8]>(0);
+    //                 kson::from_slice(val)?
+    //             }
+    //             None => None,
+    //         };
 
-            prekeys.push(prekey);
-        }
+    //         prekeys.push(prekey);
+    //     }
 
-        Ok(prekeys)
-    }
+    //     Ok(prekeys)
+    // }
 
     pub async fn register_user(
         &mut self,
@@ -355,7 +352,7 @@ impl Conn {
         let mut out = Vec::with_capacity(rows.len());
         for row in rows {
             let p: &[u8] = row.get(0);
-            out.push(serde_cbor::from_slice(p)?);
+            out.push(kson::from_slice(p)?);
         }
 
         Ok(out)
@@ -434,7 +431,7 @@ impl Conn {
         for msg in msgs {
             let push_row_id: i64 = {
                 let push_timestamp = msg.timestamp;
-                let push_vec = serde_cbor::to_vec(msg)?;
+                let push_vec = kson::to_vec(msg);
 
                 tx.query_one(&push_stmt, params![push_vec, push_timestamp.0])
                     .await?

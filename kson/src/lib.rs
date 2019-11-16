@@ -21,6 +21,22 @@ pub mod value;
 pub use kson_derive::*;
 use std::convert::TryFrom;
 
+pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
+    use ser::*;
+    let mut out = Serializer::new();
+    t.ser(&mut out);
+    out.0
+}
+
+pub fn from_bytes<T: de::De>(from: prelude::Bytes) -> Result<T, errors::KsonError> {
+    use de::*;
+    T::de(&mut de::Deserializer::new(from))
+}
+
+pub fn from_slice<T: de::De>(from: &[u8]) -> Result<T, errors::KsonError> {
+    from_bytes(from.into())
+}
+
 pub const MASK_TYPE: u8 = 0b1110_0000;
 
 pub const TYPE_OFFS: u8 = 5;

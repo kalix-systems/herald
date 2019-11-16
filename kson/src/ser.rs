@@ -256,12 +256,6 @@ trivial_ser!(Bytes, write_bytes);
 trivial_ser!(str, write_string);
 trivial_ser!(String, write_string);
 
-pub fn into_vec<T: Ser + ?Sized>(t: &T) -> Vec<u8> {
-    let mut out = Serializer::new();
-    t.ser(&mut out);
-    out.0
-}
-
 mod __impls {
     use super::*;
 

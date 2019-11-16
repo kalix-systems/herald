@@ -8,7 +8,7 @@ mod time;
 pub use time::*;
 
 pub use kcl::random::UQ;
-pub use kson::prelude::*;
+pub use kson::{self, prelude::*};
 pub use std::collections::BTreeMap;
 
 impl UserMeta {

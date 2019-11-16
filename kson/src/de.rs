@@ -403,10 +403,6 @@ impl Deserializer {
     }
 }
 
-pub fn from_bytes<T: De>(from: Bytes) -> Result<T, KsonError> {
-    T::de(&mut Deserializer::new(from))
-}
-
 macro_rules! read_tagged_val {
     ($type: ty, $fname: ident, $tag_reader: tt, $val_reader: tt) => {
         impl Deserializer {
