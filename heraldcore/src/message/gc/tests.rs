@@ -1,5 +1,7 @@
 use super::*;
-use crate::{conversation::db::set_expiration_period, message, types::ExpirationPeriod, womp};
+use crate::{
+    conversation::db::set_expiration_period, conversation::ExpirationPeriod, message, womp,
+};
 use std::convert::TryInto;
 
 #[test]

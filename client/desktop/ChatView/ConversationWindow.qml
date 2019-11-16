@@ -8,14 +8,6 @@ import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
 Flickable {
     id: cvPane
     property alias chatScrollBar: chatScrollBar
@@ -25,6 +17,8 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     contentHeight: textMessageCol.height
 
+    property var blankTransition: Transition {}
+
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
@@ -33,6 +27,7 @@ Flickable {
     Component.onCompleted: {
         chatScrollBar.position = 1.0
     }
+
 
     Column {
         id: textMessageCol
@@ -48,7 +43,6 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
-
             delegate: Row {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
@@ -156,4 +150,12 @@ Flickable {
             } //bubble wrapper
         } // Repeater
     } //singleton Col
+
+    states: State {
+        name: "searchState"
+        PropertyChanges {
+            target: cvPane
+            rebound: blankTransition
+        }
+    }
 } // flickable

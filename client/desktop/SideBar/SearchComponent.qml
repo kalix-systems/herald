@@ -13,7 +13,7 @@ Component {
         id: searchText
         height: CmnCfg.toolbarHeight
 
-        placeholderText: searchLoader.searchPlaceholder
+        placeholderText: headerLoader.searchPlaceholder
         color: CmnCfg.palette.mainTextColor
         verticalAlignment: TextEdit.AlignVCenter
 

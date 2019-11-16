@@ -17,6 +17,7 @@ pub struct ConversationBuilder {
     list: Vec<UserId>,
     title: Option<String>,
     local_id: UserId,
+    picture: Option<String>,
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
@@ -27,6 +28,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             list: Vec::new(),
             title: None,
             local_id: abort_err!(heraldcore::config::Config::static_id()),
+            picture: None,
         }
     }
 
@@ -101,9 +103,12 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
         let list = std::mem::replace(&mut self.list, vec![]);
         let title = self.title.take();
+        let picture = self.picture.take();
 
         ret_err!(std::thread::Builder::new().spawn(move || {
-            let cid = ret_err!(heraldcore::network::start_conversation(&list, title));
+            let cid = ret_err!(heraldcore::network::start_conversation(
+                &list, title, picture
+            ));
 
             // send update to Conversations list
             ret_err!(Conversations::push(ConvUpdates::BuilderFinished(cid)));
@@ -112,6 +117,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
     fn set_title(&mut self, title: String) {
         self.title.replace(title);
+    }
+
+    fn picture(&self) -> Option<&str> {
+        Some(self.picture.as_ref()?.as_str())
+    }
+
+    fn set_picture(&mut self, picture: Option<String>) {
+        self.picture = picture.map(crate::utils::strip_qrc);
     }
 
     fn row_count(&self) -> usize {

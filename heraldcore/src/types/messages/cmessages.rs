@@ -1,4 +1,5 @@
 use super::*;
+use crate::message::{MessageBody, MessageReceiptStatus};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.

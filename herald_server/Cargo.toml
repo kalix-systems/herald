@@ -33,6 +33,9 @@ path = "server_errors"
 [dependencies.server_store]
 path = "server_store"
 
+[dependencies.server_protocol]
+path = "server_protocol"
+
 [dev-dependencies]
 serial_test        = "0.2.0"
 serial_test_derive = "0.2.0"

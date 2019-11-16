@@ -19,9 +19,24 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
-    header: CVUtils.ChatBar {
+    header: Loader {
         id: messageBar
-        conversationItem: parent.conversationItem
+        property var conversationItem: parent.conversationItem
+        property Messages ownedConversation: parent.ownedConversation
+        sourceComponent: chatBarComponent
+    }
+
+
+
+    Component {
+        id: chatBarComponent
+        CVUtils.ChatBar {
+        conversationItem: messageBar.conversationItem
+        }
+    }
+
+    ChatSearchComponent {
+        id: chatSearchComponent
     }
 
     Common.Divider {
@@ -31,6 +46,7 @@ Page {
     }
 
     CVUtils.ConversationWindow {
+
         id: convWindow
         focus: true
         anchors {

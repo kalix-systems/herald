@@ -10,13 +10,13 @@ import "qrc:/imports/Avatar"
 // Shared rectangle for displaying contact and conversation items in sidebar
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
-    property bool isContact
     id: bgBox
     color: CmnCfg.palette.paneColor
     anchors.fill: parent
     property string boxTitle
     property int boxColor
     property alias labelComponent: conversationItemAvatar.labelComponent
+    property string picture
 
     AvatarMain {
         anchors.fill: parent

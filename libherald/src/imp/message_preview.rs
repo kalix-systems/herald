@@ -1,8 +1,9 @@
 use crate::{ffi, interface::*, ret_err};
 use herald_common::{Time, UserId};
 use heraldcore::{
-    message::{get_message_opt, Message},
-    types::{MessageBody, MsgId},
+    channel_send_err,
+    message::{get_message_opt, Message, MessageBody},
+    types::MsgId,
 };
 use std::convert::TryInto;
 
@@ -61,7 +62,7 @@ impl MessagePreviewTrait for MessagePreview {
     }
 
     fn set_message_id(&mut self, mid: Option<ffi::MsgIdRef>) {
-        if let (Some(mid), None) = (mid, self.msg_id) {
+        if let Some(mid) = mid {
             let mid = ret_err!(mid.try_into());
             self.msg_id.replace(mid);
 
@@ -71,7 +72,7 @@ impl MessagePreviewTrait for MessagePreview {
                 author,
                 has_attachments,
                 ..
-            }) = ret_err!(get_message_opt(&mid))
+            }) = get_msg(mid)
             {
                 self.is_dangling = false;
                 self.has_attachments = has_attachments;
@@ -96,4 +97,23 @@ impl MessagePreviewTrait for MessagePreview {
     fn msg_id_set(&self) -> bool {
         self.msg_id.is_some()
     }
+}
+
+fn get_msg(mid: MsgId) -> Option<Message> {
+    let (tx, rx) = crossbeam_channel::bounded(0);
+
+    ret_err!(
+        std::thread::Builder::new().spawn(move || match get_message_opt(&mid) {
+            Ok(msg) => {
+                ret_err!(tx.send(msg).map_err(|_| channel_send_err!()));
+            }
+            Err(_) => {
+                ret_err!(tx.send(None));
+            }
+        }),
+        None
+    );
+
+    rx.recv_timeout(std::time::Duration::from_secs(1))
+        .unwrap_or(None)
 }

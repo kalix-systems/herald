@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 
-use herald_server::protocol::*;
+use server_protocol::State;
 
 lazy_static! {
     static ref HANDLER: State = State::new();
@@ -9,5 +9,5 @@ lazy_static! {
 
 #[tokio::main]
 async fn main() {
-    HANDLER.serve(8080).await;
+    herald_server::http::serve(&HANDLER, 8080).await;
 }

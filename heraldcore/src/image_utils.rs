@@ -1,34 +1,30 @@
-use crate::{errors::HErr, platform_dirs::PROFILE_PICTURES_DIR};
-use herald_common::*;
+use crate::{errors::HErr, platform_dirs::PICTURES_DIR};
 use image::{self, FilterType, ImageFormat};
 use std::path::{Path, PathBuf};
 
 const IMAGE_SIZE: u32 = 300;
 
-/// Determines path of profile picture for user id.
-pub fn profile_picture_path(id: &str) -> PathBuf {
-    let mut image_path = PROFILE_PICTURES_DIR.join(format!("{}_{}", id, Time::now().0));
-    image_path.set_extension("png");
-    image_path
-}
-
 /// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn save_profile_picture<P>(id: &str, source: P, old_path: Option<P>) -> Result<PathBuf, HErr>
+pub fn update_picture<P>(source: P, old_path: Option<P>) -> Result<PathBuf, HErr>
 where
-    P: AsRef<Path> + std::fmt::Debug,
+    P: AsRef<Path>,
 {
-    std::fs::create_dir_all(PROFILE_PICTURES_DIR.as_path())?;
+    std::fs::create_dir_all(PICTURES_DIR.as_path())?;
+
     if let Some(old_path) = old_path {
-        if let Err(e) = std::fs::remove_file(old_path) {
-            eprintln!("{}", e);
-        }
+        std::fs::remove_file(old_path)?;
     }
 
-    let image_path = profile_picture_path(id);
+    let rid = crate::utils::rand_id();
+    let text = hex::encode(rid);
+
+    let mut image_path = PICTURES_DIR.join(text);
+    image_path.set_extension("png");
 
     image::open(source)?
         .resize_exact(IMAGE_SIZE, IMAGE_SIZE, FilterType::Nearest)
         .save_with_format(&image_path, ImageFormat::PNG)?;
+
     Ok(image_path)
 }

@@ -2,6 +2,9 @@ use super::*;
 use crate::message::MessageTime;
 use rusqlite::named_params;
 
+// TODO: this should be a struct
+type PathStr<'a> = &'a str;
+
 impl ConversationBuilder {
     ///Adds conversation
     pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
@@ -18,12 +21,21 @@ impl ConversationBuilder {
         let muted = self.muted.unwrap_or(false);
         let expiration_period = self.expiration_period.unwrap_or_default();
 
+        let picture = match &self.picture {
+            Some(picture) => {
+                // TODO Give more specific error
+                let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
+                path.into_os_string().into_string().ok()
+            }
+            None => None,
+        };
+
         conn.execute_named(
             include_str!("sql/add_conversation.sql"),
             named_params! {
                "@conversation_id": id,
                 "@title": self.title,
-                "@picture": self.picture,
+                "@picture": picture,
                 "@color": color,
                 "@pairwise": pairwise,
                 "@muted": muted,
@@ -166,20 +178,16 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<&str>,
-    old_pic: Option<&str>,
+    picture: Option<PathStr>,
+    old_pic: Option<PathStr>,
 ) -> Result<(), HErr> {
     use crate::image_utils;
 
     let path = match picture {
         Some(path) => Some(
-            image_utils::save_profile_picture(
-                format!("{:x?}", conversation_id.as_slice()).as_str(),
-                path,
-                old_pic,
-            )?
-            .into_os_string()
-            .into_string()?,
+            image_utils::update_picture(path, old_pic)?
+                .into_os_string()
+                .into_string()?,
         ),
         None => {
             if let Some(old) = old_pic {

@@ -5,16 +5,24 @@ use heraldcore::{
     config::Config,
     conversation,
     errors::HErr,
-    message::{self, Message as Msg},
+    message::{
+        self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
+        ReplyId,
+    },
     types::*,
+    utils::SearchPattern,
     NE,
 };
-use im_rc::vector::Vector;
+use im::vector::Vector;
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
 };
 
+mod search;
+use search::*;
+mod container;
+use container::*;
 mod imp;
 pub(crate) mod shared;
 pub(crate) mod types;
@@ -29,30 +37,30 @@ type List = MessagesList;
 pub struct Messages {
     emit: Emitter,
     model: List,
-    list: Vector<Message>,
-    map: HashMap<MsgId, MsgData>,
     local_id: UserId,
     conversation_id: Option<ConversationId>,
+    container: Container,
+    search: SearchMachine,
 }
 
 impl MessagesTrait for Messages {
     fn new(emit: Emitter, model: List) -> Self {
         Messages {
-            list: Vector::new(),
-            map: HashMap::new(),
             model,
             emit,
+            container: Container::default(),
             conversation_id: None,
             local_id: abort_err!(Config::static_id()),
+            search: SearchMachine::new(),
         }
     }
 
     fn is_empty(&self) -> bool {
-        self.list.is_empty()
+        self.container.is_empty()
     }
 
     fn last_author(&self) -> Option<ffi::UserIdRef> {
-        let last = self.last_msg()?;
+        let last = self.container.last_msg()?;
 
         if last.author == self.local_id {
             Some("You")
@@ -62,19 +70,20 @@ impl MessagesTrait for Messages {
     }
 
     fn last_status(&self) -> Option<u32> {
-        self.last_msg()?
+        self.container
+            .last_msg()?
             .receipts
-            .iter()
-            .map(|(_, status)| *status as u32)
+            .values()
+            .map(|status| *status as u32)
             .max()
     }
 
     fn last_body(&self) -> Option<&str> {
-        Some(self.last_msg()?.body.as_ref()?.as_str())
+        Some(self.container.last_msg()?.body.as_ref()?.as_str())
     }
 
     fn last_epoch_timestamp_ms(&self) -> Option<i64> {
-        Some(self.last_msg()?.time.insertion.0)
+        Some(self.container.last_msg()?.time.insertion.0)
     }
 
     /// Returns index of a message given its id.
@@ -83,7 +92,7 @@ impl MessagesTrait for Messages {
 
         let msg_id = ret_err!(msg_id.try_into(), ret_val);
 
-        ret_none!(self.index_of(msg_id), ret_val) as u64
+        ret_none!(self.container.index_of(msg_id), ret_val) as u64
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
@@ -98,23 +107,15 @@ impl MessagesTrait for Messages {
             self.conversation_id = Some(conversation_id);
             self.emit.conversation_id_changed();
 
-            let messages: Vector<Message> =
-                ret_err!(conversation::conversation_messages(&conversation_id))
-                    .into_iter()
-                    .map(|m| {
-                        let (message, data) = Message::split_msg(m, SaveStatus::Saved);
-                        self.map.insert(message.msg_id, data);
-                        message
-                    })
-                    .collect();
+            let container = ret_err!(Container::new(conversation_id));
 
-            if messages.is_empty() {
+            if container.is_empty() {
                 return;
             }
 
             self.model
-                .begin_insert_rows(0, messages.len().saturating_sub(1));
-            self.list = messages;
+                .begin_insert_rows(0, container.len().saturating_sub(1));
+            self.container = container;
             self.model.end_insert_rows();
             self.emit_last_changed();
         }
@@ -125,28 +126,29 @@ impl MessagesTrait for Messages {
     }
 
     fn data_saved(&self, row_index: usize) -> Option<bool> {
-        Some(self.msg_data(row_index)?.save_status == SaveStatus::Saved)
+        Some(self.container.msg_data(row_index)?.save_status == SaveStatus::Saved)
     }
 
     fn author(&self, row_index: usize) -> Option<ffi::UserIdRef> {
-        Some(self.msg_data(row_index)?.author.as_str())
+        Some(self.container.msg_data(row_index)?.author.as_str())
     }
 
     fn body(&self, row_index: usize) -> Option<&str> {
-        Some(self.msg_data(row_index)?.body.as_ref()?.as_str())
+        Some(self.container.msg_data(row_index)?.body.as_ref()?.as_str())
     }
 
     fn message_id(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
-        Some(self.list.get(row_index)?.msg_id.as_slice())
+        Some(self.container.get(row_index)?.msg_id.as_slice())
     }
 
     fn has_attachments(&self, row_index: usize) -> Option<bool> {
-        Some(self.msg_data(row_index)?.has_attachments)
+        Some(self.container.msg_data(row_index)?.has_attachments)
     }
 
     fn receipt_status(&self, row_index: usize) -> Option<u32> {
         Some(
-            self.msg_data(row_index)?
+            self.container
+                .msg_data(row_index)?
                 .receipts
                 .values()
                 .map(|r| *r as u32)
@@ -155,19 +157,23 @@ impl MessagesTrait for Messages {
         )
     }
 
+    fn match_status(&self, row_index: usize) -> Option<u8> {
+        Some(self.container.msg_data(row_index)?.match_status as u8)
+    }
+
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
-        match self.msg_data(row_index)?.op {
+        match self.container.msg_data(row_index)?.op {
             ReplyId::Known(ref mid) => Some(mid.as_slice()),
             _ => None,
         }
     }
 
     fn is_reply(&self, row_index: usize) -> Option<bool> {
-        Some(!self.msg_data(row_index)?.op.is_none())
+        Some(!self.container.msg_data(row_index)?.op.is_none())
     }
 
     fn is_head(&self, row_index: usize) -> Option<bool> {
-        if self.list.is_empty() {
+        if self.container.is_empty() {
             return None;
         }
 
@@ -177,47 +183,53 @@ impl MessagesTrait for Messages {
         }
 
         // other cases
-        let (msg, prev) = (self.msg_data(row_index)?, self.msg_data(row_index - 1)?);
+        let (msg, prev) = (
+            self.container.msg_data(row_index)?,
+            self.container.msg_data(row_index - 1)?,
+        );
 
         Some(!msg.same_flurry(prev))
     }
 
     fn is_tail(&self, row_index: usize) -> Option<bool> {
-        if self.list.is_empty() {
+        if self.container.is_empty() {
             return None;
         }
 
         // Case where message is last message in conversation
-        if row_index == self.list.len().saturating_sub(1) {
+        if row_index == self.container.len().saturating_sub(1) {
             return Some(true);
         }
 
         // other cases
-        let (msg, succ) = (self.msg_data(row_index)?, self.msg_data(row_index + 1)?);
+        let (msg, succ) = (
+            self.container.msg_data(row_index)?,
+            self.container.msg_data(row_index + 1)?,
+        );
 
         Some(!msg.same_flurry(succ))
     }
 
     fn epoch_timestamp_ms(&self, row_index: usize) -> Option<i64> {
-        Some(self.list.get(row_index)?.insertion_time.0)
+        Some(self.container.get(row_index)?.insertion_time.0)
     }
 
     fn expiration_timestamp_ms(&self, row_index: usize) -> Option<i64> {
-        Some(self.msg_data(row_index)?.time.expiration?.0)
+        Some(self.container.msg_data(row_index)?.time.expiration?.0)
     }
 
     fn server_timestamp_ms(&self, row_index: usize) -> Option<i64> {
-        Some(self.msg_data(row_index)?.time.server?.0)
+        Some(self.container.msg_data(row_index)?.time.server?.0)
     }
 
     fn delete_message(&mut self, row_index: u64) -> bool {
         let ix = row_index as usize;
 
-        let id = ret_none!(self.list.get(ix), false).msg_id;
+        let id = ret_none!(self.container.get(ix), false).msg_id;
 
         ret_err!(message::delete_message(&id), false);
 
-        self.raw_list_remove(ix, &id);
+        self.raw_list_remove(ix);
 
         true
     }
@@ -229,9 +241,8 @@ impl MessagesTrait for Messages {
         ret_err!(conversation::delete_conversation(&id), false);
 
         self.model
-            .begin_remove_rows(0, self.list.len().saturating_sub(1));
-        self.list = Vector::new();
-        self.map = HashMap::new();
+            .begin_remove_rows(0, self.container.len().saturating_sub(1));
+        self.container = Default::default();
         self.model.end_remove_rows();
 
         self.emit_last_changed();
@@ -277,51 +288,15 @@ impl MessagesTrait for Messages {
                     ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt(mid) => {
-                    let mut msg = match self.map.get_mut(&mid) {
-                        None => {
-                            // This can (possibly) happen if the message
-                            // was deleted between the receipt
-                            // being received over the network
-                            // and this part of the code.
-                            continue;
-                        }
-                        Some(msg) => msg,
-                    };
-
-                    // NOTE: If this fails, there is a bug somewhere
-                    // in libherald.
-                    //
-                    // It is probably trivial, but may reflect something
-                    // deeply wrong with our understanding of the program's
-                    // concurrency.
-                    let ix = ret_none!(self
-                        .list
-                        .iter()
-                        // search backwards,
-                        // it's probably fairly recent
-                        .rposition(|m| m.msg_id == mid));
-
-                    let receipts = ret_err!(message::get_message_receipts(&mid));
-                    msg.receipts = receipts;
-
-                    self.model.data_changed(ix, ix);
+                    ret_err!(self.container.handle_receipt(mid, &mut self.model));
                 }
                 MsgUpdate::StoreDone(mid) => {
-                    let data = ret_none!(self.map.get_mut(&mid));
-
-                    data.save_status = SaveStatus::Saved;
-                    let ix = ret_none!(self
-                        .list
-                        .iter()
-                        // search backwards,
-                        // it's probably fairly recent
-                        .rposition(|m| m.msg_id == mid));
-                    self.model.data_changed(ix, ix);
+                    ret_none!(self.container.handle_store_done(mid, &mut self.model));
                 }
                 MsgUpdate::ExpiredMessages(mids) => {
                     for mid in mids {
-                        if let Some(ix) = self.index_of(mid) {
-                            self.raw_list_remove(ix, &mid);
+                        if let Some(ix) = self.container.index_of(mid) {
+                            self.raw_list_remove(ix);
                         }
                     }
                 }
@@ -334,6 +309,103 @@ impl MessagesTrait for Messages {
     }
 
     fn row_count(&self) -> usize {
-        self.list.len()
+        self.container.len()
+    }
+
+    fn search_pattern(&self) -> &str {
+        self.search.pattern.raw()
+    }
+
+    fn set_search_pattern(&mut self, pattern: String) {
+        if pattern.is_empty() {
+            self.clear_search();
+            return;
+        }
+
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
+        }
+    }
+
+    /// Indicates whether regex search is activated
+    fn search_regex(&self) -> bool {
+        self.search.is_regex()
+    }
+
+    /// Sets search mode
+    fn set_search_regex(&mut self, use_regex: bool) {
+        if ret_err!(self.search.set_regex(use_regex)).changed() {
+            self.emit.search_regex_changed();
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
+        }
+    }
+
+    /// Indicates whether search is active
+    fn search_active(&self) -> bool {
+        self.search.active
+    }
+
+    /// Turns search on or off
+    fn set_search_active(&mut self, active: bool) {
+        self.search.active = active;
+        self.emit.search_active_changed();
+    }
+
+    /// Clears search
+    fn clear_search(&mut self) {
+        self.container.clear_search(&mut self.model);
+        self.search.clear_search(&mut self.emit);
+    }
+
+    fn search_num_matches(&self) -> u64 {
+        self.search.num_matches() as u64
+    }
+
+    fn next_search_match(&mut self) -> i64 {
+        match self.search.next(&self.container) {
+            Some(Match { mid }) => {
+                let ix = self.container.index_of(mid);
+
+                ix.map(|ix| ix as i64).unwrap_or(-1)
+            }
+            None => -1,
+        }
+    }
+
+    fn prev_search_match(&mut self) -> i64 {
+        match self.search.prev(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
+            None => -1,
+        }
+    }
+
+    fn peek_next_search_match(&mut self) -> i64 {
+        self.next_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
+    fn peek_prev_search_match(&mut self) -> i64 {
+        self.prev_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
+    fn next_would_loop(&mut self) -> bool {
+        self.search.next_would_loop(&self.container)
+    }
+
+    fn prev_would_loop(&mut self) -> bool {
+        self.search.prev_would_loop(&self.container)
     }
 }

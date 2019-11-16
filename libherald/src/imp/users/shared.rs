@@ -24,6 +24,18 @@ pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, contact::Conta
     USER_DATA.get_mut(uid)
 }
 
+#[inline]
+pub fn user_ids() -> Vec<UserId> {
+    let mut list: Vec<(String, UserId)> = USER_DATA
+        .iter()
+        .map(|kv| (kv.value().name.clone(), *kv.key()))
+        .collect();
+
+    list.sort_unstable_by(|a, b| a.cmp(b));
+
+    list.into_iter().map(|(_, u)| u).collect()
+}
+
 /// User list updates
 pub enum UsersUpdates {
     /// A new user has been added
