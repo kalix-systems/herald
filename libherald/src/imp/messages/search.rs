@@ -50,12 +50,7 @@ impl SearchMachine {
             return Ok(SearchChanged::NotChanged);
         }
 
-        self.pattern = if self.is_regex() {
-            SearchPattern::new_regex(pattern)?
-        } else {
-            SearchPattern::new_normal(pattern)?
-        };
-
+        self.pattern.set_pattern(pattern)?;
         emit.search_pattern_changed();
 
         Ok(SearchChanged::Changed)

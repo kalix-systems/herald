@@ -1,4 +1,6 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
+use crate::{
+    ffi, interface::*, ret_err, ret_none, shared::SingletonBus, spawn, toasts::new_msg_toast,
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
@@ -217,7 +219,7 @@ impl MessagesTrait for Messages {
 
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
-        ret_err!(message::delete_message(&id), false);
+        spawn!(message::delete_message(&id), false);
 
         self.raw_list_remove(ix);
 
@@ -228,7 +230,7 @@ impl MessagesTrait for Messages {
     fn clear_conversation_history(&mut self) -> bool {
         let id = ret_none!(self.conversation_id, false);
 
-        ret_err!(conversation::delete_conversation(&id), false);
+        spawn!(conversation::delete_conversation(&id), false);
 
         self.model
             .begin_remove_rows(0, self.container.len().saturating_sub(1));
@@ -370,11 +372,11 @@ impl MessagesTrait for Messages {
 
     fn next_search_match(&mut self) -> i64 {
         match self.search.next(&self.container) {
-            Some(Match { mid }) => {
-                let ix = self.container.index_of(mid);
-
-                ix.map(|ix| ix as i64).unwrap_or(-1)
-            }
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
     }
