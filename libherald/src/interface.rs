@@ -3525,11 +3525,9 @@ pub trait MessagesTrait {
     fn delete_message(&mut self, row_index: u64) -> bool;
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn next_search_match(&mut self) -> i64;
-    fn next_would_loop(&mut self) -> bool;
     fn peek_next_search_match(&mut self) -> i64;
     fn peek_prev_search_match(&mut self) -> i64;
     fn prev_search_match(&mut self) -> i64;
-    fn prev_would_loop(&mut self) -> bool;
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
@@ -3800,12 +3798,6 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_next_would_loop(ptr: *mut Messages) -> bool {
-    let o = &mut *ptr;
-    o.next_would_loop()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_peek_next_search_match(ptr: *mut Messages) -> i64 {
     let o = &mut *ptr;
     o.peek_next_search_match()
@@ -3821,12 +3813,6 @@ pub unsafe extern "C" fn messages_peek_prev_search_match(ptr: *mut Messages) -> 
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let o = &mut *ptr;
     o.prev_search_match()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_prev_would_loop(ptr: *mut Messages) -> bool {
-    let o = &mut *ptr;
-    o.prev_would_loop()
 }
 
 #[no_mangle]

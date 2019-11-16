@@ -2046,11 +2046,9 @@ extern "C" {
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     qint64 messages_next_search_match(Messages::Private*);
-    bool messages_next_would_loop(Messages::Private*);
     qint64 messages_peek_next_search_match(Messages::Private*);
     qint64 messages_peek_prev_search_match(Messages::Private*);
     qint64 messages_prev_search_match(Messages::Private*);
-    bool messages_prev_would_loop(Messages::Private*);
 };
 
 extern "C" {
@@ -3479,10 +3477,6 @@ qint64 Messages::nextSearchMatch()
 {
     return messages_next_search_match(m_d);
 }
-bool Messages::nextWouldLoop()
-{
-    return messages_next_would_loop(m_d);
-}
 qint64 Messages::peekNextSearchMatch()
 {
     return messages_peek_next_search_match(m_d);
@@ -3494,10 +3488,6 @@ qint64 Messages::peekPrevSearchMatch()
 qint64 Messages::prevSearchMatch()
 {
     return messages_prev_search_match(m_d);
-}
-bool Messages::prevWouldLoop()
-{
-    return messages_prev_would_loop(m_d);
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

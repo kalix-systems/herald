@@ -370,45 +370,37 @@ impl MessagesTrait for Messages {
         self.search.num_matches() as u64
     }
 
-    fn next_search_match(&mut self) -> i64 {
-        match self.search.next(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
-    fn prev_search_match(&mut self) -> i64 {
-        match self.search.prev(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
     fn peek_next_search_match(&mut self) -> i64 {
+        match self.search.peek_next(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
+            None => -1,
+        }
+    }
+
+    fn peek_prev_search_match(&mut self) -> i64 {
+        match self.search.peek_prev(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
+            None => -1,
+        }
+    }
+
+    fn next_search_match(&mut self) -> i64 {
         self.next_search_match_helper()
             .map(|ix| ix as i64)
             .unwrap_or(-1)
     }
 
-    fn peek_prev_search_match(&mut self) -> i64 {
+    fn prev_search_match(&mut self) -> i64 {
         self.prev_search_match_helper()
             .map(|ix| ix as i64)
             .unwrap_or(-1)
-    }
-
-    fn next_would_loop(&mut self) -> bool {
-        self.search.next_would_loop(&self.container)
-    }
-
-    fn prev_would_loop(&mut self) -> bool {
-        self.search.prev_would_loop(&self.container)
     }
 }

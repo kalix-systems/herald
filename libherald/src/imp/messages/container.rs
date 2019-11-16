@@ -27,10 +27,6 @@ impl Container {
         self.list.get(ix)
     }
 
-    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
-        self.map.get(msg_id)
-    }
-
     pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
         self.map.get_mut(msg_id)
     }

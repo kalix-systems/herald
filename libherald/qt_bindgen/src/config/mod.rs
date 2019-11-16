@@ -275,8 +275,6 @@ fn messages() -> Object {
         mut peekNextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
         mut peekPrevSearchMatch() => Qint64,
-        mut nextWouldLoop() => Bool,
-        mut prevWouldLoop() => Bool,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
