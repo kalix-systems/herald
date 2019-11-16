@@ -25,6 +25,10 @@ impl Container {
         self.list.get(ix)
     }
 
+    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
+        self.map.get(msg_id)
+    }
+
     pub(super) fn new(cid: ConversationId) -> Result<Self, HErr> {
         let (tx, rx) = crossbeam_channel::bounded(0);
 

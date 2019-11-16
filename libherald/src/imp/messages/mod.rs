@@ -410,4 +410,12 @@ impl MessagesTrait for Messages {
             None => -1,
         }
     }
+
+    fn next_would_loop(&mut self) -> bool {
+        self.search.next_would_loop(&self.container)
+    }
+
+    fn prev_would_loop(&mut self) -> bool {
+        self.search.prev_would_loop(&self.container)
+    }
 }

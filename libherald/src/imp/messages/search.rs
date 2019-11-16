@@ -122,6 +122,23 @@ impl SearchMachine {
         Some(next)
     }
 
+    pub(super) fn next_would_loop(&mut self, container: &Container) -> bool {
+        self.next_would_loop_helper(container).unwrap_or(true)
+    }
+
+    fn next_would_loop_helper(&mut self, container: &Container) -> Option<bool> {
+        if self.active.not() {
+            return None;
+        }
+
+        let (next, cursor) = (self.peek_next(container)?, self.peek_prev(container)?);
+
+        Some(
+            container.get_data(&next.mid)?.time.insertion
+                < container.get_data(&cursor.mid)?.time.insertion,
+        )
+    }
+
     pub(super) fn peek_prev(&mut self, container: &Container) -> Option<Match> {
         if self.active.not() {
             return None;
@@ -154,5 +171,22 @@ impl SearchMachine {
         self.matches.push_front(prev);
 
         Some(prev)
+    }
+
+    pub(super) fn prev_would_loop(&mut self, container: &Container) -> bool {
+        self.prev_would_loop_helper(container).unwrap_or(true)
+    }
+
+    fn prev_would_loop_helper(&mut self, container: &Container) -> Option<bool> {
+        if self.active.not() {
+            return None;
+        }
+
+        let (prev, cursor) = (self.peek_prev(container)?, self.peek_next(container)?);
+
+        Some(
+            container.get_data(&prev.mid)?.time.insertion
+                < container.get_data(&cursor.mid)?.time.insertion,
+        )
     }
 }
