@@ -1,8 +1,7 @@
 use super::*;
+use crate::{config::test_config, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
-
-use crate::{config::test_config, womp};
 
 /// Testing utility
 fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {

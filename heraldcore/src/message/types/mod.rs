@@ -29,23 +29,6 @@ pub struct Message {
     pub has_attachments: bool,
 }
 
-#[derive(Clone, Debug)]
-/// A search result produced by a global message search
-pub struct MessageSearchResult {
-    /// Message id
-    pub message_id: MsgId,
-    /// Author user id
-    pub author: UserId,
-    /// Recipient user id
-    pub conversation: ConversationId,
-    /// Body of message
-    pub body: Option<MessageBody>,
-    /// Message time information
-    pub time: MessageTime,
-    /// Indicates whether the message has attachments
-    pub has_attachments: bool,
-}
-
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
 /// that a message is a reply without necessarily knowing
