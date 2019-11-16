@@ -17,6 +17,8 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     contentHeight: textMessageCol.height
 
+    property var blankTransition: Transition {}
+
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
@@ -25,6 +27,7 @@ Flickable {
     Component.onCompleted: {
         chatScrollBar.position = 1.0
     }
+
 
     Column {
         id: textMessageCol
@@ -40,7 +43,6 @@ Flickable {
             id: chatListView
             anchors.fill: parent
             model: ownedConversation
-
             delegate: Row {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
@@ -148,4 +150,12 @@ Flickable {
             } //bubble wrapper
         } // Repeater
     } //singleton Col
+
+    states: State {
+        name: "searchState"
+        PropertyChanges {
+            target: cvPane
+            rebound: blankTransition
+        }
+    }
 } // flickable

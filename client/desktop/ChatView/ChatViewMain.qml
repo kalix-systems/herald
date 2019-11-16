@@ -23,9 +23,16 @@ Page {
         id: messageBar
         property var conversationItem: parent.conversationItem
         property Messages ownedConversation: parent.ownedConversation
-        sourceComponent: CVUtils.ChatBar {
-        conversationItem: parent.conversationItem
+        sourceComponent: chatBarComponent
     }
+
+
+
+    Component {
+        id: chatBarComponent
+        CVUtils.ChatBar {
+        conversationItem: messageBar.conversationItem
+        }
     }
 
     ChatSearchComponent {
@@ -39,6 +46,7 @@ Page {
     }
 
     CVUtils.ConversationWindow {
+
         id: convWindow
         focus: true
         anchors {

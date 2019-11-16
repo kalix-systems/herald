@@ -54,5 +54,7 @@
         <file>SideBar/GroupFlowComponents/NewGroupComponent.qml</file>
         <file>SideBar/GroupFlowComponents/FinalGroupList.qml</file>
         <file>SideBar/GroupFlowComponents/ConvoBuilder.qml</file>
+        <file>../foundation/js/utils.mjs</file>
+        <file>ChatView/js/SearchHandler.mjs</file>
     </qresource>
 </RCC>
