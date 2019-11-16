@@ -11,11 +11,32 @@ new_type! {
     secret ChainKey(CHAIN_KEY_BYTES)
 }
 
+impl ChainKey {
+    pub fn new() -> Self {
+        let mut buf = [0u8; CHAIN_KEY_BYTES];
+        random::gen_into(&mut buf);
+        ChainKey(buf)
+    }
+}
+
 #[derive(Debug, Clone, Ser, De)]
 pub struct ChainState {
     ix: u64,
     base_key: hash::Key,
     chain_key: ChainKey,
+}
+
+impl ChainState {
+    pub fn new() -> Self {
+        let base_key = hash::Key::new();
+        let chain_key = ChainKey::new();
+
+        ChainState {
+            ix: 0,
+            base_key,
+            chain_key,
+        }
+    }
 }
 
 #[must_use = "you should check if the decryption was successful and store the generated message keys"]
@@ -47,14 +68,6 @@ impl CipherData {
 }
 
 impl ChainState {
-    pub fn new(base_key: hash::Key, chain_key: ChainKey) -> ChainState {
-        ChainState {
-            ix: 0,
-            base_key,
-            chain_key,
-        }
-    }
-
     pub fn ix(&self) -> u64 {
         self.ix
     }
@@ -116,14 +129,18 @@ impl ChainState {
 
     pub fn seal(&mut self, ad: Bytes, mut msg: BytesMut) -> CipherData {
         let ix = self.ix;
+
         let key = self.kdf();
         let tag = key.seal(&ad, &mut msg);
+        let msg = msg.freeze();
+
         let cipher = Cipher {
             index: ix,
             tag,
             ad,
             msg: msg.freeze(),
         };
+
         CipherData { ix, key, cipher }
     }
 }
