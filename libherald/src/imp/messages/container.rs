@@ -100,7 +100,7 @@ impl Container {
 
     pub(super) fn apply_search(
         &mut self,
-        search: &SearchMachine,
+        search: &SearchState,
         model: &mut List,
         emit: &mut Emitter,
     ) -> Option<VecDeque<Match>> {

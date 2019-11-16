@@ -42,7 +42,7 @@ pub struct Messages {
     local_id: UserId,
     conversation_id: Option<ConversationId>,
     container: Container,
-    search: SearchMachine,
+    search: SearchState,
 }
 
 impl MessagesTrait for Messages {
@@ -53,7 +53,7 @@ impl MessagesTrait for Messages {
             container: Container::default(),
             conversation_id: None,
             local_id: abort_err!(Config::static_id()),
-            search: SearchMachine::new(),
+            search: SearchState::new(),
         }
     }
 

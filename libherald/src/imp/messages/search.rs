@@ -19,13 +19,13 @@ pub(super) struct Match {
     pub(super) mid: MsgId,
 }
 
-pub(super) struct SearchMachine {
+pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
     pub(super) matches: VecDeque<Match>,
 }
 
-impl SearchMachine {
+impl SearchState {
     pub(super) fn new() -> Self {
         Self {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
