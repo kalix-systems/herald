@@ -1,17 +1,18 @@
 use super::*;
+use crate::conversation::ConversationMeta;
 use rusqlite::named_params;
 
 // TODO: this should be a struct
 type PathStr<'a> = &'a str;
 
-/// Gets a contact's name by their `id`.
+/// Gets a user's name by their `id`.
 pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_name.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
 
-/// Change name of contact by their `id`
+/// Change name of user by their `id`
 pub(crate) fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/update_name.sql"))?;
 
@@ -19,7 +20,7 @@ pub(crate) fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> R
     Ok(())
 }
 
-/// Gets a contact's profile picture by their `id`.
+/// Gets a user's profile picture by their `id`.
 pub fn profile_picture(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_profile_picture.sql"))?;
 
@@ -30,20 +31,20 @@ pub fn profile_picture(conn: &rusqlite::Connection, id: UserId) -> Result<Option
 pub fn conversation_members(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-) -> Result<Vec<Contact>, HErr> {
+) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(params![conversation_id], Contact::from_db)?;
+    let rows = stmt.query_map(params![conversation_id], User::from_db)?;
 
-    let mut contacts: Vec<Contact> = Vec::new();
-    for contact in rows {
-        contacts.push(contact?);
+    let mut users: Vec<User> = Vec::new();
+    for user in rows {
+        users.push(user?);
     }
 
-    Ok(contacts)
+    Ok(users)
 }
 
-/// Updates a contact's profile picture.
+/// Updates a user's profile picture.
 pub fn set_profile_picture(
     conn: &rusqlite::Connection,
     id: UserId,
@@ -75,29 +76,29 @@ pub fn set_profile_picture(
     Ok(profile_picture)
 }
 
-/// Sets a contact's color
+/// Sets a user's color
 pub fn set_color(conn: &rusqlite::Connection, id: UserId, color: u32) -> Result<(), HErr> {
     conn.execute(include_str!("sql/update_color.sql"), params![color, id])?;
     Ok(())
 }
 
-/// Indicates whether contact exists
-pub fn contact_exists(conn: &rusqlite::Connection, id: UserId) -> Result<bool, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/contact_exists.sql"))?;
+/// Indicates whether user exists
+pub fn user_exists(conn: &rusqlite::Connection, id: UserId) -> Result<bool, HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/user_exists.sql"))?;
     Ok(stmt.exists(&[id])?)
 }
 
-/// Sets contact status
+/// Sets user status
 pub fn set_status(
     conn: &mut rusqlite::Connection,
     id: UserId,
-    status: ContactStatus,
+    status: UserStatus,
 ) -> Result<(), HErr> {
-    use ContactStatus::*;
+    use UserStatus::*;
     match status {
         Deleted => {
             let tx = conn.transaction()?;
-            tx.execute(include_str!("sql/delete_contact_meta.sql"), params![id])?;
+            tx.execute(include_str!("sql/delete_user_meta.sql"), params![id])?;
             tx.execute_named(
                 include_str!("../message/sql/delete_pairwise_conversation.sql"),
                 named_params! {"@user_id": id},
@@ -111,20 +112,20 @@ pub fn set_status(
     Ok(())
 }
 
-/// Gets contact status
-pub fn status(conn: &rusqlite::Connection, id: UserId) -> Result<ContactStatus, HErr> {
+/// Gets user status
+pub fn status(conn: &rusqlite::Connection, id: UserId) -> Result<UserStatus, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_status.sql"))?;
 
     Ok(stmt.query_row(&[id], |row| row.get(0))?)
 }
 
-/// Returns all contacts
-pub fn all(conn: &rusqlite::Connection) -> Result<Vec<Contact>, HErr> {
+/// Returns all users
+pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_all.sql"))?;
 
-    let rows = stmt.query_map(NO_PARAMS, Contact::from_db)?;
+    let rows = stmt.query_map(NO_PARAMS, User::from_db)?;
 
-    let mut names: Vec<Contact> = Vec::new();
+    let mut names: Vec<User> = Vec::new();
     for name_res in rows {
         names.push(name_res?);
     }
@@ -132,23 +133,20 @@ pub fn all(conn: &rusqlite::Connection) -> Result<Vec<Contact>, HErr> {
     Ok(names)
 }
 
-/// Returns a single contact by `user_id`
-pub fn by_user_id(conn: &rusqlite::Connection, user_id: UserId) -> Result<Contact, HErr> {
+/// Returns a single user by `user_id`
+pub fn by_user_id(conn: &rusqlite::Connection, user_id: UserId) -> Result<User, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_id.sql"))?;
 
-    Ok(stmt.query_row(params![user_id], Contact::from_db)?)
+    Ok(stmt.query_row(params![user_id], User::from_db)?)
 }
 
-/// Returns all contacts with the specified `status`
-pub fn get_by_status(
-    conn: &rusqlite::Connection,
-    status: ContactStatus,
-) -> Result<Vec<Contact>, HErr> {
+/// Returns all users with the specified `status`
+pub fn get_by_status(conn: &rusqlite::Connection, status: UserStatus) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(params![status], Contact::from_db)?;
+    let rows = stmt.query_map(params![status], User::from_db)?;
 
-    let mut names: Vec<Contact> = Vec::new();
+    let mut names: Vec<User> = Vec::new();
     for name_res in rows {
         names.push(name_res?);
     }
@@ -156,15 +154,21 @@ pub fn get_by_status(
     Ok(names)
 }
 
-impl ContactBuilder {
-    pub(crate) fn add_db(self, conn: &mut rusqlite::Connection) -> Result<Contact, HErr> {
+impl UserBuilder {
+    pub(crate) fn add_db(
+        self,
+        conn: &mut rusqlite::Connection,
+    ) -> Result<(User, ConversationMeta), HErr> {
         let tx = conn.transaction()?;
-        let contact = Self::add_with_tx(self, &tx);
+        let (user, conv) = Self::add_with_tx(self, &tx)?;
         tx.commit()?;
-        contact
+        Ok((user, conv))
     }
 
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<Contact, HErr> {
+    pub(crate) fn add_with_tx(
+        self,
+        tx: &rusqlite::Transaction,
+    ) -> Result<(User, ConversationMeta), HErr> {
         use crate::conversation::ConversationBuilder;
 
         let mut conv_builder = ConversationBuilder::new();
@@ -178,9 +182,9 @@ impl ContactBuilder {
 
         let name = self.name.clone().unwrap_or_else(|| self.id.to_string());
 
-        let contact_type = self.contact_type.unwrap_or(ContactType::Remote);
+        let user_type = self.user_type.unwrap_or(UserType::Remote);
 
-        let title = if let ContactType::Local = contact_type {
+        let title = if let UserType::Local = user_type {
             crate::config::NTS_CONVERSATION_NAME
         } else {
             name.as_str()
@@ -192,45 +196,47 @@ impl ContactBuilder {
             conv_builder.conversation_id(cid);
         }
 
-        let pairwise_conversation = conv_builder.add_with_tx(&tx)?;
+        let conv = conv_builder.add_with_tx(&tx)?;
+        let pairwise_conversation = conv.conversation_id;
 
-        let contact = Contact {
+        let user = User {
             id: self.id,
             name,
             profile_picture: None,
             color,
-            status: self.status.unwrap_or(ContactStatus::Active),
+            status: self.status.unwrap_or(UserStatus::Active),
             pairwise_conversation,
-            contact_type,
+            user_type,
         };
 
         tx.execute(
             include_str!("sql/add.sql"),
             params![
-                contact.id,
-                contact.name,
-                contact.profile_picture,
-                contact.color,
-                contact.status,
-                contact.pairwise_conversation,
-                contact.contact_type
+                user.id,
+                user.name,
+                user.profile_picture,
+                user.color,
+                user.status,
+                user.pairwise_conversation,
+                user.user_type
             ],
         )?;
         tx.execute(
             include_str!("../members/sql/add_member.sql"),
-            params![contact.pairwise_conversation, contact.id],
+            params![user.pairwise_conversation, user.id],
         )?;
 
-        Ok(contact)
+        Ok((user, conv))
     }
 }
 
 #[cfg(test)]
-pub(crate) fn test_contact(conn: &mut rusqlite::Connection, user_id: &str) -> Contact {
+pub(crate) fn test_user(conn: &mut rusqlite::Connection, user_id: &str) -> User {
     let receiver = user_id
         .try_into()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));
-    ContactBuilder::new(receiver)
+    UserBuilder::new(receiver)
         .add_db(conn)
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()))
+        .0
 }

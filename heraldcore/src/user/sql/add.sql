@@ -1,11 +1,11 @@
 INSERT INTO
-  contacts(
+  users(
     user_id,
     name,
     profile_picture,
     color,
     status,
     pairwise_conversation,
-    contact_type
+    user_type
   )
 VALUES(@1, @2, @3, @4, @5, @6, @7)

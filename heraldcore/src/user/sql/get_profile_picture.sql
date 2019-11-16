@@ -1,7 +1,7 @@
 SELECT
   profile_picture
 FROM
-  contacts
+  users
 WHERE
   user_id = ?
 LIMIT

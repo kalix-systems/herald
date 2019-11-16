@@ -1,6 +1,6 @@
 SELECT
-  name
+  status
 FROM
-  contacts
+  users
 WHERE
   user_id = ?

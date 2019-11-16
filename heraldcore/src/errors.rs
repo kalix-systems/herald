@@ -5,7 +5,7 @@ use image;
 use regex;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 /// A location in source code
 pub struct Location {
     /// The line where the error occurred

@@ -24,7 +24,7 @@ pub enum ConversationMessageBody {
     /// A message a user receives upon being added to a conversation
     AddedToConvo(Box<cmessages::AddedToConvo>),
     /// An acknowledgement of a contact request.
-    ContactReqAck(cmessages::ContactReqAck),
+    UserReqAck(cmessages::UserReqAck),
     /// A normal message.
     Msg(cmessages::Msg),
     /// An acknowledgement of a normal message.
@@ -124,7 +124,7 @@ impl ConversationMessage {
 /// Types of device message.
 pub enum DeviceMessageBody {
     /// A contact request
-    ContactReq(dmessages::ContactReq),
+    Req(dmessages::UserReq),
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]

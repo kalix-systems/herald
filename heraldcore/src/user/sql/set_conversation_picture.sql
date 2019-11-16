@@ -7,7 +7,7 @@ conversation_id IN (
     SELECT
         pairwise_conversation
     FROM
-        contacts
+        users
     WHERE
         user_id = @user_id
     LIMIT 1

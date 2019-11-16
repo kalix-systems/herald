@@ -10,8 +10,8 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 
     for (msg, from) in msgs {
         match msg {
-            NewKey(nk) => crate::contact_keys::add_keys(from.uid, &[nk.0])?,
-            DepKey(dk) => crate::contact_keys::deprecate_keys(&[dk.0])?,
+            NewKey(nk) => crate::user_keys::add_keys(from.uid, &[nk.0])?,
+            DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
             AddedToConvo(ac) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
@@ -34,9 +34,9 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 
                 ev.notifications.push(Notification::NewConversation(cid));
             }
-            ContactReqAck(cr) => ev
+            UserReqAck(cr) => ev
                 .notifications
-                .push(Notification::AddContactResponse(cid, from.uid, cr.0)),
+                .push(Notification::AddUserResponse(cid, from.uid, cr.0)),
             NewMembers(nm) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
@@ -98,21 +98,20 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
     let (from, msg) = msg.open()?;
 
     match msg {
-        DeviceMessageBody::ContactReq(cr) => {
-            let dmessages::ContactReq { gen, cid } = cr;
+        DeviceMessageBody::Req(cr) => {
+            let dmessages::UserReq { gen, cid } = cr;
             if gen.verify_sig(&from.did) {
-                crate::contact::ContactBuilder::new(from.uid)
+                crate::user::UserBuilder::new(from.uid)
                     .pairwise_conversation(cid)
                     .add()?;
 
                 cid.store_genesis(&gen)?;
 
-                ev.notifications
-                    .push(Notification::NewContact(from.uid, cid));
+                ev.notifications.push(Notification::NewUser(from.uid, cid));
 
                 ev.replies.push((
                     cid,
-                    ConversationMessageBody::ContactReqAck(cmessages::ContactReqAck(true)),
+                    ConversationMessageBody::UserReqAck(cmessages::UserReqAck(true)),
                 ))
             }
         }

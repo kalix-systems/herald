@@ -3,32 +3,32 @@ use crate::{db::Database, platform_dirs::PICTURES_DIR, womp};
 use serial_test_derive::serial;
 
 #[test]
-fn add_contact() {
+fn add_user() {
     let mut conn = Database::in_memory().expect(womp!());
 
     let id1 = "Hello".try_into().expect(womp!());
     let id2 = "World".try_into().expect(womp!());
 
-    ContactBuilder::new(id1)
+    UserBuilder::new(id1)
         .name("name".into())
         .add_db(&mut conn)
-        .expect("Failed to add contact");
-    ContactBuilder::new(id2)
+        .expect("Failed to add user");
+    UserBuilder::new(id2)
         .color(1)
         .add_db(&mut conn)
-        .expect("Failed to add contact");
+        .expect("Failed to add user");
 }
 
 #[test]
-fn get_contact_name() {
+fn get_user_name() {
     let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .name("name".into())
         .add_db(&mut conn)
-        .expect("Failed to add contact");
+        .expect("Failed to add user");
 
     assert_eq!(
         db::name(&conn, id)
@@ -47,9 +47,9 @@ fn fs_profile_picture() {
 
     let test_picture = "test_resources/maryland.png";
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .add_db(&mut conn)
-        .expect(womp!("Failed to add contact"));
+        .expect(womp!("Failed to add user"));
 
     db::set_profile_picture(&conn, id, Some(test_picture.into()), None)
         .expect(womp!("Failed to set profile picture"));
@@ -62,29 +62,29 @@ fn get_set_color() {
     let mut conn = Database::in_memory().expect(womp!());
     let id = "userid".try_into().expect(womp!());
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .name("Hello".into())
         .add_db(&mut conn)
         .expect(womp!());
 
     db::set_color(&conn, id, 1).expect("Failed to set color");
 
-    let contacts = db::all(&conn).expect(womp!());
+    let users = db::all(&conn).expect(womp!());
 
-    assert_eq!(contacts[0].color, 1);
+    assert_eq!(users[0].color, 1);
 }
 
 #[test]
-fn check_contact_exists() {
+fn check_user_exists() {
     let mut conn = Database::in_memory().expect(womp!());
     let id = "userid".try_into().expect(womp!());
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .name("Hello".into())
         .add_db(&mut conn)
         .expect(womp!());
 
-    assert_eq!(db::contact_exists(&conn, id).unwrap(), true);
+    assert_eq!(db::user_exists(&conn, id).unwrap(), true);
 }
 
 #[test]
@@ -93,7 +93,7 @@ fn update_name() {
 
     let id = "userid".try_into().expect(womp!());
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .name("Hello".into())
         .add_db(&mut conn)
         .expect(womp!());
@@ -102,7 +102,7 @@ fn update_name() {
 
     assert_eq!(
         db::name(&conn, id)
-            .expect("Failed to get contact")
+            .expect("Failed to get user")
             .expect(womp!()),
         "World"
     );
@@ -114,36 +114,36 @@ fn test_by_user_id() {
 
     let id = "id".try_into().expect(womp!());
 
-    ContactBuilder::new(id)
+    UserBuilder::new(id)
         .name("name".into())
         .add_db(&mut conn)
         .expect(womp!());
 
-    let contact = db::by_user_id(&conn, id).expect("Unable to get contact from userid");
+    let user = db::by_user_id(&conn, id).expect("Unable to get user from userid");
 
-    assert_eq!(contact.id, id);
-    assert_eq!(contact.name.as_str(), "name");
+    assert_eq!(user.id, id);
+    assert_eq!(user.name.as_str(), "name");
 }
 
 #[test]
-fn all_contacts() {
+fn all_users() {
     let mut conn = Database::in_memory().expect(womp!());
 
     let id1 = "Hello".try_into().expect(womp!());
     let id2 = "World".try_into().expect(womp!());
 
-    ContactBuilder::new(id2)
+    UserBuilder::new(id2)
         .add_db(&mut conn)
         .expect(womp!("Failed to add id1"));
 
-    ContactBuilder::new(id1)
+    UserBuilder::new(id1)
         .add_db(&mut conn)
         .expect(womp!("Failed to add id2"));
 
-    let contacts = db::all(&conn).expect(womp!());
-    assert_eq!(contacts.len(), 2);
-    assert_eq!(contacts[0].id, id1);
-    assert_eq!(contacts[1].id, id2);
+    let users = db::all(&conn).expect(womp!());
+    assert_eq!(users.len(), 2);
+    assert_eq!(users[0].id, id1);
+    assert_eq!(users[1].id, id2);
 }
 
 #[test]
@@ -151,24 +151,24 @@ fn set_status() {
     let mut conn = Database::in_memory().expect(womp!());
 
     let id = "HelloWorld".try_into().expect(womp!());
-    let contact = ContactBuilder::new(id).add_db(&mut conn).expect(womp!());
+    let user = UserBuilder::new(id).add_db(&mut conn).expect(womp!()).0;
 
-    db::set_status(&mut conn, id, ContactStatus::Archived).expect(womp!());
+    db::set_status(&mut conn, id, UserStatus::Archived).expect(womp!());
 
     assert_eq!(
-        db::status(&conn, id).expect("Failed to determine contact status"),
-        ContactStatus::Archived
+        db::status(&conn, id).expect("Failed to determine user status"),
+        UserStatus::Archived
     );
 
-    db::set_status(&mut conn, id, ContactStatus::Deleted).expect(womp!());
+    db::set_status(&mut conn, id, UserStatus::Deleted).expect(womp!());
 
     assert_eq!(
-        db::status(&conn, id).expect("Failed to determine contact status"),
-        ContactStatus::Deleted
+        db::status(&conn, id).expect("Failed to determine user status"),
+        UserStatus::Deleted
     );
 
     assert!(
-        crate::conversation::db::conversation_messages(&conn, &contact.pairwise_conversation)
+        crate::conversation::db::conversation_messages(&conn, &user.pairwise_conversation)
             .expect(womp!())
             .is_empty()
     );
@@ -183,18 +183,18 @@ fn add_remove_member() {
 
     let conv_id = ConversationId::from([0; 32]);
 
-    ContactBuilder::new(id1)
+    UserBuilder::new(id1)
         .add_db(&mut conn)
         .expect(womp!("Failed to add id1"));
 
-    ContactBuilder::new(id2)
+    UserBuilder::new(id2)
         .pairwise_conversation(conv_id)
         .add_db(&mut conn)
         .expect(womp!("Failed to add id2"));
 
-    let contacts = db::all(&conn).expect(womp!());
+    let users = db::all(&conn).expect(womp!());
 
-    crate::members::db::add_member(&conn, &conv_id, contacts[0].id)
+    crate::members::db::add_member(&conn, &conv_id, users[0].id)
         .expect(womp!("failed to add member"));
 
     let members = db::conversation_members(&conn, &conv_id).expect(womp!("failed to get members"));
@@ -203,7 +203,7 @@ fn add_remove_member() {
 
     assert_eq!(members[0].id, id1);
 
-    crate::members::db::remove_member(&conn, &conv_id, contacts[0].id)
+    crate::members::db::remove_member(&conn, &conv_id, users[0].id)
         .expect(womp!("failed to remove member"));
 
     let members_new =
@@ -215,21 +215,21 @@ fn add_remove_member() {
 }
 
 #[test]
-fn by_status_contacts() {
+fn by_status_users() {
     let mut conn = Database::in_memory().expect(womp!());
 
     let id1 = "Hello".try_into().expect(womp!());
     let id2 = "World".try_into().expect(womp!());
 
-    ContactBuilder::new(id1)
+    UserBuilder::new(id1)
         .add_db(&mut conn)
         .expect("Failed to add id1");
-    ContactBuilder::new(id2)
-        .status(ContactStatus::Archived)
+    UserBuilder::new(id2)
+        .status(UserStatus::Archived)
         .add_db(&mut conn)
         .expect("Failed to add id2");
 
-    let contacts = db::get_by_status(&conn, ContactStatus::Active).expect(womp!());
-    assert_eq!(contacts.len(), 1);
-    assert_eq!(contacts[0].id, id1);
+    let users = db::get_by_status(&conn, UserStatus::Active).expect(womp!());
+    assert_eq!(users.len(), 1);
+    assert_eq!(users[0].id, id1);
 }

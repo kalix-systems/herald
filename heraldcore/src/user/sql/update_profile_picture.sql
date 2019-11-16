@@ -1,6 +1,6 @@
 UPDATE
-  contacts
+  users
 SET
-  color = @1
+  profile_picture = @1
 WHERE
   user_id = @2

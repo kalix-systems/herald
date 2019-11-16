@@ -27,9 +27,9 @@ pub struct AddedToConvo {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// An acknowledgement of a contact request, with a bool to indicate whether the
+/// An acknowledgement of a user request, with a bool to indicate whether the
 /// request was accepted.
-pub struct ContactReqAck(pub bool);
+pub struct UserReqAck(pub bool);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A normal message to the conversation.

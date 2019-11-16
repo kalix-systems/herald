@@ -43,7 +43,7 @@ impl ConversationMeta {
         })
     }
 
-    /// Matches contact's text fields against a [`SearchPattern`]
+    /// Matches conversation's text fields against a [`SearchPattern`]
     pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
         match self.title.as_ref() {
             Some(name) => pattern.is_match(name),
@@ -125,13 +125,13 @@ impl ConversationBuilder {
         self
     }
 
-    /// Sets muted status
+    /// Sets muted status. This is meant to be used when syncing conversations between devices.
     pub fn muted(&mut self, muted: bool) -> &mut Self {
         self.muted.replace(muted);
         self
     }
 
-    /// Sets muted status
+    /// Sets whether or not conversation is pairwise.
     pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
         self.pairwise.replace(pairwise);
         self
@@ -143,8 +143,8 @@ impl ConversationBuilder {
         self
     }
 
-    /// Adds conversation
-    pub fn add(&mut self) -> Result<ConversationId, HErr> {
+    /// Adds conversation to database
+    pub fn add(self) -> Result<ConversationMeta, HErr> {
         let db = Database::get()?;
         self.add_db(&db)
     }

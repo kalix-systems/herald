@@ -1,6 +1,6 @@
 SELECT
-  archived
+  name
 FROM
-  contacts
+  users
 WHERE
   user_id = ?

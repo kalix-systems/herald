@@ -1,9 +1,8 @@
 use crate::{ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{
-    abort_err,
-    contact::{self, ContactBuilder, ContactStatus},
-    network,
+    abort_err, network,
+    user::{self, UserBuilder, UserStatus},
     utils::SearchPattern,
 };
 use std::convert::{TryFrom, TryInto};
@@ -51,7 +50,7 @@ pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
 
 impl UsersTrait for Users {
     fn new(mut emit: Emitter, model: List) -> Users {
-        let list = match contact::all() {
+        let list = match user::all() {
             Ok(v) => v
                 .into_iter()
                 .map(|u| {
@@ -82,16 +81,16 @@ impl UsersTrait for Users {
         }
     }
 
-    /// Adds a contact by their `id`
+    /// Adds a user by their `id`
     fn add(&mut self, id: ffi::UserId) -> ffi::ConversationId {
         let id = ret_err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
-        let contact = ret_err!(ContactBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
+        let (data, _) = ret_err!(UserBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
-        let pairwise_conversation = contact.pairwise_conversation;
+        let pairwise_conversation = data.pairwise_conversation;
 
         let user = User {
-            matched: contact.matches(&self.filter),
-            id: contact.id,
+            matched: data.matches(&self.filter),
+            id: data.id,
         };
 
         let pos = match self.list.binary_search(&user) {
@@ -101,12 +100,12 @@ impl UsersTrait for Users {
 
         self.model.begin_insert_rows(pos, pos);
         self.list.insert(pos, user);
-        shared::USER_DATA.insert(contact.id, contact);
+        shared::USER_DATA.insert(data.id, data);
         self.model.end_insert_rows();
 
         ret_err!(
             std::thread::Builder::new().spawn(move || {
-                ret_err!(network::send_contact_req(id, pairwise_conversation));
+                ret_err!(network::send_user_req(id, pairwise_conversation));
             }),
             ffi::NULL_CONV_ID.to_vec()
         );
@@ -143,7 +142,7 @@ impl UsersTrait for Users {
     fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
-        ret_err!(contact::set_name(uid, name.as_str()), false);
+        ret_err!(user::set_name(uid, name.as_str()), false);
 
         inner.name = name;
         true
@@ -170,7 +169,7 @@ impl UsersTrait for Users {
 
         let picture = picture.map(crate::utils::strip_qrc);
         let path = ret_err!(
-            contact::set_profile_picture(
+            user::set_profile_picture(
                 uid,
                 picture,
                 inner.profile_picture.as_ref().map(String::as_str),
@@ -199,7 +198,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        ret_err!(contact::set_color(uid, color), false);
+        ret_err!(user::set_color(uid, color), false);
 
         inner.color = color;
         true
@@ -212,15 +211,15 @@ impl UsersTrait for Users {
     }
 
     fn set_status(&mut self, row_index: usize, status: u8) -> bool {
-        let status = ret_err!(ContactStatus::try_from(status), false);
+        let status = ret_err!(UserStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        ret_err!(contact::set_status(uid, status), false);
+        ret_err!(user::set_status(uid, status), false);
 
         inner.status = status;
 
-        if status == ContactStatus::Deleted {
+        if status == UserStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);
             self.list.remove(row_index);
             USER_DATA.remove(&uid);
@@ -298,10 +297,10 @@ impl UsersTrait for Users {
         for update in USER_BUS.rx.try_iter() {
             match update {
                 UsersUpdates::NewUser(uid) => {
-                    let new_contact = ret_err!(contact::by_user_id(uid));
+                    let data = ret_err!(user::by_user_id(uid));
 
                     let new_user = User {
-                        matched: new_contact.matches(&self.filter),
+                        matched: data.matches(&self.filter),
                         id: uid,
                     };
 
@@ -312,14 +311,14 @@ impl UsersTrait for Users {
 
                     self.model.begin_insert_rows(pos, pos);
                     self.list.push(new_user);
-                    USER_DATA.insert(uid, new_contact);
+                    USER_DATA.insert(uid, data);
                     self.model.end_insert_rows();
                 }
                 UsersUpdates::ReqResp(uid, accepted) => {
                     if accepted {
-                        println!("PLACEHOLDER: {} accepted your contact request", uid);
+                        println!("PLACEHOLDER: {} accepted your user request", uid);
                     } else {
-                        println!("PLACEHOLDER: {} did not accept your contact request", uid);
+                        println!("PLACEHOLDER: {} did not accept your user request", uid);
                     }
                 }
             }
@@ -327,8 +326,8 @@ impl UsersTrait for Users {
     }
 
     fn clear_filter(&mut self) {
-        for contact in self.list.iter_mut() {
-            contact.matched = true;
+        for user in self.list.iter_mut() {
+            user.matched = true;
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
@@ -345,9 +344,9 @@ impl UsersTrait for Users {
 
 impl Users {
     fn inner_filter(&mut self) {
-        for contact in self.list.iter_mut() {
-            let inner = ret_none!(get_user(&contact.id));
-            contact.matched = inner.matches(&self.filter);
+        for user in self.list.iter_mut() {
+            let inner = ret_none!(get_user(&user.id));
+            user.matched = inner.matches(&self.filter);
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));

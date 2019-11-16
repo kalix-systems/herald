@@ -12,6 +12,7 @@ use std::ops::Not;
 
 pub(crate) mod shared;
 use shared::*;
+mod handlers;
 mod imp;
 
 /// Thin wrapper around `ConversationMeta`,
@@ -262,51 +263,10 @@ impl ConversationsTrait for Conversations {
                     "Failed to create new conversation"
                 ),
                 NewActivity(cid) => {
-                    let pos = match self
-                        .list
-                        .iter()
-                        .position(|c| c.inner.conversation_id == cid)
-                    {
-                        Some(pos) => pos,
-                        None => continue,
-                    };
-
-                    // NOTE: This is very important. If this check isn't here,
-                    // the program will crash.
-                    if pos == 0 {
-                        return;
-                    }
-
-                    self.model.begin_move_rows(pos, pos, 0);
-                    let conv = self.list.remove(pos);
-                    self.list.push_front(conv);
-                    self.model.end_move_rows();
+                    self.handle_new_activity(cid);
                 }
-                Settings(cid, settings) => {
-                    let pos = cont_none!(self
-                        .list
-                        .iter()
-                        .position(|c| c.inner.conversation_id == cid));
-
-                    use conversation::settings::SettingsUpdate;
-                    match settings {
-                        SettingsUpdate::Expiration(period) => {
-                            cont_none!(self.list.get_mut(pos)).inner.expiration_period = period;
-                        }
-                        SettingsUpdate::Color(color) => {
-                            cont_none!(self.list.get_mut(pos)).inner.color = color;
-                        }
-                        SettingsUpdate::Title(title) => {
-                            cont_none!(self.list.get_mut(pos)).inner.title = title;
-                        }
-                    }
-                    self.model.data_changed(pos, pos);
-                }
-                Init(contents) => {
-                    self.model.begin_reset_model();
-                    self.list = contents;
-                    self.model.end_reset_model();
-                }
+                Settings(cid, update) => cont_none!(self.handle_settings_update(cid, update)),
+                Init(contents) => self.handle_init(contents),
             }
         }
     }

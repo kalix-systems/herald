@@ -6,7 +6,7 @@ use std::convert::TryInto;
 fn search() {
     let mut conn = Database::in_memory().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 

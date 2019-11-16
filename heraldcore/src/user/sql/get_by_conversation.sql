@@ -5,9 +5,9 @@ SELECT
   color,
   status,
   pairwise_conversation,
-  contact_type
+  user_type
 FROM
-  contacts
+  users
 WHERE
   user_id IN (
     SELECT

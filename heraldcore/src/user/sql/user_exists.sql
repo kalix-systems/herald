@@ -1,7 +1,7 @@
 SELECT
   user_id
 FROM
-  contacts
+  users
 WHERE
   user_id = ?
 LIMIT

@@ -1,6 +1,6 @@
 use crate::{ffi, imp::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
-use heraldcore::{abort_err, contact, types::*, utils::SearchPattern};
+use heraldcore::{abort_err, types::*, user, utils::SearchPattern};
 use std::{
     convert::{TryFrom, TryInto},
     ops::Drop,
@@ -12,7 +12,7 @@ type List = MembersList;
 pub(crate) mod shared;
 
 #[derive(Clone)]
-/// Thin wrapper around `heraldcore::contact::Contact`,
+/// Thin wrapper around `heraldcore::user::Contact`,
 /// with an additional field to facilitate filtering
 /// in the UI.
 pub struct User {
@@ -57,7 +57,7 @@ impl MembersTrait for Members {
             let conversation_id = ret_err!(ConversationId::try_from(id));
 
             shared::EMITTERS.insert(conversation_id, self.emit().clone());
-            let list = ret_err!(contact::conversation_members(&conversation_id));
+            let list = ret_err!(user::conversation_members(&conversation_id));
 
             self.model
                 .begin_insert_rows(0, list.len().saturating_sub(1));
@@ -181,11 +181,11 @@ impl MembersTrait for Members {
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let contact = ret_none!(get_user(&user_id), false);
+        let user = ret_none!(get_user(&user_id), false);
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
-            matched: contact.matches(&self.filter),
+            matched: user.matches(&self.filter),
             id: user_id,
         });
         self.model.end_insert_rows();
@@ -243,8 +243,8 @@ impl MembersTrait for Members {
 
 impl Members {
     fn clear_filter(&mut self) {
-        for contact in self.list.iter_mut() {
-            contact.matched = true;
+        for user in self.list.iter_mut() {
+            user.matched = true;
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
@@ -259,9 +259,9 @@ impl Members {
     }
 
     fn inner_filter(&mut self) {
-        for contact in self.list.iter_mut() {
-            let inner = ret_none!(get_user(&contact.id));
-            contact.matched = inner.matches(&self.filter);
+        for user in self.list.iter_mut() {
+            let inner = ret_none!(get_user(&user.id));
+            user.matched = inner.matches(&self.filter);
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));

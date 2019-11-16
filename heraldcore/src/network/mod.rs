@@ -45,12 +45,12 @@ pub enum Notification {
         /// The conversation the message was part of
         cid: ConversationId,
     },
-    /// A new contact has been added
-    NewContact(UserId, ConversationId),
+    /// A new user has been added
+    NewUser(UserId, ConversationId),
     /// A new conversation has been added
     NewConversation(ConversationId),
-    /// Response to contact request.
-    AddContactResponse(ConversationId, UserId, bool),
+    /// Response to user request.
+    AddUserResponse(ConversationId, UserId, bool),
     /// Response to request to join conversation.
     AddConversationResponse(ConversationId, UserId, bool),
     /// The conversation settings have been updated
@@ -85,20 +85,20 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
     Ok(res)
 }
 
-/// Sends a contact request to `uid` with a proposed conversation id `cid`.
-pub fn send_contact_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
+/// Sends a user request to `uid` with a proposed conversation id `cid`.
+pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     let kp = Config::static_keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
 
     cid.store_genesis(&gen)?;
 
-    let req = dmessages::ContactReq { gen, cid };
+    let req = dmessages::UserReq { gen, cid };
 
-    send_umessage(uid, &DeviceMessageBody::ContactReq(req))
+    send_umessage(uid, &DeviceMessageBody::Req(req))
 }
 
-/// Starts a conversation with `members`. Note: all members must be in the user's contacts already.
+/// Starts a conversation with `members`. Note: all members must be in the user's users already.
 pub fn start_conversation(
     members: &[UserId],
     title: Option<String>,
@@ -121,7 +121,8 @@ pub fn start_conversation(
         conv_builder.picture(picture.clone());
     }
 
-    let cid = conv_builder.add_with_tx(&tx)?;
+    let meta = conv_builder.add_with_tx(&tx)?;
+    let cid = meta.conversation_id;
 
     crate::members::db::add_members_with_tx(&tx, cid, members)?;
     tx.commit()?;

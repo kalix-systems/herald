@@ -1,6 +1,6 @@
 SELECT
-  status
+  archived
 FROM
-  contacts
+  users
 WHERE
   user_id = ?

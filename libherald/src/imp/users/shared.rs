@@ -2,25 +2,25 @@ use crate::{interface::UsersEmitter as Emitter, shared::SingletonBus};
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
-use heraldcore::contact;
+use heraldcore::user;
 use heraldcore::{channel_send_err, NE};
 use lazy_static::*;
 use parking_lot::Mutex;
 
 lazy_static! {
-    /// Concurrent hashmap from `UserId` to `Contact`. Used to avoid data replication.
-    pub(super) static ref USER_DATA: DashMap<UserId, contact::Contact> = DashMap::default();
+    /// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
+    pub(super) static ref USER_DATA: DashMap<UserId, user::User> = DashMap::default();
 }
 
 pub fn user_in_cache(uid: &UserId) -> bool {
     USER_DATA.contains_key(uid)
 }
 
-pub fn get_user(uid: &UserId) -> Option<DashMapRef<UserId, contact::Contact>> {
+pub fn get_user(uid: &UserId) -> Option<DashMapRef<UserId, user::User>> {
     USER_DATA.get(uid)
 }
 
-pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, contact::Contact>> {
+pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, user::User>> {
     USER_DATA.get_mut(uid)
 }
 
@@ -40,7 +40,7 @@ pub fn user_ids() -> Vec<UserId> {
 pub enum UsersUpdates {
     /// A new user has been added
     NewUser(UserId),
-    /// A contact request has been responded to
+    /// A user request has been responded to
     ReqResp(UserId, bool),
 }
 

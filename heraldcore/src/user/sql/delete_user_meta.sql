@@ -1,5 +1,5 @@
 UPDATE
-  contacts
+  users
 SET
   name = '',
   profile_picture = NULL,

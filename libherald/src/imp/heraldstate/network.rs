@@ -27,7 +27,7 @@ impl NotifHandler {
             MsgReceipt { mid, cid } => {
                 ret_err!(Messages::push(cid, MsgUpdate::Receipt(mid)));
             }
-            NewContact(uid, cid) => {
+            NewUser(uid, cid) => {
                 // add user
                 ret_err!(Users::push(UsersUpdates::NewUser(uid)));
 
@@ -37,7 +37,7 @@ impl NotifHandler {
             NewConversation(cid) => {
                 ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
             }
-            AddContactResponse(cid, uid, accepted) => {
+            AddUserResponse(cid, uid, accepted) => {
                 // handle response
                 ret_err!(Users::push(UsersUpdates::ReqResp(uid, accepted)));
 

@@ -1,5 +1,5 @@
 use super::*;
-use crate::{contact::ContactBuilder, womp};
+use crate::{user::UserBuilder, womp};
 use herald_common::sig;
 use std::convert::TryFrom;
 
@@ -7,7 +7,7 @@ use std::convert::TryFrom;
 fn add_and_deprecate() {
     let mut conn = Database::in_memory().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());
-    ContactBuilder::new(uid).add_db(&mut conn).expect(womp!());
+    UserBuilder::new(uid).add_db(&mut conn).expect(womp!());
 
     let kp = sig::KeyPair::gen_new();
     let pk_signed = kp.sign(*kp.public_key());
@@ -20,7 +20,7 @@ fn add_and_deprecate() {
 fn get_valid_deprecated() {
     let mut conn = Database::in_memory().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());
-    ContactBuilder::new(uid).add_db(&mut conn).expect(womp!());
+    UserBuilder::new(uid).add_db(&mut conn).expect(womp!());
 
     let kp1 = sig::KeyPair::gen_new();
     let kp2 = sig::KeyPair::gen_new();

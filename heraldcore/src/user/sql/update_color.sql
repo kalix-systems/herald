@@ -1,6 +1,6 @@
 UPDATE
-  contacts
+  users
 SET
-  status = @1
+  color = @1
 WHERE
   user_id = @2

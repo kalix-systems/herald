@@ -7,8 +7,18 @@ type PathStr<'a> = &'a str;
 
 impl ConversationBuilder {
     ///Adds conversation
-    pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
+    pub(crate) fn add_db(self, conn: &rusqlite::Connection) -> Result<ConversationMeta, HErr> {
+        let Self {
+            conversation_id,
+            title,
+            picture,
+            color,
+            muted,
+            pairwise,
+            expiration_period,
+        } = self;
+
+        let id = match conversation_id {
             Some(id) => id.to_owned(),
             None => {
                 let rand_array = utils::rand_id();
@@ -16,12 +26,12 @@ impl ConversationBuilder {
             }
         };
 
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-        let expiration_period = self.expiration_period.unwrap_or_default();
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
+        let pairwise = pairwise.unwrap_or(false);
+        let muted = muted.unwrap_or(false);
+        let expiration_period = expiration_period.unwrap_or_default();
 
-        let picture = match &self.picture {
+        let picture = match picture.as_ref() {
             Some(picture) => {
                 // TODO Give more specific error
                 let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
@@ -30,23 +40,35 @@ impl ConversationBuilder {
             None => None,
         };
 
+        let last_active = Time::now();
+
         conn.execute_named(
             include_str!("sql/add_conversation.sql"),
             named_params! {
                "@conversation_id": id,
-                "@title": self.title,
+                "@title": title,
                 "@picture": picture,
                 "@color": color,
                 "@pairwise": pairwise,
                 "@muted": muted,
-                "@last_active_ts": Time::now(),
+                "@last_active_ts": last_active,
                 "@expiration_period": expiration_period
             },
         )?;
-        Ok(id)
+
+        Ok(ConversationMeta {
+            conversation_id: id,
+            title,
+            color,
+            pairwise,
+            picture,
+            last_active,
+            expiration_period,
+            muted,
+        })
     }
 
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
+    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationMeta, HErr> {
         self.add_db(tx)
     }
 }

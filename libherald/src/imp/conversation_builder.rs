@@ -1,8 +1,11 @@
-use crate::imp::{
-    conversations::{shared::ConvUpdate, Conversations},
-    users::shared::user_in_cache,
-};
 use crate::{bounds_chk, ffi, interface::*, ret_err, ret_none, shared::SingletonBus};
+use crate::{
+    imp::{
+        conversations::{shared::ConvUpdate, Conversations},
+        users::shared::user_in_cache,
+    },
+    spawn,
+};
 use herald_common::UserId;
 use heraldcore::abort_err;
 use std::convert::TryInto;
@@ -52,7 +55,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         }
 
         // You should not be able to add users
-        // that you don't have as contacts.
+        // that you don't have as users.
         if !user_in_cache(&user_id) {
             return false;
         }
@@ -105,14 +108,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
         let title = self.title.take();
         let picture = self.picture.take();
 
-        ret_err!(std::thread::Builder::new().spawn(move || {
+        spawn!({
             let cid = ret_err!(heraldcore::network::start_conversation(
                 &list, title, picture
             ));
 
             // send update to Conversations list
             ret_err!(Conversations::push(ConvUpdate::BuilderFinished(cid)));
-        }));
+        });
     }
 
     fn set_title(&mut self, title: String) {
