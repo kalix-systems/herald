@@ -86,8 +86,8 @@ Component {
                 if (!isOnscreen) {
                 convWindow.contentY =
                         convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y
+                    convWindow.returnToBounds()
             }
-                else {print("onscreen")}
             }
 
 
