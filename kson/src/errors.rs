@@ -2,10 +2,10 @@ use backtrace::Backtrace;
 use bytes::Bytes;
 use std::{fmt, str::Utf8Error, sync::Arc};
 
-pub type KsonError = Arc<Error>;
+pub type KsonError = Arc<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
-pub struct Error {
+pub struct KsonErrorInner {
     pub backtrace: Backtrace,
     pub location: Location,
     pub message: Option<String>,
@@ -54,7 +54,7 @@ pub enum Variant {
 
 use Variant::*;
 
-impl fmt::Display for Error {
+impl fmt::Display for KsonErrorInner {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Error while deserializing at {}", self.location)?;
         if let Some(msg) = &self.message {
@@ -151,7 +151,7 @@ macro_rules! loc {
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -165,7 +165,7 @@ macro_rules! E {
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,

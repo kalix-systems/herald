@@ -3,7 +3,6 @@ use futures::stream::*;
 use herald_common::*;
 use server_errors::*;
 use server_store::*;
-use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
     prelude::*,
@@ -194,7 +193,7 @@ impl State {
 }
 
 async fn catchup(
-    did: sign::PublicKey,
+    did: sig::PublicKey,
     s: &mut Conn,
     wtx: &mut WTx,
     rrx: &mut Receiver<Vec<u8>>,
@@ -229,22 +228,22 @@ const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
 
 async fn read_msg<T>(rx: &mut Receiver<Vec<u8>>) -> Result<T, Error>
 where
-    T: serde::de::DeserializeOwned,
+    T: De,
 {
     let m = rx.next().await.ok_or(StreamDied)?;
-    let t = serde_cbor::from_slice(&m)?;
+    let t = kson::from_slice(&m)?;
     Ok(t)
 }
 
-fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
-    Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
+fn ser_msg<T: Ser>(t: &T) -> Result<ws::Message, Error> {
+    Ok(ws::Message::binary(kson::to_vec(t)))
 }
 
 async fn write_msg<T>(t: &T, wtx: &mut WTx, rrx: &mut Receiver<Vec<u8>>) -> Result<(), Error>
 where
-    T: Serialize,
+    T: Ser,
 {
-    let bvec = Bytes::from(serde_cbor::to_vec(t)?);
+    let bvec = Bytes::from(kson::to_vec(t));
     let packets = Packet::from_bytes(bvec);
     let len = packets.len() as u64;
 

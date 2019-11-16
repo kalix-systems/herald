@@ -29,7 +29,6 @@ pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
 }
 
 pub fn from_bytes<T: de::De>(from: prelude::Bytes) -> Result<T, errors::KsonError> {
-    use de::*;
     T::de(&mut de::Deserializer::new(from))
 }
 

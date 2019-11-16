@@ -1,8 +1,7 @@
 use super::*;
-use sodiumoxide::crypto::sign;
 
 pub async fn login<T>(
-    active: &DashMap<sign::PublicKey, T>,
+    active: &DashMap<sig::PublicKey, T>,
     store: &mut Conn,
     wtx: &mut WTx,
     rrx: &mut Receiver<Vec<u8>>,
@@ -27,9 +26,9 @@ pub async fn login<T>(
         write_msg(&res, wtx, rrx).await?;
     };
 
-    let s: sign::Signature = read_msg::<LoginToken>(rrx).await?.0;
+    let s: sig::Signature = read_msg::<LoginToken>(rrx).await?.0;
 
-    if !sign::verify_detached(&s, bytes.as_ref(), &g.did) {
+    if !g.did.verify(bytes.as_ref(), s) {
         write_msg(&LoginTokenResponse::BadSig, wtx, rrx).await?;
         Err(LoginFailed)
     } else {
