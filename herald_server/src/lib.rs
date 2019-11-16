@@ -1,6 +1,3 @@
-#[macro_use]
-mod macros;
-
 pub mod http;
 
 use bytes::Buf;
@@ -13,16 +10,16 @@ use std::future::Future;
 async fn req_handler_store<B, I, O, F, Fut>(state: &State, req: B, f: F) -> Result<Vec<u8>, Error>
 where
     B: Buf,
-    I: for<'a> Deserialize<'a>,
-    O: Serialize,
+    I: De,
+    O: Ser,
     F: FnOnce(Conn, I) -> Fut,
     Fut: Future<Output = Result<O, Error>>,
 {
     let con: Conn = state.new_connection().await?;
-    let buf: Vec<u8> = req.collect();
-    let req: I = serde_cbor::from_slice(&buf)?;
+    let buf: Bytes = req.collect();
+    let req: I = kson::from_bytes(buf)?;
     let res: O = f(con, req).await?;
-    let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
+    let res_ser: Vec<u8> = kson::to_vec(&res);
     Ok(res_ser)
 }
 
@@ -33,14 +30,14 @@ async fn req_handler_async<'a, B, I, O, F, Fut>(
 ) -> Result<Vec<u8>, Error>
 where
     B: Buf,
-    I: for<'b> Deserialize<'b>,
-    O: Serialize,
+    I: De,
+    O: Ser,
     F: FnOnce(&'a State, I) -> Fut,
     Fut: Future<Output = Result<O, Error>>,
 {
-    let buf: Vec<u8> = req.collect();
-    let req: I = serde_cbor::from_slice(&buf)?;
+    let buf: Bytes = req.collect();
+    let req: I = kson::from_bytes(buf)?;
     let res: O = f(state, req).await?;
-    let res_ser: Vec<u8> = serde_cbor::to_vec(&res)?;
+    let res_ser: Vec<u8> = kson::to_vec(&res);
     Ok(res_ser)
 }
