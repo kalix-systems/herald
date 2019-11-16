@@ -35,6 +35,10 @@ declare class Messages {
   clearConversationHistory(): void;
   deleteConversation(): boolean;
   deleteConversationById(conversationId: ConversationID): boolean;
+  prevSearchMatch(): number;
+  nextSearchMatch(): number;
+  peekPrevSearchMatch(): number;
+  peekNextSearchMatch(): number;
 }
 
 declare class MessageBuilder {

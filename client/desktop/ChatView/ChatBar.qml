@@ -19,7 +19,7 @@ import "Controls" as CVUtils
 // FS: Fix scoping
 ToolBar {
     property var conversationItem
-    property Messages ownedConversation: parent.ownedConversation
+    property Messages ownedConversation: messageBar.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ

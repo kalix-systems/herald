@@ -19,13 +19,28 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
+    Rectangle {
+        x: 478
+        y: 47
+        color: "red"
+        height: 10
+        width: height
+    }
+
     header: Loader {
         id: messageBar
         property var conversationItem: parent.conversationItem
         property Messages ownedConversation: parent.ownedConversation
-        sourceComponent: CVUtils.ChatBar {
-        conversationItem: parent.conversationItem
+        sourceComponent: chatBarComponent
     }
+
+
+
+    Component {
+        id: chatBarComponent
+        CVUtils.ChatBar {
+        conversationItem: messageBar.conversationItem
+        }
     }
 
     ChatSearchComponent {
@@ -39,6 +54,7 @@ Page {
     }
 
     CVUtils.ConversationWindow {
+
         id: convWindow
         focus: true
         anchors {

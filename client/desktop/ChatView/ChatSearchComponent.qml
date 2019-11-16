@@ -5,11 +5,13 @@ import QtQuick.Layouts 1.12
 import "../common" as Common
 import "../SideBar" as SBUtils
 import "qrc:/imports/Avatar" as Avatar
+import "js/SearchHandler.mjs" as SearchUtils
 
 Component {
     id: searchBarComponent
 
     ToolBar {
+        id: searchToolBar
         height: CmnCfg.toolbarHeight
         z: CmnCfg.middleZ
 
@@ -67,20 +69,69 @@ Component {
         onTextChanged: {
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
-            print(ownedConversation.searchNumMatches, ownedConversation.prevSearchMatch())
-        }
 
-        Common.ButtonForm {
-            source: "qrc:/x-icon.svg"
-            height: 20
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-        }
+            if (ownedConversation.searchNumMatches > 0) {
+                searchToolBar.state = "searchActiveState"
+
+                var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView, chatPane, false)
+
+                if (!isOnscreen) {
+                convWindow.contentY =
+                        convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y
+            }
+                else {print("onscreen")}
+            }
+
+
+            else {print("no matches")
+                searchToolBar.state = ""
+                }
+                }
+
         background: Rectangle {
             anchors.fill: parent
             color: "white"
         }
     }
+
+    Common.ButtonForm {
+        source: "qrc:/x-icon.svg"
+       Layout.alignment: Qt.AlignVCenter
+       fill: CmnCfg.palette.paneColor
+        onClicked: {
+            ownedConversation.clearSearch()
+            messageBar.sourceComponent = chatBarComponent
+        }
+        scale: 0.8
+    }
+
+    Common.ButtonForm {
+        id: back
+        source: "qrc:/back-arrow-icon.svg"
+       Layout.alignment: Qt.AlignVCenter
+       fill: CmnCfg.palette.paneColor
+       enabled: searchToolBar.state === "searchActiveState"
+       onClicked: {
+           SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, false)
+       }
+    }
+
+    Common.ButtonForm {
+        id: forward
+        source: "qrc:/forward-arrow-icon.svg"
+       Layout.alignment: Qt.AlignVCenter
+       fill: CmnCfg.palette.paneColor
+       enabled: searchToolBar.state === "searchActiveState"
+
+       onClicked: {
+           SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
+       }
+    }
+
+    }
+
+    states: State {
+        name: "searchActiveState"
     }
     }
 }
