@@ -56,9 +56,8 @@ jobs:
           command: test
           args: --manifest-path=heraldcore/Cargo.toml
 
-  integration_tests:
+  server_integration_tests:
     name: Integration Tests
-    description: Boots a tests server and runs client e2e tests
     runs:
       using: 'docker'
       image: '/client/tests/Dockerfile'
