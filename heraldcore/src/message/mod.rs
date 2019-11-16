@@ -16,7 +16,7 @@ pub use types::*;
 mod builder;
 pub use builder::*;
 mod search;
-pub use search::Search;
+pub use search::{Search, SearchResult};
 
 /// Get message by message id
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {

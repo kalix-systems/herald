@@ -8,7 +8,8 @@ type SearchIndex = Time;
 /// Incrementally searches
 pub struct Search {
     min: SearchIndex,
-    pattern: SearchPattern,
+    /// The search pattern being used
+    pub pattern: SearchPattern,
 }
 
 impl Search {
@@ -24,6 +25,17 @@ impl Search {
     pub fn next_page(&mut self) -> Result<Option<Vec<SearchResult>>, HErr> {
         let mut conn = Database::get()?;
         self.next_page_db(&mut conn)
+    }
+
+    /// Replaces the search pattern, and resets the search.
+    pub fn replace_pattern(&mut self, pattern: SearchPattern) {
+        self.min = Time(std::i64::MAX);
+        self.pattern = pattern;
+    }
+
+    /// Resets the search without clearing the pattern
+    pub fn reset_search(&mut self) {
+        self.min = Time(std::i64::MAX);
     }
 }
 

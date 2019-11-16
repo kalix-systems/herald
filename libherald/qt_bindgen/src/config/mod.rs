@@ -56,7 +56,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        conversation_builder(),
        conversation_builder_users(),
        message_builder(),
-       attachments()
+       attachments(),
+       global_message_search()
     }
 }
 
@@ -208,7 +209,7 @@ fn members() -> Object {
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
-        mut  toggleFilterRegex() => Bool,
+        mut toggleFilterRegex() => Bool,
     };
 
     obj! {
@@ -386,5 +387,29 @@ fn attachments() -> Object {
 
     obj! {
         Attachments: Obj::new().list().props(props).item_props(item_props)
+    }
+}
+
+fn global_message_search() -> Object {
+    let props = props! {
+        searchPattern: Prop::new().simple(QString).optional().write(),
+        regexSearch: Prop::new().simple(Bool).optional().write()
+    };
+
+    let item_props = item_props! {
+        msgId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
+        conversation: ItemProp::new(QByteArray).optional(),
+        body: ItemProp::new(QString).optional(),
+        time: ItemProp::new(Qint64).optional(),
+        has_attachments: ItemProp::new(Bool).optional()
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+    };
+
+    obj! {
+        GlobalMessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }
