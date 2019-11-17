@@ -41,6 +41,7 @@ jobs:
       - run: target/debug/herald_server &
       - uses: jurplel/install-qt-action@v1
         with:
+          host: linux
           version: 5.13.2
       - uses: actions-rs/cargo@v1
         with:
@@ -48,6 +49,17 @@ jobs:
           args: --manifest-path=libherald/Cargo.toml
       - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
       - run: qmake client/tests/tests.pro && make && ./tests
+
+  should_fail:
+   name: install qt action test
+   runs-on: ubuntu-latest
+   steps:
+      - uses: actions/checkout@v1
+      - uses: jurplel/install-qt-action@v1
+        with:
+          host: linux
+          version: 5.13.2 
+      - run: qmake client/desktop/herald.pro && make
 
   test:
     name: Test
