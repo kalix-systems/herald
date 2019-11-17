@@ -8,9 +8,13 @@ use lazy_static::*;
 /// Message related conversation updates
 pub enum MsgUpdate {
     /// A new message
-    Msg(MsgId),
+    NewMsg(Box<Message>),
     /// A message has been acknowledged
-    Receipt(MsgId),
+    Receipt {
+        msg_id: MsgId,
+        recipient: UserId,
+        status: MessageReceiptStatus,
+    },
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<Message>),
     /// Save is complete

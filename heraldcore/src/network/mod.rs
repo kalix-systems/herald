@@ -6,6 +6,7 @@ use crate::{
     message::MessageReceiptStatus,
     pending,
     types::*,
+    *,
 };
 use chainmail::block::*;
 use herald_common::*;
@@ -38,16 +39,11 @@ mod helper;
 /// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
     /// A new message has been received.
-    NewMsg(MsgId, ConversationId),
+    NewMsg(message::Message),
     /// A message has been received.
-    MsgReceipt {
-        /// The message that was received
-        mid: MsgId,
-        /// The conversation the message was part of
-        cid: ConversationId,
-    },
+    MsgReceipt(message::MessageReceipt),
     /// A new user has been added
-    NewUser(UserId, ConversationId),
+    NewUser(user::User, ConversationMeta),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.

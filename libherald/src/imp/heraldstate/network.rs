@@ -17,22 +17,35 @@ impl NotifHandler {
     pub(super) fn send(&mut self, notif: Notification) {
         use crate::imp::conversations::shared::*;
         use crate::imp::users::{shared::*, Users};
+        use heraldcore::message;
         use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
 
         match notif {
-            NewMsg(msg_id, cid) => {
-                ret_err!(Messages::push(cid, MsgUpdate::Msg(msg_id)));
+            NewMsg(msg) => {
+                let cid = msg.conversation;
+                ret_err!(Messages::push(cid, MsgUpdate::NewMsg(Box::new(msg))));
             }
-            MsgReceipt { mid, cid } => {
-                ret_err!(Messages::push(cid, MsgUpdate::Receipt(mid)));
+            MsgReceipt(message::MessageReceipt {
+                msg_id,
+                cid,
+                recipient,
+                status,
+            }) => {
+                ret_err!(Messages::push(
+                    cid,
+                    MsgUpdate::Receipt {
+                        msg_id,
+                        recipient,
+                        status
+                    }
+                ));
             }
-            NewUser(uid, cid) => {
+            NewUser(user, meta) => {
                 // add user
-                ret_err!(Users::push(UsersUpdates::NewUser(uid)));
+                ret_err!(Users::push(UsersUpdates::NewUser(user)));
 
                 // add pairwise conversation
-                let meta = ret_err!(heraldcore::conversation::meta(&cid));
                 ret_err!(Conversations::push(ConvUpdate::NewConversation(meta)));
             }
             NewConversation(meta) => {

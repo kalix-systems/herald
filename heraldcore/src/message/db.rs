@@ -364,7 +364,7 @@ impl OutboundMessageBuilder {
 }
 
 impl InboundMessageBuilder {
-    pub(crate) fn store_db(self, conn: &mut rusqlite::Connection) -> Result<(), HErr> {
+    pub(crate) fn store_db(self, conn: &mut rusqlite::Connection) -> Result<Option<Message>, HErr> {
         let Self {
             message_id,
             author,
@@ -383,7 +383,7 @@ impl InboundMessageBuilder {
             if let Some(expiration) = expiration {
                 // short circuit if message has already expired
                 if expiration.0 < Time::now().0 {
-                    return Ok(());
+                    return Ok(None);
                 }
             }
         }
@@ -429,24 +429,33 @@ impl InboundMessageBuilder {
             params![Time::now(), conversation_id],
         )?;
 
-        if let Some(op) = op {
+        let op = if let Some(op) = op {
             // what if you receive a reply to message you don't have?
             let sp = tx.savepoint()?;
 
             // this succeeds in the happy case
             let res = sp.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]);
 
-            // if it doesn't try making it a dangling reply
-            if let Err(rusqlite::Error::SqliteFailure(..)) = res {
-                let none_msg_id: Option<MsgId> = None;
-                sp.execute(
-                    include_str!("sql/add_reply.sql"),
-                    params![msg_id, none_msg_id],
-                )?;
+            // and if it doesn't try making it a dangling reply
+            match res {
+                Ok(_) => {
+                    sp.commit()?;
+                    ReplyId::Known(op)
+                }
+                Err(rusqlite::Error::SqliteFailure(..)) => {
+                    let none_msg_id: Option<MsgId> = None;
+                    sp.execute(
+                        include_str!("sql/add_reply.sql"),
+                        params![msg_id, none_msg_id],
+                    )?;
+                    sp.commit()?;
+                    ReplyId::Dangling
+                }
+                Err(e) => return Err(e.into()),
             }
-
-            sp.commit()?;
-        }
+        } else {
+            ReplyId::None
+        };
 
         if has_attachments {
             attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
@@ -454,6 +463,18 @@ impl InboundMessageBuilder {
 
         tx.commit()?;
 
-        Ok(())
+        let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
+
+        Ok(Some(Message {
+            message_id: msg_id,
+            author,
+            body,
+            has_attachments,
+            conversation: conversation_id,
+            send_status: MessageSendStatus::Ack,
+            op,
+            time,
+            receipts,
+        }))
     }
 }

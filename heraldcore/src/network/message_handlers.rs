@@ -8,9 +8,9 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 
     let msgs = cm.open()?;
 
-    for (msg, from) in msgs {
+    for (msg, GlobalId { uid, .. }) in msgs {
         match msg {
-            NewKey(nk) => crate::user_keys::add_keys(from.uid, &[nk.0])?,
+            NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
             DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
             AddedToConvo(ac) => {
                 use crate::types::cmessages::AddedToConvo;
@@ -36,7 +36,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
             }
             UserReqAck(cr) => ev
                 .notifications
-                .push(Notification::AddUserResponse(cid, from.uid, cr.0)),
+                .push(Notification::AddUserResponse(cid, uid, cr.0)),
             NewMembers(nm) => {
                 let mut db = crate::db::Database::get()?;
                 let tx = db.transaction()?;
@@ -55,32 +55,34 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 
                 builder
                     .id(mid)
-                    .author(from.uid)
+                    .author(uid)
                     .conversation_id(cid)
                     .attachments(attachments)
                     .timestamp(ts);
 
-                if let Some(body) = body {
-                    builder.body(body);
+                builder.body = body;
+                builder.op = op;
+                builder.expiration = expiration;
+
+                if let Some(msg) = builder.store()? {
+                    ev.notifications.push(Notification::NewMsg(msg));
                 }
-
-                if let Some(op) = op {
-                    builder.replying_to(op);
-                }
-
-                if let Some(expiration) = expiration {
-                    builder.expiration(expiration);
-                }
-
-                builder.store()?;
-
-                ev.notifications.push(Notification::NewMsg(mid, cid));
                 ev.replies.push((cid, form_ack(mid)?));
             }
             Ack(ack) => {
-                crate::message::add_receipt(ack.of, from.uid, ack.stat)?;
+                let cmessages::Ack {
+                    of: msg_id,
+                    stat: status,
+                } = ack;
+
+                crate::message::add_receipt(msg_id, uid, status)?;
                 ev.notifications
-                    .push(Notification::MsgReceipt { mid: ack.of, cid });
+                    .push(Notification::MsgReceipt(message::MessageReceipt {
+                        msg_id,
+                        cid,
+                        recipient: uid,
+                        status,
+                    }));
             }
             Settings(update) => {
                 update.apply(&cid)?;
@@ -96,18 +98,20 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
     let mut ev = Event::default();
 
     let (from, msg) = msg.open()?;
+    let GlobalId { did, uid } = from;
 
     match msg {
         DeviceMessageBody::Req(cr) => {
             let dmessages::UserReq { gen, cid } = cr;
-            if gen.verify_sig(&from.did) {
-                crate::user::UserBuilder::new(from.uid)
+            if gen.verify_sig(&did) {
+                let (user, conversation) = crate::user::UserBuilder::new(uid)
                     .pairwise_conversation(cid)
                     .add()?;
 
+                let conversation::Conversation { meta, .. } = conversation;
                 cid.store_genesis(&gen)?;
 
-                ev.notifications.push(Notification::NewUser(from.uid, cid));
+                ev.notifications.push(Notification::NewUser(user, meta));
 
                 ev.replies.push((
                     cid,
