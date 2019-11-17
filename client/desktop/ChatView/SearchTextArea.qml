@@ -49,7 +49,6 @@ ScrollView {
         onTextChanged: {
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
-
             if (ownedConversation.searchNumMatches > 0) {
                 convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"

@@ -29,6 +29,15 @@ Component {
             SearchTextArea {
             }
 
+            Text {
+                id: indexText
+                property bool active: searchToolBar.state == "searchActiveState"
+                property int searchPlace: active ? ownedConversation.searchIndex + 1 : 0
+                color: CmnCfg.palette.paneColor
+                font.family: CmnCfg.chatFont.name
+                text: active ? searchPlace + "/" + ownedConversation.searchNumMatches : ""
+            }
+
             Common.ButtonForm {
                 id: back
                 source: "qrc:/up-chevron-icon-white.svg"
