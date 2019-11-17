@@ -47,7 +47,7 @@ jobs:
           command: build
           args: --release --manifest-path=libherald/Cargo.toml
       - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-      - run:  /Qt/5.12.4/gcc_64/bin/qmake client/tests/tests.pro && make && ./tests
+      - run:  /Qt/5.12.4/gcc_64/bin/qmake client/tests/libherald/libherald.pro && make && ./tests
 
   test:
     name: Test
