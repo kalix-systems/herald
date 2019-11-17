@@ -85,7 +85,7 @@ Component {
 
                 if (!isOnscreen) {
                 convWindow.contentY =
-                        convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y
+                        convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y - convWindow.height / 2
                     convWindow.returnToBounds()
             }
             }
