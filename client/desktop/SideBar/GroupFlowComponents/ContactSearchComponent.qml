@@ -28,10 +28,10 @@ Column {
         color: "black"
     }
 
-
     ConversationBuilderUsers {
         id: groupConvoMake
     }
+
 
     ComboBox {
         id: contactPopup

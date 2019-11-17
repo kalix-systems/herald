@@ -50,7 +50,6 @@ Rectangle {
         anchors.topMargin: 20
     }
 
-
     //create group button
     Common.ButtonForm {
         anchors.top: groupSelectText.bottom

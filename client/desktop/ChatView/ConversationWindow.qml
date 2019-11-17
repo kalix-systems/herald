@@ -93,6 +93,7 @@ Flickable {
                         authorName: authName
                         authorColor: userColor
                         replyId: op
+                        //mousearea handling jump behavior
                         jumpHandler.onClicked: {
                                 convWindow.state = "jumpState"
                                 convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y

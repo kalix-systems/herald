@@ -2,7 +2,6 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "NewConvoComponents" as ConvUtils
 import "qrc:/common" as Common
 import "../SideBar/GroupFlowComponents" as GroupFlow
 
@@ -44,11 +43,12 @@ Page {
         }
     }
 
+    //component loaded into header depending on sidebar state
     HeaderComponent {
         id: headerBarComponent
     }
 
-    //search component loaded to search convos and contacts
+    //TODO: get rid of this once global search implemented
     SearchComponent {
         id: searchBarComponent
     }
@@ -63,6 +63,7 @@ Page {
 
 
     Loader {
+        active: false
         id: convoBuilderLoader
     }
 

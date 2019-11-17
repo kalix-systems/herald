@@ -12,7 +12,8 @@ Component {
     id: searchBarComponent
 
     Column {
-       anchors.right: parent.right
+    //wrapper column to position textarea and underline
+     anchors.right: parent.right
     RowLayout {
         id: searchToolBar
         anchors.horizontalCenter: parent.horizontalCenter
@@ -24,10 +25,8 @@ Component {
             rightMargin: CmnCfg.margin
         }
 
-    SearchTextArea {
-
-    }
-
+    //main search component
+    SearchTextArea { }
 
     Common.ButtonForm {
         id: back
@@ -74,7 +73,6 @@ Component {
     states: State {
         name: "searchActiveState"
     }
-
     }
 
     Rectangle {

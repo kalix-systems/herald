@@ -35,6 +35,7 @@ Rectangle  {
             }
         }
 
+
         Common.ButtonForm {
             anchors.centerIn: parent
             source: "qrc:/camera-icon.svg"

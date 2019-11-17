@@ -17,7 +17,6 @@
         <file>RegistrationPage.qml</file>
         <file>SideBar/ContactView.qml</file>
         <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
-        <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
         <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
         <file>SideBar/NewConvoComponents/FinalizeGroupComponent.qml</file>
         <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>

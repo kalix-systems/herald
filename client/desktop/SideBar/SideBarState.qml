@@ -3,7 +3,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "./ConversationView"
-import "../SideBar/NewConvoComponents" as ConvUtils
 import "../SideBar/GroupFlowComponents" as GroupFlow
 
 Page {
@@ -55,6 +54,27 @@ Page {
         },
 
         State {
+            name: "newGroupState"
+            PropertyChanges {
+                target: sideBarBodyLoader
+                sourceComponent: newGroupComponent
+            }
+
+            PropertyChanges {
+                target: headerLoader
+                sourceComponent: headerBarComponent
+                headerText: "New group"
+                contactsSearch: true
+            }
+            PropertyChanges {
+                target: convoBuilderLoader
+                active: true
+                source: "GroupFlowComponents/ConvoBuilder.qml"
+            }
+        },
+
+        //TODO: following two states should be reworked to match new design
+        State {
             name: "conversationSearch"
             PropertyChanges {
                 target: headerLoader
@@ -77,25 +97,6 @@ Page {
                 contactsSearch: true
             }
 
-        },
-
-        State {
-            name: "newGroupState"
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: newGroupComponent
-            }
-
-            PropertyChanges {
-                target: headerLoader
-                sourceComponent: headerBarComponent
-                headerText: "New group"
-                contactsSearch: true
-            }
-            PropertyChanges {
-                target: convoBuilderLoader
-                source: "GroupFlowComponents/ConvoBuilder.qml"
-            }
         }
 
     ]

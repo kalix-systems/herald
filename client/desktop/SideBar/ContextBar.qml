@@ -46,7 +46,6 @@ ToolBar {
                 cursorShape: Qt.PointingHandCursor
                 onPressed: {
                     overlay.visible = true
-
                 }
                 onReleased: {
                     overlay.visible = false
@@ -63,7 +62,6 @@ ToolBar {
                     opacity: 0.2
                     smooth: true
                 }
-
         }
 
         Text {
@@ -76,6 +74,7 @@ ToolBar {
             color: CmnCfg.palette.mainColor
         }
 
+        //filler item
         Item {
             Layout.fillWidth: true
         }
@@ -92,21 +91,15 @@ ToolBar {
                 topPadding: 1
                 source: "qrc:/search-icon.svg"
                 //todo : add back in regex logic once ui is known
-                onClicked: {
-                    sideBarState.state = "conversationSearch"
-                }
-            }
+                onClicked: sideBarState.state = "conversationSearch"
+             }
 
-            ///--- Add contact button
+
             Common.ButtonForm {
                 id: newMessageButton
                 source: "qrc:/compose-icon-white.svg"
                 fill: CmnCfg.palette.paneColor
-                onClicked: {
-                    convoMenu.open()
-
-
-                }
+                onClicked: convoMenu.open()
             }
 
             Menu {
@@ -117,14 +110,11 @@ ToolBar {
                 }
             }
 
-            //placeholder new contact button
             Common.ButtonForm {
-                id: newContactButton
+                id: optionsButton
                 fill: CmnCfg.palette.paneColor
                 source: "qrc:/options-icon.svg"
-                onClicked: {
-                    contextOptionsMenu.open()
-                }
+                onClicked: contextOptionsMenu.open()
             }
         }
 

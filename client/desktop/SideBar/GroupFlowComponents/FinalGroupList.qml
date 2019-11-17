@@ -35,7 +35,6 @@ ListView {
             lastBody: "@" + memberId
         }
 
-
         Common.ButtonForm {
             id: xIcon
             anchors.right: parent.right

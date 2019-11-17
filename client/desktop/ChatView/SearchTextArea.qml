@@ -29,14 +29,16 @@ ScrollView {
     verticalAlignment: TextEdit.AlignVCenter
     Layout.alignment: Qt.AlignLeft
 
-    Keys.onReturnPressed: {
+    Keys.onReturnPressed: {   
+        //don't allow enter key to affect textarea
         event.accepted = true
         ownedConversation.searchActive = true
         ownedConversation.searchPattern = searchText.text
 
+        //key navigation handling
         if (ownedConversation.searchNumMatches > 0) {
+            convWindow.state = "jumpState"
             searchToolBar.state = "searchActiveState"
-            convWindow.state = "searchState"
              SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
             convWindow.returnToBounds()
         }
@@ -47,10 +49,11 @@ ScrollView {
         ownedConversation.searchPattern = searchText.text
 
         if (ownedConversation.searchNumMatches > 0) {
+            convWindow.state = "jumpState"
             searchToolBar.state = "searchActiveState"
-            convWindow.state = "searchState"
             SearchUtils.searchTextHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow)
         }
+        //clear state to disable buttons
         else searchToolBar.state = ""
       }
     }

@@ -66,7 +66,6 @@ ToolBar {
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             color: CmnCfg.palette.mainColor
         }
-
         Item {
             Layout.fillWidth: true
         }
