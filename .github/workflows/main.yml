@@ -36,16 +36,14 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: run --manifest-path=herald_server/Cargo.toml
-      - name: install qt
       - uses: jurplel/install-qt-action@v1
         with:
           version: 5.13.2
-      - name: build and run tests
-        uses: actions-rs/cargo@v1
+      - uses: actions-rs/cargo@v1
         with:
           command: build --manifest-path=libherald/Cargo.toml
-        run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-        run: /Qt/Qt5.12.5/5.12.5/gcc_64/qmake client/tests/tests.pro && make && ./tests
+      - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
+      - run: /Qt/Qt5.12.5/5.12.5/gcc_64/qmake client/tests/tests.pro && make && ./tests
 
   test:
     name: Test
