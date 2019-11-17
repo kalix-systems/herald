@@ -56,5 +56,6 @@
         <file>SideBar/GroupFlowComponents/ConvoBuilder.qml</file>
         <file>ChatView/js/SearchHandler.mjs</file>
         <file>../foundation/js/utils.mjs</file>
+        <file>ChatView/SearchTextArea.qml</file>
     </qresource>
 </RCC>
