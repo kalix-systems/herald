@@ -55,7 +55,7 @@ jobs:
    steps:
       - uses: actions/install-qt-action@v0.1.1
         with:
-        packages: 'qt.qt5.5124.gcc_64'
+          packages: 'qt.qt5.5124.gcc_64'
       - run: /Qt/5.12.4/gcc_64/bin/qmake client/desktop/herald.pro && make
 
   test:
