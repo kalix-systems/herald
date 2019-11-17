@@ -18,7 +18,7 @@ jobs:
         with:
           command: check
 
-  test:
+  end_to_end:
     name: e2e
     runs-on: ubuntu-latest
     steps:
@@ -36,7 +36,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: run --manifest-path=herald_server/Cargo.toml
-      - name: install qt    
+      - name: install qt
       - uses: jurplel/install-qt-action@v1
         with:
           version: 5.13.2
@@ -44,8 +44,11 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build --manifest-path=libherald/Cargo.toml
-          run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
+      - name: make conf file and set environment variable
+        run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
+      - name: build and run tests
         run: /Qt/Qt5.12.5/5.12.5/gcc_64/qmake client/tests/tests.pro && make && ./tests
+        
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -97,7 +100,7 @@ jobs:
           packages: 'qt.qt5.5124.gcc_64'
       - uses: actions-rs/cargo@v1
         command: build
-      - name: Run Server  
+      - name: Run Server
         run: pg_ctl -D psdb -p 5432 start
       - uses: actions-rs/cargo@v1
         with:
@@ -138,4 +141,3 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
-
