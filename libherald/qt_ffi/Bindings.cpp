@@ -42,6 +42,19 @@ namespace {
     };
     static_assert(std::is_pod<option_quint32>::value, "option_quint32 must be a POD type.");
 
+    struct option_quint64 {
+    public:
+        quint64 value;
+        bool some;
+        operator QVariant() const {
+            if (some) {
+                return QVariant::fromValue(value);
+            }
+            return QVariant();
+        }
+    };
+    static_assert(std::is_pod<option_quint64>::value, "option_quint64 must be a POD type.");
+
     struct option_quint8 {
     public:
         quint8 value;
@@ -249,6 +262,10 @@ namespace {
     inline void messagesSearchActiveChanged(Messages* o)
     {
         Q_EMIT o->searchActiveChanged();
+    }
+    inline void messagesSearchIndexChanged(Messages* o)
+    {
+        Q_EMIT o->searchIndexChanged();
     }
     inline void messagesSearchNumMatchesChanged(Messages* o)
     {
@@ -2012,7 +2029,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -2036,6 +2053,7 @@ extern "C" {
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_search_active_get(const Messages::Private*);
     void messages_search_active_set(Messages::Private*, bool);
+    option_quint64 messages_search_index_get(const Messages::Private*);
     quint64 messages_search_num_matches_get(const Messages::Private*);
     void messages_search_pattern_get(const Messages::Private*, QString*, qstring_set);
     void messages_search_pattern_set(Messages::Private*, const ushort *str, int len);
@@ -3324,6 +3342,7 @@ Messages::Messages(QObject *parent):
         messagesLastEpochTimestampMsChanged,
         messagesLastStatusChanged,
         messagesSearchActiveChanged,
+        messagesSearchIndexChanged,
         messagesSearchNumMatchesChanged,
         messagesSearchPatternChanged,
         messagesSearchRegexChanged,
@@ -3434,6 +3453,15 @@ bool Messages::searchActive() const
 }
 void Messages::setSearchActive(bool v) {
     messages_search_active_set(m_d, v);
+}
+QVariant Messages::searchIndex() const
+{
+    QVariant v;
+    auto r = messages_search_index_get(m_d);
+    if (r.some) {
+        v.setValue(r.value);
+    }
+    return r;
 }
 quint64 Messages::searchNumMatches() const
 {

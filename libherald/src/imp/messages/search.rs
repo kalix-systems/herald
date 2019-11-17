@@ -34,6 +34,7 @@ pub(super) struct SearchState {
     pub(super) active: bool,
     pub(super) matches: VecDeque<Match>,
     pub(super) cur: Option<Cursor>,
+    pub(super) index: Option<usize>,
 }
 
 impl SearchState {
@@ -43,6 +44,7 @@ impl SearchState {
             active: false,
             matches: VecDeque::new(),
             cur: None,
+            index: None,
         }
     }
 
@@ -84,18 +86,49 @@ impl SearchState {
     }
 
     pub(super) fn num_matches(&self) -> usize {
-        self.matches.len()
+        match self.cur {
+            Some(_) => self.matches.len() + 1,
+            None => self.matches.len(),
+        }
     }
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
         self.active = false;
         self.pattern = SearchPattern::new_normal("".into())?;
         self.matches = VecDeque::new();
+        self.cur = None;
+        self.index = None;
 
         emit.search_active_changed();
         emit.search_num_matches_changed();
 
         Ok(())
+    }
+
+    pub(super) fn initial_next_index(&self) -> usize {
+        1
+    }
+
+    pub(super) fn initial_prev_index(&self) -> usize {
+        self.num_matches()
+    }
+
+    pub(super) fn increment_index(&mut self) {
+        let num_matches = self.num_matches();
+
+        self.index = match self.index {
+            Some(ix) => Some((ix + 1) % num_matches),
+            None => Some(self.initial_next_index()),
+        };
+    }
+
+    pub(super) fn decrement_index(&mut self) {
+        let num_matches = self.num_matches();
+
+        self.index = match self.index {
+            Some(ix) => Some(if ix > 0 { (ix - 1) % num_matches } else { 0 }),
+            None => Some(self.initial_prev_index()),
+        };
     }
 
     pub(super) fn next(&mut self, container: &Container) -> Option<Cursor> {
@@ -112,10 +145,20 @@ impl SearchState {
                 (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
                 (None, cur @ Some(Cursor(_))) => cur,
                 (None, None) => None,
-            }?;
+            };
+
+            let cur = match cur {
+                Some(cur) => cur,
+                None => {
+                    self.cur = None;
+                    self.index = None;
+                    return None;
+                }
+            };
 
             // check if item is still valid
             if container.contains(cur.msg_id()) {
+                self.increment_index();
                 self.cur = Some(cur);
                 break cur;
             }
@@ -138,10 +181,20 @@ impl SearchState {
                 (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
                 (None, cur @ Some(Cursor(_))) => cur,
                 (None, None) => None,
-            }?;
+            };
+
+            let cur = match cur {
+                Some(cur) => cur,
+                None => {
+                    self.cur = None;
+                    self.index = None;
+                    return None;
+                }
+            };
 
             // check if item is still valid
             if container.contains(cur.msg_id()) {
+                self.decrement_index();
                 self.cur = Some(cur);
                 break cur;
             }

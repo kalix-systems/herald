@@ -3349,6 +3349,7 @@ pub struct MessagesEmitter {
     last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     last_status_changed: fn(*mut MessagesQObject),
     search_active_changed: fn(*mut MessagesQObject),
+    search_index_changed: fn(*mut MessagesQObject),
     search_num_matches_changed: fn(*mut MessagesQObject),
     search_pattern_changed: fn(*mut MessagesQObject),
     search_regex_changed: fn(*mut MessagesQObject),
@@ -3372,6 +3373,7 @@ impl MessagesEmitter {
             last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
             last_status_changed: self.last_status_changed,
             search_active_changed: self.search_active_changed,
+            search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
             search_pattern_changed: self.search_pattern_changed,
             search_regex_changed: self.search_regex_changed,
@@ -3423,6 +3425,12 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.search_active_changed)(ptr);
+        }
+    }
+    pub fn search_index_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.search_index_changed)(ptr);
         }
     }
     pub fn search_num_matches_changed(&mut self) {
@@ -3515,6 +3523,7 @@ pub trait MessagesTrait {
     fn last_status(&self) -> Option<u32>;
     fn search_active(&self) -> bool;
     fn set_search_active(&mut self, value: bool);
+    fn search_index(&self) -> Option<u64>;
     fn search_num_matches(&self) -> u64;
     fn search_pattern(&self) -> &str;
     fn set_search_pattern(&mut self, value: String);
@@ -3564,6 +3573,7 @@ pub extern "C" fn messages_new(
     messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     messages_last_status_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
+    messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
     messages_search_pattern_changed: fn(*mut MessagesQObject),
     messages_search_regex_changed: fn(*mut MessagesQObject),
@@ -3589,6 +3599,7 @@ pub extern "C" fn messages_new(
         last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
         last_status_changed: messages_last_status_changed,
         search_active_changed: messages_search_active_changed,
+        search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
         search_pattern_changed: messages_search_pattern_changed,
         search_regex_changed: messages_search_regex_changed,
@@ -3719,6 +3730,20 @@ pub unsafe extern "C" fn messages_search_active_get(ptr: *const Messages) -> boo
 #[no_mangle]
 pub unsafe extern "C" fn messages_search_active_set(ptr: *mut Messages, v: bool) {
     (&mut *ptr).set_search_active(v);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_search_index_get(ptr: *const Messages) -> COption<u64> {
+    match (&*ptr).search_index() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: u64::default(),
+            some: false,
+        },
+    }
 }
 
 #[no_mangle]

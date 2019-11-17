@@ -141,11 +141,12 @@ impl Container {
     }
 
     pub(super) fn clear_search(&mut self, model: &mut List) {
-        for data in self.map.values_mut() {
-            data.match_status = MatchStatus::NotMatched;
+        for (ix, data) in self.map.values_mut().enumerate() {
+            if data.match_status.is_match() {
+                data.match_status = MatchStatus::NotMatched;
+                model.data_changed(ix, ix);
+            }
         }
-
-        model.data_changed(0, self.list.len().saturating_sub(1));
     }
 
     pub(super) fn handle_receipt(
@@ -202,7 +203,7 @@ impl Container {
             .list
             .iter()
             // search backwards,
-            // it's probably fairly recent
+            // it's probably very recent
             .rposition(|m| m.msg_id == mid)?;
 
         model.data_changed(ix, ix);

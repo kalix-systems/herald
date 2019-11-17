@@ -385,4 +385,8 @@ impl MessagesTrait for Messages {
     fn prev_search_match(&mut self) -> i64 {
         self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
     }
+
+    fn search_index(&self) -> Option<u64> {
+        Some(self.search.index? as u64)
+    }
 }

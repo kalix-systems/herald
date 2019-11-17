@@ -10,13 +10,48 @@ impl Messages {
     }
 
     pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
-        let old = self.search.cur;
-        let new = self.search.prev(&self.container);
+        let old = (
+            self.search.cur,
+            self.search.index,
+            self.search.num_matches(),
+        );
+        let new = (
+            self.search.prev(&self.container),
+            self.search.index,
+            self.search.num_matches(),
+        );
 
         self.match_helper(old, new)
     }
 
-    fn match_helper(&mut self, old: Option<Cursor>, new: Option<Cursor>) -> Option<usize> {
+    pub(super) fn next_match_helper(&mut self) -> Option<usize> {
+        let old = (
+            self.search.cur,
+            self.search.index,
+            self.search.num_matches(),
+        );
+        let new = (
+            self.search.next(&self.container),
+            self.search.index,
+            self.search.num_matches(),
+        );
+
+        self.match_helper(old, new)
+    }
+
+    fn match_helper(
+        &mut self,
+        (old, old_index, old_len): (Option<Cursor>, Option<usize>, usize),
+        (new, new_index, new_len): (Option<Cursor>, Option<usize>, usize),
+    ) -> Option<usize> {
+        if old_index != new_index {
+            self.emit.search_index_changed();
+        }
+
+        if new_len != old_len {
+            self.emit.search_num_matches_changed();
+        }
+
         if old == new {
             let new = new?.into_inner();
             return self.container.index_of(new);
@@ -42,37 +77,31 @@ impl Messages {
         Some(ix)
     }
 
-    pub(super) fn next_match_helper(&mut self) -> Option<usize> {
-        let old = self.search.cur;
-        let new = self.search.next(&self.container);
-
-        self.match_helper(old, new)
-    }
-
     pub(super) fn raw_list_remove(&mut self, ix: usize) {
         let len = self.container.len();
 
-        let init_prev_state = if ix > 0 {
+        let prev_state = if ix > 0 {
             (self.is_tail(ix - 1), self.is_head(ix - 1))
         } else {
             (None, None)
         };
 
-        let init_succ_state = (self.is_tail(ix), self.is_head(ix));
+        let succ_state = (self.is_tail(ix), self.is_head(ix));
 
         self.model.begin_remove_rows(ix, ix);
         self.container.mem_remove(ix);
         self.model.end_remove_rows();
 
-        if ix > 0 && init_prev_state != (self.is_head(ix - 1), self.is_tail(ix - 1)) {
-            self.model.data_changed(ix - 1, ix - 1);
-        }
+        if ix > 0 {
+            let prev_head = self.is_head(ix - 1);
 
-        if ix > 0
-            && ix + 1 < self.container.len()
-            && init_succ_state != (self.is_head(ix - 1), self.is_tail(ix + 1))
-        {
-            self.model.data_changed(ix + 1, ix + 1);
+            if prev_state != (prev_head, self.is_tail(ix - 1)) {
+                self.model.data_changed(ix - 1, ix - 1);
+            }
+
+            if ix + 1 < self.container.len() && succ_state != (prev_head, self.is_tail(ix + 1)) {
+                self.model.data_changed(ix + 1, ix + 1);
+            }
         }
 
         if len == 1 {
@@ -112,9 +141,9 @@ impl Messages {
             }
         };
 
-        let init_prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
+        let prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
 
-        let init_succ_state = self.is_tail(ix);
+        let succ_state = self.is_tail(ix);
 
         self.model.begin_insert_rows(ix, ix);
         self.container.insert(ix, message, data);
@@ -128,11 +157,11 @@ impl Messages {
             self.emit.is_empty_changed();
         }
 
-        if ix > 0 && init_prev_state != self.is_tail(ix - 1) {
+        if ix > 0 && prev_state != self.is_tail(ix - 1) {
             self.model.data_changed(ix - 1, ix - 1);
         }
 
-        if ix + 1 < self.container.len() && init_succ_state != self.is_tail(ix + 1) {
+        if ix + 1 < self.container.len() && succ_state != self.is_tail(ix + 1) {
             self.model.data_changed(ix + 1, ix + 1);
         }
 

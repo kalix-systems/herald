@@ -571,6 +571,7 @@ private:
     Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
     Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
     Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY searchActiveChanged FINAL)
+    Q_PROPERTY(QVariant searchIndex READ searchIndex NOTIFY searchIndexChanged FINAL)
     Q_PROPERTY(quint64 searchNumMatches READ searchNumMatches NOTIFY searchNumMatchesChanged FINAL)
     Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern NOTIFY searchPatternChanged FINAL)
     Q_PROPERTY(bool searchRegex READ searchRegex WRITE setSearchRegex NOTIFY searchRegexChanged FINAL)
@@ -587,6 +588,7 @@ public:
     QVariant lastStatus() const;
     bool searchActive() const;
     void setSearchActive(bool v);
+    QVariant searchIndex() const;
     quint64 searchNumMatches() const;
     QString searchPattern() const;
     void setSearchPattern(const QString& v);
@@ -645,6 +647,7 @@ Q_SIGNALS:
     void lastEpochTimestampMsChanged();
     void lastStatusChanged();
     void searchActiveChanged();
+    void searchIndexChanged();
     void searchNumMatchesChanged();
     void searchPatternChanged();
     void searchRegexChanged();

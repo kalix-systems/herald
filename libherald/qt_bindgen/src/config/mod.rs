@@ -244,7 +244,10 @@ fn messages() -> Object {
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
-        searchNumMatches: Prop::new().simple(QUint64)
+        // Number of search results
+        searchNumMatches: Prop::new().simple(QUint64),
+        // Position in search results of focused item, e.g., 4 out of 7
+        searchIndex: Prop::new().simple(QUint64).optional()
     };
 
     let item_props = item_props! {
@@ -263,7 +266,7 @@ fn messages() -> Object {
         isTail: ItemProp::new(Bool).optional(),
         // 0 => Not matched,
         // 1 => Matched,
-        // 2 => Matched and selected
+        // 2 => Matched and focused
         match_status: ItemProp::new(QUint8).optional()
     };
 
