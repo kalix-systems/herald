@@ -39,7 +39,7 @@ jobs:
           command: build
           args: --manifest-path=herald_server/Cargo.toml
       - run: target/debug/herald_server &
-      - uses: actions/install-qt-action@v0.1.1
+      - uses: Mercotui/install-qt-dev-action@v0.1.1
         with:
           packages: 'qt.qt5.5124.gcc_64'
       - uses: actions-rs/cargo@v1
@@ -53,7 +53,7 @@ jobs:
    name: install qt action test
    runs-on: ubuntu-latest
    steps:
-      - uses: actions/install-qt-action@v0.1.1
+      - uses: Mercotui/install-qt-dev-action@v0.1.1
         with:
           packages: 'qt.qt5.5124.gcc_64'
       - run: /Qt/5.12.4/gcc_64/bin/qmake client/desktop/herald.pro && make
