@@ -114,8 +114,10 @@ Rectangle {
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Message " + conversationItem.title
+
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
+
             }
         }
     }

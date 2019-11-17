@@ -22,10 +22,12 @@ Page {
     SplitView.preferredWidth: root.width * windowFraction
     property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
+    property alias sideBarState: sideBarState
 
     background: Rectangle {
         color: CmnCfg.palette.paneColor
     }
+
 
     ///--- SearchBar for contacts, add contact button
     header: Loader {

@@ -96,26 +96,12 @@ ToolBar {
                 onClicked: convoMenu.open()
             }
 
-            Menu {
-                id: convoMenu
-                MenuItem {
-                    text: "New group conversation"
-                    onTriggered: {
-                        sideBarState.state = "newGroupState"
-                    }
-                }
-            }
-
             Common.ButtonForm {
                 id: optionsButton
                 fill: CmnCfg.palette.paneColor
                 source: "qrc:/options-icon.svg"
                 onClicked: contextOptionsMenu.open()
             }
-        }
-
-        Popups.ContextOptionsMenu {
-            id: contextOptionsMenu
         }
     }
 }
