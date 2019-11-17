@@ -87,28 +87,6 @@ jobs:
           command: test
           args: --manifest-path=heraldcore/Cargo.toml
 
-  server_integration_tests:
-    name: Integration Tests
-    runs:
-      using: 'docker'
-      image: '/client/tests/Dockerfile'
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-      - uses: actions/install-qt-action@v0.1.1
-        with:
-          packages: 'qt.qt5.5124.gcc_64'
-      - uses: actions-rs/cargo@v1
-        command: build
-      - name: Run Server
-        run: pg_ctl -D psdb -p 5432 start
-      - uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --mainifes-path=herald_server/Cargo.toml
-      - name: Run Tests
-        run: /Qt/5.12.4/gcc_64/bin/qmake client/tests/tests.pro
-        run: ./tests
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
