@@ -29,6 +29,19 @@ ScrollView {
     verticalAlignment: TextEdit.AlignVCenter
     Layout.alignment: Qt.AlignLeft
 
+    Keys.onReturnPressed: {
+        event.accepted = true
+        ownedConversation.searchActive = true
+        ownedConversation.searchPattern = searchText.text
+
+        if (ownedConversation.searchNumMatches > 0) {
+            searchToolBar.state = "searchActiveState"
+            convWindow.state = "searchState"
+             SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
+            convWindow.returnToBounds()
+        }
+    }
+
     onTextChanged: {
         ownedConversation.searchActive = true
         ownedConversation.searchPattern = searchText.text
@@ -36,16 +49,8 @@ ScrollView {
         if (ownedConversation.searchNumMatches > 0) {
             searchToolBar.state = "searchActiveState"
             convWindow.state = "searchState"
-            var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView,
-                                                    chatPane, convWindow, false)
-
-            if (!isOnscreen) {
-            convWindow.contentY =
-                    convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y - convWindow.height / 2
-                convWindow.returnToBounds()
+            SearchUtils.searchTextHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow)
         }
-        }
-
         else searchToolBar.state = ""
       }
     }

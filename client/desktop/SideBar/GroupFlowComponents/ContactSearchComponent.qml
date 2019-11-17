@@ -53,14 +53,12 @@ Column {
                 width: 0
                 visible: false
             }
-
             delegate: Item {
             id: contactItem
             property var contactData: model
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== config.configId
-
             Common.PlatonicRectangle {
                 color: "white"
                 id: contactRectangle
@@ -84,6 +82,7 @@ Column {
 
                     }
              }
+
             }
         }
         }

@@ -24,6 +24,17 @@ export function isOnscreen(ownedConversation, chatListView, chatPane, conversati
         }
     }
 }
+export function searchTextHandler(ownedConversation, chatListView, chatPane, conversationWindow) {
+    const onscreen = isOnscreen(ownedConversation, chatListView, chatPane, conversationWindow, false);
+    if (!onscreen) {
+        conversationWindow.contentY =
+            chatListView.itemAt(ownedConversation.prevSearchMatch()).y - conversationWindow.height / 2;
+        conversationWindow.returnToBounds();
+    }
+    else {
+        ownedConversation.prevSearchMatch();
+    }
+}
 export function jumpHandler(ownedConversation, chatListView, chatPane, conversationWindow, forward) {
     const toJump = !isOnscreen(ownedConversation, chatListView, chatPane, conversationWindow, forward);
     const convoMiddle = conversationWindow.height / 2;

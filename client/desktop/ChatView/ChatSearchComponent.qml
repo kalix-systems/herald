@@ -61,6 +61,7 @@ Component {
        Layout.alignment: Qt.AlignVCenter
        fill: CmnCfg.palette.paneColor
         onClicked: {
+
             ownedConversation.clearSearch()
             ownedConversation.searchActive = false
             messageBar.state = ""

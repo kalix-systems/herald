@@ -38,6 +38,25 @@ export function isOnscreen(
 
 }
 
+export function searchTextHandler(
+	ownedConversation: Messages,
+	chatListView: Repeater,
+	chatPane: Page,
+	conversationWindow: ConversationWindow
+	): void {
+
+   const onscreen = isOnscreen(ownedConversation, chatListView,
+                                                chatPane, conversationWindow, false)
+        if (!onscreen) {
+        conversationWindow.contentY =
+                chatListView.itemAt(ownedConversation.prevSearchMatch()).y - conversationWindow.height / 2
+            conversationWindow.returnToBounds()
+    }
+        else {
+            ownedConversation.prevSearchMatch()
+        }
+}
+
 export function jumpHandler(
 	ownedConversation: Messages,
 	chatListView: Repeater,

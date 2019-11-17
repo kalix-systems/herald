@@ -27,6 +27,7 @@ ToolBar {
             iconColor: CmnCfg.palette.avatarColors[config.color]
             initials: config.name[0].toUpperCase()
             size: 28
+            avatarHeight: 28
             pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
             Layout.alignment: Qt.AlignCenter
             Layout.leftMargin: 12
@@ -37,7 +38,6 @@ ToolBar {
                 cursorShape: Qt.PointingHandCursor
                 onPressed: {
                     overlay.visible = true
-
                 }
                 onReleased: {
                     overlay.visible = false
@@ -51,8 +51,8 @@ ToolBar {
                 visible: false
                     anchors.fill: parent
                     source: parent
-                    // hexquad black + transparent
-                    color: "#40000000"
+                    color: "black"
+                    opacity: 0.2
                     smooth: true
                 }
         }

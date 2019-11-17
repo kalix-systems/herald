@@ -59,8 +59,8 @@ ToolBar {
                 visible: false
                     anchors.fill: parent
                     source: parent
-                    // hexquad black + transparent
-                    color: "#40000000"
+                    color: "black"
+                    opacity: 0.2
                     smooth: true
                 }
 

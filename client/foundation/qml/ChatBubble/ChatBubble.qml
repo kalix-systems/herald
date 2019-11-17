@@ -11,11 +11,34 @@ Rectangle {
     property string friendlyTimestamp: ""
     property bool outbound: parent.outbound
     property real maxWidth: 0.0
+    property bool highlight: false
     property Component content
 
     color: bubbleColor
     width: contentLoader.width
     height: contentLoader.height
+
+
+    //two rectangles to extend to both sides of pane
+    Rectangle {
+        width: convWindow.width
+        anchors.right: parent.right
+        color: CmnCfg.palette.sideBarHighlightColor
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height + CmnCfg.smallMargin
+        visible: highlight
+        z: -1
+    }
+
+    Rectangle {
+        width: convWindow.width
+        anchors.left: parent.right
+        color: CmnCfg.palette.sideBarHighlightColor
+        anchors.verticalCenter: parent.verticalCenter
+        height: parent.height + CmnCfg.smallMargin
+        visible: highlight
+        z: -1
+    }
 
     Rectangle {
         id: verticalAccent
@@ -23,7 +46,7 @@ Rectangle {
         anchors.left: outbound ? contentLoader.right : undefined
         height: contentLoader.height
         width: CmnCfg.smallMargin / 4
-        color: match_status === 2 ? "yellow" : senderColor
+        color: senderColor
     }
 
     Loader {
