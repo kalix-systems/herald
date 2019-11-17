@@ -32,6 +32,7 @@ Page {
         id: headerLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
+        property string headerText: ""
 
         sourceComponent: ContextBar {
             id: contextBarComponent
@@ -51,11 +52,6 @@ Page {
         id: searchBarComponent
     }
 
-    ConvUtils.NewGroupBar {
-        id: newGroupBar
-        visible: sideBarState.state === "newConversationState"
-        anchors.top: parent.top
-    }
 
     Loader {
         id: convoBuilderLoader
@@ -63,11 +59,6 @@ Page {
 
     SideBarState {
         id: sideBarState
-        anchors {
-            top: newGroupBar.bottom
-            bottom: parent.bottom
-            right: parent.right
-            left: parent.left
-        }
+        anchors.fill: parent
     }
 }

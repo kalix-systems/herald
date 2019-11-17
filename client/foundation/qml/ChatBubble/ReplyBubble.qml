@@ -18,6 +18,8 @@ ColumnLayout {
     spacing: 0
     property color authorColor
     property var replyId
+    property alias jumpHandler: jumpHandler
+    property alias replyHighlightAnimation: replyHighlightAnimation
 
 
     MessagePreview {
@@ -46,16 +48,8 @@ ColumnLayout {
             width: reply.width
             height: reply.height
             z: 10
-            onClicked: {
-                convWindow.state = "jumpState"
-                convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
-                        - convWindow.height / 2
-                convWindow.returnToBounds()
-                convWindow.state = ""
-                replyHighlightAnimation.start()
-            }
+            id: jumpHandler
         }
-
 
         //TODO: nicer animation
         SequentialAnimation {

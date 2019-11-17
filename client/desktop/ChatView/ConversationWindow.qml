@@ -22,6 +22,7 @@ Flickable {
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
+
     }
 
     Component.onCompleted: {
@@ -93,6 +94,14 @@ Flickable {
                         authorName: authName
                         authorColor: userColor
                         replyId: op
+                        jumpHandler.onClicked: {
+                                convWindow.state = "jumpState"
+                                convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
+                                        - convWindow.height / 2
+                                convWindow.returnToBounds()
+                                convWindow.state = ""
+                                replyHighlightAnimation.start()
+                               }
                     }
                 }
 
@@ -156,14 +165,7 @@ Flickable {
         } // Repeater
     } //singleton Col
 
-    states: [ State {
-        name: "searchState"
-        PropertyChanges {
-            target: cvPane
-            rebound: blankTransition
-        }
-    },
-
+    states: [
         State {
             name: "jumpState"
             PropertyChanges {
