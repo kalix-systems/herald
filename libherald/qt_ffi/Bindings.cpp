@@ -42,19 +42,6 @@ namespace {
     };
     static_assert(std::is_pod<option_quint32>::value, "option_quint32 must be a POD type.");
 
-    struct option_quint64 {
-    public:
-        quint64 value;
-        bool some;
-        operator QVariant() const {
-            if (some) {
-                return QVariant::fromValue(value);
-            }
-            return QVariant();
-        }
-    };
-    static_assert(std::is_pod<option_quint64>::value, "option_quint64 must be a POD type.");
-
     struct option_quint8 {
     public:
         quint8 value;
@@ -2053,7 +2040,7 @@ extern "C" {
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_search_active_get(const Messages::Private*);
     void messages_search_active_set(Messages::Private*, bool);
-    option_quint64 messages_search_index_get(const Messages::Private*);
+    quint64 messages_search_index_get(const Messages::Private*);
     quint64 messages_search_num_matches_get(const Messages::Private*);
     void messages_search_pattern_get(const Messages::Private*, QString*, qstring_set);
     void messages_search_pattern_set(Messages::Private*, const ushort *str, int len);
@@ -2065,6 +2052,7 @@ extern "C" {
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     qint64 messages_next_search_match(Messages::Private*);
     qint64 messages_prev_search_match(Messages::Private*);
+    void messages_set_search_hint(Messages::Private*, float, float);
 };
 
 extern "C" {
@@ -3454,14 +3442,9 @@ bool Messages::searchActive() const
 void Messages::setSearchActive(bool v) {
     messages_search_active_set(m_d, v);
 }
-QVariant Messages::searchIndex() const
+quint64 Messages::searchIndex() const
 {
-    QVariant v;
-    auto r = messages_search_index_get(m_d);
-    if (r.some) {
-        v.setValue(r.value);
-    }
-    return r;
+    return messages_search_index_get(m_d);
 }
 quint64 Messages::searchNumMatches() const
 {
@@ -3506,6 +3489,10 @@ qint64 Messages::nextSearchMatch()
 qint64 Messages::prevSearchMatch()
 {
     return messages_prev_search_match(m_d);
+}
+void Messages::setSearchHint(float scrollbar_position, float scrollbar_height)
+{
+    return messages_set_search_hint(m_d, scrollbar_position, scrollbar_height);
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),

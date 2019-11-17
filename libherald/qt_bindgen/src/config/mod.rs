@@ -247,7 +247,7 @@ fn messages() -> Object {
         // Number of search results
         searchNumMatches: Prop::new().simple(QUint64),
         // Position in search results of focused item, e.g., 4 out of 7
-        searchIndex: Prop::new().simple(QUint64).optional()
+        searchIndex: Prop::new().simple(QUint64)
     };
 
     let item_props = item_props! {
@@ -276,6 +276,7 @@ fn messages() -> Object {
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
+        mut setSearchHint(scrollbar_position: Float, scrollbar_height: Float) => Void,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 

@@ -3523,7 +3523,7 @@ pub trait MessagesTrait {
     fn last_status(&self) -> Option<u32>;
     fn search_active(&self) -> bool;
     fn set_search_active(&mut self, value: bool);
-    fn search_index(&self) -> Option<u64>;
+    fn search_index(&self) -> u64;
     fn search_num_matches(&self) -> u64;
     fn search_pattern(&self) -> &str;
     fn set_search_pattern(&mut self, value: String);
@@ -3535,6 +3535,7 @@ pub trait MessagesTrait {
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn next_search_match(&mut self) -> i64;
     fn prev_search_match(&mut self) -> i64;
+    fn set_search_hint(&mut self, scrollbar_position: f32, scrollbar_height: f32) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
@@ -3733,17 +3734,8 @@ pub unsafe extern "C" fn messages_search_active_set(ptr: *mut Messages, v: bool)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_search_index_get(ptr: *const Messages) -> COption<u64> {
-    match (&*ptr).search_index() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: u64::default(),
-            some: false,
-        },
-    }
+pub unsafe extern "C" fn messages_search_index_get(ptr: *const Messages) -> u64 {
+    (&*ptr).search_index()
 }
 
 #[no_mangle]
@@ -3824,6 +3816,16 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let o = &mut *ptr;
     o.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_set_search_hint(
+    ptr: *mut Messages,
+    scrollbar_position: f32,
+    scrollbar_height: f32,
+) {
+    let o = &mut *ptr;
+    o.set_search_hint(scrollbar_position, scrollbar_height)
 }
 
 #[no_mangle]

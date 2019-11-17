@@ -386,7 +386,9 @@ impl MessagesTrait for Messages {
         self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
     }
 
-    fn search_index(&self) -> Option<u64> {
-        Some(self.search.index.unwrap_or(0) as u64)
+    fn search_index(&self) -> u64 {
+        self.search.index.unwrap_or(0) as u64
     }
+
+    fn set_search_hint(&mut self, _scroll_position: f32, _scroll_height: f32) {}
 }
