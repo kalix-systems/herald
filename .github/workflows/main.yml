@@ -23,22 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: sudo apt install libdbus-glib-1-dev
-      - uses: actions/checkout@v1
-      - name: Start postgres instance
-        run: docker-compose -f herald_server/docker-compose.yml up -d
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Setup database tables
-        run: cargo run --bin setup_db
-      - name: Run server
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --manifest-path=herald_server/Cargo.toml
-
+     
   test:
     name: Test
     runs-on: ubuntu-latest
