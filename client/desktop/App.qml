@@ -10,7 +10,6 @@ Item {
     id: appRoot
 
     anchors.fill: parent.fill
-
     TopMenuBar {
         Popups.ConfigPopup {
             id: preferencesPopup
@@ -33,9 +32,16 @@ Item {
         id: configPopup
     }
 
+    Popups.ContextOptionsMenu {
+        id: contextOptionsMenu
+    }
+
     Config {
         id: config
     }
+
+    focus: true
+
 
     Component {
         id: splash
@@ -66,9 +72,12 @@ Item {
                 anchors.centerIn: parent
                 source: "qrc:/herald.icns"
                 mipmap: true
+
             }
         }
     }
+
+
 
     SplitView {
         id: rootSplitView

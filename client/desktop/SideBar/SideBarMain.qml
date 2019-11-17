@@ -27,6 +27,7 @@ Page {
         color: CmnCfg.palette.paneColor
     }
 
+
     ///--- SearchBar for contacts, add contact button
     header: Loader {
         id: headerLoader

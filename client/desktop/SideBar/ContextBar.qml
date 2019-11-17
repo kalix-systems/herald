@@ -113,9 +113,5 @@ ToolBar {
                 onClicked: contextOptionsMenu.open()
             }
         }
-
-        Popups.ContextOptionsMenu {
-            id: contextOptionsMenu
-        }
     }
 }
