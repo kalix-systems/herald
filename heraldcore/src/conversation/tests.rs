@@ -7,21 +7,8 @@ use serial_test_derive::serial;
 use std::convert::TryInto;
 
 #[test]
-fn conv_id_length() {
-    let mut conn = Database::in_memory().expect(womp!());
-
-    let bld = super::ConversationBuilder::new();
-    bld.add_db(&mut conn)
-        .expect(womp!("failed to create conversation"));
-
-    let all_meta = super::db::all_meta(&conn).expect(womp!("failed to get data"));
-
-    assert_eq!(all_meta[0].conversation_id.into_array().len(), 32);
-}
-
-#[test]
 fn add_conversation() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     // test without id
     super::ConversationBuilder::new()
@@ -35,6 +22,7 @@ fn add_conversation() {
         bld.conversation_id(conversation_id);
         bld.add_db(&mut conn)
             .expect(womp!("failed to create conversation"))
+            .meta
             .conversation_id
     });
 
@@ -53,7 +41,7 @@ fn add_conversation() {
 
 #[test]
 fn add_and_get() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let author = "Hello".try_into().unwrap();
     UserBuilder::new(author).add_db(&mut conn).expect(womp!());
@@ -94,7 +82,7 @@ fn add_and_get() {
 
 #[test]
 fn matches() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     // test without id
     let mut bld = super::ConversationBuilder::new();
@@ -103,6 +91,7 @@ fn matches() {
     let conv_id = bld
         .add_db(&mut conn)
         .expect(womp!("failed to create conversation"))
+        .meta
         .conversation_id;
 
     let conv = db::meta(&conn, &conv_id).expect(womp!());
@@ -119,7 +108,7 @@ fn matches() {
 #[test]
 #[serial(fs)]
 fn set_prof_pic() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);
 
     let mut bld = super::ConversationBuilder::new();
@@ -137,7 +126,7 @@ fn set_prof_pic() {
 
 #[test]
 fn set_muted_test() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
     let conv_id = ConversationId::from([0; 32]);
 
     let mut bld = super::ConversationBuilder::new();
@@ -160,7 +149,7 @@ fn set_muted_test() {
 
 #[test]
 fn set_get_meta() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let conv_id = ConversationId::from([0; 32]);
 
@@ -188,12 +177,12 @@ fn set_get_meta() {
 
     let all_meta = super::db::all_meta(&conn).expect(womp!("Failed to get all metadata"));
 
-    assert_eq!(all_meta.len(), 2);
+    assert_eq!(all_meta.len(), 3);
 }
 
 #[test]
 fn add_remove_member() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let id1 = "id1".try_into().unwrap();
     let id2 = "id2".try_into().unwrap();
@@ -220,7 +209,7 @@ fn add_remove_member() {
     let members =
         crate::members::db::members(&conn, &conv_id).expect(womp!("failed to get members"));
 
-    assert_eq!(members.len(), 2);
+    assert_eq!(members.len(), 3);
 
     crate::members::db::remove_member(&conn, &conv_id, id2)
         .expect(womp!("failed to remove member"));
@@ -228,12 +217,12 @@ fn add_remove_member() {
     let members =
         crate::members::db::members(&conn, &conv_id).expect(womp!("failed to get members"));
 
-    assert_eq!(members.len(), 1);
+    assert_eq!(members.len(), 2);
 }
 
 #[test]
 fn delete_message() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let author = "Hello".try_into().unwrap();
     UserBuilder::new(author).add_db(&mut conn).expect(womp!());
@@ -264,7 +253,7 @@ fn delete_message() {
 
 #[test]
 fn delete_conversation() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let author = "Hello".try_into().unwrap();
     UserBuilder::new(author).add_db(&mut conn).expect(womp!());
@@ -305,7 +294,7 @@ fn delete_conversation() {
 
 #[test]
 fn pairwise_cids() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let uid1 = "Hello".try_into().expect(womp!());
     let u1 = UserBuilder::new(uid1).add_db(&mut conn).expect(womp!()).0;
@@ -323,26 +312,29 @@ fn pairwise_cids() {
 }
 
 #[test]
-fn convo_message_order() {
-    let mut conn = Database::in_memory().expect(womp!());
+fn conversation_order() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+    // this is our time resolution
+    std::thread::sleep(std::time::Duration::from_millis(2));
 
     let conv_id1 = ConversationId::from([0; 32]);
     let author = "Hello".try_into().unwrap();
 
-    let user = UserBuilder::new(author).add_db(&mut conn).expect(womp!()).0;
+    // adds a pairwise conversation
+    UserBuilder::new(author).add_db(&mut conn).expect(womp!()).0;
 
+    // adds a group conversation
     let mut bld = super::ConversationBuilder::new();
     bld.conversation_id(conv_id1);
     bld.add_db(&mut conn)
         .expect(womp!("failed to add conversation"));
 
-    let mid = [1; 32].into();
-
     // this is our time resolution
-    std::thread::sleep(std::time::Duration::from_millis(1));
+    std::thread::sleep(std::time::Duration::from_millis(2));
 
-    // conv_id1 should be the most recent conversation
+    // make conv_id1 the last active
     let mut builder = InboundMessageBuilder::default();
+    let mid = [1; 32].into();
     builder
         .id(mid)
         .author(author)
@@ -352,6 +344,6 @@ fn convo_message_order() {
     builder.store_db(&mut conn).expect(womp!());
 
     let meta = super::db::all_meta(&conn).expect(womp!("Failed to get metadata"));
-
-    assert_eq!(meta[1].conversation_id, user.pairwise_conversation);
+    assert_eq!(meta.len(), 3);
+    assert_eq!(meta[0].conversation_id, conv_id1);
 }

@@ -13,24 +13,23 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
             NewKey(nk) => crate::user_keys::add_keys(from.uid, &[nk.0])?,
             DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
             AddedToConvo(ac) => {
-                let mut db = crate::db::Database::get()?;
-                let tx = db.transaction()?;
+                use crate::types::cmessages::AddedToConvo;
 
-                let cid = ac.cid;
-                let title = ac.title;
+                let AddedToConvo {
+                    members,
+                    cid,
+                    gen,
+                    title,
+                } = *ac;
 
                 let mut conv_builder = crate::conversation::ConversationBuilder::new();
-                conv_builder.conversation_id(cid);
+                conv_builder.conversation_id(cid).override_members(members);
+                conv_builder.title = title;
 
-                if let Some(title) = title {
-                    conv_builder.title(title);
-                }
+                let mut db = crate::db::Database::get()?;
+                conv_builder.add_db(&mut db)?;
 
-                conv_builder.add_with_tx(&tx)?;
-                crate::members::db::add_members_with_tx(&tx, cid, &ac.members)?;
-                tx.commit()?;
-
-                cid.store_genesis(&ac.gen)?;
+                cid.store_genesis(&gen)?;
 
                 ev.notifications.push(Notification::NewConversation(cid));
             }

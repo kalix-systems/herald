@@ -5,7 +5,7 @@ use std::convert::TryFrom;
 
 #[test]
 fn add_and_deprecate() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());
     UserBuilder::new(uid).add_db(&mut conn).expect(womp!());
 
@@ -18,7 +18,7 @@ fn add_and_deprecate() {
 
 #[test]
 fn get_valid_deprecated() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
     let uid = UserId::try_from("Hello").expect(womp!());
     UserBuilder::new(uid).add_db(&mut conn).expect(womp!());
 

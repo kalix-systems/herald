@@ -3,7 +3,7 @@ use crate::{message::MessageReceiptStatus, types, womp};
 
 #[test]
 fn add_get_delete() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 0);

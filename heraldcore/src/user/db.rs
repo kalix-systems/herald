@@ -1,5 +1,5 @@
 use super::*;
-use crate::conversation::ConversationMeta;
+use crate::conversation::Conversation;
 use rusqlite::named_params;
 
 // TODO: this should be a struct
@@ -158,7 +158,7 @@ impl UserBuilder {
     pub(crate) fn add_db(
         self,
         conn: &mut rusqlite::Connection,
-    ) -> Result<(User, ConversationMeta), HErr> {
+    ) -> Result<(User, Conversation), HErr> {
         let tx = conn.transaction()?;
         let (user, conv) = Self::add_with_tx(self, &tx)?;
         tx.commit()?;
@@ -168,43 +168,53 @@ impl UserBuilder {
     pub(crate) fn add_with_tx(
         self,
         tx: &rusqlite::Transaction,
-    ) -> Result<(User, ConversationMeta), HErr> {
+    ) -> Result<(User, Conversation), HErr> {
         use crate::conversation::ConversationBuilder;
+
+        let Self {
+            id,
+            color,
+            name,
+            user_type,
+            status,
+            pairwise_conversation,
+        } = self;
 
         let mut conv_builder = ConversationBuilder::new();
         conv_builder.pairwise(true);
 
-        let color = self
-            .color
-            .unwrap_or_else(|| crate::utils::id_to_color(self.id.as_str()));
-
+        let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         conv_builder.color(color);
 
-        let name = self.name.clone().unwrap_or_else(|| self.id.to_string());
+        let name = name.unwrap_or_else(|| id.to_string());
 
-        let user_type = self.user_type.unwrap_or(UserType::Remote);
+        let user_type = user_type.unwrap_or(UserType::Remote);
 
-        let title = if let UserType::Local = user_type {
+        let title = if UserType::Local == user_type {
             crate::config::NTS_CONVERSATION_NAME
         } else {
             name.as_str()
         };
 
         conv_builder.title(title.to_owned());
-
-        if let Some(cid) = self.pairwise_conversation {
+        if let Some(cid) = pairwise_conversation {
             conv_builder.conversation_id(cid);
         }
 
-        let conv = conv_builder.add_with_tx(&tx)?;
-        let pairwise_conversation = conv.conversation_id;
+        let conv = if user_type == UserType::Local {
+            conv_builder.add_nts(&tx, self.id)?
+        } else {
+            conv_builder.add_tx(&tx)?
+        };
+
+        let pairwise_conversation = conv.meta.conversation_id;
 
         let user = User {
-            id: self.id,
+            id,
             name,
             profile_picture: None,
             color,
-            status: self.status.unwrap_or(UserStatus::Active),
+            status: status.unwrap_or(UserStatus::Active),
             pairwise_conversation,
             user_type,
         };

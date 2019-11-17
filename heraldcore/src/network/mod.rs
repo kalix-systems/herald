@@ -26,6 +26,7 @@ mod message_handlers;
 use message_handlers::*;
 
 mod message_senders;
+pub(crate) use message_senders::send_cmessage;
 use message_senders::*;
 
 mod event;
@@ -98,52 +99,52 @@ pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }
 
-/// Starts a conversation with `members`. Note: all members must be in the user's users already.
-pub fn start_conversation(
-    members: &[UserId],
-    title: Option<String>,
-    picture: Option<String>,
-) -> Result<ConversationId, HErr> {
-    use crate::conversation;
-
-    let pairwise = conversation::get_pairwise_conversations(members)?;
-
-    let mut db = crate::db::Database::get()?;
-    let tx = db.transaction()?;
-
-    let mut conv_builder = conversation::ConversationBuilder::new();
-
-    if let Some(title) = title.as_ref() {
-        conv_builder.title(title.clone());
-    }
-
-    if let Some(picture) = picture.as_ref() {
-        conv_builder.picture(picture.clone());
-    }
-
-    let meta = conv_builder.add_with_tx(&tx)?;
-    let cid = meta.conversation_id;
-
-    crate::members::db::add_members_with_tx(&tx, cid, members)?;
-    tx.commit()?;
-
-    let kp = crate::config::Config::static_keypair()?;
-    let gen = Genesis::new(kp.secret_key());
-    cid.store_genesis(&gen)?;
-
-    let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
-        members: Vec::from(members),
-        gen,
-        cid,
-        title: title.map(String::from),
-    }));
-
-    for pw_cid in pairwise {
-        send_cmessage(pw_cid, &body)?;
-    }
-
-    Ok(cid)
-}
+///// Starts a conversation with `members`. Note: all members must be in the user's users already.
+//pub(crate) fn start_conversation(
+//    members: &[UserId],
+//    title: Option<String>,
+//    picture: Option<String>,
+//) -> Result<ConversationId, HErr> {
+//    use crate::conversation;
+//
+//    let pairwise = conversation::get_pairwise_conversations(members)?;
+//
+//    let mut db = crate::db::Database::get()?;
+//    let tx = db.transaction()?;
+//
+//    let mut conv_builder = conversation::ConversationBuilder::new();
+//
+//    if let Some(title) = title.as_ref() {
+//        conv_builder.title(title.clone());
+//    }
+//
+//    if let Some(picture) = picture.as_ref() {
+//        conv_builder.picture(picture.clone());
+//    }
+//
+//    let meta = conv_builder.add_with_tx(&tx)?.meta;
+//    let cid = meta.conversation_id;
+//
+//    crate::members::db::add_members_with_tx(&tx, cid, members)?;
+//    tx.commit()?;
+//
+//    let kp = crate::config::Config::static_keypair()?;
+//    let gen = Genesis::new(kp.secret_key());
+//    cid.store_genesis(&gen)?;
+//
+//    let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
+//        members: Vec::from(members),
+//        gen,
+//        cid,
+//        title: title.map(String::from),
+//    }));
+//
+//    for pw_cid in pairwise {
+//        send_cmessage(pw_cid, &body)?;
+//    }
+//
+//    Ok(cid)
+//}
 
 pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))

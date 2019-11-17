@@ -1,6 +1,6 @@
 use super::*;
 
-pub(super) fn send_cmessage(
+pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessageBody,
 ) -> Result<(), HErr> {

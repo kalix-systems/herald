@@ -6,7 +6,7 @@ use std::convert::TryInto;
 
 #[test]
 fn get_and_delete_stale() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
     crate::user::db::test_user(&mut conn, "dummy");

@@ -4,7 +4,7 @@ use std::convert::TryInto;
 
 #[test]
 fn search() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
 

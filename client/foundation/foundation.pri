@@ -13,12 +13,28 @@ SOURCES += \
 # set build type for Rust library
 CONFIG(debug, debug|profile|release) {
     RUST_BUILD_TYPE = debug
+
+    linux:!android {
+        LIBS += $${PWD}/../../target/debug/libherald.so
+    }
 }
 CONFIG(profile, debug|profile|release) {
     RUST_BUILD_TYPE = release
+
+    linux:!android {
+      LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.a
+      LIBS += -ldl
+      LIBS += -ldbus-1
+    }
 }
 CONFIG(release, debug|profile|release) {
     RUST_BUILD_TYPE = release
+
+    linux:!android {
+      LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.a
+      LIBS += -ldl
+      LIBS += -ldbus-1
+    }
 }
 
 # platform specific settings
@@ -31,11 +47,7 @@ macx {
   LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
 }
 
-linux:!android {
-  LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.a
-  LIBS += -ldl
-  LIBS += -ldbus-1
-}
+
 
 
 

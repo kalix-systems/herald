@@ -1,4 +1,4 @@
-use crate::{conversation::ConversationMeta, db::Database, errors::HErr, image_utils, types::*};
+use crate::{conversation::Conversation, db::Database, errors::HErr, image_utils, types::*};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 use std::convert::TryInto;
@@ -249,7 +249,7 @@ impl UserBuilder {
     }
 
     /// Adds user to database
-    pub fn add(self) -> Result<(User, ConversationMeta), HErr> {
+    pub fn add(self) -> Result<(User, Conversation), HErr> {
         let mut db = Database::get()?;
         self.add_db(&mut db)
     }

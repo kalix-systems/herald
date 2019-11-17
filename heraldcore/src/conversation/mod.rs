@@ -7,6 +7,8 @@ pub(crate) mod db;
 pub mod settings;
 mod types;
 pub use types::*;
+mod builder;
+pub use builder::*;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
@@ -53,10 +55,8 @@ impl ConversationMeta {
 }
 
 /// Conversation
+#[derive(Clone)]
 pub struct Conversation {
-    /// Messages
-    pub messages: Vec<Message>,
-
     /// User ID's of conversation members
     pub members: Vec<UserId>,
 
@@ -65,88 +65,34 @@ pub struct Conversation {
 }
 
 impl Conversation {
-    /// Indicates whether conversation is empty
-    pub fn is_empty(&self) -> bool {
-        self.messages.is_empty()
-    }
+    /// Starts the conversation, sending it to the proposed members.
+    pub fn start(self) -> Result<(), HErr> {
+        use chainmail::block::*;
+        let Self { members, meta } = self;
+        let ConversationMeta {
+            title,
+            conversation_id: cid,
+            ..
+        } = meta;
 
-    /// Number of messages in conversation
-    pub fn len(&self) -> usize {
-        self.messages.len()
-    }
-}
+        let kp = crate::config::Config::static_keypair()?;
+        let gen = Genesis::new(kp.secret_key());
+        cid.store_genesis(&gen)?;
 
-/// Builder for Conversations
-#[derive(Default)]
-pub struct ConversationBuilder {
-    /// Conversation id
-    conversation_id: Option<ConversationId>,
-    /// Conversation title
-    title: Option<String>,
-    /// Conversation picture
-    picture: Option<String>,
-    /// Conversation color,
-    color: Option<u32>,
-    /// Indicates whether the conversation is muted
-    muted: Option<bool>,
-    /// Indicates whether the conversation is a canonical pairwise conversation
-    pairwise: Option<bool>,
-    /// How long until a message expires
-    expiration_period: Option<ExpirationPeriod>,
-}
+        let pairwise = get_pairwise_conversations(&members)?;
 
-impl ConversationBuilder {
-    /// Creates new `ConversationBuilder`
-    pub fn new() -> Self {
-        Self::default()
-    }
+        let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
+            members,
+            gen,
+            cid,
+            title,
+        }));
 
-    /// Sets title
-    pub fn title(&mut self, title: String) -> &mut Self {
-        self.title.replace(title);
-        self
-    }
+        for pw_cid in pairwise {
+            crate::network::send_cmessage(pw_cid, &body)?;
+        }
 
-    /// Sets conversation id
-    pub fn conversation_id(&mut self, cid: ConversationId) -> &mut Self {
-        self.conversation_id.replace(cid);
-        self
-    }
-
-    /// Sets picture
-    pub fn picture(&mut self, picture: String) -> &mut Self {
-        self.picture.replace(picture);
-        self
-    }
-
-    /// Sets color
-    pub fn color(&mut self, color: u32) -> &mut Self {
-        self.color.replace(color);
-        self
-    }
-
-    /// Sets muted status. This is meant to be used when syncing conversations between devices.
-    pub fn muted(&mut self, muted: bool) -> &mut Self {
-        self.muted.replace(muted);
-        self
-    }
-
-    /// Sets whether or not conversation is pairwise.
-    pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
-        self.pairwise.replace(pairwise);
-        self
-    }
-
-    /// Sets expiration period
-    pub fn expiration_period(&mut self, expiration_period: ExpirationPeriod) -> &mut Self {
-        self.expiration_period.replace(expiration_period);
-        self
-    }
-
-    /// Adds conversation to database
-    pub fn add(self) -> Result<ConversationMeta, HErr> {
-        let db = Database::get()?;
-        self.add_db(&db)
+        Ok(())
     }
 }
 

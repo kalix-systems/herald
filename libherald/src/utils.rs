@@ -130,35 +130,6 @@ macro_rules! cont_none {
     };
 }
 
-pub(crate) fn bounds_chk_string(ix: usize, len: usize, file: &str, line: u32) -> String {
-    format!(
-        "Tried get index {ix} from a list of length {actual} at {file}:{line}",
-        ix = ix,
-        actual = len,
-        file = file,
-        line = line,
-    )
-}
-
-#[macro_export]
-/// Performs a bounds check
-macro_rules! bounds_chk {
-    ($slf: expr, $ix: expr) => {
-        bounds_chk!($slf, $ix, ())
-    };
-    ($slf: expr, $ix: expr, $retval: expr) => {
-        if $slf.list.len().saturating_sub(1) < $ix {
-            let err_string =
-                $crate::utils::bounds_chk_string($ix, $slf.list.len(), file!(), line!());
-
-            eprint!("{}", err_string);
-
-            $crate::imp::errors::Errors::push(err_string).ok();
-            return $retval;
-        }
-    };
-}
-
 #[macro_export]
 /// Convenience macro for spawning thread
 macro_rules! spawn {

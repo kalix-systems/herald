@@ -154,7 +154,7 @@ pub(crate) fn static_gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> 
 #[cfg(test)]
 pub(crate) fn test_config(conn: &mut rusqlite::Connection) -> crate::config::Config {
     use std::convert::TryInto;
-    let uid = "userid".try_into().expect("Bad user id");
+    let uid = "111NOCONFLICT111".try_into().expect("Bad user id");
     crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new())
         .add_db(conn)
         .expect("Failed to create config")

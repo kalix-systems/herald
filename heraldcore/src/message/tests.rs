@@ -11,7 +11,7 @@ fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
 
 #[test]
 fn delete_get_message() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
@@ -39,7 +39,7 @@ fn delete_get_message() {
 
 #[test]
 fn reply() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let author = "Hello".try_into().unwrap();
     crate::user::UserBuilder::new(author)
@@ -121,7 +121,7 @@ fn message_send_status_updates() {
 
 #[test]
 fn message_receipt_status_updates() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
@@ -161,7 +161,7 @@ fn message_receipt_status_updates() {
 
 #[test]
 fn reply_to_unknown_message() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
@@ -187,7 +187,7 @@ fn reply_to_unknown_message() {
 
 #[test]
 fn delete_op() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
