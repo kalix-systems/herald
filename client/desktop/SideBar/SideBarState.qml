@@ -32,10 +32,6 @@ Page {
         }
     }
 
-   GroupFlow.NewGroupComponent {
-       id: newGroupComponent
-   }
-
 
     Loader {
         id: sideBarBodyLoader
@@ -47,12 +43,12 @@ Page {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarStateLoader
-                visible: false
+                target: sideBarBodyLoader
+                sourceComponent: newContactComponent
             }
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: searchBarComponent
+                sourceComponent: headerBarComponent
                 searchPlaceholder: "Search your conversations"
                 headerText: "Add contact"
             }

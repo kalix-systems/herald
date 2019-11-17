@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "NewConvoComponents" as ConvUtils
 import "qrc:/common" as Common
+import "../SideBar/GroupFlowComponents" as GroupFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -50,6 +51,14 @@ Page {
     //search component loaded to search convos and contacts
     SearchComponent {
         id: searchBarComponent
+    }
+
+    GroupFlow.NewGroupComponent {
+        id: newGroupComponent
+    }
+
+    NewContactComponent {
+        id: newContactComponent
     }
 
 
