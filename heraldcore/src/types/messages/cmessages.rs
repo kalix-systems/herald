@@ -1,5 +1,8 @@
 use super::*;
-use crate::message::{MessageBody, MessageReceiptStatus};
+use crate::{
+    message::{MessageBody, MessageReceiptStatus},
+    *,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
@@ -22,6 +25,10 @@ pub struct AddedToConvo {
     pub cid: ConversationId,
     /// The conversation's title.
     pub title: Option<String>,
+    /// The conversation's picture (as bytes)
+    pub picture: Option<Vec<u8>>,
+    /// The conversation's initial expiration period
+    pub expiration_period: conversation::ExpirationPeriod,
     /// The genesis block for the new conversation
     pub gen: Genesis,
 }

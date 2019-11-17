@@ -150,7 +150,7 @@ impl Container {
         recipient: UserId,
         model: &mut List,
     ) -> Result<(), HErr> {
-        let msg = match self.map.get_mut(&mid) {
+        let msg: &mut MsgData = match self.map.get_mut(&mid) {
             None => {
                 // This can (possibly) happen if the message
                 // was deleted between the receipt

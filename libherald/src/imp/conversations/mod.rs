@@ -151,11 +151,13 @@ impl ConversationsTrait for Conversations {
             let cid = meta.conversation_id;
 
             spawn!(
-                ret_err!(conversation::set_picture(
-                    &cid,
-                    picture.as_ref().map(|p| p.as_str()),
-                    old_picture.as_ref().map(|p| p.as_str())
-                )),
+                {
+                    ret_err!(conversation::set_picture(
+                        &cid,
+                        picture.as_ref().map(|p| p.as_str()),
+                        old_picture.as_ref().map(|p| p.as_str())
+                    ));
+                },
                 false
             );
         }
