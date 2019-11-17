@@ -23,7 +23,7 @@ Rectangle {
         anchors.left: outbound ? contentLoader.right : undefined
         height: contentLoader.height
         width: CmnCfg.smallMargin / 4
-        color: senderColor
+        color: match_status === 2 ? "yellow" : senderColor
     }
 
     Loader {
