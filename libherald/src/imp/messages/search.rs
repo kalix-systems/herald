@@ -99,6 +99,9 @@ impl SearchState {
         self.cur = None;
         self.index = None;
 
+        emit.search_index_changed();
+        emit.search_pattern_changed();
+        emit.search_regex_changed();
         emit.search_active_changed();
         emit.search_num_matches_changed();
 
