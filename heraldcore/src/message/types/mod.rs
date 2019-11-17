@@ -29,6 +29,19 @@ pub struct Message {
     pub has_attachments: bool,
 }
 
+/// An isolated message receipt.
+#[derive(Clone, Copy, Debug)]
+pub struct MessageReceipt {
+    /// The message id
+    pub msg_id: MsgId,
+    /// The conversation id the original message is associated with
+    pub cid: ConversationId,
+    /// The recipient of the message
+    pub recipient: UserId,
+    /// The message receipt status
+    pub status: MessageReceiptStatus,
+}
+
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
 /// that a message is a reply without necessarily knowing
@@ -157,7 +170,7 @@ pub enum MessageSendStatus {
     Timeout = 2,
 }
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ord, PartialOrd)]
 #[repr(u8)]
 /// Receipt status of a message
 pub enum MessageReceiptStatus {

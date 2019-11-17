@@ -89,21 +89,21 @@ impl OutboundMessageBuilder {
 #[derive(Default)]
 pub(crate) struct InboundMessageBuilder {
     /// Local message id
-    pub(super) message_id: Option<MsgId>,
+    pub(crate) message_id: Option<MsgId>,
     /// Author user id
-    pub(super) author: Option<UserId>,
+    pub(crate) author: Option<UserId>,
     /// Recipient user id
-    pub(super) conversation: Option<ConversationId>,
+    pub(crate) conversation: Option<ConversationId>,
     /// Body of message
-    pub(super) body: Option<MessageBody>,
+    pub(crate) body: Option<MessageBody>,
     /// Time the was received at the server.
-    pub(super) server_timestamp: Option<Time>,
+    pub(crate) server_timestamp: Option<Time>,
     /// Time the message expires
-    pub(super) expiration: Option<Time>,
+    pub(crate) expiration: Option<Time>,
     /// Message id of the message being replied to
-    pub(super) op: Option<MsgId>,
+    pub(crate) op: Option<MsgId>,
     /// Message attachments
-    pub(super) attachments: Vec<attachments::Attachment>,
+    pub(crate) attachments: Vec<attachments::Attachment>,
 }
 
 impl InboundMessageBuilder {
@@ -122,6 +122,7 @@ impl InboundMessageBuilder {
         self
     }
 
+    #[allow(unused)]
     pub(crate) fn body(&mut self, body: MessageBody) -> &mut Self {
         self.body.replace(body);
         self
@@ -132,6 +133,7 @@ impl InboundMessageBuilder {
         self
     }
 
+    #[allow(unused)]
     pub(crate) fn replying_to(&mut self, op_msg_id: MsgId) -> &mut Self {
         self.op.replace(op_msg_id);
         self
@@ -142,12 +144,13 @@ impl InboundMessageBuilder {
         self
     }
 
+    #[allow(unused)]
     pub(crate) fn expiration(&mut self, expiration: Time) -> &mut Self {
         self.expiration.replace(expiration);
         self
     }
 
-    pub fn store(self) -> Result<(), HErr> {
+    pub fn store(self) -> Result<Option<Message>, HErr> {
         let mut db = Database::get()?;
         self.store_db(&mut db)
     }

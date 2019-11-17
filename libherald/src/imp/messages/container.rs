@@ -143,8 +143,14 @@ impl Container {
         model.data_changed(0, self.list.len().saturating_sub(1));
     }
 
-    pub(super) fn handle_receipt(&mut self, mid: MsgId, model: &mut List) -> Result<(), HErr> {
-        let mut msg = match self.map.get_mut(&mid) {
+    pub(super) fn handle_receipt(
+        &mut self,
+        mid: MsgId,
+        status: MessageReceiptStatus,
+        recipient: UserId,
+        model: &mut List,
+    ) -> Result<(), HErr> {
+        let msg = match self.map.get_mut(&mid) {
             None => {
                 // This can (possibly) happen if the message
                 // was deleted between the receipt
@@ -169,9 +175,14 @@ impl Container {
             .rposition(|m| m.msg_id == mid)
             .ok_or(NE!())?;
 
-        // TODO exception safety
-        let receipts = message::get_message_receipts(&mid)?;
-        msg.receipts = receipts;
+        msg.receipts
+            .entry(recipient)
+            .and_modify(|v| {
+                if *v < status {
+                    *v = status
+                }
+            })
+            .or_insert(status);
 
         model.data_changed(ix, ix);
 

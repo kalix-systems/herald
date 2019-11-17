@@ -296,12 +296,10 @@ impl UsersTrait for Users {
     fn fetch_more(&mut self) {
         for update in USER_BUS.rx.try_iter() {
             match update {
-                UsersUpdates::NewUser(uid) => {
-                    let data = ret_err!(user::by_user_id(uid));
-
+                UsersUpdates::NewUser(data) => {
                     let new_user = User {
                         matched: data.matches(&self.filter),
-                        id: uid,
+                        id: data.id,
                     };
 
                     let pos = match self.list.binary_search(&new_user) {
@@ -311,7 +309,7 @@ impl UsersTrait for Users {
 
                     self.model.begin_insert_rows(pos, pos);
                     self.list.push(new_user);
-                    USER_DATA.insert(uid, data);
+                    USER_DATA.insert(data.id, data);
                     self.model.end_insert_rows();
                 }
                 UsersUpdates::ReqResp(uid, accepted) => {

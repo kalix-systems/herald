@@ -39,7 +39,7 @@ pub fn user_ids() -> Vec<UserId> {
 /// User list updates
 pub enum UsersUpdates {
     /// A new user has been added
-    NewUser(UserId),
+    NewUser(heraldcore::user::User),
     /// A user request has been responded to
     ReqResp(UserId, bool),
 }

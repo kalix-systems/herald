@@ -269,18 +269,25 @@ impl MessagesTrait for Messages {
 
         for update in rx.try_iter() {
             match update {
-                MsgUpdate::Msg(mid) => {
-                    let new = ret_err!(message::get_message(&mid));
-
+                MsgUpdate::NewMsg(new) => {
                     new_msg_toast(&new);
 
-                    ret_err!(self.raw_insert(new, SaveStatus::Saved));
+                    ret_err!(self.raw_insert(*new, SaveStatus::Saved));
                 }
                 MsgUpdate::BuilderMsg(msg) => {
                     ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
                 }
-                MsgUpdate::Receipt(mid) => {
-                    ret_err!(self.container.handle_receipt(mid, &mut self.model));
+                MsgUpdate::Receipt {
+                    msg_id,
+                    recipient,
+                    status,
+                } => {
+                    ret_err!(self.container.handle_receipt(
+                        msg_id,
+                        status,
+                        recipient,
+                        &mut self.model
+                    ));
                 }
                 MsgUpdate::StoreDone(mid) => {
                     ret_none!(self.container.handle_store_done(mid, &mut self.model));
