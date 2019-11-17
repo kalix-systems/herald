@@ -18,11 +18,17 @@ pub(super) struct MsgData {
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub(super) enum MatchStatus {
     NotMatched = 0,
     Matched = 1,
     Focused = 2,
+}
+
+impl MatchStatus {
+    pub(super) fn is_match(self) -> bool {
+        self == MatchStatus::Matched || self == MatchStatus::Focused
+    }
 }
 
 impl MsgData {

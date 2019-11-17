@@ -114,6 +114,8 @@ impl Container {
 
         for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
             let data = self.map.get_mut(msg_id)?;
+
+            let old_status = data.match_status;
             let matched = data.matches(pattern);
 
             data.match_status = if matched {
@@ -122,11 +124,14 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
+            if old_status.is_match() != data.match_status.is_match() {
+                model.data_changed(ix, ix);
+            }
+
             if !matched {
                 continue;
             };
 
-            model.data_changed(ix, ix);
             matches.push_back(Match { mid: *msg_id })
         }
 
