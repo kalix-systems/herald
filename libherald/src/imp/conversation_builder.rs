@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus};
+use crate::{ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus};
 use crate::{
     imp::{
         conversations::{shared::ConvUpdate, Conversations},
@@ -7,7 +7,7 @@ use crate::{
     spawn,
 };
 use herald_common::UserId;
-use heraldcore::{abort_err, conversation::ConversationBuilder as Inner};
+use heraldcore::conversation::ConversationBuilder as Inner;
 use std::convert::TryInto;
 
 type Emitter = ConversationBuilderEmitter;
@@ -18,7 +18,7 @@ pub struct ConversationBuilder {
     emit: Emitter,
     model: List,
     inner: Inner,
-    local_id: UserId,
+    local_id: Option<UserId>,
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
@@ -26,7 +26,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
         Self {
             emit,
             model,
-            local_id: abort_err!(heraldcore::config::Config::static_id()),
+            local_id: push_err!(
+                heraldcore::config::Config::static_id(),
+                "Failed to get local id"
+            ),
             inner: Inner::new(),
         }
     }
@@ -36,10 +39,12 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn add_member(&mut self, user_id: ffi::UserId) -> bool {
+        let local_id = ret_none!(self.local_id, false);
+
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
 
         // don't allow users to add themselves
-        if user_id == self.local_id {
+        if user_id == local_id {
             return true;
         }
 
