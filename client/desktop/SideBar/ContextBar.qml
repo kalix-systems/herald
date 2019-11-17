@@ -89,7 +89,7 @@ ToolBar {
                 property bool searchRegex: false
                 fill: CmnCfg.palette.paneColor
                 //this is a vertical center offset
-                Layout.topMargin: 1
+                topPadding: 1
                 source: "qrc:/search-icon.svg"
                 //todo : add back in regex logic once ui is known
                 onClicked: {

@@ -59,7 +59,7 @@ Column {
             property var contactData: model
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
-            visible: matched
+            visible: matched && contactData.userId !== config.configId
 
             Common.PlatonicRectangle {
                 color: "white"
