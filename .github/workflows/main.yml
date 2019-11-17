@@ -38,7 +38,7 @@ jobs:
         with:
           command: build
           args: --manifest-path=herald_server/Cargo.toml
-      - run: ./herald/target/debug/herald_server &
+      - run: target/debug/herald_server &
       - uses: jurplel/install-qt-action@v1
         with:
           version: 5.13.2
@@ -47,7 +47,7 @@ jobs:
           command: build
           args: --manifest-path=libherald/Cargo.toml
       - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-      - run: /Qt/Qt5.12.5/5.12.5/gcc_64/qmake client/tests/tests.pro && make && ./tests
+      - run: qmake client/tests/tests.pro && make && ./tests
 
   test:
     name: Test
