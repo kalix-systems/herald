@@ -41,11 +41,13 @@ ToolBar {
 
         AvatarMain {
             id: avatar
-            size: 32
+            size: groupAvatar ? 32 : 30
             iconColor: CmnCfg.avatarColors[conversationItem.color]
             textColor: CmnCfg.palette.iconFill
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
+            pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
+            groupAvatar: !conversationItem.pairwise
             anchors {
                 margins: 16
             }

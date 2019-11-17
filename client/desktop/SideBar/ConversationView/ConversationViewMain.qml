@@ -58,6 +58,7 @@ ListView {
             boxTitle: title
             boxColor: conversationData.color
             picture: Utils.safeStringOrDefault(conversationData.picture, "")
+            groupPicture: !conversationData.pairwise
             //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title

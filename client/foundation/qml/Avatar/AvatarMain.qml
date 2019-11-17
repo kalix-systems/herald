@@ -44,6 +44,7 @@ Item {
             verticalCenter: parent.verticalCenter
             left: parent.left
         }
+        groupAvatar: parent.groupAvatar
     }
 
     Loader {
