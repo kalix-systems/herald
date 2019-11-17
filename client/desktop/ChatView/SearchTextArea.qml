@@ -9,6 +9,7 @@ import "../common" as Common
 import "js/SearchHandler.mjs" as SearchUtils
 
 ScrollView {
+    //TODO: proper width calculation
     Layout.maximumWidth: 300
     Layout.minimumWidth: 200
     Layout.alignment: Qt.AlignLeft
@@ -45,10 +46,8 @@ ScrollView {
         }
         }
 
-        else {print("no matches")
-            searchToolBar.state = ""
-            }
-            }
+        else searchToolBar.state = ""
+      }
     }
 
 }

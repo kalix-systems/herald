@@ -308,6 +308,7 @@ impl MessagesTrait for Messages {
                         .begin_insert_rows(0, container.len().saturating_sub(1));
                     self.container = container;
                     self.model.end_insert_rows();
+                    self.emit.is_empty_changed();
                     self.emit_last_changed();
                 }
             }

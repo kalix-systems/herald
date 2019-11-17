@@ -68,8 +68,6 @@ ToolBar {
         Loader {
             id: searchLoader
             Layout.alignment: Qt.AlignLeft
-
-            Component.onCompleted: print(uid.width)
             height: parent.height
         }
 
