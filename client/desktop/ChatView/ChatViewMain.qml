@@ -19,12 +19,10 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
-    header: Loader {
+    header:  CVUtils.ChatBar {
         id: messageBar
-        property var conversationItem: parent.conversationItem
-        property Messages ownedConversation: parent.ownedConversation
-        sourceComponent: chatBarComponent
-    }
+        conversationItem: parent.conversationItem
+        }
 
 
 
