@@ -70,7 +70,7 @@ jobs:
 
   platform_tests:
     name: Libherald Platform Tests
-    runs-on: [ macos-latest, windows-latest ]
+    runs-on: [ macOS-latest , windows-latest ]
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -86,6 +86,7 @@ jobs:
         with:
           command: test
           args: --manifest-path=heraldcore/Cargo.toml
+
 
   fmt:
     name: Rustfmt
@@ -119,3 +120,4 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
+
