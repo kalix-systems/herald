@@ -45,18 +45,9 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --manifest-path=libherald/Cargo.toml
+          args: --release --manifest-path=libherald/Cargo.toml
       - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
       - run:  /Qt/5.12.4/gcc_64/bin/qmake client/tests/tests.pro && make && ./tests
-
-  should_fail:
-   name: install qt action test
-   runs-on: ubuntu-latest
-   steps:
-      - uses: Mercotui/install-qt-dev-action@v0.1.1
-        with:
-          packages: 'qt.qt5.5124.gcc_64'
-      - run: /Qt/5.12.4/gcc_64/bin/qmake client/desktop/herald.pro && make
 
   test:
     name: Test

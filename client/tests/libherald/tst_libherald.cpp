@@ -37,8 +37,8 @@ libherald::libherald()
     QFile file("db/store.sqlite3");
     file.remove();
     herald_state = new HeraldState();
-    herald_state -> registerNewUser("Boruto");
-    herald_state -> setConfigInit(true);
+    herald_state->registerNewUser("Boruto");
+    herald_state->login();
     error = new Errors();
 
 }
