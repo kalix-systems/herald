@@ -81,7 +81,8 @@ Component {
             if (ownedConversation.searchNumMatches > 0) {
                 searchToolBar.state = "searchActiveState"
                 convWindow.state = "searchState"
-                var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView, chatPane, false)
+                var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView,
+                                                        chatPane, convWindow, false)
 
                 if (!isOnscreen) {
                 convWindow.contentY =
@@ -111,7 +112,7 @@ Component {
 
     Common.ButtonForm {
         id: back
-        source: "qrc:/back-arrow-icon.svg"
+        source: "qrc:/up-chevron-icon-white.svg"
        Layout.alignment: Qt.AlignVCenter
        fill: CmnCfg.palette.paneColor
        enabled: searchToolBar.state === "searchActiveState"
@@ -123,7 +124,7 @@ Component {
 
     Common.ButtonForm {
         id: forward
-        source: "qrc:/forward-arrow-icon.svg"
+        source: "qrc:/down-chevron-icon-white.svg"
        Layout.alignment: Qt.AlignVCenter
        fill: CmnCfg.palette.paneColor
        enabled: searchToolBar.state === "searchActiveState"
