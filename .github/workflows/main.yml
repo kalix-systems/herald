@@ -18,37 +18,6 @@ jobs:
         with:
           command: check
 
-  end_to_end:
-    name: e2e
-    runs-on: ubuntu-latest
-    steps:
-      - run: sudo apt install libdbus-glib-1-dev
-      - uses: actions/checkout@v1
-      - name: Start postgres instance
-        run: docker-compose -f herald_server/docker-compose.yml up -d
-      - uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: stable
-          override: true
-      - name: Setup database tables
-        run: cargo run --bin setup_db
-      - uses: actions-rs/cargo@v1
-        with:
-          command: run --manifest-path=herald_server/Cargo.toml
-      - name: install qt
-      - uses: jurplel/install-qt-action@v1
-        with:
-          version: 5.13.2
-      - name: build and run tests
-        uses: actions-rs/cargo@v1
-        with:
-          command: build --manifest-path=libherald/Cargo.toml
-      - name: make conf file and set environment variable
-        run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-      - name: build and run tests
-        run: /Qt/Qt5.12.5/5.12.5/gcc_64/qmake client/tests/tests.pro && make && ./tests
-        
   test:
     name: Test
     runs-on: ubuntu-latest
