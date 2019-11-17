@@ -37,7 +37,6 @@ Item {
         id: config
     }
 
-    // PAUL: it is time for real art here.
     Component {
         id: splash
 

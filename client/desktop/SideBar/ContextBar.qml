@@ -10,14 +10,6 @@ import "qrc:/imports/Avatar"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
 ToolBar {
     id: contextBar
     height: CmnCfg.toolbarHeight
@@ -34,31 +26,31 @@ ToolBar {
             id: configAvatar
             iconColor: CmnCfg.palette.avatarColors[config.color]
             initials: config.name[0].toUpperCase()
-            size: 28
             pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
+
+            size: 28
             Layout.alignment: Qt.AlignCenter
             Layout.leftMargin: 12
             Layout.rightMargin: 12
             avatarHeight: 28
+
             MouseArea {
-                anchors.fill: parent
                 id: avatarHoverHandler
+                anchors.fill: parent
+
                 cursorShape: Qt.PointingHandCursor
-                onPressed: {
-                    overlay.visible = true
-                }
-                onReleased: {
-                    overlay.visible = false
-                }
-                onClicked: {
-                    configPopup.show()
-                }
+
+                onPressed: overlay.visible = true
+                onReleased: overlay.visible = false
+                onClicked: configPopup.show()
             }
+
             ColorOverlay {
                 id: overlay
-                visible: false
                 anchors.fill: parent
                 source: parent
+
+                visible: false
                 color: "black"
                 opacity: 0.2
                 smooth: true
@@ -68,14 +60,16 @@ ToolBar {
         Text {
             id: headerText
             text: "Conversations"
-            font.pixelSize: CmnCfg.headerSize
-            font.family: CmnCfg.chatFont.name
-            font.bold: true
+            font {
+                pixelSize: CmnCfg.headerSize
+                family: CmnCfg.chatFont.name
+                bold: true
+            }
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             color: CmnCfg.palette.mainColor
         }
 
-        //filler item
+        // filler item
         Item {
             Layout.fillWidth: true
         }
@@ -88,10 +82,10 @@ ToolBar {
                 id: searchButton
                 property bool searchRegex: false
                 fill: CmnCfg.palette.paneColor
-                //this is a vertical center offset
+                // this is a vertical center offset
                 topPadding: 1
                 source: "qrc:/search-icon.svg"
-                //todo : add back in regex logic once ui is known
+                // TODO : add back in regex logic once ui is known
                 onClicked: sideBarState.state = "conversationSearch"
             }
 
@@ -106,7 +100,9 @@ ToolBar {
                 id: convoMenu
                 MenuItem {
                     text: "New group conversation"
-                    onTriggered: sideBarState.state = "newGroupState"
+                    onTriggered: {
+                        sideBarState.state = "newGroupState"
+                    }
                 }
             }
 
