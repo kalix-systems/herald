@@ -33,11 +33,12 @@ jobs:
           override: true
       - name: Setup database tables
         run: cargo run --bin setup_db
-      - uses: actions-rs/cargo@v1
+      - name: Run server
+        uses: actions-rs/cargo@v1
         with:
           command: run
           args: --manifest-path=herald_server/Cargo.toml
-      - uses: jurplel/install-qt-action@v1
+        uses: jurplel/install-qt-action@v1
         with:
           version: 5.13.2
       - uses: actions-rs/cargo@v1
