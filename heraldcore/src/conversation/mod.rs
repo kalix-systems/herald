@@ -68,16 +68,25 @@ impl Conversation {
     /// Starts the conversation, sending it to the proposed members.
     pub fn start(self) -> Result<(), HErr> {
         use chainmail::block::*;
+        use std::fs;
         let Self { members, meta } = self;
+
         let ConversationMeta {
             title,
             conversation_id: cid,
+            picture: picture_path,
+            expiration_period,
             ..
         } = meta;
 
         let kp = crate::config::Config::static_keypair()?;
         let gen = Genesis::new(kp.secret_key());
         cid.store_genesis(&gen)?;
+
+        let picture = match picture_path {
+            Some(path) => Some(fs::read(path)?),
+            None => None,
+        };
 
         let pairwise = get_pairwise_conversations(&members)?;
 
@@ -86,6 +95,8 @@ impl Conversation {
             gen,
             cid,
             title,
+            expiration_period,
+            picture,
         }));
 
         for pw_cid in pairwise {

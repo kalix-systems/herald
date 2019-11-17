@@ -13,18 +13,34 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
             NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
             DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
             AddedToConvo(ac) => {
-                use crate::types::cmessages::AddedToConvo;
+                use crate::{image_utils::image_path, types::cmessages::AddedToConvo};
+                use std::fs;
 
                 let AddedToConvo {
                     members,
                     cid,
                     gen,
                     title,
+                    picture,
+                    expiration_period,
                 } = *ac;
 
                 let mut conv_builder = crate::conversation::ConversationBuilder::new();
-                conv_builder.conversation_id(cid).override_members(members);
+                conv_builder
+                    .conversation_id(cid)
+                    .override_members(members)
+                    .expiration_period(expiration_period);
+
                 conv_builder.title = title;
+
+                conv_builder.picture = match picture {
+                    Some(bytes) => {
+                        let image_path = image_path();
+                        fs::write(&image_path, bytes)?;
+                        Some(image_path.into_os_string().into_string()?)
+                    }
+                    None => None,
+                };
 
                 let mut db = crate::db::Database::get()?;
                 let conv = conv_builder.add_db(&mut db)?;

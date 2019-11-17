@@ -16,15 +16,21 @@ where
         std::fs::remove_file(old_path)?;
     }
 
-    let rid = crate::utils::rand_id();
-    let text = hex::encode(rid);
-
-    let mut image_path = PICTURES_DIR.join(text);
-    image_path.set_extension("png");
+    let image_path = image_path();
 
     image::open(source)?
         .resize_exact(IMAGE_SIZE, IMAGE_SIZE, FilterType::Nearest)
         .save_with_format(&image_path, ImageFormat::PNG)?;
 
     Ok(image_path)
+}
+
+pub(crate) fn image_path() -> PathBuf {
+    let rid = crate::utils::rand_id();
+    let text = hex::encode(rid);
+
+    let mut image_path = PICTURES_DIR.join(text);
+    image_path.set_extension("png");
+
+    image_path
 }
