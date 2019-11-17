@@ -6,10 +6,6 @@
 mod chainkeys;
 /// User configuration
 pub mod config;
-/// Functions and data structures related to contacts.
-pub mod contact;
-/// Contact keys
-mod contact_keys;
 /// Conversations
 pub mod conversation;
 /// Wrapper around database.
@@ -28,6 +24,10 @@ pub mod network;
 pub mod pending;
 /// Types
 pub mod types;
+/// Functions and data structures related to users.
+pub mod user;
+/// User keys
+mod user_keys;
 /// Utils
 pub mod utils;
 

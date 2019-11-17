@@ -39,6 +39,7 @@ ToolBar {
             Layout.alignment: Qt.AlignCenter
             Layout.leftMargin: 12
             Layout.rightMargin: 12
+            avatarHeight: 28
             MouseArea {
                 anchors.fill: parent
                 id: avatarHoverHandler

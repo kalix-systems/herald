@@ -1,8 +1,11 @@
 use super::*;
-use heraldcore::{channel_recv_err, channel_send_err};
+use crate::{shared::AddressedBus, spawn};
+use std::{collections::VecDeque, ops::Not};
 
 #[derive(Default)]
-pub(super) struct Container {
+/// A container type for messages backed by an RRB-tree vector
+/// and a hash map.
+pub struct Container {
     list: Vector<Message>,
     map: HashMap<MsgId, MsgData>,
 }
@@ -16,15 +19,20 @@ impl Container {
         self.list.len()
     }
 
+    pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
+        self.map.contains_key(msg_id)
+    }
+
     pub(super) fn get(&self, ix: usize) -> Option<&Message> {
         self.list.get(ix)
     }
 
-    pub(super) fn new(cid: ConversationId) -> Result<Self, HErr> {
-        let (tx, rx) = crossbeam_channel::bounded(0);
+    pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
+        self.map.get_mut(msg_id)
+    }
 
-        // for exception safety
-        std::thread::Builder::new().spawn(move || {
+    pub(super) fn fill(cid: ConversationId) {
+        spawn!({
             let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
                 ret_err!(conversation::conversation_messages(&cid))
                     .into_iter()
@@ -36,11 +44,11 @@ impl Container {
                     })
                     .unzip();
 
-            ret_err!(tx.send(Self { list, map }).map_err(|_| channel_send_err!()));
-        })?;
-
-        rx.recv_timeout(std::time::Duration::from_secs(1))
-            .map_err(|_| channel_recv_err!())
+            ret_err!(Messages::push(
+                cid,
+                MsgUpdate::Container(Self { list, map })
+            ));
+        });
     }
 
     pub(super) fn last_msg(&self) -> Option<&MsgData> {
@@ -92,41 +100,40 @@ impl Container {
 
     pub(super) fn apply_search(
         &mut self,
-        search: &SearchMachine,
+        search: &SearchState,
         model: &mut List,
         emit: &mut Emitter,
-    ) -> Option<Vec<Match>> {
-        if !search.active || search.pattern.raw().is_empty() {
+    ) -> Option<VecDeque<Match>> {
+        if search.active.not() || search.pattern.raw().is_empty() {
             return None;
         }
 
         let pattern = &search.pattern;
 
-        // to help the borrow checker
-        let map = &mut self.map;
+        let mut matches: VecDeque<Match> = VecDeque::new();
 
-        let matches: Vec<Match> = self
-            .list
-            .iter()
-            .enumerate()
-            .map(|(ix, Message { msg_id, .. })| (ix, msg_id))
-            .filter_map(|(ix, mid)| {
-                let data = map.get_mut(&mid)?;
-                let matches = data.matches(pattern);
-                data.matched = matches;
-                if !matches {
-                    return None;
-                };
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(msg_id)?;
 
-                if !matches {
-                    return None;
-                }
+            let old_status = data.match_status;
+            let matched = data.matches(pattern);
 
-                Some(Match { ix })
-            })
-            .collect();
+            data.match_status = if matched {
+                MatchStatus::Matched
+            } else {
+                MatchStatus::NotMatched
+            };
 
-        model.data_changed(0, self.list.len().saturating_sub(1));
+            if old_status.is_match() != data.match_status.is_match() {
+                model.data_changed(ix, ix);
+            }
+
+            if !matched {
+                continue;
+            };
+
+            matches.push_back(Match { mid: *msg_id })
+        }
 
         emit.search_num_matches_changed();
 
@@ -135,14 +142,20 @@ impl Container {
 
     pub(super) fn clear_search(&mut self, model: &mut List) {
         for data in self.map.values_mut() {
-            data.matched = false;
+            data.match_status = MatchStatus::NotMatched;
         }
 
         model.data_changed(0, self.list.len().saturating_sub(1));
     }
 
-    pub(super) fn handle_receipt(&mut self, mid: MsgId, model: &mut List) -> Result<(), HErr> {
-        let mut msg = match self.map.get_mut(&mid) {
+    pub(super) fn handle_receipt(
+        &mut self,
+        mid: MsgId,
+        status: MessageReceiptStatus,
+        recipient: UserId,
+        model: &mut List,
+    ) -> Result<(), HErr> {
+        let msg: &mut MsgData = match self.map.get_mut(&mid) {
             None => {
                 // This can (possibly) happen if the message
                 // was deleted between the receipt
@@ -167,9 +180,14 @@ impl Container {
             .rposition(|m| m.msg_id == mid)
             .ok_or(NE!())?;
 
-        // TODO exception safety
-        let receipts = message::get_message_receipts(&mid)?;
-        msg.receipts = receipts;
+        msg.receipts
+            .entry(recipient)
+            .and_modify(|v| {
+                if *v < status {
+                    *v = status
+                }
+            })
+            .or_insert(status);
 
         model.data_changed(ix, ix);
 

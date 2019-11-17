@@ -6,7 +6,7 @@ impl Config {
         conn: &rusqlite::Connection,
         name: String,
     ) -> Result<(), HErr> {
-        crate::contact::db::set_name(conn, self.id, name.as_str())?;
+        crate::user::db::set_name(conn, self.id, name.as_str())?;
 
         self.name = name;
         Ok(())
@@ -17,7 +17,7 @@ impl Config {
         conn: &rusqlite::Connection,
         profile_picture: Option<String>,
     ) -> Result<(), HErr> {
-        let path = crate::contact::db::set_profile_picture(
+        let path = crate::user::db::set_profile_picture(
             conn,
             self.id,
             profile_picture,
@@ -35,7 +35,7 @@ impl Config {
         conn: &rusqlite::Connection,
         color: u32,
     ) -> Result<(), HErr> {
-        crate::contact::db::set_color(conn, self.id, color)?;
+        crate::user::db::set_color(conn, self.id, color)?;
         self.color = color;
 
         Ok(())
@@ -69,17 +69,17 @@ impl ConfigBuilder {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
 
-        let mut contact_builder = crate::contact::ContactBuilder::new(id).local();
+        let mut user_builder = crate::user::UserBuilder::new(id).local();
 
         if let Some(name) = name {
-            contact_builder = contact_builder.name(name);
+            user_builder = user_builder.name(name);
         }
 
         if let Some(pairwise_conversation) = nts_conversation {
-            contact_builder = contact_builder.pairwise_conversation(pairwise_conversation);
+            user_builder = user_builder.pairwise_conversation(pairwise_conversation);
         }
 
-        contact_builder = contact_builder.color(color);
+        user_builder = user_builder.color(color);
 
         let tx = conn.transaction()?;
         tx.execute(
@@ -87,17 +87,17 @@ impl ConfigBuilder {
             params![id, keypair, colorscheme],
         )?;
 
-        let contact = contact_builder.add_with_tx(&tx)?;
+        let (user, _conv) = user_builder.add_with_tx(&tx)?;
         tx.commit()?;
 
         let config = Config {
-            id: contact.id,
-            name: contact.name,
+            id: user.id,
+            name: user.name,
             keypair,
-            profile_picture: contact.profile_picture,
+            profile_picture: user.profile_picture,
             color,
             colorscheme,
-            nts_conversation: contact.pairwise_conversation,
+            nts_conversation: user.pairwise_conversation,
         };
 
         Ok(config)
@@ -154,7 +154,7 @@ pub(crate) fn static_gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> 
 #[cfg(test)]
 pub(crate) fn test_config(conn: &mut rusqlite::Connection) -> crate::config::Config {
     use std::convert::TryInto;
-    let uid = "userid".try_into().expect("Bad user id");
+    let uid = "111NOCONFLICT111".try_into().expect("Bad user id");
     crate::config::ConfigBuilder::new(uid, sig::KeyPair::gen_new())
         .add_db(conn)
         .expect("Failed to create config")

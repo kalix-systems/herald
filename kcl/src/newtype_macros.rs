@@ -135,6 +135,7 @@ macro_rules! public_newtype_traits {
     };
 }
 
+#[macro_export]
 macro_rules! secret_newtype_traits {
     ($newtype: ident, $len: expr) => {
         impl ::kson::ser::Ser for $newtype {

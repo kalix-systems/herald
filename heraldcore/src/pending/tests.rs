@@ -1,23 +1,22 @@
 use super::*;
-use crate::{types, womp};
+use crate::{message::MessageReceiptStatus, types, womp};
 
 #[test]
 fn add_get_delete() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let pending = db::get_pending(&conn).expect(womp!());
     assert_eq!(pending.len(), 0);
 
     let conv_id = [0; 32].into();
 
-    crate::conversation::ConversationBuilder::new()
-        .conversation_id(conv_id)
-        .add_db(&mut conn)
-        .expect(womp!());
+    let mut builder = crate::conversation::ConversationBuilder::new();
+    builder.conversation_id(conv_id);
+    builder.add_db(&mut conn).expect(womp!());
 
     let msg = types::cmessages::Ack {
         of: [1; 32].into(),
-        stat: types::MessageReceiptStatus::NoAck,
+        stat: MessageReceiptStatus::NoAck,
     };
 
     let body = ConversationMessageBody::Ack(msg);

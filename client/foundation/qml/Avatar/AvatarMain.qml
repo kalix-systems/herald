@@ -28,6 +28,9 @@ Item {
     property color textColor: CmnCfg.palette.iconFill
     property real topTextMargin: 3
     property real bottomTextMargin: 4
+    //split this from size of avatarMain to allow for convolabel to take up the same space
+    //regardless of whether avatar is square or round
+    property real avatarHeight: CmnCfg.avatarSize
 
     height: size
     width: size
@@ -37,13 +40,14 @@ Item {
         color: iconColor
         textColor: parent.textColor
         initials: parent.initials
-        height: parent.size
+        height: parent.avatarHeight
         width: height
         pfpUrl: pfpPath
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
         }
+        groupAvatar: parent.groupAvatar
     }
 
     Loader {
@@ -56,8 +60,8 @@ Item {
 
             left: avatarIcon.right
             right: parent.right
-            top: avatarIcon.top
-            bottom: avatarIcon.bottom
+            top: parent.top
+            bottom: parent.bottom
         }
         sourceComponent: labelComponent
     }

@@ -2,42 +2,8 @@ use super::*;
 use crate::message::MessageTime;
 use rusqlite::named_params;
 
-impl ConversationBuilder {
-    ///Adds conversation
-    pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-        let expiration_period = self.expiration_period.unwrap_or_default();
-
-        conn.execute_named(
-            include_str!("sql/add_conversation.sql"),
-            named_params! {
-               "@conversation_id": id,
-                "@title": self.title,
-                "@picture": self.picture,
-                "@color": color,
-                "@pairwise": pairwise,
-                "@muted": muted,
-                "@last_active_ts": Time::now(),
-                "@expiration_period": expiration_period
-            },
-        )?;
-        Ok(id)
-    }
-
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
-        self.add_db(tx)
-    }
-}
+// TODO: this should be a struct
+type PathStr<'a> = &'a str;
 
 /// Deletes all messages in a conversation.
 pub(crate) fn delete_conversation(
@@ -166,20 +132,16 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<&str>,
-    old_pic: Option<&str>,
+    picture: Option<PathStr>,
+    old_pic: Option<PathStr>,
 ) -> Result<(), HErr> {
     use crate::image_utils;
 
     let path = match picture {
         Some(path) => Some(
-            image_utils::save_profile_picture(
-                format!("{:x?}", conversation_id.as_slice()).as_str(),
-                path,
-                old_pic,
-            )?
-            .into_os_string()
-            .into_string()?,
+            image_utils::update_picture(path, old_pic)?
+                .into_os_string()
+                .into_string()?,
         ),
         None => {
             if let Some(old) = old_pic {

@@ -10,6 +10,8 @@ pub mod conversation_builder_users;
 pub mod conversations;
 /// Implementation of `crate::interface::ErrorsTrait`.
 pub mod errors;
+/// Implementation of `crate::interface::GlobalMessageSearchTrait`
+pub mod global_message_search;
 /// Implementation of `crate::interface::HeraldStateTrait`.
 pub mod heraldstate;
 /// Implementation of `crate::interface::HeraldUtilsTrait`.
@@ -31,6 +33,7 @@ pub use conversation_builder::*;
 pub use conversation_builder_users::*;
 pub use conversations::*;
 pub use errors::*;
+pub use global_message_search::*;
 pub use heraldstate::*;
 pub use heraldutils::*;
 pub use members::*;

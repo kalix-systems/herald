@@ -2,11 +2,15 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 use super::*;
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A change in the settings for a conversation
 pub enum SettingsUpdate {
     /// A change in the expiring messages setting
     Expiration(ExpirationPeriod),
+    /// A change in the title of the conversation
+    Title(Option<String>),
+    /// A change in the color of the conversation
+    Color(u32),
 }
 
 impl SettingsUpdate {
@@ -20,7 +24,7 @@ impl SettingsUpdate {
     pub fn send_update(&self, cid: &ConversationId) -> Result<(), HErr> {
         use crate::network::send_conversation_settings_update;
 
-        send_conversation_settings_update(*cid, *self)
+        send_conversation_settings_update(*cid, self.clone())
     }
 }
 
@@ -36,6 +40,8 @@ pub(crate) mod db {
             use SettingsUpdate::*;
             match self {
                 Expiration(period) => Ok(set_expiration_period(&conn, cid, *period)?),
+                Title(title) => Ok(set_title(&conn, cid, title.as_ref().map(String::as_str))?),
+                Color(color) => Ok(set_color(&conn, cid, *color)?),
             }
         }
     }

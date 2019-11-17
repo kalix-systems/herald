@@ -1,11 +1,16 @@
-use crate::{ffi, interface::*, ret_err, ret_none, shared::SingletonBus, toasts::new_msg_toast};
+use crate::{
+    ffi, interface::*, ret_err, ret_none, shared::SingletonBus, spawn, toasts::new_msg_toast,
+};
 use herald_common::UserId;
 use heraldcore::{
     abort_err,
     config::Config,
     conversation,
     errors::HErr,
-    message::{self, Message as Msg},
+    message::{
+        self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
+        ReplyId,
+    },
     types::*,
     utils::SearchPattern,
     NE,
@@ -37,7 +42,7 @@ pub struct Messages {
     local_id: UserId,
     conversation_id: Option<ConversationId>,
     container: Container,
-    search: SearchMachine,
+    search: SearchState,
 }
 
 impl MessagesTrait for Messages {
@@ -48,7 +53,7 @@ impl MessagesTrait for Messages {
             container: Container::default(),
             conversation_id: None,
             local_id: abort_err!(Config::static_id()),
-            search: SearchMachine::new(),
+            search: SearchState::new(),
         }
     }
 
@@ -104,17 +109,7 @@ impl MessagesTrait for Messages {
             self.conversation_id = Some(conversation_id);
             self.emit.conversation_id_changed();
 
-            let container = ret_err!(Container::new(conversation_id));
-
-            if container.is_empty() {
-                return;
-            }
-
-            self.model
-                .begin_insert_rows(0, container.len().saturating_sub(1));
-            self.container = container;
-            self.model.end_insert_rows();
-            self.emit_last_changed();
+            Container::fill(conversation_id);
         }
     }
 
@@ -152,6 +147,10 @@ impl MessagesTrait for Messages {
                 .max()
                 .unwrap_or(MessageReceiptStatus::NoAck as u32),
         )
+    }
+
+    fn match_status(&self, row_index: usize) -> Option<u8> {
+        Some(self.container.msg_data(row_index)?.match_status as u8)
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
@@ -220,7 +219,7 @@ impl MessagesTrait for Messages {
 
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
-        ret_err!(message::delete_message(&id), false);
+        spawn!(message::delete_message(&id), false);
 
         self.raw_list_remove(ix);
 
@@ -231,7 +230,7 @@ impl MessagesTrait for Messages {
     fn clear_conversation_history(&mut self) -> bool {
         let id = ret_none!(self.conversation_id, false);
 
-        ret_err!(conversation::delete_conversation(&id), false);
+        spawn!(conversation::delete_conversation(&id), false);
 
         self.model
             .begin_remove_rows(0, self.container.len().saturating_sub(1));
@@ -270,18 +269,25 @@ impl MessagesTrait for Messages {
 
         for update in rx.try_iter() {
             match update {
-                MsgUpdate::Msg(mid) => {
-                    let new = ret_err!(message::get_message(&mid));
-
+                MsgUpdate::NewMsg(new) => {
                     new_msg_toast(&new);
 
-                    ret_err!(self.raw_insert(new, SaveStatus::Saved));
+                    ret_err!(self.raw_insert(*new, SaveStatus::Saved));
                 }
-                MsgUpdate::FullMsg(msg) => {
+                MsgUpdate::BuilderMsg(msg) => {
                     ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
                 }
-                MsgUpdate::Receipt(mid) => {
-                    ret_err!(self.container.handle_receipt(mid, &mut self.model));
+                MsgUpdate::Receipt {
+                    msg_id,
+                    recipient,
+                    status,
+                } => {
+                    ret_err!(self.container.handle_receipt(
+                        msg_id,
+                        status,
+                        recipient,
+                        &mut self.model
+                    ));
                 }
                 MsgUpdate::StoreDone(mid) => {
                     ret_none!(self.container.handle_store_done(mid, &mut self.model));
@@ -292,6 +298,18 @@ impl MessagesTrait for Messages {
                             self.raw_list_remove(ix);
                         }
                     }
+                }
+                MsgUpdate::Container(container) => {
+                    if container.is_empty() {
+                        continue;
+                    }
+
+                    self.model
+                        .begin_insert_rows(0, container.len().saturating_sub(1));
+                    self.container = container;
+                    self.model.end_insert_rows();
+                    self.emit.is_empty_changed();
+                    self.emit_last_changed();
                 }
             }
         }
@@ -315,19 +333,12 @@ impl MessagesTrait for Messages {
             return;
         }
 
-        let pattern = if self.search_regex() {
-            ret_err!(SearchPattern::new_regex(pattern))
-        } else {
-            ret_err!(SearchPattern::new_normal(pattern))
-        };
-
-        self.search.pattern = pattern;
-        self.emit.search_regex_changed();
-
-        self.search.matches = self
-            .container
-            .apply_search(&self.search, &mut self.model, &mut self.emit)
-            .unwrap_or_default();
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
+        }
     }
 
     /// Indicates whether regex search is activated
@@ -337,7 +348,7 @@ impl MessagesTrait for Messages {
 
     /// Sets search mode
     fn set_search_regex(&mut self, use_regex: bool) {
-        if ret_err!(self.search.set_regex(use_regex)) == SearchChanged::Changed {
+        if ret_err!(self.search.set_regex(use_regex)).changed() {
             self.emit.search_regex_changed();
             self.search.matches = self
                 .container
@@ -367,17 +378,37 @@ impl MessagesTrait for Messages {
         self.search.num_matches() as u64
     }
 
-    fn next_search_match(&mut self) -> i64 {
-        match self.search.next() {
-            Some(Match { ix }) => *ix as i64,
+    fn peek_next_search_match(&mut self) -> i64 {
+        match self.search.peek_next(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
     }
 
-    fn prev_search_match(&mut self) -> i64 {
-        match self.search.prev() {
-            Some(Match { ix }) => *ix as i64,
+    fn peek_prev_search_match(&mut self) -> i64 {
+        match self.search.peek_prev(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
+    }
+
+    fn next_search_match(&mut self) -> i64 {
+        self.next_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
+    fn prev_search_match(&mut self) -> i64 {
+        self.prev_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
     }
 }

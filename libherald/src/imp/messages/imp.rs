@@ -9,6 +9,54 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
+    fn unfocus(&mut self, match_val: Match) -> Option<()> {
+        let Match { mid } = match_val;
+
+        self.container.get_data_mut(&mid)?.match_status = MatchStatus::Matched;
+        let ix = self.container.index_of(mid)?;
+        self.model.data_changed(ix, ix);
+
+        Some(())
+    }
+
+    fn unfocus_ends(&mut self) -> Option<()> {
+        let prev = self.search.peek_prev(&self.container)?;
+        self.unfocus(prev)?;
+
+        let next = self.search.peek_next(&self.container)?;
+        self.unfocus(next)?;
+
+        Some(())
+    }
+
+    pub(super) fn prev_search_match_helper(&mut self) -> Option<usize> {
+        self.unfocus_ends()?;
+
+        let Match { mid } = self.search.prev(&self.container)?;
+
+        let data = self.container.get_data_mut(&mid)?;
+        data.match_status = MatchStatus::Focused;
+
+        let ix = self.container.index_of(mid)?;
+        self.model.data_changed(ix, ix);
+
+        Some(ix)
+    }
+
+    pub(super) fn next_search_match_helper(&mut self) -> Option<usize> {
+        self.unfocus_ends()?;
+
+        let Match { mid } = self.search.next(&self.container)?;
+
+        let data = self.container.get_data_mut(&mid)?;
+        data.match_status = MatchStatus::Focused;
+
+        let ix = self.container.index_of(mid)?;
+        self.model.data_changed(ix, ix);
+
+        Some(ix)
+    }
+
     pub(super) fn raw_list_remove(&mut self, ix: usize) {
         let len = self.container.len();
 
@@ -97,7 +145,7 @@ impl Messages {
         }
 
         use crate::imp::conversations::{shared::*, Conversations};
-        Conversations::push(ConvUpdates::NewActivity(cid))?;
+        Conversations::push(ConvUpdate::NewActivity(cid))?;
 
         Ok(())
     }

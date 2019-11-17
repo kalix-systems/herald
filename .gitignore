@@ -4,6 +4,7 @@ _build/
 *.install
 .direnv
 stats/
+.appimage
 
 ## qtcreator
 *.user.pro*
@@ -215,6 +216,7 @@ Icon
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
+heraldcore.toml
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop

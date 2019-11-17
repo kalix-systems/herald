@@ -10,6 +10,7 @@ Item {
     property color color
     property color textColor: CmnCfg.palette.iconFill
     property string initials
+    property real avatarHeight: parent.avatarHeight
 
     Loader {
         id: iconLoader

@@ -1,13 +1,15 @@
 use super::*;
-use crate::{conversation::db::set_expiration_period, message, types::ExpirationPeriod, womp};
+use crate::{
+    conversation::db::set_expiration_period, conversation::ExpirationPeriod, message, womp,
+};
 use std::convert::TryInto;
 
 #[test]
 fn get_and_delete_stale() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
-    crate::contact::db::test_contact(&mut conn, "dummy");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+    crate::user::db::test_user(&mut conn, "dummy");
 
     let conv = receiver.pairwise_conversation;
 

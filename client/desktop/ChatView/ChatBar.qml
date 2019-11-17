@@ -18,8 +18,9 @@ import "Controls" as CVUtils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
+    id: chatToolBar
     property var conversationItem
-    property Messages ownedConversation: parent.ownedConversation
+    property Messages ownedConversation: messageBar.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
@@ -39,12 +40,15 @@ ToolBar {
         }
 
         AvatarMain {
-
+            id: avatar
             size: 32
+            avatarHeight: groupAvatar ? 30 : 32
             iconColor: CmnCfg.avatarColors[conversationItem.color]
             textColor: CmnCfg.palette.iconFill
             initials: conversationItem.title[0].toUpperCase()
             Layout.alignment: Qt.AlignLeft
+            pfpPath: Utils.safeStringOrDefault(conversationItem.picture, "")
+            groupAvatar: !conversationItem.pairwise
             anchors {
                 margins: 16
             }
@@ -64,16 +68,24 @@ ToolBar {
             color: "white"
         }
 
+        Loader {
+            id: searchLoader
+            Layout.alignment: Qt.AlignLeft
+            height: parent.height
+        }
+
         Row {
+            id: optionsRow
             spacing: CmnCfg.margin
             Layout.alignment: Qt.AlignRight
+            height: parent.height
 
             Common.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.paneColor
                 topPadding: 1
-                onClicked: messageBar.sourceComponent = chatSearchComponent
+                onClicked: chatToolBar.state = "searchState"
             }
 
             Common.ButtonForm {
@@ -107,6 +119,20 @@ ToolBar {
                     }
                 }
             }
+        }
+    }
+
+    states: State {
+        name: "searchState"
+
+        PropertyChanges {
+            target: searchButton
+            visible: false
+        }
+
+        PropertyChanges {
+            target: searchLoader
+            sourceComponent: chatSearchComponent
         }
     }
 }

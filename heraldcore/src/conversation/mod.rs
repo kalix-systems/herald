@@ -5,6 +5,10 @@ use rusqlite::{params, NO_PARAMS};
 pub(crate) mod db;
 /// Functionality related to changes in conversation settings
 pub mod settings;
+mod types;
+pub use types::*;
+mod builder;
+pub use builder::*;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
@@ -41,7 +45,7 @@ impl ConversationMeta {
         })
     }
 
-    /// Matches contact's text fields against a [`SearchPattern`]
+    /// Matches conversation's text fields against a [`SearchPattern`]
     pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
         match self.title.as_ref() {
             Some(name) => pattern.is_match(name),
@@ -51,10 +55,8 @@ impl ConversationMeta {
 }
 
 /// Conversation
+#[derive(Clone)]
 pub struct Conversation {
-    /// Messages
-    pub messages: Vec<Message>,
-
     /// User ID's of conversation members
     pub members: Vec<UserId>,
 
@@ -63,88 +65,45 @@ pub struct Conversation {
 }
 
 impl Conversation {
-    /// Indicates whether conversation is empty
-    pub fn is_empty(&self) -> bool {
-        self.messages.is_empty()
-    }
+    /// Starts the conversation, sending it to the proposed members.
+    pub fn start(self) -> Result<(), HErr> {
+        use chainmail::block::*;
+        use std::fs;
+        let Self { members, meta } = self;
 
-    /// Number of messages in conversation
-    pub fn len(&self) -> usize {
-        self.messages.len()
-    }
-}
+        let ConversationMeta {
+            title,
+            conversation_id: cid,
+            picture: picture_path,
+            expiration_period,
+            ..
+        } = meta;
 
-/// Builder for Conversations
-#[derive(Default)]
-pub struct ConversationBuilder {
-    /// Conversation id
-    conversation_id: Option<ConversationId>,
-    /// Conversation title
-    title: Option<String>,
-    /// Conversation picture
-    picture: Option<String>,
-    /// Conversation color,
-    color: Option<u32>,
-    /// Indicates whether the conversation is muted
-    muted: Option<bool>,
-    /// Indicates whether the conversation is a canonical pairwise conversation
-    pairwise: Option<bool>,
-    /// How long until a message expires
-    expiration_period: Option<ExpirationPeriod>,
-}
+        let kp = crate::config::Config::static_keypair()?;
+        let gen = Genesis::new(kp.secret_key());
+        cid.store_genesis(&gen)?;
 
-impl ConversationBuilder {
-    /// Creates new `ConversationBuilder`
-    pub fn new() -> Self {
-        Self::default()
-    }
+        let picture = match picture_path {
+            Some(path) => Some(fs::read(path)?),
+            None => None,
+        };
 
-    /// Sets title
-    pub fn title(&mut self, title: String) -> &mut Self {
-        self.title.replace(title);
-        self
-    }
+        let pairwise = get_pairwise_conversations(&members)?;
 
-    /// Sets conversation id
-    pub fn conversation_id(&mut self, cid: ConversationId) -> &mut Self {
-        self.conversation_id.replace(cid);
-        self
-    }
+        let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
+            members,
+            gen,
+            cid,
+            title,
+            expiration_period,
+            picture,
+        }));
 
-    /// Sets picture
-    pub fn picture(&mut self, picture: String) -> &mut Self {
-        self.picture.replace(picture);
-        self
-    }
+        for pw_cid in pairwise {
+            crate::network::send_cmessage(pw_cid, &body)?;
+        }
 
-    /// Sets color
-    pub fn color(&mut self, color: u32) -> &mut Self {
-        self.color.replace(color);
-        self
-    }
-
-    /// Sets muted status
-    pub fn muted(&mut self, muted: bool) -> &mut Self {
-        self.muted.replace(muted);
-        self
-    }
-
-    /// Sets muted status
-    pub fn pairwise(&mut self, pairwise: bool) -> &mut Self {
-        self.pairwise.replace(pairwise);
-        self
-    }
-
-    /// Sets expiration period
-    pub fn expiration_period(&mut self, expiration_period: ExpirationPeriod) -> &mut Self {
-        self.expiration_period.replace(expiration_period);
-        self
-    }
-
-    /// Adds conversation
-    pub fn add(&mut self) -> Result<ConversationId, HErr> {
-        let db = Database::get()?;
-        self.add_db(&db)
+        Ok(())
     }
 }
 

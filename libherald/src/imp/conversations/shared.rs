@@ -1,3 +1,4 @@
+use super::*;
 use crate::interface::ConversationsEmitter as Emitter;
 use crate::shared::SingletonBus;
 use crossbeam_channel::*;
@@ -9,21 +10,23 @@ use parking_lot::Mutex;
 
 /// Conversation list updates
 #[derive(Debug)]
-pub enum ConvUpdates {
+pub enum ConvUpdate {
     /// A new conversation has been added
-    NewConversation(ConversationId),
+    NewConversation(ConversationMeta),
     /// A conversation builder has been finalized
-    BuilderFinished(ConversationId),
+    BuilderFinished(ConversationMeta),
     /// New activity
     NewActivity(ConversationId),
     /// Conversataion settings has been updated
     Settings(ConversationId, SettingsUpdate),
+    /// Initial data, sent when the conversations list is constructed
+    Init(Vector<Conversation>),
 }
 
 /// Channel for global conversation list updates
 pub(crate) struct ConvBus {
-    pub(super) rx: Receiver<ConvUpdates>,
-    pub(super) tx: Sender<ConvUpdates>,
+    pub(super) rx: Receiver<ConvUpdate>,
+    pub(super) tx: Sender<ConvUpdate>,
 }
 
 impl ConvBus {
@@ -44,7 +47,7 @@ lazy_static! {
 }
 
 impl SingletonBus for super::Conversations {
-    type Update = ConvUpdates;
+    type Update = ConvUpdate;
 
     fn push(update: Self::Update) -> Result<(), heraldcore::errors::HErr> {
         CONV_BUS
@@ -56,13 +59,6 @@ impl SingletonBus for super::Conversations {
         Ok(())
     }
 }
-
-//pub fn push_conv_update(update: ConvUpdates) -> Option<()> {
-//    CONV_CHANNEL.tx.clone().send(update).ok()?;
-//    conv_emit_new_data()?;
-//    Some(())
-//}
-//
 
 /// Emits a signal to the QML runtime, returns `None` on failure.
 #[must_use]

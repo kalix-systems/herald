@@ -1,9 +1,9 @@
-use crate::{ffi, interface::*, ret_err};
+use crate::{ffi, interface::*, ret_err, spawn};
 use herald_common::{Time, UserId};
 use heraldcore::{
     channel_send_err,
-    message::{get_message_opt, Message},
-    types::{MessageBody, MsgId},
+    message::{get_message_opt, Message, MessageBody},
+    types::MsgId,
 };
 use std::convert::TryInto;
 
@@ -100,20 +100,20 @@ impl MessagePreviewTrait for MessagePreview {
 }
 
 fn get_msg(mid: MsgId) -> Option<Message> {
-    let (tx, rx) = crossbeam_channel::bounded(0);
+    let (tx, rx) = crossbeam_channel::bounded(1);
 
-    ret_err!(
-        std::thread::Builder::new().spawn(move || match get_message_opt(&mid) {
+    // This is for exception safety
+    spawn!(
+        match get_message_opt(&mid) {
             Ok(msg) => {
                 ret_err!(tx.send(msg).map_err(|_| channel_send_err!()));
             }
             Err(_) => {
                 ret_err!(tx.send(None));
             }
-        }),
+        },
         None
     );
 
-    rx.recv_timeout(std::time::Duration::from_secs(1))
-        .unwrap_or(None)
+    rx.recv().unwrap_or(None)
 }
