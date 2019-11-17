@@ -37,9 +37,9 @@ jobs:
         with:
           command: test
 
-  platform_tests:
-    name: Libherald Platform Tests
-    runs-on: [ macOS-latest , windows-latest ]
+  windows_platform:
+    name: windows Platform Tests
+    runs-on: windows-latest 
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -55,6 +55,26 @@ jobs:
         with:
           command: test
           args: --manifest-path=heraldcore/Cargo.toml
+
+  Macos_platform:
+    name: Macos Platform Test
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path=libherald/Cargo.toml
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --manifest-path=heraldcore/Cargo.toml
+
 
 
   fmt:
