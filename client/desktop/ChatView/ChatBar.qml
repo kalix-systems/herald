@@ -40,7 +40,7 @@ ToolBar {
         }
 
         AvatarMain {
-
+            id: avatar
             size: 32
             iconColor: CmnCfg.avatarColors[conversationItem.color]
             textColor: CmnCfg.palette.iconFill
@@ -67,14 +67,14 @@ ToolBar {
 
         Loader {
             id: searchLoader
-           Layout.minimumWidth: 200
-           Layout.maximumWidth: 300
-        //   Layout.rightMargin: CmnCfg.margin
             Layout.alignment: Qt.AlignLeft
+
+            Component.onCompleted: print(uid.width)
             height: parent.height
         }
 
         Row {
+            id: optionsRow
             spacing: CmnCfg.margin
             Layout.alignment: Qt.AlignRight
             height: parent.height
