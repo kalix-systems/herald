@@ -82,7 +82,8 @@ Rectangle {
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
-                startColor: CmnCfg.avatarColors[contactsModel.colorById(replyUid)]
+                startColor: CmnCfg.avatarColors[contactsModel.colorById(
+                                                    replyUid)]
             }
             width: scrollView.width
         }
@@ -91,7 +92,8 @@ Rectangle {
             id: attachmentLoader
             active: false
             height: item ? item.height : 0
-            sourceComponent: AttachmentsComponent {}
+            sourceComponent: AttachmentsComponent {
+            }
             width: scrollView.width
         }
 

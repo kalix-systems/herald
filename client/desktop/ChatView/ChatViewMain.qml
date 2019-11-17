@@ -19,17 +19,15 @@ Page {
         color: CmnCfg.palette.mainColor
     }
 
-    header:  CVUtils.ChatBar {
+    header: CVUtils.ChatBar {
         id: messageBar
         conversationItem: parent.conversationItem
-        }
-
-
+    }
 
     Component {
         id: chatBarComponent
         CVUtils.ChatBar {
-        conversationItem: messageBar.conversationItem
+            conversationItem: messageBar.conversationItem
         }
     }
 

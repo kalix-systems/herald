@@ -63,11 +63,11 @@ Item {
                 }
             }
 
-        Image {
-            anchors.centerIn: parent
-            source: "qrc:/herald.icns"
-            mipmap: true
-        }
+            Image {
+                anchors.centerIn: parent
+                source: "qrc:/herald.icns"
+                mipmap: true
+            }
         }
     }
 

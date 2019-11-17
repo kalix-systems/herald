@@ -17,12 +17,12 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     contentHeight: textMessageCol.height
 
-    property var blankTransition: Transition {}
+    property var blankTransition: Transition {
+    }
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
-
     }
 
     Component.onCompleted: {
@@ -95,13 +95,14 @@ Flickable {
                         replyId: op
                         //mousearea handling jump behavior
                         jumpHandler.onClicked: {
-                                convWindow.state = "jumpState"
-                                convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
-                                        - convWindow.height / 2
-                                convWindow.returnToBounds()
-                                convWindow.state = ""
-                                replyHighlightAnimation.start()
-                               }
+                            convWindow.state = "jumpState"
+                            convWindow.contentY = chatListView.itemAt(
+                                        ownedConversation.indexById(
+                                            replyId)).y - convWindow.height / 2
+                            convWindow.returnToBounds()
+                            convWindow.state = ""
+                            replyHighlightAnimation.start()
+                        }
                     }
                 }
 
@@ -145,7 +146,8 @@ Flickable {
                              } else {
                                  std
                              }
-                    ChatBubbleHover {}
+                    ChatBubbleHover {
+                    }
                 }
 
                 AvatarMain {

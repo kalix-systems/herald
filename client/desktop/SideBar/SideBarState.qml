@@ -31,7 +31,6 @@ Page {
         }
     }
 
-
     Loader {
         id: sideBarBodyLoader
         anchors.fill: parent
@@ -96,8 +95,6 @@ Page {
                 searchPlaceholder: "Enter contact name"
                 contactsSearch: true
             }
-
         }
-
     ]
 }

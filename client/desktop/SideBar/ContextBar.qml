@@ -50,18 +50,19 @@ ToolBar {
                 onReleased: {
                     overlay.visible = false
                 }
-                onClicked: { configPopup.show()
+                onClicked: {
+                    configPopup.show()
                 }
             }
             ColorOverlay {
                 id: overlay
                 visible: false
-                    anchors.fill: parent
-                    source: parent
-                    color: "black"
-                    opacity: 0.2
-                    smooth: true
-                }
+                anchors.fill: parent
+                source: parent
+                color: "black"
+                opacity: 0.2
+                smooth: true
+            }
         }
 
         Text {
@@ -92,8 +93,7 @@ ToolBar {
                 source: "qrc:/search-icon.svg"
                 //todo : add back in regex logic once ui is known
                 onClicked: sideBarState.state = "conversationSearch"
-             }
-
+            }
 
             Common.ButtonForm {
                 id: newMessageButton
@@ -106,7 +106,7 @@ ToolBar {
                 id: convoMenu
                 MenuItem {
                     text: "New group conversation"
-                     onTriggered: sideBarState.state = "newGroupState"
+                    onTriggered: sideBarState.state = "newGroupState"
                 }
             }
 

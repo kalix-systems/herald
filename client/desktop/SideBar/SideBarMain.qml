@@ -61,7 +61,6 @@ Page {
         id: newContactComponent
     }
 
-
     Loader {
         active: false
         id: convoBuilderLoader

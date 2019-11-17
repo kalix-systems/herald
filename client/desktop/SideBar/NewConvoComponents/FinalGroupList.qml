@@ -17,8 +17,7 @@ ListView {
         width: parent.width
         property string memberName: contactsModel.nameById(memberId)
         property int memberColor: contactsModel.colorById(memberId)
-        property string memberPfp: contactsModel.profilePictureById(
-                                       memberId)
+        property string memberPfp: contactsModel.profilePictureById(memberId)
 
         Rectangle {
             id: bgBox
@@ -32,7 +31,6 @@ ListView {
 
             color: CmnCfg.palette.mainColor
         }
-
 
         Av.AvatarMain {
             anchors.fill: parent

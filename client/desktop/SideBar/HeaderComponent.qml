@@ -12,71 +12,72 @@ import QtGraphicalEffects 1.0
 //header component loaded during new group & new contact flow
 Component {
 
-ToolBar {
-    id: headerBarComponent
-    height: CmnCfg.toolbarHeight
-    background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
-    }
-    RowLayout {
+    ToolBar {
+        id: headerBarComponent
+        height: CmnCfg.toolbarHeight
+        background: Rectangle {
+            color: CmnCfg.palette.secondaryColor
+        }
+        RowLayout {
 
-        anchors.fill: parent
+            anchors.fill: parent
 
-        AvatarMain {
-            id: configAvatar
-            iconColor: CmnCfg.palette.avatarColors[config.color]
-            initials: config.name[0].toUpperCase()
-            size: 28
-            avatarHeight: 28
-            pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
-            Layout.alignment: Qt.AlignCenter
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            MouseArea {
-                anchors.fill: parent
-                id: avatarHoverHandler
-                cursorShape: Qt.PointingHandCursor
-                onPressed: {
-                    overlay.visible = true
+            AvatarMain {
+                id: configAvatar
+                iconColor: CmnCfg.palette.avatarColors[config.color]
+                initials: config.name[0].toUpperCase()
+                size: 28
+                avatarHeight: 28
+                pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
+                Layout.alignment: Qt.AlignCenter
+                Layout.leftMargin: 12
+                Layout.rightMargin: 12
+                MouseArea {
+                    anchors.fill: parent
+                    id: avatarHoverHandler
+                    cursorShape: Qt.PointingHandCursor
+                    onPressed: {
+                        overlay.visible = true
+                    }
+                    onReleased: {
+                        overlay.visible = false
+                    }
+                    onClicked: {
+                        configPopup.show()
+                    }
                 }
-                onReleased: {
-                    overlay.visible = false
-                }
-                onClicked: { configPopup.show()
-                }
-            }
 
-            ColorOverlay {
-                id: overlay
-                visible: false
+                ColorOverlay {
+                    id: overlay
+                    visible: false
                     anchors.fill: parent
                     source: parent
                     color: "black"
                     opacity: 0.2
                     smooth: true
                 }
-        }
+            }
 
-        Text {
-            id: text
-            text: headerLoader.headerText
-            font.pixelSize: CmnCfg.headerSize
-            font.family: CmnCfg.chatFont.name
-            font.bold: true
-            Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            color: CmnCfg.palette.mainColor
-        }
-        Item {
-            Layout.fillWidth: true
-        }
+            Text {
+                id: text
+                text: headerLoader.headerText
+                font.pixelSize: CmnCfg.headerSize
+                font.family: CmnCfg.chatFont.name
+                font.bold: true
+                Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
+                color: CmnCfg.palette.mainColor
+            }
+            Item {
+                Layout.fillWidth: true
+            }
 
-        Common.ButtonForm {
-            id: xButton
-            fill: CmnCfg.palette.paneColor
-            source: "qrc:/x-icon.svg"
-            scale: 0.8
-            onClicked: sideBarState.state = ""
+            Common.ButtonForm {
+                id: xButton
+                fill: CmnCfg.palette.paneColor
+                source: "qrc:/x-icon.svg"
+                scale: 0.8
+                onClicked: sideBarState.state = ""
+            }
         }
     }
-}
 }
