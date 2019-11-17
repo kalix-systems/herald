@@ -28,7 +28,7 @@ Rectangle {
     Rectangle {
         anchors.top: titleText.bottom
         id: divider
-        height: 1
+        height: 2
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
@@ -54,6 +54,7 @@ Rectangle {
     //create group button
     Common.ButtonForm {
         anchors.top: groupSelectText.bottom
+        anchors.topMargin: CmnCfg.smallMargin / 2
         anchors.right: parent.right
         anchors.rightMargin: CmnCfg.largeMargin / 2
 

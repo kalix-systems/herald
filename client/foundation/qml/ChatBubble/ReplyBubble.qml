@@ -59,8 +59,8 @@ ColumnLayout {
             property: "opacity"
             from: 1.0
             to: 0.0
-            duration: 1000
-            easing.type: Easing.OutQuad
+            duration: 600
+            easing.type: Easing.InCubic
         }
 
         ColumnLayout {
