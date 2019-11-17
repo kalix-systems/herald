@@ -146,6 +146,7 @@ Flickable {
                         bottomMargin: parent.bottomPadding
                     }
                     pfpPath: parent.pfpUrl
+                    avatarHeight: 28
                 }
             } //bubble wrapper
         } // Repeater

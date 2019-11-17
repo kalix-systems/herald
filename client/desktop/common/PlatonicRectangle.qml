@@ -29,6 +29,7 @@ Rectangle {
             margins: 6
         }
         groupAvatar: groupPicture
+        avatarHeight: groupAvatar ? 40 : 44
     }
 
     states: [
