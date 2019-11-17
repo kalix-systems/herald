@@ -27,11 +27,12 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                 conv_builder.title = title;
 
                 let mut db = crate::db::Database::get()?;
-                conv_builder.add_db(&mut db)?;
+                let conv = conv_builder.add_db(&mut db)?;
 
                 cid.store_genesis(&gen)?;
 
-                ev.notifications.push(Notification::NewConversation(cid));
+                ev.notifications
+                    .push(Notification::NewConversation(conv.meta));
             }
             UserReqAck(cr) => ev
                 .notifications

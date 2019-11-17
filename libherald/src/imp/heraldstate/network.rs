@@ -32,10 +32,11 @@ impl NotifHandler {
                 ret_err!(Users::push(UsersUpdates::NewUser(uid)));
 
                 // add pairwise conversation
-                ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
+                let meta = ret_err!(heraldcore::conversation::meta(&cid));
+                ret_err!(Conversations::push(ConvUpdate::NewConversation(meta)));
             }
-            NewConversation(cid) => {
-                ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
+            NewConversation(meta) => {
+                ret_err!(Conversations::push(ConvUpdate::NewConversation(meta)));
             }
             AddUserResponse(cid, uid, accepted) => {
                 // handle response
@@ -43,7 +44,8 @@ impl NotifHandler {
 
                 // add conversation
                 if accepted {
-                    ret_err!(Conversations::push(ConvUpdate::NewConversation(cid)));
+                    let meta = ret_err!(heraldcore::conversation::meta(&cid));
+                    ret_err!(Conversations::push(ConvUpdate::NewConversation(meta)));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {

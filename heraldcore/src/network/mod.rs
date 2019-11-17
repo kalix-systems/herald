@@ -1,7 +1,7 @@
 use crate::{
     chainkeys,
     config::Config,
-    conversation::settings,
+    conversation::{settings, ConversationMeta},
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
@@ -49,7 +49,7 @@ pub enum Notification {
     /// A new user has been added
     NewUser(UserId, ConversationId),
     /// A new conversation has been added
-    NewConversation(ConversationId),
+    NewConversation(ConversationMeta),
     /// Response to user request.
     AddUserResponse(ConversationId, UserId, bool),
     /// Response to request to join conversation.

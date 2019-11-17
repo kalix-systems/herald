@@ -12,7 +12,7 @@ use parking_lot::Mutex;
 #[derive(Debug)]
 pub enum ConvUpdate {
     /// A new conversation has been added
-    NewConversation(ConversationId),
+    NewConversation(ConversationMeta),
     /// A conversation builder has been finalized
     BuilderFinished(ConversationMeta),
     /// New activity

@@ -1,9 +1,6 @@
-use crate::{
-    cont_none, ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus, spawn,
-};
+use crate::{cont_none, ffi, interface::*, ret_err, ret_none, shared::SingletonBus, spawn};
 use heraldcore::{
     conversation::{self, ConversationMeta, ExpirationPeriod},
-    errors::HErr,
     types::ConversationId,
     utils::SearchPattern,
 };
@@ -252,27 +249,12 @@ impl ConversationsTrait for Conversations {
 
     fn fetch_more(&mut self) {
         use ConvUpdate::*;
+
         for update in CONV_BUS.rx.try_iter() {
             match update {
-                NewConversation(cid) => push_err!(
-                    self.raw_fetch_and_insert(cid),
-                    "Failed to add new conversation"
-                ),
-                BuilderFinished(inner) => {
-                    let matched = match self.filter.as_ref() {
-                        Some(filter) => inner.matches(filter),
-                        None => true,
-                    };
-
-                    let conv = Conversation { matched, inner };
-
-                    self.model.begin_insert_rows(0, 0);
-                    self.list.push_front(conv);
-                    self.model.end_insert_rows();
-                }
-                NewActivity(cid) => {
-                    self.handle_new_activity(cid);
-                }
+                NewConversation(inner) => self.handle_new_conversation(inner),
+                BuilderFinished(inner) => self.handle_builder_finished(inner),
+                NewActivity(cid) => self.handle_new_activity(cid),
                 Settings(cid, update) => cont_none!(self.handle_settings_update(cid, update)),
                 Init(contents) => self.handle_init(contents),
             }
@@ -344,21 +326,5 @@ impl Conversations {
         }
 
         Some(())
-    }
-
-    fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
-        let inner = conversation::meta(&cid)?;
-
-        let matched = match self.filter.as_ref() {
-            Some(filter) => inner.matches(filter),
-            None => true,
-        };
-
-        let conv = Conversation { matched, inner };
-
-        self.model.begin_insert_rows(0, 0);
-        self.list.push_front(conv);
-        self.model.end_insert_rows();
-        Ok(())
     }
 }
