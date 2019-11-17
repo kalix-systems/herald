@@ -2046,8 +2046,6 @@ extern "C" {
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     qint64 messages_next_search_match(Messages::Private*);
-    qint64 messages_peek_next_search_match(Messages::Private*);
-    qint64 messages_peek_prev_search_match(Messages::Private*);
     qint64 messages_prev_search_match(Messages::Private*);
 };
 
@@ -3476,14 +3474,6 @@ quint64 Messages::indexById(const QByteArray& msg_id) const
 qint64 Messages::nextSearchMatch()
 {
     return messages_next_search_match(m_d);
-}
-qint64 Messages::peekNextSearchMatch()
-{
-    return messages_peek_next_search_match(m_d);
-}
-qint64 Messages::peekPrevSearchMatch()
-{
-    return messages_peek_prev_search_match(m_d);
 }
 qint64 Messages::prevSearchMatch()
 {

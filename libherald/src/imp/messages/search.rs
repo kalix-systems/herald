@@ -14,15 +14,26 @@ impl SearchChanged {
     }
 }
 
-#[derive(Clone, Copy)]
-pub(super) struct Match {
-    pub(super) mid: MsgId,
+#[derive(Clone, Copy, PartialEq)]
+pub(super) struct Cursor(pub(super) MsgId);
+
+impl Cursor {
+    fn msg_id(&self) -> &MsgId {
+        &self.0
+    }
+
+    pub(super) fn into_inner(self) -> MsgId {
+        self.0
+    }
 }
+
+pub(super) struct Match(pub(super) MsgId);
 
 pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
     pub(super) matches: VecDeque<Match>,
+    pub(super) cur: Option<Cursor>,
 }
 
 impl SearchState {
@@ -31,6 +42,7 @@ impl SearchState {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
             active: false,
             matches: VecDeque::new(),
+            cur: None,
         }
     }
 
@@ -75,78 +87,65 @@ impl SearchState {
         self.matches.len()
     }
 
-    pub(super) fn clear_search(&mut self, emit: &mut Emitter) {
+    pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
         self.active = false;
-        self.pattern = abort_err!(SearchPattern::new_normal("".into()));
+        self.pattern = SearchPattern::new_normal("".into())?;
         self.matches = VecDeque::new();
 
         emit.search_active_changed();
         emit.search_num_matches_changed();
+
+        Ok(())
     }
 
-    pub(super) fn peek_next(&mut self, container: &Container) -> Option<Match> {
-        if self.active.not() {
-            return None;
-        }
-
-        let peek = loop {
-            let match_val = *self.matches.front()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
-            } else {
-                self.matches.pop_front()?;
-            }
-        };
-
-        Some(peek)
-    }
-
-    pub(super) fn next(&mut self, container: &Container) -> Option<Match> {
+    pub(super) fn next(&mut self, container: &Container) -> Option<Cursor> {
         if self.active.not() {
             return None;
         }
 
         let next = loop {
-            let match_val = self.matches.pop_front()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
+            let cur = match (self.matches.pop_front(), self.cur) {
+                (Some(Match(msg_id)), Some(cursor)) => {
+                    self.matches.push_back(Match(*cursor.msg_id()));
+                    Some(Cursor(msg_id))
+                }
+                (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
+                (None, cur @ Some(Cursor(_))) => cur,
+                (None, None) => None,
+            }?;
+
+            // check if item is still valid
+            if container.contains(cur.msg_id()) {
+                self.cur = Some(cur);
+                break cur;
             }
         };
 
-        self.matches.push_back(next);
         Some(next)
     }
 
-    pub(super) fn peek_prev(&mut self, container: &Container) -> Option<Match> {
-        if self.active.not() {
-            return None;
-        }
-
-        let peek = loop {
-            let match_val = *self.matches.back()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
-            } else {
-                self.matches.pop_back()?;
-            }
-        };
-
-        Some(peek)
-    }
-
-    pub(super) fn prev(&mut self, container: &Container) -> Option<Match> {
+    pub(super) fn prev(&mut self, container: &Container) -> Option<Cursor> {
         if self.active.not() {
             return None;
         }
 
         let prev = loop {
-            let match_val = self.matches.pop_back()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
+            let cur = match (self.matches.pop_back(), self.cur) {
+                (Some(Match(msg_id)), Some(cursor)) => {
+                    self.matches.push_front(Match(*cursor.msg_id()));
+                    Some(Cursor(msg_id))
+                }
+                (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
+                (None, cur @ Some(Cursor(_))) => cur,
+                (None, None) => None,
+            }?;
+
+            // check if item is still valid
+            if container.contains(cur.msg_id()) {
+                self.cur = Some(cur);
+                break cur;
             }
         };
-
-        self.matches.push_front(prev);
 
         Some(prev)
     }

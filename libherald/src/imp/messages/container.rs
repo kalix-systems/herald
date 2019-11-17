@@ -132,7 +132,7 @@ impl Container {
                 continue;
             };
 
-            matches.push_back(Match { mid: *msg_id })
+            matches.push_back(Match(*msg_id))
         }
 
         emit.search_num_matches_changed();

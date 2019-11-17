@@ -371,44 +371,18 @@ impl MessagesTrait for Messages {
     /// Clears search
     fn clear_search(&mut self) {
         self.container.clear_search(&mut self.model);
-        self.search.clear_search(&mut self.emit);
+        ret_err!(self.search.clear_search(&mut self.emit));
     }
 
     fn search_num_matches(&self) -> u64 {
         self.search.num_matches() as u64
     }
 
-    fn peek_next_search_match(&mut self) -> i64 {
-        match self.search.peek_next(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
-    fn peek_prev_search_match(&mut self) -> i64 {
-        match self.search.peek_prev(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
     fn next_search_match(&mut self) -> i64 {
-        self.next_search_match_helper()
-            .map(|ix| ix as i64)
-            .unwrap_or(-1)
+        self.next_match_helper().map(|ix| ix as i64).unwrap_or(-1)
     }
 
     fn prev_search_match(&mut self) -> i64 {
-        self.prev_search_match_helper()
-            .map(|ix| ix as i64)
-            .unwrap_or(-1)
+        self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
     }
 }

@@ -9,52 +9,44 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn unfocus(&mut self, match_val: Match) -> Option<()> {
-        let Match { mid } = match_val;
+    pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
+        let old = self.search.cur;
+        let new = self.search.prev(&self.container);
 
-        self.container.get_data_mut(&mid)?.match_status = MatchStatus::Matched;
-        let ix = self.container.index_of(mid)?;
-        self.model.data_changed(ix, ix);
-
-        Some(())
+        self.match_helper(old, new)
     }
 
-    fn unfocus_ends(&mut self) -> Option<()> {
-        let prev = self.search.peek_prev(&self.container)?;
-        self.unfocus(prev)?;
+    fn match_helper(&mut self, old: Option<Cursor>, new: Option<Cursor>) -> Option<usize> {
+        if old == new {
+            let new = new?.into_inner();
+            return self.container.index_of(new);
+        }
 
-        let next = self.search.peek_next(&self.container)?;
-        self.unfocus(next)?;
+        if let Some(old) = old {
+            let old = old.into_inner();
 
-        Some(())
-    }
+            if let Some(data) = self.container.get_data_mut(&old) {
+                data.match_status = MatchStatus::Matched;
+                let ix = self.container.index_of(old)?;
+                self.model.data_changed(ix, ix);
+            }
+        }
 
-    pub(super) fn prev_search_match_helper(&mut self) -> Option<usize> {
-        self.unfocus_ends()?;
+        let new = new?.into_inner();
 
-        let Match { mid } = self.search.prev(&self.container)?;
-
-        let data = self.container.get_data_mut(&mid)?;
+        let data = self.container.get_data_mut(&new)?;
         data.match_status = MatchStatus::Focused;
 
-        let ix = self.container.index_of(mid)?;
+        let ix = self.container.index_of(new)?;
         self.model.data_changed(ix, ix);
-
         Some(ix)
     }
 
-    pub(super) fn next_search_match_helper(&mut self) -> Option<usize> {
-        self.unfocus_ends()?;
+    pub(super) fn next_match_helper(&mut self) -> Option<usize> {
+        let old = self.search.cur;
+        let new = self.search.next(&self.container);
 
-        let Match { mid } = self.search.next(&self.container)?;
-
-        let data = self.container.get_data_mut(&mid)?;
-        data.match_status = MatchStatus::Focused;
-
-        let ix = self.container.index_of(mid)?;
-        self.model.data_changed(ix, ix);
-
-        Some(ix)
+        self.match_helper(old, new)
     }
 
     pub(super) fn raw_list_remove(&mut self, ix: usize) {
