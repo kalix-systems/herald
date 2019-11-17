@@ -15,9 +15,12 @@ ColumnLayout {
     property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                     replyPreview.author)]
     property string authorName: ""
-    spacing: 0
     property color authorColor
     property var replyId
+    property alias jumpHandler: jumpHandler
+    property alias replyHighlightAnimation: replyHighlightAnimation
+
+    spacing: 0
 
     MessagePreview {
         id: replyPreview
@@ -28,32 +31,25 @@ ColumnLayout {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
         color: CmnCfg.palette.sideBarHighlightColor
-        Layout.margins: CmnCfg.margin / 2
+        Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: reply.width
 
         Rectangle {
-            visible: !replyPreview.isDangling
             id: verticalAccent
+            visible: !replyPreview.isDangling
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
             width: CmnCfg.smallMargin / 4
             color: opColor
         }
+
         MouseArea {
+            id: jumpHandler
             anchors.centerIn: reply
             width: reply.width
             height: reply.height
-            z: 10
-            onClicked: {
-                convWindow.state = "jumpState"
-                convWindow.contentY = chatListView.itemAt(
-                            ownedConversation.indexById(
-                                replyId)).y - convWindow.height / 2
-                convWindow.returnToBounds()
-                convWindow.state = ""
-                replyHighlightAnimation.start()
-            }
+            z: CmnCfg.overlayZ
         }
 
         NumberAnimation {
@@ -77,10 +73,9 @@ ColumnLayout {
                 text: !replyPreview.isDangling ? contactsModel.nameById(
                                                      replyPreview.author) : ""
                 font.bold: true
-                Layout.topMargin: CmnCfg.margin / 2
+                Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.rightMargin: CmnCfg.smallMargin
+
                 Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
                 color: opColor
             }
@@ -100,10 +95,8 @@ ColumnLayout {
             }
 
             Label {
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.bottomMargin: CmnCfg.smallPadding
+                Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
-                Layout.rightMargin: CmnCfg.smallMargin
                 font.pixelSize: 10
                 text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
                                                      replyPreview.epochTimestampMs) : ""

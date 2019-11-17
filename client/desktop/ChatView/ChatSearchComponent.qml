@@ -37,6 +37,7 @@ Component {
        enabled: searchToolBar.state === "searchActiveState"
        opacity: enabled ? 1 : 0.5
        onClicked: {
+           convWindow.state = "jumpState"
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, false)
            convWindow.returnToBounds()
        }
@@ -51,6 +52,7 @@ Component {
        opacity: enabled ? 1 : 0.5
 
        onClicked: {
+           convWindow.state = "jumpState"
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
            convWindow.returnToBounds()
        }
@@ -72,7 +74,6 @@ Component {
     states: State {
         name: "searchActiveState"
     }
-
 
     }
 

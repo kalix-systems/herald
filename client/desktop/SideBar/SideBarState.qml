@@ -32,19 +32,6 @@ Page {
         }
     }
 
-   GroupFlow.NewGroupComponent {
-       id: newGroupComponent
-   }
-
-
-    Component {
-        id: convoFinalGroup
-        ConvUtils.FinalGroupList {
-            id: groupListView
-            anchors.fill: parent
-            model: groupMemberSelect
-        }
-    }
 
     Loader {
         id: sideBarBodyLoader
@@ -56,13 +43,14 @@ Page {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarStateLoader
-                visible: false
+                target: sideBarBodyLoader
+                sourceComponent: newContactComponent
             }
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: searchBarComponent
-                searchPlaceholder: "Enter full name or username"
+                sourceComponent: headerBarComponent
+                searchPlaceholder: "Search your conversations"
+                headerText: "Add contact"
             }
         },
 
@@ -89,11 +77,6 @@ Page {
                 contactsSearch: true
             }
 
-            PropertyChanges {
-                target: newGroupBar
-                visible: true
-            }
-
         },
 
         State {
@@ -106,6 +89,7 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: headerBarComponent
+                headerText: "New group"
                 contactsSearch: true
             }
             PropertyChanges {

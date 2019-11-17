@@ -58,8 +58,8 @@ ToolBar {
         }
 
         Text {
-            id: headerText
-            text: "New group"
+            id: text
+            text: headerLoader.headerText
             font.pixelSize: CmnCfg.headerSize
             font.family: CmnCfg.chatFont.name
             font.bold: true

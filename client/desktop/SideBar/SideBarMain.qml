@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "NewConvoComponents" as ConvUtils
 import "qrc:/common" as Common
+import "../SideBar/GroupFlowComponents" as GroupFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -32,6 +33,7 @@ Page {
         id: headerLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
+        property string headerText: ""
 
         sourceComponent: ContextBar {
             id: contextBarComponent
@@ -51,11 +53,14 @@ Page {
         id: searchBarComponent
     }
 
-    ConvUtils.NewGroupBar {
-        id: newGroupBar
-        visible: sideBarState.state === "newConversationState"
-        anchors.top: parent.top
+    GroupFlow.NewGroupComponent {
+        id: newGroupComponent
     }
+
+    NewContactComponent {
+        id: newContactComponent
+    }
+
 
     Loader {
         id: convoBuilderLoader
@@ -63,11 +68,6 @@ Page {
 
     SideBarState {
         id: sideBarState
-        anchors {
-            top: newGroupBar.bottom
-            bottom: parent.bottom
-            right: parent.right
-            left: parent.left
-        }
+        anchors.fill: parent
     }
 }
