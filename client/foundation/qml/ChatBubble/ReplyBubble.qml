@@ -19,7 +19,6 @@ ColumnLayout {
     property color authorColor
     property var replyId
 
-
     MessagePreview {
         id: replyPreview
         messageId: replyId === undefined ? null : replyId
@@ -48,33 +47,24 @@ ColumnLayout {
             z: 10
             onClicked: {
                 convWindow.state = "jumpState"
-                convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
-                        - convWindow.height / 2
+                convWindow.contentY = chatListView.itemAt(
+                            ownedConversation.indexById(
+                                replyId)).y - convWindow.height / 2
                 convWindow.returnToBounds()
                 convWindow.state = ""
                 replyHighlightAnimation.start()
             }
         }
 
-
-        //TODO: nicer animation
-        SequentialAnimation {
+        NumberAnimation {
             id: replyHighlightAnimation
-        PropertyAnimation {
-            target: chatListView.itemAt(ownedConversation.indexById(replyId))
-            property: "highlight.opacity"
-            to: 5
-            duration: 200
-            easing.type: Easing.InOutQuad
-         }
-
-        PropertyAnimation {
-            target: chatListView.itemAt(ownedConversation.indexById(replyId))
-            property: "highlight.opacity"
-            to: -5
-            duration: 200
-            easing.type: Easing.InOutQuad
-        }
+            target: chatListView.itemAt(ownedConversation.indexById(
+                                            replyId)).highlight
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 1000
+            easing.type: Easing.OutQuad
         }
 
         ColumnLayout {
@@ -114,13 +104,11 @@ ColumnLayout {
                 Layout.bottomMargin: CmnCfg.smallPadding
                 Layout.topMargin: 0
                 Layout.rightMargin: CmnCfg.smallMargin
-                   font.pixelSize: 10
-                   text: !replyPreview.isDangling ?
-                             Utils.friendlyTimestamp(
-                             replyPreview.epochTimestampMs) : ""
-                   color: CmnCfg.palette.secondaryTextColor
-               }
-
+                font.pixelSize: 10
+                text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
+                                                     replyPreview.epochTimestampMs) : ""
+                color: CmnCfg.palette.secondaryTextColor
+            }
         }
     }
 

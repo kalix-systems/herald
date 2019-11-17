@@ -19,35 +19,27 @@ Rectangle {
     width: contentLoader.width
     height: contentLoader.height
 
-
     //two rectangles to extend to both sides of pane
-
     Item {
         id: bubbleHighlight
-      anchors.fill: parent
-      z: -1
-      opacity: highlight == true ? 1 : 0
-    Rectangle {
-        width: convWindow.width
-        anchors.right: parent.right
-        color: CmnCfg.palette.sideBarHighlightColor
-        anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
-        opacity: parent.opacity
-        visible: opacity == 1 ? true : false
+        anchors.fill: parent
         z: -1
-    }
+        opacity: highlight == true ? 1.0 : 0.0
+        Rectangle {
+            width: convWindow.width
+            anchors.right: parent.right
+            color: CmnCfg.palette.sideBarHighlightColor
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height + CmnCfg.smallMargin
+        }
 
-    Rectangle {
-        width: convWindow.width
-        anchors.left: parent.right
-        color: CmnCfg.palette.sideBarHighlightColor
-        anchors.verticalCenter: parent.verticalCenter
-        height: parent.height + CmnCfg.smallMargin
-        opacity: parent.opacity
-        visible: opacity == 1 ? true : false
-        z: -1
-    }
+        Rectangle {
+            width: convWindow.width
+            anchors.left: parent.right
+            color: CmnCfg.palette.sideBarHighlightColor
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height + CmnCfg.smallMargin
+        }
     }
 
     Rectangle {

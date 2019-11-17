@@ -28,7 +28,6 @@ Flickable {
         chatScrollBar.position = 1.0
     }
 
-
     Column {
         id: textMessageCol
         focus: true
@@ -59,8 +58,8 @@ Flickable {
                                                                   author)
 
                 spacing: CmnCfg.margin
-                readonly property string pfpUrl: outbound ? config.profilePicture
-                                                          : contactsModel.profilePictureById(author)
+                readonly property string pfpUrl: outbound ? config.profilePicture : contactsModel.profilePictureById(
+                                                                author)
                 property alias highlight: bubbleActual.highlightItem
 
                 // column is most correct to resize for extra content
@@ -156,13 +155,14 @@ Flickable {
         } // Repeater
     } //singleton Col
 
-    states: [ State {
-        name: "searchState"
-        PropertyChanges {
-            target: cvPane
-            rebound: blankTransition
-        }
-    },
+    states: [
+        State {
+            name: "searchState"
+            PropertyChanges {
+                target: cvPane
+                rebound: blankTransition
+            }
+        },
 
         State {
             name: "jumpState"
@@ -172,5 +172,4 @@ Flickable {
             }
         }
     ]
-
 } // flickable
