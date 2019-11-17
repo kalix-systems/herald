@@ -20,8 +20,8 @@ export function searchTextHandler(ownedConversation, chatListView, chatPane, con
     const index = ownedConversation.prevSearchMatch();
     const onScreen = isOnscreen(index, chatListView, chatPane, conversationWindow, false);
     if (!onScreen) {
-        conversationWindow.contentY =
-            chatListView.itemAt(index).y - conversationWindow.height / 2;
+        const convoMiddle = conversationWindow.height / 2;
+        conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
         conversationWindow.returnToBounds();
     }
 }
@@ -29,19 +29,18 @@ export function jumpHandler(ownedConversation, chatListView, chatPane, conversat
     const toJump = (index) => {
         return !isOnscreen(index, chatListView, chatPane, conversationWindow, forward);
     };
-    const convoMiddle = conversationWindow.height / 2;
     if (forward) {
         const index = ownedConversation.nextSearchMatch();
         if (toJump(index)) {
+            const convoMiddle = conversationWindow.height / 2;
             conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
         }
-        return;
     }
     else {
         const index = ownedConversation.prevSearchMatch();
         if (toJump(index)) {
+            const convoMiddle = conversationWindow.height / 2;
             conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
         }
-        return;
     }
 }

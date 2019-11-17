@@ -387,6 +387,6 @@ impl MessagesTrait for Messages {
     }
 
     fn search_index(&self) -> Option<u64> {
-        Some(self.search.index? as u64)
+        Some(self.search.index.unwrap_or(0) as u64)
     }
 }
