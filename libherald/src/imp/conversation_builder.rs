@@ -109,7 +109,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
             // send update to Conversations list
             ret_err!(Conversations::push(ConvUpdate::BuilderFinished(
-                conv.meta.conversation_id
+                conv.meta.clone()
             )));
 
             ret_err!(conv.start());

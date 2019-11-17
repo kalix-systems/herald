@@ -14,7 +14,7 @@ pub enum ConvUpdate {
     /// A new conversation has been added
     NewConversation(ConversationId),
     /// A conversation builder has been finalized
-    BuilderFinished(ConversationId),
+    BuilderFinished(ConversationMeta),
     /// New activity
     NewActivity(ConversationId),
     /// Conversataion settings has been updated

@@ -258,10 +258,18 @@ impl ConversationsTrait for Conversations {
                     self.raw_fetch_and_insert(cid),
                     "Failed to add new conversation"
                 ),
-                BuilderFinished(cid) => push_err!(
-                    self.raw_fetch_and_insert(cid),
-                    "Failed to create new conversation"
-                ),
+                BuilderFinished(inner) => {
+                    let matched = match self.filter.as_ref() {
+                        Some(filter) => inner.matches(filter),
+                        None => true,
+                    };
+
+                    let conv = Conversation { matched, inner };
+
+                    self.model.begin_insert_rows(0, 0);
+                    self.list.push_front(conv);
+                    self.model.end_insert_rows();
+                }
                 NewActivity(cid) => {
                     self.handle_new_activity(cid);
                 }
