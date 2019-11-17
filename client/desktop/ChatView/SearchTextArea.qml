@@ -56,9 +56,11 @@ ScrollView {
                 SearchUtils.searchTextHandler(ownedConversation,
                                               convWindow.chatListView,
                                               chatPane, convWindow)
-            } //clear state to disable buttons
-            else
+            }
+            else {
+                //clear state to disable buttons
                 searchToolBar.state = ""
+            }
         }
     }
 }
