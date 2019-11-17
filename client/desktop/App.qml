@@ -36,6 +36,10 @@ Item {
         id: contextOptionsMenu
     }
 
+    Popups.NewMessagePopup {
+        id: convoMenu
+    }
+
     Config {
         id: config
     }
