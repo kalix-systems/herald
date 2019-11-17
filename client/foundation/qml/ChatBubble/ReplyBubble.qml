@@ -47,10 +47,11 @@ ColumnLayout {
             height: reply.height
             z: 10
             onClicked: {
+                convWindow.state = "jumpState"
                 convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
                         - convWindow.height / 2
-                //TODO: switch from vertical offshoot
-                convWindow.contentY = convWindow.contentY - convWindow.verticalOvershoot
+                convWindow.returnToBounds()
+                convWindow.state = ""
                 replyHighlightAnimation.start()
             }
         }

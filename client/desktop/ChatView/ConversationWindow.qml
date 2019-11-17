@@ -156,11 +156,21 @@ Flickable {
         } // Repeater
     } //singleton Col
 
-    states: State {
+    states: [ State {
         name: "searchState"
         PropertyChanges {
             target: cvPane
             rebound: blankTransition
         }
-    }
+    },
+
+        State {
+            name: "jumpState"
+            PropertyChanges {
+                target: cvPane
+                rebound: blankTransition
+            }
+        }
+    ]
+
 } // flickable
