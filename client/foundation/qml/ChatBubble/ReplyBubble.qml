@@ -3,8 +3,10 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../js/utils.mjs" as Utils
+import QtQuick 2.13
 
 ColumnLayout {
+    id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property string body: ""
@@ -38,6 +40,40 @@ ColumnLayout {
             height: replyWrapper.height
             width: CmnCfg.smallMargin / 4
             color: opColor
+        }
+        MouseArea {
+            anchors.centerIn: reply
+            width: reply.width
+            height: reply.height
+            z: 10
+            onClicked: {
+                convWindow.contentY = chatListView.itemAt(ownedConversation.indexById(replyId)).y
+                        - convWindow.height / 2
+                //TODO: switch from vertical offshoot
+                convWindow.contentY = convWindow.contentY - convWindow.verticalOvershoot
+                replyHighlightAnimation.start()
+            }
+        }
+
+
+        //TODO: nicer animation
+        SequentialAnimation {
+            id: replyHighlightAnimation
+        PropertyAnimation {
+            target: chatListView.itemAt(ownedConversation.indexById(replyId))
+            property: "highlight.opacity"
+            to: 5
+            duration: 200
+            easing.type: Easing.InOutQuad
+         }
+
+        PropertyAnimation {
+            target: chatListView.itemAt(ownedConversation.indexById(replyId))
+            property: "highlight.opacity"
+            to: -5
+            duration: 200
+            easing.type: Easing.InOutQuad
+        }
         }
 
         ColumnLayout {
@@ -83,6 +119,7 @@ ColumnLayout {
                              replyPreview.epochTimestampMs) : ""
                    color: CmnCfg.palette.secondaryTextColor
                }
+
         }
     }
 

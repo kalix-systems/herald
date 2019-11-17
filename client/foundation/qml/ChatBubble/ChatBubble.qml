@@ -12,6 +12,7 @@ Rectangle {
     property bool outbound: parent.outbound
     property real maxWidth: 0.0
     property bool highlight: false
+    property alias highlightItem: bubbleHighlight
     property Component content
 
     color: bubbleColor
@@ -20,13 +21,20 @@ Rectangle {
 
 
     //two rectangles to extend to both sides of pane
+
+    Item {
+        id: bubbleHighlight
+      anchors.fill: parent
+      z: -1
+      opacity: highlight == true ? 1 : 0
     Rectangle {
         width: convWindow.width
         anchors.right: parent.right
         color: CmnCfg.palette.sideBarHighlightColor
         anchors.verticalCenter: parent.verticalCenter
         height: parent.height + CmnCfg.smallMargin
-        visible: highlight
+        opacity: parent.opacity
+        visible: opacity == 1 ? true : false
         z: -1
     }
 
@@ -36,8 +44,10 @@ Rectangle {
         color: CmnCfg.palette.sideBarHighlightColor
         anchors.verticalCenter: parent.verticalCenter
         height: parent.height + CmnCfg.smallMargin
-        visible: highlight
+        opacity: parent.opacity
+        visible: opacity == 1 ? true : false
         z: -1
+    }
     }
 
     Rectangle {

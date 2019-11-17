@@ -44,6 +44,7 @@ Flickable {
             anchors.fill: parent
             model: ownedConversation
             delegate: Row {
+                id: chatRow
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                        receiptStatus)
@@ -60,6 +61,8 @@ Flickable {
                 spacing: CmnCfg.margin
                 readonly property string pfpUrl: outbound ? config.profilePicture
                                                           : contactsModel.profilePictureById(author)
+                property alias highlight: bubbleActual.highlightItem
+
                 // column is most correct to resize for extra content
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -125,7 +128,7 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.paneColor
                     senderColor: userColor
-                    highlight: match_status === 2 ? true : false
+                    highlight: match_status === 2
                     content: if (hasAttachments && dataSaved) {
                                  image
                              } else if (isReply) {
