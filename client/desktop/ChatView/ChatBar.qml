@@ -18,6 +18,7 @@ import "Controls" as CVUtils
 // Factor Component: FC
 // FS: Fix scoping
 ToolBar {
+    id: chatToolBar
     property var conversationItem
     property Messages ownedConversation: messageBar.ownedConversation
 
@@ -64,18 +65,26 @@ ToolBar {
             color: "white"
         }
 
+        Loader {
+            id: searchLoader
+           Layout.minimumWidth: 200
+           Layout.maximumWidth: 300
+        //   Layout.rightMargin: CmnCfg.margin
+            Layout.alignment: Qt.AlignLeft
+            height: parent.height
+        }
+
         Row {
             spacing: CmnCfg.margin
             Layout.alignment: Qt.AlignRight
-
-
+            height: parent.height
 
             Common.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.paneColor
                 topPadding: 1
-                onClicked: messageBar.sourceComponent = chatSearchComponent
+                onClicked: chatToolBar.state = "searchState"
             }
 
             Common.ButtonForm {
@@ -109,6 +118,20 @@ ToolBar {
                     }
                 }
             }
+        }
+    }
+
+    states: State {
+        name: "searchState"
+
+        PropertyChanges {
+            target: searchButton
+            visible: false
+        }
+
+        PropertyChanges {
+            target: searchLoader
+            sourceComponent: chatSearchComponent
         }
     }
 }

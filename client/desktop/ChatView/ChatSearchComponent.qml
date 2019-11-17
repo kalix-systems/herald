@@ -13,52 +13,26 @@ import "js/SearchHandler.mjs" as SearchUtils
 Component {
     id: searchBarComponent
 
-    ToolBar {
-        id: searchToolBar
-        height: CmnCfg.toolbarHeight
-        z: CmnCfg.middleZ
-
-        background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
-        }
-
+    Column {
+       // width: parent.width
+        anchors.right: parent.right
     RowLayout {
-        id: buttonRow
+        Layout.maximumWidth: 400
+        id: searchToolBar
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        spacing: 12
+
+        spacing: CmnCfg.smallMargin / 2
 
         anchors {
-            fill: parent
             leftMargin: CmnCfg.margin
             rightMargin: CmnCfg.margin
         }
 
-        Avatar.AvatarMain {
-
-            size: 32
-            iconColor: CmnCfg.avatarColors[conversationItem.color]
-            textColor: CmnCfg.palette.iconFill
-            initials: conversationItem.title[0].toUpperCase()
-            Layout.alignment: Qt.AlignLeft
-            anchors {
-                margins: 16
-            }
-        }
-
-        Label {
-            id: uid
-            font {
-                bold: true
-                family: CmnCfg.chatFont.name
-                pixelSize: 18
-            }
-            Layout.alignment: Qt.AlignLeft
-            Layout.fillWidth: true
-            elide: "ElideRight"
-            text: conversationItem.title
-            color: "white"
-        }
-
+        ScrollView {
+            Layout.maximumWidth: 300
+            Layout.minimumWidth: 200
+            clip: true
     TextArea {
         id: searchText
         height: CmnCfg.toolbarHeight
@@ -91,24 +65,14 @@ Component {
             }
             }
 
-
             else {print("no matches")
                 searchToolBar.state = ""
                 }
                 }
     }
 
-    Common.ButtonForm {
-        source: "qrc:/x-icon.svg"
-       Layout.alignment: Qt.AlignVCenter
-       fill: CmnCfg.palette.paneColor
-        onClicked: {
-            ownedConversation.clearSearch()
-            ownedConversation.searchActive = false
-            messageBar.sourceComponent = chatBarComponent
         }
-        scale: 0.8
-    }
+
 
     Common.ButtonForm {
         id: back
@@ -116,6 +80,7 @@ Component {
        Layout.alignment: Qt.AlignVCenter
        fill: CmnCfg.palette.paneColor
        enabled: searchToolBar.state === "searchActiveState"
+       opacity: enabled ? 1 : 0.5
        onClicked: {
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, false)
            convWindow.returnToBounds()
@@ -128,25 +93,41 @@ Component {
        Layout.alignment: Qt.AlignVCenter
        fill: CmnCfg.palette.paneColor
        enabled: searchToolBar.state === "searchActiveState"
+       opacity: enabled ? 1 : 0.5
 
        onClicked: {
            SearchUtils.jumpHandler(ownedConversation, convWindow.chatListView, chatPane, convWindow, true)
            convWindow.returnToBounds()
        }
     }
+
+    Common.ButtonForm {
+        source: "qrc:/x-icon.svg"
+       Layout.alignment: Qt.AlignVCenter
+       fill: CmnCfg.palette.paneColor
+        onClicked: {
+            ownedConversation.clearSearch()
+            ownedConversation.searchActive = false
+            messageBar.state = ""
+        }
+        scale: 0.8
+    }
+
+    states: State {
+        name: "searchActiveState"
+    }
+
+
     }
 
     Rectangle {
         height: 1
-        anchors.right: parent.right
-        anchors.rightMargin: 84
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: CmnCfg.smallMargin / 2
-        width: searchText.width + 20
-        color: CmnCfg.palette.paneColor
+        width: searchToolBar.width - CmnCfg.smallMargin
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: "white"
     }
-    states: State {
-        name: "searchActiveState"
-    }
-    }
+  }
+
 }
+
+
