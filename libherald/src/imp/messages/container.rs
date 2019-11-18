@@ -140,13 +140,17 @@ impl Container {
         Some(matches)
     }
 
-    pub(super) fn clear_search(&mut self, model: &mut List) {
-        for (ix, data) in self.map.values_mut().enumerate() {
+    pub(super) fn clear_search(&mut self, model: &mut List) -> Option<()> {
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg_id)?;
+
             if data.match_status.is_match() {
                 data.match_status = MatchStatus::NotMatched;
                 model.data_changed(ix, ix);
             }
         }
+
+        Some(())
     }
 
     pub(super) fn handle_receipt(

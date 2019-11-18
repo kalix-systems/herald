@@ -93,7 +93,6 @@ impl SearchState {
     }
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
-        self.active = false;
         self.pattern = SearchPattern::new_normal("".into())?;
         self.matches = VecDeque::new();
         self.cur = None;
@@ -102,7 +101,6 @@ impl SearchState {
         emit.search_index_changed();
         emit.search_pattern_changed();
         emit.search_regex_changed();
-        emit.search_active_changed();
         emit.search_num_matches_changed();
 
         Ok(())

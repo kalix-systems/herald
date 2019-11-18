@@ -367,11 +367,16 @@ impl MessagesTrait for Messages {
 
     /// Turns search on or off
     fn set_search_active(&mut self, active: bool) {
-        self.search.active = active;
-        self.emit.search_active_changed();
-
         if !active {
+            self.search.active = false;
             self.clear_search();
+        } else if !self.search.active {
+            self.search.active = true;
+            self.emit.search_active_changed();
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
         }
     }
 
