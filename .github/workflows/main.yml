@@ -41,13 +41,13 @@ jobs:
       - run: target/debug/herald_server &
       - uses: Mercotui/install-qt-dev-action@v0.1.1
         with:
-          packages: 'qt.qt5.5131.gcc_64'
+          packages: 'qt.qt5.5124.gcc_64'
       - uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release --manifest-path=libherald/Cargo.toml
       - run: echo "127.0.0.1:8080" > heraldcore.conf && export HERALDCORE_CONF=heraldcore.conf
-      - run: mkdir build && cd build && /Qt/5.13.1/gcc_64/bin/qmake ../client/tests/libherald/libherald.pro && make && ./libherald
+      - run: mkdir build && cd build && /Qt/5.12.4/gcc_64/bin/qmake ../client/tests/libherald/libherald.pro && make && ./libherald
 
   test:
     name: Test
