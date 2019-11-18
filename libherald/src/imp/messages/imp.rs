@@ -30,11 +30,10 @@ impl Messages {
             self.search.index,
             self.search.num_matches(),
         );
-        let new = (
-            self.search.next(&self.container),
-            self.search.index,
-            self.search.num_matches(),
-        );
+
+        let new_cur = self.search.next(&self.container);
+        let new_len = self.search.num_matches();
+        let new = (new_cur, self.search.index, new_len);
 
         self.match_helper(old, new)
     }

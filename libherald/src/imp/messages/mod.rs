@@ -232,6 +232,7 @@ impl MessagesTrait for Messages {
 
         spawn!(conversation::delete_conversation(&id), false);
 
+        self.clear_search();
         self.model
             .begin_remove_rows(0, self.container.len().saturating_sub(1));
         self.container = Default::default();
