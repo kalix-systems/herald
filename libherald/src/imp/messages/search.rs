@@ -20,6 +20,7 @@ pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
     matches: Vec<Match>,
+    start_index: Option<usize>,
     pub(super) index: Option<usize>,
 }
 
@@ -29,6 +30,7 @@ impl SearchState {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
             active: false,
             matches: Vec::new(),
+            start_index: None,
             index: None,
         }
     }
@@ -38,6 +40,21 @@ impl SearchState {
             SearchPattern::Normal { .. } => false,
             SearchPattern::Regex { .. } => true,
         }
+    }
+
+    pub(super) fn start_hint(&mut self, hint: f32, container: &Container) -> Option<()> {
+        let approx_index = (container.len() as f64 * hint as f64).ceil() as usize;
+
+        let closest_message = container.get(approx_index)?;
+
+        let index = match self.matches.binary_search(&Match(*closest_message)) {
+            Ok(ix) => ix,
+            Err(ix) => ix,
+        };
+
+        self.start_index.replace(index);
+
+        Some(())
     }
 
     pub(super) fn set_pattern(
@@ -97,6 +114,7 @@ impl SearchState {
         self.pattern.set_pattern("".into())?;
         self.matches = Vec::new();
         self.index = None;
+        self.start_index = None;
 
         emit.search_index_changed();
         emit.search_pattern_changed();
@@ -107,11 +125,12 @@ impl SearchState {
     }
 
     pub(super) fn initial_next_index(&self) -> usize {
-        0
+        self.start_index.unwrap_or(0)
     }
 
     pub(super) fn initial_prev_index(&self) -> usize {
-        self.num_matches().saturating_sub(1)
+        self.start_index
+            .unwrap_or_else(|| self.num_matches().saturating_sub(1))
     }
 
     pub(super) fn current(&self) -> Option<Match> {
