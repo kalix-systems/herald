@@ -32,7 +32,7 @@ Component {
             Text {
                 id: indexText
                 property bool active: searchToolBar.state == "searchActiveState"
-                property int searchPlace: active ? ownedConversation.searchIndex + 1 : 0
+                property int searchPlace: active ? ownedConversation.searchIndex : 0
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + ownedConversation.searchNumMatches : ""
@@ -77,7 +77,6 @@ Component {
                 Layout.alignment: Qt.AlignVCenter
                 fill: CmnCfg.palette.paneColor
                 onClicked: {
-                    ownedConversation.clearSearch()
                     ownedConversation.searchActive = false
                     messageBar.state = ""
                 }

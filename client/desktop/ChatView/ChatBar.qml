@@ -114,8 +114,7 @@ ToolBar {
 
                     MenuItem {
                         text: "Clear History"
-                        onTriggered: ownedConversation.clearConversationHistory(
-                                         )
+                        onTriggered: ownedConversation.clearConversationHistory()
                     }
                 }
             }
