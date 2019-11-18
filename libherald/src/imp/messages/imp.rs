@@ -57,7 +57,14 @@ impl Messages {
         Some(ix)
     }
 
-    pub(super) fn raw_list_remove(&mut self, ix: usize) {
+    pub(super) fn raw_remove(&mut self, msg_id: MsgId, ix: usize) {
+        self.search.try_remove_match(
+            &msg_id,
+            &mut self.container,
+            &mut self.emit,
+            &mut self.model,
+        );
+
         let len = self.container.len();
 
         let prev_state = if ix > 0 {
@@ -154,13 +161,7 @@ impl Messages {
     pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
         for mid in mids {
             if let Some(ix) = self.container.index_of(mid) {
-                self.raw_list_remove(ix);
-                self.search.try_remove_match(
-                    &mid,
-                    &mut self.container,
-                    &mut self.emit,
-                    &mut self.model,
-                );
+                self.raw_remove(mid, ix);
             }
         }
     }

@@ -220,10 +220,7 @@ impl MessagesTrait for Messages {
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
         spawn!(message::delete_message(&id), false);
-        // NOTE: the order is important
-        self.search
-            .try_remove_match(&id, &mut self.container, &mut self.emit, &mut self.model);
-        self.raw_list_remove(ix);
+        self.raw_remove(id, ix);
 
         true
     }
