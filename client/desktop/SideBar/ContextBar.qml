@@ -22,40 +22,7 @@ ToolBar {
 
         anchors.fill: parent
 
-        AvatarMain {
-            id: configAvatar
-            iconColor: CmnCfg.palette.avatarColors[config.color]
-            initials: config.name[0].toUpperCase()
-            pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
-
-            size: 28
-            Layout.alignment: Qt.AlignCenter
-            Layout.leftMargin: 12
-            Layout.rightMargin: 12
-            avatarHeight: 28
-
-            MouseArea {
-                id: avatarHoverHandler
-                anchors.fill: parent
-
-                cursorShape: Qt.PointingHandCursor
-
-                onPressed: overlay.visible = true
-                onReleased: overlay.visible = false
-                onClicked: configPopup.show()
-            }
-
-            ColorOverlay {
-                id: overlay
-                anchors.fill: parent
-                source: parent
-
-                visible: false
-                color: "black"
-                opacity: 0.2
-                smooth: true
-            }
-        }
+        Common.ConfigAvatar {}
 
         Text {
             id: headerText

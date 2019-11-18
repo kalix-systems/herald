@@ -22,41 +22,7 @@ Component {
 
             anchors.fill: parent
 
-            AvatarMain {
-                id: configAvatar
-                iconColor: CmnCfg.palette.avatarColors[config.color]
-                initials: config.name[0].toUpperCase()
-                size: 28
-                avatarHeight: 28
-                pfpPath: Utils.safeStringOrDefault(config.profilePicture, "")
-                Layout.alignment: Qt.AlignCenter
-                Layout.leftMargin: 12
-                Layout.rightMargin: 12
-                MouseArea {
-                    anchors.fill: parent
-                    id: avatarHoverHandler
-                    cursorShape: Qt.PointingHandCursor
-                    onPressed: {
-                        overlay.visible = true
-                    }
-                    onReleased: {
-                        overlay.visible = false
-                    }
-                    onClicked: {
-                        configPopup.show()
-                    }
-                }
-
-                ColorOverlay {
-                    id: overlay
-                    visible: false
-                    anchors.fill: parent
-                    source: parent
-                    color: "black"
-                    opacity: 0.2
-                    smooth: true
-                }
-            }
+            Common.ConfigAvatar {}
 
             Text {
                 id: text

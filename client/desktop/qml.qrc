@@ -53,5 +53,6 @@
         <file>ChatView/SearchTextArea.qml</file>
         <file>SideBar/NewContactComponent.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
+        <file>common/ConfigAvatar.qml</file>
     </qresource>
 </RCC>
