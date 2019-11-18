@@ -220,7 +220,9 @@ impl MessagesTrait for Messages {
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
         spawn!(message::delete_message(&id), false);
-
+        // NOTE: the order is important
+        self.search
+            .try_remove_match(&id, &mut self.container, &mut self.emit, &mut self.model);
         self.raw_list_remove(ix);
 
         true
@@ -293,13 +295,9 @@ impl MessagesTrait for Messages {
                 MsgUpdate::StoreDone(mid) => {
                     ret_none!(self.container.handle_store_done(mid, &mut self.model));
                 }
-                MsgUpdate::ExpiredMessages(mids) => {
-                    for mid in mids {
-                        if let Some(ix) = self.container.index_of(mid) {
-                            self.raw_list_remove(ix);
-                        }
-                    }
-                }
+
+                MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
+
                 MsgUpdate::Container(container) => {
                     if container.is_empty() {
                         continue;

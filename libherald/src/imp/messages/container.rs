@@ -1,6 +1,6 @@
 use super::*;
 use crate::{shared::AddressedBus, spawn};
-use std::{collections::VecDeque, ops::Not};
+use std::ops::Not;
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
@@ -19,6 +19,7 @@ impl Container {
         self.list.len()
     }
 
+    #[allow(unused)]
     pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
         self.map.contains_key(msg_id)
     }
@@ -29,6 +30,10 @@ impl Container {
 
     pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
         self.map.get_mut(msg_id)
+    }
+
+    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
+        self.map.get(msg_id)
     }
 
     pub(super) fn fill(cid: ConversationId) {
@@ -61,6 +66,12 @@ impl Container {
         self.map.get(&msg?.msg_id)
     }
 
+    #[allow(unused)]
+    pub(super) fn msg_data_mut(&mut self, index: usize) -> Option<&mut MsgData> {
+        let msg = self.list.get(index);
+        self.map.get_mut(&msg?.msg_id)
+    }
+
     pub(super) fn last(&self) -> Option<&Message> {
         self.list.last()
     }
@@ -76,13 +87,15 @@ impl Container {
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
-    pub(super) fn mem_remove(&mut self, ix: usize) {
+    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<MsgId> {
         if ix >= self.len() {
-            return;
+            return None;
         }
 
         let msg = self.list.remove(ix);
-        self.map.remove(&msg.msg_id);
+        self.map.remove(&msg.msg_id)?;
+
+        Some(msg.msg_id)
     }
 
     pub(super) fn binary_search(&self, msg: &Message) -> Result<usize, usize> {
@@ -101,14 +114,14 @@ impl Container {
         search: &SearchState,
         model: &mut List,
         emit: &mut Emitter,
-    ) -> Option<VecDeque<Match>> {
+    ) -> Option<Vec<Match>> {
         if search.active.not() || search.pattern.raw().is_empty() {
             return None;
         }
 
         let pattern = &search.pattern;
 
-        let mut matches: VecDeque<Match> = VecDeque::new();
+        let mut matches: Vec<Match> = Vec::new();
 
         for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
             let data = self.map.get_mut(msg_id)?;
@@ -130,7 +143,7 @@ impl Container {
                 continue;
             };
 
-            matches.push_back(Match(*msg_id))
+            matches.push(Match(*msg_id))
         }
 
         emit.search_num_matches_changed();

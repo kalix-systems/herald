@@ -1,5 +1,4 @@
 use super::*;
-use std::collections::VecDeque;
 use std::ops::Not;
 
 #[derive(PartialEq)]
@@ -14,26 +13,13 @@ impl SearchChanged {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
-pub(super) struct Cursor(pub(super) MsgId);
-
-impl Cursor {
-    fn msg_id(&self) -> &MsgId {
-        &self.0
-    }
-
-    pub(super) fn into_inner(self) -> MsgId {
-        self.0
-    }
-}
-
+#[derive(Copy, Clone, PartialEq)]
 pub(super) struct Match(pub(super) MsgId);
 
 pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
-    matches: VecDeque<Match>,
-    pub(super) cur: Option<Cursor>,
+    matches: Vec<Match>,
     pub(super) index: Option<usize>,
 }
 
@@ -42,8 +28,7 @@ impl SearchState {
         Self {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
             active: false,
-            matches: VecDeque::new(),
-            cur: None,
+            matches: Vec::new(),
             index: None,
         }
     }
@@ -70,15 +55,17 @@ impl SearchState {
         Ok(SearchChanged::Changed)
     }
 
-    pub(super) fn set_matches(&mut self, matches: VecDeque<Match>, emit: &mut Emitter) {
-        self.cur = None;
+    pub(super) fn set_matches(&mut self, matches: Vec<Match>, emit: &mut Emitter) {
         self.matches = matches;
-
-        assert_eq!(self.num_matches(), self.matches.len());
-
         self.index = None;
+
         emit.search_num_matches_changed();
         emit.search_index_changed();
+    }
+
+    pub(super) fn msg_matches(&self, msg_id: &MsgId, container: &Container) -> Option<bool> {
+        let data = container.get_data(msg_id)?;
+        Some(data.matches(&self.pattern))
     }
 
     pub(super) fn set_regex(
@@ -103,16 +90,12 @@ impl SearchState {
     }
 
     pub(super) fn num_matches(&self) -> usize {
-        match self.cur {
-            Some(_) => self.matches.len() + 1,
-            None => self.matches.len(),
-        }
+        self.matches.len()
     }
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
         self.pattern.set_pattern("".into())?;
-        self.matches = VecDeque::new();
-        self.cur = None;
+        self.matches = Vec::new();
         self.index = None;
 
         emit.search_index_changed();
@@ -131,106 +114,94 @@ impl SearchState {
         self.num_matches().saturating_sub(1)
     }
 
-    pub(super) fn increment_index(&mut self) {
-        let num_matches = self.num_matches();
-
-        self.index = match self.index {
-            Some(ix) => Some((ix + 1) % num_matches),
-            None => Some(self.initial_next_index()),
-        };
+    pub(super) fn current(&self) -> Option<Match> {
+        let ix = self.index?;
+        self.matches.get(ix).copied()
     }
 
-    pub(super) fn decrement_index(&mut self) {
-        let num_matches = self.num_matches();
-
-        self.index = match self.index {
-            Some(ix) => Some(if ix != 0 {
-                (ix - 1) % num_matches
-            } else {
-                num_matches.saturating_sub(1)
-            }),
-            None => Some(self.initial_prev_index()),
-        };
-    }
-
-    pub(super) fn next(&mut self, container: &Container) -> Option<Cursor> {
+    pub(super) fn next(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let next = loop {
-            let cur = match (self.matches.pop_front(), self.cur) {
-                (Some(Match(msg_id)), Some(cursor)) => {
-                    if container.contains(cursor.msg_id()) {
-                        self.matches.push_back(Match(cursor.into_inner()));
-                    }
+        match self.index {
+            Some(index) => {
+                let index = (index + 1) % self.matches.len();
+                self.index.replace(index);
 
-                    Cursor(msg_id)
-                }
-                (Some(Match(msg_id)), None) => Cursor(msg_id),
-                (None, Some(cur @ Cursor(_))) => {
-                    if self.matches.front().is_some() {
-                        continue;
-                    }
-                    cur
-                }
-                (None, None) => {
-                    self.cur = None;
-                    self.index = None;
-                    return None;
-                }
-            };
-
-            // check if item is still valid
-            if container.contains(cur.msg_id()) {
-                // Note: if the order is switched you'll get an off-by-one
-                self.cur = Some(cur);
-                self.increment_index();
-                break cur;
+                self.matches.get(index).copied()
             }
-        };
+            None => {
+                let index = self.initial_next_index();
+                self.index.replace(index);
 
-        Some(next)
+                self.matches.get(index).copied()
+            }
+        }
     }
 
-    pub(super) fn prev(&mut self, container: &Container) -> Option<Cursor> {
+    pub(super) fn prev(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let prev = loop {
-            let cur = match (self.matches.pop_back(), self.cur) {
-                (Some(Match(msg_id)), Some(cursor)) => {
-                    if container.contains(cursor.msg_id()) {
-                        self.matches.push_front(Match(cursor.into_inner()));
-                    }
+        match self.index {
+            Some(index) => {
+                let index = if index == 0 {
+                    self.matches.len().saturating_sub(1)
+                } else {
+                    index - 1
+                };
+                self.index.replace(index);
 
-                    Cursor(msg_id)
-                }
-                (Some(Match(msg_id)), None) => Cursor(msg_id),
-                (None, Some(cur @ Cursor(_))) => {
-                    if self.matches.front().is_some() {
-                        continue;
-                    }
-
-                    cur
-                }
-                (None, None) => {
-                    self.cur = None;
-                    self.index = None;
-                    return None;
-                }
-            };
-
-            // check if item is still valid
-            if container.contains(cur.msg_id()) {
-                // Note: if the order is switched you'll get an off-by-one
-                self.cur = Some(cur);
-                self.decrement_index();
-                break cur;
+                self.matches.get(index).copied()
             }
-        };
+            None => {
+                let index = self.initial_prev_index();
+                self.index.replace(index);
 
-        Some(prev)
+                self.matches.get(index).copied()
+            }
+        }
+    }
+
+    pub(super) fn try_remove_match(
+        &mut self,
+        msg_id: &MsgId,
+        container: &mut Container,
+        emit: &mut Emitter,
+        model: &mut List,
+    ) -> Option<()> {
+        if self.active.not() || self.msg_matches(msg_id, container)?.not() {
+            return Some(());
+        }
+
+        let pos = self.matches.iter().position(|Match(mid)| mid == msg_id)?;
+        self.matches.remove(pos);
+        emit.search_num_matches_changed();
+
+        if self.matches.is_empty() {
+            self.index = None;
+            emit.search_index_changed();
+            return Some(());
+        }
+
+        if let Some(ix) = self.index {
+            if (0..=ix).contains(&pos) {
+                let new_ix = ix.saturating_sub(1);
+                self.index.replace(new_ix);
+                emit.search_index_changed();
+
+                let Match(mid) = self.matches.get(new_ix)?;
+                let data = container.get_data_mut(mid)?;
+                data.match_status = MatchStatus::Focused;
+
+                let container_ix = container.index_of(*mid)?;
+
+                model.data_changed(container_ix, container_ix);
+            }
+        }
+
+        Some(())
     }
 }

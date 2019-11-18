@@ -10,55 +10,36 @@ impl Messages {
     }
 
     pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
-        let old = (
-            self.search.cur,
-            self.search.index,
-            self.search.num_matches(),
-        );
-        let new = (
-            self.search.prev(&self.container),
-            self.search.index,
-            self.search.num_matches(),
-        );
+        let old = (self.search.current(), self.search.index);
+
+        let new = (self.search.prev(), self.search.index);
 
         self.match_helper(old, new)
     }
 
     pub(super) fn next_match_helper(&mut self) -> Option<usize> {
-        let old = (
-            self.search.cur,
-            self.search.index,
-            self.search.num_matches(),
-        );
+        let old = (self.search.current(), self.search.index);
 
-        let new_cur = self.search.next(&self.container);
-        let new_len = self.search.num_matches();
-        let new = (new_cur, self.search.index, new_len);
+        let new = (self.search.next(), self.search.index);
 
         self.match_helper(old, new)
     }
 
     fn match_helper(
         &mut self,
-        (old, old_index, old_len): (Option<Cursor>, Option<usize>, usize),
-        (new, new_index, new_len): (Option<Cursor>, Option<usize>, usize),
+        (old, old_index): (Option<Match>, Option<usize>),
+        (new, new_index): (Option<Match>, Option<usize>),
     ) -> Option<usize> {
         if old_index != new_index {
             self.emit.search_index_changed();
         }
 
-        if new_len != old_len {
-            self.emit.search_num_matches_changed();
-        }
-
         if old == new {
-            let new = new?.into_inner();
-            return self.container.index_of(new);
+            let Match(mid) = new?;
+            return self.container.index_of(mid);
         }
 
-        if let Some(old) = old {
-            let old = old.into_inner();
-
+        if let Some(Match(old)) = old {
             if let Some(data) = self.container.get_data_mut(&old) {
                 data.match_status = MatchStatus::Matched;
                 let ix = self.container.index_of(old)?;
@@ -66,12 +47,12 @@ impl Messages {
             }
         }
 
-        let new = new?.into_inner();
+        let Match(mid) = new?;
 
-        let data = self.container.get_data_mut(&new)?;
+        let data = self.container.get_data_mut(&mid)?;
         data.match_status = MatchStatus::Focused;
 
-        let ix = self.container.index_of(new)?;
+        let ix = self.container.index_of(mid)?;
         self.model.data_changed(ix, ix);
         Some(ix)
     }
@@ -168,6 +149,20 @@ impl Messages {
         Conversations::push(ConvUpdate::NewActivity(cid))?;
 
         Ok(())
+    }
+
+    pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
+        for mid in mids {
+            if let Some(ix) = self.container.index_of(mid) {
+                self.raw_list_remove(ix);
+                self.search.try_remove_match(
+                    &mid,
+                    &mut self.container,
+                    &mut self.emit,
+                    &mut self.model,
+                );
+            }
+        }
     }
 }
 
