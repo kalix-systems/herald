@@ -27,7 +27,7 @@ Column {
         color: "black"
     }
 
-    ConversationBuilderUsers {
+    UsersSearch {
         id: groupConvoMake
     }
 

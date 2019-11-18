@@ -4,10 +4,7 @@ use crate::{
         color, name, profile_picture,
         shared::{get_user, user_ids},
     },
-    interface::{
-        ConversationBuilderUsersEmitter as Emitter, ConversationBuilderUsersList as List,
-        ConversationBuilderUsersTrait,
-    },
+    interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
     ret_err,
 };
 use herald_common::UserId;
@@ -20,14 +17,14 @@ struct User {
 }
 
 /// A wrapper around a vector of `User`s.
-pub struct ConversationBuilderUsers {
+pub struct UsersSearch {
     emit: Emitter,
     model: List,
     filter: Option<SearchPattern>,
     list: Vec<User>,
 }
 
-impl ConversationBuilderUsersTrait for ConversationBuilderUsers {
+impl UsersSearchTrait for UsersSearch {
     fn new(emit: Emitter, model: List) -> Self {
         Self {
             emit,
@@ -128,7 +125,7 @@ impl ConversationBuilderUsersTrait for ConversationBuilderUsers {
     }
 }
 
-impl ConversationBuilderUsers {
+impl UsersSearch {
     fn inner_filter(&mut self) -> Option<()> {
         let filter = &self.filter.as_ref()?;
         for (ix, user) in self.list.iter_mut().enumerate() {

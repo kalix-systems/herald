@@ -54,7 +54,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
-       conversation_builder_users(),
+       users_search(),
        message_builder(),
        attachments(),
        global_message_search()
@@ -323,7 +323,7 @@ fn conversation_builder() -> Object {
     }
 }
 
-fn conversation_builder_users() -> Object {
+fn users_search() -> Object {
     let props = props! {
         filter: Prop::new().simple(SimpleType::QString).write().optional()
     };
@@ -342,7 +342,7 @@ fn conversation_builder_users() -> Object {
     };
 
     obj! {
-        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+        UsersSearch: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 

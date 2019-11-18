@@ -8,7 +8,6 @@
 class Attachments;
 class Config;
 class ConversationBuilder;
-class ConversationBuilderUsers;
 class Conversations;
 class Errors;
 class GlobalMessageSearch;
@@ -19,6 +18,7 @@ class MessageBuilder;
 class MessagePreview;
 class Messages;
 class Users;
+class UsersSearch;
 
 class Attachments : public QAbstractItemModel
 {
@@ -151,59 +151,6 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void pictureChanged();
-};
-
-class ConversationBuilderUsers : public QAbstractItemModel
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
-    explicit ConversationBuilderUsers(bool owned, QObject *parent);
-public:
-    explicit ConversationBuilderUsers(QObject *parent = nullptr);
-    ~ConversationBuilderUsers() override;
-    QString filter() const;
-    void setFilter(const QString& v);
-    Q_INVOKABLE void clearFilter();
-
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
-    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    bool canFetchMore(const QModelIndex &parent) const override;
-    void fetchMore(const QModelIndex &parent) override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-    int role(const char* name) const;
-    QHash<int, QByteArray> roleNames() const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE QVariant color(int row) const;
-    Q_INVOKABLE bool matched(int row) const;
-    Q_INVOKABLE QString name(int row) const;
-    Q_INVOKABLE QString profilePicture(int row) const;
-    Q_INVOKABLE bool selected(int row) const;
-    Q_INVOKABLE bool setSelected(int row, bool value);
-    Q_INVOKABLE QString userId(int row) const;
-
-Q_SIGNALS:
-    // new data is ready to be made available to the model with fetchMore()
-    void newDataReady(const QModelIndex &parent) const;
-private:
-    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
-    void initHeaderData();
-    void updatePersistentIndexes();
-Q_SIGNALS:
-    void filterChanged();
 };
 
 class Conversations : public QAbstractItemModel
@@ -718,5 +665,58 @@ private:
 Q_SIGNALS:
     void filterChanged();
     void filterRegexChanged();
+};
+
+class UsersSearch : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    explicit UsersSearch(bool owned, QObject *parent);
+public:
+    explicit UsersSearch(QObject *parent = nullptr);
+    ~UsersSearch() override;
+    QString filter() const;
+    void setFilter(const QString& v);
+    Q_INVOKABLE void clearFilter();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE QVariant color(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE QString name(int row) const;
+    Q_INVOKABLE QString profilePicture(int row) const;
+    Q_INVOKABLE bool selected(int row) const;
+    Q_INVOKABLE bool setSelected(int row, bool value);
+    Q_INVOKABLE QString userId(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void filterChanged();
 };
 #endif // BINDINGS_H
