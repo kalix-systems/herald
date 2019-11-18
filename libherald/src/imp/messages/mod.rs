@@ -402,5 +402,8 @@ impl MessagesTrait for Messages {
         self.search.index.map(|ix| ix + 1).unwrap_or(0) as u64
     }
 
-    fn set_search_hint(&mut self, _scroll_position: f32, _scroll_height: f32) {}
+    fn set_search_hint(&mut self, scroll_position: f32, scroll_height: f32) {
+        let percentage = scroll_position + scroll_height / 2.0;
+        self.search.start_hint(percentage, &self.container);
+    }
 }
