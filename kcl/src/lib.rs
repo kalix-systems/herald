@@ -9,6 +9,7 @@ pub mod hash;
 pub mod random;
 pub mod sign;
 
+pub use libsodium_sys;
 use std::sync::{
     atomic::{AtomicI32, Ordering},
     Once,

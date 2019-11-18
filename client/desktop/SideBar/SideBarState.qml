@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "./ConversationView"
 import "../SideBar/NewConvoComponents" as ConvUtils
+import "../SideBar/GroupFlowComponents" as GroupFlow
 
 Page {
     id: sideBarStateLoader
@@ -31,6 +32,11 @@ Page {
         }
     }
 
+   GroupFlow.NewGroupComponent {
+       id: newGroupComponent
+   }
+
+
     Component {
         id: convoFinalGroup
         ConvUtils.FinalGroupList {
@@ -54,7 +60,7 @@ Page {
                 visible: false
             }
             PropertyChanges {
-                target: searchLoader
+                target: headerLoader
                 sourceComponent: searchBarComponent
                 searchPlaceholder: "Enter full name or username"
             }
@@ -63,7 +69,7 @@ Page {
         State {
             name: "conversationSearch"
             PropertyChanges {
-                target: searchLoader
+                target: headerLoader
                 sourceComponent: searchBarComponent
                 searchPlaceholder: "Search your conversations"
             }
@@ -77,7 +83,7 @@ Page {
             }
 
             PropertyChanges {
-                target: searchLoader
+                target: headerLoader
                 sourceComponent: searchBarComponent
                 searchPlaceholder: "Enter contact name"
                 contactsSearch: true
@@ -94,37 +100,19 @@ Page {
             name: "newGroupState"
             PropertyChanges {
                 target: sideBarBodyLoader
-                sourceComponent: contactslvComponent
+                sourceComponent: newGroupComponent
             }
 
             PropertyChanges {
-                target: searchLoader
-                sourceComponent: groupSelectComponent
+                target: headerLoader
+                sourceComponent: headerBarComponent
                 contactsSearch: true
             }
             PropertyChanges {
                 target: convoBuilderLoader
-                source: "NewConvoComponents/ConvoBuilder.qml"
-            }
-        },
-
-        State {
-            name: "finalizeGroupState"
-
-            PropertyChanges {
-                target: searchLoader
-                sourceComponent: finalizeGroupComponent
-            }
-
-            PropertyChanges {
-                target: convoBuilderLoader
-                source: "../SideBar/NewConvoComponents/ConvoBuilder.qml"
-            }
-
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: convoFinalGroup
+                source: "GroupFlowComponents/ConvoBuilder.qml"
             }
         }
+
     ]
 }

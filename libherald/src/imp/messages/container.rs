@@ -1,5 +1,6 @@
 use super::*;
 use heraldcore::{channel_recv_err, channel_send_err};
+use std::{collections::VecDeque, ops::Not};
 
 #[derive(Default)]
 pub(super) struct Container {
@@ -16,14 +17,26 @@ impl Container {
         self.list.len()
     }
 
+    pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
+        self.map.contains_key(msg_id)
+    }
+
     pub(super) fn get(&self, ix: usize) -> Option<&Message> {
         self.list.get(ix)
+    }
+
+    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
+        self.map.get(msg_id)
+    }
+
+    pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
+        self.map.get_mut(msg_id)
     }
 
     pub(super) fn new(cid: ConversationId) -> Result<Self, HErr> {
         let (tx, rx) = crossbeam_channel::bounded(0);
 
-        // for exception safety
+        // for exception safety, although this could be made non-blocking
         std::thread::Builder::new().spawn(move || {
             let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
                 ret_err!(conversation::conversation_messages(&cid))
@@ -95,44 +108,41 @@ impl Container {
         search: &SearchMachine,
         model: &mut List,
         emit: &mut Emitter,
-    ) -> Option<Vec<Match>> {
-        if !search.active {
+    ) -> Option<VecDeque<Match>> {
+        if search.active.not() || search.pattern.raw().is_empty() {
             return None;
         }
 
-        let old_cnt = search.matches.len();
-
         let pattern = &search.pattern;
 
-        // to help the borrow checker
-        let map = &mut self.map;
+        let mut matches: VecDeque<Match> = VecDeque::new();
 
-        let matches: Vec<Match> = self
-            .list
-            .iter()
-            .enumerate()
-            .map(|(ix, Message { msg_id, .. })| (ix, msg_id))
-            .filter_map(|(ix, mid)| {
-                let data = map.get_mut(&mid)?;
-                let matches = data.matches(pattern);
-                data.matched = matches;
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(msg_id)?;
+            let matched = data.matches(pattern);
 
-                Some(Match { ix })
-            })
-            .collect();
+            data.match_status = if matched {
+                MatchStatus::Matched
+            } else {
+                MatchStatus::NotMatched
+            };
 
-        if old_cnt != matches.len() {
-            emit.search_num_matches_changed();
+            if !matched {
+                continue;
+            };
+
+            model.data_changed(ix, ix);
+            matches.push_back(Match { mid: *msg_id })
         }
 
-        model.data_changed(0, self.list.len().saturating_sub(1));
+        emit.search_num_matches_changed();
 
         Some(matches)
     }
 
     pub(super) fn clear_search(&mut self, model: &mut List) {
         for data in self.map.values_mut() {
-            data.matched = false;
+            data.match_status = MatchStatus::NotMatched;
         }
 
         model.data_changed(0, self.list.len().saturating_sub(1));

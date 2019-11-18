@@ -256,7 +256,7 @@ impl OutboundMessageBuilder {
             has_attachments,
         };
 
-        callback(StoreAndSend::Msg(msg));
+        callback(StoreAndSend::Msg(Box::new(msg)));
 
         let attachments: Result<Vec<Attachment>, HErr> = attachments
             .into_iter()
@@ -355,7 +355,7 @@ impl OutboundMessageBuilder {
         }
 
         match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::SendDone(_) => Ok(out),
+            StoreAndSend::SendDone(_) => Ok(*out),
             other => {
                 panic!("Unexpected variant {:?}", other);
             }

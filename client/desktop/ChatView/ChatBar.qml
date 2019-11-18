@@ -19,7 +19,7 @@ import "Controls" as CVUtils
 // FS: Fix scoping
 ToolBar {
     property var conversationItem
-    property Messages ownedConversation: parent.ownedConversation
+    property Messages ownedConversation: messageBar.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
@@ -68,11 +68,14 @@ ToolBar {
             spacing: CmnCfg.margin
             Layout.alignment: Qt.AlignRight
 
+
+
             Common.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.paneColor
                 topPadding: 1
+                onClicked: messageBar.sourceComponent = chatSearchComponent
             }
 
             Common.ButtonForm {

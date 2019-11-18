@@ -5,6 +5,8 @@ use rusqlite::{params, NO_PARAMS};
 pub(crate) mod db;
 /// Functionality related to changes in conversation settings
 pub mod settings;
+mod types;
+pub use types::*;
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.

@@ -1,5 +1,5 @@
 use super::*;
-use crate::{platform_dirs::PROFILE_PICTURES_DIR, womp};
+use crate::{platform_dirs::PICTURES_DIR, womp};
 use herald_common::sig::KeyPair;
 use serial_test_derive::serial;
 use std::convert::TryInto;
@@ -79,7 +79,7 @@ fn complicated_add_get_set_config() {
         .set_profile_picture_db(&conn, Some(test_picture.to_string()))
         .expect(womp!("failed to set picture"));
 
-    std::fs::remove_dir_all(PROFILE_PICTURES_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(PICTURES_DIR.as_path()).expect(womp!());
 }
 
 #[test]

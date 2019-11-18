@@ -40,10 +40,34 @@ Item {
     // PAUL: it is time for real art here.
     Component {
         id: splash
-        Image {
+
+        Rectangle {
             anchors.fill: parent
-            source: "qrc:/land.png"
+            color: CmnCfg.palette.sideBarHighlightColor
+
+            Rectangle {
+                anchors.top: parent.top
+                width: parent.width
+                color: CmnCfg.palette.secondaryColor
+                height: CmnCfg.toolbarHeight + 1
+
+                Text {
+                    anchors.left: parent.left
+                    anchors.leftMargin: CmnCfg.largeMargin
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Herald"
+                    font.pixelSize: CmnCfg.headerSize
+                    font.family: CmnCfg.chatFont.name
+                    font.bold: true
+                    color: CmnCfg.palette.mainColor
+                }
+            }
+
+        Image {
+            anchors.centerIn: parent
+            source: "qrc:/herald.icns"
             mipmap: true
+        }
         }
     }
 

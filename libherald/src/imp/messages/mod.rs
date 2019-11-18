@@ -5,7 +5,10 @@ use heraldcore::{
     config::Config,
     conversation,
     errors::HErr,
-    message::{self, Message as Msg},
+    message::{
+        self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
+        ReplyId,
+    },
     types::*,
     utils::SearchPattern,
     NE,
@@ -152,6 +155,10 @@ impl MessagesTrait for Messages {
                 .max()
                 .unwrap_or(MessageReceiptStatus::NoAck as u32),
         )
+    }
+
+    fn match_status(&self, row_index: usize) -> Option<u8> {
+        Some(self.container.msg_data(row_index)?.match_status as u8)
     }
 
     fn op(&self, row_index: usize) -> Option<ffi::MsgIdRef> {
@@ -315,19 +322,12 @@ impl MessagesTrait for Messages {
             return;
         }
 
-        let pattern = if self.search_regex() {
-            ret_err!(SearchPattern::new_regex(pattern))
-        } else {
-            ret_err!(SearchPattern::new_normal(pattern))
-        };
-
-        self.search.pattern = pattern;
-        self.emit.search_regex_changed();
-
-        self.search.matches = self
-            .container
-            .apply_search(&self.search, &mut self.model, &mut self.emit)
-            .unwrap_or_default();
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
+            self.search.matches = self
+                .container
+                .apply_search(&self.search, &mut self.model, &mut self.emit)
+                .unwrap_or_default();
+        }
     }
 
     /// Indicates whether regex search is activated
@@ -337,7 +337,7 @@ impl MessagesTrait for Messages {
 
     /// Sets search mode
     fn set_search_regex(&mut self, use_regex: bool) {
-        if ret_err!(self.search.set_regex(use_regex)) == SearchChanged::Changed {
+        if ret_err!(self.search.set_regex(use_regex)).changed() {
             self.emit.search_regex_changed();
             self.search.matches = self
                 .container
@@ -368,16 +368,44 @@ impl MessagesTrait for Messages {
     }
 
     fn next_search_match(&mut self) -> i64 {
-        match self.search.next() {
-            Some(Match { ix }) => *ix as i64,
+        match self.search.next(&self.container) {
+            Some(Match { mid }) => {
+                let ix = self.container.index_of(mid);
+
+                ix.map(|ix| ix as i64).unwrap_or(-1)
+            }
             None => -1,
         }
     }
 
     fn prev_search_match(&mut self) -> i64 {
-        match self.search.prev() {
-            Some(Match { ix }) => *ix as i64,
+        match self.search.prev(&self.container) {
+            Some(Match { mid }) => self
+                .container
+                .index_of(mid)
+                .map(|ix| ix as i64)
+                .unwrap_or(-1),
             None => -1,
         }
+    }
+
+    fn peek_next_search_match(&mut self) -> i64 {
+        self.next_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
+    fn peek_prev_search_match(&mut self) -> i64 {
+        self.prev_search_match_helper()
+            .map(|ix| ix as i64)
+            .unwrap_or(-1)
+    }
+
+    fn next_would_loop(&mut self) -> bool {
+        self.search.next_would_loop(&self.container)
+    }
+
+    fn prev_would_loop(&mut self) -> bool {
+        self.search.prev_would_loop(&self.container)
     }
 }

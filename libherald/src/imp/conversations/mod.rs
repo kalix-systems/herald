@@ -1,9 +1,9 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none};
+use crate::{ffi, interface::*, push_err, ret_err, ret_none, spawn};
 use heraldcore::{
     abort_err,
-    conversation::{self, ConversationMeta},
+    conversation::{self, ConversationMeta, ExpirationPeriod},
     errors::HErr,
-    types::{ConversationId, ExpirationPeriod},
+    types::ConversationId,
     utils::SearchPattern,
 };
 use im::vector::Vector;
@@ -28,20 +28,6 @@ pub struct Conversations {
     filter: SearchPattern,
     filter_regex: bool,
     list: Vector<Conversation>,
-}
-
-impl Conversations {
-    fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
-        let meta = conversation::meta(&cid)?;
-        let conv = Conversation {
-            matched: meta.matches(&self.filter),
-            inner: meta,
-        };
-        self.model.begin_insert_rows(0, 0);
-        self.list.push_front(conv);
-        self.model.end_insert_rows();
-        Ok(())
-    }
 }
 
 impl ConversationsTrait for Conversations {
@@ -83,7 +69,17 @@ impl ConversationsTrait for Conversations {
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(conversation::set_color(&meta.conversation_id, color), false);
+        let cid = meta.conversation_id;
+
+        spawn!(
+            {
+                let update = conversation::settings::SettingsUpdate::Color(color);
+
+                ret_err!(update.apply(&cid));
+                ret_err!(update.send_update(&cid));
+            },
+            false
+        );
 
         meta.color = color;
         true
@@ -107,16 +103,16 @@ impl ConversationsTrait for Conversations {
         let cid = meta.conversation_id;
 
         let period = period.into();
-        ret_err!(conversation::set_expiration_period(&cid, period), false);
 
-        let update = conversation::settings::SettingsUpdate::Expiration(period);
+        spawn!(
+            {
+                let update = conversation::settings::SettingsUpdate::Expiration(period);
 
-        ret_err! {
-            std::thread::Builder::new().spawn(move || {
+                ret_err!(update.apply(&cid));
                 ret_err!(update.send_update(&cid));
-            }),
+            },
             false
-        };
+        );
 
         meta.expiration_period = period;
 
@@ -129,7 +125,9 @@ impl ConversationsTrait for Conversations {
 
     fn set_muted(&mut self, index: usize, muted: bool) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(conversation::set_muted(&meta.conversation_id, muted), false);
+        let cid = meta.conversation_id;
+
+        spawn!(ret_err!(conversation::set_muted(&cid, muted)), false);
 
         meta.muted = muted;
         true
@@ -146,14 +144,25 @@ impl ConversationsTrait for Conversations {
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(
-            conversation::set_picture(
-                &meta.conversation_id,
-                picture.as_ref().map(|p| p.as_str()),
-                meta.picture.as_ref().map(|p| p.as_str())
-            ),
-            false
-        );
+
+        if meta.pairwise {
+            return false;
+        }
+
+        {
+            let picture = picture.clone();
+            let old_picture = meta.picture.clone();
+            let cid = meta.conversation_id;
+
+            spawn!(
+                ret_err!(conversation::set_picture(
+                    &cid,
+                    picture.as_ref().map(|p| p.as_str()),
+                    old_picture.as_ref().map(|p| p.as_str())
+                )),
+                false
+            );
+        }
 
         meta.picture = picture;
         true
@@ -170,10 +179,20 @@ impl ConversationsTrait for Conversations {
 
     fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        ret_err!(
-            conversation::set_title(&meta.conversation_id, title.as_ref().map(|t| t.as_str())),
-            false
-        );
+        let cid = meta.conversation_id;
+
+        {
+            let title = title.clone();
+            spawn!(
+                {
+                    let update = conversation::settings::SettingsUpdate::Title(title);
+
+                    ret_err!(update.apply(&cid));
+                    ret_err!(update.send_update(&cid));
+                },
+                false
+            );
+        }
 
         meta.title = title;
         true
@@ -186,16 +205,14 @@ impl ConversationsTrait for Conversations {
     fn remove_conversation(&mut self, index: u64) -> bool {
         let index = index as usize;
         let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
+        let cid = meta.conversation_id;
 
         // cannot remove pairwise conversation!
         if meta.pairwise {
             return false;
         }
 
-        ret_err!(
-            conversation::delete_conversation(&meta.conversation_id),
-            false
-        );
+        spawn!(ret_err!(conversation::delete_conversation(&cid)), false);
 
         self.model.begin_remove_rows(index, index);
         self.list.remove(index);
@@ -277,9 +294,15 @@ impl ConversationsTrait for Conversations {
                     match settings {
                         SettingsUpdate::Expiration(period) => {
                             self.list[pos].inner.expiration_period = period;
-                            self.model.data_changed(pos, pos);
+                        }
+                        SettingsUpdate::Color(color) => {
+                            self.list[pos].inner.color = color;
+                        }
+                        SettingsUpdate::Title(title) => {
+                            self.list[pos].inner.title = title;
                         }
                     }
+                    self.model.data_changed(pos, pos);
                 }
             }
         }
@@ -335,5 +358,17 @@ impl Conversations {
         }
         self.model
             .data_changed(0, self.list.len().saturating_sub(1));
+    }
+
+    fn raw_fetch_and_insert(&mut self, cid: ConversationId) -> Result<(), HErr> {
+        let meta = conversation::meta(&cid)?;
+        let conv = Conversation {
+            matched: meta.matches(&self.filter),
+            inner: meta,
+        };
+        self.model.begin_insert_rows(0, 0);
+        self.list.push_front(conv);
+        self.model.end_insert_rows();
+        Ok(())
     }
 }

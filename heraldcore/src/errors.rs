@@ -1,4 +1,4 @@
-use crate::types::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField};
+use crate::message::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField};
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;

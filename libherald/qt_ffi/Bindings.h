@@ -8,8 +8,10 @@
 class Attachments;
 class Config;
 class ConversationBuilder;
+class ConversationBuilderUsers;
 class Conversations;
 class Errors;
+class GlobalMessageSearch;
 class HeraldState;
 class HeraldUtils;
 class Members;
@@ -108,10 +110,13 @@ public:
 private:
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(QString picture READ picture WRITE setPicture NOTIFY pictureChanged FINAL)
     explicit ConversationBuilder(bool owned, QObject *parent);
 public:
     explicit ConversationBuilder(QObject *parent = nullptr);
     ~ConversationBuilder() override;
+    QString picture() const;
+    void setPicture(const QString& v);
     Q_INVOKABLE bool addMember(const QString& user_id);
     Q_INVOKABLE void finalize();
     Q_INVOKABLE void removeLast();
@@ -145,6 +150,60 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void pictureChanged();
+};
+
+class ConversationBuilderUsers : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
+    explicit ConversationBuilderUsers(bool owned, QObject *parent);
+public:
+    explicit ConversationBuilderUsers(QObject *parent = nullptr);
+    ~ConversationBuilderUsers() override;
+    QString filter() const;
+    void setFilter(const QString& v);
+    Q_INVOKABLE void clearFilter();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE QVariant color(int row) const;
+    Q_INVOKABLE bool matched(int row) const;
+    Q_INVOKABLE QString name(int row) const;
+    Q_INVOKABLE QString profilePicture(int row) const;
+    Q_INVOKABLE bool selected(int row) const;
+    Q_INVOKABLE bool setSelected(int row, bool value);
+    Q_INVOKABLE QString userId(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void filterChanged();
 };
 
 class Conversations : public QAbstractItemModel
@@ -229,6 +288,61 @@ public:
     Q_INVOKABLE QString nextError();
 Q_SIGNALS:
     void tryPollChanged();
+};
+
+class GlobalMessageSearch : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    class Private;
+private:
+    Private * m_d;
+    bool m_ownsPrivate;
+    Q_PROPERTY(QVariant regexSearch READ regexSearch WRITE setRegexSearch NOTIFY regexSearchChanged FINAL)
+    Q_PROPERTY(QString searchPattern READ searchPattern WRITE setSearchPattern NOTIFY searchPatternChanged FINAL)
+    explicit GlobalMessageSearch(bool owned, QObject *parent);
+public:
+    explicit GlobalMessageSearch(QObject *parent = nullptr);
+    ~GlobalMessageSearch() override;
+    QVariant regexSearch() const;
+    void setRegexSearch(const QVariant& v);
+    QString searchPattern() const;
+    void setSearchPattern(const QString& v);
+    Q_INVOKABLE void clearSearch();
+
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &index) const override;
+    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    bool canFetchMore(const QModelIndex &parent) const override;
+    void fetchMore(const QModelIndex &parent) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+    int role(const char* name) const;
+    QHash<int, QByteArray> roleNames() const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
+    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
+    Q_INVOKABLE QString author(int row) const;
+    Q_INVOKABLE QString body(int row) const;
+    Q_INVOKABLE QByteArray conversation(int row) const;
+    Q_INVOKABLE QVariant has_attachments(int row) const;
+    Q_INVOKABLE QByteArray msgId(int row) const;
+    Q_INVOKABLE QVariant time(int row) const;
+
+Q_SIGNALS:
+    // new data is ready to be made available to the model with fetchMore()
+    void newDataReady(const QModelIndex &parent) const;
+private:
+    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
+    void initHeaderData();
+    void updatePersistentIndexes();
+Q_SIGNALS:
+    void regexSearchChanged();
+    void searchPatternChanged();
 };
 
 class HeraldState : public QObject
@@ -483,7 +597,11 @@ public:
     Q_INVOKABLE bool deleteMessage(quint64 row_index);
     Q_INVOKABLE quint64 indexById(const QByteArray& msg_id) const;
     Q_INVOKABLE qint64 nextSearchMatch();
+    Q_INVOKABLE bool nextWouldLoop();
+    Q_INVOKABLE qint64 peekNextSearchMatch();
+    Q_INVOKABLE qint64 peekPrevSearchMatch();
     Q_INVOKABLE qint64 prevSearchMatch();
+    Q_INVOKABLE bool prevWouldLoop();
 
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -510,6 +628,7 @@ public:
     Q_INVOKABLE QVariant isHead(int row) const;
     Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
+    Q_INVOKABLE QVariant match_status(int row) const;
     Q_INVOKABLE QByteArray messageId(int row) const;
     Q_INVOKABLE QByteArray op(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;

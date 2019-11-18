@@ -32,8 +32,12 @@ macx {
 }
 
 linux:!android {
-  LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.so
+  LIBS += $${PWD}/../../target/$${RUST_BUILD_TYPE}/libherald.a
+  LIBS += -ldl
+  LIBS += -ldbus-1
 }
+
+
 
 android {
       # QMAKE_LFLAGS += -nostdlib++

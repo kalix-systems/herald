@@ -123,8 +123,19 @@ macro_rules! bounds_chk {
     };
 }
 
-//#[macro_export]
-///// Convenience macro for sp
+#[macro_export]
+/// Convenience macro for spawning thread
+macro_rules! spawn {
+    ($code: expr) => {
+        spawn!($code, ())
+    };
+    ($code: expr, $retval: expr) => {
+        ret_err!(
+            ::std::thread::Builder::new().spawn(move || { $code }),
+            $retval
+        )
+    };
+}
 
 #[cfg(test)]
 mod tests {

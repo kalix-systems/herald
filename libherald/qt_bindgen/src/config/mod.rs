@@ -54,8 +54,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
+       conversation_builder_users(),
        message_builder(),
-       attachments()
+       attachments(),
+       global_message_search()
     }
 }
 
@@ -72,7 +74,7 @@ fn herald_state() -> Object {
     };
 
     obj! {
-        HeraldState : Obj::new().props(properties).funcs(funcs)
+        HeraldState: Obj::new().props(properties).funcs(funcs)
     }
 }
 
@@ -207,7 +209,7 @@ fn members() -> Object {
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
-        mut  toggleFilterRegex() => Bool,
+        mut toggleFilterRegex() => Bool,
     };
 
     obj! {
@@ -258,7 +260,11 @@ fn messages() -> Object {
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
-        isTail: ItemProp::new(Bool).optional()
+        isTail: ItemProp::new(Bool).optional(),
+        // 0 => Not matched,
+        // 1 => Matched,
+        // 2 => Matched and selected
+        match_status: ItemProp::new(QUint8).optional()
     };
 
     let funcs = functions! {
@@ -266,7 +272,11 @@ fn messages() -> Object {
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
+        mut peekNextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
+        mut peekPrevSearchMatch() => Qint64,
+        mut nextWouldLoop() => Bool,
+        mut prevWouldLoop() => Bool,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
@@ -295,6 +305,10 @@ fn conversation_builder() -> Object {
         memberId: ItemProp::new(QString)
     };
 
+    let prop = props! {
+        picture: Prop::new().simple(QString).write().optional()
+    };
+
     let funcs = functions! {
         mut addMember(user_id: QString) => Bool,
         mut removeMemberById(user_id: QString) => Bool,
@@ -305,7 +319,30 @@ fn conversation_builder() -> Object {
     };
 
     obj! {
-        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop).props(prop)
+    }
+}
+
+fn conversation_builder_users() -> Object {
+    let props = props! {
+        filter: Prop::new().simple(SimpleType::QString).write().optional()
+    };
+
+    let item_props = item_props! {
+       userId: ItemProp::new(QString).optional(),
+       name: ItemProp::new(QString).get_by_value().optional(),
+       profilePicture: picture_item_prop().get_by_value().optional(),
+       color: color_item_prop().optional(),
+       selected: ItemProp::new(Bool).write(),
+       matched: matched_item_prop()
+    };
+
+    let funcs = functions! {
+        mut clearFilter() => Void,
+    };
+
+    obj! {
+        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 
@@ -353,5 +390,29 @@ fn attachments() -> Object {
 
     obj! {
         Attachments: Obj::new().list().props(props).item_props(item_props)
+    }
+}
+
+fn global_message_search() -> Object {
+    let props = props! {
+        searchPattern: Prop::new().simple(QString).optional().write(),
+        regexSearch: Prop::new().simple(Bool).optional().write()
+    };
+
+    let item_props = item_props! {
+        msgId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
+        conversation: ItemProp::new(QByteArray).optional(),
+        body: ItemProp::new(QString).optional(),
+        time: ItemProp::new(Qint64).optional(),
+        has_attachments: ItemProp::new(Bool).optional()
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+    };
+
+    obj! {
+        GlobalMessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }

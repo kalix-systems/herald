@@ -8,6 +8,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 import QtGraphicalEffects 1.0
+import Qt.labs.platform 1.0
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -101,7 +102,17 @@ ToolBar {
                 source: "qrc:/compose-icon-white.svg"
                 fill: CmnCfg.palette.paneColor
                 onClicked: {
-                    sideBarState.state = "newConversationState"
+                    convoMenu.open()
+
+
+                }
+            }
+
+            Menu {
+                id: convoMenu
+                MenuItem {
+                    text: "New group conversation"
+                     onTriggered: sideBarState.state = "newGroupState"
                 }
             }
 
