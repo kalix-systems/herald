@@ -32,10 +32,11 @@ Component {
             Text {
                 id: indexText
                 property bool active: searchToolBar.state == "searchActiveState"
-                property int searchPlace: active ? ownedConversation.searchIndex + 1 : 0
+                property int searchPlace: active ? ownedConversation.searchIndex : 0
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + ownedConversation.searchNumMatches : ""
+                onSearchPlaceChanged: print(ownedConversation.searchIndex)
             }
 
             Common.ButtonForm {

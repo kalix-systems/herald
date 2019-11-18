@@ -350,6 +350,9 @@ impl MessagesTrait for Messages {
     fn set_search_regex(&mut self, use_regex: bool) {
         if ret_err!(self.search.set_regex(use_regex)).changed() {
             self.emit.search_regex_changed();
+            self.emit.search_index_changed();
+            self.emit.search_num_matches_changed();
+
             self.search.matches = self
                 .container
                 .apply_search(&self.search, &mut self.model, &mut self.emit)
@@ -366,6 +369,10 @@ impl MessagesTrait for Messages {
     fn set_search_active(&mut self, active: bool) {
         self.search.active = active;
         self.emit.search_active_changed();
+
+        if !active {
+            self.clear_search();
+        }
     }
 
     /// Clears search
@@ -387,7 +394,7 @@ impl MessagesTrait for Messages {
     }
 
     fn search_index(&self) -> u64 {
-        self.search.index.unwrap_or(0) as u64
+        self.search.index.map(|ix| ix + 1).unwrap_or(0) as u64
     }
 
     fn set_search_hint(&mut self, _scroll_position: f32, _scroll_height: f32) {}

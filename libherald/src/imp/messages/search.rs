@@ -14,7 +14,7 @@ impl SearchChanged {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub(super) struct Cursor(pub(super) MsgId);
 
 impl Cursor {
@@ -109,11 +109,11 @@ impl SearchState {
     }
 
     pub(super) fn initial_next_index(&self) -> usize {
-        1
+        0
     }
 
     pub(super) fn initial_prev_index(&self) -> usize {
-        self.num_matches()
+        self.num_matches().saturating_sub(1)
     }
 
     pub(super) fn increment_index(&mut self) {
@@ -129,7 +129,11 @@ impl SearchState {
         let num_matches = self.num_matches();
 
         self.index = match self.index {
-            Some(ix) => Some(if ix > 0 { (ix - 1) % num_matches } else { 0 }),
+            Some(ix) => Some(if ix != 0 {
+                (ix - 1) % num_matches
+            } else {
+                num_matches.saturating_sub(1)
+            }),
             None => Some(self.initial_prev_index()),
         };
     }
@@ -161,8 +165,9 @@ impl SearchState {
 
             // check if item is still valid
             if container.contains(cur.msg_id()) {
-                self.increment_index();
+                // Note: if the order is switched you'll get an off-by-one
                 self.cur = Some(cur);
+                self.increment_index();
                 break cur;
             }
         };
@@ -197,8 +202,9 @@ impl SearchState {
 
             // check if item is still valid
             if container.contains(cur.msg_id()) {
-                self.decrement_index();
+                // Note: if the order is switched you'll get an off-by-one
                 self.cur = Some(cur);
+                self.decrement_index();
                 break cur;
             }
         };
