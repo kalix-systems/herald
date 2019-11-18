@@ -37,7 +37,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --manifest-path=herald_server/Cargo.toml
+          args: --release --manifest-path=herald_server/Cargo.toml
       - run: target/debug/herald_server &
       - uses: Mercotui/install-qt-dev-action@v0.1.1
         with:
