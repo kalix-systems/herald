@@ -334,11 +334,15 @@ impl MessagesTrait for Messages {
             return;
         }
 
-        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
-            self.search.matches = self
-                .container
-                .apply_search(&self.search, &mut self.model, &mut self.emit)
-                .unwrap_or_default();
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed()
+            && self.search.active
+        {
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
         }
     }
 
@@ -349,15 +353,13 @@ impl MessagesTrait for Messages {
 
     /// Sets search mode
     fn set_search_regex(&mut self, use_regex: bool) {
-        if ret_err!(self.search.set_regex(use_regex)).changed() {
-            self.emit.search_regex_changed();
-            self.emit.search_index_changed();
-            self.emit.search_num_matches_changed();
-
-            self.search.matches = self
-                .container
-                .apply_search(&self.search, &mut self.model, &mut self.emit)
-                .unwrap_or_default();
+        if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
         }
     }
 
@@ -374,10 +376,12 @@ impl MessagesTrait for Messages {
         } else if !self.search.active {
             self.search.active = true;
             self.emit.search_active_changed();
-            self.search.matches = self
-                .container
-                .apply_search(&self.search, &mut self.model, &mut self.emit)
-                .unwrap_or_default();
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
         }
     }
 

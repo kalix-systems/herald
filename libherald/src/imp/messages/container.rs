@@ -76,15 +76,13 @@ impl Container {
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
-    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<()> {
+    pub(super) fn mem_remove(&mut self, ix: usize) {
         if ix >= self.len() {
-            return None;
+            return;
         }
 
         let msg = self.list.remove(ix);
         self.map.remove(&msg.msg_id);
-
-        Some(())
     }
 
     pub(super) fn binary_search(&self, msg: &Message) -> Result<usize, usize> {
@@ -124,7 +122,7 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            if old_status.is_match() != data.match_status.is_match() {
+            if old_status != data.match_status {
                 model.data_changed(ix, ix);
             }
 

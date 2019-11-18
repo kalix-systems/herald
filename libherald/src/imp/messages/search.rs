@@ -32,7 +32,7 @@ pub(super) struct Match(pub(super) MsgId);
 pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
-    pub(super) matches: VecDeque<Match>,
+    matches: VecDeque<Match>,
     pub(super) cur: Option<Cursor>,
     pub(super) index: Option<usize>,
 }
@@ -70,13 +70,30 @@ impl SearchState {
         Ok(SearchChanged::Changed)
     }
 
-    pub(super) fn set_regex(&mut self, use_regex: bool) -> Result<SearchChanged, HErr> {
+    pub(super) fn set_matches(&mut self, matches: VecDeque<Match>, emit: &mut Emitter) {
+        self.cur = None;
+        self.matches = matches;
+
+        assert_eq!(self.num_matches(), self.matches.len());
+
+        self.index = None;
+        emit.search_num_matches_changed();
+        emit.search_index_changed();
+    }
+
+    pub(super) fn set_regex(
+        &mut self,
+        use_regex: bool,
+        emit: &mut Emitter,
+    ) -> Result<SearchChanged, HErr> {
         match (use_regex, self.is_regex()) {
             (true, false) => {
                 self.pattern.regex_mode()?;
+                emit.search_regex_changed();
             }
             (false, true) => {
                 self.pattern.normal_mode()?;
+                emit.search_regex_changed();
             }
             _ => {
                 return Ok(SearchChanged::NotChanged);
@@ -93,7 +110,7 @@ impl SearchState {
     }
 
     pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
-        self.pattern = SearchPattern::new_normal("".into())?;
+        self.pattern.set_pattern("".into())?;
         self.matches = VecDeque::new();
         self.cur = None;
         self.index = None;
@@ -144,17 +161,20 @@ impl SearchState {
         let next = loop {
             let cur = match (self.matches.pop_front(), self.cur) {
                 (Some(Match(msg_id)), Some(cursor)) => {
-                    self.matches.push_back(Match(*cursor.msg_id()));
-                    Some(Cursor(msg_id))
-                }
-                (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
-                (None, cur @ Some(Cursor(_))) => cur,
-                (None, None) => None,
-            };
+                    if container.contains(cursor.msg_id()) {
+                        self.matches.push_back(Match(cursor.into_inner()));
+                    }
 
-            let cur = match cur {
-                Some(cur) => cur,
-                None => {
+                    Cursor(msg_id)
+                }
+                (Some(Match(msg_id)), None) => Cursor(msg_id),
+                (None, Some(cur @ Cursor(_))) => {
+                    if self.matches.front().is_some() {
+                        continue;
+                    }
+                    cur
+                }
+                (None, None) => {
                     self.cur = None;
                     self.index = None;
                     return None;
@@ -181,17 +201,21 @@ impl SearchState {
         let prev = loop {
             let cur = match (self.matches.pop_back(), self.cur) {
                 (Some(Match(msg_id)), Some(cursor)) => {
-                    self.matches.push_front(Match(*cursor.msg_id()));
-                    Some(Cursor(msg_id))
-                }
-                (Some(Match(msg_id)), None) => Some(Cursor(msg_id)),
-                (None, cur @ Some(Cursor(_))) => cur,
-                (None, None) => None,
-            };
+                    if container.contains(cursor.msg_id()) {
+                        self.matches.push_front(Match(cursor.into_inner()));
+                    }
 
-            let cur = match cur {
-                Some(cur) => cur,
-                None => {
+                    Cursor(msg_id)
+                }
+                (Some(Match(msg_id)), None) => Cursor(msg_id),
+                (None, Some(cur @ Cursor(_))) => {
+                    if self.matches.front().is_some() {
+                        continue;
+                    }
+
+                    cur
+                }
+                (None, None) => {
                     self.cur = None;
                     self.index = None;
                     return None;
