@@ -40,6 +40,7 @@ ScrollView {
 
                var x =  convWindow.chatScrollBar.position
                 var y = convWindow.chatScrollBar.size
+                print(x,y)
                 ownedConversation.setSearchHint(x, y)
                 convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"

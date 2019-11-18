@@ -102,6 +102,8 @@ Flickable {
                                             replyId)).y - convWindow.height / 2
                             convWindow.returnToBounds()
                             convWindow.state = ""
+                            replyHighlightAnimation.target =
+                                    chatListView.itemAt(ownedConversation.indexById(replyId)).highlight
                             replyHighlightAnimation.start()
                         }
                     }
