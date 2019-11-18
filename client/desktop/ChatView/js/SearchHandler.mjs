@@ -4,16 +4,18 @@ export function isOnscreen(index, chatListView, chatPane, conversationWindow, fo
         const x = item.x;
         const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+        const yPos2 = yPos + item.height;
         const pageHeight = conversationWindow.height;
-        return 0 < yPos && yPos < pageHeight;
+        return 0 < yPos && yPos2 < pageHeight;
     }
     else {
         const item = chatListView.itemAt(index);
         const x = item.x;
         const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+        const yPos2 = yPos + item.height;
         const pageHeight = conversationWindow.height;
-        return 0 < yPos && yPos < pageHeight;
+        return 0 < yPos && yPos2 < pageHeight;
     }
 }
 export function searchTextHandler(ownedConversation, chatListView, chatPane, conversationWindow) {
