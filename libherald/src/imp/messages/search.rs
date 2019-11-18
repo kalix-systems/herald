@@ -13,8 +13,8 @@ impl SearchChanged {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
-pub(super) struct Match(pub(super) MsgId);
+#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub(super) struct Match(pub(super) Message);
 
 pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
@@ -176,7 +176,11 @@ impl SearchState {
             return Some(());
         }
 
-        let pos = self.matches.iter().position(|Match(mid)| mid == msg_id)?;
+        let pos = self
+            .matches
+            .iter()
+            .position(|Match(Message { msg_id: mid, .. })| mid == msg_id)?;
+
         self.matches.remove(pos);
         emit.search_num_matches_changed();
 
@@ -192,13 +196,60 @@ impl SearchState {
                 self.index.replace(new_ix);
                 emit.search_index_changed();
 
-                let Match(mid) = self.matches.get(new_ix)?;
-                let data = container.get_data_mut(mid)?;
+                let Match(msg) = self.matches.get(new_ix)?;
+                let data = container.get_data_mut(&msg.msg_id)?;
                 data.match_status = MatchStatus::Focused;
 
-                let container_ix = container.index_of(*mid)?;
+                let container_ix = container.index_of(msg)?;
 
                 model.data_changed(container_ix, container_ix);
+            }
+        }
+
+        Some(())
+    }
+
+    pub(super) fn try_insert_match(
+        &mut self,
+        msg_id: MsgId,
+        model_ix: usize,
+        container: &mut Container,
+        emit: &mut Emitter,
+        model: &mut List,
+    ) -> Option<()> {
+        if self.active.not() || self.msg_matches(&msg_id, container)?.not() {
+            return Some(());
+        }
+
+        let message = Message::from_msg_id(msg_id, &container)?;
+        let ix = self.index;
+
+        let pos = if self
+            .matches
+            .last()
+            .map(|Match(last)| last.insertion_time)
+            .unwrap_or(message.insertion_time)
+            <= message.insertion_time
+        {
+            self.matches.len()
+        } else {
+            match container.binary_search(&message) {
+                Ok(_) => {
+                    return Some(());
+                }
+                Err(ix) => ix,
+            }
+        };
+
+        self.matches.insert(pos, Match(message));
+        let data = container.get_data_mut(&msg_id)?;
+        data.match_status = MatchStatus::Matched;
+        emit.search_num_matches_changed();
+
+        if let Some(ix) = ix {
+            if (0..=ix).contains(&pos) {
+                self.index.replace((ix + 1) % self.matches.len());
+                model.data_changed(model_ix, model_ix);
             }
         }
 

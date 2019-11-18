@@ -76,12 +76,12 @@ impl Container {
         self.list.last()
     }
 
-    pub(super) fn index_of(&self, msg_id: MsgId) -> Option<usize> {
-        let insertion_time = self.map.get(&msg_id)?.time.insertion;
-        let m = Message {
-            msg_id,
-            insertion_time,
-        };
+    pub(super) fn index_of(&self, msg: &Message) -> Option<usize> {
+        self.list.binary_search(&msg).ok()
+    }
+
+    pub(super) fn index_by_id(&self, msg_id: MsgId) -> Option<usize> {
+        let m = Message::from_msg_id(msg_id, &self)?;
 
         self.list.binary_search(&m).ok()
     }
@@ -123,8 +123,8 @@ impl Container {
 
         let mut matches: Vec<Match> = Vec::new();
 
-        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(msg_id)?;
+        for (ix, msg) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg.msg_id)?;
 
             let old_status = data.match_status;
             let matched = data.matches(pattern);
@@ -143,7 +143,7 @@ impl Container {
                 continue;
             };
 
-            matches.push(Match(*msg_id))
+            matches.push(Match(*msg))
         }
 
         emit.search_num_matches_changed();

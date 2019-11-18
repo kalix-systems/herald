@@ -94,7 +94,7 @@ impl MessagesTrait for Messages {
 
         let msg_id = ret_err!(msg_id.try_into(), ret_val);
 
-        ret_none!(self.container.index_of(msg_id), ret_val) as u64
+        ret_none!(self.container.index_by_id(msg_id), ret_val) as u64
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {

@@ -51,7 +51,7 @@ pub(super) enum SaveStatus {
     Unsaved,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 /// A thin wrapper around a `MsgId`
 pub(super) struct Message {
     pub(super) msg_id: MsgId,
@@ -59,7 +59,7 @@ pub(super) struct Message {
 }
 
 impl Message {
-    pub(super) fn split_msg(msg: Msg, save_status: SaveStatus) -> (Message, MsgData) {
+    pub(super) fn split_msg(msg: Msg, save_status: SaveStatus) -> (Self, MsgData) {
         let Msg {
             message_id,
             author,
@@ -90,6 +90,15 @@ impl Message {
         };
 
         (message, data)
+    }
+
+    pub(super) fn from_msg_id(msg_id: MsgId, container: &Container) -> Option<Self> {
+        let insertion_time = container.get_data(&msg_id)?.time.insertion;
+
+        Some(Self {
+            msg_id,
+            insertion_time,
+        })
     }
 }
 

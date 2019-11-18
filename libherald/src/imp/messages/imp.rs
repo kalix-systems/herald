@@ -35,24 +35,24 @@ impl Messages {
         }
 
         if old == new {
-            let Match(mid) = new?;
-            return self.container.index_of(mid);
+            let Match(msg) = new?;
+            return self.container.index_of(&msg);
         }
 
         if let Some(Match(old)) = old {
-            if let Some(data) = self.container.get_data_mut(&old) {
+            if let Some(data) = self.container.get_data_mut(&old.msg_id) {
                 data.match_status = MatchStatus::Matched;
-                let ix = self.container.index_of(old)?;
+                let ix = self.container.index_of(&old)?;
                 self.model.data_changed(ix, ix);
             }
         }
 
-        let Match(mid) = new?;
+        let Match(new) = new?;
 
-        let data = self.container.get_data_mut(&mid)?;
+        let data = self.container.get_data_mut(&new.msg_id)?;
         data.match_status = MatchStatus::Focused;
 
-        let ix = self.container.index_of(mid)?;
+        let ix = self.container.index_of(&new)?;
         self.model.data_changed(ix, ix);
         Some(ix)
     }
@@ -105,6 +105,7 @@ impl Messages {
 
         let cid = self.conversation_id.ok_or(NE!())?;
 
+        let msg_id = message.msg_id;
         let ix = if self
             .container
             .last()
@@ -116,12 +117,6 @@ impl Messages {
         } else {
             match self.container.binary_search(&message) {
                 Ok(_) => {
-                    eprintln!(
-                        "WARNING: tried to insert duplicate message at {file}:{line}:{col}",
-                        file = file!(),
-                        line = line!(),
-                        col = column!()
-                    );
                     return Ok(());
                 }
                 Err(ix) => ix,
@@ -135,6 +130,14 @@ impl Messages {
         self.model.begin_insert_rows(ix, ix);
         self.container.insert(ix, message, data);
         self.model.end_insert_rows();
+
+        self.search.try_insert_match(
+            msg_id,
+            ix,
+            &mut self.container,
+            &mut self.emit,
+            &mut self.model,
+        );
 
         if ix + 1 == self.container.len() {
             self.emit_last_changed();
@@ -160,7 +163,7 @@ impl Messages {
 
     pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
         for mid in mids {
-            if let Some(ix) = self.container.index_of(mid) {
+            if let Some(ix) = self.container.index_by_id(mid) {
                 self.raw_remove(mid, ix);
             }
         }
