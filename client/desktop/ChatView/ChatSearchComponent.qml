@@ -36,7 +36,6 @@ Component {
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + ownedConversation.searchNumMatches : ""
-                onSearchPlaceChanged: print(ownedConversation.searchIndex)
             }
 
             Common.ButtonForm {
