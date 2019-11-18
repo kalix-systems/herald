@@ -26,6 +26,7 @@ Component {
                 rightMargin: CmnCfg.margin
             }
 
+
             //main search component
             SearchTextArea {
             }
@@ -35,11 +36,12 @@ Component {
                 property bool active: searchToolBar.state == "searchActiveState"
                 property int searchPlace: active ? ownedConversation.searchIndex : 0
                 property int numMatches: active ? ownedConversation.searchNumMatches : 0
-
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + numMatches : ""
-                Layout.minimumWidth: active ? 20 : 20
+                Layout.minimumWidth: 24
+                Layout.leftMargin: -20
+
             }
 
             Common.ButtonForm {

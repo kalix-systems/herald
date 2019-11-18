@@ -85,7 +85,8 @@ Rectangle {
                 startColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                     replyUid)]
             }
-            width: scrollView.width
+            width: textWrapperRect.width
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Loader {
@@ -102,7 +103,6 @@ Rectangle {
             height: Math.min(contentHeight, 100)
             width: containerCol.width
             focus: true
-
             TextArea {
                 id: chatText
                 background: Rectangle {
