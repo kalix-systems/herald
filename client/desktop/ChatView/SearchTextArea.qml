@@ -47,7 +47,9 @@ ScrollView {
                                         convWindow.chatListView, chatPane,
                                         convWindow, true)
                 convWindow.returnToBounds()
+                convWindow.state = ""
             }
+
         }
 
         onTextChanged: {
@@ -59,6 +61,7 @@ ScrollView {
                 SearchUtils.searchTextHandler(ownedConversation,
                                               convWindow.chatListView,
                                               chatPane, convWindow)
+                convWindow.state = ""
             }
             else {
                 //clear state to disable buttons

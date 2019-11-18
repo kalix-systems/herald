@@ -23,10 +23,11 @@ Flickable {
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
+        policy: ScrollBar.AsNeeded
     }
 
     Component.onCompleted: {
-        chatScrollBar.position = 1.0
+        chatScrollBar.position = 1.0 + chatScrollBar.size
     }
 
     Column {
@@ -173,6 +174,11 @@ Flickable {
             PropertyChanges {
                 target: cvPane
                 rebound: blankTransition
+            }
+
+            PropertyChanges {
+                target: chatScrollBar
+                policy: ScrollBar.AlwaysOn
             }
         }
     ]
