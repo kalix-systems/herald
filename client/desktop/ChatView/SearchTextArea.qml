@@ -37,6 +37,10 @@ ScrollView {
 
             //key navigation handling
             if (ownedConversation.searchNumMatches > 0) {
+
+               var x =  convWindow.chatScrollBar.position
+                var y = convWindow.chatScrollBar.size
+                ownedConversation.setSearchHint(x, y)
                 convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"
                 SearchUtils.jumpHandler(ownedConversation,

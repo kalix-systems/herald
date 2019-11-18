@@ -37,6 +37,7 @@ Component {
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + numMatches : ""
+                Layout.minimumWidth: 24
             }
 
             Common.ButtonForm {
