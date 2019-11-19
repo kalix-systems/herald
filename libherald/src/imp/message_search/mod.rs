@@ -116,16 +116,16 @@ impl Interface for MessageSearch {
 
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
-            for mut results in rx.try_iter() {
-                if results.is_empty() {
+            for mut new_results in rx.try_iter() {
+                if new_results.is_empty() {
                     continue;
                 }
 
                 let last_ix = self.results.len().saturating_sub(1);
 
                 self.model
-                    .begin_insert_rows(last_ix, last_ix + results.len().saturating_sub(1));
-                self.results.append(&mut results);
+                    .begin_insert_rows(last_ix, last_ix + new_results.len().saturating_sub(1));
+                self.results.append(&mut new_results);
                 self.model.end_insert_rows();
             }
         }
