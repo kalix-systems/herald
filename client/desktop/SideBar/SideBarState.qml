@@ -22,19 +22,27 @@ Page {
         }
     }
 
-    Component {
-        id: convoslvComponent
-        ConversationViewMain {
-            id: conversationsListView
-            anchors.fill: parent
-            model: conversationsModel
-        }
-    }
+    Column {
+      anchors.fill: parent
+     Loader {
+        id: sideBarBodyLoader
+        sourceComponent: Component {
+            ConversationViewMain {
+                id: convosLvComponent
+                model: conversationsModel}}
+        width: parent.width
+      }
 
     Loader {
-        id: sideBarBodyLoader
-        anchors.fill: parent
-        sourceComponent: convoslvComponent
+        id: messageSearchLoader
+        width: parent.width
+        property var searchModel
+        sourceComponent: Component {
+            MessageSearchView {
+                model: searchModel
+            }
+        }
+    }
     }
 
     states: [
@@ -72,7 +80,6 @@ Page {
             }
         },
 
-        //TODO: following two states should be reworked to match new design
         State {
             name: "conversationSearch"
             PropertyChanges {
@@ -80,8 +87,20 @@ Page {
                 sourceComponent: searchBarComponent
                 searchPlaceholder: "Search your conversations"
             }
+
+            PropertyChanges {
+                target: searchModelLoader
+                source: "MessageSearch.qml"
+            }
+
+            PropertyChanges {
+                target: messageSearchLoader
+                searchModel: msgSearchModel
+            }
+
         },
 
+        //TODO: following state should be reworked to match new design
         State {
             name: "newConversationState"
             PropertyChanges {

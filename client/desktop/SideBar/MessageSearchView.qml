@@ -8,42 +8,38 @@ import "./js/ContactView.mjs" as JS
 import "popups" as Popups
 import "qrc:/imports/Avatar" as Av
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
 
-/// --- displays a list of contacts
-ListView {
+ ListView {
     id: messageSearchList
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
+    height: contentHeight
     ScrollBar.vertical: ScrollBar {
     }
 
     delegate: Item {
         id: messageItem
         property var messageData: model
+        property bool outbound: messageData.author === config.configId
 
-        height: visible ? CmnCfg.convoHeight : 0
+        height: CmnCfg.convoHeight
         width: parent.width
-        visible: matched
 
         Common.PlatonicRectangle {
             id: messageRectangle
             boxColor: messageData.conversationColor
-            boxTitle: messageData.name
-            picture: Utils.safeStringOrDefault(messageData.profilePicture, "")
-
+            boxTitle: messageData.conversationTitle
+            picture: Utils.safeStringOrDefault(messageData.conversationPicture, "")
+            groupPicture: !messageData.conversationPairwise
             labelComponent: Av.ConversationLabel {
-                contactName: messageData.name
+                contactName: messageData.conversationTitle
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
-                lastBody: messageData.author + ": " + messageData.body
+                lastAuthor: outbound ? "You" : messageData.author
+                lastBody: lastAuthor + ": " + messageData.body
+                lastTimestamp: Utils.friendlyTimestamp(
+                                   messageData.time)
             }
         }
     }

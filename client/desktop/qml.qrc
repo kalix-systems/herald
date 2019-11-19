@@ -55,5 +55,6 @@
         <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>common/ConfigAvatar.qml</file>
         <file>SideBar/MessageSearchView.qml</file>
+        <file>SideBar/MessageSearch.qml</file>
     </qresource>
 </RCC>
