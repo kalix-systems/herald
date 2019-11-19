@@ -3,7 +3,7 @@ use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation
-pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
+pub const NTS_CONVERSATION_NAME: &str = "Note to Self";
 
 pub(crate) mod db;
 
