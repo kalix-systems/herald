@@ -124,7 +124,7 @@ impl Interface for MessageSearch {
                 let last_ix = self.results.len().saturating_sub(1);
 
                 self.model
-                    .begin_insert_rows(last_ix, last_ix + results.len());
+                    .begin_insert_rows(last_ix, last_ix + results.len().saturating_sub(1));
                 self.results.append(&mut results);
                 self.model.end_insert_rows();
             }
