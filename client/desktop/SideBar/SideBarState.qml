@@ -22,8 +22,21 @@ Page {
         }
     }
 
+    //column to load content, components are inside instead of being declared separately because
+    // otherwise loader cannot keep track of contentHeight of the listviews.
     Column {
-      anchors.fill: parent
+        id: wrapperCol
+     width: parent.width
+
+     Text {
+         text: "Conversations"
+         anchors.left: parent.left
+         anchors.leftMargin: CmnCfg.smallMargin
+         topPadding: CmnCfg.smallMargin
+         font.bold: true
+         visible: sideBarState.state == "conversationSearch"
+     }
+
      Loader {
         id: sideBarBodyLoader
         sourceComponent: Component {
@@ -33,9 +46,19 @@ Page {
         width: parent.width
       }
 
+     Text {
+         text: "Messages"
+         anchors.left: parent.left
+         anchors.leftMargin: CmnCfg.smallMargin
+         topPadding: CmnCfg.smallMargin
+         font.bold: true
+         visible: sideBarState.state == "conversationSearch"
+     }
+
     Loader {
         id: messageSearchLoader
         width: parent.width
+        //model loaded into search view only in search state
         property var searchModel
         sourceComponent: Component {
             MessageSearchView {
@@ -43,7 +66,7 @@ Page {
             }
         }
     }
-    }
+  }
 
     states: [
         State {
@@ -88,11 +111,13 @@ Page {
                 searchPlaceholder: "Search your conversations"
             }
 
+            //loader that loads message search model
             PropertyChanges {
                 target: searchModelLoader
                 source: "MessageSearch.qml"
             }
 
+            //load model into view
             PropertyChanges {
                 target: messageSearchLoader
                 searchModel: msgSearchModel
