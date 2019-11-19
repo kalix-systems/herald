@@ -1,7 +1,5 @@
 use super::*;
-use crate::{
-    chainkeys::DecryptionResult, config::*, errors::HErr::*, message::attachments::Attachment,
-};
+use crate::{chainkeys::DecryptionResult, errors::HErr::*, message::attachments::Attachment};
 use chainmail::{block::*, errors::ChainError::CryptoError};
 use std::convert::AsRef;
 
@@ -67,9 +65,11 @@ impl ConversationMessage {
         cid: ConversationId,
         content: &ConversationMessageBody,
     ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
+        use crate::config;
+
         let cbytes = serde_cbor::to_vec(content)?;
-        let kp = Config::static_keypair()?;
-        let from = Config::static_gid()?;
+        let kp = config::keypair()?;
+        let from = config::gid()?;
         let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
         let channel_key = cid.get_channel_key()?;
 
@@ -182,11 +182,13 @@ impl DeviceMessage {
         to: &sig::PublicKey,
         content: &DeviceMessageBody,
     ) -> Result<DeviceMessage, HErr> {
+        use crate::config;
+
         let mut content = serde_cbor::to_vec(content)?;
 
         let pk = spk_to_epk(to)?;
 
-        let kp = Config::static_keypair()?;
+        let kp = crate::config::keypair()?;
         let sk = ssk_to_esk(kp.secret_key())?;
 
         let nonce = box_::gen_nonce();
@@ -194,7 +196,7 @@ impl DeviceMessage {
         let tag = box_::seal_detached(&mut content, &nonce, &pk, &sk);
 
         Ok(DeviceMessage {
-            from: Config::static_gid()?,
+            from: config::gid()?,
             content,
             nonce,
             tag,
@@ -203,6 +205,8 @@ impl DeviceMessage {
     }
 
     pub(crate) fn open(self) -> Result<(GlobalId, DeviceMessageBody), HErr> {
+        use crate::config;
+
         // TODO: remove this, handle prekey
         assert!(self.prekey.is_none());
 
@@ -216,7 +220,7 @@ impl DeviceMessage {
 
         let pk = spk_to_epk(&from.did)?;
 
-        let kp = Config::static_keypair()?;
+        let kp = config::keypair()?;
         let sk = ssk_to_esk(kp.secret_key())?;
 
         box_::open_detached(&mut content, &tag, &nonce, &pk, &sk)

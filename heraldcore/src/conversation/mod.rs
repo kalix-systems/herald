@@ -79,7 +79,7 @@ impl Conversation {
             ..
         } = meta;
 
-        let kp = crate::config::Config::static_keypair()?;
+        let kp = crate::config::keypair()?;
         let gen = Genesis::new(kp.secret_key());
         cid.store_genesis(&gen)?;
 

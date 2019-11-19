@@ -3,9 +3,7 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    abort_err,
-    config::Config,
-    conversation,
+    abort_err, config, conversation,
     errors::HErr,
     message::{
         self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
@@ -52,7 +50,7 @@ impl MessagesTrait for Messages {
             emit,
             container: Container::default(),
             conversation_id: None,
-            local_id: abort_err!(Config::static_id()),
+            local_id: abort_err!(config::id()),
             search: SearchState::new(),
         }
     }

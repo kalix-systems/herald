@@ -79,7 +79,7 @@ impl ConversationBuilder {
     }
 
     pub(crate) fn add_tx(mut self, tx: &rusqlite::Transaction) -> Result<Conversation, HErr> {
-        let local_id = crate::config::db::static_id(tx)?;
+        let local_id = crate::config::db::id(tx)?;
 
         if !self.member_set.contains(&local_id) {
             self.members.push(local_id);

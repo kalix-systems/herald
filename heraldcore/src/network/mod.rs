@@ -1,6 +1,5 @@
 use crate::{
     chainkeys,
-    config::Config,
     conversation::{settings, ConversationMeta},
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
@@ -56,14 +55,14 @@ pub enum Notification {
 
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
     Ok(helper::dep_key(&req)?.0)
 }
 
 /// Adds new key to the server's key registry.
 pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
     let req = new_key::Req(kp.sign(to_new));
     Ok(helper::new_key(&req)?.0)
 }
@@ -84,7 +83,7 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
 pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
 

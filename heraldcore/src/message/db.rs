@@ -226,7 +226,7 @@ impl OutboundMessageBuilder {
         let conversation_id = e!(conversation.ok_or(MissingConversationId));
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Time::now();
-        let author = e!(crate::config::db::static_id(&db));
+        let author = e!(crate::config::db::id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
         let expiration = match expiration_period.into_millis() {

@@ -4,8 +4,7 @@ SELECT
   profile_picture,
   color,
   colorscheme,
-  pairwise_conversation,
-  kp
+  pairwise_conversation
 FROM
   config
   INNER JOIN users ON config.id = users.user_id

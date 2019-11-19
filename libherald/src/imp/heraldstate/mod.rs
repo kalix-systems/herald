@@ -8,7 +8,7 @@ use crate::{
 };
 use herald_common::*;
 use heraldcore::network::{self as net, Notification};
-use heraldcore::{config::Config, db, message::gc};
+use heraldcore::{config, db, message::gc};
 use std::{
     convert::TryFrom,
     sync::{
@@ -33,7 +33,7 @@ pub struct HeraldState {
 
 impl HeraldStateTrait for HeraldState {
     fn new(emit: HeraldStateEmitter) -> Self {
-        let config_init = if Config::static_id().is_ok() {
+        let config_init = if config::id().is_ok() {
             // If this fails, it's because a thread couldn't be spawned.
             // This implies the OS is in a very bad place.
             push_err!(
