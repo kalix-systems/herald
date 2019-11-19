@@ -1,11 +1,9 @@
 #include "Bindings.h"
-#include <QtTest>
-#include <QSignalSpy>
 #include <QDebug>
-// add necessary includes here
+#include <QSignalSpy>
+#include <QtTest>
 
-class libherald : public QObject
-{
+class libherald : public QObject {
   Q_OBJECT
 
 public:
@@ -20,48 +18,56 @@ public:
     libherald();
     ~libherald();
 
-private slots:
-  void test_config_set_name();
-  void test_config_set_color();
-  void test_convo_messages_setup();
-  void test_convo_messages_deletion();
-  void test_message_send_delete();
-  void test_convo_settings();
-  void test_convo_filter();
-  void test_reply();
-
+  private slots:
+    void initTestCase();
+    void test_config_set_name();
+    void test_config_set_color();
+    void test_convo_messages_setup();
+    void test_convo_messages_deletion();
+    void test_message_send_delete();
+    void test_convo_settings();
+    void test_convo_filter();
+    void test_reply();
 };
 
-libherald::libherald()
-{
-    QFile file("db/store.sqlite3");
-    file.remove();
-    herald_state = new HeraldState();
-    herald_state->registerNewUser("Boruto");
-    herald_state->login();
-    error = new Errors();
-
-}
-
+libherald::libherald() {}
 libherald::~libherald() {}
+
+void libherald::initTestCase()
+{
+  qDebug() << "Removing Previous Run Database";
+  QFile file("db/store.sqlite3");
+  file.remove();
+  qDebug() << "Creating New Herald State";
+  herald_state = new HeraldState();
+  QSignalSpy spy(herald_state, SIGNAL(configInitChanged()));
+  qDebug() << "Creating New Errors Queue";
+  error = new Errors();
+  qDebug() << "Registering New User 'Alice'";
+  herald_state->registerNewUser("Alice");
+  QVERIFY(spy.wait(1000));
+}
 
 void libherald::test_config_set_name()
 {
-    cfg = new Config();
-    QSignalSpy spy(cfg, SIGNAL(nameChanged()));
-    cfg -> setName("Alfalfa");
-    QCOMPARE(cfg -> name(), "Alfalfa");
-    QCOMPARE(spy.count(), 1);
-    delete cfg;
+  cfg = new Config();
+  qDebug() << "Allocating New Config";
+  QSignalSpy spy(cfg, SIGNAL(nameChanged()));
+  qDebug() << "setting name in config";
+  cfg->setName("Alice_Alias");
+  QCOMPARE(cfg->name(), "Alice_Alias");
+  QCOMPARE(spy.count(), 1);
+  delete cfg;
 }
 
-void libherald::test_config_set_color() {
-    cfg = new Config();
-    QSignalSpy spy(cfg, SIGNAL(colorChanged()));
-    cfg -> setColor(0);
-    QCOMPARE(cfg -> color(), 0);
-    QCOMPARE(spy.count(), 1);
-    delete cfg;
+void libherald::test_config_set_color()
+{
+  cfg = new Config();
+  QSignalSpy spy(cfg, SIGNAL(colorChanged()));
+  cfg->setColor(0);
+  QCOMPARE(cfg->color(), 0);
+  QCOMPARE(spy.count(), 1);
+  delete cfg;
 }
 
 void libherald::test_convo_messages_setup() {
@@ -163,8 +169,6 @@ void libherald::test_reply() {
 
 }
 
-
-
-QTEST_APPLESS_MAIN(libherald)
+QTEST_MAIN(libherald)
 
 #include "tst_libherald.moc"
