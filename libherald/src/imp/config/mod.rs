@@ -9,7 +9,6 @@ pub struct Config {
 }
 
 // TODO this isn't exception safe
-
 impl ConfigTrait for Config {
     /// Returns new Config. Will typically end up being called from C++
     fn new(emit: ConfigEmitter) -> Self {
