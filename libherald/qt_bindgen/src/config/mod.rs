@@ -141,13 +141,13 @@ fn conversations() -> Object {
     let props = filter_props();
 
     let item_props = item_props! {
-       conversationId: ItemProp::new(QByteArray),
-       title: ItemProp::new(QString).write().optional(),
+       conversationId: ItemProp::new(QByteArray).get_by_value(),
+       title: ItemProp::new(QString).write().optional().get_by_value(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       picture: picture_item_prop().write(),
+       picture: picture_item_prop().write().get_by_value(),
        color: color_item_prop().write()
     };
 
