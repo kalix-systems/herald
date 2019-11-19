@@ -1,5 +1,4 @@
 use crate::{
-    chainkeys,
     conversation::{settings, ConversationMeta},
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
@@ -7,6 +6,7 @@ use crate::{
     types::*,
     *,
 };
+use chainkeys;
 use chainmail::block::*;
 use herald_common::*;
 use lazy_static::*;
@@ -87,7 +87,7 @@ pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(&gen)?;
+    chainkeys::store_genesis(&cid, &gen)?;
 
     let req = dmessages::UserReq { gen, cid };
 

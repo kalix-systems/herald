@@ -81,7 +81,7 @@ impl Conversation {
 
         let kp = crate::config::keypair()?;
         let gen = Genesis::new(kp.secret_key());
-        cid.store_genesis(&gen)?;
+        chainkeys::store_genesis(&cid, &gen)?;
 
         let picture = match picture_path {
             Some(path) => Some(fs::read(path)?),

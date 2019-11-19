@@ -1,5 +1,5 @@
 use super::*;
-use crate::{user::UserBuilder, womp};
+use crate::user::UserBuilder;
 use herald_common::sig;
 use std::convert::TryFrom;
 

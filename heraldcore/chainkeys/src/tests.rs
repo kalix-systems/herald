@@ -1,15 +1,12 @@
 use super::*;
-use crate::womp;
 use serial_test_derive::*;
 
-impl ConversationId {
-    fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
-        &self,
-        blocks: I,
-    ) -> Result<FoundKeys, HErr> {
-        let mut db = CK_CONN.lock();
-        get_keys(&mut db, *self, blocks)
-    }
+fn get_keys<'a, I: Iterator<Item = &'a BlockHash>>(
+    cid: &ConversationId,
+    blocks: I,
+) -> Result<FoundKeys, rusqlite::Error> {
+    let mut db = CK_CONN.lock();
+    db::get_keys(&mut db, *cid, blocks)
 }
 
 fn reset() {
@@ -32,7 +29,7 @@ fn in_memory() -> rusqlite::Connection {
 #[test]
 fn raw_pending() {
     let mut conn = in_memory();
-    let cid = ConversationId::from(crate::utils::rand_id());
+    let cid = ConversationId::from([0; 32]);
 
     let mut tx = conn.transaction().expect(womp!());
 
@@ -48,37 +45,37 @@ fn raw_pending() {
     let dummy_block_bytes3 = &[2; 32];
     let dummy_signer_bytes3 = &[2; 32];
 
-    let block_id1 = raw_add_pending_block(
+    let block_id1 = db::raw_add_pending_block(
         &mut tx,
         dummy_signer_bytes1.to_vec(),
         dummy_block_bytes1.to_vec(),
     )
     .expect(womp!());
 
-    raw_add_block_dependencies(&mut tx, block_id1, vec![blockhash1.as_ref()].into_iter())
+    db::raw_add_block_dependencies(&mut tx, block_id1, vec![blockhash1.as_ref()].into_iter())
         .expect(womp!());
 
-    let block_id2 = raw_add_pending_block(
+    let block_id2 = db::raw_add_pending_block(
         &mut tx,
         dummy_signer_bytes2.to_vec(),
         dummy_block_bytes2.to_vec(),
     )
     .expect(womp!());
-    raw_add_block_dependencies(
+    db::raw_add_block_dependencies(
         &mut tx,
         block_id2,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
     )
     .expect(womp!());
 
-    let block_id3 = raw_add_pending_block(
+    let block_id3 = db::raw_add_pending_block(
         &mut tx,
         dummy_signer_bytes3.to_vec(),
         dummy_block_bytes3.to_vec(),
     )
     .expect(womp!());
 
-    raw_add_block_dependencies(
+    db::raw_add_block_dependencies(
         &mut tx,
         block_id3,
         vec![blockhash1.as_ref(), blockhash2.as_ref()].into_iter(),
@@ -86,10 +83,10 @@ fn raw_pending() {
     .expect(womp!());
 
     // free dummy_block_bytes1
-    raw_store_key(&mut tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&mut tx, blockhash1.as_ref()).expect(womp!());
+    db::raw_store_key(&mut tx, cid, blockhash1.as_ref(), chainkey1.as_ref()).expect(womp!());
+    db::raw_remove_block_dependencies(&mut tx, blockhash1.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
+    let blocks = db::raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 1);
     assert_eq!(
         blocks[0],
@@ -97,10 +94,10 @@ fn raw_pending() {
     );
 
     // free dummy_block_bytes2 and dummy_block_bytes3
-    raw_store_key(&mut tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
-    raw_remove_block_dependencies(&mut tx, blockhash2.as_ref()).expect(womp!());
+    db::raw_store_key(&mut tx, cid, blockhash2.as_ref(), chainkey2.as_ref()).expect(womp!());
+    db::raw_remove_block_dependencies(&mut tx, blockhash2.as_ref()).expect(womp!());
 
-    let blocks = raw_pop_unblocked_blocks(&mut tx).expect(womp!());
+    let blocks = db::raw_pop_unblocked_blocks(&mut tx).expect(womp!());
     assert_eq!(blocks.len(), 2);
     assert_eq!(
         blocks[0],
@@ -121,8 +118,8 @@ fn channel_keys() {
 
     let kp = herald_common::sig::KeyPair::gen_new();
 
-    let cid1 = ConversationId::from(crate::utils::rand_id());
-    let cid2 = ConversationId::from(crate::utils::rand_id());
+    let cid1 = ConversationId::from([1; 32]);
+    let cid2 = ConversationId::from([2; 32]);
 
     assert_ne!(cid1, cid2);
 
@@ -136,29 +133,19 @@ fn channel_keys() {
 
     assert_ne!(h1, h2);
 
-    cid1.store_genesis(&g1)
-        .expect("failed to store genesis block for cid1");
-    cid2.store_genesis(&g2)
-        .expect("failed to store genesis block for cid2");
+    store_genesis(&cid1, &g1).expect("failed to store genesis block for cid1");
+    store_genesis(&cid2, &g2).expect("failed to store genesis block for cid2");
 
-    let u1 = cid1
-        .get_unused()
-        .expect("failed to get unused keys for cid1");
-    let u2 = cid2
-        .get_unused()
-        .expect("failed to get unused keys for cid2");
+    let u1 = get_unused(&cid1).expect("failed to get unused keys for cid1");
+    let u2 = get_unused(&cid2).expect("failed to get unused keys for cid2");
 
     assert_eq!(u1, vec![(h1, g1.root().clone())]);
     assert_eq!(u2, vec![(h2, g2.root().clone())]);
 
     assert_ne!(u1, u2);
 
-    let ck1 = cid1
-        .get_channel_key()
-        .expect("failed to ge channel key for cid1");
-    let ck2 = cid2
-        .get_channel_key()
-        .expect("failed to ge channel key for cid2");
+    let ck1 = get_channel_key(&cid1).expect("failed to ge channel key for cid1");
+    let ck2 = get_channel_key(&cid2).expect("failed to ge channel key for cid2");
 
     assert_eq!(&ck1, g1.channel_key());
     assert_eq!(&ck2, g2.channel_key());
@@ -171,8 +158,8 @@ fn channel_keys() {
 fn blockstore() {
     reset();
 
-    let cid1 = ConversationId::from(crate::utils::rand_id());
-    let cid2 = ConversationId::from(crate::utils::rand_id());
+    let cid1 = ConversationId::from([1; 32]);
+    let cid2 = ConversationId::from([2; 32]);
 
     let blockhash11 = BlockHash::from_slice(&[11; BLOCKHASH_BYTES]).expect(womp!());
     let blockhash12 = BlockHash::from_slice(&[12; BLOCKHASH_BYTES]).expect(womp!());
@@ -185,21 +172,19 @@ fn blockstore() {
     let chainkey22 = ChainKey::from_slice(&[22; CHAINKEY_BYTES]).expect(womp!());
 
     // cid1 keys
-    cid1.store_key(blockhash11, &chainkey11).expect(womp!());
-    cid1.store_key(blockhash12, &chainkey12).expect(womp!());
+    store_key(&cid1, blockhash11, &chainkey11).expect(womp!());
+    store_key(&cid1, blockhash12, &chainkey12).expect(womp!());
 
     // cid2 keys
-    cid2.store_key(blockhash21, &chainkey21).expect(womp!());
-    cid2.store_key(blockhash22, &chainkey22).expect(womp!());
+    store_key(&cid2, blockhash21, &chainkey21).expect(womp!());
+    store_key(&cid2, blockhash22, &chainkey22).expect(womp!());
 
     // cid1 known keys
     let known_keys1: BTreeSet<ChainKey> = vec![(&chainkey11).clone(), (&chainkey12).clone()]
         .into_iter()
         .collect();
 
-    let keys1 = cid1
-        .get_keys(vec![blockhash11, blockhash12].iter())
-        .expect(womp!());
+    let keys1 = get_keys(&cid1, vec![blockhash11, blockhash12].iter()).expect(womp!());
 
     match keys1 {
         FoundKeys::Found(keys) => {
@@ -214,9 +199,7 @@ fn blockstore() {
         .into_iter()
         .collect();
 
-    let keys2 = cid2
-        .get_keys(vec![blockhash21, blockhash22].iter())
-        .expect(womp!());
+    let keys2 = get_keys(&cid2, vec![blockhash21, blockhash22].iter()).expect(womp!());
 
     match keys2 {
         FoundKeys::Found(keys) => {
@@ -227,17 +210,17 @@ fn blockstore() {
     }
 
     // cid1 mark used
-    cid1.mark_used(vec![blockhash11].iter()).expect(womp!());
+    mark_used(&cid1, vec![blockhash11].iter()).expect(womp!());
 
-    let unused1: Vec<_> = cid1.get_unused().expect(womp!()).into_iter().collect();
+    let unused1: Vec<_> = get_unused(&cid1).expect(womp!()).into_iter().collect();
 
     assert_eq!(unused1.len(), 1);
     assert_eq!(unused1, vec![(blockhash12, chainkey12)]);
 
     // cid2 mark used
-    cid2.mark_used(vec![blockhash21].iter()).expect(womp!());
+    mark_used(&cid2, vec![blockhash21].iter()).expect(womp!());
 
-    let unused2: Vec<_> = cid2.get_unused().expect(womp!()).into_iter().collect();
+    let unused2: Vec<_> = get_unused(&cid2).expect(womp!()).into_iter().collect();
 
     assert_eq!(unused2.len(), 1);
     assert_eq!(unused2, vec![(blockhash22, chainkey22)]);

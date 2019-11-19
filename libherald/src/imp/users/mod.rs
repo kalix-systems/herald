@@ -1,7 +1,7 @@
 use crate::{ffi, interface::*, ret_err, ret_none, spawn};
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, network,
+    network,
     user::{self, UserBuilder, UserStatus},
     utils::SearchPattern,
 };

@@ -3,7 +3,7 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, config, conversation,
+    config, conversation,
     errors::HErr,
     message::{
         self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,

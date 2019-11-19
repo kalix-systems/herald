@@ -27,7 +27,7 @@ fn data_dir() -> PathBuf {
     data_dir.to_path_buf()
 }
 
-#[cfg(all(test, not(feature = "deploy_desktop")))]
+#[cfg(test)]
 fn data_dir() -> PathBuf {
     "test_output".into()
 }

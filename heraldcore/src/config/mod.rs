@@ -87,7 +87,7 @@ impl ConfigBuilder {
         // changing the chainmail API
         let kp = keypair()?;
         let gen = Genesis::new(kp.secret_key());
-        conf.nts_conversation.store_genesis(&gen)?;
+        chainkeys::store_genesis(&conf.nts_conversation, &gen)?;
         Ok(conf)
     }
 }

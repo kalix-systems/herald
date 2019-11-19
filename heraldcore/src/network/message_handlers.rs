@@ -45,7 +45,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                 let mut db = crate::db::Database::get()?;
                 let conv = conv_builder.add_db(&mut db)?;
 
-                cid.store_genesis(&gen)?;
+                chainkeys::store_genesis(&cid, &gen)?;
 
                 ev.notifications
                     .push(Notification::NewConversation(conv.meta));
@@ -125,7 +125,7 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
                     .add()?;
 
                 let conversation::Conversation { meta, .. } = conversation;
-                cid.store_genesis(&gen)?;
+                chainkeys::store_genesis(&cid, &gen)?;
 
                 ev.notifications
                     .push(Notification::NewUser(Box::new((user, meta))));

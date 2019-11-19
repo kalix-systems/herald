@@ -1,6 +1,7 @@
 use super::*;
-use crate::{chainkeys::DecryptionResult, errors::HErr::*, message::attachments::Attachment};
-use chainmail::{block::*, errors::ChainError::CryptoError};
+use crate::{errors::HErr::*, message::attachments::Attachment};
+use chainkeys::{self, ChainMailError, DecryptionResult};
+use chainmail::block::*;
 use std::convert::AsRef;
 
 /// Types relevant to [`ConversationMessage`]s
@@ -66,16 +67,24 @@ impl ConversationMessage {
         content: &ConversationMessageBody,
     ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
         use crate::config;
+        use chainkeys::ChainKeysError;
 
         let cbytes = serde_cbor::to_vec(content)?;
         let kp = config::keypair()?;
         let from = config::gid()?;
-        let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
-        let channel_key = cid.get_channel_key()?;
+        let (hashes, keys) = chainkeys::get_unused(&cid)?.into_iter().unzip();
+        let channel_key = chainkeys::get_channel_key(&cid)?;
 
+        // FIXME: This is terrible. Why don't these functions just return results?
         let SealData { block, key } =
-            Block::seal(kp.secret_key(), &channel_key, &keys, hashes, cbytes).ok_or(CryptoError)?;
-        let hash = block.compute_hash().ok_or(CryptoError)?;
+            Block::seal(kp.secret_key(), &channel_key, &keys, hashes, cbytes).ok_or(
+                HErr::ChainError(ChainKeysError::Chain(ChainMailError::CryptoError)),
+            )?;
+        let hash = block
+            .compute_hash()
+            .ok_or(HErr::ChainError(ChainKeysError::Chain(
+                ChainMailError::CryptoError,
+            )))?;
 
         Ok((
             ConversationMessage {
@@ -95,7 +104,7 @@ impl ConversationMessage {
         let mut out = Vec::new();
 
         let mut blocks = {
-            match cid.open_block(&from, body)? {
+            match chainkeys::open_block(&cid, &from, body)? {
                 DecryptionResult::Success(bvec, unlocked) => {
                     out.push((serde_cbor::from_slice(&bvec)?, from));
                     unlocked
@@ -105,7 +114,7 @@ impl ConversationMessage {
         };
 
         while let Some((block, from)) = blocks.pop() {
-            match cid.open_block(&from, block)? {
+            match chainkeys::open_block(&cid, &from, block)? {
                 DecryptionResult::Success(bvec, mut unlocked) => {
                     blocks.append(&mut unlocked);
                     out.push((serde_cbor::from_slice(&bvec)?, from));

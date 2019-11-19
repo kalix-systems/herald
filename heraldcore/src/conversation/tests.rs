@@ -1,8 +1,6 @@
 use super::*;
-use crate::{
-    db::Database, message::InboundMessageBuilder, platform_dirs::PICTURES_DIR, user::UserBuilder,
-    womp,
-};
+use crate::{db::Database, message::InboundMessageBuilder, user::UserBuilder};
+use platform_dirs::PICTURES_DIR;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 

@@ -1,0 +1,18 @@
+[package]
+name = "coretypes"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+serde             = "1.0.99"
+
+[dependencies.rusqlite]
+version          = "0.20.0"
+default_features = false
+features         = ["functions", "bundled"]
+
+[dependencies.herald_common]
+path             = "../../herald_common"
+default_features = false
+features         = ["rusqlite_"]

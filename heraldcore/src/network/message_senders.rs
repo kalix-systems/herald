@@ -14,12 +14,13 @@ pub(crate) fn send_cmessage(
 
         let mut db = chainkeys::CK_CONN.lock();
         let mut tx = db.transaction()?;
-        let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
+
+        let unlocked = chainkeys::db::store_key(&mut tx, cid, hash, &key)?;
         debug_assert!(unlocked.is_empty());
         // TODO: replace used with probably_used here
         // in general we probably want a slightly smarter system for dealing with scenarios where
         // we thought a message wasn't sent but it was
-        chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
+        chainkeys::db::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => {
@@ -31,7 +32,7 @@ pub(crate) fn send_cmessage(
                 missing
             ))),
             Err(e) => {
-                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                chainkeys::db::mark_used(&mut tx, cid, [hash].iter())?;
                 tx.commit()?;
 
                 // TODO: maybe try more than once?

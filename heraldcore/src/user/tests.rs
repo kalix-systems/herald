@@ -1,5 +1,6 @@
 use super::*;
-use crate::{db::Database, platform_dirs::PICTURES_DIR, womp};
+use crate::db::Database;
+use platform_dirs::PICTURES_DIR;
 use serial_test_derive::serial;
 
 #[test]

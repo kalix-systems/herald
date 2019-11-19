@@ -1,7 +1,8 @@
 use super::*;
-use crate::{platform_dirs::ATTACHMENTS_DIR, NE};
+use crate::NE;
 use herald_common::hash_slice;
 use hex::encode;
+use platform_dirs::ATTACHMENTS_DIR;
 use std::{
     fs::read_dir,
     path::{Path, PathBuf},

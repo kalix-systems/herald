@@ -1,4 +1,5 @@
 use crate::errors::HErr;
+use coretypes::ids::UID_LEN;
 use lazy_static::*;
 use regex::{escape, Regex, RegexBuilder};
 use serde::*;
@@ -51,7 +52,6 @@ lazy_static! {
     pub(crate) static ref CONF: Conf = Conf::read();
 }
 
-pub(crate) const RAND_ID_LEN: usize = 32;
 const NUM_COLORS: u64 = 9;
 
 pub(crate) fn id_to_color<H: std::hash::Hash>(id: H) -> u32 {
@@ -183,61 +183,14 @@ impl SearchPattern {
     }
 }
 
-#[macro_export]
-/// Convenience macro to abort on error.
-macro_rules! abort_err {
-    ($maybe: expr) => {
-        match $maybe {
-            Ok(val) => val,
-            Err(e) => {
-                eprintln!(
-                    "{error} at {file}:{line}:{column}, aborting",
-                    error = e,
-                    file = file!(),
-                    line = line!(),
-                    column = column!()
-                );
-                std::process::abort();
-            }
-        }
-    };
-    ($maybe: expr, $msg: expr) => {
-        match $maybe {
-            Ok(val) => val,
-            Err(e) => {
-                eprintln!(
-                    "{error} at {file}:{line}:{column}, message was {msg}, aborting",
-                    error = e,
-                    file = file!(),
-                    line = line!(),
-                    column = column!(),
-                    msg = $msg
-                );
-                std::process::abort();
-            }
-        }
-    };
-}
-
-#[macro_export]
-/// Convenience macro for printing location of error.
-macro_rules! womp {
-    () => {
-        &format!("{}:{}:{}", file!(), line!(), column!())
-    };
-    ($msg: expr) => {
-        &format!("{} {}:{}:{}", $msg, file!(), line!(), column!())
-    };
-}
-
-pub(crate) fn rand_id() -> [u8; RAND_ID_LEN] {
+pub(crate) fn rand_id() -> [u8; UID_LEN] {
     use sodiumoxide::randombytes::randombytes_into;
     if sodiumoxide::init().is_err() {
         eprintln!("failed to init libsodium - what have you done");
         std::process::abort()
     }
 
-    let mut buf = [0u8; RAND_ID_LEN];
+    let mut buf = [0u8; UID_LEN];
     randombytes_into(&mut buf);
     buf
 }

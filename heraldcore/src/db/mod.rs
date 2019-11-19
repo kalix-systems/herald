@@ -1,5 +1,6 @@
-use crate::{errors::*, platform_dirs::DB_DIR, utils::SearchPattern};
+use crate::{errors::*, utils::SearchPattern};
 use lazy_static::*;
+use platform_dirs::DB_DIR;
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
     ops::{Deref, DerefMut},
