@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  postgres:
+    image: "postgres"
+    command: >-
+            postgres
+             -c 'max_connections=10000'
+             -c 'effective_cache_size=4096MB'
+             -c 'shared_buffers=2048MB'
+             -c 'enable_partitionwise_aggregate=true'
+             -c 'enable_partitionwise_join=true'
+             -c 'checkpoint_completion_target=0.9'
+             -c 'shared_preload_libraries=pg_stat_statements'
+             -c 'maintenance_work_mem=128MB'
+             -c 'random_page_cost=1'
+    stdin_open: true
+    tty: true
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: docker
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+volumes:
+  pg-data:

@@ -8,15 +8,21 @@ use lazy_static::*;
 /// Message related conversation updates
 pub enum MsgUpdate {
     /// A new message
-    Msg(MsgId),
+    NewMsg(Box<Message>),
     /// A message has been acknowledged
-    Receipt(MsgId),
-    /// A full message
-    FullMsg(Box<Message>),
+    Receipt {
+        msg_id: MsgId,
+        recipient: UserId,
+        status: MessageReceiptStatus,
+    },
+    /// A rendered message from the `MessageBuilder`
+    BuilderMsg(Box<Message>),
     /// Save is complete
     StoreDone(MsgId),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
+    /// The container contents, sent when the conversation id is first set.
+    Container(Container),
 }
 
 lazy_static! {

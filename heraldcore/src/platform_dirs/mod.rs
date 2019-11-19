@@ -11,7 +11,7 @@ mod imp;
 
 lazy_static! {
     pub static ref DB_DIR: PathBuf = db_dir();
-    pub static ref PROFILE_PICTURES_DIR: PathBuf = profile_pictures_dir();
+    pub static ref PICTURES_DIR: PathBuf = pictures_dir();
     pub static ref ATTACHMENTS_DIR: PathBuf = attachments_dir();
 }
 
@@ -26,11 +26,11 @@ fn db_dir() -> PathBuf {
     db_dir
 }
 
-fn profile_pictures_dir() -> PathBuf {
-    let pic_dir = DATA_DIR.join("profile_pictures");
+fn pictures_dir() -> PathBuf {
+    let pic_dir = DATA_DIR.join("pictures");
 
     if let Err(e) = create_dir_all(&pic_dir) {
-        eprintln!("Error creating profile picture directory: {}", e);
+        eprintln!("Error creating picture directory: {}", e);
     }
 
     pic_dir

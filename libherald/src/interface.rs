@@ -555,6 +555,7 @@ pub struct ConversationBuilderQObject {}
 
 pub struct ConversationBuilderEmitter {
     qobject: Arc<AtomicPtr<ConversationBuilderQObject>>,
+    picture_changed: fn(*mut ConversationBuilderQObject),
     new_data_ready: fn(*mut ConversationBuilderQObject),
 }
 
@@ -568,6 +569,7 @@ impl ConversationBuilderEmitter {
     pub fn clone(&mut self) -> ConversationBuilderEmitter {
         ConversationBuilderEmitter {
             qobject: self.qobject.clone(),
+            picture_changed: self.picture_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -575,6 +577,12 @@ impl ConversationBuilderEmitter {
         let n: *const ConversationBuilderQObject = null();
         self.qobject
             .store(n as *mut ConversationBuilderQObject, Ordering::SeqCst);
+    }
+    pub fn picture_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.picture_changed)(ptr);
+        }
     }
     pub fn new_data_ready(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -639,6 +647,8 @@ impl ConversationBuilderList {
 pub trait ConversationBuilderTrait {
     fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
+    fn picture(&self) -> Option<&str>;
+    fn set_picture(&mut self, value: Option<String>);
     fn add_member(&mut self, user_id: String) -> bool;
     fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
@@ -663,6 +673,7 @@ pub trait ConversationBuilderTrait {
 #[no_mangle]
 pub extern "C" fn conversation_builder_new(
     conversation_builder: *mut ConversationBuilderQObject,
+    conversation_builder_picture_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_new_data_ready: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
     conversation_builder_layout_changed: fn(*mut ConversationBuilderQObject),
@@ -678,6 +689,7 @@ pub extern "C" fn conversation_builder_new(
 ) -> *mut ConversationBuilder {
     let conversation_builder_emit = ConversationBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(conversation_builder)),
+        picture_changed: conversation_builder_picture_changed,
         new_data_ready: conversation_builder_new_data_ready,
     };
     let model = ConversationBuilderList {
@@ -701,6 +713,38 @@ pub extern "C" fn conversation_builder_new(
 #[no_mangle]
 pub unsafe extern "C" fn conversation_builder_free(ptr: *mut ConversationBuilder) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_get(
+    ptr: *const ConversationBuilder,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.picture();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_set(
+    ptr: *mut ConversationBuilder,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_picture(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_picture_set_none(ptr: *mut ConversationBuilder) {
+    let o = &mut *ptr;
+    o.set_picture(None);
 }
 
 #[no_mangle]
@@ -821,360 +865,6 @@ pub unsafe extern "C" fn conversation_builder_data_member_id(
     let data = o.member_id(to_usize(row).unwrap_or(0));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
-}
-
-pub struct ConversationBuilderUsersQObject {}
-
-pub struct ConversationBuilderUsersEmitter {
-    qobject: Arc<AtomicPtr<ConversationBuilderUsersQObject>>,
-    filter_changed: fn(*mut ConversationBuilderUsersQObject),
-    new_data_ready: fn(*mut ConversationBuilderUsersQObject),
-}
-
-impl ConversationBuilderUsersEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> ConversationBuilderUsersEmitter {
-        ConversationBuilderUsersEmitter {
-            qobject: self.qobject.clone(),
-            filter_changed: self.filter_changed,
-            new_data_ready: self.new_data_ready,
-        }
-    }
-    fn clear(&self) {
-        let n: *const ConversationBuilderUsersQObject = null();
-        self.qobject
-            .store(n as *mut ConversationBuilderUsersQObject, Ordering::SeqCst);
-    }
-    pub fn filter_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.filter_changed)(ptr);
-        }
-    }
-    pub fn new_data_ready(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_data_ready)(ptr);
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct ConversationBuilderUsersList {
-    qobject: *mut ConversationBuilderUsersQObject,
-    layout_about_to_be_changed: fn(*mut ConversationBuilderUsersQObject),
-    layout_changed: fn(*mut ConversationBuilderUsersQObject),
-    data_changed: fn(*mut ConversationBuilderUsersQObject, usize, usize),
-    begin_reset_model: fn(*mut ConversationBuilderUsersQObject),
-    end_reset_model: fn(*mut ConversationBuilderUsersQObject),
-    begin_insert_rows: fn(*mut ConversationBuilderUsersQObject, usize, usize),
-    end_insert_rows: fn(*mut ConversationBuilderUsersQObject),
-    begin_move_rows: fn(*mut ConversationBuilderUsersQObject, usize, usize, usize),
-    end_move_rows: fn(*mut ConversationBuilderUsersQObject),
-    begin_remove_rows: fn(*mut ConversationBuilderUsersQObject, usize, usize),
-    end_remove_rows: fn(*mut ConversationBuilderUsersQObject),
-}
-
-impl ConversationBuilderUsersList {
-    pub fn layout_about_to_be_changed(&mut self) {
-        (self.layout_about_to_be_changed)(self.qobject);
-    }
-    pub fn layout_changed(&mut self) {
-        (self.layout_changed)(self.qobject);
-    }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
-        (self.data_changed)(self.qobject, first, last);
-    }
-    pub fn begin_reset_model(&mut self) {
-        (self.begin_reset_model)(self.qobject);
-    }
-    pub fn end_reset_model(&mut self) {
-        (self.end_reset_model)(self.qobject);
-    }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
-        (self.begin_insert_rows)(self.qobject, first, last);
-    }
-    pub fn end_insert_rows(&mut self) {
-        (self.end_insert_rows)(self.qobject);
-    }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
-        (self.begin_move_rows)(self.qobject, first, last, destination);
-    }
-    pub fn end_move_rows(&mut self) {
-        (self.end_move_rows)(self.qobject);
-    }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
-        (self.begin_remove_rows)(self.qobject, first, last);
-    }
-    pub fn end_remove_rows(&mut self) {
-        (self.end_remove_rows)(self.qobject);
-    }
-}
-
-pub trait ConversationBuilderUsersTrait {
-    fn new(emit: ConversationBuilderUsersEmitter, model: ConversationBuilderUsersList) -> Self;
-    fn emit(&mut self) -> &mut ConversationBuilderUsersEmitter;
-    fn filter(&self) -> Option<&str>;
-    fn set_filter(&mut self, value: Option<String>);
-    fn clear_filter(&mut self) -> ();
-    fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
-        false
-    }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
-        false
-    }
-    fn can_fetch_more(&self) -> bool {
-        false
-    }
-    fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> Option<u32>;
-    fn matched(&self, index: usize) -> bool;
-    fn name(&self, index: usize) -> Option<String>;
-    fn profile_picture(&self, index: usize) -> Option<String>;
-    fn selected(&self, index: usize) -> bool;
-    fn set_selected(&mut self, index: usize, _: bool) -> bool;
-    fn user_id(&self, index: usize) -> Option<&str>;
-}
-
-#[no_mangle]
-pub extern "C" fn conversation_builder_users_new(
-    conversation_builder_users: *mut ConversationBuilderUsersQObject,
-    conversation_builder_users_filter_changed: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_new_data_ready: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_layout_about_to_be_changed: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_layout_changed: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_data_changed: fn(*mut ConversationBuilderUsersQObject, usize, usize),
-    conversation_builder_users_begin_reset_model: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_end_reset_model: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_begin_insert_rows: fn(
-        *mut ConversationBuilderUsersQObject,
-        usize,
-        usize,
-    ),
-    conversation_builder_users_end_insert_rows: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_begin_move_rows: fn(
-        *mut ConversationBuilderUsersQObject,
-        usize,
-        usize,
-        usize,
-    ),
-    conversation_builder_users_end_move_rows: fn(*mut ConversationBuilderUsersQObject),
-    conversation_builder_users_begin_remove_rows: fn(
-        *mut ConversationBuilderUsersQObject,
-        usize,
-        usize,
-    ),
-    conversation_builder_users_end_remove_rows: fn(*mut ConversationBuilderUsersQObject),
-) -> *mut ConversationBuilderUsers {
-    let conversation_builder_users_emit = ConversationBuilderUsersEmitter {
-        qobject: Arc::new(AtomicPtr::new(conversation_builder_users)),
-        filter_changed: conversation_builder_users_filter_changed,
-        new_data_ready: conversation_builder_users_new_data_ready,
-    };
-    let model = ConversationBuilderUsersList {
-        qobject: conversation_builder_users,
-        layout_about_to_be_changed: conversation_builder_users_layout_about_to_be_changed,
-        layout_changed: conversation_builder_users_layout_changed,
-        data_changed: conversation_builder_users_data_changed,
-        begin_reset_model: conversation_builder_users_begin_reset_model,
-        end_reset_model: conversation_builder_users_end_reset_model,
-        begin_insert_rows: conversation_builder_users_begin_insert_rows,
-        end_insert_rows: conversation_builder_users_end_insert_rows,
-        begin_move_rows: conversation_builder_users_begin_move_rows,
-        end_move_rows: conversation_builder_users_end_move_rows,
-        begin_remove_rows: conversation_builder_users_begin_remove_rows,
-        end_remove_rows: conversation_builder_users_end_remove_rows,
-    };
-    let d_conversation_builder_users =
-        ConversationBuilderUsers::new(conversation_builder_users_emit, model);
-    Box::into_raw(Box::new(d_conversation_builder_users))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_free(ptr: *mut ConversationBuilderUsers) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_filter_get(
-    ptr: *const ConversationBuilderUsers,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.filter();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_filter_set(
-    ptr: *mut ConversationBuilderUsers,
-    v: *const c_ushort,
-    len: c_int,
-) {
-    let o = &mut *ptr;
-    let mut s = String::new();
-    set_string_from_utf16(&mut s, v, len);
-    o.set_filter(Some(s));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_filter_set_none(
-    ptr: *mut ConversationBuilderUsers,
-) {
-    let o = &mut *ptr;
-    o.set_filter(None);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_clear_filter(
-    ptr: *mut ConversationBuilderUsers,
-) {
-    let o = &mut *ptr;
-    o.clear_filter()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_row_count(
-    ptr: *const ConversationBuilderUsers,
-) -> c_int {
-    to_c_int((&*ptr).row_count())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_insert_rows(
-    ptr: *mut ConversationBuilderUsers,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_remove_rows(
-    ptr: *mut ConversationBuilderUsers,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_can_fetch_more(
-    ptr: *const ConversationBuilderUsers,
-) -> bool {
-    (&*ptr).can_fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_fetch_more(ptr: *mut ConversationBuilderUsers) {
-    (&mut *ptr).fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_sort(
-    ptr: *mut ConversationBuilderUsers,
-    column: u8,
-    order: SortOrder,
-) {
-    (&mut *ptr).sort(column, order)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_color(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-) -> COption<u32> {
-    let o = &*ptr;
-    o.color(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_matched(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-) -> bool {
-    let o = &*ptr;
-    o.matched(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_name(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.name(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_profile_picture(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.profile_picture(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_selected(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-) -> bool {
-    let o = &*ptr;
-    o.selected(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_set_data_selected(
-    ptr: *mut ConversationBuilderUsers,
-    row: c_int,
-    v: bool,
-) -> bool {
-    (&mut *ptr).set_selected(to_usize(row).unwrap_or(0), v)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn conversation_builder_users_data_user_id(
-    ptr: *const ConversationBuilderUsers,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let o = &*ptr;
-    let data = o.user_id(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let s: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, s, to_c_int(data.len()));
-    }
 }
 
 pub struct ConversationsQObject {}
@@ -1302,16 +992,16 @@ pub trait ConversationsTrait {
     fn sort(&mut self, _: u8, _: SortOrder) {}
     fn color(&self, index: usize) -> u32;
     fn set_color(&mut self, index: usize, _: u32) -> bool;
-    fn conversation_id(&self, index: usize) -> &[u8];
+    fn conversation_id(&self, index: usize) -> Vec<u8>;
     fn expiration_period(&self, index: usize) -> u8;
     fn set_expiration_period(&mut self, index: usize, _: u8) -> bool;
     fn matched(&self, index: usize) -> bool;
     fn muted(&self, index: usize) -> bool;
     fn set_muted(&mut self, index: usize, _: bool) -> bool;
     fn pairwise(&self, index: usize) -> bool;
-    fn picture(&self, index: usize) -> Option<&str>;
+    fn picture(&self, index: usize) -> Option<String>;
     fn set_picture(&mut self, index: usize, _: Option<String>) -> bool;
-    fn title(&self, index: usize) -> Option<&str>;
+    fn title(&self, index: usize) -> Option<String>;
     fn set_title(&mut self, index: usize, _: Option<String>) -> bool;
 }
 
@@ -2918,6 +2608,425 @@ pub unsafe extern "C" fn message_preview_msg_id_set_get(ptr: *const MessagePrevi
     (&*ptr).msg_id_set()
 }
 
+pub struct MessageSearchQObject {}
+
+pub struct MessageSearchEmitter {
+    qobject: Arc<AtomicPtr<MessageSearchQObject>>,
+    regex_search_changed: fn(*mut MessageSearchQObject),
+    search_pattern_changed: fn(*mut MessageSearchQObject),
+    new_data_ready: fn(*mut MessageSearchQObject),
+}
+
+impl MessageSearchEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> MessageSearchEmitter {
+        MessageSearchEmitter {
+            qobject: self.qobject.clone(),
+            regex_search_changed: self.regex_search_changed,
+            search_pattern_changed: self.search_pattern_changed,
+            new_data_ready: self.new_data_ready,
+        }
+    }
+    fn clear(&self) {
+        let n: *const MessageSearchQObject = null();
+        self.qobject
+            .store(n as *mut MessageSearchQObject, Ordering::SeqCst);
+    }
+    pub fn regex_search_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.regex_search_changed)(ptr);
+        }
+    }
+    pub fn search_pattern_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.search_pattern_changed)(ptr);
+        }
+    }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct MessageSearchList {
+    qobject: *mut MessageSearchQObject,
+    layout_about_to_be_changed: fn(*mut MessageSearchQObject),
+    layout_changed: fn(*mut MessageSearchQObject),
+    data_changed: fn(*mut MessageSearchQObject, usize, usize),
+    begin_reset_model: fn(*mut MessageSearchQObject),
+    end_reset_model: fn(*mut MessageSearchQObject),
+    begin_insert_rows: fn(*mut MessageSearchQObject, usize, usize),
+    end_insert_rows: fn(*mut MessageSearchQObject),
+    begin_move_rows: fn(*mut MessageSearchQObject, usize, usize, usize),
+    end_move_rows: fn(*mut MessageSearchQObject),
+    begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
+    end_remove_rows: fn(*mut MessageSearchQObject),
+}
+
+impl MessageSearchList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait MessageSearchTrait {
+    fn new(emit: MessageSearchEmitter, model: MessageSearchList) -> Self;
+    fn emit(&mut self) -> &mut MessageSearchEmitter;
+    fn regex_search(&self) -> Option<bool>;
+    fn set_regex_search(&mut self, value: Option<bool>);
+    fn search_pattern(&self) -> Option<&str>;
+    fn set_search_pattern(&mut self, value: Option<String>);
+    fn clear_search(&mut self) -> ();
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+        false
+    }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+        false
+    }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn author(&self, index: usize) -> Option<&str>;
+    fn body(&self, index: usize) -> Option<&str>;
+    fn conversation(&self, index: usize) -> Option<&[u8]>;
+    fn conversation_color(&self, index: usize) -> Option<u32>;
+    fn conversation_pairwise(&self, index: usize) -> Option<bool>;
+    fn conversation_picture(&self, index: usize) -> Option<String>;
+    fn conversation_title(&self, index: usize) -> Option<String>;
+    fn has_attachments(&self, index: usize) -> Option<bool>;
+    fn msg_id(&self, index: usize) -> Option<&[u8]>;
+    fn time(&self, index: usize) -> Option<i64>;
+}
+
+#[no_mangle]
+pub extern "C" fn message_search_new(
+    message_search: *mut MessageSearchQObject,
+    message_search_regex_search_changed: fn(*mut MessageSearchQObject),
+    message_search_search_pattern_changed: fn(*mut MessageSearchQObject),
+    message_search_new_data_ready: fn(*mut MessageSearchQObject),
+    message_search_layout_about_to_be_changed: fn(*mut MessageSearchQObject),
+    message_search_layout_changed: fn(*mut MessageSearchQObject),
+    message_search_data_changed: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_begin_reset_model: fn(*mut MessageSearchQObject),
+    message_search_end_reset_model: fn(*mut MessageSearchQObject),
+    message_search_begin_insert_rows: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_end_insert_rows: fn(*mut MessageSearchQObject),
+    message_search_begin_move_rows: fn(*mut MessageSearchQObject, usize, usize, usize),
+    message_search_end_move_rows: fn(*mut MessageSearchQObject),
+    message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_end_remove_rows: fn(*mut MessageSearchQObject),
+) -> *mut MessageSearch {
+    let message_search_emit = MessageSearchEmitter {
+        qobject: Arc::new(AtomicPtr::new(message_search)),
+        regex_search_changed: message_search_regex_search_changed,
+        search_pattern_changed: message_search_search_pattern_changed,
+        new_data_ready: message_search_new_data_ready,
+    };
+    let model = MessageSearchList {
+        qobject: message_search,
+        layout_about_to_be_changed: message_search_layout_about_to_be_changed,
+        layout_changed: message_search_layout_changed,
+        data_changed: message_search_data_changed,
+        begin_reset_model: message_search_begin_reset_model,
+        end_reset_model: message_search_end_reset_model,
+        begin_insert_rows: message_search_begin_insert_rows,
+        end_insert_rows: message_search_end_insert_rows,
+        begin_move_rows: message_search_begin_move_rows,
+        end_move_rows: message_search_end_move_rows,
+        begin_remove_rows: message_search_begin_remove_rows,
+        end_remove_rows: message_search_end_remove_rows,
+    };
+    let d_message_search = MessageSearch::new(message_search_emit, model);
+    Box::into_raw(Box::new(d_message_search))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_free(ptr: *mut MessageSearch) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_regex_search_get(
+    ptr: *const MessageSearch,
+) -> COption<bool> {
+    match (&*ptr).regex_search() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: bool::default(),
+            some: false,
+        },
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_regex_search_set(ptr: *mut MessageSearch, v: bool) {
+    (&mut *ptr).set_regex_search(Some(v));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_regex_search_set_none(ptr: *mut MessageSearch) {
+    let o = &mut *ptr;
+    o.set_regex_search(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_search_pattern_get(
+    ptr: *const MessageSearch,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.search_pattern();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_search_pattern_set(
+    ptr: *mut MessageSearch,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_search_pattern(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_search_pattern_set_none(ptr: *mut MessageSearch) {
+    let o = &mut *ptr;
+    o.set_search_pattern(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_clear_search(ptr: *mut MessageSearch) {
+    let o = &mut *ptr;
+    o.clear_search()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_row_count(ptr: *const MessageSearch) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_insert_rows(
+    ptr: *mut MessageSearch,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_remove_rows(
+    ptr: *mut MessageSearch,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_can_fetch_more(ptr: *const MessageSearch) -> bool {
+    (&*ptr).can_fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_fetch_more(ptr: *mut MessageSearch) {
+    (&mut *ptr).fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_sort(
+    ptr: *mut MessageSearch,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_author(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.author(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_body(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.body(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.conversation(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation_color(
+    ptr: *const MessageSearch,
+    row: c_int,
+) -> COption<u32> {
+    let o = &*ptr;
+    o.conversation_color(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation_pairwise(
+    ptr: *const MessageSearch,
+    row: c_int,
+) -> COption<bool> {
+    let o = &*ptr;
+    o.conversation_pairwise(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation_picture(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.conversation_picture(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation_title(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.conversation_title(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_has_attachments(
+    ptr: *const MessageSearch,
+    row: c_int,
+) -> COption<bool> {
+    let o = &*ptr;
+    o.has_attachments(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_msg_id(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.msg_id(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_time(
+    ptr: *const MessageSearch,
+    row: c_int,
+) -> COption<i64> {
+    let o = &*ptr;
+    o.time(to_usize(row).unwrap_or(0)).into()
+}
+
 pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {
@@ -2929,6 +3038,7 @@ pub struct MessagesEmitter {
     last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     last_status_changed: fn(*mut MessagesQObject),
     search_active_changed: fn(*mut MessagesQObject),
+    search_index_changed: fn(*mut MessagesQObject),
     search_num_matches_changed: fn(*mut MessagesQObject),
     search_pattern_changed: fn(*mut MessagesQObject),
     search_regex_changed: fn(*mut MessagesQObject),
@@ -2952,6 +3062,7 @@ impl MessagesEmitter {
             last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
             last_status_changed: self.last_status_changed,
             search_active_changed: self.search_active_changed,
+            search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
             search_pattern_changed: self.search_pattern_changed,
             search_regex_changed: self.search_regex_changed,
@@ -3003,6 +3114,12 @@ impl MessagesEmitter {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.search_active_changed)(ptr);
+        }
+    }
+    pub fn search_index_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.search_index_changed)(ptr);
         }
     }
     pub fn search_num_matches_changed(&mut self) {
@@ -3095,6 +3212,7 @@ pub trait MessagesTrait {
     fn last_status(&self) -> Option<u32>;
     fn search_active(&self) -> bool;
     fn set_search_active(&mut self, value: bool);
+    fn search_index(&self) -> u64;
     fn search_num_matches(&self) -> u64;
     fn search_pattern(&self) -> &str;
     fn set_search_pattern(&mut self, value: String);
@@ -3106,6 +3224,7 @@ pub trait MessagesTrait {
     fn index_by_id(&self, msg_id: &[u8]) -> u64;
     fn next_search_match(&mut self) -> i64;
     fn prev_search_match(&mut self) -> i64;
+    fn set_search_hint(&mut self, scrollbar_position: f32, scrollbar_height: f32) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
         false
@@ -3127,6 +3246,7 @@ pub trait MessagesTrait {
     fn is_head(&self, index: usize) -> Option<bool>;
     fn is_reply(&self, index: usize) -> Option<bool>;
     fn is_tail(&self, index: usize) -> Option<bool>;
+    fn match_status(&self, index: usize) -> Option<u8>;
     fn message_id(&self, index: usize) -> Option<&[u8]>;
     fn op(&self, index: usize) -> Option<&[u8]>;
     fn receipt_status(&self, index: usize) -> Option<u32>;
@@ -3143,6 +3263,7 @@ pub extern "C" fn messages_new(
     messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     messages_last_status_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
+    messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
     messages_search_pattern_changed: fn(*mut MessagesQObject),
     messages_search_regex_changed: fn(*mut MessagesQObject),
@@ -3168,6 +3289,7 @@ pub extern "C" fn messages_new(
         last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
         last_status_changed: messages_last_status_changed,
         search_active_changed: messages_search_active_changed,
+        search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
         search_pattern_changed: messages_search_pattern_changed,
         search_regex_changed: messages_search_regex_changed,
@@ -3301,6 +3423,11 @@ pub unsafe extern "C" fn messages_search_active_set(ptr: *mut Messages, v: bool)
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_search_index_get(ptr: *const Messages) -> u64 {
+    (&*ptr).search_index()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_search_num_matches_get(ptr: *const Messages) -> u64 {
     (&*ptr).search_num_matches()
 }
@@ -3378,6 +3505,16 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let o = &mut *ptr;
     o.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_set_search_hint(
+    ptr: *mut Messages,
+    scrollbar_position: f32,
+    scrollbar_height: f32,
+) {
+    let o = &mut *ptr;
+    o.set_search_hint(scrollbar_position, scrollbar_height)
 }
 
 #[no_mangle]
@@ -3506,6 +3643,15 @@ pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int
 pub unsafe extern "C" fn messages_data_is_tail(ptr: *const Messages, row: c_int) -> COption<bool> {
     let o = &*ptr;
     o.is_tail(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_match_status(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<u8> {
+    let o = &*ptr;
+    o.match_status(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -3990,4 +4136,326 @@ pub unsafe extern "C" fn users_data_user_id(
     let data = o.user_id(to_usize(row).unwrap_or(0));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
+}
+
+pub struct UsersSearchQObject {}
+
+pub struct UsersSearchEmitter {
+    qobject: Arc<AtomicPtr<UsersSearchQObject>>,
+    filter_changed: fn(*mut UsersSearchQObject),
+    new_data_ready: fn(*mut UsersSearchQObject),
+}
+
+impl UsersSearchEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> UsersSearchEmitter {
+        UsersSearchEmitter {
+            qobject: self.qobject.clone(),
+            filter_changed: self.filter_changed,
+            new_data_ready: self.new_data_ready,
+        }
+    }
+    fn clear(&self) {
+        let n: *const UsersSearchQObject = null();
+        self.qobject
+            .store(n as *mut UsersSearchQObject, Ordering::SeqCst);
+    }
+    pub fn filter_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.filter_changed)(ptr);
+        }
+    }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct UsersSearchList {
+    qobject: *mut UsersSearchQObject,
+    layout_about_to_be_changed: fn(*mut UsersSearchQObject),
+    layout_changed: fn(*mut UsersSearchQObject),
+    data_changed: fn(*mut UsersSearchQObject, usize, usize),
+    begin_reset_model: fn(*mut UsersSearchQObject),
+    end_reset_model: fn(*mut UsersSearchQObject),
+    begin_insert_rows: fn(*mut UsersSearchQObject, usize, usize),
+    end_insert_rows: fn(*mut UsersSearchQObject),
+    begin_move_rows: fn(*mut UsersSearchQObject, usize, usize, usize),
+    end_move_rows: fn(*mut UsersSearchQObject),
+    begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
+    end_remove_rows: fn(*mut UsersSearchQObject),
+}
+
+impl UsersSearchList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(&mut self, first: usize, last: usize) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
+}
+
+pub trait UsersSearchTrait {
+    fn new(emit: UsersSearchEmitter, model: UsersSearchList) -> Self;
+    fn emit(&mut self) -> &mut UsersSearchEmitter;
+    fn filter(&self) -> Option<&str>;
+    fn set_filter(&mut self, value: Option<String>);
+    fn clear_filter(&mut self) -> ();
+    fn row_count(&self) -> usize;
+    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+        false
+    }
+    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+        false
+    }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(&mut self, _: u8, _: SortOrder) {}
+    fn color(&self, index: usize) -> Option<u32>;
+    fn matched(&self, index: usize) -> bool;
+    fn name(&self, index: usize) -> Option<String>;
+    fn profile_picture(&self, index: usize) -> Option<String>;
+    fn selected(&self, index: usize) -> bool;
+    fn set_selected(&mut self, index: usize, _: bool) -> bool;
+    fn user_id(&self, index: usize) -> Option<&str>;
+}
+
+#[no_mangle]
+pub extern "C" fn users_search_new(
+    users_search: *mut UsersSearchQObject,
+    users_search_filter_changed: fn(*mut UsersSearchQObject),
+    users_search_new_data_ready: fn(*mut UsersSearchQObject),
+    users_search_layout_about_to_be_changed: fn(*mut UsersSearchQObject),
+    users_search_layout_changed: fn(*mut UsersSearchQObject),
+    users_search_data_changed: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_begin_reset_model: fn(*mut UsersSearchQObject),
+    users_search_end_reset_model: fn(*mut UsersSearchQObject),
+    users_search_begin_insert_rows: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_end_insert_rows: fn(*mut UsersSearchQObject),
+    users_search_begin_move_rows: fn(*mut UsersSearchQObject, usize, usize, usize),
+    users_search_end_move_rows: fn(*mut UsersSearchQObject),
+    users_search_begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_end_remove_rows: fn(*mut UsersSearchQObject),
+) -> *mut UsersSearch {
+    let users_search_emit = UsersSearchEmitter {
+        qobject: Arc::new(AtomicPtr::new(users_search)),
+        filter_changed: users_search_filter_changed,
+        new_data_ready: users_search_new_data_ready,
+    };
+    let model = UsersSearchList {
+        qobject: users_search,
+        layout_about_to_be_changed: users_search_layout_about_to_be_changed,
+        layout_changed: users_search_layout_changed,
+        data_changed: users_search_data_changed,
+        begin_reset_model: users_search_begin_reset_model,
+        end_reset_model: users_search_end_reset_model,
+        begin_insert_rows: users_search_begin_insert_rows,
+        end_insert_rows: users_search_end_insert_rows,
+        begin_move_rows: users_search_begin_move_rows,
+        end_move_rows: users_search_end_move_rows,
+        begin_remove_rows: users_search_begin_remove_rows,
+        end_remove_rows: users_search_end_remove_rows,
+    };
+    let d_users_search = UsersSearch::new(users_search_emit, model);
+    Box::into_raw(Box::new(d_users_search))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_free(ptr: *mut UsersSearch) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_filter_get(
+    ptr: *const UsersSearch,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.filter();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_filter_set(
+    ptr: *mut UsersSearch,
+    v: *const c_ushort,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let mut s = String::new();
+    set_string_from_utf16(&mut s, v, len);
+    o.set_filter(Some(s));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_filter_set_none(ptr: *mut UsersSearch) {
+    let o = &mut *ptr;
+    o.set_filter(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_clear_filter(ptr: *mut UsersSearch) {
+    let o = &mut *ptr;
+    o.clear_filter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_row_count(ptr: *const UsersSearch) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_insert_rows(
+    ptr: *mut UsersSearch,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_remove_rows(
+    ptr: *mut UsersSearch,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_can_fetch_more(ptr: *const UsersSearch) -> bool {
+    (&*ptr).can_fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_fetch_more(ptr: *mut UsersSearch) {
+    (&mut *ptr).fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_sort(ptr: *mut UsersSearch, column: u8, order: SortOrder) {
+    (&mut *ptr).sort(column, order)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_color(
+    ptr: *const UsersSearch,
+    row: c_int,
+) -> COption<u32> {
+    let o = &*ptr;
+    o.color(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_matched(ptr: *const UsersSearch, row: c_int) -> bool {
+    let o = &*ptr;
+    o.matched(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_name(
+    ptr: *const UsersSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.name(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_profile_picture(
+    ptr: *const UsersSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.profile_picture(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_selected(ptr: *const UsersSearch, row: c_int) -> bool {
+    let o = &*ptr;
+    o.selected(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_set_data_selected(
+    ptr: *mut UsersSearch,
+    row: c_int,
+    v: bool,
+) -> bool {
+    (&mut *ptr).set_selected(to_usize(row).unwrap_or(0), v)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_data_user_id(
+    ptr: *const UsersSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.user_id(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
 }

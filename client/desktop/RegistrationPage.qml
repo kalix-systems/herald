@@ -61,8 +61,8 @@ Rectangle {
                 radius: 2
             }
 
-            Keys.onReturnPressed: heraldState.registerNewUser(entryField.text.trim())
-
+            Keys.onReturnPressed: heraldState.registerNewUser(
+                                      entryField.text.trim())
         }
 
         Button {
@@ -79,7 +79,6 @@ Rectangle {
                 radius: 3
             }
             onClicked: heraldState.registerNewUser(entryField.text.trim())
-
         }
     }
 

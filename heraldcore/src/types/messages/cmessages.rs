@@ -1,4 +1,8 @@
 use super::*;
+use crate::{
+    message::{MessageBody, MessageReceiptStatus},
+    *,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
@@ -21,14 +25,18 @@ pub struct AddedToConvo {
     pub cid: ConversationId,
     /// The conversation's title.
     pub title: Option<String>,
+    /// The conversation's picture (as bytes)
+    pub picture: Option<Vec<u8>>,
+    /// The conversation's initial expiration period
+    pub expiration_period: conversation::ExpirationPeriod,
     /// The genesis block for the new conversation
     pub gen: Genesis,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// An acknowledgement of a contact request, with a bool to indicate whether the
+/// An acknowledgement of a user request, with a bool to indicate whether the
 /// request was accepted.
-pub struct ContactReqAck(pub bool);
+pub struct UserReqAck(pub bool);
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A normal message to the conversation.

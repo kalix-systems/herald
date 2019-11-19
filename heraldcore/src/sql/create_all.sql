@@ -7,14 +7,12 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
-
   -- timestamp associated with message
   insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database
   server_ts INTEGER DEFAULT NULL,
   -- time when message self-destructs
   expiration_ts INTEGER DEFAULT NULL,
-
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
   -- does the message have attachments?
@@ -22,7 +20,7 @@ CREATE TABLE IF NOT EXISTS messages (
   -- is the message a reply?
   is_reply INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
-  FOREIGN KEY(author) REFERENCES contacts(user_id)
+  FOREIGN KEY(author) REFERENCES users(user_id)
 );
 
 CREATE INDEX IF NOT EXISTS expiration_ts_ix ON messages(expiration_ts);
@@ -61,7 +59,7 @@ CREATE TABLE IF NOT EXISTS msg_attachments (
 
 CREATE INDEX IF NOT EXISTS hash_dir_ix on msg_attachments(hash_dir);
 
-CREATE TABLE IF NOT EXISTS contacts (
+CREATE TABLE IF NOT EXISTS users (
   -- user id
   user_id TEXT PRIMARY KEY NOT NULL,
   -- name as a string
@@ -72,17 +70,17 @@ CREATE TABLE IF NOT EXISTS contacts (
   pairwise_conversation BLOB NOT NULL,
   -- user color
   color INTEGER NOT NULL,
-  -- contact status
+  -- user status
   status INTEGER NOT NULL,
-  -- contact type
-  contact_type INTEGER NOT NULL,
+  -- user type
+  user_type INTEGER NOT NULL,
   FOREIGN KEY(pairwise_conversation) REFERENCES conversations(conversation_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_keys (
   key BLOB NOT NULL PRIMARY KEY,
   user_id BLOB NOT NULL,
-  FOREIGN KEY(user_id) REFERENCES contacts(user_id)
+  FOREIGN KEY(user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE IF NOT EXISTS key_creations (
@@ -133,7 +131,7 @@ CREATE TABLE IF NOT EXISTS pending_out (
 CREATE TABLE IF NOT EXISTS conversation_members (
   member_id TEXT NOT NULL,
   conversation_id BLOB NOT NULL,
-  FOREIGN KEY(member_id) REFERENCES contacts(user_id),
+  FOREIGN KEY(member_id) REFERENCES users(user_id),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id)
 );
 

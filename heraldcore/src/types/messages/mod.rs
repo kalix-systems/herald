@@ -1,480 +1,14 @@
 use super::*;
-use crate::{
-    chainkeys::DecryptionResult, config::*, errors::HErr::*, message::attachments::Attachment,
-};
+use crate::{chainkeys::DecryptionResult, errors::HErr::*, message::attachments::Attachment};
 use chainmail::{block::*, errors::ChainError::CryptoError};
-use std::{convert::AsRef, fmt, time::Duration};
+use std::convert::AsRef;
 
 /// Types relevant to [`ConversationMessage`]s
 pub(crate) mod cmessages;
 /// Types associated with [`DeviceMessage`]s
 pub(crate) mod dmessages;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
-/// In order to support expiring messages, it is necessary to indicate
-/// that a message is a reply without necessarily knowing
-pub enum ReplyId {
-    /// Not a reply
-    None,
-    /// It is a reply, but the original message could not be located
-    Dangling,
-    /// The message id is known
-    Known(MsgId),
-}
-
-impl ReplyId {
-    /// Indicates whether `ReplyId` is `None`
-    pub fn is_none(&self) -> bool {
-        self == &ReplyId::None
-    }
-
-    /// Indicates whether `ReplyId` is `Dangling`
-    pub fn is_dangling(&self) -> bool {
-        self == &ReplyId::Dangling
-    }
-
-    /// Indicates whether `ReplyId` is `Known`
-    pub fn is_known(&self) -> bool {
-        if let ReplyId::Known(_) = self {
-            true
-        } else {
-            false
-        }
-    }
-
-    #[cfg(test)]
-    pub(crate) fn unwrap(self) -> MsgId {
-        match self {
-            ReplyId::Known(mid) => mid,
-            ReplyId::Dangling => panic!("Tried to unwrap `Dangling` `ReplyId`"),
-            ReplyId::None => panic!("Tried to unwrap `None` `ReplyId`"),
-        }
-    }
-}
-
-impl From<Option<MsgId>> for ReplyId {
-    fn from(maybe_mid: Option<MsgId>) -> Self {
-        match maybe_mid {
-            Some(mid) => ReplyId::Known(mid),
-            None => ReplyId::None,
-        }
-    }
-}
-
-impl From<(Option<MsgId>, bool)> for ReplyId {
-    fn from(val: (Option<MsgId>, bool)) -> Self {
-        match val {
-            (Some(mid), true) => ReplyId::Known(mid),
-            (None, true) => ReplyId::Dangling,
-            _ => ReplyId::None,
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
-#[repr(u8)]
-/// Expiration period for messages
-pub enum ExpirationPeriod {
-    /// Messages never expire
-    Never = 0,
-    /// Messages expire after one minute
-    OneMinute = 1,
-    /// Messages expire after one hour
-    OneHour = 2,
-    /// Messages expire after one day
-    OneDay = 3,
-    /// Message expire after one week
-    OneWeek = 4,
-    /// Messages expire after one month
-    OneMonth = 5,
-    /// Messages expire after one year
-    OneYear = 6,
-}
-
-const MIN_SECS: u64 = 60;
-const HOUR_SECS: u64 = MIN_SECS * 60;
-const DAY_SECS: u64 = HOUR_SECS * 24;
-const WEEK_SECS: u64 = DAY_SECS * 7;
-const MONTH_SECS: u64 = WEEK_SECS * 4;
-const YEAR_SECS: u64 = WEEK_SECS * 52;
-
-impl ExpirationPeriod {
-    /// Converts an `ExpirationPeriod` to a `Duration`
-    pub fn into_duration(self) -> Option<Duration> {
-        use ExpirationPeriod::*;
-        match self {
-            OneMinute => Some(Duration::from_secs(MIN_SECS)),
-            OneHour => Some(Duration::from_secs(HOUR_SECS)),
-            OneDay => Some(Duration::from_secs(DAY_SECS)),
-            OneWeek => Some(Duration::from_secs(WEEK_SECS)),
-            OneMonth => Some(Duration::from_secs(MONTH_SECS)),
-            OneYear => Some(Duration::from_secs(YEAR_SECS)),
-            Never => None,
-        }
-    }
-
-    /// Converts an `ExpirationPeriod` to milliseconds
-    pub fn into_millis(self) -> Option<Time> {
-        match self.into_duration() {
-            Some(d) => Some((d.as_millis() as i64).into()),
-            None => None,
-        }
-    }
-}
-
-impl From<u8> for ExpirationPeriod {
-    fn from(val: u8) -> Self {
-        use ExpirationPeriod::*;
-        match val {
-            0 => Never,
-            1 => OneMinute,
-            2 => OneHour,
-            3 => OneDay,
-            4 => OneWeek,
-            5 => OneMonth,
-            6 => OneYear,
-            _ => Self::default(),
-        }
-    }
-}
-
-impl Default for ExpirationPeriod {
-    fn default() -> Self {
-        ExpirationPeriod::OneYear
-    }
-}
-
-impl FromSql for ExpirationPeriod {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
-
-impl ToSql for ExpirationPeriod {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Owned(Value::Blob(
-            serde_cbor::to_vec(self)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
-        )))
-    }
-}
-
-#[derive(Clone, Copy, Debug)]
-/// Time data relating to messages
-pub struct MessageTime {
-    /// The `Time` the message reached the server, if applicable.
-    pub server: Option<Time>,
-    /// The `Time` the message was saved on this device
-    pub insertion: Time,
-    /// The `Time` the message will expire, if applicable
-    pub expiration: Option<Time>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// A message body
-pub struct MessageBody(String);
-
-impl fmt::Display for MessageBody {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.as_str())
-    }
-}
-
-impl TryFrom<String> for MessageBody {
-    type Error = EmptyMessageBody;
-
-    fn try_from(s: String) -> Result<Self, Self::Error> {
-        if s.is_empty() {
-            return Err(EmptyMessageBody);
-        }
-        Ok(Self(s))
-    }
-}
-
-impl TryFrom<&str> for MessageBody {
-    type Error = EmptyMessageBody;
-
-    fn try_from(s: &str) -> Result<Self, Self::Error> {
-        if s.is_empty() {
-            return Err(EmptyMessageBody);
-        }
-        Ok(Self(s.to_owned()))
-    }
-}
-
-impl Into<String> for MessageBody {
-    fn into(self) -> String {
-        self.0
-    }
-}
-
-impl AsRef<str> for MessageBody {
-    fn as_ref(&self) -> &str {
-        self.0.as_str()
-    }
-}
-
-impl MessageBody {
-    /// Returns `MessageBody` as `&str`
-    pub fn as_str(&self) -> &str {
-        self.as_ref()
-    }
-
-    /// Returns `MessageBody` as `&[u8]`
-    pub fn as_slice(&self) -> &[u8] {
-        self.as_ref().as_bytes()
-    }
-
-    /// Parses the text as markdown, rendering it to HTML
-    pub fn parse_markdown(&self) -> Result<Self, EmptyMessageBody> {
-        use pulldown_cmark::{html, Parser};
-
-        let body_str = self.as_str();
-
-        let parser = Parser::new(body_str);
-        let mut buf = String::with_capacity(body_str.len());
-        html::push_html(&mut buf, parser);
-
-        buf.try_into()
-    }
-}
-
-impl ToSql for MessageBody {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Borrowed(ValueRef::Text(self.as_slice())))
-    }
-}
-
-impl FromSql for MessageBody {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        value
-            .as_str()?
-            .to_owned()
-            .try_into()
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
-
-#[derive(Debug)]
-/// Error returned when trying to creat an empty message body
-pub struct EmptyMessageBody;
-
-impl fmt::Display for EmptyMessageBody {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Message bodies must have at least one character")
-    }
-}
-
-impl std::error::Error for EmptyMessageBody {}
-
-#[derive(Debug)]
-/// Error returned if an inbound message is missing data
-pub enum MissingInboundMessageField {
-    /// Message id was missing
-    MissingMessageId,
-    /// Body was missing
-    MissingBody,
-    /// Conversation id was missing
-    MissingConversationId,
-    /// Timestamp was missing
-    MissingTimestamp,
-    /// Author was missing
-    MissingAuthor,
-}
-
-impl fmt::Display for MissingInboundMessageField {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MissingInboundMessageField::MissingMessageId => write!(f, "Message id was missing"),
-            MissingInboundMessageField::MissingBody => write!(f, "Body was missing"),
-            MissingInboundMessageField::MissingConversationId => {
-                write!(f, "Conversation id was missing")
-            }
-            MissingInboundMessageField::MissingTimestamp => write!(f, "Timestamp was missing"),
-            MissingInboundMessageField::MissingAuthor => write!(f, "Author was missing"),
-        }
-    }
-}
-
-impl std::error::Error for MissingInboundMessageField {}
-
-#[derive(Debug)]
-/// Error returned if an outbound message is missing data
-pub enum MissingOutboundMessageField {
-    /// Message body was missing
-    MissingBody,
-    /// Conversation id was missing
-    MissingConversationId,
-}
-
-impl fmt::Display for MissingOutboundMessageField {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            MissingOutboundMessageField::MissingBody => write!(f, "Body was missing"),
-            MissingOutboundMessageField::MissingConversationId => {
-                write!(f, "Conversation id was missing")
-            }
-        }
-    }
-}
-
-impl std::error::Error for MissingOutboundMessageField {}
-
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
-#[repr(u8)]
-/// Send status of a message
-pub enum MessageSendStatus {
-    /// No ack from server
-    NoAck = 0,
-    /// Acknowledged by server
-    Ack = 1,
-    /// The message has timed-out.
-    Timeout = 2,
-}
-
-impl TryFrom<u8> for MessageSendStatus {
-    type Error = u8;
-
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
-            0 => Ok(Self::NoAck),
-            1 => Ok(Self::Ack),
-            2 => Ok(Self::Timeout),
-            i => Err(i),
-        }
-    }
-}
-
-impl ToSql for MessageSendStatus {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
-    }
-}
-
-impl FromSql for MessageSendStatus {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        value
-            .as_i64()?
-            .try_into()
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
-
-impl std::convert::TryFrom<i64> for MessageSendStatus {
-    type Error = HErr;
-
-    fn try_from(n: i64) -> Result<Self, HErr> {
-        match u8::try_from(n) {
-            Ok(n) => n
-                .try_into()
-                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
-            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
-        }
-    }
-}
-
-impl Serialize for MessageSendStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
-    }
-}
-
-impl<'de> Deserialize<'de> for MessageSendStatus {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
-        u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 2).as_str(),
-            )
-        })
-    }
-}
-
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy)]
-#[repr(u8)]
-/// Receipt status of a message
-pub enum MessageReceiptStatus {
-    /// Not acknowledged
-    NoAck = 0,
-    /// Received by user
-    Received = 1,
-    /// Read by the recipient
-    Read = 2,
-    /// The user has read receipts turned off
-    AckTerminal = 3,
-}
-
-impl TryFrom<u8> for MessageReceiptStatus {
-    type Error = u8;
-
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
-            0 => Ok(Self::NoAck),
-            1 => Ok(Self::Received),
-            2 => Ok(Self::Read),
-            3 => Ok(Self::AckTerminal),
-            i => Err(i),
-        }
-    }
-}
-
-impl std::convert::TryFrom<i64> for MessageReceiptStatus {
-    type Error = HErr;
-
-    fn try_from(n: i64) -> Result<Self, HErr> {
-        match u8::try_from(n) {
-            Ok(n) => n
-                .try_into()
-                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
-            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
-        }
-    }
-}
-
-impl ToSql for MessageReceiptStatus {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Owned(Value::Integer(*self as i64)))
-    }
-}
-
-impl FromSql for MessageReceiptStatus {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        value
-            .as_i64()?
-            .try_into()
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
-
-impl Serialize for MessageReceiptStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
-        s.serialize_u8(*self as u8)
-    }
-}
-
-impl<'de> Deserialize<'de> for MessageReceiptStatus {
-    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
-        use serde::de::*;
-        let u = u8::deserialize(d)?;
-        u.try_into().map_err(|u| {
-            Error::invalid_value(
-                Unexpected::Unsigned(u64::from(u)),
-                &format!("expected a value between {} and {}", 0, 3).as_str(),
-            )
-        })
-    }
-}
+mod rusqlite_imp;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// The body of a [`ConversationMessage`]
@@ -488,31 +22,13 @@ pub enum ConversationMessageBody {
     /// A message a user receives upon being added to a conversation
     AddedToConvo(Box<cmessages::AddedToConvo>),
     /// An acknowledgement of a contact request.
-    ContactReqAck(cmessages::ContactReqAck),
+    UserReqAck(cmessages::UserReqAck),
     /// A normal message.
     Msg(cmessages::Msg),
     /// An acknowledgement of a normal message.
     Ack(cmessages::Ack),
     /// An update to the conversation settings
     Settings(crate::conversation::settings::SettingsUpdate),
-}
-
-impl FromSql for ConversationMessageBody {
-    fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
-            .map_err(|_| FromSqlError::InvalidType)
-    }
-}
-
-impl ToSql for ConversationMessageBody {
-    fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
-        use types::*;
-
-        Ok(ToSqlOutput::Owned(Value::Blob(
-            serde_cbor::to_vec(self)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
-        )))
-    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -549,9 +65,11 @@ impl ConversationMessage {
         cid: ConversationId,
         content: &ConversationMessageBody,
     ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
+        use crate::config;
+
         let cbytes = serde_cbor::to_vec(content)?;
-        let kp = Config::static_keypair()?;
-        let from = Config::static_gid()?;
+        let kp = config::keypair()?;
+        let from = config::gid()?;
         let (hashes, keys) = cid.get_unused()?.into_iter().unzip();
         let channel_key = cid.get_channel_key()?;
 
@@ -606,7 +124,7 @@ impl ConversationMessage {
 /// Types of device message.
 pub enum DeviceMessageBody {
     /// A contact request
-    ContactReq(dmessages::ContactReq),
+    Req(dmessages::UserReq),
 }
 
 #[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
@@ -664,11 +182,13 @@ impl DeviceMessage {
         to: &sig::PublicKey,
         content: &DeviceMessageBody,
     ) -> Result<DeviceMessage, HErr> {
+        use crate::config;
+
         let mut content = serde_cbor::to_vec(content)?;
 
         let pk = spk_to_epk(to)?;
 
-        let kp = Config::static_keypair()?;
+        let kp = crate::config::keypair()?;
         let sk = ssk_to_esk(kp.secret_key())?;
 
         let nonce = box_::gen_nonce();
@@ -676,7 +196,7 @@ impl DeviceMessage {
         let tag = box_::seal_detached(&mut content, &nonce, &pk, &sk);
 
         Ok(DeviceMessage {
-            from: Config::static_gid()?,
+            from: config::gid()?,
             content,
             nonce,
             tag,
@@ -685,6 +205,8 @@ impl DeviceMessage {
     }
 
     pub(crate) fn open(self) -> Result<(GlobalId, DeviceMessageBody), HErr> {
+        use crate::config;
+
         // TODO: remove this, handle prekey
         assert!(self.prekey.is_none());
 
@@ -698,7 +220,7 @@ impl DeviceMessage {
 
         let pk = spk_to_epk(&from.did)?;
 
-        let kp = Config::static_keypair()?;
+        let kp = config::keypair()?;
         let sk = ssk_to_esk(kp.secret_key())?;
 
         box_::open_detached(&mut content, &tag, &nonce, &pk, &sk)

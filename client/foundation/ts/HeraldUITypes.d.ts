@@ -21,3 +21,9 @@ declare class TextAreaForm {
 	state: string;
 	replyId: MessageId
 }
+
+declare class ConversationWindow {
+  contentY: number;
+  height: number;
+  returnToBounds(): void;
+}

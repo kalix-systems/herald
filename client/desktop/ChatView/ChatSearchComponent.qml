@@ -2,85 +2,104 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls.Styles 1.0
+import "Controls/" as CVUtils
 import "../common" as Common
-import "../SideBar" as SBUtils
-import "qrc:/imports/Avatar" as Avatar
+import "js/SearchHandler.mjs" as SearchUtils
 
 Component {
     id: searchBarComponent
 
-    ToolBar {
-        height: CmnCfg.toolbarHeight
-        z: CmnCfg.middleZ
+    Column {
+        //wrapper column to position textarea and underline
+        anchors.right: parent.right
+        RowLayout {
 
-        background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
-        }
+            id: searchToolBar
+            anchors.horizontalCenter: parent.horizontalCenter
 
-    RowLayout {
-        id: buttonRow
+            spacing: CmnCfg.smallMargin / 2
 
-        spacing: 12
-
-        anchors {
-            fill: parent
-            leftMargin: CmnCfg.margin
-            rightMargin: CmnCfg.margin
-        }
-
-        Avatar.AvatarMain {
-
-            size: 32
-            iconColor: CmnCfg.avatarColors[conversationItem.color]
-            textColor: CmnCfg.palette.iconFill
-            initials: conversationItem.title[0].toUpperCase()
-            Layout.alignment: Qt.AlignLeft
             anchors {
-                margins: 16
+                leftMargin: CmnCfg.margin
+                rightMargin: CmnCfg.margin
+            }
+
+
+            //main search component
+            SearchTextArea {
+            }
+
+            Text {
+                id: indexText
+                property bool active: searchToolBar.state == "searchActiveState"
+                property int searchPlace: active ? ownedConversation.searchIndex : 0
+                property int numMatches: active ? ownedConversation.searchNumMatches : 0
+                color: CmnCfg.palette.paneColor
+                font.family: CmnCfg.chatFont.name
+                text: active ? searchPlace + "/" + numMatches : ""
+                Layout.minimumWidth: 24
+                Layout.leftMargin: -20
+
+            }
+
+            Common.ButtonForm {
+                id: back
+                source: "qrc:/up-chevron-icon-white.svg"
+                Layout.alignment: Qt.AlignVCenter
+                fill: CmnCfg.palette.paneColor
+                enabled: searchToolBar.state === "searchActiveState"
+                opacity: enabled ? 1 : 0.5
+                onClicked: {
+                    convWindow.state = "jumpState"
+                    SearchUtils.jumpHandler(ownedConversation,
+                                            convWindow.chatListView, chatPane,
+                                            convWindow, false)
+                    convWindow.returnToBounds()
+                    convWindow.state = ""
+                }
+            }
+
+            Common.ButtonForm {
+                id: forward
+                source: "qrc:/down-chevron-icon-white.svg"
+                Layout.alignment: Qt.AlignVCenter
+                fill: CmnCfg.palette.paneColor
+                enabled: searchToolBar.state === "searchActiveState"
+                opacity: enabled ? 1 : 0.5
+
+                onClicked: {
+                    convWindow.state = "jumpState"
+                    SearchUtils.jumpHandler(ownedConversation,
+                                            convWindow.chatListView, chatPane,
+                                            convWindow, true)
+                    convWindow.returnToBounds()
+                    convWindow.state = ""
+                }
+            }
+
+            Common.ButtonForm {
+                source: "qrc:/x-icon.svg"
+                Layout.alignment: Qt.AlignVCenter
+                fill: CmnCfg.palette.paneColor
+                onClicked: {
+                    ownedConversation.searchActive = false
+                    messageBar.state = ""
+                }
+                scale: 0.8
+            }
+
+            states: State {
+                name: "searchActiveState"
             }
         }
 
-        Label {
-            id: uid
-            font {
-                bold: true
-                family: CmnCfg.chatFont.name
-                pixelSize: 18
-            }
-            Layout.alignment: Qt.AlignLeft
-            Layout.fillWidth: true
-            elide: "ElideRight"
-            text: conversationItem.title
+        Rectangle {
+            height: 1
+            width: searchToolBar.width - CmnCfg.smallMargin
+            anchors.horizontalCenter: parent.horizontalCenter
             color: "white"
         }
-
-    TextArea {
-        id: searchText
-        height: CmnCfg.toolbarHeight
-        Layout.fillWidth: true
-
-        placeholderText: "Search conversation..."
-        color: CmnCfg.palette.mainTextColor
-        verticalAlignment: TextEdit.AlignVCenter
-        Layout.alignment: Qt.AlignLeft
-
-        onTextChanged: {
-            ownedConversation.searchActive = true
-            ownedConversation.searchPattern = searchText.text
-            print(ownedConversation.searchNumMatches, ownedConversation.prevSearchMatch())
-        }
-
-        Common.ButtonForm {
-            source: "qrc:/x-icon.svg"
-            height: 20
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-        }
-        background: Rectangle {
-            anchors.fill: parent
-            color: "white"
-        }
-    }
-    }
     }
 }

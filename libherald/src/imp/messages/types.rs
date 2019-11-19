@@ -1,6 +1,9 @@
 use super::*;
 use herald_common::{Time, UserId};
-use std::{cmp::Ordering, collections::HashMap};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+};
 
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
@@ -14,7 +17,22 @@ pub(super) struct MsgData {
     pub(super) has_attachments: bool,
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
-    pub(super) matched: bool,
+    pub(super) match_status: MatchStatus,
+    pub(super) replies: HashSet<MsgId>,
+}
+
+#[repr(u8)]
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub(super) enum MatchStatus {
+    NotMatched = 0,
+    Matched = 1,
+    Focused = 2,
+}
+
+impl MatchStatus {
+    pub(super) fn is_match(self) -> bool {
+        self == MatchStatus::Matched || self == MatchStatus::Focused
+    }
 }
 
 impl MsgData {
@@ -37,7 +55,7 @@ pub(super) enum SaveStatus {
     Unsaved,
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq)]
 /// A thin wrapper around a `MsgId`
 pub(super) struct Message {
     pub(super) msg_id: MsgId,
@@ -45,7 +63,7 @@ pub(super) struct Message {
 }
 
 impl Message {
-    pub(super) fn split_msg(msg: Msg, save_status: SaveStatus) -> (Message, MsgData) {
+    pub(super) fn split_msg(msg: Msg, save_status: SaveStatus) -> (Self, MsgData) {
         let Msg {
             message_id,
             author,
@@ -55,6 +73,7 @@ impl Message {
             receipts,
             has_attachments,
             send_status,
+            replies,
             ..
         } = msg;
 
@@ -67,7 +86,8 @@ impl Message {
             time,
             send_status,
             save_status,
-            matched: true,
+            match_status: MatchStatus::NotMatched,
+            replies,
         };
 
         let message = Message {
@@ -76,6 +96,15 @@ impl Message {
         };
 
         (message, data)
+    }
+
+    pub(super) fn from_msg_id(msg_id: MsgId, container: &Container) -> Option<Self> {
+        let insertion_time = container.get_data(&msg_id)?.time.insertion;
+
+        Some(Self {
+            msg_id,
+            insertion_time,
+        })
     }
 }
 

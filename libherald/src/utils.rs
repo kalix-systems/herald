@@ -49,17 +49,36 @@ macro_rules! ret_err {
 }
 
 #[macro_export]
-/// If the value passed is an error, ushes an errors to the error queue without an early return.
+/// Continue on error
+macro_rules! cont_err {
+    ($maybe: expr) => {
+        match $maybe {
+            Ok(val) => val,
+            Err(e) => {
+                use $crate::shared::SingletonBus;
+                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+
+                eprintln!("{}", err_string);
+                $crate::imp::errors::Errors::push(err_string).ok();
+                continue;
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// If the value passed is an error, pushes an error to the error queue without an early return.
 macro_rules! push_err {
     ($maybe: expr, $msg: expr) => {
         match $maybe {
-            Ok(val) => val,
+            Ok(val) => Some(val),
             Err(e) => {
                 use $crate::shared::SingletonBus;
                 let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
                 eprintln!("{}", err_string);
                 $crate::imp::errors::Errors::push(err_string).ok();
+                None
             }
         }
     };
@@ -94,37 +113,37 @@ macro_rules! ret_none {
     };
 }
 
-pub(crate) fn bounds_chk_string(ix: usize, len: usize, file: &str, line: u32) -> String {
-    format!(
-        "Tried get index {ix} from a list of length {actual} at {file}:{line}",
-        ix = ix,
-        actual = len,
-        file = file,
-        line = line,
-    )
-}
-
 #[macro_export]
-/// Performs a bounds check
-macro_rules! bounds_chk {
-    ($slf: expr, $ix: expr) => {
-        bounds_chk!($slf, $ix, ())
-    };
-    ($slf: expr, $ix: expr, $retval: expr) => {
-        if $slf.list.len().saturating_sub(1) < $ix {
-            let err_string =
-                $crate::utils::bounds_chk_string($ix, $slf.list.len(), file!(), line!());
+/// Continue  on unexpected `None`
+macro_rules! cont_none {
+    ($maybe: expr) => {
+        match $maybe {
+            Some(val) => val,
+            None => {
+                use $crate::shared::SingletonBus;
+                let err_string = $crate::utils::ret_none_string(file!(), line!());
 
-            eprint!("{}", err_string);
-
-            $crate::imp::errors::Errors::push(err_string).ok();
-            return $retval;
+                eprintln!("{}", err_string);
+                $crate::imp::errors::Errors::push(err_string).ok();
+                continue;
+            }
         }
     };
 }
 
-//#[macro_export]
-///// Convenience macro for sp
+#[macro_export]
+/// Convenience macro for spawning thread
+macro_rules! spawn {
+    ($code: expr) => {
+        spawn!($code, ())
+    };
+    ($code: expr, $retval: expr) => {
+        ret_err!(
+            ::std::thread::Builder::new().spawn(move || { $code }),
+            $retval
+        )
+    };
+}
 
 #[cfg(test)]
 mod tests {

@@ -16,12 +16,6 @@
         <file>EmojiKeyboard/PickerShape.qml</file>
         <file>RegistrationPage.qml</file>
         <file>SideBar/ContactView.qml</file>
-        <file>SideBar/NewConvoComponents/ContactBubble.qml</file>
-        <file>SideBar/NewConvoComponents/ConvoBuilder.qml</file>
-        <file>SideBar/NewConvoComponents/FinalGroupList.qml</file>
-        <file>SideBar/NewConvoComponents/FinalizeGroupComponent.qml</file>
-        <file>SideBar/NewConvoComponents/GroupSelectComponent.qml</file>
-        <file>SideBar/NewConvoComponents/NewGroupBar.qml</file>
         <file>SideBar/SearchComponent.qml</file>
         <file>SideBar/SideBarState.qml</file>
         <file>SideBar/ContextBar.qml</file>
@@ -54,5 +48,12 @@
         <file>SideBar/GroupFlowComponents/NewGroupComponent.qml</file>
         <file>SideBar/GroupFlowComponents/FinalGroupList.qml</file>
         <file>SideBar/GroupFlowComponents/ConvoBuilder.qml</file>
+        <file>ChatView/js/SearchHandler.mjs</file>
+        <file>../foundation/js/utils.mjs</file>
+        <file>ChatView/SearchTextArea.qml</file>
+        <file>SideBar/NewContactComponent.qml</file>
+        <file>SideBar/popups/NewMessagePopup.qml</file>
+        <file>common/ConfigAvatar.qml</file>
+        <file>SideBar/MessageSearchView.qml</file>
     </qresource>
 </RCC>

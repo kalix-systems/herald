@@ -3,6 +3,7 @@ This file will walk you through all the steps necessary to get the server runnin
 # Prerequisites
 
 - `cargo`, at least version 1.39
+- `cargo-make`,
 - `docker`, `docker-compose`
 
 # I'm impatient and just want to paste into my terminal
@@ -11,9 +12,9 @@ Well alright then.
 The first time you run the server, you'll want to run these commands:
 
 ```bash
-docker-compose up -d &\
+cargo make start-postgres &\
 cd server_store &\
-cargo run --bin setup_db &\ 
+cargo run --bin setup_db &\
 cd .. &\
 docker-compose down
 ```
@@ -21,17 +22,17 @@ docker-compose down
 Then you can run the server with these commands:
 
 ```bash
-docker-compose up -d &\
+cargo make start-postgres &\
 cargo run --release
 ```
 
 # Setting up the development Postgres server
 
 
-You can start the postgres instance by running 
+You can start the postgres instance by running
 
 ```bash
-docker-compose up -d
+cargo make start-postgres
 ```
 
 Now you'll want to set up tables for postgres:
