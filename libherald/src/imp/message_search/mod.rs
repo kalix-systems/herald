@@ -49,12 +49,12 @@ impl Interface for MessageSearch {
                     self.pattern = Some(pattern.clone());
                     self.emit.regex_search_changed();
 
-                    ret_err!(imp::start_search(pattern.clone(), self.emit()));
+                    ret_err!(self.start_search(pattern));
                 }
                 (false, true) => {
                     ret_err!(pattern.normal_mode());
                     self.emit.regex_search_changed();
-                    ret_err!(imp::start_search(pattern.clone(), self.emit()));
+                    ret_err!(self.start_search(pattern));
                 }
                 _ => {}
             }
@@ -77,7 +77,7 @@ impl Interface for MessageSearch {
                 self.pattern = Some(old.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(imp::start_search(old, self.emit()));
+                ret_err!(self.start_search(old));
             }
             (Some(new), None) => {
                 self.clear_search();
@@ -89,7 +89,7 @@ impl Interface for MessageSearch {
                 self.pattern = Some(pattern.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(imp::start_search(pattern, self.emit()));
+                ret_err!(self.start_search(pattern));
             }
             (None, _) => self.clear_search(),
         }
