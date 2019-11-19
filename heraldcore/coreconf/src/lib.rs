@@ -1,6 +1,8 @@
 use lazy_static::*;
-use serde::*;
 use toml;
+
+#[macro_use]
+extern crate serde;
 
 #[derive(Deserialize, Default)]
 pub struct Conf {
