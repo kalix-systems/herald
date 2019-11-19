@@ -49,6 +49,10 @@ pub(crate) fn picture(cid: &ConversationId) -> Option<String> {
     CONV_DATA.get(cid)?.picture.clone()
 }
 
+pub(crate) fn color(cid: &ConversationId) -> Option<u32> {
+    Some(CONV_DATA.get(cid)?.color.clone())
+}
+
 pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
     Some(CONV_DATA.get(cid)?.pairwise)
 }

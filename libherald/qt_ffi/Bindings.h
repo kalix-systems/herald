@@ -487,6 +487,7 @@ public:
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
     Q_INVOKABLE QByteArray conversation(int row) const;
+    Q_INVOKABLE QVariant conversationColor(int row) const;
     Q_INVOKABLE QVariant conversationPairwise(int row) const;
     Q_INVOKABLE QString conversationPicture(int row) const;
     Q_INVOKABLE QString conversationTitle(int row) const;

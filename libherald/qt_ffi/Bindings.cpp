@@ -1323,6 +1323,7 @@ extern "C" {
     void message_search_data_author(const MessageSearch::Private*, int, QString*, qstring_set);
     void message_search_data_body(const MessageSearch::Private*, int, QString*, qstring_set);
     void message_search_data_conversation(const MessageSearch::Private*, int, QByteArray*, qbytearray_set);
+    option_quint32 message_search_data_conversation_color(const MessageSearch::Private*, int);
     option_bool message_search_data_conversation_pairwise(const MessageSearch::Private*, int);
     void message_search_data_conversation_picture(const MessageSearch::Private*, int, QString*, qstring_set);
     void message_search_data_conversation_title(const MessageSearch::Private*, int, QString*, qstring_set);
@@ -1419,6 +1420,13 @@ QByteArray MessageSearch::conversation(int row) const
     return b;
 }
 
+QVariant MessageSearch::conversationColor(int row) const
+{
+    QVariant v;
+    v = message_search_data_conversation_color(m_d, row);
+    return v;
+}
+
 QVariant MessageSearch::conversationPairwise(int row) const
 {
     QVariant v;
@@ -1474,16 +1482,18 @@ QVariant MessageSearch::data(const QModelIndex &index, int role) const
         case Qt::UserRole + 2:
             return cleanNullQVariant(QVariant::fromValue(conversation(index.row())));
         case Qt::UserRole + 3:
-            return conversationPairwise(index.row());
+            return conversationColor(index.row());
         case Qt::UserRole + 4:
-            return cleanNullQVariant(QVariant::fromValue(conversationPicture(index.row())));
+            return conversationPairwise(index.row());
         case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(conversationTitle(index.row())));
+            return cleanNullQVariant(QVariant::fromValue(conversationPicture(index.row())));
         case Qt::UserRole + 6:
-            return has_attachments(index.row());
+            return cleanNullQVariant(QVariant::fromValue(conversationTitle(index.row())));
         case Qt::UserRole + 7:
-            return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+            return has_attachments(index.row());
         case Qt::UserRole + 8:
+            return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+        case Qt::UserRole + 9:
             return time(index.row());
         }
         break;
@@ -1507,12 +1517,13 @@ QHash<int, QByteArray> MessageSearch::roleNames() const {
     names.insert(Qt::UserRole + 0, "author");
     names.insert(Qt::UserRole + 1, "body");
     names.insert(Qt::UserRole + 2, "conversation");
-    names.insert(Qt::UserRole + 3, "conversationPairwise");
-    names.insert(Qt::UserRole + 4, "conversationPicture");
-    names.insert(Qt::UserRole + 5, "conversationTitle");
-    names.insert(Qt::UserRole + 6, "has_attachments");
-    names.insert(Qt::UserRole + 7, "msgId");
-    names.insert(Qt::UserRole + 8, "time");
+    names.insert(Qt::UserRole + 3, "conversationColor");
+    names.insert(Qt::UserRole + 4, "conversationPairwise");
+    names.insert(Qt::UserRole + 5, "conversationPicture");
+    names.insert(Qt::UserRole + 6, "conversationTitle");
+    names.insert(Qt::UserRole + 7, "has_attachments");
+    names.insert(Qt::UserRole + 8, "msgId");
+    names.insert(Qt::UserRole + 9, "time");
     return names;
 }
 QVariant MessageSearch::headerData(int section, Qt::Orientation orientation, int role) const

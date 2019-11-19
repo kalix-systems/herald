@@ -405,6 +405,7 @@ fn message_search() -> Object {
         conversation: ItemProp::new(QByteArray).optional(),
         conversationPairwise: ItemProp::new(Bool).optional(),
         conversationPicture: ItemProp::new(QString).optional().get_by_value(),
+        conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
         conversationTitle: ItemProp::new(QString).optional().get_by_value(),
         body: ItemProp::new(QString).optional(),
         time: ItemProp::new(Qint64).optional(),
