@@ -38,7 +38,7 @@ jobs:
         with:
           command: build
           args: --release --manifest-path=herald_server/Cargo.toml
-      - run: target/debug/herald_server &
+      - run:  ./target/release/herald_server &
       - uses: Mercotui/install-qt-dev-action@v0.1.1
         with:
           packages: 'qt.qt5.5124.gcc_64'
