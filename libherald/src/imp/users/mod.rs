@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{ffi, interface::*, ret_err, ret_none, spawn};
 use herald_common::UserId;
 use heraldcore::{
     abort_err, network,
@@ -103,10 +103,8 @@ impl UsersTrait for Users {
         shared::USER_DATA.insert(data.id, data);
         self.model.end_insert_rows();
 
-        ret_err!(
-            std::thread::Builder::new().spawn(move || {
-                ret_err!(network::send_user_req(id, pairwise_conversation));
-            }),
+        spawn!(
+            ret_err!(network::send_user_req(id, pairwise_conversation)),
             ffi::NULL_CONV_ID.to_vec()
         );
 
@@ -142,7 +140,11 @@ impl UsersTrait for Users {
     fn set_name(&mut self, row_index: usize, name: String) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
-        ret_err!(user::set_name(uid, name.as_str()), false);
+
+        {
+            let name = name.clone();
+            spawn!(user::set_name(uid, name.as_str()), false);
+        }
 
         inner.name = name;
         true
@@ -168,14 +170,9 @@ impl UsersTrait for Users {
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
         let picture = picture.map(crate::utils::strip_qrc);
-        let path = ret_err!(
-            user::set_profile_picture(
-                uid,
-                picture,
-                inner.profile_picture.as_ref().map(String::as_str),
-            ),
-            false
-        );
+
+        // FIXME this is not exception safe
+        let path = ret_err!(user::set_profile_picture(uid, picture), false);
 
         inner.profile_picture = path;
         true
@@ -198,7 +195,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        ret_err!(user::set_color(uid, color), false);
+        spawn!(user::set_color(uid, color), false);
 
         inner.color = color;
         true
@@ -215,7 +212,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        ret_err!(user::set_status(uid, status), false);
+        spawn!(user::set_status(uid, status), false);
 
         inner.status = status;
 
@@ -267,6 +264,7 @@ impl UsersTrait for Users {
         } else {
             ret_err!(self.filter.normal_mode());
         }
+
         self.filter_regex = use_regex;
         self.emit.filter_regex_changed();
         self.inner_filter();
@@ -303,7 +301,7 @@ impl UsersTrait for Users {
                     };
 
                     let pos = match self.list.binary_search(&new_user) {
-                        Ok(_) => return, // this should never happen
+                        Ok(_) => continue, // this should never happen
                         Err(pos) => pos,
                     };
 

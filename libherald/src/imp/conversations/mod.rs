@@ -129,14 +129,12 @@ impl ConversationsTrait for Conversations {
 
         {
             let picture = picture.clone();
-            let old_picture = ret_none!(self.picture_(index), false);
 
             spawn!(
                 {
                     ret_err!(conversation::set_picture(
                         &cid,
-                        picture.as_ref().map(|p| p.as_str()),
-                        old_picture.as_ref().map(|p| p.as_str())
+                        picture.as_ref().map(|p| p.as_str())
                     ));
                 },
                 false

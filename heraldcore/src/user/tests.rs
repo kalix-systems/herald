@@ -51,7 +51,7 @@ fn fs_profile_picture() {
         .add_db(&mut conn)
         .expect(womp!("Failed to add user"));
 
-    db::set_profile_picture(&conn, id, Some(test_picture.into()), None)
+    db::set_profile_picture(&conn, id, Some(test_picture.into()))
         .expect(womp!("Failed to set profile picture"));
 
     std::fs::remove_dir_all(PICTURES_DIR.as_path()).expect(womp!());

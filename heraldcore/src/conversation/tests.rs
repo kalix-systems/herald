@@ -118,7 +118,7 @@ fn set_prof_pic() {
 
     let test_picture = "test_resources/maryland.png";
 
-    super::db::set_picture(&conn, &conv_id, Some(&test_picture), None)
+    super::db::set_picture(&conn, &conv_id, Some(&test_picture))
         .expect(womp!("failed to set picture"));
 
     std::fs::remove_dir_all(PICTURES_DIR.as_path()).expect(womp!());

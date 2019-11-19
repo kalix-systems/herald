@@ -144,13 +144,9 @@ pub fn set_title(conversation_id: &ConversationId, title: Option<&str>) -> Resul
 }
 
 /// Sets picture for a conversation
-pub fn set_picture(
-    conversation_id: &ConversationId,
-    picture: Option<&str>,
-    old_pic: Option<&str>,
-) -> Result<(), HErr> {
+pub fn set_picture(conversation_id: &ConversationId, picture: Option<&str>) -> Result<(), HErr> {
     let db = Database::get()?;
-    db::set_picture(&db, conversation_id, picture, old_pic)
+    db::set_picture(&db, conversation_id, picture)
 }
 
 /// Sets expiration period for a conversation

@@ -5,11 +5,11 @@ use super::*;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A change in the settings for a conversation
 pub enum SettingsUpdate {
-    /// A change in the expiring messages setting
+    /// Expiring messages setting
     Expiration(ExpirationPeriod),
-    /// A change in the title of the conversation
+    /// The title of the conversation
     Title(Option<String>),
-    /// A change in the color of the conversation
+    /// The color of the conversation
     Color(u32),
 }
 

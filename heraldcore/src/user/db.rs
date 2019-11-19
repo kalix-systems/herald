@@ -2,9 +2,6 @@ use super::*;
 use crate::conversation::Conversation;
 use rusqlite::named_params;
 
-// TODO: this should be a struct
-type PathStr<'a> = &'a str;
-
 /// Gets a user's name by their `id`.
 pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_name.sql"))?;
@@ -49,8 +46,9 @@ pub fn set_profile_picture(
     conn: &rusqlite::Connection,
     id: UserId,
     profile_picture: Option<String>,
-    old_path: Option<PathStr>,
 ) -> Result<Option<String>, HErr> {
+    let old_path = self::profile_picture(conn, id)?;
+
     let profile_picture = match profile_picture {
         Some(path) => {
             let path_string = image_utils::update_picture(path, old_path.map(|p| p.into()))?

@@ -17,12 +17,7 @@ impl Config {
         conn: &rusqlite::Connection,
         profile_picture: Option<String>,
     ) -> Result<(), HErr> {
-        let path = crate::user::db::set_profile_picture(
-            conn,
-            self.id,
-            profile_picture,
-            self.profile_picture.as_ref().map(|s| s.as_str()),
-        )?;
+        let path = crate::user::db::set_profile_picture(conn, self.id, profile_picture)?;
 
         self.profile_picture = path;
 

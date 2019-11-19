@@ -89,6 +89,21 @@ pub(crate) fn expiration_period(
     )?)
 }
 
+/// Gets expiration period for a conversation
+pub(crate) fn picture(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Option<String>, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/picture.sql"))?;
+
+    Ok(stmt.query_row_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| row.get("picture"),
+    )?)
+}
+
 /// Sets color for a conversation
 pub(crate) fn set_color(
     conn: &rusqlite::Connection,
@@ -133,18 +148,19 @@ pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     picture: Option<PathStr>,
-    old_pic: Option<PathStr>,
 ) -> Result<(), HErr> {
     use crate::image_utils;
 
+    let old_picture = self::picture(&conn, conversation_id)?;
+
     let path = match picture {
         Some(path) => Some(
-            image_utils::update_picture(path, old_pic)?
+            image_utils::update_picture(path, old_picture.as_ref().map(String::as_str))?
                 .into_os_string()
                 .into_string()?,
         ),
         None => {
-            if let Some(old) = old_pic {
+            if let Some(old) = old_picture {
                 std::fs::remove_file(old).ok();
             }
             None
