@@ -11,6 +11,7 @@ members = [
   "heraldcore",
   "heraldcore/coretypes",
   "heraldcore/coremacros",
+  "heraldcore/coreconf",
   "heraldcore/chainkeys",
   "heraldcore/platform_dirs",
   "heraldcore/search_pattern",

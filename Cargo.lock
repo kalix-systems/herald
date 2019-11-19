@@ -263,6 +263,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "coreconf"
+version = "0.1.0"
+dependencies = [
+ "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "toml 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "coremacros"
 version = "0.1.0"
 
@@ -721,6 +730,7 @@ version = "0.1.0"
 dependencies = [
  "chainkeys 0.1.0",
  "chainmail 0.2.0",
+ "coreconf 0.1.0",
  "coremacros 0.1.0",
  "coretypes 0.1.0",
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -742,7 +752,6 @@ dependencies = [
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
- "toml 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "ureq 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "url 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "websocket 0.23.0 (registry+https://github.com/rust-lang/crates.io-index)",
