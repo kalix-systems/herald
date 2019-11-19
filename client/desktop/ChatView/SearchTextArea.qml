@@ -34,13 +34,12 @@ ScrollView {
             event.accepted = true
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
-            ownedConversation.setSearchHint(x, y)
+            var x = convWindow.chatScrollBar.position
+            var y = convWindow.chatScrollBar.size
 
             //key navigation handling
             if (ownedConversation.searchNumMatches > 0) {
-
-                var x = convWindow.chatScrollBar.position
-                var y = convWindow.chatScrollBar.size
+                ownedConversation.setSearchHint(x, y)
                 convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"
                 SearchUtils.jumpHandler(ownedConversation,
@@ -54,6 +53,8 @@ ScrollView {
         onTextChanged: {
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
+            var x = convWindow.chatScrollBar.position
+            var y = convWindow.chatScrollBar.size
             ownedConversation.setSearchHint(x, y)
             if (ownedConversation.searchNumMatches > 0) {
                 convWindow.state = "jumpState"
