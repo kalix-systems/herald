@@ -1,4 +1,4 @@
-use crate::{errors::*, utils::SearchPattern};
+use crate::errors::*;
 use lazy_static::*;
 use platform_dirs::DB_DIR;
 use rusqlite::{Connection, NO_PARAMS};
@@ -67,28 +67,6 @@ impl Database {
         }
 
         conn.busy_handler(Some(busy_handler))?;
-
-        // `NormalPattern`
-        conn.create_scalar_function("normal_pattern", 2, true, |ctx| {
-            let pattern = ctx.get::<String>(0)?;
-            let value = ctx.get::<String>(1)?;
-
-            let re = SearchPattern::new_normal(pattern)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
-
-            Ok(re.is_match(value.as_str()))
-        })?;
-
-        // `RegexPattern`
-        conn.create_scalar_function("regex_pattern", 2, true, |ctx| {
-            let pattern = ctx.get::<String>(0)?;
-            let value = ctx.get::<String>(1)?;
-
-            let re = SearchPattern::new_regex(pattern)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?;
-
-            Ok(re.is_match(value.as_str()))
-        })?;
 
         // set foreign key constraint
         conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;

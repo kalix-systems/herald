@@ -7,10 +7,8 @@ use crate::{
     ret_err,
 };
 use crossbeam_channel::{unbounded, Receiver};
-use heraldcore::{
-    message::{Search, SearchResult},
-    utils::SearchPattern,
-};
+use heraldcore::message::{Search, SearchResult};
+use search_pattern::SearchPattern;
 use std::ops::Not;
 
 mod imp;

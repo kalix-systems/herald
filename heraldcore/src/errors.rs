@@ -6,7 +6,6 @@ use chainkeys::ChainKeysError;
 use coretypes::ids::InvalidRandomIdLength;
 use herald_common::*;
 use image;
-use regex;
 use std::fmt;
 
 #[derive(Debug)]
@@ -32,7 +31,7 @@ pub enum HErr {
     /// Error processing images
     ImageError(image::ImageError),
     /// Error compiling regex
-    RegexError(regex::Error),
+    RegexError(search_pattern::SearchPatternError),
     /// Serialization or deserialization
     /// error
     CborError(serde_cbor::Error),
@@ -111,7 +110,7 @@ herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
 herr!(serde_cbor::Error, CborError);
 herr!(websocket::result::WebSocketError, WebsocketError);
-herr!(regex::Error, RegexError);
+herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
 
 impl From<EmptyMessageBody> for HErr {

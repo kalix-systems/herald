@@ -10,10 +10,10 @@ use heraldcore::{
         ReplyId,
     },
     types::*,
-    utils::SearchPattern,
     NE,
 };
 use im::vector::Vector;
+use search_pattern::SearchPattern;
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},

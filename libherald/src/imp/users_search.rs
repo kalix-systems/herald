@@ -8,7 +8,7 @@ use crate::{
     ret_err,
 };
 use herald_common::UserId;
-use heraldcore::utils::SearchPattern;
+use search_pattern::SearchPattern;
 
 struct User {
     id: UserId,

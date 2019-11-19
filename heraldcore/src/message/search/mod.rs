@@ -1,5 +1,5 @@
 use super::*;
-use crate::utils::SearchPattern;
+use search_pattern::SearchPattern;
 
 mod db;
 

@@ -13,6 +13,7 @@ members = [
   "heraldcore/coremacros",
   "heraldcore/chainkeys",
   "heraldcore/platform_dirs",
+  "heraldcore/search_pattern",
   "heraldcore/location",
   "libherald",
   "libherald/qt_bindgen",

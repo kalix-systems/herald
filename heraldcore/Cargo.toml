@@ -10,7 +10,6 @@ hex               = "0.4.0"
 lazy_static       = "1.3.0"
 libsodium-sys     = "0.2.4"
 parking_lot       = "0.9.0"
-regex             = "1.2.1"
 serde             = "1.0.99"
 serde_bytes       = "0.11.2"
 serde_cbor        = "0.10.1"
@@ -32,6 +31,9 @@ path = "./coremacros"
 
 [dependencies.location]
 path = "./location"
+
+[dependencies.search_pattern]
+path = "./search_pattern"
 
 [dependencies.platform_dirs]
 path             = "./platform_dirs"

@@ -1,6 +1,7 @@
 use crate::{ffi, imp::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
-use heraldcore::{types::*, user, utils::SearchPattern};
+use heraldcore::{types::*, user};
+use search_pattern::SearchPattern;
 use std::{
     convert::{TryFrom, TryInto},
     ops::Drop,

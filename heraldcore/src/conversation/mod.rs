@@ -46,7 +46,7 @@ impl ConversationMeta {
     }
 
     /// Matches conversation's text fields against a [`SearchPattern`]
-    pub fn matches(&self, pattern: &crate::utils::SearchPattern) -> bool {
+    pub fn matches(&self, pattern: &search_pattern::SearchPattern) -> bool {
         match self.title.as_ref() {
             Some(name) => pattern.is_match(name),
             None => false,

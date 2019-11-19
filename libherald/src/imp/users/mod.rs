@@ -3,8 +3,8 @@ use herald_common::UserId;
 use heraldcore::{
     network,
     user::{self, UserBuilder, UserStatus},
-    utils::SearchPattern,
 };
+use search_pattern::SearchPattern;
 use std::convert::{TryFrom, TryInto};
 
 pub(crate) mod shared;

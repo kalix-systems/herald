@@ -2,9 +2,9 @@ use crate::{cont_none, ffi, interface::*, ret_err, ret_none, shared::SingletonBu
 use heraldcore::{
     conversation::{self, ConversationMeta, ExpirationPeriod},
     types::ConversationId,
-    utils::SearchPattern,
 };
 use im::vector::Vector;
+use search_pattern::SearchPattern;
 use std::ops::Not;
 
 pub(crate) mod shared;
