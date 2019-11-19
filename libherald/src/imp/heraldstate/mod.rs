@@ -4,6 +4,7 @@ use crate::{
     interface::*,
     push_err, ret_err,
     shared::{AddressedBus, SingletonBus},
+    spawn,
 };
 use herald_common::*;
 use heraldcore::network::{self as net, Notification};
@@ -14,7 +15,6 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
-    thread,
 };
 
 type Emitter = HeraldStateEmitter;
@@ -72,23 +72,30 @@ impl HeraldStateTrait for HeraldState {
         let config_init = self.config_init.clone();
         let mut emit = self.emit.clone();
 
-        ret_err! {
-            thread::Builder::new().spawn(move || match ret_err!(net::register(uid)) {
-                Res::UIDTaken => {
-                    eprintln!("UID taken!");
-                }
-                Res::KeyTaken => {
-                    eprintln!("Key taken!");
-                }
-                Res::BadSig(s) => {
-                    eprintln!("Bad sig: {:?}", s);
-                }
-                Res::Success => {
-                   config_init.fetch_xor(true, Ordering::Acquire);
-                   emit.config_init_changed();
-                },
-            })
-        };
+        spawn!(match ret_err!(net::register(uid)) {
+            Res::UIDTaken => {
+                eprintln!("UID taken!");
+            }
+            Res::KeyTaken => {
+                eprintln!("Key taken!");
+            }
+            Res::BadSig(s) => {
+                eprintln!("Bad sig: {:?}", s);
+            }
+            Res::Success => {
+                config_init.fetch_xor(true, Ordering::Acquire);
+                // If this fails, it's because a thread couldn't be spawned.
+                // This implies the OS is in a very bad place.
+                push_err!(
+                    gc::init(move |update| {
+                        gc_handler(update);
+                    }),
+                    "Couldn't start GC thread"
+                );
+
+                emit.config_init_changed();
+            }
+        });
     }
 
     fn login(&mut self) -> bool {
@@ -96,17 +103,15 @@ impl HeraldStateTrait for HeraldState {
 
         let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
 
-        ret_err!(
-            thread::Builder::new().spawn(move || {
-                ret_err!(net::login(
-                    move |notif: Notification| {
-                        handler.send(notif);
-                    },
-                    move |herr: HErr| {
-                        ret_err!(Err::<(), HErr>(herr));
-                    }
-                ))
-            }),
+        spawn!(
+            ret_err!(net::login(
+                move |notif: Notification| {
+                    handler.send(notif);
+                },
+                move |herr: HErr| {
+                    ret_err!(Err::<(), HErr>(herr));
+                }
+            )),
             false
         );
         true

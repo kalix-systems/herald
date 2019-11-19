@@ -57,7 +57,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        users_search(),
        message_builder(),
        attachments(),
-       global_message_search()
+       message_search()
     }
 }
 
@@ -393,7 +393,7 @@ fn attachments() -> Object {
     }
 }
 
-fn global_message_search() -> Object {
+fn message_search() -> Object {
     let props = props! {
         searchPattern: Prop::new().simple(QString).optional().write(),
         regexSearch: Prop::new().simple(Bool).optional().write()
@@ -403,6 +403,9 @@ fn global_message_search() -> Object {
         msgId: ItemProp::new(QByteArray).optional(),
         author: ItemProp::new(QString).optional(),
         conversation: ItemProp::new(QByteArray).optional(),
+        conversationPairwise: ItemProp::new(Bool).optional(),
+        conversationPicture: ItemProp::new(QString).optional().get_by_value(),
+        conversationTitle: ItemProp::new(QString).optional().get_by_value(),
         body: ItemProp::new(QString).optional(),
         time: ItemProp::new(Qint64).optional(),
         has_attachments: ItemProp::new(Bool).optional()
@@ -413,6 +416,6 @@ fn global_message_search() -> Object {
     };
 
     obj! {
-        GlobalMessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
+        MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }
