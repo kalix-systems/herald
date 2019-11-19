@@ -165,6 +165,11 @@ impl Interface for MessageSearch {
         conv::title(&cid)
     }
 
+    fn conversation_color(&self, index: usize) -> Option<u32> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::color(&cid)
+    }
+
     fn conversation_picture(&self, index: usize) -> Option<String> {
         let cid = self.results.get(index).as_ref()?.conversation;
         conv::picture(&cid)

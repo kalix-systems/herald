@@ -2732,6 +2732,7 @@ pub trait MessageSearchTrait {
     fn author(&self, index: usize) -> Option<&str>;
     fn body(&self, index: usize) -> Option<&str>;
     fn conversation(&self, index: usize) -> Option<&[u8]>;
+    fn conversation_color(&self, index: usize) -> Option<u32>;
     fn conversation_pairwise(&self, index: usize) -> Option<bool>;
     fn conversation_picture(&self, index: usize) -> Option<String>;
     fn conversation_title(&self, index: usize) -> Option<String>;
@@ -2943,6 +2944,15 @@ pub unsafe extern "C" fn message_search_data_conversation(
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_conversation_color(
+    ptr: *const MessageSearch,
+    row: c_int,
+) -> COption<u32> {
+    let o = &*ptr;
+    o.conversation_color(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]

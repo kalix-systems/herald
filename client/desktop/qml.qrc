@@ -54,5 +54,6 @@
         <file>SideBar/NewContactComponent.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>common/ConfigAvatar.qml</file>
+        <file>SideBar/MessageSearchView.qml</file>
     </qresource>
 </RCC>
