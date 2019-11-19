@@ -41,6 +41,18 @@ pub(super) fn data(cid: &ConversationId) -> Option<Ref> {
     CONV_DATA.get(cid)
 }
 
+pub(crate) fn title(cid: &ConversationId) -> Option<String> {
+    CONV_DATA.get(cid)?.title.clone()
+}
+
+pub(crate) fn picture(cid: &ConversationId) -> Option<String> {
+    CONV_DATA.get(cid)?.picture.clone()
+}
+
+pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
+    Some(CONV_DATA.get(cid)?.pairwise)
+}
+
 pub(super) fn data_mut(cid: &ConversationId) -> Option<RefMut> {
     CONV_DATA.get_mut(cid)
 }

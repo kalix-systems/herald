@@ -1,8 +1,8 @@
 use crate::{
     ffi,
+    imp::conversations::shared as conv,
     interface::{
-        GlobalMessageSearchEmitter as Emitter, GlobalMessageSearchList as List,
-        GlobalMessageSearchTrait as Interface,
+        MessageSearchEmitter as Emitter, MessageSearchList as List, MessageSearchTrait as Interface,
     },
     ret_err,
 };
@@ -16,7 +16,7 @@ use std::ops::Not;
 mod imp;
 
 /// Global message search handle
-pub struct GlobalMessageSearch {
+pub struct MessageSearch {
     pattern: Option<SearchPattern>,
     emit: Emitter,
     model: List,
@@ -24,7 +24,7 @@ pub struct GlobalMessageSearch {
     rx: Option<Receiver<Vec<SearchResult>>>,
 }
 
-impl Interface for GlobalMessageSearch {
+impl Interface for MessageSearch {
     fn new(emit: Emitter, model: List) -> Self {
         Self {
             pattern: None,
@@ -153,6 +153,21 @@ impl Interface for GlobalMessageSearch {
 
     fn time(&self, index: usize) -> Option<i64> {
         Some(self.results.get(index).as_ref()?.time.0)
+    }
+
+    fn conversation_pairwise(&self, index: usize) -> Option<bool> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::pairwise(&cid)
+    }
+
+    fn conversation_title(&self, index: usize) -> Option<String> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::title(&cid)
+    }
+
+    fn conversation_picture(&self, index: usize) -> Option<String> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::picture(&cid)
     }
 
     fn emit(&mut self) -> &mut Emitter {
