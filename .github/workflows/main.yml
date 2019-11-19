@@ -22,7 +22,8 @@ jobs:
     name: e2e
     runs-on: ubuntu-latest
     steps:
-      - run: sudo apt install libdbus-glib-1-dev \
+      - run: sudo apt-get update
+      - run: sudo apt-get install libdbus-glib-1-dev \
               libgl1-mesa-dev \
               dbus-glib-devel 
       - uses: actions/checkout@v1
