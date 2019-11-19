@@ -41,7 +41,8 @@ impl NotifHandler {
                     }
                 ));
             }
-            NewUser(user, meta) => {
+            NewUser(update) => {
+                let (user, meta) = *update;
                 // add user
                 ret_err!(Users::push(UsersUpdates::NewUser(user)));
 

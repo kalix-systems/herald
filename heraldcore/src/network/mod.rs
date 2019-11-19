@@ -42,7 +42,7 @@ pub enum Notification {
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
     /// A new user has been added
-    NewUser(user::User, ConversationMeta),
+    NewUser(Box<(user::User, ConversationMeta)>),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.

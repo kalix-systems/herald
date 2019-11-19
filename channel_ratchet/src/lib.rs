@@ -12,6 +12,7 @@ new_type! {
 }
 
 impl ChainKey {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let mut buf = [0u8; CHAIN_KEY_BYTES];
         random::gen_into(&mut buf);
@@ -27,6 +28,7 @@ pub struct ChainState {
 }
 
 impl ChainState {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let base_key = hash::Key::new();
         let chain_key = ChainKey::new();
