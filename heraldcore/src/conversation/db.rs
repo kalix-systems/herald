@@ -2,9 +2,6 @@ use super::*;
 use crate::message::MessageTime;
 use rusqlite::named_params;
 
-// TODO: this should be a struct
-type PathStr<'a> = &'a str;
-
 /// Deletes all messages in a conversation.
 pub(crate) fn delete_conversation(
     conn: &rusqlite::Connection,
@@ -147,8 +144,8 @@ pub(crate) fn set_title(
 pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
-    picture: Option<PathStr>,
-) -> Result<(), HErr> {
+    picture: Option<&str>,
+) -> Result<Option<String>, HErr> {
     use crate::image_utils;
 
     let old_picture = self::picture(&conn, conversation_id)?;
@@ -172,7 +169,7 @@ pub(crate) fn set_picture(
         params![path, conversation_id],
     )?;
 
-    Ok(())
+    Ok(path)
 }
 
 /// Get metadata of all conversations

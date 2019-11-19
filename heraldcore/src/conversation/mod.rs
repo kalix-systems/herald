@@ -144,7 +144,10 @@ pub fn set_title(conversation_id: &ConversationId, title: Option<&str>) -> Resul
 }
 
 /// Sets picture for a conversation
-pub fn set_picture(conversation_id: &ConversationId, picture: Option<&str>) -> Result<(), HErr> {
+pub fn set_picture(
+    conversation_id: &ConversationId,
+    picture: Option<&str>,
+) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     db::set_picture(&db, conversation_id, picture)
 }

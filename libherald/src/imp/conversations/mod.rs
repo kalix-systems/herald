@@ -57,8 +57,6 @@ impl ConversationsTrait for Conversations {
     }
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
-        ret_none!(self.set_color_(index, color), false);
-
         let cid = ret_none!(self.id(index), false);
 
         spawn!(
@@ -71,6 +69,7 @@ impl ConversationsTrait for Conversations {
             false
         );
 
+        ret_none!(self.set_color_(index, color), false);
         true
     }
 
@@ -127,21 +126,13 @@ impl ConversationsTrait for Conversations {
 
         let cid = ret_none!(self.id(index), false);
 
-        {
-            let picture = picture.clone();
+        // FIXME exception safety
+        let path = ret_err!(
+            conversation::set_picture(&cid, picture.as_ref().map(|p| p.as_str())),
+            false
+        );
 
-            spawn!(
-                {
-                    ret_err!(conversation::set_picture(
-                        &cid,
-                        picture.as_ref().map(|p| p.as_str())
-                    ));
-                },
-                false
-            );
-        }
-
-        self.set_picture_(index, picture);
+        self.set_picture_(index, path);
         true
     }
 
