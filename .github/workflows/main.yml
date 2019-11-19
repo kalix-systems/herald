@@ -32,7 +32,7 @@ jobs:
           toolchain: stable
           override: true
       - name: Setup database tables
-        run: cargo run --bin setup_db
+        run: cargo run --release --bin setup_db
       - name: Run server
         uses: actions-rs/cargo@v1
         with:
