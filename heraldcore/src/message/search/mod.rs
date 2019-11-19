@@ -3,11 +3,24 @@ use crate::utils::SearchPattern;
 
 mod db;
 
-type SearchIndex = Time;
+#[derive(Clone, Copy)]
+struct Index {
+    time: Time,
+    row_id: i64,
+}
+
+impl Default for Index {
+    fn default() -> Self {
+        Self {
+            time: Time(std::i64::MAX),
+            row_id: std::i64::MAX,
+        }
+    }
+}
 
 /// Incrementally searches
 pub struct Search {
-    min: SearchIndex,
+    min: Index,
     /// The search pattern being used
     pub pattern: SearchPattern,
 }
@@ -16,7 +29,7 @@ impl Search {
     /// Creates a new `Search` handle with the provided `pattern`.
     pub fn new(pattern: SearchPattern) -> Self {
         Self {
-            min: Time(std::i64::MAX),
+            min: Index::default(),
             pattern,
         }
     }
@@ -29,13 +42,13 @@ impl Search {
 
     /// Replaces the search pattern, and resets the search.
     pub fn replace_pattern(&mut self, pattern: SearchPattern) {
-        self.min = Time(std::i64::MAX);
+        self.min = Index::default();
         self.pattern = pattern;
     }
 
     /// Resets the search without clearing the pattern
     pub fn reset_search(&mut self) {
-        self.min = Time(std::i64::MAX);
+        self.min = Index::default();
     }
 }
 
