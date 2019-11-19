@@ -279,6 +279,7 @@ version = "0.1.0"
 name = "coretypes"
 version = "0.1.0"
 dependencies = [
+ "chainmail 0.2.0",
  "herald_common 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -346,6 +347,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "generic-array 0.12.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "subtle 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "crypto_helpers"
+version = "0.1.0"
+dependencies = [
+ "herald_common 0.1.0",
+ "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -734,6 +744,7 @@ dependencies = [
  "coremacros 0.1.0",
  "coretypes 0.1.0",
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "crypto_helpers 0.1.0",
  "herald_common 0.1.0",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",

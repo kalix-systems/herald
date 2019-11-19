@@ -23,13 +23,16 @@ default_features = false
 features         = ["rusqlite_"]
 
 [dependencies.coretypes]
-path             = "./coretypes"
+path = "./coretypes"
 
 [dependencies.coremacros]
 path = "./coremacros"
 
 [dependencies.coreconf]
 path = "./coreconf"
+
+[dependencies.crypto_helpers]
+path = "./crypto_helpers"
 
 [dependencies.location]
 path = "./location"
@@ -38,7 +41,7 @@ path = "./location"
 path = "./search_pattern"
 
 [dependencies.platform_dirs]
-path             = "./platform_dirs"
+path = "./platform_dirs"
 
 [dependencies.chainkeys]
 path = "./chainkeys"

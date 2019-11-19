@@ -1,4 +1,8 @@
 use super::*;
+use crate::types::cmessages;
+use crate::types::dmessages;
+use coretypes::cmessages::ConversationMessage;
+use coretypes::dmessages::DeviceMessage;
 
 pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
@@ -6,7 +10,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 
     let cid = cm.cid();
 
-    let msgs = cm.open()?;
+    let msgs = cmessages::open(cm)?;
 
     for (msg, GlobalId { uid, .. }) in msgs {
         match msg {
@@ -113,7 +117,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
 pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
-    let (from, msg) = msg.open()?;
+    let (from, msg) = dmessages::open(msg)?;
     let GlobalId { did, uid } = from;
 
     match msg {

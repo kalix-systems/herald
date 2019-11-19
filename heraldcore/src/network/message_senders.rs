@@ -1,11 +1,13 @@
 use super::*;
+use crate::types::cmessages;
+use crate::types::dmessages;
 
 pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessageBody,
 ) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
+        let (cm, hash, key) = cmessages::seal(cid, &content)?;
 
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::keypair()?.public_key();
@@ -54,7 +56,7 @@ pub(crate) fn send_cmessage(
 }
 
 pub(super) fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
+    let msg = Bytes::from(serde_cbor::to_vec(&dmessages::seal(&to, dm)?)?);
 
     let req = push_devices::Req { to: vec![to], msg };
 

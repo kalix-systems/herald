@@ -52,6 +52,8 @@ pub enum HErr {
     ChainError(ChainKeysError),
     /// Malformed path
     BadPath(std::ffi::OsString),
+    /// Key conversion error,
+    KeyConversion(crypto_helpers::Error),
 }
 
 impl fmt::Display for HErr {
@@ -76,8 +78,9 @@ impl fmt::Display for HErr {
             NoneError(location) => write!(f, "Unexpected none at {}", location),
             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
-            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
             BadRandomId(e) => write!(f, "{}", e),
+            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
+            KeyConversion(e) => write!(f, "{}", e),
         }
     }
 }
@@ -112,6 +115,7 @@ herr!(serde_cbor::Error, CborError);
 herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
+herr!(crypto_helpers::Error, KeyConversion);
 
 impl From<EmptyMessageBody> for HErr {
     fn from(_: EmptyMessageBody) -> Self {

@@ -7,12 +7,15 @@ edition = "2018"
 [dependencies]
 serde             = "1.0.99"
 
-[dependencies.rusqlite]
-version          = "0.20.0"
-default_features = false
-features         = ["functions", "bundled"]
-
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
+
+[dependencies.chainmail]
+path = "../../chainmail"
+
+[dependencies.rusqlite]
+version          = "0.20.0"
+default_features = false
+features         = ["functions", "bundled"]
