@@ -51,7 +51,7 @@ pub fn set_profile_picture(
 
     let profile_picture = match profile_picture {
         Some(path) => {
-            let path_string = image_utils::update_picture(path, old_path.map(|p| p.into()))?
+            let path_string = image_utils::update_picture(path, old_path)?
                 .into_os_string()
                 .into_string()?;
             Some(path_string)
