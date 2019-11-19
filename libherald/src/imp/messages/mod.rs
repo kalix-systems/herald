@@ -218,7 +218,7 @@ impl MessagesTrait for Messages {
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
         spawn!(message::delete_message(&id), false);
-        self.raw_remove(id, ix);
+        self.remove_helper(id, ix);
 
         true
     }
@@ -270,10 +270,10 @@ impl MessagesTrait for Messages {
                 MsgUpdate::NewMsg(new) => {
                     new_msg_toast(&new);
 
-                    ret_err!(self.raw_insert(*new, SaveStatus::Saved));
+                    ret_err!(self.insert_helper(*new, SaveStatus::Saved));
                 }
                 MsgUpdate::BuilderMsg(msg) => {
-                    ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
+                    ret_err!(self.insert_helper(*msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt {
                     msg_id,
