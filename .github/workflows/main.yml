@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: sudo apt-get update
-      - run: sudo apt-get install libdbus-glib-1-dev libgl1-mesa-dev
+      - run: sudo apt-get install libdbus-glib-1-dev libgl1-mesa-dev libx11-6 libx11-xcb1 libxcb1
       - uses: actions/checkout@v1
       - name: Start postgres instance
         run: docker-compose -f herald_server/docker-compose.yml up -d

@@ -169,6 +169,6 @@ void libherald::test_reply() {
 
 }
 
-QTEST_MAIN(libherald)
+QTEST_GUILESS_MAIN(libherald)
 
 #include "tst_libherald.moc"
