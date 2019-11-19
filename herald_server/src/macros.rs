@@ -2,7 +2,9 @@
 macro_rules! mk_filter {
     ($this: expr, $f: ident) => {
         warp::path(stringify!($f))
-            .and(::warp::filters::body::concat())
+            .boxed()
+            .and(::warp::filters::body::concat().boxed())
+            .boxed()
             .and_then(move |b: ::warp::filters::body::FullBody| {
                 async move {
                     let r1: Result<Vec<u8>, Error> = req_handler_store($this, b, $f).await;
@@ -11,6 +13,7 @@ macro_rules! mk_filter {
                     r2
                 }
             })
+            .boxed()
     };
 }
 
@@ -18,7 +21,9 @@ macro_rules! mk_filter {
 macro_rules! push_filter {
     ($this: expr, $f: tt) => {
         warp::path(stringify!($f))
-            .and(::warp::filters::body::concat())
+            .boxed()
+            .and(::warp::filters::body::concat().boxed())
+            .boxed()
             .and_then(move |b: ::warp::filters::body::FullBody| {
                 async move {
                     let r1: Result<Vec<u8>, Error> = req_handler_async($this, b, State::$f).await;
@@ -27,5 +32,6 @@ macro_rules! push_filter {
                     r2
                 }
             })
+            .boxed()
     };
 }
