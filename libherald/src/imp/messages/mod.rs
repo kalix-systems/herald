@@ -403,6 +403,10 @@ impl MessagesTrait for Messages {
     }
 
     fn set_search_hint(&mut self, scroll_position: f32, scroll_height: f32) {
+        if scroll_position.is_nan() || scroll_height.is_nan() {
+            return;
+        }
+
         let percentage = scroll_position + scroll_height / 2.0;
         self.search.start_hint(percentage, &self.container);
     }
