@@ -15,39 +15,58 @@ ScrollView {
     Layout.alignment: Qt.AlignLeft
     clip: true
     TextArea {
-    id: searchText
-    height: CmnCfg.toolbarHeight
+        id: searchText
+        height: CmnCfg.toolbarHeight
 
-    placeholderText: "Search conversation..."
-    font.pixelSize: 14
-    color: "white"
-    background: Rectangle {
-        anchors.fill: parent
-        color: CmnCfg.palette.secondaryColor
-    }
+        placeholderText: "Search conversation..."
+        font.pixelSize: 14
+        color: "white"
+        background: Rectangle {
+            anchors.fill: parent
+            color: CmnCfg.palette.secondaryColor
+        }
 
-    verticalAlignment: TextEdit.AlignVCenter
-    Layout.alignment: Qt.AlignLeft
+        verticalAlignment: TextEdit.AlignVCenter
+        Layout.alignment: Qt.AlignLeft
 
-    onTextChanged: {
-        ownedConversation.searchActive = true
-        ownedConversation.searchPattern = searchText.text
+        Keys.onReturnPressed: {
+            //don't allow enter key to affect textarea
+            event.accepted = true
+            ownedConversation.searchActive = true
+            ownedConversation.searchPattern = searchText.text
+            ownedConversation.setSearchHint(x, y)
 
-        if (ownedConversation.searchNumMatches > 0) {
-            searchToolBar.state = "searchActiveState"
-            convWindow.state = "searchState"
-            var isOnscreen = SearchUtils.isOnscreen(ownedConversation, convWindow.chatListView,
-                                                    chatPane, convWindow, false)
+            //key navigation handling
+            if (ownedConversation.searchNumMatches > 0) {
 
-            if (!isOnscreen) {
-            convWindow.contentY =
-                    convWindow.chatListView.itemAt(ownedConversation.prevSearchMatch()).y - convWindow.height / 2
+                var x = convWindow.chatScrollBar.position
+                var y = convWindow.chatScrollBar.size
+                convWindow.state = "jumpState"
+                searchToolBar.state = "searchActiveState"
+                SearchUtils.jumpHandler(ownedConversation,
+                                        convWindow.chatListView, chatPane,
+                                        convWindow, true)
                 convWindow.returnToBounds()
-        }
+                convWindow.state = ""
+            }
         }
 
-        else searchToolBar.state = ""
-      }
+        onTextChanged: {
+            ownedConversation.searchActive = true
+            ownedConversation.searchPattern = searchText.text
+            ownedConversation.setSearchHint(x, y)
+            if (ownedConversation.searchNumMatches > 0) {
+                convWindow.state = "jumpState"
+                searchToolBar.state = "searchActiveState"
+                SearchUtils.searchTextHandler(ownedConversation,
+                                              convWindow.chatListView,
+                                              chatPane, convWindow)
+                convWindow.state = ""
+            }
+            else {
+                //clear state to disable buttons
+                searchToolBar.state = ""
+            }
+        }
     }
-
 }

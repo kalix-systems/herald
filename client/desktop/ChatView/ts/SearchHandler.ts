@@ -1,74 +1,86 @@
 export function isOnscreen(
-	ownedConversation: Messages, 
-	chatListView: Repeater,
-	chatPane: Page,
-	conversationWindow: ConversationWindow,
-	forward: boolean
-	): boolean {
+  index: number,
+  chatListView: Repeater,
+  chatPane: Page,
+  conversationWindow: ConversationWindow,
+  forward: boolean
+): boolean {
+  if (!forward) {
+    const item = chatListView.itemAt(index);
+    const x = item.x;
+    const y = item.y;
 
-	if (!forward) {
-		const x = chatListView.itemAt(ownedConversation.peekPrevSearchMatch()).x;
-		const y = chatListView.itemAt(ownedConversation.peekPrevSearchMatch()).y;
-		const yPos = chatPane.mapFromItem(chatListView, x, y).y;
-		const pageHeight = conversationWindow.height;
+    const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+    const yPos2 = yPos + item.height;
+    const pageHeight = conversationWindow.height;
 
-		if (0 < yPos && yPos < pageHeight) {
-			return true;
-		}
-		else {
-			return false;
-			
-			}
-	}
+    return 0 < yPos && yPos2 < pageHeight;
+  } else {
+    const item = chatListView.itemAt(index);
+    const x = item.x;
+    const y = item.y;
 
-	else {
-		const x = chatListView.itemAt(ownedConversation.peekNextSearchMatch()).x;
-		const y = chatListView.itemAt(ownedConversation.peekNextSearchMatch()).y;
-		const yPos = chatPane.mapFromItem(chatListView, x, y).y;
-		const pageHeight = conversationWindow.height;
+    const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+    const yPos2 = yPos + item.height;
+    const pageHeight = conversationWindow.height;
 
-		if (0 < yPos && yPos < pageHeight) {
-			return true;
-		}
-		else {
-			return false;
-		}
+    return 0 < yPos && yPos2 < pageHeight;
+  }
+}
 
-	}
+export function searchTextHandler(
+  ownedConversation: Messages,
+  chatListView: Repeater,
+  chatPane: Page,
+  conversationWindow: ConversationWindow
+): void {
+  const index = ownedConversation.prevSearchMatch();
+  const onScreen = isOnscreen(
+    index,
+    chatListView,
+    chatPane,
+    conversationWindow,
+    false
+  );
 
+  if (!onScreen) {
+    const convoMiddle = conversationWindow.height / 2;
+    conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+
+    conversationWindow.returnToBounds();
+  }
 }
 
 export function jumpHandler(
-	ownedConversation: Messages,
-	chatListView: Repeater,
-	chatPane: Page,
-	conversationWindow: ConversationWindow,
-	forward: boolean
-	): void {
+  ownedConversation: Messages,
+  chatListView: Repeater,
+  chatPane: Page,
+  conversationWindow: ConversationWindow,
+  forward: boolean
+): void {
+  const toJump = (index: number): boolean => {
+    return !isOnscreen(
+      index,
+      chatListView,
+      chatPane,
+      conversationWindow,
+      forward
+    );
+  };
 
-	const toJump = !isOnscreen(ownedConversation, chatListView, chatPane, conversationWindow, forward);
+  if (forward) {
+    const index = ownedConversation.nextSearchMatch();
 
-	const convoMiddle = conversationWindow.height / 2
+    if (toJump(index)) {
+      const convoMiddle = conversationWindow.height / 2;
+      conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+    }
+  } else {
+    const index = ownedConversation.prevSearchMatch();
 
-	if (forward) {
-		if (toJump) {
-			conversationWindow.contentY = chatListView.itemAt(ownedConversation.nextSearchMatch()).y - convoMiddle;
-		}
-		else {
-			ownedConversation.nextSearchMatch()
-		}
-		return;
-	}
-
-	else {
-		if (toJump) {
-			conversationWindow.contentY = chatListView.itemAt(ownedConversation.prevSearchMatch()).y - convoMiddle;
-		}
-		else {
-			ownedConversation.prevSearchMatch()
-
-		}
-
-		return;
-	}
+    if (toJump(index)) {
+      const convoMiddle = conversationWindow.height / 2;
+      conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+    }
+  }
 }

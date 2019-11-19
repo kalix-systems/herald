@@ -17,17 +17,18 @@ Flickable {
     boundsBehavior: Flickable.StopAtBounds
     contentHeight: textMessageCol.height
 
-    property var blankTransition: Transition {}
+    property var blankTransition: Transition {
+    }
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
+        policy: ScrollBar.AsNeeded
     }
 
     Component.onCompleted: {
-        chatScrollBar.position = 1.0
+        chatScrollBar.position = 1.0 + chatScrollBar.size
     }
-
 
     Column {
         id: textMessageCol
@@ -44,6 +45,7 @@ Flickable {
             anchors.fill: parent
             model: ownedConversation
             delegate: Row {
+                id: chatRow
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                        receiptStatus)
@@ -58,8 +60,10 @@ Flickable {
                                                                   author)
 
                 spacing: CmnCfg.margin
-                readonly property string pfpUrl: outbound ? config.profilePicture
-                                                          : contactsModel.profilePictureById(author)
+                readonly property string pfpUrl: outbound ? config.profilePicture : contactsModel.profilePictureById(
+                                                                author)
+                property alias highlight: bubbleActual.highlightItem
+
                 // column is most correct to resize for extra content
                 anchors {
                     right: outbound ? parent.right : undefined
@@ -90,6 +94,18 @@ Flickable {
                         authorName: authName
                         authorColor: userColor
                         replyId: op
+                        //mousearea handling jump behavior
+                        jumpHandler.onClicked: {
+                            convWindow.state = "jumpState"
+                            convWindow.contentY = chatListView.itemAt(
+                                        ownedConversation.indexById(
+                                            replyId)).y - convWindow.height / 2
+                            convWindow.returnToBounds()
+                            convWindow.state = ""
+                            replyHighlightAnimation.target =
+                                    chatListView.itemAt(ownedConversation.indexById(replyId)).highlight
+                            replyHighlightAnimation.start()
+                        }
                     }
                 }
 
@@ -125,6 +141,7 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.paneColor
                     senderColor: userColor
+                    highlight: match_status === 2
                     content: if (hasAttachments && dataSaved) {
                                  image
                              } else if (isReply) {
@@ -132,7 +149,8 @@ Flickable {
                              } else {
                                  std
                              }
-                    ChatBubbleHover {}
+                    ChatBubbleHover {
+                    }
                 }
 
                 AvatarMain {
@@ -152,11 +170,18 @@ Flickable {
         } // Repeater
     } //singleton Col
 
-    states: State {
-        name: "searchState"
-        PropertyChanges {
-            target: cvPane
-            rebound: blankTransition
+    states: [
+        State {
+            name: "jumpState"
+            PropertyChanges {
+                target: cvPane
+                rebound: blankTransition
+            }
+
+            PropertyChanges {
+                target: chatScrollBar
+                policy: ScrollBar.AlwaysOn
+            }
         }
-    }
+    ]
 } // flickable

@@ -122,10 +122,6 @@ namespace {
     {
         Q_EMIT o->pictureChanged();
     }
-    inline void conversationBuilderUsersFilterChanged(ConversationBuilderUsers* o)
-    {
-        Q_EMIT o->filterChanged();
-    }
     inline void conversationsFilterChanged(Conversations* o)
     {
         Q_EMIT o->filterChanged();
@@ -250,6 +246,10 @@ namespace {
     {
         Q_EMIT o->searchActiveChanged();
     }
+    inline void messagesSearchIndexChanged(Messages* o)
+    {
+        Q_EMIT o->searchIndexChanged();
+    }
     inline void messagesSearchNumMatchesChanged(Messages* o)
     {
         Q_EMIT o->searchNumMatchesChanged();
@@ -269,6 +269,10 @@ namespace {
     inline void usersFilterRegexChanged(Users* o)
     {
         Q_EMIT o->filterRegexChanged();
+    }
+    inline void usersSearchFilterChanged(UsersSearch* o)
+    {
+        Q_EMIT o->filterChanged();
     }
 }
 extern "C" {
@@ -581,230 +585,6 @@ extern "C" {
     bool conversation_builder_remove_member_by_id(ConversationBuilder::Private*, const ushort*, int);
     bool conversation_builder_remove_member_by_index(ConversationBuilder::Private*, quint64);
     void conversation_builder_set_title(ConversationBuilder::Private*, const ushort*, int);
-};
-
-extern "C" {
-    option_quint32 conversation_builder_users_data_color(const ConversationBuilderUsers::Private*, int);
-    bool conversation_builder_users_data_matched(const ConversationBuilderUsers::Private*, int);
-    void conversation_builder_users_data_name(const ConversationBuilderUsers::Private*, int, QString*, qstring_set);
-    void conversation_builder_users_data_profile_picture(const ConversationBuilderUsers::Private*, int, QString*, qstring_set);
-    bool conversation_builder_users_data_selected(const ConversationBuilderUsers::Private*, int);
-    bool conversation_builder_users_set_data_selected(ConversationBuilderUsers::Private*, int, bool);
-    void conversation_builder_users_data_user_id(const ConversationBuilderUsers::Private*, int, QString*, qstring_set);
-    void conversation_builder_users_sort(ConversationBuilderUsers::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
-
-    int conversation_builder_users_row_count(const ConversationBuilderUsers::Private*);
-    bool conversation_builder_users_insert_rows(ConversationBuilderUsers::Private*, int, int);
-    bool conversation_builder_users_remove_rows(ConversationBuilderUsers::Private*, int, int);
-    bool conversation_builder_users_can_fetch_more(const ConversationBuilderUsers::Private*);
-    void conversation_builder_users_fetch_more(ConversationBuilderUsers::Private*);
-}
-int ConversationBuilderUsers::columnCount(const QModelIndex &parent) const
-{
-    return (parent.isValid()) ? 0 : 1;
-}
-
-bool ConversationBuilderUsers::hasChildren(const QModelIndex &parent) const
-{
-    return rowCount(parent) > 0;
-}
-
-int ConversationBuilderUsers::rowCount(const QModelIndex &parent) const
-{
-    return (parent.isValid()) ? 0 : conversation_builder_users_row_count(m_d);
-}
-
-bool ConversationBuilderUsers::insertRows(int row, int count, const QModelIndex &)
-{
-    return conversation_builder_users_insert_rows(m_d, row, count);
-}
-
-bool ConversationBuilderUsers::removeRows(int row, int count, const QModelIndex &)
-{
-    return conversation_builder_users_remove_rows(m_d, row, count);
-}
-
-QModelIndex ConversationBuilderUsers::index(int row, int column, const QModelIndex &parent) const
-{
-    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
-    }
-    return QModelIndex();
-}
-
-QModelIndex ConversationBuilderUsers::parent(const QModelIndex &) const
-{
-    return QModelIndex();
-}
-
-bool ConversationBuilderUsers::canFetchMore(const QModelIndex &parent) const
-{
-    return (parent.isValid()) ? 0 : conversation_builder_users_can_fetch_more(m_d);
-}
-
-void ConversationBuilderUsers::fetchMore(const QModelIndex &parent)
-{
-    if (!parent.isValid()) {
-        conversation_builder_users_fetch_more(m_d);
-    }
-}
-void ConversationBuilderUsers::updatePersistentIndexes() {}
-
-void ConversationBuilderUsers::sort(int column, Qt::SortOrder order)
-{
-    conversation_builder_users_sort(m_d, column, order);
-}
-Qt::ItemFlags ConversationBuilderUsers::flags(const QModelIndex &i) const
-{
-    auto flags = QAbstractItemModel::flags(i);
-    if (i.column() == 0) {
-        flags |= Qt::ItemIsEditable;
-    }
-    return flags;
-}
-
-QVariant ConversationBuilderUsers::color(int row) const
-{
-    QVariant v;
-    v = conversation_builder_users_data_color(m_d, row);
-    return v;
-}
-
-bool ConversationBuilderUsers::matched(int row) const
-{
-    return conversation_builder_users_data_matched(m_d, row);
-}
-
-QString ConversationBuilderUsers::name(int row) const
-{
-    QString s;
-    conversation_builder_users_data_name(m_d, row, &s, set_qstring);
-    return s;
-}
-
-QString ConversationBuilderUsers::profilePicture(int row) const
-{
-    QString s;
-    conversation_builder_users_data_profile_picture(m_d, row, &s, set_qstring);
-    return s;
-}
-
-bool ConversationBuilderUsers::selected(int row) const
-{
-    return conversation_builder_users_data_selected(m_d, row);
-}
-
-bool ConversationBuilderUsers::setSelected(int row, bool value)
-{
-    bool set = false;
-    set = conversation_builder_users_set_data_selected(m_d, row, value);
-    if (set) {
-        QModelIndex index = createIndex(row, 0, row);
-        Q_EMIT dataChanged(index, index);
-    }
-    return set;
-}
-
-QString ConversationBuilderUsers::userId(int row) const
-{
-    QString s;
-    conversation_builder_users_data_user_id(m_d, row, &s, set_qstring);
-    return s;
-}
-
-QVariant ConversationBuilderUsers::data(const QModelIndex &index, int role) const
-{
-    Q_ASSERT(rowCount(index.parent()) > index.row());
-    switch (index.column()) {
-    case 0:
-        switch (role) {
-        case Qt::UserRole + 0:
-            return color(index.row());
-        case Qt::UserRole + 1:
-            return QVariant::fromValue(matched(index.row()));
-        case Qt::UserRole + 2:
-            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
-        case Qt::UserRole + 3:
-            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
-        case Qt::UserRole + 4:
-            return QVariant::fromValue(selected(index.row()));
-        case Qt::UserRole + 5:
-            return cleanNullQVariant(QVariant::fromValue(userId(index.row())));
-        }
-        break;
-    }
-    return QVariant();
-}
-
-int ConversationBuilderUsers::role(const char* name) const {
-    auto names = roleNames();
-    auto i = names.constBegin();
-    while (i != names.constEnd()) {
-        if (i.value() == name) {
-            return i.key();
-        }
-        ++i;
-    }
-    return -1;
-}
-QHash<int, QByteArray> ConversationBuilderUsers::roleNames() const {
-    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-    names.insert(Qt::UserRole + 0, "color");
-    names.insert(Qt::UserRole + 1, "matched");
-    names.insert(Qt::UserRole + 2, "name");
-    names.insert(Qt::UserRole + 3, "profilePicture");
-    names.insert(Qt::UserRole + 4, "selected");
-    names.insert(Qt::UserRole + 5, "userId");
-    return names;
-}
-QVariant ConversationBuilderUsers::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    if (orientation != Qt::Horizontal) {
-        return QVariant();
-    }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
-}
-
-bool ConversationBuilderUsers::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
-{
-    if (orientation != Qt::Horizontal) {
-        return false;
-    }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
-    return true;
-}
-
-bool ConversationBuilderUsers::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    if (index.column() == 0) {
-        if (role == Qt::UserRole + 4) {
-            if (value.canConvert(qMetaTypeId<bool>())) {
-                return setSelected(index.row(), value.value<bool>());
-            }
-        }
-    }
-    return false;
-}
-
-extern "C" {
-    ConversationBuilderUsers::Private* conversation_builder_users_new(ConversationBuilderUsers*, void (*)(ConversationBuilderUsers*),
-        void (*)(const ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*, quintptr, quintptr),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*, int, int),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*, int, int, int),
-        void (*)(ConversationBuilderUsers*),
-        void (*)(ConversationBuilderUsers*, int, int),
-        void (*)(ConversationBuilderUsers*));
-    void conversation_builder_users_free(ConversationBuilderUsers::Private*);
-    void conversation_builder_users_filter_get(const ConversationBuilderUsers::Private*, QString*, qstring_set);
-    void conversation_builder_users_filter_set(ConversationBuilderUsers::Private*, const ushort *str, int len);
-    void conversation_builder_users_filter_set_none(ConversationBuilderUsers::Private*);
-    void conversation_builder_users_clear_filter(ConversationBuilderUsers::Private*);
 };
 
 extern "C" {
@@ -2012,7 +1792,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
 }
 
 extern "C" {
-    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+    Messages::Private* messages_new(Messages*, void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -2036,6 +1816,7 @@ extern "C" {
     option_quint32 messages_last_status_get(const Messages::Private*);
     bool messages_search_active_get(const Messages::Private*);
     void messages_search_active_set(Messages::Private*, bool);
+    quint64 messages_search_index_get(const Messages::Private*);
     quint64 messages_search_num_matches_get(const Messages::Private*);
     void messages_search_pattern_get(const Messages::Private*, QString*, qstring_set);
     void messages_search_pattern_set(Messages::Private*, const ushort *str, int len);
@@ -2046,9 +1827,8 @@ extern "C" {
     bool messages_delete_message(Messages::Private*, quint64);
     quint64 messages_index_by_id(const Messages::Private*, const char*, int);
     qint64 messages_next_search_match(Messages::Private*);
-    qint64 messages_peek_next_search_match(Messages::Private*);
-    qint64 messages_peek_prev_search_match(Messages::Private*);
     qint64 messages_prev_search_match(Messages::Private*);
+    void messages_set_search_hint(Messages::Private*, float, float);
 };
 
 extern "C" {
@@ -2346,6 +2126,230 @@ extern "C" {
     bool users_toggle_filter_regex(Users::Private*);
 };
 
+extern "C" {
+    option_quint32 users_search_data_color(const UsersSearch::Private*, int);
+    bool users_search_data_matched(const UsersSearch::Private*, int);
+    void users_search_data_name(const UsersSearch::Private*, int, QString*, qstring_set);
+    void users_search_data_profile_picture(const UsersSearch::Private*, int, QString*, qstring_set);
+    bool users_search_data_selected(const UsersSearch::Private*, int);
+    bool users_search_set_data_selected(UsersSearch::Private*, int, bool);
+    void users_search_data_user_id(const UsersSearch::Private*, int, QString*, qstring_set);
+    void users_search_sort(UsersSearch::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int users_search_row_count(const UsersSearch::Private*);
+    bool users_search_insert_rows(UsersSearch::Private*, int, int);
+    bool users_search_remove_rows(UsersSearch::Private*, int, int);
+    bool users_search_can_fetch_more(const UsersSearch::Private*);
+    void users_search_fetch_more(UsersSearch::Private*);
+}
+int UsersSearch::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool UsersSearch::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int UsersSearch::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : users_search_row_count(m_d);
+}
+
+bool UsersSearch::insertRows(int row, int count, const QModelIndex &)
+{
+    return users_search_insert_rows(m_d, row, count);
+}
+
+bool UsersSearch::removeRows(int row, int count, const QModelIndex &)
+{
+    return users_search_remove_rows(m_d, row, count);
+}
+
+QModelIndex UsersSearch::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex UsersSearch::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool UsersSearch::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : users_search_can_fetch_more(m_d);
+}
+
+void UsersSearch::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        users_search_fetch_more(m_d);
+    }
+}
+void UsersSearch::updatePersistentIndexes() {}
+
+void UsersSearch::sort(int column, Qt::SortOrder order)
+{
+    users_search_sort(m_d, column, order);
+}
+Qt::ItemFlags UsersSearch::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    if (i.column() == 0) {
+        flags |= Qt::ItemIsEditable;
+    }
+    return flags;
+}
+
+QVariant UsersSearch::color(int row) const
+{
+    QVariant v;
+    v = users_search_data_color(m_d, row);
+    return v;
+}
+
+bool UsersSearch::matched(int row) const
+{
+    return users_search_data_matched(m_d, row);
+}
+
+QString UsersSearch::name(int row) const
+{
+    QString s;
+    users_search_data_name(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QString UsersSearch::profilePicture(int row) const
+{
+    QString s;
+    users_search_data_profile_picture(m_d, row, &s, set_qstring);
+    return s;
+}
+
+bool UsersSearch::selected(int row) const
+{
+    return users_search_data_selected(m_d, row);
+}
+
+bool UsersSearch::setSelected(int row, bool value)
+{
+    bool set = false;
+    set = users_search_set_data_selected(m_d, row, value);
+    if (set) {
+        QModelIndex index = createIndex(row, 0, row);
+        Q_EMIT dataChanged(index, index);
+    }
+    return set;
+}
+
+QString UsersSearch::userId(int row) const
+{
+    QString s;
+    users_search_data_user_id(m_d, row, &s, set_qstring);
+    return s;
+}
+
+QVariant UsersSearch::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::UserRole + 0:
+            return color(index.row());
+        case Qt::UserRole + 1:
+            return QVariant::fromValue(matched(index.row()));
+        case Qt::UserRole + 2:
+            return cleanNullQVariant(QVariant::fromValue(name(index.row())));
+        case Qt::UserRole + 3:
+            return cleanNullQVariant(QVariant::fromValue(profilePicture(index.row())));
+        case Qt::UserRole + 4:
+            return QVariant::fromValue(selected(index.row()));
+        case Qt::UserRole + 5:
+            return cleanNullQVariant(QVariant::fromValue(userId(index.row())));
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int UsersSearch::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> UsersSearch::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    names.insert(Qt::UserRole + 0, "color");
+    names.insert(Qt::UserRole + 1, "matched");
+    names.insert(Qt::UserRole + 2, "name");
+    names.insert(Qt::UserRole + 3, "profilePicture");
+    names.insert(Qt::UserRole + 4, "selected");
+    names.insert(Qt::UserRole + 5, "userId");
+    return names;
+}
+QVariant UsersSearch::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool UsersSearch::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+bool UsersSearch::setData(const QModelIndex &index, const QVariant &value, int role)
+{
+    if (index.column() == 0) {
+        if (role == Qt::UserRole + 4) {
+            if (value.canConvert(qMetaTypeId<bool>())) {
+                return setSelected(index.row(), value.value<bool>());
+            }
+        }
+    }
+    return false;
+}
+
+extern "C" {
+    UsersSearch::Private* users_search_new(UsersSearch*, void (*)(UsersSearch*),
+        void (*)(const UsersSearch*),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*, quintptr, quintptr),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*, int, int),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*, int, int, int),
+        void (*)(UsersSearch*),
+        void (*)(UsersSearch*, int, int),
+        void (*)(UsersSearch*));
+    void users_search_free(UsersSearch::Private*);
+    void users_search_filter_get(const UsersSearch::Private*, QString*, qstring_set);
+    void users_search_filter_set(UsersSearch::Private*, const ushort *str, int len);
+    void users_search_filter_set_none(UsersSearch::Private*);
+    void users_search_clear_filter(UsersSearch::Private*);
+};
+
 Attachments::Attachments(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
     m_d(nullptr),
@@ -2600,89 +2604,6 @@ bool ConversationBuilder::removeMemberByIndex(quint64 index)
 void ConversationBuilder::setTitle(const QString& title)
 {
     return conversation_builder_set_title(m_d, title.utf16(), title.size());
-}
-ConversationBuilderUsers::ConversationBuilderUsers(bool /*owned*/, QObject *parent):
-    QAbstractItemModel(parent),
-    m_d(nullptr),
-    m_ownsPrivate(false)
-{
-    initHeaderData();
-}
-
-ConversationBuilderUsers::ConversationBuilderUsers(QObject *parent):
-    QAbstractItemModel(parent),
-    m_d(conversation_builder_users_new(this,
-        conversationBuilderUsersFilterChanged,
-        [](const ConversationBuilderUsers* o) {
-            Q_EMIT o->newDataReady(QModelIndex());
-        },
-        [](ConversationBuilderUsers* o) {
-            Q_EMIT o->layoutAboutToBeChanged();
-        },
-        [](ConversationBuilderUsers* o) {
-            o->updatePersistentIndexes();
-            Q_EMIT o->layoutChanged();
-        },
-        [](ConversationBuilderUsers* o, quintptr first, quintptr last) {
-            o->dataChanged(o->createIndex(first, 0, first),
-                       o->createIndex(last, 0, last));
-        },
-        [](ConversationBuilderUsers* o) {
-            o->beginResetModel();
-        },
-        [](ConversationBuilderUsers* o) {
-            o->endResetModel();
-        },
-        [](ConversationBuilderUsers* o, int first, int last) {
-            o->beginInsertRows(QModelIndex(), first, last);
-        },
-        [](ConversationBuilderUsers* o) {
-            o->endInsertRows();
-        },
-        [](ConversationBuilderUsers* o, int first, int last, int destination) {
-            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
-        },
-        [](ConversationBuilderUsers* o) {
-            o->endMoveRows();
-        },
-        [](ConversationBuilderUsers* o, int first, int last) {
-            o->beginRemoveRows(QModelIndex(), first, last);
-        },
-        [](ConversationBuilderUsers* o) {
-            o->endRemoveRows();
-        }
-)),
-    m_ownsPrivate(true)
-{
-    connect(this, &ConversationBuilderUsers::newDataReady, this, [this](const QModelIndex& i) {
-        this->fetchMore(i);
-    }, Qt::QueuedConnection);
-    initHeaderData();
-}
-
-ConversationBuilderUsers::~ConversationBuilderUsers() {
-    if (m_ownsPrivate) {
-        conversation_builder_users_free(m_d);
-    }
-}
-void ConversationBuilderUsers::initHeaderData() {
-}
-QString ConversationBuilderUsers::filter() const
-{
-    QString v;
-    conversation_builder_users_filter_get(m_d, &v, set_qstring);
-    return v;
-}
-void ConversationBuilderUsers::setFilter(const QString& v) {
-    if (v.isNull()) {
-        conversation_builder_users_filter_set_none(m_d);
-    } else {
-    conversation_builder_users_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
-    }
-}
-void ConversationBuilderUsers::clearFilter()
-{
-    return conversation_builder_users_clear_filter(m_d);
 }
 Conversations::Conversations(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -3326,6 +3247,7 @@ Messages::Messages(QObject *parent):
         messagesLastEpochTimestampMsChanged,
         messagesLastStatusChanged,
         messagesSearchActiveChanged,
+        messagesSearchIndexChanged,
         messagesSearchNumMatchesChanged,
         messagesSearchPatternChanged,
         messagesSearchRegexChanged,
@@ -3437,6 +3359,10 @@ bool Messages::searchActive() const
 void Messages::setSearchActive(bool v) {
     messages_search_active_set(m_d, v);
 }
+quint64 Messages::searchIndex() const
+{
+    return messages_search_index_get(m_d);
+}
 quint64 Messages::searchNumMatches() const
 {
     return messages_search_num_matches_get(m_d);
@@ -3477,17 +3403,13 @@ qint64 Messages::nextSearchMatch()
 {
     return messages_next_search_match(m_d);
 }
-qint64 Messages::peekNextSearchMatch()
-{
-    return messages_peek_next_search_match(m_d);
-}
-qint64 Messages::peekPrevSearchMatch()
-{
-    return messages_peek_prev_search_match(m_d);
-}
 qint64 Messages::prevSearchMatch()
 {
     return messages_prev_search_match(m_d);
+}
+void Messages::setSearchHint(float scrollbar_position, float scrollbar_height)
+{
+    return messages_set_search_hint(m_d, scrollbar_position, scrollbar_height);
 }
 Users::Users(bool /*owned*/, QObject *parent):
     QAbstractItemModel(parent),
@@ -3601,4 +3523,87 @@ QString Users::profilePictureById(const QString& id) const
 bool Users::toggleFilterRegex()
 {
     return users_toggle_filter_regex(m_d);
+}
+UsersSearch::UsersSearch(bool /*owned*/, QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(nullptr),
+    m_ownsPrivate(false)
+{
+    initHeaderData();
+}
+
+UsersSearch::UsersSearch(QObject *parent):
+    QAbstractItemModel(parent),
+    m_d(users_search_new(this,
+        usersSearchFilterChanged,
+        [](const UsersSearch* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](UsersSearch* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](UsersSearch* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](UsersSearch* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](UsersSearch* o) {
+            o->beginResetModel();
+        },
+        [](UsersSearch* o) {
+            o->endResetModel();
+        },
+        [](UsersSearch* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](UsersSearch* o) {
+            o->endInsertRows();
+        },
+        [](UsersSearch* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](UsersSearch* o) {
+            o->endMoveRows();
+        },
+        [](UsersSearch* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](UsersSearch* o) {
+            o->endRemoveRows();
+        }
+)),
+    m_ownsPrivate(true)
+{
+    connect(this, &UsersSearch::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
+}
+
+UsersSearch::~UsersSearch() {
+    if (m_ownsPrivate) {
+        users_search_free(m_d);
+    }
+}
+void UsersSearch::initHeaderData() {
+}
+QString UsersSearch::filter() const
+{
+    QString v;
+    users_search_filter_get(m_d, &v, set_qstring);
+    return v;
+}
+void UsersSearch::setFilter(const QString& v) {
+    if (v.isNull()) {
+        users_search_filter_set_none(m_d);
+    } else {
+    users_search_filter_set(m_d, reinterpret_cast<const ushort*>(v.data()), v.size());
+    }
+}
+void UsersSearch::clearFilter()
+{
+    return users_search_clear_filter(m_d);
 }

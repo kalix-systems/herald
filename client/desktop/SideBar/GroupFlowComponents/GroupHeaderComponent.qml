@@ -6,13 +6,13 @@ import "../../common" as Common
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 
-Rectangle  {
+Rectangle {
     id: topRect
     anchors.top: parent.top
     height: 70
     width: parent.width
-   color: CmnCfg.palette.paneColor
-   property alias profPic: groupImageLoader.imageSource
+    color: CmnCfg.palette.paneColor
+    property alias profPic: groupImageLoader.imageSource
 
     Rectangle {
         anchors.top: parent.top

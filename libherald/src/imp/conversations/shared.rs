@@ -1,7 +1,8 @@
-use super::*;
+use super::{types::Data, *};
 use crate::interface::ConversationsEmitter as Emitter;
 use crate::shared::SingletonBus;
 use crossbeam_channel::*;
+use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use heraldcore::{
     channel_send_err, conversation::settings::SettingsUpdate, types::ConversationId, NE,
 };
@@ -23,18 +24,25 @@ pub enum ConvUpdate {
     Init(Vector<Conversation>),
 }
 
+pub(super) type Ref<'a> = DashMapRef<'a, ConversationId, Data>;
+pub(super) type RefMut<'a> = DashMapRefMut<'a, ConversationId, Data>;
+
 /// Channel for global conversation list updates
 pub(crate) struct ConvBus {
     pub(super) rx: Receiver<ConvUpdate>,
     pub(super) tx: Sender<ConvUpdate>,
 }
 
-impl ConvBus {
-    /// Creates new `ConvChannel`
-    pub fn new() -> Self {
-        let (tx, rx) = unbounded();
-        Self { rx, tx }
-    }
+pub(super) fn insert_data(cid: ConversationId, data: Data) {
+    CONV_DATA.insert(cid, data);
+}
+
+pub(super) fn data(cid: &ConversationId) -> Option<Ref> {
+    CONV_DATA.get(cid)
+}
+
+pub(super) fn data_mut(cid: &ConversationId) -> Option<RefMut> {
+    CONV_DATA.get_mut(cid)
 }
 
 lazy_static! {
@@ -44,6 +52,17 @@ lazy_static! {
 
     /// Conversations list emitter, filled in when the conversations list is constructed
     pub(super) static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+
+
+    pub(super) static ref CONV_DATA: DashMap<ConversationId, Data> = DashMap::default();
+}
+
+impl ConvBus {
+    /// Creates new `ConvChannel`
+    pub fn new() -> Self {
+        let (tx, rx) = unbounded();
+        Self { rx, tx }
+    }
 }
 
 impl SingletonBus for super::Conversations {

@@ -36,13 +36,14 @@ Rectangle {
         anchors.right: wrapper.left
         height: wrapper.height
         width: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.avatarColors[contactsModel.colorById(replyCompPreview.author)]
+        color: CmnCfg.palette.avatarColors[contactsModel.colorById(
+                                               replyCompPreview.author)]
     }
 
     Common.ButtonForm {
         id: exitButton
         anchors {
-          //  margins: CmnCfg.smallMargin
+            //  margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
@@ -51,7 +52,6 @@ Rectangle {
         onClicked: {
             builder.clearReply()
         }
-
     }
 
     ColumnLayout {
@@ -66,7 +66,8 @@ Rectangle {
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.avatarColors[contactsModel.colorById(replyCompPreview.author)]
+            color: CmnCfg.palette.avatarColors[contactsModel.colorById(
+                                                   replyCompPreview.author)]
         }
 
         TextMetrics {
@@ -92,15 +93,14 @@ Rectangle {
         }
 
         Label {
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.bottomMargin: CmnCfg.smallPadding
-                Layout.topMargin: 0
-                Layout.rightMargin: CmnCfg.smallMargin
-               font.pixelSize: 10
-               text: Utils.friendlyTimestamp(replyCompPreview.epochTimestampMs)
-               id: timestamp
-               color: CmnCfg.palette.secondaryTextColor
-           }
+            Layout.leftMargin: CmnCfg.smallMargin
+            Layout.bottomMargin: CmnCfg.smallPadding
+            Layout.topMargin: 0
+            Layout.rightMargin: CmnCfg.smallMargin
+            font.pixelSize: 10
+            text: Utils.friendlyTimestamp(replyCompPreview.epochTimestampMs)
+            id: timestamp
+            color: CmnCfg.palette.secondaryTextColor
+        }
     }
-
 }

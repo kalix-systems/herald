@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
   qmlRegisterType<MessagePreview>("LibHerald", 1, 0, "MessagePreview");
-  qmlRegisterType<ConversationBuilderUsers>("LibHerald", 1, 0, "ConversationBuilderUsers");
+  qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");

@@ -46,6 +46,7 @@ Item {
         anchors {
             verticalCenter: parent.verticalCenter
             left: parent.left
+            leftMargin: groupAvatar ? 2 : 0
         }
         groupAvatar: parent.groupAvatar
     }

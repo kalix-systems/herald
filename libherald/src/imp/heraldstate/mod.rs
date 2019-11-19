@@ -128,6 +128,7 @@ impl HeraldStateTrait for HeraldState {
 fn gc_handler(update: gc::GCUpdate) {
     use crate::imp::messages::{shared::MsgUpdate, Messages};
     use gc::GCUpdate::*;
+    use heraldcore::errors::HErr;
     match update {
         StaleConversations(convs) => {
             for (cid, mids) in convs {
@@ -138,7 +139,7 @@ fn gc_handler(update: gc::GCUpdate) {
             }
         }
         GCError(e) => {
-            push_err!(Err(e), "Error deleting expired messages");
+            push_err!(Err::<(), HErr>(e), "Error deleting expired messages");
         }
     }
 }

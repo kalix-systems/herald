@@ -123,6 +123,7 @@ declare class Item {
   focus: boolean;
   x: number;
   y: number;
+  height: number;
 }
 
 declare class Popup {

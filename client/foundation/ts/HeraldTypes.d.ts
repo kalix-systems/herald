@@ -37,14 +37,18 @@ declare class Messages {
   lastBody: string;
   isEmpty: string;
   lastEpochTimestampMs: number;
+
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
   deleteConversation(): boolean;
   deleteConversationById(conversationId: ConversationID): boolean;
+
+  searchPattern: string;
+  searchActive: boolean;
+  searchNumMatches: number;
+  searchIndex?: number;
   prevSearchMatch(): number;
   nextSearchMatch(): number;
-  peekPrevSearchMatch(): number;
-  peekNextSearchMatch(): number;
 }
 
 declare class MessageBuilder {

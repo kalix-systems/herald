@@ -9,78 +9,86 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    fn unfocus(&mut self, match_val: Match) -> Option<()> {
-        let Match { mid } = match_val;
+    pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
+        let old = (self.search.current(), self.search.index);
 
-        self.container.get_data_mut(&mid)?.match_status = MatchStatus::Matched;
-        let ix = self.container.index_of(mid)?;
-        self.model.data_changed(ix, ix);
+        let new = (self.search.prev(), self.search.index);
 
-        Some(())
+        self.match_helper(old, new)
     }
 
-    fn unfocus_ends(&mut self) -> Option<()> {
-        let prev = self.search.peek_prev(&self.container)?;
-        self.unfocus(prev)?;
+    pub(super) fn next_match_helper(&mut self) -> Option<usize> {
+        let old = (self.search.current(), self.search.index);
 
-        let next = self.search.peek_next(&self.container)?;
-        self.unfocus(next)?;
+        let new = (self.search.next(), self.search.index);
 
-        Some(())
+        self.match_helper(old, new)
     }
 
-    pub(super) fn prev_search_match_helper(&mut self) -> Option<usize> {
-        self.unfocus_ends()?;
+    fn match_helper(
+        &mut self,
+        (old, old_index): (Option<Match>, Option<usize>),
+        (new, new_index): (Option<Match>, Option<usize>),
+    ) -> Option<usize> {
+        if old_index != new_index {
+            self.emit.search_index_changed();
+        }
 
-        let Match { mid } = self.search.prev(&self.container)?;
+        if old == new {
+            let Match(msg) = new?;
+            return self.container.index_of(&msg);
+        }
 
-        let data = self.container.get_data_mut(&mid)?;
+        if let Some(Match(old)) = old {
+            if let Some(data) = self.container.get_data_mut(&old.msg_id) {
+                data.match_status = MatchStatus::Matched;
+                let ix = self.container.index_of(&old)?;
+                self.model.data_changed(ix, ix);
+            }
+        }
+
+        let Match(new) = new?;
+
+        let data = self.container.get_data_mut(&new.msg_id)?;
         data.match_status = MatchStatus::Focused;
 
-        let ix = self.container.index_of(mid)?;
+        let ix = self.container.index_of(&new)?;
         self.model.data_changed(ix, ix);
-
         Some(ix)
     }
 
-    pub(super) fn next_search_match_helper(&mut self) -> Option<usize> {
-        self.unfocus_ends()?;
+    pub(super) fn raw_remove(&mut self, msg_id: MsgId, ix: usize) {
+        self.search.try_remove_match(
+            &msg_id,
+            &mut self.container,
+            &mut self.emit,
+            &mut self.model,
+        );
 
-        let Match { mid } = self.search.next(&self.container)?;
-
-        let data = self.container.get_data_mut(&mid)?;
-        data.match_status = MatchStatus::Focused;
-
-        let ix = self.container.index_of(mid)?;
-        self.model.data_changed(ix, ix);
-
-        Some(ix)
-    }
-
-    pub(super) fn raw_list_remove(&mut self, ix: usize) {
         let len = self.container.len();
 
-        let init_prev_state = if ix > 0 {
+        let prev_state = if ix > 0 {
             (self.is_tail(ix - 1), self.is_head(ix - 1))
         } else {
             (None, None)
         };
 
-        let init_succ_state = (self.is_tail(ix), self.is_head(ix));
+        let succ_state = (self.is_tail(ix), self.is_head(ix));
 
         self.model.begin_remove_rows(ix, ix);
         self.container.mem_remove(ix);
         self.model.end_remove_rows();
 
-        if ix > 0 && init_prev_state != (self.is_head(ix - 1), self.is_tail(ix - 1)) {
-            self.model.data_changed(ix - 1, ix - 1);
-        }
+        if ix > 0 {
+            let prev_head = self.is_head(ix - 1);
 
-        if ix > 0
-            && ix + 1 < self.container.len()
-            && init_succ_state != (self.is_head(ix - 1), self.is_tail(ix + 1))
-        {
-            self.model.data_changed(ix + 1, ix + 1);
+            if prev_state != (prev_head, self.is_tail(ix - 1)) {
+                self.model.data_changed(ix - 1, ix - 1);
+            }
+
+            if ix + 1 < self.container.len() && succ_state != (prev_head, self.is_tail(ix + 1)) {
+                self.model.data_changed(ix + 1, ix + 1);
+            }
         }
 
         if len == 1 {
@@ -97,6 +105,7 @@ impl Messages {
 
         let cid = self.conversation_id.ok_or(NE!())?;
 
+        let msg_id = message.msg_id;
         let ix = if self
             .container
             .last()
@@ -108,25 +117,27 @@ impl Messages {
         } else {
             match self.container.binary_search(&message) {
                 Ok(_) => {
-                    eprintln!(
-                        "WARNING: tried to insert duplicate message at {file}:{line}:{col}",
-                        file = file!(),
-                        line = line!(),
-                        col = column!()
-                    );
                     return Ok(());
                 }
                 Err(ix) => ix,
             }
         };
 
-        let init_prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
+        let prev_state = if ix > 0 { self.is_tail(ix - 1) } else { None };
 
-        let init_succ_state = self.is_tail(ix);
+        let succ_state = self.is_tail(ix);
 
         self.model.begin_insert_rows(ix, ix);
         self.container.insert(ix, message, data);
         self.model.end_insert_rows();
+
+        self.search.try_insert_match(
+            msg_id,
+            ix,
+            &mut self.container,
+            &mut self.emit,
+            &mut self.model,
+        );
 
         if ix + 1 == self.container.len() {
             self.emit_last_changed();
@@ -136,11 +147,11 @@ impl Messages {
             self.emit.is_empty_changed();
         }
 
-        if ix > 0 && init_prev_state != self.is_tail(ix - 1) {
+        if ix > 0 && prev_state != self.is_tail(ix - 1) {
             self.model.data_changed(ix - 1, ix - 1);
         }
 
-        if ix + 1 < self.container.len() && init_succ_state != self.is_tail(ix + 1) {
+        if ix + 1 < self.container.len() && succ_state != self.is_tail(ix + 1) {
             self.model.data_changed(ix + 1, ix + 1);
         }
 
@@ -148,6 +159,14 @@ impl Messages {
         Conversations::push(ConvUpdate::NewActivity(cid))?;
 
         Ok(())
+    }
+
+    pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
+        for mid in mids {
+            if let Some(ix) = self.container.index_by_id(mid) {
+                self.raw_remove(mid, ix);
+            }
+        }
     }
 }
 

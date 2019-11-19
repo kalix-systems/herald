@@ -67,17 +67,18 @@ macro_rules! cont_err {
 }
 
 #[macro_export]
-/// If the value passed is an error, ushes an errors to the error queue without an early return.
+/// If the value passed is an error, pushes an error to the error queue without an early return.
 macro_rules! push_err {
     ($maybe: expr, $msg: expr) => {
         match $maybe {
-            Ok(val) => val,
+            Ok(val) => Some(val),
             Err(e) => {
                 use $crate::shared::SingletonBus;
                 let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
                 eprintln!("{}", err_string);
                 $crate::imp::errors::Errors::push(err_string).ok();
+                None
             }
         }
     };

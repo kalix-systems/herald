@@ -1,48 +1,48 @@
-export function isOnscreen(ownedConversation, chatListView, chatPane, conversationWindow, forward) {
+export function isOnscreen(index, chatListView, chatPane, conversationWindow, forward) {
     if (!forward) {
-        const x = chatListView.itemAt(ownedConversation.peekPrevSearchMatch()).x;
-        const y = chatListView.itemAt(ownedConversation.peekPrevSearchMatch()).y;
+        const item = chatListView.itemAt(index);
+        const x = item.x;
+        const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+        const yPos2 = yPos + item.height;
         const pageHeight = conversationWindow.height;
-        if (0 < yPos && yPos < pageHeight) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return 0 < yPos && yPos2 < pageHeight;
     }
     else {
-        const x = chatListView.itemAt(ownedConversation.peekNextSearchMatch()).x;
-        const y = chatListView.itemAt(ownedConversation.peekNextSearchMatch()).y;
+        const item = chatListView.itemAt(index);
+        const x = item.x;
+        const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
+        const yPos2 = yPos + item.height;
         const pageHeight = conversationWindow.height;
-        if (0 < yPos && yPos < pageHeight) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return 0 < yPos && yPos2 < pageHeight;
+    }
+}
+export function searchTextHandler(ownedConversation, chatListView, chatPane, conversationWindow) {
+    const index = ownedConversation.prevSearchMatch();
+    const onScreen = isOnscreen(index, chatListView, chatPane, conversationWindow, false);
+    if (!onScreen) {
+        const convoMiddle = conversationWindow.height / 2;
+        conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+        conversationWindow.returnToBounds();
     }
 }
 export function jumpHandler(ownedConversation, chatListView, chatPane, conversationWindow, forward) {
-    const toJump = !isOnscreen(ownedConversation, chatListView, chatPane, conversationWindow, forward);
-    const convoMiddle = conversationWindow.height / 2;
+    const toJump = (index) => {
+        return !isOnscreen(index, chatListView, chatPane, conversationWindow, forward);
+    };
     if (forward) {
-        if (toJump) {
-            conversationWindow.contentY = chatListView.itemAt(ownedConversation.nextSearchMatch()).y - convoMiddle;
+        const index = ownedConversation.nextSearchMatch();
+        if (toJump(index)) {
+            const convoMiddle = conversationWindow.height / 2;
+            conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
         }
-        else {
-            ownedConversation.nextSearchMatch();
-        }
-        return;
     }
     else {
-        if (toJump) {
-            conversationWindow.contentY = chatListView.itemAt(ownedConversation.prevSearchMatch()).y - convoMiddle;
+        const index = ownedConversation.prevSearchMatch();
+        if (toJump(index)) {
+            const convoMiddle = conversationWindow.height / 2;
+            conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
         }
-        else {
-            ownedConversation.prevSearchMatch();
-        }
-        return;
     }
 }

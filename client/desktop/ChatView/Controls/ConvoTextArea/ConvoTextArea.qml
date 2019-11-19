@@ -82,16 +82,19 @@ Rectangle {
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
-                startColor: CmnCfg.avatarColors[contactsModel.colorById(replyUid)]
+                startColor: CmnCfg.avatarColors[contactsModel.colorById(
+                                                    replyUid)]
             }
-            width: scrollView.width
+            width: textWrapperRect.width
+            anchors.horizontalCenter: parent.horizontalCenter
         }
 
         Loader {
             id: attachmentLoader
             active: false
             height: item ? item.height : 0
-            sourceComponent: AttachmentsComponent {}
+            sourceComponent: AttachmentsComponent {
+            }
             width: scrollView.width
         }
 
@@ -100,7 +103,6 @@ Rectangle {
             height: Math.min(contentHeight, 100)
             width: containerCol.width
             focus: true
-
             TextArea {
                 id: chatText
                 background: Rectangle {
@@ -112,8 +114,10 @@ Rectangle {
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Message " + conversationItem.title
+
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
+
             }
         }
     }

@@ -2,8 +2,8 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "NewConvoComponents" as ConvUtils
 import "qrc:/common" as Common
+import "../SideBar/GroupFlowComponents" as GroupFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -22,16 +22,19 @@ Page {
     SplitView.preferredWidth: root.width * windowFraction
     property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
+    property alias sideBarState: sideBarState
 
     background: Rectangle {
         color: CmnCfg.palette.paneColor
     }
+
 
     ///--- SearchBar for contacts, add contact button
     header: Loader {
         id: headerLoader
         property string searchPlaceholder: ""
         property bool contactsSearch: false
+        property string headerText: ""
 
         sourceComponent: ContextBar {
             id: contextBarComponent
@@ -42,32 +45,31 @@ Page {
         }
     }
 
+    //component loaded into header depending on sidebar state
     HeaderComponent {
         id: headerBarComponent
     }
 
-    //search component loaded to search convos and contacts
+    //TODO: get rid of this once global search implemented
     SearchComponent {
         id: searchBarComponent
     }
 
-    ConvUtils.NewGroupBar {
-        id: newGroupBar
-        visible: sideBarState.state === "newConversationState"
-        anchors.top: parent.top
+    GroupFlow.NewGroupComponent {
+        id: newGroupComponent
+    }
+
+    NewContactComponent {
+        id: newContactComponent
     }
 
     Loader {
+        active: false
         id: convoBuilderLoader
     }
 
     SideBarState {
         id: sideBarState
-        anchors {
-            top: newGroupBar.bottom
-            bottom: parent.bottom
-            right: parent.right
-            left: parent.left
-        }
+        anchors.fill: parent
     }
 }

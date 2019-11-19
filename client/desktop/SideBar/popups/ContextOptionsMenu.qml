@@ -4,7 +4,7 @@ Menu {
     id: utilityOptionsMenu
     MenuItem {
         text: "Add contact"
-        onTriggered: sideBarState.state = "newContactState"
+        onTriggered: sideBar.sideBarState.state = "newContactState"
     }
 
     MenuItem {

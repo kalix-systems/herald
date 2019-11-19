@@ -1,6 +1,6 @@
 use super::*;
 use crate::{shared::AddressedBus, spawn};
-use std::{collections::VecDeque, ops::Not};
+use std::ops::Not;
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
@@ -19,6 +19,7 @@ impl Container {
         self.list.len()
     }
 
+    #[allow(unused)]
     pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
         self.map.contains_key(msg_id)
     }
@@ -29,6 +30,10 @@ impl Container {
 
     pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
         self.map.get_mut(msg_id)
+    }
+
+    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
+        self.map.get(msg_id)
     }
 
     pub(super) fn fill(cid: ConversationId) {
@@ -61,30 +66,36 @@ impl Container {
         self.map.get(&msg?.msg_id)
     }
 
+    #[allow(unused)]
+    pub(super) fn msg_data_mut(&mut self, index: usize) -> Option<&mut MsgData> {
+        let msg = self.list.get(index);
+        self.map.get_mut(&msg?.msg_id)
+    }
+
     pub(super) fn last(&self) -> Option<&Message> {
         self.list.last()
     }
 
-    pub(super) fn index_of(&self, msg_id: MsgId) -> Option<usize> {
-        let insertion_time = self.map.get(&msg_id)?.time.insertion;
-        let m = Message {
-            msg_id,
-            insertion_time,
-        };
+    pub(super) fn index_of(&self, msg: &Message) -> Option<usize> {
+        self.list.binary_search(&msg).ok()
+    }
+
+    pub(super) fn index_by_id(&self, msg_id: MsgId) -> Option<usize> {
+        let m = Message::from_msg_id(msg_id, &self)?;
 
         self.list.binary_search(&m).ok()
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
-    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<()> {
+    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<MsgId> {
         if ix >= self.len() {
             return None;
         }
 
         let msg = self.list.remove(ix);
-        self.map.remove(&msg.msg_id);
+        self.map.remove(&msg.msg_id)?;
 
-        Some(())
+        Some(msg.msg_id)
     }
 
     pub(super) fn binary_search(&self, msg: &Message) -> Result<usize, usize> {
@@ -103,17 +114,17 @@ impl Container {
         search: &SearchState,
         model: &mut List,
         emit: &mut Emitter,
-    ) -> Option<VecDeque<Match>> {
+    ) -> Option<Vec<Match>> {
         if search.active.not() || search.pattern.raw().is_empty() {
             return None;
         }
 
         let pattern = &search.pattern;
 
-        let mut matches: VecDeque<Match> = VecDeque::new();
+        let mut matches: Vec<Match> = Vec::new();
 
-        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(msg_id)?;
+        for (ix, msg) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg.msg_id)?;
 
             let old_status = data.match_status;
             let matched = data.matches(pattern);
@@ -124,7 +135,7 @@ impl Container {
                 MatchStatus::NotMatched
             };
 
-            if old_status.is_match() != data.match_status.is_match() {
+            if old_status != data.match_status {
                 model.data_changed(ix, ix);
             }
 
@@ -132,7 +143,7 @@ impl Container {
                 continue;
             };
 
-            matches.push_back(Match { mid: *msg_id })
+            matches.push(Match(*msg))
         }
 
         emit.search_num_matches_changed();
@@ -140,12 +151,17 @@ impl Container {
         Some(matches)
     }
 
-    pub(super) fn clear_search(&mut self, model: &mut List) {
-        for data in self.map.values_mut() {
-            data.match_status = MatchStatus::NotMatched;
+    pub(super) fn clear_search(&mut self, model: &mut List) -> Option<()> {
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg_id)?;
+
+            if data.match_status.is_match() {
+                data.match_status = MatchStatus::NotMatched;
+                model.data_changed(ix, ix);
+            }
         }
 
-        model.data_changed(0, self.list.len().saturating_sub(1));
+        Some(())
     }
 
     pub(super) fn handle_receipt(
@@ -202,7 +218,7 @@ impl Container {
             .list
             .iter()
             // search backwards,
-            // it's probably fairly recent
+            // it's probably very recent
             .rposition(|m| m.msg_id == mid)?;
 
         model.data_changed(ix, ix);

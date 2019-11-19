@@ -1,5 +1,4 @@
 use super::*;
-use std::collections::VecDeque;
 use std::ops::Not;
 
 #[derive(PartialEq)]
@@ -14,15 +13,15 @@ impl SearchChanged {
     }
 }
 
-#[derive(Clone, Copy)]
-pub(super) struct Match {
-    pub(super) mid: MsgId,
-}
+#[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
+pub(super) struct Match(pub(super) Message);
 
 pub(super) struct SearchState {
     pub(super) pattern: SearchPattern,
     pub(super) active: bool,
-    pub(super) matches: VecDeque<Match>,
+    matches: Vec<Match>,
+    start_index: Option<usize>,
+    pub(super) index: Option<usize>,
 }
 
 impl SearchState {
@@ -30,7 +29,9 @@ impl SearchState {
         Self {
             pattern: abort_err!(SearchPattern::new_normal("".into())),
             active: false,
-            matches: VecDeque::new(),
+            matches: Vec::new(),
+            start_index: None,
+            index: None,
         }
     }
 
@@ -39,6 +40,21 @@ impl SearchState {
             SearchPattern::Normal { .. } => false,
             SearchPattern::Regex { .. } => true,
         }
+    }
+
+    pub(super) fn start_hint(&mut self, hint: f32, container: &Container) -> Option<()> {
+        let approx_index = (container.len() as f64 * hint as f64).ceil() as usize;
+
+        let closest_message = container.get(approx_index)?;
+
+        let index = match self.matches.binary_search(&Match(*closest_message)) {
+            Ok(ix) => ix,
+            Err(ix) => ix,
+        };
+
+        self.start_index.replace(index);
+
+        Some(())
     }
 
     pub(super) fn set_pattern(
@@ -56,13 +72,32 @@ impl SearchState {
         Ok(SearchChanged::Changed)
     }
 
-    pub(super) fn set_regex(&mut self, use_regex: bool) -> Result<SearchChanged, HErr> {
+    pub(super) fn set_matches(&mut self, matches: Vec<Match>, emit: &mut Emitter) {
+        self.matches = matches;
+        self.index = None;
+
+        emit.search_num_matches_changed();
+        emit.search_index_changed();
+    }
+
+    pub(super) fn msg_matches(&self, msg_id: &MsgId, container: &Container) -> Option<bool> {
+        let data = container.get_data(msg_id)?;
+        Some(data.matches(&self.pattern))
+    }
+
+    pub(super) fn set_regex(
+        &mut self,
+        use_regex: bool,
+        emit: &mut Emitter,
+    ) -> Result<SearchChanged, HErr> {
         match (use_regex, self.is_regex()) {
             (true, false) => {
                 self.pattern.regex_mode()?;
+                emit.search_regex_changed();
             }
             (false, true) => {
                 self.pattern.normal_mode()?;
+                emit.search_regex_changed();
             }
             _ => {
                 return Ok(SearchChanged::NotChanged);
@@ -75,79 +110,168 @@ impl SearchState {
         self.matches.len()
     }
 
-    pub(super) fn clear_search(&mut self, emit: &mut Emitter) {
-        self.active = false;
-        self.pattern = abort_err!(SearchPattern::new_normal("".into()));
-        self.matches = VecDeque::new();
+    pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
+        self.pattern.set_pattern("".into())?;
+        self.matches = Vec::new();
+        self.index = None;
+        self.start_index = None;
 
-        emit.search_active_changed();
+        emit.search_index_changed();
+        emit.search_pattern_changed();
+        emit.search_regex_changed();
         emit.search_num_matches_changed();
+
+        Ok(())
     }
 
-    pub(super) fn peek_next(&mut self, container: &Container) -> Option<Match> {
+    pub(super) fn initial_next_index(&self) -> usize {
+        self.start_index.unwrap_or(0)
+    }
+
+    pub(super) fn initial_prev_index(&self) -> usize {
+        self.start_index
+            .unwrap_or_else(|| self.num_matches().saturating_sub(1))
+    }
+
+    pub(super) fn current(&self) -> Option<Match> {
+        let ix = self.index?;
+        self.matches.get(ix).copied()
+    }
+
+    pub(super) fn next(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let peek = loop {
-            let match_val = *self.matches.front()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
-            } else {
-                self.matches.pop_front()?;
-            }
-        };
+        match self.index {
+            Some(index) => {
+                let index = (index + 1) % self.matches.len();
+                self.index.replace(index);
 
-        Some(peek)
+                self.matches.get(index).copied()
+            }
+            None => {
+                let index = self.initial_next_index();
+                self.index.replace(index);
+
+                self.matches.get(index).copied()
+            }
+        }
     }
 
-    pub(super) fn next(&mut self, container: &Container) -> Option<Match> {
+    pub(super) fn prev(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
 
-        let next = loop {
-            let match_val = self.matches.pop_front()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
-            }
-        };
+        match self.index {
+            Some(index) => {
+                let index = if index == 0 {
+                    self.matches.len().saturating_sub(1)
+                } else {
+                    index - 1
+                };
+                self.index.replace(index);
 
-        self.matches.push_back(next);
-        Some(next)
+                self.matches.get(index).copied()
+            }
+            None => {
+                let index = self.initial_prev_index();
+                self.index.replace(index);
+
+                self.matches.get(index).copied()
+            }
+        }
     }
 
-    pub(super) fn peek_prev(&mut self, container: &Container) -> Option<Match> {
-        if self.active.not() {
-            return None;
+    pub(super) fn try_remove_match(
+        &mut self,
+        msg_id: &MsgId,
+        container: &mut Container,
+        emit: &mut Emitter,
+        model: &mut List,
+    ) -> Option<()> {
+        if self.active.not() || self.msg_matches(msg_id, container)?.not() {
+            return Some(());
         }
 
-        let peek = loop {
-            let match_val = *self.matches.back()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
-            } else {
-                self.matches.pop_back()?;
-            }
-        };
+        let pos = self
+            .matches
+            .iter()
+            .position(|Match(Message { msg_id: mid, .. })| mid == msg_id)?;
 
-        Some(peek)
+        self.matches.remove(pos);
+        emit.search_num_matches_changed();
+
+        if self.matches.is_empty() {
+            self.index = None;
+            emit.search_index_changed();
+            return Some(());
+        }
+
+        if let Some(ix) = self.index {
+            if (0..=ix).contains(&pos) {
+                let new_ix = ix.saturating_sub(1);
+                self.index.replace(new_ix);
+                emit.search_index_changed();
+
+                let Match(msg) = self.matches.get(new_ix)?;
+                let data = container.get_data_mut(&msg.msg_id)?;
+                data.match_status = MatchStatus::Focused;
+
+                let container_ix = container.index_of(msg)?;
+
+                model.data_changed(container_ix, container_ix);
+            }
+        }
+
+        Some(())
     }
 
-    pub(super) fn prev(&mut self, container: &Container) -> Option<Match> {
-        if self.active.not() {
-            return None;
+    pub(super) fn try_insert_match(
+        &mut self,
+        msg_id: MsgId,
+        model_ix: usize,
+        container: &mut Container,
+        emit: &mut Emitter,
+        model: &mut List,
+    ) -> Option<()> {
+        if self.active.not() || self.msg_matches(&msg_id, container)?.not() {
+            return Some(());
         }
 
-        let prev = loop {
-            let match_val = self.matches.pop_back()?;
-            if container.contains(&match_val.mid) {
-                break match_val;
+        let message = Message::from_msg_id(msg_id, &container)?;
+        let ix = self.index;
+
+        let pos = if self
+            .matches
+            .last()
+            .map(|Match(last)| last.insertion_time)
+            .unwrap_or(message.insertion_time)
+            <= message.insertion_time
+        {
+            self.matches.len()
+        } else {
+            match container.binary_search(&message) {
+                Ok(_) => {
+                    return Some(());
+                }
+                Err(ix) => ix,
             }
         };
 
-        self.matches.push_front(prev);
+        self.matches.insert(pos, Match(message));
+        let data = container.get_data_mut(&msg_id)?;
+        data.match_status = MatchStatus::Matched;
+        emit.search_num_matches_changed();
 
-        Some(prev)
+        if let Some(ix) = ix {
+            if (0..=ix).contains(&pos) {
+                self.index.replace((ix + 1) % self.matches.len());
+                model.data_changed(model_ix, model_ix);
+            }
+        }
+
+        Some(())
     }
 }

@@ -54,7 +54,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
-       conversation_builder_users(),
+       users_search(),
        message_builder(),
        attachments(),
        global_message_search()
@@ -141,13 +141,13 @@ fn conversations() -> Object {
     let props = filter_props();
 
     let item_props = item_props! {
-       conversationId: ItemProp::new(QByteArray),
-       title: ItemProp::new(QString).write().optional(),
+       conversationId: ItemProp::new(QByteArray).get_by_value(),
+       title: ItemProp::new(QString).write().optional().get_by_value(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       picture: picture_item_prop().write(),
+       picture: picture_item_prop().write().get_by_value(),
        color: color_item_prop().write()
     };
 
@@ -244,7 +244,10 @@ fn messages() -> Object {
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
-        searchNumMatches: Prop::new().simple(QUint64)
+        // Number of search results
+        searchNumMatches: Prop::new().simple(QUint64),
+        // Position in search results of focused item, e.g., 4 out of 7
+        searchIndex: Prop::new().simple(QUint64)
     };
 
     let item_props = item_props! {
@@ -263,7 +266,7 @@ fn messages() -> Object {
         isTail: ItemProp::new(Bool).optional(),
         // 0 => Not matched,
         // 1 => Matched,
-        // 2 => Matched and selected
+        // 2 => Matched and focused
         match_status: ItemProp::new(QUint8).optional()
     };
 
@@ -272,9 +275,8 @@ fn messages() -> Object {
         mut clearConversationHistory() => Bool,
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
-        mut peekNextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
-        mut peekPrevSearchMatch() => Qint64,
+        mut setSearchHint(scrollbar_position: Float, scrollbar_height: Float) => Void,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
@@ -321,7 +323,7 @@ fn conversation_builder() -> Object {
     }
 }
 
-fn conversation_builder_users() -> Object {
+fn users_search() -> Object {
     let props = props! {
         filter: Prop::new().simple(SimpleType::QString).write().optional()
     };
@@ -340,7 +342,7 @@ fn conversation_builder_users() -> Object {
     };
 
     obj! {
-        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+        UsersSearch: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 

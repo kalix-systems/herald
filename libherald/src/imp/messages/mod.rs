@@ -94,7 +94,7 @@ impl MessagesTrait for Messages {
 
         let msg_id = ret_err!(msg_id.try_into(), ret_val);
 
-        ret_none!(self.container.index_of(msg_id), ret_val) as u64
+        ret_none!(self.container.index_by_id(msg_id), ret_val) as u64
     }
 
     fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
@@ -220,8 +220,7 @@ impl MessagesTrait for Messages {
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
         spawn!(message::delete_message(&id), false);
-
-        self.raw_list_remove(ix);
+        self.raw_remove(id, ix);
 
         true
     }
@@ -232,6 +231,7 @@ impl MessagesTrait for Messages {
 
         spawn!(conversation::delete_conversation(&id), false);
 
+        self.clear_search();
         self.model
             .begin_remove_rows(0, self.container.len().saturating_sub(1));
         self.container = Default::default();
@@ -292,13 +292,9 @@ impl MessagesTrait for Messages {
                 MsgUpdate::StoreDone(mid) => {
                     ret_none!(self.container.handle_store_done(mid, &mut self.model));
                 }
-                MsgUpdate::ExpiredMessages(mids) => {
-                    for mid in mids {
-                        if let Some(ix) = self.container.index_of(mid) {
-                            self.raw_list_remove(ix);
-                        }
-                    }
-                }
+
+                MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
+
                 MsgUpdate::Container(container) => {
                     if container.is_empty() {
                         continue;
@@ -333,11 +329,15 @@ impl MessagesTrait for Messages {
             return;
         }
 
-        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed() {
-            self.search.matches = self
-                .container
-                .apply_search(&self.search, &mut self.model, &mut self.emit)
-                .unwrap_or_default();
+        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed()
+            && self.search.active
+        {
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
         }
     }
 
@@ -348,12 +348,13 @@ impl MessagesTrait for Messages {
 
     /// Sets search mode
     fn set_search_regex(&mut self, use_regex: bool) {
-        if ret_err!(self.search.set_regex(use_regex)).changed() {
-            self.emit.search_regex_changed();
-            self.search.matches = self
-                .container
-                .apply_search(&self.search, &mut self.model, &mut self.emit)
-                .unwrap_or_default();
+        if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
         }
     }
 
@@ -364,51 +365,45 @@ impl MessagesTrait for Messages {
 
     /// Turns search on or off
     fn set_search_active(&mut self, active: bool) {
-        self.search.active = active;
-        self.emit.search_active_changed();
+        if !active {
+            self.search.active = false;
+            self.clear_search();
+        } else if !self.search.active {
+            self.search.active = true;
+            self.emit.search_active_changed();
+            self.search.set_matches(
+                self.container
+                    .apply_search(&self.search, &mut self.model, &mut self.emit)
+                    .unwrap_or_default(),
+                &mut self.emit,
+            );
+        }
     }
 
     /// Clears search
     fn clear_search(&mut self) {
         self.container.clear_search(&mut self.model);
-        self.search.clear_search(&mut self.emit);
+        ret_err!(self.search.clear_search(&mut self.emit));
     }
 
     fn search_num_matches(&self) -> u64 {
         self.search.num_matches() as u64
     }
 
-    fn peek_next_search_match(&mut self) -> i64 {
-        match self.search.peek_next(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
-    fn peek_prev_search_match(&mut self) -> i64 {
-        match self.search.peek_prev(&self.container) {
-            Some(Match { mid }) => self
-                .container
-                .index_of(mid)
-                .map(|ix| ix as i64)
-                .unwrap_or(-1),
-            None => -1,
-        }
-    }
-
     fn next_search_match(&mut self) -> i64 {
-        self.next_search_match_helper()
-            .map(|ix| ix as i64)
-            .unwrap_or(-1)
+        self.next_match_helper().map(|ix| ix as i64).unwrap_or(-1)
     }
 
     fn prev_search_match(&mut self) -> i64 {
-        self.prev_search_match_helper()
-            .map(|ix| ix as i64)
-            .unwrap_or(-1)
+        self.prev_match_helper().map(|ix| ix as i64).unwrap_or(-1)
+    }
+
+    fn search_index(&self) -> u64 {
+        self.search.index.map(|ix| ix + 1).unwrap_or(0) as u64
+    }
+
+    fn set_search_hint(&mut self, scroll_position: f32, scroll_height: f32) {
+        let percentage = scroll_position + scroll_height / 2.0;
+        self.search.start_hint(percentage, &self.container);
     }
 }

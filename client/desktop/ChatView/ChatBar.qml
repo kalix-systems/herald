@@ -20,7 +20,7 @@ import "Controls" as CVUtils
 ToolBar {
     id: chatToolBar
     property var conversationItem
-    property Messages ownedConversation: messageBar.ownedConversation
+    property Messages ownedConversation: parent.ownedConversation
 
     height: CmnCfg.toolbarHeight
     z: CmnCfg.middleZ
@@ -114,8 +114,7 @@ ToolBar {
 
                     MenuItem {
                         text: "Clear History"
-                        onTriggered: ownedConversation.clearConversationHistory(
-                                         )
+                        onTriggered: ownedConversation.clearConversationHistory()
                     }
                 }
             }
