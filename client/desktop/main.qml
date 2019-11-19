@@ -28,7 +28,8 @@ ApplicationWindow {
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {}
+        property var errPopup: ErrorUtils.ErrorDialog {
+        }
     }
 
     HeraldUtils {
@@ -43,13 +44,15 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        sourceComponent: App {}
+        sourceComponent: App {
+        }
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !heraldState.configInit
-        sourceComponent: RegistrationPage {}
+        sourceComponent: RegistrationPage {
+        }
     }
 }

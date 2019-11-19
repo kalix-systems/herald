@@ -63,6 +63,7 @@ pub(crate) fn id_to_color<H: std::hash::Hash>(id: H) -> u32 {
 }
 
 /// Search strings
+#[derive(Clone)]
 pub enum SearchPattern {
     /// Regex search string
     Regex {
@@ -121,6 +122,22 @@ impl SearchPattern {
         }
     }
 
+    /// Indicates whether the `SearchPattern` is a regex pattern.
+    pub fn is_regex(&self) -> bool {
+        match self {
+            SearchPattern::Normal { .. } => false,
+            SearchPattern::Regex { .. } => true,
+        }
+    }
+
+    /// Indicates whether the `SearchPattern` is a regex pattern.
+    pub fn is_normal(&self) -> bool {
+        match self {
+            SearchPattern::Normal { .. } => true,
+            SearchPattern::Regex { .. } => false,
+        }
+    }
+
     /// Switches to regex mode
     pub fn regex_mode(&mut self) -> Result<(), HErr> {
         if let Self::Normal { raw, .. } = self {
@@ -145,6 +162,20 @@ impl SearchPattern {
             }
             Self::Normal { raw, .. } => {
                 *self = Self::new_regex(raw.to_owned())?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Changes the pattern while preserving the mode
+    pub fn set_pattern(&mut self, pattern: String) -> Result<(), HErr> {
+        match self {
+            Self::Regex { .. } => {
+                *self = Self::new_regex(pattern)?;
+            }
+            Self::Normal { .. } => {
+                *self = Self::new_normal(pattern)?;
             }
         }
 

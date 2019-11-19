@@ -2,10 +2,12 @@ use super::*;
 use crate::conversation::db::expiration_period;
 use crate::message::MessageTime;
 use rusqlite::{named_params, Connection as Conn};
+use std::collections::HashSet;
 
 /// Get message by message id
 pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
     let receipts = get_receipts(conn, msg_id)?;
+    let replies = self::replies(conn, msg_id)?;
 
     Ok(conn.query_row_named(
         include_str!("sql/get_message.sql"),
@@ -34,6 +36,7 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
                 has_attachments: row.get("has_attachments")?,
                 time,
                 receipts,
+                replies,
             })
         },
     )?)
@@ -49,6 +52,8 @@ pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Mess
         },
         |row| {
             let receipts = get_receipts(conn, msg_id)?;
+            let replies = self::replies(conn, msg_id)?;
+
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
                 server: row.get("server_ts")?,
@@ -70,6 +75,7 @@ pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Mess
                 has_attachments: row.get("has_attachments")?,
                 time,
                 receipts,
+                replies,
             })
         },
     )?;
@@ -97,9 +103,19 @@ pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
     msg_id: &MsgId,
 ) -> Result<HashMap<UserId, MessageReceiptStatus>, rusqlite::Error> {
-    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+    let mut get_stmt = conn.prepare_cached(include_str!("sql/get_receipts.sql"))?;
 
     let res = get_stmt.query_map(params![msg_id], |row| Ok((row.get(0)?, row.get(1)?)))?;
+    res.collect()
+}
+
+pub(crate) fn replies(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+) -> Result<HashSet<MsgId>, rusqlite::Error> {
+    let mut get_stmt = conn.prepare_cached(include_str!("sql/replies.sql"))?;
+    let res = get_stmt.query_map(params![msg_id], |row| Ok(row.get("op_msg_id")?))?;
+
     res.collect()
 }
 
@@ -123,6 +139,8 @@ pub(crate) fn by_send_status(
     let res = stmt.query_map_named(named_params! { "@send_status": send_status }, |row| {
         let message_id = row.get("msg_id")?;
         let receipts = get_receipts(conn, &message_id)?;
+        let replies = self::replies(conn, &message_id)?;
+
         let time = MessageTime {
             insertion: row.get("insertion_ts")?,
             server: row.get("server_ts")?,
@@ -144,6 +162,7 @@ pub(crate) fn by_send_status(
             has_attachments: row.get("has_attachments")?,
             time,
             receipts,
+            replies,
         })
     })?;
 
@@ -226,7 +245,7 @@ impl OutboundMessageBuilder {
         let conversation_id = e!(conversation.ok_or(MissingConversationId));
         let msg_id: MsgId = utils::rand_id().into();
         let timestamp = Time::now();
-        let author = e!(crate::config::db::static_id(&db));
+        let author = e!(crate::config::db::id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
         let expiration = match expiration_period.into_millis() {
@@ -252,11 +271,12 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             time,
             send_status,
-            receipts: e!(get_receipts(&db, &msg_id)),
             has_attachments,
+            receipts: HashMap::new(),
+            replies: HashSet::new(),
         };
 
-        callback(StoreAndSend::Msg(msg));
+        callback(StoreAndSend::Msg(Box::new(msg)));
 
         let attachments: Result<Vec<Attachment>, HErr> = attachments
             .into_iter()
@@ -355,7 +375,7 @@ impl OutboundMessageBuilder {
         }
 
         match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::SendDone(_) => Ok(out),
+            StoreAndSend::SendDone(_) => Ok(*out),
             other => {
                 panic!("Unexpected variant {:?}", other);
             }
@@ -364,7 +384,7 @@ impl OutboundMessageBuilder {
 }
 
 impl InboundMessageBuilder {
-    pub(crate) fn store_db(self, conn: &mut rusqlite::Connection) -> Result<(), HErr> {
+    pub(crate) fn store_db(self, conn: &mut rusqlite::Connection) -> Result<Option<Message>, HErr> {
         let Self {
             message_id,
             author,
@@ -383,7 +403,7 @@ impl InboundMessageBuilder {
             if let Some(expiration) = expiration {
                 // short circuit if message has already expired
                 if expiration.0 < Time::now().0 {
-                    return Ok(());
+                    return Ok(None);
                 }
             }
         }
@@ -429,24 +449,33 @@ impl InboundMessageBuilder {
             params![Time::now(), conversation_id],
         )?;
 
-        if let Some(op) = op {
+        let op = if let Some(op) = op {
             // what if you receive a reply to message you don't have?
             let sp = tx.savepoint()?;
 
             // this succeeds in the happy case
             let res = sp.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]);
 
-            // if it doesn't try making it a dangling reply
-            if let Err(rusqlite::Error::SqliteFailure(..)) = res {
-                let none_msg_id: Option<MsgId> = None;
-                sp.execute(
-                    include_str!("sql/add_reply.sql"),
-                    params![msg_id, none_msg_id],
-                )?;
+            // and if it doesn't try making it a dangling reply
+            match res {
+                Ok(_) => {
+                    sp.commit()?;
+                    ReplyId::Known(op)
+                }
+                Err(rusqlite::Error::SqliteFailure(..)) => {
+                    let none_msg_id: Option<MsgId> = None;
+                    sp.execute(
+                        include_str!("sql/add_reply.sql"),
+                        params![msg_id, none_msg_id],
+                    )?;
+                    sp.commit()?;
+                    ReplyId::Dangling
+                }
+                Err(e) => return Err(e.into()),
             }
-
-            sp.commit()?;
-        }
+        } else {
+            ReplyId::None
+        };
 
         if has_attachments {
             attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
@@ -454,6 +483,20 @@ impl InboundMessageBuilder {
 
         tx.commit()?;
 
-        Ok(())
+        let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
+        let replies = self::replies(&conn, &msg_id).unwrap_or_default();
+
+        Ok(Some(Message {
+            message_id: msg_id,
+            author,
+            body,
+            has_attachments,
+            conversation: conversation_id,
+            send_status: MessageSendStatus::Ack,
+            op,
+            time,
+            receipts,
+            replies,
+        }))
     }
 }

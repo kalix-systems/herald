@@ -17,6 +17,7 @@ Rectangle {
     property int boxColor
     property alias labelComponent: conversationItemAvatar.labelComponent
     property string picture
+    property bool groupPicture: false
 
     AvatarMain {
         anchors.fill: parent
@@ -27,6 +28,8 @@ Rectangle {
         anchors {
             margins: 6
         }
+        groupAvatar: groupPicture
+        avatarHeight: groupAvatar ? 40 : 44
     }
 
     states: [

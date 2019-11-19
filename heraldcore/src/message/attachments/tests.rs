@@ -1,8 +1,5 @@
 use super::*;
-use crate::{
-    config::{self, test_config},
-    womp,
-};
+use crate::{config::test_config, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
 use std::str::FromStr;
@@ -43,15 +40,15 @@ fn outbound_message_attachment() {
 #[test]
 #[serial(attach)]
 fn inbound_message_attachment() {
-    use crate::contact::ContactBuilder;
+    use crate::user::UserBuilder;
     use std::convert::TryInto;
 
-    let mut conn = Database::in_memory().expect(womp!());
-    config::db::test_config(&mut conn);
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let other = ContactBuilder::new("hi".try_into().expect(womp!()))
+    let other = UserBuilder::new("hi".try_into().expect(womp!()))
         .add_db(&mut conn)
-        .expect(womp!());
+        .expect(womp!())
+        .0;
 
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
@@ -77,9 +74,9 @@ fn inbound_message_attachment() {
 #[test]
 #[serial(attach)]
 fn delete_message_with_attachment() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
 

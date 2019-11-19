@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Herald
+Comment=Encrypted instant messenger
+Exec=herald
+Icon=herald
+Categories=Network;
+Terminal=false

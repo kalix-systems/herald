@@ -138,7 +138,7 @@ impl ChainState {
             index: ix,
             tag,
             ad,
-            msg: msg.freeze(),
+            msg,
         };
 
         CipherData { ix, key, cipher }

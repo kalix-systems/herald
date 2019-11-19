@@ -4,6 +4,7 @@ _build/
 *.install
 .direnv
 stats/
+.appimage
 
 ## qtcreator
 *.user.pro*
@@ -11,6 +12,7 @@ stats/
 ## heraldcore config file
 .heraldcore_conf.toml
 .heraldcore.toml
+herald_conf.toml
 
 ## profiling data
 callgrind.out*
@@ -215,6 +217,7 @@ Icon
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 
+heraldcore.toml
 # Directories potentially created on remote AFP share
 .AppleDB
 .AppleDesktop
@@ -226,4 +229,3 @@ Temporary Items
 
 node_modules
 package-lock.json
-

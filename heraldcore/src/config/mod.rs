@@ -22,7 +22,6 @@ pub struct Config {
     pub color: u32,
     /// The *Note to Self* conversation id.
     pub nts_conversation: ConversationId,
-    keypair: sig::KeyPair,
 }
 
 /// Builder for `Config`
@@ -86,66 +85,59 @@ impl ConfigBuilder {
         // TODO this is weirdly special cased,
         // but changing it without making testing awkward requires
         // changing the chainmail API
-        let kp = Config::static_keypair()?;
+        let kp = keypair()?;
         let gen = Genesis::new(kp.secret_key());
         conf.nts_conversation.store_genesis(&gen)?;
         Ok(conf)
     }
 }
 
-impl Config {
-    /// Gets the user's configuration
-    pub fn get() -> Result<Config, HErr> {
-        let db = Database::get()?;
-        db::get(&db)
-    }
+/// Gets the user's configuration
+pub fn get() -> Result<Config, HErr> {
+    let db = Database::get()?;
+    db::get(&db)
+}
 
-    /// Gets user id
-    pub fn id(&self) -> UserId {
-        self.id
-    }
+/// Gets user id
+pub fn id() -> Result<UserId, HErr> {
+    let db = Database::get()?;
+    db::id(&db)
+}
 
-    /// Gets user id directly from database.
-    pub fn static_id() -> Result<UserId, HErr> {
-        let db = Database::get()?;
-        db::static_id(&db)
-    }
+/// Gets the current user's kepair directly from the database.
+pub fn keypair() -> Result<sig::KeyPair, HErr> {
+    let db = Database::get()?;
+    db::keypair(&db)
+}
 
-    /// Gets the current user's kepair directly from the database.
-    pub fn static_keypair() -> Result<sig::KeyPair, HErr> {
-        let db = Database::get()?;
-        db::static_keypair(&db)
-    }
+/// Gets the current user's GlobalId
+pub fn gid() -> Result<GlobalId, HErr> {
+    let db = Database::get()?;
+    db::gid(&db)
+}
 
-    /// Gets the current user's GlobalId
-    pub fn static_gid() -> Result<GlobalId, HErr> {
-        let db = Database::get()?;
-        db::static_gid(&db)
-    }
+/// Updates user's display name
+pub fn set_name(name: String) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_name(&db, name)
+}
 
-    /// Updates user's display name
-    pub fn set_name(&mut self, name: String) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.set_name_db(&db, name)
-    }
+/// Updates user's profile picture
+pub fn set_profile_picture(profile_picture: Option<String>) -> Result<Option<String>, HErr> {
+    let db = Database::get()?;
+    db::set_profile_picture(&db, profile_picture)
+}
 
-    /// Updates user's profile picture
-    pub fn set_profile_picture(&mut self, profile_picture: Option<String>) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.set_profile_picture_db(&db, profile_picture)
-    }
+/// Update user's color
+pub fn set_color(color: u32) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_color(&db, color)
+}
 
-    /// Update user's color
-    pub fn set_color(&mut self, color: u32) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.set_color_db(&db, color)
-    }
-
-    /// Update user's colorscheme
-    pub fn set_colorscheme(&mut self, colorscheme: u32) -> Result<(), HErr> {
-        let db = Database::get()?;
-        self.set_colorscheme_db(&db, colorscheme)
-    }
+/// Update user's colorscheme
+pub fn set_colorscheme(colorscheme: u32) -> Result<(), HErr> {
+    let db = Database::get()?;
+    db::set_colorscheme(&db, colorscheme)
 }
 
 #[cfg(test)]

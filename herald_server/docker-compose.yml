@@ -3,7 +3,7 @@ version: '3'
 services:
   postgres:
     image: "postgres"
-    command: >- 
+    command: >-
             postgres
              -c 'max_connections=10000'
              -c 'effective_cache_size=4096MB'
@@ -16,8 +16,6 @@ services:
              -c 'random_page_cost=1'
     stdin_open: true
     tty: true
-    ports:
-      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: docker
     volumes:

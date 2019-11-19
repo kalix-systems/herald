@@ -1,11 +1,11 @@
-use crate::types::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField};
+use crate::message::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField};
 use chainmail::errors::ChainError;
 use herald_common::*;
 use image;
 use regex;
 use std::fmt;
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 /// A location in source code
 pub struct Location {
     /// The line where the error occurred

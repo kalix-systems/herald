@@ -1,4 +1,8 @@
 use super::*;
+use crate::{
+    message::{MessageBody, MessageReceiptStatus},
+    *,
+};
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
@@ -26,9 +30,9 @@ pub struct AddedToConvo {
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// An acknowledgement of a contact request, with a bool to indicate whether the
+/// An acknowledgement of a user request, with a bool to indicate whether the
 /// request was accepted.
-pub struct ContactReqAck(pub bool);
+pub struct UserReqAck(pub bool);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A normal message to the conversation.

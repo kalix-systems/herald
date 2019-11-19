@@ -73,7 +73,8 @@ Item {
             width: 20
             currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
-            indicator: Item {}
+            indicator: Item {
+            }
             delegate: ItemDelegate {
                 height: menu.height
                 Rectangle {
@@ -113,7 +114,8 @@ Item {
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: ScrollBar {
+            }
             contentHeight: innerCol.height
             Column {
                 id: innerCol

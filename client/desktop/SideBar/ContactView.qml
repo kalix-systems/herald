@@ -22,7 +22,8 @@ ListView {
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
-    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.vertical: ScrollBar {
+    }
 
     delegate: Item {
         id: contactItem

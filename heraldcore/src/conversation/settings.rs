@@ -2,11 +2,15 @@
 #![allow(clippy::trivially_copy_pass_by_ref)]
 use super::*;
 
-#[derive(Ser, De, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A change in the settings for a conversation
 pub enum SettingsUpdate {
-    /// A change in the expiring messages setting
+    /// Expiring messages setting
     Expiration(ExpirationPeriod),
+    /// The title of the conversation
+    Title(Option<String>),
+    /// The color of the conversation
+    Color(u32),
 }
 
 impl SettingsUpdate {
@@ -36,6 +40,8 @@ pub(crate) mod db {
             use SettingsUpdate::*;
             match self {
                 Expiration(period) => Ok(set_expiration_period(&conn, cid, *period)?),
+                Title(title) => Ok(set_title(&conn, cid, title.as_ref().map(String::as_str))?),
+                Color(color) => Ok(set_color(&conn, cid, *color)?),
             }
         }
     }

@@ -3,8 +3,10 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../js/utils.mjs" as Utils
+import QtQuick 2.13
 
 ColumnLayout {
+    id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property string body: ""
@@ -13,10 +15,12 @@ ColumnLayout {
     property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                     replyPreview.author)]
     property string authorName: ""
-    spacing: 0
     property color authorColor
     property var replyId
+    property alias jumpHandler: jumpHandler
+    property alias replyHighlightAnimation: replyHighlightAnimation
 
+    spacing: 0
 
     MessagePreview {
         id: replyPreview
@@ -27,17 +31,35 @@ ColumnLayout {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
         color: CmnCfg.palette.sideBarHighlightColor
-        Layout.margins: CmnCfg.margin / 2
+        Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: reply.width
 
         Rectangle {
-            visible: !replyPreview.isDangling
             id: verticalAccent
+            visible: !replyPreview.isDangling
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
             width: CmnCfg.smallMargin / 4
             color: opColor
+        }
+
+        MouseArea {
+            id: jumpHandler
+            anchors.centerIn: reply
+            width: reply.width
+            height: reply.height
+            z: CmnCfg.overlayZ
+            enabled: !replyPreview.isDangling ? true : false
+        }
+
+        NumberAnimation {
+            id: replyHighlightAnimation
+            property: "opacity"
+            from: 1.0
+            to: 0.0
+            duration: 600
+            easing.type: Easing.InCubic
         }
 
         ColumnLayout {
@@ -50,10 +72,9 @@ ColumnLayout {
                 text: !replyPreview.isDangling ? contactsModel.nameById(
                                                      replyPreview.author) : ""
                 font.bold: true
-                Layout.topMargin: CmnCfg.margin / 2
+                Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.rightMargin: CmnCfg.smallMargin
+
                 Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
                 color: opColor
             }
@@ -73,16 +94,13 @@ ColumnLayout {
             }
 
             Label {
-                Layout.leftMargin: CmnCfg.smallMargin
-                Layout.bottomMargin: CmnCfg.smallPadding
+                Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
-                Layout.rightMargin: CmnCfg.smallMargin
-                   font.pixelSize: 10
-                   text: !replyPreview.isDangling ?
-                             Utils.friendlyTimestamp(
-                             replyPreview.epochTimestampMs) : ""
-                   color: CmnCfg.palette.secondaryTextColor
-               }
+                font.pixelSize: 10
+                text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
+                                                     replyPreview.epochTimestampMs) : ""
+                color: CmnCfg.palette.secondaryTextColor
+            }
         }
     }
 

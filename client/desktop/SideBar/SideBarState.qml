@@ -3,7 +3,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "./ConversationView"
-import "../SideBar/NewConvoComponents" as ConvUtils
 import "../SideBar/GroupFlowComponents" as GroupFlow
 
 Page {
@@ -32,20 +31,6 @@ Page {
         }
     }
 
-   GroupFlow.NewGroupComponent {
-       id: newGroupComponent
-   }
-
-
-    Component {
-        id: convoFinalGroup
-        ConvUtils.FinalGroupList {
-            id: groupListView
-            anchors.fill: parent
-            model: groupMemberSelect
-        }
-    }
-
     Loader {
         id: sideBarBodyLoader
         anchors.fill: parent
@@ -56,16 +41,38 @@ Page {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarStateLoader
-                visible: false
+                target: sideBarBodyLoader
+                sourceComponent: newContactComponent
             }
             PropertyChanges {
                 target: headerLoader
-                sourceComponent: searchBarComponent
-                searchPlaceholder: "Enter full name or username"
+                sourceComponent: headerBarComponent
+                searchPlaceholder: "Search your conversations"
+                headerText: "Add contact"
             }
         },
 
+        State {
+            name: "newGroupState"
+            PropertyChanges {
+                target: sideBarBodyLoader
+                sourceComponent: newGroupComponent
+            }
+
+            PropertyChanges {
+                target: headerLoader
+                sourceComponent: headerBarComponent
+                headerText: "New group"
+                contactsSearch: true
+            }
+            PropertyChanges {
+                target: convoBuilderLoader
+                active: true
+                source: "GroupFlowComponents/ConvoBuilder.qml"
+            }
+        },
+
+        //TODO: following two states should be reworked to match new design
         State {
             name: "conversationSearch"
             PropertyChanges {
@@ -88,31 +95,6 @@ Page {
                 searchPlaceholder: "Enter contact name"
                 contactsSearch: true
             }
-
-            PropertyChanges {
-                target: newGroupBar
-                visible: true
-            }
-
-        },
-
-        State {
-            name: "newGroupState"
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: newGroupComponent
-            }
-
-            PropertyChanges {
-                target: headerLoader
-                sourceComponent: headerBarComponent
-                contactsSearch: true
-            }
-            PropertyChanges {
-                target: convoBuilderLoader
-                source: "GroupFlowComponents/ConvoBuilder.qml"
-            }
         }
-
     ]
 }

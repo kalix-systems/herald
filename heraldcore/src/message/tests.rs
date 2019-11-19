@@ -1,8 +1,7 @@
 use super::*;
+use crate::{config::test_config, womp};
 use serial_test_derive::serial;
 use std::convert::TryInto;
-
-use crate::{config::test_config, womp};
 
 /// Testing utility
 fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
@@ -12,9 +11,9 @@ fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
 
 #[test]
 fn delete_get_message() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 
@@ -40,17 +39,18 @@ fn delete_get_message() {
 
 #[test]
 fn reply() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
     let author = "Hello".try_into().unwrap();
-    crate::contact::ContactBuilder::new(author)
+    crate::user::UserBuilder::new(author)
         .add_db(&mut conn)
         .expect(womp!());
 
     let conversation = [1; 32].into();
 
-    crate::conversation::ConversationBuilder::new()
-        .conversation_id(conversation)
+    let mut builder = crate::conversation::ConversationBuilder::new();
+    builder.conversation_id(conversation);
+    builder
         .add_db(&mut conn)
         .expect(womp!("Failed to create conversation"));
 
@@ -121,9 +121,9 @@ fn message_send_status_updates() {
 
 #[test]
 fn message_receipt_status_updates() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 
@@ -161,9 +161,9 @@ fn message_receipt_status_updates() {
 
 #[test]
 fn reply_to_unknown_message() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 
@@ -187,9 +187,9 @@ fn reply_to_unknown_message() {
 
 #[test]
 fn delete_op() {
-    let mut conn = Database::in_memory().expect(womp!());
+    let mut conn = Database::in_memory_with_config().expect(womp!());
 
-    let receiver = crate::contact::db::test_contact(&mut conn, "receiver");
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
 
     let conv = receiver.pairwise_conversation;
 

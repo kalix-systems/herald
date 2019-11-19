@@ -1,6 +1,8 @@
+use super::{types::Data, *};
 use crate::interface::ConversationsEmitter as Emitter;
 use crate::shared::SingletonBus;
 use crossbeam_channel::*;
+use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use heraldcore::{
     channel_send_err, conversation::settings::SettingsUpdate, types::ConversationId, NE,
 };
@@ -9,21 +11,66 @@ use parking_lot::Mutex;
 
 /// Conversation list updates
 #[derive(Debug)]
-pub enum ConvUpdates {
+pub enum ConvUpdate {
     /// A new conversation has been added
-    NewConversation(ConversationId),
+    NewConversation(ConversationMeta),
     /// A conversation builder has been finalized
-    BuilderFinished(ConversationId),
+    BuilderFinished(ConversationMeta),
     /// New activity
     NewActivity(ConversationId),
     /// Conversataion settings has been updated
     Settings(ConversationId, SettingsUpdate),
+    /// Initial data, sent when the conversations list is constructed
+    Init(Vector<Conversation>),
 }
+
+pub(super) type Ref<'a> = DashMapRef<'a, ConversationId, Data>;
+pub(super) type RefMut<'a> = DashMapRefMut<'a, ConversationId, Data>;
 
 /// Channel for global conversation list updates
 pub(crate) struct ConvBus {
-    pub(super) rx: Receiver<ConvUpdates>,
-    pub(super) tx: Sender<ConvUpdates>,
+    pub(super) rx: Receiver<ConvUpdate>,
+    pub(super) tx: Sender<ConvUpdate>,
+}
+
+pub(super) fn insert_data(cid: ConversationId, data: Data) {
+    CONV_DATA.insert(cid, data);
+}
+
+pub(super) fn data(cid: &ConversationId) -> Option<Ref> {
+    CONV_DATA.get(cid)
+}
+
+pub(crate) fn title(cid: &ConversationId) -> Option<String> {
+    CONV_DATA.get(cid)?.title.clone()
+}
+
+pub(crate) fn picture(cid: &ConversationId) -> Option<String> {
+    CONV_DATA.get(cid)?.picture.clone()
+}
+
+pub(crate) fn color(cid: &ConversationId) -> Option<u32> {
+    Some(CONV_DATA.get(cid)?.color)
+}
+
+pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
+    Some(CONV_DATA.get(cid)?.pairwise)
+}
+
+pub(super) fn data_mut(cid: &ConversationId) -> Option<RefMut> {
+    CONV_DATA.get_mut(cid)
+}
+
+lazy_static! {
+    /// Statically initialized instance of `UsersUpdates` used to pass notifications
+    /// from the network.
+    pub(super) static ref CONV_BUS: ConvBus= ConvBus::new();
+
+    /// Conversations list emitter, filled in when the conversations list is constructed
+    pub(super) static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+
+
+    pub(super) static ref CONV_DATA: DashMap<ConversationId, Data> = DashMap::default();
 }
 
 impl ConvBus {
@@ -34,17 +81,8 @@ impl ConvBus {
     }
 }
 
-lazy_static! {
-    /// Statically initialized instance of `UsersUpdates` used to pass notifications
-    /// from the network.
-    pub(super) static ref CONV_BUS: ConvBus= ConvBus::new();
-
-    /// Conversations list emitter, filled in when the conversations list is constructed
-    pub(super) static ref CONV_EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
-}
-
 impl SingletonBus for super::Conversations {
-    type Update = ConvUpdates;
+    type Update = ConvUpdate;
 
     fn push(update: Self::Update) -> Result<(), heraldcore::errors::HErr> {
         CONV_BUS
@@ -56,13 +94,6 @@ impl SingletonBus for super::Conversations {
         Ok(())
     }
 }
-
-//pub fn push_conv_update(update: ConvUpdates) -> Option<()> {
-//    CONV_CHANNEL.tx.clone().send(update).ok()?;
-//    conv_emit_new_data()?;
-//    Some(())
-//}
-//
 
 /// Emits a signal to the QML runtime, returns `None` on failure.
 #[must_use]

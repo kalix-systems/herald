@@ -106,6 +106,15 @@ impl Database {
         Self::setup(conn)
     }
 
+    #[cfg(test)]
+    pub(crate) fn in_memory_with_config() -> Result<Self, HErr> {
+        let conn = Connection::open_in_memory()?;
+        conn.execute_batch(include_str!("../sql/create_all.sql"))?;
+        let mut conn = Self::setup(conn)?;
+        crate::config::db::test_config(&mut conn);
+        Ok(conn)
+    }
+
     /// Resets all tables in database
     #[cfg(test)]
     pub(crate) fn reset_all() -> Result<(), HErr> {

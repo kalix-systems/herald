@@ -121,6 +121,9 @@ declare class ListView<T extends Item> {
 
 declare class Item {
   focus: boolean;
+  x: number;
+  y: number;
+  height: number;
 }
 
 declare class Popup {
@@ -148,4 +151,18 @@ declare class QKeyEvent {
 
 declare class Component {
   status: Qt.ComponentStatus;
+}
+
+declare class QPoint {
+  x: number;
+  y: number;
+}
+
+declare class Page {
+  mapFromItem(item: Item, x: number, y: number): QPoint;
+  height: number;
+}
+
+declare class Repeater extends Item {
+  itemAt(index: number): Item
 }

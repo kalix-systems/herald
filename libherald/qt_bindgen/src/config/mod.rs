@@ -54,9 +54,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_preview(),
        config_obj(),
        conversation_builder(),
-       conversation_builder_users(),
+       users_search(),
        message_builder(),
-       attachments()
+       attachments(),
+       message_search()
     }
 }
 
@@ -140,13 +141,13 @@ fn conversations() -> Object {
     let props = filter_props();
 
     let item_props = item_props! {
-       conversationId: ItemProp::new(QByteArray),
-       title: ItemProp::new(QString).write().optional(),
+       conversationId: ItemProp::new(QByteArray).get_by_value(),
+       title: ItemProp::new(QString).write().optional().get_by_value(),
        muted: ItemProp::new(Bool).write(),
        pairwise: ItemProp::new(Bool),
        expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
-       picture: picture_item_prop().write(),
+       picture: picture_item_prop().write().get_by_value(),
        color: color_item_prop().write()
     };
 
@@ -208,7 +209,7 @@ fn members() -> Object {
     let funcs = functions! {
         mut addToConversation(id: QString) => Bool,
         mut removeFromConversationByIndex(row_index: QUint64) => Bool,
-        mut  toggleFilterRegex() => Bool,
+        mut toggleFilterRegex() => Bool,
     };
 
     obj! {
@@ -243,7 +244,10 @@ fn messages() -> Object {
         searchPattern: filter_prop(),
         searchRegex: filter_regex_prop(),
         searchActive: Prop::new().simple(Bool).write(),
-        searchNumMatches: Prop::new().simple(QUint64)
+        // Number of search results
+        searchNumMatches: Prop::new().simple(QUint64),
+        // Position in search results of focused item, e.g., 4 out of 7
+        searchIndex: Prop::new().simple(QUint64)
     };
 
     let item_props = item_props! {
@@ -259,7 +263,11 @@ fn messages() -> Object {
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
-        isTail: ItemProp::new(Bool).optional()
+        isTail: ItemProp::new(Bool).optional(),
+        // 0 => Not matched,
+        // 1 => Matched,
+        // 2 => Matched and focused
+        match_status: ItemProp::new(QUint8).optional()
     };
 
     let funcs = functions! {
@@ -268,6 +276,7 @@ fn messages() -> Object {
         mut clearSearch() => Void,
         mut nextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
+        mut setSearchHint(scrollbar_position: Float, scrollbar_height: Float) => Void,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
@@ -296,6 +305,10 @@ fn conversation_builder() -> Object {
         memberId: ItemProp::new(QString)
     };
 
+    let prop = props! {
+        picture: Prop::new().simple(QString).write().optional()
+    };
+
     let funcs = functions! {
         mut addMember(user_id: QString) => Bool,
         mut removeMemberById(user_id: QString) => Bool,
@@ -306,11 +319,11 @@ fn conversation_builder() -> Object {
     };
 
     obj! {
-        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop)
+        ConversationBuilder: Obj::new().list().funcs(funcs).item_props(item_prop).props(prop)
     }
 }
 
-fn conversation_builder_users() -> Object {
+fn users_search() -> Object {
     let props = props! {
         filter: Prop::new().simple(SimpleType::QString).write().optional()
     };
@@ -329,7 +342,7 @@ fn conversation_builder_users() -> Object {
     };
 
     obj! {
-        ConversationBuilderUsers: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+        UsersSearch: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
     }
 }
 
@@ -377,5 +390,33 @@ fn attachments() -> Object {
 
     obj! {
         Attachments: Obj::new().list().props(props).item_props(item_props)
+    }
+}
+
+fn message_search() -> Object {
+    let props = props! {
+        searchPattern: Prop::new().simple(QString).optional().write(),
+        regexSearch: Prop::new().simple(Bool).optional().write()
+    };
+
+    let item_props = item_props! {
+        msgId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
+        conversation: ItemProp::new(QByteArray).optional(),
+        conversationPairwise: ItemProp::new(Bool).optional(),
+        conversationPicture: ItemProp::new(QString).optional().get_by_value(),
+        conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
+        conversationTitle: ItemProp::new(QString).optional().get_by_value(),
+        body: ItemProp::new(QString).optional(),
+        time: ItemProp::new(Qint64).optional(),
+        has_attachments: ItemProp::new(Bool).optional()
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+    };
+
+    obj! {
+        MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }

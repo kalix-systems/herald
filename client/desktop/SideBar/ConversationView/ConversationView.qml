@@ -25,7 +25,8 @@ ListView {
     boundsBehavior: Flickable.StopAtBounds
 
     //PAUL: , lets write our own QML formatter so that this is a one liner
-    ScrollBar.vertical: ScrollBar {}
+    ScrollBar.vertical: ScrollBar {
+    }
 
     delegate: Item {
         id: conversationItem
@@ -56,8 +57,6 @@ ListView {
             boxColor: conversationsModel.color(index)
             boxTitle: Utils.unwrapOr(title, "unknown")
             isContact: false
-
-
 
             MouseArea {
                 id: hoverHandler

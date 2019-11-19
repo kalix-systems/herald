@@ -2,43 +2,6 @@ use super::*;
 use crate::message::MessageTime;
 use rusqlite::named_params;
 
-impl ConversationBuilder {
-    ///Adds conversation
-    pub(crate) fn add_db(&self, conn: &rusqlite::Connection) -> Result<ConversationId, HErr> {
-        let id = match self.conversation_id {
-            Some(id) => id.to_owned(),
-            None => {
-                let rand_array = utils::rand_id();
-                ConversationId::from(rand_array)
-            }
-        };
-
-        let color = self.color.unwrap_or_else(|| crate::utils::id_to_color(&id));
-        let pairwise = self.pairwise.unwrap_or(false);
-        let muted = self.muted.unwrap_or(false);
-        let expiration_period = self.expiration_period.unwrap_or_default();
-
-        conn.execute_named(
-            include_str!("sql/add_conversation.sql"),
-            named_params! {
-               "@conversation_id": id,
-                "@title": self.title,
-                "@picture": self.picture,
-                "@color": color,
-                "@pairwise": pairwise,
-                "@muted": muted,
-                "@last_active_ts": Time::now(),
-                "@expiration_period": expiration_period
-            },
-        )?;
-        Ok(id)
-    }
-
-    pub(crate) fn add_with_tx(self, tx: &rusqlite::Transaction) -> Result<ConversationId, HErr> {
-        self.add_db(tx)
-    }
-}
-
 /// Deletes all messages in a conversation.
 pub(crate) fn delete_conversation(
     conn: &rusqlite::Connection,
@@ -64,6 +27,8 @@ pub(crate) fn conversation_messages(
         |row| {
             let message_id = row.get("msg_id")?;
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
+            let replies = crate::message::db::replies(conn, &message_id)?;
+
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
                 server: row.get("server_ts")?,
@@ -85,6 +50,7 @@ pub(crate) fn conversation_messages(
                 send_status: row.get("send_status")?,
                 has_attachments: row.get("has_attachments")?,
                 receipts,
+                replies,
             })
         },
     )?;
@@ -120,6 +86,21 @@ pub(crate) fn expiration_period(
             "@conversation_id": conversation_id
         },
         |row| row.get("expiration_period"),
+    )?)
+}
+
+/// Gets expiration period for a conversation
+pub(crate) fn picture(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Option<String>, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/picture.sql"))?;
+
+    Ok(stmt.query_row_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| row.get("picture"),
     )?)
 }
 
@@ -167,22 +148,19 @@ pub(crate) fn set_picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
     picture: Option<&str>,
-    old_pic: Option<&str>,
-) -> Result<(), HErr> {
+) -> Result<Option<String>, HErr> {
     use crate::image_utils;
+
+    let old_picture = self::picture(&conn, conversation_id)?;
 
     let path = match picture {
         Some(path) => Some(
-            image_utils::save_profile_picture(
-                format!("{:x?}", conversation_id.as_slice()).as_str(),
-                path,
-                old_pic,
-            )?
-            .into_os_string()
-            .into_string()?,
+            image_utils::update_picture(path, old_picture.as_ref().map(String::as_str))?
+                .into_os_string()
+                .into_string()?,
         ),
         None => {
-            if let Some(old) = old_pic {
+            if let Some(old) = old_picture {
                 std::fs::remove_file(old).ok();
             }
             None
@@ -194,7 +172,7 @@ pub(crate) fn set_picture(
         params![path, conversation_id],
     )?;
 
-    Ok(())
+    Ok(path)
 }
 
 /// Get metadata of all conversations
