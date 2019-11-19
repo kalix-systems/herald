@@ -38,6 +38,7 @@ impl Search {
                     author,
                     conversation,
                     has_attachments,
+                    rowid: row_id,
                 }))
             },
         )?;

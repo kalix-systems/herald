@@ -30,8 +30,6 @@ fn search() {
         .body("pattern".try_into().expect(womp!()));
     builder.store_db(&mut conn).expect(womp!());
 
-    std::thread::sleep(std::time::Duration::from_millis(10));
-
     let mut builder = InboundMessageBuilder::default();
     let msg_id3 = [3; 32].into();
     builder
@@ -55,10 +53,12 @@ fn search() {
 
     assert_eq!(first_page.len(), 2);
     let (first, second) = (&first_page[0], &first_page[1]);
-    assert!(first.time.0 > second.time.0);
 
+    assert_eq!(first_page[0].rowid, 3);
+    assert_eq!(first_page[1].rowid, 2);
     assert_eq!(first_page[0].body.as_str(), "patent");
     assert_eq!(first_page[1].body.as_str(), "pattern");
+    assert!(first.time.0 >= second.time.0);
 
     let second_page = searcher.next_page_db(&mut conn).expect(womp!());
     assert!(second_page.is_none());
