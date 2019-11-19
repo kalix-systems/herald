@@ -39,7 +39,6 @@ path = "./location"
 
 [dependencies.search_pattern]
 path = "./search_pattern"
-default_features = false
 
 [dependencies.platform_dirs]
 path = "./platform_dirs"

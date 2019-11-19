@@ -5,12 +5,16 @@ authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-serde             = "1.0.99"
+serde = "1.0"
+
 
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
+
+[dependencies.search_pattern]
+path = "../search_pattern"
 
 [dependencies.chainmail]
 path = "../../chainmail"
