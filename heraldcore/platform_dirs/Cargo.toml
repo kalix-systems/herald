@@ -8,3 +8,10 @@ edition = "2018"
 
 [dependencies]
 lazy_static       = "1.3.0"
+
+[dependencies.directories]
+version = "2.0.2"
+optional = true
+
+[features]
+deploy_desktop = ["directories"]
