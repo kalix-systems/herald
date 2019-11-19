@@ -5,8 +5,9 @@ lazy_static! {
     pub(super) static ref DATA_DIR: PathBuf = data_dir();
 }
 
-#[cfg(all(not(test), feature = "deploy_desktop"))]
+#[cfg(feature = "deploy_desktop")]
 fn data_dir() -> PathBuf {
+    dbg!();
     use directories::ProjectDirs;
     use std::fs::create_dir_all;
 
@@ -27,12 +28,7 @@ fn data_dir() -> PathBuf {
     data_dir.to_path_buf()
 }
 
-#[cfg(test)]
+#[cfg(not(feature = "deploy_desktop"))]
 fn data_dir() -> PathBuf {
-    "test_output".into()
-}
-
-#[cfg(all(not(test), not(feature = "deploy_desktop")))]
-fn data_dir() -> PathBuf {
-    "".into()
+    "data_dir".into()
 }
