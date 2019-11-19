@@ -27,6 +27,8 @@ pub(crate) fn conversation_messages(
         |row| {
             let message_id = row.get("msg_id")?;
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
+            let replies = crate::message::db::replies(conn, &message_id)?;
+
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
                 server: row.get("server_ts")?,
@@ -48,6 +50,7 @@ pub(crate) fn conversation_messages(
                 send_status: row.get("send_status")?,
                 has_attachments: row.get("has_attachments")?,
                 receipts,
+                replies,
             })
         },
     )?;

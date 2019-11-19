@@ -2,10 +2,12 @@ use super::*;
 use crate::conversation::db::expiration_period;
 use crate::message::MessageTime;
 use rusqlite::{named_params, Connection as Conn};
+use std::collections::HashSet;
 
 /// Get message by message id
 pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
     let receipts = get_receipts(conn, msg_id)?;
+    let replies = self::replies(conn, msg_id)?;
 
     Ok(conn.query_row_named(
         include_str!("sql/get_message.sql"),
@@ -34,6 +36,7 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
                 has_attachments: row.get("has_attachments")?,
                 time,
                 receipts,
+                replies,
             })
         },
     )?)
@@ -49,6 +52,8 @@ pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Mess
         },
         |row| {
             let receipts = get_receipts(conn, msg_id)?;
+            let replies = self::replies(conn, msg_id)?;
+
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
                 server: row.get("server_ts")?,
@@ -70,6 +75,7 @@ pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Mess
                 has_attachments: row.get("has_attachments")?,
                 time,
                 receipts,
+                replies,
             })
         },
     )?;
@@ -97,9 +103,19 @@ pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
     msg_id: &MsgId,
 ) -> Result<HashMap<UserId, MessageReceiptStatus>, rusqlite::Error> {
-    let mut get_stmt = conn.prepare(include_str!("sql/get_receipts.sql"))?;
+    let mut get_stmt = conn.prepare_cached(include_str!("sql/get_receipts.sql"))?;
 
     let res = get_stmt.query_map(params![msg_id], |row| Ok((row.get(0)?, row.get(1)?)))?;
+    res.collect()
+}
+
+pub(crate) fn replies(
+    conn: &rusqlite::Connection,
+    msg_id: &MsgId,
+) -> Result<HashSet<MsgId>, rusqlite::Error> {
+    let mut get_stmt = conn.prepare_cached(include_str!("sql/replies.sql"))?;
+    let res = get_stmt.query_map(params![msg_id], |row| Ok(row.get("op_msg_id")?))?;
+
     res.collect()
 }
 
@@ -123,6 +139,8 @@ pub(crate) fn by_send_status(
     let res = stmt.query_map_named(named_params! { "@send_status": send_status }, |row| {
         let message_id = row.get("msg_id")?;
         let receipts = get_receipts(conn, &message_id)?;
+        let replies = self::replies(conn, &message_id)?;
+
         let time = MessageTime {
             insertion: row.get("insertion_ts")?,
             server: row.get("server_ts")?,
@@ -144,6 +162,7 @@ pub(crate) fn by_send_status(
             has_attachments: row.get("has_attachments")?,
             time,
             receipts,
+            replies,
         })
     })?;
 
@@ -252,8 +271,9 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             time,
             send_status,
-            receipts: e!(get_receipts(&db, &msg_id)),
             has_attachments,
+            receipts: HashMap::new(),
+            replies: HashSet::new(),
         };
 
         callback(StoreAndSend::Msg(Box::new(msg)));
@@ -464,6 +484,7 @@ impl InboundMessageBuilder {
         tx.commit()?;
 
         let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
+        let replies = self::replies(&conn, &msg_id).unwrap_or_default();
 
         Ok(Some(Message {
             message_id: msg_id,
@@ -475,6 +496,7 @@ impl InboundMessageBuilder {
             op,
             time,
             receipts,
+            replies,
         }))
     }
 }

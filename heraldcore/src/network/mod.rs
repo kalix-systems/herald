@@ -38,7 +38,7 @@ mod helper;
 /// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
     /// A new message has been received.
-    NewMsg(message::Message),
+    NewMsg(Box<message::Message>),
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
     /// A new user has been added

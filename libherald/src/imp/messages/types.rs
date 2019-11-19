@@ -1,6 +1,9 @@
 use super::*;
 use herald_common::{Time, UserId};
-use std::{cmp::Ordering, collections::HashMap};
+use std::{
+    cmp::Ordering,
+    collections::{HashMap, HashSet},
+};
 
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
@@ -15,6 +18,7 @@ pub(super) struct MsgData {
     pub(super) save_status: SaveStatus,
     pub(super) send_status: MessageSendStatus,
     pub(super) match_status: MatchStatus,
+    pub(super) replies: HashSet<MsgId>,
 }
 
 #[repr(u8)]
@@ -69,6 +73,7 @@ impl Message {
             receipts,
             has_attachments,
             send_status,
+            replies,
             ..
         } = msg;
 
@@ -82,6 +87,7 @@ impl Message {
             send_status,
             save_status,
             match_status: MatchStatus::NotMatched,
+            replies,
         };
 
         let message = Message {

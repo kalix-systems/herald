@@ -1,4 +1,5 @@
 use super::*;
+use std::collections::HashSet;
 use std::convert::TryInto;
 
 mod convert;
@@ -27,6 +28,8 @@ pub struct Message {
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     /// Indicates whether the message has attachments
     pub has_attachments: bool,
+    /// Messages that replied to this message
+    pub replies: HashSet<MsgId>,
 }
 
 /// An isolated message receipt.

@@ -24,7 +24,7 @@ impl NotifHandler {
         match notif {
             NewMsg(msg) => {
                 let cid = msg.conversation;
-                ret_err!(Messages::push(cid, MsgUpdate::NewMsg(Box::new(msg))));
+                ret_err!(Messages::push(cid, MsgUpdate::NewMsg(msg)));
             }
             MsgReceipt(message::MessageReceipt {
                 msg_id,

@@ -7,14 +7,12 @@ CREATE TABLE IF NOT EXISTS messages (
   conversation_id BLOB NOT NULL,
   -- text of message
   body TEXT,
-
   -- timestamp associated with message
   insertion_ts INTEGER NOT NULL,
   -- timestamp the message was inserted into the database
   server_ts INTEGER DEFAULT NULL,
   -- time when message self-destructs
   expiration_ts INTEGER DEFAULT NULL,
-
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
   -- does the message have attachments?

@@ -81,7 +81,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                 builder.expiration = expiration;
 
                 if let Some(msg) = builder.store()? {
-                    ev.notifications.push(Notification::NewMsg(msg));
+                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                 }
                 ev.replies.push((cid, form_ack(mid)?));
             }
