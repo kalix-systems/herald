@@ -36,18 +36,18 @@ impl Search {
 
         let mut out = Vec::new();
 
-        // Length counter. If it is 0 after processing the results,
+        // If it is true after processing the results,
         // we've processed all of the messages and should return `None`
-        let mut len: usize = 0;
+        let mut done: bool = true;
 
         for res in results {
-            len += 1;
+            done = false;
             if let Some(res) = res? {
                 out.push(res);
             }
         }
 
-        if len == 0 {
+        if done {
             return Ok(None);
         }
 
