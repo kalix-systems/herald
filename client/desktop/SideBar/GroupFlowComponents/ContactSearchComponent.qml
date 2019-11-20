@@ -21,7 +21,7 @@ Column {
     }
 
     Rectangle {
-        height: 2
+        height: 1
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         color: "black"
