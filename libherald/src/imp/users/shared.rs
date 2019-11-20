@@ -24,6 +24,22 @@ pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, user::User>> {
     USER_DATA.get_mut(uid)
 }
 
+pub(crate) fn color(uid: &UserId) -> Option<u32> {
+    Some(get_user(&uid)?.color)
+}
+
+pub(crate) fn name(uid: &UserId) -> Option<String> {
+    let inner = get_user(uid)?;
+
+    Some(inner.name.clone())
+}
+
+pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
+    let inner = get_user(uid)?;
+
+    inner.profile_picture.clone()
+}
+
 #[inline]
 pub fn user_ids() -> Vec<UserId> {
     let mut list: Vec<(String, UserId)> = USER_DATA
