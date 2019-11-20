@@ -75,8 +75,11 @@ Page {
 
     Popups.EmojiPopup {
         id: emoKeysPopup
-        anchors.bottom: chatTextArea.top
-        anchors.left: chatTextArea.left
+        anchors {
+            margins: 12
+            bottom: chatTextArea.top
+            left: parent.left
+        }
     }
 
     Common.Divider {
