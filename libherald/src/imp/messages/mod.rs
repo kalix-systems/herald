@@ -217,8 +217,8 @@ impl MessagesTrait for Messages {
 
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
-        spawn!(message::delete_message(&id), false);
         self.remove_helper(id, ix);
+        spawn!(message::delete_message(&id), false);
 
         true
     }
