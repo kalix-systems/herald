@@ -88,7 +88,7 @@ QtObject {
     readonly property real deviceDotsPerInch: Screen.pixelDensity * 25.4
 
     function dp(dips) {
-        const ref_dpi = deviceDotsPerInch
+        var ref_dpi = deviceDotsPerInch
         return dips
     }
 

@@ -36,7 +36,10 @@ macro_rules! newtype_from_slice {
 macro_rules! newtype_traits {
     ($newtype:ident, $len:expr) => {
         impl ::std::cmp::PartialEq for $newtype {
-            fn eq(&self, other: &$newtype) -> bool {
+            fn eq(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 unsafe {
                     libsodium_sys::sodium_memcmp(
                         self.0.as_ptr() as *const _,
@@ -63,42 +66,66 @@ macro_rules! public_newtype_traits {
     ($newtype:ident, $len: expr) => {
         impl ::std::cmp::PartialOrd for $newtype {
             #[inline]
-            fn partial_cmp(&self, other: &$newtype) -> Option<::std::cmp::Ordering> {
+            fn partial_cmp(
+                &self,
+                other: &$newtype,
+            ) -> Option<::std::cmp::Ordering> {
                 ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn lt(&self, other: &$newtype) -> bool {
+            fn lt(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn le(&self, other: &$newtype) -> bool {
+            fn le(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn ge(&self, other: &$newtype) -> bool {
+            fn ge(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn gt(&self, other: &$newtype) -> bool {
+            fn gt(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
             }
         }
 
         impl ::std::cmp::Ord for $newtype {
             #[inline]
-            fn cmp(&self, other: &$newtype) -> ::std::cmp::Ordering {
+            fn cmp(
+                &self,
+                other: &$newtype,
+            ) -> ::std::cmp::Ordering {
                 ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
             }
         }
 
         impl ::std::hash::Hash for $newtype {
-            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+            fn hash<H: ::std::hash::Hasher>(
+                &self,
+                state: &mut H,
+            ) {
                 ::std::hash::Hash::hash(self.as_ref(), state)
             }
         }
 
         impl ::kson::ser::Ser for $newtype {
-            fn ser(&self, serializer: &mut ::kson::ser::Serializer) {
+            fn ser(
+                &self,
+                serializer: &mut ::kson::ser::Serializer,
+            ) {
                 serializer.write_bytes(&self.as_ref());
             }
         }
@@ -139,7 +166,10 @@ macro_rules! public_newtype_traits {
 macro_rules! secret_newtype_traits {
     ($newtype: ident, $len: expr) => {
         impl ::kson::ser::Ser for $newtype {
-            fn ser(&self, serializer: &mut ::kson::ser::Serializer) {
+            fn ser(
+                &self,
+                serializer: &mut ::kson::ser::Serializer,
+            ) {
                 serializer.write_bytes(&self.as_ref());
             }
         }

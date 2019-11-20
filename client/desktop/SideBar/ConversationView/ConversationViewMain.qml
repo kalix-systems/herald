@@ -22,18 +22,15 @@ ListView {
     id: conversationList
     clip: true
     currentIndex: -1
-    boundsBehavior: Flickable.StopAtBounds
-
-    ScrollBar.vertical: ScrollBar {
-    }
-
+    interactive: false
+    height: contentHeight
     delegate: Item {
         id: conversationItem
 
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-
+        property bool outbound: messageModel.lastAuthor === config.configId
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }
@@ -64,9 +61,9 @@ ListView {
             labelComponent: Av.ConversationLabel {
                 contactName: title
                 lastBody: !messageModel.isEmpty ? lastAuthor + ": " + messageModel.lastBody : ""
-                lastAuthor: messageModel.lastAuthor
-                lastTimestamp: Utils.friendlyTimestamp(
-                                   messageModel.lastEpochTimestampMs)
+                lastAuthor: outbound ? "You" : messageModel.lastAuthor
+                lastTimestamp: !messageModel.isEmpty ? Utils.friendlyTimestamp(
+                                                           messageModel.lastEpochTimestampMs) : ""
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
             }

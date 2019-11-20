@@ -23,11 +23,11 @@ Page {
     property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState
+    property alias msgSearchModel: searchModelLoader.item
 
     background: Rectangle {
         color: CmnCfg.palette.paneColor
     }
-
 
     ///--- SearchBar for contacts, add contact button
     header: Loader {
@@ -66,6 +66,11 @@ Page {
     Loader {
         active: false
         id: convoBuilderLoader
+    }
+
+    Loader {
+        active: false
+        id: searchModelLoader
     }
 
     SideBarState {

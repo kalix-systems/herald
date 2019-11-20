@@ -5,10 +5,12 @@ import QtQuick.Layouts 1.12
 import "../../common" as Common
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
+import "qrc:/imports/js/utils.mjs" as Utils
 
 Component {
     // this uses a rectangle and anchors instead of a layout because that manages the
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
+
     Rectangle {
         anchors.fill: parent
         color: CmnCfg.palette.paneColor
@@ -28,7 +30,7 @@ Component {
         Rectangle {
             anchors.top: titleText.bottom
             id: divider
-            height: 2
+            height: 1
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
             color: "black"
@@ -40,7 +42,7 @@ Component {
             id: bigDivider
             height: 1
             width: parent.width
-            color: CmnCfg.palette.secondaryTextColor
+            color: "black"
         }
 
         //component for searching contacts to add
@@ -72,8 +74,12 @@ Component {
                 font.family: CmnCfg.chatFont.name
             }
             onClicked: {
-                groupMemberSelect.setTitle(titleText.text)
-                groupMemberSelect.picture = topRect.profPic
+                titleText.text == "" ? groupMemberSelect.setTitle(
+                                           "Untitled Group") : groupMemberSelect.setTitle(
+                                           titleText.text)
+                if (topRect.profPic !== "") {
+                    groupMemberSelect.picture = topRect.profPic
+                }
                 groupMemberSelect.finalize()
                 sideBarState.state = ""
             }

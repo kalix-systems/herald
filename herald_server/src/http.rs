@@ -31,7 +31,10 @@ macro_rules! push_filter {
     };
 }
 
-pub async fn serve(state: &'static State, port: u16) {
+pub async fn serve(
+    state: &'static State,
+    port: u16,
+) {
     use warp::filters::method;
     let route_get = {
         use get::*;

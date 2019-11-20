@@ -12,6 +12,7 @@ new_type! {
 }
 
 impl ChainKey {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let mut buf = [0u8; CHAIN_KEY_BYTES];
         random::gen_into(&mut buf);
@@ -27,6 +28,7 @@ pub struct ChainState {
 }
 
 impl ChainState {
+    #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let base_key = hash::Key::new();
         let chain_key = ChainKey::new();
@@ -88,7 +90,10 @@ impl ChainState {
         aead::Key(messagekey_buf)
     }
 
-    pub fn open(&mut self, cipher: Cipher) -> DecryptionResult {
+    pub fn open(
+        &mut self,
+        cipher: Cipher,
+    ) -> DecryptionResult {
         let Cipher {
             index,
             tag,
@@ -127,7 +132,11 @@ impl ChainState {
         }
     }
 
-    pub fn seal(&mut self, ad: Bytes, mut msg: BytesMut) -> CipherData {
+    pub fn seal(
+        &mut self,
+        ad: Bytes,
+        mut msg: BytesMut,
+    ) -> CipherData {
         let ix = self.ix;
 
         let key = self.kdf();

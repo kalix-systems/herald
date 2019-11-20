@@ -53,5 +53,7 @@
         <file>compose-icon-white.svg</file>
         <file>down-chevron-icon-white.svg</file>
         <file>up-chevron-icon-white.svg</file>
+        <file>attach-icon.svg</file>
+        <file>clear-photo-icon.svg</file>
     </qresource>
 </RCC>

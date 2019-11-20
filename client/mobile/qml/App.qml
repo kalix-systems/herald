@@ -12,17 +12,20 @@ Item {
 
     Component {
         id: cvMain
-        CVView.ConversationViewMain {}
+        CVView.ConversationViewMain {
+        }
     }
 
     Component {
         id: configMain
-        ConfigMenu.ConfigMenuMain {}
+        ConfigMenu.ConfigMenuMain {
+        }
     }
 
     Component {
         id: newContactViewMain
-        NewContactView.NewContactViewMain {}
+        NewContactView.NewContactViewMain {
+        }
     }
 
     HeraldUtils {

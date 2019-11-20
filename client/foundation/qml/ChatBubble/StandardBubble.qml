@@ -12,13 +12,14 @@ ColumnLayout {
     property color authorColor
     spacing: 0
 
-
     ChatLabel {
         id: uname
         senderName: authorName
         senderColor: authorColor
     }
 
-    StandardTextEdit {}
-    StandardStamps {}
+    StandardTextEdit {
+    }
+    StandardStamps {
+    }
 }

@@ -63,8 +63,7 @@ ScrollView {
                                               convWindow.chatListView,
                                               chatPane, convWindow)
                 convWindow.state = ""
-            }
-            else {
+            } else {
                 //clear state to disable buttons
                 searchToolBar.state = ""
             }

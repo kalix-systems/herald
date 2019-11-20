@@ -7,7 +7,11 @@ use server_protocol::*;
 use server_store::*;
 use std::future::Future;
 
-async fn req_handler_store<B, I, O, F, Fut>(state: &State, req: B, f: F) -> Result<Vec<u8>, Error>
+async fn req_handler_store<B, I, O, F, Fut>(
+    state: &State,
+    req: B,
+    f: F,
+) -> Result<Vec<u8>, Error>
 where
     B: Buf,
     I: De,

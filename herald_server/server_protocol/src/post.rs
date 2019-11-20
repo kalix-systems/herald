@@ -1,6 +1,9 @@
 use super::*;
 
-pub async fn register(mut store: Conn, req: register::Req) -> Result<register::Res, Error> {
+pub async fn register(
+    mut store: Conn,
+    req: register::Req,
+) -> Result<register::Res, Error> {
     use register::*;
 
     match req.1.verify_sig() {
@@ -9,7 +12,10 @@ pub async fn register(mut store: Conn, req: register::Req) -> Result<register::R
     }
 }
 
-pub async fn new_key(mut store: Conn, req: new_key::Req) -> Result<new_key::Res, Error> {
+pub async fn new_key(
+    mut store: Conn,
+    req: new_key::Req,
+) -> Result<new_key::Res, Error> {
     use new_key::*;
 
     match req.0.verify_sig() {
@@ -18,7 +24,10 @@ pub async fn new_key(mut store: Conn, req: new_key::Req) -> Result<new_key::Res,
     }
 }
 
-pub async fn dep_key(mut store: Conn, req: dep_key::Req) -> Result<dep_key::Res, Error> {
+pub async fn dep_key(
+    mut store: Conn,
+    req: dep_key::Req,
+) -> Result<dep_key::Res, Error> {
     use dep_key::*;
 
     match req.0.verify_sig() {

@@ -19,12 +19,14 @@ ApplicationWindow {
     Loader {
         id: capitan
         active: false
-        sourceComponent: Item {}
+        sourceComponent: Item {
+        }
     }
 
     // displays error dialog upon output from
     // libherald, meant as a debugging tool
-    Errors.ErrorHandler {}
+    Errors.ErrorHandler {
+    }
 
     Loader {
         id: loginPageLoader
@@ -41,6 +43,7 @@ ApplicationWindow {
         id: appLoader
         active: heraldState.configInit
         anchors.fill: parent
-        sourceComponent: App {}
+        sourceComponent: App {
+        }
     }
 }

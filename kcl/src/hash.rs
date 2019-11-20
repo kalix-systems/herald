@@ -24,7 +24,10 @@ pub fn simple_hash(msg: &[u8]) -> [u8; HASH_REC_LEN] {
     buf
 }
 
-pub fn simple_hash_into(buf: &mut [u8], msg: &[u8]) {
+pub fn simple_hash_into(
+    buf: &mut [u8],
+    msg: &[u8],
+) {
     assert!(HASH_MIN_LEN <= buf.len());
     assert!(buf.len() <= HASH_MAX_LEN);
     let res = unsafe {
@@ -51,7 +54,11 @@ impl Key {
         Key(buf)
     }
 
-    pub fn hash_into(&self, buf: &mut [u8], msg: &[u8]) {
+    pub fn hash_into(
+        &self,
+        buf: &mut [u8],
+        msg: &[u8],
+    ) {
         assert!(HASH_MIN_LEN <= buf.len());
         assert!(buf.len() <= HASH_MAX_LEN);
         let result = unsafe {
@@ -67,7 +74,11 @@ impl Key {
         assert_eq!(result, 0);
     }
 
-    pub fn hash_into_many<'a, I: IntoIterator<Item = &'a mut [u8]>>(&self, msg: &[u8], keys: I) {
+    pub fn hash_into_many<'a, I: IntoIterator<Item = &'a mut [u8]>>(
+        &self,
+        msg: &[u8],
+        keys: I,
+    ) {
         for (i, key_buf) in keys.into_iter().enumerate() {
             let mut hasher = Builder::new().out_len(key_buf.len()).key(self).build();
             hasher.update(msg);
@@ -90,12 +101,18 @@ impl<'a> Builder<'a> {
         }
     }
 
-    pub fn out_len(mut self, out_len: usize) -> Self {
+    pub fn out_len(
+        mut self,
+        out_len: usize,
+    ) -> Self {
         self.out_len = Some(out_len);
         self
     }
 
-    pub fn key(mut self, key: &'a Key) -> Self {
+    pub fn key(
+        mut self,
+        key: &'a Key,
+    ) -> Self {
         self.key = Some(key);
         self
     }
@@ -113,7 +130,10 @@ pub struct Hasher {
 }
 
 impl Hasher {
-    fn mk(out_len: usize, key: Option<&Key>) -> Self {
+    fn mk(
+        out_len: usize,
+        key: Option<&Key>,
+    ) -> Self {
         assert!(HASH_MIN_LEN <= out_len);
         assert!(out_len <= HASH_MAX_LEN);
 
@@ -132,7 +152,10 @@ impl Hasher {
         Hasher { out_len, state }
     }
 
-    pub fn update(&mut self, data: &[u8]) {
+    pub fn update(
+        &mut self,
+        data: &[u8],
+    ) {
         let res = unsafe {
             crypto_generichash_blake2b_update(&mut self.state, data.as_ptr(), data.len() as u64)
         };
@@ -150,7 +173,10 @@ impl Hasher {
         Digest(buf)
     }
 
-    pub fn finalize_into(mut self, buf: &mut [u8]) {
+    pub fn finalize_into(
+        mut self,
+        buf: &mut [u8],
+    ) {
         assert!(buf.len() == self.out_len);
         unsafe {
             let res =

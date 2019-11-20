@@ -15,7 +15,10 @@ fn hash(buf: &[u8]) -> u32 {
     h.finalize()
 }
 
-fn div_round_up(num: usize, den: usize) -> usize {
+fn div_round_up(
+    num: usize,
+    den: usize,
+) -> usize {
     (num + den - 1) / den
 }
 
