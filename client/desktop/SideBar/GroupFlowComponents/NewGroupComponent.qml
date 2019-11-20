@@ -73,7 +73,8 @@ Component {
                 font.family: CmnCfg.chatFont.name
             }
             onClicked: {
-                groupMemberSelect.setTitle(titleText.text)
+                titleText.text == "" ? groupMemberSelect.setTitle("Untitled Group")
+                                     : groupMemberSelect.setTitle(titleText.text)
                 if (topRect.profPic !== "") {
                     groupMemberSelect.picture = topRect.profPic
                 }
