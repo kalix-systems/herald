@@ -1,14 +1,14 @@
 SELECT
   messages.msg_id,
-  author,
-  body,
-  op_msg_id,
-  insertion_ts,
-  server_ts,
-  expiration_ts,
-  send_status,
-  has_attachments,
-  is_reply
+  messages.author,
+  messages.body,
+  replies.op_msg_id,
+  messages.insertion_ts,
+  messages.server_ts,
+  messages.expiration_ts,
+  messages.send_status,
+  messages.has_attachments,
+  messages.is_reply
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id
 WHERE
