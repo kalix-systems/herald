@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 serde = "1.0"
-
+pulldown-cmark = "0.6.0"
 
 [dependencies.herald_common]
 path             = "../../herald_common"

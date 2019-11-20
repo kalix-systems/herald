@@ -68,13 +68,8 @@ version          = "0.22.1"
 default_features = false
 features         = ["jpeg", "png_codec"]
 
-[dependencies.pulldown-cmark]
-version  = "0.6.0"
-# optional = true
-
 [features]
 deploy_desktop = ["platform_dirs/deploy_desktop"]
-#markdown = ["pulldown-cmark"]
 
 
 [dev-dependencies]

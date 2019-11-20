@@ -1,5 +1,6 @@
-use super::*;
-use std::collections::HashSet;
+use crate::ids::*;
+use herald_common::*;
+use std::collections::{HashMap, HashSet};
 use std::convert::TryInto;
 
 mod convert;
@@ -74,15 +75,6 @@ impl ReplyId {
             true
         } else {
             false
-        }
-    }
-
-    #[cfg(test)]
-    pub(crate) fn unwrap(self) -> MsgId {
-        match self {
-            ReplyId::Known(mid) => mid,
-            ReplyId::Dangling => panic!("Tried to unwrap `Dangling` `ReplyId`"),
-            ReplyId::None => panic!("Tried to unwrap `None` `ReplyId`"),
         }
     }
 }

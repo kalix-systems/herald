@@ -81,7 +81,7 @@ fn reply() {
 
     let reply = db::get_message(&conn, &mid2).unwrap();
 
-    assert_eq!(reply.op.unwrap(), mid1);
+    assert_eq!(ReplyId::Known(mid1), reply.op);
 }
 
 #[test]
