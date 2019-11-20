@@ -1,5 +1,8 @@
-use crate::{conversation::Conversation, db::Database, errors::HErr, image_utils, types::*};
-pub use coretypes::user::{User, UserStatus, UserType};
+use crate::{db::Database, errors::HErr, image_utils, types::*};
+pub use coretypes::{
+    conversation::Conversation,
+    user::{User, UserStatus, UserType},
+};
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 

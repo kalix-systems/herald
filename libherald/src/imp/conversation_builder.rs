@@ -7,7 +7,7 @@ use crate::{
     spawn,
 };
 use herald_common::UserId;
-use heraldcore::conversation::ConversationBuilder as Inner;
+use heraldcore::conversation::{start, ConversationBuilder as Inner};
 use std::convert::TryInto;
 
 type Emitter = ConversationBuilderEmitter;
@@ -114,7 +114,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
                 conv.meta.clone()
             )));
 
-            ret_err!(conv.start());
+            ret_err!(start(conv));
         });
     }
 

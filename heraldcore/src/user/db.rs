@@ -1,5 +1,5 @@
 use super::*;
-use crate::conversation::Conversation;
+use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 
 /// Gets a user's name by their `id`.

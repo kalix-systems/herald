@@ -116,7 +116,7 @@ pub struct AddedToConvo {
     /// The conversation's picture (as bytes)
     pub picture: Option<Vec<u8>>,
     /// The conversation's initial expiration period
-    pub expiration_period: conversation::ExpirationPeriod,
+    pub expiration_period: coretypes::conversation::ExpirationPeriod,
     /// The genesis block for the new conversation
     pub gen: Genesis,
 }

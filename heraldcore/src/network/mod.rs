@@ -1,5 +1,5 @@
 use crate::{
-    conversation::{settings, ConversationMeta},
+    conversation::settings,
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
@@ -8,6 +8,7 @@ use crate::{
 };
 use chainkeys;
 use chainmail::block::*;
+use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use lazy_static::*;
 use std::{

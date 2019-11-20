@@ -61,10 +61,11 @@ impl ConversationsTrait for Conversations {
 
         spawn!(
             {
-                let update = conversation::settings::SettingsUpdate::Color(color);
+                use conversation::settings::*;
+                let update = SettingsUpdate::Color(color);
 
-                ret_err!(update.apply(&cid));
-                ret_err!(update.send_update(&cid));
+                ret_err!(apply(&update, &cid));
+                ret_err!(send_update(update, &cid));
             },
             false
         );
@@ -88,10 +89,11 @@ impl ConversationsTrait for Conversations {
 
         spawn!(
             {
-                let update = conversation::settings::SettingsUpdate::Expiration(period);
+                use conversation::settings::*;
+                let update = SettingsUpdate::Expiration(period);
 
-                ret_err!(update.apply(&cid));
-                ret_err!(update.send_update(&cid));
+                ret_err!(apply(&update, &cid));
+                ret_err!(send_update(update, &cid));
             },
             false
         );
@@ -146,10 +148,11 @@ impl ConversationsTrait for Conversations {
             let title = title.clone();
             spawn!(
                 {
-                    let update = conversation::settings::SettingsUpdate::Title(title);
+                    use conversation::settings::*;
+                    let update = SettingsUpdate::Title(title);
 
-                    ret_err!(update.apply(&cid));
-                    ret_err!(update.send_update(&cid));
+                    ret_err!(apply(&update, &cid));
+                    ret_err!(send_update(update, &cid));
                 },
                 false
             );

@@ -105,7 +105,8 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                     }));
             }
             Settings(update) => {
-                update.apply(&cid)?;
+                conversation::settings::apply(&update, &cid)?;
+
                 ev.notifications.push(Notification::Settings(cid, update));
             }
         }
@@ -128,7 +129,7 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
                     .pairwise_conversation(cid)
                     .add()?;
 
-                let conversation::Conversation { meta, .. } = conversation;
+                let coretypes::conversation::Conversation { meta, .. } = conversation;
                 chainkeys::store_genesis(&cid, &gen)?;
 
                 ev.notifications
