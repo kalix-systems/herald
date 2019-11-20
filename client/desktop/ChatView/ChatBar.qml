@@ -37,6 +37,7 @@ ToolBar {
         anchors {
             fill: parent
             leftMargin: CmnCfg.margin
+            rightMargin: CmnCfg.smallMargin
         }
 
         AvatarMain {
@@ -114,7 +115,8 @@ ToolBar {
 
                     MenuItem {
                         text: "Clear History"
-                        onTriggered: ownedConversation.clearConversationHistory()
+                        onTriggered: ownedConversation.clearConversationHistory(
+                                         )
                     }
                 }
             }

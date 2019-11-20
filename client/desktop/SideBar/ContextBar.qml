@@ -13,14 +13,17 @@ import Qt.labs.platform 1.0
 ToolBar {
     id: contextBar
     height: CmnCfg.toolbarHeight
+
     background: Rectangle {
         color: CmnCfg.palette.secondaryColor
     }
+
     property alias headerText: headerText.text
 
     RowLayout {
 
         anchors.fill: parent
+        anchors.rightMargin: 8
 
         Common.ConfigAvatar {}
 
@@ -44,7 +47,6 @@ ToolBar {
         Row {
             spacing: 12
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-
             Common.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
