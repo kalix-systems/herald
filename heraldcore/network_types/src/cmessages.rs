@@ -1,8 +1,61 @@
-use super::*;
-use crate::{
-    message::{MessageBody, MessageReceiptStatus},
-    *,
+use chainmail::block::{Block, Genesis};
+use coretypes::{
+    attachments::Attachment,
+    conversation,
+    ids::*,
+    messages::{MessageBody, MessageReceiptStatus},
 };
+use herald_common::*;
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// The body of a [`ConversationMessage`]
+pub enum ConversationMessageBody {
+    /// A new key
+    NewKey(NewKey),
+    /// A key to be marked as deprecated
+    DepKey(DepKey),
+    /// Members just added to a conversation
+    NewMembers(NewMembers),
+    /// A message a user receives upon being added to a conversation
+    AddedToConvo(Box<AddedToConvo>),
+    /// An acknowledgement of a contact request.
+    UserReqAck(UserReqAck),
+    /// A normal message.
+    Msg(Msg),
+    /// An acknowledgement of a normal message.
+    Ack(Ack),
+    /// An update to the conversation settings
+    Settings(conversation::settings::SettingsUpdate),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+/// A conversation message
+pub struct ConversationMessage {
+    /// The ciphertext of the message. After decryption, this should deserialize as a
+    /// [`ConversationMessageBody`].
+    pub body: chainmail::block::Block,
+    /// Conversation the message is associated with
+    pub cid: ConversationId,
+    /// Who supposedly sent the message
+    pub from: GlobalId,
+}
+
+impl ConversationMessage {
+    /// Raw body of the message
+    pub fn body(&self) -> &Block {
+        &self.body
+    }
+
+    /// `ConversationId` associated with the message
+    pub fn cid(&self) -> ConversationId {
+        self.cid
+    }
+
+    /// The device the message claims to be from.
+    pub fn from(&self) -> GlobalId {
+        self.from
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
@@ -28,7 +81,7 @@ pub struct AddedToConvo {
     /// The conversation's picture (as bytes)
     pub picture: Option<Vec<u8>>,
     /// The conversation's initial expiration period
-    pub expiration_period: conversation::ExpirationPeriod,
+    pub expiration_period: coretypes::conversation::ExpirationPeriod,
     /// The genesis block for the new conversation
     pub gen: Genesis,
 }

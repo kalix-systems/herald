@@ -1,5 +1,5 @@
 use super::*;
-use crate::{config::test_config, womp};
+use crate::config::test_config;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -88,7 +88,8 @@ fn reply() {
     assert!(op_replies.contains(&mid2));
 
     let reply = db::get_message(&conn, &mid2).expect(womp!());
-    assert_eq!(reply.op.unwrap(), mid1);
+
+    assert_eq!(ReplyId::Known(mid1), reply.op);
 }
 
 #[test]

@@ -1,5 +1,6 @@
 use super::*;
-use crate::{config::test_config, womp};
+use crate::config::test_config;
+use platform_dirs::ATTACHMENTS_DIR;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 use std::str::FromStr;

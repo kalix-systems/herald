@@ -1,11 +1,13 @@
 use super::*;
+use crate::types::cmessages;
+use crate::types::dmessages;
 
 pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessageBody,
 ) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
+        let (cm, hash, key) = cmessages::seal(cid, &content)?;
 
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::keypair()?.public_key();
@@ -14,12 +16,13 @@ pub(crate) fn send_cmessage(
 
         let mut db = chainkeys::CK_CONN.lock();
         let mut tx = db.transaction()?;
-        let unlocked = chainkeys::store_key(&mut tx, cid, hash, &key)?;
+
+        let unlocked = chainkeys::db::store_key(&mut tx, cid, hash, &key)?;
         debug_assert!(unlocked.is_empty());
         // TODO: replace used with probably_used here
         // in general we probably want a slightly smarter system for dealing with scenarios where
         // we thought a message wasn't sent but it was
-        chainkeys::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
+        chainkeys::db::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
 
         match helper::push_users(&req) {
             Ok(push_users::Res::Success) => {
@@ -31,7 +34,7 @@ pub(crate) fn send_cmessage(
                 missing
             ))),
             Err(e) => {
-                chainkeys::mark_used(&mut tx, cid, [hash].iter())?;
+                chainkeys::db::mark_used(&mut tx, cid, [hash].iter())?;
                 tx.commit()?;
 
                 // TODO: maybe try more than once?
@@ -53,7 +56,7 @@ pub(crate) fn send_cmessage(
 }
 
 pub(super) fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(&DeviceMessage::seal(&to, dm)?)?);
+    let msg = Bytes::from(serde_cbor::to_vec(&dmessages::seal(&to, dm)?)?);
 
     let req = push_devices::Req { to: vec![to], msg };
 

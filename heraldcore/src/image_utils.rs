@@ -1,5 +1,6 @@
-use crate::{errors::HErr, platform_dirs::PICTURES_DIR};
+use crate::errors::HErr;
 use image::{self, FilterType, ImageFormat};
+use platform_dirs::PICTURES_DIR;
 use std::path::{Path, PathBuf};
 
 const IMAGE_SIZE: u32 = 300;

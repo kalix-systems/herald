@@ -1,10 +1,10 @@
 use crate::{ffi, interface::*, ret_err, ret_none, spawn};
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, network,
+    network,
     user::{self, UserBuilder, UserStatus},
-    utils::SearchPattern,
 };
+use search_pattern::SearchPattern;
 use std::convert::{TryFrom, TryInto};
 
 pub(crate) mod shared;
@@ -27,25 +27,9 @@ pub struct User {
 pub struct Users {
     emit: Emitter,
     model: List,
-    filter: SearchPattern,
+    filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vec<User>,
-}
-
-pub(crate) fn color(uid: &UserId) -> Option<u32> {
-    Some(get_user(&uid)?.color)
-}
-
-pub(crate) fn name(uid: &UserId) -> Option<String> {
-    let inner = get_user(uid)?;
-
-    Some(inner.name.clone())
-}
-
-pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
-    let inner = get_user(uid)?;
-
-    inner.profile_picture.clone()
 }
 
 impl UsersTrait for Users {
@@ -59,10 +43,7 @@ impl UsersTrait for Users {
                     User { id, matched: true }
                 })
                 .collect(),
-            Err(e) => {
-                eprintln!("{}", e);
-                Vec::new()
-            }
+            Err(_) => Vec::new(),
         };
 
         let global_emit = emit.clone();
@@ -70,7 +51,7 @@ impl UsersTrait for Users {
         shared::USER_EMITTER.lock().replace(global_emit);
 
         // this should *really* never fail
-        let filter = abort_err!(SearchPattern::new_normal("".into()));
+        let filter = SearchPattern::new_normal("".into()).ok();
 
         Users {
             emit,
@@ -89,7 +70,11 @@ impl UsersTrait for Users {
         let pairwise_conversation = data.pairwise_conversation;
 
         let user = User {
-            matched: data.matches(&self.filter),
+            matched: self
+                .filter
+                .as_ref()
+                .map(|filter| data.matches(filter))
+                .unwrap_or(true),
             id: data.id,
         };
 
@@ -231,7 +216,7 @@ impl UsersTrait for Users {
     }
 
     fn filter(&self) -> &str {
-        self.filter.raw()
+        self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
     fn set_filter(&mut self, pattern: String) {
@@ -240,13 +225,14 @@ impl UsersTrait for Users {
             return;
         }
 
-        let pattern = if self.filter_regex() {
-            ret_err!(SearchPattern::new_regex(pattern))
-        } else {
-            ret_err!(SearchPattern::new_normal(pattern))
+        self.filter = match self.filter.take() {
+            Some(mut pat) => {
+                ret_err!(pat.set_pattern(pattern));
+                Some(pat)
+            }
+            None => SearchPattern::new_normal(pattern).ok(),
         };
 
-        self.filter = pattern;
         self.emit.filter_changed();
 
         self.inner_filter();
@@ -259,11 +245,18 @@ impl UsersTrait for Users {
 
     /// Sets filter mode
     fn set_filter_regex(&mut self, use_regex: bool) {
-        if use_regex {
-            ret_err!(self.filter.regex_mode());
-        } else {
-            ret_err!(self.filter.normal_mode());
-        }
+        self.filter = match self.filter.take() {
+            Some(mut filter) => {
+                if use_regex {
+                    ret_err!(filter.regex_mode());
+                    Some(filter)
+                } else {
+                    ret_err!(filter.normal_mode());
+                    Some(filter)
+                }
+            }
+            None => None,
+        };
 
         self.filter_regex = use_regex;
         self.emit.filter_regex_changed();
@@ -296,7 +289,11 @@ impl UsersTrait for Users {
             match update {
                 UsersUpdates::NewUser(data) => {
                     let new_user = User {
-                        matched: data.matches(&self.filter),
+                        matched: self
+                            .filter
+                            .as_ref()
+                            .map(|filter| data.matches(filter))
+                            .unwrap_or(true),
                         id: data.id,
                     };
 
@@ -322,16 +319,17 @@ impl UsersTrait for Users {
     }
 
     fn clear_filter(&mut self) {
-        for user in self.list.iter_mut() {
-            user.matched = true;
+        for (ix, user) in self.list.iter_mut().enumerate() {
+            if !user.matched {
+                user.matched = true;
+                self.model.data_changed(ix, ix);
+            }
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
 
         if self.filter_regex {
-            self.filter = ret_err!(SearchPattern::new_regex("".to_owned()));
+            self.filter = SearchPattern::new_regex("".to_owned()).ok();
         } else {
-            self.filter = ret_err!(SearchPattern::new_normal("".to_owned()));
+            self.filter = SearchPattern::new_normal("".to_owned()).ok();
         }
 
         self.emit.filter_changed();
@@ -340,11 +338,17 @@ impl UsersTrait for Users {
 
 impl Users {
     fn inner_filter(&mut self) {
-        for user in self.list.iter_mut() {
+        for (ix, user) in self.list.iter_mut().enumerate() {
             let inner = ret_none!(get_user(&user.id));
-            user.matched = inner.matches(&self.filter);
+            let old_matched = user.matched;
+            user.matched = self
+                .filter
+                .as_ref()
+                .map(|filter| inner.matches(&filter))
+                .unwrap_or(true);
+            if user.matched != old_matched {
+                self.model.data_changed(ix, ix);
+            }
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
     }
 }

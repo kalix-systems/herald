@@ -1,5 +1,7 @@
 use super::*;
+use platform_dirs::ATTACHMENTS_DIR;
 use rusqlite::{Connection as Conn, NO_PARAMS};
+use std::path::Path;
 
 pub(crate) fn add<'a, A: Iterator<Item = &'a Path>>(
     conn: &Conn,
@@ -24,7 +26,7 @@ pub(crate) fn get(conn: &Conn, msg_id: &MsgId) -> Result<AttachmentMeta, HErr> {
         .map(|path_string| Ok(PathBuf::from(path_string?)))
         .collect();
 
-    Ok(AttachmentMeta(attachments?))
+    Ok(AttachmentMeta::new(attachments?))
 }
 
 /// Deletes all attachments uniquely associated with a message id

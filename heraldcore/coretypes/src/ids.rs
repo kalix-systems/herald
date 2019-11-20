@@ -1,7 +1,43 @@
-use crate::errors::HErr;
 use herald_common::*;
 use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 use std::convert::TryFrom;
+
+/// Wrong number of bytes
+#[derive(Clone, Copy, Debug)]
+pub struct InvalidRandomIdLength {
+    /// Found length
+    pub found: usize,
+    /// Type of id
+    pub variant: Variant,
+}
+
+/// Variants of `InvalidIdLenght`
+#[derive(Clone, Copy, Debug)]
+pub enum Variant {
+    /// Message id
+    Msg,
+    /// Conversation id
+    Conversation,
+}
+
+impl std::fmt::Display for InvalidRandomIdLength {
+    fn fmt(&self, out: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self.variant {
+            Variant::Msg => write!(
+                out,
+                "Invalid message id, expected {} bytes, found {} bytes",
+                UID_LEN, self.found
+            ),
+            Variant::Conversation => write!(
+                out,
+                "Invalid conversation id, expected {} bytes, found {} bytes",
+                UID_LEN, self.found
+            ),
+        }
+    }
+}
+
+impl std::error::Error for InvalidRandomIdLength {}
 
 /// Length of randomly generated unique ids
 pub const UID_LEN: usize = 32;
@@ -51,11 +87,14 @@ impl From<[u8; UID_LEN]> for MsgId {
 }
 
 impl TryFrom<Vec<u8>> for MsgId {
-    type Error = HErr;
+    type Error = InvalidRandomIdLength;
 
     fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(HErr::InvalidMessageId)
+            Err(InvalidRandomIdLength {
+                found: val.len(),
+                variant: Variant::Msg,
+            })
         } else {
             let mut buf = [0u8; UID_LEN];
 
@@ -69,11 +108,14 @@ impl TryFrom<Vec<u8>> for MsgId {
 }
 
 impl TryFrom<&[u8]> for MsgId {
-    type Error = HErr;
+    type Error = InvalidRandomIdLength;
 
     fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(HErr::InvalidMessageId)
+            Err(InvalidRandomIdLength {
+                found: val.len(),
+                variant: Variant::Msg,
+            })
         } else {
             let mut buf = [0u8; UID_LEN];
 
@@ -123,11 +165,14 @@ impl From<[u8; UID_LEN]> for ConversationId {
 }
 
 impl TryFrom<Vec<u8>> for ConversationId {
-    type Error = HErr;
+    type Error = InvalidRandomIdLength;
 
     fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(HErr::InvalidConversationId)
+            Err(InvalidRandomIdLength {
+                found: val.len(),
+                variant: Variant::Conversation,
+            })
         } else {
             let mut buf = [0u8; UID_LEN];
 
@@ -141,11 +186,14 @@ impl TryFrom<Vec<u8>> for ConversationId {
 }
 
 impl TryFrom<&[u8]> for ConversationId {
-    type Error = HErr;
+    type Error = InvalidRandomIdLength;
 
     fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
         if val.len() != UID_LEN {
-            Err(HErr::InvalidConversationId)
+            Err(InvalidRandomIdLength {
+                found: val.len(),
+                variant: Variant::Conversation,
+            })
         } else {
             let mut buf = [0u8; UID_LEN];
 

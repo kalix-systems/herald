@@ -1,5 +1,5 @@
 use super::*;
-use crate::conversation::Conversation;
+use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 
 /// Gets a user's name by their `id`.
@@ -31,7 +31,7 @@ pub fn conversation_members(
 ) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(params![conversation_id], User::from_db)?;
+    let rows = stmt.query_map(params![conversation_id], from_db)?;
 
     let mut users: Vec<User> = Vec::new();
     for user in rows {
@@ -121,7 +121,7 @@ pub fn status(conn: &rusqlite::Connection, id: UserId) -> Result<UserStatus, HEr
 pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_all.sql"))?;
 
-    let rows = stmt.query_map(NO_PARAMS, User::from_db)?;
+    let rows = stmt.query_map(NO_PARAMS, from_db)?;
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -135,14 +135,14 @@ pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
 pub fn by_user_id(conn: &rusqlite::Connection, user_id: UserId) -> Result<User, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_id.sql"))?;
 
-    Ok(stmt.query_row(params![user_id], User::from_db)?)
+    Ok(stmt.query_row(params![user_id], from_db)?)
 }
 
 /// Returns all users with the specified `status`
 pub fn get_by_status(conn: &rusqlite::Connection, status: UserStatus) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(params![status], User::from_db)?;
+    let rows = stmt.query_map(params![status], from_db)?;
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -238,8 +238,21 @@ impl UserBuilder {
     }
 }
 
+fn from_db(row: &rusqlite::Row) -> Result<User, rusqlite::Error> {
+    Ok(User {
+        id: row.get(0)?,
+        name: row.get(1)?,
+        profile_picture: row.get(2)?,
+        color: row.get(3)?,
+        status: row.get(4)?,
+        pairwise_conversation: row.get(5)?,
+        user_type: row.get(6)?,
+    })
+}
+
 #[cfg(test)]
 pub(crate) fn test_user(conn: &mut rusqlite::Connection, user_id: &str) -> User {
+    use std::convert::TryInto;
     let receiver = user_id
         .try_into()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));

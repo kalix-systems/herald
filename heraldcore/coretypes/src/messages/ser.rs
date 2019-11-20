@@ -10,6 +10,7 @@ impl<'de> Deserialize<'de> for MessageSendStatus {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         use serde::de::*;
         let u = u8::deserialize(d)?;
+
         u.try_into().map_err(|u| {
             Error::invalid_value(
                 Unexpected::Unsigned(u64::from(u)),
@@ -29,6 +30,7 @@ impl<'de> Deserialize<'de> for MessageReceiptStatus {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         use serde::de::*;
         let u = u8::deserialize(d)?;
+
         u.try_into().map_err(|u| {
             Error::invalid_value(
                 Unexpected::Unsigned(u64::from(u)),

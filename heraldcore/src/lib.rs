@@ -2,8 +2,9 @@
 
 #![warn(missing_docs)]
 
-/// Chainmail support
-mod chainkeys;
+#[macro_use]
+extern crate coremacros;
+
 /// User configuration
 pub mod config;
 /// Conversations
@@ -31,4 +32,4 @@ mod user_keys;
 /// Utils
 pub mod utils;
 
-mod platform_dirs;
+pub use location::{loc, Location};

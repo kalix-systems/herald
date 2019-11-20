@@ -55,7 +55,7 @@ Item {
         id: labelContent
         anchors {
             leftMargin: CmnCfg.margin
-            rightMargin: CmnCfg.margin
+            rightMargin: CmnCfg.margin / 2
             topMargin: topTextMargin
             bottomMargin: bottomTextMargin
 

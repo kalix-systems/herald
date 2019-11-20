@@ -1,4 +1,5 @@
-use super::*;
+use super::cmessages::*;
+use rusqlite::types::{self, FromSql, FromSqlError, FromSqlResult, ToSql};
 
 impl FromSql for ConversationMessageBody {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {

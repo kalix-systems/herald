@@ -1,28 +1,12 @@
 use crate::{db::Database, errors::*, types::*};
+pub use coretypes::config::Config;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation
-pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
+pub const NTS_CONVERSATION_NAME: &str = "Note to Self";
 
 pub(crate) mod db;
-
-/// User configuration
-#[derive(Clone)]
-pub struct Config {
-    /// ID of the local user
-    pub id: UserId,
-    /// Colorscheme
-    pub colorscheme: u32,
-    /// Name of the local user
-    pub name: String,
-    /// Profile picture of the local user
-    pub profile_picture: Option<String>,
-    /// Color of the local user
-    pub color: u32,
-    /// The *Note to Self* conversation id.
-    pub nts_conversation: ConversationId,
-}
 
 /// Builder for `Config`
 pub struct ConfigBuilder {
@@ -87,7 +71,7 @@ impl ConfigBuilder {
         // changing the chainmail API
         let kp = keypair()?;
         let gen = Genesis::new(kp.secret_key());
-        conf.nts_conversation.store_genesis(&gen)?;
+        chainkeys::store_genesis(&conf.nts_conversation, &gen)?;
         Ok(conf)
     }
 }

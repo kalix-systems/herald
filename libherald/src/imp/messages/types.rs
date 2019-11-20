@@ -41,7 +41,7 @@ impl MsgData {
             && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
     }
 
-    pub(super) fn matches(&self, pattern: &heraldcore::utils::SearchPattern) -> bool {
+    pub(super) fn matches(&self, pattern: &search_pattern::SearchPattern) -> bool {
         match self.body.as_ref() {
             Some(body) => pattern.is_match(body.as_str()),
             None => false,

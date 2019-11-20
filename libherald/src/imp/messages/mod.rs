@@ -3,17 +3,17 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    abort_err, config, conversation,
+    config, conversation,
     errors::HErr,
     message::{
         self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
         ReplyId,
     },
     types::*,
-    utils::SearchPattern,
     NE,
 };
 use im::vector::Vector;
+use search_pattern::SearchPattern;
 use std::{
     collections::HashMap,
     convert::{TryFrom, TryInto},
@@ -37,7 +37,7 @@ type List = MessagesList;
 pub struct Messages {
     emit: Emitter,
     model: List,
-    local_id: UserId,
+    local_id: Option<UserId>,
     conversation_id: Option<ConversationId>,
     container: Container,
     search: SearchState,
@@ -50,7 +50,7 @@ impl MessagesTrait for Messages {
             emit,
             container: Container::default(),
             conversation_id: None,
-            local_id: abort_err!(config::id()),
+            local_id: config::id().ok(),
             search: SearchState::new(),
         }
     }
@@ -62,7 +62,7 @@ impl MessagesTrait for Messages {
     fn last_author(&self) -> Option<ffi::UserIdRef> {
         let last = self.container.last_msg()?;
 
-        if last.author == self.local_id {
+        if last.author == self.local_id? {
             Some("You")
         } else {
             Some(last.author.as_str())
@@ -74,8 +74,8 @@ impl MessagesTrait for Messages {
             .last_msg()?
             .receipts
             .values()
-            .map(|status| *status as u32)
             .max()
+            .map(|status| *status as u32)
     }
 
     fn last_body(&self) -> Option<&str> {
@@ -217,8 +217,8 @@ impl MessagesTrait for Messages {
 
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
-        spawn!(message::delete_message(&id), false);
         self.remove_helper(id, ix);
+        spawn!(message::delete_message(&id), false);
 
         true
     }
@@ -318,7 +318,11 @@ impl MessagesTrait for Messages {
     }
 
     fn search_pattern(&self) -> &str {
-        self.search.pattern.raw()
+        self.search
+            .pattern
+            .as_ref()
+            .map(SearchPattern::raw)
+            .unwrap_or("")
     }
 
     fn set_search_pattern(&mut self, pattern: String) {

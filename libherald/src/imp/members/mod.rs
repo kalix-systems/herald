@@ -1,6 +1,7 @@
 use crate::{ffi, imp::users::shared::get_user, interface::*, ret_err, ret_none};
 use herald_common::UserId;
-use heraldcore::{abort_err, types::*, user, utils::SearchPattern};
+use heraldcore::{types::*, user};
+use search_pattern::SearchPattern;
 use std::{
     convert::{TryFrom, TryInto},
     ops::Drop,
@@ -25,7 +26,7 @@ pub struct User {
 pub struct Members {
     emit: Emitter,
     model: List,
-    filter: SearchPattern,
+    filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vec<User>,
     // Note: this is not really optional, but it is difficult to
@@ -36,7 +37,7 @@ pub struct Members {
 impl MembersTrait for Members {
     fn new(emit: Emitter, model: List) -> Members {
         // this should *really* never fail
-        let filter = abort_err!(SearchPattern::new_normal("".into()));
+        let filter = SearchPattern::new_normal("".into()).ok();
 
         Members {
             emit,
@@ -121,7 +122,7 @@ impl MembersTrait for Members {
     }
 
     fn filter(&self) -> &str {
-        self.filter.raw()
+        self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
     fn set_filter(&mut self, pattern: String) {
@@ -130,13 +131,14 @@ impl MembersTrait for Members {
             return;
         }
 
-        let pattern = if self.filter_regex() {
-            ret_err!(SearchPattern::new_regex(pattern))
-        } else {
-            ret_err!(SearchPattern::new_normal(pattern))
+        self.filter = match self.filter.take() {
+            Some(mut filter) => {
+                ret_err!(filter.set_pattern(pattern));
+                Some(filter)
+            }
+            None => SearchPattern::new_regex(pattern).ok(),
         };
 
-        self.filter = pattern;
         self.emit.filter_changed();
 
         self.inner_filter();
@@ -149,11 +151,18 @@ impl MembersTrait for Members {
 
     /// Sets filter mode
     fn set_filter_regex(&mut self, use_regex: bool) {
-        if use_regex {
-            ret_err!(self.filter.regex_mode());
-        } else {
-            ret_err!(self.filter.normal_mode());
-        }
+        self.filter = match self.filter.take() {
+            Some(mut filter) => {
+                if use_regex {
+                    ret_err!(filter.regex_mode());
+                } else {
+                    ret_err!(filter.normal_mode());
+                }
+                Some(filter)
+            }
+            None => None,
+        };
+
         self.filter_regex = use_regex;
         self.emit.filter_regex_changed();
         self.inner_filter();
@@ -185,7 +194,11 @@ impl MembersTrait for Members {
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
-            matched: user.matches(&self.filter),
+            matched: self
+                .filter
+                .as_ref()
+                .map(|filter| user.matches(filter))
+                .unwrap_or(true),
             id: user_id,
         });
         self.model.end_insert_rows();
@@ -226,7 +239,11 @@ impl MembersTrait for Members {
                 ReqResp(uid, accepted) => {
                     if accepted {
                         let matched = match get_user(&uid) {
-                            Some(meta) => meta.matches(&self.filter),
+                            Some(meta) => self
+                                .filter
+                                .as_ref()
+                                .map(|filter| meta.matches(filter))
+                                .unwrap_or(true),
                             None => continue,
                         };
 
@@ -243,28 +260,29 @@ impl MembersTrait for Members {
 
 impl Members {
     fn clear_filter(&mut self) {
-        for user in self.list.iter_mut() {
-            user.matched = true;
-        }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
-
-        if self.filter_regex {
-            self.filter = ret_err!(SearchPattern::new_regex("".to_owned()));
-        } else {
-            self.filter = ret_err!(SearchPattern::new_normal("".to_owned()));
+        for (ix, user) in self.list.iter_mut().enumerate() {
+            if !user.matched {
+                user.matched = true;
+                self.model.data_changed(ix, ix);
+            }
         }
 
-        self.emit.filter_changed();
+        if let Some(filter) = self.filter.as_mut() {
+            ret_err!(filter.set_pattern("".into()));
+            self.emit.filter_changed();
+        }
     }
 
     fn inner_filter(&mut self) {
-        for user in self.list.iter_mut() {
+        for (ix, user) in self.list.iter_mut().enumerate() {
             let inner = ret_none!(get_user(&user.id));
-            user.matched = inner.matches(&self.filter);
+            user.matched = self
+                .filter
+                .as_ref()
+                .map(|filter| inner.matches(filter))
+                .unwrap_or(true);
+            self.model.data_changed(ix, ix);
         }
-        self.model
-            .data_changed(0, self.list.len().saturating_sub(1));
     }
 }
 

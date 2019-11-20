@@ -1,13 +1,14 @@
 use crate::{
-    chainkeys,
-    conversation::{settings, ConversationMeta},
+    conversation::settings,
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
     types::*,
     *,
 };
+use chainkeys;
 use chainmail::block::*;
+use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use lazy_static::*;
 use std::{
@@ -42,7 +43,7 @@ pub enum Notification {
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
     /// A new user has been added
-    NewUser(Box<(user::User, ConversationMeta)>),
+    NewUser(Box<(coretypes::user::User, ConversationMeta)>),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.
@@ -87,7 +88,7 @@ pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(&gen)?;
+    chainkeys::store_genesis(&cid, &gen)?;
 
     let req = dmessages::UserReq { gen, cid };
 
