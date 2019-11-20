@@ -8,7 +8,7 @@ pub(crate) fn send_cmessage(
         let (cm, hash, key) = ConversationMessage::seal(cid, &content)?;
 
         let to = crate::members::members(&cid)?;
-        let exc = *crate::config::Config::static_keypair()?.public_key();
+        let exc = *crate::config::keypair()?.public_key();
         let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
         let req = push_users::Req { to, exc, msg };
 

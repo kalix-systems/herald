@@ -15,6 +15,7 @@ Component {
         //wrapper column to position textarea and underline
         anchors.right: parent.right
         RowLayout {
+
             id: searchToolBar
             anchors.horizontalCenter: parent.horizontalCenter
 
@@ -25,6 +26,7 @@ Component {
                 rightMargin: CmnCfg.margin
             }
 
+
             //main search component
             SearchTextArea {
             }
@@ -34,11 +36,12 @@ Component {
                 property bool active: searchToolBar.state == "searchActiveState"
                 property int searchPlace: active ? ownedConversation.searchIndex : 0
                 property int numMatches: active ? ownedConversation.searchNumMatches : 0
-
                 color: CmnCfg.palette.paneColor
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + numMatches : ""
                 Layout.minimumWidth: 24
+                Layout.leftMargin: -20
+
             }
 
             Common.ButtonForm {
@@ -54,6 +57,7 @@ Component {
                                             convWindow.chatListView, chatPane,
                                             convWindow, false)
                     convWindow.returnToBounds()
+                    convWindow.state = ""
                 }
             }
 
@@ -71,6 +75,7 @@ Component {
                                             convWindow.chatListView, chatPane,
                                             convWindow, true)
                     convWindow.returnToBounds()
+                    convWindow.state = ""
                 }
             }
 

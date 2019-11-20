@@ -1,5 +1,6 @@
 use super::*;
 use crate::{shared::AddressedBus, spawn};
+use std::collections::HashSet;
 use std::ops::Not;
 
 #[derive(Default)]
@@ -34,6 +35,22 @@ impl Container {
 
     pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
         self.map.get(msg_id)
+    }
+
+    /// Sets the reply type of a message to "dangling"
+    pub(super) fn set_dangling(&mut self, ids: HashSet<MsgId>, model: &mut List) -> Option<()> {
+        for id in ids.into_iter() {
+            if let Some(data) = self.get_data_mut(&id) {
+                if data.op != ReplyId::Dangling {
+                    data.op = ReplyId::Dangling;
+
+                    let ix = self.index_by_id(id)?;
+                    model.data_changed(ix, ix);
+                }
+            }
+        }
+
+        Some(())
     }
 
     pub(super) fn fill(cid: ConversationId) {
@@ -87,26 +104,33 @@ impl Container {
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
-    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<MsgId> {
+    pub(super) fn remove(&mut self, ix: usize) -> Option<MsgData> {
         if ix >= self.len() {
             return None;
         }
 
         let msg = self.list.remove(ix);
-        self.map.remove(&msg.msg_id)?;
+        let data = self.map.remove(&msg.msg_id)?;
 
-        Some(msg.msg_id)
+        Some(data)
     }
 
     pub(super) fn binary_search(&self, msg: &Message) -> Result<usize, usize> {
         self.list.binary_search(msg)
     }
 
-    pub(super) fn insert(&mut self, ix: usize, msg: Message, data: MsgData) {
+    #[must_use]
+    pub(super) fn insert(&mut self, ix: usize, msg: Message, data: MsgData) -> Option<()> {
         let mid = msg.msg_id;
+
+        if let ReplyId::Known(op) = &data.op {
+            self.get_data_mut(op)?.replies.insert(mid);
+        }
 
         self.list.insert(ix, msg);
         self.map.insert(mid, data);
+
+        Some(())
     }
 
     pub(super) fn apply_search(

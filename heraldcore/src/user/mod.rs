@@ -33,10 +33,9 @@ pub fn conversation_members(conversation_id: &ConversationId) -> Result<Vec<User
 pub fn set_profile_picture(
     id: UserId,
     profile_picture: Option<String>,
-    old_path: Option<&str>,
 ) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
-    db::set_profile_picture(&db, id, profile_picture, old_path)
+    db::set_profile_picture(&db, id, profile_picture)
 }
 
 /// Sets a user's color

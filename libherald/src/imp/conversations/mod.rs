@@ -11,15 +11,8 @@ pub(crate) mod shared;
 use shared::*;
 mod handlers;
 mod imp;
-
-/// Thin wrapper around `ConversationMeta`,
-/// with an additional field to facilitate filtering
-/// in the UI.
-#[derive(Clone, Debug)]
-pub struct Conversation {
-    inner: ConversationMeta,
-    matched: bool,
-}
+pub(crate) mod types;
+use types::*;
 
 /// A wrapper around a vector of `Conversation`, with additional
 /// fields to facilitate interaction with Qt.
@@ -60,12 +53,11 @@ impl ConversationsTrait for Conversations {
     }
 
     fn color(&self, index: usize) -> u32 {
-        ret_none!(self.list.get(index), 0).inner.color
+        ret_none!(self.color_(index), 0)
     }
 
     fn set_color(&mut self, index: usize, color: u32) -> bool {
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let cid = meta.conversation_id;
+        let cid = ret_none!(self.id(index), false);
 
         spawn!(
             {
@@ -77,28 +69,22 @@ impl ConversationsTrait for Conversations {
             false
         );
 
-        meta.color = color;
+        ret_none!(self.set_color_(index, color), false);
         true
     }
 
-    fn conversation_id(&self, index: usize) -> ffi::ConversationIdRef {
-        ret_none!(self.list.get(index), &[])
-            .inner
-            .conversation_id
-            .as_slice()
+    fn conversation_id(&self, index: usize) -> ffi::ConversationId {
+        ret_none!(self.list.get(index), vec![]).id.to_vec()
     }
 
     fn expiration_period(&self, index: usize) -> u8 {
-        ret_none!(self.list.get(index), ExpirationPeriod::default() as u8)
-            .inner
-            .expiration_period as u8
+        ret_none!(self.expiration_(index), ExpirationPeriod::default() as u8) as u8
     }
 
     fn set_expiration_period(&mut self, index: usize, period: u8) -> bool {
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let cid = meta.conversation_id;
-
         let period = period.into();
+
+        let cid = ret_none!(self.id(index), false);
 
         spawn!(
             {
@@ -110,75 +96,52 @@ impl ConversationsTrait for Conversations {
             false
         );
 
-        meta.expiration_period = period;
+        ret_none!(self.set_expiration_(index, period), false);
 
         true
     }
 
     fn muted(&self, index: usize) -> bool {
-        ret_none!(self.list.get(index), true).inner.muted
+        ret_none!(self.muted_(index), true)
     }
 
     fn set_muted(&mut self, index: usize, muted: bool) -> bool {
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let cid = meta.conversation_id;
+        let cid = ret_none!(self.id(index), false);
 
         spawn!(ret_err!(conversation::set_muted(&cid, muted)), false);
 
-        meta.muted = muted;
+        ret_none!(self.set_muted_(index, muted), false);
+
         true
     }
 
-    fn picture(&self, index: usize) -> Option<&str> {
-        self.list
-            .get(index)?
-            .inner
-            .picture
-            .as_ref()
-            .map(String::as_str)
+    fn picture(&self, index: usize) -> Option<String> {
+        self.picture_(index)?
     }
 
     fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-
-        if meta.pairwise {
+        if self.pairwise_(index).unwrap_or(false) {
             return false;
         }
 
-        {
-            let picture = picture.clone();
-            let old_picture = meta.picture.clone();
-            let cid = meta.conversation_id;
+        let cid = ret_none!(self.id(index), false);
 
-            spawn!(
-                {
-                    ret_err!(conversation::set_picture(
-                        &cid,
-                        picture.as_ref().map(|p| p.as_str()),
-                        old_picture.as_ref().map(|p| p.as_str())
-                    ));
-                },
-                false
-            );
-        }
+        // FIXME exception safety
+        let path = ret_err!(
+            conversation::set_picture(&cid, picture.as_ref().map(|p| p.as_str())),
+            false
+        );
 
-        meta.picture = picture;
+        self.set_picture_(index, path);
         true
     }
 
-    fn title(&self, index: usize) -> Option<&str> {
-        self.list
-            .get(index)?
-            .inner
-            .title
-            .as_ref()
-            .map(|t| t.as_str())
+    fn title(&self, index: usize) -> Option<String> {
+        self.title_(index)?
     }
 
     fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let cid = meta.conversation_id;
-
+        let cid = ret_none!(self.id(index), false);
         {
             let title = title.clone();
             spawn!(
@@ -192,21 +155,20 @@ impl ConversationsTrait for Conversations {
             );
         }
 
-        meta.title = title;
+        self.set_title_(index, title);
         true
     }
 
     fn pairwise(&self, index: usize) -> bool {
-        ret_none!(self.list.get(index), false).inner.pairwise
+        ret_none!(self.pairwise_(index), false)
     }
 
     fn remove_conversation(&mut self, index: u64) -> bool {
         let index = index as usize;
-        let meta = &mut ret_none!(self.list.get_mut(index), false).inner;
-        let cid = meta.conversation_id;
+        let cid = ret_none!(self.id(index), false);
 
         // cannot remove pairwise conversation!
-        if meta.pairwise {
+        if self.pairwise_(index).unwrap_or(false) {
             return false;
         }
 
@@ -318,11 +280,17 @@ impl Conversations {
     fn inner_filter(&mut self) -> Option<()> {
         let filter = &self.filter.as_ref()?;
 
-        for (ix, conv) in self.list.iter_mut().enumerate() {
-            let matched = conv.inner.matches(filter);
+        let list = &mut self.list;
+        for (ix, Conversation { matched, id }) in list.iter_mut().enumerate() {
+            let data = cont_none!(shared::data(id));
 
-            if conv.matched != matched {
-                conv.matched = matched;
+            let new_matched = match &data.title {
+                Some(title) => filter.is_match(&title),
+                None => false,
+            };
+
+            if new_matched != *matched {
+                *matched = new_matched;
                 self.model.data_changed(ix, ix);
             }
         }

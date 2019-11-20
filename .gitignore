@@ -12,6 +12,7 @@ stats/
 ## heraldcore config file
 .heraldcore_conf.toml
 .heraldcore.toml
+herald_conf.toml
 
 ## profiling data
 callgrind.out*
@@ -228,4 +229,3 @@ Temporary Items
 
 node_modules
 package-lock.json
-

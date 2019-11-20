@@ -1,6 +1,5 @@
 use crate::{
     chainkeys,
-    config::Config,
     conversation::{settings, ConversationMeta},
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
@@ -39,11 +38,11 @@ mod helper;
 /// `Notification`s contain info about what updates were made to the database.
 pub enum Notification {
     /// A new message has been received.
-    NewMsg(message::Message),
+    NewMsg(Box<message::Message>),
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
     /// A new user has been added
-    NewUser(user::User, ConversationMeta),
+    NewUser(Box<(user::User, ConversationMeta)>),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.
@@ -56,14 +55,14 @@ pub enum Notification {
 
 /// Deprecates key on server.
 pub fn dep_key(to_dep: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
     let req = dep_key::Req(kp.sign(to_dep));
     Ok(helper::dep_key(&req)?.0)
 }
 
 /// Adds new key to the server's key registry.
 pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
     let req = new_key::Req(kp.sign(to_new));
     Ok(helper::new_key(&req)?.0)
 }
@@ -84,7 +83,7 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
 pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
-    let kp = Config::static_keypair()?;
+    let kp = config::keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
 
@@ -94,53 +93,6 @@ pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
 
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }
-
-///// Starts a conversation with `members`. Note: all members must be in the user's users already.
-//pub(crate) fn start_conversation(
-//    members: &[UserId],
-//    title: Option<String>,
-//    picture: Option<String>,
-//) -> Result<ConversationId, HErr> {
-//    use crate::conversation;
-//
-//    let pairwise = conversation::get_pairwise_conversations(members)?;
-//
-//    let mut db = crate::db::Database::get()?;
-//    let tx = db.transaction()?;
-//
-//    let mut conv_builder = conversation::ConversationBuilder::new();
-//
-//    if let Some(title) = title.as_ref() {
-//        conv_builder.title(title.clone());
-//    }
-//
-//    if let Some(picture) = picture.as_ref() {
-//        conv_builder.picture(picture.clone());
-//    }
-//
-//    let meta = conv_builder.add_with_tx(&tx)?.meta;
-//    let cid = meta.conversation_id;
-//
-//    crate::members::db::add_members_with_tx(&tx, cid, members)?;
-//    tx.commit()?;
-//
-//    let kp = crate::config::Config::static_keypair()?;
-//    let gen = Genesis::new(kp.secret_key());
-//    cid.store_genesis(&gen)?;
-//
-//    let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
-//        members: Vec::from(members),
-//        gen,
-//        cid,
-//        title: title.map(String::from),
-//    }));
-//
-//    for pw_cid in pairwise {
-//        send_cmessage(pw_cid, &body)?;
-//    }
-//
-//    Ok(cid)
-//}
 
 pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))

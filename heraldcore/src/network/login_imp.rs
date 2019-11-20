@@ -18,8 +18,9 @@ where
 
     CAUGHT_UP.store(false, Ordering::Release);
 
-    let uid = Config::static_id()?;
-    let kp = Config::static_keypair()?;
+    let uid = config::id()?;
+    let kp = config::keypair()?;
+
     let gid = GlobalId {
         uid,
         did: *kp.public_key(),

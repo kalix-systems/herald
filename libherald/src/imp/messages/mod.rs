@@ -3,9 +3,7 @@ use crate::{
 };
 use herald_common::UserId;
 use heraldcore::{
-    abort_err,
-    config::Config,
-    conversation,
+    abort_err, config, conversation,
     errors::HErr,
     message::{
         self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
@@ -52,7 +50,7 @@ impl MessagesTrait for Messages {
             emit,
             container: Container::default(),
             conversation_id: None,
-            local_id: abort_err!(Config::static_id()),
+            local_id: abort_err!(config::id()),
             search: SearchState::new(),
         }
     }
@@ -220,7 +218,7 @@ impl MessagesTrait for Messages {
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
         spawn!(message::delete_message(&id), false);
-        self.raw_remove(id, ix);
+        self.remove_helper(id, ix);
 
         true
     }
@@ -272,10 +270,10 @@ impl MessagesTrait for Messages {
                 MsgUpdate::NewMsg(new) => {
                     new_msg_toast(&new);
 
-                    ret_err!(self.raw_insert(*new, SaveStatus::Saved));
+                    ret_err!(self.insert_helper(*new, SaveStatus::Saved));
                 }
                 MsgUpdate::BuilderMsg(msg) => {
-                    ret_err!(self.raw_insert(*msg, SaveStatus::Unsaved));
+                    ret_err!(self.insert_helper(*msg, SaveStatus::Unsaved));
                 }
                 MsgUpdate::Receipt {
                     msg_id,
@@ -402,5 +400,12 @@ impl MessagesTrait for Messages {
         self.search.index.map(|ix| ix + 1).unwrap_or(0) as u64
     }
 
-    fn set_search_hint(&mut self, _scroll_position: f32, _scroll_height: f32) {}
+    fn set_search_hint(&mut self, scroll_position: f32, scroll_height: f32) {
+        if scroll_position.is_nan() || scroll_height.is_nan() {
+            return;
+        }
+
+        let percentage = scroll_position + scroll_height / 2.0;
+        self.search.start_hint(percentage, &self.container);
+    }
 }

@@ -12,8 +12,30 @@ new_type! {
     secret SecretKey(SECRET_KEY_LEN)
 }
 
+impl From<crate::sign::SecretKey> for SecretKey {
+    fn from(sk: crate::sign::SecretKey) -> Self {
+        let mut skbuf = [0u8; SECRET_KEY_LEN];
+        let res = unsafe {
+            crypto_sign_ed25519_sk_to_curve25519(skbuf.as_mut_ptr(), sk.as_ref().as_ptr())
+        };
+        assert_eq!(res, 0);
+        SecretKey(skbuf)
+    }
+}
+
 new_type! {
     public PublicKey(PUBLIC_KEY_LEN)
+}
+
+impl From<crate::sign::PublicKey> for PublicKey {
+    fn from(pk: crate::sign::PublicKey) -> Self {
+        let mut pkbuf = [0u8; PUBLIC_KEY_LEN];
+        let res = unsafe {
+            crypto_sign_ed25519_pk_to_curve25519(pkbuf.as_mut_ptr(), pk.as_ref().as_ptr())
+        };
+        assert_eq!(res, 0);
+        PublicKey(pkbuf)
+    }
 }
 
 new_type! {

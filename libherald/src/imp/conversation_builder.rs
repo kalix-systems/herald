@@ -26,10 +26,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         Self {
             emit,
             model,
-            local_id: push_err!(
-                heraldcore::config::Config::static_id(),
-                "Failed to get local id"
-            ),
+            local_id: push_err!(heraldcore::config::id(), "Failed to get local id"),
             inner: Inner::new(),
         }
     }

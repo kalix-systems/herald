@@ -23,10 +23,11 @@ Flickable {
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
+        policy: ScrollBar.AsNeeded
     }
 
     Component.onCompleted: {
-        chatScrollBar.position = 1.0
+        chatScrollBar.position = 1.0 + chatScrollBar.size
     }
 
     Column {
@@ -101,6 +102,8 @@ Flickable {
                                             replyId)).y - convWindow.height / 2
                             convWindow.returnToBounds()
                             convWindow.state = ""
+                            replyHighlightAnimation.target =
+                                    chatListView.itemAt(ownedConversation.indexById(replyId)).highlight
                             replyHighlightAnimation.start()
                         }
                     }
@@ -173,6 +176,11 @@ Flickable {
             PropertyChanges {
                 target: cvPane
                 rebound: blankTransition
+            }
+
+            PropertyChanges {
+                target: chatScrollBar
+                policy: ScrollBar.AlwaysOn
             }
         }
     ]

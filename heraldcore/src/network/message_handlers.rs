@@ -81,7 +81,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                 builder.expiration = expiration;
 
                 if let Some(msg) = builder.store()? {
-                    ev.notifications.push(Notification::NewMsg(msg));
+                    ev.notifications.push(Notification::NewMsg(Box::new(msg)));
                 }
                 ev.replies.push((cid, form_ack(mid)?));
             }
@@ -127,7 +127,8 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
                 let conversation::Conversation { meta, .. } = conversation;
                 cid.store_genesis(&gen)?;
 
-                ev.notifications.push(Notification::NewUser(user, meta));
+                ev.notifications
+                    .push(Notification::NewUser(Box::new((user, meta))));
 
                 ev.replies.push((
                     cid,

@@ -9,6 +9,12 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
+    pub(super) fn entry_changed(&mut self, ix: usize) {
+        if ix < self.container.len() {
+            self.model.data_changed(ix, ix);
+        }
+    }
+
     pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
         let old = (self.search.current(), self.search.index);
 
@@ -43,7 +49,7 @@ impl Messages {
             if let Some(data) = self.container.get_data_mut(&old.msg_id) {
                 data.match_status = MatchStatus::Matched;
                 let ix = self.container.index_of(&old)?;
-                self.model.data_changed(ix, ix);
+                self.entry_changed(ix);
             }
         }
 
@@ -53,11 +59,11 @@ impl Messages {
         data.match_status = MatchStatus::Focused;
 
         let ix = self.container.index_of(&new)?;
-        self.model.data_changed(ix, ix);
+        self.entry_changed(ix);
         Some(ix)
     }
 
-    pub(super) fn raw_remove(&mut self, msg_id: MsgId, ix: usize) {
+    pub(super) fn remove_helper(&mut self, msg_id: MsgId, ix: usize) {
         self.search.try_remove_match(
             &msg_id,
             &mut self.container,
@@ -76,18 +82,22 @@ impl Messages {
         let succ_state = (self.is_tail(ix), self.is_head(ix));
 
         self.model.begin_remove_rows(ix, ix);
-        self.container.mem_remove(ix);
+        let data = self.container.remove(ix);
         self.model.end_remove_rows();
+
+        if let Some(MsgData { replies, .. }) = data {
+            self.container.set_dangling(replies, &mut self.model);
+        }
 
         if ix > 0 {
             let prev_head = self.is_head(ix - 1);
 
             if prev_state != (prev_head, self.is_tail(ix - 1)) {
-                self.model.data_changed(ix - 1, ix - 1);
+                self.entry_changed(ix - 1);
             }
 
             if ix + 1 < self.container.len() && succ_state != (prev_head, self.is_tail(ix + 1)) {
-                self.model.data_changed(ix + 1, ix + 1);
+                self.entry_changed(ix + 1);
             }
         }
 
@@ -100,7 +110,7 @@ impl Messages {
         }
     }
 
-    pub(super) fn raw_insert(&mut self, msg: Msg, save_status: SaveStatus) -> Result<(), HErr> {
+    pub(super) fn insert_helper(&mut self, msg: Msg, save_status: SaveStatus) -> Result<(), HErr> {
         let (message, data) = Message::split_msg(msg, save_status);
 
         let cid = self.conversation_id.ok_or(NE!())?;
@@ -127,8 +137,9 @@ impl Messages {
 
         let succ_state = self.is_tail(ix);
 
+        self.container.insert(ix, message, data).ok_or(NE!())?;
+
         self.model.begin_insert_rows(ix, ix);
-        self.container.insert(ix, message, data);
         self.model.end_insert_rows();
 
         self.search.try_insert_match(
@@ -148,11 +159,11 @@ impl Messages {
         }
 
         if ix > 0 && prev_state != self.is_tail(ix - 1) {
-            self.model.data_changed(ix - 1, ix - 1);
+            self.entry_changed(ix - 1);
         }
 
         if ix + 1 < self.container.len() && succ_state != self.is_tail(ix + 1) {
-            self.model.data_changed(ix + 1, ix + 1);
+            self.entry_changed(ix + 1);
         }
 
         use crate::imp::conversations::{shared::*, Conversations};
@@ -164,7 +175,7 @@ impl Messages {
     pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
         for mid in mids {
             if let Some(ix) = self.container.index_by_id(mid) {
-                self.raw_remove(mid, ix);
+                self.remove_helper(mid, ix);
             }
         }
     }

@@ -10,17 +10,17 @@ impl Conversations {
         let pos = self
             .list
             .iter()
-            .position(|c| c.inner.conversation_id == cid)?;
+            .position(|Conversation { id, .. }| id == &cid)?;
 
         match update {
             SettingsUpdate::Expiration(period) => {
-                self.list.get_mut(pos)?.inner.expiration_period = period;
+                self.set_expiration_(pos, period)?;
             }
             SettingsUpdate::Color(color) => {
-                self.list.get_mut(pos)?.inner.color = color;
+                self.set_color_(pos, color)?;
             }
             SettingsUpdate::Title(title) => {
-                self.list.get_mut(pos)?.inner.title = title;
+                self.set_title_(pos, title)?;
             }
         }
 
@@ -39,7 +39,7 @@ impl Conversations {
         let pos = match self
             .list
             .iter()
-            .position(|c| c.inner.conversation_id == cid)
+            .position(|Conversation { id, .. }| id == &cid)
         {
             Some(pos) => pos,
             None => return,
@@ -65,15 +65,17 @@ impl Conversations {
         self.insert_new_conversation(inner)
     }
 
-    fn insert_new_conversation(&mut self, inner: ConversationMeta) {
+    fn insert_new_conversation(&mut self, meta: ConversationMeta) {
         let matched = match self.filter.as_ref() {
-            Some(filter) => inner.matches(filter),
+            Some(filter) => meta.matches(filter),
             None => true,
         };
 
-        let conv = Conversation { matched, inner };
+        let (mut conv, data) = split_meta(meta);
+        conv.matched = matched;
 
         self.model.begin_insert_rows(0, 0);
+        insert_data(conv.id, data);
         self.list.push_front(conv);
         self.model.end_insert_rows();
     }

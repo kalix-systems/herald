@@ -1,8 +1,8 @@
 use crate::{
     ffi,
+    imp::conversations::shared as conv,
     interface::{
-        GlobalMessageSearchEmitter as Emitter, GlobalMessageSearchList as List,
-        GlobalMessageSearchTrait as Interface,
+        MessageSearchEmitter as Emitter, MessageSearchList as List, MessageSearchTrait as Interface,
     },
     ret_err,
 };
@@ -16,7 +16,7 @@ use std::ops::Not;
 mod imp;
 
 /// Global message search handle
-pub struct GlobalMessageSearch {
+pub struct MessageSearch {
     pattern: Option<SearchPattern>,
     emit: Emitter,
     model: List,
@@ -24,7 +24,7 @@ pub struct GlobalMessageSearch {
     rx: Option<Receiver<Vec<SearchResult>>>,
 }
 
-impl Interface for GlobalMessageSearch {
+impl Interface for MessageSearch {
     fn new(emit: Emitter, model: List) -> Self {
         Self {
             pattern: None,
@@ -49,12 +49,12 @@ impl Interface for GlobalMessageSearch {
                     self.pattern = Some(pattern.clone());
                     self.emit.regex_search_changed();
 
-                    ret_err!(imp::start_search(pattern.clone(), self.emit()));
+                    ret_err!(self.start_search(pattern));
                 }
                 (false, true) => {
                     ret_err!(pattern.normal_mode());
                     self.emit.regex_search_changed();
-                    ret_err!(imp::start_search(pattern.clone(), self.emit()));
+                    ret_err!(self.start_search(pattern));
                 }
                 _ => {}
             }
@@ -77,7 +77,7 @@ impl Interface for GlobalMessageSearch {
                 self.pattern = Some(old.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(imp::start_search(old, self.emit()));
+                ret_err!(self.start_search(old));
             }
             (Some(new), None) => {
                 self.clear_search();
@@ -89,7 +89,7 @@ impl Interface for GlobalMessageSearch {
                 self.pattern = Some(pattern.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(imp::start_search(pattern, self.emit()));
+                ret_err!(self.start_search(pattern));
             }
             (None, _) => self.clear_search(),
         }
@@ -116,16 +116,16 @@ impl Interface for GlobalMessageSearch {
 
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
-            for mut results in rx.try_iter() {
-                if results.is_empty() {
+            for mut new_results in rx.try_iter() {
+                if new_results.is_empty() {
                     continue;
                 }
 
                 let last_ix = self.results.len().saturating_sub(1);
 
                 self.model
-                    .begin_insert_rows(last_ix, last_ix + results.len());
-                self.results.append(&mut results);
+                    .begin_insert_rows(last_ix, last_ix + new_results.len().saturating_sub(1));
+                self.results.append(&mut new_results);
                 self.model.end_insert_rows();
             }
         }
@@ -153,6 +153,26 @@ impl Interface for GlobalMessageSearch {
 
     fn time(&self, index: usize) -> Option<i64> {
         Some(self.results.get(index).as_ref()?.time.0)
+    }
+
+    fn conversation_pairwise(&self, index: usize) -> Option<bool> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::pairwise(&cid)
+    }
+
+    fn conversation_title(&self, index: usize) -> Option<String> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::title(&cid)
+    }
+
+    fn conversation_color(&self, index: usize) -> Option<u32> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::color(&cid)
+    }
+
+    fn conversation_picture(&self, index: usize) -> Option<String> {
+        let cid = self.results.get(index).as_ref()?.conversation;
+        conv::picture(&cid)
     }
 
     fn emit(&mut self) -> &mut Emitter {

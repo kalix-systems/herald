@@ -50,12 +50,11 @@ ColumnLayout {
             width: reply.width
             height: reply.height
             z: CmnCfg.overlayZ
+            enabled: !replyPreview.isDangling ? true : false
         }
 
         NumberAnimation {
             id: replyHighlightAnimation
-            target: chatListView.itemAt(ownedConversation.indexById(
-                                            replyId)).highlight
             property: "opacity"
             from: 1.0
             to: 0.0
