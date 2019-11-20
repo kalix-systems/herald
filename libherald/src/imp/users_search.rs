@@ -1,9 +1,6 @@
 use crate::{
     ffi,
-    imp::users::{
-        color, name, profile_picture,
-        shared::{get_user, user_ids},
-    },
+    imp::users::shared::{color, get_user, name, profile_picture, user_ids},
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
     ret_err,
 };

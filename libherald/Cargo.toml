@@ -24,9 +24,6 @@ path    = "../herald_common"
 [dependencies.heraldcore]
 path    = "../heraldcore"
 
-[dependencies.coremacros]
-path    = "../heraldcore/coremacros"
-
 [dependencies.search_pattern]
 path    = "../heraldcore/search_pattern"
 
