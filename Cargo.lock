@@ -359,8 +359,8 @@ name = "crypto_helpers"
 version = "0.1.0"
 dependencies = [
  "herald_common 0.1.0",
- "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
- "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kcl 0.1.0",
+ "kson 0.1.0",
 ]
 
 [[package]]
