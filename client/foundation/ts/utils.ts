@@ -15,6 +15,7 @@ export function friendlyTimestamp(msEpochTime: number): string {
   const secondsPerHour = 3600;
   const secondsPerDay = 3600 * 24;
   const secondsPerWeek = 3600 * 24 * 7;
+  const secondsPerYear = 3600 * 24 * 365;
 
   var weekdays = new Array(7);
 	weekdays[0] = "Sun";
@@ -24,6 +25,20 @@ export function friendlyTimestamp(msEpochTime: number): string {
 	weekdays[4] = "Thurs";
 	weekdays[5] = "Fri";
 	weekdays[6] = "Sat";
+
+var months = new Array(12);
+	months[0] = "Jan";
+	months[1] = "Feb";
+	months[2] = "Mar";
+	months[3] = "Apr";
+	months[4] = "May";
+	months[5] = "Jun";
+	months[6] = "Jul";
+	months[7] = "Aug";
+	months[8] = "Sep";
+	months[9] = "Oct";
+	months[10] = "Nov";
+	months[11] = "Dec";
 
   const dt = new Date(msEpochTime);
   const now = Date.now();
@@ -47,7 +62,16 @@ export function friendlyTimestamp(msEpochTime: number): string {
 
   }
 
-  return dt.toDateString();
+  if (diff < secondsPerYear) {
+  	const monthNum = dt.getMonth();
+  	const dateNum = dt.getDate();
+  	return months[monthNum] + " " + dateNum;
+  }
+
+  //not using datestring because don't want day of the week
+  const monthNum = dt.getMonth();
+  const dateNum = dt.getDate();
+  return months[monthNum] + " " + dateNum + " " + dt.getFullYear();
 }
 
 function isBoolean(maybeBool: unknown): boolean {
