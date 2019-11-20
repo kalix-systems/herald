@@ -46,7 +46,6 @@ Item {
 
     focus: true
 
-
     Component {
         id: splash
 
@@ -76,12 +75,9 @@ Item {
                 anchors.centerIn: parent
                 source: "qrc:/herald.icns"
                 mipmap: true
-
             }
         }
     }
-
-
 
     SplitView {
         id: rootSplitView
@@ -103,7 +99,7 @@ Item {
             Rectangle {
                 id: toolBarHandle
                 implicitWidth: 1
-                color: "white"
+                color: CmnCfg.palette.sideBarHighlightColor
                 height: CmnCfg.toolbarHeight
                 anchors {
                     top: parent.top

@@ -27,21 +27,18 @@ ToolBar {
 
         Common.ConfigAvatar {}
 
-        Text {
+        Label {
             id: headerText
             text: "Conversations"
+            Layout.fillWidth: true
             font {
                 pixelSize: CmnCfg.headerSize
                 family: CmnCfg.chatFont.name
                 bold: true
             }
+            elide: Text.ElideRight
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
             color: CmnCfg.palette.mainColor
-        }
-
-        // filler item
-        Item {
-            Layout.fillWidth: true
         }
 
         Row {

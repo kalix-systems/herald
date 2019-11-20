@@ -64,9 +64,9 @@ ToolBar {
             }
             Layout.alignment: Qt.AlignLeft
             Layout.fillWidth: true
-            elide: "ElideRight"
+            elide: Label.ElideRight
             text: conversationItem.title
-            color: "white"
+            color: CmnCfg.palette.mainColor
         }
 
         Loader {

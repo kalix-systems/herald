@@ -130,7 +130,7 @@ Item {
                         }
 
                         Loader {
-                            asynchronous: index !== 0
+                            asynchronous: index > 1
                             sourceComponent: Grid {
                                 id: emojiGrid
                                 columns: 10
@@ -176,32 +176,37 @@ Item {
                 anchorIndex: 0
                 imageSource: "qrc:/emoji-categories/gestural.svg"
             }
+
             AnchorButton {
                 anchorIndex: 1
-                imageSource: "qrc:/emoji-categories/nature.svg"
+                imageSource: "qrc:/emoji-categories/gestural.svg"
             }
             AnchorButton {
                 anchorIndex: 2
-                imageSource: "qrc:/emoji-categories/food.svg"
+                imageSource: "qrc:/emoji-categories/nature.svg"
             }
             AnchorButton {
                 anchorIndex: 3
-                imageSource: "qrc:/emoji-categories/transport.svg"
+                imageSource: "qrc:/emoji-categories/food.svg"
             }
             AnchorButton {
                 anchorIndex: 4
-                imageSource: "qrc:/emoji-categories/sports.svg"
+                imageSource: "qrc:/emoji-categories/transport.svg"
             }
             AnchorButton {
                 anchorIndex: 5
-                imageSource: "qrc:/emoji-categories/items.svg"
+                imageSource: "qrc:/emoji-categories/sports.svg"
             }
             AnchorButton {
                 anchorIndex: 6
-                imageSource: "qrc:/emoji-categories/symbols.svg"
+                imageSource: "qrc:/emoji-categories/items.svg"
             }
             AnchorButton {
                 anchorIndex: 7
+                imageSource: "qrc:/emoji-categories/symbols.svg"
+            }
+            AnchorButton {
+                anchorIndex: 8
                 imageSource: "qrc:/emoji-categories/flags.svg"
             }
         }
