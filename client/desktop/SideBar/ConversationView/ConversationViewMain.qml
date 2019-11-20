@@ -22,7 +22,7 @@ ListView {
     id: conversationList
     clip: true
     currentIndex: -1
-    boundsBehavior: Flickable.StopAtBounds
+    interactive: false
     height: contentHeight
     delegate: Item {
         id: conversationItem

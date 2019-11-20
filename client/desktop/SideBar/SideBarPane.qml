@@ -12,6 +12,7 @@ Flickable {
     anchors.fill: parent
     contentHeight: wrapperCol.height
     interactive: true
+    boundsBehavior: Flickable.StopAtBounds
     ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded
         width: CmnCfg.padding
         }

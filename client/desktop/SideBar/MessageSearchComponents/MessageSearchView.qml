@@ -13,8 +13,8 @@ import "qrc:/imports/Avatar" as Av
     id: messageSearchList
     clip: true
     currentIndex: -1
-    boundsBehavior: Flickable.StopAtBounds
     height: contentHeight
+    interactive: false
 
     delegate: Item {
         id: messageItem
