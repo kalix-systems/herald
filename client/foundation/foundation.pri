@@ -18,6 +18,7 @@ CONFIG(debug, debug|profile|release) {
         LIBS += $${PWD}/../../target/debug/libherald.so
     }
 }
+
 CONFIG(profile, debug|profile|release) {
     RUST_BUILD_TYPE = release
 

@@ -139,11 +139,11 @@ impl Container {
         model: &mut List,
         emit: &mut Emitter,
     ) -> Option<Vec<Match>> {
-        if search.active.not() || search.pattern.raw().is_empty() {
+        let pattern = search.pattern.as_ref()?;
+
+        if search.active.not() || pattern.raw().is_empty() {
             return None;
         }
-
-        let pattern = &search.pattern;
 
         let mut matches: Vec<Match> = Vec::new();
 
