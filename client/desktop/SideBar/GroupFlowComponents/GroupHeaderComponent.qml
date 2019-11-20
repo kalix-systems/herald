@@ -14,10 +14,13 @@ Rectangle {
     color: CmnCfg.palette.paneColor
     property alias profPic: groupImageLoader.imageSource
 
-    Rectangle {
+    Row {
+        height: 42
         anchors.top: parent.top
         anchors.topMargin: CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
+        spacing: CmnCfg.largeMargin
+    Rectangle {
         width: 42
         height: width
         color: "black"
@@ -41,6 +44,15 @@ Rectangle {
             fill: CmnCfg.palette.paneColor
             onClicked: groupPicDialogue.open()
         }
+    }
+
+    Common.ButtonForm {
+        source: "qrc:/clear-photo-icon.svg"
+        anchors.verticalCenter: parent.verticalCenter
+        visible: groupImageLoader.imageSource !== ""
+        enabled: visible
+        onClicked: groupImageLoader.imageSource = ""
+    }
     }
 
     FileDialog {
