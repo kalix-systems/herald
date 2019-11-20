@@ -55,7 +55,10 @@ pub enum Variant {
 use Variant::*;
 
 impl fmt::Display for KsonErrorInner {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         write!(f, "Error while deserializing at {}", self.location)?;
         if let Some(msg) = &self.message {
             write!(f, " with extra msg {}", msg)?;
@@ -125,7 +128,10 @@ pub struct Location {
 }
 
 impl fmt::Display for Location {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         write!(
             f,
             "{file}:{line}:{column}",

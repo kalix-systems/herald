@@ -74,7 +74,11 @@ fn dep_check(
     }
 }
 
-fn dep_is_some(ts: Option<i64>, signed_by: Option<&[u8]>, sig: Option<&[u8]>) -> bool {
+fn dep_is_some(
+    ts: Option<i64>,
+    signed_by: Option<&[u8]>,
+    sig: Option<&[u8]>,
+) -> bool {
     ts.is_some() || signed_by.is_some() || sig.is_some()
 }
 
@@ -88,7 +92,10 @@ type RawPkMeta<'a> = (
 );
 
 impl Conn {
-    pub async fn device_exists(&mut self, pk: &sig::PublicKey) -> Result<bool, Error> {
+    pub async fn device_exists(
+        &mut self,
+        pk: &sig::PublicKey,
+    ) -> Result<bool, Error> {
         let stmt = self
             .prepare_typed(sql!("device_exists"), types![BYTEA])
             .await?;
@@ -195,7 +202,10 @@ impl Conn {
         Ok(register::Res::Success)
     }
 
-    pub async fn add_key(&mut self, key: Signed<sig::PublicKey>) -> Result<PKIResponse, Error> {
+    pub async fn add_key(
+        &mut self,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<PKIResponse, Error> {
         let tx = self.transaction().await?;
 
         let user_id_stmt = tx
@@ -246,7 +256,10 @@ impl Conn {
         unique_violation_to_redundant(res)
     }
 
-    pub async fn read_key(&mut self, key: sig::PublicKey) -> Result<sig::PKMeta, Error> {
+    pub async fn read_key(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Result<sig::PKMeta, Error> {
         use sig::*;
 
         let stmt = self
@@ -319,7 +332,10 @@ impl Conn {
         Ok(PKIResponse::Success)
     }
 
-    pub async fn user_exists(&mut self, uid: &UserId) -> Result<bool, Error> {
+    pub async fn user_exists(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<bool, Error> {
         let stmt = self
             .prepare_typed(sql!("user_exists"), types![TEXT])
             .await?;
@@ -329,7 +345,10 @@ impl Conn {
         Ok(!res.is_empty())
     }
 
-    pub async fn key_is_valid(&mut self, key: sig::PublicKey) -> Result<bool, Error> {
+    pub async fn key_is_valid(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Result<bool, Error> {
         let stmt = self
             .prepare_typed(sql!("key_is_valid"), types![BYTEA])
             .await?;
@@ -358,7 +377,11 @@ impl Conn {
         Ok(out)
     }
 
-    pub async fn expire_pending(&mut self, key: sig::PublicKey, limit: u32) -> Result<(), Error> {
+    pub async fn expire_pending(
+        &mut self,
+        key: sig::PublicKey,
+        limit: u32,
+    ) -> Result<(), Error> {
         let text = format!(sql!("expire_pending"), limit = limit);
 
         let stmt = self.prepare_typed(&text, types![BYTEA]).await?;
@@ -367,7 +390,10 @@ impl Conn {
         Ok(())
     }
 
-    pub async fn valid_keys(&mut self, uid: &UserId) -> Result<Vec<sig::PublicKey>, Error> {
+    pub async fn valid_keys(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<Vec<sig::PublicKey>, Error> {
         let stmt = self
             .prepare_typed(sql!("get_valid_keys_by_user_id"), types![TEXT])
             .await?;
@@ -382,7 +408,10 @@ impl Conn {
             .collect()
     }
 
-    pub async fn read_meta(&mut self, uid: &UserId) -> Result<UserMeta, Error> {
+    pub async fn read_meta(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<UserMeta, Error> {
         let stmt = self.prepare_typed(sql!("read_meta"), types![TEXT]).await?;
 
         let meta_inner: Result<BTreeMap<sig::PublicKey, sig::PKMeta>, Error> = self
