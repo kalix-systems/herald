@@ -3,7 +3,6 @@ pub(crate) use network_types::cmessages::*;
 
 /// Seals the messages.
 pub fn seal(
-    // note: this is only mut because BlockStore thinks it should be
     cid: ConversationId,
     content: &ConversationMessageBody,
 ) -> Result<(ConversationMessage, BlockHash, ChainKey), HErr> {
@@ -20,6 +19,7 @@ pub fn seal(
         .ok_or(HErr::ChainError(ChainKeysError::Chain(
             ChainMailError::CryptoError,
         )))?;
+
     let hash = block
         .compute_hash()
         .ok_or(HErr::ChainError(ChainKeysError::Chain(
