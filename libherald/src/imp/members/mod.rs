@@ -35,7 +35,10 @@ pub struct Members {
 }
 
 impl MembersTrait for Members {
-    fn new(emit: Emitter, model: List) -> Members {
+    fn new(
+        emit: Emitter,
+        model: List,
+    ) -> Members {
         // this should *really* never fail
         let filter = SearchPattern::new_normal("".into()).ok();
 
@@ -53,7 +56,10 @@ impl MembersTrait for Members {
         self.conversation_id.as_ref().map(|id| id.as_slice())
     }
 
-    fn set_conversation_id(&mut self, conversation_id: Option<ffi::ConversationIdRef>) {
+    fn set_conversation_id(
+        &mut self,
+        conversation_id: Option<ffi::ConversationIdRef>,
+    ) {
         if let (Some(id), None) = (conversation_id, self.conversation_id) {
             let conversation_id = ret_err!(ConversationId::try_from(id));
 
@@ -76,21 +82,30 @@ impl MembersTrait for Members {
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> ffi::UserIdRef {
+    fn user_id(
+        &self,
+        row_index: usize,
+    ) -> ffi::UserIdRef {
         ret_none!(self.list.get(row_index), ffi::NULL_USER_ID)
             .id
             .as_str()
     }
 
     /// Returns conversation id.
-    fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
+    fn pairwise_conversation_id(
+        &self,
+        row_index: usize,
+    ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
         let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> String {
+    fn name(
+        &self,
+        row_index: usize,
+    ) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
         let inner = ret_none!(get_user(uid), uid.to_string());
 
@@ -98,26 +113,38 @@ impl MembersTrait for Members {
     }
 
     /// Returns profile picture
-    fn profile_picture(&self, row_index: usize) -> Option<String> {
+    fn profile_picture(
+        &self,
+        row_index: usize,
+    ) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
         let inner = get_user(uid)?;
         inner.profile_picture.clone()
     }
 
     /// Returns user's color
-    fn color(&self, row_index: usize) -> u32 {
+    fn color(
+        &self,
+        row_index: usize,
+    ) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
         let inner = ret_none!(get_user(&uid), 0);
         inner.color
     }
 
-    fn status(&self, row_index: usize) -> u8 {
+    fn status(
+        &self,
+        row_index: usize,
+    ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
         let inner = ret_none!(get_user(&uid), 0);
         inner.status as u8
     }
 
-    fn matched(&self, row_index: usize) -> bool {
+    fn matched(
+        &self,
+        row_index: usize,
+    ) -> bool {
         ret_none!(self.list.get(row_index), true).matched
     }
 
@@ -125,7 +152,10 @@ impl MembersTrait for Members {
         self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
-    fn set_filter(&mut self, pattern: String) {
+    fn set_filter(
+        &mut self,
+        pattern: String,
+    ) {
         if pattern.is_empty() {
             self.clear_filter();
             return;
@@ -150,7 +180,10 @@ impl MembersTrait for Members {
     }
 
     /// Sets filter mode
-    fn set_filter_regex(&mut self, use_regex: bool) {
+    fn set_filter_regex(
+        &mut self,
+        use_regex: bool,
+    ) {
         self.filter = match self.filter.take() {
             Some(mut filter) => {
                 if use_regex {
@@ -185,7 +218,10 @@ impl MembersTrait for Members {
         self.list.len()
     }
 
-    fn add_to_conversation(&mut self, user_id: ffi::UserId) -> bool {
+    fn add_to_conversation(
+        &mut self,
+        user_id: ffi::UserId,
+    ) -> bool {
         let user_id = ret_err!(user_id.as_str().try_into(), false);
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
@@ -205,7 +241,10 @@ impl MembersTrait for Members {
         true
     }
 
-    fn remove_from_conversation_by_index(&mut self, index: u64) -> bool {
+    fn remove_from_conversation_by_index(
+        &mut self,
+        index: u64,
+    ) -> bool {
         let index = index as usize;
         let conv_id = ret_err!(
             ConversationId::try_from(ret_none!(self.conversation_id, false)),

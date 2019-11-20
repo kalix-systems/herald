@@ -59,7 +59,10 @@ pub enum HErr {
 }
 
 impl fmt::Display for HErr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    fn fmt(
+        &self,
+        f: &mut fmt::Formatter<'_>,
+    ) -> fmt::Result {
         use HErr::*;
         match self {
             DatabaseError(e) => write!(f, "Database Error: {}", e),

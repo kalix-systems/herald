@@ -10,7 +10,10 @@ pub struct Event {
 
 impl Event {
     /// Merges two events.
-    pub fn merge(&mut self, mut other: Self) {
+    pub fn merge(
+        &mut self,
+        mut other: Self,
+    ) {
         self.notifications.append(&mut other.notifications);
         self.replies.append(&mut other.replies);
     }

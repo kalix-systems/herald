@@ -83,7 +83,10 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 }
 
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
-pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
+pub fn send_user_req(
+    uid: UserId,
+    cid: ConversationId,
+) -> Result<(), HErr> {
     let kp = config::keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
@@ -95,7 +98,10 @@ pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }
 
-pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
+pub(crate) fn send_normal_message(
+    cid: ConversationId,
+    msg: cmessages::Msg,
+) -> Result<(), HErr> {
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 

@@ -26,22 +26,34 @@ impl<'a> Obj<'a> {
         }
     }
 
-    pub fn name(mut self, name: &'a str) -> Self {
+    pub fn name(
+        mut self,
+        name: &'a str,
+    ) -> Self {
         self.name.replace(name);
         self
     }
 
-    pub fn funcs(mut self, functions: BTreeMap<String, Function>) -> Self {
+    pub fn funcs(
+        mut self,
+        functions: BTreeMap<String, Function>,
+    ) -> Self {
         self.functions = functions;
         self
     }
 
-    pub fn item_props(mut self, item_props: BTreeMap<String, ItemProperty>) -> Self {
+    pub fn item_props(
+        mut self,
+        item_props: BTreeMap<String, ItemProperty>,
+    ) -> Self {
         self.item_properties = item_props;
         self
     }
 
-    pub fn props(mut self, properties: BTreeMap<String, Property>) -> Self {
+    pub fn props(
+        mut self,
+        properties: BTreeMap<String, Property>,
+    ) -> Self {
         self.properties = properties;
         self
     }

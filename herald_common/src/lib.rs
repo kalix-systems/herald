@@ -20,7 +20,10 @@ impl UserMeta {
         }
     }
 
-    pub fn key_is_valid(&self, key: sig::PublicKey) -> bool {
+    pub fn key_is_valid(
+        &self,
+        key: sig::PublicKey,
+    ) -> bool {
         let maybe_kmeta = self.keys.get(&key);
         if maybe_kmeta.is_none() {
             return false;
@@ -28,11 +31,17 @@ impl UserMeta {
         maybe_kmeta.unwrap().key_is_valid(key)
     }
 
-    pub fn verify_sig<T: AsRef<[u8]>>(&self, data: &Signed<T>) -> bool {
+    pub fn verify_sig<T: AsRef<[u8]>>(
+        &self,
+        data: &Signed<T>,
+    ) -> bool {
         self.key_is_valid(*data.signed_by()) && data.verify_sig().eq(&SigValid::Yes)
     }
 
-    pub fn add_new_key(&mut self, new: Signed<sig::PublicKey>) -> bool {
+    pub fn add_new_key(
+        &mut self,
+        new: Signed<sig::PublicKey>,
+    ) -> bool {
         if !self.verify_sig(&new) {
             return false;
         }
@@ -41,11 +50,18 @@ impl UserMeta {
         true
     }
 
-    pub fn add_key_unchecked(&mut self, key: sig::PublicKey, meta: sig::PKMeta) {
+    pub fn add_key_unchecked(
+        &mut self,
+        key: sig::PublicKey,
+        meta: sig::PKMeta,
+    ) {
         self.keys.insert(key, meta);
     }
 
-    pub fn deprecate_key(&mut self, dep: Signed<sig::PublicKey>) -> bool {
+    pub fn deprecate_key(
+        &mut self,
+        dep: Signed<sig::PublicKey>,
+    ) -> bool {
         // cannot have a key deprecate itself
         if !self.verify_sig(&dep) || *dep.signed_by() == *dep.data() {
             return false;

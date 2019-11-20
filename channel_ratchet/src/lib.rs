@@ -90,7 +90,10 @@ impl ChainState {
         aead::Key(messagekey_buf)
     }
 
-    pub fn open(&mut self, cipher: Cipher) -> DecryptionResult {
+    pub fn open(
+        &mut self,
+        cipher: Cipher,
+    ) -> DecryptionResult {
         let Cipher {
             index,
             tag,
@@ -129,7 +132,11 @@ impl ChainState {
         }
     }
 
-    pub fn seal(&mut self, ad: Bytes, mut msg: BytesMut) -> CipherData {
+    pub fn seal(
+        &mut self,
+        ad: Bytes,
+        mut msg: BytesMut,
+    ) -> CipherData {
         let ix = self.ix;
 
         let key = self.kdf();

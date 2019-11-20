@@ -2,7 +2,11 @@ use proc_macro2::Literal;
 use quote::quote;
 use syn::*;
 
-pub fn kson_ser(name: Ident, data: DataStruct, gens: Generics) -> proc_macro2::TokenStream {
+pub fn kson_ser(
+    name: Ident,
+    data: DataStruct,
+    gens: Generics,
+) -> proc_macro2::TokenStream {
     let impl_ser = match data.fields {
         // C-style structs
         Fields::Named(fields) => {

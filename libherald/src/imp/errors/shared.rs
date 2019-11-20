@@ -1,5 +1,4 @@
-use crate::interface::ErrorsEmitter;
-use crate::shared::SingletonBus;
+use crate::{interface::ErrorsEmitter, shared::SingletonBus};
 use crossbeam_channel::*;
 use heraldcore::{channel_send_err, NE};
 use lazy_static::*;

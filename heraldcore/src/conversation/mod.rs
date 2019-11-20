@@ -72,19 +72,28 @@ pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> 
 }
 
 /// Sets color for a conversation
-pub fn set_color(conversation_id: &ConversationId, color: u32) -> Result<(), HErr> {
+pub fn set_color(
+    conversation_id: &ConversationId,
+    color: u32,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_color(&db, conversation_id, color)
 }
 
 /// Sets muted status of a conversation
-pub fn set_muted(conversation_id: &ConversationId, muted: bool) -> Result<(), HErr> {
+pub fn set_muted(
+    conversation_id: &ConversationId,
+    muted: bool,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_muted(&db, conversation_id, muted)
 }
 
 /// Sets title for a conversation
-pub fn set_title(conversation_id: &ConversationId, title: Option<&str>) -> Result<(), HErr> {
+pub fn set_title(
+    conversation_id: &ConversationId,
+    title: Option<&str>,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_title(&db, conversation_id, title)
 }

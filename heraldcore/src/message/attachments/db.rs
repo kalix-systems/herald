@@ -18,7 +18,10 @@ pub(crate) fn add<'a, A: Iterator<Item = &'a Path>>(
 }
 
 /// Gets all attachments associated with a message id
-pub(crate) fn get(conn: &Conn, msg_id: &MsgId) -> Result<AttachmentMeta, HErr> {
+pub(crate) fn get(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<AttachmentMeta, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_attachments.sql"))?;
 
     let attachments: Result<Vec<PathBuf>, HErr> = stmt

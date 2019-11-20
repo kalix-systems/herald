@@ -9,7 +9,10 @@ impl Messages {
         self.emit.last_status_changed();
     }
 
-    pub(super) fn entry_changed(&mut self, ix: usize) {
+    pub(super) fn entry_changed(
+        &mut self,
+        ix: usize,
+    ) {
         if ix < self.container.len() {
             self.model.data_changed(ix, ix);
         }
@@ -63,7 +66,11 @@ impl Messages {
         Some(ix)
     }
 
-    pub(super) fn remove_helper(&mut self, msg_id: MsgId, ix: usize) {
+    pub(super) fn remove_helper(
+        &mut self,
+        msg_id: MsgId,
+        ix: usize,
+    ) {
         self.search.try_remove_match(
             &msg_id,
             &mut self.container,
@@ -110,7 +117,11 @@ impl Messages {
         }
     }
 
-    pub(super) fn insert_helper(&mut self, msg: Msg, save_status: SaveStatus) -> Result<(), HErr> {
+    pub(super) fn insert_helper(
+        &mut self,
+        msg: Msg,
+        save_status: SaveStatus,
+    ) -> Result<(), HErr> {
         let (message, data) = Message::split_msg(msg, save_status);
 
         let cid = self.conversation_id.ok_or(NE!())?;
@@ -172,7 +183,10 @@ impl Messages {
         Ok(())
     }
 
-    pub(super) fn handle_expiration(&mut self, mids: Vec<MsgId>) {
+    pub(super) fn handle_expiration(
+        &mut self,
+        mids: Vec<MsgId>,
+    ) {
         for mid in mids {
             if let Some(ix) = self.container.index_by_id(mid) {
                 self.remove_helper(mid, ix);

@@ -1,5 +1,4 @@
-use super::shared;
-use super::*;
+use super::{shared, *};
 
 macro_rules! imp {
     ($($name: ident, $field: ident, $ret: ty),*) => {
@@ -28,16 +27,25 @@ macro_rules! imp_clone {
 }
 
 impl Conversations {
-    pub(super) fn id(&self, index: usize) -> Option<ConversationId> {
+    pub(super) fn id(
+        &self,
+        index: usize,
+    ) -> Option<ConversationId> {
         Some(self.list.get(index)?.id)
     }
 
-    fn data(&self, index: usize) -> Option<Ref> {
+    fn data(
+        &self,
+        index: usize,
+    ) -> Option<Ref> {
         let id = &self.list.get(index).as_ref()?.id;
         shared::data(id)
     }
 
-    fn data_mut(&self, index: usize) -> Option<RefMut> {
+    fn data_mut(
+        &self,
+        index: usize,
+    ) -> Option<RefMut> {
         let id = &self.list.get(index).as_ref()?.id;
         shared::data_mut(id)
     }

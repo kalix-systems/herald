@@ -15,7 +15,10 @@ pub fn name(id: UserId) -> Result<Option<String>, HErr> {
 }
 
 /// Change name of user by their `id`
-pub fn set_name(id: UserId, name: &str) -> Result<(), HErr> {
+pub fn set_name(
+    id: UserId,
+    name: &str,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_name(&db, id, name)
 }
@@ -42,7 +45,10 @@ pub fn set_profile_picture(
 }
 
 /// Sets a user's color
-pub fn set_color(id: UserId, color: u32) -> Result<(), HErr> {
+pub fn set_color(
+    id: UserId,
+    color: u32,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::set_color(&db, id, color)
 }
@@ -54,7 +60,10 @@ pub fn user_exists(id: UserId) -> Result<bool, HErr> {
 }
 
 /// Sets user status
-pub fn set_status(id: UserId, status: UserStatus) -> Result<(), HErr> {
+pub fn set_status(
+    id: UserId,
+    status: UserStatus,
+) -> Result<(), HErr> {
     let mut db = Database::get()?;
     db::set_status(&mut db, id, status)
 }
@@ -113,25 +122,37 @@ impl UserBuilder {
     }
 
     /// Sets the name of the user being built.
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(
+        mut self,
+        name: String,
+    ) -> Self {
         self.name = Some(name);
         self
     }
 
     /// Sets the color of the user being built.
-    pub fn color(mut self, color: u32) -> Self {
+    pub fn color(
+        mut self,
+        color: u32,
+    ) -> Self {
         self.color = Some(color);
         self
     }
 
     /// Sets the status of the user being built.
-    pub fn status(mut self, status: UserStatus) -> Self {
+    pub fn status(
+        mut self,
+        status: UserStatus,
+    ) -> Self {
         self.status = Some(status);
         self
     }
 
     /// Sets the pairwise conversation id of the user being built.
-    pub fn pairwise_conversation(mut self, pairwise_conversation: ConversationId) -> Self {
+    pub fn pairwise_conversation(
+        mut self,
+        pairwise_conversation: ConversationId,
+    ) -> Self {
         self.pairwise_conversation = Some(pairwise_conversation);
         self
     }

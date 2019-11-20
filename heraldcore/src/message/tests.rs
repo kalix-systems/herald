@@ -4,7 +4,10 @@ use serial_test_derive::serial;
 use std::convert::TryInto;
 
 /// Testing utility
-fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+fn test_outbound_text(
+    msg: &str,
+    conv: ConversationId,
+) -> (MsgId, Time) {
     let mut conn = Database::get().expect(womp!());
     db::test_outbound_text(&mut conn, msg, conv)
 }

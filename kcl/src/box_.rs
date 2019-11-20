@@ -91,7 +91,11 @@ pub struct Tag(Mac, Nonce);
 pub struct OpenSucceeded(pub bool);
 
 impl SecretKey {
-    pub fn seal(&self, them: PublicKey, msg: &mut [u8]) -> Tag {
+    pub fn seal(
+        &self,
+        them: PublicKey,
+        msg: &mut [u8],
+    ) -> Tag {
         let mut mac_buf = [0u8; MAC_LEN];
         let mut nonce_buf = [0u8; NONCE_LEN];
 
@@ -130,7 +134,12 @@ impl SecretKey {
         Tag(mac, nonce)
     }
 
-    pub fn open(&self, them: PublicKey, tag: Tag, msg: &mut [u8]) -> OpenSucceeded {
+    pub fn open(
+        &self,
+        them: PublicKey,
+        tag: Tag,
+        msg: &mut [u8],
+    ) -> OpenSucceeded {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {

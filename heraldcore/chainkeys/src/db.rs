@@ -31,7 +31,7 @@ pub(super) fn raw_remove_block_dependencies(
 }
 
 pub(super) fn raw_pop_unblocked_blocks(
-    tx: &mut rusqlite::Transaction,
+    tx: &mut rusqlite::Transaction
 ) -> Result<Vec<(RawBlock, RawSigner)>, rusqlite::Error> {
     let mut get_blocks_stmt = tx.prepare(include_str!("sql/get_unblocked_blocks.sql"))?;
 

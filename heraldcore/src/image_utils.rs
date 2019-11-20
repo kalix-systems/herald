@@ -7,7 +7,10 @@ const IMAGE_SIZE: u32 = 300;
 
 /// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn update_picture<P>(source: P, old_path: Option<P>) -> Result<PathBuf, HErr>
+pub fn update_picture<P>(
+    source: P,
+    old_path: Option<P>,
+) -> Result<PathBuf, HErr>
 where
     P: AsRef<Path>,
 {

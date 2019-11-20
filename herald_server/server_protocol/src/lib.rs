@@ -41,7 +41,10 @@ impl State {
         Ok(self.pool.get().await?)
     }
 
-    pub async fn handle_login(&'static self, ws: WebSocket) -> Result<(), Error> {
+    pub async fn handle_login(
+        &'static self,
+        ws: WebSocket,
+    ) -> Result<(), Error> {
         let mut store: Conn = self.new_connection().await?;
 
         // all the channels we'll need for plumbing
@@ -96,7 +99,10 @@ impl State {
         Ok(())
     }
 
-    pub async fn push_users(&self, req: push_users::Req) -> Result<push_users::Res, Error> {
+    pub async fn push_users(
+        &self,
+        req: push_users::Req,
+    ) -> Result<push_users::Res, Error> {
         let push_users::Req { to, exc, msg } = req;
         let msg: Push = Push {
             tag: PushTag::User,
@@ -128,7 +134,10 @@ impl State {
         })
     }
 
-    pub async fn push_devices(&self, req: push_devices::Req) -> Result<push_devices::Res, Error> {
+    pub async fn push_devices(
+        &self,
+        req: push_devices::Req,
+    ) -> Result<push_devices::Res, Error> {
         let push_devices::Req { to, msg } = req;
         let msg = Push {
             tag: PushTag::Device,
@@ -240,7 +249,11 @@ fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
     Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
 }
 
-async fn write_msg<T>(t: &T, wtx: &mut WTx, rrx: &mut Receiver<Vec<u8>>) -> Result<(), Error>
+async fn write_msg<T>(
+    t: &T,
+    wtx: &mut WTx,
+    rrx: &mut Receiver<Vec<u8>>,
+) -> Result<(), Error>
 where
     T: Serialize,
 {
