@@ -34,7 +34,10 @@ macro_rules! newtype_from_slice {
 macro_rules! newtype_traits {
     ($newtype:ident, $len:expr) => {
         impl ::std::cmp::PartialEq for $newtype {
-            fn eq(&self, other: &$newtype) -> bool {
+            fn eq(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 use sodiumoxide::utils::memcmp;
                 memcmp(&self.0, &other.0)
             }
@@ -42,7 +45,10 @@ macro_rules! newtype_traits {
         impl ::std::cmp::Eq for $newtype {}
 
         impl ::serde::Serialize for $newtype {
-            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            fn serialize<S>(
+                &self,
+                serializer: S,
+            ) -> Result<S::Ok, S::Error>
             where
                 S: ::serde::Serializer,
             {
@@ -64,7 +70,10 @@ macro_rules! newtype_traits {
                     ) -> ::std::fmt::Result {
                         write!(formatter, stringify!($newtype))
                     }
-                    fn visit_seq<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
+                    fn visit_seq<V>(
+                        self,
+                        mut visitor: V,
+                    ) -> Result<Self::Value, V::Error>
                     where
                         V: ::serde::de::SeqAccess<'de>,
                     {
@@ -76,7 +85,10 @@ macro_rules! newtype_traits {
                         }
                         Ok(res)
                     }
-                    fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+                    fn visit_bytes<E>(
+                        self,
+                        v: &[u8],
+                    ) -> Result<Self::Value, E>
                     where
                         E: ::serde::de::Error,
                     {
@@ -102,34 +114,55 @@ macro_rules! public_newtype_traits {
     ($newtype:ident) => {
         impl ::std::cmp::PartialOrd for $newtype {
             #[inline]
-            fn partial_cmp(&self, other: &$newtype) -> Option<::std::cmp::Ordering> {
+            fn partial_cmp(
+                &self,
+                other: &$newtype,
+            ) -> Option<::std::cmp::Ordering> {
                 ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn lt(&self, other: &$newtype) -> bool {
+            fn lt(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn le(&self, other: &$newtype) -> bool {
+            fn le(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn ge(&self, other: &$newtype) -> bool {
+            fn ge(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
             }
             #[inline]
-            fn gt(&self, other: &$newtype) -> bool {
+            fn gt(
+                &self,
+                other: &$newtype,
+            ) -> bool {
                 ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
             }
         }
         impl ::std::cmp::Ord for $newtype {
             #[inline]
-            fn cmp(&self, other: &$newtype) -> ::std::cmp::Ordering {
+            fn cmp(
+                &self,
+                other: &$newtype,
+            ) -> ::std::cmp::Ordering {
                 ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
             }
         }
         impl ::std::hash::Hash for $newtype {
-            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+            fn hash<H: ::std::hash::Hasher>(
+                &self,
+                state: &mut H,
+            ) {
                 ::std::hash::Hash::hash(self.as_ref(), state)
             }
         }

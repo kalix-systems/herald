@@ -13,7 +13,7 @@ pub(crate) fn add_to_pending(
 }
 
 pub(crate) fn get_pending(
-    conn: &rusqlite::Connection,
+    conn: &rusqlite::Connection
 ) -> Result<Vec<(i64, ConversationId, ConversationMessageBody)>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_pending.sql"))?;
 
@@ -21,7 +21,10 @@ pub(crate) fn get_pending(
     res.map(|triple| Ok(triple?)).collect()
 }
 
-pub(crate) fn remove_pending(conn: &rusqlite::Connection, tag: i64) -> Result<(), HErr> {
+pub(crate) fn remove_pending(
+    conn: &rusqlite::Connection,
+    tag: i64,
+) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/remove_pending.sql"))?;
     stmt.execute(params![tag])?;
     Ok(())

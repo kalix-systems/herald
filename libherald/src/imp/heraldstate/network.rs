@@ -14,7 +14,10 @@ pub struct NotifHandler {
 }
 
 impl NotifHandler {
-    pub(super) fn send(&mut self, notif: Notification) {
+    pub(super) fn send(
+        &mut self,
+        notif: Notification,
+    ) {
         use crate::imp::{
             conversations::shared::*,
             users::{shared::*, Users},
@@ -73,7 +76,10 @@ impl NotifHandler {
             }
         }
     }
-    pub(super) fn new(emit: Emitter, _effects_flags: Arc<EffectsFlags>) -> Self {
+    pub(super) fn new(
+        emit: Emitter,
+        _effects_flags: Arc<EffectsFlags>,
+    ) -> Self {
         Self {
             _effects_flags,
             _emit: emit,

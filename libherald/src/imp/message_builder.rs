@@ -14,7 +14,10 @@ type Emitter = MessageBuilderEmitter;
 type List = MessageBuilderList;
 
 impl MessageBuilderTrait for MessageBuilder {
-    fn new(emit: MessageBuilderEmitter, model: MessageBuilderList) -> Self {
+    fn new(
+        emit: MessageBuilderEmitter,
+        model: MessageBuilderList,
+    ) -> Self {
         Self {
             emit,
             model,
@@ -31,7 +34,10 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.inner.conversation.as_ref()?.as_slice())
     }
 
-    fn set_conversation_id(&mut self, cid: Option<ffi::ConversationIdRef>) {
+    fn set_conversation_id(
+        &mut self,
+        cid: Option<ffi::ConversationIdRef>,
+    ) {
         if let (None, Some(cid)) = (self.inner.conversation, cid) {
             let cid = ret_err!(cid.try_into());
             self.inner.conversation_id(cid);
@@ -50,7 +56,10 @@ impl MessageBuilderTrait for MessageBuilder {
         !self.inner.attachments.is_empty()
     }
 
-    fn set_parse_markdown(&mut self, val: bool) {
+    fn set_parse_markdown(
+        &mut self,
+        val: bool,
+    ) {
         self.inner.parse_markdown = val;
     }
 
@@ -58,7 +67,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.parse_markdown
     }
 
-    fn set_replying_to(&mut self, op_msg_id: Option<ffi::MsgIdRef>) {
+    fn set_replying_to(
+        &mut self,
+        op_msg_id: Option<ffi::MsgIdRef>,
+    ) {
         match (op_msg_id, self.inner.op) {
             (Some(op_msg_id), _) => {
                 let op_msg_id = ret_err!(op_msg_id.try_into());
@@ -81,7 +93,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.emit.replying_to_changed();
     }
 
-    fn add_attachment(&mut self, path: String) -> bool {
+    fn add_attachment(
+        &mut self,
+        path: String,
+    ) -> bool {
         let path = match crate::utils::strip_qrc(path) {
             Some(path) => path,
             None => return false,
@@ -102,7 +117,10 @@ impl MessageBuilderTrait for MessageBuilder {
         true
     }
 
-    fn set_body(&mut self, body: Option<String>) {
+    fn set_body(
+        &mut self,
+        body: Option<String>,
+    ) {
         match body {
             Some(body) => {
                 if !body.is_empty() {
@@ -155,7 +173,10 @@ impl MessageBuilderTrait for MessageBuilder {
         });
     }
 
-    fn remove_attachment(&mut self, path: String) -> bool {
+    fn remove_attachment(
+        &mut self,
+        path: String,
+    ) -> bool {
         let path = PathBuf::from(path);
         let pos = ret_none!(
             self.inner.attachments.iter().rposition(|p| p == &path),
@@ -173,7 +194,10 @@ impl MessageBuilderTrait for MessageBuilder {
         true
     }
 
-    fn remove_attachment_by_index(&mut self, row_index: u64) -> bool {
+    fn remove_attachment_by_index(
+        &mut self,
+        row_index: u64,
+    ) -> bool {
         let row_index = row_index as usize;
 
         if row_index > self.inner.attachments.len() {
@@ -211,7 +235,10 @@ impl MessageBuilderTrait for MessageBuilder {
         self.inner.attachments.len()
     }
 
-    fn attachment_path(&self, index: usize) -> &str {
+    fn attachment_path(
+        &self,
+        index: usize,
+    ) -> &str {
         ret_none! {
             ret_none!(self.inner.attachments.get(index), "").to_str(),
             ""

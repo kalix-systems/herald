@@ -18,7 +18,10 @@ pub struct Attachments {
 }
 
 impl AttachmentsTrait for Attachments {
-    fn new(emit: AttachmentsEmitter, model: AttachmentsList) -> Self {
+    fn new(
+        emit: AttachmentsEmitter,
+        model: AttachmentsList,
+    ) -> Self {
         Self {
             emit,
             model,
@@ -36,7 +39,10 @@ impl AttachmentsTrait for Attachments {
         Some(self.msg_id.as_ref()?.as_slice())
     }
 
-    fn set_msg_id(&mut self, msg_id: Option<ffi::MsgIdRef>) {
+    fn set_msg_id(
+        &mut self,
+        msg_id: Option<ffi::MsgIdRef>,
+    ) {
         if let (Some(msg_id), None) = (msg_id, self.msg_id) {
             let msg_id = ret_err!(msg_id.try_into());
 
@@ -82,7 +88,10 @@ impl AttachmentsTrait for Attachments {
         self.inner.len()
     }
 
-    fn attachment_path(&self, index: usize) -> &str {
+    fn attachment_path(
+        &self,
+        index: usize,
+    ) -> &str {
         ret_none!(self.inner.get(index), "")
     }
 }

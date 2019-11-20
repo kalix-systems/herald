@@ -32,7 +32,10 @@ pub(crate) struct ConvBus {
     pub(super) tx: Sender<ConvUpdate>,
 }
 
-pub(super) fn insert_data(cid: ConversationId, data: Data) {
+pub(super) fn insert_data(
+    cid: ConversationId,
+    data: Data,
+) {
     CONV_DATA.insert(cid, data);
 }
 

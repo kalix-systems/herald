@@ -21,7 +21,10 @@ pub enum Variant {
 }
 
 impl std::fmt::Display for InvalidRandomIdLength {
-    fn fmt(&self, out: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        out: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
         match self.variant {
             Variant::Msg => write!(
                 out,

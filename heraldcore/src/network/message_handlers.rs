@@ -2,7 +2,10 @@ use super::*;
 use crate::types::{cmessages, dmessages};
 use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage};
 
-pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
+pub(super) fn handle_cmessage(
+    ts: Time,
+    cm: ConversationMessage,
+) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
@@ -113,7 +116,10 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
     Ok(ev)
 }
 
-pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
+pub(super) fn handle_dmessage(
+    _: Time,
+    msg: DeviceMessage,
+) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
     let (from, msg) = dmessages::open(msg)?;

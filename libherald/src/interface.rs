@@ -59,7 +59,11 @@ where
 
 pub enum QString {}
 
-fn set_string_from_utf16(s: &mut String, str: *const c_ushort, len: c_int) {
+fn set_string_from_utf16(
+    s: &mut String,
+    str: *const c_ushort,
+    len: c_int,
+) {
     let utf16 = unsafe {
         match to_usize(len) {
             Some(len) => ::std::slice::from_raw_parts(str, len),
@@ -161,7 +165,11 @@ impl AttachmentsList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -170,19 +178,32 @@ impl AttachmentsList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -191,23 +212,45 @@ impl AttachmentsList {
 }
 
 pub trait AttachmentsTrait {
-    fn new(emit: AttachmentsEmitter, model: AttachmentsList) -> Self;
+    fn new(
+        emit: AttachmentsEmitter,
+        model: AttachmentsList,
+    ) -> Self;
     fn emit(&mut self) -> &mut AttachmentsEmitter;
     fn msg_id(&self) -> Option<&[u8]>;
-    fn set_msg_id(&mut self, value: Option<&[u8]>);
+    fn set_msg_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn attachment_path(&self, index: usize) -> &str;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn attachment_path(
+        &self,
+        index: usize,
+    ) -> &str;
 }
 
 #[no_mangle]
@@ -326,7 +369,11 @@ pub unsafe extern "C" fn attachments_fetch_more(ptr: *mut Attachments) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn attachments_sort(ptr: *mut Attachments, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn attachments_sort(
+    ptr: *mut Attachments,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
@@ -420,15 +467,27 @@ pub trait ConfigTrait {
     fn new(emit: ConfigEmitter) -> Self;
     fn emit(&mut self) -> &mut ConfigEmitter;
     fn color(&self) -> u32;
-    fn set_color(&mut self, value: u32);
+    fn set_color(
+        &mut self,
+        value: u32,
+    );
     fn colorscheme(&self) -> u32;
-    fn set_colorscheme(&mut self, value: u32);
+    fn set_colorscheme(
+        &mut self,
+        value: u32,
+    );
     fn config_id(&self) -> &str;
     fn name(&self) -> &str;
-    fn set_name(&mut self, value: String);
+    fn set_name(
+        &mut self,
+        value: String,
+    );
     fn nts_conversation_id(&self) -> &[u8];
     fn profile_picture(&self) -> Option<&str>;
-    fn set_profile_picture(&mut self, value: Option<String>);
+    fn set_profile_picture(
+        &mut self,
+        value: Option<String>,
+    );
 }
 
 #[no_mangle]
@@ -465,7 +524,10 @@ pub unsafe extern "C" fn config_color_get(ptr: *const Config) -> u32 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_color_set(ptr: *mut Config, v: u32) {
+pub unsafe extern "C" fn config_color_set(
+    ptr: *mut Config,
+    v: u32,
+) {
     (&mut *ptr).set_color(v);
 }
 
@@ -475,7 +537,10 @@ pub unsafe extern "C" fn config_colorscheme_get(ptr: *const Config) -> u32 {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_colorscheme_set(ptr: *mut Config, v: u32) {
+pub unsafe extern "C" fn config_colorscheme_set(
+    ptr: *mut Config,
+    v: u32,
+) {
     (&mut *ptr).set_colorscheme(v);
 }
 
@@ -504,7 +569,11 @@ pub unsafe extern "C" fn config_name_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn config_name_set(ptr: *mut Config, v: *const c_ushort, len: c_int) {
+pub unsafe extern "C" fn config_name_set(
+    ptr: *mut Config,
+    v: *const c_ushort,
+    len: c_int,
+) {
     let o = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, v, len);
@@ -619,7 +688,11 @@ impl ConversationBuilderList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -628,19 +701,32 @@ impl ConversationBuilderList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -649,29 +735,63 @@ impl ConversationBuilderList {
 }
 
 pub trait ConversationBuilderTrait {
-    fn new(emit: ConversationBuilderEmitter, model: ConversationBuilderList) -> Self;
+    fn new(
+        emit: ConversationBuilderEmitter,
+        model: ConversationBuilderList,
+    ) -> Self;
     fn emit(&mut self) -> &mut ConversationBuilderEmitter;
     fn picture(&self) -> Option<&str>;
-    fn set_picture(&mut self, value: Option<String>);
-    fn add_member(&mut self, user_id: String) -> bool;
+    fn set_picture(
+        &mut self,
+        value: Option<String>,
+    );
+    fn add_member(
+        &mut self,
+        user_id: String,
+    ) -> bool;
     fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
-    fn remove_member_by_id(&mut self, user_id: String) -> bool;
-    fn remove_member_by_index(&mut self, index: u64) -> bool;
-    fn set_title(&mut self, title: String) -> ();
+    fn remove_member_by_id(
+        &mut self,
+        user_id: String,
+    ) -> bool;
+    fn remove_member_by_index(
+        &mut self,
+        index: u64,
+    ) -> bool;
+    fn set_title(
+        &mut self,
+        title: String,
+    ) -> ();
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn member_id(&self, index: usize) -> &str;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn member_id(
+        &self,
+        index: usize,
+    ) -> &str;
 }
 
 #[no_mangle]
@@ -839,7 +959,7 @@ pub unsafe extern "C" fn conversation_builder_remove_rows(
 
 #[no_mangle]
 pub unsafe extern "C" fn conversation_builder_can_fetch_more(
-    ptr: *const ConversationBuilder,
+    ptr: *const ConversationBuilder
 ) -> bool {
     (&*ptr).can_fetch_more()
 }
@@ -943,7 +1063,11 @@ impl ConversationsList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -952,19 +1076,32 @@ impl ConversationsList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -973,40 +1110,109 @@ impl ConversationsList {
 }
 
 pub trait ConversationsTrait {
-    fn new(emit: ConversationsEmitter, model: ConversationsList) -> Self;
+    fn new(
+        emit: ConversationsEmitter,
+        model: ConversationsList,
+    ) -> Self;
     fn emit(&mut self) -> &mut ConversationsEmitter;
     fn filter(&self) -> &str;
-    fn set_filter(&mut self, value: String);
+    fn set_filter(
+        &mut self,
+        value: String,
+    );
     fn filter_regex(&self) -> bool;
-    fn set_filter_regex(&mut self, value: bool);
+    fn set_filter_regex(
+        &mut self,
+        value: bool,
+    );
     fn clear_filter(&mut self) -> ();
-    fn remove_conversation(&mut self, row_index: u64) -> bool;
+    fn remove_conversation(
+        &mut self,
+        row_index: u64,
+    ) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> u32;
-    fn set_color(&mut self, index: usize, _: u32) -> bool;
-    fn conversation_id(&self, index: usize) -> Vec<u8>;
-    fn expiration_period(&self, index: usize) -> u8;
-    fn set_expiration_period(&mut self, index: usize, _: u8) -> bool;
-    fn matched(&self, index: usize) -> bool;
-    fn muted(&self, index: usize) -> bool;
-    fn set_muted(&mut self, index: usize, _: bool) -> bool;
-    fn pairwise(&self, index: usize) -> bool;
-    fn picture(&self, index: usize) -> Option<String>;
-    fn set_picture(&mut self, index: usize, _: Option<String>) -> bool;
-    fn title(&self, index: usize) -> Option<String>;
-    fn set_title(&mut self, index: usize, _: Option<String>) -> bool;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn color(
+        &self,
+        index: usize,
+    ) -> u32;
+    fn set_color(
+        &mut self,
+        index: usize,
+        _: u32,
+    ) -> bool;
+    fn conversation_id(
+        &self,
+        index: usize,
+    ) -> Vec<u8>;
+    fn expiration_period(
+        &self,
+        index: usize,
+    ) -> u8;
+    fn set_expiration_period(
+        &mut self,
+        index: usize,
+        _: u8,
+    ) -> bool;
+    fn matched(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn muted(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn set_muted(
+        &mut self,
+        index: usize,
+        _: bool,
+    ) -> bool;
+    fn pairwise(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn picture(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn set_picture(
+        &mut self,
+        index: usize,
+        _: Option<String>,
+    ) -> bool;
+    fn title(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn set_title(
+        &mut self,
+        index: usize,
+        _: Option<String>,
+    ) -> bool;
 }
 
 #[no_mangle]
@@ -1086,7 +1292,10 @@ pub unsafe extern "C" fn conversations_filter_regex_get(ptr: *const Conversation
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_filter_regex_set(ptr: *mut Conversations, v: bool) {
+pub unsafe extern "C" fn conversations_filter_regex_set(
+    ptr: *mut Conversations,
+    v: bool,
+) {
     (&mut *ptr).set_filter_regex(v);
 }
 
@@ -1151,12 +1360,19 @@ pub unsafe extern "C" fn conversations_fetch_more(ptr: *mut Conversations) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_sort(ptr: *mut Conversations, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn conversations_sort(
+    ptr: *mut Conversations,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_color(ptr: *const Conversations, row: c_int) -> u32 {
+pub unsafe extern "C" fn conversations_data_color(
+    ptr: *const Conversations,
+    row: c_int,
+) -> u32 {
     let o = &*ptr;
     o.color(to_usize(row).unwrap_or(0))
 }
@@ -1202,13 +1418,19 @@ pub unsafe extern "C" fn conversations_set_data_expiration_period(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_matched(ptr: *const Conversations, row: c_int) -> bool {
+pub unsafe extern "C" fn conversations_data_matched(
+    ptr: *const Conversations,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_muted(ptr: *const Conversations, row: c_int) -> bool {
+pub unsafe extern "C" fn conversations_data_muted(
+    ptr: *const Conversations,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.muted(to_usize(row).unwrap_or(0))
 }
@@ -1434,7 +1656,10 @@ pub trait HeraldStateTrait {
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
     fn login(&mut self) -> bool;
-    fn register_new_user(&mut self, user_id: String) -> ();
+    fn register_new_user(
+        &mut self,
+        user_id: String,
+    ) -> ();
 }
 
 #[no_mangle]
@@ -1520,8 +1745,15 @@ impl HeraldUtilsEmitter {
 pub trait HeraldUtilsTrait {
     fn new(emit: HeraldUtilsEmitter) -> Self;
     fn emit(&mut self) -> &mut HeraldUtilsEmitter;
-    fn compare_byte_array(&self, bs1: &[u8], bs2: &[u8]) -> bool;
-    fn is_valid_rand_id(&self, bs: &[u8]) -> bool;
+    fn compare_byte_array(
+        &self,
+        bs1: &[u8],
+        bs2: &[u8],
+    ) -> bool;
+    fn is_valid_rand_id(
+        &self,
+        bs: &[u8],
+    ) -> bool;
 }
 
 #[no_mangle]
@@ -1643,7 +1875,11 @@ impl MembersList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -1652,19 +1888,32 @@ impl MembersList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -1673,36 +1922,88 @@ impl MembersList {
 }
 
 pub trait MembersTrait {
-    fn new(emit: MembersEmitter, model: MembersList) -> Self;
+    fn new(
+        emit: MembersEmitter,
+        model: MembersList,
+    ) -> Self;
     fn emit(&mut self) -> &mut MembersEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
-    fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn set_conversation_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn filter(&self) -> &str;
-    fn set_filter(&mut self, value: String);
+    fn set_filter(
+        &mut self,
+        value: String,
+    );
     fn filter_regex(&self) -> bool;
-    fn set_filter_regex(&mut self, value: bool);
-    fn add_to_conversation(&mut self, id: String) -> bool;
-    fn remove_from_conversation_by_index(&mut self, row_index: u64) -> bool;
+    fn set_filter_regex(
+        &mut self,
+        value: bool,
+    );
+    fn add_to_conversation(
+        &mut self,
+        id: String,
+    ) -> bool;
+    fn remove_from_conversation_by_index(
+        &mut self,
+        row_index: u64,
+    ) -> bool;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> u32;
-    fn matched(&self, index: usize) -> bool;
-    fn name(&self, index: usize) -> String;
-    fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
-    fn profile_picture(&self, index: usize) -> Option<String>;
-    fn status(&self, index: usize) -> u8;
-    fn user_id(&self, index: usize) -> &str;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn color(
+        &self,
+        index: usize,
+    ) -> u32;
+    fn matched(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn name(
+        &self,
+        index: usize,
+    ) -> String;
+    fn pairwise_conversation_id(
+        &self,
+        index: usize,
+    ) -> Vec<u8>;
+    fn profile_picture(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8;
+    fn user_id(
+        &self,
+        index: usize,
+    ) -> &str;
 }
 
 #[no_mangle]
@@ -1798,7 +2099,11 @@ pub unsafe extern "C" fn members_filter_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_filter_set(ptr: *mut Members, v: *const c_ushort, len: c_int) {
+pub unsafe extern "C" fn members_filter_set(
+    ptr: *mut Members,
+    v: *const c_ushort,
+    len: c_int,
+) {
     let o = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, v, len);
@@ -1811,7 +2116,10 @@ pub unsafe extern "C" fn members_filter_regex_get(ptr: *const Members) -> bool {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_filter_regex_set(ptr: *mut Members, v: bool) {
+pub unsafe extern "C" fn members_filter_regex_set(
+    ptr: *mut Members,
+    v: bool,
+) {
     (&mut *ptr).set_filter_regex(v);
 }
 
@@ -1848,7 +2156,11 @@ pub unsafe extern "C" fn members_row_count(ptr: *const Members) -> c_int {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_insert_rows(ptr: *mut Members, row: c_int, count: c_int) -> bool {
+pub unsafe extern "C" fn members_insert_rows(
+    ptr: *mut Members,
+    row: c_int,
+    count: c_int,
+) -> bool {
     match (to_usize(row), to_usize(count)) {
         (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
         _ => false,
@@ -1856,7 +2168,11 @@ pub unsafe extern "C" fn members_insert_rows(ptr: *mut Members, row: c_int, coun
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_remove_rows(ptr: *mut Members, row: c_int, count: c_int) -> bool {
+pub unsafe extern "C" fn members_remove_rows(
+    ptr: *mut Members,
+    row: c_int,
+    count: c_int,
+) -> bool {
     match (to_usize(row), to_usize(count)) {
         (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
         _ => false,
@@ -1874,18 +2190,28 @@ pub unsafe extern "C" fn members_fetch_more(ptr: *mut Members) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_sort(ptr: *mut Members, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn members_sort(
+    ptr: *mut Members,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_color(ptr: *const Members, row: c_int) -> u32 {
+pub unsafe extern "C" fn members_data_color(
+    ptr: *const Members,
+    row: c_int,
+) -> u32 {
     let o = &*ptr;
     o.color(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_matched(ptr: *const Members, row: c_int) -> bool {
+pub unsafe extern "C" fn members_data_matched(
+    ptr: *const Members,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
 }
@@ -1932,7 +2258,10 @@ pub unsafe extern "C" fn members_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn members_data_status(ptr: *const Members, row: c_int) -> u8 {
+pub unsafe extern "C" fn members_data_status(
+    ptr: *const Members,
+    row: c_int,
+) -> u8 {
     let o = &*ptr;
     o.status(to_usize(row).unwrap_or(0))
 }
@@ -2054,7 +2383,11 @@ impl MessageBuilderList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -2063,19 +2396,32 @@ impl MessageBuilderList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -2084,37 +2430,77 @@ impl MessageBuilderList {
 }
 
 pub trait MessageBuilderTrait {
-    fn new(emit: MessageBuilderEmitter, model: MessageBuilderList) -> Self;
+    fn new(
+        emit: MessageBuilderEmitter,
+        model: MessageBuilderList,
+    ) -> Self;
     fn emit(&mut self) -> &mut MessageBuilderEmitter;
     fn body(&self) -> Option<&str>;
-    fn set_body(&mut self, value: Option<String>);
+    fn set_body(
+        &mut self,
+        value: Option<String>,
+    );
     fn conversation_id(&self) -> Option<&[u8]>;
-    fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn set_conversation_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn is_media_message(&self) -> bool;
     fn is_reply(&self) -> bool;
     fn parse_markdown(&self) -> bool;
-    fn set_parse_markdown(&mut self, value: bool);
+    fn set_parse_markdown(
+        &mut self,
+        value: bool,
+    );
     fn replying_to(&self) -> Option<&[u8]>;
-    fn set_replying_to(&mut self, value: Option<&[u8]>);
-    fn add_attachment(&mut self, path: String) -> bool;
+    fn set_replying_to(
+        &mut self,
+        value: Option<&[u8]>,
+    );
+    fn add_attachment(
+        &mut self,
+        path: String,
+    ) -> bool;
     fn clear_reply(&mut self) -> ();
     fn finalize(&mut self) -> ();
-    fn remove_attachment(&mut self, path: String) -> bool;
-    fn remove_attachment_by_index(&mut self, row_index: u64) -> bool;
+    fn remove_attachment(
+        &mut self,
+        path: String,
+    ) -> bool;
+    fn remove_attachment_by_index(
+        &mut self,
+        row_index: u64,
+    ) -> bool;
     fn remove_last(&mut self) -> ();
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn attachment_path(&self, index: usize) -> &str;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn attachment_path(
+        &self,
+        index: usize,
+    ) -> &str;
 }
 
 #[no_mangle]
@@ -2251,7 +2637,10 @@ pub unsafe extern "C" fn message_builder_parse_markdown_get(ptr: *const MessageB
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_parse_markdown_set(ptr: *mut MessageBuilder, v: bool) {
+pub unsafe extern "C" fn message_builder_parse_markdown_set(
+    ptr: *mut MessageBuilder,
+    v: bool,
+) {
     (&mut *ptr).set_parse_markdown(v);
 }
 
@@ -2488,7 +2877,10 @@ pub trait MessagePreviewTrait {
     fn has_attachments(&self) -> bool;
     fn is_dangling(&self) -> bool;
     fn message_id(&self) -> Option<&[u8]>;
-    fn set_message_id(&mut self, value: Option<&[u8]>);
+    fn set_message_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn msg_id_set(&self) -> bool;
 }
 
@@ -2552,7 +2944,7 @@ pub unsafe extern "C" fn message_preview_body_get(
 
 #[no_mangle]
 pub unsafe extern "C" fn message_preview_epoch_timestamp_ms_get(
-    ptr: *const MessagePreview,
+    ptr: *const MessagePreview
 ) -> COption<i64> {
     match (&*ptr).epoch_timestamp_ms() {
         Some(value) => COption {
@@ -2684,7 +3076,11 @@ impl MessageSearchList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -2693,19 +3089,32 @@ impl MessageSearchList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -2714,35 +3123,87 @@ impl MessageSearchList {
 }
 
 pub trait MessageSearchTrait {
-    fn new(emit: MessageSearchEmitter, model: MessageSearchList) -> Self;
+    fn new(
+        emit: MessageSearchEmitter,
+        model: MessageSearchList,
+    ) -> Self;
     fn emit(&mut self) -> &mut MessageSearchEmitter;
     fn regex_search(&self) -> Option<bool>;
-    fn set_regex_search(&mut self, value: Option<bool>);
+    fn set_regex_search(
+        &mut self,
+        value: Option<bool>,
+    );
     fn search_pattern(&self) -> Option<&str>;
-    fn set_search_pattern(&mut self, value: Option<String>);
+    fn set_search_pattern(
+        &mut self,
+        value: Option<String>,
+    );
     fn clear_search(&mut self) -> ();
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn author(&self, index: usize) -> Option<&str>;
-    fn body(&self, index: usize) -> Option<&str>;
-    fn conversation(&self, index: usize) -> Option<&[u8]>;
-    fn conversation_color(&self, index: usize) -> Option<u32>;
-    fn conversation_pairwise(&self, index: usize) -> Option<bool>;
-    fn conversation_picture(&self, index: usize) -> Option<String>;
-    fn conversation_title(&self, index: usize) -> Option<String>;
-    fn has_attachments(&self, index: usize) -> Option<bool>;
-    fn msg_id(&self, index: usize) -> Option<&[u8]>;
-    fn time(&self, index: usize) -> Option<i64>;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn author(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn body(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn conversation(
+        &self,
+        index: usize,
+    ) -> Option<&[u8]>;
+    fn conversation_color(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
+    fn conversation_pairwise(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn conversation_picture(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn conversation_title(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn has_attachments(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn msg_id(
+        &self,
+        index: usize,
+    ) -> Option<&[u8]>;
+    fn time(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
 }
 
 #[no_mangle]
@@ -2794,7 +3255,7 @@ pub unsafe extern "C" fn message_search_free(ptr: *mut MessageSearch) {
 
 #[no_mangle]
 pub unsafe extern "C" fn message_search_regex_search_get(
-    ptr: *const MessageSearch,
+    ptr: *const MessageSearch
 ) -> COption<bool> {
     match (&*ptr).regex_search() {
         Some(value) => COption {
@@ -2809,7 +3270,10 @@ pub unsafe extern "C" fn message_search_regex_search_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_search_regex_search_set(ptr: *mut MessageSearch, v: bool) {
+pub unsafe extern "C" fn message_search_regex_search_set(
+    ptr: *mut MessageSearch,
+    v: bool,
+) {
     (&mut *ptr).set_regex_search(Some(v));
 }
 
@@ -3175,7 +3639,11 @@ impl MessagesList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -3184,19 +3652,32 @@ impl MessagesList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -3205,56 +3686,136 @@ impl MessagesList {
 }
 
 pub trait MessagesTrait {
-    fn new(emit: MessagesEmitter, model: MessagesList) -> Self;
+    fn new(
+        emit: MessagesEmitter,
+        model: MessagesList,
+    ) -> Self;
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn conversation_id(&self) -> Option<&[u8]>;
-    fn set_conversation_id(&mut self, value: Option<&[u8]>);
+    fn set_conversation_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn is_empty(&self) -> bool;
     fn last_author(&self) -> Option<&str>;
     fn last_body(&self) -> Option<&str>;
     fn last_epoch_timestamp_ms(&self) -> Option<i64>;
     fn last_status(&self) -> Option<u32>;
     fn search_active(&self) -> bool;
-    fn set_search_active(&mut self, value: bool);
+    fn set_search_active(
+        &mut self,
+        value: bool,
+    );
     fn search_index(&self) -> u64;
     fn search_num_matches(&self) -> u64;
     fn search_pattern(&self) -> &str;
-    fn set_search_pattern(&mut self, value: String);
+    fn set_search_pattern(
+        &mut self,
+        value: String,
+    );
     fn search_regex(&self) -> bool;
-    fn set_search_regex(&mut self, value: bool);
+    fn set_search_regex(
+        &mut self,
+        value: bool,
+    );
     fn clear_conversation_history(&mut self) -> bool;
     fn clear_search(&mut self) -> ();
-    fn delete_message(&mut self, row_index: u64) -> bool;
-    fn index_by_id(&self, msg_id: &[u8]) -> u64;
+    fn delete_message(
+        &mut self,
+        row_index: u64,
+    ) -> bool;
+    fn index_by_id(
+        &self,
+        msg_id: &[u8],
+    ) -> u64;
     fn next_search_match(&mut self) -> i64;
     fn prev_search_match(&mut self) -> i64;
-    fn set_search_hint(&mut self, scrollbar_position: f32, scrollbar_height: f32) -> ();
+    fn set_search_hint(
+        &mut self,
+        scrollbar_position: f32,
+        scrollbar_height: f32,
+    ) -> ();
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn author(&self, index: usize) -> Option<&str>;
-    fn body(&self, index: usize) -> Option<&str>;
-    fn data_saved(&self, index: usize) -> Option<bool>;
-    fn epoch_timestamp_ms(&self, index: usize) -> Option<i64>;
-    fn expiration_timestamp_ms(&self, index: usize) -> Option<i64>;
-    fn has_attachments(&self, index: usize) -> Option<bool>;
-    fn is_head(&self, index: usize) -> Option<bool>;
-    fn is_reply(&self, index: usize) -> Option<bool>;
-    fn is_tail(&self, index: usize) -> Option<bool>;
-    fn match_status(&self, index: usize) -> Option<u8>;
-    fn message_id(&self, index: usize) -> Option<&[u8]>;
-    fn op(&self, index: usize) -> Option<&[u8]>;
-    fn receipt_status(&self, index: usize) -> Option<u32>;
-    fn server_timestamp_ms(&self, index: usize) -> Option<i64>;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn author(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn body(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn data_saved(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn epoch_timestamp_ms(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
+    fn expiration_timestamp_ms(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
+    fn has_attachments(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn is_head(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn is_reply(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn is_tail(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn match_status(
+        &self,
+        index: usize,
+    ) -> Option<u8>;
+    fn message_id(
+        &self,
+        index: usize,
+    ) -> Option<&[u8]>;
+    fn op(
+        &self,
+        index: usize,
+    ) -> Option<&[u8]>;
+    fn receipt_status(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
+    fn server_timestamp_ms(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
 }
 
 #[no_mangle]
@@ -3388,7 +3949,7 @@ pub unsafe extern "C" fn messages_last_body_get(
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_last_epoch_timestamp_ms_get(
-    ptr: *const Messages,
+    ptr: *const Messages
 ) -> COption<i64> {
     match (&*ptr).last_epoch_timestamp_ms() {
         Some(value) => COption {
@@ -3422,7 +3983,10 @@ pub unsafe extern "C" fn messages_search_active_get(ptr: *const Messages) -> boo
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_search_active_set(ptr: *mut Messages, v: bool) {
+pub unsafe extern "C" fn messages_search_active_set(
+    ptr: *mut Messages,
+    v: bool,
+) {
     (&mut *ptr).set_search_active(v);
 }
 
@@ -3466,7 +4030,10 @@ pub unsafe extern "C" fn messages_search_regex_get(ptr: *const Messages) -> bool
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_search_regex_set(ptr: *mut Messages, v: bool) {
+pub unsafe extern "C" fn messages_search_regex_set(
+    ptr: *mut Messages,
+    v: bool,
+) {
     (&mut *ptr).set_search_regex(v);
 }
 
@@ -3483,7 +4050,10 @@ pub unsafe extern "C" fn messages_clear_search(ptr: *mut Messages) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_delete_message(ptr: *mut Messages, row_index: u64) -> bool {
+pub unsafe extern "C" fn messages_delete_message(
+    ptr: *mut Messages,
+    row_index: u64,
+) -> bool {
     let o = &mut *ptr;
     o.delete_message(row_index)
 }
@@ -3561,7 +4131,11 @@ pub unsafe extern "C" fn messages_fetch_more(ptr: *mut Messages) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_sort(ptr: *mut Messages, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn messages_sort(
+    ptr: *mut Messages,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
@@ -3632,19 +4206,28 @@ pub unsafe extern "C" fn messages_data_has_attachments(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_is_head(ptr: *const Messages, row: c_int) -> COption<bool> {
+pub unsafe extern "C" fn messages_data_is_head(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<bool> {
     let o = &*ptr;
     o.is_head(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_is_reply(ptr: *const Messages, row: c_int) -> COption<bool> {
+pub unsafe extern "C" fn messages_data_is_reply(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<bool> {
     let o = &*ptr;
     o.is_reply(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_is_tail(ptr: *const Messages, row: c_int) -> COption<bool> {
+pub unsafe extern "C" fn messages_data_is_tail(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<bool> {
     let o = &*ptr;
     o.is_tail(to_usize(row).unwrap_or(0)).into()
 }
@@ -3777,7 +4360,11 @@ impl UsersList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -3786,19 +4373,32 @@ impl UsersList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -3807,41 +4407,112 @@ impl UsersList {
 }
 
 pub trait UsersTrait {
-    fn new(emit: UsersEmitter, model: UsersList) -> Self;
+    fn new(
+        emit: UsersEmitter,
+        model: UsersList,
+    ) -> Self;
     fn emit(&mut self) -> &mut UsersEmitter;
     fn filter(&self) -> &str;
-    fn set_filter(&mut self, value: String);
+    fn set_filter(
+        &mut self,
+        value: String,
+    );
     fn filter_regex(&self) -> bool;
-    fn set_filter_regex(&mut self, value: bool);
-    fn add(&mut self, id: String) -> Vec<u8>;
+    fn set_filter_regex(
+        &mut self,
+        value: bool,
+    );
+    fn add(
+        &mut self,
+        id: String,
+    ) -> Vec<u8>;
     fn clear_filter(&mut self) -> ();
-    fn color_by_id(&self, id: String) -> u32;
-    fn name_by_id(&self, id: String) -> String;
-    fn profile_picture_by_id(&self, id: String) -> String;
+    fn color_by_id(
+        &self,
+        id: String,
+    ) -> u32;
+    fn name_by_id(
+        &self,
+        id: String,
+    ) -> String;
+    fn profile_picture_by_id(
+        &self,
+        id: String,
+    ) -> String;
     fn toggle_filter_regex(&mut self) -> bool;
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> u32;
-    fn set_color(&mut self, index: usize, _: u32) -> bool;
-    fn matched(&self, index: usize) -> bool;
-    fn name(&self, index: usize) -> String;
-    fn set_name(&mut self, index: usize, _: String) -> bool;
-    fn pairwise_conversation_id(&self, index: usize) -> Vec<u8>;
-    fn profile_picture(&self, index: usize) -> Option<String>;
-    fn set_profile_picture(&mut self, index: usize, _: Option<String>) -> bool;
-    fn status(&self, index: usize) -> u8;
-    fn set_status(&mut self, index: usize, _: u8) -> bool;
-    fn user_id(&self, index: usize) -> &str;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn color(
+        &self,
+        index: usize,
+    ) -> u32;
+    fn set_color(
+        &mut self,
+        index: usize,
+        _: u32,
+    ) -> bool;
+    fn matched(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn name(
+        &self,
+        index: usize,
+    ) -> String;
+    fn set_name(
+        &mut self,
+        index: usize,
+        _: String,
+    ) -> bool;
+    fn pairwise_conversation_id(
+        &self,
+        index: usize,
+    ) -> Vec<u8>;
+    fn profile_picture(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn set_profile_picture(
+        &mut self,
+        index: usize,
+        _: Option<String>,
+    ) -> bool;
+    fn status(
+        &self,
+        index: usize,
+    ) -> u8;
+    fn set_status(
+        &mut self,
+        index: usize,
+        _: u8,
+    ) -> bool;
+    fn user_id(
+        &self,
+        index: usize,
+    ) -> &str;
 }
 
 #[no_mangle]
@@ -3904,7 +4575,11 @@ pub unsafe extern "C" fn users_filter_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_filter_set(ptr: *mut Users, v: *const c_ushort, len: c_int) {
+pub unsafe extern "C" fn users_filter_set(
+    ptr: *mut Users,
+    v: *const c_ushort,
+    len: c_int,
+) {
     let o = &mut *ptr;
     let mut s = String::new();
     set_string_from_utf16(&mut s, v, len);
@@ -3917,7 +4592,10 @@ pub unsafe extern "C" fn users_filter_regex_get(ptr: *const Users) -> bool {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_filter_regex_set(ptr: *mut Users, v: bool) {
+pub unsafe extern "C" fn users_filter_regex_set(
+    ptr: *mut Users,
+    v: bool,
+) {
     (&mut *ptr).set_filter_regex(v);
 }
 
@@ -3999,7 +4677,11 @@ pub unsafe extern "C" fn users_row_count(ptr: *const Users) -> c_int {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_insert_rows(ptr: *mut Users, row: c_int, count: c_int) -> bool {
+pub unsafe extern "C" fn users_insert_rows(
+    ptr: *mut Users,
+    row: c_int,
+    count: c_int,
+) -> bool {
     match (to_usize(row), to_usize(count)) {
         (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
         _ => false,
@@ -4007,7 +4689,11 @@ pub unsafe extern "C" fn users_insert_rows(ptr: *mut Users, row: c_int, count: c
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_remove_rows(ptr: *mut Users, row: c_int, count: c_int) -> bool {
+pub unsafe extern "C" fn users_remove_rows(
+    ptr: *mut Users,
+    row: c_int,
+    count: c_int,
+) -> bool {
     match (to_usize(row), to_usize(count)) {
         (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
         _ => false,
@@ -4025,23 +4711,37 @@ pub unsafe extern "C" fn users_fetch_more(ptr: *mut Users) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_sort(ptr: *mut Users, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn users_sort(
+    ptr: *mut Users,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_data_color(ptr: *const Users, row: c_int) -> u32 {
+pub unsafe extern "C" fn users_data_color(
+    ptr: *const Users,
+    row: c_int,
+) -> u32 {
     let o = &*ptr;
     o.color(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_set_data_color(ptr: *mut Users, row: c_int, v: u32) -> bool {
+pub unsafe extern "C" fn users_set_data_color(
+    ptr: *mut Users,
+    row: c_int,
+    v: u32,
+) -> bool {
     (&mut *ptr).set_color(to_usize(row).unwrap_or(0), v)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_data_matched(ptr: *const Users, row: c_int) -> bool {
+pub unsafe extern "C" fn users_data_matched(
+    ptr: *const Users,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
 }
@@ -4114,18 +4814,28 @@ pub unsafe extern "C" fn users_set_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_set_data_profile_picture_none(ptr: *mut Users, row: c_int) -> bool {
+pub unsafe extern "C" fn users_set_data_profile_picture_none(
+    ptr: *mut Users,
+    row: c_int,
+) -> bool {
     (&mut *ptr).set_profile_picture(to_usize(row).unwrap_or(0), None)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_data_status(ptr: *const Users, row: c_int) -> u8 {
+pub unsafe extern "C" fn users_data_status(
+    ptr: *const Users,
+    row: c_int,
+) -> u8 {
     let o = &*ptr;
     o.status(to_usize(row).unwrap_or(0))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_set_data_status(ptr: *mut Users, row: c_int, v: u8) -> bool {
+pub unsafe extern "C" fn users_set_data_status(
+    ptr: *mut Users,
+    row: c_int,
+    v: u8,
+) -> bool {
     (&mut *ptr).set_status(to_usize(row).unwrap_or(0), v)
 }
 
@@ -4206,7 +4916,11 @@ impl UsersSearchList {
     pub fn layout_changed(&mut self) {
         (self.layout_changed)(self.qobject);
     }
-    pub fn data_changed(&mut self, first: usize, last: usize) {
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.data_changed)(self.qobject, first, last);
     }
     pub fn begin_reset_model(&mut self) {
@@ -4215,19 +4929,32 @@ impl UsersSearchList {
     pub fn end_reset_model(&mut self) {
         (self.end_reset_model)(self.qobject);
     }
-    pub fn begin_insert_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_insert_rows)(self.qobject, first, last);
     }
     pub fn end_insert_rows(&mut self) {
         (self.end_insert_rows)(self.qobject);
     }
-    pub fn begin_move_rows(&mut self, first: usize, last: usize, destination: usize) {
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
         (self.begin_move_rows)(self.qobject, first, last, destination);
     }
     pub fn end_move_rows(&mut self) {
         (self.end_move_rows)(self.qobject);
     }
-    pub fn begin_remove_rows(&mut self, first: usize, last: usize) {
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
         (self.begin_remove_rows)(self.qobject, first, last);
     }
     pub fn end_remove_rows(&mut self) {
@@ -4236,30 +4963,71 @@ impl UsersSearchList {
 }
 
 pub trait UsersSearchTrait {
-    fn new(emit: UsersSearchEmitter, model: UsersSearchList) -> Self;
+    fn new(
+        emit: UsersSearchEmitter,
+        model: UsersSearchList,
+    ) -> Self;
     fn emit(&mut self) -> &mut UsersSearchEmitter;
     fn filter(&self) -> Option<&str>;
-    fn set_filter(&mut self, value: Option<String>);
+    fn set_filter(
+        &mut self,
+        value: Option<String>,
+    );
     fn clear_filter(&mut self) -> ();
     fn row_count(&self) -> usize;
-    fn insert_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
-    fn remove_rows(&mut self, _row: usize, _count: usize) -> bool {
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
         false
     }
     fn can_fetch_more(&self) -> bool {
         false
     }
     fn fetch_more(&mut self) {}
-    fn sort(&mut self, _: u8, _: SortOrder) {}
-    fn color(&self, index: usize) -> Option<u32>;
-    fn matched(&self, index: usize) -> bool;
-    fn name(&self, index: usize) -> Option<String>;
-    fn profile_picture(&self, index: usize) -> Option<String>;
-    fn selected(&self, index: usize) -> bool;
-    fn set_selected(&mut self, index: usize, _: bool) -> bool;
-    fn user_id(&self, index: usize) -> Option<&str>;
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
+    fn color(
+        &self,
+        index: usize,
+    ) -> Option<u32>;
+    fn matched(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn name(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn profile_picture(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+    fn selected(
+        &self,
+        index: usize,
+    ) -> bool;
+    fn set_selected(
+        &mut self,
+        index: usize,
+        _: bool,
+    ) -> bool;
+    fn user_id(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
 }
 
 #[no_mangle]
@@ -4385,7 +5153,11 @@ pub unsafe extern "C" fn users_search_fetch_more(ptr: *mut UsersSearch) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_search_sort(ptr: *mut UsersSearch, column: u8, order: SortOrder) {
+pub unsafe extern "C" fn users_search_sort(
+    ptr: *mut UsersSearch,
+    column: u8,
+    order: SortOrder,
+) {
     (&mut *ptr).sort(column, order)
 }
 
@@ -4399,7 +5171,10 @@ pub unsafe extern "C" fn users_search_data_color(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_search_data_matched(ptr: *const UsersSearch, row: c_int) -> bool {
+pub unsafe extern "C" fn users_search_data_matched(
+    ptr: *const UsersSearch,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.matched(to_usize(row).unwrap_or(0))
 }
@@ -4435,7 +5210,10 @@ pub unsafe extern "C" fn users_search_data_profile_picture(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn users_search_data_selected(ptr: *const UsersSearch, row: c_int) -> bool {
+pub unsafe extern "C" fn users_search_data_selected(
+    ptr: *const UsersSearch,
+    row: c_int,
+) -> bool {
     let o = &*ptr;
     o.selected(to_usize(row).unwrap_or(0))
 }

@@ -24,13 +24,19 @@ impl ChainKey {
 }
 
 impl PartialOrd for ChainKey {
-    fn partial_cmp(&self, other: &ChainKey) -> Option<std::cmp::Ordering> {
+    fn partial_cmp(
+        &self,
+        other: &ChainKey,
+    ) -> Option<std::cmp::Ordering> {
         Some(self.cmp(other))
     }
 }
 
 impl Ord for ChainKey {
-    fn cmp(&self, other: &ChainKey) -> std::cmp::Ordering {
+    fn cmp(
+        &self,
+        other: &ChainKey,
+    ) -> std::cmp::Ordering {
         self.0.cmp(&other.0)
     }
 }
@@ -217,7 +223,10 @@ impl Genesis {
         &self.root
     }
 
-    pub fn verify_sig(&self, pk: &sign::PublicKey) -> bool {
+    pub fn verify_sig(
+        &self,
+        pk: &sign::PublicKey,
+    ) -> bool {
         sign::verify_detached(
             &self.sig,
             &Self::compute_signing_data(&self.channel_key, &self.root),
@@ -226,7 +235,10 @@ impl Genesis {
     }
 }
 
-fn compute_block_signing_data(hashes: &BTreeSet<BlockHash>, salt: Salt) -> Vec<u8> {
+fn compute_block_signing_data(
+    hashes: &BTreeSet<BlockHash>,
+    salt: Salt,
+) -> Vec<u8> {
     let capacity = hashes.len() * BLOCKHASH_BYTES + SALT_BYTES;
     let mut data = Vec::with_capacity(capacity);
     for hash in hashes {
@@ -236,7 +248,11 @@ fn compute_block_signing_data(hashes: &BTreeSet<BlockHash>, salt: Salt) -> Vec<u
     data
 }
 
-fn compute_block_ad(parents: &BTreeSet<BlockHash>, salt: Salt, sig: sign::Signature) -> Vec<u8> {
+fn compute_block_ad(
+    parents: &BTreeSet<BlockHash>,
+    salt: Salt,
+    sig: sign::Signature,
+) -> Vec<u8> {
     let capacity = parents.len() * BLOCKHASH_BYTES + SALT_BYTES + sign::SIGNATUREBYTES;
     let mut ad = Vec::with_capacity(capacity);
     for parent in parents.iter() {

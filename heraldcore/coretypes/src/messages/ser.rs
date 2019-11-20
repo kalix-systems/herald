@@ -1,7 +1,10 @@
 use super::*;
 
 impl Serialize for MessageSendStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(
+        &self,
+        s: S,
+    ) -> Result<S::Ok, S::Error> {
         s.serialize_u8(*self as u8)
     }
 }
@@ -21,7 +24,10 @@ impl<'de> Deserialize<'de> for MessageSendStatus {
 }
 
 impl Serialize for MessageReceiptStatus {
-    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+    fn serialize<S: Serializer>(
+        &self,
+        s: S,
+    ) -> Result<S::Ok, S::Error> {
         s.serialize_u8(*self as u8)
     }
 }

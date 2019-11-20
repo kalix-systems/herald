@@ -1,6 +1,9 @@
 use super::*;
 
-pub(crate) fn set_name(conn: &rusqlite::Connection, name: String) -> Result<(), HErr> {
+pub(crate) fn set_name(
+    conn: &rusqlite::Connection,
+    name: String,
+) -> Result<(), HErr> {
     let id = id(conn)?;
     Ok(crate::user::db::set_name(conn, id, name.as_str())?)
 }
@@ -18,14 +21,20 @@ pub(crate) fn set_profile_picture(
 }
 
 /// Update user's color
-pub(crate) fn set_color(conn: &rusqlite::Connection, color: u32) -> Result<(), HErr> {
+pub(crate) fn set_color(
+    conn: &rusqlite::Connection,
+    color: u32,
+) -> Result<(), HErr> {
     let id = id(conn)?;
     crate::user::db::set_color(conn, id, color)?;
 
     Ok(())
 }
 
-pub(crate) fn set_colorscheme(conn: &rusqlite::Connection, colorscheme: u32) -> Result<(), HErr> {
+pub(crate) fn set_colorscheme(
+    conn: &rusqlite::Connection,
+    colorscheme: u32,
+) -> Result<(), HErr> {
     conn.execute(include_str!("sql/update_colorscheme.sql"), &[colorscheme])?;
 
     Ok(())
@@ -78,7 +87,10 @@ pub(crate) fn gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> {
 
 impl ConfigBuilder {
     /// Adds configuration.
-    pub(crate) fn add_db(self, conn: &mut rusqlite::Connection) -> Result<Config, HErr> {
+    pub(crate) fn add_db(
+        self,
+        conn: &mut rusqlite::Connection,
+    ) -> Result<Config, HErr> {
         let ConfigBuilder {
             id,
             keypair,

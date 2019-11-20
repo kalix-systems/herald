@@ -23,7 +23,10 @@ pub struct MessageSearch {
 }
 
 impl Interface for MessageSearch {
-    fn new(emit: Emitter, model: List) -> Self {
+    fn new(
+        emit: Emitter,
+        model: List,
+    ) -> Self {
         Self {
             pattern: None,
             results: vec![],
@@ -37,7 +40,10 @@ impl Interface for MessageSearch {
         Some(self.pattern.as_ref()?.is_regex())
     }
 
-    fn set_regex_search(&mut self, is_regex: Option<bool>) {
+    fn set_regex_search(
+        &mut self,
+        is_regex: Option<bool>,
+    ) {
         if let (Some(new), Some(mut pattern)) = (is_regex, self.pattern.take()) {
             match (new, pattern.is_regex()) {
                 (true, false) => {
@@ -63,7 +69,10 @@ impl Interface for MessageSearch {
         Some(self.pattern.as_ref()?.raw())
     }
 
-    fn set_search_pattern(&mut self, pattern: Option<String>) {
+    fn set_search_pattern(
+        &mut self,
+        pattern: Option<String>,
+    ) {
         match (pattern, self.pattern.take()) {
             (Some(new), Some(mut old)) => {
                 self.clear_search();
@@ -129,46 +138,76 @@ impl Interface for MessageSearch {
         }
     }
 
-    fn author(&self, index: usize) -> Option<ffi::UserIdRef> {
+    fn author(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserIdRef> {
         Some(self.results.get(index).as_ref()?.author.as_str())
     }
 
-    fn body(&self, index: usize) -> Option<&str> {
+    fn body(
+        &self,
+        index: usize,
+    ) -> Option<&str> {
         Some(self.results.get(index).as_ref()?.body.as_str())
     }
 
-    fn conversation(&self, index: usize) -> Option<ffi::ConversationIdRef> {
+    fn conversation(
+        &self,
+        index: usize,
+    ) -> Option<ffi::ConversationIdRef> {
         Some(self.results.get(index).as_ref()?.conversation.as_slice())
     }
 
-    fn has_attachments(&self, index: usize) -> Option<bool> {
+    fn has_attachments(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
         Some(self.results.get(index).as_ref()?.has_attachments)
     }
 
-    fn msg_id(&self, index: usize) -> Option<ffi::MsgIdRef> {
+    fn msg_id(
+        &self,
+        index: usize,
+    ) -> Option<ffi::MsgIdRef> {
         Some(self.results.get(index).as_ref()?.message_id.as_slice())
     }
 
-    fn time(&self, index: usize) -> Option<i64> {
+    fn time(
+        &self,
+        index: usize,
+    ) -> Option<i64> {
         Some(self.results.get(index).as_ref()?.time.0)
     }
 
-    fn conversation_pairwise(&self, index: usize) -> Option<bool> {
+    fn conversation_pairwise(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
         let cid = self.results.get(index).as_ref()?.conversation;
         conv::pairwise(&cid)
     }
 
-    fn conversation_title(&self, index: usize) -> Option<String> {
+    fn conversation_title(
+        &self,
+        index: usize,
+    ) -> Option<String> {
         let cid = self.results.get(index).as_ref()?.conversation;
         conv::title(&cid)
     }
 
-    fn conversation_color(&self, index: usize) -> Option<u32> {
+    fn conversation_color(
+        &self,
+        index: usize,
+    ) -> Option<u32> {
         let cid = self.results.get(index).as_ref()?.conversation;
         conv::color(&cid)
     }
 
-    fn conversation_picture(&self, index: usize) -> Option<String> {
+    fn conversation_picture(
+        &self,
+        index: usize,
+    ) -> Option<String> {
         let cid = self.results.get(index).as_ref()?.conversation;
         conv::picture(&cid)
     }

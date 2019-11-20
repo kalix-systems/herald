@@ -41,7 +41,10 @@ impl Search {
     }
 
     /// Replaces the search pattern, and resets the search.
-    pub fn replace_pattern(&mut self, pattern: SearchPattern) {
+    pub fn replace_pattern(
+        &mut self,
+        pattern: SearchPattern,
+    ) {
         self.min = Index::default();
         self.pattern = pattern;
     }

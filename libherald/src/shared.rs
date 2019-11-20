@@ -18,5 +18,8 @@ pub trait AddressedBus {
     type Addr: std::hash::Hash;
 
     /// Pushes the update through the bus, to the object addressed by `to`
-    fn push(to: Self::Addr, update: Self::Update) -> Result<(), HErr>;
+    fn push(
+        to: Self::Addr,
+        update: Self::Update,
+    ) -> Result<(), HErr>;
 }

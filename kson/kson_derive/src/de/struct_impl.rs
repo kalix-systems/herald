@@ -53,7 +53,11 @@ fn read_struct_tag(
     }
 }
 
-pub fn kson_de(name: Ident, data: DataStruct, gens: Generics) -> proc_macro2::TokenStream {
+pub fn kson_de(
+    name: Ident,
+    data: DataStruct,
+    gens: Generics,
+) -> proc_macro2::TokenStream {
     let impl_de = match data.fields {
         // C-style structs
         Fields::Named(fields) => {

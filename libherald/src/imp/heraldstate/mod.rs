@@ -67,7 +67,10 @@ impl HeraldStateTrait for HeraldState {
         self.config_init.load(Ordering::Acquire)
     }
 
-    fn register_new_user(&mut self, user_id: ffi::UserId) {
+    fn register_new_user(
+        &mut self,
+        user_id: ffi::UserId,
+    ) {
         use register::*;
 
         let uid = ret_err!(UserId::try_from(user_id.as_str()));

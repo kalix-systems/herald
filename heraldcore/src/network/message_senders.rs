@@ -54,7 +54,10 @@ pub(crate) fn send_cmessage(
     }
 }
 
-pub(super) fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Result<(), HErr> {
+pub(super) fn send_dmessage(
+    to: sig::PublicKey,
+    dm: &DeviceMessageBody,
+) -> Result<(), HErr> {
     let msg = Bytes::from(serde_cbor::to_vec(&dmessages::seal(&to, dm)?)?);
 
     let req = push_devices::Req { to: vec![to], msg };
@@ -69,7 +72,10 @@ pub(super) fn send_dmessage(to: sig::PublicKey, dm: &DeviceMessageBody) -> Resul
     }
 }
 
-pub(super) fn send_umessage(uid: UserId, msg: &DeviceMessageBody) -> Result<(), HErr> {
+pub(super) fn send_umessage(
+    uid: UserId,
+    msg: &DeviceMessageBody,
+) -> Result<(), HErr> {
     let meta = match keys_of(vec![uid])?.pop() {
         Some((u, m)) => {
             if u == uid {

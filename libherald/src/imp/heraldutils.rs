@@ -10,11 +10,18 @@ impl HeraldUtilsTrait for HeraldUtils {
         HeraldUtils { emit }
     }
 
-    fn compare_byte_array(&self, bs1: &[u8], bs2: &[u8]) -> bool {
+    fn compare_byte_array(
+        &self,
+        bs1: &[u8],
+        bs2: &[u8],
+    ) -> bool {
         bs1 == bs2
     }
 
-    fn is_valid_rand_id(&self, bs: &[u8]) -> bool {
+    fn is_valid_rand_id(
+        &self,
+        bs: &[u8],
+    ) -> bool {
         bs.len() == 32
     }
 

@@ -55,7 +55,10 @@ impl ConfigTrait for Config {
     }
 
     /// Sets the color of the current user.
-    fn set_color(&mut self, color: u32) {
+    fn set_color(
+        &mut self,
+        color: u32,
+    ) {
         let inner = ret_none!(self.inner.as_mut());
         spawn!(core::set_color(color));
         inner.color = color;
@@ -64,7 +67,10 @@ impl ConfigTrait for Config {
     }
 
     /// Sets the name of the current user.
-    fn set_name(&mut self, name: String) {
+    fn set_name(
+        &mut self,
+        name: String,
+    ) {
         let inner = ret_none!(self.inner.as_mut());
 
         let name = if name.is_empty() {
@@ -84,7 +90,10 @@ impl ConfigTrait for Config {
     }
 
     /// Set the colorscheme of the current user.
-    fn set_colorscheme(&mut self, colorscheme: u32) {
+    fn set_colorscheme(
+        &mut self,
+        colorscheme: u32,
+    ) {
         let inner = ret_none!(self.inner.as_mut());
 
         spawn!(core::set_colorscheme(colorscheme));
@@ -96,7 +105,10 @@ impl ConfigTrait for Config {
 
     /// Sets the profile picture of the current user to the picture at the specified path.
     /// If `picture` is None, this clears the user's profile picture.
-    fn set_profile_picture(&mut self, picture: Option<String>) {
+    fn set_profile_picture(
+        &mut self,
+        picture: Option<String>,
+    ) {
         let inner = ret_none!(self.inner.as_mut());
 
         // TODO exception safety

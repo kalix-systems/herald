@@ -36,25 +36,37 @@ pub enum StoreAndSend {
 
 impl OutboundMessageBuilder {
     /// Set conversation id
-    pub fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
+    pub fn conversation_id(
+        &mut self,
+        conversation_id: ConversationId,
+    ) -> &mut Self {
         self.conversation.replace(conversation_id);
         self
     }
 
     /// Set body
-    pub fn body(&mut self, body: MessageBody) -> &mut Self {
+    pub fn body(
+        &mut self,
+        body: MessageBody,
+    ) -> &mut Self {
         self.body.replace(body);
         self
     }
 
     /// Set the id of the message being replied to, if this message is a reply
-    pub fn replying_to(&mut self, op_msg_id: Option<MsgId>) -> &mut Self {
+    pub fn replying_to(
+        &mut self,
+        op_msg_id: Option<MsgId>,
+    ) -> &mut Self {
         self.op = op_msg_id;
         self
     }
 
     /// Add attachment
-    pub fn add_attachment(&mut self, path: PathBuf) -> &mut Self {
+    pub fn add_attachment(
+        &mut self,
+        path: PathBuf,
+    ) -> &mut Self {
         self.attachments.push(path);
         self
     }
@@ -107,45 +119,69 @@ pub(crate) struct InboundMessageBuilder {
 }
 
 impl InboundMessageBuilder {
-    pub(crate) fn id(&mut self, msg_id: MsgId) -> &mut Self {
+    pub(crate) fn id(
+        &mut self,
+        msg_id: MsgId,
+    ) -> &mut Self {
         self.message_id.replace(msg_id);
         self
     }
 
-    pub(crate) fn author(&mut self, uid: UserId) -> &mut Self {
+    pub(crate) fn author(
+        &mut self,
+        uid: UserId,
+    ) -> &mut Self {
         self.author.replace(uid);
         self
     }
 
-    pub(crate) fn conversation_id(&mut self, conversation_id: ConversationId) -> &mut Self {
+    pub(crate) fn conversation_id(
+        &mut self,
+        conversation_id: ConversationId,
+    ) -> &mut Self {
         self.conversation.replace(conversation_id);
         self
     }
 
     #[allow(unused)]
-    pub(crate) fn body(&mut self, body: MessageBody) -> &mut Self {
+    pub(crate) fn body(
+        &mut self,
+        body: MessageBody,
+    ) -> &mut Self {
         self.body.replace(body);
         self
     }
 
-    pub(crate) fn timestamp(&mut self, ts: Time) -> &mut Self {
+    pub(crate) fn timestamp(
+        &mut self,
+        ts: Time,
+    ) -> &mut Self {
         self.server_timestamp.replace(ts);
         self
     }
 
     #[allow(unused)]
-    pub(crate) fn replying_to(&mut self, op_msg_id: MsgId) -> &mut Self {
+    pub(crate) fn replying_to(
+        &mut self,
+        op_msg_id: MsgId,
+    ) -> &mut Self {
         self.op.replace(op_msg_id);
         self
     }
 
-    pub(crate) fn attachments(&mut self, attachments: Vec<attachments::Attachment>) -> &mut Self {
+    pub(crate) fn attachments(
+        &mut self,
+        attachments: Vec<attachments::Attachment>,
+    ) -> &mut Self {
         self.attachments = attachments;
         self
     }
 
     #[allow(unused)]
-    pub(crate) fn expiration(&mut self, expiration: Time) -> &mut Self {
+    pub(crate) fn expiration(
+        &mut self,
+        expiration: Time,
+    ) -> &mut Self {
         self.expiration.replace(expiration);
         self
     }

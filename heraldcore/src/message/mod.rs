@@ -30,7 +30,10 @@ pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
 }
 
 /// Sets the message status of an item in the database
-pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+pub fn update_send_status(
+    msg_id: MsgId,
+    status: MessageSendStatus,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::update_send_status(&db, msg_id, status)
 }

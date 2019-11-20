@@ -24,7 +24,10 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     /// Creates new `ConfigBuilder`
-    pub fn new(id: UserId, keypair: sig::KeyPair) -> Self {
+    pub fn new(
+        id: UserId,
+        keypair: sig::KeyPair,
+    ) -> Self {
         Self {
             id,
             keypair,
@@ -36,26 +39,38 @@ impl ConfigBuilder {
     }
 
     /// Sets colorscheme, defaults to 0 if not set.
-    pub fn colorscheme(mut self, colorscheme: u32) -> Self {
+    pub fn colorscheme(
+        mut self,
+        colorscheme: u32,
+    ) -> Self {
         self.colorscheme = Some(colorscheme);
         self
     }
 
     /// Sets color, computed from hash of the UserId if not set.
-    pub fn color(mut self, color: u32) -> Self {
+    pub fn color(
+        mut self,
+        color: u32,
+    ) -> Self {
         self.color = Some(color);
         self
     }
 
     /// Sets name.
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(
+        mut self,
+        name: String,
+    ) -> Self {
         self.name = Some(name);
         self
     }
 
     /// Sets conversation id for "Note to Self" conversation, a new conversation is created
     /// if this is not set.
-    pub fn nts_conversation(mut self, conv_id: ConversationId) -> Self {
+    pub fn nts_conversation(
+        mut self,
+        conv_id: ConversationId,
+    ) -> Self {
         self.nts_conversation = Some(conv_id);
         self
     }

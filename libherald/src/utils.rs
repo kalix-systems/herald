@@ -22,7 +22,11 @@ pub(crate) fn err_string_msg(
     )
 }
 
-pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
+pub(crate) fn ret_err_string(
+    e: &dyn std::error::Error,
+    file: &str,
+    line: u32,
+) -> String {
     format!(
         "{error} at {file}:{line}",
         error = e,
@@ -88,7 +92,10 @@ macro_rules! push_err {
     };
 }
 
-pub(crate) fn ret_none_string(file: &str, line: u32) -> String {
+pub(crate) fn ret_none_string(
+    file: &str,
+    line: u32,
+) -> String {
     format!(
         "Unexpected `None` at {file}:{line}",
         file = file,
