@@ -31,7 +31,7 @@ Component {
 
         Rectangle {
             anchors.top: titleText.bottom
-            anchors.topMargin: - CmnCfg.smallMargin / 2
+            anchors.topMargin: -CmnCfg.smallMargin / 2
             id: divider
             height: 1
             width: parent.width - CmnCfg.largeMargin

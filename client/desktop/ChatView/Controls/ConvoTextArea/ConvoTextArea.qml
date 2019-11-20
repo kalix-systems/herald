@@ -117,7 +117,6 @@ Rectangle {
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
-
             }
         }
     }

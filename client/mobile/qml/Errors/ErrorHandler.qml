@@ -2,9 +2,10 @@ import LibHerald 1.0
 
 Errors {
     id: self
-    property var errPopup: ErrorPopup {}
+    property var errPopup: ErrorPopup {
+    }
     onTryPollChanged: {
-        const errMsg = nextError()
+        var errMsg = nextError()
         if (errMsg !== "") {
             errPopup.errorMsg = errMsg
             errPopup.open()

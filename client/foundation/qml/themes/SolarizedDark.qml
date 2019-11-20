@@ -36,7 +36,7 @@ QtObject {
     property color tooltipTextColor: mainTextColor
     property color tooltipColor: tertiaryColor
 
-//    property font defaultFont: Text.font.family
-//    property font markdownFont: Text.font.family
+    //    property font defaultFont: Text.font.family
+    //    property font markdownFont: Text.font.family
     property var avatarColors: ["#b58900", "#cb4b16", "#dc322f", "#d33682", "#6c71c4", "#268bd2", "#2aa198", "#859900", "#cd74d4"]
 }
