@@ -64,7 +64,7 @@ default_features = false
 [dependencies.rusqlite]
 version          = "0.20.0"
 default_features = false
-features         = ["functions", "bundled"]
+features         = ["bundled"]
 
 [dependencies.image]
 version          = "0.22.1"

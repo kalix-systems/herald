@@ -1,21 +1,5 @@
 use super::*;
-use network_types::dmessages::DeviceMessage;
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// A contact request.
-pub struct UserReq {
-    /// The genesis block for the conversation.
-    pub gen: Genesis,
-    /// The proposed conversation id.
-    pub cid: ConversationId,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// Types of device message.
-pub enum DeviceMessageBody {
-    /// A contact request
-    Req(dmessages::UserReq),
-}
+pub(crate) use network_types::dmessages::*;
 
 pub(crate) fn seal(
     to: &sig::PublicKey,
