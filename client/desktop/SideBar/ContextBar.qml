@@ -53,7 +53,7 @@ ToolBar {
                 topPadding: 1
                 source: "qrc:/search-icon.svg"
                 // TODO : add back in regex logic once ui is known
-                onClicked: sideBarState.state = "conversationSearch"
+                onClicked: sideBarState.state = "globalSearch"
             }
 
             Common.ButtonForm {

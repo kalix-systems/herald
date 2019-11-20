@@ -22,26 +22,15 @@ Page {
         }
     }
 
-    Component {
-        id: convoslvComponent
-        ConversationViewMain {
-            id: conversationsListView
-            anchors.fill: parent
-            model: conversationsModel
-        }
-    }
-
-    Loader {
-        id: sideBarBodyLoader
-        anchors.fill: parent
-        sourceComponent: convoslvComponent
+    SideBarPane {
+        id: sideBarPane
     }
 
     states: [
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarBodyLoader
+                target: sideBarPane.sideBarBodyLoader
                 sourceComponent: newContactComponent
             }
             PropertyChanges {
@@ -55,7 +44,7 @@ Page {
         State {
             name: "newGroupState"
             PropertyChanges {
-                target: sideBarBodyLoader
+                target: sideBarPane.sideBarBodyLoader
                 sourceComponent: newGroupComponent
             }
 
@@ -72,16 +61,31 @@ Page {
             }
         },
 
-        //TODO: following two states should be reworked to match new design
         State {
-            name: "conversationSearch"
+            name: "globalSearch"
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: searchBarComponent
                 searchPlaceholder: "Search your conversations"
             }
+
+            //loader that loads message search model
+            PropertyChanges {
+                //loader in sidebarMain
+                target: searchModelLoader
+                active: true
+                source: "MessageSearchComponents/MessageSearch.qml"
+            }
+
+            //load model into view
+            PropertyChanges {
+                target: sideBarPane.messageSearchLoader
+                searchModel: msgSearchModel
+            }
+
         },
 
+        //TODO: following state should be reworked to match new design
         State {
             name: "newConversationState"
             PropertyChanges {
