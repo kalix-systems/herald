@@ -30,7 +30,7 @@ Page {
         State {
             name: "newContactState"
             PropertyChanges {
-                target: sideBarBodyLoader
+                target: sideBarPane.sideBarBodyLoader
                 sourceComponent: newContactComponent
             }
             PropertyChanges {
@@ -44,7 +44,7 @@ Page {
         State {
             name: "newGroupState"
             PropertyChanges {
-                target: sideBarBodyLoader
+                target: sideBarPane.sideBarBodyLoader
                 sourceComponent: newGroupComponent
             }
 
@@ -62,7 +62,7 @@ Page {
         },
 
         State {
-            name: "conversationSearch"
+            name: "globalSearch"
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: searchBarComponent

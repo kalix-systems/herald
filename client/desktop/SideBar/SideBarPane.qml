@@ -8,14 +8,15 @@ import "MessageSearchComponents"
 
 Flickable {
     property alias messageSearchLoader: messageSearchLoader
+    property alias sideBarBodyLoader: sideBarBodyLoader
     anchors.fill: parent
     contentHeight: wrapperCol.height
     interactive: true
     ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded
         width: CmnCfg.padding
         }
-//column to load content, components are inside instead of being declared separately because
-// otherwise loader cannot keep track of contentHeight of the listviews.
+    //column to load content, components are inside instead of being declared separately because
+    // otherwise loader cannot keep track of contentHeight of the listviews.
     Column {
      id: wrapperCol
      width: parent.width
@@ -25,7 +26,7 @@ Flickable {
          anchors.leftMargin: CmnCfg.smallMargin
          topPadding: CmnCfg.smallMargin
          font.bold: true
-         visible: sideBarState.state === "conversationSearch"
+         visible: sideBarState.state === "globalSearch"
      }
 
      Loader {
@@ -43,7 +44,7 @@ Flickable {
          anchors.leftMargin: CmnCfg.smallMargin
          topPadding: CmnCfg.smallMargin
          font.bold: true
-         visible: sideBarState.state === "conversationSearch"
+         visible: sideBarState.state === "globalSearch"
      }
 
     Loader {

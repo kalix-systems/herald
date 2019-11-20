@@ -15,8 +15,6 @@ import "qrc:/imports/Avatar" as Av
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
     height: contentHeight
-    ScrollBar.vertical: ScrollBar {
-    }
 
     delegate: Item {
         id: messageItem
