@@ -116,7 +116,7 @@ pub(crate) fn replies(
     let mut get_stmt = conn.prepare_cached(include_str!("sql/replies.sql"))?;
 
     let res = get_stmt.query_map_named(named_params!("@parent_msg_id": msg_id), |row| {
-        Ok(row.get("op_msg_id")?)
+        Ok(row.get("msg_id")?)
     })?;
 
     res.collect()

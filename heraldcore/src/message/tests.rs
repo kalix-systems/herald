@@ -79,8 +79,15 @@ fn reply() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    let reply = db::get_message(&conn, &mid2).unwrap();
+    let op_replies = db::replies(&conn, &mid1).expect(womp!());
+    let op = db::get_message(&conn, &mid1).expect(womp!());
+    assert_eq!(op.replies.len(), 1);
+    assert_eq!(op_replies.len(), 1);
 
+    assert!(op.replies.contains(&mid2));
+    assert!(op_replies.contains(&mid2));
+
+    let reply = db::get_message(&conn, &mid2).expect(womp!());
     assert_eq!(reply.op.unwrap(), mid1);
 }
 
