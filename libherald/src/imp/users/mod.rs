@@ -154,7 +154,7 @@ impl UsersTrait for Users {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        let picture = picture.map(crate::utils::strip_qrc);
+        let picture = picture.and_then(crate::utils::strip_qrc);
 
         // FIXME this is not exception safe
         let path = ret_err!(user::set_profile_picture(uid, picture), false);

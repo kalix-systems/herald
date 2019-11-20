@@ -101,7 +101,7 @@ impl ConfigTrait for Config {
 
         // TODO exception safety
         let picture = ret_err!(core::set_profile_picture(
-            picture.map(crate::utils::strip_qrc)
+            picture.and_then(crate::utils::strip_qrc)
         ));
 
         inner.profile_picture = picture;
