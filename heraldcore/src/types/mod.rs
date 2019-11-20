@@ -2,7 +2,6 @@ use super::*;
 use crate::errors::{HErr, HErr::*};
 use chainkeys::{self, ChainMailError, DecryptionResult};
 use chainmail::block::*;
-use crypto_helpers::{spk_to_epk, ssk_to_esk};
 use herald_common::*;
 
 mod messages;

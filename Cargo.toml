@@ -12,7 +12,6 @@ members = [
   "heraldcore/coretypes",
   "heraldcore/coremacros",
   "heraldcore/coreconf",
-  "heraldcore/crypto_helpers",
   "heraldcore/network_types",
   "heraldcore/chainkeys",
   "heraldcore/platform_dirs",
