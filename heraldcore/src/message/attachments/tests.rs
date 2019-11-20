@@ -5,7 +5,7 @@ use std::convert::TryInto;
 use std::str::FromStr;
 
 #[test]
-#[serial(attach)]
+#[serial]
 fn make_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
@@ -16,7 +16,7 @@ fn make_attachment() {
 }
 
 #[test]
-#[serial(attach)]
+#[serial]
 fn outbound_message_attachment() {
     Database::reset_all().expect(womp!());
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
@@ -38,7 +38,7 @@ fn outbound_message_attachment() {
 }
 
 #[test]
-#[serial(attach)]
+#[serial]
 fn inbound_message_attachment() {
     use crate::user::UserBuilder;
     use std::convert::TryInto;
@@ -72,7 +72,7 @@ fn inbound_message_attachment() {
 }
 
 #[test]
-#[serial(attach)]
+#[serial]
 fn delete_message_with_attachment() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 
