@@ -24,9 +24,6 @@ ListView {
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
     height: contentHeight
-    ScrollBar.vertical: ScrollBar {
-    }
-
     delegate: Item {
         id: conversationItem
 
