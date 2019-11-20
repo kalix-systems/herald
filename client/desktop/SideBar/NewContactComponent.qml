@@ -24,6 +24,7 @@ Component {
 
                 Keys.onReturnPressed: {
                     JS.insertContact(text, contactsModel)
+                    sideBarState.state = ""
                 }
             }
         }

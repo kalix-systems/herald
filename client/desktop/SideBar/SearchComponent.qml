@@ -60,6 +60,8 @@ Component {
             anchors.rightMargin: CmnCfg.smallMargin / 2
             anchors.verticalCenter: parent.verticalCenter
             onClicked: {
+                msgSearchModel.clearSearch()
+                conversationsModel.filter = ""
                 sideBarState.state = ""
             }
         }
@@ -71,7 +73,8 @@ Component {
                 }, searchText.text)
             } else {
                 Qt.callLater(function (text) {
-                    conversationsModel.filter = text
+                   conversationsModel.filter = text
+                    msgSearchModel.searchPattern = text
                 }, searchText.text)
             }
         }

@@ -52,7 +52,7 @@ Rectangle {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        source: "qrc:/plus-icon.svg"
+        source: "qrc:/attach-icon.svg"
     }
 
     Common.ButtonForm {
