@@ -14,6 +14,16 @@ export function friendlyTimestamp(msEpochTime: number): string {
   const secondsPerMinute = 60;
   const secondsPerHour = 3600;
   const secondsPerDay = 3600 * 24;
+  const secondsPerWeek = 3600 * 24 * 7;
+
+  var weekdays = new Array(7);
+	weekdays[0] = "Sun";
+	weekdays[1] = "Mon";
+	weekdays[2] = "Tues";
+	weekdays[3] = "Weds";
+	weekdays[4] = "Thurs";
+	weekdays[5] = "Fri";
+	weekdays[6] = "Sat";
 
   const dt = new Date(msEpochTime);
   const now = Date.now();
@@ -21,14 +31,20 @@ export function friendlyTimestamp(msEpochTime: number): string {
 
   if (diff < 0) return "";
 
-  if (diff < secondsPerMinute) return "NOW";
+  if (diff < secondsPerMinute) return "Now";
 
   if (diff < secondsPerHour) {
-    return Math.floor(diff / secondsPerMinute) + " MIN AGO";
+    return Math.floor(diff / secondsPerMinute) + " min";
   }
 
   if (diff < secondsPerDay) {
-    return Math.floor(diff / secondsPerHour) + " HR AGO";
+    return Math.floor(diff / secondsPerHour) + " hr";
+  }
+
+  if (diff < secondsPerWeek) {
+  	const dayNum = dt.getDay();
+  	return weekdays[dayNum];
+
   }
 
   return dt.toDateString();
