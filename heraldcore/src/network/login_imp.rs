@@ -4,7 +4,10 @@ use super::*;
 /// the server.
 ///
 /// Takes a callback as an argument that is called whenever a message is received.
-pub fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
+pub fn login<F, G>(
+    mut f: F,
+    mut g: G,
+) -> Result<(), HErr>
 where
     F: FnMut(Notification) + Send + 'static,
     G: FnMut(HErr) + Send + 'static,
@@ -72,8 +75,8 @@ where
     Ok(())
 }
 
-fn sock_get_msg<S: websocket::stream::Stream, T: De>(
-    ws: &mut wsclient::Client<S>,
+fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     let len;
 
@@ -101,7 +104,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: De>(
                 // after the server receives this, it *will* delete the message,
                 // so I'm inclined to be damn sure we're done with it
                 sock_send_msg(ws, &PacketResponse::Success)?;
-                return Ok(kson::from_slice(&v)?);
+                return Ok(serde_cbor::from_slice(&v)?);
             }
             None => {
                 sock_send_msg(ws, &PacketResponse::Retry)?;
@@ -110,21 +113,21 @@ fn sock_get_msg<S: websocket::stream::Stream, T: De>(
     }
 }
 
-fn sock_get_block<S: websocket::stream::Stream, T: De>(
-    ws: &mut wsclient::Client<S>,
+fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+    ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     loop {
         if let WMessage::Binary(v) = ws.recv_message()? {
-            return Ok(kson::from_slice(&v)?);
+            return Ok(serde_cbor::from_slice(&v)?);
         }
     }
 }
 
-fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
+fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    let m = WMessage::Binary(kson::to_vec(t)?);
+    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
     ws.send_message(&m)?;
     Ok(())
 }
@@ -132,11 +135,11 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
 fn handle_push(push: &Push) -> Result<Event, HErr> {
     match push.tag {
         PushTag::User => {
-            let umsg = kson::from_slice(&push.msg)?;
+            let umsg = serde_cbor::from_slice(&push.msg)?;
             handle_cmessage(push.timestamp, umsg)
         }
         PushTag::Device => {
-            let dmsg = kson::from_slice(&push.msg)?;
+            let dmsg = serde_cbor::from_slice(&push.msg)?;
             handle_dmessage(push.timestamp, dmsg)
         }
     }

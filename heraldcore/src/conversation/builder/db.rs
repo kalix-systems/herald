@@ -2,7 +2,10 @@ use super::*;
 use rusqlite::named_params;
 
 impl ConversationBuilder {
-    fn raw_add(self, tx: &rusqlite::Transaction) -> Result<Conversation, HErr> {
+    fn raw_add(
+        self,
+        tx: &rusqlite::Transaction,
+    ) -> Result<Conversation, HErr> {
         let Self {
             conversation_id,
             title,
@@ -78,7 +81,10 @@ impl ConversationBuilder {
         Ok(self.raw_add(tx)?)
     }
 
-    pub(crate) fn add_tx(mut self, tx: &rusqlite::Transaction) -> Result<Conversation, HErr> {
+    pub(crate) fn add_tx(
+        mut self,
+        tx: &rusqlite::Transaction,
+    ) -> Result<Conversation, HErr> {
         let local_id = crate::config::db::id(tx)?;
 
         if !self.member_set.contains(&local_id) {
@@ -90,7 +96,10 @@ impl ConversationBuilder {
         Ok(conv)
     }
 
-    pub(crate) fn add_db(self, conn: &mut rusqlite::Connection) -> Result<Conversation, HErr> {
+    pub(crate) fn add_db(
+        self,
+        conn: &mut rusqlite::Connection,
+    ) -> Result<Conversation, HErr> {
         let tx = conn.transaction()?;
         let conv = self.add_tx(&tx)?;
         tx.commit()?;

@@ -42,7 +42,10 @@ impl AddressedBus for Messages {
     type Addr = ConversationId;
     type Update = MsgUpdate;
 
-    fn push(to: Self::Addr, update: Self::Update) -> Result<(), HErr> {
+    fn push(
+        to: Self::Addr,
+        update: Self::Update,
+    ) -> Result<(), HErr> {
         let tx = match TXS.get(&to) {
             Some(tx) => tx.clone(),
             None => {

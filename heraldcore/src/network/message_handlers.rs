@@ -1,12 +1,17 @@
 use super::*;
+use crate::types::{cmessages, dmessages};
+use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage};
 
-pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
+pub(super) fn handle_cmessage(
+    ts: Time,
+    cm: ConversationMessage,
+) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
     let mut ev = Event::default();
 
     let cid = cm.cid();
 
-    let msgs = cm.open()?;
+    let msgs = cmessages::open(cm)?;
 
     for (msg, GlobalId { uid, .. }) in msgs {
         match msg {
@@ -45,7 +50,7 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                 let mut db = crate::db::Database::get()?;
                 let conv = conv_builder.add_db(&mut db)?;
 
-                cid.store_genesis(&gen)?;
+                chainkeys::store_genesis(&cid, &gen)?;
 
                 ev.notifications
                     .push(Notification::NewConversation(conv.meta));
@@ -101,7 +106,8 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
                     }));
             }
             Settings(update) => {
-                update.apply(&cid)?;
+                conversation::settings::apply(&update, &cid)?;
+
                 ev.notifications.push(Notification::Settings(cid, update));
             }
         }
@@ -110,10 +116,13 @@ pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event
     Ok(ev)
 }
 
-pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr> {
+pub(super) fn handle_dmessage(
+    _: Time,
+    msg: DeviceMessage,
+) -> Result<Event, HErr> {
     let mut ev = Event::default();
 
-    let (from, msg) = msg.open()?;
+    let (from, msg) = dmessages::open(msg)?;
     let GlobalId { did, uid } = from;
 
     match msg {
@@ -124,10 +133,11 @@ pub(super) fn handle_dmessage(_: Time, msg: DeviceMessage) -> Result<Event, HErr
                     .pairwise_conversation(cid)
                     .add()?;
 
-                let conversation::Conversation { meta, .. } = conversation;
-                cid.store_genesis(&gen)?;
+                let coretypes::conversation::Conversation { meta, .. } = conversation;
+                chainkeys::store_genesis(&cid, &gen)?;
 
-                ev.notifications.push(Notification::NewUser(user, meta));
+                ev.notifications
+                    .push(Notification::NewUser(Box::new((user, meta))));
 
                 ev.replies.push((
                     cid,

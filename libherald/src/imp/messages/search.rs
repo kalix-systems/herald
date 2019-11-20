@@ -17,7 +17,7 @@ impl SearchChanged {
 pub(super) struct Match(pub(super) Message);
 
 pub(super) struct SearchState {
-    pub(super) pattern: SearchPattern,
+    pub(super) pattern: Option<SearchPattern>,
     pub(super) active: bool,
     matches: Vec<Match>,
     start_index: Option<usize>,
@@ -27,7 +27,7 @@ pub(super) struct SearchState {
 impl SearchState {
     pub(super) fn new() -> Self {
         Self {
-            pattern: abort_err!(SearchPattern::new_normal("".into())),
+            pattern: SearchPattern::new_normal("".into()).ok(),
             active: false,
             matches: Vec::new(),
             start_index: None,
@@ -37,12 +37,16 @@ impl SearchState {
 
     pub(super) fn is_regex(&self) -> bool {
         match self.pattern {
-            SearchPattern::Normal { .. } => false,
-            SearchPattern::Regex { .. } => true,
+            Some(SearchPattern::Regex { .. }) => true,
+            _ => false,
         }
     }
 
-    pub(super) fn start_hint(&mut self, hint: f32, container: &Container) -> Option<()> {
+    pub(super) fn start_hint(
+        &mut self,
+        hint: f32,
+        container: &Container,
+    ) -> Option<()> {
         let approx_index = (container.len() as f64 * hint as f64).ceil() as usize;
 
         let closest_message = container.get(approx_index)?;
@@ -62,17 +66,28 @@ impl SearchState {
         pattern: String,
         emit: &mut Emitter,
     ) -> Result<SearchChanged, HErr> {
-        if pattern == self.pattern.raw() {
-            return Ok(SearchChanged::NotChanged);
-        }
+        self.pattern = match self.pattern.take() {
+            Some(mut old) => {
+                if pattern == old.raw() {
+                    return Ok(SearchChanged::NotChanged);
+                }
 
-        self.pattern.set_pattern(pattern)?;
+                old.set_pattern(pattern)?;
+                Some(old)
+            }
+            None => Some(SearchPattern::new_normal(pattern)?),
+        };
+
         emit.search_pattern_changed();
 
         Ok(SearchChanged::Changed)
     }
 
-    pub(super) fn set_matches(&mut self, matches: Vec<Match>, emit: &mut Emitter) {
+    pub(super) fn set_matches(
+        &mut self,
+        matches: Vec<Match>,
+        emit: &mut Emitter,
+    ) {
         self.matches = matches;
         self.index = None;
 
@@ -80,9 +95,13 @@ impl SearchState {
         emit.search_index_changed();
     }
 
-    pub(super) fn msg_matches(&self, msg_id: &MsgId, container: &Container) -> Option<bool> {
+    pub(super) fn msg_matches(
+        &self,
+        msg_id: &MsgId,
+        container: &Container,
+    ) -> Option<bool> {
         let data = container.get_data(msg_id)?;
-        Some(data.matches(&self.pattern))
+        Some(data.matches(self.pattern.as_ref()?))
     }
 
     pub(super) fn set_regex(
@@ -90,13 +109,13 @@ impl SearchState {
         use_regex: bool,
         emit: &mut Emitter,
     ) -> Result<SearchChanged, HErr> {
-        match (use_regex, self.is_regex()) {
-            (true, false) => {
-                self.pattern.regex_mode()?;
+        match (use_regex, self.is_regex(), self.pattern.as_mut()) {
+            (true, false, Some(pattern)) => {
+                pattern.regex_mode()?;
                 emit.search_regex_changed();
             }
-            (false, true) => {
-                self.pattern.normal_mode()?;
+            (false, true, Some(pattern)) => {
+                pattern.normal_mode()?;
                 emit.search_regex_changed();
             }
             _ => {
@@ -110,8 +129,14 @@ impl SearchState {
         self.matches.len()
     }
 
-    pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
-        self.pattern.set_pattern("".into())?;
+    pub(super) fn clear_search(
+        &mut self,
+        emit: &mut Emitter,
+    ) -> Result<(), HErr> {
+        if let Some(pattern) = self.pattern.as_mut() {
+            pattern.set_pattern("".into())?;
+        }
+
         self.matches = Vec::new();
         self.index = None;
         self.start_index = None;

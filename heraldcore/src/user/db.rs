@@ -1,16 +1,23 @@
 use super::*;
-use crate::conversation::Conversation;
+use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 
 /// Gets a user's name by their `id`.
-pub(crate) fn name(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
+pub(crate) fn name(
+    conn: &rusqlite::Connection,
+    id: UserId,
+) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_name.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
 }
 
 /// Change name of user by their `id`
-pub(crate) fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> Result<(), HErr> {
+pub(crate) fn set_name(
+    conn: &rusqlite::Connection,
+    id: UserId,
+    name: &str,
+) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/update_name.sql"))?;
 
     stmt.execute(params![name, id])?;
@@ -18,7 +25,10 @@ pub(crate) fn set_name(conn: &rusqlite::Connection, id: UserId, name: &str) -> R
 }
 
 /// Gets a user's profile picture by their `id`.
-pub fn profile_picture(conn: &rusqlite::Connection, id: UserId) -> Result<Option<String>, HErr> {
+pub fn profile_picture(
+    conn: &rusqlite::Connection,
+    id: UserId,
+) -> Result<Option<String>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_profile_picture.sql"))?;
 
     Ok(stmt.query_row(params![id], |row| row.get(0))?)
@@ -31,7 +41,7 @@ pub fn conversation_members(
 ) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_conversation.sql"))?;
 
-    let rows = stmt.query_map(params![conversation_id], User::from_db)?;
+    let rows = stmt.query_map(params![conversation_id], from_db)?;
 
     let mut users: Vec<User> = Vec::new();
     for user in rows {
@@ -75,13 +85,20 @@ pub fn set_profile_picture(
 }
 
 /// Sets a user's color
-pub fn set_color(conn: &rusqlite::Connection, id: UserId, color: u32) -> Result<(), HErr> {
+pub fn set_color(
+    conn: &rusqlite::Connection,
+    id: UserId,
+    color: u32,
+) -> Result<(), HErr> {
     conn.execute(include_str!("sql/update_color.sql"), params![color, id])?;
     Ok(())
 }
 
 /// Indicates whether user exists
-pub fn user_exists(conn: &rusqlite::Connection, id: UserId) -> Result<bool, HErr> {
+pub fn user_exists(
+    conn: &rusqlite::Connection,
+    id: UserId,
+) -> Result<bool, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/user_exists.sql"))?;
     Ok(stmt.exists(&[id])?)
 }
@@ -111,7 +128,10 @@ pub fn set_status(
 }
 
 /// Gets user status
-pub fn status(conn: &rusqlite::Connection, id: UserId) -> Result<UserStatus, HErr> {
+pub fn status(
+    conn: &rusqlite::Connection,
+    id: UserId,
+) -> Result<UserStatus, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_status.sql"))?;
 
     Ok(stmt.query_row(&[id], |row| row.get(0))?)
@@ -121,7 +141,7 @@ pub fn status(conn: &rusqlite::Connection, id: UserId) -> Result<UserStatus, HEr
 pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_all.sql"))?;
 
-    let rows = stmt.query_map(NO_PARAMS, User::from_db)?;
+    let rows = stmt.query_map(NO_PARAMS, from_db)?;
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -132,17 +152,23 @@ pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
 }
 
 /// Returns a single user by `user_id`
-pub fn by_user_id(conn: &rusqlite::Connection, user_id: UserId) -> Result<User, HErr> {
+pub fn by_user_id(
+    conn: &rusqlite::Connection,
+    user_id: UserId,
+) -> Result<User, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_id.sql"))?;
 
-    Ok(stmt.query_row(params![user_id], User::from_db)?)
+    Ok(stmt.query_row(params![user_id], from_db)?)
 }
 
 /// Returns all users with the specified `status`
-pub fn get_by_status(conn: &rusqlite::Connection, status: UserStatus) -> Result<Vec<User>, HErr> {
+pub fn get_by_status(
+    conn: &rusqlite::Connection,
+    status: UserStatus,
+) -> Result<Vec<User>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_by_status.sql"))?;
 
-    let rows = stmt.query_map(params![status], User::from_db)?;
+    let rows = stmt.query_map(params![status], from_db)?;
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -238,8 +264,24 @@ impl UserBuilder {
     }
 }
 
+fn from_db(row: &rusqlite::Row) -> Result<User, rusqlite::Error> {
+    Ok(User {
+        id: row.get(0)?,
+        name: row.get(1)?,
+        profile_picture: row.get(2)?,
+        color: row.get(3)?,
+        status: row.get(4)?,
+        pairwise_conversation: row.get(5)?,
+        user_type: row.get(6)?,
+    })
+}
+
 #[cfg(test)]
-pub(crate) fn test_user(conn: &mut rusqlite::Connection, user_id: &str) -> User {
+pub(crate) fn test_user(
+    conn: &mut rusqlite::Connection,
+    user_id: &str,
+) -> User {
+    use std::convert::TryInto;
     let receiver = user_id
         .try_into()
         .unwrap_or_else(|_| panic!("{}:{}:{}", file!(), line!(), column!()));

@@ -1,0 +1,8 @@
+[package]
+name = "search_pattern"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+regex             = "1.2.1"

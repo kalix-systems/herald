@@ -71,7 +71,7 @@ pub(crate) fn meta(
     Ok(conn.query_row(
         include_str!("sql/get_conversation_meta.sql"),
         params![conversation_id],
-        ConversationMeta::from_db,
+        from_db,
     )?)
 }
 
@@ -178,7 +178,7 @@ pub(crate) fn set_picture(
 /// Get metadata of all conversations
 pub(crate) fn all_meta(conn: &rusqlite::Connection) -> Result<Vec<ConversationMeta>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/all_meta.sql"))?;
-    let res = stmt.query_map(NO_PARAMS, ConversationMeta::from_db)?;
+    let res = stmt.query_map(NO_PARAMS, from_db)?;
 
     let mut meta = Vec::new();
     for data in res {
@@ -212,4 +212,17 @@ pub(crate) fn set_expiration_period(
         "@expiration_period": expiration_period,
     })?;
     Ok(())
+}
+
+fn from_db(row: &rusqlite::Row) -> Result<ConversationMeta, rusqlite::Error> {
+    Ok(ConversationMeta {
+        conversation_id: row.get("conversation_id")?,
+        title: row.get("title")?,
+        picture: row.get("picture")?,
+        color: row.get("color")?,
+        muted: row.get("muted")?,
+        pairwise: row.get("pairwise")?,
+        last_active: row.get("last_active_ts")?,
+        expiration_period: row.get("expiration_period")?,
+    })
 }

@@ -20,7 +20,11 @@ impl<'a> Func<'a> {
         self
     }
 
-    pub fn arg(mut self, name: &'a str, typ: SimpleType) -> Self {
+    pub fn arg(
+        mut self,
+        name: &'a str,
+        typ: SimpleType,
+    ) -> Self {
         self.arguments.push((name, typ));
         self
     }

@@ -1,14 +1,11 @@
 use crate::{
     ffi,
-    imp::users::{
-        color, name, profile_picture,
-        shared::{get_user, user_ids},
-    },
+    imp::users::shared::{color, get_user, name, profile_picture, user_ids},
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
     ret_err,
 };
 use herald_common::UserId;
-use heraldcore::utils::SearchPattern;
+use search_pattern::SearchPattern;
 
 struct User {
     id: UserId,
@@ -25,7 +22,10 @@ pub struct UsersSearch {
 }
 
 impl UsersSearchTrait for UsersSearch {
-    fn new(emit: Emitter, model: List) -> Self {
+    fn new(
+        emit: Emitter,
+        model: List,
+    ) -> Self {
         Self {
             emit,
             model,
@@ -42,37 +42,56 @@ impl UsersSearchTrait for UsersSearch {
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> Option<ffi::UserIdRef> {
+    fn user_id(
+        &self,
+        row_index: usize,
+    ) -> Option<ffi::UserIdRef> {
         Some(self.list.get(row_index)?.id.as_str())
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> Option<String> {
+    fn name(
+        &self,
+        row_index: usize,
+    ) -> Option<String> {
         let uid = &self.list.get(row_index).as_ref()?.id;
 
         Some(name(uid).unwrap_or_else(|| uid.to_string()))
     }
 
     /// Returns profile picture
-    fn profile_picture(&self, row_index: usize) -> Option<String> {
+    fn profile_picture(
+        &self,
+        row_index: usize,
+    ) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
         profile_picture(&uid)
     }
 
     /// Returns user's color
-    fn color(&self, row_index: usize) -> Option<u32> {
+    fn color(
+        &self,
+        row_index: usize,
+    ) -> Option<u32> {
         let uid = self.list.get(row_index)?.id;
         Some(color(&uid).unwrap_or(0))
     }
 
-    fn selected(&self, row_index: usize) -> bool {
+    fn selected(
+        &self,
+        row_index: usize,
+    ) -> bool {
         self.list
             .get(row_index)
             .map(|u| u.selected)
             .unwrap_or(false)
     }
 
-    fn set_selected(&mut self, row_index: usize, selected: bool) -> bool {
+    fn set_selected(
+        &mut self,
+        row_index: usize,
+        selected: bool,
+    ) -> bool {
         if let Some(user) = self.list.get_mut(row_index) {
             user.selected = selected;
             self.clear_filter();
@@ -81,7 +100,10 @@ impl UsersSearchTrait for UsersSearch {
         return false;
     }
 
-    fn matched(&self, row_index: usize) -> bool {
+    fn matched(
+        &self,
+        row_index: usize,
+    ) -> bool {
         self.list.get(row_index).map(|u| u.matched).unwrap_or(false)
     }
 
@@ -100,7 +122,10 @@ impl UsersSearchTrait for UsersSearch {
         Some(self.filter.as_ref()?.raw())
     }
 
-    fn set_filter(&mut self, pattern: Option<String>) {
+    fn set_filter(
+        &mut self,
+        pattern: Option<String>,
+    ) {
         match pattern {
             Some(pattern) => {
                 if pattern.is_empty() {

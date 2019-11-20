@@ -1,8 +1,7 @@
 use crate::{db::Database, errors::HErr, types::*, utils};
 use herald_common::*;
 use rusqlite::params;
-use std::collections::HashMap;
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 /// Message attachments
 pub mod attachments;
@@ -10,9 +9,8 @@ pub mod attachments;
 pub(crate) mod db;
 /// Runs message garbage collection tasks such as removing expired messages
 pub mod gc;
-mod types;
 use attachments::*;
-pub use types::*;
+pub use coretypes::messages::*;
 mod builder;
 pub use builder::*;
 mod search;
@@ -32,7 +30,10 @@ pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
 }
 
 /// Sets the message status of an item in the database
-pub fn update_send_status(msg_id: MsgId, status: MessageSendStatus) -> Result<(), HErr> {
+pub fn update_send_status(
+    msg_id: MsgId,
+    status: MessageSendStatus,
+) -> Result<(), HErr> {
     let db = Database::get()?;
     db::update_send_status(&db, msg_id, status)
 }

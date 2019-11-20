@@ -33,12 +33,18 @@ impl Prop {
         self
     }
 
-    pub fn simple(mut self, typ: SimpleType) -> Self {
+    pub fn simple(
+        mut self,
+        typ: SimpleType,
+    ) -> Self {
         self.property_type = Type::Simple(typ);
         self
     }
 
-    pub fn object(mut self, typ: Object) -> Self {
+    pub fn object(
+        mut self,
+        typ: Object,
+    ) -> Self {
         self.property_type = Type::Object(std::rc::Rc::new(typ));
         self
     }

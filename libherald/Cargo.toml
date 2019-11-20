@@ -24,6 +24,9 @@ path    = "../herald_common"
 [dependencies.heraldcore]
 path    = "../heraldcore"
 
+[dependencies.search_pattern]
+path    = "../heraldcore/search_pattern"
+
 
 [target.'cfg( all( target_family = "unix", not( any( target_os = "android", target_os="ios" ) ) ) )'.dependencies.notify-rust]
 version = "3.6.2"

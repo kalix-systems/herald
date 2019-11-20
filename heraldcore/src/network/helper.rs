@@ -6,9 +6,9 @@ macro_rules! mk_request {
     ($method: tt, $path: tt) => {
         pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
             let res_reader = ureq::$method(&server_url(stringify!($path)))
-                .send_bytes(&kson::to_vec(req)?)
+                .send_bytes(&serde_cbor::to_vec(req)?)
                 .into_reader();
-            let res = kson::from_reader(res_reader)?;
+            let res = serde_cbor::from_reader(res_reader)?;
             Ok(res)
         }
     };

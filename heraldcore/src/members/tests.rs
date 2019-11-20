@@ -1,5 +1,5 @@
 use super::*;
-use crate::{conversation::ConversationBuilder, user::UserBuilder, womp};
+use crate::{conversation::ConversationBuilder, user::UserBuilder};
 use std::convert::TryInto;
 
 #[test]

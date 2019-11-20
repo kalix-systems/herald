@@ -2,3 +2,4 @@ profile_pictures
 *.sqlite3*
 ./attachments
 test_output
+data_dir

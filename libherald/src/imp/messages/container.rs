@@ -1,6 +1,6 @@
 use super::*;
 use crate::{shared::AddressedBus, spawn};
-use std::ops::Not;
+use std::{collections::HashSet, ops::Not};
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
@@ -20,20 +20,52 @@ impl Container {
     }
 
     #[allow(unused)]
-    pub(super) fn contains(&self, msg_id: &MsgId) -> bool {
+    pub(super) fn contains(
+        &self,
+        msg_id: &MsgId,
+    ) -> bool {
         self.map.contains_key(msg_id)
     }
 
-    pub(super) fn get(&self, ix: usize) -> Option<&Message> {
+    pub(super) fn get(
+        &self,
+        ix: usize,
+    ) -> Option<&Message> {
         self.list.get(ix)
     }
 
-    pub(super) fn get_data_mut(&mut self, msg_id: &MsgId) -> Option<&mut MsgData> {
+    pub(super) fn get_data_mut(
+        &mut self,
+        msg_id: &MsgId,
+    ) -> Option<&mut MsgData> {
         self.map.get_mut(msg_id)
     }
 
-    pub(super) fn get_data(&self, msg_id: &MsgId) -> Option<&MsgData> {
+    pub(super) fn get_data(
+        &self,
+        msg_id: &MsgId,
+    ) -> Option<&MsgData> {
         self.map.get(msg_id)
+    }
+
+    /// Sets the reply type of a message to "dangling"
+    pub(super) fn set_dangling(
+        &mut self,
+        ids: HashSet<MsgId>,
+        model: &mut List,
+    ) -> Option<()> {
+        for id in ids.into_iter() {
+            if let Some(data) = self.get_data_mut(&id) {
+                if data.op != ReplyId::Dangling {
+                    data.op = ReplyId::Dangling;
+
+                    let ix = self.index_by_id(id)?;
+                    model.data_changed(ix, ix);
+                }
+            }
+        }
+
+        Some(())
     }
 
     pub(super) fn fill(cid: ConversationId) {
@@ -61,13 +93,19 @@ impl Container {
         self.map.get(&mid)
     }
 
-    pub(super) fn msg_data(&self, index: usize) -> Option<&MsgData> {
+    pub(super) fn msg_data(
+        &self,
+        index: usize,
+    ) -> Option<&MsgData> {
         let msg = self.list.get(index);
         self.map.get(&msg?.msg_id)
     }
 
     #[allow(unused)]
-    pub(super) fn msg_data_mut(&mut self, index: usize) -> Option<&mut MsgData> {
+    pub(super) fn msg_data_mut(
+        &mut self,
+        index: usize,
+    ) -> Option<&mut MsgData> {
         let msg = self.list.get(index);
         self.map.get_mut(&msg?.msg_id)
     }
@@ -76,37 +114,61 @@ impl Container {
         self.list.last()
     }
 
-    pub(super) fn index_of(&self, msg: &Message) -> Option<usize> {
+    pub(super) fn index_of(
+        &self,
+        msg: &Message,
+    ) -> Option<usize> {
         self.list.binary_search(&msg).ok()
     }
 
-    pub(super) fn index_by_id(&self, msg_id: MsgId) -> Option<usize> {
+    pub(super) fn index_by_id(
+        &self,
+        msg_id: MsgId,
+    ) -> Option<usize> {
         let m = Message::from_msg_id(msg_id, &self)?;
 
         self.list.binary_search(&m).ok()
     }
 
     /// Removes the item from the container. *Does not modify disk storage*.
-    pub(super) fn mem_remove(&mut self, ix: usize) -> Option<MsgId> {
+    pub(super) fn remove(
+        &mut self,
+        ix: usize,
+    ) -> Option<MsgData> {
         if ix >= self.len() {
             return None;
         }
 
         let msg = self.list.remove(ix);
-        self.map.remove(&msg.msg_id)?;
+        let data = self.map.remove(&msg.msg_id)?;
 
-        Some(msg.msg_id)
+        Some(data)
     }
 
-    pub(super) fn binary_search(&self, msg: &Message) -> Result<usize, usize> {
+    pub(super) fn binary_search(
+        &self,
+        msg: &Message,
+    ) -> Result<usize, usize> {
         self.list.binary_search(msg)
     }
 
-    pub(super) fn insert(&mut self, ix: usize, msg: Message, data: MsgData) {
+    #[must_use]
+    pub(super) fn insert(
+        &mut self,
+        ix: usize,
+        msg: Message,
+        data: MsgData,
+    ) -> Option<()> {
         let mid = msg.msg_id;
+
+        if let ReplyId::Known(op) = &data.op {
+            self.get_data_mut(op)?.replies.insert(mid);
+        }
 
         self.list.insert(ix, msg);
         self.map.insert(mid, data);
+
+        Some(())
     }
 
     pub(super) fn apply_search(
@@ -115,11 +177,11 @@ impl Container {
         model: &mut List,
         emit: &mut Emitter,
     ) -> Option<Vec<Match>> {
-        if search.active.not() || search.pattern.raw().is_empty() {
+        let pattern = search.pattern.as_ref()?;
+
+        if search.active.not() || pattern.raw().is_empty() {
             return None;
         }
-
-        let pattern = &search.pattern;
 
         let mut matches: Vec<Match> = Vec::new();
 
@@ -151,7 +213,10 @@ impl Container {
         Some(matches)
     }
 
-    pub(super) fn clear_search(&mut self, model: &mut List) -> Option<()> {
+    pub(super) fn clear_search(
+        &mut self,
+        model: &mut List,
+    ) -> Option<()> {
         for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
             let data = self.map.get_mut(&msg_id)?;
 
@@ -210,7 +275,11 @@ impl Container {
         Ok(())
     }
 
-    pub(super) fn handle_store_done(&mut self, mid: MsgId, model: &mut List) -> Option<()> {
+    pub(super) fn handle_store_done(
+        &mut self,
+        mid: MsgId,
+        model: &mut List,
+    ) -> Option<()> {
         let data = self.map.get_mut(&mid)?;
 
         data.save_status = SaveStatus::Saved;

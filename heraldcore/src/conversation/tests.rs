@@ -1,8 +1,6 @@
 use super::*;
-use crate::{
-    db::Database, message::InboundMessageBuilder, platform_dirs::PICTURES_DIR, user::UserBuilder,
-    womp,
-};
+use crate::{db::Database, message::InboundMessageBuilder, user::UserBuilder};
+use platform_dirs::PICTURES_DIR;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -96,9 +94,9 @@ fn matches() {
 
     let conv = db::meta(&conn, &conv_id).expect(womp!());
 
-    let pattern = utils::SearchPattern::new_normal("titl".into()).expect(womp!());
+    let pattern = search_pattern::SearchPattern::new_normal("titl".into()).expect(womp!());
 
-    let bad_pattern = utils::SearchPattern::new_normal("tilt".into()).expect(womp!());
+    let bad_pattern = search_pattern::SearchPattern::new_normal("tilt".into()).expect(womp!());
 
     assert_eq!(conv.matches(&pattern), true);
 

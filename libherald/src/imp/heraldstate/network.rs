@@ -14,9 +14,14 @@ pub struct NotifHandler {
 }
 
 impl NotifHandler {
-    pub(super) fn send(&mut self, notif: Notification) {
-        use crate::imp::conversations::shared::*;
-        use crate::imp::users::{shared::*, Users};
+    pub(super) fn send(
+        &mut self,
+        notif: Notification,
+    ) {
+        use crate::imp::{
+            conversations::shared::*,
+            users::{shared::*, Users},
+        };
         use heraldcore::message;
         use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
@@ -41,7 +46,8 @@ impl NotifHandler {
                     }
                 ));
             }
-            NewUser(user, meta) => {
+            NewUser(update) => {
+                let (user, meta) = *update;
                 // add user
                 ret_err!(Users::push(UsersUpdates::NewUser(user)));
 
@@ -70,7 +76,10 @@ impl NotifHandler {
             }
         }
     }
-    pub(super) fn new(emit: Emitter, _effects_flags: Arc<EffectsFlags>) -> Self {
+    pub(super) fn new(
+        emit: Emitter,
+        _effects_flags: Arc<EffectsFlags>,
+    ) -> Self {
         Self {
             _effects_flags,
             _emit: emit,

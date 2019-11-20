@@ -1,28 +1,12 @@
 use crate::{db::Database, errors::*, types::*};
+pub use coretypes::config::Config;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
 
 /// Default name for the "Note to Self" conversation
-pub static NTS_CONVERSATION_NAME: &str = "Note to Self";
+pub const NTS_CONVERSATION_NAME: &str = "Note to Self";
 
 pub(crate) mod db;
-
-/// User configuration
-#[derive(Clone)]
-pub struct Config {
-    /// ID of the local user
-    pub id: UserId,
-    /// Colorscheme
-    pub colorscheme: u32,
-    /// Name of the local user
-    pub name: String,
-    /// Profile picture of the local user
-    pub profile_picture: Option<String>,
-    /// Color of the local user
-    pub color: u32,
-    /// The *Note to Self* conversation id.
-    pub nts_conversation: ConversationId,
-}
 
 /// Builder for `Config`
 pub struct ConfigBuilder {
@@ -40,7 +24,10 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     /// Creates new `ConfigBuilder`
-    pub fn new(id: UserId, keypair: sig::KeyPair) -> Self {
+    pub fn new(
+        id: UserId,
+        keypair: sig::KeyPair,
+    ) -> Self {
         Self {
             id,
             keypair,
@@ -52,26 +39,38 @@ impl ConfigBuilder {
     }
 
     /// Sets colorscheme, defaults to 0 if not set.
-    pub fn colorscheme(mut self, colorscheme: u32) -> Self {
+    pub fn colorscheme(
+        mut self,
+        colorscheme: u32,
+    ) -> Self {
         self.colorscheme = Some(colorscheme);
         self
     }
 
     /// Sets color, computed from hash of the UserId if not set.
-    pub fn color(mut self, color: u32) -> Self {
+    pub fn color(
+        mut self,
+        color: u32,
+    ) -> Self {
         self.color = Some(color);
         self
     }
 
     /// Sets name.
-    pub fn name(mut self, name: String) -> Self {
+    pub fn name(
+        mut self,
+        name: String,
+    ) -> Self {
         self.name = Some(name);
         self
     }
 
     /// Sets conversation id for "Note to Self" conversation, a new conversation is created
     /// if this is not set.
-    pub fn nts_conversation(mut self, conv_id: ConversationId) -> Self {
+    pub fn nts_conversation(
+        mut self,
+        conv_id: ConversationId,
+    ) -> Self {
         self.nts_conversation = Some(conv_id);
         self
     }
@@ -87,7 +86,7 @@ impl ConfigBuilder {
         // changing the chainmail API
         let kp = keypair()?;
         let gen = Genesis::new(kp.secret_key());
-        conf.nts_conversation.store_genesis(&gen)?;
+        chainkeys::store_genesis(&conf.nts_conversation, &gen)?;
         Ok(conf)
     }
 }

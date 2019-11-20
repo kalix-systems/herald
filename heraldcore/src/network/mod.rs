@@ -1,13 +1,14 @@
 use crate::{
-    chainkeys,
-    conversation::{settings, ConversationMeta},
+    conversation::settings,
     errors::HErr::{self, *},
     message::MessageReceiptStatus,
     pending,
     types::*,
     *,
 };
+use chainkeys;
 use chainmail::block::*;
+use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use lazy_static::*;
 use std::{
@@ -42,7 +43,7 @@ pub enum Notification {
     /// A message has been received.
     MsgReceipt(message::MessageReceipt),
     /// A new user has been added
-    NewUser(user::User, ConversationMeta),
+    NewUser(Box<(coretypes::user::User, ConversationMeta)>),
     /// A new conversation has been added
     NewConversation(ConversationMeta),
     /// Response to user request.
@@ -82,19 +83,25 @@ pub fn register(uid: UserId) -> Result<register::Res, HErr> {
 }
 
 /// Sends a user request to `uid` with a proposed conversation id `cid`.
-pub fn send_user_req(uid: UserId, cid: ConversationId) -> Result<(), HErr> {
+pub fn send_user_req(
+    uid: UserId,
+    cid: ConversationId,
+) -> Result<(), HErr> {
     let kp = config::keypair()?;
 
     let gen = Genesis::new(kp.secret_key());
 
-    cid.store_genesis(&gen)?;
+    chainkeys::store_genesis(&cid, &gen)?;
 
     let req = dmessages::UserReq { gen, cid };
 
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }
 
-pub(crate) fn send_normal_message(cid: ConversationId, msg: cmessages::Msg) -> Result<(), HErr> {
+pub(crate) fn send_normal_message(
+    cid: ConversationId,
+    msg: cmessages::Msg,
+) -> Result<(), HErr> {
     send_cmessage(cid, &ConversationMessageBody::Msg(msg))
 }
 
