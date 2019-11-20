@@ -63,10 +63,6 @@ Page {
         id: newContactComponent
     }
 
-    MessageSearch {
-        id: msgSearchModel
-    }
-
 
     Loader {
         active: false

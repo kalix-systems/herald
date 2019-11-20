@@ -2,10 +2,10 @@ import QtQuick 2.13
 import LibHerald 1.0
 import QtQuick.Controls 2.13
 import QtQuick.Dialogs 1.3
-import "../common" as Common
+import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
-import "./js/ContactView.mjs" as JS
-import "popups" as Popups
+import "./../js/ContactView.mjs" as JS
+import "../popups" as Popups
 import "qrc:/imports/Avatar" as Av
 
 

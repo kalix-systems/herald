@@ -22,58 +22,8 @@ Page {
         }
     }
 
-    Flickable {
-        anchors.fill: parent
-        contentHeight: wrapperCol.height
-        interactive: true
-        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded
-            width: CmnCfg.padding
-            }
-    //column to load content, components are inside instead of being declared separately because
-    // otherwise loader cannot keep track of contentHeight of the listviews.
-    Column {
-     id: wrapperCol
-     width: parent.width
-     Text {
-         text: "Conversations"
-         anchors.left: parent.left
-         anchors.leftMargin: CmnCfg.smallMargin
-         topPadding: CmnCfg.smallMargin
-         font.bold: true
-         visible: sideBarState.state == "conversationSearch"
-     }
-
-     Loader {
-        id: sideBarBodyLoader
-        sourceComponent: Component {
-            ConversationViewMain {
-                id: convosLvComponent
-                model: conversationsModel}}
-        width: parent.width
-        onWidthChanged: print("Width", width)
-      }
-
-     Text {
-         text: "Messages"
-         anchors.left: parent.left
-         anchors.leftMargin: CmnCfg.smallMargin
-         topPadding: CmnCfg.smallMargin
-         font.bold: true
-         visible: sideBarState.state == "conversationSearch"
-     }
-
-    Loader {
-        id: messageSearchLoader
-        width: parent.width
-        //model loaded into search view only in search state
-        property var searchModel
-        sourceComponent: Component {
-            MessageSearchView {
-                model: searchModel
-            }
-        }
-    }
-  }
+    SideBarPane {
+        id: sideBarPane
     }
 
     states: [
@@ -124,12 +74,12 @@ Page {
                 //loader in sidebarMain
                 target: searchModelLoader
                 active: true
-                source: "MessageSearch.qml"
+                source: "MessageSearchComponents/MessageSearch.qml"
             }
 
             //load model into view
             PropertyChanges {
-                target: messageSearchLoader
+                target: sideBarPane.messageSearchLoader
                 searchModel: msgSearchModel
             }
 
