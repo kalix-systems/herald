@@ -1,6 +1,6 @@
 use super::*;
 use crate::message::{MessageBody, MessageReceiptStatus};
-use coretypes::cmessages::ConversationMessage;
+use network_types::cmessages::ConversationMessage;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// The body of a [`ConversationMessage`]

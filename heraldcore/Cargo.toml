@@ -31,6 +31,9 @@ path = "./coremacros"
 [dependencies.coreconf]
 path = "./coreconf"
 
+[dependencies.network_types]
+path = "./network_types"
+
 [dependencies.crypto_helpers]
 path = "./crypto_helpers"
 

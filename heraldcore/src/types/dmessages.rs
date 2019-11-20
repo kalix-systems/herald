@@ -1,5 +1,5 @@
 use super::*;
-use coretypes::dmessages::DeviceMessage;
+use network_types::dmessages::DeviceMessage;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 /// A contact request.

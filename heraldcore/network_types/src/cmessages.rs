@@ -1,5 +1,5 @@
-use crate::ids::ConversationId;
 use chainmail::block::Block;
+use coretypes::ids::ConversationId;
 use herald_common::*;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
