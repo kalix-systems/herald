@@ -10,6 +10,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Component {
     // this uses a rectangle and anchors instead of a layout because that manages the
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
+
     Rectangle {
         anchors.fill: parent
         color: CmnCfg.palette.paneColor

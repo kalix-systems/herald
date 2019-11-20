@@ -29,11 +29,11 @@ Column {
 
     UsersSearch {
         id: groupConvoMake
+        Component.onCompleted: contactPopup.model = groupConvoMake
     }
 
     ComboBox {
         id: contactPopup
-        model: groupConvoMake
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
