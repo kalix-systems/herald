@@ -413,7 +413,8 @@ impl InboundMessageBuilder {
         let server_timestamp = server_timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
 
-        let res: Result<Vec<PathBuf>, HErr> = attachments.into_iter().map(|a| a.save()).collect();
+        let res: Result<Vec<PathBuf>, HErr> =
+            attachments.into_iter().map(|a| Ok(a.save()?)).collect();
         let attachment_paths = res?;
         let has_attachments = !attachment_paths.is_empty();
 

@@ -281,10 +281,14 @@ version = "0.1.0"
 dependencies = [
  "chainmail 0.2.0",
  "herald_common 0.1.0",
+ "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "location 0.1.0",
+ "platform_dirs 0.1.0",
  "pulldown-cmark 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
+ "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

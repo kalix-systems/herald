@@ -16,16 +16,12 @@ pub enum HErr {
     HeraldError(String),
     /// Database error.
     DatabaseError(rusqlite::Error),
-    /// Invalid `UserId`
-    InvalidUserId,
     /// Invalid `ConversationId` or `MsgId`
     BadRandomId(InvalidRandomIdLength),
     /// Missing fields when sending a message
     MissingOutboundMessageField(MissingOutboundMessageField),
     /// Missing fields when storing a received a message
     MissingInboundMessageField(MissingInboundMessageField),
-    /// An empty message body,
-    EmptyMessageBody,
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
@@ -54,6 +50,12 @@ pub enum HErr {
     BadPath(std::ffi::OsString),
     /// Key conversion error,
     KeyConversion(crypto_helpers::Error),
+    /// Attachments error
+    Attachment(coretypes::attachments::Error),
+    /// An empty message body,
+    EmptyMessageBody,
+    /// Invalid `UserId`
+    InvalidUserId,
 }
 
 impl fmt::Display for HErr {
@@ -79,8 +81,9 @@ impl fmt::Display for HErr {
             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
             BadRandomId(e) => write!(f, "{}", e),
-            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
             KeyConversion(e) => write!(f, "{}", e),
+            Attachment(e) => write!(f, "{}", e),
+            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
         }
     }
 }
@@ -116,6 +119,7 @@ herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
 herr!(crypto_helpers::Error, KeyConversion);
+herr!(coretypes::attachments::Error, Attachment);
 
 impl From<EmptyMessageBody> for HErr {
     fn from(_: EmptyMessageBody) -> Self {

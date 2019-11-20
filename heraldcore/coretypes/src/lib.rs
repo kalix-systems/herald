@@ -1,3 +1,4 @@
+pub mod attachments;
 pub mod cmessages;
 pub mod config;
 pub mod dmessages;
