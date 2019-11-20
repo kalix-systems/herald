@@ -7,8 +7,11 @@ use crate::{
     spawn,
 };
 use herald_common::*;
-use heraldcore::network::{self as net, Notification};
-use heraldcore::{config, db, message::gc};
+use heraldcore::{
+    config, db,
+    message::gc,
+    network::{self as net, Notification},
+};
 use std::{
     convert::TryFrom,
     sync::{

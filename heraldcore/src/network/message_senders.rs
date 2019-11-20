@@ -1,6 +1,5 @@
 use super::*;
-use crate::types::cmessages;
-use crate::types::dmessages;
+use crate::types::{cmessages, dmessages};
 
 pub(crate) fn send_cmessage(
     cid: ConversationId,

@@ -2,9 +2,13 @@
 use libc::{c_char, c_int, c_ushort};
 use std::char::decode_utf16;
 
-use std::ptr::null;
-use std::sync::atomic::{AtomicPtr, Ordering};
-use std::sync::Arc;
+use std::{
+    ptr::null,
+    sync::{
+        atomic::{AtomicPtr, Ordering},
+        Arc,
+    },
+};
 
 use crate::imp::*;
 

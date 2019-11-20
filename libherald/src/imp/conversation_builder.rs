@@ -1,9 +1,12 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus};
 use crate::{
+    ffi,
     imp::{
         conversations::{shared::ConvUpdate, Conversations},
         users::shared::user_in_cache,
     },
+    interface::*,
+    push_err, ret_err, ret_none,
+    shared::SingletonBus,
     spawn,
 };
 use herald_common::UserId;

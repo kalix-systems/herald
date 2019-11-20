@@ -1,5 +1,4 @@
-use super::shared;
-use super::*;
+use super::{shared, *};
 
 macro_rules! imp {
     ($($name: ident, $field: ident, $ret: ty),*) => {

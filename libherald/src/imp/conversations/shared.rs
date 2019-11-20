@@ -1,6 +1,5 @@
 use super::{types::Data, *};
-use crate::interface::ConversationsEmitter as Emitter;
-use crate::shared::SingletonBus;
+use crate::{interface::ConversationsEmitter as Emitter, shared::SingletonBus};
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use heraldcore::{

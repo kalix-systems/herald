@@ -1,7 +1,6 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus, spawn};
 use heraldcore::message::*;
-use std::convert::TryInto;
-use std::path::PathBuf;
+use std::{convert::TryInto, path::PathBuf};
 
 /// Message builder, used for interactively composing messages
 pub struct MessageBuilder {

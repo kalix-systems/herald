@@ -1,8 +1,7 @@
 use crate::{ffi, interface::*, ret_err, ret_none, spawn};
 use crossbeam_channel::{bounded, Receiver};
 use heraldcore::{channel_send_err, message::attachments, types::MsgId};
-use std::convert::TryInto;
-use std::ops::Not;
+use std::{convert::TryInto, ops::Not};
 
 type Emitter = AttachmentsEmitter;
 type List = AttachmentsList;

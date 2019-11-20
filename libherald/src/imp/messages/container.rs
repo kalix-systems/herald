@@ -1,7 +1,6 @@
 use super::*;
 use crate::{shared::AddressedBus, spawn};
-use std::collections::HashSet;
-use std::ops::Not;
+use std::{collections::HashSet, ops::Not};
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector

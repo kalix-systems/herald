@@ -1,6 +1,5 @@
 use super::*;
-use crate::conversation::db::expiration_period;
-use crate::message::MessageTime;
+use crate::{conversation::db::expiration_period, message::MessageTime};
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
 

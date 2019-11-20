@@ -1,8 +1,7 @@
 use crate::{db::Database, errors::HErr, types::*, utils};
 use herald_common::*;
 use rusqlite::params;
-use std::collections::HashMap;
-use std::path::PathBuf;
+use std::{collections::HashMap, path::PathBuf};
 
 /// Message attachments
 pub mod attachments;

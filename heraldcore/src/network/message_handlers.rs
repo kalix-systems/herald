@@ -1,8 +1,6 @@
 use super::*;
-use crate::types::cmessages;
-use crate::types::dmessages;
-use network_types::cmessages::ConversationMessage;
-use network_types::dmessages::DeviceMessage;
+use crate::types::{cmessages, dmessages};
+use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage};
 
 pub(super) fn handle_cmessage(ts: Time, cm: ConversationMessage) -> Result<Event, HErr> {
     use ConversationMessageBody::*;
