@@ -11,13 +11,19 @@ impl Serializer {
 }
 
 pub trait Ser {
-    fn ser(&self, into: &mut Serializer);
+    fn ser(
+        &self,
+        into: &mut Serializer,
+    );
 }
 
 macro_rules! write_uint {
     ($fname: ident, $ty: tt, $digs: ident) => {
         impl Serializer {
-            pub fn $fname(&mut self, u: $ty) {
+            pub fn $fname(
+                &mut self,
+                u: $ty,
+            ) {
                 let typ = Type::Unsigned as u8;
                 if u == 0 {
                     self.0.push(typ);
@@ -45,7 +51,10 @@ write_uint!(write_u128, u128, bytes_of_u128);
 macro_rules! write_int {
     ($fname: ident, $ty: tt, $ity: tt) => {
         impl Serializer {
-            pub fn $fname(&mut self, i: $ty) {
+            pub fn $fname(
+                &mut self,
+                i: $ty,
+            ) {
                 let typ = Type::Signed as u8;
                 self.0.push(typ | SignedType::$ity as u8);
                 let digs = $ty::to_le_bytes(i);
@@ -68,13 +77,20 @@ impl Serializer {
         self.0.push(byte);
     }
 
-    pub fn write_bool(&mut self, b: bool) {
+    pub fn write_bool(
+        &mut self,
+        b: bool,
+    ) {
         let mut byte = Type::Special as u8;
         byte |= Constants::from(b) as u8;
         self.0.push(byte);
     }
 
-    fn write_slice(&mut self, is_utf8: bool, raw: &[u8]) {
+    fn write_slice(
+        &mut self,
+        is_utf8: bool,
+        raw: &[u8],
+    ) {
         debug_assert!(!is_utf8 | std::str::from_utf8(raw).is_ok());
 
         let major_type = Type::Bytes as u8;
@@ -98,15 +114,24 @@ impl Serializer {
         self.0.extend_from_slice(raw);
     }
 
-    pub fn write_bytes(&mut self, bytes: &[u8]) {
+    pub fn write_bytes(
+        &mut self,
+        bytes: &[u8],
+    ) {
         self.write_slice(false, bytes)
     }
 
-    pub fn write_string(&mut self, string: &str) {
+    pub fn write_string(
+        &mut self,
+        string: &str,
+    ) {
         self.write_slice(true, string.as_bytes())
     }
 
-    pub fn start_vec(&mut self, len: usize) {
+    pub fn start_vec(
+        &mut self,
+        len: usize,
+    ) {
         let major_type = Type::Collection as u8;
         let minor_type = 0;
         let mut tag = major_type | minor_type;
@@ -125,12 +150,17 @@ impl Serializer {
         }
     }
 
-    pub fn put_vec_item<T: Ser + ?Sized>(&mut self, item: &T) {
+    pub fn put_vec_item<T: Ser + ?Sized>(
+        &mut self,
+        item: &T,
+    ) {
         item.ser(self);
     }
 
-    pub fn write_vec<'a, T, I>(&mut self, items: I)
-    where
+    pub fn write_vec<'a, T, I>(
+        &mut self,
+        items: I,
+    ) where
         T: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = &'a T>,
     {
@@ -140,7 +170,10 @@ impl Serializer {
         }
     }
 
-    pub fn start_map(&mut self, len: usize) {
+    pub fn start_map(
+        &mut self,
+        len: usize,
+    ) {
         let major_type = Type::Collection as u8;
         let minor_type = COLLECTION_IS_MAP;
         let mut tag = major_type | minor_type;
@@ -159,13 +192,19 @@ impl Serializer {
         }
     }
 
-    pub fn put_map_pair<K: Ser + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
+    pub fn put_map_pair<K: Ser + ?Sized, V: Ser + ?Sized>(
+        &mut self,
+        key: &K,
+        val: &V,
+    ) {
         key.ser(self);
         val.ser(self);
     }
 
-    pub fn write_map<'a, K, V, I>(&mut self, items: I)
-    where
+    pub fn write_map<'a, K, V, I>(
+        &mut self,
+        items: I,
+    ) where
         K: 'a + Ser + Ser + ?Sized,
         V: 'a + Ser + ?Sized,
         I: ExactSizeIterator + Iterator<Item = (&'a K, &'a V)>,
@@ -177,7 +216,11 @@ impl Serializer {
         }
     }
 
-    pub fn start_cons(&mut self, is_map: bool, len: usize) {
+    pub fn start_cons(
+        &mut self,
+        is_map: bool,
+        len: usize,
+    ) {
         let major_type = Type::Cons as u8;
         let minor_type = if is_map { COLLECTION_IS_MAP } else { 0 };
         let mut tag = major_type | minor_type;
@@ -196,22 +239,35 @@ impl Serializer {
         }
     }
 
-    pub fn put_cons_tag<T: Ser + ?Sized>(&mut self, item: &T) {
+    pub fn put_cons_tag<T: Ser + ?Sized>(
+        &mut self,
+        item: &T,
+    ) {
         item.ser(self);
     }
 
-    pub fn put_cons_item<T: Ser + ?Sized>(&mut self, item: &T) {
+    pub fn put_cons_item<T: Ser + ?Sized>(
+        &mut self,
+        item: &T,
+    ) {
         item.ser(self);
     }
 
-    pub fn put_cons_pair<K: Ser + ?Sized, V: Ser + ?Sized>(&mut self, key: &K, val: &V) {
+    pub fn put_cons_pair<K: Ser + ?Sized, V: Ser + ?Sized>(
+        &mut self,
+        key: &K,
+        val: &V,
+    ) {
         key.ser(self);
         val.ser(self);
     }
 }
 
 impl Ser for () {
-    fn ser(&self, into: &mut Serializer) {
+    fn ser(
+        &self,
+        into: &mut Serializer,
+    ) {
         into.write_null()
     }
 }
@@ -219,7 +275,10 @@ impl Ser for () {
 macro_rules! trivial_ser_copy {
     ($ty: tt, $method: tt) => {
         impl Ser for $ty {
-            fn ser(&self, into: &mut Serializer) {
+            fn ser(
+                &self,
+                into: &mut Serializer,
+            ) {
                 into.$method(*self);
             }
         }
@@ -243,7 +302,10 @@ trivial_ser_copy!(i128, write_i128);
 macro_rules! trivial_ser {
     ($ty: tt, $method: tt) => {
         impl Ser for $ty {
-            fn ser(&self, into: &mut Serializer) {
+            fn ser(
+                &self,
+                into: &mut Serializer,
+            ) {
                 into.$method(self);
             }
         }
@@ -264,7 +326,10 @@ mod __impls {
         use std::collections::*;
 
         impl<T: Ser> Ser for Vec<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for i in self {
                     i.ser(s);
@@ -273,7 +338,10 @@ mod __impls {
         }
 
         impl<T: Ser> Ser for VecDeque<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for i in self {
                     i.ser(s);
@@ -282,7 +350,10 @@ mod __impls {
         }
 
         impl<T: Ser> Ser for BinaryHeap<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for i in self {
                     i.ser(s);
@@ -291,7 +362,10 @@ mod __impls {
         }
 
         impl<T: Ser> Ser for LinkedList<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for i in self {
                     i.ser(s);
@@ -300,7 +374,10 @@ mod __impls {
         }
 
         impl<K: Ser, V: Ser, S: std::hash::BuildHasher> Ser for HashMap<K, V, S> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_map(self.len());
                 for (k, v) in self {
                     s.put_map_pair(k, v);
@@ -309,7 +386,10 @@ mod __impls {
         }
 
         impl<K: Ser, V: Ser> Ser for BTreeMap<K, V> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_map(self.len());
                 for (k, v) in self {
                     s.put_map_pair(k, v);
@@ -318,7 +398,10 @@ mod __impls {
         }
 
         impl<T: Ser, S: std::hash::BuildHasher> Ser for HashSet<T, S> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for t in self {
                     t.ser(s);
@@ -327,7 +410,10 @@ mod __impls {
         }
 
         impl<T: Ser> Ser for BTreeSet<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
                 for t in self {
                     t.ser(s);
@@ -336,7 +422,10 @@ mod __impls {
         }
 
         impl<T: Ser> Ser for Option<T> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 match self {
                     None => {
                         s.start_cons(false, 0);
@@ -357,7 +446,10 @@ mod __impls {
         use arrayvec::*;
 
         impl<T: Ser, A: Array<Item = T>> Ser for ArrayVec<A> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.start_vec(self.len());
 
                 for t in self {
@@ -367,7 +459,10 @@ mod __impls {
         }
 
         impl<A: Array<Item = u8> + Copy> Ser for ArrayString<A> {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 s.write_string(self.as_str());
             }
         }
@@ -394,12 +489,18 @@ mod __impls {
         ptr_impl!(Box, Arc, Rc);
 
         impl<T: Ser + ?Sized> Ser for &T {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 <T as Ser>::ser(self, s);
             }
         }
         impl<T: Ser> Ser for &mut T {
-            fn ser(&self, s: &mut Serializer) {
+            fn ser(
+                &self,
+                s: &mut Serializer,
+            ) {
                 <T as Ser>::ser(self, s);
             }
         }
@@ -435,4 +536,6 @@ mod __impls {
         tuple_ser!(11, A, B, C, D, E, F, G, H, I, J, K);
         tuple_ser!(12, A, B, C, D, E, F, G, H, I, J, K, L);
     }
+
+    mod __sys {}
 }

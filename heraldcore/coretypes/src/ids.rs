@@ -45,28 +45,28 @@ impl std::error::Error for InvalidRandomIdLength {}
 /// Length of randomly generated unique ids
 pub const UID_LEN: usize = 32;
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize, PartialOrd, Ord)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De, PartialOrd, Ord)]
 /// Message ID
-pub struct MsgId([u8; UID_LEN]);
+pub struct MsgId(UQ);
 
-#[derive(Default, Hash, Debug, Clone, PartialEq, Eq, Copy, Serialize, Deserialize)]
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
 /// Conversation ID
-pub struct ConversationId([u8; UID_LEN]);
+pub struct ConversationId(UQ);
 
 impl MsgId {
     /// Converts [`MsgId`] to `Vec<u8>`
     pub fn to_vec(self) -> Vec<u8> {
-        self.0.to_vec()
+        self.into_array().to_vec()
     }
 
     /// Converts [`MsgId`] into a fixed length array.
     pub fn into_array(self) -> [u8; UID_LEN] {
-        self.0
+        (self.0).0
     }
 
     /// [`MsgId`] as a byte slice.
     pub fn as_slice(&self) -> &[u8] {
-        &self.0 as &[u8]
+        self.0.as_ref()
     }
 }
 
@@ -85,7 +85,7 @@ impl ToSql for MsgId {
 
 impl From<[u8; UID_LEN]> for MsgId {
     fn from(arr: [u8; UID_LEN]) -> Self {
-        Self(arr)
+        Self(UQ(arr))
     }
 }
 
@@ -93,20 +93,12 @@ impl TryFrom<Vec<u8>> for MsgId {
     type Error = InvalidRandomIdLength;
 
     fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(InvalidRandomIdLength {
+        UQ::from_slice(&val)
+            .ok_or(InvalidRandomIdLength {
                 found: val.len(),
                 variant: Variant::Msg,
             })
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.into_iter().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
+            .map(Self)
     }
 }
 
@@ -114,20 +106,12 @@ impl TryFrom<&[u8]> for MsgId {
     type Error = InvalidRandomIdLength;
 
     fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(InvalidRandomIdLength {
+        UQ::from_slice(val)
+            .ok_or(InvalidRandomIdLength {
                 found: val.len(),
                 variant: Variant::Msg,
             })
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.iter().copied().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
+            .map(Self)
     }
 }
 
@@ -147,23 +131,23 @@ impl ToSql for ConversationId {
 impl ConversationId {
     /// Converts [`ConversationId`] to `Vec<u8>`
     pub fn to_vec(&self) -> Vec<u8> {
-        self.0.to_vec()
+        self.0.as_ref().to_vec()
     }
 
     /// Converts [`ConversationId`] into a fixed length array.
     pub fn into_array(self) -> [u8; UID_LEN] {
-        self.0
+        (self.0).0
     }
 
     /// [`ConversationId`] as a byte slice.
     pub fn as_slice(&self) -> &[u8] {
-        &self.0 as &[u8]
+        self.0.as_ref()
     }
 }
 
 impl From<[u8; UID_LEN]> for ConversationId {
     fn from(arr: [u8; UID_LEN]) -> Self {
-        Self(arr)
+        Self(UQ(arr))
     }
 }
 
@@ -171,20 +155,12 @@ impl TryFrom<Vec<u8>> for ConversationId {
     type Error = InvalidRandomIdLength;
 
     fn try_from(val: Vec<u8>) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(InvalidRandomIdLength {
+        UQ::from_slice(&val)
+            .ok_or(InvalidRandomIdLength {
                 found: val.len(),
-                variant: Variant::Conversation,
+                variant: Variant::Msg,
             })
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.into_iter().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
+            .map(Self)
     }
 }
 
@@ -192,19 +168,11 @@ impl TryFrom<&[u8]> for ConversationId {
     type Error = InvalidRandomIdLength;
 
     fn try_from(val: &[u8]) -> Result<Self, Self::Error> {
-        if val.len() != UID_LEN {
-            Err(InvalidRandomIdLength {
+        UQ::from_slice(val)
+            .ok_or(InvalidRandomIdLength {
                 found: val.len(),
-                variant: Variant::Conversation,
+                variant: Variant::Msg,
             })
-        } else {
-            let mut buf = [0u8; UID_LEN];
-
-            for (ix, n) in val.iter().copied().enumerate() {
-                buf[ix] = n;
-            }
-
-            Ok(Self(buf))
-        }
+            .map(Self)
     }
 }

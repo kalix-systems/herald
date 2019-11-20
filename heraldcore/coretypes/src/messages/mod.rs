@@ -48,7 +48,7 @@ pub struct MessageReceipt {
     pub status: MessageReceiptStatus,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 /// In order to support expiring messages, it is necessary to indicate
 /// that a message is a reply without necessarily knowing
 pub enum ReplyId {
@@ -92,7 +92,7 @@ pub struct MessageTime {
     pub expiration: Option<Time>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message body
 pub struct MessageBody(String);
 

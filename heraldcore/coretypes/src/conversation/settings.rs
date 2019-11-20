@@ -1,6 +1,6 @@
 use super::*;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A change in the settings for a conversation
 pub enum SettingsUpdate {
     /// Expiring messages setting
