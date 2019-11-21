@@ -71,8 +71,8 @@ Item {
             anchors.right: parent.right
             anchors.margins: CmnCfg.margin
             anchors.verticalCenter: taBox.verticalCenter
-            height: 20
-            width: 20
+            height: 24
+            width: 24
             currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
             indicator: Item {}
@@ -103,7 +103,6 @@ Item {
                     ShapePath {
                         fillColor: CmnCfg.palette.secondaryTextColor
                         strokeColor: CmnCfg.palette.secondaryTextColor
-                        Component.onCompleted: print(cornerCarat.height)
                         startX: cornerCarat.width / 2
                         startY: cornerCarat.height
                         PathLine {
