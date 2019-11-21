@@ -11,8 +11,8 @@ Button {
 
     onClicked: maskShape.send(emoji)
 
-    height: selector.height + 3
-    width: selector.width + 5
+    height: selector.height
+    width: selector.width
 
     background: Rectangle {
         id: bg
@@ -26,7 +26,7 @@ Button {
         id: selector
         opacity: 1.0
         anchors.centerIn: parent
-        font.pixelSize: 20
+        font.pixelSize: 15
         text: emoji
     }
 }

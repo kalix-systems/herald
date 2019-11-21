@@ -71,29 +71,14 @@ Item {
             color: CmnCfg.palette.secondaryColor
         }
 
-        Image {
+        Button {
             id: receiptImage
-            // in the future this should be some function call from common
-            source: JS.receiptCodeSwitch(lastReceipt)
-            sourceSize: Qt.size(16, 16)
-            mipmap: true
-            layer.enabled: true
-            layer.samplerName: "maskSource"
-            layer.effect: ShaderEffect {
-                property color overlay: CmnCfg.palette.mainTextColor
-                property var source: receiptImage
-                fragmentShader: "
-uniform lowp sampler2D source;
-uniform lowp sampler2D maskSource;
-uniform vec4 overlay;
-varying highp vec2 qt_TexCoord0;
-void main() {
-lowp vec4 tex = texture2D(source, qt_TexCoord0);
-lowp vec4 mask = texture2D(maskSource, qt_TexCoord0);
-gl_FragColor = overlay * mask.a;
-}
-"
-            }
+            icon.source: JS.receiptCodeSwitch(lastReceipt)
+            icon.height: 24
+            icon.width: 24
+            icon.color: CmnCfg.palette.mainTextColor
+            padding: 0
+            background: Item {}
         }
     }
 }
