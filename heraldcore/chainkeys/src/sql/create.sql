@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS ratchet_states(
 
 CREATE TABLE IF NOT EXISTS derived_keys(
   conversation_id BLOB NOT NULL,
+  -- little-endian u64
   ix BLOB NOT NULL,
   msg_key BLOB NOT NULL,
   insertion_ts INTEGER NOT NULL,
