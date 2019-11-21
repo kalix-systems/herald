@@ -80,11 +80,24 @@ ColumnLayout {
             }
 
             TextMetrics {
-                readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
-                text: !replyPreview.isDangling ? replyPreview.body : "Original message not found"
-                elideWidth: constWidth
+                property string shortenedText: truncate_text(
+                                                   replyPreview.body).slice(
+                                                   0, 350) + decoration
+                readonly property string decoration: replyPreview.body.length > 350 ? "..." : ""
+
+                text: !replyPreview.isDangling ? shortenedText : "Original message not found"
+                elideWidth: maxWidth * 3
                 elide: Text.ElideRight
+
+                function truncate_text(body) {
+                    const bodyLines = body.split("\n")
+                    if (bodyLines.length > 3) {
+                        return bodyLines.slice(0, 3).join("\n")
+                    } else {
+                        return body
+                    }
+                }
             }
 
             StandardTextEdit {
@@ -114,6 +127,5 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }
