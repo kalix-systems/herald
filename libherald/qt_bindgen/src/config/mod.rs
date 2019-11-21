@@ -232,7 +232,9 @@ fn messages() -> Object {
         // Position in search results of focused item, e.g., 4 out of 7
         searchIndex: Prop::new().simple(QUint64),
 
-        builder: Prop::new().object(message_builder())
+        builder: Prop::new().object(message_builder()),
+        // Id of the message the message builder is replying to, if any
+        builderOpMsgId: Prop::new().simple(QByteArray).optional().write()
     };
 
     let item_props = item_props! {
@@ -279,6 +281,40 @@ fn messages() -> Object {
 
     obj! {
         Messages: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+    }
+}
+
+fn message_builder() -> Object {
+    let props = props! (
+        isReply: Prop::new().simple(Bool),
+        // Body of the message
+        body: Prop::new().simple(QString).optional().write(),
+        isMediaMessage: Prop::new().simple(Bool),
+        parseMarkdown: Prop::new().simple(Bool).write(),
+
+        // Message id of the message being replied to, if any
+        opId: Prop::new().simple(QByteArray).optional(),
+        opAuthor: Prop::new().simple(QString).optional(),
+        opBody: Prop::new().simple(QString).optional(),
+        opTime: Prop::new().simple(Qint64).optional(),
+        opHasAttachments: Prop::new().simple(Bool).optional()
+    );
+
+    let item_props = item_props! {
+        attachmentPath: ItemProp::new(QString)
+    };
+
+    let funcs = functions! {
+        mut finalize() => Void,
+        mut clearReply() => Void,
+        mut addAttachment(path: QString) => Bool,
+        mut removeAttachment(path: QString) => Bool,
+        mut removeAttachmentByIndex(row_index: QUint64) => Bool,
+        mut removeLast() => Void,
+    };
+
+    obj! {
+        MessageBuilder: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
     }
 }
 
@@ -340,40 +376,6 @@ fn users_search() -> Object {
 
     obj! {
         UsersSearch: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
-    }
-}
-
-fn message_builder() -> Object {
-    let props = props! (
-        isReply: Prop::new().simple(Bool),
-        // Body of the message
-        body: Prop::new().simple(QString).optional().write(),
-        isMediaMessage: Prop::new().simple(Bool),
-        parseMarkdown: Prop::new().simple(Bool).write(),
-
-        // Message id of the message being replied to
-        opId: Prop::new().simple(QByteArray).optional().write(),
-        opAuthor: Prop::new().simple(QString).optional(),
-        opBody: Prop::new().simple(QString).optional(),
-        opTime: Prop::new().simple(Qint64).optional(),
-        opHasAttachments: Prop::new().simple(Bool).optional()
-    );
-
-    let item_props = item_props! {
-        attachmentPath: ItemProp::new(QString)
-    };
-
-    let funcs = functions! {
-        mut finalize() => Void,
-        mut clearReply() => Void,
-        mut addAttachment(path: QString) => Bool,
-        mut removeAttachment(path: QString) => Bool,
-        mut removeAttachmentByIndex(row_index: QUint64) => Bool,
-        mut removeLast() => Void,
-    };
-
-    obj! {
-        MessageBuilder: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
     }
 }
 

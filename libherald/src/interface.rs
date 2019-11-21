@@ -2466,10 +2466,6 @@ pub trait MessageBuilderTrait {
     fn op_body(&self) -> Option<&str>;
     fn op_has_attachments(&self) -> Option<bool>;
     fn op_id(&self) -> Option<&[u8]>;
-    fn set_op_id(
-        &mut self,
-        value: Option<&[u8]>,
-    );
     fn op_time(&self) -> Option<i64>;
     fn parse_markdown(&self) -> bool;
     fn set_parse_markdown(
@@ -2681,23 +2677,6 @@ pub unsafe extern "C" fn message_builder_op_id_get(
         let s: *const c_char = v.as_ptr() as (*const c_char);
         set(p, s, to_c_int(v.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_op_id_set(
-    ptr: *mut MessageBuilder,
-    v: *const c_char,
-    len: c_int,
-) {
-    let o = &mut *ptr;
-    let v = qba_slice!(v, len);
-    o.set_op_id(Some(v.into()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_op_id_set_none(ptr: *mut MessageBuilder) {
-    let o = &mut *ptr;
-    o.set_op_id(None);
 }
 
 #[no_mangle]
@@ -3334,6 +3313,7 @@ pub struct MessagesQObject {}
 
 pub struct MessagesEmitter {
     qobject: Arc<AtomicPtr<MessagesQObject>>,
+    builder_op_msg_id_changed: fn(*mut MessagesQObject),
     conversation_id_changed: fn(*mut MessagesQObject),
     is_empty_changed: fn(*mut MessagesQObject),
     last_author_changed: fn(*mut MessagesQObject),
@@ -3358,6 +3338,7 @@ impl MessagesEmitter {
     pub fn clone(&mut self) -> MessagesEmitter {
         MessagesEmitter {
             qobject: self.qobject.clone(),
+            builder_op_msg_id_changed: self.builder_op_msg_id_changed,
             conversation_id_changed: self.conversation_id_changed,
             is_empty_changed: self.is_empty_changed,
             last_author_changed: self.last_author_changed,
@@ -3376,6 +3357,12 @@ impl MessagesEmitter {
         let n: *const MessagesQObject = null();
         self.qobject
             .store(n as *mut MessagesQObject, Ordering::SeqCst);
+    }
+    pub fn builder_op_msg_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.builder_op_msg_id_changed)(ptr);
+        }
     }
     pub fn conversation_id_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -3529,6 +3516,11 @@ pub trait MessagesTrait {
     fn emit(&mut self) -> &mut MessagesEmitter;
     fn builder(&self) -> &MessageBuilder;
     fn builder_mut(&mut self) -> &mut MessageBuilder;
+    fn builder_op_msg_id(&self) -> Option<&[u8]>;
+    fn set_builder_op_msg_id(
+        &mut self,
+        value: Option<&[u8]>,
+    );
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(
         &mut self,
@@ -3697,6 +3689,7 @@ pub extern "C" fn messages_new(
     builder_end_move_rows: fn(*mut MessageBuilderQObject),
     builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
     builder_end_remove_rows: fn(*mut MessageBuilderQObject),
+    messages_builder_op_msg_id_changed: fn(*mut MessagesQObject),
     messages_conversation_id_changed: fn(*mut MessagesQObject),
     messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_author_changed: fn(*mut MessagesQObject),
@@ -3751,6 +3744,7 @@ pub extern "C" fn messages_new(
     let d_builder = MessageBuilder::new(builder_emit, model);
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
+        builder_op_msg_id_changed: messages_builder_op_msg_id_changed,
         conversation_id_changed: messages_conversation_id_changed,
         is_empty_changed: messages_is_empty_changed,
         last_author_changed: messages_last_author_changed,
@@ -3790,6 +3784,37 @@ pub unsafe extern "C" fn messages_free(ptr: *mut Messages) {
 #[no_mangle]
 pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut MessageBuilder {
     (&mut *ptr).builder_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_builder_op_msg_id_get(
+    ptr: *const Messages,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.builder_op_msg_id();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_builder_op_msg_id_set(
+    ptr: *mut Messages,
+    v: *const c_char,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let v = qba_slice!(v, len);
+    o.set_builder_op_msg_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_builder_op_msg_id_set_none(ptr: *mut Messages) {
+    let o = &mut *ptr;
+    o.set_builder_op_msg_id(None);
 }
 
 #[no_mangle]

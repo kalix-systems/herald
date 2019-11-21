@@ -202,6 +202,10 @@ namespace {
     {
         Q_EMIT o->searchPatternChanged();
     }
+    inline void messagesBuilderOpMsgIdChanged(Messages* o)
+    {
+        Q_EMIT o->builderOpMsgIdChanged();
+    }
     inline void messagesConversationIdChanged(Messages* o)
     {
         Q_EMIT o->conversationIdChanged();
@@ -1277,8 +1281,6 @@ extern "C" {
     void message_builder_op_body_get(const MessageBuilder::Private*, QString*, qstring_set);
     option_bool message_builder_op_has_attachments_get(const MessageBuilder::Private*);
     void message_builder_op_id_get(const MessageBuilder::Private*, QByteArray*, qbytearray_set);
-    void message_builder_op_id_set(MessageBuilder::Private*, const char* bytes, int len);
-    void message_builder_op_id_set_none(MessageBuilder::Private*);
     option_qint64 message_builder_op_time_get(const MessageBuilder::Private*);
     bool message_builder_parse_markdown_get(const MessageBuilder::Private*);
     void message_builder_parse_markdown_set(MessageBuilder::Private*, bool);
@@ -1863,7 +1865,7 @@ extern "C" {
         void (*)(MessageBuilder*, int, int, int),
         void (*)(MessageBuilder*),
         void (*)(MessageBuilder*, int, int),
-        void (*)(MessageBuilder*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
+        void (*)(MessageBuilder*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*), void (*)(Messages*),
         void (*)(const Messages*),
         void (*)(Messages*),
         void (*)(Messages*),
@@ -1878,6 +1880,9 @@ extern "C" {
         void (*)(Messages*));
     void messages_free(Messages::Private*);
     MessageBuilder::Private* messages_builder_get(const Messages::Private*);
+    void messages_builder_op_msg_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
+    void messages_builder_op_msg_id_set(Messages::Private*, const char* bytes, int len);
+    void messages_builder_op_msg_id_set_none(Messages::Private*);
     void messages_conversation_id_get(const Messages::Private*, QByteArray*, qbytearray_set);
     void messages_conversation_id_set(Messages::Private*, const char* bytes, int len);
     void messages_conversation_id_set_none(Messages::Private*);
@@ -3102,13 +3107,6 @@ QByteArray MessageBuilder::opId() const
     message_builder_op_id_get(m_d, &v, set_qbytearray);
     return v;
 }
-void MessageBuilder::setOpId(const QByteArray& v) {
-    if (v.isNull()) {
-        message_builder_op_id_set_none(m_d);
-    } else {
-    message_builder_op_id_set(m_d, v.data(), v.size());
-    }
-}
 QVariant MessageBuilder::opTime() const
 {
     QVariant v;
@@ -3310,6 +3308,7 @@ Messages::Messages(QObject *parent):
             o->endRemoveRows();
         }
 ,
+        messagesBuilderOpMsgIdChanged,
         messagesConversationIdChanged,
         messagesIsEmptyChanged,
         messagesLastAuthorChanged,
@@ -3386,6 +3385,19 @@ const MessageBuilder* Messages::builder() const
 MessageBuilder* Messages::builder()
 {
     return m_builder;
+}
+QByteArray Messages::builderOpMsgId() const
+{
+    QByteArray v;
+    messages_builder_op_msg_id_get(m_d, &v, set_qbytearray);
+    return v;
+}
+void Messages::setBuilderOpMsgId(const QByteArray& v) {
+    if (v.isNull()) {
+        messages_builder_op_msg_id_set_none(m_d);
+    } else {
+    messages_builder_op_msg_id_set(m_d, v.data(), v.size());
+    }
 }
 QByteArray Messages::conversationId() const
 {

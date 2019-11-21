@@ -77,26 +77,6 @@ impl Container {
         Some(())
     }
 
-    pub(super) fn fill(cid: ConversationId) {
-        spawn!({
-            let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
-                ret_err!(conversation::conversation_messages(&cid))
-                    .into_iter()
-                    .map(|m| {
-                        let mid = m.message_id;
-                        let (message, data) = Message::split_msg(m, SaveStatus::Saved);
-
-                        (message, (mid, data))
-                    })
-                    .unzip();
-
-            ret_err!(Messages::push(
-                cid,
-                MsgUpdate::Container(Self { list, map })
-            ));
-        });
-    }
-
     pub(super) fn last_msg(&self) -> Option<&MsgData> {
         let mid = self.list.last()?.msg_id;
         self.map.get(&mid)
@@ -179,4 +159,24 @@ impl Container {
 
         Some(())
     }
+}
+
+pub(super) fn fill(cid: ConversationId) {
+    spawn!({
+        let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
+            ret_err!(conversation::conversation_messages(&cid))
+                .into_iter()
+                .map(|m| {
+                    let mid = m.message_id;
+                    let (message, data) = Message::split_msg(m, SaveStatus::Saved);
+
+                    (message, (mid, data))
+                })
+                .unzip();
+
+        ret_err!(Messages::push(
+            cid,
+            MsgUpdate::Container(Container { list, map })
+        ));
+    });
 }

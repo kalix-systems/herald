@@ -1,14 +1,13 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus, spawn};
 use herald_common::{Time, UserId};
-use heraldcore::{message::*, types::ConversationId};
+use heraldcore::{
+    message::*,
+    types::{ConversationId, InvalidRandomIdLength, MsgId},
+};
 use std::{convert::TryInto, path::PathBuf};
 
-struct Reply {
-    time: Time,
-    body: Option<MessageBody>,
-    author: UserId,
-    has_attachments: bool,
-}
+mod imp;
+use imp::*;
 
 /// Message builder, used for interactively composing messages
 pub struct MessageBuilder {
@@ -211,27 +210,6 @@ impl MessageBuilderTrait for MessageBuilder {
         }
     }
 
-    fn set_op_id(
-        &mut self,
-        op_msg_id: Option<ffi::MsgIdRef>,
-    ) {
-        match (op_msg_id, self.inner.op) {
-            (Some(op_msg_id), _) => {
-                let op_msg_id = ret_err!(op_msg_id.try_into());
-
-                self.inner.replying_to(Some(op_msg_id));
-                self.emit.op_id_changed();
-                self.emit.is_reply_changed();
-            }
-            (None, Some(_)) => {
-                self.inner.replying_to(None);
-                self.emit.op_id_changed();
-                self.emit.is_reply_changed();
-            }
-            _ => {}
-        }
-    }
-
     fn clear_reply(&mut self) {
         self.inner.replying_to(None);
         self.emit.op_id_changed();
@@ -260,10 +238,24 @@ impl MessageBuilderTrait for MessageBuilder {
 }
 
 impl MessageBuilder {
-    #[allow(unused)]
     pub(super) fn set_conversation_id(
         &mut self,
-        _cid: ConversationId,
+        cid: ConversationId,
     ) {
+        self.inner.conversation_id(cid);
+    }
+
+    pub(super) fn set_op_id(
+        &mut self,
+        op_msg_id: Option<ffi::MsgIdRef>,
+        container: &super::Container,
+    ) -> Result<OpChanged, InvalidRandomIdLength> {
+        match op_msg_id {
+            Some(op_msg_id) => {
+                let op_msg_id = op_msg_id.try_into()?;
+                Ok(self.update_op_id(&op_msg_id, container))
+            }
+            None => Ok(self.clear_reply_()),
+        }
     }
 }
