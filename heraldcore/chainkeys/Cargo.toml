@@ -1,7 +1,7 @@
 [package]
 name = "chainkeys"
 version = "0.1.0"
-authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+authors = ["theseriousadult <jack@kalix.io>", "Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 
 [dependencies]
@@ -16,8 +16,8 @@ path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
-[dependencies.chainmail]
-path = "../../chainmail"
+[dependencies.channel_ratchet]
+path = "../../channel_ratchet"
 
 [dependencies.coretypes]
 path             = "../coretypes"

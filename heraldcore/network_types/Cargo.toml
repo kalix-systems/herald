@@ -16,9 +16,6 @@ features         = ["rusqlite_"]
 [dependencies.coretypes]
 path = "../coretypes"
 
-[dependencies.chainmail]
-path = "../../chainmail"
-
 [dependencies.rusqlite]
 version          = "0.20.0"
 default_features = false

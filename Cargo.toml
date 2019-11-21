@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-  "chainmail",
   "channel_ratchet",
   "herald_common",
   "herald_server",

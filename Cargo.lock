@@ -171,29 +171,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "chainkeys"
 version = "0.1.0"
 dependencies = [
- "chainmail 0.2.0",
- "coremacros 0.1.0",
- "coretypes 0.1.0",
- "herald_common 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "location 0.1.0",
  "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "platform_dirs 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_cbor 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "chainmail"
-version = "0.2.0"
-dependencies = [
- "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -730,7 +715,6 @@ name = "heraldcore"
 version = "0.1.0"
 dependencies = [
  "chainkeys 0.1.0",
- "chainmail 0.2.0",
  "coreconf 0.1.0",
  "coremacros 0.1.0",
  "coretypes 0.1.0",
@@ -1215,7 +1199,6 @@ dependencies = [
 name = "network_types"
 version = "0.1.0"
 dependencies = [
- "chainmail 0.2.0",
  "coretypes 0.1.0",
  "herald_common 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
