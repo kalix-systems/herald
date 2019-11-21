@@ -21,11 +21,13 @@ pub(crate) fn get() -> Config {
     let cpp_file = PathBuf::from("qt_ffi/Bindings.cpp");
 
     let objects = objects();
+
     let rust = Rust {
         dir: parent_dir.to_path_buf(),
         implementation_module: "imp".into(),
         interface_module: "interface".into(),
     };
+
     let rust_edition = RustEdition::Rust2018;
     let overwrite_implementation = false;
 

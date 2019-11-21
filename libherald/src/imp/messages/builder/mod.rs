@@ -1,6 +1,6 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus, spawn};
 use herald_common::{Time, UserId};
-use heraldcore::message::*;
+use heraldcore::{message::*, types::ConversationId};
 use std::{convert::TryInto, path::PathBuf};
 
 struct Reply {
@@ -256,5 +256,14 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn op_has_attachments(&self) -> Option<bool> {
         Some(self.op.as_ref()?.has_attachments)
+    }
+}
+
+impl MessageBuilder {
+    #[allow(unused)]
+    pub(super) fn set_conversation_id(
+        &mut self,
+        _cid: ConversationId,
+    ) {
     }
 }
