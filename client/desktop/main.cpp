@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
-  qmlRegisterType<MessagePreview>("LibHerald", 1, 0, "MessagePreview");
   qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
 

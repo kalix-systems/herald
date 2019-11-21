@@ -11,7 +11,6 @@ export function enterKeyHandler(event, target, builder, messageModel, textAreaFo
     const text = target.text;
     target.clear();
     builder.body = text;
-    builder.conversationId = messageModel.conversationId;
     builder.finalize();
     textAreaForm.state = "default";
 }

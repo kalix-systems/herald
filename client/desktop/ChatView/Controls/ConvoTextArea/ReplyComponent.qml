@@ -26,10 +26,6 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    MessagePreview {
-        id: replyCompPreview
-        messageId: builder.replyingTo
-    }
 
     Rectangle {
         id: verticalAccent
@@ -37,7 +33,7 @@ Rectangle {
         height: wrapper.height
         width: CmnCfg.smallMargin / 4
         color: CmnCfg.palette.avatarColors[contactsModel.colorById(
-                                               replyCompPreview.author)]
+                                               ownedConversation.builderopAuthor)]
     }
 
     Common.ButtonForm {
@@ -50,7 +46,7 @@ Rectangle {
         source: "qrc:/x-icon.svg"
         scale: 0.8
         onClicked: {
-            builder.clearReply()
+            ownedConversation.builder.clearReply()
         }
     }
 
@@ -59,20 +55,19 @@ Rectangle {
 
         Label {
             id: sender
-            text: contactsModel.nameById(replyCompPreview.author)
+            text: contactsModel.nameById(ownedConversation.builder.opAuthor)
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.rightMargin: CmnCfg.smallMargin
             Layout.bottomMargin: CmnCfg.margin / 2
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.avatarColors[contactsModel.colorById(
-                                                   replyCompPreview.author)]
+            color: CmnCfg.palette.avatarColors[contactsModel.colorById(ownedConversation.builder.opAuthor)]
         }
 
         TextMetrics {
             id: opTextMetrics
-            text: replyCompPreview.body
+            text: ownedConversation.builder.opBody
             elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
@@ -98,7 +93,7 @@ Rectangle {
             Layout.topMargin: 0
             Layout.rightMargin: CmnCfg.smallMargin
             font.pixelSize: 10
-            text: Utils.friendlyTimestamp(replyCompPreview.epochTimestampMs)
+            text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
             id: timestamp
             color: CmnCfg.palette.secondaryTextColor
         }

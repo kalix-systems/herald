@@ -42,7 +42,7 @@ declare class Messages {
   lastAuthor: string;
   lastBody: string;
   isEmpty: string;
-  lastEpochTimestampMs: number;
+  lastTime: number;
   builder: MessageBuilder;
 
   deleteMessage(rowIndex: number): boolean;

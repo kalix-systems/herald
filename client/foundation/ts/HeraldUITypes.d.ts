@@ -19,7 +19,7 @@ declare enum ColorScheme {
 
 declare class TextAreaForm {
 	state: string;
-	replyId: MessageId
+	replyId: MsgId
 }
 
 declare class ConversationWindow {

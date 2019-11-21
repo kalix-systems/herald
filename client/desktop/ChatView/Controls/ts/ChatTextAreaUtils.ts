@@ -20,7 +20,6 @@ export function enterKeyHandler(
   target.clear();
 
   builder.body = text;
-  builder.conversationId = messageModel.conversationId;
   builder.finalize();
   textAreaForm.state = "default";
 }
