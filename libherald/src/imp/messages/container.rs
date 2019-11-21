@@ -54,6 +54,8 @@ impl Container {
         ids: HashSet<MsgId>,
         model: &mut List,
     ) -> Option<()> {
+        use crate::imp::message_preview::{shared::Update, MessagePreview};
+
         for id in ids.into_iter() {
             if let Some(data) = self.get_data_mut(&id) {
                 if data.op != ReplyId::Dangling {
@@ -61,6 +63,8 @@ impl Container {
 
                     let ix = self.index_by_id(id)?;
                     model.data_changed(ix, ix);
+
+                    ret_err!(MessagePreview::push(id, Update::SetDangling), None);
                 }
             }
         }

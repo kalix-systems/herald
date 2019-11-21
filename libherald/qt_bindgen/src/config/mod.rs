@@ -226,7 +226,7 @@ fn message_preview() -> Object {
     };
 
     obj! {
-       MessagePreview: Obj::new().props(props)
+       MessagePreview: Obj::new().list().props(props)
     }
 }
 
