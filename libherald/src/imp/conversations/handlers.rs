@@ -29,13 +29,19 @@ impl Conversations {
         Some(())
     }
 
-    pub(super) fn handle_init(&mut self, contents: Vector<Conversation>) {
+    pub(super) fn handle_init(
+        &mut self,
+        contents: Vector<Conversation>,
+    ) {
         self.model.begin_reset_model();
         self.list = contents;
         self.model.end_reset_model();
     }
 
-    pub(super) fn handle_new_activity(&mut self, cid: ConversationId) {
+    pub(super) fn handle_new_activity(
+        &mut self,
+        cid: ConversationId,
+    ) {
         let pos = match self
             .list
             .iter()
@@ -57,15 +63,24 @@ impl Conversations {
         self.model.end_move_rows();
     }
 
-    pub(super) fn handle_builder_finished(&mut self, inner: ConversationMeta) {
+    pub(super) fn handle_builder_finished(
+        &mut self,
+        inner: ConversationMeta,
+    ) {
         self.insert_new_conversation(inner)
     }
 
-    pub(super) fn handle_new_conversation(&mut self, inner: ConversationMeta) {
+    pub(super) fn handle_new_conversation(
+        &mut self,
+        inner: ConversationMeta,
+    ) {
         self.insert_new_conversation(inner)
     }
 
-    fn insert_new_conversation(&mut self, meta: ConversationMeta) {
+    fn insert_new_conversation(
+        &mut self,
+        meta: ConversationMeta,
+    ) {
         let matched = match self.filter.as_ref() {
             Some(filter) => meta.matches(filter),
             None => true,

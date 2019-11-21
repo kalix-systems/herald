@@ -1,8 +1,5 @@
-use rust_qt_binding_generator::configuration::SimpleType::*;
-use rust_qt_binding_generator::configuration::*;
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-use std::rc::Rc;
+use rust_qt_binding_generator::configuration::{SimpleType::*, *};
+use std::{collections::BTreeMap, path::PathBuf, rc::Rc};
 
 pub mod func;
 pub mod item_prop;

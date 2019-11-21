@@ -1,8 +1,7 @@
 use crate::{ffi, interface::*, ret_err, ret_none, spawn};
 use crossbeam_channel::{bounded, Receiver};
 use heraldcore::{channel_send_err, message::attachments, types::MsgId};
-use std::convert::TryInto;
-use std::ops::Not;
+use std::{convert::TryInto, ops::Not};
 
 type Emitter = AttachmentsEmitter;
 type List = AttachmentsList;
@@ -19,7 +18,10 @@ pub struct Attachments {
 }
 
 impl AttachmentsTrait for Attachments {
-    fn new(emit: AttachmentsEmitter, model: AttachmentsList) -> Self {
+    fn new(
+        emit: AttachmentsEmitter,
+        model: AttachmentsList,
+    ) -> Self {
         Self {
             emit,
             model,
@@ -37,7 +39,10 @@ impl AttachmentsTrait for Attachments {
         Some(self.msg_id.as_ref()?.as_slice())
     }
 
-    fn set_msg_id(&mut self, msg_id: Option<ffi::MsgIdRef>) {
+    fn set_msg_id(
+        &mut self,
+        msg_id: Option<ffi::MsgIdRef>,
+    ) {
         if let (Some(msg_id), None) = (msg_id, self.msg_id) {
             let msg_id = ret_err!(msg_id.try_into());
 
@@ -71,11 +76,12 @@ impl AttachmentsTrait for Attachments {
 
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
-            let contents = ret_err!(rx.recv());
-            self.model
-                .begin_insert_rows(0, contents.len().saturating_sub(1));
-            self.inner = contents;
-            self.model.end_insert_rows();
+            if let Ok(contents) = rx.recv() {
+                self.model
+                    .begin_insert_rows(0, contents.len().saturating_sub(1));
+                self.inner = contents;
+                self.model.end_insert_rows();
+            }
         }
     }
 
@@ -83,7 +89,10 @@ impl AttachmentsTrait for Attachments {
         self.inner.len()
     }
 
-    fn attachment_path(&self, index: usize) -> &str {
+    fn attachment_path(
+        &self,
+        index: usize,
+    ) -> &str {
         ret_none!(self.inner.get(index), "")
     }
 }

@@ -10,15 +10,15 @@ RowLayout {
     Layout.bottomMargin: CmnCfg.smallPadding
 
     Label {
-           font.pixelSize: 10
-           text: friendlyTimestamp
-           id: timestamp
-           color: CmnCfg.palette.secondaryTextColor
-       }
+        font.pixelSize: 10
+        text: friendlyTimestamp
+        id: timestamp
+        color: CmnCfg.palette.secondaryTextColor
+    }
 
-       Item {
-           Layout.fillWidth: true
-       }
+    Item {
+        Layout.fillWidth: true
+    }
 
     Image {
         id: receipt

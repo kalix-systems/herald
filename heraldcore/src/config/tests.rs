@@ -1,6 +1,6 @@
 use super::*;
-use crate::{platform_dirs::PICTURES_DIR, womp};
 use herald_common::sig::KeyPair;
+use platform_dirs::PICTURES_DIR;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 

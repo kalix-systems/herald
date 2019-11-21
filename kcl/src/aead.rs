@@ -31,7 +31,11 @@ impl Key {
         Key(buf)
     }
 
-    pub fn seal(&self, ad: &[u8], msg: &mut [u8]) -> Tag {
+    pub fn seal(
+        &self,
+        ad: &[u8],
+        msg: &mut [u8],
+    ) -> Tag {
         let mut mac_buf = [0u8; MAC_LEN];
         let mut nonce_buf = [0u8; NONCE_LEN];
 
@@ -73,7 +77,12 @@ impl Key {
         Tag(Mac(mac_buf), Nonce(nonce_buf))
     }
 
-    pub fn open(&self, ad: &[u8], tag: Tag, msg: &mut [u8]) -> OpenSucceeded {
+    pub fn open(
+        &self,
+        ad: &[u8],
+        tag: Tag,
+        msg: &mut [u8],
+    ) -> OpenSucceeded {
         let Tag(mac, nonce) = tag;
 
         let res = unsafe {

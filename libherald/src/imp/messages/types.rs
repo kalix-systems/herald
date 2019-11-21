@@ -36,12 +36,18 @@ impl MatchStatus {
 }
 
 impl MsgData {
-    pub(super) fn same_flurry(&self, rhs: &Self) -> bool {
+    pub(super) fn same_flurry(
+        &self,
+        rhs: &Self,
+    ) -> bool {
         (self.author == rhs.author)
             && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
     }
 
-    pub(super) fn matches(&self, pattern: &heraldcore::utils::SearchPattern) -> bool {
+    pub(super) fn matches(
+        &self,
+        pattern: &search_pattern::SearchPattern,
+    ) -> bool {
         match self.body.as_ref() {
             Some(body) => pattern.is_match(body.as_str()),
             None => false,
@@ -63,7 +69,10 @@ pub(super) struct Message {
 }
 
 impl Message {
-    pub(super) fn split_msg(msg: Msg, save_status: SaveStatus) -> (Self, MsgData) {
+    pub(super) fn split_msg(
+        msg: Msg,
+        save_status: SaveStatus,
+    ) -> (Self, MsgData) {
         let Msg {
             message_id,
             author,
@@ -98,7 +107,10 @@ impl Message {
         (message, data)
     }
 
-    pub(super) fn from_msg_id(msg_id: MsgId, container: &Container) -> Option<Self> {
+    pub(super) fn from_msg_id(
+        msg_id: MsgId,
+        container: &Container,
+    ) -> Option<Self> {
         let insertion_time = container.get_data(&msg_id)?.time.insertion;
 
         Some(Self {
@@ -109,13 +121,19 @@ impl Message {
 }
 
 impl PartialOrd for Message {
-    fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
+    fn partial_cmp(
+        &self,
+        rhs: &Self,
+    ) -> Option<Ordering> {
         self.insertion_time.0.partial_cmp(&rhs.insertion_time.0)
     }
 }
 
 impl Ord for Message {
-    fn cmp(&self, rhs: &Self) -> Ordering {
+    fn cmp(
+        &self,
+        rhs: &Self,
+    ) -> Ordering {
         match self.partial_cmp(rhs) {
             Some(ord) => ord,
             None => self.msg_id.cmp(&rhs.msg_id),

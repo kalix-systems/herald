@@ -102,8 +102,9 @@ Flickable {
                                             replyId)).y - convWindow.height / 2
                             convWindow.returnToBounds()
                             convWindow.state = ""
-                            replyHighlightAnimation.target =
-                                    chatListView.itemAt(ownedConversation.indexById(replyId)).highlight
+                            replyHighlightAnimation.target = chatListView.itemAt(
+                                        ownedConversation.indexById(
+                                            replyId)).highlight
                             replyHighlightAnimation.start()
                         }
                     }
@@ -134,6 +135,7 @@ Flickable {
                         bottomMargin: parent.bottomPadding
                     }
                     pfpPath: parent.pfpUrl
+                    avatarHeight: 28
                 }
 
                 CB.ChatBubble {

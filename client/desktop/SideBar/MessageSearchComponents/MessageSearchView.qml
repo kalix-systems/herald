@@ -8,8 +8,7 @@ import "./../js/ContactView.mjs" as JS
 import "../popups" as Popups
 import "qrc:/imports/Avatar" as Av
 
-
- ListView {
+ListView {
     id: messageSearchList
     clip: true
     currentIndex: -1
@@ -28,7 +27,8 @@ import "qrc:/imports/Avatar" as Av
             id: messageRectangle
             boxColor: messageData.conversationColor
             boxTitle: messageData.conversationTitle
-            picture: Utils.safeStringOrDefault(messageData.conversationPicture, "")
+            picture: Utils.safeStringOrDefault(messageData.conversationPicture,
+                                               "")
             groupPicture: !messageData.conversationPairwise
             labelComponent: Av.ConversationLabel {
                 contactName: messageData.conversationTitle
@@ -36,8 +36,7 @@ import "qrc:/imports/Avatar" as Av
                 labelSize: 14
                 lastAuthor: outbound ? "You" : messageData.author
                 lastBody: lastAuthor + ": " + messageData.body
-                lastTimestamp: Utils.friendlyTimestamp(
-                                   messageData.time)
+                lastTimestamp: Utils.friendlyTimestamp(messageData.time)
             }
         }
     }

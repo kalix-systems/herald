@@ -12,7 +12,6 @@ import QtQml 2.13
 ApplicationWindow {
     id: root
     title: "Herald"
-
     visible: true
     width: 900
     height: 640

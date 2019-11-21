@@ -28,7 +28,10 @@ impl Deserializer {
         self.data.len().saturating_sub(self.ix)
     }
 
-    pub fn read_raw_slice(&mut self, len: usize) -> Result<&[u8], KsonError> {
+    pub fn read_raw_slice(
+        &mut self,
+        len: usize,
+    ) -> Result<&[u8], KsonError> {
         if self.remaining() < len {
             e!(
                 LengthError {
@@ -44,7 +47,10 @@ impl Deserializer {
         Ok(out)
     }
 
-    pub fn read_raw_bytes(&mut self, len: usize) -> Result<Bytes, KsonError> {
+    pub fn read_raw_bytes(
+        &mut self,
+        len: usize,
+    ) -> Result<Bytes, KsonError> {
         if self.remaining() < len {
             e!(
                 LengthError {
@@ -62,7 +68,11 @@ impl Deserializer {
         Ok(out)
     }
 
-    pub fn read_raw_len(&mut self, prelen: u8, is_big: bool) -> Result<usize, KsonError> {
+    pub fn read_raw_len(
+        &mut self,
+        prelen: u8,
+        is_big: bool,
+    ) -> Result<usize, KsonError> {
         let len = if !is_big {
             prelen as usize
         } else {
@@ -134,7 +144,10 @@ tag_reader_method!(read_cons_tag, Cons, "failed to read cons tag");
 macro_rules! read_raw_uint {
     ($fname: ident, $type: tt, $len: expr) => {
         impl Deserializer {
-            pub fn $fname(&mut self, len: u8) -> Result<$type, KsonError> {
+            pub fn $fname(
+                &mut self,
+                len: u8,
+            ) -> Result<$type, KsonError> {
                 if len > $len {
                     e!(
                         IntTooShort {
@@ -169,7 +182,10 @@ read_raw_uint!(read_raw_u128, u128, 16);
 macro_rules! read_uint_from_tag {
     ($fname: ident, $rawname: tt, $type: tt) => {
         impl Deserializer {
-            pub fn $fname(&mut self, tag: TagByte) -> Result<$type, KsonError> {
+            pub fn $fname(
+                &mut self,
+                tag: TagByte,
+            ) -> Result<$type, KsonError> {
                 if !tag.is_big {
                     return Ok(tag.val as $type);
                 }
@@ -188,7 +204,10 @@ read_uint_from_tag!(read_u128_from_tag, read_raw_u128, u128);
 macro_rules! read_int_from_tag {
     ($fname: ident, $type: tt, $len: expr) => {
         impl Deserializer {
-            pub fn $fname(&mut self, tag: TagByte) -> Result<$type, KsonError> {
+            pub fn $fname(
+                &mut self,
+                tag: TagByte,
+            ) -> Result<$type, KsonError> {
                 if !tag.is_big {
                     return Ok(tag.val as $type);
                 }
@@ -261,12 +280,18 @@ impl Deserializer {
         }
     }
 
-    pub fn read_bytes_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+    pub fn read_bytes_len_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<usize, KsonError> {
         let prelen = tag.val & !(MASK_TYPE | BIG_BIT | BYTES_ARE_UTF8);
         self.read_raw_len(prelen, tag.is_big)
     }
 
-    pub fn read_bytes_from_tag(&mut self, tag: TagByte) -> Result<Bytes, KsonError> {
+    pub fn read_bytes_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<Bytes, KsonError> {
         if tag.val & BYTES_ARE_UTF8 == BYTES_ARE_UTF8 {
             e!(
                 WrongMinorType {
@@ -284,7 +309,10 @@ impl Deserializer {
     }
 
     // TODO: replace this with string-y wrapper around bytes
-    pub fn read_str_from_tag(&mut self, tag: TagByte) -> Result<&str, KsonError> {
+    pub fn read_str_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<&str, KsonError> {
         if tag.val & BYTES_ARE_UTF8 != BYTES_ARE_UTF8 {
             e!(
                 WrongMinorType {
@@ -305,7 +333,10 @@ impl Deserializer {
         std::str::from_utf8(bytes).map_err(|e| E!(BadUtf8String(e), err_data, ix))
     }
 
-    pub fn read_array_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+    pub fn read_array_len_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<usize, KsonError> {
         if tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP {
             e!(
                 WrongMinorType {
@@ -321,7 +352,10 @@ impl Deserializer {
         self.read_raw_len(prelen, tag.is_big)
     }
 
-    pub fn read_map_len_from_tag(&mut self, tag: TagByte) -> Result<usize, KsonError> {
+    pub fn read_map_len_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<usize, KsonError> {
         if tag.val & COLLECTION_IS_MAP != COLLECTION_IS_MAP {
             e!(
                 WrongMinorType {
@@ -337,7 +371,10 @@ impl Deserializer {
         self.read_raw_len(prelen, tag.is_big)
     }
 
-    pub fn read_cons_meta_from_tag(&mut self, tag: TagByte) -> Result<(bool, usize), KsonError> {
+    pub fn read_cons_meta_from_tag(
+        &mut self,
+        tag: TagByte,
+    ) -> Result<(bool, usize), KsonError> {
         let is_map = tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP;
         let prelen = tag.val & !COLLECTION_IS_MAP;
         Ok((is_map, self.read_raw_len(prelen, tag.is_big)?))
@@ -359,7 +396,10 @@ impl Deserializer {
         Ok(cdr)
     }
 
-    pub fn check_entry<V: De>(&mut self, key_should_be: &'static str) -> Result<V, KsonError> {
+    pub fn check_entry<V: De>(
+        &mut self,
+        key_should_be: &'static str,
+    ) -> Result<V, KsonError> {
         let err_data = self.data.clone();
         let err_ix = self.ix;
         let key = self.read_str()?;

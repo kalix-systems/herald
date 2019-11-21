@@ -71,7 +71,10 @@ impl<T: AsRef<[u8]>> From<(T, SigMeta)> for Signed<T> {
     }
 }
 
-fn compute_signing_data(slice: &[u8], ts: Time) -> Vec<u8> {
+fn compute_signing_data(
+    slice: &[u8],
+    ts: Time,
+) -> Vec<u8> {
     let mut out = Vec::with_capacity(slice.len() + 8);
     out.extend_from_slice(slice);
     out.extend_from_slice(&i64::to_le_bytes(ts.0));
@@ -141,7 +144,11 @@ impl<T: AsRef<[u8]>> Signed<T> {
 }
 
 impl SigMeta {
-    pub fn new(sig: sign::Signature, signed_by: sign::PublicKey, timestamp: Time) -> Self {
+    pub fn new(
+        sig: sign::Signature,
+        signed_by: sign::PublicKey,
+        timestamp: Time,
+    ) -> Self {
         Self {
             sig,
             signed_by,
@@ -157,7 +164,10 @@ impl SigMeta {
         self.sig
     }
 
-    pub fn verify_sig(&self, msg: &[u8]) -> SigValid {
+    pub fn verify_sig(
+        &self,
+        msg: &[u8],
+    ) -> SigValid {
         verify_sig(msg, self.timestamp, self.sig, self.signed_by)
     }
 
@@ -189,11 +199,17 @@ pub mod sig {
     }
 
     impl PKMeta {
-        pub fn new(sig: SigMeta, deprecated: Option<SigMeta>) -> Self {
+        pub fn new(
+            sig: SigMeta,
+            deprecated: Option<SigMeta>,
+        ) -> Self {
             Self { sig, deprecated }
         }
 
-        pub fn key_is_valid(&self, key: PublicKey) -> bool {
+        pub fn key_is_valid(
+            &self,
+            key: PublicKey,
+        ) -> bool {
             if let Some(d) = self.deprecated {
                 if d.verify_sig(key.as_ref()) == SigValid::Yes {
                     return false;
@@ -203,7 +219,10 @@ pub mod sig {
             self.sig.verify_sig(key.as_ref()) == SigValid::Yes
         }
 
-        pub fn deprecate(&mut self, deprecation: SigMeta) -> bool {
+        pub fn deprecate(
+            &mut self,
+            deprecation: SigMeta,
+        ) -> bool {
             if self.deprecated.is_some() {
                 false
             } else {
@@ -235,7 +254,10 @@ pub mod sig {
             &self.secret
         }
 
-        pub fn sign<T: AsRef<[u8]>>(&self, data: T) -> Signed<T> {
+        pub fn sign<T: AsRef<[u8]>>(
+            &self,
+            data: T,
+        ) -> Signed<T> {
             let timestamp = Time::now();
             let to_sign = compute_signing_data(data.as_ref(), timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
@@ -249,11 +271,17 @@ pub mod sig {
             signed
         }
 
-        pub fn raw_sign_detached(&self, data: &[u8]) -> Signature {
+        pub fn raw_sign_detached(
+            &self,
+            data: &[u8],
+        ) -> Signature {
             sign::sign_detached(data, &self.secret)
         }
 
-        pub fn sign_detached(&self, data: &[u8]) -> SigMeta {
+        pub fn sign_detached(
+            &self,
+            data: &[u8],
+        ) -> SigMeta {
             let timestamp = Time::now();
             let to_sign = compute_signing_data(data, timestamp);
             let sig = sign::sign_detached(&to_sign, &self.secret);
@@ -283,7 +311,10 @@ pub mod sealed {
     }
 
     impl PublicKey {
-        pub fn seal(&self, msg: &[u8]) -> Vec<u8> {
+        pub fn seal(
+            &self,
+            msg: &[u8],
+        ) -> Vec<u8> {
             sealedbox::seal(msg, &self.0.data)
         }
     }
@@ -306,11 +337,17 @@ pub mod sealed {
         }
 
         // TODO: figure out if this will ever fail
-        pub fn sign_pub(&self, pair: &sig::KeyPair) -> PublicKey {
+        pub fn sign_pub(
+            &self,
+            pair: &sig::KeyPair,
+        ) -> PublicKey {
             PublicKey(pair.sign(self.sealed))
         }
 
-        pub fn open(&self, msg: &[u8]) -> Option<Vec<u8>> {
+        pub fn open(
+            &self,
+            msg: &[u8],
+        ) -> Option<Vec<u8>> {
             sealedbox::open(msg, &self.sealed, &self.sk).ok()
         }
     }

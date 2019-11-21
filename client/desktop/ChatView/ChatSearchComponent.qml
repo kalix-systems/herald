@@ -26,7 +26,6 @@ Component {
                 rightMargin: CmnCfg.margin
             }
 
-
             //main search component
             SearchTextArea {
             }
@@ -41,7 +40,6 @@ Component {
                 text: active ? searchPlace + "/" + numMatches : ""
                 Layout.minimumWidth: 24
                 Layout.leftMargin: -20
-
             }
 
             Common.ButtonForm {

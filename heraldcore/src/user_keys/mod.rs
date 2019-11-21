@@ -4,7 +4,10 @@ use rusqlite::params;
 
 mod db;
 
-pub(crate) fn add_keys(uid: UserId, keys: &[Signed<sign::PublicKey>]) -> Result<(), HErr> {
+pub(crate) fn add_keys(
+    uid: UserId,
+    keys: &[Signed<sign::PublicKey>],
+) -> Result<(), HErr> {
     let mut db = Database::get()?;
 
     db::add_keys(&mut db, uid, keys)

@@ -1,10 +1,13 @@
 use super::*;
-use crate::{config::test_config, womp};
+use crate::config::test_config;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
 /// Testing utility
-fn test_outbound_text(msg: &str, conv: ConversationId) -> (MsgId, Time) {
+fn test_outbound_text(
+    msg: &str,
+    conv: ConversationId,
+) -> (MsgId, Time) {
     let mut conn = Database::get().expect(womp!());
     db::test_outbound_text(&mut conn, msg, conv)
 }
@@ -79,9 +82,17 @@ fn reply() {
 
     builder.store_db(&mut conn).expect(womp!());
 
-    let reply = db::get_message(&conn, &mid2).unwrap();
+    let op_replies = db::replies(&conn, &mid1).expect(womp!());
+    let op = db::get_message(&conn, &mid1).expect(womp!());
+    assert_eq!(op.replies.len(), 1);
+    assert_eq!(op_replies.len(), 1);
 
-    assert_eq!(reply.op.unwrap(), mid1);
+    assert!(op.replies.contains(&mid2));
+    assert!(op_replies.contains(&mid2));
+
+    let reply = db::get_message(&conn, &mid2).expect(womp!());
+
+    assert_eq!(ReplyId::Known(mid1), reply.op);
 }
 
 #[test]

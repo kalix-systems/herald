@@ -1,13 +1,16 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none, shared::SingletonBus};
 use crate::{
+    ffi,
     imp::{
         conversations::{shared::ConvUpdate, Conversations},
         users::shared::user_in_cache,
     },
+    interface::*,
+    push_err, ret_err, ret_none,
+    shared::SingletonBus,
     spawn,
 };
 use herald_common::UserId;
-use heraldcore::conversation::ConversationBuilder as Inner;
+use heraldcore::conversation::{start, ConversationBuilder as Inner};
 use std::convert::TryInto;
 
 type Emitter = ConversationBuilderEmitter;
@@ -22,7 +25,10 @@ pub struct ConversationBuilder {
 }
 
 impl ConversationBuilderTrait for ConversationBuilder {
-    fn new(emit: Emitter, model: List) -> Self {
+    fn new(
+        emit: Emitter,
+        model: List,
+    ) -> Self {
         Self {
             emit,
             model,
@@ -35,7 +41,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
         &mut self.emit
     }
 
-    fn add_member(&mut self, user_id: ffi::UserId) -> bool {
+    fn add_member(
+        &mut self,
+        user_id: ffi::UserId,
+    ) -> bool {
         let local_id = ret_none!(self.local_id, false);
 
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
@@ -59,7 +68,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
-    fn remove_member_by_id(&mut self, user_id: ffi::UserId) -> bool {
+    fn remove_member_by_id(
+        &mut self,
+        user_id: ffi::UserId,
+    ) -> bool {
         let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
 
         if !self.inner.has_member(&user_id) {
@@ -78,7 +90,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
         true
     }
 
-    fn remove_member_by_index(&mut self, index: u64) -> bool {
+    fn remove_member_by_index(
+        &mut self,
+        index: u64,
+    ) -> bool {
         let ix = index as usize;
 
         if ix >= self.inner.members().len() {
@@ -114,11 +129,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
                 conv.meta.clone()
             )));
 
-            ret_err!(conv.start());
+            ret_err!(start(conv));
         });
     }
 
-    fn set_title(&mut self, title: String) {
+    fn set_title(
+        &mut self,
+        title: String,
+    ) {
         self.inner.title(title);
     }
 
@@ -126,15 +144,22 @@ impl ConversationBuilderTrait for ConversationBuilder {
         Some(self.inner.picture.as_ref()?.as_str())
     }
 
-    fn set_picture(&mut self, picture: Option<String>) {
-        self.inner.picture = picture.map(crate::utils::strip_qrc);
+    fn set_picture(
+        &mut self,
+        picture: Option<String>,
+    ) {
+        self.inner.picture = picture.and_then(crate::utils::strip_qrc);
+        self.emit.picture_changed();
     }
 
     fn row_count(&self) -> usize {
         self.inner.members().len()
     }
 
-    fn member_id(&self, index: usize) -> ffi::UserIdRef {
+    fn member_id(
+        &self,
+        index: usize,
+    ) -> ffi::UserIdRef {
         ret_none!(self.inner.members().get(index), "").as_str()
     }
 }

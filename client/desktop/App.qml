@@ -46,7 +46,6 @@ Item {
 
     focus: true
 
-
     Component {
         id: splash
 
@@ -76,12 +75,9 @@ Item {
                 anchors.centerIn: parent
                 source: "qrc:/herald.icns"
                 mipmap: true
-
             }
         }
     }
-
-
 
     SplitView {
         id: rootSplitView

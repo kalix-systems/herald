@@ -30,7 +30,6 @@ Item {
         columns: 2
         width: parent.width
         height: parent.height
-
         Label {
             id: uid
             font {

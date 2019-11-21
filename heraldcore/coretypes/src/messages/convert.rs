@@ -1,5 +1,5 @@
 use super::*;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 
 impl From<Option<MsgId>> for ReplyId {
     fn from(maybe_mid: Option<MsgId>) -> Self {
@@ -54,11 +54,40 @@ impl AsRef<str> for MessageBody {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum Error {
+    SendStatus(i64),
+    ReceiptStatus(i64),
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(
+        &self,
+        out: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
+        use Error::*;
+        match self {
+            SendStatus(n) => write!(
+                out,
+                "Unknown message send status: found {}, expected 0, 1, or 2",
+                n
+            ),
+            ReceiptStatus(n) => write!(
+                out,
+                "Unknown message receipt status: found {}, expected 0, 1, 2, or 3",
+                n
+            ),
+        }
+    }
+}
+
+impl std::error::Error for Error {}
+
 impl TryFrom<u8> for MessageSendStatus {
     type Error = u8;
 
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
+    fn try_from(n: u8) -> Result<Self, Self::Error> {
+        match n {
             0 => Ok(Self::NoAck),
             1 => Ok(Self::Ack),
             2 => Ok(Self::Timeout),
@@ -68,14 +97,14 @@ impl TryFrom<u8> for MessageSendStatus {
 }
 
 impl std::convert::TryFrom<i64> for MessageSendStatus {
-    type Error = HErr;
+    type Error = Error;
 
-    fn try_from(n: i64) -> Result<Self, HErr> {
-        match u8::try_from(n) {
-            Ok(n) => n
-                .try_into()
-                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
-            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
+    fn try_from(n: i64) -> Result<Self, Self::Error> {
+        match n {
+            0 => Ok(Self::NoAck),
+            1 => Ok(Self::Ack),
+            2 => Ok(Self::Timeout),
+            i => Err(Error::SendStatus(i as i64)),
         }
     }
 }
@@ -83,8 +112,8 @@ impl std::convert::TryFrom<i64> for MessageSendStatus {
 impl TryFrom<u8> for MessageReceiptStatus {
     type Error = u8;
 
-    fn try_from(val: u8) -> Result<Self, Self::Error> {
-        match val {
+    fn try_from(n: u8) -> Result<Self, Self::Error> {
+        match n {
             0 => Ok(Self::NoAck),
             1 => Ok(Self::Received),
             2 => Ok(Self::Read),
@@ -95,14 +124,15 @@ impl TryFrom<u8> for MessageReceiptStatus {
 }
 
 impl std::convert::TryFrom<i64> for MessageReceiptStatus {
-    type Error = HErr;
+    type Error = Error;
 
-    fn try_from(n: i64) -> Result<Self, HErr> {
-        match u8::try_from(n) {
-            Ok(n) => n
-                .try_into()
-                .map_err(|n| HErr::HeraldError(format!("Unknown status {}", n))),
-            Err(_) => Err(HErr::HeraldError(format!("Unknown status {}", n))),
+    fn try_from(n: i64) -> Result<Self, Error> {
+        match n {
+            0 => Ok(Self::NoAck),
+            1 => Ok(Self::Received),
+            2 => Ok(Self::Read),
+            3 => Ok(Self::AckTerminal),
+            i => Err(Error::ReceiptStatus(i)),
         }
     }
 }

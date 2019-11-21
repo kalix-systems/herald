@@ -17,7 +17,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: check
-  
+
   end_to_end:
     name: e2e
     runs-on: ubuntu-latest
@@ -71,7 +71,7 @@ jobs:
 
   windows_platform:
     name: windows Platform Tests
-    runs-on: windows-latest 
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -141,4 +141,3 @@ jobs:
         with:
           command: clippy
           args: -- -D warnings
-

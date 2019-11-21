@@ -3,4 +3,4 @@ SELECT
 FROM
     replies
 WHERE
-    op_msg_id = @msg_id
+    replies.op_msg_id = @parent_msg_id

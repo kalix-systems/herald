@@ -14,6 +14,31 @@ export function friendlyTimestamp(msEpochTime: number): string {
   const secondsPerMinute = 60;
   const secondsPerHour = 3600;
   const secondsPerDay = 3600 * 24;
+  const secondsPerWeek = 3600 * 24 * 7;
+  const secondsPerYear = 3600 * 24 * 365;
+
+  var weekdays = new Array(7);
+	weekdays[0] = "Sun";
+	weekdays[1] = "Mon";
+	weekdays[2] = "Tues";
+	weekdays[3] = "Weds";
+	weekdays[4] = "Thurs";
+	weekdays[5] = "Fri";
+	weekdays[6] = "Sat";
+
+var months = new Array(12);
+	months[0] = "Jan";
+	months[1] = "Feb";
+	months[2] = "Mar";
+	months[3] = "Apr";
+	months[4] = "May";
+	months[5] = "Jun";
+	months[6] = "Jul";
+	months[7] = "Aug";
+	months[8] = "Sep";
+	months[9] = "Oct";
+	months[10] = "Nov";
+	months[11] = "Dec";
 
   const dt = new Date(msEpochTime);
   const now = Date.now();
@@ -21,17 +46,32 @@ export function friendlyTimestamp(msEpochTime: number): string {
 
   if (diff < 0) return "";
 
-  if (diff < secondsPerMinute) return "NOW";
+  if (diff < secondsPerMinute) return "Now";
 
   if (diff < secondsPerHour) {
-    return Math.floor(diff / secondsPerMinute) + " MIN AGO";
+    return Math.floor(diff / secondsPerMinute) + " min";
   }
 
   if (diff < secondsPerDay) {
-    return Math.floor(diff / secondsPerHour) + " HR AGO";
+    return Math.floor(diff / secondsPerHour) + " hr";
   }
 
-  return dt.toDateString();
+  if (diff < secondsPerWeek) {
+  	const dayNum = dt.getDay();
+  	return weekdays[dayNum];
+
+  }
+
+  if (diff < secondsPerYear) {
+  	const monthNum = dt.getMonth();
+  	const dateNum = dt.getDate();
+  	return months[monthNum] + " " + dateNum;
+  }
+
+  //not using datestring because don't want day of the week
+  const monthNum = dt.getMonth();
+  const dateNum = dt.getDate();
+  return months[monthNum] + " " + dateNum + " " + dt.getFullYear();
 }
 
 function isBoolean(maybeBool: unknown): boolean {

@@ -61,7 +61,10 @@ impl MessagePreviewTrait for MessagePreview {
         Some(self.msg_id.as_ref()?.as_slice())
     }
 
-    fn set_message_id(&mut self, mid: Option<ffi::MsgIdRef>) {
+    fn set_message_id(
+        &mut self,
+        mid: Option<ffi::MsgIdRef>,
+    ) {
         if let Some(mid) = mid {
             let mid = ret_err!(mid.try_into());
             self.msg_id.replace(mid);

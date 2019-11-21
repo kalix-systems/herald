@@ -2,7 +2,11 @@ use proc_macro2::Span;
 use quote::quote;
 use syn::*;
 
-pub fn kson_ser(name: Ident, data: DataEnum, gens: Generics) -> proc_macro2::TokenStream {
+pub fn kson_ser(
+    name: Ident,
+    data: DataEnum,
+    gens: Generics,
+) -> proc_macro2::TokenStream {
     let variant_id_fields: Vec<(Ident, Vec<Ident>, Fields, String)> = data
         .variants // variants of the enum
         .into_iter()

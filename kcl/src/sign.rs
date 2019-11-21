@@ -28,7 +28,10 @@ new_type! {
 }
 
 impl SecretKey {
-    pub fn sign(&self, data: &[u8]) -> Signature {
+    pub fn sign(
+        &self,
+        data: &[u8],
+    ) -> Signature {
         let mut sigbuf = [0u8; SIGNATURE_LEN];
         let mut siglen = 0;
         unsafe {
@@ -46,7 +49,11 @@ impl SecretKey {
 }
 
 impl PublicKey {
-    pub fn verify(&self, data: &[u8], sig: Signature) -> bool {
+    pub fn verify(
+        &self,
+        data: &[u8],
+        sig: Signature,
+    ) -> bool {
         let ret_code = unsafe {
             crypto_sign_ed25519_verify_detached(
                 sig.0.as_ptr(),

@@ -31,8 +31,9 @@ Component {
 
         Rectangle {
             anchors.top: titleText.bottom
+            anchors.topMargin: -CmnCfg.smallMargin / 2
             id: divider
-            height: 2
+            height: 1
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
             color: "black"
@@ -44,7 +45,7 @@ Component {
             id: bigDivider
             height: 1
             width: parent.width
-            color: CmnCfg.palette.secondaryTextColor
+            color: "black"
         }
     }
 }

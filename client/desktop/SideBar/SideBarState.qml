@@ -82,7 +82,6 @@ Page {
                 target: sideBarPane.messageSearchLoader
                 searchModel: msgSearchModel
             }
-
         },
 
         //TODO: following state should be reworked to match new design
