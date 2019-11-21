@@ -19,7 +19,7 @@ Page {
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
-    SplitView.preferredWidth: root.width * windowFraction
+    SplitView.preferredWidth: 300
     property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState

@@ -99,7 +99,7 @@ Item {
             Rectangle {
                 id: toolBarHandle
                 implicitWidth: 1
-                color: "white"
+                color: CmnCfg.palette.sideBarHighlightColor
                 height: CmnCfg.toolbarHeight
                 anchors {
                     top: parent.top
