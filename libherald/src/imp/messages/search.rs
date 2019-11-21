@@ -53,7 +53,7 @@ impl SearchState {
 
         let index = match self.matches.binary_search(&Match(*closest_message)) {
             Ok(ix) => ix,
-            Err(ix) => ix,
+            Err(ix) => ix.saturating_sub(1),
         };
 
         self.start_index.replace(index);
@@ -202,6 +202,7 @@ impl SearchState {
             }
             None => {
                 let index = self.initial_prev_index();
+
                 self.index.replace(index);
 
                 self.matches.get(index).copied()
