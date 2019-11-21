@@ -66,5 +66,4 @@ Item {
         }
         sourceComponent: labelComponent
     }
-
 }

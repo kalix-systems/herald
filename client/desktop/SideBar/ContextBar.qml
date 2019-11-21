@@ -25,7 +25,8 @@ ToolBar {
         anchors.fill: parent
         anchors.rightMargin: 8
 
-        Common.ConfigAvatar {}
+        Common.ConfigAvatar {
+        }
 
         Label {
             id: headerText

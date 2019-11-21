@@ -22,7 +22,8 @@ Component {
 
             anchors.fill: parent
 
-            Common.ConfigAvatar {}
+            Common.ConfigAvatar {
+            }
 
             Text {
                 id: text

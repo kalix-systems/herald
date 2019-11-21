@@ -10,6 +10,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Component {
     // this uses a rectangle and anchors instead of a layout because that manages the
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
+
     Rectangle {
         anchors.fill: parent
         color: CmnCfg.palette.paneColor
@@ -73,7 +74,9 @@ Component {
                 font.family: CmnCfg.chatFont.name
             }
             onClicked: {
-                groupMemberSelect.setTitle(titleText.text)
+                titleText.text == "" ? groupMemberSelect.setTitle(
+                                           "Untitled Group") : groupMemberSelect.setTitle(
+                                           titleText.text)
                 if (topRect.profPic !== "") {
                     groupMemberSelect.picture = topRect.profPic
                 }

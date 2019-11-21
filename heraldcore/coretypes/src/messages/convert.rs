@@ -61,7 +61,10 @@ pub enum Error {
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, out: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        out: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
         use Error::*;
         match self {
             SendStatus(n) => write!(

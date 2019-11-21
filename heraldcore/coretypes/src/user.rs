@@ -9,7 +9,10 @@ pub enum Error {
 }
 
 impl std::fmt::Display for Error {
-    fn fmt(&self, out: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(
+        &self,
+        out: &mut std::fmt::Formatter,
+    ) -> std::fmt::Result {
         use Error::*;
         match self {
             UnknownStatus(n) => {
@@ -63,7 +66,10 @@ impl User {
     }
 
     /// Matches user's text fields against a [`SearchPattern`]
-    pub fn matches(&self, pattern: &search_pattern::SearchPattern) -> bool {
+    pub fn matches(
+        &self,
+        pattern: &search_pattern::SearchPattern,
+    ) -> bool {
         pattern.is_match(self.id.as_str()) || pattern.is_match(self.name.as_str())
     }
 }

@@ -25,7 +25,10 @@ pub struct Conversations {
 }
 
 impl ConversationsTrait for Conversations {
-    fn new(mut emit: ConversationsEmitter, model: ConversationsList) -> Self {
+    fn new(
+        mut emit: ConversationsEmitter,
+        model: ConversationsList,
+    ) -> Self {
         let filter = SearchPattern::new_normal("".into()).ok();
 
         let global_emit = emit.clone();
@@ -52,11 +55,18 @@ impl ConversationsTrait for Conversations {
         self.list.len()
     }
 
-    fn color(&self, index: usize) -> u32 {
+    fn color(
+        &self,
+        index: usize,
+    ) -> u32 {
         ret_none!(self.color_(index), 0)
     }
 
-    fn set_color(&mut self, index: usize, color: u32) -> bool {
+    fn set_color(
+        &mut self,
+        index: usize,
+        color: u32,
+    ) -> bool {
         let cid = ret_none!(self.id(index), false);
 
         spawn!(
@@ -74,15 +84,25 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn conversation_id(&self, index: usize) -> ffi::ConversationId {
+    fn conversation_id(
+        &self,
+        index: usize,
+    ) -> ffi::ConversationId {
         ret_none!(self.list.get(index), vec![]).id.to_vec()
     }
 
-    fn expiration_period(&self, index: usize) -> u8 {
+    fn expiration_period(
+        &self,
+        index: usize,
+    ) -> u8 {
         ret_none!(self.expiration_(index), ExpirationPeriod::default() as u8) as u8
     }
 
-    fn set_expiration_period(&mut self, index: usize, period: u8) -> bool {
+    fn set_expiration_period(
+        &mut self,
+        index: usize,
+        period: u8,
+    ) -> bool {
         let period = period.into();
 
         let cid = ret_none!(self.id(index), false);
@@ -103,11 +123,18 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn muted(&self, index: usize) -> bool {
+    fn muted(
+        &self,
+        index: usize,
+    ) -> bool {
         ret_none!(self.muted_(index), true)
     }
 
-    fn set_muted(&mut self, index: usize, muted: bool) -> bool {
+    fn set_muted(
+        &mut self,
+        index: usize,
+        muted: bool,
+    ) -> bool {
         let cid = ret_none!(self.id(index), false);
 
         spawn!(ret_err!(conversation::set_muted(&cid, muted)), false);
@@ -117,11 +144,18 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn picture(&self, index: usize) -> Option<String> {
+    fn picture(
+        &self,
+        index: usize,
+    ) -> Option<String> {
         self.picture_(index)?
     }
 
-    fn set_picture(&mut self, index: usize, picture: Option<String>) -> bool {
+    fn set_picture(
+        &mut self,
+        index: usize,
+        picture: Option<String>,
+    ) -> bool {
         if self.pairwise_(index).unwrap_or(false) {
             return false;
         }
@@ -138,11 +172,18 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn title(&self, index: usize) -> Option<String> {
+    fn title(
+        &self,
+        index: usize,
+    ) -> Option<String> {
         self.title_(index)?
     }
 
-    fn set_title(&mut self, index: usize, title: Option<String>) -> bool {
+    fn set_title(
+        &mut self,
+        index: usize,
+        title: Option<String>,
+    ) -> bool {
         let cid = ret_none!(self.id(index), false);
         {
             let title = title.clone();
@@ -162,11 +203,17 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn pairwise(&self, index: usize) -> bool {
+    fn pairwise(
+        &self,
+        index: usize,
+    ) -> bool {
         ret_none!(self.pairwise_(index), false)
     }
 
-    fn remove_conversation(&mut self, index: u64) -> bool {
+    fn remove_conversation(
+        &mut self,
+        index: u64,
+    ) -> bool {
         let index = index as usize;
         let cid = ret_none!(self.id(index), false);
 
@@ -184,7 +231,10 @@ impl ConversationsTrait for Conversations {
         true
     }
 
-    fn matched(&self, row_index: usize) -> bool {
+    fn matched(
+        &self,
+        row_index: usize,
+    ) -> bool {
         ret_none!(self.list.get(row_index), true).matched
     }
 
@@ -192,7 +242,10 @@ impl ConversationsTrait for Conversations {
         self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
-    fn set_filter(&mut self, pattern: String) {
+    fn set_filter(
+        &mut self,
+        pattern: String,
+    ) {
         if pattern.is_empty() {
             self.clear_filter();
             return;
@@ -234,7 +287,10 @@ impl ConversationsTrait for Conversations {
     }
 
     /// Sets filter mode
-    fn set_filter_regex(&mut self, use_regex: bool) {
+    fn set_filter_regex(
+        &mut self,
+        use_regex: bool,
+    ) {
         if use_regex {
             ret_err!(self
                 .filter

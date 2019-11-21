@@ -2,8 +2,7 @@ use crate::{interface::UsersEmitter as Emitter, shared::SingletonBus};
 use crossbeam_channel::*;
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
-use heraldcore::user;
-use heraldcore::{channel_send_err, NE};
+use heraldcore::{channel_send_err, user, NE};
 use lazy_static::*;
 use parking_lot::Mutex;
 

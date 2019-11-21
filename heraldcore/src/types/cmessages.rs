@@ -39,7 +39,7 @@ pub fn seal(
 
 /// Opens the message.
 pub fn open(
-    message: ConversationMessage,
+    message: ConversationMessage
 ) -> Result<Vec<(ConversationMessageBody, GlobalId)>, HErr> {
     let ConversationMessage { cid, from, body } = message;
 

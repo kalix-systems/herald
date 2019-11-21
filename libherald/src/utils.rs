@@ -1,6 +1,10 @@
 /// Strips `qrc` prefix from paths passed from QML.
-pub fn strip_qrc(mut path: String) -> String {
-    path.split_off(7)
+pub fn strip_qrc(mut path: String) -> Option<String> {
+    if path.len() < 7 {
+        None
+    } else {
+        Some(path.split_off(7))
+    }
 }
 
 pub(crate) fn err_string_msg(
@@ -18,7 +22,11 @@ pub(crate) fn err_string_msg(
     )
 }
 
-pub(crate) fn ret_err_string(e: &dyn std::error::Error, file: &str, line: u32) -> String {
+pub(crate) fn ret_err_string(
+    e: &dyn std::error::Error,
+    file: &str,
+    line: u32,
+) -> String {
     format!(
         "{error} at {file}:{line}",
         error = e,
@@ -84,7 +92,10 @@ macro_rules! push_err {
     };
 }
 
-pub(crate) fn ret_none_string(file: &str, line: u32) -> String {
+pub(crate) fn ret_none_string(
+    file: &str,
+    line: u32,
+) -> String {
     format!(
         "Unexpected `None` at {file}:{line}",
         file = file,
@@ -151,6 +162,6 @@ mod tests {
     fn strip_qrc() {
         let path = "file:///what/a/path".into();
 
-        assert_eq!("/what/a/path", super::strip_qrc(path));
+        assert_eq!("/what/a/path", super::strip_qrc(path).unwrap());
     }
 }

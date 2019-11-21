@@ -108,7 +108,10 @@ impl SearchPattern {
     }
 
     /// Changes the pattern while preserving the mode
-    pub fn set_pattern(&mut self, pattern: String) -> Result<(), Error> {
+    pub fn set_pattern(
+        &mut self,
+        pattern: String,
+    ) -> Result<(), Error> {
         match self {
             Self::Regex { .. } => {
                 *self = Self::new_regex(pattern)?;

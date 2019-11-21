@@ -14,7 +14,10 @@ pub enum ChainError {
 use ChainError::*;
 
 impl fmt::Display for ChainError {
-    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+    fn fmt(
+        &self,
+        fmt: &mut fmt::Formatter,
+    ) -> Result<(), fmt::Error> {
         match self {
             CryptoError => write!(fmt, "libsodium failed"),
             DecryptionError => write!(fmt, "Failed to decrypt a block"),

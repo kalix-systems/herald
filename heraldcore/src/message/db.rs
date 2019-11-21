@@ -1,11 +1,13 @@
 use super::*;
-use crate::conversation::db::expiration_period;
-use crate::message::MessageTime;
+use crate::{conversation::db::expiration_period, message::MessageTime};
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
 
 /// Get message by message id
-pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> {
+pub(crate) fn get_message(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<Message, HErr> {
     let receipts = get_receipts(conn, msg_id)?;
     let replies = self::replies(conn, msg_id)?;
 
@@ -43,7 +45,10 @@ pub(crate) fn get_message(conn: &Conn, msg_id: &MsgId) -> Result<Message, HErr> 
 }
 
 /// Get message by message id
-pub(crate) fn get_message_opt(conn: &Conn, msg_id: &MsgId) -> Result<Option<Message>, HErr> {
+pub(crate) fn get_message_opt(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<Option<Message>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_message.sql"))?;
 
     let mut res = stmt.query_map_named(
@@ -178,7 +183,10 @@ pub(crate) fn by_send_status(
 }
 
 /// Deletes a message
-pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
+pub(crate) fn delete_message(
+    conn: &Conn,
+    id: &MsgId,
+) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/delete_message.sql"))?;
     stmt.execute_named(named_params! { "@msg_id": id })?;
     super::attachments::db::gc(conn)?;
@@ -187,7 +195,11 @@ pub(crate) fn delete_message(conn: &Conn, id: &MsgId) -> Result<(), HErr> {
 
 /// Testing utility
 #[cfg(test)]
-pub(crate) fn test_outbound_text(db: &mut Conn, msg: &str, conv: ConversationId) -> (MsgId, Time) {
+pub(crate) fn test_outbound_text(
+    db: &mut Conn,
+    msg: &str,
+    conv: ConversationId,
+) -> (MsgId, Time) {
     use std::convert::TryInto;
 
     let mut builder = OutboundMessageBuilder::default();
@@ -351,7 +363,10 @@ impl OutboundMessageBuilder {
     }
 
     #[cfg(test)]
-    pub(crate) fn store_and_send_blocking_db(self, db: &mut Conn) -> Result<Message, HErr> {
+    pub(crate) fn store_and_send_blocking_db(
+        self,
+        db: &mut Conn,
+    ) -> Result<Message, HErr> {
         use crate::{channel_recv_err, loc};
         use crossbeam_channel::*;
 
@@ -387,7 +402,10 @@ impl OutboundMessageBuilder {
 }
 
 impl InboundMessageBuilder {
-    pub(crate) fn store_db(self, conn: &mut rusqlite::Connection) -> Result<Option<Message>, HErr> {
+    pub(crate) fn store_db(
+        self,
+        conn: &mut rusqlite::Connection,
+    ) -> Result<Option<Message>, HErr> {
         let Self {
             message_id,
             author,

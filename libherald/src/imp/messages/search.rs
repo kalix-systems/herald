@@ -42,7 +42,11 @@ impl SearchState {
         }
     }
 
-    pub(super) fn start_hint(&mut self, hint: f32, container: &Container) -> Option<()> {
+    pub(super) fn start_hint(
+        &mut self,
+        hint: f32,
+        container: &Container,
+    ) -> Option<()> {
         let approx_index = (container.len() as f64 * hint as f64).ceil() as usize;
 
         let closest_message = container.get(approx_index)?;
@@ -79,7 +83,11 @@ impl SearchState {
         Ok(SearchChanged::Changed)
     }
 
-    pub(super) fn set_matches(&mut self, matches: Vec<Match>, emit: &mut Emitter) {
+    pub(super) fn set_matches(
+        &mut self,
+        matches: Vec<Match>,
+        emit: &mut Emitter,
+    ) {
         self.matches = matches;
         self.index = None;
 
@@ -87,7 +95,11 @@ impl SearchState {
         emit.search_index_changed();
     }
 
-    pub(super) fn msg_matches(&self, msg_id: &MsgId, container: &Container) -> Option<bool> {
+    pub(super) fn msg_matches(
+        &self,
+        msg_id: &MsgId,
+        container: &Container,
+    ) -> Option<bool> {
         let data = container.get_data(msg_id)?;
         Some(data.matches(self.pattern.as_ref()?))
     }
@@ -117,7 +129,10 @@ impl SearchState {
         self.matches.len()
     }
 
-    pub(super) fn clear_search(&mut self, emit: &mut Emitter) -> Result<(), HErr> {
+    pub(super) fn clear_search(
+        &mut self,
+        emit: &mut Emitter,
+    ) -> Result<(), HErr> {
         if let Some(pattern) = self.pattern.as_mut() {
             pattern.set_pattern("".into())?;
         }

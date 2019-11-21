@@ -2,7 +2,10 @@ use super::*;
 use heraldcore::errors::HErr;
 
 impl MessageSearch {
-    pub(super) fn start_search(&mut self, pattern: SearchPattern) -> Result<(), HErr> {
+    pub(super) fn start_search(
+        &mut self,
+        pattern: SearchPattern,
+    ) -> Result<(), HErr> {
         let (tx, rx) = unbounded();
 
         let mut emit = self.emit.clone();

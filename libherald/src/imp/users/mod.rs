@@ -33,7 +33,10 @@ pub struct Users {
 }
 
 impl UsersTrait for Users {
-    fn new(mut emit: Emitter, model: List) -> Users {
+    fn new(
+        mut emit: Emitter,
+        model: List,
+    ) -> Users {
         let list = match user::all() {
             Ok(v) => v
                 .into_iter()
@@ -63,7 +66,10 @@ impl UsersTrait for Users {
     }
 
     /// Adds a user by their `id`
-    fn add(&mut self, id: ffi::UserId) -> ffi::ConversationId {
+    fn add(
+        &mut self,
+        id: ffi::UserId,
+    ) -> ffi::ConversationId {
         let id = ret_err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
         let (data, _) = ret_err!(UserBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
@@ -97,32 +103,48 @@ impl UsersTrait for Users {
     }
 
     /// Returns user id.
-    fn user_id(&self, row_index: usize) -> ffi::UserIdRef {
+    fn user_id(
+        &self,
+        row_index: usize,
+    ) -> ffi::UserIdRef {
         ret_none!(self.list.get(row_index), "").id.as_str()
     }
 
     /// Returns conversation id.
-    fn pairwise_conversation_id(&self, row_index: usize) -> ffi::ConversationId {
+    fn pairwise_conversation_id(
+        &self,
+        row_index: usize,
+    ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
         let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
     /// Returns users name
-    fn name(&self, row_index: usize) -> String {
+    fn name(
+        &self,
+        row_index: usize,
+    ) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
 
         ret_none!(name(uid), uid.to_string())
     }
 
     /// Returns name if it is set, otherwise returns empty string
-    fn name_by_id(&self, id: ffi::UserId) -> String {
+    fn name_by_id(
+        &self,
+        id: ffi::UserId,
+    ) -> String {
         let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
         name(uid).unwrap_or_else(|| "".to_owned())
     }
 
     /// Updates a user's name, returns a boolean to indicate success.
-    fn set_name(&mut self, row_index: usize, name: String) -> bool {
+    fn set_name(
+        &mut self,
+        row_index: usize,
+        name: String,
+    ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
@@ -136,13 +158,19 @@ impl UsersTrait for Users {
     }
 
     /// Returns profile picture
-    fn profile_picture(&self, row_index: usize) -> Option<String> {
+    fn profile_picture(
+        &self,
+        row_index: usize,
+    ) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
         profile_picture(&uid)
     }
 
     /// Returns path to profile if it is set, otherwise returns the empty string.
-    fn profile_picture_by_id(&self, id: ffi::UserId) -> String {
+    fn profile_picture_by_id(
+        &self,
+        id: ffi::UserId,
+    ) -> String {
         let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
         profile_picture(uid).unwrap_or_else(|| "".to_owned())
     }
@@ -150,11 +178,15 @@ impl UsersTrait for Users {
     /// Sets profile picture.
     ///
     /// Returns bool indicating success.
-    fn set_profile_picture(&mut self, row_index: usize, picture: Option<String>) -> bool {
+    fn set_profile_picture(
+        &mut self,
+        row_index: usize,
+        picture: Option<String>,
+    ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
-        let picture = picture.map(crate::utils::strip_qrc);
+        let picture = picture.and_then(crate::utils::strip_qrc);
 
         // FIXME this is not exception safe
         let path = ret_err!(user::set_profile_picture(uid, picture), false);
@@ -164,19 +196,29 @@ impl UsersTrait for Users {
     }
 
     /// Returns user's color
-    fn color(&self, row_index: usize) -> u32 {
+    fn color(
+        &self,
+        row_index: usize,
+    ) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
         color(&uid).unwrap_or(0)
     }
 
     /// Returns name if it is set, otherwise returns the user's id.
-    fn color_by_id(&self, id: ffi::UserId) -> u32 {
+    fn color_by_id(
+        &self,
+        id: ffi::UserId,
+    ) -> u32 {
         let uid = &ret_err!(id.as_str().try_into(), 0);
         color(&uid).unwrap_or(0)
     }
 
     /// Sets color
-    fn set_color(&mut self, row_index: usize, color: u32) -> bool {
+    fn set_color(
+        &mut self,
+        row_index: usize,
+        color: u32,
+    ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
 
@@ -186,13 +228,20 @@ impl UsersTrait for Users {
         true
     }
 
-    fn status(&self, row_index: usize) -> u8 {
+    fn status(
+        &self,
+        row_index: usize,
+    ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
         let inner = ret_none!(get_user(&uid), 0);
         inner.status as u8
     }
 
-    fn set_status(&mut self, row_index: usize, status: u8) -> bool {
+    fn set_status(
+        &mut self,
+        row_index: usize,
+        status: u8,
+    ) -> bool {
         let status = ret_err!(UserStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
         let mut inner = ret_none!(get_user_mut(&uid), false);
@@ -211,7 +260,10 @@ impl UsersTrait for Users {
         true
     }
 
-    fn matched(&self, row_index: usize) -> bool {
+    fn matched(
+        &self,
+        row_index: usize,
+    ) -> bool {
         ret_none!(self.list.get(row_index), true).matched
     }
 
@@ -219,7 +271,10 @@ impl UsersTrait for Users {
         self.filter.as_ref().map(SearchPattern::raw).unwrap_or("")
     }
 
-    fn set_filter(&mut self, pattern: String) {
+    fn set_filter(
+        &mut self,
+        pattern: String,
+    ) {
         if pattern.is_empty() {
             self.clear_filter();
             return;
@@ -244,7 +299,10 @@ impl UsersTrait for Users {
     }
 
     /// Sets filter mode
-    fn set_filter_regex(&mut self, use_regex: bool) {
+    fn set_filter_regex(
+        &mut self,
+        use_regex: bool,
+    ) {
         self.filter = match self.filter.take() {
             Some(mut filter) => {
                 if use_regex {

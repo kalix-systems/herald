@@ -20,39 +20,39 @@ Rectangle {
         anchors.topMargin: CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: CmnCfg.largeMargin
-    Rectangle {
-        width: 42
-        height: width
-        color: "black"
+        Rectangle {
+            width: 42
+            height: width
+            color: "black"
 
-        Loader {
-            id: groupImageLoader
-            active: false
-            z: 100
-            property string imageSource
-            anchors.fill: parent
-            sourceComponent: Image {
-                source: imageSource
+            Loader {
+                id: groupImageLoader
+                active: false
+                z: 100
+                property string imageSource
                 anchors.fill: parent
-                fillMode: Image.PreserveAspectCrop
+                sourceComponent: Image {
+                    source: imageSource
+                    anchors.fill: parent
+                    fillMode: Image.PreserveAspectCrop
+                }
+            }
+
+            Common.ButtonForm {
+                anchors.centerIn: parent
+                source: "qrc:/camera-icon.svg"
+                fill: CmnCfg.palette.paneColor
+                onClicked: groupPicDialogue.open()
             }
         }
 
         Common.ButtonForm {
-            anchors.centerIn: parent
-            source: "qrc:/camera-icon.svg"
-            fill: CmnCfg.palette.paneColor
-            onClicked: groupPicDialogue.open()
+            source: "qrc:/clear-photo-icon.svg"
+            anchors.verticalCenter: parent.verticalCenter
+            visible: groupImageLoader.imageSource !== ""
+            enabled: visible
+            onClicked: groupImageLoader.imageSource = ""
         }
-    }
-
-    Common.ButtonForm {
-        source: "qrc:/clear-photo-icon.svg"
-        anchors.verticalCenter: parent.verticalCenter
-        visible: groupImageLoader.imageSource !== ""
-        enabled: visible
-        onClicked: groupImageLoader.imageSource = ""
-    }
     }
 
     FileDialog {

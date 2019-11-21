@@ -4,7 +4,10 @@ use super::*;
 /// the server.
 ///
 /// Takes a callback as an argument that is called whenever a message is received.
-pub fn login<F, G>(mut f: F, mut g: G) -> Result<(), HErr>
+pub fn login<F, G>(
+    mut f: F,
+    mut g: G,
+) -> Result<(), HErr>
 where
     F: FnMut(Notification) + Send + 'static,
     G: FnMut(HErr) + Send + 'static,
@@ -73,7 +76,7 @@ where
 }
 
 fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
-    ws: &mut wsclient::Client<S>,
+    ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     let len;
 
@@ -111,7 +114,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
 }
 
 fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
-    ws: &mut wsclient::Client<S>,
+    ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     loop {
         if let WMessage::Binary(v) = ws.recv_message()? {

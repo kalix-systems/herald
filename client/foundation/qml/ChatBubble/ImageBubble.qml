@@ -10,7 +10,7 @@ ColumnLayout {
     property string imageSource: ""
     property string authorName: ""
     property Attachments messageAttachments: null
-     property color authorColor
+    property color authorColor
 
     spacing: 0
 
