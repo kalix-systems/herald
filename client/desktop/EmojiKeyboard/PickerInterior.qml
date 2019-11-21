@@ -1,6 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
+import QtQuick.Shapes 1.13
 import LibHerald 1.0
 
 Item {
@@ -38,17 +39,16 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                 }
 
-                ScrollView {
-                    width: 185
-                    TextArea {
-                        id: searchTextArea
-                        padding: 0
-                        color: CmnCfg.palette.sideBarHighlightColor
-                        placeholderText: "Search emoji"
-                        Keys.onReturnPressed: event.accepted = true
-                        anchors.fill: parent
-                    }
+                TextArea {
+                    id: searchTextArea
+                    padding: 0
+                    topPadding: 3
+                    color: CmnCfg.palette.sideBarHighlightColor
                     anchors.verticalCenter: parent.verticalCenter
+                    placeholderText: "Search emoji"
+                    Keys.onReturnPressed: event.accepted = true
+                    width: 185
+                    height: parent.height
                 }
 
                 Button {
@@ -57,9 +57,9 @@ Item {
                     background: Item {}
                     icon.source: "qrc:/x-icon.svg"
                     icon.color: CmnCfg.palette.sideBarHighlightColor
-                    onClicked: emoKeysPopup.active = false
                     icon.height: 17
                     icon.width: 17
+                    onClicked: emoKeysPopup.active = false
                     anchors.verticalCenter: parent.verticalCenter
                 }
             }
@@ -93,6 +93,33 @@ Item {
                 anchors.fill: parent
                 border.color: CmnCfg.palette.secondaryTextColor
                 color: menu.model[menu.currentIndex]
+                Shape {
+                    id: cornerCarat
+                    anchors {
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+                    anchors.fill: parent
+                    ShapePath {
+                        fillColor: CmnCfg.palette.secondaryTextColor
+                        strokeColor: CmnCfg.palette.secondaryTextColor
+                        Component.onCompleted: print(cornerCarat.height)
+                        startX: cornerCarat.width / 2
+                        startY: cornerCarat.height
+                        PathLine {
+                            x: cornerCarat.width
+                            y: cornerCarat.height / 2
+                        }
+                        PathLine {
+                            x: cornerCarat.width
+                            y: cornerCarat.height
+                        }
+                        PathLine {
+                            x: cornerCarat.width / 2
+                            y: cornerCarat.height
+                        }
+                    }
+                }
             }
         }
     }
