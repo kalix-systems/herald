@@ -76,11 +76,12 @@ impl AttachmentsTrait for Attachments {
 
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
-            let contents = ret_err!(rx.recv());
-            self.model
-                .begin_insert_rows(0, contents.len().saturating_sub(1));
-            self.inner = contents;
-            self.model.end_insert_rows();
+            if let Ok(contents) = rx.recv() {
+                self.model
+                    .begin_insert_rows(0, contents.len().saturating_sub(1));
+                self.inner = contents;
+                self.model.end_insert_rows();
+            }
         }
     }
 
