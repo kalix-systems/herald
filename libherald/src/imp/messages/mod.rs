@@ -126,7 +126,7 @@ impl Interface for Messages {
             self.builder.set_conversation_id(conversation_id);
             self.emit.conversation_id_changed();
 
-            Container::fill(conversation_id);
+            container::fill(conversation_id);
         }
     }
 
