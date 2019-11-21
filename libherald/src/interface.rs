@@ -2,13 +2,9 @@
 use libc::{c_char, c_int, c_ushort};
 use std::char::decode_utf16;
 
-use std::{
-    ptr::null,
-    sync::{
-        atomic::{AtomicPtr, Ordering},
-        Arc,
-    },
-};
+use std::ptr::null;
+use std::sync::atomic::{AtomicPtr, Ordering};
+use std::sync::Arc;
 
 use crate::imp::*;
 
@@ -2798,6 +2794,7 @@ pub struct MessagePreviewEmitter {
     is_dangling_changed: fn(*mut MessagePreviewQObject),
     message_id_changed: fn(*mut MessagePreviewQObject),
     msg_id_set_changed: fn(*mut MessagePreviewQObject),
+    new_data_ready: fn(*mut MessagePreviewQObject),
 }
 
 impl MessagePreviewEmitter {
@@ -2817,6 +2814,7 @@ impl MessagePreviewEmitter {
             is_dangling_changed: self.is_dangling_changed,
             message_id_changed: self.message_id_changed,
             msg_id_set_changed: self.msg_id_set_changed,
+            new_data_ready: self.new_data_ready,
         }
     }
     fn clear(&self) {
@@ -2866,10 +2864,88 @@ impl MessagePreviewEmitter {
             (self.msg_id_set_changed)(ptr);
         }
     }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct MessagePreviewList {
+    qobject: *mut MessagePreviewQObject,
+    layout_about_to_be_changed: fn(*mut MessagePreviewQObject),
+    layout_changed: fn(*mut MessagePreviewQObject),
+    data_changed: fn(*mut MessagePreviewQObject, usize, usize),
+    begin_reset_model: fn(*mut MessagePreviewQObject),
+    end_reset_model: fn(*mut MessagePreviewQObject),
+    begin_insert_rows: fn(*mut MessagePreviewQObject, usize, usize),
+    end_insert_rows: fn(*mut MessagePreviewQObject),
+    begin_move_rows: fn(*mut MessagePreviewQObject, usize, usize, usize),
+    end_move_rows: fn(*mut MessagePreviewQObject),
+    begin_remove_rows: fn(*mut MessagePreviewQObject, usize, usize),
+    end_remove_rows: fn(*mut MessagePreviewQObject),
+}
+
+impl MessagePreviewList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
 }
 
 pub trait MessagePreviewTrait {
-    fn new(emit: MessagePreviewEmitter) -> Self;
+    fn new(
+        emit: MessagePreviewEmitter,
+        model: MessagePreviewList,
+    ) -> Self;
     fn emit(&mut self) -> &mut MessagePreviewEmitter;
     fn author(&self) -> Option<&str>;
     fn body(&self) -> Option<&str>;
@@ -2882,6 +2958,31 @@ pub trait MessagePreviewTrait {
         value: Option<&[u8]>,
     );
     fn msg_id_set(&self) -> bool;
+    fn row_count(&self) -> usize;
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
+        false
+    }
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
+        false
+    }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
 }
 
 #[no_mangle]
@@ -2894,6 +2995,18 @@ pub extern "C" fn message_preview_new(
     message_preview_is_dangling_changed: fn(*mut MessagePreviewQObject),
     message_preview_message_id_changed: fn(*mut MessagePreviewQObject),
     message_preview_msg_id_set_changed: fn(*mut MessagePreviewQObject),
+    message_preview_new_data_ready: fn(*mut MessagePreviewQObject),
+    message_preview_layout_about_to_be_changed: fn(*mut MessagePreviewQObject),
+    message_preview_layout_changed: fn(*mut MessagePreviewQObject),
+    message_preview_data_changed: fn(*mut MessagePreviewQObject, usize, usize),
+    message_preview_begin_reset_model: fn(*mut MessagePreviewQObject),
+    message_preview_end_reset_model: fn(*mut MessagePreviewQObject),
+    message_preview_begin_insert_rows: fn(*mut MessagePreviewQObject, usize, usize),
+    message_preview_end_insert_rows: fn(*mut MessagePreviewQObject),
+    message_preview_begin_move_rows: fn(*mut MessagePreviewQObject, usize, usize, usize),
+    message_preview_end_move_rows: fn(*mut MessagePreviewQObject),
+    message_preview_begin_remove_rows: fn(*mut MessagePreviewQObject, usize, usize),
+    message_preview_end_remove_rows: fn(*mut MessagePreviewQObject),
 ) -> *mut MessagePreview {
     let message_preview_emit = MessagePreviewEmitter {
         qobject: Arc::new(AtomicPtr::new(message_preview)),
@@ -2904,8 +3017,23 @@ pub extern "C" fn message_preview_new(
         is_dangling_changed: message_preview_is_dangling_changed,
         message_id_changed: message_preview_message_id_changed,
         msg_id_set_changed: message_preview_msg_id_set_changed,
+        new_data_ready: message_preview_new_data_ready,
     };
-    let d_message_preview = MessagePreview::new(message_preview_emit);
+    let model = MessagePreviewList {
+        qobject: message_preview,
+        layout_about_to_be_changed: message_preview_layout_about_to_be_changed,
+        layout_changed: message_preview_layout_changed,
+        data_changed: message_preview_data_changed,
+        begin_reset_model: message_preview_begin_reset_model,
+        end_reset_model: message_preview_end_reset_model,
+        begin_insert_rows: message_preview_begin_insert_rows,
+        end_insert_rows: message_preview_end_insert_rows,
+        begin_move_rows: message_preview_begin_move_rows,
+        end_move_rows: message_preview_end_move_rows,
+        begin_remove_rows: message_preview_begin_remove_rows,
+        end_remove_rows: message_preview_end_remove_rows,
+    };
+    let d_message_preview = MessagePreview::new(message_preview_emit, model);
     Box::into_raw(Box::new(d_message_preview))
 }
 
@@ -3002,6 +3130,54 @@ pub unsafe extern "C" fn message_preview_message_id_set_none(ptr: *mut MessagePr
 #[no_mangle]
 pub unsafe extern "C" fn message_preview_msg_id_set_get(ptr: *const MessagePreview) -> bool {
     (&*ptr).msg_id_set()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_row_count(ptr: *const MessagePreview) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_insert_rows(
+    ptr: *mut MessagePreview,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_remove_rows(
+    ptr: *mut MessagePreview,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_can_fetch_more(ptr: *const MessagePreview) -> bool {
+    (&*ptr).can_fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_fetch_more(ptr: *mut MessagePreview) {
+    (&mut *ptr).fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_preview_sort(
+    ptr: *mut MessagePreview,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
 }
 
 pub struct MessageSearchQObject {}

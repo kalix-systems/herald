@@ -1306,7 +1306,133 @@ extern "C" {
 };
 
 extern "C" {
-    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*));
+    void message_preview_sort(MessagePreview::Private*, unsigned char column, Qt::SortOrder order = Qt::AscendingOrder);
+
+    int message_preview_row_count(const MessagePreview::Private*);
+    bool message_preview_insert_rows(MessagePreview::Private*, int, int);
+    bool message_preview_remove_rows(MessagePreview::Private*, int, int);
+    bool message_preview_can_fetch_more(const MessagePreview::Private*);
+    void message_preview_fetch_more(MessagePreview::Private*);
+}
+int MessagePreview::columnCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : 1;
+}
+
+bool MessagePreview::hasChildren(const QModelIndex &parent) const
+{
+    return rowCount(parent) > 0;
+}
+
+int MessagePreview::rowCount(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : message_preview_row_count(m_d);
+}
+
+bool MessagePreview::insertRows(int row, int count, const QModelIndex &)
+{
+    return message_preview_insert_rows(m_d, row, count);
+}
+
+bool MessagePreview::removeRows(int row, int count, const QModelIndex &)
+{
+    return message_preview_remove_rows(m_d, row, count);
+}
+
+QModelIndex MessagePreview::index(int row, int column, const QModelIndex &parent) const
+{
+    if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
+        return createIndex(row, column, (quintptr)row);
+    }
+    return QModelIndex();
+}
+
+QModelIndex MessagePreview::parent(const QModelIndex &) const
+{
+    return QModelIndex();
+}
+
+bool MessagePreview::canFetchMore(const QModelIndex &parent) const
+{
+    return (parent.isValid()) ? 0 : message_preview_can_fetch_more(m_d);
+}
+
+void MessagePreview::fetchMore(const QModelIndex &parent)
+{
+    if (!parent.isValid()) {
+        message_preview_fetch_more(m_d);
+    }
+}
+void MessagePreview::updatePersistentIndexes() {}
+
+void MessagePreview::sort(int column, Qt::SortOrder order)
+{
+    message_preview_sort(m_d, column, order);
+}
+Qt::ItemFlags MessagePreview::flags(const QModelIndex &i) const
+{
+    auto flags = QAbstractItemModel::flags(i);
+    return flags;
+}
+
+QVariant MessagePreview::data(const QModelIndex &index, int role) const
+{
+    Q_ASSERT(rowCount(index.parent()) > index.row());
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        }
+        break;
+    }
+    return QVariant();
+}
+
+int MessagePreview::role(const char* name) const {
+    auto names = roleNames();
+    auto i = names.constBegin();
+    while (i != names.constEnd()) {
+        if (i.value() == name) {
+            return i.key();
+        }
+        ++i;
+    }
+    return -1;
+}
+QHash<int, QByteArray> MessagePreview::roleNames() const {
+    QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+    return names;
+}
+QVariant MessagePreview::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (orientation != Qt::Horizontal) {
+        return QVariant();
+    }
+    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+}
+
+bool MessagePreview::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
+{
+    if (orientation != Qt::Horizontal) {
+        return false;
+    }
+    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    return true;
+}
+
+extern "C" {
+    MessagePreview::Private* message_preview_new(MessagePreview*, void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*), void (*)(MessagePreview*),
+        void (*)(const MessagePreview*),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*, quintptr, quintptr),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*, int, int),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*, int, int, int),
+        void (*)(MessagePreview*),
+        void (*)(MessagePreview*, int, int),
+        void (*)(MessagePreview*));
     void message_preview_free(MessagePreview::Private*);
     void message_preview_author_get(const MessagePreview::Private*, QString*, qstring_set);
     void message_preview_body_get(const MessagePreview::Private*, QString*, qstring_set);
@@ -3102,14 +3228,15 @@ void MessageBuilder::removeLast()
     return message_builder_remove_last(m_d);
 }
 MessagePreview::MessagePreview(bool /*owned*/, QObject *parent):
-    QObject(parent),
+    QAbstractItemModel(parent),
     m_d(nullptr),
     m_ownsPrivate(false)
 {
+    initHeaderData();
 }
 
 MessagePreview::MessagePreview(QObject *parent):
-    QObject(parent),
+    QAbstractItemModel(parent),
     m_d(message_preview_new(this,
         messagePreviewAuthorChanged,
         messagePreviewBodyChanged,
@@ -3117,15 +3244,60 @@ MessagePreview::MessagePreview(QObject *parent):
         messagePreviewHasAttachmentsChanged,
         messagePreviewIsDanglingChanged,
         messagePreviewMessageIdChanged,
-        messagePreviewMsgIdSetChanged)),
+        messagePreviewMsgIdSetChanged,
+        [](const MessagePreview* o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+        },
+        [](MessagePreview* o) {
+            Q_EMIT o->layoutAboutToBeChanged();
+        },
+        [](MessagePreview* o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+        },
+        [](MessagePreview* o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                       o->createIndex(last, 0, last));
+        },
+        [](MessagePreview* o) {
+            o->beginResetModel();
+        },
+        [](MessagePreview* o) {
+            o->endResetModel();
+        },
+        [](MessagePreview* o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+        },
+        [](MessagePreview* o) {
+            o->endInsertRows();
+        },
+        [](MessagePreview* o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(), destination);
+        },
+        [](MessagePreview* o) {
+            o->endMoveRows();
+        },
+        [](MessagePreview* o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+        },
+        [](MessagePreview* o) {
+            o->endRemoveRows();
+        }
+)),
     m_ownsPrivate(true)
 {
+    connect(this, &MessagePreview::newDataReady, this, [this](const QModelIndex& i) {
+        this->fetchMore(i);
+    }, Qt::QueuedConnection);
+    initHeaderData();
 }
 
 MessagePreview::~MessagePreview() {
     if (m_ownsPrivate) {
         message_preview_free(m_d);
     }
+}
+void MessagePreview::initHeaderData() {
 }
 QString MessagePreview::author() const
 {

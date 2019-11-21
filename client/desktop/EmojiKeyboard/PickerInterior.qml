@@ -1,5 +1,7 @@
 import QtQuick 2.13
 import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
+import QtQuick.Shapes 1.13
 import LibHerald 1.0
 
 Item {
@@ -9,58 +11,58 @@ Item {
         id: header
         height: 30 //enough for search bar of default size w/ margins
         anchors.top: parent.top
-        anchors.topMargin: CmnCfg.margin
+        anchors.topMargin: CmnCfg.smallMargin
         anchors.right: parent.right
         anchors.left: parent.left
 
         // search bar and exit button
         Rectangle {
             id: taBox
-            ScrollView {
-                anchors {
-                    left: parent.left
-                    right: exitButton.left
-                }
-                TextArea {
-                    id: searchTextArea
-                    placeholderText: "Search..."
-                    Keys.onReturnPressed: {
-                        event.accepted = true
-                    }
-                }
-            }
-            Button {
-                id: exitButton
-                background: Rectangle {
-                    color: parent.pressed ? "#33000000" : "#44000000" // transparent
-                    radius: parent.height
-                    anchors.fill: parent
-                }
-                anchors {
-                    top: parent.top
-                    bottom: parent.bottom
-                    right: parent.right
-                    margins: CmnCfg.margin - 5
-                }
-                width: height
-                onClicked: emoKeysPopup.active = false
-                Text {
-                    text: "X"
-                    anchors.centerIn: parent
-                }
-            }
-
             anchors {
                 left: parent.left
                 right: menu.left
-                margins: 10
+                margins: CmnCfg.smallMargin
             }
-
             color: "#33000000" // transparent
-            radius: CmnCfg.radius
-            border.color: "white"
-            border.width: 0.5
-            height: 25
+            border.color: CmnCfg.palette.sideBarHighlightColor
+            height: 24
+            Row {
+                anchors.fill: parent
+                spacing: 0
+                Button {
+                    padding: 0
+                    background: Item {}
+                    icon.source: "qrc:/search-icon.svg"
+                    icon.color: CmnCfg.palette.sideBarHighlightColor
+                    icon.height: 17
+                    icon.width: 17
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+
+                TextArea {
+                    id: searchTextArea
+                    padding: 0
+                    topPadding: 3
+                    color: CmnCfg.palette.sideBarHighlightColor
+                    anchors.verticalCenter: parent.verticalCenter
+                    placeholderText: "Search emoji"
+                    Keys.onReturnPressed: event.accepted = true
+                    width: 185
+                    height: parent.height
+                }
+
+                Button {
+                    id: exitButton
+                    padding: 0
+                    background: Item {}
+                    icon.source: "qrc:/x-icon.svg"
+                    icon.color: CmnCfg.palette.sideBarHighlightColor
+                    icon.height: 17
+                    icon.width: 17
+                    onClicked: emoKeysPopup.active = false
+                    anchors.verticalCenter: parent.verticalCenter
+                }
+            }
         }
 
         // skin swatch selector
@@ -69,12 +71,12 @@ Item {
             anchors.right: parent.right
             anchors.margins: CmnCfg.margin
             anchors.verticalCenter: taBox.verticalCenter
-            height: 20
-            width: 20
+            height: 24
+            width: 24
             currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
-            indicator: Item {
-            }
+            indicator: Item {}
+
             delegate: ItemDelegate {
                 height: menu.height
                 Rectangle {
@@ -89,33 +91,54 @@ Item {
 
             contentItem: Rectangle {
                 anchors.fill: parent
+                border.color: CmnCfg.palette.secondaryTextColor
                 color: menu.model[menu.currentIndex]
+                Shape {
+                    id: cornerCarat
+                    anchors {
+                        right: parent.right
+                        bottom: parent.bottom
+                    }
+                    anchors.fill: parent
+                    ShapePath {
+                        fillColor: CmnCfg.palette.secondaryTextColor
+                        strokeColor: CmnCfg.palette.secondaryTextColor
+                        startX: cornerCarat.width / 2
+                        startY: cornerCarat.height
+                        PathLine {
+                            x: cornerCarat.width
+                            y: cornerCarat.height / 2
+                        }
+                        PathLine {
+                            x: cornerCarat.width
+                            y: cornerCarat.height
+                        }
+                        PathLine {
+                            x: cornerCarat.width / 2
+                            y: cornerCarat.height
+                        }
+                    }
+                }
             }
         }
-    }
-
-    Rectangle {
-        width: parent.width
-        height: 0.5
-        color: "white"
-        anchors.bottom: listView.top
     }
 
     // actual interior
     Item {
         id: listView
         width: parent.width
+
         anchors {
             top: header.bottom
             bottom: footer.top
         }
+
         Flickable {
             id: emojiList
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            ScrollBar.vertical: ScrollBar {
-            }
+            ScrollBar.vertical: ScrollBar {}
             contentHeight: innerCol.height
             Column {
                 id: innerCol
@@ -123,17 +146,22 @@ Item {
                     id: innerRepeater
                     model: searchTextArea.text.length ? [] : CmnCfg.emojiModel
                     Column {
-                        Text {
-                            padding: CmnCfg.smallMargin
+                        padding: CmnCfg.smallMargin
+                        Label {
                             text: modelData.sectionName
+                            color: CmnCfg.palette.sideBarHighlightColor
                             font.bold: true
+                            font.family: CmnCfg.chatFont.name
+                            bottomPadding: CmnCfg.smallMargin
                         }
-                        Component {
-                            id: emojiComp
-                            Grid {
+
+                        Loader {
+                            asynchronous: index > 1
+                            sourceComponent: Grid {
                                 id: emojiGrid
-                                columns: 8
-                                spacing: 2
+                                columns: 10
+                                spacing: 7
+                                width: listView.width
                                 Repeater {
                                     id: self
                                     model: modelData.List
@@ -144,10 +172,6 @@ Item {
                                 }
                             }
                         }
-                        Loader {
-                            sourceComponent: emojiComp
-                            asynchronous: index > 0
-                        }
                     }
                 }
             }
@@ -157,63 +181,58 @@ Item {
     // footer and anchor links
     Item {
         id: footer
+
+        anchors.bottom: parent.bottom
         width: parent.width
         height: 30
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 20 // 10 + carat height
 
         Rectangle {
             id: hr
             width: parent.width
             height: 1
-            color: "white"
+            color: CmnCfg.palette.secondaryTextColor
         }
 
-        Row {
-            anchors {
-                topMargin: CmnCfg.margin
-                top: hr.bottom
-                horizontalCenter: hr.horizontalCenter
-            }
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: 8
             spacing: CmnCfg.smallMargin
+
             AnchorButton {
-                lowlight: lowlight
                 anchorIndex: 0
                 imageSource: "qrc:/emoji-categories/gestural.svg"
             }
+
             AnchorButton {
-                lowlight: lowlight
                 anchorIndex: 1
+                imageSource: "qrc:/emoji-categories/gestural.svg"
+            }
+            AnchorButton {
+                anchorIndex: 2
                 imageSource: "qrc:/emoji-categories/nature.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 2
+                anchorIndex: 3
                 imageSource: "qrc:/emoji-categories/food.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 3
+                anchorIndex: 4
                 imageSource: "qrc:/emoji-categories/transport.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 4
+                anchorIndex: 5
                 imageSource: "qrc:/emoji-categories/sports.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 5
+                anchorIndex: 6
                 imageSource: "qrc:/emoji-categories/items.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 6
+                anchorIndex: 7
                 imageSource: "qrc:/emoji-categories/symbols.svg"
             }
             AnchorButton {
-                lowlight: lowlight
-                anchorIndex: 7
+                anchorIndex: 8
                 imageSource: "qrc:/emoji-categories/flags.svg"
             }
         }
