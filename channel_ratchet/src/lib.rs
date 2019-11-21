@@ -5,38 +5,38 @@ use kcl::*;
 use kson::prelude::*;
 use std::ops::DerefMut;
 
-pub const CHAIN_KEY_BYTES: usize = 64;
+pub const RATCHET_KEY_LEN: usize = 64;
 new_type! {
     /// A secret key that is used in the kdf ratchet
-    secret ChainKey(CHAIN_KEY_BYTES)
+    secret RatchetKey(RATCHET_KEY_LEN)
 }
 
-impl ChainKey {
+impl RatchetKey {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
-        let mut buf = [0u8; CHAIN_KEY_BYTES];
+        let mut buf = [0u8; RATCHET_KEY_LEN];
         random::gen_into(&mut buf);
-        ChainKey(buf)
+        RatchetKey(buf)
     }
 }
 
 #[derive(Debug, Clone, Ser, De)]
-pub struct ChainState {
+pub struct RatchetState {
     ix: u64,
     base_key: hash::Key,
-    chain_key: ChainKey,
+    ratchet_key: RatchetKey,
 }
 
-impl ChainState {
+impl RatchetState {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let base_key = hash::Key::new();
-        let chain_key = ChainKey::new();
+        let ratchet_key = RatchetKey::new();
 
-        ChainState {
+        RatchetState {
             ix: 0,
             base_key,
-            chain_key,
+            ratchet_key,
         }
     }
 }
@@ -49,7 +49,7 @@ pub enum DecryptionResult {
     },
     IndexTooHigh {
         cipher_index: u64,
-        chain_index: u64,
+        ratchet_index: u64,
     },
     Failed {
         extra_keys: Vec<(u64, aead::Key)>,
@@ -69,23 +69,23 @@ impl CipherData {
     }
 }
 
-impl ChainState {
+impl RatchetState {
     pub fn ix(&self) -> u64 {
         self.ix
     }
 
     fn kdf(&mut self) -> aead::Key {
-        let mut chainkey_buf = [0u8; CHAIN_KEY_BYTES];
+        let mut ratchetkey_buf = [0u8; RATCHET_KEY_LEN];
         let mut messagekey_buf = [0u8; aead::KEY_LEN];
 
-        let mut bufs: [&mut [u8]; 2] = [&mut chainkey_buf, &mut messagekey_buf];
+        let mut bufs: [&mut [u8]; 2] = [&mut ratchetkey_buf, &mut messagekey_buf];
         self.base_key.hash_into_many(
-            self.chain_key.as_ref(),
+            self.ratchet_key.as_ref(),
             bufs.iter_mut().map(DerefMut::deref_mut),
         );
 
         self.ix += 1;
-        self.chain_key = ChainKey(chainkey_buf);
+        self.ratchet_key = RatchetKey(ratchetkey_buf);
 
         aead::Key(messagekey_buf)
     }
@@ -106,7 +106,7 @@ impl ChainState {
         if num_extra == 0 {
             return DecryptionResult::IndexTooHigh {
                 cipher_index: index,
-                chain_index: self.ix,
+                ratchet_index: self.ix,
             };
         }
 
