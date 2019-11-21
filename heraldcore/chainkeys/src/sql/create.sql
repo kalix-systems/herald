@@ -1,28 +1,19 @@
-CREATE TABLE IF NOT EXISTS chainkeys(
-  chainkey BLOB NOT NULL,
-  hash BLOB NOT NULL,
-  used INTEGER NOT NULL DEFAULT(0),
+CREATE TABLE IF NOT EXISTS ratchet_states(
   conversation_id BLOB NOT NULL,
-  PRIMARY KEY(chainkey, hash)
-);
-
-CREATE TABLE IF NOT EXISTS pending_blocks(
-  block_id INTEGER PRIMARY KEY NOT NULL,
-  global_id_bytes BLOB NOT NULL,
-  block BLOB NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS block_dependencies(
-  block_id INTEGER NOT NULL,
-  parent_hash BLOB NOT NULL,
-  FOREIGN KEY(block_id) REFERENCES pending_blocks(block_id),
-  PRIMARY KEY(block_id, parent_hash)
-);
-
-CREATE TABLE IF NOT EXISTS channel_keys(
-  conversation_id BLOB NOT NULL,
-  channel_key BLOB NOT NULL,
+  -- little-endian u64
+  next_ix BLOB NOT NULL,
+  base_key BLOB NOT NULL,
+  ratchet_key BLOB NOT NULL,
   PRIMARY KEY(conversation_id)
 );
 
-CREATE INDEX IF NOT EXISTS block_dep_parent ON block_dependencies(parent_hash);
+CREATE TABLE IF NOT EXISTS derived_keys(
+  conversation_id BLOB NOT NULL,
+  ix INTEGER NOT NULL,
+  msg_key BLOB NOT NULL,
+  insertion_ts INTEGER NOT NULL,
+  PRIMARY KEY(conversation_id, ix)
+);
+
+-- TODO: use this to implement gc strategy
+CREATE INDEX IF NOT EXISTS derived_keys_insertion_ts_ix ON derived_keys(insertion_ts);

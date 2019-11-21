@@ -39,6 +39,30 @@ impl RatchetState {
             ratchet_key,
         }
     }
+
+    pub fn mk(
+        ix: u64,
+        base_key: hash::Key,
+        ratchet_key: RatchetKey,
+    ) -> Self {
+        RatchetState {
+            ix,
+            base_key,
+            ratchet_key,
+        }
+    }
+
+    pub fn ix(&self) -> u64 {
+        self.ix
+    }
+
+    pub fn base_key(&self) -> &hash::Key {
+        &self.base_key
+    }
+
+    pub fn ratchet_key(&self) -> &RatchetKey {
+        &self.ratchet_key
+    }
 }
 
 #[must_use = "you should check if the decryption was successful and store the generated message keys"]
@@ -70,10 +94,6 @@ impl CipherData {
 }
 
 impl RatchetState {
-    pub fn ix(&self) -> u64 {
-        self.ix
-    }
-
     fn kdf(&mut self) -> aead::Key {
         let mut ratchetkey_buf = [0u8; RATCHET_KEY_LEN];
         let mut messagekey_buf = [0u8; aead::KEY_LEN];
