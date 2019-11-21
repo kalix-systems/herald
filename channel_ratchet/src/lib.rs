@@ -69,7 +69,8 @@ impl RatchetState {
 pub enum DecryptionResult {
     Success {
         extra_keys: Vec<(u64, aead::Key)>,
-        plaintext: BytesMut,
+        ad: Bytes,
+        pt: BytesMut,
     },
     IndexTooHigh {
         cipher_index: u64,
@@ -78,6 +79,17 @@ pub enum DecryptionResult {
     Failed {
         extra_keys: Vec<(u64, aead::Key)>,
     },
+}
+
+impl DecryptionResult {
+    fn extra_keys_mut(&mut self) -> Option<&mut Vec<(u64, aead::Key)>> {
+        use DecryptionResult::*;
+        match self {
+            Success { extra_keys, .. } => Some(extra_keys),
+            Failed { extra_keys, .. } => Some(extra_keys),
+            IndexTooHigh { .. } => None,
+        }
+    }
 }
 
 #[must_use = "you should make sure to store the message key in case anyone else uses it"]
@@ -114,42 +126,29 @@ impl RatchetState {
         &mut self,
         cipher: Cipher,
     ) -> DecryptionResult {
-        let Cipher {
-            index,
-            tag,
-            ad,
-            msg,
-        } = cipher;
-
-        let num_extra = index.saturating_add(1).saturating_sub(self.ix);
+        let num_extra = cipher.index.saturating_add(1).saturating_sub(self.ix);
 
         if num_extra == 0 {
             return DecryptionResult::IndexTooHigh {
-                cipher_index: index,
+                cipher_index: cipher.index,
                 ratchet_index: self.ix,
             };
         }
 
         let mut extra_keys = Vec::with_capacity(num_extra as usize);
 
-        for i in self.ix..index {
+        for i in self.ix..cipher.index {
             let key = self.kdf();
             extra_keys.push((i, key));
         }
 
         let key = self.kdf();
-        extra_keys.push((index, key.clone()));
+        extra_keys.push((cipher.index, key.clone()));
 
-        let mut msg = BytesMut::from(msg);
-
-        if key.open(&ad, tag, &mut msg).0 {
-            DecryptionResult::Success {
-                extra_keys,
-                plaintext: msg,
-            }
-        } else {
-            DecryptionResult::Failed { extra_keys }
-        }
+        let mut res = cipher.open_with(key);
+        res.extra_keys_mut()
+            .map(move |extra| extra.append(&mut extra_keys));
+        res
     }
 
     pub fn seal(
@@ -176,8 +175,30 @@ impl RatchetState {
 
 #[derive(Debug, Clone, Ser, De)]
 pub struct Cipher {
-    index: u64,
-    tag: aead::Tag,
-    ad: Bytes,
-    msg: Bytes,
+    pub index: u64,
+    pub tag: aead::Tag,
+    pub ad: Bytes,
+    pub msg: Bytes,
+}
+
+impl Cipher {
+    pub fn open_with(
+        self,
+        key: aead::Key,
+    ) -> DecryptionResult {
+        let Cipher { tag, ad, msg, .. } = self;
+
+        let extra_keys = Vec::new();
+        let mut msg = BytesMut::from(msg);
+
+        if key.open(&ad, tag, &mut msg).0 {
+            DecryptionResult::Success {
+                extra_keys,
+                ad,
+                pt: msg,
+            }
+        } else {
+            DecryptionResult::Failed { extra_keys }
+        }
+    }
 }

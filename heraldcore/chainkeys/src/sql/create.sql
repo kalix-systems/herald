@@ -9,9 +9,11 @@ CREATE TABLE IF NOT EXISTS ratchet_states(
 
 CREATE TABLE IF NOT EXISTS derived_keys(
   conversation_id BLOB NOT NULL,
-  ix INTEGER NOT NULL,
+  ix BLOB NOT NULL,
   msg_key BLOB NOT NULL,
   insertion_ts INTEGER NOT NULL,
+  -- bool
+  used INTEGER NOT NULL,
   PRIMARY KEY(conversation_id, ix)
 );
 

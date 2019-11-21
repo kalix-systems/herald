@@ -1,4 +1,4 @@
-use channel_ratchet::*;
+use bytes::*;
 use coremacros::*;
 use coretypes::ids::ConversationId;
 use herald_common::*;
@@ -22,7 +22,7 @@ from_fn!(ChainKeysError, rusqlite::Error, ChainKeysError::Db);
 // FIXME initialization can be done more cleanly
 // A lot of this is redundant
 lazy_static! {
-    pub static ref CK_CONN: Mutex<rusqlite::Connection> = {
+    static ref CK_CONN: Mutex<rusqlite::Connection> = {
         let path = DB_DIR.join("ck.sqlite3");
         let mut conn = abort_err!(rusqlite::Connection::open(path));
         let tx = abort_err!(conn.transaction());
@@ -34,108 +34,66 @@ lazy_static! {
 
 pub mod db;
 
-type RawBlock = Vec<u8>;
-type RawSigner = Vec<u8>;
+pub struct Decrypted {
+    pub ad: Bytes,
+    pub pt: BytesMut,
+}
 
-// #[cfg(test)]
-// pub(crate) fn store_key(
-//     cid: &ConversationId,
-//     hash: BlockHash,
-//     key: &ChainKey,
-// ) -> Result<Vec<(Block, GlobalId)>, ChainKeysError> {
-//     let mut db = CK_CONN.lock();
-//     let mut tx = db.transaction()?;
-//     let blocks = db::store_key(&mut tx, *cid, hash, key)?;
-//     tx.commit()?;
+pub fn open_msg(
+    cid: ConversationId,
+    cipher: channel_ratchet::Cipher,
+) -> Result<Option<Decrypted>, ChainKeysError> {
+    db::with_tx(move |tx| {
+        use channel_ratchet::DecryptionResult::*;
 
-//     Ok(blocks)
-// }
+        let res = if let Some(k) = tx.get_derived_key(cid, cipher.ix) {
+            let r0 = cipher.open_with(k);
+            if let Success { .. } = &r0 {
+                tx.mark_used(cid, cipher.ix)?;
+            }
+            r0
+        } else {
+            let mut state = tx.get_ratchet_state(cid)?;
+            state.open(cipher);
+            tx.store_ratchet_state(cid, &state)?;
+        };
 
-// // TODO GC strategy
-// #[cfg(test)]
-// pub(crate) fn mark_used<'a, I: Iterator<Item = &'a BlockHash>>(
-//     cid: &ConversationId,
-//     blocks: I,
-// ) -> Result<(), rusqlite::Error> {
-//     let mut db = CK_CONN.lock();
-//     let mut tx = db.transaction()?;
+        match res {
+            Success { extra_keys, ad, pt } => {
+                if let Some((ix, _)) = extra_keys.last() {
+                    tx.mark_used(cid, *ix)?;
+                }
 
-//     db::mark_used(&mut tx, *cid, blocks)?;
-//     tx.commit()?;
-//     Ok(())
-// }
+                for (ix, key) in extra_keys {
+                    tx.store_derived_key(cid, ix, key)?;
+                }
 
-// #[allow(unused)]
-// // TODO use this
-// pub(crate) fn mark_unused(
-//     cid: &ConversationId,
-//     blocks: &BTreeSet<BlockHash>,
-// ) -> Result<(), rusqlite::Error> {
-//     let mut db = CK_CONN.lock();
-//     let mut tx = db.transaction()?;
+                Ok(Some(Decrypted { ad, pt }))
+            }
+            Failed { extra_keys } => {
+                for (ix, key) in extra_keys {
+                    tx.store_derived_key(cid, ix, key)?;
+                }
 
-//     db::mark_unused(&mut tx, *cid, blocks)?;
-//     tx.commit()?;
-//     Ok(())
-// }
+                Ok(None)
+            }
+            // TODO: include these fields in error msg
+            IndexTooHigh { .. } => Err(ChainKeysError::StoreCorrupted),
+        }
+    })
+}
 
-// pub fn get_channel_key(cid: &ConversationId) -> Result<ChannelKey, ChainKeysError> {
-//     let db = CK_CONN.lock();
-//     db::get_channel_key(&db, *cid)
-// }
-
-// pub fn get_unused(cid: &ConversationId) -> Result<Vec<(BlockHash, ChainKey)>, ChainKeysError> {
-//     let db = CK_CONN.lock();
-//     db::get_unused(&db, *cid)
-// }
-
-// pub fn open_block(
-//     cid: &ConversationId,
-//     signer: &GlobalId,
-//     block: Block,
-// ) -> Result<DecryptionResult, ChainKeysError> {
-//     let hashes = block.parent_hashes().clone();
-
-//     let mut db = CK_CONN.lock();
-//     let mut tx = db.transaction()?;
-
-//     // TODO: consider storing pending for these too?
-//     let channel_key = db::get_channel_key(&tx, *cid)?;
-//     let res = match db::get_keys(&tx, *cid, block.parent_hashes().iter())? {
-//         FoundKeys::Found(parent_keys) => {
-//             let OpenData { msg, hash, key } =
-//                 block.open(&channel_key, &signer.did, &parent_keys)?;
-//             let unlocked = db::store_key(&mut tx, *cid, hash, &key)?;
-//             db::mark_used(&mut tx, *cid, hashes.iter())?;
-//             DecryptionResult::Success(msg, unlocked)
-//         }
-//         FoundKeys::Missing(missing_keys) => {
-//             db::add_pending(&mut tx, signer, &block, &missing_keys)?;
-//             DecryptionResult::Pending
-//         }
-//     };
-
-//     tx.commit()?;
-
-//     Ok(res)
-// }
-
-// pub fn store_genesis(
-//     cid: &ConversationId,
-//     gen: &Genesis,
-// ) -> Result<Vec<(Block, GlobalId)>, ChainKeysError> {
-//     let hash = gen.compute_hash().ok_or(ChainMailError::CryptoError)?;
-
-//     let mut db = CK_CONN.lock();
-//     let mut tx = db.transaction()?;
-
-//     db::store_channel_key(&mut tx, *cid, gen.channel_key())?;
-//     let out = db::store_key(&mut tx, *cid, hash, gen.root())?;
-
-//     tx.commit()?;
-
-//     Ok(out)
-// }
-
-// #[cfg(test)]
-// mod tests;
+pub fn seal_msg(
+    cid: ConversationId,
+    ad: Bytes,
+    msg: BytesMut,
+) -> Result<Cipher, ChainKeysError> {
+    db::with_tx(move |tx| {
+        let mut ratchet = tx.get_ratchet_state(cid)?;
+        let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
+        tx.store_derived_key(cid, ix, key)?;
+        tx.mark_used(cid, ix)?;
+        tx.store_ratchet_state(cid, &ratchet)?;
+        Ok(cipher)
+    })
+}
