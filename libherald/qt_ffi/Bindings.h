@@ -364,7 +364,7 @@ private:
     Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
     Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
     Q_PROPERTY(QVariant opHasAttachments READ opHasAttachments NOTIFY opHasAttachmentsChanged FINAL)
-    Q_PROPERTY(QByteArray opId READ opId WRITE setOpId NOTIFY opIdChanged FINAL)
+    Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
     Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
     Q_PROPERTY(bool parseMarkdown READ parseMarkdown WRITE setParseMarkdown NOTIFY parseMarkdownChanged FINAL)
     explicit MessageBuilder(bool owned, QObject *parent);
@@ -379,7 +379,6 @@ public:
     QString opBody() const;
     QVariant opHasAttachments() const;
     QByteArray opId() const;
-    void setOpId(const QByteArray& v);
     QVariant opTime() const;
     bool parseMarkdown() const;
     void setParseMarkdown(bool v);
@@ -497,6 +496,7 @@ private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(MessageBuilder* builder READ builder NOTIFY builderChanged FINAL)
+    Q_PROPERTY(QByteArray builderOpMsgId READ builderOpMsgId WRITE setBuilderOpMsgId NOTIFY builderOpMsgIdChanged FINAL)
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
     Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
@@ -514,6 +514,8 @@ public:
     ~Messages() override;
     const MessageBuilder* builder() const;
     MessageBuilder* builder();
+    QByteArray builderOpMsgId() const;
+    void setBuilderOpMsgId(const QByteArray& v);
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
     bool isEmpty() const;
@@ -581,6 +583,7 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void builderChanged();
+    void builderOpMsgIdChanged();
     void conversationIdChanged();
     void isEmptyChanged();
     void lastAuthorChanged();

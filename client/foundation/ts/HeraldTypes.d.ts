@@ -43,7 +43,10 @@ declare class Messages {
   lastBody: string;
   isEmpty: string;
   lastEpochTimestampMs: number;
+
   builder: MessageBuilder;
+  // id of the message the message builder is replying to, if any
+  builderOpMsgId: MsgId;
 
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;

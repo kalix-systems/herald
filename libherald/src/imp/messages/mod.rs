@@ -123,6 +123,7 @@ impl Interface for Messages {
             TXS.remove(&conversation_id);
 
             self.conversation_id = Some(conversation_id);
+            self.builder.set_conversation_id(conversation_id);
             self.emit.conversation_id_changed();
 
             Container::fill(conversation_id);
@@ -478,6 +479,17 @@ impl Interface for Messages {
 
     fn builder_mut(&mut self) -> &mut MessageBuilder {
         &mut self.builder
+    }
+
+    fn builder_op_msg_id(&self) -> Option<ffi::MsgIdRef> {
+        self.builder.op_id_slice()
+    }
+
+    fn set_builder_op_msg_id(
+        &mut self,
+        id: Option<ffi::MsgIdRef>,
+    ) {
+        ret_err!(self.builder.set_op_id(id, &self.container));
     }
 
     fn reply_type(
