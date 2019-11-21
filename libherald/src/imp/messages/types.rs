@@ -120,6 +120,21 @@ impl Message {
     }
 }
 
+#[repr(u8)]
+pub(super) enum ReplyType {
+    None = 0,
+    Dangling = 1,
+    Known = 2,
+}
+
+pub(super) fn reply_type(reply_id: &ReplyId) -> ReplyType {
+    match reply_id {
+        ReplyId::None => ReplyType::None,
+        ReplyId::Dangling => ReplyType::Dangling,
+        ReplyId::Known(_) => ReplyType::Known,
+    }
+}
+
 impl PartialOrd for Message {
     fn partial_cmp(
         &self,

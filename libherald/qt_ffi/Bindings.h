@@ -14,7 +14,6 @@ class HeraldState;
 class HeraldUtils;
 class Members;
 class MessageBuilder;
-class MessagePreview;
 class MessageSearch;
 class Messages;
 class Users;
@@ -23,6 +22,7 @@ class UsersSearch;
 class Attachments : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -68,6 +68,7 @@ Q_SIGNALS:
 class Config : public QObject
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -105,6 +106,7 @@ Q_SIGNALS:
 class ConversationBuilder : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -156,6 +158,7 @@ Q_SIGNALS:
 class Conversations : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -221,6 +224,7 @@ Q_SIGNALS:
 class Errors : public QObject
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -240,6 +244,7 @@ Q_SIGNALS:
 class HeraldState : public QObject
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -266,6 +271,7 @@ Q_SIGNALS:
 class HeraldUtils : public QObject
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -283,6 +289,7 @@ Q_SIGNALS:
 class Members : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -345,31 +352,37 @@ Q_SIGNALS:
 class MessageBuilder : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
     Private * m_d;
     bool m_ownsPrivate;
     Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
-    Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(bool isMediaMessage READ isMediaMessage NOTIFY isMediaMessageChanged FINAL)
     Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
+    Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
+    Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
+    Q_PROPERTY(QVariant opHasAttachments READ opHasAttachments NOTIFY opHasAttachmentsChanged FINAL)
+    Q_PROPERTY(QByteArray opId READ opId WRITE setOpId NOTIFY opIdChanged FINAL)
+    Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
     Q_PROPERTY(bool parseMarkdown READ parseMarkdown WRITE setParseMarkdown NOTIFY parseMarkdownChanged FINAL)
-    Q_PROPERTY(QByteArray replyingTo READ replyingTo WRITE setReplyingTo NOTIFY replyingToChanged FINAL)
     explicit MessageBuilder(bool owned, QObject *parent);
 public:
     explicit MessageBuilder(QObject *parent = nullptr);
     ~MessageBuilder() override;
     QString body() const;
     void setBody(const QString& v);
-    QByteArray conversationId() const;
-    void setConversationId(const QByteArray& v);
     bool isMediaMessage() const;
     bool isReply() const;
+    QString opAuthor() const;
+    QString opBody() const;
+    QVariant opHasAttachments() const;
+    QByteArray opId() const;
+    void setOpId(const QByteArray& v);
+    QVariant opTime() const;
     bool parseMarkdown() const;
     void setParseMarkdown(bool v);
-    QByteArray replyingTo() const;
-    void setReplyingTo(const QByteArray& v);
     Q_INVOKABLE bool addAttachment(const QString& path);
     Q_INVOKABLE void clearReply();
     Q_INVOKABLE void finalize();
@@ -404,78 +417,20 @@ private:
     void updatePersistentIndexes();
 Q_SIGNALS:
     void bodyChanged();
-    void conversationIdChanged();
     void isMediaMessageChanged();
     void isReplyChanged();
+    void opAuthorChanged();
+    void opBodyChanged();
+    void opHasAttachmentsChanged();
+    void opIdChanged();
+    void opTimeChanged();
     void parseMarkdownChanged();
-    void replyingToChanged();
-};
-
-class MessagePreview : public QAbstractItemModel
-{
-    Q_OBJECT
-public:
-    class Private;
-private:
-    Private * m_d;
-    bool m_ownsPrivate;
-    Q_PROPERTY(QString author READ author NOTIFY authorChanged FINAL)
-    Q_PROPERTY(QString body READ body NOTIFY bodyChanged FINAL)
-    Q_PROPERTY(QVariant epochTimestampMs READ epochTimestampMs NOTIFY epochTimestampMsChanged FINAL)
-    Q_PROPERTY(bool hasAttachments READ hasAttachments NOTIFY hasAttachmentsChanged FINAL)
-    Q_PROPERTY(bool isDangling READ isDangling NOTIFY isDanglingChanged FINAL)
-    Q_PROPERTY(QByteArray messageId READ messageId WRITE setMessageId NOTIFY messageIdChanged FINAL)
-    Q_PROPERTY(bool msgIdSet READ msgIdSet NOTIFY msgIdSetChanged FINAL)
-    explicit MessagePreview(bool owned, QObject *parent);
-public:
-    explicit MessagePreview(QObject *parent = nullptr);
-    ~MessagePreview() override;
-    QString author() const;
-    QString body() const;
-    QVariant epochTimestampMs() const;
-    bool hasAttachments() const;
-    bool isDangling() const;
-    QByteArray messageId() const;
-    void setMessageId(const QByteArray& v);
-    bool msgIdSet() const;
-
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex &index) const override;
-    bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    bool canFetchMore(const QModelIndex &parent) const override;
-    void fetchMore(const QModelIndex &parent) override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-    int role(const char* name) const;
-    QHash<int, QByteArray> roleNames() const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-    bool setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role = Qt::EditRole) override;
-    Q_INVOKABLE bool insertRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-    Q_INVOKABLE bool removeRows(int row, int count, const QModelIndex &parent = QModelIndex()) override;
-
-Q_SIGNALS:
-    // new data is ready to be made available to the model with fetchMore()
-    void newDataReady(const QModelIndex &parent) const;
-private:
-    QHash<QPair<int,Qt::ItemDataRole>, QVariant> m_headerData;
-    void initHeaderData();
-    void updatePersistentIndexes();
-Q_SIGNALS:
-    void authorChanged();
-    void bodyChanged();
-    void epochTimestampMsChanged();
-    void hasAttachmentsChanged();
-    void isDanglingChanged();
-    void messageIdChanged();
-    void msgIdSetChanged();
 };
 
 class MessageSearch : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -538,14 +493,16 @@ class Messages : public QAbstractItemModel
 public:
     class Private;
 private:
+    MessageBuilder* const m_builder;
     Private * m_d;
     bool m_ownsPrivate;
+    Q_PROPERTY(MessageBuilder* builder READ builder NOTIFY builderChanged FINAL)
     Q_PROPERTY(QByteArray conversationId READ conversationId WRITE setConversationId NOTIFY conversationIdChanged FINAL)
     Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
     Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
     Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
-    Q_PROPERTY(QVariant lastEpochTimestampMs READ lastEpochTimestampMs NOTIFY lastEpochTimestampMsChanged FINAL)
     Q_PROPERTY(QVariant lastStatus READ lastStatus NOTIFY lastStatusChanged FINAL)
+    Q_PROPERTY(QVariant lastTime READ lastTime NOTIFY lastTimeChanged FINAL)
     Q_PROPERTY(bool searchActive READ searchActive WRITE setSearchActive NOTIFY searchActiveChanged FINAL)
     Q_PROPERTY(quint64 searchIndex READ searchIndex NOTIFY searchIndexChanged FINAL)
     Q_PROPERTY(quint64 searchNumMatches READ searchNumMatches NOTIFY searchNumMatchesChanged FINAL)
@@ -555,13 +512,15 @@ private:
 public:
     explicit Messages(QObject *parent = nullptr);
     ~Messages() override;
+    const MessageBuilder* builder() const;
+    MessageBuilder* builder();
     QByteArray conversationId() const;
     void setConversationId(const QByteArray& v);
     bool isEmpty() const;
     QString lastAuthor() const;
     QString lastBody() const;
-    QVariant lastEpochTimestampMs() const;
     QVariant lastStatus() const;
+    QVariant lastTime() const;
     bool searchActive() const;
     void setSearchActive(bool v);
     quint64 searchIndex() const;
@@ -597,17 +556,21 @@ public:
     Q_INVOKABLE QString author(int row) const;
     Q_INVOKABLE QString body(int row) const;
     Q_INVOKABLE QVariant dataSaved(int row) const;
-    Q_INVOKABLE QVariant epochTimestampMs(int row) const;
-    Q_INVOKABLE QVariant expirationTimestampMs(int row) const;
+    Q_INVOKABLE QVariant expirationTime(int row) const;
     Q_INVOKABLE QVariant hasAttachments(int row) const;
+    Q_INVOKABLE QVariant insertionTime(int row) const;
     Q_INVOKABLE QVariant isHead(int row) const;
-    Q_INVOKABLE QVariant isReply(int row) const;
     Q_INVOKABLE QVariant isTail(int row) const;
-    Q_INVOKABLE QVariant match_status(int row) const;
-    Q_INVOKABLE QByteArray messageId(int row) const;
-    Q_INVOKABLE QByteArray op(int row) const;
+    Q_INVOKABLE QVariant matchStatus(int row) const;
+    Q_INVOKABLE QByteArray msgId(int row) const;
+    Q_INVOKABLE QString opAuthor(int row) const;
+    Q_INVOKABLE QString opBody(int row) const;
+    Q_INVOKABLE QVariant opHasAttachments(int row) const;
+    Q_INVOKABLE QByteArray opMsgId(int row) const;
+    Q_INVOKABLE QVariant opTime(int row) const;
     Q_INVOKABLE QVariant receiptStatus(int row) const;
-    Q_INVOKABLE QVariant serverTimestampMs(int row) const;
+    Q_INVOKABLE QVariant replyType(int row) const;
+    Q_INVOKABLE QVariant serverTime(int row) const;
 
 Q_SIGNALS:
     // new data is ready to be made available to the model with fetchMore()
@@ -617,12 +580,13 @@ private:
     void initHeaderData();
     void updatePersistentIndexes();
 Q_SIGNALS:
+    void builderChanged();
     void conversationIdChanged();
     void isEmptyChanged();
     void lastAuthorChanged();
     void lastBodyChanged();
-    void lastEpochTimestampMsChanged();
     void lastStatusChanged();
+    void lastTimeChanged();
     void searchActiveChanged();
     void searchIndexChanged();
     void searchNumMatchesChanged();
@@ -633,6 +597,7 @@ Q_SIGNALS:
 class Users : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:
@@ -699,6 +664,7 @@ Q_SIGNALS:
 class UsersSearch : public QAbstractItemModel
 {
     Q_OBJECT
+    friend class Messages;
 public:
     class Private;
 private:

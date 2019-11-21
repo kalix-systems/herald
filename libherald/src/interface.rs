@@ -2280,11 +2280,14 @@ pub struct MessageBuilderQObject {}
 pub struct MessageBuilderEmitter {
     qobject: Arc<AtomicPtr<MessageBuilderQObject>>,
     body_changed: fn(*mut MessageBuilderQObject),
-    conversation_id_changed: fn(*mut MessageBuilderQObject),
     is_media_message_changed: fn(*mut MessageBuilderQObject),
     is_reply_changed: fn(*mut MessageBuilderQObject),
+    op_author_changed: fn(*mut MessageBuilderQObject),
+    op_body_changed: fn(*mut MessageBuilderQObject),
+    op_has_attachments_changed: fn(*mut MessageBuilderQObject),
+    op_id_changed: fn(*mut MessageBuilderQObject),
+    op_time_changed: fn(*mut MessageBuilderQObject),
     parse_markdown_changed: fn(*mut MessageBuilderQObject),
-    replying_to_changed: fn(*mut MessageBuilderQObject),
     new_data_ready: fn(*mut MessageBuilderQObject),
 }
 
@@ -2299,11 +2302,14 @@ impl MessageBuilderEmitter {
         MessageBuilderEmitter {
             qobject: self.qobject.clone(),
             body_changed: self.body_changed,
-            conversation_id_changed: self.conversation_id_changed,
             is_media_message_changed: self.is_media_message_changed,
             is_reply_changed: self.is_reply_changed,
+            op_author_changed: self.op_author_changed,
+            op_body_changed: self.op_body_changed,
+            op_has_attachments_changed: self.op_has_attachments_changed,
+            op_id_changed: self.op_id_changed,
+            op_time_changed: self.op_time_changed,
             parse_markdown_changed: self.parse_markdown_changed,
-            replying_to_changed: self.replying_to_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -2318,12 +2324,6 @@ impl MessageBuilderEmitter {
             (self.body_changed)(ptr);
         }
     }
-    pub fn conversation_id_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.conversation_id_changed)(ptr);
-        }
-    }
     pub fn is_media_message_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
@@ -2336,16 +2336,40 @@ impl MessageBuilderEmitter {
             (self.is_reply_changed)(ptr);
         }
     }
+    pub fn op_author_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.op_author_changed)(ptr);
+        }
+    }
+    pub fn op_body_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.op_body_changed)(ptr);
+        }
+    }
+    pub fn op_has_attachments_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.op_has_attachments_changed)(ptr);
+        }
+    }
+    pub fn op_id_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.op_id_changed)(ptr);
+        }
+    }
+    pub fn op_time_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.op_time_changed)(ptr);
+        }
+    }
     pub fn parse_markdown_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.parse_markdown_changed)(ptr);
-        }
-    }
-    pub fn replying_to_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.replying_to_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -2436,22 +2460,21 @@ pub trait MessageBuilderTrait {
         &mut self,
         value: Option<String>,
     );
-    fn conversation_id(&self) -> Option<&[u8]>;
-    fn set_conversation_id(
+    fn is_media_message(&self) -> bool;
+    fn is_reply(&self) -> bool;
+    fn op_author(&self) -> Option<&str>;
+    fn op_body(&self) -> Option<&str>;
+    fn op_has_attachments(&self) -> Option<bool>;
+    fn op_id(&self) -> Option<&[u8]>;
+    fn set_op_id(
         &mut self,
         value: Option<&[u8]>,
     );
-    fn is_media_message(&self) -> bool;
-    fn is_reply(&self) -> bool;
+    fn op_time(&self) -> Option<i64>;
     fn parse_markdown(&self) -> bool;
     fn set_parse_markdown(
         &mut self,
         value: bool,
-    );
-    fn replying_to(&self) -> Option<&[u8]>;
-    fn set_replying_to(
-        &mut self,
-        value: Option<&[u8]>,
     );
     fn add_attachment(
         &mut self,
@@ -2503,11 +2526,14 @@ pub trait MessageBuilderTrait {
 pub extern "C" fn message_builder_new(
     message_builder: *mut MessageBuilderQObject,
     message_builder_body_changed: fn(*mut MessageBuilderQObject),
-    message_builder_conversation_id_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_author_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_body_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_id_changed: fn(*mut MessageBuilderQObject),
+    message_builder_op_time_changed: fn(*mut MessageBuilderQObject),
     message_builder_parse_markdown_changed: fn(*mut MessageBuilderQObject),
-    message_builder_replying_to_changed: fn(*mut MessageBuilderQObject),
     message_builder_new_data_ready: fn(*mut MessageBuilderQObject),
     message_builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
     message_builder_layout_changed: fn(*mut MessageBuilderQObject),
@@ -2524,11 +2550,14 @@ pub extern "C" fn message_builder_new(
     let message_builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(message_builder)),
         body_changed: message_builder_body_changed,
-        conversation_id_changed: message_builder_conversation_id_changed,
         is_media_message_changed: message_builder_is_media_message_changed,
         is_reply_changed: message_builder_is_reply_changed,
+        op_author_changed: message_builder_op_author_changed,
+        op_body_changed: message_builder_op_body_changed,
+        op_has_attachments_changed: message_builder_op_has_attachments_changed,
+        op_id_changed: message_builder_op_id_changed,
+        op_time_changed: message_builder_op_time_changed,
         parse_markdown_changed: message_builder_parse_markdown_changed,
-        replying_to_changed: message_builder_replying_to_changed,
         new_data_ready: message_builder_new_data_ready,
     };
     let model = MessageBuilderList {
@@ -2587,37 +2616,6 @@ pub unsafe extern "C" fn message_builder_body_set_none(ptr: *mut MessageBuilder)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_conversation_id_get(
-    ptr: *const MessageBuilder,
-    p: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.conversation_id();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_conversation_id_set(
-    ptr: *mut MessageBuilder,
-    v: *const c_char,
-    len: c_int,
-) {
-    let o = &mut *ptr;
-    let v = qba_slice!(v, len);
-    o.set_conversation_id(Some(v.into()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_conversation_id_set_none(ptr: *mut MessageBuilder) {
-    let o = &mut *ptr;
-    o.set_conversation_id(None);
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn message_builder_is_media_message_get(ptr: *const MessageBuilder) -> bool {
     (&*ptr).is_media_message()
 }
@@ -2625,6 +2623,95 @@ pub unsafe extern "C" fn message_builder_is_media_message_get(ptr: *const Messag
 #[no_mangle]
 pub unsafe extern "C" fn message_builder_is_reply_get(ptr: *const MessageBuilder) -> bool {
     (&*ptr).is_reply()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_author_get(
+    ptr: *const MessageBuilder,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.op_author();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_body_get(
+    ptr: *const MessageBuilder,
+    p: *mut QString,
+    set: fn(*mut QString, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.op_body();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_has_attachments_get(
+    ptr: *const MessageBuilder
+) -> COption<bool> {
+    match (&*ptr).op_has_attachments() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: bool::default(),
+            some: false,
+        },
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_get(
+    ptr: *const MessageBuilder,
+    p: *mut QByteArray,
+    set: fn(*mut QByteArray, *const c_char, c_int),
+) {
+    let o = &*ptr;
+    let v = o.op_id();
+    if let Some(v) = v {
+        let s: *const c_char = v.as_ptr() as (*const c_char);
+        set(p, s, to_c_int(v.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set(
+    ptr: *mut MessageBuilder,
+    v: *const c_char,
+    len: c_int,
+) {
+    let o = &mut *ptr;
+    let v = qba_slice!(v, len);
+    o.set_op_id(Some(v.into()));
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_id_set_none(ptr: *mut MessageBuilder) {
+    let o = &mut *ptr;
+    o.set_op_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_builder_op_time_get(ptr: *const MessageBuilder) -> COption<i64> {
+    match (&*ptr).op_time() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: i64::default(),
+            some: false,
+        },
+    }
 }
 
 #[no_mangle]
@@ -2638,37 +2725,6 @@ pub unsafe extern "C" fn message_builder_parse_markdown_set(
     v: bool,
 ) {
     (&mut *ptr).set_parse_markdown(v);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_replying_to_get(
-    ptr: *const MessageBuilder,
-    p: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.replying_to();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_replying_to_set(
-    ptr: *mut MessageBuilder,
-    v: *const c_char,
-    len: c_int,
-) {
-    let o = &mut *ptr;
-    let v = qba_slice!(v, len);
-    o.set_replying_to(Some(v.into()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_replying_to_set_none(ptr: *mut MessageBuilder) {
-    let o = &mut *ptr;
-    o.set_replying_to(None);
 }
 
 #[no_mangle]
@@ -2781,403 +2837,6 @@ pub unsafe extern "C" fn message_builder_data_attachment_path(
     let data = o.attachment_path(to_usize(row).unwrap_or(0));
     let s: *const c_char = data.as_ptr() as (*const c_char);
     set(d, s, to_c_int(data.len()));
-}
-
-pub struct MessagePreviewQObject {}
-
-pub struct MessagePreviewEmitter {
-    qobject: Arc<AtomicPtr<MessagePreviewQObject>>,
-    author_changed: fn(*mut MessagePreviewQObject),
-    body_changed: fn(*mut MessagePreviewQObject),
-    epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
-    has_attachments_changed: fn(*mut MessagePreviewQObject),
-    is_dangling_changed: fn(*mut MessagePreviewQObject),
-    message_id_changed: fn(*mut MessagePreviewQObject),
-    msg_id_set_changed: fn(*mut MessagePreviewQObject),
-    new_data_ready: fn(*mut MessagePreviewQObject),
-}
-
-impl MessagePreviewEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> MessagePreviewEmitter {
-        MessagePreviewEmitter {
-            qobject: self.qobject.clone(),
-            author_changed: self.author_changed,
-            body_changed: self.body_changed,
-            epoch_timestamp_ms_changed: self.epoch_timestamp_ms_changed,
-            has_attachments_changed: self.has_attachments_changed,
-            is_dangling_changed: self.is_dangling_changed,
-            message_id_changed: self.message_id_changed,
-            msg_id_set_changed: self.msg_id_set_changed,
-            new_data_ready: self.new_data_ready,
-        }
-    }
-    fn clear(&self) {
-        let n: *const MessagePreviewQObject = null();
-        self.qobject
-            .store(n as *mut MessagePreviewQObject, Ordering::SeqCst);
-    }
-    pub fn author_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.author_changed)(ptr);
-        }
-    }
-    pub fn body_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.body_changed)(ptr);
-        }
-    }
-    pub fn epoch_timestamp_ms_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.epoch_timestamp_ms_changed)(ptr);
-        }
-    }
-    pub fn has_attachments_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.has_attachments_changed)(ptr);
-        }
-    }
-    pub fn is_dangling_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.is_dangling_changed)(ptr);
-        }
-    }
-    pub fn message_id_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.message_id_changed)(ptr);
-        }
-    }
-    pub fn msg_id_set_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.msg_id_set_changed)(ptr);
-        }
-    }
-    pub fn new_data_ready(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.new_data_ready)(ptr);
-        }
-    }
-}
-
-#[derive(Clone)]
-pub struct MessagePreviewList {
-    qobject: *mut MessagePreviewQObject,
-    layout_about_to_be_changed: fn(*mut MessagePreviewQObject),
-    layout_changed: fn(*mut MessagePreviewQObject),
-    data_changed: fn(*mut MessagePreviewQObject, usize, usize),
-    begin_reset_model: fn(*mut MessagePreviewQObject),
-    end_reset_model: fn(*mut MessagePreviewQObject),
-    begin_insert_rows: fn(*mut MessagePreviewQObject, usize, usize),
-    end_insert_rows: fn(*mut MessagePreviewQObject),
-    begin_move_rows: fn(*mut MessagePreviewQObject, usize, usize, usize),
-    end_move_rows: fn(*mut MessagePreviewQObject),
-    begin_remove_rows: fn(*mut MessagePreviewQObject, usize, usize),
-    end_remove_rows: fn(*mut MessagePreviewQObject),
-}
-
-impl MessagePreviewList {
-    pub fn layout_about_to_be_changed(&mut self) {
-        (self.layout_about_to_be_changed)(self.qobject);
-    }
-    pub fn layout_changed(&mut self) {
-        (self.layout_changed)(self.qobject);
-    }
-    pub fn data_changed(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        (self.data_changed)(self.qobject, first, last);
-    }
-    pub fn begin_reset_model(&mut self) {
-        (self.begin_reset_model)(self.qobject);
-    }
-    pub fn end_reset_model(&mut self) {
-        (self.end_reset_model)(self.qobject);
-    }
-    pub fn begin_insert_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        (self.begin_insert_rows)(self.qobject, first, last);
-    }
-    pub fn end_insert_rows(&mut self) {
-        (self.end_insert_rows)(self.qobject);
-    }
-    pub fn begin_move_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-        destination: usize,
-    ) {
-        (self.begin_move_rows)(self.qobject, first, last, destination);
-    }
-    pub fn end_move_rows(&mut self) {
-        (self.end_move_rows)(self.qobject);
-    }
-    pub fn begin_remove_rows(
-        &mut self,
-        first: usize,
-        last: usize,
-    ) {
-        (self.begin_remove_rows)(self.qobject, first, last);
-    }
-    pub fn end_remove_rows(&mut self) {
-        (self.end_remove_rows)(self.qobject);
-    }
-}
-
-pub trait MessagePreviewTrait {
-    fn new(
-        emit: MessagePreviewEmitter,
-        model: MessagePreviewList,
-    ) -> Self;
-    fn emit(&mut self) -> &mut MessagePreviewEmitter;
-    fn author(&self) -> Option<&str>;
-    fn body(&self) -> Option<&str>;
-    fn epoch_timestamp_ms(&self) -> Option<i64>;
-    fn has_attachments(&self) -> bool;
-    fn is_dangling(&self) -> bool;
-    fn message_id(&self) -> Option<&[u8]>;
-    fn set_message_id(
-        &mut self,
-        value: Option<&[u8]>,
-    );
-    fn msg_id_set(&self) -> bool;
-    fn row_count(&self) -> usize;
-    fn insert_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
-        false
-    }
-    fn remove_rows(
-        &mut self,
-        _row: usize,
-        _count: usize,
-    ) -> bool {
-        false
-    }
-    fn can_fetch_more(&self) -> bool {
-        false
-    }
-    fn fetch_more(&mut self) {}
-    fn sort(
-        &mut self,
-        _: u8,
-        _: SortOrder,
-    ) {
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn message_preview_new(
-    message_preview: *mut MessagePreviewQObject,
-    message_preview_author_changed: fn(*mut MessagePreviewQObject),
-    message_preview_body_changed: fn(*mut MessagePreviewQObject),
-    message_preview_epoch_timestamp_ms_changed: fn(*mut MessagePreviewQObject),
-    message_preview_has_attachments_changed: fn(*mut MessagePreviewQObject),
-    message_preview_is_dangling_changed: fn(*mut MessagePreviewQObject),
-    message_preview_message_id_changed: fn(*mut MessagePreviewQObject),
-    message_preview_msg_id_set_changed: fn(*mut MessagePreviewQObject),
-    message_preview_new_data_ready: fn(*mut MessagePreviewQObject),
-    message_preview_layout_about_to_be_changed: fn(*mut MessagePreviewQObject),
-    message_preview_layout_changed: fn(*mut MessagePreviewQObject),
-    message_preview_data_changed: fn(*mut MessagePreviewQObject, usize, usize),
-    message_preview_begin_reset_model: fn(*mut MessagePreviewQObject),
-    message_preview_end_reset_model: fn(*mut MessagePreviewQObject),
-    message_preview_begin_insert_rows: fn(*mut MessagePreviewQObject, usize, usize),
-    message_preview_end_insert_rows: fn(*mut MessagePreviewQObject),
-    message_preview_begin_move_rows: fn(*mut MessagePreviewQObject, usize, usize, usize),
-    message_preview_end_move_rows: fn(*mut MessagePreviewQObject),
-    message_preview_begin_remove_rows: fn(*mut MessagePreviewQObject, usize, usize),
-    message_preview_end_remove_rows: fn(*mut MessagePreviewQObject),
-) -> *mut MessagePreview {
-    let message_preview_emit = MessagePreviewEmitter {
-        qobject: Arc::new(AtomicPtr::new(message_preview)),
-        author_changed: message_preview_author_changed,
-        body_changed: message_preview_body_changed,
-        epoch_timestamp_ms_changed: message_preview_epoch_timestamp_ms_changed,
-        has_attachments_changed: message_preview_has_attachments_changed,
-        is_dangling_changed: message_preview_is_dangling_changed,
-        message_id_changed: message_preview_message_id_changed,
-        msg_id_set_changed: message_preview_msg_id_set_changed,
-        new_data_ready: message_preview_new_data_ready,
-    };
-    let model = MessagePreviewList {
-        qobject: message_preview,
-        layout_about_to_be_changed: message_preview_layout_about_to_be_changed,
-        layout_changed: message_preview_layout_changed,
-        data_changed: message_preview_data_changed,
-        begin_reset_model: message_preview_begin_reset_model,
-        end_reset_model: message_preview_end_reset_model,
-        begin_insert_rows: message_preview_begin_insert_rows,
-        end_insert_rows: message_preview_end_insert_rows,
-        begin_move_rows: message_preview_begin_move_rows,
-        end_move_rows: message_preview_end_move_rows,
-        begin_remove_rows: message_preview_begin_remove_rows,
-        end_remove_rows: message_preview_end_remove_rows,
-    };
-    let d_message_preview = MessagePreview::new(message_preview_emit, model);
-    Box::into_raw(Box::new(d_message_preview))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_free(ptr: *mut MessagePreview) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_author_get(
-    ptr: *const MessagePreview,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.author();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_body_get(
-    ptr: *const MessagePreview,
-    p: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.body();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_epoch_timestamp_ms_get(
-    ptr: *const MessagePreview
-) -> COption<i64> {
-    match (&*ptr).epoch_timestamp_ms() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: i64::default(),
-            some: false,
-        },
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_has_attachments_get(ptr: *const MessagePreview) -> bool {
-    (&*ptr).has_attachments()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_is_dangling_get(ptr: *const MessagePreview) -> bool {
-    (&*ptr).is_dangling()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_message_id_get(
-    ptr: *const MessagePreview,
-    p: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
-    let o = &*ptr;
-    let v = o.message_id();
-    if let Some(v) = v {
-        let s: *const c_char = v.as_ptr() as (*const c_char);
-        set(p, s, to_c_int(v.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_message_id_set(
-    ptr: *mut MessagePreview,
-    v: *const c_char,
-    len: c_int,
-) {
-    let o = &mut *ptr;
-    let v = qba_slice!(v, len);
-    o.set_message_id(Some(v.into()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_message_id_set_none(ptr: *mut MessagePreview) {
-    let o = &mut *ptr;
-    o.set_message_id(None);
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_msg_id_set_get(ptr: *const MessagePreview) -> bool {
-    (&*ptr).msg_id_set()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_row_count(ptr: *const MessagePreview) -> c_int {
-    to_c_int((&*ptr).row_count())
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_insert_rows(
-    ptr: *mut MessagePreview,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_remove_rows(
-    ptr: *mut MessagePreview,
-    row: c_int,
-    count: c_int,
-) -> bool {
-    match (to_usize(row), to_usize(count)) {
-        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
-        _ => false,
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_can_fetch_more(ptr: *const MessagePreview) -> bool {
-    (&*ptr).can_fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_fetch_more(ptr: *mut MessagePreview) {
-    (&mut *ptr).fetch_more()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_preview_sort(
-    ptr: *mut MessagePreview,
-    column: u8,
-    order: SortOrder,
-) {
-    (&mut *ptr).sort(column, order)
 }
 
 pub struct MessageSearchQObject {}
@@ -3679,8 +3338,8 @@ pub struct MessagesEmitter {
     is_empty_changed: fn(*mut MessagesQObject),
     last_author_changed: fn(*mut MessagesQObject),
     last_body_changed: fn(*mut MessagesQObject),
-    last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     last_status_changed: fn(*mut MessagesQObject),
+    last_time_changed: fn(*mut MessagesQObject),
     search_active_changed: fn(*mut MessagesQObject),
     search_index_changed: fn(*mut MessagesQObject),
     search_num_matches_changed: fn(*mut MessagesQObject),
@@ -3703,8 +3362,8 @@ impl MessagesEmitter {
             is_empty_changed: self.is_empty_changed,
             last_author_changed: self.last_author_changed,
             last_body_changed: self.last_body_changed,
-            last_epoch_timestamp_ms_changed: self.last_epoch_timestamp_ms_changed,
             last_status_changed: self.last_status_changed,
+            last_time_changed: self.last_time_changed,
             search_active_changed: self.search_active_changed,
             search_index_changed: self.search_index_changed,
             search_num_matches_changed: self.search_num_matches_changed,
@@ -3742,16 +3401,16 @@ impl MessagesEmitter {
             (self.last_body_changed)(ptr);
         }
     }
-    pub fn last_epoch_timestamp_ms_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-        if !ptr.is_null() {
-            (self.last_epoch_timestamp_ms_changed)(ptr);
-        }
-    }
     pub fn last_status_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
             (self.last_status_changed)(ptr);
+        }
+    }
+    pub fn last_time_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.last_time_changed)(ptr);
         }
     }
     pub fn search_active_changed(&mut self) {
@@ -3865,8 +3524,11 @@ pub trait MessagesTrait {
     fn new(
         emit: MessagesEmitter,
         model: MessagesList,
+        builder: MessageBuilder,
     ) -> Self;
     fn emit(&mut self) -> &mut MessagesEmitter;
+    fn builder(&self) -> &MessageBuilder;
+    fn builder_mut(&mut self) -> &mut MessageBuilder;
     fn conversation_id(&self) -> Option<&[u8]>;
     fn set_conversation_id(
         &mut self,
@@ -3875,8 +3537,8 @@ pub trait MessagesTrait {
     fn is_empty(&self) -> bool;
     fn last_author(&self) -> Option<&str>;
     fn last_body(&self) -> Option<&str>;
-    fn last_epoch_timestamp_ms(&self) -> Option<i64>;
     fn last_status(&self) -> Option<u32>;
+    fn last_time(&self) -> Option<i64>;
     fn search_active(&self) -> bool;
     fn set_search_active(
         &mut self,
@@ -3948,11 +3610,7 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<bool>;
-    fn epoch_timestamp_ms(
-        &self,
-        index: usize,
-    ) -> Option<i64>;
-    fn expiration_timestamp_ms(
+    fn expiration_time(
         &self,
         index: usize,
     ) -> Option<i64>;
@@ -3960,11 +3618,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<bool>;
-    fn is_head(
+    fn insertion_time(
         &self,
         index: usize,
-    ) -> Option<bool>;
-    fn is_reply(
+    ) -> Option<i64>;
+    fn is_head(
         &self,
         index: usize,
     ) -> Option<bool>;
@@ -3976,19 +3634,39 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<u8>;
-    fn message_id(
+    fn msg_id(
         &self,
         index: usize,
     ) -> Option<&[u8]>;
-    fn op(
+    fn op_author(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn op_body(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
+    fn op_has_attachments(
+        &self,
+        index: usize,
+    ) -> Option<bool>;
+    fn op_msg_id(
         &self,
         index: usize,
     ) -> Option<&[u8]>;
+    fn op_time(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
     fn receipt_status(
         &self,
         index: usize,
     ) -> Option<u32>;
-    fn server_timestamp_ms(
+    fn reply_type(
+        &self,
+        index: usize,
+    ) -> Option<u8>;
+    fn server_time(
         &self,
         index: usize,
     ) -> Option<i64>;
@@ -3997,12 +3675,34 @@ pub trait MessagesTrait {
 #[no_mangle]
 pub extern "C" fn messages_new(
     messages: *mut MessagesQObject,
+    builder: *mut MessageBuilderQObject,
+    builder_body_changed: fn(*mut MessageBuilderQObject),
+    builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
+    builder_is_reply_changed: fn(*mut MessageBuilderQObject),
+    builder_op_author_changed: fn(*mut MessageBuilderQObject),
+    builder_op_body_changed: fn(*mut MessageBuilderQObject),
+    builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
+    builder_op_id_changed: fn(*mut MessageBuilderQObject),
+    builder_op_time_changed: fn(*mut MessageBuilderQObject),
+    builder_parse_markdown_changed: fn(*mut MessageBuilderQObject),
+    builder_new_data_ready: fn(*mut MessageBuilderQObject),
+    builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
+    builder_layout_changed: fn(*mut MessageBuilderQObject),
+    builder_data_changed: fn(*mut MessageBuilderQObject, usize, usize),
+    builder_begin_reset_model: fn(*mut MessageBuilderQObject),
+    builder_end_reset_model: fn(*mut MessageBuilderQObject),
+    builder_begin_insert_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    builder_end_insert_rows: fn(*mut MessageBuilderQObject),
+    builder_begin_move_rows: fn(*mut MessageBuilderQObject, usize, usize, usize),
+    builder_end_move_rows: fn(*mut MessageBuilderQObject),
+    builder_begin_remove_rows: fn(*mut MessageBuilderQObject, usize, usize),
+    builder_end_remove_rows: fn(*mut MessageBuilderQObject),
     messages_conversation_id_changed: fn(*mut MessagesQObject),
     messages_is_empty_changed: fn(*mut MessagesQObject),
     messages_last_author_changed: fn(*mut MessagesQObject),
     messages_last_body_changed: fn(*mut MessagesQObject),
-    messages_last_epoch_timestamp_ms_changed: fn(*mut MessagesQObject),
     messages_last_status_changed: fn(*mut MessagesQObject),
+    messages_last_time_changed: fn(*mut MessagesQObject),
     messages_search_active_changed: fn(*mut MessagesQObject),
     messages_search_index_changed: fn(*mut MessagesQObject),
     messages_search_num_matches_changed: fn(*mut MessagesQObject),
@@ -4021,14 +3721,42 @@ pub extern "C" fn messages_new(
     messages_begin_remove_rows: fn(*mut MessagesQObject, usize, usize),
     messages_end_remove_rows: fn(*mut MessagesQObject),
 ) -> *mut Messages {
+    let builder_emit = MessageBuilderEmitter {
+        qobject: Arc::new(AtomicPtr::new(builder)),
+        body_changed: builder_body_changed,
+        is_media_message_changed: builder_is_media_message_changed,
+        is_reply_changed: builder_is_reply_changed,
+        op_author_changed: builder_op_author_changed,
+        op_body_changed: builder_op_body_changed,
+        op_has_attachments_changed: builder_op_has_attachments_changed,
+        op_id_changed: builder_op_id_changed,
+        op_time_changed: builder_op_time_changed,
+        parse_markdown_changed: builder_parse_markdown_changed,
+        new_data_ready: builder_new_data_ready,
+    };
+    let model = MessageBuilderList {
+        qobject: builder,
+        layout_about_to_be_changed: builder_layout_about_to_be_changed,
+        layout_changed: builder_layout_changed,
+        data_changed: builder_data_changed,
+        begin_reset_model: builder_begin_reset_model,
+        end_reset_model: builder_end_reset_model,
+        begin_insert_rows: builder_begin_insert_rows,
+        end_insert_rows: builder_end_insert_rows,
+        begin_move_rows: builder_begin_move_rows,
+        end_move_rows: builder_end_move_rows,
+        begin_remove_rows: builder_begin_remove_rows,
+        end_remove_rows: builder_end_remove_rows,
+    };
+    let d_builder = MessageBuilder::new(builder_emit, model);
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
         conversation_id_changed: messages_conversation_id_changed,
         is_empty_changed: messages_is_empty_changed,
         last_author_changed: messages_last_author_changed,
         last_body_changed: messages_last_body_changed,
-        last_epoch_timestamp_ms_changed: messages_last_epoch_timestamp_ms_changed,
         last_status_changed: messages_last_status_changed,
+        last_time_changed: messages_last_time_changed,
         search_active_changed: messages_search_active_changed,
         search_index_changed: messages_search_index_changed,
         search_num_matches_changed: messages_search_num_matches_changed,
@@ -4050,13 +3778,18 @@ pub extern "C" fn messages_new(
         begin_remove_rows: messages_begin_remove_rows,
         end_remove_rows: messages_end_remove_rows,
     };
-    let d_messages = Messages::new(messages_emit, model);
+    let d_messages = Messages::new(messages_emit, model, d_builder);
     Box::into_raw(Box::new(d_messages))
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn messages_free(ptr: *mut Messages) {
     Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_builder_get(ptr: *mut Messages) -> *mut MessageBuilder {
+    (&mut *ptr).builder_mut()
 }
 
 #[no_mangle]
@@ -4124,22 +3857,6 @@ pub unsafe extern "C" fn messages_last_body_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_last_epoch_timestamp_ms_get(
-    ptr: *const Messages
-) -> COption<i64> {
-    match (&*ptr).last_epoch_timestamp_ms() {
-        Some(value) => COption {
-            data: value,
-            some: true,
-        },
-        None => COption {
-            data: i64::default(),
-            some: false,
-        },
-    }
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COption<u32> {
     match (&*ptr).last_status() {
         Some(value) => COption {
@@ -4148,6 +3865,20 @@ pub unsafe extern "C" fn messages_last_status_get(ptr: *const Messages) -> COpti
         },
         None => COption {
             data: u32::default(),
+            some: false,
+        },
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_last_time_get(ptr: *const Messages) -> COption<i64> {
+    match (&*ptr).last_time() {
+        Some(value) => COption {
+            data: value,
+            some: true,
+        },
+        None => COption {
+            data: i64::default(),
             some: false,
         },
     }
@@ -4355,21 +4086,12 @@ pub unsafe extern "C" fn messages_data_data_saved(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_epoch_timestamp_ms(
+pub unsafe extern "C" fn messages_data_expiration_time(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<i64> {
     let o = &*ptr;
-    o.epoch_timestamp_ms(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_expiration_timestamp_ms(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<i64> {
-    let o = &*ptr;
-    o.expiration_timestamp_ms(to_usize(row).unwrap_or(0)).into()
+    o.expiration_time(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -4382,21 +4104,21 @@ pub unsafe extern "C" fn messages_data_has_attachments(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_insertion_time(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<i64> {
+    let o = &*ptr;
+    o.insertion_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_is_head(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<bool> {
     let o = &*ptr;
     o.is_head(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_is_reply(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<bool> {
-    let o = &*ptr;
-    o.is_reply(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -4418,14 +4140,14 @@ pub unsafe extern "C" fn messages_data_match_status(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_message_id(
+pub unsafe extern "C" fn messages_data_msg_id(
     ptr: *const Messages,
     row: c_int,
     d: *mut QByteArray,
     set: fn(*mut QByteArray, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
-    let data = o.message_id(to_usize(row).unwrap_or(0));
+    let data = o.msg_id(to_usize(row).unwrap_or(0));
     if let Some(data) = data {
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
@@ -4433,18 +4155,66 @@ pub unsafe extern "C" fn messages_data_message_id(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_op(
+pub unsafe extern "C" fn messages_data_op_author(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.op_author(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_body(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let o = &*ptr;
+    let data = o.op_body(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let s: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, s, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_has_attachments(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<bool> {
+    let o = &*ptr;
+    o.op_has_attachments(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_msg_id(
     ptr: *const Messages,
     row: c_int,
     d: *mut QByteArray,
     set: fn(*mut QByteArray, *const c_char, len: c_int),
 ) {
     let o = &*ptr;
-    let data = o.op(to_usize(row).unwrap_or(0));
+    let data = o.op_msg_id(to_usize(row).unwrap_or(0));
     if let Some(data) = data {
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_time(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<i64> {
+    let o = &*ptr;
+    o.op_time(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -4457,12 +4227,21 @@ pub unsafe extern "C" fn messages_data_receipt_status(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_server_timestamp_ms(
+pub unsafe extern "C" fn messages_data_reply_type(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<u8> {
+    let o = &*ptr;
+    o.reply_type(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_server_time(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<i64> {
     let o = &*ptr;
-    o.server_timestamp_ms(to_usize(row).unwrap_or(0)).into()
+    o.server_time(to_usize(row).unwrap_or(0)).into()
 }
 
 pub struct UsersQObject {}

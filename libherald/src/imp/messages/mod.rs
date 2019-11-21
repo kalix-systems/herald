@@ -1,5 +1,10 @@
 use crate::{
-    ffi, interface::*, ret_err, ret_none, shared::SingletonBus, spawn, toasts::new_msg_toast,
+    ffi,
+    interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
+    ret_err, ret_none,
+    shared::SingletonBus,
+    spawn,
+    toasts::new_msg_toast,
 };
 use herald_common::UserId;
 use heraldcore::{
@@ -29,8 +34,9 @@ pub(crate) mod types;
 use shared::*;
 use types::*;
 
-type Emitter = MessagesEmitter;
-type List = MessagesList;
+/// Implementation of `crate::interface::MessageBuilderTrait`.
+pub mod builder;
+use builder::MessageBuilder;
 
 /// A wrapper around a vector of `Message`s with additional fields
 /// to facilitate interaction with QML.
@@ -41,12 +47,14 @@ pub struct Messages {
     conversation_id: Option<ConversationId>,
     container: Container,
     search: SearchState,
+    builder: MessageBuilder,
 }
 
-impl MessagesTrait for Messages {
+impl Interface for Messages {
     fn new(
         emit: Emitter,
         model: List,
+        builder: MessageBuilder,
     ) -> Self {
         Messages {
             model,
@@ -55,6 +63,7 @@ impl MessagesTrait for Messages {
             conversation_id: None,
             local_id: config::id().ok(),
             search: SearchState::new(),
+            builder,
         }
     }
 
@@ -85,7 +94,7 @@ impl MessagesTrait for Messages {
         Some(self.container.last_msg()?.body.as_ref()?.as_str())
     }
 
-    fn last_epoch_timestamp_ms(&self) -> Option<i64> {
+    fn last_time(&self) -> Option<i64> {
         Some(self.container.last_msg()?.time.insertion.0)
     }
 
@@ -145,7 +154,7 @@ impl MessagesTrait for Messages {
         Some(self.container.msg_data(row_index)?.body.as_ref()?.as_str())
     }
 
-    fn message_id(
+    fn msg_id(
         &self,
         row_index: usize,
     ) -> Option<ffi::MsgIdRef> {
@@ -179,23 +188,6 @@ impl MessagesTrait for Messages {
         row_index: usize,
     ) -> Option<u8> {
         Some(self.container.msg_data(row_index)?.match_status as u8)
-    }
-
-    fn op(
-        &self,
-        row_index: usize,
-    ) -> Option<ffi::MsgIdRef> {
-        match self.container.msg_data(row_index)?.op {
-            ReplyId::Known(ref mid) => Some(mid.as_slice()),
-            _ => None,
-        }
-    }
-
-    fn is_reply(
-        &self,
-        row_index: usize,
-    ) -> Option<bool> {
-        Some(!self.container.msg_data(row_index)?.op.is_none())
     }
 
     fn is_head(
@@ -242,21 +234,21 @@ impl MessagesTrait for Messages {
         Some(!msg.same_flurry(succ))
     }
 
-    fn epoch_timestamp_ms(
+    fn insertion_time(
         &self,
         row_index: usize,
     ) -> Option<i64> {
         Some(self.container.get(row_index)?.insertion_time.0)
     }
 
-    fn expiration_timestamp_ms(
+    fn expiration_time(
         &self,
         row_index: usize,
     ) -> Option<i64> {
         Some(self.container.msg_data(row_index)?.time.expiration?.0)
     }
 
-    fn server_timestamp_ms(
+    fn server_time(
         &self,
         row_index: usize,
     ) -> Option<i64> {
@@ -478,5 +470,58 @@ impl MessagesTrait for Messages {
 
         let percentage = scroll_position + scroll_height / 2.0;
         self.search.start_hint(percentage, &self.container);
+    }
+
+    fn builder(&self) -> &MessageBuilder {
+        &self.builder
+    }
+
+    fn builder_mut(&mut self) -> &mut MessageBuilder {
+        &mut self.builder
+    }
+
+    fn reply_type(
+        &self,
+        index: usize,
+    ) -> Option<u8> {
+        Some(self.container.op_reply_type(index)? as u8)
+    }
+
+    fn op_msg_id(
+        &self,
+        index: usize,
+    ) -> Option<ffi::MsgIdRef> {
+        self.container.op_msg_id(index).map(MsgId::as_slice)
+    }
+
+    fn op_author(
+        &self,
+        index: usize,
+    ) -> Option<ffi::UserIdRef> {
+        self.container.op_author(index).map(UserId::as_str)
+    }
+
+    fn op_body(
+        &self,
+        index: usize,
+    ) -> Option<&str> {
+        self.container
+            .op_body(index)?
+            .as_ref()
+            .map(MessageBody::as_str)
+    }
+
+    fn op_has_attachments(
+        &self,
+        index: usize,
+    ) -> Option<bool> {
+        self.container.op_has_attachments(index)
+    }
+
+    fn op_time(
+        &self,
+        index: usize,
+    ) -> Option<i64> {
+        Some(self.container.op_time(index)?.0)
     }
 }

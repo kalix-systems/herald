@@ -2,6 +2,15 @@ use super::*;
 use crate::{shared::AddressedBus, spawn};
 use std::{collections::HashSet, ops::Not};
 
+mod handlers;
+pub use handlers::*;
+
+mod search;
+pub use search::*;
+
+mod op;
+pub use op::*;
+
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
 /// and a hash map.
@@ -54,8 +63,6 @@ impl Container {
         ids: HashSet<MsgId>,
         model: &mut List,
     ) -> Option<()> {
-        use crate::imp::message_preview::{shared::Update, MessagePreview};
-
         for id in ids.into_iter() {
             if let Some(data) = self.get_data_mut(&id) {
                 if data.op != ReplyId::Dangling {
@@ -63,8 +70,6 @@ impl Container {
 
                     let ix = self.index_by_id(id)?;
                     model.data_changed(ix, ix);
-
-                    ret_err!(MessagePreview::push(id, Update::SetDangling), None);
                 }
             }
         }
@@ -171,130 +176,6 @@ impl Container {
 
         self.list.insert(ix, msg);
         self.map.insert(mid, data);
-
-        Some(())
-    }
-
-    pub(super) fn apply_search(
-        &mut self,
-        search: &SearchState,
-        model: &mut List,
-        emit: &mut Emitter,
-    ) -> Option<Vec<Match>> {
-        let pattern = search.pattern.as_ref()?;
-
-        if search.active.not() || pattern.raw().is_empty() {
-            return None;
-        }
-
-        let mut matches: Vec<Match> = Vec::new();
-
-        for (ix, msg) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(&msg.msg_id)?;
-
-            let old_status = data.match_status;
-            let matched = data.matches(pattern);
-
-            data.match_status = if matched {
-                MatchStatus::Matched
-            } else {
-                MatchStatus::NotMatched
-            };
-
-            if old_status != data.match_status {
-                model.data_changed(ix, ix);
-            }
-
-            if !matched {
-                continue;
-            };
-
-            matches.push(Match(*msg))
-        }
-
-        emit.search_num_matches_changed();
-
-        Some(matches)
-    }
-
-    pub(super) fn clear_search(
-        &mut self,
-        model: &mut List,
-    ) -> Option<()> {
-        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(&msg_id)?;
-
-            if data.match_status.is_match() {
-                data.match_status = MatchStatus::NotMatched;
-                model.data_changed(ix, ix);
-            }
-        }
-
-        Some(())
-    }
-
-    pub(super) fn handle_receipt(
-        &mut self,
-        mid: MsgId,
-        status: MessageReceiptStatus,
-        recipient: UserId,
-        model: &mut List,
-    ) -> Result<(), HErr> {
-        let msg: &mut MsgData = match self.map.get_mut(&mid) {
-            None => {
-                // This can (possibly) happen if the message
-                // was deleted between the receipt
-                // being received over the network
-                // and this part of the code.
-                return Ok(());
-            }
-            Some(msg) => msg,
-        };
-
-        // NOTE: If this fails, there is a bug somewhere
-        // in libherald.
-        //
-        // It is probably trivial, but may reflect something
-        // deeply wrong with our understanding of the program's
-        // concurrency.
-        let ix = self
-            .list
-            .iter()
-            // search backwards,
-            // it's probably fairly recent
-            .rposition(|m| m.msg_id == mid)
-            .ok_or(NE!())?;
-
-        msg.receipts
-            .entry(recipient)
-            .and_modify(|v| {
-                if *v < status {
-                    *v = status
-                }
-            })
-            .or_insert(status);
-
-        model.data_changed(ix, ix);
-
-        Ok(())
-    }
-
-    pub(super) fn handle_store_done(
-        &mut self,
-        mid: MsgId,
-        model: &mut List,
-    ) -> Option<()> {
-        let data = self.map.get_mut(&mid)?;
-
-        data.save_status = SaveStatus::Saved;
-        let ix = self
-            .list
-            .iter()
-            // search backwards,
-            // it's probably very recent
-            .rposition(|m| m.msg_id == mid)?;
-
-        model.data_changed(ix, ix);
 
         Some(())
     }

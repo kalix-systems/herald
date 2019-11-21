@@ -5,7 +5,7 @@ impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
         self.emit.last_author_changed();
         self.emit.last_body_changed();
-        self.emit.last_epoch_timestamp_ms_changed();
+        self.emit.last_time_changed();
         self.emit.last_status_changed();
     }
 

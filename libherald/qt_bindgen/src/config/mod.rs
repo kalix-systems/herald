@@ -48,7 +48,6 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        users(),
        members(),
        messages(),
-       message_preview(),
        config_obj(),
        conversation_builder(),
        users_search(),
@@ -214,28 +213,13 @@ fn members() -> Object {
     }
 }
 
-fn message_preview() -> Object {
-    let props = props! {
-         messageId: Prop::new().simple(QByteArray).optional().write(),
-         author: Prop::new().simple(QString).optional(),
-         body: Prop::new().simple(QString).optional(),
-         epochTimestampMs: Prop::new().simple(Qint64).optional(),
-         isDangling: Prop::new().simple(Bool),
-         hasAttachments: Prop::new().simple(Bool),
-         msgIdSet: Prop::new().simple(Bool)
-    };
-
-    obj! {
-       MessagePreview: Obj::new().list().props(props)
-    }
-}
-
 fn messages() -> Object {
     let props = props! {
         conversationId: conv_id_prop(),
         lastAuthor: Prop::new().simple(QString).optional(),
         lastBody: Prop::new().simple(QString).optional(),
-        lastEpochTimestampMs: Prop::new().simple(Qint64).optional(),
+        // Insertion time of last available message
+        lastTime: Prop::new().simple(Qint64).optional(),
         lastStatus: Prop::new().simple(QUint32).optional(),
         isEmpty: Prop::new().simple(Bool),
         searchPattern: filter_prop(),
@@ -244,27 +228,41 @@ fn messages() -> Object {
         // Number of search results
         searchNumMatches: Prop::new().simple(QUint64),
         // Position in search results of focused item, e.g., 4 out of 7
-        searchIndex: Prop::new().simple(QUint64)
+        searchIndex: Prop::new().simple(QUint64),
+
+        builder: Prop::new().object(message_builder())
     };
 
     let item_props = item_props! {
-        messageId: ItemProp::new(QByteArray).optional(),
+        // Main message properties
+        msgId: ItemProp::new(QByteArray).optional(),
         author: ItemProp::new(QString).optional(),
         body: ItemProp::new(QString).optional(),
-        epochTimestampMs: ItemProp::new(Qint64).optional(),
-        serverTimestampMs: ItemProp::new(Qint64).optional(),
-        expirationTimestampMs: ItemProp::new(Qint64).optional(),
-        op: ItemProp::new(QByteArray).optional(),
-        isReply: ItemProp::new(Bool).optional(),
+        insertionTime: ItemProp::new(Qint64).optional(),
+        serverTime: ItemProp::new(Qint64).optional(),
+        expirationTime: ItemProp::new(Qint64).optional(),
         hasAttachments: ItemProp::new(Bool).optional(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
+
         // 0 => Not matched,
         // 1 => Matched,
         // 2 => Matched and focused
-        match_status: ItemProp::new(QUint8).optional()
+        matchStatus: ItemProp::new(QUint8).optional(),
+
+        // 0 => Not reply
+        // 1 => Dangling (i.e., unknown reply)
+        // 2 => Known reply
+        replyType: ItemProp::new(QUint8).optional(),
+
+        // Message preview properties
+        opMsgId: ItemProp::new(QByteArray).optional(),
+        opAuthor: ItemProp::new(QString).optional(),
+        opBody: ItemProp::new(QString).optional(),
+        opTime: ItemProp::new(Qint64).optional(),
+        opHasAttachments: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {
@@ -344,17 +342,20 @@ fn users_search() -> Object {
 }
 
 fn message_builder() -> Object {
-    let props = props! {
-        // Conversation id
-        conversationId: conv_id_prop(),
-        // Message id of the message being replied to
-        replyingTo: Prop::new().simple(QByteArray).optional().write(),
+    let props = props! (
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
         isMediaMessage: Prop::new().simple(Bool),
-        parseMarkdown: Prop::new().simple(Bool).write()
-    };
+        parseMarkdown: Prop::new().simple(Bool).write(),
+
+        // Message id of the message being replied to
+        opId: Prop::new().simple(QByteArray).optional().write(),
+        opAuthor: Prop::new().simple(QString).optional(),
+        opBody: Prop::new().simple(QString).optional(),
+        opTime: Prop::new().simple(Qint64).optional(),
+        opHasAttachments: Prop::new().simple(Bool).optional()
+    );
 
     let item_props = item_props! {
         attachmentPath: ItemProp::new(QString)
