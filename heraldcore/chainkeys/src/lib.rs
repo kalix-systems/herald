@@ -97,3 +97,10 @@ pub fn seal_msg(
         Ok(cipher)
     })
 }
+
+pub fn store_state(
+    cid: ConversationId,
+    ratchet: &RatchetState,
+) -> Result<(), ChainKeysError> {
+    db::with_tx(move |tx| tx.store_ratchet_state(cid, ratchet)?)
+}
