@@ -1,10 +1,12 @@
-To generate the bindings for `libherald` you should first install
-`cargo-make` by running:
+This project uses the crate `qt_bindgen` to generate bindings so Rust
+code can be easily used from C++.
 
-```bash
-cargo install cargo-make
-```
-then run:
+*Dependencies*:
+    + `cargo-make`
+    + `clang` (for `clang-format`)
+
+
+Run:
 
 ```bash
 cargo make bindgen
