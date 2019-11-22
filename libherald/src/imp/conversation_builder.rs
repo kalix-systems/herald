@@ -134,7 +134,9 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn clear(&mut self) {
+        self.model.begin_reset_model();
         std::mem::replace(&mut self.inner, Default::default());
+        self.model.end_reset_model();
     }
 
     fn set_title(

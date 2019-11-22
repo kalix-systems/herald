@@ -30,9 +30,7 @@ mod network;
 use network::*;
 mod imp;
 
-/// Global state for the application that can't easily be included
-/// in another model. Currently only used to distinguish initial registration
-/// from logins.
+/// Application state
 pub struct Herald {
     config_init: Arc<AtomicBool>,
     emit: HeraldEmitter,
@@ -64,7 +62,7 @@ macro_rules! props {
 impl HeraldTrait for Herald {
     fn new(
         emit: HeraldEmitter,
-        config: Config,
+        mut config: Config,
         conversation_builder: ConversationBuilder,
         conversations: Conversations,
         errors: Errors,
@@ -82,6 +80,8 @@ impl HeraldTrait for Herald {
                 }),
                 "Couldn't start GC thread"
             );
+
+            push_err!(config.try_load(), "Couldn't load Config");
 
             Arc::new(AtomicBool::new(true))
         } else {
@@ -109,7 +109,7 @@ impl HeraldTrait for Herald {
     }
 
     fn config_init(&self) -> bool {
-        self.config_init.load(Ordering::Acquire)
+        self.config.loaded()
     }
 
     fn register_new_user(
