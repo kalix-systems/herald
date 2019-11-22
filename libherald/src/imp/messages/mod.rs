@@ -28,6 +28,7 @@ use container::*;
 mod imp;
 pub(crate) mod shared;
 use shared::*;
+mod underscore;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;
@@ -51,15 +52,7 @@ impl Interface for Messages {
         model: List,
         builder: MessageBuilder,
     ) -> Self {
-        Messages {
-            model,
-            emit,
-            container: Container::default(),
-            conversation_id: None,
-            local_id: config::id().ok(),
-            search: SearchState::new(),
-            builder,
-        }
+        Self::new_(emit, model, builder)
     }
 
     fn is_empty(&self) -> bool {
@@ -67,22 +60,11 @@ impl Interface for Messages {
     }
 
     fn last_author(&self) -> Option<ffi::UserIdRef> {
-        let last = self.container.last_msg()?;
-
-        if last.author == self.local_id? {
-            Some("You")
-        } else {
-            Some(last.author.as_str())
-        }
+        self.last_author_()
     }
 
     fn last_status(&self) -> Option<u32> {
-        self.container
-            .last_msg()?
-            .receipts
-            .values()
-            .max()
-            .map(|status| *status as u32)
+        self.last_status_()
     }
 
     fn last_body(&self) -> Option<&str> {
@@ -98,31 +80,14 @@ impl Interface for Messages {
         &self,
         msg_id: ffi::MsgIdRef,
     ) -> u64 {
-        let ret_val = std::u32::MAX as u64;
-
-        let msg_id = ret_err!(msg_id.try_into(), ret_val);
-
-        ret_none!(self.container.index_by_id(msg_id), ret_val) as u64
+        self.index_by_id_(msg_id)
     }
 
     fn set_conversation_id(
         &mut self,
         conversation_id: Option<ffi::ConversationIdRef>,
     ) {
-        if let (Some(id), None) = (conversation_id, self.conversation_id) {
-            let conversation_id = ret_err!(ConversationId::try_from(id));
-
-            EMITTERS.insert(conversation_id, self.emit().clone());
-            // remove left over channel from previous session
-            RXS.remove(&conversation_id);
-            TXS.remove(&conversation_id);
-
-            self.conversation_id = Some(conversation_id);
-            self.builder.set_conversation_id(conversation_id);
-            self.emit.conversation_id_changed();
-
-            container::fill(conversation_id);
-        }
+        self.set_conversation_id_(conversation_id)
     }
 
     fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
@@ -166,17 +131,9 @@ impl Interface for Messages {
 
     fn receipt_status(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<u32> {
-        Some(
-            self.container
-                .msg_data(row_index)?
-                .receipts
-                .values()
-                .map(|r| *r as u32)
-                .max()
-                .unwrap_or(MessageReceiptStatus::NoAck as u32),
-        )
+        self.receipt_status_(index)
     }
 
     fn match_status(
@@ -190,44 +147,14 @@ impl Interface for Messages {
         &self,
         row_index: usize,
     ) -> Option<bool> {
-        if self.container.is_empty() {
-            return None;
-        }
-
-        // Case where message is first message in conversation
-        if row_index == 0 {
-            return Some(true);
-        }
-
-        // other cases
-        let (msg, prev) = (
-            self.container.msg_data(row_index)?,
-            self.container.msg_data(row_index - 1)?,
-        );
-
-        Some(!msg.same_flurry(prev))
+        self.is_head_(row_index)
     }
 
     fn is_tail(
         &self,
         row_index: usize,
     ) -> Option<bool> {
-        if self.container.is_empty() {
-            return None;
-        }
-
-        // Case where message is last message in conversation
-        if row_index == self.container.len().saturating_sub(1) {
-            return Some(true);
-        }
-
-        // other cases
-        let (msg, succ) = (
-            self.container.msg_data(row_index)?,
-            self.container.msg_data(row_index + 1)?,
-        );
-
-        Some(!msg.same_flurry(succ))
+        self.is_tail_(row_index)
     }
 
     fn insertion_time(
@@ -255,105 +182,21 @@ impl Interface for Messages {
         &mut self,
         row_index: u64,
     ) -> bool {
-        let ix = row_index as usize;
-
-        let id = ret_none!(self.container.get(ix), false).msg_id;
-
-        self.remove_helper(id, ix);
-        spawn!(message::delete_message(&id), false);
-
-        true
+        self.delete_message_(row_index)
     }
 
     /// Deletes all messages in the current conversation.
     fn clear_conversation_history(&mut self) -> bool {
-        let id = ret_none!(self.conversation_id, false);
-
-        spawn!(conversation::delete_conversation(&id), false);
-
-        self.clear_search();
-        self.model
-            .begin_remove_rows(0, self.container.len().saturating_sub(1));
-        self.container = Default::default();
-        self.model.end_remove_rows();
-
-        self.emit_last_changed();
-        self.emit.is_empty_changed();
-        true
+        self.clear_conversation_history_()
     }
 
     fn can_fetch_more(&self) -> bool {
-        let conv_id = match &self.conversation_id {
-            Some(cid) => cid,
-            None => return false,
-        };
-
-        let rx = match RXS.get(conv_id) {
-            Some(rx) => rx,
-            // it's not a problem if the model doesn't have a receiver yet
-            None => return false,
-        };
-
-        !rx.is_empty()
+        self.can_fetch_more_()
     }
 
     /// Polls for updates
     fn fetch_more(&mut self) {
-        let conv_id = ret_none!(self.conversation_id);
-
-        let rx = match RXS.get(&conv_id) {
-            Some(rx) => rx,
-            // it's not a problem if the model doesn't have a receiver yet
-            None => return,
-        };
-
-        for update in rx.try_iter() {
-            match update {
-                MsgUpdate::NewMsg(new) => {
-                    new_msg_toast(&new);
-
-                    ret_err!(self.insert_helper(*new, SaveStatus::Saved));
-                }
-                MsgUpdate::BuilderMsg(msg) => {
-                    ret_err!(self.insert_helper(*msg, SaveStatus::Unsaved));
-                }
-                MsgUpdate::Receipt {
-                    msg_id,
-                    recipient,
-                    status,
-                } => {
-                    ret_err!(container::handle_receipt(
-                        &mut self.container,
-                        msg_id,
-                        status,
-                        recipient,
-                        &mut self.model
-                    ));
-                }
-                MsgUpdate::StoreDone(mid) => {
-                    ret_none!(container::handle_store_done(
-                        &mut self.container,
-                        mid,
-                        &mut self.model
-                    ));
-                }
-
-                MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
-
-                MsgUpdate::Container(container) => {
-                    if container.is_empty() {
-                        continue;
-                    }
-
-                    self.model
-                        .begin_insert_rows(0, container.len().saturating_sub(1));
-                    self.container = container;
-                    self.model.end_insert_rows();
-                    self.emit.is_empty_changed();
-                    self.emit_last_changed();
-                }
-            }
-        }
+        self.fetch_more_()
     }
 
     fn emit(&mut self) -> &mut Emitter {
@@ -365,36 +208,14 @@ impl Interface for Messages {
     }
 
     fn search_pattern(&self) -> &str {
-        self.search
-            .pattern
-            .as_ref()
-            .map(SearchPattern::raw)
-            .unwrap_or("")
+        self.search_pattern_()
     }
 
     fn set_search_pattern(
         &mut self,
         pattern: String,
     ) {
-        if pattern.is_empty() {
-            self.clear_search();
-            return;
-        }
-
-        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed()
-            && self.search.active
-        {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
-                    &self.search,
-                    &mut self.model,
-                    &mut self.emit,
-                )
-                .unwrap_or_default(),
-                &mut self.emit,
-            );
-        }
+        self.set_search_pattern_(pattern)
     }
 
     /// Indicates whether regex search is activated
@@ -407,18 +228,7 @@ impl Interface for Messages {
         &mut self,
         use_regex: bool,
     ) {
-        if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
-                    &self.search,
-                    &mut self.model,
-                    &mut self.emit,
-                )
-                .unwrap_or_default(),
-                &mut self.emit,
-            );
-        }
+        self.set_search_regex_(use_regex)
     }
 
     /// Indicates whether search is active
@@ -431,29 +241,12 @@ impl Interface for Messages {
         &mut self,
         active: bool,
     ) {
-        if !active {
-            self.search.active = false;
-            self.clear_search();
-        } else if !self.search.active {
-            self.search.active = true;
-            self.emit.search_active_changed();
-            self.search.set_matches(
-                apply_search(
-                    &mut self.container,
-                    &self.search,
-                    &mut self.model,
-                    &mut self.emit,
-                )
-                .unwrap_or_default(),
-                &mut self.emit,
-            );
-        }
+        self.set_search_active_(active)
     }
 
     /// Clears search
     fn clear_search(&mut self) {
-        clear_search(&mut self.container, &mut self.model);
-        ret_err!(self.search.clear_search(&mut self.emit));
+        self.clear_search_()
     }
 
     fn search_num_matches(&self) -> u64 {
@@ -477,12 +270,7 @@ impl Interface for Messages {
         scroll_position: f32,
         scroll_height: f32,
     ) {
-        if scroll_position.is_nan() || scroll_height.is_nan() {
-            return;
-        }
-
-        let percentage = scroll_position + scroll_height / 2.0;
-        self.search.start_hint(percentage, &self.container);
+        self.set_search_hint_(scroll_position, scroll_height)
     }
 
     fn builder(&self) -> &MessageBuilder {
@@ -501,14 +289,7 @@ impl Interface for Messages {
         &mut self,
         id: Option<ffi::MsgIdRef>,
     ) {
-        use builder::OpChanged;
-
-        match ret_err!(self.builder.set_op_id(id, &self.container)) {
-            OpChanged::Changed => {
-                self.emit.builder_op_msg_id_changed();
-            }
-            OpChanged::NotChanged => {}
-        }
+        self.set_builder_op_msg_id_(id)
     }
 
     fn reply_type(
@@ -536,10 +317,7 @@ impl Interface for Messages {
         &self,
         index: usize,
     ) -> Option<&str> {
-        self.container
-            .op_body(index)?
-            .as_ref()
-            .map(MessageBody::as_str)
+        self.op_body_(index)
     }
 
     fn op_has_attachments(
