@@ -41,7 +41,7 @@ Page {
         Button {
             text: "Send"
             onClicked: {
-                usersModel.add(usernameTextArea.text.trim())
+                herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()
             }
         }

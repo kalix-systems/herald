@@ -28,27 +28,11 @@ Item {
         }
     }
 
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    Conversations {
-        id: conversationsModel
-    }
-
-    Config {
-        id: configModel
-    }
-
-    Users {
-        id: usersModel
-    }
-
     StackView {
         id: mainView
         anchors.fill: parent
         initialItem: cvMain
     }
 
-    Component.onCompleted: heraldState.login()
+    Component.onCompleted: herald.login()
 }
