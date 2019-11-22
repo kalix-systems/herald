@@ -5,7 +5,7 @@ import QtQuick.Controls 2.13
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
 import "../../common" as Common
-import "../../common/js/utils.mjs" as Utils
+import "qrc:/imports/utils.mjs" as Utils
 import "./js/ContactClickedPopup.mjs" as JS
 import "../popups/js/" as Popups
 

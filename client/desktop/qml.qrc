@@ -40,7 +40,6 @@
         <file>ChatView/js/SearchHandler.mjs</file>
         <file>../foundation/js/utils.mjs</file>
         <file>ChatView/SearchTextArea.qml</file>
-        <file>SideBar/NewContactComponent.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>common/ConfigAvatar.qml</file>
         <file>SideBar/Header/ContextBar.qml</file>
@@ -56,5 +55,6 @@
         <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/GroupHeaderComponent.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/NewGroupComponent.qml</file>
+        <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
     </qresource>
 </RCC>

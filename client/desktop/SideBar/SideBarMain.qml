@@ -6,6 +6,7 @@ import "qrc:/common" as Common
 import "../SideBar/Header" as Header
 import "../SideBar/Pane" as Pane
 import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
+import "../SideBar/Pane/ContactFlowComponents" as ContactFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -60,7 +61,7 @@ Page {
         id: newGroupComponent
     }
 
-    NewContactComponent {
+    ContactFlow.NewContactComponent {
         id: newContactComponent
     }
 
