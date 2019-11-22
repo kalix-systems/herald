@@ -51,11 +51,6 @@ ListView {
                 hoverEnabled: true
                 z: CmnCfg.overlayZ
                 anchors.fill: parent
-                onClicked: {
-                    if (sideBarState.state === "newGroupState") {
-                        groupMemberSelect.addMember(userId)
-                    }
-                }
             }
         }
     }

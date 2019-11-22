@@ -76,7 +76,7 @@ Column {
                     anchors.fill: parent
                     onClicked: {
                         //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
-                        groupMemberSelect.addMember(contactData.userId)
+                        herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
                         groupConvoMake.clearFilter()
                         groupSelectText.text = ""

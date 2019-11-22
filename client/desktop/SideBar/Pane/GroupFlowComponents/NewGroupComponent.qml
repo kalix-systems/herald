@@ -74,15 +74,17 @@ Component {
                 font.family: CmnCfg.chatFont.name
             }
             onClicked: {
-                titleText.text == "" ? groupMemberSelect.setTitle(
-                                           "Untitled Group") : groupMemberSelect.setTitle(
+                titleText.text == "" ? herald.conversationBuilder.setTitle(
+                                           "Untitled Group") : herald.conversationBuilder.setTitle(
                                            titleText.text)
                 if (topRect.profPic !== "") {
-                    groupMemberSelect.picture = topRect.profPic
+                    herald.conversationBuilder.picture = topRect.profPic
                 }
-                groupMemberSelect.finalize()
+                herald.conversationBuilder.finalize()
                 sideBarState.state = ""
             }
         }
+
+        Component.onDestruction: herald.conversationBuilder.clear()
     }
 }

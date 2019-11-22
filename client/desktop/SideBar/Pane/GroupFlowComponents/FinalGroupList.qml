@@ -10,7 +10,7 @@ import QtQml 2.13
 ListView {
     height: contentHeight
     width: parent.width
-    model: groupMemberSelect
+    model: herald.conversationBuilder
 
     delegate: Item {
         id: memberItem
@@ -42,7 +42,7 @@ ListView {
                 anchors.rightMargin: CmnCfg.largeMargin / 2
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/x-icon.svg"
-                onClicked: groupMemberSelect.removeMemberById(memberId)
+                onClicked: herald.conversationBuilder.removeMemberById(memberId)
             }
         }
     }

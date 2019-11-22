@@ -50,7 +50,6 @@
         <file>SideBar/Pane/SideBarPane.qml</file>
         <file>SideBar/Pane/ContactView.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/ContactSearchComponent.qml</file>
-        <file>SideBar/Pane/GroupFlowComponents/ConvoBuilder.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/GroupHeaderComponent.qml</file>
         <file>SideBar/Pane/GroupFlowComponents/NewGroupComponent.qml</file>
