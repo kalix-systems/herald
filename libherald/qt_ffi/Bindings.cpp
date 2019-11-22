@@ -120,13 +120,13 @@ inline void conversationsFilterRegexChanged(Conversations *o) {
   Q_EMIT o->filterRegexChanged();
 }
 inline void errorsTryPollChanged(Errors *o) { Q_EMIT o->tryPollChanged(); }
-inline void heraldStateConfigInitChanged(HeraldState *o) {
+inline void heraldConfigInitChanged(Herald *o) {
   Q_EMIT o->configInitChanged();
 }
-inline void heraldStateConnectionPendingChanged(HeraldState *o) {
+inline void heraldConnectionPendingChanged(Herald *o) {
   Q_EMIT o->connectionPendingChanged();
 }
-inline void heraldStateConnectionUpChanged(HeraldState *o) {
+inline void heraldConnectionUpChanged(Herald *o) {
   Q_EMIT o->connectionUpChanged();
 }
 inline void membersConversationIdChanged(Members *o) {
@@ -835,34 +835,60 @@ void errors_next_error(Errors::Private *, QString *, qstring_set);
 };
 
 extern "C" {
-HeraldState::Private *herald_state_new(
-    HeraldState *, void (*)(HeraldState *), void (*)(HeraldState *),
-    void (*)(HeraldState *), MessageSearch *, void (*)(MessageSearch *),
-    void (*)(MessageSearch *), void (*)(const MessageSearch *),
+Herald::Private *herald_new(
+    Herald *, Config *, void (*)(Config *), void (*)(Config *),
+    void (*)(Config *), void (*)(Config *), void (*)(Config *),
+    void (*)(Config *), void (*)(Herald *), void (*)(Herald *),
+    void (*)(Herald *), ConversationBuilder *, void (*)(ConversationBuilder *),
+    void (*)(const ConversationBuilder *), void (*)(ConversationBuilder *),
+    void (*)(ConversationBuilder *),
+    void (*)(ConversationBuilder *, quintptr, quintptr),
+    void (*)(ConversationBuilder *), void (*)(ConversationBuilder *),
+    void (*)(ConversationBuilder *, int, int), void (*)(ConversationBuilder *),
+    void (*)(ConversationBuilder *, int, int, int),
+    void (*)(ConversationBuilder *), void (*)(ConversationBuilder *, int, int),
+    void (*)(ConversationBuilder *), Conversations *, void (*)(Conversations *),
+    void (*)(Conversations *), void (*)(const Conversations *),
+    void (*)(Conversations *), void (*)(Conversations *),
+    void (*)(Conversations *, quintptr, quintptr), void (*)(Conversations *),
+    void (*)(Conversations *), void (*)(Conversations *, int, int),
+    void (*)(Conversations *), void (*)(Conversations *, int, int, int),
+    void (*)(Conversations *), void (*)(Conversations *, int, int),
+    void (*)(Conversations *), Errors *, void (*)(Errors *), MessageSearch *,
     void (*)(MessageSearch *), void (*)(MessageSearch *),
-    void (*)(MessageSearch *, quintptr, quintptr), void (*)(MessageSearch *),
-    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int),
-    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int, int),
-    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int),
-    void (*)(MessageSearch *));
-void herald_state_free(HeraldState::Private *);
-bool herald_state_config_init_get(const HeraldState::Private *);
-bool herald_state_connection_pending_get(const HeraldState::Private *);
-bool herald_state_connection_up_get(const HeraldState::Private *);
-MessageSearch::Private *
-herald_state_global_message_search_get(const HeraldState::Private *);
-bool herald_state_login(HeraldState::Private *);
-void herald_state_register_new_user(HeraldState::Private *, const ushort *,
-                                    int);
-};
-
-extern "C" {
-HeraldUtils::Private *herald_utils_new(HeraldUtils *);
-void herald_utils_free(HeraldUtils::Private *);
-bool herald_utils_compare_byte_array(const HeraldUtils::Private *, const char *,
-                                     int, const char *, int);
-bool herald_utils_is_valid_rand_id(const HeraldUtils::Private *, const char *,
-                                   int);
+    void (*)(const MessageSearch *), void (*)(MessageSearch *),
+    void (*)(MessageSearch *), void (*)(MessageSearch *, quintptr, quintptr),
+    void (*)(MessageSearch *), void (*)(MessageSearch *),
+    void (*)(MessageSearch *, int, int), void (*)(MessageSearch *),
+    void (*)(MessageSearch *, int, int, int), void (*)(MessageSearch *),
+    void (*)(MessageSearch *, int, int), void (*)(MessageSearch *), Users *,
+    void (*)(Users *), void (*)(Users *), void (*)(const Users *),
+    void (*)(Users *), void (*)(Users *), void (*)(Users *, quintptr, quintptr),
+    void (*)(Users *), void (*)(Users *), void (*)(Users *, int, int),
+    void (*)(Users *), void (*)(Users *, int, int, int), void (*)(Users *),
+    void (*)(Users *, int, int), void (*)(Users *), UsersSearch *,
+    void (*)(UsersSearch *), void (*)(const UsersSearch *),
+    void (*)(UsersSearch *), void (*)(UsersSearch *),
+    void (*)(UsersSearch *, quintptr, quintptr), void (*)(UsersSearch *),
+    void (*)(UsersSearch *), void (*)(UsersSearch *, int, int),
+    void (*)(UsersSearch *), void (*)(UsersSearch *, int, int, int),
+    void (*)(UsersSearch *), void (*)(UsersSearch *, int, int),
+    void (*)(UsersSearch *), Utils *);
+void herald_free(Herald::Private *);
+Config::Private *herald_config_get(const Herald::Private *);
+bool herald_config_init_get(const Herald::Private *);
+bool herald_connection_pending_get(const Herald::Private *);
+bool herald_connection_up_get(const Herald::Private *);
+ConversationBuilder::Private *
+herald_conversation_builder_get(const Herald::Private *);
+Conversations::Private *herald_conversations_get(const Herald::Private *);
+Errors::Private *herald_errors_get(const Herald::Private *);
+MessageSearch::Private *herald_message_search_get(const Herald::Private *);
+Users::Private *herald_users_get(const Herald::Private *);
+UsersSearch::Private *herald_users_search_get(const Herald::Private *);
+Utils::Private *herald_utils_get(const Herald::Private *);
+bool herald_login(Herald::Private *);
+void herald_register_new_user(Herald::Private *, const ushort *, int);
 };
 
 extern "C" {
@@ -2295,6 +2321,14 @@ void users_search_filter_set_none(UsersSearch::Private *);
 void users_search_clear_filter(UsersSearch::Private *);
 };
 
+extern "C" {
+Utils::Private *utils_new(Utils *);
+void utils_free(Utils::Private *);
+bool utils_compare_byte_array(const Utils::Private *, const char *, int,
+                              const char *, int);
+bool utils_is_valid_rand_id(const Utils::Private *, const char *, int);
+};
+
 Attachments::Attachments(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
   initHeaderData();
@@ -2576,17 +2610,87 @@ QString Errors::nextError() {
   errors_next_error(m_d, &s, set_qstring);
   return s;
 }
-HeraldState::HeraldState(bool /*owned*/, QObject *parent)
-    : QObject(parent), m_globalMessageSearch(new MessageSearch(false, this)),
-      m_d(nullptr), m_ownsPrivate(false) {}
+Herald::Herald(bool /*owned*/, QObject *parent)
+    : QObject(parent), m_config(new Config(false, this)),
+      m_conversationBuilder(new ConversationBuilder(false, this)),
+      m_conversations(new Conversations(false, this)),
+      m_errors(new Errors(false, this)),
+      m_messageSearch(new MessageSearch(false, this)),
+      m_users(new Users(false, this)),
+      m_usersSearch(new UsersSearch(false, this)),
+      m_utils(new Utils(false, this)), m_d(nullptr), m_ownsPrivate(false) {}
 
-HeraldState::HeraldState(QObject *parent)
-    : QObject(parent), m_globalMessageSearch(new MessageSearch(false, this)),
-      m_d(herald_state_new(
-          this, heraldStateConfigInitChanged,
-          heraldStateConnectionPendingChanged, heraldStateConnectionUpChanged,
-          m_globalMessageSearch, messageSearchRegexSearchChanged,
-          messageSearchSearchPatternChanged,
+Herald::Herald(QObject *parent)
+    : QObject(parent), m_config(new Config(false, this)),
+      m_conversationBuilder(new ConversationBuilder(false, this)),
+      m_conversations(new Conversations(false, this)),
+      m_errors(new Errors(false, this)),
+      m_messageSearch(new MessageSearch(false, this)),
+      m_users(new Users(false, this)),
+      m_usersSearch(new UsersSearch(false, this)),
+      m_utils(new Utils(false, this)),
+      m_d(herald_new(
+          this, m_config, configColorChanged, configColorschemeChanged,
+          configConfigIdChanged, configNameChanged,
+          configNtsConversationIdChanged, configProfilePictureChanged,
+          heraldConfigInitChanged, heraldConnectionPendingChanged,
+          heraldConnectionUpChanged, m_conversationBuilder,
+          conversationBuilderPictureChanged,
+          [](const ConversationBuilder *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](ConversationBuilder *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](ConversationBuilder *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](ConversationBuilder *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](ConversationBuilder *o) { o->beginResetModel(); },
+          [](ConversationBuilder *o) { o->endResetModel(); },
+          [](ConversationBuilder *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](ConversationBuilder *o) { o->endInsertRows(); },
+          [](ConversationBuilder *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](ConversationBuilder *o) { o->endMoveRows(); },
+          [](ConversationBuilder *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](ConversationBuilder *o) { o->endRemoveRows(); }, m_conversations,
+          conversationsFilterChanged, conversationsFilterRegexChanged,
+          [](const Conversations *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](Conversations *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](Conversations *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](Conversations *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](Conversations *o) { o->beginResetModel(); },
+          [](Conversations *o) { o->endResetModel(); },
+          [](Conversations *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](Conversations *o) { o->endInsertRows(); },
+          [](Conversations *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](Conversations *o) { o->endMoveRows(); },
+          [](Conversations *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](Conversations *o) { o->endRemoveRows(); }, m_errors,
+          errorsTryPollChanged, m_messageSearch,
+          messageSearchRegexSearchChanged, messageSearchSearchPatternChanged,
           [](const MessageSearch *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](MessageSearch *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](MessageSearch *o) {
@@ -2611,60 +2715,128 @@ HeraldState::HeraldState(QObject *parent)
           [](MessageSearch *o, int first, int last) {
             o->beginRemoveRows(QModelIndex(), first, last);
           },
-          [](MessageSearch *o) { o->endRemoveRows(); })),
+          [](MessageSearch *o) { o->endRemoveRows(); }, m_users,
+          usersFilterChanged, usersFilterRegexChanged,
+          [](const Users *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](Users *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](Users *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](Users *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](Users *o) { o->beginResetModel(); },
+          [](Users *o) { o->endResetModel(); },
+          [](Users *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](Users *o) { o->endInsertRows(); },
+          [](Users *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](Users *o) { o->endMoveRows(); },
+          [](Users *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](Users *o) { o->endRemoveRows(); }, m_usersSearch,
+          usersSearchFilterChanged,
+          [](const UsersSearch *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](UsersSearch *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](UsersSearch *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](UsersSearch *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](UsersSearch *o) { o->beginResetModel(); },
+          [](UsersSearch *o) { o->endResetModel(); },
+          [](UsersSearch *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](UsersSearch *o) { o->endInsertRows(); },
+          [](UsersSearch *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](UsersSearch *o) { o->endMoveRows(); },
+          [](UsersSearch *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](UsersSearch *o) { o->endRemoveRows(); }, m_utils)),
       m_ownsPrivate(true) {
-  m_globalMessageSearch->m_d = herald_state_global_message_search_get(m_d);
+  m_config->m_d = herald_config_get(m_d);
+  m_conversationBuilder->m_d = herald_conversation_builder_get(m_d);
+  m_conversations->m_d = herald_conversations_get(m_d);
+  m_errors->m_d = herald_errors_get(m_d);
+  m_messageSearch->m_d = herald_message_search_get(m_d);
+  m_users->m_d = herald_users_get(m_d);
+  m_usersSearch->m_d = herald_users_search_get(m_d);
+  m_utils->m_d = herald_utils_get(m_d);
   connect(
-      this->m_globalMessageSearch, &MessageSearch::newDataReady,
-      this->m_globalMessageSearch,
+      this->m_conversationBuilder, &ConversationBuilder::newDataReady,
+      this->m_conversationBuilder,
       [this](const QModelIndex &i) {
-        this->m_globalMessageSearch->fetchMore(i);
+        this->m_conversationBuilder->fetchMore(i);
       },
+      Qt::QueuedConnection);
+  connect(
+      this->m_conversations, &Conversations::newDataReady,
+      this->m_conversations,
+      [this](const QModelIndex &i) { this->m_conversations->fetchMore(i); },
+      Qt::QueuedConnection);
+  connect(
+      this->m_messageSearch, &MessageSearch::newDataReady,
+      this->m_messageSearch,
+      [this](const QModelIndex &i) { this->m_messageSearch->fetchMore(i); },
+      Qt::QueuedConnection);
+  connect(
+      this->m_users, &Users::newDataReady, this->m_users,
+      [this](const QModelIndex &i) { this->m_users->fetchMore(i); },
+      Qt::QueuedConnection);
+  connect(
+      this->m_usersSearch, &UsersSearch::newDataReady, this->m_usersSearch,
+      [this](const QModelIndex &i) { this->m_usersSearch->fetchMore(i); },
       Qt::QueuedConnection);
 }
 
-HeraldState::~HeraldState() {
+Herald::~Herald() {
   if (m_ownsPrivate) {
-    herald_state_free(m_d);
+    herald_free(m_d);
   }
 }
-bool HeraldState::configInit() const {
-  return herald_state_config_init_get(m_d);
+const Config *Herald::config() const { return m_config; }
+Config *Herald::config() { return m_config; }
+bool Herald::configInit() const { return herald_config_init_get(m_d); }
+bool Herald::connectionPending() const {
+  return herald_connection_pending_get(m_d);
 }
-bool HeraldState::connectionPending() const {
-  return herald_state_connection_pending_get(m_d);
+bool Herald::connectionUp() const { return herald_connection_up_get(m_d); }
+const ConversationBuilder *Herald::conversationBuilder() const {
+  return m_conversationBuilder;
 }
-bool HeraldState::connectionUp() const {
-  return herald_state_connection_up_get(m_d);
+ConversationBuilder *Herald::conversationBuilder() {
+  return m_conversationBuilder;
 }
-const MessageSearch *HeraldState::globalMessageSearch() const {
-  return m_globalMessageSearch;
-}
-MessageSearch *HeraldState::globalMessageSearch() {
-  return m_globalMessageSearch;
-}
-bool HeraldState::login() { return herald_state_login(m_d); }
-void HeraldState::registerNewUser(const QString &user_id) {
-  return herald_state_register_new_user(m_d, user_id.utf16(), user_id.size());
-}
-HeraldUtils::HeraldUtils(bool /*owned*/, QObject *parent)
-    : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
-
-HeraldUtils::HeraldUtils(QObject *parent)
-    : QObject(parent), m_d(herald_utils_new(this)), m_ownsPrivate(true) {}
-
-HeraldUtils::~HeraldUtils() {
-  if (m_ownsPrivate) {
-    herald_utils_free(m_d);
-  }
-}
-bool HeraldUtils::compareByteArray(const QByteArray &bs1,
-                                   const QByteArray &bs2) const {
-  return herald_utils_compare_byte_array(m_d, bs1.data(), bs1.size(),
-                                         bs2.data(), bs2.size());
-}
-bool HeraldUtils::isValidRandId(const QByteArray &bs) const {
-  return herald_utils_is_valid_rand_id(m_d, bs.data(), bs.size());
+const Conversations *Herald::conversations() const { return m_conversations; }
+Conversations *Herald::conversations() { return m_conversations; }
+const Errors *Herald::errors() const { return m_errors; }
+Errors *Herald::errors() { return m_errors; }
+const MessageSearch *Herald::messageSearch() const { return m_messageSearch; }
+MessageSearch *Herald::messageSearch() { return m_messageSearch; }
+const Users *Herald::users() const { return m_users; }
+Users *Herald::users() { return m_users; }
+const UsersSearch *Herald::usersSearch() const { return m_usersSearch; }
+UsersSearch *Herald::usersSearch() { return m_usersSearch; }
+const Utils *Herald::utils() const { return m_utils; }
+Utils *Herald::utils() { return m_utils; }
+bool Herald::login() { return herald_login(m_d); }
+void Herald::registerNewUser(const QString &user_id) {
+  return herald_register_new_user(m_d, user_id.utf16(), user_id.size());
 }
 Members::Members(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
@@ -3260,3 +3432,22 @@ void UsersSearch::setFilter(const QString &v) {
   }
 }
 void UsersSearch::clearFilter() { return users_search_clear_filter(m_d); }
+Utils::Utils(bool /*owned*/, QObject *parent)
+    : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
+
+Utils::Utils(QObject *parent)
+    : QObject(parent), m_d(utils_new(this)), m_ownsPrivate(true) {}
+
+Utils::~Utils() {
+  if (m_ownsPrivate) {
+    utils_free(m_d);
+  }
+}
+bool Utils::compareByteArray(const QByteArray &bs1,
+                             const QByteArray &bs2) const {
+  return utils_compare_byte_array(m_d, bs1.data(), bs1.size(), bs2.data(),
+                                  bs2.size());
+}
+bool Utils::isValidRandId(const QByteArray &bs) const {
+  return utils_is_valid_rand_id(m_d, bs.data(), bs.size());
+}

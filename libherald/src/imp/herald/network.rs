@@ -1,4 +1,5 @@
 use super::*;
+use crate::imp::messages;
 
 /// A bundle of `AtomicBool`s used for signalling
 pub struct EffectsFlags {
@@ -18,10 +19,7 @@ impl NotifHandler {
         &mut self,
         notif: Notification,
     ) {
-        use crate::imp::{
-            conversations::shared::*,
-            users::{shared::*, Users},
-        };
+        use crate::imp::{conversations::shared::*, users::shared::*};
         use heraldcore::message;
         use messages::{shared::MsgUpdate, Messages};
         use Notification::*;

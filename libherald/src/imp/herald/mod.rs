@@ -1,6 +1,10 @@
 use crate::{
     ffi,
-    imp::{conversations::Conversations, message_search::MessageSearch, messages},
+    imp::{
+        config::Config, conversation_builder::ConversationBuilder, conversations::Conversations,
+        errors::Errors, message_search::MessageSearch, users::Users, users_search::UsersSearch,
+        utils::Utils,
+    },
     interface::*,
     push_err, ret_err,
     shared::{AddressedBus, SingletonBus},
@@ -20,7 +24,7 @@ use std::{
     },
 };
 
-type Emitter = HeraldStateEmitter;
+type Emitter = HeraldEmitter;
 
 mod network;
 use network::*;
@@ -29,17 +33,45 @@ mod imp;
 /// Global state for the application that can't easily be included
 /// in another model. Currently only used to distinguish initial registration
 /// from logins.
-pub struct HeraldState {
+pub struct Herald {
     config_init: Arc<AtomicBool>,
-    emit: HeraldStateEmitter,
+    emit: HeraldEmitter,
     effects_flags: Arc<EffectsFlags>,
     message_search: MessageSearch,
+    config: Config,
+    conversation_builder: ConversationBuilder,
+    conversations: Conversations,
+    errors: Errors,
+    users: Users,
+    users_search: UsersSearch,
+    utils: Utils,
 }
 
-impl HeraldStateTrait for HeraldState {
+macro_rules! props {
+    ($( $field: ident, $mut: ident, $ret: ty),*) => {
+       $(
+       fn $field(&self) -> &$ret {
+            &self.$field
+       }
+
+       fn $mut(&mut self) -> &mut $ret {
+            &mut self.$field
+       }
+       )*
+    }
+}
+
+impl HeraldTrait for Herald {
     fn new(
-        emit: HeraldStateEmitter,
+        emit: HeraldEmitter,
+        config: Config,
+        conversation_builder: ConversationBuilder,
+        conversations: Conversations,
+        errors: Errors,
         message_search: MessageSearch,
+        users: Users,
+        users_search: UsersSearch,
+        utils: Utils,
     ) -> Self {
         let config_init = if config::id().is_ok() {
             // If this fails, it's because a thread couldn't be spawned.
@@ -61,11 +93,18 @@ impl HeraldStateTrait for HeraldState {
             Arc::new(AtomicBool::new(false))
         };
 
-        HeraldState {
+        Herald {
             emit,
             config_init,
             effects_flags: Arc::new(EffectsFlags::new()),
             message_search,
+            config,
+            conversation_builder,
+            conversations,
+            errors,
+            users,
+            users_search,
+            utils,
         }
     }
 
@@ -137,15 +176,18 @@ impl HeraldStateTrait for HeraldState {
         self.effects_flags.net_pending.load(Ordering::Relaxed)
     }
 
-    fn emit(&mut self) -> &mut HeraldStateEmitter {
+    fn emit(&mut self) -> &mut HeraldEmitter {
         &mut self.emit
     }
 
-    fn global_message_search(&self) -> &MessageSearch {
-        &self.message_search
-    }
-
-    fn global_message_search_mut(&mut self) -> &mut MessageSearch {
-        &mut self.message_search
+    props! {
+        config, config_mut, Config,
+        conversation_builder, conversation_builder_mut, ConversationBuilder,
+        conversations, conversations_mut, Conversations,
+        errors, errors_mut, Errors,
+        message_search, message_search_mut, MessageSearch,
+        users, users_mut, Users,
+        users_search, users_search_mut, UsersSearch,
+        utils, utils_mut, Utils
     }
 }

@@ -1596,24 +1596,24 @@ pub unsafe extern "C" fn errors_next_error(
     set(d, s, r.len() as i32);
 }
 
-pub struct HeraldStateQObject {}
+pub struct HeraldQObject {}
 
-pub struct HeraldStateEmitter {
-    qobject: Arc<AtomicPtr<HeraldStateQObject>>,
-    config_init_changed: fn(*mut HeraldStateQObject),
-    connection_pending_changed: fn(*mut HeraldStateQObject),
-    connection_up_changed: fn(*mut HeraldStateQObject),
+pub struct HeraldEmitter {
+    qobject: Arc<AtomicPtr<HeraldQObject>>,
+    config_init_changed: fn(*mut HeraldQObject),
+    connection_pending_changed: fn(*mut HeraldQObject),
+    connection_up_changed: fn(*mut HeraldQObject),
 }
 
-impl HeraldStateEmitter {
+impl HeraldEmitter {
     /// Clone the emitter
     ///
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
     /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> HeraldStateEmitter {
-        HeraldStateEmitter {
+    pub fn clone(&mut self) -> HeraldEmitter {
+        HeraldEmitter {
             qobject: self.qobject.clone(),
             config_init_changed: self.config_init_changed,
             connection_pending_changed: self.connection_pending_changed,
@@ -1621,9 +1621,9 @@ impl HeraldStateEmitter {
         }
     }
     fn clear(&self) {
-        let n: *const HeraldStateQObject = null();
+        let n: *const HeraldQObject = null();
         self.qobject
-            .store(n as *mut HeraldStateQObject, Ordering::SeqCst);
+            .store(n as *mut HeraldQObject, Ordering::SeqCst);
     }
     pub fn config_init_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
@@ -1645,17 +1645,38 @@ impl HeraldStateEmitter {
     }
 }
 
-pub trait HeraldStateTrait {
+pub trait HeraldTrait {
     fn new(
-        emit: HeraldStateEmitter,
-        global_message_search: MessageSearch,
+        emit: HeraldEmitter,
+        config: Config,
+        conversation_builder: ConversationBuilder,
+        conversations: Conversations,
+        errors: Errors,
+        message_search: MessageSearch,
+        users: Users,
+        users_search: UsersSearch,
+        utils: Utils,
     ) -> Self;
-    fn emit(&mut self) -> &mut HeraldStateEmitter;
+    fn emit(&mut self) -> &mut HeraldEmitter;
+    fn config(&self) -> &Config;
+    fn config_mut(&mut self) -> &mut Config;
     fn config_init(&self) -> bool;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
-    fn global_message_search(&self) -> &MessageSearch;
-    fn global_message_search_mut(&mut self) -> &mut MessageSearch;
+    fn conversation_builder(&self) -> &ConversationBuilder;
+    fn conversation_builder_mut(&mut self) -> &mut ConversationBuilder;
+    fn conversations(&self) -> &Conversations;
+    fn conversations_mut(&mut self) -> &mut Conversations;
+    fn errors(&self) -> &Errors;
+    fn errors_mut(&mut self) -> &mut Errors;
+    fn message_search(&self) -> &MessageSearch;
+    fn message_search_mut(&mut self) -> &mut MessageSearch;
+    fn users(&self) -> &Users;
+    fn users_mut(&mut self) -> &mut Users;
+    fn users_search(&self) -> &UsersSearch;
+    fn users_search_mut(&mut self) -> &mut UsersSearch;
+    fn utils(&self) -> &Utils;
+    fn utils_mut(&mut self) -> &mut Utils;
     fn login(&mut self) -> bool;
     fn register_new_user(
         &mut self,
@@ -1664,94 +1685,308 @@ pub trait HeraldStateTrait {
 }
 
 #[no_mangle]
-pub extern "C" fn herald_state_new(
-    herald_state: *mut HeraldStateQObject,
-    herald_state_config_init_changed: fn(*mut HeraldStateQObject),
-    herald_state_connection_pending_changed: fn(*mut HeraldStateQObject),
-    herald_state_connection_up_changed: fn(*mut HeraldStateQObject),
-    global_message_search: *mut MessageSearchQObject,
-    global_message_search_regex_search_changed: fn(*mut MessageSearchQObject),
-    global_message_search_search_pattern_changed: fn(*mut MessageSearchQObject),
-    global_message_search_new_data_ready: fn(*mut MessageSearchQObject),
-    global_message_search_layout_about_to_be_changed: fn(*mut MessageSearchQObject),
-    global_message_search_layout_changed: fn(*mut MessageSearchQObject),
-    global_message_search_data_changed: fn(*mut MessageSearchQObject, usize, usize),
-    global_message_search_begin_reset_model: fn(*mut MessageSearchQObject),
-    global_message_search_end_reset_model: fn(*mut MessageSearchQObject),
-    global_message_search_begin_insert_rows: fn(*mut MessageSearchQObject, usize, usize),
-    global_message_search_end_insert_rows: fn(*mut MessageSearchQObject),
-    global_message_search_begin_move_rows: fn(*mut MessageSearchQObject, usize, usize, usize),
-    global_message_search_end_move_rows: fn(*mut MessageSearchQObject),
-    global_message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
-    global_message_search_end_remove_rows: fn(*mut MessageSearchQObject),
-) -> *mut HeraldState {
-    let global_message_search_emit = MessageSearchEmitter {
-        qobject: Arc::new(AtomicPtr::new(global_message_search)),
-        regex_search_changed: global_message_search_regex_search_changed,
-        search_pattern_changed: global_message_search_search_pattern_changed,
-        new_data_ready: global_message_search_new_data_ready,
+pub extern "C" fn herald_new(
+    herald: *mut HeraldQObject,
+    config: *mut ConfigQObject,
+    config_color_changed: fn(*mut ConfigQObject),
+    config_colorscheme_changed: fn(*mut ConfigQObject),
+    config_config_id_changed: fn(*mut ConfigQObject),
+    config_name_changed: fn(*mut ConfigQObject),
+    config_nts_conversation_id_changed: fn(*mut ConfigQObject),
+    config_profile_picture_changed: fn(*mut ConfigQObject),
+    herald_config_init_changed: fn(*mut HeraldQObject),
+    herald_connection_pending_changed: fn(*mut HeraldQObject),
+    herald_connection_up_changed: fn(*mut HeraldQObject),
+    conversation_builder: *mut ConversationBuilderQObject,
+    conversation_builder_picture_changed: fn(*mut ConversationBuilderQObject),
+    conversation_builder_new_data_ready: fn(*mut ConversationBuilderQObject),
+    conversation_builder_layout_about_to_be_changed: fn(*mut ConversationBuilderQObject),
+    conversation_builder_layout_changed: fn(*mut ConversationBuilderQObject),
+    conversation_builder_data_changed: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_begin_reset_model: fn(*mut ConversationBuilderQObject),
+    conversation_builder_end_reset_model: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_insert_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_end_insert_rows: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_move_rows: fn(*mut ConversationBuilderQObject, usize, usize, usize),
+    conversation_builder_end_move_rows: fn(*mut ConversationBuilderQObject),
+    conversation_builder_begin_remove_rows: fn(*mut ConversationBuilderQObject, usize, usize),
+    conversation_builder_end_remove_rows: fn(*mut ConversationBuilderQObject),
+    conversations: *mut ConversationsQObject,
+    conversations_filter_changed: fn(*mut ConversationsQObject),
+    conversations_filter_regex_changed: fn(*mut ConversationsQObject),
+    conversations_new_data_ready: fn(*mut ConversationsQObject),
+    conversations_layout_about_to_be_changed: fn(*mut ConversationsQObject),
+    conversations_layout_changed: fn(*mut ConversationsQObject),
+    conversations_data_changed: fn(*mut ConversationsQObject, usize, usize),
+    conversations_begin_reset_model: fn(*mut ConversationsQObject),
+    conversations_end_reset_model: fn(*mut ConversationsQObject),
+    conversations_begin_insert_rows: fn(*mut ConversationsQObject, usize, usize),
+    conversations_end_insert_rows: fn(*mut ConversationsQObject),
+    conversations_begin_move_rows: fn(*mut ConversationsQObject, usize, usize, usize),
+    conversations_end_move_rows: fn(*mut ConversationsQObject),
+    conversations_begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
+    conversations_end_remove_rows: fn(*mut ConversationsQObject),
+    errors: *mut ErrorsQObject,
+    errors_try_poll_changed: fn(*mut ErrorsQObject),
+    message_search: *mut MessageSearchQObject,
+    message_search_regex_search_changed: fn(*mut MessageSearchQObject),
+    message_search_search_pattern_changed: fn(*mut MessageSearchQObject),
+    message_search_new_data_ready: fn(*mut MessageSearchQObject),
+    message_search_layout_about_to_be_changed: fn(*mut MessageSearchQObject),
+    message_search_layout_changed: fn(*mut MessageSearchQObject),
+    message_search_data_changed: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_begin_reset_model: fn(*mut MessageSearchQObject),
+    message_search_end_reset_model: fn(*mut MessageSearchQObject),
+    message_search_begin_insert_rows: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_end_insert_rows: fn(*mut MessageSearchQObject),
+    message_search_begin_move_rows: fn(*mut MessageSearchQObject, usize, usize, usize),
+    message_search_end_move_rows: fn(*mut MessageSearchQObject),
+    message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
+    message_search_end_remove_rows: fn(*mut MessageSearchQObject),
+    users: *mut UsersQObject,
+    users_filter_changed: fn(*mut UsersQObject),
+    users_filter_regex_changed: fn(*mut UsersQObject),
+    users_new_data_ready: fn(*mut UsersQObject),
+    users_layout_about_to_be_changed: fn(*mut UsersQObject),
+    users_layout_changed: fn(*mut UsersQObject),
+    users_data_changed: fn(*mut UsersQObject, usize, usize),
+    users_begin_reset_model: fn(*mut UsersQObject),
+    users_end_reset_model: fn(*mut UsersQObject),
+    users_begin_insert_rows: fn(*mut UsersQObject, usize, usize),
+    users_end_insert_rows: fn(*mut UsersQObject),
+    users_begin_move_rows: fn(*mut UsersQObject, usize, usize, usize),
+    users_end_move_rows: fn(*mut UsersQObject),
+    users_begin_remove_rows: fn(*mut UsersQObject, usize, usize),
+    users_end_remove_rows: fn(*mut UsersQObject),
+    users_search: *mut UsersSearchQObject,
+    users_search_filter_changed: fn(*mut UsersSearchQObject),
+    users_search_new_data_ready: fn(*mut UsersSearchQObject),
+    users_search_layout_about_to_be_changed: fn(*mut UsersSearchQObject),
+    users_search_layout_changed: fn(*mut UsersSearchQObject),
+    users_search_data_changed: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_begin_reset_model: fn(*mut UsersSearchQObject),
+    users_search_end_reset_model: fn(*mut UsersSearchQObject),
+    users_search_begin_insert_rows: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_end_insert_rows: fn(*mut UsersSearchQObject),
+    users_search_begin_move_rows: fn(*mut UsersSearchQObject, usize, usize, usize),
+    users_search_end_move_rows: fn(*mut UsersSearchQObject),
+    users_search_begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
+    users_search_end_remove_rows: fn(*mut UsersSearchQObject),
+    utils: *mut UtilsQObject,
+) -> *mut Herald {
+    let config_emit = ConfigEmitter {
+        qobject: Arc::new(AtomicPtr::new(config)),
+        color_changed: config_color_changed,
+        colorscheme_changed: config_colorscheme_changed,
+        config_id_changed: config_config_id_changed,
+        name_changed: config_name_changed,
+        nts_conversation_id_changed: config_nts_conversation_id_changed,
+        profile_picture_changed: config_profile_picture_changed,
+    };
+    let d_config = Config::new(config_emit);
+    let conversation_builder_emit = ConversationBuilderEmitter {
+        qobject: Arc::new(AtomicPtr::new(conversation_builder)),
+        picture_changed: conversation_builder_picture_changed,
+        new_data_ready: conversation_builder_new_data_ready,
+    };
+    let model = ConversationBuilderList {
+        qobject: conversation_builder,
+        layout_about_to_be_changed: conversation_builder_layout_about_to_be_changed,
+        layout_changed: conversation_builder_layout_changed,
+        data_changed: conversation_builder_data_changed,
+        begin_reset_model: conversation_builder_begin_reset_model,
+        end_reset_model: conversation_builder_end_reset_model,
+        begin_insert_rows: conversation_builder_begin_insert_rows,
+        end_insert_rows: conversation_builder_end_insert_rows,
+        begin_move_rows: conversation_builder_begin_move_rows,
+        end_move_rows: conversation_builder_end_move_rows,
+        begin_remove_rows: conversation_builder_begin_remove_rows,
+        end_remove_rows: conversation_builder_end_remove_rows,
+    };
+    let d_conversation_builder = ConversationBuilder::new(conversation_builder_emit, model);
+    let conversations_emit = ConversationsEmitter {
+        qobject: Arc::new(AtomicPtr::new(conversations)),
+        filter_changed: conversations_filter_changed,
+        filter_regex_changed: conversations_filter_regex_changed,
+        new_data_ready: conversations_new_data_ready,
+    };
+    let model = ConversationsList {
+        qobject: conversations,
+        layout_about_to_be_changed: conversations_layout_about_to_be_changed,
+        layout_changed: conversations_layout_changed,
+        data_changed: conversations_data_changed,
+        begin_reset_model: conversations_begin_reset_model,
+        end_reset_model: conversations_end_reset_model,
+        begin_insert_rows: conversations_begin_insert_rows,
+        end_insert_rows: conversations_end_insert_rows,
+        begin_move_rows: conversations_begin_move_rows,
+        end_move_rows: conversations_end_move_rows,
+        begin_remove_rows: conversations_begin_remove_rows,
+        end_remove_rows: conversations_end_remove_rows,
+    };
+    let d_conversations = Conversations::new(conversations_emit, model);
+    let errors_emit = ErrorsEmitter {
+        qobject: Arc::new(AtomicPtr::new(errors)),
+        try_poll_changed: errors_try_poll_changed,
+    };
+    let d_errors = Errors::new(errors_emit);
+    let message_search_emit = MessageSearchEmitter {
+        qobject: Arc::new(AtomicPtr::new(message_search)),
+        regex_search_changed: message_search_regex_search_changed,
+        search_pattern_changed: message_search_search_pattern_changed,
+        new_data_ready: message_search_new_data_ready,
     };
     let model = MessageSearchList {
-        qobject: global_message_search,
-        layout_about_to_be_changed: global_message_search_layout_about_to_be_changed,
-        layout_changed: global_message_search_layout_changed,
-        data_changed: global_message_search_data_changed,
-        begin_reset_model: global_message_search_begin_reset_model,
-        end_reset_model: global_message_search_end_reset_model,
-        begin_insert_rows: global_message_search_begin_insert_rows,
-        end_insert_rows: global_message_search_end_insert_rows,
-        begin_move_rows: global_message_search_begin_move_rows,
-        end_move_rows: global_message_search_end_move_rows,
-        begin_remove_rows: global_message_search_begin_remove_rows,
-        end_remove_rows: global_message_search_end_remove_rows,
+        qobject: message_search,
+        layout_about_to_be_changed: message_search_layout_about_to_be_changed,
+        layout_changed: message_search_layout_changed,
+        data_changed: message_search_data_changed,
+        begin_reset_model: message_search_begin_reset_model,
+        end_reset_model: message_search_end_reset_model,
+        begin_insert_rows: message_search_begin_insert_rows,
+        end_insert_rows: message_search_end_insert_rows,
+        begin_move_rows: message_search_begin_move_rows,
+        end_move_rows: message_search_end_move_rows,
+        begin_remove_rows: message_search_begin_remove_rows,
+        end_remove_rows: message_search_end_remove_rows,
     };
-    let d_global_message_search = MessageSearch::new(global_message_search_emit, model);
-    let herald_state_emit = HeraldStateEmitter {
-        qobject: Arc::new(AtomicPtr::new(herald_state)),
-        config_init_changed: herald_state_config_init_changed,
-        connection_pending_changed: herald_state_connection_pending_changed,
-        connection_up_changed: herald_state_connection_up_changed,
+    let d_message_search = MessageSearch::new(message_search_emit, model);
+    let users_emit = UsersEmitter {
+        qobject: Arc::new(AtomicPtr::new(users)),
+        filter_changed: users_filter_changed,
+        filter_regex_changed: users_filter_regex_changed,
+        new_data_ready: users_new_data_ready,
     };
-    let d_herald_state = HeraldState::new(herald_state_emit, d_global_message_search);
-    Box::into_raw(Box::new(d_herald_state))
+    let model = UsersList {
+        qobject: users,
+        layout_about_to_be_changed: users_layout_about_to_be_changed,
+        layout_changed: users_layout_changed,
+        data_changed: users_data_changed,
+        begin_reset_model: users_begin_reset_model,
+        end_reset_model: users_end_reset_model,
+        begin_insert_rows: users_begin_insert_rows,
+        end_insert_rows: users_end_insert_rows,
+        begin_move_rows: users_begin_move_rows,
+        end_move_rows: users_end_move_rows,
+        begin_remove_rows: users_begin_remove_rows,
+        end_remove_rows: users_end_remove_rows,
+    };
+    let d_users = Users::new(users_emit, model);
+    let users_search_emit = UsersSearchEmitter {
+        qobject: Arc::new(AtomicPtr::new(users_search)),
+        filter_changed: users_search_filter_changed,
+        new_data_ready: users_search_new_data_ready,
+    };
+    let model = UsersSearchList {
+        qobject: users_search,
+        layout_about_to_be_changed: users_search_layout_about_to_be_changed,
+        layout_changed: users_search_layout_changed,
+        data_changed: users_search_data_changed,
+        begin_reset_model: users_search_begin_reset_model,
+        end_reset_model: users_search_end_reset_model,
+        begin_insert_rows: users_search_begin_insert_rows,
+        end_insert_rows: users_search_end_insert_rows,
+        begin_move_rows: users_search_begin_move_rows,
+        end_move_rows: users_search_end_move_rows,
+        begin_remove_rows: users_search_begin_remove_rows,
+        end_remove_rows: users_search_end_remove_rows,
+    };
+    let d_users_search = UsersSearch::new(users_search_emit, model);
+    let utils_emit = UtilsEmitter {
+        qobject: Arc::new(AtomicPtr::new(utils)),
+    };
+    let d_utils = Utils::new(utils_emit);
+    let herald_emit = HeraldEmitter {
+        qobject: Arc::new(AtomicPtr::new(herald)),
+        config_init_changed: herald_config_init_changed,
+        connection_pending_changed: herald_connection_pending_changed,
+        connection_up_changed: herald_connection_up_changed,
+    };
+    let d_herald = Herald::new(
+        herald_emit,
+        d_config,
+        d_conversation_builder,
+        d_conversations,
+        d_errors,
+        d_message_search,
+        d_users,
+        d_users_search,
+        d_utils,
+    );
+    Box::into_raw(Box::new(d_herald))
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_free(ptr: *mut HeraldState) {
+pub unsafe extern "C" fn herald_free(ptr: *mut Herald) {
     Box::from_raw(ptr).emit().clear();
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_config_init_get(ptr: *const HeraldState) -> bool {
+pub unsafe extern "C" fn herald_config_get(ptr: *mut Herald) -> *mut Config {
+    (&mut *ptr).config_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_config_init_get(ptr: *const Herald) -> bool {
     (&*ptr).config_init()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_connection_pending_get(ptr: *const HeraldState) -> bool {
+pub unsafe extern "C" fn herald_connection_pending_get(ptr: *const Herald) -> bool {
     (&*ptr).connection_pending()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_connection_up_get(ptr: *const HeraldState) -> bool {
+pub unsafe extern "C" fn herald_connection_up_get(ptr: *const Herald) -> bool {
     (&*ptr).connection_up()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_global_message_search_get(
-    ptr: *mut HeraldState
-) -> *mut MessageSearch {
-    (&mut *ptr).global_message_search_mut()
+pub unsafe extern "C" fn herald_conversation_builder_get(
+    ptr: *mut Herald
+) -> *mut ConversationBuilder {
+    (&mut *ptr).conversation_builder_mut()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_login(ptr: *mut HeraldState) -> bool {
+pub unsafe extern "C" fn herald_conversations_get(ptr: *mut Herald) -> *mut Conversations {
+    (&mut *ptr).conversations_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_errors_get(ptr: *mut Herald) -> *mut Errors {
+    (&mut *ptr).errors_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_message_search_get(ptr: *mut Herald) -> *mut MessageSearch {
+    (&mut *ptr).message_search_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_users_get(ptr: *mut Herald) -> *mut Users {
+    (&mut *ptr).users_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_users_search_get(ptr: *mut Herald) -> *mut UsersSearch {
+    (&mut *ptr).users_search_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_utils_get(ptr: *mut Herald) -> *mut Utils {
+    (&mut *ptr).utils_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_login(ptr: *mut Herald) -> bool {
     let o = &mut *ptr;
     o.login()
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn herald_state_register_new_user(
-    ptr: *mut HeraldState,
+pub unsafe extern "C" fn herald_register_new_user(
+    ptr: *mut Herald,
     user_id_str: *const c_ushort,
     user_id_len: c_int,
 ) {
@@ -1759,84 +1994,6 @@ pub unsafe extern "C" fn herald_state_register_new_user(
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     o.register_new_user(user_id)
-}
-
-pub struct HeraldUtilsQObject {}
-
-pub struct HeraldUtilsEmitter {
-    qobject: Arc<AtomicPtr<HeraldUtilsQObject>>,
-}
-
-impl HeraldUtilsEmitter {
-    /// Clone the emitter
-    ///
-    /// The emitter can only be cloned when it is mutable. The emitter calls
-    /// into C++ code which may call into Rust again. If emmitting is possible
-    /// from immutable structures, that might lead to access to a mutable
-    /// reference. That is undefined behaviour and forbidden.
-    pub fn clone(&mut self) -> HeraldUtilsEmitter {
-        HeraldUtilsEmitter {
-            qobject: self.qobject.clone(),
-        }
-    }
-    fn clear(&self) {
-        let n: *const HeraldUtilsQObject = null();
-        self.qobject
-            .store(n as *mut HeraldUtilsQObject, Ordering::SeqCst);
-    }
-}
-
-pub trait HeraldUtilsTrait {
-    fn new(emit: HeraldUtilsEmitter) -> Self;
-    fn emit(&mut self) -> &mut HeraldUtilsEmitter;
-    fn compare_byte_array(
-        &self,
-        bs1: &[u8],
-        bs2: &[u8],
-    ) -> bool;
-    fn is_valid_rand_id(
-        &self,
-        bs: &[u8],
-    ) -> bool;
-}
-
-#[no_mangle]
-pub extern "C" fn herald_utils_new(herald_utils: *mut HeraldUtilsQObject) -> *mut HeraldUtils {
-    let herald_utils_emit = HeraldUtilsEmitter {
-        qobject: Arc::new(AtomicPtr::new(herald_utils)),
-    };
-    let d_herald_utils = HeraldUtils::new(herald_utils_emit);
-    Box::into_raw(Box::new(d_herald_utils))
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_utils_free(ptr: *mut HeraldUtils) {
-    Box::from_raw(ptr).emit().clear();
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_utils_compare_byte_array(
-    ptr: *const HeraldUtils,
-    bs1_str: *const c_char,
-    bs1_len: c_int,
-    bs2_str: *const c_char,
-    bs2_len: c_int,
-) -> bool {
-    let bs1 = { qba_slice!(bs1_str, bs1_len) };
-    let bs2 = { qba_slice!(bs2_str, bs2_len) };
-    let o = &*ptr;
-    o.compare_byte_array(bs1, bs2)
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn herald_utils_is_valid_rand_id(
-    ptr: *const HeraldUtils,
-    bs_str: *const c_char,
-    bs_len: c_int,
-) -> bool {
-    let bs = { qba_slice!(bs_str, bs_len) };
-    let o = &*ptr;
-    o.is_valid_rand_id(bs)
 }
 
 pub struct MembersQObject {}
@@ -5268,4 +5425,81 @@ pub unsafe extern "C" fn users_search_data_user_id(
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
     }
+}
+
+pub struct UtilsQObject {}
+
+pub struct UtilsEmitter {
+    qobject: Arc<AtomicPtr<UtilsQObject>>,
+}
+
+impl UtilsEmitter {
+    /// Clone the emitter
+    ///
+    /// The emitter can only be cloned when it is mutable. The emitter calls
+    /// into C++ code which may call into Rust again. If emmitting is possible
+    /// from immutable structures, that might lead to access to a mutable
+    /// reference. That is undefined behaviour and forbidden.
+    pub fn clone(&mut self) -> UtilsEmitter {
+        UtilsEmitter {
+            qobject: self.qobject.clone(),
+        }
+    }
+    fn clear(&self) {
+        let n: *const UtilsQObject = null();
+        self.qobject.store(n as *mut UtilsQObject, Ordering::SeqCst);
+    }
+}
+
+pub trait UtilsTrait {
+    fn new(emit: UtilsEmitter) -> Self;
+    fn emit(&mut self) -> &mut UtilsEmitter;
+    fn compare_byte_array(
+        &self,
+        bs1: &[u8],
+        bs2: &[u8],
+    ) -> bool;
+    fn is_valid_rand_id(
+        &self,
+        bs: &[u8],
+    ) -> bool;
+}
+
+#[no_mangle]
+pub extern "C" fn utils_new(utils: *mut UtilsQObject) -> *mut Utils {
+    let utils_emit = UtilsEmitter {
+        qobject: Arc::new(AtomicPtr::new(utils)),
+    };
+    let d_utils = Utils::new(utils_emit);
+    Box::into_raw(Box::new(d_utils))
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_free(ptr: *mut Utils) {
+    Box::from_raw(ptr).emit().clear();
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_compare_byte_array(
+    ptr: *const Utils,
+    bs1_str: *const c_char,
+    bs1_len: c_int,
+    bs2_str: *const c_char,
+    bs2_len: c_int,
+) -> bool {
+    let bs1 = { qba_slice!(bs1_str, bs1_len) };
+    let bs2 = { qba_slice!(bs2_str, bs2_len) };
+    let o = &*ptr;
+    o.compare_byte_array(bs1, bs2)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_is_valid_rand_id(
+    ptr: *const Utils,
+    bs_str: *const c_char,
+    bs_len: c_int,
+) -> bool {
+    let bs = { qba_slice!(bs_str, bs_len) };
+    let o = &*ptr;
+    o.is_valid_rand_id(bs)
 }
