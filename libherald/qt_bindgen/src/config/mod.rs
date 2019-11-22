@@ -276,7 +276,8 @@ fn messages() -> Object {
         opMsgId: ItemProp::new(QByteArray).optional(),
         opAuthor: ItemProp::new(QString).optional(),
         opBody: ItemProp::new(QString).optional(),
-        opTime: ItemProp::new(Qint64).optional(),
+        opInsertionTime: ItemProp::new(Qint64).optional(),
+        opExpirationTime: ItemProp::new(Qint64).optional(),
         opHasAttachments: ItemProp::new(Bool).optional()
     };
 

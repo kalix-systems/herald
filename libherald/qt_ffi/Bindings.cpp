@@ -1613,10 +1613,11 @@ void messages_data_op_author(const Messages::Private *, int, QString *,
                              qstring_set);
 void messages_data_op_body(const Messages::Private *, int, QString *,
                            qstring_set);
+option_qint64 messages_data_op_expiration_time(const Messages::Private *, int);
 option_bool messages_data_op_has_attachments(const Messages::Private *, int);
+option_qint64 messages_data_op_insertion_time(const Messages::Private *, int);
 void messages_data_op_msg_id(const Messages::Private *, int, QByteArray *,
                              qbytearray_set);
-option_qint64 messages_data_op_time(const Messages::Private *, int);
 option_quint32 messages_data_receipt_status(const Messages::Private *, int);
 option_quint8 messages_data_reply_type(const Messages::Private *, int);
 option_qint64 messages_data_server_time(const Messages::Private *, int);
@@ -1753,9 +1754,21 @@ QString Messages::opBody(int row) const {
   return s;
 }
 
+QVariant Messages::opExpirationTime(int row) const {
+  QVariant v;
+  v = messages_data_op_expiration_time(m_d, row);
+  return v;
+}
+
 QVariant Messages::opHasAttachments(int row) const {
   QVariant v;
   v = messages_data_op_has_attachments(m_d, row);
+  return v;
+}
+
+QVariant Messages::opInsertionTime(int row) const {
+  QVariant v;
+  v = messages_data_op_insertion_time(m_d, row);
   return v;
 }
 
@@ -1763,12 +1776,6 @@ QByteArray Messages::opMsgId(int row) const {
   QByteArray b;
   messages_data_op_msg_id(m_d, row, &b, set_qbytearray);
   return b;
-}
-
-QVariant Messages::opTime(int row) const {
-  QVariant v;
-  v = messages_data_op_time(m_d, row);
-  return v;
 }
 
 QVariant Messages::receiptStatus(int row) const {
@@ -1819,16 +1826,18 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 11:
       return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
     case Qt::UserRole + 12:
-      return opHasAttachments(index.row());
+      return opExpirationTime(index.row());
     case Qt::UserRole + 13:
-      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
+      return opHasAttachments(index.row());
     case Qt::UserRole + 14:
-      return opTime(index.row());
+      return opInsertionTime(index.row());
     case Qt::UserRole + 15:
-      return receiptStatus(index.row());
+      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
     case Qt::UserRole + 16:
-      return replyType(index.row());
+      return receiptStatus(index.row());
     case Qt::UserRole + 17:
+      return replyType(index.row());
+    case Qt::UserRole + 18:
       return serverTime(index.row());
     }
     break;
@@ -1861,12 +1870,13 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 9, "msgId");
   names.insert(Qt::UserRole + 10, "opAuthor");
   names.insert(Qt::UserRole + 11, "opBody");
-  names.insert(Qt::UserRole + 12, "opHasAttachments");
-  names.insert(Qt::UserRole + 13, "opMsgId");
-  names.insert(Qt::UserRole + 14, "opTime");
-  names.insert(Qt::UserRole + 15, "receiptStatus");
-  names.insert(Qt::UserRole + 16, "replyType");
-  names.insert(Qt::UserRole + 17, "serverTime");
+  names.insert(Qt::UserRole + 12, "opExpirationTime");
+  names.insert(Qt::UserRole + 13, "opHasAttachments");
+  names.insert(Qt::UserRole + 14, "opInsertionTime");
+  names.insert(Qt::UserRole + 15, "opMsgId");
+  names.insert(Qt::UserRole + 16, "receiptStatus");
+  names.insert(Qt::UserRole + 17, "replyType");
+  names.insert(Qt::UserRole + 18, "serverTime");
   return names;
 }
 QVariant Messages::headerData(int section, Qt::Orientation orientation,

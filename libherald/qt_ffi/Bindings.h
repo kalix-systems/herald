@@ -744,9 +744,10 @@ public:
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
+  Q_INVOKABLE QVariant opExpirationTime(int row) const;
   Q_INVOKABLE QVariant opHasAttachments(int row) const;
+  Q_INVOKABLE QVariant opInsertionTime(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
-  Q_INVOKABLE QVariant opTime(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;

@@ -327,10 +327,17 @@ impl Interface for Messages {
         self.container.op_has_attachments(index)
     }
 
-    fn op_time(
+    fn op_insertion_time(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.op_time(index)?.0)
+        Some(self.container.op_insertion_time(index)?.0)
+    }
+
+    fn op_expiration_time(
+        &self,
+        index: usize,
+    ) -> Option<i64> {
+        Some(self.container.op_insertion_time(index)?.0)
     }
 }

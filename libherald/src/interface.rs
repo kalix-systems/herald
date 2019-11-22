@@ -4029,18 +4029,22 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<&str>;
+    fn op_expiration_time(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
     fn op_has_attachments(
         &self,
         index: usize,
     ) -> Option<bool>;
+    fn op_insertion_time(
+        &self,
+        index: usize,
+    ) -> Option<i64>;
     fn op_msg_id(
         &self,
         index: usize,
     ) -> Option<&[u8]>;
-    fn op_time(
-        &self,
-        index: usize,
-    ) -> Option<i64>;
     fn receipt_status(
         &self,
         index: usize,
@@ -4601,12 +4605,30 @@ pub unsafe extern "C" fn messages_data_op_body(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_op_expiration_time(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<i64> {
+    let o = &*ptr;
+    o.op_expiration_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_has_attachments(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<bool> {
     let o = &*ptr;
     o.op_has_attachments(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_insertion_time(
+    ptr: *const Messages,
+    row: c_int,
+) -> COption<i64> {
+    let o = &*ptr;
+    o.op_insertion_time(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -4622,15 +4644,6 @@ pub unsafe extern "C" fn messages_data_op_msg_id(
         let s: *const c_char = data.as_ptr() as (*const c_char);
         set(d, s, to_c_int(data.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_op_time(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<i64> {
-    let o = &*ptr;
-    o.op_time(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
