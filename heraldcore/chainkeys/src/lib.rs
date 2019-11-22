@@ -32,6 +32,8 @@ lazy_static! {
 }
 
 pub mod db;
+#[cfg(test)]
+mod tests;
 
 pub struct Decrypted {
     pub ad: Bytes,
@@ -42,46 +44,7 @@ pub fn open_msg(
     cid: ConversationId,
     cipher: channel_ratchet::Cipher,
 ) -> Result<Option<Decrypted>, ChainKeysError> {
-    db::with_tx(move |tx| {
-        use channel_ratchet::DecryptionResult::*;
-
-        let res = if let Some(k) = tx.get_derived_key(cid, cipher.index)? {
-            let ix = cipher.index;
-            let r0 = cipher.open_with(k);
-            if let Success { .. } = &r0 {
-                tx.mark_used(cid, ix)?;
-            }
-            r0
-        } else {
-            let mut state = tx.get_ratchet_state(cid)?;
-            let res = state.open(cipher);
-            tx.store_ratchet_state(cid, &state)?;
-            res
-        };
-
-        match res {
-            Success { extra_keys, ad, pt } => {
-                if let Some((ix, _)) = extra_keys.last() {
-                    tx.mark_used(cid, *ix)?;
-                }
-
-                for (ix, key) in extra_keys {
-                    tx.store_derived_key(cid, ix, key)?;
-                }
-
-                Ok(Some(Decrypted { ad, pt }))
-            }
-            Failed { extra_keys } => {
-                for (ix, key) in extra_keys {
-                    tx.store_derived_key(cid, ix, key)?;
-                }
-
-                Ok(None)
-            }
-            // TODO: include these fields in error msg
-            IndexTooHigh { .. } => Err(ChainKeysError::StoreCorrupted),
-        }
-    })
+    db::with_tx(move |tx| tx.open_msg(cid, cipher))
 }
 
 pub fn seal_msg(
@@ -89,14 +52,7 @@ pub fn seal_msg(
     ad: Bytes,
     msg: BytesMut,
 ) -> Result<channel_ratchet::Cipher, ChainKeysError> {
-    db::with_tx(move |tx| {
-        let mut ratchet = tx.get_ratchet_state(cid)?;
-        let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
-        tx.store_derived_key(cid, ix, key)?;
-        tx.mark_used(cid, ix)?;
-        tx.store_ratchet_state(cid, &ratchet)?;
-        Ok(cipher)
-    })
+    db::with_tx(move |tx| tx.seal_msg(cid, ad, msg))
 }
 
 pub fn store_state(

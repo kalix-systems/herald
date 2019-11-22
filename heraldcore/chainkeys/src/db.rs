@@ -132,4 +132,63 @@ impl Tx<'_> {
             .transpose()?;
         Ok(res)
     }
+
+    pub fn open_msg(
+        &mut self,
+        cid: ConversationId,
+        cipher: channel_ratchet::Cipher,
+    ) -> Result<Option<Decrypted>, ChainKeysError> {
+        use channel_ratchet::DecryptionResult::*;
+
+        let res = if let Some(k) = self.get_derived_key(cid, cipher.index)? {
+            let ix = cipher.index;
+            let r0 = cipher.open_with(k);
+            if let Success { .. } = &r0 {
+                self.mark_used(cid, ix)?;
+            }
+            r0
+        } else {
+            let mut state = self.get_ratchet_state(cid)?;
+            let res = state.open(cipher);
+            self.store_ratchet_state(cid, &state)?;
+            res
+        };
+
+        match res {
+            Success { extra_keys, ad, pt } => {
+                if let Some((ix, _)) = extra_keys.last() {
+                    self.mark_used(cid, *ix)?;
+                }
+
+                for (ix, key) in extra_keys {
+                    self.store_derived_key(cid, ix, key)?;
+                }
+
+                Ok(Some(Decrypted { ad, pt }))
+            }
+            Failed { extra_keys } => {
+                for (ix, key) in extra_keys {
+                    self.store_derived_key(cid, ix, key)?;
+                }
+
+                Ok(None)
+            }
+            // TODO: include these fields in error msg
+            IndexTooHigh { .. } => Err(ChainKeysError::StoreCorrupted),
+        }
+    }
+
+    pub fn seal_msg(
+        &mut self,
+        cid: ConversationId,
+        ad: Bytes,
+        msg: BytesMut,
+    ) -> Result<channel_ratchet::Cipher, ChainKeysError> {
+        let mut ratchet = self.get_ratchet_state(cid)?;
+        let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
+        self.store_derived_key(cid, ix, key)?;
+        self.mark_used(cid, ix)?;
+        self.store_ratchet_state(cid, &ratchet)?;
+        Ok(cipher)
+    }
 }

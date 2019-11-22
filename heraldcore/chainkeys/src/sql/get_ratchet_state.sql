@@ -1,5 +1,5 @@
 SELECT
-  (next_ix, base_key, ratchet_key)
+  next_ix, base_key, ratchet_key
 FROM
   ratchet_states
 WHERE

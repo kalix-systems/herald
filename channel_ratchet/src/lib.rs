@@ -20,7 +20,7 @@ impl RatchetKey {
     }
 }
 
-#[derive(Debug, Clone, Ser, De)]
+#[derive(Debug, Clone, Ser, De, Eq, PartialEq)]
 pub struct RatchetState {
     ix: u64,
     base_key: hash::Key,
