@@ -18,17 +18,14 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-
-
-
     Herald {
         id: herald
         errors.onTryPollChanged: {
-                var errMsg = errorQueue.nextError()
-                if (errMsg !== "") {
-                    errPopup.errorMsg = errMsg
-                    errPopup.open()
-                }
+            var errMsg = errorQueue.nextError()
+            if (errMsg !== "") {
+                errPopup.errorMsg = errMsg
+                errPopup.open()
+            }
         }
         property var errPopup: ErrorUtils.ErrorDialog {
         }

@@ -6,7 +6,6 @@ import "../SideBar/Header" as Header
 import "../SideBar/Pane" as Pane
 import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 
-
 Page {
     id: sideBarStateLoader
     padding: 0

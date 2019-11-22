@@ -64,7 +64,6 @@ Page {
         id: newContactComponent
     }
 
-
     SideBarState {
         id: sideBarState
         anchors.fill: parent

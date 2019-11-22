@@ -21,7 +21,6 @@ ColumnLayout {
     property alias replyHighlightAnimation: replyHighlightAnimation
     property bool knownReply: replyType == 2
 
-
     spacing: 0
 
     Rectangle {
@@ -77,11 +76,12 @@ ColumnLayout {
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string decoration: knownReply && opBody.length > 350 ? "..." : ""
+                property string decoration: knownReply
+                                            && opBody.length > 350 ? "..." : ""
                 property string shortenedText: knownReply ? truncate_text(
-                                                                    opBody).slice(
-                                                                    0, 350) + decoration
-                                                          : "Original message not found"
+                                                                opBody).slice(
+                                                                0,
+                                                                350) + decoration : "Original message not found"
                 text: shortenedText
                 elideWidth: maxWidth * 3
                 elide: Text.ElideRight

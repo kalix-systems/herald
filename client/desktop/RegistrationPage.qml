@@ -61,8 +61,7 @@ Rectangle {
                 radius: 2
             }
 
-            Keys.onReturnPressed: herald.registerNewUser(
-                                      entryField.text.trim())
+            Keys.onReturnPressed: herald.registerNewUser(entryField.text.trim())
         }
 
         Button {
