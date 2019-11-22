@@ -93,7 +93,7 @@ impl Messages {
         self.model.end_remove_rows();
 
         if let Some(MsgData { replies, .. }) = data {
-            self.container.set_dangling(replies, &mut self.model);
+            container::set_dangling(&mut self.container, replies, &mut self.model);
         }
 
         if ix > 0 {
@@ -122,7 +122,7 @@ impl Messages {
         msg: Msg,
         save_status: SaveStatus,
     ) -> Result<(), HErr> {
-        let (message, data) = Message::split_msg(msg, save_status);
+        let (message, data) = split_msg(msg, save_status);
 
         let cid = self.conversation_id.ok_or(NE!())?;
 

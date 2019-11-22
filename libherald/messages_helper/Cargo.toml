@@ -1,0 +1,17 @@
+[package]
+name = "messages_helper"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+im = "14.0.0"
+
+[dependencies.herald_common]
+path    = "../../herald_common"
+
+[dependencies.heraldcore]
+path    = "../../heraldcore"
+
+[dependencies.search_pattern]
+path    = "../../heraldcore/search_pattern"

@@ -266,7 +266,7 @@ impl SearchState {
             return Some(());
         }
 
-        let message = Message::from_msg_id(msg_id, &container)?;
+        let message = from_msg_id(msg_id, &container)?;
         let ix = self.index;
 
         let pos = if self

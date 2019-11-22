@@ -10,10 +10,7 @@ use herald_common::UserId;
 use heraldcore::{
     config, conversation,
     errors::HErr,
-    message::{
-        self, Message as Msg, MessageBody, MessageReceiptStatus, MessageSendStatus, MessageTime,
-        ReplyId,
-    },
+    message::{self, Message as Msg, MessageBody, MessageReceiptStatus},
     types::*,
     NE,
 };
@@ -30,9 +27,7 @@ mod container;
 use container::*;
 mod imp;
 pub(crate) mod shared;
-pub(crate) mod types;
 use shared::*;
-use types::*;
 
 /// Implementation of `crate::interface::MessageBuilderTrait`.
 pub mod builder;
@@ -327,7 +322,8 @@ impl Interface for Messages {
                     recipient,
                     status,
                 } => {
-                    ret_err!(self.container.handle_receipt(
+                    ret_err!(container::handle_receipt(
+                        &mut self.container,
                         msg_id,
                         status,
                         recipient,
@@ -335,7 +331,11 @@ impl Interface for Messages {
                     ));
                 }
                 MsgUpdate::StoreDone(mid) => {
-                    ret_none!(self.container.handle_store_done(mid, &mut self.model));
+                    ret_none!(container::handle_store_done(
+                        &mut self.container,
+                        mid,
+                        &mut self.model
+                    ));
                 }
 
                 MsgUpdate::ExpiredMessages(mids) => self.handle_expiration(mids),
@@ -385,9 +385,13 @@ impl Interface for Messages {
             && self.search.active
         {
             self.search.set_matches(
-                self.container
-                    .apply_search(&self.search, &mut self.model, &mut self.emit)
-                    .unwrap_or_default(),
+                container::apply_search(
+                    &mut self.container,
+                    &self.search,
+                    &mut self.model,
+                    &mut self.emit,
+                )
+                .unwrap_or_default(),
                 &mut self.emit,
             );
         }
@@ -405,9 +409,13 @@ impl Interface for Messages {
     ) {
         if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
             self.search.set_matches(
-                self.container
-                    .apply_search(&self.search, &mut self.model, &mut self.emit)
-                    .unwrap_or_default(),
+                container::apply_search(
+                    &mut self.container,
+                    &self.search,
+                    &mut self.model,
+                    &mut self.emit,
+                )
+                .unwrap_or_default(),
                 &mut self.emit,
             );
         }
@@ -430,9 +438,13 @@ impl Interface for Messages {
             self.search.active = true;
             self.emit.search_active_changed();
             self.search.set_matches(
-                self.container
-                    .apply_search(&self.search, &mut self.model, &mut self.emit)
-                    .unwrap_or_default(),
+                apply_search(
+                    &mut self.container,
+                    &self.search,
+                    &mut self.model,
+                    &mut self.emit,
+                )
+                .unwrap_or_default(),
                 &mut self.emit,
             );
         }
@@ -440,7 +452,7 @@ impl Interface for Messages {
 
     /// Clears search
     fn clear_search(&mut self) {
-        self.container.clear_search(&mut self.model);
+        clear_search(&mut self.container, &mut self.model);
         ret_err!(self.search.clear_search(&mut self.emit));
     }
 

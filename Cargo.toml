@@ -19,6 +19,7 @@ members = [
   "heraldcore/search_pattern",
   "heraldcore/location",
   "libherald",
+  "libherald/messages_helper",
   "libherald/qt_bindgen",
   "kcl",
   "kson",
