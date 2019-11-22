@@ -21,6 +21,7 @@ ColumnLayout {
     property alias replyHighlightAnimation: replyHighlightAnimation
     property bool knownReply: replyType == 2
 
+
     spacing: 0
 
     Rectangle {

@@ -18,21 +18,20 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    Errors {
-        id: errorQueue
-        onTryPollChanged: {
-            var errMsg = errorQueue.nextError()
-            if (errMsg !== "") {
-                errPopup.errorMsg = errMsg
-                errPopup.open()
-            }
-        }
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
-    }
+
+
 
     Herald {
         id: herald
+        errors.onTryPollChanged: {
+                var errMsg = errorQueue.nextError()
+                if (errMsg !== "") {
+                    errPopup.errorMsg = errMsg
+                    errPopup.open()
+                }
+        }
+        property var errPopup: ErrorUtils.ErrorDialog {
+        }
     }
 
     Loader {
