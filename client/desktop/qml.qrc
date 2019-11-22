@@ -18,7 +18,6 @@
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
-        <file>SideBar/popups/ContactClickedPopup.qml</file>
         <file>SideBar/popups/js/ConfigPopupSubmission.mjs</file>
         <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/js/NewContactDialogue.mjs</file>

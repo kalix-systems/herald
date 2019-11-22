@@ -20,7 +20,7 @@ Page {
         Pane.ContactView {
             id: contactsListView
             anchors.fill: parent
-            model: contactsModel
+            model: herald.users
         }
     }
 

@@ -16,10 +16,6 @@ Item {
         }
     }
 
-    Users {
-        id: contactsModel
-    }
-
     Popups.ColorPicker {
         id: avatarColorPicker
     }
@@ -34,10 +30,6 @@ Item {
 
     Popups.NewMessagePopup {
         id: convoMenu
-    }
-
-    Config {
-        id: config
     }
 
     focus: true

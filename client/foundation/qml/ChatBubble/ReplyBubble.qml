@@ -12,7 +12,7 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
-    property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
+    property color opColor: CmnCfg.avatarColors[herald.users.colorById(
                                                     opAuthor)]
     property string authorName: ""
     property color authorColor
@@ -65,7 +65,7 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: knownReply ? contactsModel.nameById(opAuthor) : ""
+                text: knownReply ? herald.users.nameById(opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0

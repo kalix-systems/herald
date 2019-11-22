@@ -71,7 +71,7 @@ Component {
                     onTextChanged: {
                         if (contactsSearch) {
                             Qt.callLater(function (text) {
-                                contactsModel.filter = text
+                                herald.users.filter = text
                             }, searchText.text)
                         } else {
                             Qt.callLater(function (text) {
@@ -82,14 +82,14 @@ Component {
                     }
 
                     Component.onDestruction: {
-                        contactsModel.clearFilter()
+                        herald.users.clearFilter()
                         herald.conversations.clearFilter()
                         herald.messageSearch.clearSearch()
                     }
 
                     Keys.onReturnPressed: {
                         if (sideBarState.state == "newContactState") {
-                            JS.insertContact(searchText, contactsModel)
+                            JS.insertContact(searchText, herald.users)
                             sideBarState.state = ""
                         }
                     }

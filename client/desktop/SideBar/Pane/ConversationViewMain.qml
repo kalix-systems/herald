@@ -30,7 +30,7 @@ ListView {
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-        property bool outbound: messageModel.lastAuthor === config.configId
+        property bool outbound: messageModel.lastAuthor === herald.config.configId
         property Messages messageModel: Messages {
             conversationId: conversationIdProxy
         }

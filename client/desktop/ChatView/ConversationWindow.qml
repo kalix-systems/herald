@@ -49,18 +49,18 @@ Flickable {
                 readonly property string proxyBody: body
                 property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                        receiptStatus)
-                readonly property color userColor: CmnCfg.avatarColors[contactsModel.colorById(
+                readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
                                                         insertionTime)
 
-                readonly property bool outbound: author === config.configId
+                readonly property bool outbound: author === herald.config.configId
 
-                readonly property string authName: outbound ? config.name : contactsModel.nameById(
+                readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
                                                                   author)
 
                 spacing: CmnCfg.margin
-                readonly property string pfpUrl: outbound ? config.profilePicture : contactsModel.profilePictureById(
+                readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
                                                                 author)
                 property alias highlight: bubbleActual.highlightItem
 

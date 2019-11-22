@@ -27,13 +27,9 @@ Column {
         color: "black"
     }
 
-    UsersSearch {
-        id: groupConvoMake
-        Component.onCompleted: contactPopup.model = groupConvoMake
-    }
-
     ComboBox {
         id: contactPopup
+        model: herald.usersSearch
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
@@ -56,7 +52,7 @@ Column {
             property var contactData: model
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
-            visible: matched && contactData.userId !== config.configId
+            visible: matched && contactData.userId !== herald.config.configId
             Common.PlatonicRectangle {
                 color: "white"
                 id: contactRectangle
