@@ -501,7 +501,14 @@ impl Interface for Messages {
         &mut self,
         id: Option<ffi::MsgIdRef>,
     ) {
-        ret_err!(self.builder.set_op_id(id, &self.container));
+        use builder::OpChanged;
+
+        match ret_err!(self.builder.set_op_id(id, &self.container)) {
+            OpChanged::Changed => {
+                self.emit.builder_op_msg_id_changed();
+            }
+            OpChanged::NotChanged => {}
+        }
     }
 
     fn reply_type(

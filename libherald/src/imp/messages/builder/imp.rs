@@ -19,13 +19,10 @@ impl MessageBuilder {
         op_msg_id: &MsgId,
         container: &Container,
     ) -> OpChanged {
-        let mut was_reply = false;
-
         if let Some(old) = self.inner.op {
             if *op_msg_id == old {
                 return OpChanged::NotChanged;
             }
-            was_reply = true;
         }
 
         let reply = match get_reply(&op_msg_id, container) {
@@ -38,9 +35,7 @@ impl MessageBuilder {
 
         self.emit_op_changed();
 
-        if was_reply {
-            self.emit.is_reply_changed();
-        }
+        self.emit.is_reply_changed();
 
         OpChanged::Changed
     }
@@ -51,13 +46,14 @@ impl MessageBuilder {
 
     pub(super) fn emit_op_changed(&mut self) {
         self.emit.op_id_changed();
-        self.emit.body_changed();
+        self.emit.op_body_changed();
         self.emit.op_author_changed();
         self.emit.op_time_changed();
         self.emit.op_has_attachments_changed();
     }
 }
 
+#[derive(Debug)]
 pub(super) struct Reply {
     pub(super) time: Time,
     pub(super) body: Option<MessageBody>,
@@ -83,6 +79,7 @@ fn get_reply(
     container.get_data(op_msg_id).map(Reply::from_msg_data)
 }
 
+#[derive(Debug)]
 pub(in crate::imp::messages) enum OpChanged {
     Changed,
     NotChanged,

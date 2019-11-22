@@ -53,7 +53,7 @@ MouseArea {
         z: CmnCfg.overlayZ
 
         onClicked: {
-            ownedConversation.builder.opId = msgId
+            ownedConversation.builderOpMsgId = msgId
         }
     }
 }

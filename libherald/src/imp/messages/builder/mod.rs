@@ -7,7 +7,7 @@ use heraldcore::{
 use std::{convert::TryInto, path::PathBuf};
 
 mod imp;
-use imp::*;
+pub(super) use imp::*;
 
 /// Message builder, used for interactively composing messages
 pub struct MessageBuilder {
