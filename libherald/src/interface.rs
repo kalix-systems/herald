@@ -1646,11 +1646,16 @@ impl HeraldStateEmitter {
 }
 
 pub trait HeraldStateTrait {
-    fn new(emit: HeraldStateEmitter) -> Self;
+    fn new(
+        emit: HeraldStateEmitter,
+        global_message_search: MessageSearch,
+    ) -> Self;
     fn emit(&mut self) -> &mut HeraldStateEmitter;
     fn config_init(&self) -> bool;
     fn connection_pending(&self) -> bool;
     fn connection_up(&self) -> bool;
+    fn global_message_search(&self) -> &MessageSearch;
+    fn global_message_search_mut(&mut self) -> &mut MessageSearch;
     fn login(&mut self) -> bool;
     fn register_new_user(
         &mut self,
@@ -1664,14 +1669,50 @@ pub extern "C" fn herald_state_new(
     herald_state_config_init_changed: fn(*mut HeraldStateQObject),
     herald_state_connection_pending_changed: fn(*mut HeraldStateQObject),
     herald_state_connection_up_changed: fn(*mut HeraldStateQObject),
+    global_message_search: *mut MessageSearchQObject,
+    global_message_search_regex_search_changed: fn(*mut MessageSearchQObject),
+    global_message_search_search_pattern_changed: fn(*mut MessageSearchQObject),
+    global_message_search_new_data_ready: fn(*mut MessageSearchQObject),
+    global_message_search_layout_about_to_be_changed: fn(*mut MessageSearchQObject),
+    global_message_search_layout_changed: fn(*mut MessageSearchQObject),
+    global_message_search_data_changed: fn(*mut MessageSearchQObject, usize, usize),
+    global_message_search_begin_reset_model: fn(*mut MessageSearchQObject),
+    global_message_search_end_reset_model: fn(*mut MessageSearchQObject),
+    global_message_search_begin_insert_rows: fn(*mut MessageSearchQObject, usize, usize),
+    global_message_search_end_insert_rows: fn(*mut MessageSearchQObject),
+    global_message_search_begin_move_rows: fn(*mut MessageSearchQObject, usize, usize, usize),
+    global_message_search_end_move_rows: fn(*mut MessageSearchQObject),
+    global_message_search_begin_remove_rows: fn(*mut MessageSearchQObject, usize, usize),
+    global_message_search_end_remove_rows: fn(*mut MessageSearchQObject),
 ) -> *mut HeraldState {
+    let global_message_search_emit = MessageSearchEmitter {
+        qobject: Arc::new(AtomicPtr::new(global_message_search)),
+        regex_search_changed: global_message_search_regex_search_changed,
+        search_pattern_changed: global_message_search_search_pattern_changed,
+        new_data_ready: global_message_search_new_data_ready,
+    };
+    let model = MessageSearchList {
+        qobject: global_message_search,
+        layout_about_to_be_changed: global_message_search_layout_about_to_be_changed,
+        layout_changed: global_message_search_layout_changed,
+        data_changed: global_message_search_data_changed,
+        begin_reset_model: global_message_search_begin_reset_model,
+        end_reset_model: global_message_search_end_reset_model,
+        begin_insert_rows: global_message_search_begin_insert_rows,
+        end_insert_rows: global_message_search_end_insert_rows,
+        begin_move_rows: global_message_search_begin_move_rows,
+        end_move_rows: global_message_search_end_move_rows,
+        begin_remove_rows: global_message_search_begin_remove_rows,
+        end_remove_rows: global_message_search_end_remove_rows,
+    };
+    let d_global_message_search = MessageSearch::new(global_message_search_emit, model);
     let herald_state_emit = HeraldStateEmitter {
         qobject: Arc::new(AtomicPtr::new(herald_state)),
         config_init_changed: herald_state_config_init_changed,
         connection_pending_changed: herald_state_connection_pending_changed,
         connection_up_changed: herald_state_connection_up_changed,
     };
-    let d_herald_state = HeraldState::new(herald_state_emit);
+    let d_herald_state = HeraldState::new(herald_state_emit, d_global_message_search);
     Box::into_raw(Box::new(d_herald_state))
 }
 
@@ -1693,6 +1734,13 @@ pub unsafe extern "C" fn herald_state_connection_pending_get(ptr: *const HeraldS
 #[no_mangle]
 pub unsafe extern "C" fn herald_state_connection_up_get(ptr: *const HeraldState) -> bool {
     (&*ptr).connection_up()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_state_global_message_search_get(
+    ptr: *mut HeraldState
+) -> *mut MessageSearch {
+    (&mut *ptr).global_message_search_mut()
 }
 
 #[no_mangle]

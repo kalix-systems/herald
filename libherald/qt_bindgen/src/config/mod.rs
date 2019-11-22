@@ -63,7 +63,9 @@ fn herald_state() -> Object {
     let properties = props! {
         configInit: Prop::new().simple(Bool),
         connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool)
+        connectionPending: Prop::new().simple(Bool),
+
+        globalMessageSearch: Prop::new().object(message_search())
     };
 
     let funcs = functions! {

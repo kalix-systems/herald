@@ -1,6 +1,6 @@
 use crate::{
     ffi,
-    imp::{conversations::Conversations, messages},
+    imp::{conversations::Conversations, message_search::MessageSearch, messages},
     interface::*,
     push_err, ret_err,
     shared::{AddressedBus, SingletonBus},
@@ -24,6 +24,7 @@ type Emitter = HeraldStateEmitter;
 
 mod network;
 use network::*;
+mod imp;
 
 /// Global state for the application that can't easily be included
 /// in another model. Currently only used to distinguish initial registration
@@ -32,16 +33,20 @@ pub struct HeraldState {
     config_init: Arc<AtomicBool>,
     emit: HeraldStateEmitter,
     effects_flags: Arc<EffectsFlags>,
+    message_search: MessageSearch,
 }
 
 impl HeraldStateTrait for HeraldState {
-    fn new(emit: HeraldStateEmitter) -> Self {
+    fn new(
+        emit: HeraldStateEmitter,
+        message_search: MessageSearch,
+    ) -> Self {
         let config_init = if config::id().is_ok() {
             // If this fails, it's because a thread couldn't be spawned.
             // This implies the OS is in a very bad place.
             push_err!(
                 gc::init(move |update| {
-                    gc_handler(update);
+                    imp::gc_handler(update);
                 }),
                 "Couldn't start GC thread"
             );
@@ -60,6 +65,7 @@ impl HeraldStateTrait for HeraldState {
             emit,
             config_init,
             effects_flags: Arc::new(EffectsFlags::new()),
+            message_search,
         }
     }
 
@@ -94,7 +100,7 @@ impl HeraldStateTrait for HeraldState {
                 // This implies the OS is in a very bad place.
                 push_err!(
                     gc::init(move |update| {
-                        gc_handler(update);
+                        imp::gc_handler(update);
                     }),
                     "Couldn't start GC thread"
                 );
@@ -134,23 +140,12 @@ impl HeraldStateTrait for HeraldState {
     fn emit(&mut self) -> &mut HeraldStateEmitter {
         &mut self.emit
     }
-}
 
-fn gc_handler(update: gc::GCUpdate) {
-    use crate::imp::messages::{shared::MsgUpdate, Messages};
-    use gc::GCUpdate::*;
-    use heraldcore::errors::HErr;
-    match update {
-        StaleConversations(convs) => {
-            for (cid, mids) in convs {
-                push_err!(
-                    Messages::push(cid, MsgUpdate::ExpiredMessages(mids)),
-                    "Couldn't expire messages"
-                );
-            }
-        }
-        GCError(e) => {
-            push_err!(Err::<(), HErr>(e), "Error deleting expired messages");
-        }
+    fn global_message_search(&self) -> &MessageSearch {
+        &self.message_search
+    }
+
+    fn global_message_search_mut(&mut self) -> &mut MessageSearch {
+        &mut self.message_search
     }
 }

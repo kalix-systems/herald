@@ -21,6 +21,7 @@ class UsersSearch;
 
 class Attachments : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -79,6 +80,7 @@ Q_SIGNALS:
 
 class Config : public QObject {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -122,6 +124,7 @@ Q_SIGNALS:
 
 class ConversationBuilder : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -186,6 +189,7 @@ Q_SIGNALS:
 
 class Conversations : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -266,6 +270,7 @@ Q_SIGNALS:
 
 class Errors : public QObject {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -294,6 +299,7 @@ public:
   class Private;
 
 private:
+  MessageSearch *const m_globalMessageSearch;
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
@@ -301,6 +307,8 @@ private:
                  connectionPendingChanged FINAL)
   Q_PROPERTY(
       bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
+  Q_PROPERTY(MessageSearch *globalMessageSearch READ globalMessageSearch NOTIFY
+                 globalMessageSearchChanged FINAL)
   explicit HeraldState(bool owned, QObject *parent);
 
 public:
@@ -309,16 +317,20 @@ public:
   bool configInit() const;
   bool connectionPending() const;
   bool connectionUp() const;
+  const MessageSearch *globalMessageSearch() const;
+  MessageSearch *globalMessageSearch();
   Q_INVOKABLE bool login();
   Q_INVOKABLE void registerNewUser(const QString &user_id);
 Q_SIGNALS:
   void configInitChanged();
   void connectionPendingChanged();
   void connectionUpChanged();
+  void globalMessageSearchChanged();
 };
 
 class HeraldUtils : public QObject {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -340,6 +352,7 @@ Q_SIGNALS:
 
 class Members : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -417,6 +430,7 @@ Q_SIGNALS:
 
 class MessageBuilder : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -508,6 +522,7 @@ Q_SIGNALS:
 
 class MessageSearch : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -581,6 +596,8 @@ Q_SIGNALS:
 
 class Messages : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
+
 public:
   class Private;
 
@@ -710,6 +727,7 @@ Q_SIGNALS:
 
 class Users : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:
@@ -791,6 +809,7 @@ Q_SIGNALS:
 
 class UsersSearch : public QAbstractItemModel {
   Q_OBJECT
+  friend class HeraldState;
   friend class Messages;
 
 public:

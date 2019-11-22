@@ -835,13 +835,22 @@ void errors_next_error(Errors::Private *, QString *, qstring_set);
 };
 
 extern "C" {
-HeraldState::Private *herald_state_new(HeraldState *, void (*)(HeraldState *),
-                                       void (*)(HeraldState *),
-                                       void (*)(HeraldState *));
+HeraldState::Private *herald_state_new(
+    HeraldState *, void (*)(HeraldState *), void (*)(HeraldState *),
+    void (*)(HeraldState *), MessageSearch *, void (*)(MessageSearch *),
+    void (*)(MessageSearch *), void (*)(const MessageSearch *),
+    void (*)(MessageSearch *), void (*)(MessageSearch *),
+    void (*)(MessageSearch *, quintptr, quintptr), void (*)(MessageSearch *),
+    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int),
+    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int, int),
+    void (*)(MessageSearch *), void (*)(MessageSearch *, int, int),
+    void (*)(MessageSearch *));
 void herald_state_free(HeraldState::Private *);
 bool herald_state_config_init_get(const HeraldState::Private *);
 bool herald_state_connection_pending_get(const HeraldState::Private *);
 bool herald_state_connection_up_get(const HeraldState::Private *);
+MessageSearch::Private *
+herald_state_global_message_search_get(const HeraldState::Private *);
 bool herald_state_login(HeraldState::Private *);
 void herald_state_register_new_user(HeraldState::Private *, const ushort *,
                                     int);
@@ -2568,13 +2577,51 @@ QString Errors::nextError() {
   return s;
 }
 HeraldState::HeraldState(bool /*owned*/, QObject *parent)
-    : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
+    : QObject(parent), m_globalMessageSearch(new MessageSearch(false, this)),
+      m_d(nullptr), m_ownsPrivate(false) {}
 
 HeraldState::HeraldState(QObject *parent)
-    : QObject(parent), m_d(herald_state_new(this, heraldStateConfigInitChanged,
-                                            heraldStateConnectionPendingChanged,
-                                            heraldStateConnectionUpChanged)),
-      m_ownsPrivate(true) {}
+    : QObject(parent), m_globalMessageSearch(new MessageSearch(false, this)),
+      m_d(herald_state_new(
+          this, heraldStateConfigInitChanged,
+          heraldStateConnectionPendingChanged, heraldStateConnectionUpChanged,
+          m_globalMessageSearch, messageSearchRegexSearchChanged,
+          messageSearchSearchPatternChanged,
+          [](const MessageSearch *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](MessageSearch *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](MessageSearch *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](MessageSearch *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](MessageSearch *o) { o->beginResetModel(); },
+          [](MessageSearch *o) { o->endResetModel(); },
+          [](MessageSearch *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](MessageSearch *o) { o->endInsertRows(); },
+          [](MessageSearch *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](MessageSearch *o) { o->endMoveRows(); },
+          [](MessageSearch *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](MessageSearch *o) { o->endRemoveRows(); })),
+      m_ownsPrivate(true) {
+  m_globalMessageSearch->m_d = herald_state_global_message_search_get(m_d);
+  connect(
+      this->m_globalMessageSearch, &MessageSearch::newDataReady,
+      this->m_globalMessageSearch,
+      [this](const QModelIndex &i) {
+        this->m_globalMessageSearch->fetchMore(i);
+      },
+      Qt::QueuedConnection);
+}
 
 HeraldState::~HeraldState() {
   if (m_ownsPrivate) {
@@ -2589,6 +2636,12 @@ bool HeraldState::connectionPending() const {
 }
 bool HeraldState::connectionUp() const {
   return herald_state_connection_up_get(m_d);
+}
+const MessageSearch *HeraldState::globalMessageSearch() const {
+  return m_globalMessageSearch;
+}
+MessageSearch *HeraldState::globalMessageSearch() {
+  return m_globalMessageSearch;
 }
 bool HeraldState::login() { return herald_state_login(m_d); }
 void HeraldState::registerNewUser(const QString &user_id) {
