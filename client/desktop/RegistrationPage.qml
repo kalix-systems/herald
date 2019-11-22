@@ -61,7 +61,7 @@ Rectangle {
                 radius: 2
             }
 
-            Keys.onReturnPressed: heraldState.registerNewUser(
+            Keys.onReturnPressed: herald.registerNewUser(
                                       entryField.text.trim())
         }
 
@@ -78,7 +78,7 @@ Rectangle {
                 color: "steelblue"
                 radius: 3
             }
-            onClicked: heraldState.registerNewUser(entryField.text.trim())
+            onClicked: herald.registerNewUser(entryField.text.trim())
         }
     }
 
