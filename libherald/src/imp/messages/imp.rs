@@ -5,7 +5,7 @@ impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
         self.emit.last_author_changed();
         self.emit.last_body_changed();
-        self.emit.last_epoch_timestamp_ms_changed();
+        self.emit.last_time_changed();
         self.emit.last_status_changed();
     }
 
@@ -77,6 +77,7 @@ impl Messages {
             &mut self.emit,
             &mut self.model,
         );
+        self.builder.try_clear_reply(&msg_id);
 
         let len = self.container.len();
 
@@ -93,7 +94,7 @@ impl Messages {
         self.model.end_remove_rows();
 
         if let Some(MsgData { replies, .. }) = data {
-            self.container.set_dangling(replies, &mut self.model);
+            container::set_dangling(&mut self.container, replies, &mut self.model);
         }
 
         if ix > 0 {
@@ -122,7 +123,7 @@ impl Messages {
         msg: Msg,
         save_status: SaveStatus,
     ) -> Result<(), HErr> {
-        let (message, data) = Message::split_msg(msg, save_status);
+        let (message, data) = split_msg(msg, save_status);
 
         let cid = self.conversation_id.ok_or(NE!())?;
 

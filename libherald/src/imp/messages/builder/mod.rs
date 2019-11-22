@@ -1,12 +1,20 @@
 use crate::{ffi, interface::*, ret_err, ret_none, shared::AddressedBus, spawn};
-use heraldcore::message::*;
+use herald_common::{Time, UserId};
+use heraldcore::{
+    message::*,
+    types::{ConversationId, InvalidRandomIdLength, MsgId},
+};
 use std::{convert::TryInto, path::PathBuf};
+
+mod imp;
+pub(super) use imp::*;
 
 /// Message builder, used for interactively composing messages
 pub struct MessageBuilder {
     emit: Emitter,
     model: List,
     inner: OutboundMessageBuilder,
+    op: Option<Reply>,
     parse_markdown: bool,
 }
 
@@ -23,6 +31,7 @@ impl MessageBuilderTrait for MessageBuilder {
             model,
             inner: OutboundMessageBuilder::default(),
             parse_markdown: false,
+            op: None,
         }
     }
 
@@ -30,26 +39,8 @@ impl MessageBuilderTrait for MessageBuilder {
         &mut self.emit
     }
 
-    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
-        Some(self.inner.conversation.as_ref()?.as_slice())
-    }
-
-    fn set_conversation_id(
-        &mut self,
-        cid: Option<ffi::ConversationIdRef>,
-    ) {
-        if let (None, Some(cid)) = (self.inner.conversation, cid) {
-            let cid = ret_err!(cid.try_into());
-            self.inner.conversation_id(cid);
-        }
-    }
-
-    fn replying_to(&self) -> Option<ffi::MsgIdRef> {
-        Some(self.inner.op.as_ref()?.as_slice())
-    }
-
     fn is_reply(&self) -> bool {
-        self.inner.op.is_some()
+        self.op.is_some()
     }
 
     fn is_media_message(&self) -> bool {
@@ -65,32 +56,6 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn parse_markdown(&self) -> bool {
         self.parse_markdown
-    }
-
-    fn set_replying_to(
-        &mut self,
-        op_msg_id: Option<ffi::MsgIdRef>,
-    ) {
-        match (op_msg_id, self.inner.op) {
-            (Some(op_msg_id), _) => {
-                let op_msg_id = ret_err!(op_msg_id.try_into());
-
-                self.inner.replying_to(Some(op_msg_id));
-                self.emit.replying_to_changed();
-                self.emit.is_reply_changed();
-            }
-            (None, Some(_)) => {
-                self.inner.replying_to(None);
-                self.emit.replying_to_changed();
-                self.emit.is_reply_changed();
-            }
-            _ => {}
-        }
-    }
-
-    fn clear_reply(&mut self) {
-        self.set_replying_to(None);
-        self.emit.replying_to_changed();
     }
 
     fn add_attachment(
@@ -242,6 +207,53 @@ impl MessageBuilderTrait for MessageBuilder {
         ret_none! {
             ret_none!(self.inner.attachments.get(index), "").to_str(),
             ""
+        }
+    }
+
+    fn clear_reply(&mut self) {
+        self.clear_reply_();
+    }
+
+    fn op_id(&self) -> Option<ffi::MsgIdRef> {
+        Some(self.inner.op.as_ref()?.as_slice())
+    }
+
+    fn op_author(&self) -> Option<ffi::UserIdRef> {
+        Some(self.op.as_ref()?.author.as_str())
+    }
+
+    fn op_body(&self) -> Option<&str> {
+        Some(self.op.as_ref()?.body.as_ref()?.as_str())
+    }
+
+    fn op_time(&self) -> Option<i64> {
+        Some(self.op.as_ref()?.time.0)
+    }
+
+    fn op_has_attachments(&self) -> Option<bool> {
+        Some(self.op.as_ref()?.has_attachments)
+    }
+}
+
+impl MessageBuilder {
+    pub(super) fn set_conversation_id(
+        &mut self,
+        cid: ConversationId,
+    ) {
+        self.inner.conversation_id(cid);
+    }
+
+    pub(super) fn set_op_id(
+        &mut self,
+        op_msg_id: Option<ffi::MsgIdRef>,
+        container: &super::Container,
+    ) -> Result<OpChanged, InvalidRandomIdLength> {
+        match op_msg_id {
+            Some(op_msg_id) => {
+                let op_msg_id = op_msg_id.try_into()?;
+                Ok(self.update_op_id(&op_msg_id, container))
+            }
+            None => Ok(self.clear_reply_()),
         }
     }
 }

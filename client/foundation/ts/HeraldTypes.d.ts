@@ -1,7 +1,7 @@
 declare class ByteArray {}
 
 declare class ConversationID extends ByteArray {}
-declare class MessageId extends ByteArray {}
+declare class MsgId extends ByteArray {}
 
 declare const enum ExpirationPeriod {
   Never = 0,
@@ -17,6 +17,12 @@ declare const enum MatchStatus {
   NotMatched = 0,
   Matched = 1,
   Focused = 2
+}
+
+declare const enum ReplyType {
+  None = 0,
+  Dangling = 1,
+  Known = 2
 }
 
 declare type UserId = string;
@@ -36,7 +42,10 @@ declare class Messages {
   lastAuthor: string;
   lastBody: string;
   isEmpty: string;
-  lastEpochTimestampMs: number;
+  lastTime: number;
+  builder: MessageBuilder;
+  // id of the message the message builder is replying to, if any
+  builderOpMsgId: MsgId;
 
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
@@ -52,13 +61,21 @@ declare class Messages {
 }
 
 declare class MessageBuilder {
-  conversationId?: ConversationID;
-  replyingTo?: MessageId;
+  isReply: boolean;
   body?: string;
+  isMediaMessage: boolean;
+  parseMarkdown: boolean;
+
+  opId?: MsgId;
+  opAuthor?: UserId;
+  opBody?: string;
+  opTime?: number;
+  opHasAttachments?: boolean;
+
   finalize(): void;
   addAttachment(path: string): boolean;
   removeAttachment(path: string): boolean;
-  removeAttachmentByIndex(rowIndex: number): boolean;
+  removeAttachmentByIndex(index: number): boolean;
   removeLast(): void;
   attachmentPath(rowIndex: number): string;
 }

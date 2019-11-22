@@ -52,7 +52,7 @@ Flickable {
                 readonly property color userColor: CmnCfg.avatarColors[contactsModel.colorById(
                                                                            author)]
                 readonly property string timestamp: Utils.friendlyTimestamp(
-                                                        epochTimestampMs)
+                                                        insertionTime)
 
                 readonly property bool outbound: author === config.configId
 
@@ -93,7 +93,7 @@ Flickable {
                         receiptImage: proxyReceiptImage
                         authorName: authName
                         authorColor: userColor
-                        replyId: op
+                        replyId: opMsgId
                         //mousearea handling jump behavior
                         jumpHandler.onClicked: {
                             convWindow.state = "jumpState"
@@ -143,10 +143,11 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.paneColor
                     senderColor: userColor
-                    highlight: match_status === 2
+                    highlight: matchStatus === 2
                     content: if (hasAttachments && dataSaved) {
                                  image
-                             } else if (isReply) {
+                                 //reply types: 0 not reply, 1 dangling, 2 known reply
+                             } else if (replyType > 0) {
                                  reply
                              } else {
                                  std

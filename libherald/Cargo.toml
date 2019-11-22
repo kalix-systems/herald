@@ -10,13 +10,12 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 crossbeam-channel = "0.3.9"
 dashmap           = "1.0.5"
-im             = "13.0.0"
+im             = "14.0.0"
 lazy_static       = "1.4.0"
 libc              = "0.2.60"
 parking_lot       = "0.9.0"
 serde             = "1.0.99"
 serde_cbor        = "0.10.1"
-
 
 [dependencies.herald_common]
 path    = "../herald_common"
@@ -26,6 +25,9 @@ path    = "../heraldcore"
 
 [dependencies.search_pattern]
 path    = "../heraldcore/search_pattern"
+
+[dependencies.messages_helper]
+path = "./messages_helper"
 
 
 [target.'cfg( all( target_family = "unix", not( any( target_os = "android", target_os="ios" ) ) ) )'.dependencies.notify-rust]

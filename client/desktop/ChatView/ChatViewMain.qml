@@ -101,11 +101,9 @@ Page {
         }
 
         keysProxy: Item {
-            MessageBuilder {
-                id: builder
-            }
             Keys.onReturnPressed: JS.enterKeyHandler(
-                                      event, chatTextArea.chatText, builder,
+                                      event, chatTextArea.chatText,
+                                      ownedConversation.builder,
                                       // this is actually a text area TODO rename
                                       ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus

@@ -331,7 +331,7 @@ impl OutboundMessageBuilder {
         if let Some(op) = op {
             e!(tx.execute_named(
                 include_str!("sql/add_reply.sql"),
-                named_params! { "@msg_id": msg_id, "@op": op}
+                named_params! { "@msg_id": msg_id, "@op": op }
             ));
         }
 

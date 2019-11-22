@@ -13,19 +13,15 @@ ColumnLayout {
     property string friendlyTimestamp: ""
     property string receiptImage: ""
     property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
-                                                    replyPreview.author)]
+                                                    opAuthor)]
     property string authorName: ""
     property color authorColor
     property var replyId
     property alias jumpHandler: jumpHandler
     property alias replyHighlightAnimation: replyHighlightAnimation
+    property bool knownReply: replyType == 2
 
     spacing: 0
-
-    MessagePreview {
-        id: replyPreview
-        messageId: replyId === undefined ? null : replyId
-    }
 
     Rectangle {
         id: replyWrapper
@@ -36,7 +32,7 @@ ColumnLayout {
 
         Rectangle {
             id: verticalAccent
-            visible: !replyPreview.isDangling
+            visible: knownReply
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
@@ -50,7 +46,7 @@ ColumnLayout {
             width: reply.width
             height: reply.height
             z: CmnCfg.overlayZ
-            enabled: !replyPreview.isDangling ? true : false
+            enabled: knownReply ? true : false
         }
 
         NumberAnimation {
@@ -69,29 +65,28 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: !replyPreview.isDangling ? contactsModel.nameById(
-                                                     replyPreview.author) : ""
+                text: knownReply ? contactsModel.nameById(opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
 
-                Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
+                Layout.preferredHeight: knownReply ? implicitHeight : 0
                 color: opColor
             }
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string shortenedText: truncate_text(
-                                                   replyPreview.body).slice(
-                                                   0, 350) + decoration
-                readonly property string decoration: replyPreview.body.length > 350 ? "..." : ""
-
-                text: !replyPreview.isDangling ? shortenedText : "Original message not found"
+                property string decoration: knownReply && opBody.length > 350 ? "..." : ""
+                property string shortenedText: knownReply ? truncate_text(
+                                                                    opBody).slice(
+                                                                    0, 350) + decoration
+                                                          : "Original message not found"
+                text: shortenedText
                 elideWidth: maxWidth * 3
                 elide: Text.ElideRight
 
                 function truncate_text(body) {
-                    const bodyLines = body.split("\n")
+                    var bodyLines = body.split("\n")
                     if (bodyLines.length > 3) {
                         return bodyLines.slice(0, 3).join("\n")
                     } else {
@@ -110,8 +105,7 @@ ColumnLayout {
                 Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
                 font.pixelSize: 10
-                text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
-                                                     replyPreview.epochTimestampMs) : ""
+                text: replyType === 2 ? Utils.friendlyTimestamp(opTime) : ""
                 color: CmnCfg.palette.secondaryTextColor
             }
         }
@@ -127,5 +121,6 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {}
+    StandardStamps {
+    }
 }

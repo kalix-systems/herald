@@ -14,10 +14,6 @@ pub mod heraldstate;
 pub mod heraldutils;
 /// Implementation of `crate::interface::MembersTrait`.
 pub mod members;
-/// Implementation of `crate::interface::MessageBuilderTrait`.
-pub mod message_builder;
-/// Implementation of `crate::interface::MessagePreviewTrait`
-pub mod message_preview;
 /// Implementation of `crate::interface::MessageSearchTrait`
 pub mod message_search;
 /// Implementation of `crate::interface::MessagesTrait`.
@@ -35,9 +31,8 @@ pub use errors::*;
 pub use heraldstate::*;
 pub use heraldutils::*;
 pub use members::*;
-pub use message_builder::*;
-pub use message_preview::*;
 pub use message_search::*;
+pub use messages::builder::*;
 pub use messages::*;
 pub use users::*;
 pub use users_search::*;

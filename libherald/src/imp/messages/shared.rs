@@ -35,7 +35,7 @@ lazy_static! {
     pub(super) static ref TXS: DashMap<ConversationId, Sender<MsgUpdate>> = DashMap::default();
     /// Concurrent hash map of `MessagesEmitter`. These are removed when the
     /// associated `Messages` object is dropped.
-    pub(super) static ref EMITTERS: DashMap<ConversationId, MessagesEmitter> = DashMap::default();
+    pub(super) static ref EMITTERS: DashMap<ConversationId, Emitter> = DashMap::default();
 }
 
 impl AddressedBus for Messages {

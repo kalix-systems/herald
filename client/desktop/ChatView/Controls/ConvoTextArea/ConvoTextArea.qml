@@ -125,14 +125,14 @@ Rectangle {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
-            builder.addAttachment(attachmentsDialogue.fileUrl)
+            ownedConversation.builder.addAttachment(attachmentsDialogue.fileUrl)
         }
     }
 
     states: [
         State {
             name: "replystate"
-            when: builder.isReply
+            when: ownedConversation.builder.isReply
             PropertyChanges {
                 target: replyLoader
                 active: true
@@ -145,7 +145,7 @@ Rectangle {
 
         State {
             name: "attachmentstate"
-            when: builder.isMediaMessage
+            when: ownedConversation.builder.isMediaMessage
             PropertyChanges {
                 target: attachmentLoader
                 active: true

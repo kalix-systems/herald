@@ -26,6 +26,12 @@ impl std::ops::Deref for UserId {
     }
 }
 
+impl UserId {
+    pub fn as_str(&self) -> &str {
+        self.0.as_str()
+    }
+}
+
 #[derive(Debug)]
 pub enum InvalidUserId {
     NonAlphaNumeric,

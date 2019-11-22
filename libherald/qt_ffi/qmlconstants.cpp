@@ -1,6 +1,3 @@
 #include "qmlconstants.h"
 
-QmlConstants::QmlConstants()
-{
-
-}
+QmlConstants::QmlConstants() {}
