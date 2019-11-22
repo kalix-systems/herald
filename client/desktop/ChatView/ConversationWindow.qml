@@ -146,7 +146,7 @@ Flickable {
                     highlight: matchStatus === 2
                     content: if (hasAttachments && dataSaved) {
                                  image
-                             //reply types: 0 not reply, 1 dangling, 2 known reply
+                                 //reply types: 0 not reply, 1 dangling, 2 known reply
                              } else if (replyType > 0) {
                                  reply
                              } else {

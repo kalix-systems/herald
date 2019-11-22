@@ -125,7 +125,7 @@ Rectangle {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
-           ownedConversation.builder.addAttachment(attachmentsDialogue.fileUrl)
+            ownedConversation.builder.addAttachment(attachmentsDialogue.fileUrl)
         }
     }
 

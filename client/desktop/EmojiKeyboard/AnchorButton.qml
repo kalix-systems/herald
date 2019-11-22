@@ -9,7 +9,8 @@ Button {
 
     onClicked: emojiList.contentY = innerRepeater.itemAt(anchorIndex).y
     padding: 0
-    background: Item {}
+    background: Item {
+    }
     icon.source: imageSource
     icon.color: CmnCfg.palette.mainColor
     icon.width: 15

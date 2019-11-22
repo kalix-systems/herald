@@ -22,7 +22,6 @@ ColumnLayout {
 
     spacing: 0
 
-
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
@@ -65,8 +64,7 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: replyType === 2 ? contactsModel.nameById(
-                                                     opAuthor) : ""
+                text: replyType === 2 ? contactsModel.nameById(opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
@@ -93,8 +91,7 @@ ColumnLayout {
                 Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
                 font.pixelSize: 10
-                text: replyType === 2 ? Utils.friendlyTimestamp(
-                                                     opTime) : ""
+                text: replyType === 2 ? Utils.friendlyTimestamp(opTime) : ""
                 color: CmnCfg.palette.secondaryTextColor
             }
         }

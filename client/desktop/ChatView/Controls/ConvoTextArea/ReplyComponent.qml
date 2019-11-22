@@ -26,7 +26,6 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-
     Rectangle {
         id: verticalAccent
         anchors.right: wrapper.left
@@ -62,7 +61,8 @@ Rectangle {
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.avatarColors[contactsModel.colorById(ownedConversation.builder.opAuthor)]
+            color: CmnCfg.palette.avatarColors[contactsModel.colorById(
+                                                   ownedConversation.builder.opAuthor)]
         }
 
         TextMetrics {
