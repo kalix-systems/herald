@@ -173,7 +173,7 @@ impl RatchetState {
     }
 }
 
-#[derive(Debug, Clone, Ser, De)]
+#[derive(Debug, Clone, Ser, De, Eq, PartialEq)]
 pub struct Cipher {
     pub index: u64,
     pub tag: aead::Tag,

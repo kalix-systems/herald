@@ -1202,11 +1202,12 @@ dependencies = [
 name = "network_types"
 version = "0.1.0"
 dependencies = [
+ "channel_ratchet 0.1.0",
  "coretypes 0.1.0",
  "herald_common 0.1.0",
+ "kson 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_cbor 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

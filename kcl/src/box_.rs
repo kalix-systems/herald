@@ -84,7 +84,7 @@ impl Seed {
     }
 }
 
-#[derive(Ser, De, Copy, Clone)]
+#[derive(Debug, Hash, Ser, De, Copy, Clone, Eq, PartialEq)]
 pub struct Tag(Mac, Nonce);
 
 #[must_use = "you should definitely check if the decryption was successful"]
