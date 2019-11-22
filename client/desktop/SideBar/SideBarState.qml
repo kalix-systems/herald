@@ -69,7 +69,7 @@ Page {
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: heraldState.globalMessageSearch
+                searchModel: herald.messageSearch
             }
         },
 

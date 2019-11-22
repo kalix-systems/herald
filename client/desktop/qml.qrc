@@ -44,7 +44,6 @@
         <file>common/ConfigAvatar.qml</file>
         <file>SideBar/Header/ContextBar.qml</file>
         <file>SideBar/Header/HeaderComponent.qml</file>
-        <file>SideBar/Header/NewContactComponent.qml</file>
         <file>SideBar/Header/SearchComponent.qml</file>
         <file>SideBar/Pane/ConversationViewMain.qml</file>
         <file>SideBar/Pane/MessageSearchView.qml</file>

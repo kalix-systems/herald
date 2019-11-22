@@ -20,10 +20,6 @@ Item {
         id: contactsModel
     }
 
-    Conversations {
-        id: conversationsModel
-    }
-
     Popups.ColorPicker {
         id: avatarColorPicker
     }
@@ -116,5 +112,5 @@ Item {
         }
     }
 
-    Component.onCompleted: heraldState.login()
+    Component.onCompleted: herald.login()
 }
