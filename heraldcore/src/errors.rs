@@ -1,6 +1,9 @@
 use chainkeys::ChainKeysError;
 use coremacros::*;
-use coretypes::ids::InvalidRandomIdLength;
+use coretypes::{
+    ids::InvalidRandomIdLength,
+    messages::{MissingInboundMessageField, MissingOutboundMessageField},
+};
 use herald_common::*;
 use image;
 use std::fmt;
@@ -15,10 +18,10 @@ pub enum HErr {
     DatabaseError(rusqlite::Error),
     /// Invalid `ConversationId` or `MsgId`
     BadRandomId(InvalidRandomIdLength),
-    // /// Missing fields when sending a message
-    // MissingOutboundMessageField(MissingOutboundMessageField),
-    // /// Missing fields when storing a received a message
-    // MissingInboundMessageField(MissingInboundMessageField),
+    /// Missing fields when sending a message
+    MissingOutboundMessageField(MissingOutboundMessageField),
+    /// Missing fields when storing a received a message
+    MissingInboundMessageField(MissingInboundMessageField),
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
@@ -72,8 +75,8 @@ impl fmt::Display for HErr {
             GIDSpecFailed(lt) => write!(f, "GIDSpecFailed: {:?}", lt),
             SignInFailed(lt) => write!(f, "SignInFailed: {:?}", lt),
             WebsocketError(e) => write!(f, "WebsocketError: {}", e),
-            // MissingOutboundMessageField(missing) => write!(f, "{}", missing),
-            // MissingInboundMessageField(missing) => write!(f, "{}", missing),
+            MissingOutboundMessageField(missing) => write!(f, "{}", missing),
+            MissingInboundMessageField(missing) => write!(f, "{}", missing),
             NoneError(location) => write!(f, "Unexpected none at {}", location),
             ChannelSendError(location) => write!(f, "Channel send error at {}", location),
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
@@ -105,8 +108,8 @@ macro_rules! herr {
     };
 }
 
-// herr!(MissingOutboundMessageField, MissingOutboundMessageField);
-// herr!(MissingInboundMessageField, MissingInboundMessageField);
+herr!(MissingOutboundMessageField, MissingOutboundMessageField);
+herr!(MissingInboundMessageField, MissingInboundMessageField);
 herr!(ChainKeysError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
@@ -136,7 +139,7 @@ impl From<image::ImageError> for HErr {
 /// Creates a `ChannelSendError`
 macro_rules! channel_send_err {
     () => {{
-        use $crate::loc;
+        use herald_common::loc;
         $crate::errors::HErr::ChannelSendError(loc!())
     }};
 }
@@ -145,7 +148,7 @@ macro_rules! channel_send_err {
 /// Creates a `ChannelRecvError`
 macro_rules! channel_recv_err {
     () => {{
-        use $crate::loc;
+        use herald_common::loc;
         $crate::errors::HErr::ChannelRecvError(loc!())
     }};
 }
@@ -154,7 +157,7 @@ macro_rules! channel_recv_err {
 #[macro_export]
 macro_rules! NE {
     () => {{
-        use $crate::loc;
+        use herald_common::loc;
         $crate::errors::HErr::NoneError(loc!())
     }};
 }

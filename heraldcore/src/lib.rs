@@ -15,8 +15,8 @@ pub mod errors;
 pub(crate) mod image_utils;
 /// Members of conversations
 pub mod members;
-// /// Functions and data structures related to messages.
-// pub mod message;
+/// Functions and data structures related to messages.
+pub mod message;
 /// Networking
 pub mod network;
 /// Pending out messages
