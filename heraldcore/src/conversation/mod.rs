@@ -47,8 +47,7 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
     }));
 
     for pw_cid in pairwise {
-        // TODO: uncomment this
-        // crate::network::send_cmessage(pw_cid, &body)?;
+        crate::network::send_cmessage(pw_cid, &body)?;
     }
 
     Ok(())
