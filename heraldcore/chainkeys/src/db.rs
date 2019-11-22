@@ -27,9 +27,7 @@ where
 {
     let mut tx = Tx(conn.transaction()?);
     let o = f(&mut tx)?;
-    dbg!();
     tx.0.commit()?;
-    dbg!();
     Ok(o)
 }
 
@@ -69,12 +67,9 @@ impl Tx<'_> {
         ix: u64,
         key: kcl::aead::Key,
     ) -> Result<(), rusqlite::Error> {
-        dbg!(ix);
         let mut store_stmt = self.prepare_cached(include_str!("sql/store_derived_key.sql"))?;
         let ts = Time::now();
-        dbg!();
         store_stmt.execute(params![cid, &ix.to_le_bytes() as &[u8], key.as_ref(), ts.0])?;
-        dbg!();
         Ok(())
     }
 
@@ -124,17 +119,15 @@ impl Tx<'_> {
         cid: ConversationId,
         ix: u64,
     ) -> Result<Option<kcl::aead::Key>, ChainKeysError> {
-        dbg!(ix);
         let mut stmt = self.prepare_cached(include_str!("sql/get_derived_key.sql"))?;
-        dbg!();
         let res = stmt
             .query_map(params![cid, &ix.to_le_bytes() as &[u8]], |row| {
-                Ok(dbg!(row.get::<_, Vec<u8>>(0))?)
+                Ok(row.get::<_, Vec<u8>>(0)?)
             })?
             .next()
             .transpose()?
             .map(|raw_key| {
-                dbg!(kcl::aead::Key::from_slice(&raw_key)).ok_or(ChainKeysError::StoreCorrupted)
+                kcl::aead::Key::from_slice(&raw_key).ok_or(ChainKeysError::StoreCorrupted)
             })
             .transpose()?;
         Ok(res)
@@ -148,48 +141,34 @@ impl Tx<'_> {
         use channel_ratchet::DecryptionResult::*;
 
         let res = if let Some(k) = self.get_derived_key(cid, cipher.index)? {
-            dbg!();
             let ix = cipher.index;
             let r0 = cipher.open_with(k);
             if let Success { .. } = &r0 {
-                dbg!();
                 self.mark_used(cid, ix)?;
-                dbg!();
             }
             r0
         } else {
-            dbg!();
             let mut state = self.get_ratchet_state(cid)?;
-            dbg!();
             let res = state.open(cipher);
             self.store_ratchet_state(cid, &state)?;
-            dbg!();
             res
         };
 
         match res {
             Success { extra_keys, ad, pt } => {
-                dbg!();
                 if let Some((ix, _)) = extra_keys.last() {
-                    dbg!();
                     self.mark_used(cid, *ix)?;
-                    dbg!();
                 }
 
                 for (ix, key) in extra_keys {
-                    dbg!();
                     self.store_derived_key(cid, ix, key)?;
-                    dbg!();
                 }
 
                 Ok(Some(Decrypted { ad, pt }))
             }
             Failed { extra_keys } => {
-                dbg!();
                 for (ix, key) in extra_keys {
-                    dbg!();
                     self.store_derived_key(cid, ix, key)?;
-                    dbg!();
                 }
 
                 Ok(None)
@@ -206,7 +185,7 @@ impl Tx<'_> {
         msg: BytesMut,
     ) -> Result<channel_ratchet::Cipher, ChainKeysError> {
         let mut ratchet = self.get_ratchet_state(cid)?;
-        let (ix, key, cipher) = dbg!(ratchet.seal(ad, msg).destruct());
+        let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
         self.store_derived_key(cid, ix, key)?;
         self.mark_used(cid, ix)?;
         self.store_ratchet_state(cid, &ratchet)?;
