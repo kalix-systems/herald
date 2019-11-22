@@ -1,25 +1,21 @@
 use super::*;
+use bytes::*;
 pub(crate) use network_types::dmessages::*;
 
 pub(crate) fn seal(
-    to: &sig::PublicKey,
+    to: sig::PublicKey,
     content: &DeviceMessageBody,
 ) -> Result<DeviceMessage, HErr> {
-    let mut content = serde_cbor::to_vec(content)?;
+    let mut content = kson::to_vec(content);
 
-    let pk = spk_to_epk(to)?;
+    let pk = to.into();
+    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret_key().clone());
 
-    let kp = crate::config::keypair()?;
-    let sk = ssk_to_esk(kp.secret_key())?;
-
-    let nonce = box_::gen_nonce();
-
-    let tag = box_::seal_detached(&mut content, &nonce, &pk, &sk);
+    let tag = sk.seal(pk, &mut content);
 
     Ok(DeviceMessage {
         from: config::gid()?,
-        content,
-        nonce,
+        content: content.into(),
         tag,
         prekey: None,
     })
@@ -30,22 +26,19 @@ pub(crate) fn open(message: DeviceMessage) -> Result<(GlobalId, DeviceMessageBod
     assert!(message.prekey.is_none());
 
     let DeviceMessage {
-        from,
-        mut content,
-        nonce,
-        tag,
-        ..
+        from, content, tag, ..
     } = message;
 
-    let pk = spk_to_epk(&from.did)?;
+    let mut content = BytesMut::from(content);
 
-    let kp = config::keypair()?;
-    let sk = ssk_to_esk(kp.secret_key())?;
+    let pk = from.did.into();
+    let sk = kcl::box_::SecretKey::from(config::keypair()?.secret_key().clone());
 
-    box_::open_detached(&mut content, &tag, &nonce, &pk, &sk)
-        .map_err(|_| HeraldError("Failed to decrypt message to device".into()))?;
+    if sk.open(pk, tag, &mut content).0 {
+        let dm = kson::from_bytes(content.into())?;
 
-    let dm = serde_cbor::from_slice(&content)?;
-
-    Ok((from, dm))
+        Ok((from, dm))
+    } else {
+        Err(HeraldError("Failed to decrypt message to device".into()))
+    }
 }

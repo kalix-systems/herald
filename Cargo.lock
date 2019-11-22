@@ -718,6 +718,7 @@ name = "heraldcore"
 version = "0.1.0"
 dependencies = [
  "chainkeys 0.1.0",
+ "channel_ratchet 0.1.0",
  "coreconf 0.1.0",
  "coremacros 0.1.0",
  "coretypes 0.1.0",
@@ -725,6 +726,7 @@ dependencies = [
  "herald_common 0.1.0",
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
+ "kcl 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "location 0.1.0",
@@ -735,7 +737,6 @@ dependencies = [
  "search_pattern 0.1.0",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_bytes 0.11.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "serde_cbor 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sodiumoxide 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",

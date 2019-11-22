@@ -8,8 +8,8 @@ use coretypes::{
 use herald_common::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// The body of a [`ConversationMessage`]
-pub enum ConversationMessageBody {
+/// A message in a conversation
+pub enum ConversationMessage {
     /// A new key
     NewKey(NewKey),
     /// A key to be marked as deprecated
@@ -26,35 +26,6 @@ pub enum ConversationMessageBody {
     Ack(Ack),
     /// An update to the conversation settings
     Settings(conversation::settings::SettingsUpdate),
-}
-
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// A conversation message
-pub struct ConversationMessage {
-    /// The ciphertext of the message. After decryption, this should deserialize as a
-    /// [`ConversationMessageBody`].
-    pub body: Cipher,
-    /// Conversation the message is associated with
-    pub cid: ConversationId,
-    /// Who supposedly sent the message
-    pub from: GlobalId,
-}
-
-impl ConversationMessage {
-    /// Raw body of the message
-    pub fn body(&self) -> &Cipher {
-        &self.body
-    }
-
-    /// `ConversationId` associated with the message
-    pub fn cid(&self) -> ConversationId {
-        self.cid
-    }
-
-    /// The device the message claims to be from.
-    pub fn from(&self) -> GlobalId {
-        self.from
-    }
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]

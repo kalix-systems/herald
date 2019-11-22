@@ -10,7 +10,7 @@ pub struct DeviceMessage {
     pub from: GlobalId,
     /// The ciphertext of the message. After decryption, this should deserialize as a
     /// [`DeviceMessageBody`]
-    pub content: Vec<u8>,
+    pub content: Bytes,
     pub tag: box_::Tag,
     /// The prekey used to encrypt the message.
     /// If none, the message was encrypted with this device's public signing key treated as an

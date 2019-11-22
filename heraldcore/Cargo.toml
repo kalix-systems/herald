@@ -12,7 +12,6 @@ libsodium-sys     = "0.2.4"
 parking_lot       = "0.9.0"
 serde             = "1.0.99"
 serde_bytes       = "0.11.2"
-serde_cbor        = "0.10.1"
 sodiumoxide       = "0.2.4"
 tar               = "0.4.26"
 url               = "2.1"
@@ -21,6 +20,12 @@ url               = "2.1"
 path             = "../herald_common"
 default_features = false
 features         = ["rusqlite_"]
+
+[dependencies.kcl]
+path = "../kcl"
+
+[dependencies.channel_ratchet]
+path = "../channel_ratchet"
 
 [dependencies.coretypes]
 path = "./coretypes"
@@ -45,6 +50,7 @@ path = "./platform_dirs"
 
 [dependencies.chainkeys]
 path = "./chainkeys"
+
 
 [dependencies.websocket]
 version          = "0.23"

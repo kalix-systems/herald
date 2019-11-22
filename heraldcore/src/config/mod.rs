@@ -77,7 +77,6 @@ impl ConfigBuilder {
 
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
-        use chainmail::block::Genesis;
         let mut db = Database::get()?;
         let conf = self.add_db(&mut db)?;
 
@@ -85,8 +84,8 @@ impl ConfigBuilder {
         // but changing it without making testing awkward requires
         // changing the chainmail API
         let kp = keypair()?;
-        let gen = Genesis::new(kp.secret_key());
-        chainkeys::store_genesis(&conf.nts_conversation, &gen)?;
+        let ratchet = channel_ratchet::RatchetState::new();
+        chainkeys::store_state(conf.nts_conversation, &ratchet)?;
         Ok(conf)
     }
 }

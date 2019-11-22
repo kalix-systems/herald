@@ -1,9 +1,7 @@
 //! Core logic for herald client.
 
-#![warn(missing_docs)]
-
-#[macro_use]
-extern crate coremacros;
+// #![warn(missing_docs)]
+#![allow(warnings)]
 
 /// User configuration
 pub mod config;
@@ -15,21 +13,19 @@ pub mod db;
 pub mod errors;
 /// Image processing
 pub(crate) mod image_utils;
-/// Members of conversations
-pub mod members;
-/// Functions and data structures related to messages.
-pub mod message;
-/// Networking
-pub mod network;
-/// Pending out messages
-pub mod pending;
+// /// Members of conversations
+// pub mod members;
+// /// Functions and data structures related to messages.
+// pub mod message;
+// /// Networking
+// pub mod network;
+// /// Pending out messages
+// pub mod pending;
 /// Types
 pub mod types;
 /// Functions and data structures related to users.
 pub mod user;
-/// User keys
-mod user_keys;
+// /// User keys
+// mod user_keys;
 /// Utils
 pub mod utils;
-
-pub use location::{loc, Location};

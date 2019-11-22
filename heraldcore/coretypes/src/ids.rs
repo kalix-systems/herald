@@ -45,15 +45,27 @@ impl std::error::Error for InvalidRandomIdLength {}
 /// Length of randomly generated unique ids
 pub const UID_LEN: usize = 32;
 
-#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De, PartialOrd, Ord)]
-/// Message ID
-pub struct MsgId(UQ);
-
 #[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De)]
 /// Conversation ID
-pub struct ConversationId(UQ);
+pub struct ConversationId(pub UQ);
+
+impl ConversationId {
+    /// Creates a new random ConversationId
+    pub fn new() -> Self {
+        Self(UQ::new())
+    }
+}
+
+#[derive(Hash, Debug, Clone, PartialEq, Eq, Copy, Ser, De, PartialOrd, Ord)]
+/// Message ID
+pub struct MsgId(pub UQ);
 
 impl MsgId {
+    /// Creates a new random MsgId
+    pub fn new() -> Self {
+        Self(UQ::new())
+    }
+
     /// Converts [`MsgId`] to `Vec<u8>`
     pub fn to_vec(self) -> Vec<u8> {
         self.into_array().to_vec()

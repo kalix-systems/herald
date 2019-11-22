@@ -1,12 +1,10 @@
 use super::*;
 use crate::errors::{HErr, HErr::*};
-use chainkeys::{self, ChainMailError, DecryptionResult};
-use chainmail::block::*;
+use chainkeys::*;
 use herald_common::*;
 
-mod messages;
 pub use coretypes::ids::*;
-pub use network_types::{cmessages::ConversationMessageBody, dmessages::DeviceMessageBody};
+pub use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessageBody};
 
 /// Types relevant to [`ConversationMessage`]s
 pub(crate) mod cmessages;
