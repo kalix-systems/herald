@@ -74,11 +74,24 @@ ColumnLayout {
             }
 
             TextMetrics {
-                readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
-                text: replyType === 2 ? opBody : "Original message not found"
-                elideWidth: constWidth
+                property string shortenedText: truncate_text(
+                                                   replyPreview.body).slice(
+                                                   0, 350) + decoration
+                readonly property string decoration: replyPreview.body.length > 350 ? "..." : ""
+
+                text: !replyPreview.isDangling ? shortenedText : "Original message not found"
+                elideWidth: maxWidth * 3
                 elide: Text.ElideRight
+
+                function truncate_text(body) {
+                    var bodyLines = body.split("\n")
+                    if (bodyLines.length > 3) {
+                        return bodyLines.slice(0, 3).join("\n")
+                    } else {
+                        return body
+                    }
+                }
             }
 
             StandardTextEdit {
