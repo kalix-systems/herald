@@ -2,8 +2,10 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "./ConversationView"
-import "../SideBar/GroupFlowComponents" as GroupFlow
+import "../SideBar/Header" as Header
+import "../SideBar/Pane" as Pane
+import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
+
 
 Page {
     id: sideBarStateLoader
@@ -15,14 +17,14 @@ Page {
 
     Component {
         id: contactslvComponent
-        ContactView {
+        Pane.ContactView {
             id: contactsListView
             anchors.fill: parent
             model: contactsModel
         }
     }
 
-    SideBarPane {
+    Pane.SideBarPane {
         id: sideBarPane
     }
 
@@ -53,11 +55,6 @@ Page {
                 sourceComponent: headerBarComponent
                 headerText: "New group"
                 contactsSearch: true
-            }
-            PropertyChanges {
-                target: convoBuilderLoader
-                active: true
-                source: "GroupFlowComponents/ConvoBuilder.qml"
             }
         },
 

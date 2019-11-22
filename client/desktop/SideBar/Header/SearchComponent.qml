@@ -2,9 +2,9 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../common" as Common
-import "popups/js/NewContactDialogue.mjs" as JS
-import "../SideBar" as SBUtils
+import "../../common" as Common
+import "../popups/js/NewContactDialogue.mjs" as JS
+import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"

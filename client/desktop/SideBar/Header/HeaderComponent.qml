@@ -2,11 +2,11 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../common" as Common
+import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
-import "../SideBar" as SideBar
+import "../../SideBar" as SideBar
 import "qrc:/imports/Avatar"
-import "popups" as Popups
+import "../popups" as Popups
 import QtGraphicalEffects 1.0
 
 //header component loaded during new group & new contact flow

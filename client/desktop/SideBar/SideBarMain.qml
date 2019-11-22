@@ -3,7 +3,9 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "qrc:/common" as Common
-import "../SideBar/GroupFlowComponents" as GroupFlow
+import "../SideBar/Header" as Header
+import "../SideBar/Pane" as Pane
+import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -35,7 +37,7 @@ Page {
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: ContextBar {
+        sourceComponent: Header.ContextBar {
             id: contextBarComponent
         }
 
@@ -45,12 +47,12 @@ Page {
     }
 
     //component loaded into header depending on sidebar state
-    HeaderComponent {
+    Header.HeaderComponent {
         id: headerBarComponent
     }
 
     //TODO: get rid of this once global search implemented
-    SearchComponent {
+    Header.SearchComponent {
         id: searchBarComponent
     }
 
@@ -66,8 +68,6 @@ Page {
         active: false
         id: convoBuilderLoader
     }
-
-
 
     SideBarState {
         id: sideBarState
