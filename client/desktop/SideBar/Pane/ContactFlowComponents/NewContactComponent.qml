@@ -23,7 +23,7 @@ Component {
                 placeholderText: "Enter username or display name"
 
                 Keys.onReturnPressed: {
-                    JS.insertContact(text, contactsModel)
+                    JS.insertContact(text, herald.users)
                     sideBarState.state = ""
                 }
             }

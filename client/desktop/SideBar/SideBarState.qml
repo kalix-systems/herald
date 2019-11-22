@@ -20,7 +20,7 @@ Page {
         Pane.ContactView {
             id: contactsListView
             anchors.fill: parent
-            model: contactsModel
+            model: herald.users
         }
     }
 
@@ -69,7 +69,7 @@ Page {
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: heraldState.globalMessageSearch
+                searchModel: herald.messageSearch
             }
         },
 

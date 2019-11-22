@@ -23,7 +23,6 @@ Page {
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: 300
-    property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState
 
@@ -65,10 +64,6 @@ Page {
         id: newContactComponent
     }
 
-    Loader {
-        active: false
-        id: convoBuilderLoader
-    }
 
     SideBarState {
         id: sideBarState

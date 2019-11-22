@@ -31,17 +31,13 @@ ApplicationWindow {
         }
     }
 
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    HeraldState {
-        id: heraldState
+    Herald {
+        id: herald
     }
 
     Loader {
         id: appLoader
-        active: heraldState.configInit
+        active: herald.configInit
         anchors.fill: parent
         sourceComponent: App {
         }
@@ -50,7 +46,7 @@ ApplicationWindow {
     Loader {
         anchors.fill: parent
         id: registrationLoader
-        active: !heraldState.configInit
+        active: !herald.configInit
         sourceComponent: RegistrationPage {
         }
     }

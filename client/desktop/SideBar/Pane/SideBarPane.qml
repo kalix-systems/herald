@@ -34,7 +34,7 @@ Flickable {
             sourceComponent: Component {
                 ConversationViewMain {
                     id: convosLvComponent
-                    model: conversationsModel
+                    model: herald.conversations
                 }
             }
             width: parent.width

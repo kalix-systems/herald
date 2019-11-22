@@ -15,7 +15,7 @@ Column {
         leftPadding: 12
         placeholderText: "Add members"
         onTextChanged: {
-            groupConvoMake.filter = groupSelectText.text
+            herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
     }
@@ -27,13 +27,9 @@ Column {
         color: "black"
     }
 
-    UsersSearch {
-        id: groupConvoMake
-        Component.onCompleted: contactPopup.model = groupConvoMake
-    }
-
     ComboBox {
         id: contactPopup
+        model: herald.usersSearch
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
@@ -56,7 +52,7 @@ Column {
             property var contactData: model
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
-            visible: matched && contactData.userId !== config.configId
+            visible: matched && contactData.userId !== herald.config.configId
             Common.PlatonicRectangle {
                 color: "white"
                 id: contactRectangle
@@ -76,9 +72,9 @@ Column {
                     anchors.fill: parent
                     onClicked: {
                         //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
-                        groupMemberSelect.addMember(contactData.userId)
+                        herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
-                        groupConvoMake.clearFilter()
+                        herald.usersSearch.clearFilter()
                         groupSelectText.text = ""
                     }
                 }

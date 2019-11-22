@@ -43,7 +43,10 @@ Component {
                 fill: CmnCfg.palette.paneColor
                 source: "qrc:/x-icon.svg"
                 scale: 0.8
-                onClicked: sideBarState.state = ""
+                onClicked: {
+                    sideBarState.state = ""
+                    herald.conversationBuilder.clear()
+                }
             }
         }
     }

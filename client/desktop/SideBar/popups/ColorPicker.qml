@@ -54,7 +54,7 @@ Window {
         }
 
         onClicked: {
-            contactsModel.setColor(gsSelectedIndex,
+            herald.users.setColor(gsSelectedIndex,
                                    avatarColorPicker.colorIndex)
             avatarColorPicker.close()
         }

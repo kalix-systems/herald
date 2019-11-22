@@ -2,6 +2,7 @@ declare class ByteArray {}
 
 declare class ConversationID extends ByteArray {}
 declare class MsgId extends ByteArray {}
+declare class MessageSearch {}
 
 declare const enum ExpirationPeriod {
   Never = 0,
@@ -34,7 +35,7 @@ declare class Herald {
   connectionPending: boolean;
 
   config: Config;
-  conversationBuilder: conversationBuilder;
+  conversationBuilder: ConversationBuilder;
   conversations: Conversations;
   messageSearch: MessageSearch;
   users: Users;
