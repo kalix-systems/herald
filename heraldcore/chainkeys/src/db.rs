@@ -1,5 +1,6 @@
 use super::*;
 use byteorder::*;
+use channel_ratchet::*;
 
 pub struct Tx<'a>(rusqlite::Transaction<'a>);
 
@@ -9,6 +10,21 @@ where
     E: From<rusqlite::Error>,
 {
     let mut conn = CK_CONN.lock();
+    with_tx_from_conn(&mut conn, f)
+    // let mut tx = Tx(conn.transaction()?);
+    // let o = f(&mut tx)?;
+    // tx.0.commit()?;
+    // Ok(o)
+}
+
+pub fn with_tx_from_conn<F, E, O>(
+    conn: &mut rusqlite::Connection,
+    f: F,
+) -> Result<O, E>
+where
+    F: FnOnce(&mut Tx) -> Result<O, E>,
+    E: From<rusqlite::Error>,
+{
     let mut tx = Tx(conn.transaction()?);
     let o = f(&mut tx)?;
     tx.0.commit()?;

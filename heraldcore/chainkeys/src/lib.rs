@@ -5,8 +5,7 @@ use herald_common::*;
 use lazy_static::*;
 use parking_lot::Mutex;
 use platform_dirs::DB_DIR;
-use rusqlite::{params, NO_PARAMS};
-use std::collections::BTreeSet;
+use rusqlite::params;
 
 #[derive(Debug)]
 pub enum ChainKeysError {
@@ -46,16 +45,18 @@ pub fn open_msg(
     db::with_tx(move |tx| {
         use channel_ratchet::DecryptionResult::*;
 
-        let res = if let Some(k) = tx.get_derived_key(cid, cipher.ix) {
+        let res = if let Some(k) = tx.get_derived_key(cid, cipher.index)? {
+            let ix = cipher.index;
             let r0 = cipher.open_with(k);
             if let Success { .. } = &r0 {
-                tx.mark_used(cid, cipher.ix)?;
+                tx.mark_used(cid, ix)?;
             }
             r0
         } else {
             let mut state = tx.get_ratchet_state(cid)?;
-            state.open(cipher);
+            let res = state.open(cipher);
             tx.store_ratchet_state(cid, &state)?;
+            res
         };
 
         match res {
@@ -87,7 +88,7 @@ pub fn seal_msg(
     cid: ConversationId,
     ad: Bytes,
     msg: BytesMut,
-) -> Result<Cipher, ChainKeysError> {
+) -> Result<channel_ratchet::Cipher, ChainKeysError> {
     db::with_tx(move |tx| {
         let mut ratchet = tx.get_ratchet_state(cid)?;
         let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
@@ -100,7 +101,10 @@ pub fn seal_msg(
 
 pub fn store_state(
     cid: ConversationId,
-    ratchet: &RatchetState,
+    ratchet: &channel_ratchet::RatchetState,
 ) -> Result<(), ChainKeysError> {
-    db::with_tx(move |tx| tx.store_ratchet_state(cid, ratchet)?)
+    db::with_tx(move |tx| {
+        tx.store_ratchet_state(cid, ratchet)?;
+        Ok(())
+    })
 }
