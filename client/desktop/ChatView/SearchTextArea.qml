@@ -33,7 +33,6 @@ ScrollView {
             //don't allow enter key to affect textarea
             event.accepted = true
             ownedConversation.searchActive = true
-            ownedConversation.searchPattern = searchText.text
             var x = convWindow.chatScrollBar.position
             var y = convWindow.chatScrollBar.size
 
