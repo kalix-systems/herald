@@ -3,7 +3,6 @@ import QtQuick.Controls 2.12
 import QtGraphicalEffects 1.12
 import LibHerald 1.0
 
-//PAUL: demagic all numbers and colors
 Rectangle {
     id: maskShape
     property string modifier: ""
