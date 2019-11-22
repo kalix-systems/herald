@@ -508,6 +508,7 @@ void conversation_builder_picture_set(ConversationBuilder::Private *,
 void conversation_builder_picture_set_none(ConversationBuilder::Private *);
 bool conversation_builder_add_member(ConversationBuilder::Private *,
                                      const ushort *, int);
+void conversation_builder_clear(ConversationBuilder::Private *);
 void conversation_builder_finalize(ConversationBuilder::Private *);
 void conversation_builder_remove_last(ConversationBuilder::Private *);
 bool conversation_builder_remove_member_by_id(ConversationBuilder::Private *,
@@ -2506,6 +2507,7 @@ void ConversationBuilder::setPicture(const QString &v) {
 bool ConversationBuilder::addMember(const QString &user_id) {
   return conversation_builder_add_member(m_d, user_id.utf16(), user_id.size());
 }
+void ConversationBuilder::clear() { return conversation_builder_clear(m_d); }
 void ConversationBuilder::finalize() {
   return conversation_builder_finalize(m_d);
 }
