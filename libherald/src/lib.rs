@@ -19,3 +19,11 @@ pub mod shared;
 pub mod toasts;
 /// Utilities.
 pub mod utils;
+
+pub(crate) trait Loadable {
+    type Error;
+
+    fn try_load(&mut self) -> Result<(), Self::Error>;
+
+    fn loaded(&self) -> bool;
+}

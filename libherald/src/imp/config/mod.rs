@@ -1,8 +1,7 @@
 use crate::{ffi, interface::*, ret_err, ret_none, spawn};
-use heraldcore::{
-    config::{self as core, Config as Core},
-    errors::HErr,
-};
+use heraldcore::config::{self as core, Config as Core};
+
+mod imp;
 
 /// Thin wrapper around heraldcore::config::Config,
 /// with a field containing emitters for Qt.
@@ -124,16 +123,5 @@ impl ConfigTrait for Config {
 
     fn emit(&mut self) -> &mut ConfigEmitter {
         &mut self.emit
-    }
-}
-
-impl Config {
-    pub(crate) fn try_load(&mut self) -> Result<(), HErr> {
-        self.inner.replace(core::get()?);
-        Ok(())
-    }
-
-    pub(crate) fn loaded(&self) -> bool {
-        self.inner.is_some()
     }
 }

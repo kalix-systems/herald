@@ -1610,6 +1610,7 @@ pub struct HeraldEmitter {
     config_init_changed: fn(*mut HeraldQObject),
     connection_pending_changed: fn(*mut HeraldQObject),
     connection_up_changed: fn(*mut HeraldQObject),
+    new_data_ready: fn(*mut HeraldQObject),
 }
 
 impl HeraldEmitter {
@@ -1625,6 +1626,7 @@ impl HeraldEmitter {
             config_init_changed: self.config_init_changed,
             connection_pending_changed: self.connection_pending_changed,
             connection_up_changed: self.connection_up_changed,
+            new_data_ready: self.new_data_ready,
         }
     }
     fn clear(&self) {
@@ -1650,11 +1652,87 @@ impl HeraldEmitter {
             (self.connection_up_changed)(ptr);
         }
     }
+    pub fn new_data_ready(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+        if !ptr.is_null() {
+            (self.new_data_ready)(ptr);
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct HeraldList {
+    qobject: *mut HeraldQObject,
+    layout_about_to_be_changed: fn(*mut HeraldQObject),
+    layout_changed: fn(*mut HeraldQObject),
+    data_changed: fn(*mut HeraldQObject, usize, usize),
+    begin_reset_model: fn(*mut HeraldQObject),
+    end_reset_model: fn(*mut HeraldQObject),
+    begin_insert_rows: fn(*mut HeraldQObject, usize, usize),
+    end_insert_rows: fn(*mut HeraldQObject),
+    begin_move_rows: fn(*mut HeraldQObject, usize, usize, usize),
+    end_move_rows: fn(*mut HeraldQObject),
+    begin_remove_rows: fn(*mut HeraldQObject, usize, usize),
+    end_remove_rows: fn(*mut HeraldQObject),
+}
+
+impl HeraldList {
+    pub fn layout_about_to_be_changed(&mut self) {
+        (self.layout_about_to_be_changed)(self.qobject);
+    }
+    pub fn layout_changed(&mut self) {
+        (self.layout_changed)(self.qobject);
+    }
+    pub fn data_changed(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.data_changed)(self.qobject, first, last);
+    }
+    pub fn begin_reset_model(&mut self) {
+        (self.begin_reset_model)(self.qobject);
+    }
+    pub fn end_reset_model(&mut self) {
+        (self.end_reset_model)(self.qobject);
+    }
+    pub fn begin_insert_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.begin_insert_rows)(self.qobject, first, last);
+    }
+    pub fn end_insert_rows(&mut self) {
+        (self.end_insert_rows)(self.qobject);
+    }
+    pub fn begin_move_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+        destination: usize,
+    ) {
+        (self.begin_move_rows)(self.qobject, first, last, destination);
+    }
+    pub fn end_move_rows(&mut self) {
+        (self.end_move_rows)(self.qobject);
+    }
+    pub fn begin_remove_rows(
+        &mut self,
+        first: usize,
+        last: usize,
+    ) {
+        (self.begin_remove_rows)(self.qobject, first, last);
+    }
+    pub fn end_remove_rows(&mut self) {
+        (self.end_remove_rows)(self.qobject);
+    }
 }
 
 pub trait HeraldTrait {
     fn new(
         emit: HeraldEmitter,
+        model: HeraldList,
         config: Config,
         conversation_builder: ConversationBuilder,
         conversations: Conversations,
@@ -1689,6 +1767,31 @@ pub trait HeraldTrait {
         &mut self,
         user_id: String,
     ) -> ();
+    fn row_count(&self) -> usize;
+    fn insert_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
+        false
+    }
+    fn remove_rows(
+        &mut self,
+        _row: usize,
+        _count: usize,
+    ) -> bool {
+        false
+    }
+    fn can_fetch_more(&self) -> bool {
+        false
+    }
+    fn fetch_more(&mut self) {}
+    fn sort(
+        &mut self,
+        _: u8,
+        _: SortOrder,
+    ) {
+    }
 }
 
 #[no_mangle]
@@ -1780,6 +1883,18 @@ pub extern "C" fn herald_new(
     users_search_begin_remove_rows: fn(*mut UsersSearchQObject, usize, usize),
     users_search_end_remove_rows: fn(*mut UsersSearchQObject),
     utils: *mut UtilsQObject,
+    herald_new_data_ready: fn(*mut HeraldQObject),
+    herald_layout_about_to_be_changed: fn(*mut HeraldQObject),
+    herald_layout_changed: fn(*mut HeraldQObject),
+    herald_data_changed: fn(*mut HeraldQObject, usize, usize),
+    herald_begin_reset_model: fn(*mut HeraldQObject),
+    herald_end_reset_model: fn(*mut HeraldQObject),
+    herald_begin_insert_rows: fn(*mut HeraldQObject, usize, usize),
+    herald_end_insert_rows: fn(*mut HeraldQObject),
+    herald_begin_move_rows: fn(*mut HeraldQObject, usize, usize, usize),
+    herald_end_move_rows: fn(*mut HeraldQObject),
+    herald_begin_remove_rows: fn(*mut HeraldQObject, usize, usize),
+    herald_end_remove_rows: fn(*mut HeraldQObject),
 ) -> *mut Herald {
     let config_emit = ConfigEmitter {
         qobject: Arc::new(AtomicPtr::new(config)),
@@ -1908,9 +2023,25 @@ pub extern "C" fn herald_new(
         config_init_changed: herald_config_init_changed,
         connection_pending_changed: herald_connection_pending_changed,
         connection_up_changed: herald_connection_up_changed,
+        new_data_ready: herald_new_data_ready,
+    };
+    let model = HeraldList {
+        qobject: herald,
+        layout_about_to_be_changed: herald_layout_about_to_be_changed,
+        layout_changed: herald_layout_changed,
+        data_changed: herald_data_changed,
+        begin_reset_model: herald_begin_reset_model,
+        end_reset_model: herald_end_reset_model,
+        begin_insert_rows: herald_begin_insert_rows,
+        end_insert_rows: herald_end_insert_rows,
+        begin_move_rows: herald_begin_move_rows,
+        end_move_rows: herald_end_move_rows,
+        begin_remove_rows: herald_begin_remove_rows,
+        end_remove_rows: herald_end_remove_rows,
     };
     let d_herald = Herald::new(
         herald_emit,
+        model,
         d_config,
         d_conversation_builder,
         d_conversations,
@@ -2001,6 +2132,54 @@ pub unsafe extern "C" fn herald_register_new_user(
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     o.register_new_user(user_id)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_row_count(ptr: *const Herald) -> c_int {
+    to_c_int((&*ptr).row_count())
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_insert_rows(
+    ptr: *mut Herald,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).insert_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_remove_rows(
+    ptr: *mut Herald,
+    row: c_int,
+    count: c_int,
+) -> bool {
+    match (to_usize(row), to_usize(count)) {
+        (Some(row), Some(count)) => (&mut *ptr).remove_rows(row, count),
+        _ => false,
+    }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_can_fetch_more(ptr: *const Herald) -> bool {
+    (&*ptr).can_fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_fetch_more(ptr: *mut Herald) {
+    (&mut *ptr).fetch_more()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_sort(
+    ptr: *mut Herald,
+    column: u8,
+    order: SortOrder,
+) {
+    (&mut *ptr).sort(column, order)
 }
 
 pub struct MembersQObject {}
@@ -5166,6 +5345,7 @@ pub trait UsersSearchTrait {
         value: Option<String>,
     );
     fn clear_filter(&mut self) -> ();
+    fn refresh(&mut self) -> ();
     fn row_count(&self) -> usize;
     fn insert_rows(
         &mut self,
@@ -5303,6 +5483,12 @@ pub unsafe extern "C" fn users_search_filter_set_none(ptr: *mut UsersSearch) {
 pub unsafe extern "C" fn users_search_clear_filter(ptr: *mut UsersSearch) {
     let o = &mut *ptr;
     o.clear_filter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn users_search_refresh(ptr: *mut UsersSearch) {
+    let o = &mut *ptr;
+    o.refresh()
 }
 
 #[no_mangle]

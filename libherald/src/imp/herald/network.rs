@@ -85,6 +85,27 @@ impl NotifHandler {
     }
 }
 
+impl Herald {
+    pub(super) fn login_(&mut self) -> bool {
+        use heraldcore::errors::HErr;
+
+        let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
+
+        spawn!(
+            ret_err!(net::login(
+                move |notif: Notification| {
+                    handler.send(notif);
+                },
+                move |herr: HErr| {
+                    ret_err!(Err::<(), HErr>(herr));
+                }
+            )),
+            false
+        );
+        true
+    }
+}
+
 impl EffectsFlags {
     /// Creates a new `EffectsFlags`
     pub fn new() -> Self {

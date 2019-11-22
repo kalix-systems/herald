@@ -292,7 +292,7 @@ Q_SIGNALS:
   void tryPollChanged();
 };
 
-class Herald : public QObject {
+class Herald : public QAbstractItemModel {
   Q_OBJECT
   friend class Messages;
 
@@ -353,6 +353,39 @@ public:
   Utils *utils();
   Q_INVOKABLE bool login();
   Q_INVOKABLE void registerNewUser(const QString &user_id);
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
+Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
 Q_SIGNALS:
   void configChanged();
   void configInitChanged();
@@ -845,6 +878,7 @@ public:
   QString filter() const;
   void setFilter(const QString &v);
   Q_INVOKABLE void clearFilter();
+  Q_INVOKABLE void refresh();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;

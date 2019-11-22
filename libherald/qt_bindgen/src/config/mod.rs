@@ -83,7 +83,7 @@ fn herald() -> Object {
     };
 
     obj! {
-        Herald: Obj::new().props(properties).funcs(funcs)
+        Herald: Obj::new().props(properties).funcs(funcs).list()
     }
 }
 
@@ -384,6 +384,7 @@ fn users_search() -> Object {
 
     let funcs = functions! {
         mut clearFilter() => Void,
+        mut refresh() => Void,
     };
 
     obj! {

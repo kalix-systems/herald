@@ -8,8 +8,9 @@ use crate::{
     interface::*,
     push_err, ret_err,
     shared::{AddressedBus, SingletonBus},
-    spawn,
+    spawn, Loadable,
 };
+use crossbeam_channel::{Receiver, Sender};
 use herald_common::*;
 use heraldcore::{
     config, db,
@@ -29,20 +30,20 @@ type Emitter = HeraldEmitter;
 mod network;
 use network::*;
 mod imp;
+use imp::LoadProps;
+mod shared;
 
 /// Application state
 pub struct Herald {
-    config_init: Arc<AtomicBool>,
     emit: HeraldEmitter,
     effects_flags: Arc<EffectsFlags>,
     message_search: MessageSearch,
-    config: Config,
-    conversation_builder: ConversationBuilder,
-    conversations: Conversations,
     errors: Errors,
-    users: Users,
     users_search: UsersSearch,
     utils: Utils,
+    load_props: LoadProps,
+    rx: Receiver<shared::Update>,
+    tx: Sender<shared::Update>,
 }
 
 macro_rules! props {
@@ -59,10 +60,25 @@ macro_rules! props {
     }
 }
 
+macro_rules! load_props {
+    ($( $field: ident, $mut: ident, $ret: ty),*) => {
+       $(
+       fn $field(&self) -> &$ret {
+            &self.load_props.$field
+       }
+
+       fn $mut(&mut self) -> &mut $ret {
+            &mut self.load_props.$field
+       }
+       )*
+    }
+}
+
 impl HeraldTrait for Herald {
     fn new(
         emit: HeraldEmitter,
-        mut config: Config,
+        _: HeraldList,
+        config: Config,
         conversation_builder: ConversationBuilder,
         conversations: Conversations,
         errors: Errors,
@@ -71,45 +87,38 @@ impl HeraldTrait for Herald {
         users_search: UsersSearch,
         utils: Utils,
     ) -> Self {
-        let config_init = if config::id().is_ok() {
-            // If this fails, it's because a thread couldn't be spawned.
-            // This implies the OS is in a very bad place.
-            push_err!(
-                gc::init(move |update| {
-                    imp::gc_handler(update);
-                }),
-                "Couldn't start GC thread"
-            );
+        let (tx, rx) = crossbeam_channel::unbounded();
+        let mut herald = Herald {
+            emit,
+            effects_flags: Arc::new(EffectsFlags::new()),
+            message_search,
+            load_props: LoadProps {
+                config,
+                conversation_builder,
+                conversations,
+                users,
+            },
+            errors,
+            users_search,
+            utils,
+            tx,
+            rx,
+        };
 
-            push_err!(config.try_load(), "Couldn't load Config");
-
-            Arc::new(AtomicBool::new(true))
+        if config::id().is_ok() {
+            herald.load_props.setup();
         } else {
             // If this fails, the file system is in a very bad place.
             // This probably cannot be recovered from, and there's not meaningful
             // sense in which the application can work.
             push_err!(db::init(), "Couldn't initialize storage");
-
-            Arc::new(AtomicBool::new(false))
         };
 
-        Herald {
-            emit,
-            config_init,
-            effects_flags: Arc::new(EffectsFlags::new()),
-            message_search,
-            config,
-            conversation_builder,
-            conversations,
-            errors,
-            users,
-            users_search,
-            utils,
-        }
+        herald
     }
 
     fn config_init(&self) -> bool {
-        self.config.loaded()
+        self.load_props.config.loaded()
     }
 
     fn register_new_user(
@@ -120,8 +129,8 @@ impl HeraldTrait for Herald {
 
         let uid = ret_err!(UserId::try_from(user_id.as_str()));
 
-        let config_init = self.config_init.clone();
         let mut emit = self.emit.clone();
+        let tx = self.tx.clone();
 
         spawn!(match ret_err!(net::register(uid)) {
             Res::UIDTaken => {
@@ -134,38 +143,31 @@ impl HeraldTrait for Herald {
                 eprintln!("Bad sig: {:?}", s);
             }
             Res::Success => {
-                config_init.fetch_xor(true, Ordering::Acquire);
-                // If this fails, it's because a thread couldn't be spawned.
-                // This implies the OS is in a very bad place.
-                push_err!(
-                    gc::init(move |update| {
-                        imp::gc_handler(update);
-                    }),
-                    "Couldn't start GC thread"
-                );
-
-                emit.config_init_changed();
+                ret_err!(tx.send(shared::Update::RegistrationSuccess));
+                emit.new_data_ready();
             }
         });
     }
 
-    fn login(&mut self) -> bool {
-        use heraldcore::errors::HErr;
+    fn can_fetch_more(&self) -> bool {
+        !self.rx.is_empty()
+    }
 
-        let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
+    fn fetch_more(&mut self) {
+        use shared::Update::*;
 
-        spawn!(
-            ret_err!(net::login(
-                move |notif: Notification| {
-                    handler.send(notif);
-                },
-                move |herr: HErr| {
-                    ret_err!(Err::<(), HErr>(herr));
+        for update in self.rx.try_iter() {
+            match update {
+                RegistrationSuccess => {
+                    self.load_props.setup();
+                    self.emit.config_init_changed();
                 }
-            )),
-            false
-        );
-        true
+            }
+        }
+    }
+
+    fn login(&mut self) -> bool {
+        self.login_()
     }
 
     fn connection_up(&self) -> bool {
@@ -180,14 +182,21 @@ impl HeraldTrait for Herald {
         &mut self.emit
     }
 
-    props! {
+    load_props! {
         config, config_mut, Config,
         conversation_builder, conversation_builder_mut, ConversationBuilder,
         conversations, conversations_mut, Conversations,
+        users, users_mut, Users
+    }
+
+    props! {
         errors, errors_mut, Errors,
         message_search, message_search_mut, MessageSearch,
-        users, users_mut, Users,
         users_search, users_search_mut, UsersSearch,
         utils, utils_mut, Utils
+    }
+
+    fn row_count(&self) -> usize {
+        0
     }
 }

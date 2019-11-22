@@ -5,7 +5,7 @@ use crate::{
         users::shared::user_in_cache,
     },
     interface::*,
-    push_err, ret_err, ret_none,
+    ret_err, ret_none,
     shared::SingletonBus,
     spawn,
 };
@@ -32,7 +32,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         Self {
             emit,
             model,
-            local_id: push_err!(heraldcore::config::id(), "Failed to get local id"),
+            local_id: None,
             inner: Inner::new(),
         }
     }
@@ -119,7 +119,9 @@ impl ConversationBuilderTrait for ConversationBuilder {
     }
 
     fn finalize(&mut self) {
+        self.model.begin_reset_model();
         let inner = std::mem::replace(&mut self.inner, Default::default());
+        self.model.end_reset_model();
 
         spawn!({
             let conv = ret_err!(inner.add());
@@ -135,7 +137,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
 
     fn clear(&mut self) {
         self.model.begin_reset_model();
-        std::mem::replace(&mut self.inner, Default::default());
+        self.inner = Default::default();
         self.model.end_reset_model();
     }
 
@@ -167,5 +169,14 @@ impl ConversationBuilderTrait for ConversationBuilder {
         index: usize,
     ) -> ffi::UserIdRef {
         ret_none!(self.inner.members().get(index), "").as_str()
+    }
+}
+
+impl ConversationBuilder {
+    pub(crate) fn set_local_id(
+        &mut self,
+        id: UserId,
+    ) {
+        self.local_id.replace(id);
     }
 }
