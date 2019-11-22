@@ -66,16 +66,17 @@ impl SearchState {
         pattern: String,
         emit: &mut Emitter,
     ) -> Result<SearchChanged, HErr> {
-        self.pattern = match self.pattern.take() {
-            Some(mut old) => {
-                if pattern == old.raw() {
+        match self.pattern.as_mut() {
+            Some(old_pattern) => {
+                if pattern == old_pattern.raw() {
                     return Ok(SearchChanged::NotChanged);
                 }
 
-                old.set_pattern(pattern)?;
-                Some(old)
+                old_pattern.set_pattern(pattern)?;
             }
-            None => Some(SearchPattern::new_normal(pattern)?),
+            None => {
+                self.pattern.replace(SearchPattern::new_normal(pattern)?);
+            }
         };
 
         emit.search_pattern_changed();
