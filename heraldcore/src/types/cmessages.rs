@@ -19,10 +19,10 @@ pub fn seal(
 }
 
 /// Opens the message.
-pub fn open(cipher: Cipher) -> Result<(ConversationMessage, GlobalId), HErr> {
+pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, ConversationMessage), HErr> {
     let (cid, from) = kson::from_bytes(cipher.ad.clone())?;
     let decrypted = chainkeys::open_msg(cid, cipher)?.ok_or(ChainKeysError::DecryptionFailed)?;
     let parsed = kson::from_bytes(decrypted.pt.into())?;
 
-    Ok((parsed, from))
+    Ok((cid, from, parsed))
 }

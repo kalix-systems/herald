@@ -38,7 +38,7 @@ where
 
     match sock_get_msg(&mut ws)? {
         SignAsResponse::Sign(u) => {
-            let token = LoginToken(kp.raw_sign_detached(u.as_ref()));
+            let token = LoginToken(kp.secret_key().sign(u.as_ref()));
             sock_send_msg(&mut ws, &token)?;
 
             match sock_get_msg(&mut ws)? {
@@ -75,7 +75,7 @@ where
     Ok(())
 }
 
-fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+fn sock_get_msg<S: websocket::stream::Stream, T: De>(
     ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     let len;
@@ -104,7 +104,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
                 // after the server receives this, it *will* delete the message,
                 // so I'm inclined to be damn sure we're done with it
                 sock_send_msg(ws, &PacketResponse::Success)?;
-                return Ok(serde_cbor::from_slice(&v)?);
+                return Ok(kson::from_bytes(v.into())?);
             }
             None => {
                 sock_send_msg(ws, &PacketResponse::Retry)?;
@@ -113,21 +113,21 @@ fn sock_get_msg<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
     }
 }
 
-fn sock_get_block<S: websocket::stream::Stream, T: for<'a> Deserialize<'a>>(
+fn sock_get_block<S: websocket::stream::Stream, T: De>(
     ws: &mut wsclient::Client<S>
 ) -> Result<T, HErr> {
     loop {
         if let WMessage::Binary(v) = ws.recv_message()? {
-            return Ok(serde_cbor::from_slice(&v)?);
+            return Ok(kson::from_bytes(v.into())?);
         }
     }
 }
 
-fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
+fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
     ws: &mut wsclient::Client<S>,
     t: &T,
 ) -> Result<(), HErr> {
-    let m = WMessage::Binary(serde_cbor::to_vec(t)?);
+    let m = WMessage::Binary(kson::to_vec(t));
     ws.send_message(&m)?;
     Ok(())
 }
@@ -135,11 +135,11 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Serialize>(
 fn handle_push(push: &Push) -> Result<Event, HErr> {
     match push.tag {
         PushTag::User => {
-            let umsg = serde_cbor::from_slice(&push.msg)?;
+            let umsg = kson::from_bytes(push.msg.clone())?;
             handle_cmessage(push.timestamp, umsg)
         }
         PushTag::Device => {
-            let dmsg = serde_cbor::from_slice(&push.msg)?;
+            let dmsg = kson::from_bytes(push.msg.clone())?;
             handle_dmessage(push.timestamp, dmsg)
         }
     }

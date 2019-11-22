@@ -23,7 +23,7 @@ pub struct DeviceMessage {
 /// A contact request.
 pub struct UserReq {
     /// The genesis block for the conversation.
-    pub gen: RatchetState,
+    pub ratchet: RatchetState,
     /// The proposed conversation id.
     pub cid: ConversationId,
 }

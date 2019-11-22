@@ -4,7 +4,7 @@ use super::*;
 #[derive(Debug)]
 pub struct Event {
     pub(super) notifications: Vec<Notification>,
-    pub(super) replies: Vec<(ConversationId, ConversationMessageBody)>,
+    pub(super) replies: Vec<(ConversationId, ConversationMessage)>,
     pub(super) errors: Vec<HErr>,
 }
 
