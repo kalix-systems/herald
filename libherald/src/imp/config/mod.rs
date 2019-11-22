@@ -1,5 +1,8 @@
-use crate::{ffi, interface::*, push_err, ret_err, ret_none, spawn};
-use heraldcore::config::{self as core, Config as Core};
+use crate::{ffi, interface::*, ret_err, ret_none, spawn};
+use heraldcore::{
+    config::{self as core, Config as Core},
+    errors::HErr,
+};
 
 /// Thin wrapper around heraldcore::config::Config,
 /// with a field containing emitters for Qt.
@@ -10,10 +13,8 @@ pub struct Config {
 
 // TODO this isn't exception safe
 impl ConfigTrait for Config {
-    /// Returns new Config. Will typically end up being called from C++
     fn new(emit: ConfigEmitter) -> Self {
-        let inner = push_err!(core::get(), "Couldn't fetch `Config`");
-        Config { emit, inner }
+        Config { emit, inner: None }
     }
 
     /// UserId of the current user as an `&str`.
@@ -123,5 +124,16 @@ impl ConfigTrait for Config {
 
     fn emit(&mut self) -> &mut ConfigEmitter {
         &mut self.emit
+    }
+}
+
+impl Config {
+    pub(crate) fn try_load(&mut self) -> Result<(), HErr> {
+        self.inner.replace(core::get()?);
+        Ok(())
+    }
+
+    pub(crate) fn loaded(&self) -> bool {
+        self.inner.is_some()
     }
 }
