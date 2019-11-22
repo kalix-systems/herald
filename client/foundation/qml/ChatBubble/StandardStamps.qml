@@ -20,7 +20,7 @@ RowLayout {
 
         Button {
             id: clock
-            icon.source: conversationItem.expirationPeriod
+            icon.source: expirationTime
                          !== 0 ? "qrc:/countdown-icon-temp.svg" : ""
             icon.height: 16
             icon.width: 16

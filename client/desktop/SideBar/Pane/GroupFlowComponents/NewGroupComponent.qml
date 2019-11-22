@@ -84,7 +84,7 @@ Component {
                 sideBarState.state = ""
             }
         }
-
+        Component.onCompleted: herald.usersSearch.refresh()
         Component.onDestruction: herald.conversationBuilder.clear()
     }
 }
