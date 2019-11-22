@@ -15,7 +15,7 @@ Column {
         leftPadding: 12
         placeholderText: "Add members"
         onTextChanged: {
-            groupConvoMake.filter = groupSelectText.text
+            herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
     }
@@ -74,7 +74,7 @@ Column {
                         //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
                         herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
-                        groupConvoMake.clearFilter()
+                        herald.usersSearch.clearFilter()
                         groupSelectText.text = ""
                     }
                 }
