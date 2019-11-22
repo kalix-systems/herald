@@ -434,8 +434,10 @@ impl InboundMessageBuilder {
         let server_timestamp = server_timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
 
-        let res: Result<Vec<PathBuf>, HErr> =
-            attachments.into_iter().map(|a| Ok(a.save()?)).collect();
+        let res: Result<Vec<String>, HErr> = attachments
+            .into_iter()
+            .map(|a| Ok(a.save()?.into()))
+            .collect();
         let attachment_paths = res?;
         let has_attachments = !attachment_paths.is_empty();
 
@@ -500,7 +502,7 @@ impl InboundMessageBuilder {
         };
 
         if has_attachments {
-            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
+            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|s| s.as_str()))?;
         }
 
         tx.commit()?;

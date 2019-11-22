@@ -2,7 +2,7 @@ use chainkeys::ChainKeysError;
 use coremacros::*;
 use coretypes::{
     ids::InvalidRandomIdLength,
-    messages::{MissingInboundMessageField, MissingOutboundMessageField},
+    messages::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField},
 };
 use herald_common::*;
 use image;
@@ -119,11 +119,11 @@ herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
 herr!(coretypes::attachments::Error, Attachment);
 
-// impl From<EmptyMessageBody> for HErr {
-//     fn from(_: EmptyMessageBody) -> Self {
-//         HErr::EmptyMessageBody
-//     }
-// }
+impl From<EmptyMessageBody> for HErr {
+    fn from(_: EmptyMessageBody) -> Self {
+        HErr::EmptyMessageBody
+    }
+}
 
 impl From<image::ImageError> for HErr {
     fn from(e: image::ImageError) -> Self {
