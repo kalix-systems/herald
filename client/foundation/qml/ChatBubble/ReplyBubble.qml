@@ -81,21 +81,18 @@ ColumnLayout {
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string shortenedText: truncate_text(
-                                                   replyPreview.body).slice(
-                                                   0, 350) + decoration
-                readonly property string decoration: replyPreview.body.length > 350 ? "..." : ""
-
+                property string shortenedText: truncate_text(replyPreview.body)
                 text: !replyPreview.isDangling ? shortenedText : "Original message not found"
                 elideWidth: maxWidth * 3
                 elide: Text.ElideRight
 
                 function truncate_text(body) {
                     const bodyLines = body.split("\n")
+                    const decoration = body.length > 350 ? "…" : ""
                     if (bodyLines.length > 3) {
-                        return bodyLines.slice(0, 3).join("\n")
+                        return bodyLines.slice(0, 3).join("\n") + "…"
                     } else {
-                        return body
+                        return body.slice(0, 350) + decoration
                     }
                 }
             }
