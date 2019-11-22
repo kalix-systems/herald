@@ -77,6 +77,7 @@ impl Messages {
             &mut self.emit,
             &mut self.model,
         );
+        self.builder.try_clear_reply(&msg_id);
 
         let len = self.container.len();
 

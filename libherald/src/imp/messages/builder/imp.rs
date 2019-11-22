@@ -6,6 +6,7 @@ impl MessageBuilder {
         match self.op.take() {
             Some(_) => {
                 self.op = None;
+                self.inner.replying_to(None);
                 self.emit_op_changed();
                 self.emit.is_reply_changed();
                 OpChanged::Changed
@@ -50,6 +51,17 @@ impl MessageBuilder {
         self.emit.op_author_changed();
         self.emit.op_time_changed();
         self.emit.op_has_attachments_changed();
+    }
+
+    pub(in crate::imp::messages) fn try_clear_reply(
+        &mut self,
+        msg_id: &MsgId,
+    ) {
+        if let Some(op_id) = &self.inner.op {
+            if op_id == msg_id {
+                self.clear_reply_();
+            }
+        }
     }
 }
 

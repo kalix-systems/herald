@@ -40,7 +40,7 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn is_reply(&self) -> bool {
-        self.inner.op.is_some()
+        self.op.is_some()
     }
 
     fn is_media_message(&self) -> bool {
@@ -211,9 +211,7 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn clear_reply(&mut self) {
-        self.inner.replying_to(None);
-        self.emit.op_id_changed();
-        self.emit.is_reply_changed();
+        self.clear_reply_();
     }
 
     fn op_id(&self) -> Option<ffi::MsgIdRef> {
