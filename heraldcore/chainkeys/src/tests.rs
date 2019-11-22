@@ -11,6 +11,10 @@ fn in_memory() -> rusqlite::Connection {
 #[test]
 fn ratchet_states() {
     let mut conn = in_memory();
+    // let mut conn = CK_CONN.lock();
+    // conn.execute_batch(include_str!("sql/create.sql"))
+    //     .expect(womp!());
+
     let cid1 = ConversationId::from([1; 32]);
     let cid2 = ConversationId::from([2; 32]);
 
@@ -50,6 +54,15 @@ fn ratchet_states() {
         Ok((c1, c2))
     });
     let (c1, c2) = res.expect(womp!());
+
+    let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
+        let m1 = tx.get_derived_key(cid1, 0)?;
+        let m2 = tx.get_derived_key(cid2, 0)?;
+        Ok((m1, m2))
+    });
+    let (m1, m2) = res.expect(womp!());
+    m1.expect(womp!());
+    m2.expect(womp!());
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
         let d1 = tx.open_msg(cid1, c1)?;
