@@ -143,6 +143,7 @@ public:
   QString picture() const;
   void setPicture(const QString &v);
   Q_INVOKABLE bool addMember(const QString &user_id);
+  Q_INVOKABLE void clear();
   Q_INVOKABLE void finalize();
   Q_INVOKABLE void removeLast();
   Q_INVOKABLE bool removeMemberById(const QString &user_id);

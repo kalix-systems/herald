@@ -360,6 +360,7 @@ fn conversation_builder() -> Object {
         mut removeLast() => Void,
         mut setTitle(title: QString) => Void,
         mut finalize() => Void,
+        mut clear() => Void,
     };
 
     obj! {

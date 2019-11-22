@@ -133,6 +133,10 @@ impl ConversationBuilderTrait for ConversationBuilder {
         });
     }
 
+    fn clear(&mut self) {
+        std::mem::replace(&mut self.inner, Default::default());
+    }
+
     fn set_title(
         &mut self,
         title: String,

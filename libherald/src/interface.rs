@@ -745,6 +745,7 @@ pub trait ConversationBuilderTrait {
         &mut self,
         user_id: String,
     ) -> bool;
+    fn clear(&mut self) -> ();
     fn finalize(&mut self) -> ();
     fn remove_last(&mut self) -> ();
     fn remove_member_by_id(
@@ -877,6 +878,12 @@ pub unsafe extern "C" fn conversation_builder_add_member(
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     let o = &mut *ptr;
     o.add_member(user_id)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversation_builder_clear(ptr: *mut ConversationBuilder) {
+    let o = &mut *ptr;
+    o.clear()
 }
 
 #[no_mangle]
