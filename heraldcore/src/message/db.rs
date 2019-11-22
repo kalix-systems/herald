@@ -367,13 +367,12 @@ impl OutboundMessageBuilder {
         self,
         db: &mut Conn,
     ) -> Result<Message, HErr> {
-        use crate::{channel_recv_err, loc};
+        use crate::channel_recv_err;
         use crossbeam_channel::*;
 
         let (tx, rx) = unbounded();
         self.store_and_send_db(db, move |m| {
-            tx.send(m)
-                .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
+            tx.send(m).unwrap_or_else(|_| panic!("Send error"));
         });
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {

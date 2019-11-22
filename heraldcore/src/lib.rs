@@ -1,7 +1,6 @@
 //! Core logic for herald client.
 
 // #![warn(missing_docs)]
-
 /// User configuration
 pub mod config;
 /// Conversations
@@ -28,3 +27,7 @@ pub mod user;
 mod user_keys;
 /// Utils
 pub mod utils;
+
+#[cfg(test)]
+#[macro_use]
+extern crate coremacros;
