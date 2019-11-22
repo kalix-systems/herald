@@ -105,7 +105,7 @@ Item {
                     anchors.fill: parent
                     ShapePath {
                         fillColor: CmnCfg.palette.secondaryTextColor
-                        strokeColor: CmnCfg.palette.secondaryTextColor
+                        strokeColor: "#00000000"
                         startX: cornerCarat.width / 2
                         startY: cornerCarat.height
                         PathLine {
