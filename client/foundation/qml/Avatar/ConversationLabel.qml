@@ -78,7 +78,8 @@ Item {
             icon.width: 24
             icon.color: CmnCfg.palette.mainTextColor
             padding: 0
-            background: Item {}
+            background: Item {
+            }
         }
     }
 }
