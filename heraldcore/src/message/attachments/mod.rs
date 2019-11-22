@@ -1,5 +1,4 @@
 use super::*;
-use crate::NE;
 pub use coretypes::attachments::*;
 
 pub(crate) mod db;

@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::HErr, message::Message, types::*, utils};
+use crate::{db::Database, errors::HErr, message::Message, types::*};
 pub use coretypes::conversation::*;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
@@ -26,7 +26,6 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
         ..
     } = meta;
 
-    let kp = crate::config::keypair()?;
     let ratchet = RatchetState::new();
     chainkeys::store_state(cid, &ratchet)?;
 

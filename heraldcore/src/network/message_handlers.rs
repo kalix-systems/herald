@@ -120,7 +120,7 @@ pub(super) fn handle_dmessage(
     let mut ev = Event::default();
 
     let (from, msg) = dmessages::open(msg)?;
-    let GlobalId { did, uid } = from;
+    let GlobalId { uid, .. } = from;
 
     match msg {
         DeviceMessageBody::Req(cr) => {

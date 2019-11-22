@@ -83,7 +83,6 @@ impl ConfigBuilder {
         // TODO this is weirdly special cased,
         // but changing it without making testing awkward requires
         // changing the chainmail API
-        let kp = keypair()?;
         let ratchet = channel_ratchet::RatchetState::new();
         chainkeys::store_state(conf.nts_conversation, &ratchet)?;
         Ok(conf)

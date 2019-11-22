@@ -1,7 +1,6 @@
 use super::*;
 use platform_dirs::ATTACHMENTS_DIR;
 use rusqlite::{Connection as Conn, NO_PARAMS};
-use std::path::Path;
 
 pub(crate) fn add<'a, A: Iterator<Item = &'a str>>(
     conn: &Conn,

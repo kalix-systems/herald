@@ -87,8 +87,6 @@ pub fn send_user_req(
     uid: UserId,
     cid: ConversationId,
 ) -> Result<(), HErr> {
-    let kp = config::keypair()?;
-
     let ratchet = RatchetState::new();
     chainkeys::store_state(cid, &ratchet)?;
 
