@@ -13,7 +13,7 @@ ColumnLayout {
     property string friendlyTimestamp: ""
     property string receiptImage: ""
     property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
-                                                    replyPreview.author)]
+                                                    opAuthor)]
     property string authorName: ""
     property color authorColor
     property var replyId
@@ -22,10 +22,6 @@ ColumnLayout {
 
     spacing: 0
 
-    MessagePreview {
-        id: replyPreview
-        messageId: replyId === undefined ? null : replyId
-    }
 
     Rectangle {
         id: replyWrapper
@@ -36,7 +32,7 @@ ColumnLayout {
 
         Rectangle {
             id: verticalAccent
-            visible: !replyPreview.isDangling
+            visible: replyType === 2
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
@@ -50,7 +46,7 @@ ColumnLayout {
             width: reply.width
             height: reply.height
             z: CmnCfg.overlayZ
-            enabled: !replyPreview.isDangling ? true : false
+            enabled: replyType === 2 ? true : false
         }
 
         NumberAnimation {
@@ -69,20 +65,20 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: !replyPreview.isDangling ? contactsModel.nameById(
-                                                     replyPreview.author) : ""
+                text: replyType === 2 ? contactsModel.nameById(
+                                                     opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
 
-                Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
+                Layout.preferredHeight: replyType === 2 ? implicitHeight : 0
                 color: opColor
             }
 
             TextMetrics {
                 readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
-                text: !replyPreview.isDangling ? replyPreview.body : "Original message not found"
+                text: replyType === 2 ? opBody : "Original message not found"
                 elideWidth: constWidth
                 elide: Text.ElideRight
             }
@@ -97,8 +93,8 @@ ColumnLayout {
                 Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
                 font.pixelSize: 10
-                text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
-                                                     replyPreview.epochTimestampMs) : ""
+                text: replyType === 2 ? Utils.friendlyTimestamp(
+                                                     opTime) : ""
                 color: CmnCfg.palette.secondaryTextColor
             }
         }

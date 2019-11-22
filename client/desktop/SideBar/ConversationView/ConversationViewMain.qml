@@ -63,7 +63,7 @@ ListView {
                 lastBody: !messageModel.isEmpty ? lastAuthor + ": " + messageModel.lastBody : ""
                 lastAuthor: outbound ? "You" : messageModel.lastAuthor
                 lastTimestamp: !messageModel.isEmpty ? Utils.friendlyTimestamp(
-                                                           messageModel.lastEpochTimestampMs) : ""
+                                                           messageModel.lastTime) : ""
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
             }
