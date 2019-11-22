@@ -134,6 +134,7 @@ Flickable {
                         margins: CmnCfg.margin
                         bottomMargin: parent.bottomPadding
                     }
+                    z: 10
                     pfpPath: parent.pfpUrl
                     avatarHeight: 28
                 }
@@ -166,6 +167,7 @@ Flickable {
                         margins: CmnCfg.margin
                         bottomMargin: parent.bottomPadding
                     }
+                    z: 10
                     pfpPath: parent.pfpUrl
                     avatarHeight: 28
                 }
