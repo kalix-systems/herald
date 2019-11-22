@@ -69,18 +69,10 @@ Page {
                 searchPlaceholder: "Search your conversations"
             }
 
-            //loader that loads message search model
-            PropertyChanges {
-                //loader in sidebarMain
-                target: searchModelLoader
-                active: true
-                source: "MessageSearchComponents/MessageSearch.qml"
-            }
-
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: msgSearchModel
+                searchModel: heraldState.globalMessageSearch
             }
         },
 

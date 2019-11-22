@@ -62,7 +62,7 @@ Component {
                         anchors.rightMargin: CmnCfg.smallMargin / 2
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            msgSearchModel.clearSearch()
+                            heraldState.globalMessageSearch.clearSearch()
                             conversationsModel.filter = ""
                             sideBarState.state = ""
                         }
@@ -76,7 +76,7 @@ Component {
                         } else {
                             Qt.callLater(function (text) {
                                 conversationsModel.filter = text
-                                msgSearchModel.searchPattern = text
+                                heraldState.globalMessageSearch.searchPattern = text
                             }, searchText.text)
                         }
                     }
@@ -84,6 +84,7 @@ Component {
                     Component.onDestruction: {
                         contactsModel.clearFilter()
                         conversationsModel.clearFilter()
+                        heraldState.globalMessageSearch.clearSearch()
                     }
 
                     Keys.onReturnPressed: {

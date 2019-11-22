@@ -23,7 +23,6 @@ Page {
     property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState
-    property alias msgSearchModel: searchModelLoader.item
 
     background: Rectangle {
         color: CmnCfg.palette.paneColor
@@ -68,10 +67,7 @@ Page {
         id: convoBuilderLoader
     }
 
-    Loader {
-        active: false
-        id: searchModelLoader
-    }
+
 
     SideBarState {
         id: sideBarState
