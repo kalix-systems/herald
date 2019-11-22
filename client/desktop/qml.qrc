@@ -14,10 +14,7 @@
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>RegistrationPage.qml</file>
-        <file>SideBar/ContactView.qml</file>
-        <file>SideBar/SearchComponent.qml</file>
         <file>SideBar/SideBarState.qml</file>
-        <file>SideBar/ContextBar.qml</file>
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
@@ -34,27 +31,30 @@
         <file>common/js/Avatar.mjs</file>
         <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
-        <file>SideBar/ConversationView/ConversationViewMain.qml</file>
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
         <file>ChatView/Controls/TimerOptions.qml</file>
-        <file>SideBar/HeaderComponent.qml</file>
         <file>ChatView/ChatSearchComponent.qml</file>
-        <file>SideBar/GroupFlowComponents/ContactSearchComponent.qml</file>
-        <file>SideBar/GroupFlowComponents/GroupHeaderComponent.qml</file>
-        <file>SideBar/GroupFlowComponents/NewGroupComponent.qml</file>
-        <file>SideBar/GroupFlowComponents/FinalGroupList.qml</file>
-        <file>SideBar/GroupFlowComponents/ConvoBuilder.qml</file>
         <file>ChatView/js/SearchHandler.mjs</file>
         <file>../foundation/js/utils.mjs</file>
         <file>ChatView/SearchTextArea.qml</file>
-        <file>SideBar/NewContactComponent.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>common/ConfigAvatar.qml</file>
-        <file>SideBar/SideBarPane.qml</file>
-        <file>SideBar/MessageSearchComponents/MessageSearch.qml</file>
-        <file>SideBar/MessageSearchComponents/MessageSearchView.qml</file>
+        <file>SideBar/Header/ContextBar.qml</file>
+        <file>SideBar/Header/HeaderComponent.qml</file>
+        <file>SideBar/Header/NewContactComponent.qml</file>
+        <file>SideBar/Header/SearchComponent.qml</file>
+        <file>SideBar/Pane/ConversationViewMain.qml</file>
+        <file>SideBar/Pane/MessageSearchView.qml</file>
+        <file>SideBar/Pane/SideBarPane.qml</file>
+        <file>SideBar/Pane/ContactView.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/ContactSearchComponent.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/ConvoBuilder.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/GroupHeaderComponent.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/NewGroupComponent.qml</file>
+        <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
     </qresource>
 </RCC>

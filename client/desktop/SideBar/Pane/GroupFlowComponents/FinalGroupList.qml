@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../../common" as Common
+import "../../../common" as Common
 import "qrc:/imports/Avatar" as Av
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQml 2.13
