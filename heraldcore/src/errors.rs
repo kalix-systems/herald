@@ -1,5 +1,5 @@
 use chainkeys::ChainKeysError;
-use coremacros::*;
+use coremacros::from_fn;
 use coretypes::{
     ids::InvalidRandomIdLength,
     messages::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField},
