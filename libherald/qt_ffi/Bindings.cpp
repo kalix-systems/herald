@@ -301,7 +301,7 @@ bool Attachments::removeRows(int row, int count, const QModelIndex &)
 QModelIndex Attachments::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -376,7 +376,7 @@ QVariant Attachments::headerData(int section, Qt::Orientation orientation, int r
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool Attachments::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -384,7 +384,7 @@ bool Attachments::setHeaderData(int section, Qt::Orientation orientation, const 
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -462,7 +462,7 @@ bool ConversationBuilder::removeRows(int row, int count, const QModelIndex &)
 QModelIndex ConversationBuilder::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -537,7 +537,7 @@ QVariant ConversationBuilder::headerData(int section, Qt::Orientation orientatio
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -545,7 +545,7 @@ bool ConversationBuilder::setHeaderData(int section, Qt::Orientation orientation
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -627,7 +627,7 @@ bool Conversations::removeRows(int row, int count, const QModelIndex &)
 QModelIndex Conversations::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -828,7 +828,7 @@ QVariant Conversations::headerData(int section, Qt::Orientation orientation, int
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool Conversations::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -836,7 +836,7 @@ bool Conversations::setHeaderData(int section, Qt::Orientation orientation, cons
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -964,7 +964,7 @@ bool Members::removeRows(int row, int count, const QModelIndex &)
 QModelIndex Members::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -1093,7 +1093,7 @@ QVariant Members::headerData(int section, Qt::Orientation orientation, int role)
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -1101,7 +1101,7 @@ bool Members::setHeaderData(int section, Qt::Orientation orientation, const QVar
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -1170,7 +1170,7 @@ bool MessageBuilder::removeRows(int row, int count, const QModelIndex &)
 QModelIndex MessageBuilder::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -1245,7 +1245,7 @@ QVariant MessageBuilder::headerData(int section, Qt::Orientation orientation, in
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool MessageBuilder::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -1253,7 +1253,7 @@ bool MessageBuilder::setHeaderData(int section, Qt::Orientation orientation, con
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -1339,7 +1339,7 @@ bool MessageSearch::removeRows(int row, int count, const QModelIndex &)
 QModelIndex MessageSearch::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -1504,7 +1504,7 @@ QVariant MessageSearch::headerData(int section, Qt::Orientation orientation, int
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool MessageSearch::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -1512,7 +1512,7 @@ bool MessageSearch::setHeaderData(int section, Qt::Orientation orientation, cons
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -1595,7 +1595,7 @@ bool Messages::removeRows(int row, int count, const QModelIndex &)
 QModelIndex Messages::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -1840,7 +1840,7 @@ QVariant Messages::headerData(int section, Qt::Orientation orientation, int role
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -1848,7 +1848,7 @@ bool Messages::setHeaderData(int section, Qt::Orientation orientation, const QVa
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -1957,7 +1957,7 @@ bool Users::removeRows(int row, int count, const QModelIndex &)
 QModelIndex Users::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -2137,7 +2137,7 @@ QVariant Users::headerData(int section, Qt::Orientation orientation, int role) c
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool Users::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -2145,7 +2145,7 @@ bool Users::setHeaderData(int section, Qt::Orientation orientation, const QVaria
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
@@ -2247,7 +2247,7 @@ bool UsersSearch::removeRows(int row, int count, const QModelIndex &)
 QModelIndex UsersSearch::index(int row, int column, const QModelIndex &parent) const
 {
     if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 && column < 1) {
-        return createIndex(row, column, (quintptr)row);
+        return createIndex(row, column, static_cast<quintptr>(row));
     }
     return QModelIndex();
 }
@@ -2382,7 +2382,7 @@ QVariant UsersSearch::headerData(int section, Qt::Orientation orientation, int r
     if (orientation != Qt::Horizontal) {
         return QVariant();
     }
-    return m_headerData.value(qMakePair(section, (Qt::ItemDataRole)role), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
+    return m_headerData.value(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), role == Qt::DisplayRole ?QString::number(section + 1) :QVariant());
 }
 
 bool UsersSearch::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
@@ -2390,7 +2390,7 @@ bool UsersSearch::setHeaderData(int section, Qt::Orientation orientation, const 
     if (orientation != Qt::Horizontal) {
         return false;
     }
-    m_headerData.insert(qMakePair(section, (Qt::ItemDataRole)role), value);
+    m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)), value);
     return true;
 }
 
