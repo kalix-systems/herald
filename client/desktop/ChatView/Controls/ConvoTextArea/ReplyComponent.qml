@@ -70,10 +70,6 @@ Rectangle {
             text: ownedConversation.builder.opBody
             elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
             elide: Text.ElideRight
-
-            onTextChanged: {
-                print("text changed:", text)
-            }
         }
 
         TextEdit {
