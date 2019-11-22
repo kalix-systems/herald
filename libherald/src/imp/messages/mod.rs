@@ -96,37 +96,37 @@ impl Interface for Messages {
 
     fn data_saved(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
-        Some(self.container.msg_data(row_index)?.save_status == SaveStatus::Saved)
+        Some(self.container.msg_data(index)?.save_status == SaveStatus::Saved)
     }
 
     fn author(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<ffi::UserIdRef> {
-        Some(self.container.msg_data(row_index)?.author.as_str())
+        Some(self.container.msg_data(index)?.author.as_str())
     }
 
     fn body(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<&str> {
-        Some(self.container.msg_data(row_index)?.body.as_ref()?.as_str())
+        Some(self.container.msg_data(index)?.body.as_ref()?.as_str())
     }
 
     fn msg_id(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<ffi::MsgIdRef> {
-        Some(self.container.get(row_index)?.msg_id.as_slice())
+        Some(self.container.get(index)?.msg_id.as_slice())
     }
 
     fn has_attachments(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
-        Some(self.container.msg_data(row_index)?.has_attachments)
+        Some(self.container.msg_data(index)?.has_attachments)
     }
 
     fn receipt_status(
@@ -138,51 +138,51 @@ impl Interface for Messages {
 
     fn match_status(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<u8> {
-        Some(self.container.msg_data(row_index)?.match_status as u8)
+        Some(self.container.msg_data(index)?.match_status as u8)
     }
 
     fn is_head(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
-        self.is_head_(row_index)
+        self.is_head_(index)
     }
 
     fn is_tail(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
-        self.is_tail_(row_index)
+        self.is_tail_(index)
     }
 
     fn insertion_time(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<i64> {
-        Some(self.container.get(row_index)?.insertion_time.0)
+        Some(self.container.get(index)?.insertion_time.0)
     }
 
     fn expiration_time(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(row_index)?.time.expiration?.0)
+        Some(self.container.msg_data(index)?.time.expiration?.0)
     }
 
     fn server_time(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(row_index)?.time.server?.0)
+        Some(self.container.msg_data(index)?.time.server?.0)
     }
 
     fn delete_message(
         &mut self,
-        row_index: u64,
+        index: u64,
     ) -> bool {
-        self.delete_message_(row_index)
+        self.delete_message_(index)
     }
 
     /// Deletes all messages in the current conversation.

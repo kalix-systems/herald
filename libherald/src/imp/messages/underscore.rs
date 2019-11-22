@@ -16,6 +16,7 @@ impl Messages {
             builder,
         }
     }
+
     pub(super) fn fetch_more_(&mut self) {
         let conv_id = ret_none!(self.conversation_id);
 
@@ -156,21 +157,21 @@ impl Messages {
 
     pub(super) fn is_tail_(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
         if self.container.is_empty() {
             return None;
         }
 
         // Case where message is last message in conversation
-        if row_index == self.container.len().saturating_sub(1) {
+        if index == self.container.len().saturating_sub(1) {
             return Some(true);
         }
 
         // other cases
         let (msg, succ) = (
-            self.container.msg_data(row_index)?,
-            self.container.msg_data(row_index + 1)?,
+            self.container.msg_data(index)?,
+            self.container.msg_data(index + 1)?,
         );
 
         Some(!msg.same_flurry(succ))
@@ -178,21 +179,21 @@ impl Messages {
 
     pub(super) fn is_head_(
         &self,
-        row_index: usize,
+        index: usize,
     ) -> Option<bool> {
         if self.container.is_empty() {
             return None;
         }
 
         // Case where message is first message in conversation
-        if row_index == 0 {
+        if index == 0 {
             return Some(true);
         }
 
         // other cases
         let (msg, prev) = (
-            self.container.msg_data(row_index)?,
-            self.container.msg_data(row_index - 1)?,
+            self.container.msg_data(index)?,
+            self.container.msg_data(index - 1)?,
         );
 
         Some(!msg.same_flurry(prev))
@@ -216,9 +217,9 @@ impl Messages {
 
     pub(super) fn delete_message_(
         &mut self,
-        row_index: u64,
+        index: u64,
     ) -> bool {
-        let ix = row_index as usize;
+        let ix = index as usize;
 
         let id = ret_none!(self.container.get(ix), false).msg_id;
 
