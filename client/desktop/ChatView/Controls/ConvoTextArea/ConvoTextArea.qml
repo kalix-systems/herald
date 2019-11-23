@@ -38,7 +38,7 @@ Rectangle {
     // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyUid === config.configId
+    property bool owned: replyUid === herald.config.configId
     property string replyUid
 
     property var replyId
@@ -82,7 +82,7 @@ Rectangle {
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
-                startColor: CmnCfg.avatarColors[contactsModel.colorById(
+                startColor: CmnCfg.avatarColors[herald.users.colorById(
                                                     replyUid)]
             }
             width: textWrapperRect.width

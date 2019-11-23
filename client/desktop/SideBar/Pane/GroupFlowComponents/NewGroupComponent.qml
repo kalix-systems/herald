@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../../common" as Common
+import "../../../common" as Common
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 import "qrc:/imports/js/utils.mjs" as Utils
@@ -74,15 +74,17 @@ Component {
                 font.family: CmnCfg.chatFont.name
             }
             onClicked: {
-                titleText.text == "" ? groupMemberSelect.setTitle(
-                                           "Untitled Group") : groupMemberSelect.setTitle(
+                titleText.text == "" ? herald.conversationBuilder.setTitle(
+                                           "Untitled Group") : herald.conversationBuilder.setTitle(
                                            titleText.text)
                 if (topRect.profPic !== "") {
-                    groupMemberSelect.picture = topRect.profPic
+                    herald.conversationBuilder.picture = topRect.profPic
                 }
-                groupMemberSelect.finalize()
+                herald.conversationBuilder.finalize()
                 sideBarState.state = ""
             }
         }
+        Component.onCompleted: herald.usersSearch.refresh()
+        Component.onDestruction: herald.conversationBuilder.clear()
     }
 }

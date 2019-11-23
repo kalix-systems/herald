@@ -1,4 +1,5 @@
 use super::*;
+use crate::imp::messages;
 
 /// A bundle of `AtomicBool`s used for signalling
 pub struct EffectsFlags {
@@ -18,10 +19,7 @@ impl NotifHandler {
         &mut self,
         notif: Notification,
     ) {
-        use crate::imp::{
-            conversations::shared::*,
-            users::{shared::*, Users},
-        };
+        use crate::imp::{conversations::shared::*, users::shared::*};
         use heraldcore::message;
         use messages::{shared::MsgUpdate, Messages};
         use Notification::*;
@@ -84,6 +82,27 @@ impl NotifHandler {
             _effects_flags,
             _emit: emit,
         }
+    }
+}
+
+impl Herald {
+    pub(super) fn login_(&mut self) -> bool {
+        use heraldcore::errors::HErr;
+
+        let mut handler = NotifHandler::new(self.emit.clone(), self.effects_flags.clone());
+
+        spawn!(
+            ret_err!(net::login(
+                move |notif: Notification| {
+                    handler.send(notif);
+                },
+                move |herr: HErr| {
+                    ret_err!(Err::<(), HErr>(herr));
+                }
+            )),
+            false
+        );
+        true
     }
 }
 

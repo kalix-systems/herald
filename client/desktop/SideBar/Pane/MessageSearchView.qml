@@ -18,7 +18,7 @@ ListView {
     delegate: Item {
         id: messageItem
         property var messageData: model
-        property bool outbound: messageData.author === config.configId
+        property bool outbound: messageData.author === herald.config.configId
 
         height: CmnCfg.convoHeight
         width: parent.width

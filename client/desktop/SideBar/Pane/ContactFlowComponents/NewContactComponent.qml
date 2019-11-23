@@ -2,9 +2,9 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../common" as Common
+import "../../../common" as Common
 import QtQuick.Dialogs 1.3
-import "popups/js/NewContactDialogue.mjs" as JS
+import "../../popups/js/NewContactDialogue.mjs" as JS
 
 Component {
     Rectangle {
@@ -23,7 +23,7 @@ Component {
                 placeholderText: "Enter username or display name"
 
                 Keys.onReturnPressed: {
-                    JS.insertContact(text, contactsModel)
+                    JS.insertContact(text, herald.users)
                     sideBarState.state = ""
                 }
             }

@@ -8,10 +8,8 @@ pub mod conversation_builder;
 pub mod conversations;
 /// Implementation of `crate::interface::ErrorsTrait`.
 pub mod errors;
-/// Implementation of `crate::interface::HeraldStateTrait`.
-pub mod heraldstate;
-/// Implementation of `crate::interface::HeraldUtilsTrait`.
-pub mod heraldutils;
+/// Implementation of `crate::interface::HeraldTrait`.
+pub mod herald;
 /// Implementation of `crate::interface::MembersTrait`.
 pub mod members;
 /// Implementation of `crate::interface::MessageSearchTrait`
@@ -22,17 +20,19 @@ pub mod messages;
 pub mod users;
 /// Implementation of `crate::interface::ConversationBuilderUsersTrait`.
 pub mod users_search;
+/// Implementation of `crate::interface::UtilsTrait`.
+pub mod utils;
 
 pub use attachments::*;
 pub use config::*;
 pub use conversation_builder::*;
 pub use conversations::*;
 pub use errors::*;
-pub use heraldstate::*;
-pub use heraldutils::*;
+pub use herald::*;
 pub use members::*;
 pub use message_search::*;
 pub use messages::builder::*;
 pub use messages::*;
 pub use users::*;
 pub use users_search::*;
+pub use utils::*;

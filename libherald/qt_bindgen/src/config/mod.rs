@@ -43,27 +43,38 @@ pub(crate) fn get() -> Config {
 
 fn objects() -> BTreeMap<String, Rc<Object>> {
     objects! {
-       herald_state(),
-       errors(),
-       herald_utils(),
-       conversations(),
+       herald(),
        users(),
-       members(),
-       messages(),
-       config_obj(),
+       config(),
+       conversations(),
+       message_search(),
        conversation_builder(),
        users_search(),
+       utils(),
+       errors(),
+
+       members(),
+
+       messages(),
        message_builder(),
-       attachments(),
-       message_search()
+       attachments()
     }
 }
 
-fn herald_state() -> Object {
+fn herald() -> Object {
     let properties = props! {
         configInit: Prop::new().simple(Bool),
         connectionUp: Prop::new().simple(Bool),
-        connectionPending: Prop::new().simple(Bool)
+        connectionPending: Prop::new().simple(Bool),
+
+        config: Prop::new().object(config()),
+        conversationBuilder: Prop::new().object(conversation_builder()),
+        conversations: Prop::new().object(conversations()),
+        errors: Prop::new().object(errors()),
+        messageSearch: Prop::new().object(message_search()),
+        users: Prop::new().object(users()),
+        usersSearch: Prop::new().object(users_search()),
+        utils: Prop::new().object(utils())
     };
 
     let funcs = functions! {
@@ -72,7 +83,7 @@ fn herald_state() -> Object {
     };
 
     obj! {
-        HeraldState: Obj::new().props(properties).funcs(funcs)
+        Herald: Obj::new().props(properties).funcs(funcs).list()
     }
 }
 
@@ -90,14 +101,14 @@ fn errors() -> Object {
     }
 }
 
-fn herald_utils() -> Object {
+fn utils() -> Object {
     let functions = functions! {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
         const isValidRandId(bs: QByteArray) => Bool,
     };
 
     obj! {
-        HeraldUtils: Obj::new().funcs(functions)
+        Utils: Obj::new().funcs(functions)
     }
 }
 
@@ -265,7 +276,8 @@ fn messages() -> Object {
         opMsgId: ItemProp::new(QByteArray).optional(),
         opAuthor: ItemProp::new(QString).optional(),
         opBody: ItemProp::new(QString).optional(),
-        opTime: ItemProp::new(Qint64).optional(),
+        opInsertionTime: ItemProp::new(Qint64).optional(),
+        opExpirationTime: ItemProp::new(Qint64).optional(),
         opHasAttachments: ItemProp::new(Bool).optional()
     };
 
@@ -318,7 +330,7 @@ fn message_builder() -> Object {
     }
 }
 
-fn config_obj() -> Object {
+fn config() -> Object {
     let props = props! {
         configId: Prop::new().simple(QString),
         name: Prop::new().simple(QString).write(),
@@ -349,6 +361,7 @@ fn conversation_builder() -> Object {
         mut removeLast() => Void,
         mut setTitle(title: QString) => Void,
         mut finalize() => Void,
+        mut clear() => Void,
     };
 
     obj! {
@@ -372,6 +385,7 @@ fn users_search() -> Object {
 
     let funcs = functions! {
         mut clearFilter() => Void,
+        mut refresh() => Void,
     };
 
     obj! {

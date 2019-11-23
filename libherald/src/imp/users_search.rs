@@ -148,6 +148,13 @@ impl UsersSearchTrait for UsersSearch {
     fn row_count(&self) -> usize {
         self.list.len()
     }
+
+    fn refresh(&mut self) {
+        self.model.begin_reset_model();
+        self.filter = None;
+        self.list = users();
+        self.model.end_reset_model();
+    }
 }
 
 impl UsersSearch {
@@ -168,4 +175,15 @@ impl UsersSearch {
 
         Some(())
     }
+}
+
+fn users() -> Vec<User> {
+    user_ids()
+        .into_iter()
+        .map(|id| User {
+            id,
+            matched: false,
+            selected: false,
+        })
+        .collect()
 }

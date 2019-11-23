@@ -18,9 +18,9 @@ ApplicationWindow {
     minimumWidth: 500
     minimumHeight: 300
 
-    Errors {
-        id: errorQueue
-        onTryPollChanged: {
+    Herald {
+        id: herald
+        errors.onTryPollChanged: {
             var errMsg = errorQueue.nextError()
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
@@ -31,17 +31,9 @@ ApplicationWindow {
         }
     }
 
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    HeraldState {
-        id: heraldState
-    }
-
     Loader {
         id: appLoader
-        active: heraldState.configInit
+        active: herald.configInit
         anchors.fill: parent
         sourceComponent: App {
         }
@@ -50,7 +42,7 @@ ApplicationWindow {
     Loader {
         anchors.fill: parent
         id: registrationLoader
-        active: !heraldState.configInit
+        active: !herald.configInit
         sourceComponent: RegistrationPage {
         }
     }

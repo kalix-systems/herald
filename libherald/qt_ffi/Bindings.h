@@ -10,17 +10,18 @@ class Config;
 class ConversationBuilder;
 class Conversations;
 class Errors;
-class HeraldState;
-class HeraldUtils;
+class Herald;
 class Members;
 class MessageBuilder;
 class MessageSearch;
 class Messages;
 class Users;
 class UsersSearch;
+class Utils;
 
 class Attachments : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -79,6 +80,7 @@ Q_SIGNALS:
 
 class Config : public QObject {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -122,6 +124,7 @@ Q_SIGNALS:
 
 class ConversationBuilder : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -140,6 +143,7 @@ public:
   QString picture() const;
   void setPicture(const QString &v);
   Q_INVOKABLE bool addMember(const QString &user_id);
+  Q_INVOKABLE void clear();
   Q_INVOKABLE void finalize();
   Q_INVOKABLE void removeLast();
   Q_INVOKABLE bool removeMemberById(const QString &user_id);
@@ -186,6 +190,7 @@ Q_SIGNALS:
 
 class Conversations : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -266,6 +271,7 @@ Q_SIGNALS:
 
 class Errors : public QObject {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -286,7 +292,7 @@ Q_SIGNALS:
   void tryPollChanged();
 };
 
-class HeraldState : public QObject {
+class Herald : public QAbstractItemModel {
   Q_OBJECT
   friend class Messages;
 
@@ -294,52 +300,109 @@ public:
   class Private;
 
 private:
+  Config *const m_config;
+  ConversationBuilder *const m_conversationBuilder;
+  Conversations *const m_conversations;
+  Errors *const m_errors;
+  MessageSearch *const m_messageSearch;
+  Users *const m_users;
+  UsersSearch *const m_usersSearch;
+  Utils *const m_utils;
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(Config *config READ config NOTIFY configChanged FINAL)
   Q_PROPERTY(bool configInit READ configInit NOTIFY configInitChanged FINAL)
   Q_PROPERTY(bool connectionPending READ connectionPending NOTIFY
                  connectionPendingChanged FINAL)
   Q_PROPERTY(
       bool connectionUp READ connectionUp NOTIFY connectionUpChanged FINAL)
-  explicit HeraldState(bool owned, QObject *parent);
+  Q_PROPERTY(ConversationBuilder *conversationBuilder READ conversationBuilder
+                 NOTIFY conversationBuilderChanged FINAL)
+  Q_PROPERTY(Conversations *conversations READ conversations NOTIFY
+                 conversationsChanged FINAL)
+  Q_PROPERTY(Errors *errors READ errors NOTIFY errorsChanged FINAL)
+  Q_PROPERTY(MessageSearch *messageSearch READ messageSearch NOTIFY
+                 messageSearchChanged FINAL)
+  Q_PROPERTY(Users *users READ users NOTIFY usersChanged FINAL)
+  Q_PROPERTY(
+      UsersSearch *usersSearch READ usersSearch NOTIFY usersSearchChanged FINAL)
+  Q_PROPERTY(Utils *utils READ utils NOTIFY utilsChanged FINAL)
+  explicit Herald(bool owned, QObject *parent);
 
 public:
-  explicit HeraldState(QObject *parent = nullptr);
-  ~HeraldState() override;
+  explicit Herald(QObject *parent = nullptr);
+  ~Herald() override;
+  const Config *config() const;
+  Config *config();
   bool configInit() const;
   bool connectionPending() const;
   bool connectionUp() const;
+  const ConversationBuilder *conversationBuilder() const;
+  ConversationBuilder *conversationBuilder();
+  const Conversations *conversations() const;
+  Conversations *conversations();
+  const Errors *errors() const;
+  Errors *errors();
+  const MessageSearch *messageSearch() const;
+  MessageSearch *messageSearch();
+  const Users *users() const;
+  Users *users();
+  const UsersSearch *usersSearch() const;
+  UsersSearch *usersSearch();
+  const Utils *utils() const;
+  Utils *utils();
   Q_INVOKABLE bool login();
   Q_INVOKABLE void registerNewUser(const QString &user_id);
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
 Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
+Q_SIGNALS:
+  void configChanged();
   void configInitChanged();
   void connectionPendingChanged();
   void connectionUpChanged();
-};
-
-class HeraldUtils : public QObject {
-  Q_OBJECT
-  friend class Messages;
-
-public:
-  class Private;
-
-private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  explicit HeraldUtils(bool owned, QObject *parent);
-
-public:
-  explicit HeraldUtils(QObject *parent = nullptr);
-  ~HeraldUtils() override;
-  Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
-                                    const QByteArray &bs2) const;
-  Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
-Q_SIGNALS:
+  void conversationBuilderChanged();
+  void conversationsChanged();
+  void errorsChanged();
+  void messageSearchChanged();
+  void usersChanged();
+  void usersSearchChanged();
+  void utilsChanged();
 };
 
 class Members : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -417,6 +480,7 @@ Q_SIGNALS:
 
 class MessageBuilder : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -508,6 +572,7 @@ Q_SIGNALS:
 
 class MessageSearch : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -581,6 +646,8 @@ Q_SIGNALS:
 
 class Messages : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
+
 public:
   class Private;
 
@@ -677,9 +744,10 @@ public:
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
+  Q_INVOKABLE QVariant opExpirationTime(int row) const;
   Q_INVOKABLE QVariant opHasAttachments(int row) const;
+  Q_INVOKABLE QVariant opInsertionTime(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
-  Q_INVOKABLE QVariant opTime(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
   Q_INVOKABLE QVariant serverTime(int row) const;
@@ -710,6 +778,7 @@ Q_SIGNALS:
 
 class Users : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -791,6 +860,7 @@ Q_SIGNALS:
 
 class UsersSearch : public QAbstractItemModel {
   Q_OBJECT
+  friend class Herald;
   friend class Messages;
 
 public:
@@ -809,6 +879,7 @@ public:
   QString filter() const;
   void setFilter(const QString &v);
   Q_INVOKABLE void clearFilter();
+  Q_INVOKABLE void refresh();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -854,5 +925,27 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void filterChanged();
+};
+
+class Utils : public QObject {
+  Q_OBJECT
+  friend class Herald;
+  friend class Messages;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  explicit Utils(bool owned, QObject *parent);
+
+public:
+  explicit Utils(QObject *parent = nullptr);
+  ~Utils() override;
+  Q_INVOKABLE bool compareByteArray(const QByteArray &bs1,
+                                    const QByteArray &bs2) const;
+  Q_INVOKABLE bool isValidRandId(const QByteArray &bs) const;
+Q_SIGNALS:
 };
 #endif // BINDINGS_H

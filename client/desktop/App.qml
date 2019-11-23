@@ -16,14 +16,6 @@ Item {
         }
     }
 
-    Users {
-        id: contactsModel
-    }
-
-    Conversations {
-        id: conversationsModel
-    }
-
     Popups.ColorPicker {
         id: avatarColorPicker
     }
@@ -38,10 +30,6 @@ Item {
 
     Popups.NewMessagePopup {
         id: convoMenu
-    }
-
-    Config {
-        id: config
     }
 
     focus: true
@@ -116,5 +104,5 @@ Item {
         }
     }
 
-    Component.onCompleted: heraldState.login()
+    Component.onCompleted: herald.login()
 }

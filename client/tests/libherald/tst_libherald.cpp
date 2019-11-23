@@ -7,14 +7,9 @@ class libherald : public QObject {
   Q_OBJECT
 
 public:
-    Config*     cfg    = nullptr;
-    HeraldState*  herald_state = nullptr;
-    Conversations*  convos = nullptr;
-    ConversationBuilder* convobuilder = nullptr;
+    Herald*  herald = nullptr;
     Messages*   msg = nullptr;
     MessageBuilder*  msgbuilder =  nullptr;
-    Users*  user = nullptr;
-    Errors* error = nullptr;
     libherald();
     ~libherald();
 
@@ -39,35 +34,29 @@ void libherald::initTestCase()
   QFile file("db/store.sqlite3");
   file.remove();
   qDebug() << "Creating New Herald State";
-  herald_state = new HeraldState();
-  QSignalSpy spy(herald_state, SIGNAL(configInitChanged()));
-  qDebug() << "Creating New Errors Queue";
-  error = new Errors();
+  herald = new Herald();
+  QSignalSpy spy(herald, SIGNAL(configInitChanged()));
   qDebug() << "Registering New User 'Alice'";
-  herald_state->registerNewUser("GAlice");
+  herald -> registerNewUser("GAlice");
   QVERIFY(spy.wait(1000));
 }
 
 void libherald::test_config_set_name()
 {
-  cfg = new Config();
   qDebug() << "Allocating New Config";
-  QSignalSpy spy(cfg, SIGNAL(nameChanged()));
+  QSignalSpy spy(herald -> config(), SIGNAL(nameChanged()));
   qDebug() << "setting name in config";
-  cfg->setName("Alice_Alias");
-  QCOMPARE(cfg->name(), "Alice_Alias");
+  herald -> config() -> setName("Alice_Alias");
+  QCOMPARE(herald -> config() -> name(), "Alice_Alias");
   QCOMPARE(spy.count(), 1);
-  delete cfg;
 }
 
 void libherald::test_config_set_color()
 {
-  cfg = new Config();
-  QSignalSpy spy(cfg, SIGNAL(colorChanged()));
-  cfg->setColor(0);
-  QCOMPARE(cfg->color(), 0);
+  QSignalSpy spy(herald -> config(), SIGNAL(colorChanged()));
+  herald -> config() -> setColor(0);
+  QCOMPARE(herald -> config() -> color(), 0);
   QCOMPARE(spy.count(), 1);
-  delete cfg;
 }
 
 // void libherald::test_convo_messages_setup()

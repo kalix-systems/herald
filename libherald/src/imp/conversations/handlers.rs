@@ -35,6 +35,7 @@ impl Conversations {
     ) {
         self.model.begin_reset_model();
         self.list = contents;
+        self.loaded = true;
         self.model.end_reset_model();
     }
 

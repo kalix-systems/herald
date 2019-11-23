@@ -11,9 +11,6 @@ RowLayout {
     width: parent.width
     spacing: 0
 
-    MessageBuilder {
-        id: builder
-    }
 
     TextArea {
         id: cta
@@ -46,9 +43,8 @@ RowLayout {
             Layout.alignment: Qt.AlignRight
             color: CmnCfg.palette.iconFill
             tapCallback: send ? function () {
-                builder.body = cta.text
-                builder.conversationId = ownedMessages.conversationId
-                builder.finalize()
+                ownedMessages.builder.body = cta.text
+                ownedMessages.builder.finalize()
                 cta.clear()
             } : function () {}
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"

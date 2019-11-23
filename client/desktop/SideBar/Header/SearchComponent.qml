@@ -2,9 +2,9 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
-import "../common" as Common
-import "popups/js/NewContactDialogue.mjs" as JS
-import "../SideBar" as SBUtils
+import "../../common" as Common
+import "../popups/js/NewContactDialogue.mjs" as JS
+import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
@@ -62,8 +62,8 @@ Component {
                         anchors.rightMargin: CmnCfg.smallMargin / 2
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            msgSearchModel.clearSearch()
-                            conversationsModel.filter = ""
+                            herald.messageSearch.clearSearch()
+                            herald.conversations.filter = ""
                             sideBarState.state = ""
                         }
                     }
@@ -71,24 +71,25 @@ Component {
                     onTextChanged: {
                         if (contactsSearch) {
                             Qt.callLater(function (text) {
-                                contactsModel.filter = text
+                                herald.users.filter = text
                             }, searchText.text)
                         } else {
                             Qt.callLater(function (text) {
-                                conversationsModel.filter = text
-                                msgSearchModel.searchPattern = text
+                                herald.conversations.filter = text
+                                herald.messageSearch.searchPattern = text
                             }, searchText.text)
                         }
                     }
 
                     Component.onDestruction: {
-                        contactsModel.clearFilter()
-                        conversationsModel.clearFilter()
+                        herald.users.clearFilter()
+                        herald.conversations.clearFilter()
+                        herald.messageSearch.clearSearch()
                     }
 
                     Keys.onReturnPressed: {
                         if (sideBarState.state == "newContactState") {
-                            JS.insertContact(searchText, contactsModel)
+                            JS.insertContact(searchText, herald.users)
                             sideBarState.state = ""
                         }
                     }

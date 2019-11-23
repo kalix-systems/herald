@@ -12,8 +12,8 @@ ApplicationWindow {
 
     // utility code, meant to reduce the amount of js laying
     // around the code base
-    HeraldState {
-        id: heraldState
+    Herald {
+        id: herald
     }
 
     Loader {
@@ -23,14 +23,9 @@ ApplicationWindow {
         }
     }
 
-    // displays error dialog upon output from
-    // libherald, meant as a debugging tool
-    Errors.ErrorHandler {
-    }
-
     Loader {
         id: loginPageLoader
-        active: !heraldState.configInit
+        active: !herald.configInit
         anchors.fill: parent
         // windows cannot be filled, unless reffered to as parent
         sourceComponent: LoginPage.LoginLandingPage {
@@ -41,7 +36,7 @@ ApplicationWindow {
 
     Loader {
         id: appLoader
-        active: heraldState.configInit
+        active: herald.configInit
         anchors.fill: parent
         sourceComponent: App {
         }

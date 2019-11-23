@@ -3,7 +3,10 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "qrc:/common" as Common
-import "../SideBar/GroupFlowComponents" as GroupFlow
+import "../SideBar/Header" as Header
+import "../SideBar/Pane" as Pane
+import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
+import "../SideBar/Pane/ContactFlowComponents" as ContactFlow
 
 // Reveiw Key
 // OS Dependent: OSD
@@ -20,10 +23,8 @@ Page {
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
     SplitView.preferredWidth: 300
-    property alias groupMemberSelect: convoBuilderLoader.item
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState
-    property alias msgSearchModel: searchModelLoader.item
 
     background: Rectangle {
         color: CmnCfg.palette.paneColor
@@ -36,7 +37,7 @@ Page {
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: ContextBar {
+        sourceComponent: Header.ContextBar {
             id: contextBarComponent
         }
 
@@ -46,12 +47,12 @@ Page {
     }
 
     //component loaded into header depending on sidebar state
-    HeaderComponent {
+    Header.HeaderComponent {
         id: headerBarComponent
     }
 
     //TODO: get rid of this once global search implemented
-    SearchComponent {
+    Header.SearchComponent {
         id: searchBarComponent
     }
 
@@ -59,18 +60,8 @@ Page {
         id: newGroupComponent
     }
 
-    NewContactComponent {
+    ContactFlow.NewContactComponent {
         id: newContactComponent
-    }
-
-    Loader {
-        active: false
-        id: convoBuilderLoader
-    }
-
-    Loader {
-        active: false
-        id: searchModelLoader
     }
 
     SideBarState {

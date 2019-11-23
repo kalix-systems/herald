@@ -10,7 +10,6 @@
         "SideBar/ts/ContactView.ts",
         "SideBar/ts/ContactViewTypes.d.ts",
         "SideBar/popups/ts/ConfigPopupSubmission.ts",
-        "SideBar/popups/ts/ContactClickedPopup.ts",
         "SideBar/popups/ts/NewContactDialogue.ts",
         "common/ts/Avatar.ts",
         "../foundation/ts/HeraldTypes.d.ts",
