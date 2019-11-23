@@ -6,18 +6,56 @@
 #include <QtCore/QObject>
 
 class Attachments;
+typedef Attachments *AttachmentsRef;
+Q_DECLARE_METATYPE(AttachmentsRef);
+
 class Config;
+typedef Config *ConfigRef;
+Q_DECLARE_METATYPE(ConfigRef);
+
 class ConversationBuilder;
+typedef ConversationBuilder *ConversationBuilderRef;
+Q_DECLARE_METATYPE(ConversationBuilderRef);
+
 class Conversations;
+typedef Conversations *ConversationsRef;
+Q_DECLARE_METATYPE(ConversationsRef);
+
 class Errors;
+typedef Errors *ErrorsRef;
+Q_DECLARE_METATYPE(ErrorsRef);
+
 class Herald;
+typedef Herald *HeraldRef;
+Q_DECLARE_METATYPE(HeraldRef);
+
 class Members;
+typedef Members *MembersRef;
+Q_DECLARE_METATYPE(MembersRef);
+
 class MessageBuilder;
+typedef MessageBuilder *MessageBuilderRef;
+Q_DECLARE_METATYPE(MessageBuilderRef);
+
 class MessageSearch;
+typedef MessageSearch *MessageSearchRef;
+Q_DECLARE_METATYPE(MessageSearchRef);
+
 class Messages;
+typedef Messages *MessagesRef;
+Q_DECLARE_METATYPE(MessagesRef);
+
 class Users;
+typedef Users *UsersRef;
+Q_DECLARE_METATYPE(UsersRef);
+
 class UsersSearch;
+typedef UsersSearch *UsersSearchRef;
+Q_DECLARE_METATYPE(UsersSearchRef);
+
 class Utils;
+typedef Utils *UtilsRef;
+Q_DECLARE_METATYPE(UtilsRef);
 
 class Attachments : public QAbstractItemModel {
   Q_OBJECT

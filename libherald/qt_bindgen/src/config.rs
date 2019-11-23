@@ -1,18 +1,12 @@
-use rust_qt_binding_generator::configuration::{SimpleType::*, *};
+use builders::func::*;
+use builders::item_prop::*;
+use builders::obj::*;
+use builders::prop::*;
+use rust_qt_binding_generator::{
+    builders,
+    configuration::{SimpleType::*, *},
+};
 use std::{collections::BTreeMap, path::PathBuf, rc::Rc};
-
-pub mod func;
-pub mod item_prop;
-pub mod macros;
-pub mod obj;
-pub mod prop;
-
-use func::*;
-use item_prop::*;
-use obj::*;
-use prop::*;
-
-use crate::*;
 
 pub(crate) fn get() -> Config {
     let crate_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
