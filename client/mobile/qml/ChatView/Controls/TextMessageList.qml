@@ -18,14 +18,14 @@ Column {
             // no receipt images for now
             property string proxyReceiptImage
 
-            readonly property color userColor: CmnCfg.avatarColors[usersModel.colorById(
+            readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
                                                                        author)]
             readonly property string timestamp: Utils.friendlyTimestamp(
-                                                    epochTimestampMs)
+                                                    insertionTime)
 
-            readonly property string authName: outbound ? "" : usersModel.nameById(
+            readonly property string authName: outbound ? "" : herald.users.nameById(
                                                               author)
-            readonly property bool outbound: author === configModel.configId
+            readonly property bool outbound: author === herald.config.configId
 
             // column is most correct to resize for extra content
             anchors {

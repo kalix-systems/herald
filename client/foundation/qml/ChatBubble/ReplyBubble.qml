@@ -12,7 +12,7 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
-    property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
+    property color opColor: CmnCfg.avatarColors[herald.users.colorById(
                                                     opAuthor)]
     property string authorName: ""
     property color authorColor
@@ -65,7 +65,7 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: knownReply ? contactsModel.nameById(opAuthor) : ""
+                text: knownReply ? herald.users.nameById(opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
@@ -76,11 +76,12 @@ ColumnLayout {
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string decoration: knownReply && opBody.length > 350 ? "..." : ""
+                property string decoration: knownReply
+                                            && opBody.length > 350 ? "..." : ""
                 property string shortenedText: knownReply ? truncate_text(
-                                                                    opBody).slice(
-                                                                    0, 350) + decoration
-                                                          : "Original message not found"
+                                                                opBody).slice(
+                                                                0,
+                                                                350) + decoration : "Original message not found"
                 text: shortenedText
                 elideWidth: maxWidth * 3
                 elide: Text.ElideRight
@@ -101,15 +102,38 @@ ColumnLayout {
                 Layout.minimumWidth: messageBody.width
             }
 
+            Row {
+                spacing: 2
+                Layout.bottomMargin: CmnCfg.smallPadding
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
             Label {
+                id: replyTs
                 Layout.margins: CmnCfg.smallMargin
                 Layout.topMargin: 0
                 font.pixelSize: 10
-                text: replyType === 2 ? Utils.friendlyTimestamp(opTime) : ""
+                text: replyType === 2 ? Utils.friendlyTimestamp(opInsertionTime) : ""
                 color: CmnCfg.palette.secondaryTextColor
             }
+
+            Button {
+                id: clock
+                icon.source: opExpirationTime
+                             !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+                icon.height: 16
+                icon.width: 16
+                icon.color: "grey"
+                padding: 0
+                background: Item {
+                }
+                anchors.verticalCenter: replyTs.verticalCenter
+            }
         }
-    }
+
+            }
+
+        }
+
 
     ChatLabel {
         id: uname

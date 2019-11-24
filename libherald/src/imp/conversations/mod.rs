@@ -22,6 +22,7 @@ pub struct Conversations {
     filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vector<Conversation>,
+    loaded: bool,
 }
 
 impl ConversationsTrait for Conversations {
@@ -35,15 +36,13 @@ impl ConversationsTrait for Conversations {
 
         CONV_EMITTER.lock().replace(global_emit);
 
-        // start loading conversations in another thread
-        imp::init();
-
         Self {
             emit,
             filter,
             filter_regex: false,
             model,
             list: Vector::new(),
+            loaded: false,
         }
     }
 
@@ -332,28 +331,5 @@ impl ConversationsTrait for Conversations {
         }
 
         self.emit.filter_changed();
-    }
-}
-
-impl Conversations {
-    fn inner_filter(&mut self) -> Option<()> {
-        let filter = &self.filter.as_ref()?;
-
-        let list = &mut self.list;
-        for (ix, Conversation { matched, id }) in list.iter_mut().enumerate() {
-            let data = cont_none!(shared::data(id));
-
-            let new_matched = match &data.title {
-                Some(title) => filter.is_match(&title),
-                None => false,
-            };
-
-            if new_matched != *matched {
-                *matched = new_matched;
-                self.model.data_changed(ix, ix);
-            }
-        }
-
-        Some(())
     }
 }

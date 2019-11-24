@@ -3,8 +3,6 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "qrc:/common" as Common
-import "../SideBar/ConversationView"
-import "MessageSearchComponents"
 
 Flickable {
     property alias messageSearchLoader: messageSearchLoader
@@ -36,7 +34,7 @@ Flickable {
             sourceComponent: Component {
                 ConversationViewMain {
                     id: convosLvComponent
-                    model: conversationsModel
+                    model: herald.conversations
                 }
             }
             width: parent.width

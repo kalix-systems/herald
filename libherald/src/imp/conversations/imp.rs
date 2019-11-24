@@ -71,15 +71,48 @@ impl Conversations {
     }
 }
 
-pub(super) fn init() {
-    spawn!({
-        let mut list = Vector::new();
-        for meta in ret_err!(conversation::all_meta()).into_iter() {
-            let (conv, data) = split_meta(meta);
-            shared::insert_data(conv.id, data);
-            list.push_back(conv);
+impl Conversations {
+    pub(super) fn inner_filter(&mut self) -> Option<()> {
+        let filter = &self.filter.as_ref()?;
+
+        let list = &mut self.list;
+        for (ix, Conversation { matched, id }) in list.iter_mut().enumerate() {
+            let data = cont_none!(shared::data(id));
+
+            let new_matched = match &data.title {
+                Some(title) => filter.is_match(&title),
+                None => false,
+            };
+
+            if new_matched != *matched {
+                *matched = new_matched;
+                self.model.data_changed(ix, ix);
+            }
         }
 
-        ret_err!(Conversations::push(ConvUpdate::Init(list)));
-    });
+        Some(())
+    }
+}
+
+impl crate::Loadable for Conversations {
+    type Error = std::io::Error;
+
+    fn try_load(&mut self) -> Result<(), std::io::Error> {
+        std::thread::Builder::new().spawn(|| {
+            let mut list = Vector::new();
+            for meta in ret_err!(conversation::all_meta()).into_iter() {
+                let (conv, data) = split_meta(meta);
+                shared::insert_data(conv.id, data);
+                list.push_back(conv);
+            }
+
+            ret_err!(Self::push(ConvUpdate::Init(list)));
+        })?;
+
+        Ok(())
+    }
+
+    fn loaded(&self) -> bool {
+        self.loaded
+    }
 }

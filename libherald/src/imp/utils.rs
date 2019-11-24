@@ -1,13 +1,13 @@
 use crate::interface::*;
 
 /// A collection of pure functions that are used in QML.
-pub struct HeraldUtils {
-    emit: HeraldUtilsEmitter,
+pub struct Utils {
+    emit: UtilsEmitter,
 }
 
-impl HeraldUtilsTrait for HeraldUtils {
-    fn new(emit: HeraldUtilsEmitter) -> Self {
-        HeraldUtils { emit }
+impl UtilsTrait for Utils {
+    fn new(emit: UtilsEmitter) -> Self {
+        Utils { emit }
     }
 
     fn compare_byte_array(
@@ -25,7 +25,7 @@ impl HeraldUtilsTrait for HeraldUtils {
         bs.len() == 32
     }
 
-    fn emit(&mut self) -> &mut HeraldUtilsEmitter {
+    fn emit(&mut self) -> &mut UtilsEmitter {
         &mut self.emit
     }
 }

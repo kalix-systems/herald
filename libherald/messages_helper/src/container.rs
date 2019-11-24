@@ -173,11 +173,18 @@ impl Container {
         Some(&self.op(index)?.body)
     }
 
-    pub fn op_time(
+    pub fn op_insertion_time(
         &self,
         index: usize,
     ) -> Option<Time> {
         Some(self.op(index)?.time.insertion)
+    }
+
+    pub fn op_expiration_time(
+        &self,
+        index: usize,
+    ) -> Option<Time> {
+        Some(self.op(index)?.time.expiration?)
     }
 
     pub fn op_has_attachments(

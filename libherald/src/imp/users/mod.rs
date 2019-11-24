@@ -9,6 +9,7 @@ use std::convert::{TryFrom, TryInto};
 
 pub(crate) mod shared;
 use shared::*;
+mod imp;
 
 type Emitter = UsersEmitter;
 type List = UsersList;
@@ -30,6 +31,7 @@ pub struct Users {
     filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vec<User>,
+    loaded: bool,
 }
 
 impl UsersTrait for Users {
@@ -37,18 +39,6 @@ impl UsersTrait for Users {
         mut emit: Emitter,
         model: List,
     ) -> Users {
-        let list = match user::all() {
-            Ok(v) => v
-                .into_iter()
-                .map(|u| {
-                    let id = u.id;
-                    shared::USER_DATA.insert(id, u);
-                    User { id, matched: true }
-                })
-                .collect(),
-            Err(_) => Vec::new(),
-        };
-
         let global_emit = emit.clone();
 
         shared::USER_EMITTER.lock().replace(global_emit);
@@ -59,9 +49,10 @@ impl UsersTrait for Users {
         Users {
             emit,
             model,
-            list,
+            list: Vec::new(),
             filter,
             filter_regex: false,
+            loaded: false,
         }
     }
 
@@ -391,22 +382,5 @@ impl UsersTrait for Users {
         }
 
         self.emit.filter_changed();
-    }
-}
-
-impl Users {
-    fn inner_filter(&mut self) {
-        for (ix, user) in self.list.iter_mut().enumerate() {
-            let inner = ret_none!(get_user(&user.id));
-            let old_matched = user.matched;
-            user.matched = self
-                .filter
-                .as_ref()
-                .map(|filter| inner.matches(&filter))
-                .unwrap_or(true);
-            if user.matched != old_matched {
-                self.model.data_changed(ix, ix);
-            }
-        }
     }
 }

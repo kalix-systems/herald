@@ -2,6 +2,7 @@ declare class ByteArray {}
 
 declare class ConversationID extends ByteArray {}
 declare class MsgId extends ByteArray {}
+declare class MessageSearch {}
 
 declare const enum ExpirationPeriod {
   Never = 0,
@@ -27,11 +28,19 @@ declare const enum ReplyType {
 
 declare type UserId = string;
 
-declare class HeraldState {
+declare class Herald {
   configInit: boolean;
 
   connectionUp: boolean;
   connectionPending: boolean;
+
+  config: Config;
+  conversationBuilder: ConversationBuilder;
+  conversations: Conversations;
+  messageSearch: MessageSearch;
+  users: Users;
+  usersSearch: Users;
+  utils: Utils;
 
   registerNewUser(userid: UserId): boolean;
   login(): boolean;
@@ -134,7 +143,7 @@ declare class ConversationBuilder {
   finalize(): ByteArray;
 }
 
-declare class HeraldUtils {
+declare class Utils {
   compareByteArray(
     bs1: ByteArray | undefined,
     bs2: ByteArray | undefined

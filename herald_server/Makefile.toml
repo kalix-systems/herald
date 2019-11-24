@@ -1,6 +1,6 @@
 [tasks.start-postgres]
 linux_alias = "start-postgres-linux"
-mac_alis = "start-postgres-macos"
+mac_alias = "start-postgres-macos"
 
 [tasks.start-postgres-linux]
 command = "docker-compose"

@@ -41,8 +41,8 @@ Page {
     }
 
     function registerUser() {
-        if (heraldState.registerNewUser(entryField.text.trim())) {
-            heraldState.configInit = true
+        if (herald.registerNewUser(entryField.text.trim())) {
+            herald.configInit = true
         }
     }
 }

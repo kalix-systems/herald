@@ -31,7 +31,7 @@ Rectangle {
         anchors.right: wrapper.left
         height: wrapper.height
         width: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.avatarColors[contactsModel.colorById(
+        color: CmnCfg.palette.avatarColors[herald.users.colorById(
                                                ownedConversation.builderopAuthor)]
     }
 
@@ -54,14 +54,14 @@ Rectangle {
 
         Label {
             id: sender
-            text: contactsModel.nameById(ownedConversation.builder.opAuthor)
+            text: herald.users.nameById(ownedConversation.builder.opAuthor)
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.rightMargin: CmnCfg.smallMargin
             Layout.bottomMargin: CmnCfg.margin / 2
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.avatarColors[contactsModel.colorById(
+            color: CmnCfg.palette.avatarColors[herald.users.colorById(
                                                    ownedConversation.builder.opAuthor)]
         }
 
