@@ -43,12 +43,12 @@ pub const TYPE_OFFS: u8 = 5;
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Type {
-    Special = 0 << TYPE_OFFS,
-    Unsigned = 1 << TYPE_OFFS,
-    Signed = 2 << TYPE_OFFS,
-    Bytes = 3 << TYPE_OFFS,
-    Cons = 4 << TYPE_OFFS,
-    Collection = 5 << TYPE_OFFS,
+    Special = 0,
+    Unsigned = 1,
+    Signed = 2,
+    Bytes = 3,
+    Cons = 4,
+    Collection = 5,
 }
 
 impl TryFrom<u8> for Type {
@@ -155,13 +155,9 @@ mod test {
         ];
 
         for ty in &types {
-            assert!(MASK_TYPE | *ty as u8 == MASK_TYPE);
+            let ut = *ty as u8;
+            assert_eq!(MASK_TYPE | (ut << TYPE_OFFS), MASK_TYPE);
+            assert_eq!((ut << TYPE_OFFS) >> TYPE_OFFS, ut);
         }
-    }
-
-    #[test]
-    fn true_false_typed_corr() {
-        assert_eq!(FALSE_BYTE & MASK_TYPE, Type::Special as u8);
-        assert_eq!(TRUE_BYTE & MASK_TYPE, Type::Special as u8);
     }
 }

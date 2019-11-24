@@ -7,8 +7,8 @@ pub struct UnitLike;
 #[test]
 fn unit_like_serde() {
     let val = UnitLike;
-    let as_vec = kson::ser::into_vec(&val);
-    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
 
@@ -18,8 +18,8 @@ pub struct EmptyTuple();
 #[test]
 fn empty_tuple_serde() {
     let val = EmptyTuple();
-    let as_vec = kson::ser::into_vec(&val);
-    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
 
@@ -35,8 +35,8 @@ fn tuple_serde() {
         u64::max_value(),
         u128::max_value(),
     );
-    let as_vec = kson::ser::into_vec(&val);
-    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
 
@@ -58,8 +58,8 @@ fn struct_serde() {
         fourth: u64::max_value(),
         fifth: u128::max_value(),
     };
-    let as_vec = kson::ser::into_vec(&val);
-    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }
 
@@ -80,7 +80,7 @@ fn generic_serde() {
         in2: map,
         rest: Bytes::from_static(b"asdf"),
     };
-    let as_vec = kson::ser::into_vec(&val);
-    let val2 = kson::de::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
     assert_eq!(val, val2);
 }

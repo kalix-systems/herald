@@ -24,7 +24,7 @@ macro_rules! write_uint {
                 &mut self,
                 u: $ty,
             ) {
-                let typ = Type::Unsigned as u8;
+                let typ = (Type::Unsigned as u8) << TYPE_OFFS;
                 if u == 0 {
                     self.0.push(typ);
                 } else if u < BIG_BIT as $ty {
@@ -55,7 +55,7 @@ macro_rules! write_int {
                 &mut self,
                 i: $ty,
             ) {
-                let typ = Type::Signed as u8;
+                let typ = (Type::Signed as u8) << TYPE_OFFS;
                 self.0.push(typ | SignedType::$ity as u8);
                 let digs = $ty::to_le_bytes(i);
                 self.0.extend_from_slice(&digs);
@@ -72,7 +72,7 @@ write_int!(write_i128, i128, I128);
 
 impl Serializer {
     pub fn write_null(&mut self) {
-        let mut byte = Type::Special as u8;
+        let mut byte = (Type::Special as u8) << TYPE_OFFS;
         byte |= Constants::Null as u8;
         self.0.push(byte);
     }
@@ -81,7 +81,7 @@ impl Serializer {
         &mut self,
         b: bool,
     ) {
-        let mut byte = Type::Special as u8;
+        let mut byte = (Type::Special as u8) << TYPE_OFFS;
         byte |= Constants::from(b) as u8;
         self.0.push(byte);
     }
@@ -93,7 +93,7 @@ impl Serializer {
     ) {
         debug_assert!(!is_utf8 | std::str::from_utf8(raw).is_ok());
 
-        let major_type = Type::Bytes as u8;
+        let major_type = (Type::Bytes as u8) << TYPE_OFFS;
         let minor_type = if is_utf8 { BYTES_ARE_UTF8 } else { 0 };
         let mut tag = major_type | minor_type;
 
@@ -132,7 +132,7 @@ impl Serializer {
         &mut self,
         len: usize,
     ) {
-        let major_type = Type::Collection as u8;
+        let major_type = (Type::Collection as u8) << TYPE_OFFS;
         let minor_type = 0;
         let mut tag = major_type | minor_type;
         if len < COLLECTION_IS_MAP as usize {
@@ -174,7 +174,7 @@ impl Serializer {
         &mut self,
         len: usize,
     ) {
-        let major_type = Type::Collection as u8;
+        let major_type = (Type::Collection as u8) << TYPE_OFFS;
         let minor_type = COLLECTION_IS_MAP;
         let mut tag = major_type | minor_type;
         if len < COLLECTION_IS_MAP as usize {
@@ -221,7 +221,7 @@ impl Serializer {
         is_map: bool,
         len: usize,
     ) {
-        let major_type = Type::Cons as u8;
+        let major_type = (Type::Cons as u8) << TYPE_OFFS;
         let minor_type = if is_map { COLLECTION_IS_MAP } else { 0 };
         let mut tag = major_type | minor_type;
         if len < COLLECTION_IS_MAP as usize {

@@ -113,7 +113,7 @@ impl Deserializer {
 
         let byte = self.data[self.ix];
 
-        let typ = (byte & MASK_TYPE)
+        let typ = ((byte & MASK_TYPE) >> TYPE_OFFS)
             .try_into()
             .map_err(|u| E!(UnknownType(u), self.data.clone(), self.ix))?;
 
@@ -243,6 +243,8 @@ macro_rules! read_int_from_tag {
                     })?
                     .as_len();
 
+                dbg!(len);
+
                 if len > $len {
                     e!(
                         IntTooShort {
@@ -255,6 +257,8 @@ macro_rules! read_int_from_tag {
                 }
 
                 let bytes = self.read_raw_slice(len)?;
+
+                dbg!(&bytes);
 
                 let mut buf = [0u8; $len];
                 unsafe {
@@ -276,43 +280,41 @@ read_int_from_tag!(read_i128_from_tag, i128, 16);
 
 impl Deserializer {
     pub fn read_null(&mut self) -> Result<(), KsonError> {
-        let tag = self.read_raw_u8(1)?;
-        if tag & MASK_TYPE == Type::Special as u8 {
-            match (tag & !MASK_TYPE).try_into() {
+        let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
+        match typ {
+            Type::Special => match (val | if is_big { BIG_BIT } else { 0 }).try_into() {
                 Ok(Constants::Null) => Ok(()),
                 Ok(c) => Err(E!(UnknownConst(c as u8), self.data.clone(), self.ix)),
                 Err(o) => Err(E!(UnknownConst(o), self.data.clone(), self.ix)),
-            }
-        } else {
-            Err(E!(
+            },
+            other => Err(E!(
                 WrongType {
                     expected: Type::Special,
-                    found: tag & MASK_TYPE
+                    found: other as u8,
                 },
                 self.data.clone(),
                 self.ix
-            ))
+            )),
         }
     }
 
     pub fn read_bool(&mut self) -> Result<bool, KsonError> {
-        let tag = self.read_raw_u8(1)?;
-        if tag & MASK_TYPE == Type::Special as u8 {
-            match (tag & !MASK_TYPE).try_into() {
+        let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
+        match typ {
+            Type::Special => match (val | if is_big { BIG_BIT } else { 0 }).try_into() {
                 Ok(Constants::False) => Ok(false),
                 Ok(Constants::True) => Ok(true),
                 Ok(c) => Err(E!(UnknownConst(c as u8), self.data.clone(), self.ix)),
                 Err(o) => Err(E!(UnknownConst(o), self.data.clone(), self.ix)),
-            }
-        } else {
-            Err(E!(
+            },
+            other => Err(E!(
                 WrongType {
                     expected: Type::Special,
-                    found: tag & MASK_TYPE
+                    found: other as u8,
                 },
                 self.data.clone(),
                 self.ix
-            ))
+            )),
         }
     }
 
