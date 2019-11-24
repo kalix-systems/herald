@@ -336,33 +336,33 @@ async fn add_get_expire_pending_id() {
     }
 }
 
-#[tokio::test]
-#[serial]
-async fn add_and_get_prekey() {
-    let mut client = wa!(get_client());
-    wa!(client.reset_all());
+// #[tokio::test]
+// #[serial]
+// async fn add_and_get_prekey() {
+//     let mut client = wa!(get_client());
+//     wa!(client.reset_all());
 
-    let kp = sig::KeyPair::gen_new();
-    let signed_pk = kp.sign(*kp.public_key());
-    let user_id = "Hello".try_into().expect(womp!());
-    wa!(client.register_user(user_id, signed_pk));
+//     let kp = sig::KeyPair::gen_new();
+//     let signed_pk = kp.sign(*kp.public_key());
+//     let user_id = "Hello".try_into().expect(womp!());
+//     wa!(client.register_user(user_id, signed_pk));
 
-    let sealed_kp1 = sealed::KeyPair::gen_new();
-    let sealed_kp2 = sealed::KeyPair::gen_new();
+//     let sealed_kp1 = sealed::KeyPair::gen_new();
+//     let sealed_kp2 = sealed::KeyPair::gen_new();
 
-    let sealed_pk1 = sealed_kp1.sign_pub(&kp);
-    let sealed_pk2 = sealed_kp2.sign_pub(&kp);
+//     let sealed_pk1 = sealed_kp1.sign_pub(&kp);
+//     let sealed_pk2 = sealed_kp2.sign_pub(&kp);
 
-    wa!(client.add_prekeys(&[sealed_pk1, sealed_pk2]));
+//     wa!(client.add_prekeys(&[sealed_pk1, sealed_pk2]));
 
-    let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
-    assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+//     let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
+//     assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
 
-    let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
-    assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
+//     let retrieved = wa!(client.pop_prekeys(&[*kp.public_key()]))[0].expect(womp!());
+//     assert!(retrieved == sealed_pk1 || retrieved == sealed_pk2);
 
-    assert!(wa!(client.pop_prekeys(&[*kp.public_key()]))[0].is_none());
-}
+//     assert!(wa!(client.pop_prekeys(&[*kp.public_key()]))[0].is_none());
+// }
 
 #[tokio::test]
 #[serial]
