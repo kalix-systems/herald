@@ -16,6 +16,12 @@ pub struct TagByte {
     pub val: u8,
 }
 
+pub struct TagByteWithType {
+    pub typ: Type,
+    pub is_big: bool,
+    pub val: u8,
+}
+
 impl Deserializer {
     pub fn new(source: Bytes) -> Self {
         Deserializer {
@@ -92,31 +98,45 @@ impl Deserializer {
             Ok(len)
         }
     }
+
+    pub fn read_tag_byte(&mut self) -> Result<TagByteWithType, KsonError> {
+        if self.remaining() == 0 {
+            e!(
+                LengthError {
+                    expected: 1,
+                    remaining: 0
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let byte = self.data[self.ix];
+
+        let typ = (byte & MASK_TYPE)
+            .try_into()
+            .map_err(|u| E!(UnknownType(u), self.data.clone(), self.ix))?;
+
+        let is_big = byte & BIG_BIT == BIG_BIT;
+        let val = byte & !(MASK_TYPE | BIG_BIT);
+
+        self.ix += 1;
+
+        Ok(TagByteWithType { typ, is_big, val })
+    }
 }
 
 macro_rules! tag_reader_method {
     ($fname: ident, $type: tt, $message: expr) => {
         impl Deserializer {
             pub fn $fname(&mut self) -> Result<TagByte, KsonError> {
-                if self.remaining() == 0 {
-                    e!(
-                        LengthError {
-                            expected: 1,
-                            remaining: 0
-                        },
-                        self.data.clone(),
-                        self.ix,
-                        $message
-                    )
-                }
+                let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
 
-                let byte = self.data[self.ix];
-
-                if byte & MASK_TYPE != $crate::Type::$type as u8 {
+                if typ != $crate::Type::$type {
                     e!(
                         WrongType {
                             expected: $crate::Type::$type,
-                            found: byte & $crate::MASK_TYPE,
+                            found: typ as u8,
                         },
                         self.data.clone(),
                         self.ix,
@@ -124,12 +144,7 @@ macro_rules! tag_reader_method {
                     )
                 }
 
-                self.ix += 1;
-
-                Ok(TagByte {
-                    is_big: byte & BIG_BIT == BIG_BIT,
-                    val: byte & !(MASK_TYPE | BIG_BIT),
-                })
+                Ok(TagByte { is_big, val })
             }
         }
     };
@@ -279,6 +294,7 @@ impl Deserializer {
             ))
         }
     }
+
     pub fn read_bool(&mut self) -> Result<bool, KsonError> {
         let tag = self.read_raw_u8(1)?;
         if tag & MASK_TYPE == Type::Special as u8 {

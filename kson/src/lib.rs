@@ -51,6 +51,21 @@ pub enum Type {
     Collection = 5 << TYPE_OFFS,
 }
 
+impl TryFrom<u8> for Type {
+    type Error = u8;
+    fn try_from(of: u8) -> Result<Type, u8> {
+        match of {
+            0 => Ok(Type::Special),
+            1 => Ok(Type::Unsigned),
+            2 => Ok(Type::Signed),
+            3 => Ok(Type::Bytes),
+            4 => Ok(Type::Cons),
+            5 => Ok(Type::Collection),
+            _ => Err(of),
+        }
+    }
+}
+
 #[repr(u8)]
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum Constants {

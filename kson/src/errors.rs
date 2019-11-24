@@ -49,6 +49,7 @@ pub enum Variant {
     },
     BadUtf8String(Utf8Error),
     UnknownConst(u8),
+    UnknownType(u8),
     CustomError(String),
 }
 
@@ -108,6 +109,7 @@ impl fmt::Display for KsonErrorInner {
                     max_len, found
                 ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
+                UnknownType(u) => format!("unknown type found: {}", u),
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
                 CustomError(s) => s.clone(),
             }),
