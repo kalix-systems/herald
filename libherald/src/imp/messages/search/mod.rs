@@ -1,6 +1,8 @@
 use super::*;
 use std::ops::Not;
 
+mod search_helper;
+
 #[derive(PartialEq)]
 pub(super) enum SearchChanged {
     Changed,
@@ -66,22 +68,13 @@ impl SearchState {
         pattern: String,
         emit: &mut Emitter,
     ) -> Result<SearchChanged, HErr> {
-        match self.pattern.as_mut() {
-            Some(old_pattern) => {
-                if pattern == old_pattern.raw() {
-                    return Ok(SearchChanged::NotChanged);
-                }
-
-                old_pattern.set_pattern(pattern)?;
+        match self.set_pattern_inner(pattern)? {
+            SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
+            SearchChanged::Changed => {
+                emit.search_pattern_changed();
+                Ok(SearchChanged::Changed)
             }
-            None => {
-                self.pattern.replace(SearchPattern::new_normal(pattern)?);
-            }
-        };
-
-        emit.search_pattern_changed();
-
-        Ok(SearchChanged::Changed)
+        }
     }
 
     pub(super) fn set_matches(
@@ -89,9 +82,7 @@ impl SearchState {
         matches: Vec<Match>,
         emit: &mut Emitter,
     ) {
-        self.matches = matches;
-        self.index = None;
-
+        self.set_matches_inner(matches);
         emit.search_num_matches_changed();
         emit.search_index_changed();
     }
@@ -110,20 +101,13 @@ impl SearchState {
         use_regex: bool,
         emit: &mut Emitter,
     ) -> Result<SearchChanged, HErr> {
-        match (use_regex, self.is_regex(), self.pattern.as_mut()) {
-            (true, false, Some(pattern)) => {
-                pattern.regex_mode()?;
+        match self.set_regex_inner(use_regex)? {
+            SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
+            SearchChanged::Changed => {
                 emit.search_regex_changed();
-            }
-            (false, true, Some(pattern)) => {
-                pattern.normal_mode()?;
-                emit.search_regex_changed();
-            }
-            _ => {
-                return Ok(SearchChanged::NotChanged);
+                Ok(SearchChanged::Changed)
             }
         }
-        Ok(SearchChanged::Changed)
     }
 
     pub(super) fn num_matches(&self) -> usize {
@@ -134,13 +118,7 @@ impl SearchState {
         &mut self,
         emit: &mut Emitter,
     ) -> Result<(), HErr> {
-        if let Some(pattern) = self.pattern.as_mut() {
-            pattern.set_pattern("".into())?;
-        }
-
-        self.matches = Vec::new();
-        self.index = None;
-        self.start_index = None;
+        self.clear_search_inner()?;
 
         emit.search_index_changed();
         emit.search_pattern_changed();
