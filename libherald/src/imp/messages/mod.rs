@@ -112,7 +112,17 @@ impl Interface for Messages {
         &self,
         index: usize,
     ) -> Option<&str> {
-        Some(self.container.msg_data(index)?.body.as_ref()?.as_str())
+        if self.container.msg_data(index)?.match_status.is_match() {
+            Some(
+                self.container
+                    .msg_data(index)?
+                    .search_buf
+                    .as_ref()?
+                    .as_str(),
+            )
+        } else {
+            Some(self.container.msg_data(index)?.body.as_ref()?.as_str())
+        }
     }
 
     fn msg_id(
