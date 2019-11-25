@@ -23,11 +23,34 @@ pub fn arb_atom() -> impl Strategy<Value = Atom> {
     ]
 }
 
+const VEC_LEN: usize = 257;
+const MAP_LEN: usize = 257;
+pub fn arb_atomic_coll() -> impl Strategy<Value = Collection<Atom, Atom, Atom>> {
+    prop_oneof![
+        prop::collection::vec(arb_atom(), 0..VEC_LEN).prop_map(Collection::Arr),
+        prop::collection::btree_map(arb_atom(), arb_atom(), 0..MAP_LEN).prop_map(Collection::Map)
+    ]
+}
+
+// pub fn arb_value() -> impl Strategy<Value = Value> {
+// }
+
 proptest! {
-    #![proptest_config(ProptestConfig { cases: 1_000, ..ProptestConfig::default() })]
+    #![proptest_config(ProptestConfig { cases: 10_000, ..ProptestConfig::default() })]
 
     #[test]
     fn encode_decode_atom(k in arb_atom()) {
+        let enc = kson::to_vec(&k);
+        let dec = kson::from_bytes(enc.into()).expect("failed to parse");
+        assert_eq!(k, dec);
+    }
+}
+
+proptest! {
+    #![proptest_config(ProptestConfig { cases: 100, ..ProptestConfig::default() })]
+
+    #[test]
+    fn encode_decode_atomic_coll(k in arb_atomic_coll()) {
         let enc = kson::to_vec(&k);
         let dec = kson::from_bytes(enc.into()).expect("failed to parse");
         assert_eq!(k, dec);

@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use bytes::Bytes;
-use std::convert::TryInto;
+use std::{collections::BTreeMap, convert::TryInto};
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone)]
 pub enum Atom {
     Null,
     Bool(bool),
@@ -52,16 +52,64 @@ impl De for Atom {
                     Atom::Bytes(from.read_bytes_from_tag(tag)?)
                 }
             }
-            _ => unimplemented!(),
+            t => e!(
+                CustomError(format!("can't deserialize type {:?} as an atom", t)),
+                from.data.clone(),
+                from.ix
+            ),
         };
 
         Ok(res)
     }
 }
 
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone)]
+pub enum Collection<T, K: Ord, V> {
+    Arr(Vec<T>),
+    Map(BTreeMap<K, V>),
+}
+
+impl<T: Ser, K: Ser + Ord, V: Ser> Ser for Collection<T, K, V> {
+    fn ser(
+        &self,
+        into: &mut Serializer,
+    ) {
+        match self {
+            Collection::Arr(a) => a.ser(into),
+            Collection::Map(m) => m.ser(into),
+        }
+    }
+}
+
+impl<T: De, K: De + Ord, V: De> De for Collection<T, K, V> {
+    fn de(from: &mut Deserializer) -> Result<Self, KsonError> {
+        let tag = from.read_coll_tag()?;
+
+        // this is a stupid hack, but I'm trying to make this a good test not to make it fast
+        from.ix -= 1;
+
+        if tag.val & COLLECTION_IS_MAP == COLLECTION_IS_MAP {
+            Ok(Collection::Map(from.take_val()?))
+        } else {
+            Ok(Collection::Arr(from.take_val()?))
+        }
+    }
+}
+
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd, Clone)]
 pub enum Value {
     Atom(Atom),
-    Array(Vec<Value>),
-    Cons(Box<Value>, Vec<Value>),
-    Map(Vec<(Value, Value)>),
+    Collection(Collection<Value, Value, Value>),
+    Cons(Box<Value>, Collection<Value, Value, Value>),
 }
+
+// impl Ser for Value {
+//     fn ser(&self, into: &mut Serializer) {
+//         match self {
+//             Atom(a) => a.ser(into),
+//             Array(v) => v.ser(into),
+//             Cons(t, r) =>
+//             Map(m)
+//         }
+//     }
+// }

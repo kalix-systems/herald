@@ -146,9 +146,9 @@ impl Serializer {
         } else {
             tag |= BIG_BIT;
 
-            let digs = bytes_of_u64(len as u64 - 1);
+            let digs = bytes_of_u64(len as u64);
             debug_assert!(digs.len() < BYTES_ARE_UTF8 as usize);
-            tag |= digs.len() as u8;
+            tag |= digs.len() as u8 - 1;
 
             self.0.push(tag);
             self.0.extend_from_slice(&digs);
@@ -188,9 +188,9 @@ impl Serializer {
         } else {
             tag |= BIG_BIT;
 
-            let digs = bytes_of_u64(len as u64 - 1);
+            let digs = bytes_of_u64(len as u64);
             debug_assert!(digs.len() < BYTES_ARE_UTF8 as usize);
-            tag |= digs.len() as u8;
+            tag |= digs.len() as u8 - 1;
 
             self.0.push(tag);
             self.0.extend_from_slice(&digs);
