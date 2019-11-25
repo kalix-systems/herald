@@ -35,11 +35,11 @@ impl AttachmentsTrait for Attachments {
         &mut self.emit
     }
 
-    fn msg_id(&self) -> Option<ffi::MsgIdRef> {
+    fn attachments_msg_id(&self) -> Option<ffi::MsgIdRef> {
         Some(self.msg_id.as_ref()?.as_slice())
     }
 
-    fn set_msg_id(
+    fn set_attachments_msg_id(
         &mut self,
         msg_id: Option<ffi::MsgIdRef>,
     ) {
@@ -47,7 +47,7 @@ impl AttachmentsTrait for Attachments {
             let msg_id = ret_err!(msg_id.try_into());
 
             self.msg_id = Some(msg_id);
-            self.emit.msg_id_changed();
+            self.emit.attachments_msg_id_changed();
 
             let (tx, rx) = bounded(1);
             self.rx.replace(rx);

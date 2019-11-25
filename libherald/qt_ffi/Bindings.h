@@ -68,15 +68,15 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(
-      QByteArray msgId READ msgId WRITE setMsgId NOTIFY msgIdChanged FINAL)
+  Q_PROPERTY(QByteArray attachmentsMsgId READ attachmentsMsgId WRITE
+                 setAttachmentsMsgId NOTIFY attachmentsMsgIdChanged FINAL)
   explicit Attachments(bool owned, QObject *parent);
 
 public:
   explicit Attachments(QObject *parent = nullptr);
   ~Attachments() override;
-  QByteArray msgId() const;
-  void setMsgId(const QByteArray &v);
+  QByteArray attachmentsMsgId() const;
+  void setAttachmentsMsgId(const QByteArray &v);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -113,7 +113,7 @@ private:
   void initHeaderData();
   void updatePersistentIndexes();
 Q_SIGNALS:
-  void msgIdChanged();
+  void attachmentsMsgIdChanged();
 };
 
 class Config : public QObject {

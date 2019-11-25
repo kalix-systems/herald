@@ -118,7 +118,7 @@ Flickable {
                         receiptImage: proxyReceiptImage
                         authorName: authName
                         messageAttachments: Attachments {
-                            msgId: ownedConversation.msgId(index)
+                            attachmentsMsgId: msgId
                         }
                         authorColor: userColor
                     }

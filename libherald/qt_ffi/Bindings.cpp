@@ -95,8 +95,8 @@ struct qmodelindex_t {
 inline QVariant cleanNullQVariant(const QVariant &v) {
   return (v.isNull()) ? QVariant() : v;
 }
-inline void attachmentsMsgIdChanged(Attachments *o) {
-  Q_EMIT o->msgIdChanged();
+inline void attachmentsAttachmentsMsgIdChanged(Attachments *o) {
+  Q_EMIT o->attachmentsMsgIdChanged();
 }
 inline void configColorChanged(Config *o) { Q_EMIT o->colorChanged(); }
 inline void configColorschemeChanged(Config *o) {
@@ -341,10 +341,11 @@ attachments_new(Attachments *, void (*)(Attachments *),
                 void (*)(Attachments *, int, int, int), void (*)(Attachments *),
                 void (*)(Attachments *, int, int), void (*)(Attachments *));
 void attachments_free(Attachments::Private *);
-void attachments_msg_id_get(const Attachments::Private *, QByteArray *,
-                            qbytearray_set);
-void attachments_msg_id_set(Attachments::Private *, const char *bytes, int len);
-void attachments_msg_id_set_none(Attachments::Private *);
+void attachments_attachments_msg_id_get(const Attachments::Private *,
+                                        QByteArray *, qbytearray_set);
+void attachments_attachments_msg_id_set(Attachments::Private *,
+                                        const char *bytes, int len);
+void attachments_attachments_msg_id_set_none(Attachments::Private *);
 };
 
 extern "C" {
@@ -2459,7 +2460,7 @@ Attachments::Attachments(bool /*owned*/, QObject *parent)
 Attachments::Attachments(QObject *parent)
     : QAbstractItemModel(parent),
       m_d(attachments_new(
-          this, attachmentsMsgIdChanged,
+          this, attachmentsAttachmentsMsgIdChanged,
           [](const Attachments *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Attachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Attachments *o) {
@@ -2499,16 +2500,16 @@ Attachments::~Attachments() {
   }
 }
 void Attachments::initHeaderData() {}
-QByteArray Attachments::msgId() const {
+QByteArray Attachments::attachmentsMsgId() const {
   QByteArray v;
-  attachments_msg_id_get(m_d, &v, set_qbytearray);
+  attachments_attachments_msg_id_get(m_d, &v, set_qbytearray);
   return v;
 }
-void Attachments::setMsgId(const QByteArray &v) {
+void Attachments::setAttachmentsMsgId(const QByteArray &v) {
   if (v.isNull()) {
-    attachments_msg_id_set_none(m_d);
+    attachments_attachments_msg_id_set_none(m_d);
   } else {
-    attachments_msg_id_set(m_d, v.data(), v.size());
+    attachments_attachments_msg_id_set(m_d, v.data(), v.size());
   }
 }
 Config::Config(bool /*owned*/, QObject *parent)
