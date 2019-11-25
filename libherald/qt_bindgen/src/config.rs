@@ -158,6 +158,7 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        const indexById(conversation_id: QByteArray) => QUint64,
     };
 
     obj! {

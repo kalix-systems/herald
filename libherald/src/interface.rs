@@ -1035,6 +1035,10 @@ pub trait ConversationsTrait {
         value: bool,
     );
     fn clear_filter(&mut self) -> ();
+    fn index_by_id(
+        &self,
+        conversation_id: &[u8],
+    ) -> u64;
     fn remove_conversation(
         &mut self,
         row_index: u64,
@@ -1212,6 +1216,17 @@ pub unsafe extern "C" fn conversations_filter_regex_set(
 pub unsafe extern "C" fn conversations_clear_filter(ptr: *mut Conversations) {
     let o = &mut *ptr;
     o.clear_filter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_index_by_id(
+    ptr: *const Conversations,
+    conversation_id_str: *const c_char,
+    conversation_id_len: c_int,
+) -> u64 {
+    let conversation_id = { qba_slice!(conversation_id_str, conversation_id_len) };
+    let o = &*ptr;
+    o.index_by_id(conversation_id)
 }
 
 #[no_mangle]

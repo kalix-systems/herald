@@ -825,6 +825,8 @@ void conversations_filter_set(Conversations::Private *, const ushort *str,
 bool conversations_filter_regex_get(const Conversations::Private *);
 void conversations_filter_regex_set(Conversations::Private *, bool);
 void conversations_clear_filter(Conversations::Private *);
+quint64 conversations_index_by_id(const Conversations::Private *, const char *,
+                                  int);
 bool conversations_remove_conversation(Conversations::Private *, quint64);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 };
@@ -2710,6 +2712,10 @@ void Conversations::setFilterRegex(bool v) {
   conversations_filter_regex_set(m_d, v);
 }
 void Conversations::clearFilter() { return conversations_clear_filter(m_d); }
+quint64 Conversations::indexById(const QByteArray &conversation_id) const {
+  return conversations_index_by_id(m_d, conversation_id.data(),
+                                   conversation_id.size());
+}
 bool Conversations::removeConversation(quint64 row_index) {
   return conversations_remove_conversation(m_d, row_index);
 }

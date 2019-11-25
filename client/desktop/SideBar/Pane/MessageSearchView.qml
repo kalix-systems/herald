@@ -7,6 +7,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "./../js/ContactView.mjs" as JS
 import "../popups" as Popups
 import "qrc:/imports/Avatar" as Av
+import "../../ChatView" as CV
 
 ListView {
     id: messageSearchList
@@ -23,6 +24,17 @@ ListView {
         height: CmnCfg.convoHeight
         width: parent.width
 
+        property Messages matchedModel: Messages {
+            conversationId: messageData.conversation
+        }
+
+        property var childChatView: Component {
+            CV.ChatViewMain {
+                conversationItem: conversationData
+                ownedConversation: matchedModel
+            }
+        }
+
         Common.PlatonicRectangle {
             id: messageRectangle
             boxColor: messageData.conversationColor
@@ -31,13 +43,21 @@ ListView {
                                                "")
             groupPicture: !messageData.conversationPairwise
             labelComponent: Av.ConversationLabel {
-                contactName: messageData.conversationTitle
-                labelColor: CmnCfg.palette.secondaryColor
-                labelSize: 14
-                lastAuthor: outbound ? "You" : messageData.author
-                lastBody: lastAuthor + ": " + messageData.body
-                lastTimestamp: Utils.friendlyTimestamp(messageData.time)
+            contactName: messageData.conversationTitle
+            labelColor: CmnCfg.palette.secondaryColor
+            labelSize: 14
+            lastAuthor: outbound ? "You" : messageData.author
+            lastBody: lastAuthor + ": " + messageData.body
+            lastTimestamp: Utils.friendlyTimestamp(messageData.time)
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    chatView.sourceComponent = childChatView
+                }
             }
         }
+
     }
 }

@@ -251,6 +251,7 @@ public:
   bool filterRegex() const;
   void setFilterRegex(bool v);
   Q_INVOKABLE void clearFilter();
+  Q_INVOKABLE quint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
