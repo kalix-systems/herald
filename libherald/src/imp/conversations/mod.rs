@@ -340,12 +340,10 @@ impl ConversationsTrait for Conversations {
     ) -> u64 {
         let ret_val = std::u32::MAX as u64;
         let conversation_id = ret_err!(ConversationId::try_from(cid), ret_val);
-        let index = self
-            .list
+        self.list
             .iter()
             .position(|Conversation { id, .. }| id == &conversation_id)
             .map(|n| n as u64)
-            .unwrap_or(ret_val);
-        index
+            .unwrap_or(ret_val)
     }
 }
