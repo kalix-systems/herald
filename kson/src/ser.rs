@@ -55,10 +55,15 @@ macro_rules! write_int {
                 &mut self,
                 i: $ty,
             ) {
-                let typ = (Type::Signed as u8) << TYPE_OFFS;
-                self.0.push(typ | SignedType::$ity as u8);
-                let digs = $ty::to_le_bytes(i);
-                self.0.extend_from_slice(&digs);
+                if 0 <= i && i < BIG_BIT as $ty {
+                    let typ = (Type::Signed as u8) << TYPE_OFFS;
+                    self.0.push(typ | i as u8);
+                } else {
+                    let typ = (Type::Signed as u8) << TYPE_OFFS;
+                    self.0.push(typ | BIG_BIT | SignedType::$ity as u8);
+                    let digs = $ty::to_le_bytes(i);
+                    self.0.extend_from_slice(&digs);
+                }
             }
         }
     };

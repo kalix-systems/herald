@@ -24,6 +24,22 @@ fn empty_tuple_serde() {
 }
 
 #[derive(Eq, PartialEq, Debug, Ser, De)]
+pub struct Newtype(i64);
+
+#[test]
+fn newtype_serde() {
+    let val = Newtype(i64::min_value());
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(val, val2);
+
+    let val = Newtype(i64::max_value());
+    let as_vec = kson::to_vec(&val);
+    let val2 = kson::from_bytes(Bytes::from(as_vec)).expect("failed to deserialize");
+    assert_eq!(val, val2);
+}
+
+#[derive(Eq, PartialEq, Debug, Ser, De)]
 pub struct Tuple(u8, u16, u32, u64, u128);
 
 #[test]

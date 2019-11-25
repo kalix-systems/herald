@@ -243,8 +243,6 @@ macro_rules! read_int_from_tag {
                     })?
                     .as_len();
 
-                dbg!(len);
-
                 if len > $len {
                     e!(
                         IntTooShort {
@@ -257,8 +255,6 @@ macro_rules! read_int_from_tag {
                 }
 
                 let bytes = self.read_raw_slice(len)?;
-
-                dbg!(&bytes);
 
                 let mut buf = [0u8; $len];
                 unsafe {
