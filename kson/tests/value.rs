@@ -1,5 +1,5 @@
 use bytes::Bytes;
-use kson::{prelude::*, value::*, *};
+use kson::{prelude::*, value::*};
 use proptest::prelude::*;
 
 /// arbitrary Bytes for use with proptest
