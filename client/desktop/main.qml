@@ -27,23 +27,20 @@ ApplicationWindow {
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
+        property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
     Loader {
         id: appLoader
         active: herald.configInit
         anchors.fill: parent
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !herald.configInit
-        sourceComponent: RegistrationPage {
-        }
+        sourceComponent: RegistrationPage {}
     }
 }
