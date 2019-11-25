@@ -2,6 +2,7 @@ use super::*;
 use std::ops::Not;
 
 mod search_helper;
+pub(crate) use search_helper::highlight_message;
 
 #[derive(PartialEq)]
 pub(super) enum SearchChanged {
@@ -268,6 +269,11 @@ impl SearchState {
         self.matches.insert(pos, Match(message));
         let data = container.get_data_mut(&msg_id)?;
         data.match_status = MatchStatus::Matched;
+        data.search_buf = Some(highlight_message(
+            self.pattern.as_ref()?,
+            data.body.as_ref()?,
+        ));
+        model.data_changed(pos, pos);
         emit.search_num_matches_changed();
 
         if let Some(ix) = ix {

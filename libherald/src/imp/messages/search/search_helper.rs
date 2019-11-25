@@ -1,4 +1,5 @@
 use super::*;
+use search_pattern::Captures;
 impl SearchState {
     pub(crate) fn set_pattern_inner(
         &mut self,
@@ -58,4 +59,23 @@ impl SearchState {
 
         Ok(())
     }
+}
+
+pub(crate) fn highlight_message(
+    search: &SearchPattern,
+    body: &MessageBody,
+) -> String {
+    let start_tag = "<span style = \"background-color: #F0C80C\">";
+    let end_tag = "</span>";
+
+    let replace_pattern = search.replace_all(body.as_str(), |caps: &Captures| {
+        format!(
+            "{}{}{}",
+            start_tag,
+            caps.get(0).map(|m| m.as_str()).unwrap_or(""),
+            end_tag
+        )
+    });
+
+    replace_pattern.to_string()
 }

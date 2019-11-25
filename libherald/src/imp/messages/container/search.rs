@@ -1,5 +1,5 @@
 use super::*;
-use search_pattern::Captures;
+use crate::imp::messages::search::highlight_message;
 
 use std::ops::Not;
 
@@ -27,23 +27,11 @@ pub(in crate::imp::messages) fn apply_search(
             MatchStatus::NotMatched
         };
 
-        let start_tag = "<span style = \"background-color: #F0C80C\">";
-        let end_tag = "</span>";
-
-        let replace_pattern = search.pattern.as_ref()?.replace_all(
-            data.body.as_ref()?.as_str(),
-            |caps: &Captures| {
-                format!(
-                    "{}{}{}",
-                    start_tag,
-                    caps.get(0).map(|m| m.as_str()).unwrap_or(""),
-                    end_tag
-                )
-            },
-        );
-
         data.search_buf = if data.match_status.is_match() {
-            Some(replace_pattern.to_string())
+            Some(highlight_message(
+                search.pattern.as_ref()?,
+                data.body.as_ref()?,
+            ))
         } else {
             None
         };
