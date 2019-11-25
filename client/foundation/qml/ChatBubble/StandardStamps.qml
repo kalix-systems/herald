@@ -21,7 +21,7 @@ RowLayout {
         Button {
             id: clock
             icon.source: expirationTime
-                         !== 0 ? "qrc:/countdown-icon-temp.svg" : ""
+                         !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
             icon.height: 16
             icon.width: 16
             icon.color: "grey"
