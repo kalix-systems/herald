@@ -1,7 +1,8 @@
-use crate::{prelude::*, *};
+use crate::prelude::*;
 use bytes::Bytes;
 use std::convert::TryInto;
 
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Atom {
     Null,
     Bool(bool),

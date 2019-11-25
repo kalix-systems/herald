@@ -14,3 +14,5 @@ bytes = "0.4.12"
 [dependencies.kson_derive]
 path = "./kson_derive"
 
+[dev-dependencies]
+proptest = "0.9.4"
