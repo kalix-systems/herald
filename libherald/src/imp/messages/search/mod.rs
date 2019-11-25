@@ -4,7 +4,7 @@ use std::ops::Not;
 mod search_helper;
 pub(crate) use search_helper::highlight_message;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub(super) enum SearchChanged {
     Changed,
     NotChanged,
@@ -286,3 +286,6 @@ impl SearchState {
         Some(())
     }
 }
+
+#[cfg(test)]
+mod tests;
