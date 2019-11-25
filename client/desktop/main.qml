@@ -21,7 +21,7 @@ ApplicationWindow {
     Herald {
         id: herald
         errors.onTryPollChanged: {
-            var errMsg = errorQueue.nextError()
+            var errMsg = herald.errors.nextError()
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
                 errPopup.open()

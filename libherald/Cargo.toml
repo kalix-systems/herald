@@ -1,7 +1,7 @@
 [package]
 name = "herald"
 version = "0.1.0"
-authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>", "mobile-bungalow <pwmay@ucsc.edu>"]
+authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>", "mobile-bungalow <pwmay@ucsc.edu>", "Kaavya Jayram <kaavya@berkeley.edu>"]
 edition = "2018"
 
 [lib]
