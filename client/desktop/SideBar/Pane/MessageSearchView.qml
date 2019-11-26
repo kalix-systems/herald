@@ -24,17 +24,6 @@ ListView {
         height: CmnCfg.convoHeight
         width: parent.width
 
-        property Messages matchedModel: Messages {
-            conversationId: messageData.conversation
-        }
-
-        property var childChatView: Component {
-            CV.ChatViewMain {
-                conversationItem: conversationData
-                ownedConversation: matchedModel
-            }
-        }
-
         Common.PlatonicRectangle {
             id: messageRectangle
             boxColor: messageData.conversationColor
@@ -51,13 +40,6 @@ ListView {
             lastTimestamp: Utils.friendlyTimestamp(messageData.time)
             }
 
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    chatView.sourceComponent = childChatView
-                }
-            }
-        }
-
     }
+}
 }
