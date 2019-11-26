@@ -244,8 +244,8 @@ where
     Ok(t)
 }
 
-fn ser_msg<T: Ser>(t: &T) -> Result<ws::Message, Error> {
-    Ok(ws::Message::binary(kson::to_vec(t)))
+fn ser_msg<T: Ser>(t: &T) -> ws::Message {
+    ws::Message::binary(kson::to_vec(t))
 }
 
 async fn write_msg<T>(
@@ -261,15 +261,15 @@ where
     let len = packets.len() as u64;
 
     loop {
-        wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+        wtx.send(ser_msg(&len)).timeout(TIMEOUT_DUR).await??;
 
         if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
-            wtx.send(ser_msg(&PacketResponse::Success)?)
+            wtx.send(ser_msg(&PacketResponse::Success))
                 .timeout(TIMEOUT_DUR)
                 .await??;
             break;
         } else {
-            wtx.send(ser_msg(&PacketResponse::Retry)?)
+            wtx.send(ser_msg(&PacketResponse::Retry))
                 .timeout(TIMEOUT_DUR)
                 .await??;
         }
@@ -277,7 +277,7 @@ where
 
     loop {
         for packet in packets.iter() {
-            wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+            wtx.send(ser_msg(packet)).timeout(TIMEOUT_DUR).await??;
         }
 
         match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {
