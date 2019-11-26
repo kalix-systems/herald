@@ -21,29 +21,26 @@ ApplicationWindow {
     Herald {
         id: herald
         errors.onTryPollChanged: {
-            var errMsg = errorQueue.nextError()
+            var errMsg = herald.errors.nextError()
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {
-        }
+        property var errPopup: ErrorUtils.ErrorDialog {}
     }
 
     Loader {
         id: appLoader
         active: herald.configInit
         anchors.fill: parent
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !herald.configInit
-        sourceComponent: RegistrationPage {
-        }
+        sourceComponent: RegistrationPage {}
     }
 }

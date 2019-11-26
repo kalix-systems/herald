@@ -26,6 +26,7 @@ Button {
         id: selector
         opacity: 1.0
         anchors.centerIn: parent
+        color: "white"
         font.pixelSize: 15
         text: emoji
     }

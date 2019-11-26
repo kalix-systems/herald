@@ -99,5 +99,7 @@ Component {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "white"
         }
+
+        Component.onDestruction: ownedConversation.searchActive = false
     }
 }

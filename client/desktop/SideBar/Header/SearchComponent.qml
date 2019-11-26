@@ -86,13 +86,6 @@ Component {
                         herald.conversations.clearFilter()
                         herald.messageSearch.clearSearch()
                     }
-
-                    Keys.onReturnPressed: {
-                        if (sideBarState.state == "newContactState") {
-                            JS.insertContact(searchText, herald.users)
-                            sideBarState.state = ""
-                        }
-                    }
                 }
 
                 Rectangle {

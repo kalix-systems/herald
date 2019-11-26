@@ -1,4 +1,6 @@
 use super::*;
+use crate::imp::messages::search::highlight_message;
+
 use std::ops::Not;
 
 pub(in crate::imp::messages) fn apply_search(
@@ -17,8 +19,6 @@ pub(in crate::imp::messages) fn apply_search(
 
     for (ix, msg) in container.list.iter().enumerate() {
         let data = container.map.get_mut(&msg.msg_id)?;
-
-        let old_status = data.match_status;
         let matched = data.matches(pattern);
 
         data.match_status = if matched {
@@ -27,9 +27,16 @@ pub(in crate::imp::messages) fn apply_search(
             MatchStatus::NotMatched
         };
 
-        if old_status != data.match_status {
-            model.data_changed(ix, ix);
-        }
+        data.search_buf = if data.match_status.is_match() {
+            Some(highlight_message(
+                search.pattern.as_ref()?,
+                data.body.as_ref()?,
+            ))
+        } else {
+            None
+        };
+
+        model.data_changed(ix, ix);
 
         if !matched {
             continue;

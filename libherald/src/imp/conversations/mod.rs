@@ -5,6 +5,7 @@ use heraldcore::{
 };
 use im::vector::Vector;
 use search_pattern::SearchPattern;
+use std::convert::TryFrom;
 use std::ops::Not;
 
 pub(crate) mod shared;
@@ -331,5 +332,18 @@ impl ConversationsTrait for Conversations {
         }
 
         self.emit.filter_changed();
+    }
+
+    fn index_by_id(
+        &self,
+        cid: ffi::ConversationIdRef,
+    ) -> u64 {
+        let ret_val = std::u32::MAX as u64;
+        let conversation_id = ret_err!(ConversationId::try_from(cid), ret_val);
+        self.list
+            .iter()
+            .position(|Conversation { id, .. }| id == &conversation_id)
+            .map(|n| n as u64)
+            .unwrap_or(ret_val)
     }
 }

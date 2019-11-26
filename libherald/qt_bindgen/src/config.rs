@@ -158,6 +158,7 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
+        const indexById(conversation_id: QByteArray) => QUint64,
     };
 
     obj! {
@@ -390,7 +391,7 @@ fn users_search() -> Object {
 fn attachments() -> Object {
     let props = props! {
         // the message id the attachments list is associated with
-        msgId: Prop::new().simple(QByteArray).optional().write()
+        attachmentsMsgId: Prop::new().simple(QByteArray).optional().write()
     };
 
     let item_props = item_props! {

@@ -25,6 +25,7 @@ pub struct MsgData {
     pub send_status: MessageSendStatus,
     pub match_status: MatchStatus,
     pub replies: HashSet<MsgId>,
+    pub search_buf: Option<String>,
 }
 
 #[repr(u8)]
@@ -102,6 +103,7 @@ pub fn split_msg(
         save_status,
         match_status: MatchStatus::NotMatched,
         replies,
+        search_buf: None,
     };
 
     let message = Message {

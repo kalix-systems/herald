@@ -7,7 +7,7 @@ pub struct AttachmentsQObject {}
 
 pub struct AttachmentsEmitter {
     qobject: Arc<AtomicPtr<AttachmentsQObject>>,
-    msg_id_changed: fn(*mut AttachmentsQObject),
+    attachments_msg_id_changed: fn(*mut AttachmentsQObject),
     new_data_ready: fn(*mut AttachmentsQObject),
 }
 
@@ -21,7 +21,7 @@ impl AttachmentsEmitter {
     pub fn clone(&mut self) -> AttachmentsEmitter {
         AttachmentsEmitter {
             qobject: self.qobject.clone(),
-            msg_id_changed: self.msg_id_changed,
+            attachments_msg_id_changed: self.attachments_msg_id_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -30,10 +30,10 @@ impl AttachmentsEmitter {
         self.qobject
             .store(n as *mut AttachmentsQObject, Ordering::SeqCst);
     }
-    pub fn msg_id_changed(&mut self) {
+    pub fn attachments_msg_id_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
         if !ptr.is_null() {
-            (self.msg_id_changed)(ptr);
+            (self.attachments_msg_id_changed)(ptr);
         }
     }
     pub fn new_data_ready(&mut self) {
@@ -119,8 +119,8 @@ pub trait AttachmentsTrait {
         model: AttachmentsList,
     ) -> Self;
     fn emit(&mut self) -> &mut AttachmentsEmitter;
-    fn msg_id(&self) -> Option<&[u8]>;
-    fn set_msg_id(
+    fn attachments_msg_id(&self) -> Option<&[u8]>;
+    fn set_attachments_msg_id(
         &mut self,
         value: Option<&[u8]>,
     );
@@ -158,7 +158,7 @@ pub trait AttachmentsTrait {
 #[no_mangle]
 pub extern "C" fn attachments_new(
     attachments: *mut AttachmentsQObject,
-    attachments_msg_id_changed: fn(*mut AttachmentsQObject),
+    attachments_attachments_msg_id_changed: fn(*mut AttachmentsQObject),
     attachments_new_data_ready: fn(*mut AttachmentsQObject),
     attachments_layout_about_to_be_changed: fn(*mut AttachmentsQObject),
     attachments_layout_changed: fn(*mut AttachmentsQObject),
@@ -174,7 +174,7 @@ pub extern "C" fn attachments_new(
 ) -> *mut Attachments {
     let attachments_emit = AttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(attachments)),
-        msg_id_changed: attachments_msg_id_changed,
+        attachments_msg_id_changed: attachments_attachments_msg_id_changed,
         new_data_ready: attachments_new_data_ready,
     };
     let model = AttachmentsList {
@@ -201,13 +201,13 @@ pub unsafe extern "C" fn attachments_free(ptr: *mut Attachments) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn attachments_msg_id_get(
+pub unsafe extern "C" fn attachments_attachments_msg_id_get(
     ptr: *const Attachments,
     p: *mut QByteArray,
     set: fn(*mut QByteArray, *const c_char, c_int),
 ) {
     let o = &*ptr;
-    let v = o.msg_id();
+    let v = o.attachments_msg_id();
     if let Some(v) = v {
         let s: *const c_char = v.as_ptr() as (*const c_char);
         set(p, s, to_c_int(v.len()));
@@ -215,20 +215,20 @@ pub unsafe extern "C" fn attachments_msg_id_get(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn attachments_msg_id_set(
+pub unsafe extern "C" fn attachments_attachments_msg_id_set(
     ptr: *mut Attachments,
     v: *const c_char,
     len: c_int,
 ) {
     let o = &mut *ptr;
     let v = qba_slice!(v, len);
-    o.set_msg_id(Some(v.into()));
+    o.set_attachments_msg_id(Some(v.into()));
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn attachments_msg_id_set_none(ptr: *mut Attachments) {
+pub unsafe extern "C" fn attachments_attachments_msg_id_set_none(ptr: *mut Attachments) {
     let o = &mut *ptr;
-    o.set_msg_id(None);
+    o.set_attachments_msg_id(None);
 }
 
 #[no_mangle]
@@ -1035,6 +1035,10 @@ pub trait ConversationsTrait {
         value: bool,
     );
     fn clear_filter(&mut self) -> ();
+    fn index_by_id(
+        &self,
+        conversation_id: &[u8],
+    ) -> u64;
     fn remove_conversation(
         &mut self,
         row_index: u64,
@@ -1212,6 +1216,17 @@ pub unsafe extern "C" fn conversations_filter_regex_set(
 pub unsafe extern "C" fn conversations_clear_filter(ptr: *mut Conversations) {
     let o = &mut *ptr;
     o.clear_filter()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn conversations_index_by_id(
+    ptr: *const Conversations,
+    conversation_id_str: *const c_char,
+    conversation_id_len: c_int,
+) -> u64 {
+    let conversation_id = { qba_slice!(conversation_id_str, conversation_id_len) };
+    let o = &*ptr;
+    o.index_by_id(conversation_id)
 }
 
 #[no_mangle]
