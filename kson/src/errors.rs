@@ -70,7 +70,6 @@ impl fmt::Display for KsonErrorInner {
              Raw bytes were: {:#?}\n\
              Error found at offset: {}\n\
              Variant was: {}\n\
-             Backtrace was:\n\
              {:#?}
              ",
             self.bytes,
