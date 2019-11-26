@@ -79,7 +79,7 @@ impl Attachment {
         let data = a.into_inner().map_err(|e| Error::Read(e, loc!()))?;
 
         let hash = kcl::hash::simple_hash(&data);
-        let hash_dir = String::from(encode(hash));
+        let hash_dir = encode(hash);
 
         Ok(Attachment { data, hash_dir })
     }
