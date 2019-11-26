@@ -37,7 +37,6 @@
         <file>ChatView/Controls/TimerOptions.qml</file>
         <file>ChatView/ChatSearchComponent.qml</file>
         <file>ChatView/js/SearchHandler.mjs</file>
-        <file>../foundation/js/utils.mjs</file>
         <file>ChatView/SearchTextArea.qml</file>
         <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>common/ConfigAvatar.qml</file>
