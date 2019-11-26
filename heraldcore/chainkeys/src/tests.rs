@@ -1,5 +1,6 @@
 use super::*;
 use channel_ratchet::*;
+use coremacros::womp;
 
 fn in_memory() -> rusqlite::Connection {
     let conn = rusqlite::Connection::open_in_memory().expect(womp!());
@@ -61,8 +62,8 @@ fn ratchet_states() {
         Ok((m1, m2))
     });
     let (m1, m2) = res.expect(womp!());
-    m1.expect(womp!());
-    m2.expect(womp!());
+    drop(m1.expect(womp!()));
+    drop(m2.expect(womp!()));
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
         let d1 = tx.open_msg(cid1, c1)?;
