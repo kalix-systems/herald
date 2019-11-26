@@ -8,7 +8,7 @@ pub async fn login<T>(
 ) -> Result<GlobalId, Error> {
     use herald_common::login::*;
 
-    let bytes = UQ::new();
+    let bytes = UQ::gen_new();
 
     let g: GlobalId = read_msg::<SignAs>(rrx).await?.0;
 

@@ -20,7 +20,7 @@ impl ConversationBuilder {
 
         let id = match conversation_id {
             Some(id) => id.to_owned(),
-            None => ConversationId::new(),
+            None => ConversationId::gen_new(),
         };
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));

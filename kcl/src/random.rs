@@ -11,7 +11,7 @@ new_type! {
 
 impl UQ {
     /// Generate a new `[UQ]`. Guaranteed never to collide with another instance.
-    pub fn new() -> Self {
+    pub fn gen_new() -> Self {
         let mut buf = [0u8; 32];
         gen_into(&mut buf);
         UQ(buf)

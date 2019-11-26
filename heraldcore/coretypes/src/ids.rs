@@ -51,8 +51,8 @@ pub struct ConversationId(pub UQ);
 
 impl ConversationId {
     /// Creates a new random ConversationId
-    pub fn new() -> Self {
-        Self(UQ::new())
+    pub fn gen_new() -> Self {
+        Self(UQ::gen_new())
     }
 }
 
@@ -62,8 +62,8 @@ pub struct MsgId(pub UQ);
 
 impl MsgId {
     /// Creates a new random MsgId
-    pub fn new() -> Self {
-        Self(UQ::new())
+    pub fn gen_new() -> Self {
+        Self(UQ::gen_new())
     }
 
     /// Converts [`MsgId`] to `Vec<u8>`
