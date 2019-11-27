@@ -667,19 +667,17 @@ mod __impls {
                                 d.ix
                             ))
                         }
+                    } else if len == 0 {
+                        Ok(None)
                     } else {
-                        if len == 0 {
-                            Ok(None)
-                        } else {
-                            Err(E!(
-                                WrongConsSize {
-                                    expected: 0,
-                                    found: len
-                                },
-                                d.data.clone(),
-                                d.ix
-                            ))
-                        }
+                        Err(E!(
+                            WrongConsSize {
+                                expected: 0,
+                                found: len
+                            },
+                            d.data.clone(),
+                            d.ix
+                        ))
                     }
                 };
 
