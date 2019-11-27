@@ -1,11 +1,88 @@
+use async_trait::*;
 use futures::FutureExt;
 use herald_common::*;
 use server_errors::{Error, Error::*};
-use tokio;
 use tokio_postgres::{types::Type, Client, Error as PgError, NoTls};
 
 mod pool;
 pub use pool::*;
+
+#[async_trait]
+pub trait ServerStore {
+    async fn device_exists(
+        &mut self,
+        pk: &sig::PublicKey,
+    ) -> Result<bool, Error>;
+
+    // async fn add_prekeys(
+    //     &mut self,
+    //     pres: &[sealed::PublicKey],
+    // ) -> Result<Vec<PKIResponse>, Error>;
+    //
+    // async fn pop_prekeys(
+    //     &mut self,
+    //     keys: &[sig::PublicKey],
+    // ) -> Result<Vec<Option<sealed::PublicKey>>, Error>;
+
+    async fn register_user(
+        &mut self,
+        user_id: UserId,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<register::Res, Error>;
+
+    async fn add_key(
+        &mut self,
+        key: Signed<sig::PublicKey>,
+    ) -> Result<PKIResponse, Error>;
+
+    async fn read_key(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Result<sig::PKMeta, Error>;
+
+    async fn deprecate_key(
+        &mut self,
+        signed_key: Signed<sig::PublicKey>,
+    ) -> Result<PKIResponse, Error>;
+
+    async fn user_exists(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<bool, Error>;
+
+    async fn key_is_valid(
+        &mut self,
+        key: sig::PublicKey,
+    ) -> Result<bool, Error>;
+
+    async fn get_pending(
+        &mut self,
+        key: sig::PublicKey,
+        limit: u32,
+    ) -> Result<Vec<Push>, Error>;
+
+    async fn expire_pending(
+        &mut self,
+        key: sig::PublicKey,
+        limit: u32,
+    ) -> Result<(), Error>;
+
+    async fn valid_keys(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<Vec<sig::PublicKey>, Error>;
+
+    async fn read_meta(
+        &mut self,
+        uid: &UserId,
+    ) -> Result<UserMeta, Error>;
+
+    async fn add_pending(
+        &mut self,
+        keys: Vec<sig::PublicKey>,
+        msgs: &[Push],
+    ) -> Result<(), Error>;
+}
 
 macro_rules! sql {
     ($path: literal) => {
@@ -91,8 +168,9 @@ type RawPkMeta<'a> = (
     Option<i64>,
 );
 
-impl Conn {
-    pub async fn device_exists(
+#[async_trait]
+impl ServerStore for Conn {
+    async fn device_exists(
         &mut self,
         pk: &sig::PublicKey,
     ) -> Result<bool, Error> {
@@ -105,7 +183,7 @@ impl Conn {
         Ok(row.get(0))
     }
 
-    // pub async fn add_prekeys(
+    //  async fn add_prekeys(
     //     &mut self,
     //     pres: &[sealed::PublicKey],
     // ) -> Result<Vec<PKIResponse>, Error> {
@@ -126,7 +204,7 @@ impl Conn {
     //     Ok(out)
     // }
 
-    // pub async fn pop_prekeys(
+    //  async fn pop_prekeys(
     //     &mut self,
     //     keys: &[sig::PublicKey],
     // ) -> Result<Vec<Option<sealed::PublicKey>>, Error> {
@@ -156,7 +234,7 @@ impl Conn {
     //     Ok(prekeys)
     // }
 
-    pub async fn register_user(
+    async fn register_user(
         &mut self,
         user_id: UserId,
         key: Signed<sig::PublicKey>,
@@ -202,7 +280,7 @@ impl Conn {
         Ok(register::Res::Success)
     }
 
-    pub async fn add_key(
+    async fn add_key(
         &mut self,
         key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error> {
@@ -256,7 +334,7 @@ impl Conn {
         unique_violation_to_redundant(res)
     }
 
-    pub async fn read_key(
+    async fn read_key(
         &mut self,
         key: sig::PublicKey,
     ) -> Result<sig::PKMeta, Error> {
@@ -286,7 +364,7 @@ impl Conn {
         Ok(PKMeta::new(sig_meta, dep_sig_meta))
     }
 
-    pub async fn deprecate_key(
+    async fn deprecate_key(
         &mut self,
         signed_key: Signed<sig::PublicKey>,
     ) -> Result<PKIResponse, Error> {
@@ -332,7 +410,7 @@ impl Conn {
         Ok(PKIResponse::Success)
     }
 
-    pub async fn user_exists(
+    async fn user_exists(
         &mut self,
         uid: &UserId,
     ) -> Result<bool, Error> {
@@ -345,7 +423,7 @@ impl Conn {
         Ok(!res.is_empty())
     }
 
-    pub async fn key_is_valid(
+    async fn key_is_valid(
         &mut self,
         key: sig::PublicKey,
     ) -> Result<bool, Error> {
@@ -358,7 +436,7 @@ impl Conn {
         Ok(row.get(0))
     }
 
-    pub async fn get_pending(
+    async fn get_pending(
         &mut self,
         key: sig::PublicKey,
         limit: u32,
@@ -377,7 +455,7 @@ impl Conn {
         Ok(out)
     }
 
-    pub async fn expire_pending(
+    async fn expire_pending(
         &mut self,
         key: sig::PublicKey,
         limit: u32,
@@ -390,7 +468,7 @@ impl Conn {
         Ok(())
     }
 
-    pub async fn valid_keys(
+    async fn valid_keys(
         &mut self,
         uid: &UserId,
     ) -> Result<Vec<sig::PublicKey>, Error> {
@@ -408,7 +486,7 @@ impl Conn {
             .collect()
     }
 
-    pub async fn read_meta(
+    async fn read_meta(
         &mut self,
         uid: &UserId,
     ) -> Result<UserMeta, Error> {
@@ -442,10 +520,10 @@ impl Conn {
         Ok(UserMeta { keys: meta_inner? })
     }
 
-    pub async fn add_pending<'a, M: Iterator<Item = &'a Push>>(
+    async fn add_pending(
         &mut self,
         keys: Vec<sig::PublicKey>,
-        msgs: M,
+        msgs: &[Push],
     ) -> Result<(), Error> {
         let tx = self.transaction().await?;
 
@@ -475,7 +553,8 @@ impl Conn {
         tx.commit().await?;
         Ok(())
     }
-
+}
+impl Conn {
     pub async fn setup(&mut self) -> Result<(), Error> {
         // create
         self.batch_execute(include_str!(

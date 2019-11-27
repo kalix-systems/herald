@@ -215,7 +215,7 @@ async fn add_get_expire_pending_ts() {
             let mut rt = w!(Runtime::new());
             rt.block_on(async {
                 let mut client = wa!(get_client());
-                assert!(client.add_pending(vec![pk], [p].iter()).await.is_ok());
+                assert!(client.add_pending(vec![pk], &[p]).await.is_ok());
             });
         })
     };
@@ -304,7 +304,7 @@ async fn add_get_expire_pending_id() {
         pushes.sort_by_key(|p| p.timestamp);
         assert_eq!(pushes, pushes_unsorted);
 
-        wa!(client.add_pending(vec![*kp.public_key()], pushes.iter()));
+        wa!(client.add_pending(vec![*kp.public_key()], &pushes));
 
         let pending = wa!(client.get_pending(*kp.public_key(), 1));
         assert_eq!(pending.as_slice(), &pushes[..1]);

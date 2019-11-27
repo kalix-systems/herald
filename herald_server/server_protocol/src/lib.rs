@@ -167,7 +167,7 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), [msg].iter()).await?;
+        con.add_pending(to_devs.clone(), &[msg]).await?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
