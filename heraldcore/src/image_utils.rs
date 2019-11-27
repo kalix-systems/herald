@@ -30,8 +30,8 @@ where
 }
 
 pub(crate) fn image_path() -> PathBuf {
-    let rid = crate::utils::rand_id();
-    let text = hex::encode(rid);
+    let rid = kcl::random::UQ::gen_new();
+    let text = hex::encode(rid.as_ref());
 
     let mut image_path = PICTURES_DIR.join(text);
     image_path.set_extension("png");

@@ -2,10 +2,10 @@ use backtrace::Backtrace;
 use bytes::Bytes;
 use std::{fmt, str::Utf8Error, sync::Arc};
 
-pub type KsonError = Arc<Error>;
+pub type KsonError = Arc<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
-pub struct Error {
+pub struct KsonErrorInner {
     pub backtrace: Backtrace,
     pub location: Location,
     pub message: Option<String>,
@@ -49,12 +49,13 @@ pub enum Variant {
     },
     BadUtf8String(Utf8Error),
     UnknownConst(u8),
+    UnknownType(u8),
     CustomError(String),
 }
 
 use Variant::*;
 
-impl fmt::Display for Error {
+impl fmt::Display for KsonErrorInner {
     fn fmt(
         &self,
         f: &mut fmt::Formatter<'_>,
@@ -69,7 +70,6 @@ impl fmt::Display for Error {
              Raw bytes were: {:#?}\n\
              Error found at offset: {}\n\
              Variant was: {}\n\
-             Backtrace was:\n\
              {:#?}
              ",
             self.bytes,
@@ -108,6 +108,7 @@ impl fmt::Display for Error {
                     max_len, found
                 ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
+                UnknownType(u) => format!("unknown type found: {}", u),
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
                 CustomError(s) => s.clone(),
             }),
@@ -157,7 +158,7 @@ macro_rules! loc {
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -171,7 +172,7 @@ macro_rules! E {
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,

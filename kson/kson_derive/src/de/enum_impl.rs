@@ -135,8 +135,8 @@ pub fn kson_de(
                                 if !is_map {
                                     Err(E!(
                                         WrongMinorType {
-                                            expected: "cons-array",
-                                            found: "cons-map".into()
+                                            expected: "cons-map",
+                                            found: "cons-array".into()
                                         },
                                         d.data.clone(),
                                         d.ix

@@ -5,39 +5,63 @@ use kcl::*;
 use kson::prelude::*;
 use std::ops::DerefMut;
 
-pub const CHAIN_KEY_BYTES: usize = 64;
+pub const RATCHET_KEY_LEN: usize = 64;
 new_type! {
     /// A secret key that is used in the kdf ratchet
-    secret ChainKey(CHAIN_KEY_BYTES)
+    secret RatchetKey(RATCHET_KEY_LEN)
 }
 
-impl ChainKey {
+impl RatchetKey {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
-        let mut buf = [0u8; CHAIN_KEY_BYTES];
+        let mut buf = [0u8; RATCHET_KEY_LEN];
         random::gen_into(&mut buf);
-        ChainKey(buf)
+        RatchetKey(buf)
     }
 }
 
-#[derive(Debug, Clone, Ser, De)]
-pub struct ChainState {
+#[derive(Debug, Clone, Ser, De, Eq, PartialEq)]
+pub struct RatchetState {
     ix: u64,
     base_key: hash::Key,
-    chain_key: ChainKey,
+    ratchet_key: RatchetKey,
 }
 
-impl ChainState {
+impl RatchetState {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
         let base_key = hash::Key::new();
-        let chain_key = ChainKey::new();
+        let ratchet_key = RatchetKey::new();
 
-        ChainState {
+        RatchetState {
             ix: 0,
             base_key,
-            chain_key,
+            ratchet_key,
         }
+    }
+
+    pub fn mk(
+        ix: u64,
+        base_key: hash::Key,
+        ratchet_key: RatchetKey,
+    ) -> Self {
+        RatchetState {
+            ix,
+            base_key,
+            ratchet_key,
+        }
+    }
+
+    pub fn ix(&self) -> u64 {
+        self.ix
+    }
+
+    pub fn base_key(&self) -> &hash::Key {
+        &self.base_key
+    }
+
+    pub fn ratchet_key(&self) -> &RatchetKey {
+        &self.ratchet_key
     }
 }
 
@@ -45,15 +69,27 @@ impl ChainState {
 pub enum DecryptionResult {
     Success {
         extra_keys: Vec<(u64, aead::Key)>,
-        plaintext: BytesMut,
+        ad: Bytes,
+        pt: BytesMut,
     },
     IndexTooHigh {
         cipher_index: u64,
-        chain_index: u64,
+        ratchet_index: u64,
     },
     Failed {
         extra_keys: Vec<(u64, aead::Key)>,
     },
+}
+
+impl DecryptionResult {
+    fn extra_keys_mut(&mut self) -> Option<&mut Vec<(u64, aead::Key)>> {
+        use DecryptionResult::*;
+        match self {
+            Success { extra_keys, .. } => Some(extra_keys),
+            Failed { extra_keys, .. } => Some(extra_keys),
+            IndexTooHigh { .. } => None,
+        }
+    }
 }
 
 #[must_use = "you should make sure to store the message key in case anyone else uses it"]
@@ -69,23 +105,19 @@ impl CipherData {
     }
 }
 
-impl ChainState {
-    pub fn ix(&self) -> u64 {
-        self.ix
-    }
-
+impl RatchetState {
     fn kdf(&mut self) -> aead::Key {
-        let mut chainkey_buf = [0u8; CHAIN_KEY_BYTES];
+        let mut ratchetkey_buf = [0u8; RATCHET_KEY_LEN];
         let mut messagekey_buf = [0u8; aead::KEY_LEN];
 
-        let mut bufs: [&mut [u8]; 2] = [&mut chainkey_buf, &mut messagekey_buf];
+        let mut bufs: [&mut [u8]; 2] = [&mut ratchetkey_buf, &mut messagekey_buf];
         self.base_key.hash_into_many(
-            self.chain_key.as_ref(),
+            self.ratchet_key.as_ref(),
             bufs.iter_mut().map(DerefMut::deref_mut),
         );
 
         self.ix += 1;
-        self.chain_key = ChainKey(chainkey_buf);
+        self.ratchet_key = RatchetKey(ratchetkey_buf);
 
         aead::Key(messagekey_buf)
     }
@@ -94,42 +126,32 @@ impl ChainState {
         &mut self,
         cipher: Cipher,
     ) -> DecryptionResult {
-        let Cipher {
-            index,
-            tag,
-            ad,
-            msg,
-        } = cipher;
-
-        let num_extra = index.saturating_add(1).saturating_sub(self.ix);
+        let num_extra = cipher.index.saturating_add(1).saturating_sub(self.ix);
 
         if num_extra == 0 {
             return DecryptionResult::IndexTooHigh {
-                cipher_index: index,
-                chain_index: self.ix,
+                cipher_index: cipher.index,
+                ratchet_index: self.ix,
             };
         }
 
         let mut extra_keys = Vec::with_capacity(num_extra as usize);
 
-        for i in self.ix..index {
+        for i in self.ix..cipher.index {
             let key = self.kdf();
             extra_keys.push((i, key));
         }
 
         let key = self.kdf();
-        extra_keys.push((index, key.clone()));
+        extra_keys.push((cipher.index, key.clone()));
 
-        let mut msg = BytesMut::from(msg);
+        let mut res = cipher.open_with(key);
 
-        if key.open(&ad, tag, &mut msg).0 {
-            DecryptionResult::Success {
-                extra_keys,
-                plaintext: msg,
-            }
-        } else {
-            DecryptionResult::Failed { extra_keys }
+        if let Some(extra) = res.extra_keys_mut() {
+            extra.append(&mut extra_keys);
         }
+
+        res
     }
 
     pub fn seal(
@@ -154,10 +176,32 @@ impl ChainState {
     }
 }
 
-#[derive(Debug, Clone, Ser, De)]
+#[derive(Debug, Clone, Ser, De, Eq, PartialEq)]
 pub struct Cipher {
-    index: u64,
-    tag: aead::Tag,
-    ad: Bytes,
-    msg: Bytes,
+    pub index: u64,
+    pub tag: aead::Tag,
+    pub ad: Bytes,
+    pub msg: Bytes,
+}
+
+impl Cipher {
+    pub fn open_with(
+        self,
+        key: aead::Key,
+    ) -> DecryptionResult {
+        let Cipher { tag, ad, msg, .. } = self;
+
+        let extra_keys = Vec::new();
+        let mut msg = BytesMut::from(msg);
+
+        if key.open(&ad, tag, &mut msg).0 {
+            DecryptionResult::Success {
+                extra_keys,
+                ad,
+                pt: msg,
+            }
+        } else {
+            DecryptionResult::Failed { extra_keys }
+        }
+    }
 }

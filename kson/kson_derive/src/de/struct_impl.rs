@@ -6,18 +6,18 @@ fn read_struct_tag(
     exp_len: usize,
     ident_string: &str,
 ) -> proc_macro2::TokenStream {
-    let map_cond = if should_be_map {
-        quote!(!is_map)
+    let (map_cond, minor_expected, minor_found) = if should_be_map {
+        (quote!(!is_map), quote!("cons-map"), quote!("cons-array"))
     } else {
-        quote!(is_map)
+        (quote!(is_map), quote!("cons-array"), quote!("cons-map"))
     };
     quote! {
         |d,is_map,len| {
             if #map_cond {
                 e!(
                     WrongMinorType {
-                        expected: "cons-map",
-                        found: "array-map".into()
+                        expected: #minor_expected,
+                        found: #minor_found.into()
                     },
                     d.data.clone(),
                     d.ix

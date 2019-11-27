@@ -19,7 +19,7 @@ fn add_get_delete() {
         stat: MessageReceiptStatus::NoAck,
     };
 
-    let body = ConversationMessageBody::Ack(msg);
+    let body = ConversationMessage::Ack(msg);
 
     db::add_to_pending(&conn, conv_id, &body).expect(womp!());
     let pending = db::get_pending(&conn).expect(womp!());

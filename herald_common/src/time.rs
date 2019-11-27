@@ -1,11 +1,11 @@
-use serde::*;
+use kson::*;
 use std::{
     convert::TryInto,
     ops::Deref,
     time::{SystemTime, UNIX_EPOCH},
 };
 
-#[derive(Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Serialize, Deserialize)]
+#[derive(Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Ser, De)]
 pub struct Time(pub i64);
 
 fn u128_as_i64(u: u128) -> i64 {

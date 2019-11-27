@@ -1,4 +1,4 @@
-use chainmail::block::{Block, Genesis};
+use channel_ratchet::*;
 use coretypes::{
     attachments::Attachment,
     conversation,
@@ -7,9 +7,9 @@ use coretypes::{
 };
 use herald_common::*;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// The body of a [`ConversationMessage`]
-pub enum ConversationMessageBody {
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// A message in a conversation
+pub enum ConversationMessage {
     /// A new key
     NewKey(NewKey),
     /// A key to be marked as deprecated
@@ -28,48 +28,19 @@ pub enum ConversationMessageBody {
     Settings(conversation::settings::SettingsUpdate),
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-/// A conversation message
-pub struct ConversationMessage {
-    /// The ciphertext of the message. After decryption, this should deserialize as a
-    /// [`ConversationMessageBody`].
-    pub body: chainmail::block::Block,
-    /// Conversation the message is associated with
-    pub cid: ConversationId,
-    /// Who supposedly sent the message
-    pub from: GlobalId,
-}
-
-impl ConversationMessage {
-    /// Raw body of the message
-    pub fn body(&self) -> &Block {
-        &self.body
-    }
-
-    /// `ConversationId` associated with the message
-    pub fn cid(&self) -> ConversationId {
-        self.cid
-    }
-
-    /// The device the message claims to be from.
-    pub fn from(&self) -> GlobalId {
-        self.from
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
 pub struct NewKey(pub Signed<sig::PublicKey>);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A key that is to be marked as deprecated.
 pub struct DepKey(pub Signed<sig::PublicKey>);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message received by a user when they are addeded to a conversation.
 pub struct AddedToConvo {
     /// The current members in that conversation.
@@ -83,15 +54,15 @@ pub struct AddedToConvo {
     /// The conversation's initial expiration period
     pub expiration_period: coretypes::conversation::ExpirationPeriod,
     /// The genesis block for the new conversation
-    pub gen: Genesis,
+    pub ratchet: RatchetState,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement of a user request, with a bool to indicate whether the
 /// request was accepted.
 pub struct UserReqAck(pub bool);
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A normal message to the conversation.
 pub struct Msg {
     /// The message id. Globally unique.
@@ -103,7 +74,7 @@ pub struct Msg {
     pub op: Option<MsgId>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Variants of messages.
 pub struct Message {
     /// Body of the message
@@ -114,7 +85,7 @@ pub struct Message {
     pub expiration: Option<Time>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// An acknowledgement that a message was received.
 pub struct Ack {
     /// The message id.

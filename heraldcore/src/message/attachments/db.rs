@@ -1,16 +1,14 @@
 use super::*;
 use platform_dirs::ATTACHMENTS_DIR;
 use rusqlite::{Connection as Conn, NO_PARAMS};
-use std::path::Path;
 
-pub(crate) fn add<'a, A: Iterator<Item = &'a Path>>(
+pub(crate) fn add<'a, A: Iterator<Item = &'a str>>(
     conn: &Conn,
     msg_id: &MsgId,
     attachments: A,
 ) -> Result<(), HErr> {
     let mut stmt = conn.prepare(include_str!("sql/add_attachment.sql"))?;
-    for (ix, a) in attachments.enumerate() {
-        let hash_dir = a.to_str().ok_or(NE!())?;
+    for (ix, hash_dir) in attachments.enumerate() {
         let ix = ix as i64;
         stmt.execute(params![msg_id, ix, hash_dir])?;
     }
@@ -24,9 +22,9 @@ pub(crate) fn get(
 ) -> Result<AttachmentMeta, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_attachments.sql"))?;
 
-    let attachments: Result<Vec<PathBuf>, HErr> = stmt
+    let attachments: Result<Vec<String>, HErr> = stmt
         .query_map(params![msg_id], |row| row.get::<_, String>(0))?
-        .map(|path_string| Ok(PathBuf::from(path_string?)))
+        .map(|path_string| Ok(path_string?))
         .collect();
 
     Ok(AttachmentMeta::new(attachments?))

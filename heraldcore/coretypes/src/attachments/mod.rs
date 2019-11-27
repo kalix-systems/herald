@@ -2,12 +2,7 @@ use herald_common::*;
 use hex::encode;
 use location::{loc, Location};
 use platform_dirs::ATTACHMENTS_DIR;
-use std::{
-    ffi::OsString,
-    fmt,
-    fs::read_dir,
-    path::{Path, PathBuf},
-};
+use std::{ffi::OsString, fmt, fs::read_dir, path::Path};
 use tar::{Archive, Builder};
 
 #[derive(Debug)]
@@ -56,22 +51,26 @@ impl fmt::Display for Error {
 impl std::error::Error for Error {}
 
 /// A message attachmentent
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     data: Vec<u8>,
-    hash_dir: PathBuf,
+    // TODO: make a Path newtype
+    hash_dir: String,
 }
 
 impl Attachment {
     /// Create attachment from path
-    pub fn new(path: &Path) -> Result<Self, Error> {
+    pub fn new<P: AsRef<Path>>(path: &P) -> Result<Self, Error> {
         let buf: Vec<u8> = Vec::new();
 
         let mut a = Builder::new(buf);
 
         let file_name = path
+            .as_ref()
             .file_name()
-            .ok_or_else(|| Error::InvalidPathComponent(path.to_path_buf().into_os_string()))?
+            .ok_or_else(|| {
+                Error::InvalidPathComponent(path.as_ref().to_path_buf().into_os_string())
+            })?
             .to_owned();
 
         a.append_path_with_name(path, file_name)
@@ -79,35 +78,35 @@ impl Attachment {
 
         let data = a.into_inner().map_err(|e| Error::Read(e, loc!()))?;
 
-        let hash = hash_slice(&data).ok_or(Error::Hash)?;
-        let hash_dir = PathBuf::from(encode(hash));
+        let hash = kcl::hash::simple_hash(&data);
+        let hash_dir = encode(hash);
 
         Ok(Attachment { data, hash_dir })
     }
 
     /// Returns hex encoded hash
-    pub fn hash_dir(&self) -> &Path {
+    pub fn hash_dir(&self) -> &str {
         &self.hash_dir
     }
 
     /// Saves file to disk
-    pub fn save(&self) -> Result<PathBuf, Error> {
+    pub fn save(&self) -> Result<&str, Error> {
         let mut archive = Archive::new(self.data.as_slice());
 
         let path = ATTACHMENTS_DIR.join(self.hash_dir());
 
         archive.unpack(&path).map_err(|e| Error::Write(e, loc!()))?;
 
-        Ok(self.hash_dir().to_path_buf())
+        Ok(self.hash_dir())
     }
 }
 
 /// Attachments
 #[derive(Debug)]
-pub struct AttachmentMeta(Vec<PathBuf>);
+pub struct AttachmentMeta(Vec<String>);
 
 impl AttachmentMeta {
-    pub fn new(paths: Vec<PathBuf>) -> Self {
+    pub fn new(paths: Vec<String>) -> Self {
         Self(paths)
     }
 

@@ -9,7 +9,7 @@ use std::time::Duration;
 
 pub mod settings;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
 /// Conversation metadata.
 pub struct ConversationMeta {
     /// Conversation id
@@ -53,7 +53,7 @@ pub struct Conversation {
     pub meta: ConversationMeta,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Ser, De, Eq, PartialEq, Hash)]
 #[repr(u8)]
 /// Expiration period for messages
 pub enum ExpirationPeriod {
@@ -119,7 +119,7 @@ impl Default for ExpirationPeriod {
 
 impl FromSql for ExpirationPeriod {
     fn column_result(value: types::ValueRef) -> FromSqlResult<Self> {
-        serde_cbor::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
+        kson::from_slice(value.as_blob().map_err(|_| FromSqlError::InvalidType)?)
             .map_err(|_| FromSqlError::InvalidType)
     }
 }
@@ -128,10 +128,7 @@ impl ToSql for ExpirationPeriod {
     fn to_sql(&self) -> Result<types::ToSqlOutput, rusqlite::Error> {
         use types::*;
 
-        Ok(ToSqlOutput::Owned(Value::Blob(
-            serde_cbor::to_vec(self)
-                .map_err(|e| rusqlite::Error::UserFunctionError(Box::new(e)))?,
-        )))
+        Ok(ToSqlOutput::Owned(Value::Blob(kson::to_vec(self))))
     }
 }
 

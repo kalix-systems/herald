@@ -3,7 +3,6 @@ use futures::stream::*;
 use herald_common::*;
 use server_errors::*;
 use server_store::*;
-use sodiumoxide::crypto::sign;
 use std::time::Duration;
 use tokio::{
     prelude::*,
@@ -168,7 +167,7 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), [msg].iter()).await?;
+        con.add_pending(to_devs.clone(), &[msg]).await?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
@@ -203,7 +202,7 @@ impl State {
 }
 
 async fn catchup(
-    did: sign::PublicKey,
+    did: sig::PublicKey,
     s: &mut Conn,
     wtx: &mut WTx,
     rrx: &mut Receiver<Vec<u8>>,
@@ -238,15 +237,15 @@ const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
 
 async fn read_msg<T>(rx: &mut Receiver<Vec<u8>>) -> Result<T, Error>
 where
-    T: serde::de::DeserializeOwned,
+    T: De,
 {
     let m = rx.next().await.ok_or(StreamDied)?;
-    let t = serde_cbor::from_slice(&m)?;
+    let t = kson::from_slice(&m)?;
     Ok(t)
 }
 
-fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
-    Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
+fn ser_msg<T: Ser>(t: &T) -> ws::Message {
+    ws::Message::binary(kson::to_vec(t))
 }
 
 async fn write_msg<T>(
@@ -255,22 +254,22 @@ async fn write_msg<T>(
     rrx: &mut Receiver<Vec<u8>>,
 ) -> Result<(), Error>
 where
-    T: Serialize,
+    T: Ser,
 {
-    let bvec = Bytes::from(serde_cbor::to_vec(t)?);
+    let bvec = Bytes::from(kson::to_vec(t));
     let packets = Packet::from_bytes(bvec);
     let len = packets.len() as u64;
 
     loop {
-        wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+        wtx.send(ser_msg(&len)).timeout(TIMEOUT_DUR).await??;
 
         if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
-            wtx.send(ser_msg(&PacketResponse::Success)?)
+            wtx.send(ser_msg(&PacketResponse::Success))
                 .timeout(TIMEOUT_DUR)
                 .await??;
             break;
         } else {
-            wtx.send(ser_msg(&PacketResponse::Retry)?)
+            wtx.send(ser_msg(&PacketResponse::Retry))
                 .timeout(TIMEOUT_DUR)
                 .await??;
         }
@@ -278,7 +277,7 @@ where
 
     loop {
         for packet in packets.iter() {
-            wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+            wtx.send(ser_msg(packet)).timeout(TIMEOUT_DUR).await??;
         }
 
         match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {

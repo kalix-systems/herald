@@ -1,6 +1,8 @@
-UPDATE derived_keys
-  SET used = 1
+SELECT
+  msg_key
+FROM
+  derived_keys
 WHERE
   conversation_id = @1
   AND ix = @2
-  
+

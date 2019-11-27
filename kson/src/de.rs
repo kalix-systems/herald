@@ -1,6 +1,6 @@
 use super::{errors::*, *};
 use bytes::Bytes;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 pub struct Deserializer {
     pub data: Bytes,
@@ -12,6 +12,12 @@ pub trait De: Sized {
 }
 
 pub struct TagByte {
+    pub is_big: bool,
+    pub val: u8,
+}
+
+pub struct TagByteWithType {
+    pub typ: Type,
     pub is_big: bool,
     pub val: u8,
 }
@@ -92,31 +98,45 @@ impl Deserializer {
             Ok(len)
         }
     }
+
+    pub fn read_tag_byte(&mut self) -> Result<TagByteWithType, KsonError> {
+        if self.remaining() == 0 {
+            e!(
+                LengthError {
+                    expected: 1,
+                    remaining: 0
+                },
+                self.data.clone(),
+                self.ix
+            )
+        }
+
+        let byte = self.data[self.ix];
+
+        let typ = ((byte & MASK_TYPE) >> TYPE_OFFS)
+            .try_into()
+            .map_err(|u| E!(UnknownType(u), self.data.clone(), self.ix))?;
+
+        let is_big = byte & BIG_BIT == BIG_BIT;
+        let val = byte & !(MASK_TYPE | BIG_BIT);
+
+        self.ix += 1;
+
+        Ok(TagByteWithType { typ, is_big, val })
+    }
 }
 
 macro_rules! tag_reader_method {
     ($fname: ident, $type: tt, $message: expr) => {
         impl Deserializer {
             pub fn $fname(&mut self) -> Result<TagByte, KsonError> {
-                if self.remaining() == 0 {
-                    e!(
-                        LengthError {
-                            expected: 1,
-                            remaining: 0
-                        },
-                        self.data.clone(),
-                        self.ix,
-                        $message
-                    )
-                }
+                let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
 
-                let byte = self.data[self.ix];
-
-                if byte & MASK_TYPE != $crate::Type::$type as u8 {
+                if typ != $crate::Type::$type {
                     e!(
                         WrongType {
                             expected: $crate::Type::$type,
-                            found: byte & $crate::MASK_TYPE,
+                            found: typ as u8,
                         },
                         self.data.clone(),
                         self.ix,
@@ -124,12 +144,7 @@ macro_rules! tag_reader_method {
                     )
                 }
 
-                self.ix += 1;
-
-                Ok(TagByte {
-                    is_big: byte & BIG_BIT == BIG_BIT,
-                    val: byte & !(MASK_TYPE | BIG_BIT),
-                })
+                Ok(TagByte { is_big, val })
             }
         }
     };
@@ -260,23 +275,42 @@ read_int_from_tag!(read_i64_from_tag, i64, 8);
 read_int_from_tag!(read_i128_from_tag, i128, 16);
 
 impl Deserializer {
-    pub fn read_bool(&mut self) -> Result<bool, KsonError> {
-        let tag = self.read_raw_u8(1)?;
-        if tag & MASK_TYPE == Type::Special as u8 {
-            match tag & !MASK_TYPE {
-                FALSE_BYTE => Ok(false),
-                TRUE_BYTE => Ok(true),
-                other => Err(E!(UnknownConst(other), self.data.clone(), self.ix)),
-            }
-        } else {
-            Err(E!(
+    pub fn read_null(&mut self) -> Result<(), KsonError> {
+        let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
+        match typ {
+            Type::Special => match (val | if is_big { BIG_BIT } else { 0 }).try_into() {
+                Ok(Constants::Null) => Ok(()),
+                Ok(c) => Err(E!(UnknownConst(c as u8), self.data.clone(), self.ix)),
+                Err(o) => Err(E!(UnknownConst(o), self.data.clone(), self.ix)),
+            },
+            other => Err(E!(
                 WrongType {
                     expected: Type::Special,
-                    found: tag & MASK_TYPE
+                    found: other as u8,
                 },
                 self.data.clone(),
                 self.ix
-            ))
+            )),
+        }
+    }
+
+    pub fn read_bool(&mut self) -> Result<bool, KsonError> {
+        let TagByteWithType { typ, is_big, val } = self.read_tag_byte()?;
+        match typ {
+            Type::Special => match (val | if is_big { BIG_BIT } else { 0 }).try_into() {
+                Ok(Constants::False) => Ok(false),
+                Ok(Constants::True) => Ok(true),
+                Ok(c) => Err(E!(UnknownConst(c as u8), self.data.clone(), self.ix)),
+                Err(o) => Err(E!(UnknownConst(o), self.data.clone(), self.ix)),
+            },
+            other => Err(E!(
+                WrongType {
+                    expected: Type::Special,
+                    found: other as u8,
+                },
+                self.data.clone(),
+                self.ix
+            )),
         }
     }
 
@@ -423,10 +457,6 @@ impl Deserializer {
     }
 }
 
-pub fn from_bytes<T: De>(from: Bytes) -> Result<T, KsonError> {
-    T::de(&mut Deserializer::new(from))
-}
-
 macro_rules! read_tagged_val {
     ($type: ty, $fname: ident, $tag_reader: tt, $val_reader: tt) => {
         impl Deserializer {
@@ -444,6 +474,12 @@ read_tagged_val!(u16, read_u16, read_uint_tag, read_u16_from_tag);
 read_tagged_val!(u32, read_u32, read_uint_tag, read_u32_from_tag);
 read_tagged_val!(u64, read_u64, read_uint_tag, read_u64_from_tag);
 read_tagged_val!(u128, read_u128, read_uint_tag, read_u128_from_tag);
+
+read_tagged_val!(i8, read_i8, read_int_tag, read_i8_from_tag);
+read_tagged_val!(i16, read_i16, read_int_tag, read_i16_from_tag);
+read_tagged_val!(i32, read_i32, read_int_tag, read_i32_from_tag);
+read_tagged_val!(i64, read_i64, read_int_tag, read_i64_from_tag);
+read_tagged_val!(i128, read_i128, read_int_tag, read_i128_from_tag);
 
 read_tagged_val!(&str, read_str, read_bytes_tag, read_str_from_tag);
 read_tagged_val!(Bytes, read_bytes, read_bytes_tag, read_bytes_from_tag);
@@ -465,11 +501,17 @@ macro_rules! trivial_de {
     };
 }
 
+trivial_de!(bool, read_bool);
 trivial_de!(u8, read_u8);
 trivial_de!(u16, read_u16);
 trivial_de!(u32, read_u32);
 trivial_de!(u64, read_u64);
 trivial_de!(u128, read_u128);
+trivial_de!(i8, read_i8);
+trivial_de!(i16, read_i16);
+trivial_de!(i32, read_i32);
+trivial_de!(i64, read_i64);
+trivial_de!(i128, read_i128);
 trivial_de!(String, read_string);
 trivial_de!(Bytes, read_bytes);
 
@@ -583,6 +625,65 @@ mod __impls {
                 Ok(out)
             }
         }
+
+        impl<T: De> De for Option<T> {
+            fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                let read_tag = |d: &mut Deserializer, is_map, len| {
+                    if is_map {
+                        e!(
+                            WrongMinorType {
+                                expected: "cons-array",
+                                found: "cons-map".into()
+                            },
+                            d.data.clone(),
+                            d.ix
+                        )
+                    }
+
+                    let id = d.read_str()?;
+                    match id {
+                        "None" => Ok((false, len)),
+                        "Some" => Ok((true, len)),
+                        _ => {
+                            let id = id.into();
+                            Err(E!(WrongEnumVariant { found: id }, d.data.clone(), d.ix))
+                        }
+                    }
+                };
+
+                let read_data = |d: &mut Deserializer, input| {
+                    let (is_some, len) = input;
+                    if is_some {
+                        if len == 1 {
+                            let t = d.take_val()?;
+                            Ok(Some(t))
+                        } else {
+                            Err(E!(
+                                WrongConsSize {
+                                    expected: 1,
+                                    found: len
+                                },
+                                d.data.clone(),
+                                d.ix
+                            ))
+                        }
+                    } else if len == 0 {
+                        Ok(None)
+                    } else {
+                        Err(E!(
+                            WrongConsSize {
+                                expected: 0,
+                                found: len
+                            },
+                            d.data.clone(),
+                            d.ix
+                        ))
+                    }
+                };
+
+                d.read_cons(read_tag, read_data)
+            }
+        }
     }
 
     mod __arrayvec {
@@ -654,5 +755,58 @@ mod __impls {
         }
 
         ptr_impl!(Box, Arc, Rc);
+    }
+
+    mod __tuple {
+        use super::*;
+
+        macro_rules! tuple_de {
+            ($len:expr, $($typ:ident),*) => {
+                impl<$($typ: De),*> De for ($($typ,)*) {
+                    fn de(d: &mut Deserializer) -> Result<Self, KsonError> {
+                        d.read_cons(|d,is_map, len| {
+                            if is_map {
+                                Err(E!(
+                                    WrongMinorType {
+                                        expected: "cons-array",
+                                        found: "cons-map".into()
+                                    },
+                                    d.data.clone(),
+                                    d.ix
+                                ))
+                            } else if len != $len {
+                                Err(E!(
+                                    WrongConsSize {
+                                        expected: 1,
+                                        found: len
+                                    },
+                                    d.data.clone(),
+                                    d.ix
+                                ))
+                            } else {
+                                d.read_null()?;
+                                Ok(())
+                            }
+                        }, |d, ()| {
+                            let tuple = ($($typ::de(d)?,)*);
+                            Ok(tuple)
+                        })
+                    }
+                }
+            }
+        }
+
+        tuple_de!(1, A);
+        tuple_de!(2, A, B);
+        tuple_de!(3, A, B, C);
+        tuple_de!(4, A, B, C, D);
+        tuple_de!(5, A, B, C, D, E);
+        tuple_de!(6, A, B, C, D, E, F);
+        tuple_de!(7, A, B, C, D, E, F, G);
+        tuple_de!(8, A, B, C, D, E, F, G, H);
+        tuple_de!(9, A, B, C, D, E, F, G, H, I);
+        tuple_de!(10, A, B, C, D, E, F, G, H, I, J);
+        tuple_de!(11, A, B, C, D, E, F, G, H, I, J, K);
+        tuple_de!(12, A, B, C, D, E, F, G, H, I, J, K, L);
     }
 }

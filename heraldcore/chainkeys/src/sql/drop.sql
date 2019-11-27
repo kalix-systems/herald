@@ -1,6 +1,4 @@
-DROP INDEX IF EXISTS block_dep_parent;
+DROP TABLE IF EXISTS ratchet_states;
 
-DROP TABLE IF EXISTS block_dependencies;
-DROP TABLE IF EXISTS chainkeys;
-DROP TABLE IF EXISTS pending_blocks;
-DROP TABLE IF EXISTS channel_keys;
+DROP INDEX IF EXISTS derived_keys_insertion_ts_ix;
+DROP TABLE IF EXISTS derived_keys;

@@ -7,7 +7,7 @@ use crate::{
     *,
 };
 use chainkeys;
-use chainmail::block::*;
+use channel_ratchet::RatchetState;
 use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use lazy_static::*;
@@ -87,13 +87,10 @@ pub fn send_user_req(
     uid: UserId,
     cid: ConversationId,
 ) -> Result<(), HErr> {
-    let kp = config::keypair()?;
+    let ratchet = RatchetState::new();
+    chainkeys::store_state(cid, &ratchet)?;
 
-    let gen = Genesis::new(kp.secret_key());
-
-    chainkeys::store_genesis(&cid, &gen)?;
-
-    let req = dmessages::UserReq { gen, cid };
+    let req = dmessages::UserReq { ratchet, cid };
 
     send_umessage(uid, &DeviceMessageBody::Req(req))
 }
@@ -102,14 +99,14 @@ pub(crate) fn send_normal_message(
     cid: ConversationId,
     msg: cmessages::Msg,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessageBody::Msg(msg))
+    send_cmessage(cid, &ConversationMessage::Msg(msg))
 }
 
 pub(crate) fn send_conversation_settings_update(
     cid: ConversationId,
     update: settings::SettingsUpdate,
 ) -> Result<(), HErr> {
-    send_cmessage(cid, &ConversationMessageBody::Settings(update))
+    send_cmessage(cid, &ConversationMessage::Settings(update))
 }
 
 pub(crate) fn server_url(ext: &str) -> String {

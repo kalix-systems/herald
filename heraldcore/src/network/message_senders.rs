@@ -3,39 +3,24 @@ use crate::types::{cmessages, dmessages};
 
 pub(crate) fn send_cmessage(
     cid: ConversationId,
-    content: &ConversationMessageBody,
+    content: &ConversationMessage,
 ) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let (cm, hash, key) = cmessages::seal(cid, &content)?;
+        let cm = cmessages::seal(cid, &content)?;
 
         let to = crate::members::members(&cid)?;
         let exc = *crate::config::keypair()?.public_key();
-        let msg = Bytes::from(serde_cbor::to_vec(&cm)?);
+        let msg = kson::to_vec(&cm).into();
+
         let req = push_users::Req { to, exc, msg };
 
-        let mut db = chainkeys::CK_CONN.lock();
-        let mut tx = db.transaction()?;
-
-        let unlocked = chainkeys::db::store_key(&mut tx, cid, hash, &key)?;
-        debug_assert!(unlocked.is_empty());
-        // TODO: replace used with probably_used here
-        // in general we probably want a slightly smarter system for dealing with scenarios where
-        // we thought a message wasn't sent but it was
-        chainkeys::db::mark_used(&mut tx, cid, cm.body().parent_hashes().iter())?;
-
         match helper::push_users(&req) {
-            Ok(push_users::Res::Success) => {
-                tx.commit()?;
-                Ok(())
-            }
+            Ok(push_users::Res::Success) => Ok(()),
             Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
                 "tried to send messages to nonexistent users {:?}",
                 missing
             ))),
             Err(e) => {
-                chainkeys::db::mark_used(&mut tx, cid, [hash].iter())?;
-                tx.commit()?;
-
                 // TODO: maybe try more than once?
                 // maybe have some mechanism to send a signal that more things have gone wrong?
                 eprintln!(
@@ -58,7 +43,7 @@ pub(super) fn send_dmessage(
     to: sig::PublicKey,
     dm: &DeviceMessageBody,
 ) -> Result<(), HErr> {
-    let msg = Bytes::from(serde_cbor::to_vec(&dmessages::seal(&to, dm)?)?);
+    let msg = kson::to_vec(&dmessages::seal(to, dm)?).into();
 
     let req = push_devices::Req { to: vec![to], msg };
 

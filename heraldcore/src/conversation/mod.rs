@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::HErr, message::Message, types::*, utils};
+use crate::{db::Database, errors::HErr, message::Message, types::*};
 pub use coretypes::conversation::*;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
@@ -13,7 +13,7 @@ pub use builder::*;
 
 /// Starts the conversation, sending it to the proposed members.
 pub fn start(conversation: Conversation) -> Result<(), HErr> {
-    use chainmail::block::*;
+    use channel_ratchet::*;
     use std::fs;
 
     let Conversation { members, meta } = conversation;
@@ -26,9 +26,8 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
         ..
     } = meta;
 
-    let kp = crate::config::keypair()?;
-    let gen = Genesis::new(kp.secret_key());
-    chainkeys::store_genesis(&cid, &gen)?;
+    let ratchet = RatchetState::new();
+    chainkeys::store_state(cid, &ratchet)?;
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),
@@ -37,9 +36,9 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let pairwise = get_pairwise_conversations(&members)?;
 
-    let body = ConversationMessageBody::AddedToConvo(Box::new(cmessages::AddedToConvo {
+    let body = ConversationMessage::AddedToConvo(Box::new(cmessages::AddedToConvo {
         members,
-        gen,
+        ratchet,
         cid,
         title,
         expiration_period,
