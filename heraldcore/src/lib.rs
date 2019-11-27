@@ -1,6 +1,6 @@
 //! Core logic for herald client.
 
-// #![warn(missing_docs)]
+#![warn(missing_docs)]
 /// User configuration
 pub mod config;
 /// Conversations
