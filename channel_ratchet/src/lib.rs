@@ -146,8 +146,11 @@ impl RatchetState {
         extra_keys.push((cipher.index, key.clone()));
 
         let mut res = cipher.open_with(key);
-        res.extra_keys_mut()
-            .map(move |extra| extra.append(&mut extra_keys));
+
+        if let Some(extra) = res.extra_keys_mut() {
+            extra.append(&mut extra_keys);
+        }
+
         res
     }
 
