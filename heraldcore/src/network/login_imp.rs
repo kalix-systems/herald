@@ -81,7 +81,7 @@ fn sock_get_msg<S: websocket::stream::Stream, T: De>(
     let len;
 
     loop {
-        let maybe_len = sock_get_block(ws)?;
+        let maybe_len = sock_get_block::<_, u64>(ws)?;
         sock_send_msg(ws, &maybe_len)?;
         match sock_get_block(ws)? {
             PacketResponse::Success => {
