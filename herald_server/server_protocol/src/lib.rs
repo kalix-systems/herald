@@ -4,6 +4,7 @@ use herald_common::*;
 use server_errors::*;
 use server_store::*;
 use std::time::Duration;
+use stream_cancel::{Trigger, Valved};
 use tokio::{
     prelude::*,
     sync::{
@@ -17,10 +18,11 @@ use tokio::{
 use warp::filters::ws::{self, WebSocket};
 
 type WTx = SplitSink<WebSocket, ws::Message>;
+type ActiveSessions = DashMap<sig::PublicKey, (Trigger, Sender<()>)>;
 
 #[derive(Default)]
 pub struct State {
-    pub active: DashMap<sig::PublicKey, Sender<()>>,
+    pub active: ActiveSessions,
     pub pool: Pool,
 }
 
@@ -72,12 +74,15 @@ impl State {
 
         let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
-        self.active.insert(gid.did, ptx);
+        let (trigger, prx) = Valved::new(prx);
+        self.active.insert(gid.did, (trigger, ptx));
 
         // remove active session on graceful exit
         tokio::spawn(async move {
             drop(closed.await);
-            self.active.remove(&gid.did);
+            if let Some((_, (t, _))) = self.active.remove(&gid.did) {
+                t.cancel();
+            }
         });
 
         // TODO: handle this error somehow?
@@ -86,14 +91,16 @@ impl State {
             .await
             .is_ok()
         {
-            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+            let mut prx: Timeout<Valved<Receiver<()>>> = prx.timeout(Duration::from_secs(60));
             drop(
                 self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                     .await,
             );
         }
 
-        self.active.remove(&gid.did);
+        if let Some((_, (t, _))) = self.active.remove(&gid.did) {
+            t.cancel();
+        }
 
         Ok(())
     }
@@ -171,7 +178,7 @@ impl State {
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
-                let mut sender = s.clone();
+                let mut sender = s.1.clone();
                 drop(sender.send(()).await);
             }
         }
@@ -184,7 +191,7 @@ impl State {
         store: &mut Conn,
         wtx: &mut WTx,
         rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Receiver<()>>,
+        rx: &mut Timeout<Valved<Receiver<()>>>,
         did: sig::PublicKey,
     ) -> Result<(), Error> {
         while let Some(p) = rx.next().await {
