@@ -1,3 +1,4 @@
+use crate::imp::Messages;
 use crate::{cont_none, ffi, interface::*, ret_err, ret_none, shared::SingletonBus, spawn};
 use heraldcore::{
     conversation::{self, ConversationMeta, ExpirationPeriod},
@@ -5,6 +6,7 @@ use heraldcore::{
 };
 use im::vector::Vector;
 use search_pattern::SearchPattern;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ops::Not;
 
@@ -23,6 +25,7 @@ pub struct Conversations {
     filter: Option<SearchPattern>,
     filter_regex: bool,
     list: Vector<Conversation>,
+    message_map: HashMap<ConversationId, Messages>,
     loaded: bool,
 }
 
@@ -44,6 +47,7 @@ impl ConversationsTrait for Conversations {
             model,
             list: Vector::new(),
             loaded: false,
+            message_map: HashMap::new(),
         }
     }
 
@@ -208,6 +212,26 @@ impl ConversationsTrait for Conversations {
         index: usize,
     ) -> bool {
         ret_none!(self.pairwise_(index), false)
+    }
+
+    fn messages(
+        &self,
+        index: usize,
+    ) -> &Messages {
+        // FIXME
+        let cid = self.id(index).unwrap();
+
+        self.message_map.get(&cid).unwrap()
+    }
+
+    fn messages_mut(
+        &mut self,
+        index: usize,
+    ) -> &mut Messages {
+        // FIXME
+        let cid = self.id(index).unwrap();
+
+        self.message_map.get_mut(&cid).unwrap()
     }
 
     fn remove_conversation(
