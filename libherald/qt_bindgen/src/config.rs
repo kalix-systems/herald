@@ -149,7 +149,8 @@ fn conversations() -> Object {
        expirationPeriod: ItemProp::new().simple(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().write().get_by_value(),
-       color: color_item_prop().write()
+       color: color_item_prop().write(),
+       messages: ItemProp::new().object(Rc::new(messages()))
     };
 
     let funcs = functions! {

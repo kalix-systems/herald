@@ -309,6 +309,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         conversations_end_move_rows,
         conversations_begin_remove_rows,
         conversations_end_remove_rows,
+        messages_ptr_bundle_factory,
         errors,
         errors_try_poll_changed,
         message_search,
@@ -418,6 +419,8 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         end_move_rows: conversations_end_move_rows,
         begin_remove_rows: conversations_begin_remove_rows,
         end_remove_rows: conversations_end_remove_rows,
+
+        messages_ptr_bundle_factory,
     };
     let d_conversations = Conversations::new(conversations_emit, model);
     let errors_emit = ErrorsEmitter {
@@ -698,6 +701,7 @@ pub struct HeraldPtrBundle {
     conversations_end_move_rows: fn(*mut ConversationsQObject),
     conversations_begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
     conversations_end_remove_rows: fn(*mut ConversationsQObject),
+    messages_ptr_bundle_factory: fn(*mut ConversationsQObject) -> *mut MessagesPtrBundle,
     errors: *mut ErrorsQObject,
     errors_try_poll_changed: fn(*mut ErrorsQObject),
     message_search: *mut MessageSearchQObject,
