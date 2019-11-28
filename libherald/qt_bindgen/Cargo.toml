@@ -6,5 +6,5 @@ edition = "2018"
 license = "GPLv2"
 
 [dependencies.riqtshaw]
-git = "https://github.com/kalix-systems/rust-qt-binding-generator"
+git = "https://github.com/kalix-systems/riqtshaw"
 rev = "5199e4b2fc26ab361a7d37acdc8bf8cddbd25d2a"
