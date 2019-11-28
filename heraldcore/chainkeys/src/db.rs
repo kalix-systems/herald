@@ -1,6 +1,6 @@
 use super::*;
 use byteorder::*;
-use channel_ratchet::*;
+use kdf_ratchet::*;
 
 pub struct Tx<'a>(rusqlite::Transaction<'a>);
 
@@ -136,9 +136,9 @@ impl Tx<'_> {
     pub fn open_msg(
         &mut self,
         cid: ConversationId,
-        cipher: channel_ratchet::Cipher,
+        cipher: kdf_ratchet::Cipher,
     ) -> Result<Option<Decrypted>, ChainKeysError> {
-        use channel_ratchet::DecryptionResult::*;
+        use kdf_ratchet::DecryptionResult::*;
 
         let res = if let Some(k) = self.get_derived_key(cid, cipher.index)? {
             let ix = cipher.index;
@@ -183,7 +183,7 @@ impl Tx<'_> {
         cid: ConversationId,
         ad: Bytes,
         msg: BytesMut,
-    ) -> Result<channel_ratchet::Cipher, ChainKeysError> {
+    ) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
         let mut ratchet = self.get_ratchet_state(cid)?;
         let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
         self.store_derived_key(cid, ix, key)?;

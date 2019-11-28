@@ -1,6 +1,6 @@
 use super::*;
 use crate::types::{cmessages, dmessages};
-use channel_ratchet::Cipher;
+use kdf_ratchet::Cipher;
 use network_types::{cmessages::ConversationMessage, dmessages::DeviceMessage};
 
 pub(super) fn handle_cmessage(

@@ -1,5 +1,5 @@
 use super::*;
-use channel_ratchet::Cipher;
+use kdf_ratchet::Cipher;
 pub(crate) use network_types::cmessages::*;
 
 /// Seals the messages.

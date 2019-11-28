@@ -1,5 +1,5 @@
 use super::*;
-use channel_ratchet::*;
+use kdf_ratchet::*;
 use coremacros::womp;
 
 fn in_memory() -> rusqlite::Connection {

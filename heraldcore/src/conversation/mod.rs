@@ -13,7 +13,7 @@ pub use builder::*;
 
 /// Starts the conversation, sending it to the proposed members.
 pub fn start(conversation: Conversation) -> Result<(), HErr> {
-    use channel_ratchet::*;
+    use kdf_ratchet::*;
     use std::fs;
 
     let Conversation { members, meta } = conversation;

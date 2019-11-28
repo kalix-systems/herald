@@ -14,8 +14,8 @@ path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
-[dependencies.channel_ratchet]
-path = "../../channel_ratchet"
+[dependencies.kdf_ratchet]
+path = "../../kdf_ratchet"
 
 [dependencies.coretypes]
 path             = "../coretypes"

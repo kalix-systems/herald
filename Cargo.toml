@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-  "channel_ratchet",
   "herald_common",
   "herald_server",
   "herald_server/server_store",
@@ -16,10 +15,11 @@ members = [
   "heraldcore/platform_dirs",
   "heraldcore/search_pattern",
   "heraldcore/location",
+  "kcl",
+  "kdf_ratchet",
+  "kson",
+  "kson/kson_derive",
   "libherald",
   "libherald/messages_helper",
   "libherald/qt_bindgen",
-  "kcl",
-  "kson",
-  "kson/kson_derive"
 ]

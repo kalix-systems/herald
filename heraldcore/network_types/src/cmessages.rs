@@ -1,4 +1,4 @@
-use channel_ratchet::*;
+use kdf_ratchet::*;
 use coretypes::{
     attachments::Attachment,
     conversation,

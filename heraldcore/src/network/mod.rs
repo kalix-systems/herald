@@ -7,7 +7,7 @@ use crate::{
     *,
 };
 use chainkeys;
-use channel_ratchet::RatchetState;
+use kdf_ratchet::RatchetState;
 use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use lazy_static::*;

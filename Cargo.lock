@@ -202,25 +202,16 @@ name = "chainkeys"
 version = "0.1.0"
 dependencies = [
  "byteorder 1.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "channel_ratchet 0.1.0",
  "coremacros 0.1.0",
  "coretypes 0.1.0",
  "herald_common 0.1.0",
+ "kdf_ratchet 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "platform_dirs 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "channel_ratchet"
-version = "0.1.0"
-dependencies = [
- "bytes 0.4.12 (registry+https://github.com/rust-lang/crates.io-index)",
- "kcl 0.1.0",
- "kson 0.1.0",
 ]
 
 [[package]]
@@ -742,7 +733,6 @@ name = "heraldcore"
 version = "0.1.0"
 dependencies = [
  "chainkeys 0.1.0",
- "channel_ratchet 0.1.0",
  "coreconf 0.1.0",
  "coremacros 0.1.0",
  "coretypes 0.1.0",
@@ -751,6 +741,7 @@ dependencies = [
  "hex 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "image 0.22.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "kcl 0.1.0",
+ "kdf_ratchet 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "location 0.1.0",
@@ -954,6 +945,14 @@ dependencies = [
  "arrayvec 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "kson 0.1.0",
  "libsodium-sys 0.2.5 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "kdf_ratchet"
+version = "0.1.0"
+dependencies = [
+ "kcl 0.1.0",
+ "kson 0.1.0",
 ]
 
 [[package]]
@@ -1241,9 +1240,9 @@ dependencies = [
 name = "network_types"
 version = "0.1.0"
 dependencies = [
- "channel_ratchet 0.1.0",
  "coretypes 0.1.0",
  "herald_common 0.1.0",
+ "kdf_ratchet 0.1.0",
  "kson 0.1.0",
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 1.0.101 (registry+https://github.com/rust-lang/crates.io-index)",
