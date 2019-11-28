@@ -25,7 +25,7 @@ pub struct Tag(Mac, Nonce);
 pub struct OpenSucceeded(pub bool);
 
 impl Key {
-    pub fn new() -> Self {
+    pub fn gen_new() -> Self {
         let mut buf = [0u8; KEY_LEN];
         random::gen_into(&mut buf);
         Key(buf)

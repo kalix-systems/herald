@@ -1,3 +1,3 @@
 INSERT OR REPLACE INTO
-  ratchet_states(conversation_id, next_ix, base_key, ratchet_key)
-VALUES(@1, @2, @3, @4)
+  ratchet_states(conversation_id, public_key, next_ix, base_key, ratchet_key)
+VALUES(@cid, @pk, @ix, @base_key, @ratchet_key)

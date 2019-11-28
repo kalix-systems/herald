@@ -1,6 +1,7 @@
 use super::*;
 use byteorder::*;
 use kdf_ratchet::*;
+use rusqlite::named_params;
 
 pub struct Tx<'a>(rusqlite::Transaction<'a>);
 
@@ -49,51 +50,51 @@ impl Tx<'_> {
     pub fn store_ratchet_state(
         &mut self,
         cid: ConversationId,
+        pk: sig::PublicKey,
         state: &RatchetState,
     ) -> Result<(), rusqlite::Error> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/store_ratchet_state.sql"))?;
-        store_stmt.execute(params![
-            cid,
-            &state.ix().to_le_bytes() as &[u8],
-            state.base_key().as_ref(),
-            state.ratchet_key().as_ref()
-        ])?;
+        store_stmt.execute_named(named_params! {
+            "@cid": cid,
+            "@pk": pk.as_ref(),
+            "@ix": &state.ix().to_le_bytes() as &[u8],
+            "@base_key": state.base_key().as_ref(),
+            "@ratchet_key": state.ratchet_key().as_ref()
+        })?;
         Ok(())
     }
 
     pub fn store_derived_key(
         &mut self,
         cid: ConversationId,
+        pk: sig::PublicKey,
         ix: u64,
         key: kcl::aead::Key,
     ) -> Result<(), rusqlite::Error> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/store_derived_key.sql"))?;
         let ts = Time::now();
-        store_stmt.execute(params![cid, &ix.to_le_bytes() as &[u8], key.as_ref(), ts.0])?;
-        Ok(())
-    }
-
-    pub fn mark_used(
-        &mut self,
-        cid: ConversationId,
-        ix: u64,
-    ) -> Result<(), ChainKeysError> {
-        let mut set_stmt = self.prepare_cached(include_str!("sql/mark_used.sql"))?;
-        set_stmt.execute(params![cid, &ix.to_le_bytes() as &[u8]])?;
+        store_stmt.execute_named(named_params! {
+            "@cid": cid,
+            "@pk": pk.as_ref(),
+            "@ix": &ix.to_le_bytes() as &[u8],
+            "@msg_key": key.as_ref(),
+            "@ts": ts.0
+        })?;
         Ok(())
     }
 
     pub fn get_ratchet_state(
         &self,
         cid: ConversationId,
+        pk: sig::PublicKey,
     ) -> Result<RatchetState, ChainKeysError> {
         let mut get_stmt = self.prepare_cached(include_str!("sql/get_ratchet_state.sql"))?;
         let (raw_ix, raw_base_key, raw_ratchet_key) = get_stmt
-            .query_map(params![cid], |row| {
+            .query_map_named(named_params! {"@cid": cid, "@pk": pk.as_ref()}, |row| {
                 Ok((
-                    row.get::<_, Vec<u8>>(0)?,
-                    row.get::<_, Vec<u8>>(1)?,
-                    row.get::<_, Vec<u8>>(2)?,
+                    row.get::<_, Vec<u8>>("next_ix")?,
+                    row.get::<_, Vec<u8>>("base_key")?,
+                    row.get::<_, Vec<u8>>("ratchet_key")?,
                 ))
             })?
             .next()
@@ -117,13 +118,19 @@ impl Tx<'_> {
     pub fn get_derived_key(
         &self,
         cid: ConversationId,
+        pk: sig::PublicKey,
         ix: u64,
     ) -> Result<Option<kcl::aead::Key>, ChainKeysError> {
         let mut stmt = self.prepare_cached(include_str!("sql/get_derived_key.sql"))?;
         let res = stmt
-            .query_map(params![cid, &ix.to_le_bytes() as &[u8]], |row| {
-                Ok(row.get::<_, Vec<u8>>(0)?)
-            })?
+            .query_map_named(
+                named_params! {
+                    "@cid": cid,
+                    "@pk": pk.as_ref(),
+                    "@ix": &ix.to_le_bytes() as &[u8]
+                },
+                |row| Ok(row.get::<_, Vec<u8>>("msg_key")?),
+            )?
             .next()
             .transpose()?
             .map(|raw_key| {
@@ -136,39 +143,30 @@ impl Tx<'_> {
     pub fn open_msg(
         &mut self,
         cid: ConversationId,
+        pk: sig::PublicKey,
         cipher: kdf_ratchet::Cipher,
     ) -> Result<Option<Decrypted>, ChainKeysError> {
         use kdf_ratchet::DecryptionResult::*;
 
-        let res = if let Some(k) = self.get_derived_key(cid, cipher.index)? {
-            let ix = cipher.index;
-            let r0 = cipher.open_with(k);
-            if let Success { .. } = &r0 {
-                self.mark_used(cid, ix)?;
-            }
-            r0
+        let res = if let Some(k) = self.get_derived_key(cid, pk, cipher.index)? {
+            cipher.open_with(k)
         } else {
-            let mut state = self.get_ratchet_state(cid)?;
-            let res = state.open(cipher);
-            self.store_ratchet_state(cid, &state)?;
-            res
+            let mut state = self.get_ratchet_state(cid, pk)?;
+            self.store_ratchet_state(cid, pk, &state)?;
+            state.open(cipher)
         };
 
         match res {
             Success { extra_keys, ad, pt } => {
-                if let Some((ix, _)) = extra_keys.last() {
-                    self.mark_used(cid, *ix)?;
-                }
-
                 for (ix, key) in extra_keys {
-                    self.store_derived_key(cid, ix, key)?;
+                    self.store_derived_key(cid, pk, ix, key)?;
                 }
 
                 Ok(Some(Decrypted { ad, pt }))
             }
             Failed { extra_keys } => {
                 for (ix, key) in extra_keys {
-                    self.store_derived_key(cid, ix, key)?;
+                    self.store_derived_key(cid, pk, ix, key)?;
                 }
 
                 Ok(None)
@@ -181,14 +179,14 @@ impl Tx<'_> {
     pub fn seal_msg(
         &mut self,
         cid: ConversationId,
+        pk: sig::PublicKey,
         ad: Bytes,
         msg: BytesMut,
     ) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
-        let mut ratchet = self.get_ratchet_state(cid)?;
+        let mut ratchet = self.get_ratchet_state(cid, pk)?;
         let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
-        self.store_derived_key(cid, ix, key)?;
-        self.mark_used(cid, ix)?;
-        self.store_ratchet_state(cid, &ratchet)?;
+        self.store_derived_key(cid, pk, ix, key)?;
+        self.store_ratchet_state(cid, pk, &ratchet)?;
         Ok(cipher)
     }
 }

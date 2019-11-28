@@ -62,7 +62,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
 }
 
 impl Seed {
-    pub fn new() -> Self {
+    pub fn gen_new() -> Self {
         let mut seed = [0u8; SEED_LEN];
         random::gen_into(&mut seed);
         Seed(seed)

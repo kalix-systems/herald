@@ -48,7 +48,7 @@ new_type! {
 }
 
 impl Key {
-    pub fn new() -> Self {
+    pub fn gen_new() -> Self {
         let mut buf = [0u8; KEY_LEN];
         crate::random::gen_into(&mut buf);
         Key(buf)
@@ -91,6 +91,15 @@ impl Key {
 pub struct Builder<'a> {
     out_len: Option<usize>,
     key: Option<&'a Key>,
+}
+
+impl<'a> Default for Builder<'a> {
+    fn default() -> Self {
+        Builder {
+            out_len: None,
+            key: None,
+        }
+    }
 }
 
 impl<'a> Builder<'a> {

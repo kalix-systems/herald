@@ -12,8 +12,7 @@ new_type! {
 }
 
 impl RatchetKey {
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
+    pub fn gen_new() -> Self {
         let mut buf = [0u8; RATCHET_KEY_LEN];
         random::gen_into(&mut buf);
         RatchetKey(buf)
@@ -28,10 +27,9 @@ pub struct RatchetState {
 }
 
 impl RatchetState {
-    #[allow(clippy::new_without_default)]
-    pub fn new() -> Self {
-        let base_key = hash::Key::new();
-        let ratchet_key = RatchetKey::new();
+    pub fn gen_new() -> Self {
+        let base_key = hash::Key::gen_new();
+        let ratchet_key = RatchetKey::gen_new();
 
         RatchetState {
             ix: 0,

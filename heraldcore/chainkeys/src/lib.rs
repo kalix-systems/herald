@@ -5,7 +5,6 @@ use herald_common::*;
 use lazy_static::*;
 use parking_lot::Mutex;
 use platform_dirs::DB_DIR;
-use rusqlite::params;
 
 #[derive(Debug)]
 pub enum ChainKeysError {
@@ -42,25 +41,28 @@ pub struct Decrypted {
 
 pub fn open_msg(
     cid: ConversationId,
+    pk: sig::PublicKey,
     cipher: kdf_ratchet::Cipher,
 ) -> Result<Option<Decrypted>, ChainKeysError> {
-    db::with_tx(move |tx| tx.open_msg(cid, cipher))
+    db::with_tx(move |tx| tx.open_msg(cid, pk, cipher))
 }
 
 pub fn seal_msg(
     cid: ConversationId,
+    pk: sig::PublicKey,
     ad: Bytes,
     msg: BytesMut,
 ) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
-    db::with_tx(move |tx| tx.seal_msg(cid, ad, msg))
+    db::with_tx(move |tx| tx.seal_msg(cid, pk, ad, msg))
 }
 
 pub fn store_state(
     cid: ConversationId,
+    pk: sig::PublicKey,
     ratchet: &kdf_ratchet::RatchetState,
 ) -> Result<(), ChainKeysError> {
     db::with_tx(move |tx| {
-        tx.store_ratchet_state(cid, ratchet)?;
+        tx.store_ratchet_state(cid, pk, ratchet)?;
         Ok(())
     })
 }

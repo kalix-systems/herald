@@ -3,4 +3,6 @@ SELECT
 FROM
   ratchet_states
 WHERE
-  conversation_id = ?
+  conversation_id = @cid
+  AND public_key = @pk
+

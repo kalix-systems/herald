@@ -1,3 +1,3 @@
 REPLACE INTO
-  derived_keys(conversation_id, ix, msg_key, insertion_ts, used)
-VALUES(@1, @2, @3, @4, 0)
+  derived_keys(conversation_id, public_key, ix, msg_key, insertion_ts)
+VALUES(@cid, @pk, @ix, @msg_key, @ts)

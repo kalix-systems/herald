@@ -1,5 +1,3 @@
-#![allow(clippy::new_without_default)]
-
 #[macro_use]
 mod newtype_macros;
 
