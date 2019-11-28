@@ -7,9 +7,9 @@ use crate::{
     *,
 };
 use chainkeys;
-use kdf_ratchet::RatchetState;
 use coretypes::conversation::ConversationMeta;
 use herald_common::*;
+use kdf_ratchet::RatchetState;
 use lazy_static::*;
 use std::{
     net::{SocketAddr, SocketAddrV4},
@@ -87,8 +87,8 @@ pub fn send_user_req(
     uid: UserId,
     cid: ConversationId,
 ) -> Result<(), HErr> {
-    let ratchet = RatchetState::new();
-    chainkeys::store_state(cid, &ratchet)?;
+    let ratchet = RatchetState::gen_new();
+    chainkeys::store_state(cid, *config::keypair()?.public_key(), &ratchet)?;
 
     let req = dmessages::UserReq { ratchet, cid };
 

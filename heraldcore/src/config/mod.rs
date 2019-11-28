@@ -77,14 +77,16 @@ impl ConfigBuilder {
 
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
+        let pk = *self.keypair.public_key();
+
         let mut db = Database::get()?;
         let conf = self.add_db(&mut db)?;
 
         // TODO this is weirdly special cased,
         // but changing it without making testing awkward requires
         // changing the chainmail API
-        let ratchet = kdf_ratchet::RatchetState::new();
-        chainkeys::store_state(conf.nts_conversation, &ratchet)?;
+        let ratchet = kdf_ratchet::RatchetState::gen_new();
+        chainkeys::store_state(conf.nts_conversation, pk, &ratchet)?;
         Ok(conf)
     }
 }

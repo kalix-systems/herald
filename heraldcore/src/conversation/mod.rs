@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::HErr, message::Message, types::*};
+use crate::{config, db::Database, errors::HErr, message::Message, types::*};
 pub use coretypes::conversation::*;
 use herald_common::*;
 use rusqlite::{params, NO_PARAMS};
@@ -26,8 +26,9 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
         ..
     } = meta;
 
-    let ratchet = RatchetState::new();
-    chainkeys::store_state(cid, &ratchet)?;
+    let ratchet = RatchetState::gen_new();
+    let pk = *config::keypair()?.public_key();
+    chainkeys::store_state(cid, pk, &ratchet)?;
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),

@@ -10,7 +10,7 @@ pub(super) fn handle_cmessage(
     use ConversationMessage::*;
     let mut ev = Event::default();
 
-    let (cid, GlobalId { uid, .. }, msg) = cmessages::open(cm)?;
+    let (cid, GlobalId { uid, did }, msg) = cmessages::open(cm)?;
 
     match msg {
         NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
@@ -48,7 +48,7 @@ pub(super) fn handle_cmessage(
             let mut db = crate::db::Database::get()?;
             let conv = conv_builder.add_db(&mut db)?;
 
-            chainkeys::store_state(cid, &ratchet)?;
+            chainkeys::store_state(cid, did, &ratchet)?;
 
             ev.notifications
                 .push(Notification::NewConversation(conv.meta));
@@ -120,7 +120,7 @@ pub(super) fn handle_dmessage(
     let mut ev = Event::default();
 
     let (from, msg) = dmessages::open(msg)?;
-    let GlobalId { uid, .. } = from;
+    let GlobalId { uid, did } = from;
 
     match msg {
         DeviceMessageBody::Req(cr) => {
@@ -130,7 +130,7 @@ pub(super) fn handle_dmessage(
                 .add()?;
 
             let coretypes::conversation::Conversation { meta, .. } = conversation;
-            chainkeys::store_state(cid, &ratchet)?;
+            chainkeys::store_state(cid, did, &ratchet)?;
 
             ev.notifications
                 .push(Notification::NewUser(Box::new((user, meta))));

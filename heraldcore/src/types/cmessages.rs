@@ -13,15 +13,16 @@ pub fn seal(
 
     let ad = kson::to_vec(&(cid, from)).into();
 
-    let cipher = chainkeys::seal_msg(cid, ad, cbytes)?;
+    let cipher = chainkeys::seal_msg(cid, from.did, ad, cbytes)?;
 
     Ok(cipher)
 }
 
 /// Opens the message.
 pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, ConversationMessage), HErr> {
-    let (cid, from) = kson::from_bytes(cipher.ad.clone())?;
-    let decrypted = chainkeys::open_msg(cid, cipher)?.ok_or(ChainKeysError::DecryptionFailed)?;
+    let (cid, from) = kson::from_bytes::<(ConversationId, GlobalId)>(cipher.ad.clone())?;
+    let decrypted =
+        chainkeys::open_msg(cid, from.did, cipher)?.ok_or(ChainKeysError::DecryptionFailed)?;
     let parsed = kson::from_bytes(decrypted.pt.into())?;
 
     Ok((cid, from, parsed))
