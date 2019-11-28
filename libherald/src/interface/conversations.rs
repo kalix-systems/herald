@@ -69,7 +69,6 @@ pub struct ConversationsList {
     pub(super) begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
     pub(super) data_changed: fn(*mut ConversationsQObject, usize, usize),
     pub(super) begin_move_rows: fn(*mut ConversationsQObject, usize, usize, usize),
-    pub(super) messages_ptr_bundle_factory: fn(*mut ConversationsQObject) -> *mut MessagesPtrBundle,
 }
 
 impl ConversationsList {
@@ -154,14 +153,6 @@ impl ConversationsList {
         if !self.qobject.is_null() {
             (self.begin_move_rows)(self.qobject, first, last, destination);
         }
-    }
-
-    pub fn messages_new(&mut self) -> Option<Messages> {
-        if self.qobject.is_null() {
-            return None;
-        }
-        let ptr_bundle = (self.messages_ptr_bundle_factory)(self.qobject);
-        Some(unsafe { messages_new_inner(ptr_bundle) })
     }
 }
 
@@ -264,16 +255,6 @@ pub trait ConversationsTrait {
         index: usize,
     ) -> bool;
 
-    fn messages(
-        &self,
-        index: usize,
-    ) -> &Messages;
-
-    fn messages_mut(
-        &mut self,
-        index: usize,
-    ) -> &mut Messages;
-
     fn muted(
         &self,
         index: usize,
@@ -340,7 +321,6 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
         conversations_end_move_rows,
         conversations_begin_remove_rows,
         conversations_end_remove_rows,
-        messages_ptr_bundle_factory,
     } = ptr_bundle;
     let conversations_emit = ConversationsEmitter {
         qobject: Arc::new(AtomicPtr::new(conversations)),
@@ -361,8 +341,6 @@ pub unsafe fn conversations_new_inner(ptr_bundle: *mut ConversationsPtrBundle) -
         end_move_rows: conversations_end_move_rows,
         begin_remove_rows: conversations_begin_remove_rows,
         end_remove_rows: conversations_end_remove_rows,
-
-        messages_ptr_bundle_factory,
     };
     let d_conversations = Conversations::new(conversations_emit, model);
     d_conversations
@@ -549,14 +527,6 @@ pub unsafe extern "C" fn conversations_data_matched(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn conversations_data_messages(
-    ptr: *mut Conversations,
-    row: c_int,
-) -> *mut Messages {
-    (&mut *ptr).messages_mut(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn conversations_data_muted(
     ptr: *const Conversations,
     row: c_int,
@@ -673,5 +643,4 @@ pub struct ConversationsPtrBundle {
     conversations_end_move_rows: fn(*mut ConversationsQObject),
     conversations_begin_remove_rows: fn(*mut ConversationsQObject, usize, usize),
     conversations_end_remove_rows: fn(*mut ConversationsQObject),
-    messages_ptr_bundle_factory: fn(*mut ConversationsQObject) -> *mut MessagesPtrBundle,
 }

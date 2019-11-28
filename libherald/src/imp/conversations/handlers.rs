@@ -34,12 +34,6 @@ impl Conversations {
         contents: Vector<Conversation>,
     ) {
         self.model.begin_reset_model();
-        for Conversation { id, .. } in contents.iter() {
-            let mut messages = self.model.messages_new().unwrap();
-            messages.set_conversation_id(Some(id.as_slice()));
-            // FIXME
-            self.message_map.insert(*id, messages);
-        }
         self.list = contents;
         self.loaded = true;
         self.model.end_reset_model();

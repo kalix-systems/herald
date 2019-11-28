@@ -7,4 +7,4 @@ license = "GPLv2"
 
 [dependencies.riqtshaw]
 git = "https://github.com/kalix-systems/rust-qt-binding-generator"
-rev = "86bff7f09e008314df96decc4ce53c5b597f12c2"
+rev = "5199e4b2fc26ab361a7d37acdc8bf8cddbd25d2a"

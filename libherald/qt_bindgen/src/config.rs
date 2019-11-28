@@ -120,7 +120,7 @@ fn filter_regex_prop() -> Prop {
 }
 
 fn matched_item_prop() -> ItemProp {
-    ItemProp::new().simple(SimpleType::Bool)
+    ItemProp::new(SimpleType::Bool)
 }
 
 fn filter_props() -> BTreeMap<String, Property> {
@@ -131,26 +131,25 @@ fn filter_props() -> BTreeMap<String, Property> {
 }
 
 fn color_item_prop() -> ItemProp {
-    ItemProp::new().simple(SimpleType::QUint32)
+    ItemProp::new(SimpleType::QUint32)
 }
 
 fn picture_item_prop() -> ItemProp {
-    ItemProp::new().simple(SimpleType::QString).optional()
+    ItemProp::new(SimpleType::QString).optional()
 }
 
 fn conversations() -> Object {
     let props = filter_props();
 
     let item_props = item_props! {
-       conversationId: ItemProp::new().simple(QByteArray).get_by_value(),
-       title: ItemProp::new().simple(QString).write().optional().get_by_value(),
-       muted: ItemProp::new().simple(Bool).write(),
-       pairwise: ItemProp::new().simple(Bool),
-       expirationPeriod: ItemProp::new().simple(QUint8).write(),
+       conversationId: ItemProp::new(QByteArray).get_by_value(),
+       title: ItemProp::new(QString).write().optional().get_by_value(),
+       muted: ItemProp::new(Bool).write(),
+       pairwise: ItemProp::new(Bool),
+       expirationPeriod: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        picture: picture_item_prop().write().get_by_value(),
-       color: color_item_prop().write(),
-       messages: ItemProp::new().object(Rc::new(messages()))
+       color: color_item_prop().write()
     };
 
     let funcs = functions! {
@@ -169,10 +168,10 @@ fn users() -> Object {
     let props = filter_props();
 
     let item_props = item_props! {
-       userId: ItemProp::new().simple(QString),
-       name: ItemProp::new().simple(QString).get_by_value().write(),
-       pairwiseConversationId: ItemProp::new().simple(QByteArray).get_by_value(),
-       status: ItemProp::new().simple(QUint8).write(),
+       userId: ItemProp::new(QString),
+       name: ItemProp::new(QString).get_by_value().write(),
+       pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
+       status: ItemProp::new(QUint8).write(),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value().write(),
        color: color_item_prop().write()
@@ -200,10 +199,10 @@ fn members() -> Object {
     props.append(&mut filter_props());
 
     let item_props = item_props! {
-       userId: ItemProp::new().simple(QString),
-       name: ItemProp::new().simple(QString).get_by_value(),
-       pairwiseConversationId: ItemProp::new().simple(QByteArray).get_by_value(),
-       status: ItemProp::new().simple(QUint8),
+       userId: ItemProp::new(QString),
+       name: ItemProp::new(QString).get_by_value(),
+       pairwiseConversationId: ItemProp::new(QByteArray).get_by_value(),
+       status: ItemProp::new(QUint8),
        matched: matched_item_prop(),
        profilePicture: picture_item_prop().get_by_value(),
        color: color_item_prop()
@@ -244,35 +243,35 @@ fn messages() -> Object {
 
     let item_props = item_props! {
         // Main message properties
-        msgId: ItemProp::new().simple(QByteArray).optional(),
-        author: ItemProp::new().simple(QString).optional(),
-        body: ItemProp::new().simple(QString).optional(),
-        insertionTime: ItemProp::new().simple(Qint64).optional(),
-        serverTime: ItemProp::new().simple(Qint64).optional(),
-        expirationTime: ItemProp::new().simple(Qint64).optional(),
-        hasAttachments: ItemProp::new().simple(Bool).optional(),
-        receiptStatus: ItemProp::new().simple(QUint32).optional(),
-        dataSaved: ItemProp::new().simple(Bool).optional(),
-        isHead: ItemProp::new().simple(Bool).optional(),
-        isTail: ItemProp::new().simple(Bool).optional(),
+        msgId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
+        body: ItemProp::new(QString).optional(),
+        insertionTime: ItemProp::new(Qint64).optional(),
+        serverTime: ItemProp::new(Qint64).optional(),
+        expirationTime: ItemProp::new(Qint64).optional(),
+        hasAttachments: ItemProp::new(Bool).optional(),
+        receiptStatus: ItemProp::new(QUint32).optional(),
+        dataSaved: ItemProp::new(Bool).optional(),
+        isHead: ItemProp::new(Bool).optional(),
+        isTail: ItemProp::new(Bool).optional(),
 
         // 0 => Not matched,
         // 1 => Matched,
         // 2 => Matched and focused
-        matchStatus: ItemProp::new().simple(QUint8).optional(),
+        matchStatus: ItemProp::new(QUint8).optional(),
 
         // 0 => Not reply
         // 1 => Dangling (i.e., unknown reply)
         // 2 => Known reply
-        replyType: ItemProp::new().simple(QUint8).optional(),
+        replyType: ItemProp::new(QUint8).optional(),
 
         // Message preview properties
-        opMsgId: ItemProp::new().simple(QByteArray).optional(),
-        opAuthor: ItemProp::new().simple(QString).optional(),
-        opBody: ItemProp::new().simple(QString).optional(),
-        opInsertionTime: ItemProp::new().simple(Qint64).optional(),
-        opExpirationTime: ItemProp::new().simple(Qint64).optional(),
-        opHasAttachments: ItemProp::new().simple(Bool).optional()
+        opMsgId: ItemProp::new(QByteArray).optional(),
+        opAuthor: ItemProp::new(QString).optional(),
+        opBody: ItemProp::new(QString).optional(),
+        opInsertionTime: ItemProp::new(Qint64).optional(),
+        opExpirationTime: ItemProp::new(Qint64).optional(),
+        opHasAttachments: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {
@@ -307,7 +306,7 @@ fn message_builder() -> Object {
     );
 
     let item_props = item_props! {
-        attachmentPath: ItemProp::new().simple(QString)
+        attachmentPath: ItemProp::new(QString)
     };
 
     let funcs = functions! {
@@ -341,7 +340,7 @@ fn config() -> Object {
 
 fn conversation_builder() -> Object {
     let item_prop = item_props! {
-        memberId: ItemProp::new().simple(QString)
+        memberId: ItemProp::new(QString)
     };
 
     let prop = props! {
@@ -369,11 +368,11 @@ fn users_search() -> Object {
     };
 
     let item_props = item_props! {
-       userId: ItemProp::new().simple(QString).optional(),
-       name: ItemProp::new().simple(QString).get_by_value().optional(),
+       userId: ItemProp::new(QString).optional(),
+       name: ItemProp::new(QString).get_by_value().optional(),
        profilePicture: picture_item_prop().get_by_value().optional(),
        color: color_item_prop().optional(),
-       selected: ItemProp::new().simple(Bool).write(),
+       selected: ItemProp::new(Bool).write(),
        matched: matched_item_prop()
     };
 
@@ -395,7 +394,7 @@ fn attachments() -> Object {
 
     let item_props = item_props! {
         // Path the the attachment
-        attachmentPath: ItemProp::new().simple(QString)
+        attachmentPath: ItemProp::new(QString)
     };
 
     obj! {
@@ -410,16 +409,16 @@ fn message_search() -> Object {
     };
 
     let item_props = item_props! {
-        msgId: ItemProp::new().simple(QByteArray).optional(),
-        author: ItemProp::new().simple(QString).optional(),
-        conversation: ItemProp::new().simple(QByteArray).optional(),
-        conversationPairwise: ItemProp::new().simple(Bool).optional(),
-        conversationPicture: ItemProp::new().simple(QString).optional().get_by_value(),
-        conversationColor: ItemProp::new().simple(QUint32).optional().get_by_value(),
-        conversationTitle: ItemProp::new().simple(QString).optional().get_by_value(),
-        body: ItemProp::new().simple(QString).optional(),
-        time: ItemProp::new().simple(Qint64).optional(),
-        has_attachments: ItemProp::new().simple(Bool).optional()
+        msgId: ItemProp::new(QByteArray).optional(),
+        author: ItemProp::new(QString).optional(),
+        conversation: ItemProp::new(QByteArray).optional(),
+        conversationPairwise: ItemProp::new(Bool).optional(),
+        conversationPicture: ItemProp::new(QString).optional().get_by_value(),
+        conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
+        conversationTitle: ItemProp::new(QString).optional().get_by_value(),
+        body: ItemProp::new(QString).optional(),
+        time: ItemProp::new(Qint64).optional(),
+        has_attachments: ItemProp::new(Bool).optional()
     };
 
     let funcs = functions! {
