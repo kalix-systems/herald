@@ -1,4 +1,3 @@
-use kdf_ratchet::*;
 use coretypes::{
     attachments::Attachment,
     conversation,
@@ -6,14 +5,15 @@ use coretypes::{
     messages::{MessageBody, MessageReceiptStatus},
 };
 use herald_common::*;
+use kdf_ratchet::*;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message in a conversation
 pub enum ConversationMessage {
     /// A new key
     NewKey(NewKey),
-    /// A key to be marked as deprecated
-    DepKey(DepKey),
+    /// Telling everyone else that you're leaving a conversation
+    Leave,
     /// Members just added to a conversation
     NewMembers(NewMembers),
     /// A message a user receives upon being added to a conversation
@@ -33,10 +33,6 @@ pub enum ConversationMessage {
 pub struct NewKey(pub Signed<sig::PublicKey>);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// A key that is to be marked as deprecated.
-pub struct DepKey(pub Signed<sig::PublicKey>);
-
-#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.
 pub struct NewMembers(pub Vec<UserId>);
 
@@ -44,7 +40,7 @@ pub struct NewMembers(pub Vec<UserId>);
 /// A message received by a user when they are addeded to a conversation.
 pub struct AddedToConvo {
     /// The current members in that conversation.
-    pub members: Vec<UserId>,
+    pub members: HashMap<GlobalId, RatchetState>,
     /// The [`ConversationId`]
     pub cid: ConversationId,
     /// The conversation's title.
@@ -53,8 +49,6 @@ pub struct AddedToConvo {
     pub picture: Option<Vec<u8>>,
     /// The conversation's initial expiration period
     pub expiration_period: coretypes::conversation::ExpirationPeriod,
-    /// The genesis block for the new conversation
-    pub ratchet: RatchetState,
 }
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
