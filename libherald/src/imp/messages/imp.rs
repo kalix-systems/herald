@@ -1,4 +1,6 @@
 use super::*;
+use crate::interface::MessagesTrait as Interface;
+use heraldcore::{errors::HErr, message::Message as Msg, NE};
 use std::ops::Drop;
 
 impl Messages {
@@ -193,6 +195,21 @@ impl Messages {
                 self.remove_helper(mid, ix);
             }
         }
+    }
+
+    pub(crate) fn set_conversation_id(
+        &mut self,
+        id: ConversationId,
+    ) {
+        EMITTERS.insert(id, self.emit().clone());
+        // remove left over channel from previous session
+        RXS.remove(&id);
+        TXS.remove(&id);
+
+        self.conversation_id = Some(id);
+        self.builder.set_conversation_id(id);
+
+        container::fill(id);
     }
 }
 

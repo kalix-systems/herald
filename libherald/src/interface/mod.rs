@@ -2,6 +2,7 @@ use crate::imp::*;
 pub use attachments::*;
 pub use config::*;
 pub use conversation_builder::*;
+pub use conversation_content::*;
 pub use conversations::*;
 pub use errors::*;
 pub use herald::*;
@@ -21,6 +22,8 @@ mod attachments;
 mod config;
 
 mod conversation_builder;
+
+mod conversation_content;
 
 mod conversations;
 

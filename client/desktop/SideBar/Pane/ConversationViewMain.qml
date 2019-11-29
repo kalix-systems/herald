@@ -31,25 +31,20 @@ ListView {
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
         property bool outbound: messageModel.lastAuthor === herald.config.configId
-        property Messages messageModel: Messages {
+        property ConversationContent convoContent: ConversationContent {
             conversationId: conversationIdProxy
         }
 
         property var childChatView: Component {
             CV.ChatViewMain {
                 conversationItem: conversationData
-                ownedConversation: messageModel
+                ownedConversation: convoContent.messages
             }
         }
 
         visible: matched
         height: visible ? CmnCfg.convoHeight : 0
         width: parent.width
-
-        Members {
-            id: convoItemMembers
-            conversationId: conversationIdProxy
-        }
 
         Common.PlatonicRectangle {
             id: convoRectangle

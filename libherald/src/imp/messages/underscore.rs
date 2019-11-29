@@ -1,4 +1,15 @@
 use super::*;
+use crate::{
+    ffi,
+    interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
+    ret_err, ret_none, spawn,
+    toasts::new_msg_toast,
+};
+use heraldcore::{
+    config, conversation,
+    message::{self, MessageBody, MessageReceiptStatus},
+};
+use std::convert::TryInto;
 
 impl Messages {
     pub(super) fn new_(
@@ -88,26 +99,6 @@ impl Messages {
                 .max()
                 .unwrap_or(MessageReceiptStatus::NoAck as u32),
         )
-    }
-
-    pub(super) fn set_conversation_id_(
-        &mut self,
-        conversation_id: Option<ffi::ConversationIdRef>,
-    ) {
-        if let (Some(id), None) = (conversation_id, self.conversation_id) {
-            let conversation_id = ret_err!(ConversationId::try_from(id));
-
-            EMITTERS.insert(conversation_id, self.emit().clone());
-            // remove left over channel from previous session
-            RXS.remove(&conversation_id);
-            TXS.remove(&conversation_id);
-
-            self.conversation_id = Some(conversation_id);
-            self.builder.set_conversation_id(conversation_id);
-            self.emit.conversation_id_changed();
-
-            container::fill(conversation_id);
-        }
     }
 
     pub(super) fn last_author_(&self) -> Option<ffi::UserIdRef> {

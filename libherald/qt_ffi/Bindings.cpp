@@ -114,6 +114,9 @@ inline void configProfilePictureChanged(Config *o) {
 inline void conversationBuilderPictureChanged(ConversationBuilder *o) {
   Q_EMIT o->pictureChanged();
 }
+inline void conversationContentConversationIdChanged(ConversationContent *o) {
+  Q_EMIT o->conversationIdChanged();
+}
 inline void conversationsFilterChanged(Conversations *o) {
   Q_EMIT o->filterChanged();
 }
@@ -129,9 +132,6 @@ inline void heraldConnectionPendingChanged(Herald *o) {
 }
 inline void heraldConnectionUpChanged(Herald *o) {
   Q_EMIT o->connectionUpChanged();
-}
-inline void membersConversationIdChanged(Members *o) {
-  Q_EMIT o->conversationIdChanged();
 }
 inline void membersFilterChanged(Members *o) { Q_EMIT o->filterChanged(); }
 inline void membersFilterRegexChanged(Members *o) {
@@ -172,9 +172,6 @@ inline void messageSearchSearchPatternChanged(MessageSearch *o) {
 }
 inline void messagesBuilderOpMsgIdChanged(Messages *o) {
   Q_EMIT o->builderOpMsgIdChanged();
-}
-inline void messagesConversationIdChanged(Messages *o) {
-  Q_EMIT o->conversationIdChanged();
 }
 inline void messagesIsEmptyChanged(Messages *o) { Q_EMIT o->isEmptyChanged(); }
 inline void messagesLastAuthorChanged(Messages *o) {
@@ -499,6 +496,21 @@ bool conversation_builder_remove_member_by_index(ConversationBuilder::Private *,
                                                  quint64);
 void conversation_builder_set_title(ConversationBuilder::Private *,
                                     const ushort *, int);
+}
+extern "C" {
+ConversationContent::Private *
+conversation_content_new(ConversationContentPtrBundle *);
+void conversation_content_free(ConversationContent::Private *);
+void conversation_content_conversation_id_get(
+    const ConversationContent::Private *, QByteArray *, qbytearray_set);
+void conversation_content_conversation_id_set(ConversationContent::Private *,
+                                              const char *bytes, int len);
+void conversation_content_conversation_id_set_none(
+    ConversationContent::Private *);
+Members::Private *
+conversation_content_members_get(const ConversationContent::Private *);
+Messages::Private *
+conversation_content_messages_get(const ConversationContent::Private *);
 }
 extern "C" {
 quint32 conversations_data_color(const Conversations::Private *, int);
@@ -1108,11 +1120,6 @@ bool Members::setHeaderData(int section, Qt::Orientation orientation,
 extern "C" {
 Members::Private *members_new(MembersPtrBundle *);
 void members_free(Members::Private *);
-void members_conversation_id_get(const Members::Private *, QByteArray *,
-                                 qbytearray_set);
-void members_conversation_id_set(Members::Private *, const char *bytes,
-                                 int len);
-void members_conversation_id_set_none(Members::Private *);
 void members_filter_get(const Members::Private *, QString *, qstring_set);
 void members_filter_set(Members::Private *, const ushort *str, int len);
 bool members_filter_regex_get(const Members::Private *);
@@ -1815,11 +1822,6 @@ void messages_builder_op_msg_id_get(const Messages::Private *, QByteArray *,
 void messages_builder_op_msg_id_set(Messages::Private *, const char *bytes,
                                     int len);
 void messages_builder_op_msg_id_set_none(Messages::Private *);
-void messages_conversation_id_get(const Messages::Private *, QByteArray *,
-                                  qbytearray_set);
-void messages_conversation_id_set(Messages::Private *, const char *bytes,
-                                  int len);
-void messages_conversation_id_set_none(Messages::Private *);
 bool messages_is_empty_get(const Messages::Private *);
 void messages_last_author_get(const Messages::Private *, QString *,
                               qstring_set);
@@ -2531,6 +2533,165 @@ void ConversationBuilder::setTitle(const QString &title) {
   return conversation_builder_set_title(m_d, title.utf16(), title.size());
 }
 
+ConversationContent::ConversationContent(bool /*owned*/, QObject *parent)
+    : QObject(parent), m_members(new Members(false, this)),
+      m_messages(new Messages(false, this)), m_d(nullptr),
+      m_ownsPrivate(false) {}
+
+ConversationContent::ConversationContent(QObject *parent)
+    : QObject(parent), m_members(new Members(false, this)),
+      m_messages(new Messages(false, this)),
+      m_d(conversation_content_new(new ConversationContentPtrBundle{
+          this,
+          conversationContentConversationIdChanged,
+          m_members,
+          membersFilterChanged,
+          membersFilterRegexChanged,
+          [](const Members *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](Members *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](Members *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](Members *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](Members *o) { o->beginResetModel(); },
+          [](Members *o) { o->endResetModel(); },
+          [](Members *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](Members *o) { o->endInsertRows(); },
+          [](Members *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](Members *o) { o->endMoveRows(); },
+          [](Members *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](Members *o) { o->endRemoveRows(); },
+          m_messages,
+          m_messages->m_builder,
+          messageBuilderBodyChanged,
+          messageBuilderIsMediaMessageChanged,
+          messageBuilderIsReplyChanged,
+          messageBuilderOpAuthorChanged,
+          messageBuilderOpBodyChanged,
+          messageBuilderOpHasAttachmentsChanged,
+          messageBuilderOpIdChanged,
+          messageBuilderOpTimeChanged,
+          messageBuilderParseMarkdownChanged,
+          [](const MessageBuilder *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](MessageBuilder *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](MessageBuilder *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](MessageBuilder *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](MessageBuilder *o) { o->beginResetModel(); },
+          [](MessageBuilder *o) { o->endResetModel(); },
+          [](MessageBuilder *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](MessageBuilder *o) { o->endInsertRows(); },
+          [](MessageBuilder *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](MessageBuilder *o) { o->endMoveRows(); },
+          [](MessageBuilder *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](MessageBuilder *o) { o->endRemoveRows(); },
+          messagesBuilderOpMsgIdChanged,
+          messagesIsEmptyChanged,
+          messagesLastAuthorChanged,
+          messagesLastBodyChanged,
+          messagesLastStatusChanged,
+          messagesLastTimeChanged,
+          messagesSearchActiveChanged,
+          messagesSearchIndexChanged,
+          messagesSearchNumMatchesChanged,
+          messagesSearchPatternChanged,
+          messagesSearchRegexChanged,
+          [](const Messages *o) { Q_EMIT o->newDataReady(QModelIndex()); },
+          [](Messages *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](Messages *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](Messages *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](Messages *o) { o->beginResetModel(); },
+          [](Messages *o) { o->endResetModel(); },
+          [](Messages *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](Messages *o) { o->endInsertRows(); },
+          [](Messages *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](Messages *o) { o->endMoveRows(); },
+          [](Messages *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](Messages *o) { o->endRemoveRows(); }})),
+      m_ownsPrivate(true) {
+  m_members->m_d = conversation_content_members_get(m_d);
+  m_messages->m_d = conversation_content_messages_get(m_d);
+  m_messages->m_builder->m_d = messages_builder_get(m_messages->m_d);
+  connect(
+      this->m_members, &Members::newDataReady, this->m_members,
+      [this](const QModelIndex &i) { this->m_members->fetchMore(i); },
+      Qt::QueuedConnection);
+  connect(
+      this->m_messages->m_builder, &MessageBuilder::newDataReady,
+      this->m_messages->m_builder,
+      [this](const QModelIndex &i) {
+        this->m_messages->m_builder->fetchMore(i);
+      },
+      Qt::QueuedConnection);
+  connect(
+      this->m_messages, &Messages::newDataReady, this->m_messages,
+      [this](const QModelIndex &i) { this->m_messages->fetchMore(i); },
+      Qt::QueuedConnection);
+}
+
+ConversationContent::~ConversationContent() {
+  if (m_ownsPrivate) {
+    conversation_content_free(m_d);
+  }
+}
+
+QByteArray ConversationContent::conversationId() const {
+  QByteArray v;
+  conversation_content_conversation_id_get(m_d, &v, set_qbytearray);
+  return v;
+}
+void ConversationContent::setConversationId(const QByteArray &v) {
+  if (v.isNull()) {
+    conversation_content_conversation_id_set_none(m_d);
+  } else {
+    conversation_content_conversation_id_set(m_d, v.data(), v.size());
+  }
+}
+
+const Members *ConversationContent::members() const { return m_members; }
+Members *ConversationContent::members() { return m_members; }
+
+const Messages *ConversationContent::messages() const { return m_messages; }
+Messages *ConversationContent::messages() { return m_messages; }
+
 Conversations::Conversations(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
   initHeaderData();
@@ -2926,8 +3087,7 @@ Members::Members(bool /*owned*/, QObject *parent)
 Members::Members(QObject *parent)
     : QAbstractItemModel(parent),
       m_d(members_new(new MembersPtrBundle{
-          this, membersConversationIdChanged, membersFilterChanged,
-          membersFilterRegexChanged,
+          this, membersFilterChanged, membersFilterRegexChanged,
           [](const Members *o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](Members *o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](Members *o) {
@@ -2967,19 +3127,6 @@ Members::~Members() {
   }
 }
 void Members::initHeaderData() {}
-
-QByteArray Members::conversationId() const {
-  QByteArray v;
-  members_conversation_id_get(m_d, &v, set_qbytearray);
-  return v;
-}
-void Members::setConversationId(const QByteArray &v) {
-  if (v.isNull()) {
-    members_conversation_id_set_none(m_d);
-  } else {
-    members_conversation_id_set(m_d, v.data(), v.size());
-  }
-}
 
 QString Members::filter() const {
   QString v;
@@ -3266,7 +3413,6 @@ Messages::Messages(QObject *parent)
           },
           [](MessageBuilder *o) { o->endRemoveRows(); },
           messagesBuilderOpMsgIdChanged,
-          messagesConversationIdChanged,
           messagesIsEmptyChanged,
           messagesLastAuthorChanged,
           messagesLastBodyChanged,
@@ -3335,19 +3481,6 @@ void Messages::setBuilderOpMsgId(const QByteArray &v) {
     messages_builder_op_msg_id_set_none(m_d);
   } else {
     messages_builder_op_msg_id_set(m_d, v.data(), v.size());
-  }
-}
-
-QByteArray Messages::conversationId() const {
-  QByteArray v;
-  messages_conversation_id_get(m_d, &v, set_qbytearray);
-  return v;
-}
-void Messages::setConversationId(const QByteArray &v) {
-  if (v.isNull()) {
-    messages_conversation_id_set_none(m_d);
-  } else {
-    messages_conversation_id_set(m_d, v.data(), v.size());
   }
 }
 

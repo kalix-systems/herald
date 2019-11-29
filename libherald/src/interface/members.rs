@@ -4,7 +4,6 @@ pub struct MembersQObject;
 
 pub struct MembersEmitter {
     pub(super) qobject: Arc<AtomicPtr<MembersQObject>>,
-    pub(super) conversation_id_changed: fn(*mut MembersQObject),
     pub(super) filter_changed: fn(*mut MembersQObject),
     pub(super) filter_regex_changed: fn(*mut MembersQObject),
     pub(super) new_data_ready: fn(*mut MembersQObject),
@@ -20,7 +19,6 @@ impl MembersEmitter {
     pub fn clone(&mut self) -> MembersEmitter {
         MembersEmitter {
             qobject: self.qobject.clone(),
-            conversation_id_changed: self.conversation_id_changed,
             filter_changed: self.filter_changed,
             filter_regex_changed: self.filter_regex_changed,
             new_data_ready: self.new_data_ready,
@@ -31,14 +29,6 @@ impl MembersEmitter {
         let n: *const MembersQObject = null();
         self.qobject
             .store(n as *mut MembersQObject, Ordering::SeqCst);
-    }
-
-    pub fn conversation_id_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.conversation_id_changed)(ptr);
-        }
     }
 
     pub fn filter_changed(&mut self) {
@@ -174,13 +164,6 @@ pub trait MembersTrait {
 
     fn emit(&mut self) -> &mut MembersEmitter;
 
-    fn conversation_id(&self) -> Option<&[u8]>;
-
-    fn set_conversation_id(
-        &mut self,
-        value: Option<&[u8]>,
-    );
-
     fn filter(&self) -> &str;
 
     fn set_filter(
@@ -285,7 +268,6 @@ pub unsafe fn members_new_inner(ptr_bundle: *mut MembersPtrBundle) -> Members {
 
     let MembersPtrBundle {
         members,
-        members_conversation_id_changed,
         members_filter_changed,
         members_filter_regex_changed,
         members_new_data_ready,
@@ -303,7 +285,6 @@ pub unsafe fn members_new_inner(ptr_bundle: *mut MembersPtrBundle) -> Members {
     } = ptr_bundle;
     let members_emit = MembersEmitter {
         qobject: Arc::new(AtomicPtr::new(members)),
-        conversation_id_changed: members_conversation_id_changed,
         filter_changed: members_filter_changed,
         filter_regex_changed: members_filter_regex_changed,
         new_data_ready: members_new_data_ready,
@@ -356,37 +337,6 @@ pub unsafe extern "C" fn members_remove_from_conversation_by_index(
 pub unsafe extern "C" fn members_toggle_filter_regex(ptr: *mut Members) -> bool {
     let obj = &mut *ptr;
     obj.toggle_filter_regex()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_conversation_id_get(
-    ptr: *const Members,
-    prop: *mut QByteArray,
-    set: fn(*mut QByteArray, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.conversation_id();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_conversation_id_set(
-    ptr: *mut Members,
-    value: *const c_char,
-    len: c_int,
-) {
-    let obj = &mut *ptr;
-    let value = qba_slice!(value, len);
-    obj.set_conversation_id(Some(value));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn members_conversation_id_set_none(ptr: *mut Members) {
-    let obj = &mut *ptr;
-    obj.set_conversation_id(None);
 }
 
 #[no_mangle]
@@ -559,7 +509,6 @@ pub unsafe extern "C" fn members_data_user_id(
 #[repr(C)]
 pub struct MembersPtrBundle {
     members: *mut MembersQObject,
-    members_conversation_id_changed: fn(*mut MembersQObject),
     members_filter_changed: fn(*mut MembersQObject),
     members_filter_regex_changed: fn(*mut MembersQObject),
     members_new_data_ready: fn(*mut MembersQObject),
