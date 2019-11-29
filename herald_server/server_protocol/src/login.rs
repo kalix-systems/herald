@@ -29,8 +29,8 @@ pub async fn login(
         write_msg(&LoginTokenResponse::BadSig, wtx, rrx).await?;
         Err(LoginFailed)
     } else {
-        if let Some((_, (t, _))) = active.remove(&g.did) {
-            t.cancel();
+        if let Some((_, sess)) = active.remove(&g.did) {
+            sess.interrupt().await;
         }
 
         write_msg(&LoginTokenResponse::Success, wtx, rrx).await?;
