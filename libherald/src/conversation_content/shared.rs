@@ -85,6 +85,15 @@ impl super::ConversationContent {
 
         Some(())
     }
+
+    #[must_use]
+    pub(super) fn register_model(&mut self) -> Option<()> {
+        let id = self.id?;
+
+        EMITTERS.insert(id, self.emit.clone());
+
+        Some(())
+    }
 }
 
 impl Drop for ConversationContent {

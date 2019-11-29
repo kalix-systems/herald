@@ -57,6 +57,8 @@ impl Interface for ConversationContent {
 
             self.id.replace(id);
             self.emit.conversation_id_changed();
+
+            ret_none!(self.register_model());
         }
     }
 
