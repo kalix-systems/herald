@@ -57,7 +57,7 @@ fn search() {
     assert_eq!(first_page[1].rowid, 2);
     assert_eq!(first_page[0].body.as_str(), "patent");
     assert_eq!(first_page[1].body.as_str(), "pattern");
-    assert!(first.time.0 >= second.time.0);
+    assert!(first.time >= second.time);
 
     let second_page = searcher.next_page_db(&mut conn).expect(womp!());
     assert!(second_page.is_none());

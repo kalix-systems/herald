@@ -69,7 +69,12 @@ impl Tx<'_> {
     ) -> Result<(), rusqlite::Error> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/store_derived_key.sql"))?;
         let ts = Time::now();
-        store_stmt.execute(params![cid, &ix.to_le_bytes() as &[u8], key.as_ref(), ts.0])?;
+        store_stmt.execute(params![
+            cid,
+            &ix.to_le_bytes() as &[u8],
+            key.as_ref(),
+            ts.as_i64()
+        ])?;
         Ok(())
     }
 

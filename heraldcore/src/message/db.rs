@@ -264,7 +264,7 @@ impl OutboundMessageBuilder {
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
         let expiration = match expiration_period.into_millis() {
-            Some(period) => Some(Time(timestamp.0 + period.0)),
+            Some(period) => Some(timestamp + period),
             None => None,
         };
 
@@ -422,7 +422,7 @@ impl InboundMessageBuilder {
         {
             if let Some(expiration) = expiration {
                 // short circuit if message has already expired
-                if expiration.0 < Time::now().0 {
+                if expiration < Time::now() {
                     return Ok(None);
                 }
             }

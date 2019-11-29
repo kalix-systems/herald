@@ -61,7 +61,7 @@ fn compute_signing_data(
 ) -> Vec<u8> {
     let mut out = Vec::with_capacity(slice.len() + 8);
     out.extend_from_slice(slice);
-    out.extend_from_slice(&i64::to_le_bytes(ts.0));
+    out.extend_from_slice(&ts.to_le_bytes());
     out
 }
 

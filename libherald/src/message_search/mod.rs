@@ -177,7 +177,7 @@ impl Interface for MessageSearch {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.results.get(index).as_ref()?.time.0)
+        Some(self.results.get(index).as_ref()?.time.into())
     }
 
     fn conversation_pairwise(

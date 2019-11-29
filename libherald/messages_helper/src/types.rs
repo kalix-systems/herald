@@ -47,8 +47,7 @@ impl MsgData {
         &self,
         rhs: &Self,
     ) -> bool {
-        (self.author == rhs.author)
-            && (self.time.insertion.0 - rhs.time.insertion.0).abs() < FLURRY_FUZZ
+        (self.author == rhs.author) && self.time.insertion.within(FLURRY_FUZZ, rhs.time.insertion)
     }
 
     pub fn matches(
@@ -146,7 +145,7 @@ impl PartialOrd for Message {
         &self,
         rhs: &Self,
     ) -> Option<Ordering> {
-        self.insertion_time.0.partial_cmp(&rhs.insertion_time.0)
+        self.insertion_time.partial_cmp(&rhs.insertion_time)
     }
 }
 

@@ -227,7 +227,7 @@ impl MessageBuilderTrait for MessageBuilder {
     }
 
     fn op_time(&self) -> Option<i64> {
-        Some(self.op.as_ref()?.time.0)
+        Some(self.op.as_ref()?.time.into())
     }
 
     fn op_has_attachments(&self) -> Option<bool> {

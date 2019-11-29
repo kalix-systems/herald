@@ -274,7 +274,7 @@ impl Messages {
     }
 
     pub(crate) fn last_time_(&self) -> Option<i64> {
-        Some(self.container.last_msg()?.time.insertion.0)
+        Some(self.container.last_msg()?.time.insertion.into())
     }
 
     pub(crate) fn data_saved_(
@@ -312,21 +312,21 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.get(index)?.insertion_time.0)
+        Some(self.container.get(index)?.insertion_time.into())
     }
 
     pub(crate) fn expiration_time_(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.expiration?.0)
+        Some(self.container.msg_data(index)?.time.expiration?.into())
     }
 
     pub(crate) fn server_time_(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.server?.0)
+        Some(self.container.msg_data(index)?.time.server?.into())
     }
 
     pub(crate) fn reply_type_(
@@ -373,14 +373,14 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.op_insertion_time(index)?.0)
+        Some(self.container.op_insertion_time(index)?.into())
     }
 
     pub(crate) fn op_expiration_time_(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.op_insertion_time(index)?.0)
+        Some(self.container.op_insertion_time(index)?.into())
     }
 
     pub(crate) fn msg_id_(
