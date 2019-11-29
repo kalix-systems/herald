@@ -18,6 +18,10 @@ class ConversationBuilder;
 typedef ConversationBuilder *ConversationBuilderRef;
 Q_DECLARE_METATYPE(ConversationBuilderRef);
 
+class ConversationContent;
+typedef ConversationContent *ConversationContentRef;
+Q_DECLARE_METATYPE(ConversationContentRef);
+
 class Conversations;
 typedef Conversations *ConversationsRef;
 Q_DECLARE_METATYPE(ConversationsRef);
@@ -62,6 +66,7 @@ extern "C" {
 typedef struct AttachmentsPtrBundle AttachmentsPtrBundle;
 typedef struct ConfigPtrBundle ConfigPtrBundle;
 typedef struct ConversationBuilderPtrBundle ConversationBuilderPtrBundle;
+typedef struct ConversationContentPtrBundle ConversationContentPtrBundle;
 typedef struct ConversationsPtrBundle ConversationsPtrBundle;
 typedef struct ErrorsPtrBundle ErrorsPtrBundle;
 typedef struct HeraldPtrBundle HeraldPtrBundle;
@@ -119,6 +124,74 @@ struct ConversationBuilderPtrBundle {
   void (*conversation_builder_begin_remove_rows)(ConversationBuilder *, int,
                                                  int);
   void (*conversation_builder_end_remove_rows)(ConversationBuilder *);
+};
+struct ConversationContentPtrBundle {
+  ConversationContent *conversation_content;
+  void (*conversation_content_conversation_id_changed)(ConversationContent *);
+  Members *members;
+  void (*members_filter_changed)(Members *);
+  void (*members_filter_regex_changed)(Members *);
+
+  void (*members_new_data_ready)(const Members *);
+  void (*members_layout_about_to_be_changed)(Members *);
+  void (*members_layout_changed)(Members *);
+  void (*members_data_changed)(Members *, quintptr, quintptr);
+  void (*members_begin_reset_model)(Members *);
+  void (*members_end_reset_model)(Members *);
+  void (*members_begin_insert_rows)(Members *, int, int);
+  void (*members_end_insert_rows)(Members *);
+  void (*members_begin_move_rows)(Members *, int, int, int);
+  void (*members_end_move_rows)(Members *);
+  void (*members_begin_remove_rows)(Members *, int, int);
+  void (*members_end_remove_rows)(Members *);
+  Messages *messages;
+  MessageBuilder *message_builder;
+  void (*message_builder_body_changed)(MessageBuilder *);
+  void (*message_builder_is_media_message_changed)(MessageBuilder *);
+  void (*message_builder_is_reply_changed)(MessageBuilder *);
+  void (*message_builder_op_author_changed)(MessageBuilder *);
+  void (*message_builder_op_body_changed)(MessageBuilder *);
+  void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_id_changed)(MessageBuilder *);
+  void (*message_builder_op_time_changed)(MessageBuilder *);
+  void (*message_builder_parse_markdown_changed)(MessageBuilder *);
+
+  void (*message_builder_new_data_ready)(const MessageBuilder *);
+  void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
+  void (*message_builder_layout_changed)(MessageBuilder *);
+  void (*message_builder_data_changed)(MessageBuilder *, quintptr, quintptr);
+  void (*message_builder_begin_reset_model)(MessageBuilder *);
+  void (*message_builder_end_reset_model)(MessageBuilder *);
+  void (*message_builder_begin_insert_rows)(MessageBuilder *, int, int);
+  void (*message_builder_end_insert_rows)(MessageBuilder *);
+  void (*message_builder_begin_move_rows)(MessageBuilder *, int, int, int);
+  void (*message_builder_end_move_rows)(MessageBuilder *);
+  void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
+  void (*message_builder_end_remove_rows)(MessageBuilder *);
+  void (*messages_builder_op_msg_id_changed)(Messages *);
+  void (*messages_is_empty_changed)(Messages *);
+  void (*messages_last_author_changed)(Messages *);
+  void (*messages_last_body_changed)(Messages *);
+  void (*messages_last_status_changed)(Messages *);
+  void (*messages_last_time_changed)(Messages *);
+  void (*messages_search_active_changed)(Messages *);
+  void (*messages_search_index_changed)(Messages *);
+  void (*messages_search_num_matches_changed)(Messages *);
+  void (*messages_search_pattern_changed)(Messages *);
+  void (*messages_search_regex_changed)(Messages *);
+
+  void (*messages_new_data_ready)(const Messages *);
+  void (*messages_layout_about_to_be_changed)(Messages *);
+  void (*messages_layout_changed)(Messages *);
+  void (*messages_data_changed)(Messages *, quintptr, quintptr);
+  void (*messages_begin_reset_model)(Messages *);
+  void (*messages_end_reset_model)(Messages *);
+  void (*messages_begin_insert_rows)(Messages *, int, int);
+  void (*messages_end_insert_rows)(Messages *);
+  void (*messages_begin_move_rows)(Messages *, int, int, int);
+  void (*messages_end_move_rows)(Messages *);
+  void (*messages_begin_remove_rows)(Messages *, int, int);
+  void (*messages_end_remove_rows)(Messages *);
 };
 struct ConversationsPtrBundle {
   Conversations *conversations;
@@ -256,7 +329,6 @@ struct HeraldPtrBundle {
 };
 struct MembersPtrBundle {
   Members *members;
-  void (*members_conversation_id_changed)(Members *);
   void (*members_filter_changed)(Members *);
   void (*members_filter_regex_changed)(Members *);
 
@@ -342,7 +414,6 @@ struct MessagesPtrBundle {
   void (*message_builder_begin_remove_rows)(MessageBuilder *, int, int);
   void (*message_builder_end_remove_rows)(MessageBuilder *);
   void (*messages_builder_op_msg_id_changed)(Messages *);
-  void (*messages_conversation_id_changed)(Messages *);
   void (*messages_is_empty_changed)(Messages *);
   void (*messages_last_author_changed)(Messages *);
   void (*messages_last_body_changed)(Messages *);
@@ -410,6 +481,7 @@ class Attachments : public QAbstractItemModel {
   Q_OBJECT
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -478,6 +550,7 @@ class Config : public QObject {
   Q_OBJECT
   friend class Attachments;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -531,6 +604,7 @@ class ConversationBuilder : public QAbstractItemModel {
   Q_OBJECT
   friend class Attachments;
   friend class Config;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -602,11 +676,56 @@ private:
 Q_SIGNALS:
   void pictureChanged();
 };
+class ConversationContent : public QObject {
+  Q_OBJECT
+  friend class Attachments;
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class Conversations;
+  friend class Errors;
+  friend class Herald;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Members *const m_members;
+  Messages *const m_messages;
+  Private *m_d;
+  bool m_ownsPrivate;
+  Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
+                 setConversationId NOTIFY conversationIdChanged FINAL)
+  Q_PROPERTY(Members *members READ members NOTIFY membersChanged FINAL)
+  Q_PROPERTY(Messages *messages READ messages NOTIFY messagesChanged FINAL)
+  explicit ConversationContent(bool owned, QObject *parent);
+
+public:
+  explicit ConversationContent(QObject *parent = nullptr);
+  ~ConversationContent() override;
+  QByteArray conversationId() const;
+  void setConversationId(const QByteArray &v);
+  const Members *members() const;
+  Members *members();
+  const Messages *messages() const;
+  Messages *messages();
+Q_SIGNALS:
+  void conversationIdChanged();
+  void membersChanged();
+  void messagesChanged();
+};
 class Conversations : public QAbstractItemModel {
   Q_OBJECT
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Errors;
   friend class Herald;
   friend class Members;
@@ -698,6 +817,7 @@ class Errors : public QObject {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Herald;
   friend class Members;
@@ -730,6 +850,7 @@ class Herald : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Members;
@@ -848,6 +969,7 @@ class Members : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -864,8 +986,6 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
-  Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
-                 setConversationId NOTIFY conversationIdChanged FINAL)
   Q_PROPERTY(
       QString filter READ filter WRITE setFilter NOTIFY filterChanged FINAL)
   Q_PROPERTY(bool filterRegex READ filterRegex WRITE setFilterRegex NOTIFY
@@ -875,8 +995,6 @@ private:
 public:
   explicit Members(QObject *parent = nullptr);
   ~Members() override;
-  QByteArray conversationId() const;
-  void setConversationId(const QByteArray &v);
   QString filter() const;
   void setFilter(const QString &v);
   bool filterRegex() const;
@@ -926,7 +1044,6 @@ private:
   void initHeaderData();
   void updatePersistentIndexes();
 Q_SIGNALS:
-  void conversationIdChanged();
   void filterChanged();
   void filterRegexChanged();
 };
@@ -935,6 +1052,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -1036,6 +1154,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -1119,6 +1238,7 @@ class Messages : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -1139,8 +1259,6 @@ private:
   Q_PROPERTY(MessageBuilder *builder READ builder NOTIFY builderChanged FINAL)
   Q_PROPERTY(QByteArray builderOpMsgId READ builderOpMsgId WRITE
                  setBuilderOpMsgId NOTIFY builderOpMsgIdChanged FINAL)
-  Q_PROPERTY(QByteArray conversationId READ conversationId WRITE
-                 setConversationId NOTIFY conversationIdChanged FINAL)
   Q_PROPERTY(bool isEmpty READ isEmpty NOTIFY isEmptyChanged FINAL)
   Q_PROPERTY(QString lastAuthor READ lastAuthor NOTIFY lastAuthorChanged FINAL)
   Q_PROPERTY(QString lastBody READ lastBody NOTIFY lastBodyChanged FINAL)
@@ -1165,8 +1283,6 @@ public:
   MessageBuilder *builder();
   QByteArray builderOpMsgId() const;
   void setBuilderOpMsgId(const QByteArray &v);
-  QByteArray conversationId() const;
-  void setConversationId(const QByteArray &v);
   bool isEmpty() const;
   QString lastAuthor() const;
   QString lastBody() const;
@@ -1244,7 +1360,6 @@ private:
 Q_SIGNALS:
   void builderChanged();
   void builderOpMsgIdChanged();
-  void conversationIdChanged();
   void isEmptyChanged();
   void lastAuthorChanged();
   void lastBodyChanged();
@@ -1261,6 +1376,7 @@ class Users : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -1352,6 +1468,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;
@@ -1430,6 +1547,7 @@ class Utils : public QObject {
   friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
+  friend class ConversationContent;
   friend class Conversations;
   friend class Errors;
   friend class Herald;

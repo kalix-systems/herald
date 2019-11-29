@@ -47,6 +47,7 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
 
        members(),
 
+       conversation_content(),
        messages(),
        message_builder(),
        attachments()
@@ -59,6 +60,7 @@ fn herald() -> Object {
         connectionUp: Prop::new().simple(Bool),
         connectionPending: Prop::new().simple(Bool),
 
+        // object props
         config: Prop::new().object(config()),
         conversationBuilder: Prop::new().object(conversation_builder()),
         conversations: Prop::new().object(conversations()),
@@ -102,40 +104,6 @@ fn utils() -> Object {
     obj! {
         Utils: Obj::new().funcs(functions)
     }
-}
-
-fn conv_id_prop() -> Prop {
-    Prop::new()
-        .simple(SimpleType::QByteArray)
-        .write()
-        .optional()
-}
-
-fn filter_prop() -> Prop {
-    Prop::new().simple(SimpleType::QString).write()
-}
-
-fn filter_regex_prop() -> Prop {
-    Prop::new().simple(SimpleType::Bool).write()
-}
-
-fn matched_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::Bool)
-}
-
-fn filter_props() -> BTreeMap<String, Property> {
-    props! {
-        filter: filter_prop(),
-        filterRegex: filter_regex_prop()
-    }
-}
-
-fn color_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QUint32)
-}
-
-fn picture_item_prop() -> ItemProp {
-    ItemProp::new(SimpleType::QString).optional()
 }
 
 fn conversations() -> Object {
@@ -191,11 +159,20 @@ fn users() -> Object {
     }
 }
 
-fn members() -> Object {
-    let mut props = props! {
+fn conversation_content() -> Object {
+    let props = props! {
+        members: Prop::new().object(members()),
+        messages: Prop::new().object(messages()),
         conversationId: conv_id_prop()
     };
 
+    obj! {
+        ConversationContent: Obj::new().props(props)
+    }
+}
+
+fn members() -> Object {
+    let mut props = props! {};
     props.append(&mut filter_props());
 
     let item_props = item_props! {
@@ -221,7 +198,6 @@ fn members() -> Object {
 
 fn messages() -> Object {
     let props = props! {
-        conversationId: conv_id_prop(),
         lastAuthor: Prop::new().simple(QString).optional(),
         lastBody: Prop::new().simple(QString).optional(),
         // Insertion time of last available message
@@ -428,4 +404,38 @@ fn message_search() -> Object {
     obj! {
         MessageSearch: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
+}
+
+fn conv_id_prop() -> Prop {
+    Prop::new()
+        .simple(SimpleType::QByteArray)
+        .write()
+        .optional()
+}
+
+fn filter_prop() -> Prop {
+    Prop::new().simple(SimpleType::QString).write()
+}
+
+fn filter_regex_prop() -> Prop {
+    Prop::new().simple(SimpleType::Bool).write()
+}
+
+fn matched_item_prop() -> ItemProp {
+    ItemProp::new(SimpleType::Bool)
+}
+
+fn filter_props() -> BTreeMap<String, Property> {
+    props! {
+        filter: filter_prop(),
+        filterRegex: filter_regex_prop()
+    }
+}
+
+fn color_item_prop() -> ItemProp {
+    ItemProp::new(SimpleType::QUint32)
+}
+
+fn picture_item_prop() -> ItemProp {
+    ItemProp::new(SimpleType::QString).optional()
 }

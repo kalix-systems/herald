@@ -1,25 +1,20 @@
 use crate::{
     ffi,
     interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
-    ret_err, ret_none,
+    ret_err,
     shared::SingletonBus,
-    spawn,
-    toasts::new_msg_toast,
 };
 use herald_common::UserId;
 use heraldcore::{
-    config, conversation,
+    conversation,
     errors::HErr,
-    message::{self, Message as Msg, MessageBody, MessageReceiptStatus},
+    message::{MessageBody, MessageReceiptStatus},
     types::*,
     NE,
 };
 use im::vector::Vector;
 use search_pattern::SearchPattern;
-use std::{
-    collections::HashMap,
-    convert::{TryFrom, TryInto},
-};
+use std::collections::HashMap;
 
 mod search;
 use search::*;
@@ -81,17 +76,6 @@ impl Interface for Messages {
         msg_id: ffi::MsgIdRef,
     ) -> u64 {
         self.index_by_id_(msg_id)
-    }
-
-    fn set_conversation_id(
-        &mut self,
-        conversation_id: Option<ffi::ConversationIdRef>,
-    ) {
-        self.set_conversation_id_(conversation_id)
-    }
-
-    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
-        self.conversation_id.as_ref().map(|c| c.as_slice())
     }
 
     fn data_saved(

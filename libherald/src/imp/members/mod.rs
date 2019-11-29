@@ -10,6 +10,7 @@ use std::{
 type Emitter = MembersEmitter;
 type List = MembersList;
 
+pub(crate) mod imp;
 pub(crate) mod shared;
 
 #[derive(Clone)]
@@ -49,35 +50,6 @@ impl MembersTrait for Members {
             filter,
             filter_regex: false,
             conversation_id: None,
-        }
-    }
-
-    fn conversation_id(&self) -> Option<ffi::ConversationIdRef> {
-        self.conversation_id.as_ref().map(|id| id.as_slice())
-    }
-
-    fn set_conversation_id(
-        &mut self,
-        conversation_id: Option<ffi::ConversationIdRef>,
-    ) {
-        if let (Some(id), None) = (conversation_id, self.conversation_id) {
-            let conversation_id = ret_err!(ConversationId::try_from(id));
-
-            shared::EMITTERS.insert(conversation_id, self.emit().clone());
-            let list = ret_err!(user::conversation_members(&conversation_id));
-
-            self.model
-                .begin_insert_rows(0, list.len().saturating_sub(1));
-            self.list = list
-                .into_iter()
-                .map(|u| {
-                    let id = u.id;
-                    User { id, matched: true }
-                })
-                .collect();
-            self.model.end_insert_rows();
-
-            self.emit.conversation_id_changed();
         }
     }
 
