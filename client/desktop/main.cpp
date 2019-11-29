@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
   qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
+  qmlRegisterType<ConversationContent>("LibHerald", 1, 0, "ConversationContent");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
                            1, 0, "CmnCfg");
