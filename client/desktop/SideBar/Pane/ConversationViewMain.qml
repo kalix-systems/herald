@@ -30,7 +30,7 @@ ListView {
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-        property bool outbound: messageModel.lastAuthor === herald.config.configId
+        property bool outbound: convoContent.messages.lastAuthor === herald.config.configId
         property ConversationContent convoContent: ConversationContent {
             conversationId: conversationIdProxy
         }
@@ -55,10 +55,10 @@ ListView {
             //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
-                lastBody: !messageModel.isEmpty ? lastAuthor + ": " + messageModel.lastBody : ""
-                lastAuthor: outbound ? "You" : messageModel.lastAuthor
-                lastTimestamp: !messageModel.isEmpty ? Utils.friendlyTimestamp(
-                                                           messageModel.lastTime) : ""
+                lastBody: !convoContent.messages.isEmpty ? lastAuthor + ": " + convoContent.messages.lastBody : ""
+                lastAuthor: outbound ? "You" : convoContent.messages.lastAuthor
+                lastTimestamp: !convoContent.messages.isEmpty ? Utils.friendlyTimestamp(
+                                                           convoContent.messages.lastTime) : ""
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
             }
