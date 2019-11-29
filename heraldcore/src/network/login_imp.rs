@@ -14,8 +14,6 @@ where
 {
     use login::*;
 
-    kcl::init();
-
     CAUGHT_UP.store(false, Ordering::Release);
 
     let uid = config::id()?;

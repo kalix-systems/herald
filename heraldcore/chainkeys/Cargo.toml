@@ -23,6 +23,9 @@ path             = "../coretypes"
 [dependencies.coremacros]
 path = "../coremacros"
 
+[dependencies.kcl]
+path = "../../kcl"
+
 [dependencies.platform_dirs]
 path             = "../platform_dirs"
 
