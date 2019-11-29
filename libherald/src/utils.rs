@@ -45,11 +45,10 @@ macro_rules! ret_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                use $crate::shared::SingletonBus;
                 let err_string = crate::utils::ret_err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::imp::errors::Errors::push(err_string).ok();
+                $crate::push(crate::Update::Error(err_string)).ok();
                 return $retval;
             }
         }
@@ -67,7 +66,7 @@ macro_rules! cont_err {
                 let err_string = crate::utils::ret_err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::imp::errors::Errors::push(err_string).ok();
+                $crate::push(crate::Update::Error(err_string)).ok();
                 continue;
             }
         }
@@ -81,11 +80,10 @@ macro_rules! push_err {
         match $maybe {
             Ok(val) => Some(val),
             Err(e) => {
-                use $crate::shared::SingletonBus;
                 let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
                 eprintln!("{}", err_string);
-                $crate::imp::errors::Errors::push(err_string).ok();
+                $crate::push(Update::Error(err_string)).ok();
                 None
             }
         }
@@ -113,11 +111,10 @@ macro_rules! ret_none {
         match $maybe {
             Some(val) => val,
             None => {
-                use $crate::shared::SingletonBus;
                 let err_string = $crate::utils::ret_none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::imp::errors::Errors::push(err_string).ok();
+                $crate::push(crate::Update::Error(err_string)).ok();
                 return $retval;
             }
         }
@@ -131,11 +128,10 @@ macro_rules! cont_none {
         match $maybe {
             Some(val) => val,
             None => {
-                use $crate::shared::SingletonBus;
                 let err_string = $crate::utils::ret_none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::imp::errors::Errors::push(err_string).ok();
+                $crate::push(crate::Update::Error(err_string)).ok();
                 continue;
             }
         }

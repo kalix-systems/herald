@@ -83,7 +83,7 @@ fn herald() -> Object {
 
 fn errors() -> Object {
     let properties = props! {
-        tryPoll:  Prop::new().simple(QUint8)
+        tryPoll:  Prop::new().simple(Bool)
     };
 
     let functions = functions! {
@@ -167,7 +167,7 @@ fn conversation_content() -> Object {
     };
 
     obj! {
-        ConversationContent: Obj::new().props(props)
+        ConversationContent: Obj::new().props(props).list()
     }
 }
 

@@ -41,7 +41,7 @@ pub trait ErrorsTrait {
 
     fn emit(&mut self) -> &mut ErrorsEmitter;
 
-    fn try_poll(&self) -> u8;
+    fn try_poll(&self) -> bool;
 
     fn next_error(&mut self) -> String;
 }
@@ -85,7 +85,7 @@ pub unsafe extern "C" fn errors_next_error(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn errors_try_poll_get(ptr: *const Errors) -> u8 {
+pub unsafe extern "C" fn errors_try_poll_get(ptr: *const Errors) -> bool {
     (&*ptr).try_poll()
 }
 
