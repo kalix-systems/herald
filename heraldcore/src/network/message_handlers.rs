@@ -7,111 +7,67 @@ pub(super) fn handle_cmessage(
     ts: Time,
     cm: Cipher,
 ) -> Result<Event, HErr> {
-    unimplemented!()
-    // use ConversationMessage::*;
-    // let mut ev = Event::default();
+    use ConversationMessage::*;
+    let mut ev = Event::default();
 
-    // let (cid, GlobalId { uid, did }, msg) = cmessages::open(cm)?;
+    let (cid, GlobalId { uid, did }, msg) = cmessages::open(cm)?;
 
-    // match msg {
-    //     NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
-    //     DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
-    //     AddedToConvo(ac) => {
-    //         use crate::{image_utils::image_path, types::cmessages::AddedToConvo};
-    //         use std::fs;
+    match msg {
+        NewMembers(nm) => {
+            let mut db = crate::db::Database::get()?;
+            let tx = db.transaction()?;
+            crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
+            tx.commit()?;
+        }
+        Msg(msg) => {
+            let cmessages::Msg { mid, content, op } = msg;
+            let cmessages::Message {
+                body,
+                attachments,
+                expiration,
+            } = content;
 
-    //         let AddedToConvo {
-    //             members,
-    //             cid,
-    //             ratchet,
-    //             title,
-    //             picture,
-    //             expiration_period,
-    //         } = *ac;
+            let mut builder = crate::message::InboundMessageBuilder::default();
 
-    //         let mut conv_builder = crate::conversation::ConversationBuilder::new();
-    //         conv_builder
-    //             .conversation_id(cid)
-    //             .override_members(members)
-    //             .expiration_period(expiration_period);
+            builder
+                .id(mid)
+                .author(uid)
+                .conversation_id(cid)
+                .attachments(attachments)
+                .timestamp(ts);
 
-    //         conv_builder.title = title;
+            builder.body = body;
+            builder.op = op;
+            builder.expiration = expiration;
 
-    //         conv_builder.picture = match picture {
-    //             Some(bytes) => {
-    //                 let image_path = image_path();
-    //                 fs::write(&image_path, bytes)?;
-    //                 Some(image_path.into_os_string().into_string()?)
-    //             }
-    //             None => None,
-    //         };
+            if let Some(msg) = builder.store()? {
+                ev.add_notif(Notification::NewMsg(Box::new(msg)));
+            }
+            ev.add_creply(cid, form_ack(mid)?);
+        }
+        Ack(ack) => {
+            let cmessages::Ack {
+                of: msg_id,
+                stat: status,
+            } = ack;
 
-    //         let mut db = crate::db::Database::get()?;
-    //         let conv = conv_builder.add_db(&mut db)?;
+            crate::message::add_receipt(msg_id, uid, status)?;
+            ev.add_notif(Notification::MsgReceipt(message::MessageReceipt {
+                msg_id,
+                cid,
+                recipient: uid,
+                status,
+            }));
+        }
+        Settings(update) => {
+            conversation::settings::apply(&update, &cid)?;
 
-    //         chainkeys::store_state(cid, did, &ratchet)?;
+            ev.add_notif(Notification::Settings(cid, update));
+        }
+        Leave => unimplemented!(),
+    }
 
-    //         ev.notifications
-    //             .push(Notification::NewConversation(conv.meta));
-    //     }
-    //     UserReqAck(cr) => ev
-    //         .notifications
-    //         .push(Notification::AddUserResponse(cid, uid, cr.0)),
-    //     NewMembers(nm) => {
-    //         let mut db = crate::db::Database::get()?;
-    //         let tx = db.transaction()?;
-    //         crate::members::db::add_members_with_tx(&tx, cid, &nm.0)?;
-    //         tx.commit()?;
-    //     }
-    //     Msg(msg) => {
-    //         let cmessages::Msg { mid, content, op } = msg;
-    //         let cmessages::Message {
-    //             body,
-    //             attachments,
-    //             expiration,
-    //         } = content;
-
-    //         let mut builder = crate::message::InboundMessageBuilder::default();
-
-    //         builder
-    //             .id(mid)
-    //             .author(uid)
-    //             .conversation_id(cid)
-    //             .attachments(attachments)
-    //             .timestamp(ts);
-
-    //         builder.body = body;
-    //         builder.op = op;
-    //         builder.expiration = expiration;
-
-    //         if let Some(msg) = builder.store()? {
-    //             ev.notifications.push(Notification::NewMsg(Box::new(msg)));
-    //         }
-    //         ev.replies.push((cid, form_ack(mid)?));
-    //     }
-    //     Ack(ack) => {
-    //         let cmessages::Ack {
-    //             of: msg_id,
-    //             stat: status,
-    //         } = ack;
-
-    //         crate::message::add_receipt(msg_id, uid, status)?;
-    //         ev.notifications
-    //             .push(Notification::MsgReceipt(message::MessageReceipt {
-    //                 msg_id,
-    //                 cid,
-    //                 recipient: uid,
-    //                 status,
-    //             }));
-    //     }
-    //     Settings(update) => {
-    //         conversation::settings::apply(&update, &cid)?;
-
-    //         ev.notifications.push(Notification::Settings(cid, update));
-    //     }
-    // }
-
-    // Ok(ev)
+    Ok(ev)
 }
 
 pub(super) fn handle_dmessage(
@@ -151,6 +107,49 @@ pub(super) fn handle_amessage(
     ts: Time,
     msg: Cipher,
 ) -> Result<Event, HErr> {
+    // NewKey(nk) => crate::user_keys::add_keys(uid, &[nk.0])?,
+    // DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
+    // AddedToConvo(ac) => {
+    //     use crate::{image_utils::image_path, types::cmessages::AddedToConvo};
+    //     use std::fs;
+
+    //     let AddedToConvo {
+    //         members,
+    //         cid,
+    //         ratchet,
+    //         title,
+    //         picture,
+    //         expiration_period,
+    //     } = *ac;
+
+    //     let mut conv_builder = crate::conversation::ConversationBuilder::new();
+    //     conv_builder
+    //         .conversation_id(cid)
+    //         .override_members(members)
+    //         .expiration_period(expiration_period);
+
+    //     conv_builder.title = title;
+
+    //     conv_builder.picture = match picture {
+    //         Some(bytes) => {
+    //             let image_path = image_path();
+    //             fs::write(&image_path, bytes)?;
+    //             Some(image_path.into_os_string().into_string()?)
+    //         }
+    //         None => None,
+    //     };
+
+    //     let mut db = crate::db::Database::get()?;
+    //     let conv = conv_builder.add_db(&mut db)?;
+
+    //     chainkeys::store_state(cid, did, &ratchet)?;
+
+    //     ev.notifications
+    //         .push(Notification::NewConversation(conv.meta));
+    // }
+    // UserReqAck(cr) => ev
+    //     .notifications
+    //     .push(Notification::AddUserResponse(cid, uid, cr.0)),
     unimplemented!()
 }
 
