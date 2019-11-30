@@ -1,6 +1,6 @@
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "android", target_os = "ios", target_os = "windows")))]
 /// App name on desktop, used for toasts
-const DESKTOP_APP_NAME: &str = "heraldqtDesktop";
+const DESKTOP_APP_NAME: &str = "herald";
 
 #[cfg(all(
     target_family = "unix",
