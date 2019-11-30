@@ -6,58 +6,56 @@ pub(crate) fn send_cmessage(
     cid: ConversationId,
     content: &ConversationMessage,
 ) -> Result<(), HErr> {
-    unimplemented!()
-    // if CAUGHT_UP.load(Ordering::Acquire) {
-    //     let cm = cmessages::seal(cid, &content)?;
+    if CAUGHT_UP.load(Ordering::Acquire) {
+        let cm = cmessages::seal(cid, &content)?;
 
-    //     let to = crate::members::members(&cid)?;
-    //     let exc = *crate::config::keypair()?.public_key();
-    //     let msg = kson::to_vec(&cm).into();
+        let to = crate::members::members(&cid)?;
+        let exc = *crate::config::keypair()?.public_key();
+        let msg = kson::to_vec(&cm).into();
 
-    //     let req = push_users::Req { to, exc, msg };
+        let req = push_users::Req { to, exc, msg };
 
-    //     match helper::push_users(&req) {
-    //         Ok(push_users::Res::Success) => Ok(()),
-    //         Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
-    //             "tried to send messages to nonexistent users {:?}",
-    //             missing
-    //         ))),
-    //         Err(e) => {
-    //             // TODO: maybe try more than once?
-    //             // maybe have some mechanism to send a signal that more things have gone wrong?
-    //             eprintln!(
-    //                 "failed to send message {:?}, error was {}\n\
-    //                  assuming failed session and adding to pending now",
-    //                 req, e
-    //             );
+        match helper::push_users(&req) {
+            Ok(push_users::Res::Success) => Ok(()),
+            Ok(push_users::Res::Missing(missing)) => Err(HeraldError(format!(
+                "tried to send messages to nonexistent users {:?}",
+                missing
+            ))),
+            Err(e) => {
+                // TODO: maybe try more than once?
+                // maybe have some mechanism to send a signal that more things have gone wrong?
+                eprintln!(
+                    "failed to send message {:?}, error was {}\n\
+                     assuming failed session and adding to pending now",
+                    req, e
+                );
 
-    //             CAUGHT_UP.store(false, Ordering::Release);
+                CAUGHT_UP.store(false, Ordering::Release);
 
-    //             pending::add_to_pending(cid, content)
-    //         }
-    //     }
-    // } else {
-    //     pending::add_to_pending(cid, content)
-    // }
+                pending::add_to_pending(cid, content)
+            }
+        }
+    } else {
+        pending::add_to_pending(cid, content)
+    }
 }
 
 pub(crate) fn send_dmessage(
     to: sig::PublicKey,
     dm: &DeviceMessageBody,
 ) -> Result<(), HErr> {
-    unimplemented!()
-    // let msg = kson::to_vec(&dmessages::seal(to, dm)?).into();
+    let msg = kson::to_vec(&dmessages::seal(to, dm)?).into();
 
-    // let req = push_devices::Req { to: vec![to], msg };
+    let req = push_devices::Req { to: vec![to], msg };
 
-    // // TODO retry logic? for now, things go to the void
-    // match helper::push_devices(&req)? {
-    //     push_devices::Res::Success => Ok(()),
-    //     push_devices::Res::Missing(missing) => Err(HeraldError(format!(
-    //         "tried to send messages to nonexistent keys {:?}",
-    //         missing
-    //     ))),
-    // }
+    // TODO retry logic? for now, things go to the void
+    match helper::push_devices(&req)? {
+        push_devices::Res::Success => Ok(()),
+        push_devices::Res::Missing(missing) => Err(HeraldError(format!(
+            "tried to send messages to nonexistent keys {:?}",
+            missing
+        ))),
+    }
 }
 
 pub(crate) fn send_umessage(
