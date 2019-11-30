@@ -26,6 +26,7 @@ pub struct ActiveSession {
 }
 
 impl ActiveSession {
+    #[allow(clippy::unneeded_field_pattern)]
     pub async fn interrupt(self) -> bool {
         let ActiveSession {
             interrupt,
