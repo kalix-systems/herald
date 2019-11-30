@@ -10,7 +10,6 @@ pub struct Config {
     inner: Option<Core>,
 }
 
-// TODO this isn't exception safe
 impl ConfigTrait for Config {
     fn new(emit: ConfigEmitter) -> Self {
         Config { emit, inner: None }
@@ -109,19 +108,27 @@ impl ConfigTrait for Config {
         &mut self,
         picture: Option<String>,
     ) {
-        let inner = ret_none!(self.inner.as_mut());
-
-        // TODO exception safety
-        let picture = ret_err!(core::set_profile_picture(
-            picture.and_then(crate::utils::strip_qrc)
-        ));
-
-        inner.profile_picture = picture;
-
-        self.emit.profile_picture_changed();
+        spawn!(ret_err!(crate::push((
+            core::set_profile_picture(picture.and_then(crate::utils::strip_qrc))
+                .map(ConfUpdate::Picture),
+            loc!()
+        ))));
     }
 
     fn emit(&mut self) -> &mut ConfigEmitter {
         &mut self.emit
+    }
+}
+
+/// Config update
+pub enum ConfUpdate {
+    /// Profile picture changed
+    Picture(Option<String>),
+}
+
+use crate::Update;
+impl From<ConfUpdate> for Update {
+    fn from(update: ConfUpdate) -> Update {
+        Update::Conf(update)
     }
 }

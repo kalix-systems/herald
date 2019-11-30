@@ -8,6 +8,7 @@ pub enum Update {
     RegistrationSuccess,
     Conv(crate::conversations::shared::ConvUpdate),
     User(crate::users::shared::UserUpdate),
+    Conf(crate::config::ConfUpdate),
     Error(String),
 }
 
@@ -82,7 +83,23 @@ impl super::Herald {
                 Error(error) => {
                     self.errors.handle_error(error);
                 }
+                Conf(update) => {
+                    self.load_props.config.handle_update(update);
+                }
             }
+        }
+    }
+}
+
+impl<U, E> From<(Result<U, E>, location::Location)> for Update
+where
+    U: Into<Update>,
+    E: std::error::Error,
+{
+    fn from((res, loc): (Result<U, E>, location::Location)) -> Update {
+        match res {
+            Ok(update) => update.into(),
+            Err(e) => Update::Error(format!("{error} at {location}", error = e, location = loc)),
         }
     }
 }
