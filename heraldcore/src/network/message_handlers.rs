@@ -109,36 +109,31 @@ impl Event {
         _: Time,
         msg: DeviceMessage,
     ) {
-        unimplemented!()
-        // let mut ev = Event::default();
+        self.with_comp(|ev| {
+            let (from, msg) = dmessages::open(msg)?;
+            let GlobalId { uid, did } = from;
 
-        // ev.with_comp(|ev| {
+            match msg {
+                DeviceMessageBody::Req(cr) => {
+                    let dmessages::UserReq { ratchet, cid } = cr;
+                    let (user, conversation) = crate::user::UserBuilder::new(uid)
+                        .pairwise_conversation(cid)
+                        .add()?;
 
-        // let (from, msg) = dmessages::open(msg)?;
-        // let GlobalId { uid, did } = from;
+                    chainkeys::store_state(cid, did, 0, &ratchet)?;
 
-        // match msg {
-        //     DeviceMessageBody::Req(cr) => {
-        //         let dmessages::UserReq { ratchet, cid } = cr;
-        //         let (user, conversation) = crate::user::UserBuilder::new(uid)
-        //             .pairwise_conversation(cid)
-        //             .add()?;
+                    ev.add_notif(Notification::NewUser(Box::new((user, conversation.meta))));
 
-        //         let coretypes::conversation::Conversation { meta, .. } = conversation;
-        //         chainkeys::store_state(cid, did, &ratchet)?;
+                    ev.add_areply(
+                        from.uid,
+                        AuxMessage::UserReqAck(amessages::UserReqAck(true)),
+                    );
+                }
+                _ => unimplemented!(),
+            }
 
-        //         ev.notifications
-        //             .push(Notification::NewUser(Box::new((user, meta))));
-
-        //         ev.replies.push((
-        //             cid,
-        //             ConversationMessage::UserReqAck(cmessages::UserReqAck(true)),
-        //         ))
-        //     }
-        // }
-
-        // Ok(ev)
-        // });
+            Ok(())
+        });
     }
 
     pub(super) fn handle_amessage(
