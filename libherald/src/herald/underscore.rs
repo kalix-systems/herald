@@ -108,9 +108,9 @@ impl Herald {
         &mut self,
         path: String,
     ) {
-        ret_none!(heraldcore::set_data_dir(std::path::PathBuf::from(
-            ret_none!(crate::utils::strip_qrc(path))
-        )));
+        if let Some(path) = crate::utils::strip_qrc(path) {
+            ret_none!(heraldcore::set_data_dir(std::path::PathBuf::from(path)));
+        }
 
         if config::id().is_ok() {
             self.load_props.setup();
