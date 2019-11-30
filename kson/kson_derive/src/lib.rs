@@ -22,7 +22,7 @@ fn ser_struct_impl(
     let imp = quote! {
         mod #modname {
             use super::*;
-            use ::kson::{
+            use kson::{
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
@@ -48,7 +48,7 @@ fn de_struct_impl(
     let imp = quote! {
         mod #modname {
             use super::*;
-            use ::kson::{
+            use kson::{
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
@@ -74,7 +74,7 @@ fn ser_enum_impl(
     let imp = quote! {
         mod #modname {
             use super::*;
-            use ::kson::{
+            use kson::{
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
@@ -101,7 +101,7 @@ fn de_enum_impl(
 
         mod #modname {
             use super::*;
-            use ::kson::{
+            use kson::{
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},

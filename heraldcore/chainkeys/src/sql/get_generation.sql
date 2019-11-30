@@ -1,5 +1,5 @@
 SELECT
-  generation, next_ix, base_key, ratchet_key
+  generation
 FROM
   ratchet_states
 WHERE

@@ -57,8 +57,8 @@ pub fn seal_msg(
     pk: sig::PublicKey,
     ad: Bytes,
     msg: BytesMut,
-) -> Result<(u32, kdf_ratchet::Cipher), ChainKeysError> {
-    db::with_tx(move |tx| tx.seal_msg(cid, pk, ad, msg))
+) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
+    db::with_tx(move |tx| tx.seal_msg(cid, pk, ad, msg)).map(|t| t.1)
 }
 
 pub fn store_state(

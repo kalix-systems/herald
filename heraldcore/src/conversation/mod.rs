@@ -29,7 +29,7 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let ratchet = RatchetState::gen_new();
     let pk = *config::keypair()?.public_key();
-    chainkeys::store_state(cid, pk, &ratchet)?;
+    chainkeys::store_state(cid, pk, 0, &ratchet)?;
 
     let ratchets = std::iter::once((pk, ratchet)).collect();
 

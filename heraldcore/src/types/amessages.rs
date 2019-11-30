@@ -2,6 +2,14 @@ use super::*;
 use kdf_ratchet::Cipher;
 pub(crate) use network_types::amessages::*;
 
+#[derive(Ser, De)]
+struct AuxAD {
+    cid: ConversationId,
+    to: UserId,
+    from: GlobalId,
+    gen: u32,
+}
+
 /// Seals the messages.
 pub fn seal(
     // note: this is only mut because BlockStore thinks it should be
@@ -12,17 +20,18 @@ pub fn seal(
     let cbytes = kson::to_vec(content).into();
     let from = config::gid()?;
 
-    let ad = kson::to_vec(&(cid, to, from)).into();
+    chainkeys::db::with_tx(move |tx| {
+        let gen = tx.get_generation(cid, from.did)?;
+        let ad = kson::to_vec(&AuxAD { cid, to, from, gen }).into();
 
-    let cipher = chainkeys::seal_msg(cid, from.did, ad, cbytes)?;
-
-    Ok(cipher)
+        let (_, cipher) = tx.seal_msg(cid, from.did, ad, cbytes)?;
+        Ok(cipher)
+    })
 }
 
 /// Opens the message.
 pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, ConversationMessage), HErr> {
-    let (cid, to, from) =
-        kson::from_bytes::<(ConversationId, UserId, GlobalId)>(cipher.ad.clone())?;
+    let AuxAD { cid, to, from, gen } = kson::from_bytes(cipher.ad.clone())?;
 
     if to != config::id()? {
         return Err(HeraldError(format!(
@@ -32,7 +41,7 @@ pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, ConversationMes
     }
 
     let decrypted =
-        chainkeys::open_msg(cid, from.did, cipher)?.ok_or(ChainKeysError::DecryptionFailed)?;
+        chainkeys::open_msg(cid, from.did, gen, cipher)?.ok_or(ChainKeysError::DecryptionFailed)?;
 
     let parsed = kson::from_bytes(decrypted.pt.into())?;
 

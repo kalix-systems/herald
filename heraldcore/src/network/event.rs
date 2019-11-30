@@ -5,10 +5,18 @@ use std::collections::HashMap;
 #[derive(Debug)]
 pub struct Event {
     notifications: Vec<Notification>,
-    creplies: HashMap<ConversationId, Vec<ConversationMessage>>,
-    areplies: HashMap<UserId, Vec<AuxMessage>>,
+    replies: Vec<Dispatch>,
     errors: Vec<HErr>,
 }
+
+#[derive(Debug)]
+enum Dispatch {
+    ADisp(UserId, AuxMessage),
+    CDisp(ConversationId, ConversationMessage),
+    DDisp(sig::PublicKey, DeviceMessageBody),
+}
+
+use Dispatch::*;
 
 impl Event {
     pub fn add_notif(
@@ -23,7 +31,7 @@ impl Event {
         to: ConversationId,
         content: ConversationMessage,
     ) {
-        self.creplies.entry(to).or_insert(Vec::new()).push(content)
+        self.replies.push(CDisp(to, content));
     }
 
     pub fn add_areply(
@@ -31,7 +39,15 @@ impl Event {
         to: UserId,
         content: AuxMessage,
     ) {
-        self.areplies.entry(to).or_insert(Vec::new()).push(content)
+        self.replies.push(ADisp(to, content));
+    }
+
+    pub fn add_dreply(
+        &mut self,
+        to: sig::PublicKey,
+        content: DeviceMessageBody,
+    ) {
+        self.replies.push(DDisp(to, content));
     }
 
     pub fn add_error(
@@ -46,30 +62,9 @@ impl Event {
         &mut self,
         mut other: Self,
     ) {
-        let Event {
-            mut notifications,
-            creplies,
-            areplies,
-            errors,
-        } = other;
-
-        self.notifications.append(&mut notifications);
-
-        for (c, mut r) in creplies.into_iter() {
-            if let Some(r0) = self.creplies.get_mut(&c) {
-                r0.append(&mut r);
-            } else {
-                self.creplies.insert(c, r);
-            }
-        }
-
-        for (u, mut r) in areplies.into_iter() {
-            if let Some(r0) = self.areplies.get_mut(&u) {
-                r0.append(&mut r);
-            } else {
-                self.areplies.insert(u, r);
-            }
-        }
+        self.notifications.append(&mut other.notifications);
+        self.replies.append(&mut other.replies);
+        self.errors.append(&mut other.errors);
     }
 
     /// Sends replies to inbound messages and calls `f`, passing each notification in as an
@@ -81,29 +76,30 @@ impl Event {
     ) -> Result<(), HErr> {
         let Event {
             notifications,
-            errors,
-            creplies,
-            areplies,
+            replies,
+            mut errors,
         } = self;
 
         for note in notifications {
             f(note);
         }
 
+        for dispatch in replies {
+            match dispatch {
+                ADisp(to, content) => {
+                    send_amessage(to, &content).unwrap_or_else(|e| errors.push(e))
+                }
+                CDisp(to, content) => {
+                    send_cmessage(to, &content).unwrap_or_else(|e| errors.push(e))
+                }
+                DDisp(to, content) => {
+                    send_dmessage(to, &content).unwrap_or_else(|e| errors.push(e))
+                }
+            }
+        }
+
         for herr in errors {
             g(herr);
-        }
-
-        for (uid, contents) in areplies {
-            for content in contents {
-                send_amessage(uid, &content)?;
-            }
-        }
-
-        for (cid, contents) in creplies {
-            for content in contents.iter() {
-                send_cmessage(cid, content)?;
-            }
         }
 
         Ok(())
@@ -114,8 +110,7 @@ impl Default for Event {
     fn default() -> Self {
         Event {
             notifications: Vec::new(),
-            creplies: HashMap::new(),
-            areplies: HashMap::new(),
+            replies: Vec::new(),
             errors: Vec::new(),
         }
     }

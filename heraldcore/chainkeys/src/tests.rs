@@ -14,6 +14,7 @@ fn ratchet_states() {
     kcl::init();
 
     let mut conn = in_memory();
+    // // use a real db for debugging failures
     // let mut conn = CK_CONN.lock();
     // conn.execute_batch(include_str!("sql/create.sql"))
     //     .expect(womp!());

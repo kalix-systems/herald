@@ -86,7 +86,7 @@ impl ConfigBuilder {
         // but changing it without making testing awkward requires
         // changing the chainmail API
         let ratchet = kdf_ratchet::RatchetState::gen_new();
-        chainkeys::store_state(conf.nts_conversation, pk, &ratchet)?;
+        chainkeys::store_state(conf.nts_conversation, pk, 0, &ratchet)?;
         Ok(conf)
     }
 }

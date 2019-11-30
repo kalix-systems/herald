@@ -5,7 +5,7 @@ use rusqlite::named_params;
 
 pub struct Tx<'a>(rusqlite::Transaction<'a>);
 
-pub fn with_tx<F, E, O>(f: F) -> Result<O, E>
+pub fn with_tx<E, O, F>(f: F) -> Result<O, E>
 where
     F: FnOnce(&mut Tx) -> Result<O, E>,
     E: From<rusqlite::Error>,
@@ -14,7 +14,7 @@ where
     with_tx_from_conn(&mut conn, f)
 }
 
-pub fn with_tx_from_conn<F, E, O>(
+pub fn with_tx_from_conn<E, O, F>(
     conn: &mut rusqlite::Connection,
     f: F,
 ) -> Result<O, E>
@@ -128,7 +128,7 @@ impl Tx<'_> {
         let (gen, raw_ix, raw_base_key, raw_ratchet_key) = get_stmt
             .query_map_named(named_params! {"@cid": cid, "@pk": pk.as_ref()}, |row| {
                 Ok((
-                    row.get::<_, u32>("generation")?,
+                    row.get("generation")?,
                     row.get::<_, Vec<u8>>("next_ix")?,
                     row.get::<_, Vec<u8>>("base_key")?,
                     row.get::<_, Vec<u8>>("ratchet_key")?,
@@ -151,6 +151,21 @@ impl Tx<'_> {
 
         let ratchet = RatchetState::mk(ix, base_key, ratchet_key);
         Ok((gen, ratchet))
+    }
+
+    pub fn get_generation(
+        &self,
+        cid: ConversationId,
+        pk: sig::PublicKey,
+    ) -> Result<u32, ChainKeysError> {
+        let mut get_stmt = self.prepare_cached(include_str!("sql/get_generation.sql"))?;
+        let gen = get_stmt
+            .query_map_named(named_params! {"@cid": cid, "@pk": pk.as_ref()}, |row| {
+                Ok(row.get("generation")?)
+            })?
+            .next()
+            .ok_or(ChainKeysError::NoneError(loc!()))??;
+        Ok(gen)
     }
 
     pub fn get_derived_key(
