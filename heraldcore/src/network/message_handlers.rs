@@ -114,8 +114,7 @@ impl Event {
             let GlobalId { uid, did } = from;
 
             match msg {
-                DeviceMessageBody::Req(cr) => {
-                    let dmessages::UserReq { ratchet, cid } = cr;
+                DeviceMessageBody::Req(dmessages::UserReq { ratchet, cid }) => {
                     let (user, conversation) = crate::user::UserBuilder::new(uid)
                         .pairwise_conversation(cid)
                         .add()?;
@@ -129,7 +128,10 @@ impl Event {
                         AuxMessage::UserReqAck(amessages::UserReqAck(true)),
                     );
                 }
-                _ => unimplemented!(),
+                DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet }) => {
+                    let cid = crate::user::by_user_id(uid)?.pairwise_conversation;
+                    chainkeys::store_state(cid, did, gen, &ratchet)?;
+                }
             }
 
             Ok(())

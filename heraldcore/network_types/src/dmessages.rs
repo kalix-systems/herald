@@ -30,11 +30,17 @@ pub struct UserReq {
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A new ratchet for the auxiliary conversation
-pub struct NewRatchet(pub RatchetState);
+pub struct NewRatchet {
+    pub gen: u32,
+    pub ratchet: RatchetState,
+}
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Types of device message.
 pub enum DeviceMessageBody {
     /// A contact request
     Req(UserReq),
+    /// A new ratchet for the auxiliary conversation, which for now is identified with the
+    /// canonical pairwise one
+    NewRatchet(NewRatchet),
 }
