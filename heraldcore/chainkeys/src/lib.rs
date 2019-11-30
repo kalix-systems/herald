@@ -46,9 +46,10 @@ pub struct Decrypted {
 pub fn open_msg(
     cid: ConversationId,
     pk: sig::PublicKey,
+    gen: u32,
     cipher: kdf_ratchet::Cipher,
 ) -> Result<Option<Decrypted>, ChainKeysError> {
-    db::with_tx(move |tx| tx.open_msg(cid, pk, cipher))
+    db::with_tx(move |tx| tx.open_msg(cid, pk, gen, cipher))
 }
 
 pub fn seal_msg(
@@ -56,17 +57,18 @@ pub fn seal_msg(
     pk: sig::PublicKey,
     ad: Bytes,
     msg: BytesMut,
-) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
+) -> Result<(u32, kdf_ratchet::Cipher), ChainKeysError> {
     db::with_tx(move |tx| tx.seal_msg(cid, pk, ad, msg))
 }
 
 pub fn store_state(
     cid: ConversationId,
     pk: sig::PublicKey,
+    gen: u32,
     ratchet: &kdf_ratchet::RatchetState,
 ) -> Result<(), ChainKeysError> {
     db::with_tx(move |tx| {
-        tx.store_ratchet_state(cid, pk, ratchet)?;
+        tx.store_ratchet_state(cid, pk, gen, ratchet)?;
         Ok(())
     })
 }

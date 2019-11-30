@@ -12,10 +12,6 @@ where
 {
     let mut conn = CK_CONN.lock();
     with_tx_from_conn(&mut conn, f)
-    // let mut tx = Tx(conn.transaction()?);
-    // let o = f(&mut tx)?;
-    // tx.0.commit()?;
-    // Ok(o)
 }
 
 pub fn with_tx_from_conn<F, E, O>(
@@ -51,12 +47,14 @@ impl Tx<'_> {
         &mut self,
         cid: ConversationId,
         pk: sig::PublicKey,
+        gen: u32,
         state: &RatchetState,
     ) -> Result<(), rusqlite::Error> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/store_ratchet_state.sql"))?;
         store_stmt.execute_named(named_params! {
             "@cid": cid,
             "@pk": pk.as_ref(),
+            "@gen": gen,
             "@ix": &state.ix().to_le_bytes() as &[u8],
             "@base_key": state.base_key().as_ref(),
             "@ratchet_key": state.ratchet_key().as_ref()
@@ -68,6 +66,7 @@ impl Tx<'_> {
         &mut self,
         cid: ConversationId,
         pk: sig::PublicKey,
+        gen: u32,
         ix: u64,
         key: kcl::aead::Key,
     ) -> Result<(), rusqlite::Error> {
@@ -76,6 +75,7 @@ impl Tx<'_> {
         store_stmt.execute_named(named_params! {
             "@cid": cid,
             "@pk": pk.as_ref(),
+            "@gen": gen,
             "@ix": &ix.to_le_bytes() as &[u8],
             "@msg_key": key.as_ref(),
             "@ts": ts.as_i64()
@@ -87,11 +87,48 @@ impl Tx<'_> {
         &self,
         cid: ConversationId,
         pk: sig::PublicKey,
+        gen: u32,
     ) -> Result<RatchetState, ChainKeysError> {
         let mut get_stmt = self.prepare_cached(include_str!("sql/get_ratchet_state.sql"))?;
         let (raw_ix, raw_base_key, raw_ratchet_key) = get_stmt
+            .query_map_named(
+                named_params! {"@cid": cid, "@pk": pk.as_ref(), "@gen": gen},
+                |row| {
+                    Ok((
+                        row.get::<_, Vec<u8>>("next_ix")?,
+                        row.get::<_, Vec<u8>>("base_key")?,
+                        row.get::<_, Vec<u8>>("ratchet_key")?,
+                    ))
+                },
+            )?
+            .next()
+            .ok_or(ChainKeysError::NoneError(loc!()))??;
+
+        let ix = if raw_ix.len() != 8 {
+            return Err(ChainKeysError::StoreCorrupted);
+        } else {
+            LE::read_u64(&raw_ix)
+        };
+
+        let base_key =
+            kcl::hash::Key::from_slice(&raw_base_key).ok_or(ChainKeysError::StoreCorrupted)?;
+
+        let ratchet_key =
+            RatchetKey::from_slice(&raw_ratchet_key).ok_or(ChainKeysError::StoreCorrupted)?;
+
+        Ok(RatchetState::mk(ix, base_key, ratchet_key))
+    }
+
+    pub fn get_recent_ratchet(
+        &self,
+        cid: ConversationId,
+        pk: sig::PublicKey,
+    ) -> Result<(u32, RatchetState), ChainKeysError> {
+        let mut get_stmt = self.prepare_cached(include_str!("sql/get_recent_ratchet.sql"))?;
+        let (gen, raw_ix, raw_base_key, raw_ratchet_key) = get_stmt
             .query_map_named(named_params! {"@cid": cid, "@pk": pk.as_ref()}, |row| {
                 Ok((
+                    row.get::<_, u32>("generation")?,
                     row.get::<_, Vec<u8>>("next_ix")?,
                     row.get::<_, Vec<u8>>("base_key")?,
                     row.get::<_, Vec<u8>>("ratchet_key")?,
@@ -112,13 +149,15 @@ impl Tx<'_> {
         let ratchet_key =
             RatchetKey::from_slice(&raw_ratchet_key).ok_or(ChainKeysError::StoreCorrupted)?;
 
-        Ok(RatchetState::mk(ix, base_key, ratchet_key))
+        let ratchet = RatchetState::mk(ix, base_key, ratchet_key);
+        Ok((gen, ratchet))
     }
 
     pub fn get_derived_key(
         &self,
         cid: ConversationId,
         pk: sig::PublicKey,
+        gen: u32,
         ix: u64,
     ) -> Result<Option<kcl::aead::Key>, ChainKeysError> {
         let mut stmt = self.prepare_cached(include_str!("sql/get_derived_key.sql"))?;
@@ -127,6 +166,7 @@ impl Tx<'_> {
                 named_params! {
                     "@cid": cid,
                     "@pk": pk.as_ref(),
+                    "@gen": gen,
                     "@ix": &ix.to_le_bytes() as &[u8]
                 },
                 |row| Ok(row.get::<_, Vec<u8>>("msg_key")?),
@@ -144,29 +184,30 @@ impl Tx<'_> {
         &mut self,
         cid: ConversationId,
         pk: sig::PublicKey,
+        gen: u32,
         cipher: kdf_ratchet::Cipher,
     ) -> Result<Option<Decrypted>, ChainKeysError> {
         use kdf_ratchet::DecryptionResult::*;
 
-        let res = if let Some(k) = self.get_derived_key(cid, pk, cipher.index)? {
+        let res = if let Some(k) = self.get_derived_key(cid, pk, gen, cipher.index)? {
             cipher.open_with(k)
         } else {
-            let mut state = self.get_ratchet_state(cid, pk)?;
-            self.store_ratchet_state(cid, pk, &state)?;
+            let mut state = self.get_ratchet_state(cid, pk, gen)?;
+            self.store_ratchet_state(cid, pk, gen, &state)?;
             state.open(cipher)
         };
 
         match res {
             Success { extra_keys, ad, pt } => {
                 for (ix, key) in extra_keys {
-                    self.store_derived_key(cid, pk, ix, key)?;
+                    self.store_derived_key(cid, pk, gen, ix, key)?;
                 }
 
                 Ok(Some(Decrypted { ad, pt }))
             }
             Failed { extra_keys } => {
                 for (ix, key) in extra_keys {
-                    self.store_derived_key(cid, pk, ix, key)?;
+                    self.store_derived_key(cid, pk, gen, ix, key)?;
                 }
 
                 Ok(None)
@@ -182,11 +223,11 @@ impl Tx<'_> {
         pk: sig::PublicKey,
         ad: Bytes,
         msg: BytesMut,
-    ) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
-        let mut ratchet = self.get_ratchet_state(cid, pk)?;
+    ) -> Result<(u32, kdf_ratchet::Cipher), ChainKeysError> {
+        let (gen, mut ratchet) = self.get_recent_ratchet(cid, pk)?;
         let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();
-        self.store_derived_key(cid, pk, ix, key)?;
-        self.store_ratchet_state(cid, pk, &ratchet)?;
-        Ok(cipher)
+        self.store_ratchet_state(cid, pk, gen, &ratchet)?;
+        self.store_derived_key(cid, pk, gen, ix, key)?;
+        Ok((gen, cipher))
     }
 }

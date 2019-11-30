@@ -13,10 +13,10 @@ fn in_memory() -> rusqlite::Connection {
 fn ratchet_states() {
     kcl::init();
 
-    let mut conn = in_memory();
-    // let mut conn = CK_CONN.lock();
-    // conn.execute_batch(include_str!("sql/create.sql"))
-    //     .expect(womp!());
+    // let mut conn = in_memory();
+    let mut conn = CK_CONN.lock();
+    conn.execute_batch(include_str!("sql/create.sql"))
+        .expect(womp!());
 
     let cid1 = ConversationId::from([1; 32]);
     let cid2 = ConversationId::from([2; 32]);
@@ -50,11 +50,11 @@ fn ratchet_states() {
     assert_ne!(r4, r3);
 
     let res: Result<(), ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
-        tx.store_ratchet_state(cid1, pk1, &r1)?;
-        tx.store_ratchet_state(cid2, pk1, &r2)?;
+        tx.store_ratchet_state(cid1, pk1, 0, &r1)?;
+        tx.store_ratchet_state(cid2, pk1, 0, &r2)?;
 
-        tx.store_ratchet_state(cid1, pk2, &r3)?;
-        tx.store_ratchet_state(cid2, pk2, &r4)?;
+        tx.store_ratchet_state(cid1, pk2, 0, &r3)?;
+        tx.store_ratchet_state(cid2, pk2, 0, &r4)?;
         Ok(())
     });
 
@@ -62,14 +62,19 @@ fn ratchet_states() {
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
         Ok((
-            tx.get_ratchet_state(cid1, pk1)?,
-            tx.get_ratchet_state(cid2, pk1)?,
-            tx.get_ratchet_state(cid1, pk2)?,
-            tx.get_ratchet_state(cid2, pk2)?,
+            tx.get_recent_ratchet(cid1, pk1)?,
+            tx.get_recent_ratchet(cid2, pk1)?,
+            tx.get_recent_ratchet(cid1, pk2)?,
+            tx.get_recent_ratchet(cid2, pk2)?,
         ))
     });
 
-    let (r1_, r2_, r3_, r4_) = res.expect(womp!());
+    let ((gr1, r1_), (gr2, r2_), (gr3, r3_), (gr4, r4_)) = res.expect(womp!());
+
+    assert_eq!(gr1, 0);
+    assert_eq!(gr2, 0);
+    assert_eq!(gr3, 0);
+    assert_eq!(gr4, 0);
 
     assert_eq!(r1, r1_);
     assert_eq!(r2, r2_);
@@ -93,26 +98,33 @@ fn ratchet_states() {
         let c4 = tx.seal_msg(cid2, pk2, ad4.clone(), msg4.clone())?;
         Ok((c1, c2, c3, c4))
     });
-    let (c1, c2, c3, c4) = res.expect(womp!());
+    let ((gc1, c1), (gc2, c2), (gc3, c3), (gc4, c4)) = res.expect(womp!());
+
+    assert_eq!(gc1, 0);
+    assert_eq!(gc2, 0);
+    assert_eq!(gc3, 0);
+    assert_eq!(gc4, 0);
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
-        let m1 = tx.get_derived_key(cid1, pk1, 0)?;
-        let m2 = tx.get_derived_key(cid2, pk1, 0)?;
-        let m3 = tx.get_derived_key(cid1, pk2, 0)?;
-        let m4 = tx.get_derived_key(cid2, pk2, 0)?;
+        let m1 = tx.get_derived_key(cid1, pk1, 0, 0)?;
+        let m2 = tx.get_derived_key(cid2, pk1, 0, 0)?;
+        let m3 = tx.get_derived_key(cid1, pk2, 0, 0)?;
+        let m4 = tx.get_derived_key(cid2, pk2, 0, 0)?;
         Ok((m1, m2, m3, m4))
     });
+
     let (m1, m2, m3, m4) = res.expect(womp!());
+
     drop(m1.expect(womp!()));
     drop(m2.expect(womp!()));
     drop(m3.expect(womp!()));
     drop(m4.expect(womp!()));
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
-        let d1 = tx.open_msg(cid1, pk1, c1)?;
-        let d2 = tx.open_msg(cid2, pk1, c2)?;
-        let d3 = tx.open_msg(cid1, pk2, c3)?;
-        let d4 = tx.open_msg(cid2, pk2, c4)?;
+        let d1 = tx.open_msg(cid1, pk1, 0, c1)?;
+        let d2 = tx.open_msg(cid2, pk1, 0, c2)?;
+        let d3 = tx.open_msg(cid1, pk2, 0, c3)?;
+        let d4 = tx.open_msg(cid2, pk2, 0, c4)?;
         Ok((d1, d2, d3, d4))
     });
     let (d1, d2, d3, d4) = res.expect(womp!());

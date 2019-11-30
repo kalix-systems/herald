@@ -6,4 +6,8 @@ WHERE
   conversation_id = @cid
   AND public_key = @pk
   AND ix = @ix
-  AND generation = @gen
+SORT BY
+  generation DESC
+LIMIT
+  1
+
