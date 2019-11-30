@@ -9,18 +9,26 @@ use kdf_ratchet::*;
 use std::collections::HashMap;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
-/// A message in a conversation
-pub enum ConversationMessage {
+pub enum PersonalMessage {
     /// A new key
     NewKey(NewKey),
-    /// Telling everyone else that you're leaving a conversation
-    Leave,
-    /// Members just added to a conversation
-    NewMembers(NewMembers),
+    /// A deprecated key
+    DepKey(DepKey),
+    /// Update ratchets for certain conversations
+    NewRatchets(NewRatchets),
     /// A message a user receives upon being added to a conversation
     AddedToConvo(Box<AddedToConvo>),
     /// An acknowledgement of a contact request.
     UserReqAck(UserReqAck),
+}
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// A message in a conversation
+pub enum ConversationMessage {
+    /// Telling everyone else that you're leaving a conversation
+    Leave,
+    /// Members just added to a conversation
+    NewMembers(NewMembers),
     /// A normal message.
     Msg(Msg),
     /// An acknowledgement of a normal message.
@@ -32,6 +40,10 @@ pub enum ConversationMessage {
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A new, signed key.
 pub struct NewKey(pub Signed<sig::PublicKey>);
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// A signed key to be deprecated
+pub struct DepKey(pub Signed<sig::PublicKey>);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Members that have just been added to a conversation.

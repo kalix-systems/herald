@@ -65,6 +65,8 @@ pub async fn serve(
             .boxed()
             .or(push_filter!(state, push_devices))
             .boxed()
+            .or(push_filter!(state, push_aux))
+            .boxed()
     };
 
     let routes = method::get2()

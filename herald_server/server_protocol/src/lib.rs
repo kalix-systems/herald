@@ -171,6 +171,43 @@ impl State {
         })
     }
 
+    pub async fn push_aux(
+        &self,
+        req: push_aux::Req,
+    ) -> Result<push_aux::Res, Error> {
+        let push_aux::Req { to, msg } = req;
+        let push = Push {
+            tag: PushTag::Aux,
+            timestamp: Time::now(),
+            msg,
+        };
+
+        let mut conn: Conn = self.new_connection().await?;
+
+        let mut missing_users: Vec<UserId> = Vec::with_capacity(to.len());
+
+        for user in to.iter() {
+            if !conn.user_exists(user).await? {
+                missing_users.push(user.clone());
+            }
+        }
+
+        Ok(if !missing_users.is_empty() {
+            push_aux::Res::Missing(missing_users)
+        } else {
+            let mut to_devs: Vec<sig::PublicKey> = Vec::with_capacity(2 * to.len());
+            for user in to {
+                for dev in conn.valid_keys(&user).await? {
+                    to_devs.push(dev);
+                }
+            }
+
+            self.send_push_to_devices(&mut conn, to_devs, push).await?;
+
+            push_aux::Res::Success
+        })
+    }
+
     pub async fn push_devices(
         &self,
         req: push_devices::Req,

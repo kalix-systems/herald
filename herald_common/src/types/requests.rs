@@ -57,6 +57,22 @@ pub mod push_users {
     }
 }
 
+pub mod push_aux {
+    use super::*;
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub struct Req {
+        pub to: Vec<UserId>,
+        pub msg: Bytes,
+    }
+
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+    pub enum Res {
+        Success,
+        Missing(Vec<UserId>),
+    }
+}
+
 pub mod push_devices {
     use super::*;
 
