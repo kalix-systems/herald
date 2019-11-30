@@ -11,6 +11,7 @@ use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use kdf_ratchet::RatchetState;
 use lazy_static::*;
+use network_types::{amessages::*, cmessages::*, dmessages::*};
 use std::{
     net::{SocketAddr, SocketAddrV4},
     sync::atomic::{AtomicBool, Ordering},
@@ -27,8 +28,8 @@ mod message_handlers;
 use message_handlers::*;
 
 mod message_senders;
-pub(crate) use message_senders::send_cmessage;
 use message_senders::*;
+pub(crate) use message_senders::{send_amessage, send_cmessage, send_umessage};
 
 mod event;
 use event::*;

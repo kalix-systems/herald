@@ -1,6 +1,7 @@
 use crate::{config, db::Database, errors::HErr, message::Message, types::*};
 pub use coretypes::conversation::*;
 use herald_common::*;
+use network_types::{amessages::*, cmessages::*, dmessages::*};
 use rusqlite::{params, NO_PARAMS};
 
 pub(crate) mod db;
@@ -30,24 +31,24 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
     let pk = *config::keypair()?.public_key();
     chainkeys::store_state(cid, pk, &ratchet)?;
 
+    let ratchets = std::iter::once((pk, ratchet)).collect();
+
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),
         None => None,
     };
 
-    let pairwise = get_pairwise_conversations(&members)?;
-
-    let body = ConversationMessage::AddedToConvo(Box::new(cmessages::AddedToConvo {
-        members,
-        ratchet,
+    let body = AuxMessage::AddedToConvo(Box::new(AddedToConvo {
+        members: members.clone(),
+        ratchets,
         cid,
         title,
         expiration_period,
         picture,
     }));
 
-    for pw_cid in pairwise {
-        crate::network::send_cmessage(pw_cid, &body)?;
+    for member in members {
+        crate::network::send_amessage(member, &body)?;
     }
 
     Ok(())
