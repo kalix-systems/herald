@@ -6,7 +6,7 @@ use std::{
 };
 
 #[derive(Debug, Hash, Ord, PartialOrd, Eq, PartialEq, Copy, Clone, Ser, De)]
-pub struct Time(pub i64);
+pub struct Time(i64);
 
 fn u128_as_i64(u: u128) -> i64 {
     match u.try_into() {
@@ -34,6 +34,10 @@ impl Time {
     ) -> bool {
         (self.0 - other.0).abs() <= fuzz
     }
+
+    pub fn as_i64(&self) -> i64 {
+        self.0
+    }
 }
 
 impl Deref for Time {
@@ -46,5 +50,33 @@ impl Deref for Time {
 impl From<i64> for Time {
     fn from(i: i64) -> Time {
         Time(i)
+    }
+}
+
+impl Into<i64> for Time {
+    fn into(self) -> i64 {
+        self.0
+    }
+}
+
+impl std::ops::Add for Time {
+    type Output = Time;
+
+    fn add(
+        self,
+        rhs: Time,
+    ) -> Time {
+        Time(self.0 + rhs.0)
+    }
+}
+
+impl std::ops::Sub for Time {
+    type Output = Time;
+
+    fn sub(
+        self,
+        rhs: Time,
+    ) -> Time {
+        Time(self.0.saturating_sub(rhs.0))
     }
 }

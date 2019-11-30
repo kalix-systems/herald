@@ -14,10 +14,7 @@ where
 {
     use login::*;
 
-    if sodiumoxide::init().is_err() {
-        eprintln!("failed to init libsodium - what are you doing");
-        std::process::abort()
-    }
+    kcl::init();
 
     CAUGHT_UP.store(false, Ordering::Release);
 

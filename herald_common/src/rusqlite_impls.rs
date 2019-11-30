@@ -35,7 +35,7 @@ impl ToSql for Time {
     fn to_sql(&self) -> Result<sql_types::ToSqlOutput, rusqlite::Error> {
         use sql_types::*;
 
-        Ok(ToSqlOutput::Owned(Value::Integer(self.0)))
+        Ok(ToSqlOutput::Owned(Value::Integer((*self).into())))
     }
 }
 

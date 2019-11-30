@@ -78,7 +78,7 @@ impl Tx<'_> {
             "@pk": pk.as_ref(),
             "@ix": &ix.to_le_bytes() as &[u8],
             "@msg_key": key.as_ref(),
-            "@ts": ts.0
+            "@ts": ts.as_i64()
         })?;
         Ok(())
     }

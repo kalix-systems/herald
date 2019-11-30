@@ -1,7 +1,7 @@
 use super::*;
 
-pub async fn login<T>(
-    active: &DashMap<sig::PublicKey, T>,
+pub async fn login(
+    active: &ActiveSessions,
     store: &mut Conn,
     wtx: &mut WTx,
     rrx: &mut Receiver<Vec<u8>>,
@@ -12,10 +12,7 @@ pub async fn login<T>(
 
     let g: GlobalId = read_msg::<SignAs>(rrx).await?.0;
 
-    if active.contains_key(&g.did) {
-        write_msg(&SignAsResponse::SessionExists, wtx, rrx).await?;
-        return Err(LoginFailed);
-    } else if !store.key_is_valid(g.did).await? {
+    if !store.key_is_valid(g.did).await? {
         write_msg(&SignAsResponse::KeyDeprecated, wtx, rrx).await?;
         return Err(LoginFailed);
     } else if !store.user_exists(&g.uid).await? {
@@ -32,6 +29,10 @@ pub async fn login<T>(
         write_msg(&LoginTokenResponse::BadSig, wtx, rrx).await?;
         Err(LoginFailed)
     } else {
+        if let Some((_, sess)) = active.remove(&g.did) {
+            sess.interrupt().await;
+        }
+
         write_msg(&LoginTokenResponse::Success, wtx, rrx).await?;
         Ok(g)
     }

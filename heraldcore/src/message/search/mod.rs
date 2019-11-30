@@ -12,7 +12,7 @@ struct Index {
 impl Default for Index {
     fn default() -> Self {
         Self {
-            time: Time(std::i64::MAX),
+            time: Time::from(std::i64::MAX),
             row_id: std::i64::MAX,
         }
     }

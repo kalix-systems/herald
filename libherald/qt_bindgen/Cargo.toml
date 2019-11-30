@@ -5,7 +5,6 @@ authors = ["Baeo Maltinksy <baeo.maltinsky@gmail.com>"]
 edition = "2018"
 license = "GPLv2"
 
-[dependencies.rust_qt_binding_generator]
-# path = "../../../rqbg"
-git = "https://github.com/kalix-systems/rust-qt-binding-generator"
-rev = "d31f0ca2137b9db5d2cfb167114510bea060a660"
+[dependencies.riqtshaw]
+git = "https://github.com/kalix-systems/riqtshaw"
+rev = "5199e4b2fc26ab361a7d37acdc8bf8cddbd25d2a"

@@ -4,6 +4,7 @@ use herald_common::*;
 use server_errors::*;
 use server_store::*;
 use std::time::Duration;
+use stream_cancel::{Trigger, Tripwire, Valved};
 use tokio::{
     prelude::*,
     sync::{
@@ -18,9 +19,34 @@ use warp::filters::ws::{self, WebSocket};
 
 type WTx = SplitSink<WebSocket, ws::Message>;
 
+pub struct ActiveSession {
+    interrupt: Trigger,
+    done: Tripwire,
+    emitter: Sender<()>,
+}
+
+impl ActiveSession {
+    pub async fn interrupt(self) -> bool {
+        let ActiveSession {
+            interrupt,
+            done,
+            emitter: _,
+        } = self;
+
+        interrupt.cancel();
+        done.await
+    }
+
+    pub fn emit(&self) -> Result<(), tokio::sync::mpsc::error::UnboundedTrySendError<()>> {
+        self.emitter.clone().try_send(())
+    }
+}
+
+type ActiveSessions = DashMap<sig::PublicKey, ActiveSession>;
+
 #[derive(Default)]
 pub struct State {
-    pub active: DashMap<sig::PublicKey, Sender<()>>,
+    pub active: ActiveSessions,
     pub pool: Pool,
 }
 
@@ -72,12 +98,21 @@ impl State {
 
         let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
-        self.active.insert(gid.did, ptx);
+        let (interrupt, prx) = Valved::new(prx);
+        let (trigger_done, done) = Tripwire::new();
+        let sess = ActiveSession {
+            interrupt,
+            done,
+            emitter: ptx,
+        };
+        self.active.insert(gid.did, sess);
 
         // remove active session on graceful exit
         tokio::spawn(async move {
             drop(closed.await);
-            self.active.remove(&gid.did);
+            if let Some((_, s)) = self.active.remove(&gid.did) {
+                s.interrupt().await;
+            }
         });
 
         // TODO: handle this error somehow?
@@ -86,14 +121,17 @@ impl State {
             .await
             .is_ok()
         {
-            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+            let mut prx: Timeout<Valved<Receiver<()>>> = prx.timeout(Duration::from_secs(60));
             drop(
                 self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                     .await,
             );
+            trigger_done.cancel();
         }
 
-        self.active.remove(&gid.did);
+        if let Some((_, s)) = self.active.remove(&gid.did) {
+            s.interrupt().await;
+        }
 
         Ok(())
     }
@@ -171,8 +209,7 @@ impl State {
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
-                let mut sender = s.clone();
-                drop(sender.send(()).await);
+                drop(s.emit());
             }
         }
 
@@ -184,7 +221,7 @@ impl State {
         store: &mut Conn,
         wtx: &mut WTx,
         rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Receiver<()>>,
+        rx: &mut Timeout<Valved<Receiver<()>>>,
         did: sig::PublicKey,
     ) -> Result<(), Error> {
         while let Some(p) = rx.next().await {

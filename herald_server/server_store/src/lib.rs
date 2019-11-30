@@ -260,7 +260,7 @@ impl ServerStore for Conn {
             params![
                 key.data().as_ref(),
                 key.signed_by().as_ref(),
-                key.timestamp().0,
+                key.timestamp().as_i64(),
                 key.sig().as_ref(),
             ],
         )
@@ -311,7 +311,7 @@ impl ServerStore for Conn {
                 params![
                     key.data().as_ref(),
                     key.signed_by().as_ref(),
-                    key.timestamp().0,
+                    key.timestamp().as_i64(),
                     key.sig().as_ref(),
                 ],
             )
@@ -394,7 +394,7 @@ impl ServerStore for Conn {
             .execute(
                 &dep_stmt,
                 params![
-                    meta.timestamp().0,
+                    meta.timestamp().as_i64(),
                     signer_key.as_ref(),
                     meta.sig().as_ref(),
                     data.as_ref(),
@@ -540,7 +540,7 @@ impl ServerStore for Conn {
                 let push_timestamp = msg.timestamp;
                 let push_vec = kson::to_vec(msg);
 
-                tx.query_one(&push_stmt, params![push_vec, push_timestamp.0])
+                tx.query_one(&push_stmt, params![push_vec, push_timestamp.as_i64()])
                     .await?
                     .get(0)
             };

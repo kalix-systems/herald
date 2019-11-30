@@ -6,6 +6,7 @@ use coretypes::{
 };
 use herald_common::*;
 use kdf_ratchet::*;
+use std::collections::HashMap;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message in a conversation

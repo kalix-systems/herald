@@ -22,9 +22,7 @@ fn get_and_delete_stale() {
         .id(msg_id)
         .author(receiver.id)
         .conversation_id(conv)
-        .expiration(Time(
-            Time::now().0 - Duration::from_secs(120).as_millis() as i64,
-        ))
+        .expiration(Time::now() - Time::from(Duration::from_secs(120).as_millis() as i64))
         .timestamp(Time::now())
         .body("hi".try_into().expect(womp!()));
 
