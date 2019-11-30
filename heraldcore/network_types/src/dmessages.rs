@@ -1,7 +1,7 @@
-use kdf_ratchet::*;
 use coretypes::ids::ConversationId;
 use herald_common::*;
 use kcl::box_;
+use kdf_ratchet::*;
 
 #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
 /// A message sent to a specific device.
@@ -27,6 +27,10 @@ pub struct UserReq {
     /// The proposed conversation id.
     pub cid: ConversationId,
 }
+
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
+/// A new ratchet for the auxiliary conversation
+pub struct NewRatchet(pub RatchetState);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Types of device message.
