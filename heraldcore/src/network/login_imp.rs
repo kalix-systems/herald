@@ -129,29 +129,6 @@ fn sock_send_msg<S: websocket::stream::Stream, T: Ser>(
     Ok(())
 }
 
-fn handle_push(push: Push) -> Result<Event, HErr> {
-    let Push {
-        tag,
-        timestamp,
-        msg,
-    } = push;
-
-    match tag {
-        PushTag::User => {
-            let cmsg = kson::from_bytes(msg)?;
-            handle_cmessage(timestamp, cmsg)
-        }
-        PushTag::Device => {
-            let dmsg = kson::from_bytes(msg)?;
-            handle_dmessage(timestamp, dmsg)
-        }
-        PushTag::Aux => {
-            let amsg = kson::from_bytes(msg)?;
-            handle_amessage(timestamp, amsg)
-        }
-    }
-}
-
 fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result<Event, HErr> {
     use catchup::*;
 
@@ -160,13 +137,7 @@ fn catchup<S: websocket::stream::Stream>(ws: &mut wsclient::Client<S>) -> Result
     while let Catchup::Messages(p) = sock_get_msg(ws)? {
         let len = p.len() as u64;
         for push in p {
-            match handle_push(push) {
-                Ok(e2) => ev.merge(e2),
-                Err(e) => {
-                    eprintln!("error while catching up, error was:\n{}", e);
-                    ev.add_error(e);
-                }
-            }
+            ev.handle_push(push);
         }
         sock_send_msg(ws, &CatchupAck(len))?;
     }

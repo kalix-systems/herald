@@ -104,6 +104,28 @@ impl Event {
 
         Ok(())
     }
+
+    pub fn with_comp<F>(
+        &mut self,
+        f: F,
+    ) where
+        F: for<'a> FnOnce(&'a mut Event) -> Result<(), HErr>,
+    {
+        if let Err(e) = f(self) {
+            self.add_error(e);
+        }
+    }
+
+    pub fn with_simple_comp<F>(
+        &mut self,
+        f: F,
+    ) where
+        F: FnOnce() -> Result<(), HErr>,
+    {
+        if let Err(e) = f() {
+            self.add_error(e);
+        }
+    }
 }
 
 impl Default for Event {
