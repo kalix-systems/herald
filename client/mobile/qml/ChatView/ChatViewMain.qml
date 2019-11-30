@@ -26,6 +26,7 @@ Page {
         ScrollBar.vertical: ScrollBar {
             id: scrollControl
         }
+
         TextMessageList {
             model: ownedMessages
             width: parent.width

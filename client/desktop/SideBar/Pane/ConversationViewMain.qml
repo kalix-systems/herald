@@ -55,10 +55,11 @@ ListView {
             //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
-                lastBody: !convoContent.messages.isEmpty ? lastAuthor + ": " + convoContent.messages.lastBody : ""
+                lastBody: !convoContent.messages.isEmpty ? lastAuthor + ": "
+                                                           + convoContent.messages.lastBody : ""
                 lastAuthor: outbound ? "You" : convoContent.messages.lastAuthor
                 lastTimestamp: !convoContent.messages.isEmpty ? Utils.friendlyTimestamp(
-                                                           convoContent.messages.lastTime) : ""
+                                                                    convoContent.messages.lastTime) : ""
                 labelColor: CmnCfg.palette.secondaryColor
                 labelSize: 14
             }

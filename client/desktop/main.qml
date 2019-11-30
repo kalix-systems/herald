@@ -29,24 +29,29 @@ ApplicationWindow {
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {}
+        property var errPopup: ErrorUtils.ErrorDialog {
+        }
 
         // NOTE: This is very important. Until our initialization is cleaned up this has to happen immediately after `Herald`
         // is initialized.
-        Component.onCompleted: herald.setAppLocalDataDir(StandardPaths.writableLocation(StandardPaths.AppLocalDataLocation))
+        Component.onCompleted: herald.setAppLocalDataDir(
+                                   StandardPaths.writableLocation(
+                                       StandardPaths.AppLocalDataLocation))
     }
 
     Loader {
         id: appLoader
         active: herald.configInit
         anchors.fill: parent
-        sourceComponent: App {}
+        sourceComponent: App {
+        }
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !herald.configInit
-        sourceComponent: RegistrationPage {}
+        sourceComponent: RegistrationPage {
+        }
     }
 }

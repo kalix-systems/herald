@@ -51,6 +51,7 @@ Column {
                 color: CmnCfg.palette.tertiaryColor
                 senderColor: userColor
                 content: std
+                convContainer: parent
             }
         } //bubble wrapper
     } // Repeater

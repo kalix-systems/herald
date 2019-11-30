@@ -18,7 +18,9 @@ ApplicationWindow {
 
         // NOTE: This is very important. Until our initialization is cleaned up this has to happen immediately after `Herald`
         // is initialized.
-        Component.onCompleted: herald.setAppLocalDataDir(StandardPaths.writableLocation(StandardPaths.AppLocalDataLocation))
+        Component.onCompleted: herald.setAppLocalDataDir(
+                                   StandardPaths.writableLocation(
+                                       StandardPaths.AppLocalDataLocation))
     }
 
     Loader {

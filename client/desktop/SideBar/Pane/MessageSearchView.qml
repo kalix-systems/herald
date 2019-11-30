@@ -32,14 +32,13 @@ ListView {
                                                "")
             groupPicture: !messageData.conversationPairwise
             labelComponent: Av.ConversationLabel {
-            contactName: messageData.conversationTitle
-            labelColor: CmnCfg.palette.secondaryColor
-            labelSize: 14
-            lastAuthor: outbound ? "You" : messageData.author
-            lastBody: lastAuthor + ": " + messageData.body
-            lastTimestamp: Utils.friendlyTimestamp(messageData.time)
+                contactName: messageData.conversationTitle
+                labelColor: CmnCfg.palette.secondaryColor
+                labelSize: 14
+                lastAuthor: outbound ? "You" : messageData.author
+                lastBody: lastAuthor + ": " + messageData.body
+                lastTimestamp: Utils.friendlyTimestamp(messageData.time)
             }
-
+        }
     }
-}
 }

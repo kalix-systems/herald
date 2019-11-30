@@ -59,7 +59,8 @@ ScrollView {
                             sourceSize: Qt.size(25, 25)
                         }
                         onClicked: {
-                            ownedConversation.builder.removeAttachmentByIndex(index)
+                            ownedConversation.builder.removeAttachmentByIndex(
+                                        index)
                         }
                     }
                 }

@@ -42,7 +42,6 @@ Page {
     }
 
     CVUtils.ConversationWindow {
-
         id: convWindow
         focus: true
         anchors {

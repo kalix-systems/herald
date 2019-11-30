@@ -11,7 +11,6 @@ RowLayout {
     width: parent.width
     spacing: 0
 
-
     TextArea {
         id: cta
         height: textareaHeight

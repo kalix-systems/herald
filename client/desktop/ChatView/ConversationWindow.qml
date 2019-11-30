@@ -144,6 +144,7 @@ Flickable {
                     maxWidth: cvPane.width * 0.66
                     color: CmnCfg.palette.paneColor
                     senderColor: userColor
+                    convContainer: convWindow
                     highlight: matchStatus === 2
                     content: if (hasAttachments && dataSaved) {
                                  image

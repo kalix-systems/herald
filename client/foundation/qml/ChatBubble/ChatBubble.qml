@@ -14,6 +14,7 @@ Rectangle {
     property bool highlight: false
     property alias highlightItem: bubbleHighlight
     property Component content
+    property Item convContainer
 
     color: bubbleColor
     width: contentLoader.width
@@ -26,7 +27,7 @@ Rectangle {
         z: -1
         opacity: highlight == true ? 1.0 : 0.0
         Rectangle {
-            width: convWindow.width
+            width: convContainer.width
             anchors.right: parent.right
             color: CmnCfg.palette.sideBarHighlightColor
             anchors.verticalCenter: parent.verticalCenter
@@ -34,7 +35,7 @@ Rectangle {
         }
 
         Rectangle {
-            width: convWindow.width
+            width: convContainer.width
             anchors.left: parent.right
             color: CmnCfg.palette.sideBarHighlightColor
             anchors.verticalCenter: parent.verticalCenter
