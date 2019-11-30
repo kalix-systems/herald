@@ -12,6 +12,7 @@ Rectangle {
     // the index corresponding to the visual color of this GroupBox
     property int colorCode: 0
     property string proxyTitle: title
+    property ConversationContent convContent: null
 
     height: CmnCfg.avatarSize
     color: CmnCfg.palette.mainColor
@@ -46,10 +47,10 @@ Rectangle {
 
             labelComponent: ConversationLabel {
                 contactName: title
-                lastBody: ownedMessages.lastBody
+                lastBody: convContent.messages.lastBody
                 lastTimestamp: Utils.friendlyTimestamp(
-                                   ownedMessages.lastEpochTimestampMs)
-                lastReceipt: ownedMessages.lastStatus === undefined ? 0 : ownedMessages.lastStatus
+                                   convContent.messages.lastTime)
+                lastReceipt: convContent.messages.lastStatus === undefined ? 0 : convContent.messages.lastStatus
             }
         }
     }
@@ -97,7 +98,7 @@ Rectangle {
     Component {
         id: ownedChatView
         ChatView.ChatViewMain {
-            ownedMessages: contactItem.ownedMessages
+            ownedMessages: contactItem.convContent.messages
             headerTitle: proxyTitle
         }
     }

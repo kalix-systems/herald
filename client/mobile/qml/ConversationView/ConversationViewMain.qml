@@ -42,7 +42,8 @@ Page {
                 readonly property ConversationContent ownedConversationContent: ConversationContent {
                     conversationId: conversationIdProxy
                 }
-                readonly property Messages ownedMessages: ownedConversationContent.messages
+                convContent: ownedConversationContent
+
                 colorCode: colorProxy
             }
         }
