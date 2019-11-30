@@ -70,6 +70,8 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
 
 /// Registers new user on the server.
 pub fn register(uid: UserId) -> Result<register::Res, HErr> {
+    kcl::init();
+
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
     let req = register::Req(uid, sig);

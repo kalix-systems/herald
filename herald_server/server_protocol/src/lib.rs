@@ -4,7 +4,7 @@ use herald_common::*;
 use server_errors::*;
 use server_store::*;
 use std::time::Duration;
-use stream_cancel::{Trigger, Valved};
+use stream_cancel::{Trigger, Tripwire, Valved};
 use tokio::{
     prelude::*,
     sync::{
@@ -18,7 +18,32 @@ use tokio::{
 use warp::filters::ws::{self, WebSocket};
 
 type WTx = SplitSink<WebSocket, ws::Message>;
-type ActiveSessions = DashMap<sig::PublicKey, (Trigger, Sender<()>)>;
+
+pub struct ActiveSession {
+    interrupt: Trigger,
+    done: Tripwire,
+    emitter: Sender<()>,
+}
+
+impl ActiveSession {
+    #[allow(clippy::unneeded_field_pattern)]
+    pub async fn interrupt(self) -> bool {
+        let ActiveSession {
+            interrupt,
+            done,
+            emitter: _,
+        } = self;
+
+        interrupt.cancel();
+        done.await
+    }
+
+    pub fn emit(&self) -> Result<(), tokio::sync::mpsc::error::UnboundedTrySendError<()>> {
+        self.emitter.clone().try_send(())
+    }
+}
+
+type ActiveSessions = DashMap<sig::PublicKey, ActiveSession>;
 
 #[derive(Default)]
 pub struct State {
@@ -74,14 +99,20 @@ impl State {
 
         let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
-        let (trigger, prx) = Valved::new(prx);
-        self.active.insert(gid.did, (trigger, ptx));
+        let (interrupt, prx) = Valved::new(prx);
+        let (trigger_done, done) = Tripwire::new();
+        let sess = ActiveSession {
+            interrupt,
+            done,
+            emitter: ptx,
+        };
+        self.active.insert(gid.did, sess);
 
         // remove active session on graceful exit
         tokio::spawn(async move {
             drop(closed.await);
-            if let Some((_, (t, _))) = self.active.remove(&gid.did) {
-                t.cancel();
+            if let Some((_, s)) = self.active.remove(&gid.did) {
+                s.interrupt().await;
             }
         });
 
@@ -96,10 +127,11 @@ impl State {
                 self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                     .await,
             );
+            trigger_done.cancel();
         }
 
-        if let Some((_, (t, _))) = self.active.remove(&gid.did) {
-            t.cancel();
+        if let Some((_, s)) = self.active.remove(&gid.did) {
+            s.interrupt().await;
         }
 
         Ok(())
@@ -178,8 +210,7 @@ impl State {
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
-                let mut sender = s.1.clone();
-                drop(sender.send(()).await);
+                drop(s.emit());
             }
         }
 

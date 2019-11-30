@@ -22,11 +22,15 @@ from_fn!(ChainKeysError, rusqlite::Error, ChainKeysError::Db);
 // A lot of this is redundant
 lazy_static! {
     static ref CK_CONN: Mutex<rusqlite::Connection> = {
+        kcl::init();
+
         let path = db_dir().join("ck.sqlite3");
         let mut conn = abort_err!(rusqlite::Connection::open(path));
         let tx = abort_err!(conn.transaction());
+
         abort_err!(tx.execute_batch(include_str!("sql/create.sql")));
         abort_err!(tx.commit());
+
         Mutex::new(conn)
     };
 }
