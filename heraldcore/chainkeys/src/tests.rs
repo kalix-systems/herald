@@ -13,10 +13,10 @@ fn in_memory() -> rusqlite::Connection {
 fn ratchet_states() {
     kcl::init();
 
-    // let mut conn = in_memory();
-    let mut conn = CK_CONN.lock();
-    conn.execute_batch(include_str!("sql/create.sql"))
-        .expect(womp!());
+    let mut conn = in_memory();
+    // let mut conn = CK_CONN.lock();
+    // conn.execute_batch(include_str!("sql/create.sql"))
+    //     .expect(womp!());
 
     let cid1 = ConversationId::from([1; 32]);
     let cid2 = ConversationId::from([2; 32]);
