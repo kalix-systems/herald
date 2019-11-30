@@ -1,4 +1,5 @@
 use super::*;
+use crate::ret_none;
 
 impl Herald {
     #[allow(clippy::too_many_arguments)]
@@ -16,7 +17,7 @@ impl Herald {
         let global_emit = emit.clone();
         shared::set_emitter(global_emit);
 
-        let mut herald = Herald {
+        Herald {
             emit,
             effects_flags: Arc::new(EffectsFlags::new()),
             message_search,
@@ -29,18 +30,7 @@ impl Herald {
             errors,
             users_search,
             utils,
-        };
-
-        if config::id().is_ok() {
-            herald.load_props.setup();
-        } else {
-            // If this fails, the file system is in a very bad place.
-            // This probably cannot be recovered from, and there's not meaningful
-            // sense in which the application can work. But crashing is still a bad look.
-            push_err!(db::init(), "Couldn't initialize storage");
-        };
-
-        herald
+        }
     }
 
     pub(crate) fn config_init_(&self) -> bool {
@@ -112,5 +102,24 @@ impl Herald {
 
     pub(crate) fn emit_(&mut self) -> &mut HeraldEmitter {
         &mut self.emit
+    }
+
+    pub(crate) fn set_app_local_data_dir_(
+        &mut self,
+        path: String,
+    ) {
+        ret_none!(heraldcore::set_data_dir(std::path::PathBuf::from(
+            ret_none!(crate::utils::strip_qrc(path))
+        )));
+
+        if config::id().is_ok() {
+            self.load_props.setup();
+            self.emit.config_init_changed();
+        } else {
+            // If this fails, the file system is in a very bad place.
+            // This probably cannot be recovered from, and there's not meaningful
+            // sense in which the application can work. But crashing is still a bad look.
+            push_err!(db::init(), "Couldn't initialize storage");
+        };
     }
 }

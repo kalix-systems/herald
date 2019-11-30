@@ -1058,6 +1058,7 @@ UsersSearch::Private *herald_users_search_get(const Herald::Private *);
 Utils::Private *herald_utils_get(const Herald::Private *);
 bool herald_login(Herald::Private *);
 void herald_register_new_user(Herald::Private *, const ushort *, int);
+void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
 quint32 members_data_color(const Members::Private *, int);
@@ -3222,6 +3223,9 @@ Utils *Herald::utils() { return m_utils; }
 bool Herald::login() { return herald_login(m_d); }
 void Herald::registerNewUser(const QString &user_id) {
   return herald_register_new_user(m_d, user_id.utf16(), user_id.size());
+}
+void Herald::setAppLocalDataDir(const QString &path) {
+  return herald_set_app_local_data_dir(m_d, path.utf16(), path.size());
 }
 
 Members::Members(bool /*owned*/, QObject *parent)

@@ -1,5 +1,5 @@
 use super::*;
-use platform_dirs::ATTACHMENTS_DIR;
+use platform_dirs::attachments_dir;
 use rusqlite::{Connection as Conn, NO_PARAMS};
 
 pub(crate) fn add<'a, A: Iterator<Item = &'a str>>(
@@ -38,7 +38,7 @@ pub(crate) fn gc(conn: &rusqlite::Connection) -> Result<(), HErr> {
 
     for res in results {
         if let Ok(path) = res {
-            drop(std::fs::remove_dir_all(ATTACHMENTS_DIR.join(path)));
+            drop(std::fs::remove_dir_all(attachments_dir().join(path)));
         }
     }
 

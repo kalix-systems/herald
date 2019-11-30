@@ -227,6 +227,11 @@ pub trait HeraldTrait {
         user_id: String,
     ) -> ();
 
+    fn set_app_local_data_dir(
+        &mut self,
+        path: String,
+    ) -> ();
+
     fn row_count(&self) -> usize;
 
     fn insert_rows(
@@ -548,6 +553,18 @@ pub unsafe extern "C" fn herald_register_new_user(
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
     obj.register_new_user(user_id)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn herald_set_app_local_data_dir(
+    ptr: *mut Herald,
+    path_str: *const c_ushort,
+    path_len: c_int,
+) {
+    let obj = &mut *ptr;
+    let mut path = String::new();
+    set_string_from_utf16(&mut path, path_str, path_len);
+    obj.set_app_local_data_dir(path)
 }
 
 #[no_mangle]
