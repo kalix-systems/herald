@@ -35,6 +35,7 @@ void libherald::initTestCase()
   file.remove();
   qDebug() << "Creating New Herald State";
   herald = new Herald();
+  herald->setAppLocalDataDir("");
   QSignalSpy spy(herald, SIGNAL(configInitChanged()));
   qDebug() << "Registering New User 'Alice'";
   herald -> registerNewUser("GAlice");
