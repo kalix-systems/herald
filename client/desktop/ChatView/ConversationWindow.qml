@@ -13,7 +13,8 @@ ListView {
     property alias chatScrollBar: chatScrollBarInner
 
     cacheBuffer: 3000
-    property var blankTransition: Transition {}
+    property var blankTransition: Transition {
+    }
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -26,7 +27,8 @@ ListView {
         minimumSize: 0.1
     }
 
-    boundsBehavior: Flickable.StopAtBounds
+    boundsBehavior: ListView.StopAtBounds
+    boundsMovement: Flickable.StopAtBounds
 
     model: ownedConversation
 
@@ -141,7 +143,8 @@ ListView {
                      } else {
                          std
                      }
-            ChatBubbleHover {}
+            ChatBubbleHover {
+            }
         }
 
         AvatarMain {
