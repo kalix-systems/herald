@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 Rectangle {
     id: background
-    property color bubbleColor: CmnCfg.palette.paneColor
+    property color bubbleColor: CmnCfg.palette.lightGrey
     property color senderColor: "white"
     property string receiptImage: ""
     property string friendlyTimestamp: ""

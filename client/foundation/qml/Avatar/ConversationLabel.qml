@@ -54,7 +54,7 @@ Item {
             text: lastTimestamp
             Layout.preferredHeight: labelGrid.height * 0.25
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
 
         Label {
@@ -68,7 +68,7 @@ Item {
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             Layout.maximumHeight: labelGrid.height * 0.25
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
 
         Button {
@@ -76,7 +76,7 @@ Item {
             icon.source: JS.receiptCodeSwitch(lastReceipt)
             icon.height: 24
             icon.width: 24
-            icon.color: CmnCfg.palette.mainTextColor
+            icon.color: CmnCfg.palette.black
             padding: 0
             background: Item {
             }
