@@ -11,6 +11,7 @@ import "../SideBar/js/ContactView.mjs" as CUtils
 ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
+    property alias chatListView: chatListView
 
     cacheBuffer: chatListView.height * 3
     property var blankTransition: Transition {}

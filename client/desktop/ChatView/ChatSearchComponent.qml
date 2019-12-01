@@ -51,12 +51,7 @@ Component {
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
                 onClicked: {
-                    convWindow.state = "jumpState"
-                    SearchUtils.jumpHandler(ownedConversation,
-                                            convWindow.chatListView, chatPane,
-                                            convWindow, false)
-                    convWindow.returnToBounds()
-                    convWindow.state = ""
+                    convWindow.positionViewAtIndex(ownedConversation.prevSearchMatch(), ListView.Center)
                 }
             }
 
@@ -69,12 +64,7 @@ Component {
                 opacity: enabled ? 1 : 0.5
 
                 onClicked: {
-                    convWindow.state = "jumpState"
-                    SearchUtils.jumpHandler(ownedConversation,
-                                            convWindow.chatListView, chatPane,
-                                            convWindow, true)
-                    convWindow.returnToBounds()
-                    convWindow.state = ""
+                    convWindow.positionViewAtIndex(ownedConversation.nextSearchMatch(), ListView.Center)
                 }
             }
 
