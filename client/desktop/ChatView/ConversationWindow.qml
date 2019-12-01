@@ -13,8 +13,7 @@ ListView {
     property alias chatScrollBar: chatScrollBarInner
 
     cacheBuffer: 3000
-    property var blankTransition: Transition {
-    }
+    property var blankTransition: Transition {}
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -31,10 +30,7 @@ ListView {
 
     model: ownedConversation
 
-    Component.onCompleted: {
-        chatScrollBarInner.position = 100.0
-        convWindow.returnToBounds()
-    }
+    Component.onCompleted: positionViewAtEnd()
 
     delegate: Row {
         id: chatRow
@@ -145,8 +141,7 @@ ListView {
                      } else {
                          std
                      }
-            ChatBubbleHover {
-            }
+            ChatBubbleHover {}
         }
 
         AvatarMain {
