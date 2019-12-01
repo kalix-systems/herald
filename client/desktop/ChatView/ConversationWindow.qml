@@ -142,7 +142,7 @@ Flickable {
                 CB.ChatBubble {
                     id: bubbleActual
                     maxWidth: cvPane.width * 0.66
-                    color: CmnCfg.palette.paneColor
+                    color: CmnCfg.palette.lightGrey
                     senderColor: userColor
                     convContainer: convWindow
                     highlight: matchStatus === 2

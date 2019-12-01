@@ -23,7 +23,7 @@ ScrollView {
         color: "white"
         background: Rectangle {
             anchors.fill: parent
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
 
         verticalAlignment: TextEdit.AlignVCenter

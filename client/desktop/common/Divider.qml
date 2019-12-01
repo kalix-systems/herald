@@ -10,5 +10,5 @@ Rectangle {
     anchors.left: horizontal ? leftAnchor : undefined
     width: horizontal ? 1 : parent.width
     height: horizontal ? parent.width : 1
-    color: CmnCfg.palette.borderColor
+    color: CmnCfg.palette.black
 }

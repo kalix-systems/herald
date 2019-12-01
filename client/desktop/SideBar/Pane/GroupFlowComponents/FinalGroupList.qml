@@ -20,7 +20,7 @@ ListView {
         width: parent.width
 
         Common.PlatonicRectangle {
-            color: CmnCfg.palette.paneColor
+            color: CmnCfg.palette.lightGrey
             id: memberRectangle
             boxColor: herald.users.colorById(memberId)
             boxTitle: herald.users.nameById(memberId)
@@ -32,7 +32,7 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: herald.users.nameById(memberId)
-                labelColor: CmnCfg.palette.secondaryColor
+                labelColor: CmnCfg.palette.offBlack
                 labelSize: 14
                 lastBody: "@" + memberId
             }

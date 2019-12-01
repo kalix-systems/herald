@@ -16,7 +16,7 @@ Page {
     property Messages ownedConversation
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     header: CVUtils.ChatBar {
@@ -78,7 +78,7 @@ Page {
 
     Common.Divider {
         height: 1
-        color: CmnCfg.palette.borderColor
+        color: CmnCfg.palette.black
         bottomAnchor: chatTextArea.top
     }
 

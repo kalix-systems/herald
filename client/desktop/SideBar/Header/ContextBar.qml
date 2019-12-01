@@ -16,7 +16,7 @@ ToolBar {
     height: CmnCfg.toolbarHeight
 
     background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
     }
 
     property alias headerText: headerText.text
@@ -40,7 +40,7 @@ ToolBar {
             }
             elide: Text.ElideRight
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            color: CmnCfg.palette.mainColor
+            color: CmnCfg.palette.white
         }
 
         Row {
@@ -49,7 +49,7 @@ ToolBar {
             Imports.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 // this is a vertical center offset
                 topPadding: 1
                 source: "qrc:/search-icon.svg"
@@ -60,13 +60,13 @@ ToolBar {
             Imports.ButtonForm {
                 id: newMessageButton
                 source: "qrc:/compose-icon-white.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: convoMenu.open()
             }
 
             Imports.ButtonForm {
                 id: optionsButton
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 source: "qrc:/options-icon.svg"
                 onClicked: contextOptionsMenu.open()
             }

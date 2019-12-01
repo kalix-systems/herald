@@ -65,7 +65,7 @@ Window {
                     enabled: false
                     property bool userIdValid: true
                     placeholderText: enabled ? "Enter UID " : herald.config.configId
-                    selectionColor: CmnCfg.palette.tertiaryColor
+                    selectionColor: "lightsteelblue"
                 }
 
                 TextField {
@@ -73,7 +73,7 @@ Window {
                     maximumLength: 256
                     property bool usernameValid: true
                     text: herald.config.name
-                    selectionColor: CmnCfg.palette.tertiaryColor
+                    selectionColor: "lightsteelblue"
                 }
             }
 

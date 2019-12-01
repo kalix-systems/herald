@@ -33,11 +33,12 @@ ListView {
             groupPicture: !messageData.conversationPairwise
             labelComponent: Av.ConversationLabel {
                 contactName: messageData.conversationTitle
-                labelColor: CmnCfg.palette.secondaryColor
+                labelColor: CmnCfg.palette.black
                 labelSize: 14
                 lastAuthor: outbound ? "You" : messageData.author
                 lastBody: lastAuthor + ": " + messageData.body
                 lastTimestamp: Utils.friendlyTimestamp(messageData.time)
+
             }
         }
     }

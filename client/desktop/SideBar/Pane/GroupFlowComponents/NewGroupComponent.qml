@@ -14,7 +14,7 @@ Component {
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
 
         //header includes group title and picture settings
         GroupHeaderComponent {
@@ -65,7 +65,7 @@ Component {
 
             background: Rectangle {
                 anchors.fill: parent
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.offBlack
             }
 
             Text {

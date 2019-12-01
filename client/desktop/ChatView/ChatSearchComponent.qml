@@ -36,7 +36,7 @@ Component {
                 property bool active: searchToolBar.state == "searchActiveState"
                 property int searchPlace: active ? ownedConversation.searchIndex : 0
                 property int numMatches: active ? ownedConversation.searchNumMatches : 0
-                color: CmnCfg.palette.paneColor
+                color: CmnCfg.palette.lightGrey
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + numMatches : ""
                 Layout.minimumWidth: 24
@@ -47,7 +47,7 @@ Component {
                 id: back
                 source: "qrc:/up-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
                 onClicked: {
@@ -64,7 +64,7 @@ Component {
                 id: forward
                 source: "qrc:/down-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
 
@@ -81,7 +81,7 @@ Component {
             Imports.ButtonForm {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: {
                     ownedConversation.searchActive = false
                     messageBar.state = ""

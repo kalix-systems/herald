@@ -36,7 +36,7 @@ Rectangle {
 
     property var replyId
 
-    color: CmnCfg.palette.mainColor
+    color: CmnCfg.palette.white
     clip: true
 
     height: containerCol.height
@@ -100,11 +100,11 @@ Rectangle {
             TextArea {
                 id: chatText
                 background: Rectangle {
-                    color: CmnCfg.palette.mainColor
+                    color: CmnCfg.palette.white
                 }
                 bottomPadding: CmnCfg.smallMargin * 0.5
-                selectionColor: CmnCfg.palette.tertiaryColor
-                color: CmnCfg.palette.mainTextColor
+                selectionColor: CmnCfg.palette.highlightColor
+                color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Message " + conversationItem.title

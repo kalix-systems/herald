@@ -17,7 +17,7 @@ Component {
         id: headerBarComponent
         height: CmnCfg.toolbarHeight
         background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
         RowLayout {
 
@@ -33,7 +33,7 @@ Component {
                 font.family: CmnCfg.chatFont.name
                 font.bold: true
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                color: CmnCfg.palette.mainColor
+                color: CmnCfg.palette.white
             }
             Item {
                 Layout.fillWidth: true
@@ -41,7 +41,7 @@ Component {
 
             Imports.ButtonForm {
                 id: xButton
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 source: "qrc:/x-icon.svg"
                 scale: 0.8
                 onClicked: {

@@ -27,7 +27,7 @@ Page {
     property alias sideBarState: sideBarState
 
     background: Rectangle {
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
     }
 
     ///--- SearchBar for contacts, add contact button

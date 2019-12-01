@@ -17,7 +17,7 @@ ToolBar {
     z: CmnCfg.middleZ
 
     background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
     }
 
     RowLayout {
@@ -57,7 +57,7 @@ ToolBar {
             Layout.fillWidth: true
             elide: Label.ElideRight
             text: conversationItem.title
-            color: CmnCfg.palette.mainColor
+            color: CmnCfg.palette.white
         }
 
         Loader {
@@ -75,7 +75,7 @@ ToolBar {
             Imports.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: chatToolBar.state = "searchState"
             }
@@ -83,7 +83,7 @@ ToolBar {
             Imports.ButtonForm {
                 id: timerButton
                 source: timerMenu.chosenTimer
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: timerMenu.open()
             }
@@ -96,7 +96,7 @@ ToolBar {
             Imports.ButtonForm {
                 id: convOptionsButton
                 source: "qrc:/options-icon.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: convOptionsMenu.open()
                 Menu {
                     id: convOptionsMenu

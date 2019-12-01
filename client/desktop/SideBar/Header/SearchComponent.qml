@@ -17,7 +17,7 @@ Component {
     ToolBar {
         height: CmnCfg.toolbarHeight
         background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
         RowLayout {
 
@@ -28,7 +28,7 @@ Component {
 
             Rectangle {
                 Layout.fillWidth: true
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.offBlack
                 height: parent.height
                 Layout.leftMargin: -12
 
@@ -43,7 +43,7 @@ Component {
                     anchors.topMargin: CmnCfg.smallMargin / 4
 
                     background: Rectangle {
-                        color: CmnCfg.palette.secondaryColor
+                        color: CmnCfg.palette.offBlack
                         anchors.fill: parent
                     }
 
@@ -58,7 +58,7 @@ Component {
                     Imports.ButtonForm {
                         source: "qrc:/x-icon.svg"
                         scale: 0.8
-                        fill: CmnCfg.palette.paneColor
+                        fill: CmnCfg.palette.lightGrey
                         anchors.right: parent.right
                         anchors.rightMargin: CmnCfg.smallMargin / 2
                         anchors.verticalCenter: parent.verticalCenter
