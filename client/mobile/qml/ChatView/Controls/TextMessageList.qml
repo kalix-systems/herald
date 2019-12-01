@@ -23,7 +23,7 @@ Column {
             readonly property string timestamp: Utils.friendlyTimestamp(
                                                     insertionTime)
 
-            readonly property string authName: outbound ? "" : herald.users.nameById(
+            readonly property string authName: herald.users.nameById(
                                                               author)
             readonly property bool outbound: author === herald.config.configId
 
