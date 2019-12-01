@@ -43,6 +43,7 @@ Column {
                     friendlyTimestamp: timestamp
                     authorName: authName
                     receiptImage: proxyReceiptImage
+                    authorColor: userColor
                 }
             }
 
