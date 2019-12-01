@@ -24,13 +24,6 @@ Page {
         conversationItem: parent.conversationItem
     }
 
-    Component {
-        id: chatBarComponent
-        CVUtils.ChatBar {
-            conversationItem: messageBar.conversationItem
-        }
-    }
-
     ChatSearchComponent {
         id: chatSearchComponent
     }
