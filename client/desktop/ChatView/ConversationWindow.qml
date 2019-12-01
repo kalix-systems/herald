@@ -31,6 +31,7 @@ ListView {
 
     Component.onCompleted: {
         chatScrollBarInner.position = 100.0
+        convWindow.returnToBounds()
     }
 
     delegate: Row {
