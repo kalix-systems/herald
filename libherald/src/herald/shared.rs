@@ -45,7 +45,8 @@ fn emit_new_data() -> Option<()> {
 
 pub(crate) fn push<T: Into<Update>>(update: T) {
     // if this fails, our typical error reporting machinery is broken
-    // but we might want to log it some other way. TODO
+    // (which would be odd given that the channel should never be dropped)
+    // but we might want to log it some other way.  TODO
     if BUS.tx.clone().send(update.into()).is_ok() {
         emit_new_data();
     }
