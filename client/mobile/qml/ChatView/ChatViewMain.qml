@@ -14,7 +14,7 @@ Page {
     }
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     ScrollView {
@@ -58,7 +58,7 @@ Page {
 
     Rectangle {
         anchors.fill: chatTextArea
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
         z: -1
     }
 }

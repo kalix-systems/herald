@@ -48,7 +48,7 @@ Column {
 
             CB.ChatBubble {
                 maxWidth: textMessageCol.width * 0.66
-                color: CmnCfg.palette.paneColor
+                color: CmnCfg.palette.lightGrey
                 senderColor: userColor
                 content: std
                 convContainer: parent
