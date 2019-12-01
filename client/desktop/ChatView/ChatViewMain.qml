@@ -43,9 +43,11 @@ Page {
             left: parent.left
             right: parent.right
         }
+
         Component.onCompleted: forceActiveFocus()
         Keys.onUpPressed: chatScrollBar.decrease()
         Keys.onDownPressed: chatScrollBar.increase()
+
         Connections {
             target: ownedConversation
             onRowsInserted: {
@@ -93,11 +95,11 @@ Page {
         }
 
         keysProxy: Item {
-            Keys.onReturnPressed: JS.enterKeyHandler(
-                                      event, chatTextArea.chatText,
-                                      ownedConversation.builder,
-                                      // this is actually a text area TODO rename
-                                      ownedConversation, chatTextArea)
+            Keys.onReturnPressed: JS.enterKeyHandler(event,
+                                                     chatTextArea.chatText,
+                                                     ownedConversation.builder,
+                                                     ownedConversation,
+                                                     chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

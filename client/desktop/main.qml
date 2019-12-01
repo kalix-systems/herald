@@ -36,7 +36,6 @@ ApplicationWindow {
         // NOTE: This is very important.
         // Until our initialization is cleaned up this has to happen immediately after `Herald`
         // is initialized.
-        //
         // TODO: This should probably be called from C++ before executing the application with a manually exposed
         // extern "C" function.
         Component.onCompleted: herald.setAppLocalDataDir(
