@@ -41,7 +41,6 @@ ListView {
     model: ownedConversation
 
     Component.onCompleted: {
-        print(maximumFlickVelocity)
         positionViewAtEnd()
     }
 
