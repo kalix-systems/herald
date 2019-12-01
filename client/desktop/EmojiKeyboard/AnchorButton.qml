@@ -12,7 +12,7 @@ Button {
     background: Item {
     }
     icon.source: imageSource
-    icon.color: CmnCfg.palette.mainColor
+    icon.color: CmnCfg.palette.white
     icon.width: 15
     icon.height: 15
 }

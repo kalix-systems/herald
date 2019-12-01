@@ -24,7 +24,7 @@ Item {
                 margins: CmnCfg.smallMargin
             }
             color: "#33000000" // transparent
-            border.color: CmnCfg.palette.sideBarHighlightColor
+            border.color: CmnCfg.palette.medGrey
             height: 24
             Row {
                 anchors.fill: parent
@@ -34,7 +34,7 @@ Item {
                     background: Item {
                     }
                     icon.source: "qrc:/search-icon.svg"
-                    icon.color: CmnCfg.palette.sideBarHighlightColor
+                    icon.color: CmnCfg.palette.medGrey
                     icon.height: 17
                     icon.width: 17
                     anchors.verticalCenter: parent.verticalCenter
@@ -44,7 +44,7 @@ Item {
                     id: searchTextArea
                     padding: 0
                     topPadding: 3
-                    color: CmnCfg.palette.sideBarHighlightColor
+                    color: CmnCfg.palette.medGrey
                     anchors.verticalCenter: parent.verticalCenter
                     placeholderText: "Search emoji"
                     Keys.onReturnPressed: event.accepted = true
@@ -58,7 +58,7 @@ Item {
                     background: Item {
                     }
                     icon.source: "qrc:/x-icon.svg"
-                    icon.color: CmnCfg.palette.sideBarHighlightColor
+                    icon.color: CmnCfg.palette.medGrey
                     icon.height: 17
                     icon.width: 17
                     onClicked: emoKeysPopup.active = false
@@ -94,7 +94,7 @@ Item {
 
             contentItem: Rectangle {
                 anchors.fill: parent
-                border.color: CmnCfg.palette.secondaryTextColor
+                border.color: CmnCfg.palette.darkGrey
                 color: menu.model[menu.currentIndex]
                 Shape {
                     id: cornerCarat
@@ -104,7 +104,7 @@ Item {
                     }
                     anchors.fill: parent
                     ShapePath {
-                        fillColor: CmnCfg.palette.secondaryTextColor
+                        fillColor: CmnCfg.palette.darkGrey
                         strokeColor: "#00000000"
                         startX: cornerCarat.width / 2
                         startY: cornerCarat.height
@@ -153,7 +153,7 @@ Item {
                         padding: CmnCfg.smallMargin
                         Label {
                             text: modelData.sectionName
-                            color: CmnCfg.palette.sideBarHighlightColor
+                            color: CmnCfg.palette.medGrey
                             font.bold: true
                             font.family: CmnCfg.chatFont.name
                             bottomPadding: CmnCfg.smallMargin
@@ -194,7 +194,7 @@ Item {
             id: hr
             width: parent.width
             height: 1
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
 
         RowLayout {

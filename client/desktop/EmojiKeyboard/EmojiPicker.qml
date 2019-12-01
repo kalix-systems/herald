@@ -13,7 +13,7 @@ Rectangle {
 
     height: 250
     width: 280
-    color: CmnCfg.palette.secondaryColor
+    color: CmnCfg.palette.offBlack
     border.color: "#FFFFFF"
 
     PickerInterior {
