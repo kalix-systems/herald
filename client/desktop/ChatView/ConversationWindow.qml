@@ -30,7 +30,7 @@ ListView {
     model: ownedConversation
 
     Component.onCompleted: {
-        chatScrollBar.position = 1.0 + chatScrollBar.size
+        chatScrollBarInner.position = 100.0
     }
 
     delegate: Row {
@@ -170,7 +170,7 @@ ListView {
             }
 
             PropertyChanges {
-                target: chatScrollBar
+                target: chatScrollBarInner
                 policy: ScrollBar.AlwaysOn
             }
         }
