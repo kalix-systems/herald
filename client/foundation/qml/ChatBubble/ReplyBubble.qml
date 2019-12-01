@@ -26,7 +26,7 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: CmnCfg.palette.sideBarHighlightColor
+        color: CmnCfg.palette.medGrey
         Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: reply.width
 
@@ -114,7 +114,7 @@ ColumnLayout {
                     font.pixelSize: 10
                     text: replyType === 2 ? Utils.friendlyTimestamp(
                                                 opInsertionTime) : ""
-                    color: CmnCfg.palette.secondaryTextColor
+                    color: CmnCfg.palette.darkGrey
                 }
 
                 Button {

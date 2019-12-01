@@ -9,7 +9,7 @@ import "qrc:/imports" as Imports
 
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.sideBarHighlightColor
+    color: CmnCfg.palette.medGrey
     width: parent.width
     height: Math.max(textCol.height, 20)
 
@@ -75,7 +75,7 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color: CmnCfg.palette.mainTextColor
+            color: CmnCfg.palette.black
         }
 
         Label {
@@ -86,7 +86,7 @@ Rectangle {
             font.pixelSize: 10
             text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
             id: timestamp
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
     }
 }
