@@ -31,10 +31,7 @@ ListView {
 
     model: ownedConversation
 
-    Component.onCompleted: {
-        positionViewAtEnd()
-        print(cacheBuffer)
-    }
+    Component.onCompleted: positionViewAtEnd()
 
     delegate: Row {
         id: chatRow
