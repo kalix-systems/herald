@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
-import "../common" as Common
+import "qrc:/imports" as Imports
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "Controls" as CVUtils
@@ -73,7 +73,7 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             height: parent.height
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
                 fill: CmnCfg.palette.paneColor
@@ -81,7 +81,7 @@ ToolBar {
                 onClicked: chatToolBar.state = "searchState"
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: timerButton
                 source: timerMenu.chosenTimer
                 fill: CmnCfg.palette.paneColor
@@ -93,7 +93,7 @@ ToolBar {
                 id: timerMenu
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: convOptionsButton
                 source: "qrc:/options-icon.svg"
                 fill: CmnCfg.palette.paneColor
@@ -102,11 +102,11 @@ ToolBar {
                     id: convOptionsMenu
 
                     MenuItem {
-                        text: "Archive"
+                        text: qsTr("Archive")
                     }
 
                     MenuItem {
-                        text: "Clear History"
+                        text: qsTr("Clear History")
                         onTriggered: ownedConversation.clearConversationHistory(
                                          )
                     }

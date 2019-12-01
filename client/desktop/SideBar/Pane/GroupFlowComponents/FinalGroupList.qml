@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../../common" as Common
 import "qrc:/imports/Avatar" as Av
+import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQml 2.13
 
@@ -36,7 +37,7 @@ ListView {
                 lastBody: "@" + memberId
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: xIcon
                 anchors.right: parent.right
                 anchors.rightMargin: CmnCfg.largeMargin / 2

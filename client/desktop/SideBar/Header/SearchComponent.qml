@@ -8,6 +8,7 @@ import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
+import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Component {
@@ -54,7 +55,7 @@ Component {
                         }
                     }
 
-                    Common.ButtonForm {
+                    Imports.ButtonForm {
                         source: "qrc:/x-icon.svg"
                         scale: 0.8
                         fill: CmnCfg.palette.paneColor

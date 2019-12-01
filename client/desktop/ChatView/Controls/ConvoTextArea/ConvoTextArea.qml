@@ -5,6 +5,7 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
+import "qrc:/imports" as Imports
 import "../js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../../common" as Common
 
@@ -48,14 +49,14 @@ Rectangle {
 
     height: containerCol.height
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         source: "qrc:/attach-icon.svg"
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom

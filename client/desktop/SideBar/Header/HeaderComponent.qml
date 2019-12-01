@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 import "../popups" as Popups
@@ -38,7 +39,7 @@ Component {
                 Layout.fillWidth: true
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: xButton
                 fill: CmnCfg.palette.paneColor
                 source: "qrc:/x-icon.svg"

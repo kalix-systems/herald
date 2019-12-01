@@ -38,7 +38,7 @@ Item {
                 pixelSize: labelSize
             }
             Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-            Layout.preferredHeight: labelGrid.height / 4
+            Layout.preferredHeight: labelGrid.height * 0.25
             Layout.maximumWidth: parent.width
             elide: "ElideRight"
             text: contactName
@@ -52,7 +52,7 @@ Item {
                 pixelSize: 11
             }
             text: lastTimestamp
-            Layout.preferredHeight: labelGrid.height / 4
+            Layout.preferredHeight: labelGrid.height * 0.25
             Layout.alignment: Qt.AlignRight | Qt.AlignTop
             color: CmnCfg.palette.secondaryColor
         }
@@ -67,7 +67,7 @@ Item {
             text: lastBody
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
-            Layout.maximumHeight: labelGrid.height / 2
+            Layout.maximumHeight: labelGrid.height * 0.25
             color: CmnCfg.palette.secondaryColor
         }
 

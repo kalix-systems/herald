@@ -6,6 +6,7 @@ import "../../../common" as Common
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 
 Component {
 
@@ -53,7 +54,7 @@ Component {
         }
 
         //create group button
-        Common.ButtonForm {
+        Imports.ButtonForm {
             anchors.top: groupSelectText.bottom
             anchors.topMargin: CmnCfg.smallMargin / 2
             anchors.right: parent.right

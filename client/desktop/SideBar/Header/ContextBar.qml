@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.12
 import "../popups" as Popups
 import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 import QtGraphicalEffects 1.0
@@ -45,7 +46,7 @@ ToolBar {
         Row {
             spacing: 12
             Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: searchButton
                 property bool searchRegex: false
                 fill: CmnCfg.palette.paneColor
@@ -56,14 +57,14 @@ ToolBar {
                 onClicked: sideBarState.state = "globalSearch"
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: newMessageButton
                 source: "qrc:/compose-icon-white.svg"
                 fill: CmnCfg.palette.paneColor
                 onClicked: convoMenu.open()
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: optionsButton
                 fill: CmnCfg.palette.paneColor
                 source: "qrc:/options-icon.svg"

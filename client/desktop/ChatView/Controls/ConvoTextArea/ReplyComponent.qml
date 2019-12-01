@@ -5,17 +5,8 @@ import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
-
-//NPB: just looks kind bad
 Rectangle {
     id: wrapper
     color: CmnCfg.palette.sideBarHighlightColor
@@ -35,7 +26,7 @@ Rectangle {
                                                ownedConversation.builderopAuthor)]
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: exitButton
         anchors {
             //  margins: CmnCfg.smallMargin

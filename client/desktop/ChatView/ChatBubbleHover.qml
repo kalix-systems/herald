@@ -1,5 +1,6 @@
 import QtQuick 2.13
 import "../common" as Common
+import "qrc:/imports" as Imports
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "Popups" as Popups
@@ -19,7 +20,7 @@ MouseArea {
         top: parent.top
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: messageOptionsButton
         visible: chatBubbleHitbox.containsMouse
 
@@ -39,7 +40,7 @@ MouseArea {
         id: messageOptionsMenu
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: replyButton
         visible: chatBubbleHitbox.containsMouse
         anchors {

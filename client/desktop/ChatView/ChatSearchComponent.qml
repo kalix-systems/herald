@@ -6,6 +6,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls.Styles 1.0
 import "Controls/" as CVUtils
 import "../common" as Common
+import "qrc:/imports" as Imports
 import "js/SearchHandler.mjs" as SearchUtils
 
 Component {
@@ -42,7 +43,7 @@ Component {
                 Layout.leftMargin: -20
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: back
                 source: "qrc:/up-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
@@ -59,7 +60,7 @@ Component {
                 }
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: forward
                 source: "qrc:/down-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
@@ -77,7 +78,7 @@ Component {
                 }
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
                 fill: CmnCfg.palette.paneColor
