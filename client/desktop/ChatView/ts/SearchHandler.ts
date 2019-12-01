@@ -1,12 +1,12 @@
 export function isOnscreen(
   index: number,
-  chatListView: Repeater,
+  chatListView: ListView<Item>,
   chatPane: Page,
   conversationWindow: ConversationWindow,
   forward: boolean
 ): boolean {
   if (!forward) {
-    const item = chatListView.itemAt(index);
+    const item = chatListView.itemAtIndex(index);
     const x = item.x;
     const y = item.y;
 
@@ -16,7 +16,7 @@ export function isOnscreen(
 
     return 0 < yPos && yPos2 < pageHeight;
   } else {
-    const item = chatListView.itemAt(index);
+    const item = chatListView.itemAtIndex(index);
     const x = item.x;
     const y = item.y;
 
@@ -30,7 +30,7 @@ export function isOnscreen(
 
 export function searchTextHandler(
   ownedConversation: Messages,
-  chatListView: Repeater,
+  chatListView: ListView<Item>,
   chatPane: Page,
   conversationWindow: ConversationWindow
 ): void {
@@ -44,16 +44,14 @@ export function searchTextHandler(
   );
 
   if (!onScreen) {
-    const convoMiddle = conversationWindow.height / 2;
-    conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
-
+    conversationWindow.positionViewAtIndex(index, ListView.Center)
     conversationWindow.returnToBounds();
   }
 }
 
 export function jumpHandler(
   ownedConversation: Messages,
-  chatListView: Repeater,
+  chatListView: ListView<Item>,
   chatPane: Page,
   conversationWindow: ConversationWindow,
   forward: boolean
@@ -72,15 +70,14 @@ export function jumpHandler(
     const index = ownedConversation.nextSearchMatch();
 
     if (toJump(index)) {
-      const convoMiddle = conversationWindow.height / 2;
-      conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+      conversationWindow.positionViewAtIndex(index, ListView.Center)
+
     }
   } else {
     const index = ownedConversation.prevSearchMatch();
 
     if (toJump(index)) {
-      const convoMiddle = conversationWindow.height / 2;
-      conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+      conversationWindow.positionViewAtIndex(index, ListView.Center)
     }
   }
 }

@@ -1,6 +1,6 @@
 export function isOnscreen(index, chatListView, chatPane, conversationWindow, forward) {
     if (!forward) {
-        const item = chatListView.itemAt(index);
+        const item = chatListView.itemAtIndex(index);
         const x = item.x;
         const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
@@ -9,7 +9,7 @@ export function isOnscreen(index, chatListView, chatPane, conversationWindow, fo
         return 0 < yPos && yPos2 < pageHeight;
     }
     else {
-        const item = chatListView.itemAt(index);
+        const item = chatListView.itemAtIndex(index);
         const x = item.x;
         const y = item.y;
         const yPos = chatPane.mapFromItem(chatListView, x, y).y;
@@ -22,8 +22,7 @@ export function searchTextHandler(ownedConversation, chatListView, chatPane, con
     const index = ownedConversation.prevSearchMatch();
     const onScreen = isOnscreen(index, chatListView, chatPane, conversationWindow, false);
     if (!onScreen) {
-        const convoMiddle = conversationWindow.height / 2;
-        conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+        conversationWindow.positionViewAtIndex(index, 1);
         conversationWindow.returnToBounds();
     }
 }
@@ -34,15 +33,13 @@ export function jumpHandler(ownedConversation, chatListView, chatPane, conversat
     if (forward) {
         const index = ownedConversation.nextSearchMatch();
         if (toJump(index)) {
-            const convoMiddle = conversationWindow.height / 2;
-            conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+            conversationWindow.positionViewAtIndex(index, 1);
         }
     }
     else {
         const index = ownedConversation.prevSearchMatch();
         if (toJump(index)) {
-            const convoMiddle = conversationWindow.height / 2;
-            conversationWindow.contentY = chatListView.itemAt(index).y - convoMiddle;
+            conversationWindow.positionViewAtIndex(index, 1);
         }
     }
 }

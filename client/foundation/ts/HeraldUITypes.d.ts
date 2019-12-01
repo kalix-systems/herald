@@ -1,4 +1,4 @@
-declare class ContactView extends ListView<ContactItem> {}
+declare class ContactView extends ListView<ContactItem> { }
 
 declare enum ColorScheme {
   Dark = 0,
@@ -12,10 +12,13 @@ declare class TextAreaForm {
   replyId: MsgId;
 }
 
+
+
 declare class ConversationWindow {
   contentY: number;
   height: number;
   returnToBounds(): void;
+  positionViewAtIndex(index: number, mode: number): void;
 }
 
 declare class ContactItem extends Item {
