@@ -17,28 +17,28 @@ export function friendlyTimestamp(msEpochTime: number): string {
   const secondsPerWeek = 3600 * 24 * 7;
   const secondsPerYear = 3600 * 24 * 365;
 
-  var weekdays = new Array(7);
-	weekdays[0] = "Sun";
-	weekdays[1] = "Mon";
-	weekdays[2] = "Tues";
-	weekdays[3] = "Weds";
-	weekdays[4] = "Thurs";
-	weekdays[5] = "Fri";
-	weekdays[6] = "Sat";
+  const weekdays = new Array(7);
+  weekdays[0] = "Sun";
+  weekdays[1] = "Mon";
+  weekdays[2] = "Tues";
+  weekdays[3] = "Weds";
+  weekdays[4] = "Thurs";
+  weekdays[5] = "Fri";
+  weekdays[6] = "Sat";
 
-var months = new Array(12);
-	months[0] = "Jan";
-	months[1] = "Feb";
-	months[2] = "Mar";
-	months[3] = "Apr";
-	months[4] = "May";
-	months[5] = "Jun";
-	months[6] = "Jul";
-	months[7] = "Aug";
-	months[8] = "Sep";
-	months[9] = "Oct";
-	months[10] = "Nov";
-	months[11] = "Dec";
+  const months = new Array(12);
+  months[0] = "Jan";
+  months[1] = "Feb";
+  months[2] = "Mar";
+  months[3] = "Apr";
+  months[4] = "May";
+  months[5] = "Jun";
+  months[6] = "Jul";
+  months[7] = "Aug";
+  months[8] = "Sep";
+  months[9] = "Oct";
+  months[10] = "Nov";
+  months[11] = "Dec";
 
   const dt = new Date(msEpochTime);
   const now = Date.now();
@@ -57,15 +57,14 @@ var months = new Array(12);
   }
 
   if (diff < secondsPerWeek) {
-  	const dayNum = dt.getDay();
-  	return weekdays[dayNum];
-
+    const dayNum = dt.getDay();
+    return weekdays[dayNum];
   }
 
   if (diff < secondsPerYear) {
-  	const monthNum = dt.getMonth();
-  	const dateNum = dt.getDate();
-  	return months[monthNum] + " " + dateNum;
+    const monthNum = dt.getMonth();
+    const dateNum = dt.getDate();
+    return months[monthNum] + " " + dateNum;
   }
 
   //not using datestring because don't want day of the week
@@ -157,23 +156,23 @@ export function safeStringOrDefault(
 }
 
 /*
-* returns the uri of an icon corresponding to the
-* receipt code
-* */
-export function receiptCodeSwitch(receiptCode: number) : string {
+ * returns the uri of an icon corresponding to the
+ * receipt code
+ * */
+export function receiptCodeSwitch(receiptCode: number): string {
   switch (receiptCode) {
     case 0: {
-      return ""
+      return "";
     }
     case 1: {
-      return "qrc:/single-check-receipt-icon.svg"
+      return "qrc:/single-check-receipt-icon.svg";
     }
     case 2: {
-      return "qrc:/double-check-receipt-icon.svg"
+      return "qrc:/double-check-receipt-icon.svg";
     }
     case 3: {
-      return "qrc:/single-check-receipt-icon.svg"
+      return "qrc:/single-check-receipt-icon.svg";
     }
   }
-  return ""
+  return "";
 }
