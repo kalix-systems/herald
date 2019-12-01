@@ -15,7 +15,7 @@ RowLayout {
             id: timestamp
             font.pixelSize: 10
             text: friendlyTimestamp
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
 
         Button {
