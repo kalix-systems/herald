@@ -10,17 +10,18 @@ import "../SideBar/js/ContactView.mjs" as CUtils
 
 ListView {
     id: chatListView
+    property alias chatScrollBar: chatScrollBarInner
 
     cacheBuffer: 3000
 
     ScrollBar.vertical: ScrollBar {
-        id: chatScrollBar
+        id: chatScrollBarInner
         width: CmnCfg.padding
 
         policy: ScrollBar.AsNeeded
         hoverEnabled: true
 
-        stepSize: 0.001
+        stepSize: 0.01
         minimumSize: 0.1
     }
 
@@ -141,8 +142,7 @@ ListView {
                      } else {
                          std
                      }
-            ChatBubbleHover {
-            }
+            ChatBubbleHover {}
         }
 
         AvatarMain {
@@ -175,5 +175,4 @@ ListView {
             }
         }
     ]
-
 }
