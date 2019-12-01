@@ -6,7 +6,7 @@ import "../../Common"
 
 RowLayout {
     id: chatRowLayout
-    readonly property real textareaHeight: CmnCfg.units.dp(36)
+    readonly property real textareaHeight: CmnCfg.units.dp(24)
     property bool send: cta.text.length > 0
     width: parent.width
     spacing: 0
@@ -24,10 +24,6 @@ RowLayout {
             pointSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
         }
-
-        background: Rectangle {
-            color: CmnCfg.palette.white
-        }
     }
 
     Grid {
@@ -39,13 +35,13 @@ RowLayout {
 
         IconButton {
             Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
+            color: CmnCfg.palette.black
             imageSource: "qrc:/camera-icon.svg"
         }
 
         IconButton {
             Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
+            color: CmnCfg.palette.black
             tapCallback: send ? function () {
                 ownedMessages.builder.body = cta.text
                 ownedMessages.builder.finalize()
@@ -53,5 +49,7 @@ RowLayout {
             } : function () {}
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
         }
+
+
     }
 }
