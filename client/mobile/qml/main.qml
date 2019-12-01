@@ -11,8 +11,6 @@ ApplicationWindow {
     width: 300
     height: 500
 
-    // utility code, meant to reduce the amount of js laying
-    // around the code base
     Herald {
         id: herald
 

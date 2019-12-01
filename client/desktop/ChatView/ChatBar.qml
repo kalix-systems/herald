@@ -9,14 +9,6 @@ import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "Controls" as CVUtils
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
 ToolBar {
     id: chatToolBar
     property var conversationItem
