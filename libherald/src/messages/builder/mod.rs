@@ -1,4 +1,4 @@
-use crate::{content_push, ffi, interface::*, ret_err, ret_none, spawn};
+use crate::{content_push, ffi, interface::*, push, ret_err, ret_none, spawn};
 use herald_common::{Time, UserId};
 use heraldcore::{
     message::*,
@@ -122,10 +122,8 @@ impl MessageBuilderTrait for MessageBuilder {
                     Msg(msg) => {
                         ret_err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
                     }
-                    Error { error, line_number } => {
-                        // TODO better line number usage
-                        eprintln!("Error at {}", line_number);
-                        ret_err!(Err(error))
+                    Error { error, location } => {
+                        push((Err::<(), HErr>(error), location));
                     }
                     StoreDone(mid) => {
                         ret_err!(content_push(cid, MsgUpdate::StoreDone(mid)));

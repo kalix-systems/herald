@@ -48,7 +48,7 @@ macro_rules! ret_err {
                 let err_string = crate::utils::ret_err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::push(crate::Update::Error(err_string)).ok();
+                $crate::push(crate::Update::Error(err_string));
                 return $retval;
             }
         }
@@ -83,7 +83,7 @@ macro_rules! push_err {
                 let err_string = crate::utils::err_string_msg(&e, file!(), line!(), $msg);
 
                 eprintln!("{}", err_string);
-                $crate::push(Update::Error(err_string)).ok();
+                $crate::push(Update::Error(err_string));
                 None
             }
         }
@@ -114,7 +114,7 @@ macro_rules! ret_none {
                 let err_string = $crate::utils::ret_none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::push(crate::Update::Error(err_string)).ok();
+                $crate::push(crate::Update::Error(err_string));
                 return $retval;
             }
         }
@@ -131,7 +131,7 @@ macro_rules! cont_none {
                 let err_string = $crate::utils::ret_none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
-                $crate::push(crate::Update::Error(err_string)).ok();
+                $crate::push(crate::Update::Error(err_string));
                 continue;
             }
         }

@@ -45,8 +45,6 @@ impl Herald {
 
         let uid = ret_err!(UserId::try_from(user_id.as_str()));
 
-        let mut emit = self.emit.clone();
-
         spawn!(match ret_err!(net::register(uid)) {
             Res::UIDTaken => {
                 eprintln!("UID taken!");
@@ -58,8 +56,7 @@ impl Herald {
                 eprintln!("Bad sig: {:?}", s);
             }
             Res::Success => {
-                ret_err!(push(shared::Update::RegistrationSuccess));
-                emit.new_data_ready();
+                push(shared::Update::RegistrationSuccess);
             }
         });
     }

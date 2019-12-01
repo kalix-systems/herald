@@ -228,7 +228,7 @@ impl OutboundMessageBuilder {
                     Err(e) => {
                         callback(StoreAndSend::Error {
                             error: e.into(),
-                            line_number: line!(),
+                            location: loc!(),
                         });
                         return;
                     }

@@ -1,6 +1,5 @@
 use super::Emitter;
 use crossbeam_channel::*;
-use heraldcore::{channel_send_err, NE};
 use lazy_static::*;
 use parking_lot::Mutex;
 
@@ -10,6 +9,8 @@ pub enum Update {
     User(crate::users::shared::UserUpdate),
     Conf(crate::config::ConfUpdate),
     Error(String),
+    // This is here because rust doesn't have specializatoin
+    Nil,
 }
 
 /// Channel for updates from `ConversationContent` objects.
@@ -34,7 +35,6 @@ lazy_static! {
 }
 
 /// Emits a signal to the QML runtime, returns `None` if the emitter has not been provided yet.
-#[must_use]
 fn emit_new_data() -> Option<()> {
     let mut lock = EMITTER.lock();
     let emitter = lock.as_mut()?;
@@ -43,13 +43,12 @@ fn emit_new_data() -> Option<()> {
     Some(())
 }
 
-pub(crate) fn push<T: Into<Update>>(update: T) -> Result<(), heraldcore::errors::HErr> {
-    BUS.tx
-        .clone()
-        .send(update.into())
-        .map_err(|_| channel_send_err!())?;
-    emit_new_data().ok_or(NE!())?;
-    Ok(())
+pub(crate) fn push<T: Into<Update>>(update: T) {
+    // if this fails, our typical error reporting machinery is broken
+    // but we might want to log it some other way. TODO
+    if BUS.tx.clone().send(update.into()).is_ok() {
+        emit_new_data();
+    }
 }
 
 pub(super) fn set_emitter(emit: crate::interface::HeraldEmitter) {
@@ -86,6 +85,7 @@ impl super::Herald {
                 Conf(update) => {
                     self.load_props.config.handle_update(update);
                 }
+                Nil => {}
             }
         }
     }
@@ -101,5 +101,11 @@ where
             Ok(update) => update.into(),
             Err(e) => Update::Error(format!("{error} at {location}", error = e, location = loc)),
         }
+    }
+}
+
+impl From<()> for Update {
+    fn from(_: ()) -> Update {
+        Update::Nil
     }
 }

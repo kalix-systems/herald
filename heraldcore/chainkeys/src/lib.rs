@@ -13,7 +13,7 @@ pub enum ChainKeysError {
     DecryptionFailed,
     StoreCorrupted,
     Kson(KsonError),
-    NoneError(Location),
+    NoneError(location::Location),
 }
 
 from_fn!(ChainKeysError, rusqlite::Error, ChainKeysError::Db);

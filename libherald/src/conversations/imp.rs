@@ -107,7 +107,7 @@ impl crate::Loadable for Conversations {
                 list.push_back(conv);
             }
 
-            ret_err!(push(ConvUpdate::Init(list)));
+            push(ConvUpdate::Init(list));
         })?;
 
         Ok(())

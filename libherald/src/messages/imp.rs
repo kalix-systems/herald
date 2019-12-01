@@ -182,7 +182,7 @@ impl Messages {
 
         use crate::conversations::shared::*;
 
-        push(ConvUpdate::NewActivity(cid))?;
+        push(ConvUpdate::NewActivity(cid));
 
         Ok(())
     }

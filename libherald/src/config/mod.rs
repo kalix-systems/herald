@@ -108,11 +108,11 @@ impl ConfigTrait for Config {
         &mut self,
         picture: Option<String>,
     ) {
-        spawn!(ret_err!(crate::push((
+        spawn!(crate::push((
             core::set_profile_picture(picture.and_then(crate::utils::strip_qrc))
                 .map(ConfUpdate::Picture),
             loc!()
-        ))));
+        )));
     }
 
     fn emit(&mut self) -> &mut ConfigEmitter {

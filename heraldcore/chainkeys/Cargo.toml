@@ -18,7 +18,10 @@ features         = ["rusqlite_"]
 path = "../../channel_ratchet"
 
 [dependencies.coretypes]
-path             = "../coretypes"
+path = "../coretypes"
+
+[dependencies.location]
+path = "../location"
 
 [dependencies.coremacros]
 path = "../coremacros"
