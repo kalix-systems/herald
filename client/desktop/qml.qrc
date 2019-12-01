@@ -28,7 +28,6 @@
         <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>common/js/Avatar.mjs</file>
-        <file>errors/ErrorDialog.qml</file>
         <file>main.qml</file>
         <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/popups/ContextOptionsMenu.qml</file>

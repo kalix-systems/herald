@@ -2,7 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import Qt.labs.platform 1.1
 import LibHerald 1.0
-import "./Errors" as Errors
+import "qrc:/imports/errors"
 import "./LoginPage" as LoginPage
 
 ApplicationWindow {
@@ -15,6 +15,17 @@ ApplicationWindow {
     // around the code base
     Herald {
         id: herald
+
+        property var errPopup: ErrorDialog {
+        }
+
+        errors.onTryPollChanged: {
+            var errMsg = herald.errors.nextError()
+            if (errMsg !== "") {
+                errPopup.errorMsg = errMsg
+                errPopup.open()
+            }
+        }
 
         // NOTE: This is very important. Until our initialization is cleaned up this has to happen immediately after `Herald`
         // is initialized.

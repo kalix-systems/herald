@@ -12,8 +12,6 @@
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/Common/StdText.qml</file>
-        <file>qml/Errors/ErrorHandler.qml</file>
-        <file>qml/Errors/ErrorPopup.qml</file>
         <file>qml/ConversationView/Controls/CVHeader.qml</file>
         <file>qml/ConversationView/Controls/CVListItem.qml</file>
         <file>qml/ConversationView/ConversationViewMain.qml</file>

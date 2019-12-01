@@ -50,7 +50,8 @@ Rectangle {
                 lastBody: convContent.messages.lastBody
                 lastTimestamp: Utils.friendlyTimestamp(
                                    convContent.messages.lastTime)
-                lastReceipt: convContent.messages.lastStatus === undefined ? 0 : convContent.messages.lastStatus
+                lastReceipt: convContent.messages.lastStatus
+                             === undefined ? 0 : convContent.messages.lastStatus
             }
         }
     }

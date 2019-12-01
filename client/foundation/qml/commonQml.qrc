@@ -21,6 +21,7 @@
         <file>Avatar/AvatarIcon.qml</file>
         <file>Avatar/ConversationLabel.qml</file>
         <file>Avatar/AvatarMain.qml</file>
+        <file>errors/ErrorDialog.qml</file>
         <file>js/utils.mjs</file>
     </qresource>
 </RCC>
