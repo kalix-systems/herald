@@ -13,7 +13,7 @@ ListView {
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
 
-    cacheBuffer: 3000
+    cacheBuffer: chatListView.height * 3
     property var blankTransition: Transition {}
 
     ScrollBar.vertical: ScrollBar {
@@ -27,11 +27,15 @@ ListView {
         minimumSize: 0.1
     }
 
-    boundsBehavior: Flickable.StopAtBounds
+    boundsBehavior: ListView.StopAtBounds
+    boundsMovement: Flickable.StopAtBounds
 
     model: ownedConversation
 
-    Component.onCompleted: positionViewAtEnd()
+    Component.onCompleted: {
+        positionViewAtEnd()
+        print(cacheBuffer)
+    }
 
     delegate: Row {
         id: chatRow
