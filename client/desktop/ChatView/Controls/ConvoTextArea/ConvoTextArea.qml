@@ -45,6 +45,7 @@ Rectangle {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
     }
 
@@ -52,6 +53,7 @@ Rectangle {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"
     }
 
@@ -64,9 +66,11 @@ Rectangle {
             right: attachmentsButton.left
             leftMargin: CmnCfg.smallMargin * 0.5
             rightMargin: CmnCfg.smallMargin * 0.5
+            bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
         topPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.smallMargin * 0.5
 
         Loader {
             id: replyLoader

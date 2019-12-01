@@ -22,13 +22,15 @@ ListView {
 
         stepSize: 0.001
         minimumSize: 0.1
-
-        Component.onCompleted: {
-            position = 1.0
-        }
     }
 
+    boundsBehavior: Flickable.StopAtBounds
+
     model: ownedConversation
+
+    Component.onCompleted: {
+        chatScrollBar.position = 1.0 + chatScrollBar.size
+    }
 
     delegate: Row {
         id: chatRow
@@ -173,4 +175,5 @@ ListView {
             }
         }
     ]
+
 }
