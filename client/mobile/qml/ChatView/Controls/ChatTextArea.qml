@@ -18,10 +18,15 @@ RowLayout {
         Layout.alignment: Qt.AlignBottom
         placeholderText: "Send a message..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        color: CmnCfg.palette.iconFill
+        color: CmnCfg.palette.mainTextColor
+
         font {
             pointSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
+        }
+
+        background: Rectangle {
+            color: CmnCfg.palette.mainColor
         }
     }
 

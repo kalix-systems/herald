@@ -96,6 +96,7 @@ Rectangle {
             height: Math.min(contentHeight, 100)
             width: containerCol.width
             focus: true
+
             TextArea {
                 id: chatText
                 background: Rectangle {
