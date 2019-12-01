@@ -53,6 +53,9 @@ def update_qrc(src_to_dest, foundation_files):
         set(src_to_dest.values()).difference(qrc_mjs_files).difference(foundation_files)
     )
 
+    for file in qrc_mjs_files:
+        print("Skipping:", file)
+
     for file in diff:
         print("Adding:", file)
         file_elem = ET.SubElement(qresource, "file")
