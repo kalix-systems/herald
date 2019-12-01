@@ -9,7 +9,9 @@ import "./SideBar"
 Item {
     id: appRoot
 
+    focus: true
     anchors.fill: parent.fill
+
     TopMenuBar {
         Popups.ConfigPopup {
             id: preferencesPopup
@@ -31,8 +33,6 @@ Item {
     Popups.NewMessagePopup {
         id: convoMenu
     }
-
-    focus: true
 
     Component {
         id: splash

@@ -23,15 +23,16 @@ int main(int argc, char* argv[])
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
   qmlRegisterType<ConversationContent>("LibHerald", 1, 0, "ConversationContent");
 
-  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
-                           1, 0, "CmnCfg");
+  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "CmnCfg");
 
   app.setOrganizationName("Kalix Systems");
   app.setOrganizationDomain("kalix.io");
   app.setApplicationName("Herald");
 
   QQmlApplicationEngine engine;
+
   engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
   if (engine.rootObjects().isEmpty()) return -1;
 
   return app.exec();

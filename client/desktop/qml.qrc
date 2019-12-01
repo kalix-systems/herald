@@ -8,7 +8,6 @@
         <file>ChatView/Controls/ConvoTextArea/AttachmentsComponent.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ConvoTextArea.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ReplyComponent.qml</file>
-        <file>ChatView/Controls/TimerOptions.qml</file>
         <file>ChatView/Controls/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ConversationWindow.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
