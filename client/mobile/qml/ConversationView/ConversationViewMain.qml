@@ -16,7 +16,7 @@ Page {
     }
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     Common.Drawer {

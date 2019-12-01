@@ -15,7 +15,7 @@ Rectangle {
     property ConversationContent convContent: null
 
     height: CmnCfg.avatarSize
-    color: CmnCfg.palette.mainColor
+    color: CmnCfg.palette.white
 
     // prevent animation spill over
     clip: true
@@ -48,9 +48,8 @@ Rectangle {
             labelComponent: ConversationLabel {
                 contactName: title
                 lastBody: convContent.messages.lastBody
-                lastTimestamp: convContent.messages.isEmpty ? "" :
-                                                              Utils.friendlyTimestamp(
-                                   convContent.messages.lastTime)
+                lastTimestamp: convContent.messages.isEmpty ? "" : Utils.friendlyTimestamp(
+                                                                  convContent.messages.lastTime)
                 lastReceipt: convContent.messages.lastStatus
                              === undefined ? 0 : convContent.messages.lastStatus
             }
