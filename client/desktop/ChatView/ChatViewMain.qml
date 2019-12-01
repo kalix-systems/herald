@@ -79,7 +79,7 @@ Page {
     Common.Divider {
         height: 1
         color: CmnCfg.palette.black
-        bottomAnchor: chatTextArea.top
+        anchors.bottom: chatTextArea.top
     }
 
     ///--- Text entry area, for typing
