@@ -12,9 +12,15 @@ ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
+
+    property var blankTransition: Transition {}
+
+    maximumFlickVelocity: 1500
+    flickDeceleration: chatListView.height * 4
+
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 3
-    property var blankTransition: Transition {}
+
     Layout.maximumWidth: parent.width
 
     ScrollBar.vertical: ScrollBar {
@@ -89,7 +95,9 @@ ListView {
                 replyId: opMsgId
                 //mousearea handling jump behavior
                 jumpHandler.onClicked: {
-                    convWindow.positionViewAtIndex(ownedConversation.indexById(replyId), ListView.Center)
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.indexById(replyId),
+                                ListView.Center)
                     replyHighlightAnimation.target = convWindow.itemAtIndex(
                                 ownedConversation.indexById(replyId)).highlight
                     replyHighlightAnimation.start()
