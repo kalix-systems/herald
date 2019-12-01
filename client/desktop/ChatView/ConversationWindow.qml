@@ -16,8 +16,8 @@ ListView {
     property var blankTransition: Transition {}
 
     // TODO this shouldn't be set using pixels directly
-    maximumFlickVelocity: 1500
-    flickDeceleration: chatListView.height * 4
+    maximumFlickVelocity: 1000
+    flickDeceleration: chatListView.height * 10
 
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 3
@@ -41,6 +41,7 @@ ListView {
     model: ownedConversation
 
     Component.onCompleted: {
+        print(maximumFlickVelocity)
         positionViewAtEnd()
     }
 
