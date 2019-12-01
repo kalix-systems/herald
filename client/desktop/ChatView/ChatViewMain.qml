@@ -91,7 +91,7 @@ Page {
             right: parent.right
             bottom: parent.bottom
             margins: CmnCfg.margin
-            bottomMargin: CmnCfg.smallMargin
+            bottomMargin: 0
         }
 
         keysProxy: Item {

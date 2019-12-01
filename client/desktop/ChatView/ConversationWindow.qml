@@ -8,46 +8,23 @@ import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
-//Flickable {
-//    id: cvPane
-//    property alias chatScrollBar: chatScrollBar
-//    property alias chatListView: chatListView
-//    clip: true
-//    interactive: true
-//    boundsBehavior: Flickable.StopAtBounds
-//    contentHeight: textMessageCol.height
-//    property var blankTransition: Transition {}
-//    Component.onCompleted: {
-//        chatScrollBar.position = 1.0 + chatScrollBar.size
-//    }
-
-//Column {
-//    id: textMessageCol
-//    focus: true
-
-//    //   spacing: CmnCfg.smallMargin
-//    anchors {
-//        right: parent.right
-//        left: parent.left
-//    }
 ListView {
     id: chatListView
 
-    //clip: true
+    cacheBuffer: 3000
+
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBar
         width: CmnCfg.padding
+
         policy: ScrollBar.AsNeeded
         hoverEnabled: true
+
         stepSize: 0.001
+        minimumSize: 0.1
 
-        size: 0.1 // frame.height / parent.height
-
-        onSizeChanged: {
-            Qt.callLater(function () {
-                size = 0.1
-                print(size)
-            })
+        Component.onCompleted: {
+            position = 1.0
         }
     }
 
@@ -180,10 +157,8 @@ ListView {
             pfpPath: parent.pfpUrl
             avatarHeight: 28
         }
-    } //bubble wrapper
-    //} // Repeater
+    }
 
-    //} //singleton Col
     states: [
         State {
             name: "jumpState"
@@ -198,4 +173,4 @@ ListView {
             }
         }
     ]
-} // flickable
+}
