@@ -54,6 +54,7 @@ def update_qrc(src_to_dest, foundation_files):
     )
 
     for file in diff:
+        print("Adding:", file)
         file_elem = ET.SubElement(qresource, "file")
         file_elem.text = file
 
@@ -116,7 +117,7 @@ def main():
         foundation_match = foundation_pattern.match(file)
 
         if foundation_match is not None:
-            print("adding: ", dest_js_file)
+            print("Skipping: ", dest_js_file)
             foundation_files.add(dest_js_file)
 
     # run the compiler

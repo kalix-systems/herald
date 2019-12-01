@@ -11,11 +11,11 @@
         "SideBar/ts/ContactViewTypes.d.ts",
         "SideBar/popups/ts/ConfigPopupSubmission.ts",
         "SideBar/popups/ts/NewContactDialogue.ts",
-        "common/ts/Avatar.ts",
         "../foundation/ts/HeraldTypes.d.ts",
         "../foundation/ts/HeraldUITypes.d.ts",
         "../foundation/ts/QtTypes.d.ts",
         "../foundation/ts/utils.ts",
+        "../foundation/ts/Avatar.ts",
         "ChatView/ts/SearchHandler.ts"
     ]
 }

@@ -3,52 +3,51 @@
         <file>App.qml</file>
         <file>ChatView/ChatBar.qml</file>
         <file>ChatView/ChatBubbleHover.qml</file>
+        <file>ChatView/ChatSearchComponent.qml</file>
         <file>ChatView/ChatViewMain.qml</file>
         <file>ChatView/Controls/ConvoTextArea/AttachmentsComponent.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ConvoTextArea.qml</file>
         <file>ChatView/Controls/ConvoTextArea/ReplyComponent.qml</file>
+        <file>ChatView/Controls/TimerOptions.qml</file>
         <file>ChatView/Controls/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/ConversationWindow.qml</file>
+        <file>ChatView/Popups/EmojiPopup.qml</file>
+        <file>ChatView/Popups/MessageOptionsPopup.qml</file>
+        <file>ChatView/SearchTextArea.qml</file>
+        <file>ChatView/js/SearchHandler.mjs</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>EmojiKeyboard/EmojiButton.qml</file>
         <file>EmojiKeyboard/EmojiPicker.qml</file>
         <file>EmojiKeyboard/PickerInterior.qml</file>
         <file>RegistrationPage.qml</file>
+        <file>SideBar/Header/ContextBar.qml</file>
+        <file>SideBar/Header/HeaderComponent.qml</file>
+        <file>SideBar/Header/SearchComponent.qml</file>
+        <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
+        <file>SideBar/Pane/ContactView.qml</file>
+        <file>SideBar/Pane/ConversationViewMain.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/ContactSearchComponent.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/GroupHeaderComponent.qml</file>
+        <file>SideBar/Pane/GroupFlowComponents/NewGroupComponent.qml</file>
+        <file>SideBar/Pane/MessageSearchView.qml</file>
+        <file>SideBar/Pane/SideBarPane.qml</file>
+        <file>SideBar/SideBarMain.qml</file>
         <file>SideBar/SideBarState.qml</file>
         <file>SideBar/js/ContactView.mjs</file>
         <file>SideBar/popups/ColorPicker.qml</file>
         <file>SideBar/popups/ConfigPopup.qml</file>
+        <file>SideBar/popups/ContextOptionsMenu.qml</file>
+        <file>SideBar/popups/NewMessagePopup.qml</file>
         <file>SideBar/popups/js/ConfigPopupSubmission.mjs</file>
         <file>SideBar/popups/js/ContactClickedPopup.mjs</file>
         <file>SideBar/popups/js/NewContactDialogue.mjs</file>
         <file>TopMenuBar.qml</file>
         <file>common/CommonConfig.qml</file>
+        <file>common/ConfigAvatar.qml</file>
         <file>common/Divider.qml</file>
         <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
-        <file>common/js/Avatar.mjs</file>
         <file>main.qml</file>
-        <file>SideBar/SideBarMain.qml</file>
-        <file>SideBar/popups/ContextOptionsMenu.qml</file>
-        <file>ChatView/Popups/MessageOptionsPopup.qml</file>
-        <file>ChatView/Popups/EmojiPopup.qml</file>
-        <file>ChatView/Controls/TimerOptions.qml</file>
-        <file>ChatView/ChatSearchComponent.qml</file>
-        <file>ChatView/js/SearchHandler.mjs</file>
-        <file>ChatView/SearchTextArea.qml</file>
-        <file>SideBar/popups/NewMessagePopup.qml</file>
-        <file>common/ConfigAvatar.qml</file>
-        <file>SideBar/Header/ContextBar.qml</file>
-        <file>SideBar/Header/HeaderComponent.qml</file>
-        <file>SideBar/Header/SearchComponent.qml</file>
-        <file>SideBar/Pane/ConversationViewMain.qml</file>
-        <file>SideBar/Pane/MessageSearchView.qml</file>
-        <file>SideBar/Pane/SideBarPane.qml</file>
-        <file>SideBar/Pane/ContactView.qml</file>
-        <file>SideBar/Pane/GroupFlowComponents/ContactSearchComponent.qml</file>
-        <file>SideBar/Pane/GroupFlowComponents/FinalGroupList.qml</file>
-        <file>SideBar/Pane/GroupFlowComponents/GroupHeaderComponent.qml</file>
-        <file>SideBar/Pane/GroupFlowComponents/NewGroupComponent.qml</file>
-        <file>SideBar/Pane/ContactFlowComponents/NewContactComponent.qml</file>
     </qresource>
 </RCC>

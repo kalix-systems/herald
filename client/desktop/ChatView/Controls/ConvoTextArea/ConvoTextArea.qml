@@ -9,14 +9,6 @@ import "qrc:/imports" as Imports
 import "../js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../../common" as Common
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
 Rectangle {
     id: textWrapperRect
     property var parentPage
@@ -70,11 +62,11 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            leftMargin: CmnCfg.smallMargin / 2
-            rightMargin: CmnCfg.smallMargin / 2
+            leftMargin: CmnCfg.smallMargin * 0.5
+            rightMargin: CmnCfg.smallMargin * 0.5
         }
 
-        topPadding: CmnCfg.smallMargin / 2
+        topPadding: CmnCfg.smallMargin * 0.5
 
         Loader {
             id: replyLoader
@@ -109,7 +101,7 @@ Rectangle {
                 background: Rectangle {
                     color: CmnCfg.palette.mainColor
                 }
-                bottomPadding: CmnCfg.smallMargin / 2
+                bottomPadding: CmnCfg.smallMargin * 0.5
                 selectionColor: CmnCfg.palette.tertiaryColor
                 color: CmnCfg.palette.mainTextColor
                 selectByMouse: true
