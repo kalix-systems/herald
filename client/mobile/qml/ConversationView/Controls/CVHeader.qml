@@ -30,7 +30,7 @@ ToolBar {
             }
             Label {
                 id: stateLabel
-                text: "Messages"
+                text: "Conversations"
                 font {
                     pointSize: CmnCfg.chatPreviewSize
                     family: CmnCfg.chatFont.name
