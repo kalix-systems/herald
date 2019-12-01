@@ -13,6 +13,8 @@ ListView {
     property alias chatScrollBar: chatScrollBarInner
 
     cacheBuffer: 3000
+    property var blankTransition: Transition {
+    }
 
     ScrollBar.vertical: ScrollBar {
         id: chatScrollBarInner
@@ -143,7 +145,8 @@ ListView {
                      } else {
                          std
                      }
-            ChatBubbleHover {}
+            ChatBubbleHover {
+            }
         }
 
         AvatarMain {
@@ -166,7 +169,7 @@ ListView {
         State {
             name: "jumpState"
             PropertyChanges {
-                target: cvPane
+                target: chatListView
                 rebound: blankTransition
             }
 
