@@ -33,7 +33,7 @@ Page {
                 Common.HeaderText {
                     font.pointSize: 12
                     text: qsTr("The primary identifying contact information of your account,\
-any of your contacts must know this identifier exactly.\
+any of your contacts must know this identifier exactly. \
 It is not searchable, nor can it be changed.")
                     color: CmnCfg.palette.darkGrey
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
