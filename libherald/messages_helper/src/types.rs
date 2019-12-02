@@ -160,3 +160,62 @@ impl Ord for Message {
         }
     }
 }
+
+pub struct Elider {
+    line_count: usize,
+    char_count: usize,
+    char_per_line: usize,
+}
+
+impl Default for Elider {
+    fn default() -> Self {
+        let line_count = 30;
+        let char_per_line = 25;
+        let char_count = line_count * char_per_line;
+
+        Self {
+            line_count,
+            char_per_line,
+            char_count,
+        }
+    }
+}
+
+impl Elider {
+    pub fn set_line_count(
+        &mut self,
+        line_count: usize,
+    ) {
+        self.line_count = line_count
+    }
+
+    pub fn set_char_count(
+        &mut self,
+        char_count: usize,
+    ) {
+        self.char_count = char_count
+    }
+
+    pub fn set_char_per_line(
+        &mut self,
+        char_per_line: usize,
+    ) {
+        self.char_per_line = char_per_line;
+    }
+
+    pub fn elided_body(
+        &self,
+        body: &MessageBody,
+    ) -> String {
+        let char_count = body.as_str().chars().count();
+        let line_count = body.as_str().lines().count();
+
+        if char_count < self.char_count && line_count < self.line_count {
+            return body.to_string();
+        }
+
+        let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);
+
+        body.as_str().chars().take(chars_to_take).collect()
+    }
+}

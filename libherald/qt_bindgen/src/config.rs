@@ -221,11 +221,19 @@ fn messages() -> Object {
     let item_props = item_props! {
         // Main message properties
         msgId: ItemProp::new(QByteArray).optional(),
+        // Author of the message
         author: ItemProp::new(QString).optional(),
-        body: ItemProp::new(QString).optional(),
+        // Message body. Possibly truncated if the message is too long
+        body: ItemProp::new(QString).optional().get_by_value(),
+        // Full message body
+        fullBody: ItemProp::new(QString).optional(),
+        // Time the message was saved locally
         insertionTime: ItemProp::new(Qint64).optional(),
+        // Time the message arrived at the server (only valid for inbound messages)
         serverTime: ItemProp::new(Qint64).optional(),
+        // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
+        // Whether or not the message has attachments
         hasAttachments: ItemProp::new(Bool).optional(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
@@ -258,6 +266,9 @@ fn messages() -> Object {
         mut nextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
         mut setSearchHint(scrollbar_position: Float, scrollbar_height: Float) => Void,
+        mut setElisionLineCount(line_count: QUint8) => Void,
+        mut setElisionCharCount(char_count: QUint16) => Void,
+        mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         const indexById(msg_id: QByteArray) => QUint64,
     };
 
