@@ -19,6 +19,7 @@ RowLayout {
         placeholderText: "Send a message..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         color: CmnCfg.palette.black
+        selectionColor: CmnCfg.palette.highlightColor
 
         font {
             pointSize: CmnCfg.chatPreviewSize

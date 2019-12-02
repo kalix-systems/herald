@@ -61,6 +61,7 @@ ScrollView {
             const x = convWindow.chatScrollBar.position
             const y = convWindow.chatScrollBar.size
             ownedConversation.setSearchHint(x, y)
+
             if (ownedConversation.searchNumMatches > 0) {
                 searchToolBar.state = "searchActiveState"
                 convWindow.positionViewAtIndex(
