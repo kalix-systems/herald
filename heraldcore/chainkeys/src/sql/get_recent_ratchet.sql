@@ -5,6 +5,7 @@ FROM
 WHERE
   conversation_id = @cid
   AND public_key = @pk
+  AND deprecated = 0
 ORDER BY
   generation DESC
 LIMIT

@@ -251,12 +251,25 @@ impl Tx<'_> {
         cid: ConversationId,
         pk: sig::PublicKey,
         gen: u32,
-    ) -> Result<(), ChainKeysError> {
+    ) -> Result<(), rusqlite::Error> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_before.sql"))?;
         store_stmt.execute_named(named_params! {
             "@cid": cid,
             "@pk": pk.as_ref(),
             "@gen": gen
+        })?;
+        Ok(())
+    }
+
+    pub fn deprecate_all(
+        &mut self,
+        cid: ConversationId,
+        pk: sig::PublicKey,
+    ) -> Result<(), rusqlite::Error> {
+        let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_all.sql"))?;
+        store_stmt.execute_named(named_params! {
+            "@cid": cid,
+            "@pk": pk
         })?;
         Ok(())
     }

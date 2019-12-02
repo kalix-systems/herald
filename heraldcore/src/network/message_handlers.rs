@@ -120,7 +120,7 @@ impl Event {
                         .pairwise_conversation(cid)
                         .add()?;
 
-                    chainkeys::store_state(cid, did, 0, &ratchet)?;
+                    chainkeys::store_new_state(cid, did, 0, &ratchet)?;
 
                     ev.add_notif(Notification::NewUser(Box::new((user, conversation.meta))));
 
@@ -131,7 +131,7 @@ impl Event {
                 }
                 DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet }) => {
                     let cid = crate::user::by_user_id(uid)?.pairwise_conversation;
-                    chainkeys::store_state(cid, did, gen, &ratchet)?;
+                    chainkeys::store_new_state(cid, did, gen, &ratchet)?;
                 }
             }
 
