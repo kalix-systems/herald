@@ -27,7 +27,8 @@ RowLayout {
     }
 
     Grid {
-        columns: cta.lineCount > 1 ? 1 : 2
+        // TODO: Collapse options into plus when typing
+        columns: 2 //cta.lineCount > 1 ? 1 : 2
         Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         Layout.margins: CmnCfg.units.dp(12)
         Layout.bottomMargin: CmnCfg.units.dp(6)
