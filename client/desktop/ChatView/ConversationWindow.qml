@@ -12,7 +12,9 @@ ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
-
+    // TODO this only clips because of highlight rectangles, figure out a way to
+    // not use clip
+    clip: true
     property var blankTransition: Transition {}
 
     // TODO this shouldn't be set using pixels directly
