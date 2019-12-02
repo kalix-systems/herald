@@ -60,19 +60,18 @@ ListView {
 
         readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
                                                           author)
-
-        spacing: CmnCfg.margin
         readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
                                                         author)
         property alias highlight: bubbleActual.highlightItem
 
-        // column is most correct to resize for extra content
         anchors {
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
             rightMargin: CmnCfg.margin
             leftMargin: CmnCfg.smallMargin
         }
+
+        spacing: CmnCfg.margin
         bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
