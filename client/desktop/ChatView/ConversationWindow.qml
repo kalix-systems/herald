@@ -98,11 +98,12 @@ ListView {
                 replyId: opMsgId
                 //mousearea handling jump behavior
                 jumpHandler.onClicked: {
-                    convWindow.positionViewAtIndex(
-                                ownedConversation.indexById(replyId),
-                                ListView.Center)
-                    replyHighlightAnimation.target = convWindow.itemAtIndex(
-                                ownedConversation.indexById(replyId)).highlight
+                    var msgIndex = ownedConversation.indexById(replyId)
+                    var window = convWindow
+
+                    window.positionViewAtIndex(msgIndex, ListView.Center)
+                    replyHighlightAnimation.target = window.itemAtIndex(
+                                msgIndex).highlight
                     replyHighlightAnimation.start()
                 }
             }
