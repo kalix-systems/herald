@@ -269,7 +269,7 @@ impl Tx<'_> {
         let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_all.sql"))?;
         store_stmt.execute_named(named_params! {
             "@cid": cid,
-            "@pk": pk
+            "@pk": pk.as_ref()
         })?;
         Ok(())
     }

@@ -5,7 +5,6 @@ use herald_common::*;
 use lazy_static::*;
 use parking_lot::Mutex;
 use platform_dirs::db_dir;
-use rusqlite::params;
 
 #[derive(Debug)]
 pub enum ChainKeysError {
