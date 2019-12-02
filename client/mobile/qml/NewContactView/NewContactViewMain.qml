@@ -7,8 +7,7 @@ import "Controls"
 
 Page {
 
-    header: NewContactHeader {
-    }
+    header: NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent

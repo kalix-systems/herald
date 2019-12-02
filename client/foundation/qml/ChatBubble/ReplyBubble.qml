@@ -125,8 +125,7 @@ ColumnLayout {
                     icon.width: 16
                     icon.color: "grey"
                     padding: 0
-                    background: Item {
-                    }
+                    background: Item {}
                     anchors.verticalCenter: replyTs.verticalCenter
                 }
             }
@@ -143,6 +142,5 @@ ColumnLayout {
         id: messageBody
     }
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

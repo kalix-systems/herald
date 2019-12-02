@@ -40,7 +40,7 @@ declare namespace Qt {
   const ExtraButton23 = 0x02000000;
   const ExtraButton24 = 0x04000000;
 
-  class MouseEvent {
+  export class MouseEvent {
     button: MouseEventButtons;
   }
 
@@ -114,11 +114,6 @@ declare namespace Qt {
   }
 }
 
-declare class ListView<T extends Item> {
-  currentIndex: number;
-  currentItem: T;
-}
-
 declare class Item {
   focus: boolean;
   x: number;
@@ -126,12 +121,18 @@ declare class Item {
   height: number;
 }
 
+declare class ListView<T extends Item> extends Item {
+  currentIndex: number;
+  currentItem: T;
+  itemAtIndex(index: number): Item;
+}
+
 declare class Popup {
   close(): void;
   open(): void;
 }
 
-declare class Menu extends Popup { }
+declare class Menu extends Popup {}
 
 declare class TextArea {
   text: string;
@@ -164,5 +165,5 @@ declare class Page {
 }
 
 declare class Repeater extends Item {
-  itemAt(index: number): Item
+  itemAt(index: number): Item;
 }

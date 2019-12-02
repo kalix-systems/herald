@@ -23,8 +23,7 @@ Component {
 
             anchors.fill: parent
 
-            Common.ConfigAvatar {
-            }
+            Common.ConfigAvatar {}
 
             Rectangle {
                 Layout.fillWidth: true

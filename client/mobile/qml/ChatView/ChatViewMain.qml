@@ -29,7 +29,7 @@ Page {
         }
 
         TextMessageList {
-            model: ownedMessages
+            messageListModel: ownedMessages
             width: parent.width
         }
 

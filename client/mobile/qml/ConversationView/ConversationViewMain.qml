@@ -11,8 +11,7 @@ Page {
 
     header: Loader {
         id: headerLoader
-        sourceComponent: CVHeader {
-        }
+        sourceComponent: CVHeader {}
     }
 
     background: Rectangle {
@@ -21,8 +20,7 @@ Page {
 
     Common.Drawer {
         id: contextDrawer
-        DrawerContents {
-        }
+        DrawerContents {}
     }
 
     // the body of this entire element

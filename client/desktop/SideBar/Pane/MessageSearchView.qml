@@ -38,7 +38,6 @@ ListView {
                 lastAuthor: outbound ? "You" : messageData.author
                 lastBody: lastAuthor + ": " + messageData.body
                 lastTimestamp: Utils.friendlyTimestamp(messageData.time)
-
             }
         }
     }

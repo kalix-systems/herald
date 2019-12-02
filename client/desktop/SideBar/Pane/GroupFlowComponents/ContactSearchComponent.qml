@@ -82,6 +82,5 @@ Column {
         }
     }
     //component for selected group members
-    FinalGroupList {
-    }
+    FinalGroupList {}
 }
