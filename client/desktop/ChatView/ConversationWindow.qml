@@ -12,14 +12,16 @@ ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
+    property var blankTransition: Transition {}
+
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
-    property var blankTransition: Transition {}
 
-    // TODO this shouldn't be set using pixels directly
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
+
+    onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 3

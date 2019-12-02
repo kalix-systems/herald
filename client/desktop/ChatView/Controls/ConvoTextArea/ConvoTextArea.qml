@@ -114,6 +114,8 @@ Rectangle {
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
+
+                onEditingFinished: convWindow.focus = true
             }
         }
     }
