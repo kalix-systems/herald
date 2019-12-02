@@ -26,7 +26,8 @@ ListView {
     height: contentHeight
 
     Connections {
-        target: sideBarPaneRoot.messageSearchLoader.children[0]
+        target: sideBarPaneRoot.messageSearchLoader.item
+
         onMessageClicked: {
             const conv_idx = herald.conversations.indexById(
                                searchConversationId)
