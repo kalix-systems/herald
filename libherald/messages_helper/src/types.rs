@@ -208,6 +208,7 @@ impl Elider {
         &self,
         body: &MessageBody,
     ) -> String {
+        // TODO consider eliding using font data rather rather than only grapheme clusters
         let char_count = UnicodeSegmentation::graphemes(body.as_str(), true).count();
 
         let line_count = body.as_str().lines().count();
