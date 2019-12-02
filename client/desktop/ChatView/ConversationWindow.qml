@@ -18,7 +18,7 @@ ListView {
     property var blankTransition: Transition {}
 
     // TODO this shouldn't be set using pixels directly
-    maximumFlickVelocity: 1000
+    maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
 
     highlightFollowsCurrentItem: false
@@ -44,7 +44,7 @@ ListView {
 
     Component.onCompleted: {
         ownedConversation.setElisionLineCount(38)
-        ownedConversation.setElisionCharCount(38*40)
+        ownedConversation.setElisionCharCount(38 * 40)
         ownedConversation.setElisionCharsPerLine(40)
         positionViewAtEnd()
     }
@@ -67,8 +67,6 @@ ListView {
                                                         author)
         property alias highlight: bubbleActual.highlightItem
         property bool elided: body.length !== fullBody.length
-
-
 
         anchors {
             right: outbound ? parent.right : undefined
