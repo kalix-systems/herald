@@ -114,14 +114,9 @@ declare namespace Qt {
   }
 }
 
-declare namespace ListView {
-  const Center = 0x01;
-}
-
 declare class ListView<T extends Item> {
   currentIndex: number;
   currentItem: T;
-  itemAtIndex(index: number): T;
 }
 
 declare class Item {
@@ -164,7 +159,7 @@ declare class QPoint {
 }
 
 declare class Page {
-  mapFromItem(item: any, x: number, y: number): QPoint;
+  mapFromItem(item: Item, x: number, y: number): QPoint;
   height: number;
 }
 
