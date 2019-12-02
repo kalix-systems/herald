@@ -17,6 +17,7 @@
         "../foundation/ts/QtTypes.d.ts",
         "../foundation/ts/utils.ts",
         "../foundation/ts/Avatar.ts",
-        "ChatView/ts/SearchHandler.ts"
+        "ChatView/ts/SearchHandler.ts",
+        "ChatView/ts/KeyNavigation.ts"
     ]
 }

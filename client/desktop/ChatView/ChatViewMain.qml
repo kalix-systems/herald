@@ -5,6 +5,7 @@ import LibHerald 1.0
 import "." as CVUtils
 import "./Controls/js/ChatTextAreaUtils.mjs" as JS
 import "./Controls/ConvoTextArea"
+import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
@@ -45,13 +46,14 @@ Page {
         }
 
         Component.onCompleted: forceActiveFocus()
-        Keys.onUpPressed: chatScrollBar.decrease()
-        Keys.onDownPressed: chatScrollBar.increase()
+        Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
+                                                    chatListView,
+                                                    ScrollBar.AlwaysOn,
+                                                    ScrollBar.AsNeeded)
 
         Connections {
             target: ownedConversation
             onRowsInserted: {
-
                 convWindow.contentY = convWindow.contentHeight
             }
         }

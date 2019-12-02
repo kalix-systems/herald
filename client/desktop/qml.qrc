@@ -48,5 +48,6 @@
         <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>main.qml</file>
+        <file>ChatView/js/KeyNavigation.mjs</file>
     </qresource>
 </RCC>
