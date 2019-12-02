@@ -10,6 +10,7 @@ use std::{
     cmp::Ordering,
     collections::{HashMap, HashSet},
 };
+use unicode_segmentation::UnicodeSegmentation;
 
 const FLURRY_FUZZ: i64 = 5 * 60_000;
 
@@ -207,7 +208,8 @@ impl Elider {
         &self,
         body: &MessageBody,
     ) -> String {
-        let char_count = body.as_str().chars().count();
+        let char_count = UnicodeSegmentation::graphemes(body.as_str(), true).count();
+
         let line_count = body.as_str().lines().count();
 
         if char_count < self.char_count && line_count < self.line_count {
@@ -216,6 +218,8 @@ impl Elider {
 
         let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);
 
-        body.as_str().chars().take(chars_to_take).collect()
+        UnicodeSegmentation::graphemes(body.as_str(), true)
+            .take(chars_to_take)
+            .collect()
     }
 }

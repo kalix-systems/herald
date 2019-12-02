@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 im = "14.0.0"
+unicode-segmentation = "1.6.0"
 
 [dependencies.herald_common]
 path    = "../../herald_common"
