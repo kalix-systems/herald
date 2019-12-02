@@ -9,14 +9,6 @@ import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-
 /// --- displays a list of conversations
 ListView {
     id: conversationList
@@ -24,6 +16,8 @@ ListView {
     currentIndex: -1
     interactive: false
     height: contentHeight
+
+    signal messagePositionRequested(var requestedMsgId)
 
     Connections {
         target: sideBarPaneRoot.messageSearchLoader.item
@@ -40,15 +34,7 @@ ListView {
 
             chatView.sourceComponent = conversationList.currentItem.childChatView
 
-            const msg_idx = conversationList.currentItem.convContent.messages.indexById(
-                              searchMsgId)
-
-            // early return on out of bounds
-            if (msg_idx < 0)
-                return
-
-            chatView.item.conversationWindow.positionViewAtIndex(
-                        msg_idx, ListView.Center)
+            conversationList.messagePositionRequested(searchMsgId)
         }
     }
 
@@ -81,7 +67,6 @@ ListView {
             boxColor: conversationData.color
             picture: Utils.safeStringOrDefault(conversationData.picture, "")
             groupPicture: !conversationData.pairwise
-            //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
                 lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "

@@ -15,7 +15,6 @@ Page {
 
     property var conversationItem
     property Messages ownedConversation
-    property var conversationWindow: convWindow
 
     background: Rectangle {
         color: CmnCfg.palette.white
@@ -56,6 +55,20 @@ Page {
             target: ownedConversation
             onRowsInserted: {
                 convWindow.contentY = convWindow.contentHeight
+            }
+        }
+
+        Connections {
+            target: conversationList
+            onMessagePositionRequested: {
+                const msg_idx = chatPane.ownedConversation.indexById(
+                                  requestedMsgId)
+
+                // early return on out of bounds
+                if (msg_idx < 0)
+                    return
+
+                convWindow.positionViewAtIndex(msg_idx, ListView.Center)
             }
         }
     }
