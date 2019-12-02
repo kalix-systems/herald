@@ -26,5 +26,9 @@
         <file>themes/MetaThemes.qml</file>
         <file>themes/SolarizedDark.qml</file>
         <file>themes/SolarizedLight.qml</file>
+        <file>ChatBubble/ElideHandler.qml</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>ChatBubble/ElideHandler.qml</file>
     </qresource>
 </RCC>
