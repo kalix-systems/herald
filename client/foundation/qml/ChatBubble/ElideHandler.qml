@@ -15,8 +15,6 @@ TextEdit {
     readOnly: true
     MouseArea {
         anchors.fill: parent
-        onClicked: {
-            wrapperCol.expanded == true ? wrapperCol.expanded = false : wrapperCol.expanded = true
-        }
+        onClicked: wrapperCol.expanded = !wrapperCol.expanded
     }
 }
