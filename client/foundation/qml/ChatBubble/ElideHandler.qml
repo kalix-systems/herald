@@ -17,4 +17,8 @@ TextEdit {
         anchors.fill: parent
         onClicked: wrapperCol.expanded = !wrapperCol.expanded
     }
+
+    TapHandler {
+        onTapped: wrapperCol.expanded = !wrapperCol.expanded
+    }
 }
