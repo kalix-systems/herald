@@ -36,9 +36,18 @@ ListView {
                 return
 
             conversationList.currentIndex = conv_idx
-            chatView.sourceComponent = conversationList.currentItem.childChatView
-            const position = conversationList.currentItem.convoContent.messages.indexById(searchMsgId)
-            conversationList.currentItem.childChatView.children[0].conversationWindow.positionViewAtIndex(position, ListView.Center)
+
+            appRoot.chatView.sourceComponent = conversationList.currentItem.childChatView
+
+            const msg_idx = conversationList.currentItem.convoContent.messages.indexById(
+                              searchMsgId)
+
+            // early return on out of bounds
+            if (msg_idx < 0)
+                return
+
+            appRoot.chatView.item.conversationWindow.positionViewAtIndex(
+                        msg_idx, ListView.Center)
         }
     }
 
@@ -48,8 +57,8 @@ ListView {
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-        property bool outbound: convoContent.messages.lastAuthor === herald.config.configId
-        property ConversationContent convoContent: ConversationContent {
+        property bool outbound: convContent.messages.lastAuthor === herald.config.configId
+        property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
 
