@@ -20,6 +20,10 @@ ColumnLayout {
     property alias jumpHandler: jumpHandler
     property alias replyHighlightAnimation: replyHighlightAnimation
     property bool knownReply: replyType == 2
+    property bool elided: false
+    property bool expanded: false
+
+    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
 
@@ -141,6 +145,7 @@ ColumnLayout {
     StandardTextEdit {
         id: messageBody
     }
+    ElideHandler {}
 
     StandardStamps {}
 }

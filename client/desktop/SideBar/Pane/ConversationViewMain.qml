@@ -35,6 +35,7 @@ ListView {
             conversationId: conversationIdProxy
         }
 
+
         property var childChatView: Component {
             CV.ChatViewMain {
                 conversationItem: conversationData

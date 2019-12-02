@@ -25,6 +25,7 @@ ListView {
     spacing: CmnCfg.margin
     model: messageListModel
     delegate: Column {
+        id: containerCol
         readonly property string proxyBody: body
 
         // no receipt images for now
@@ -37,7 +38,7 @@ ListView {
 
         readonly property string authName: herald.users.nameById(author)
         readonly property bool outbound: author === herald.config.configId
-
+        readonly property bool elided: body.length !== fullBody.length
         // column is most correct to resize for extra content
         anchors {
             // This is okay as a ternary, the types are enforced by QML.
@@ -55,6 +56,7 @@ ListView {
                 authorName: authName
                 receiptImage: proxyReceiptImage
                 authorColor: userColor
+                elided: containerCol.elided
             }
         }
 

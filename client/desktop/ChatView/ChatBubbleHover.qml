@@ -25,7 +25,6 @@ MouseArea {
         visible: chatBubbleHitbox.containsMouse
 
         anchors {
-            // Ternary is okay, types are enforced, cases are explicit.
             left: outbound ? parent.left : undefined
             right: !outbound ? parent.right : undefined
             margins: CmnCfg.margin
@@ -44,7 +43,6 @@ MouseArea {
         id: replyButton
         visible: chatBubbleHitbox.containsMouse
         anchors {
-            // Ternary is okay, types are enforced, cases are explicit.
             right: outbound ? messageOptionsButton.left : undefined
             left: !outbound ? messageOptionsButton.right : undefined
             margins: CmnCfg.margin
@@ -53,8 +51,6 @@ MouseArea {
         source: "qrc:/reply-icon.svg"
         z: CmnCfg.overlayZ
 
-        onClicked: {
-            ownedConversation.builderOpMsgId = msgId
-        }
+        onClicked: ownedConversation.builderOpMsgId = msgId
     }
 }

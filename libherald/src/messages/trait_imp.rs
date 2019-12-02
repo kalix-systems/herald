@@ -57,8 +57,15 @@ impl Interface for Messages {
     fn body(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.body_(index)
+    }
+
+    fn full_body(
+        &self,
+        index: usize,
+    ) -> Option<&str> {
+        self.full_body_(index)
     }
 
     fn receipt_status(
@@ -270,5 +277,26 @@ impl Interface for Messages {
         index: usize,
     ) -> Option<u8> {
         self.match_status_(index)
+    }
+
+    fn set_elision_line_count(
+        &mut self,
+        line_count: u8,
+    ) {
+        self.set_elision_line_count_(line_count)
+    }
+
+    fn set_elision_char_count(
+        &mut self,
+        char_count: u16,
+    ) {
+        self.set_elision_char_count_(char_count)
+    }
+
+    fn set_elision_chars_per_line(
+        &mut self,
+        chars_per_line: u8,
+    ) {
+        self.set_elision_chars_per_line_(chars_per_line)
     }
 }

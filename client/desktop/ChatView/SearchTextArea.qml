@@ -30,27 +30,41 @@ ScrollView {
         Layout.alignment: Qt.AlignLeft
 
         Keys.onReturnPressed: {
+            const backwards = (event.modifiers & Qt.ShiftModifier)
             //don't allow enter key to affect textarea
             event.accepted = true
+
             ownedConversation.searchActive = true
-            var x = convWindow.chatScrollBar.position
-            var y = convWindow.chatScrollBar.size
+
+            const x = convWindow.chatScrollBar.position
+            const y = convWindow.chatScrollBar.size
+
             //key navigation handling
             if (ownedConversation.searchNumMatches > 0) {
                 ownedConversation.setSearchHint(x, y)
                 searchToolBar.state = "searchActiveState"
-                convWindow.positionViewAtIndex(
-                            ownedConversation.nextSearchMatch(),
-                            ListView.Center)
+
+                if (backwards) {
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.prevSearchMatch(),
+                                ListView.Center)
+                } else {
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.nextSearchMatch(),
+                                ListView.Center)
+                }
             }
         }
 
         onTextChanged: {
             ownedConversation.searchActive = true
             ownedConversation.searchPattern = searchText.text
-            var x = convWindow.chatScrollBar.position
-            var y = convWindow.chatScrollBar.size
+
+            const x = convWindow.chatScrollBar.position
+            const y = convWindow.chatScrollBar.size
+
             ownedConversation.setSearchHint(x, y)
+
             if (ownedConversation.searchNumMatches > 0) {
                 searchToolBar.state = "searchActiveState"
                 convWindow.positionViewAtIndex(

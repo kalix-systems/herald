@@ -18,7 +18,7 @@ ListView {
     property var blankTransition: Transition {}
 
     // TODO this shouldn't be set using pixels directly
-    maximumFlickVelocity: 1000
+    maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
 
     highlightFollowsCurrentItem: false
@@ -43,6 +43,9 @@ ListView {
     model: ownedConversation
 
     Component.onCompleted: {
+        ownedConversation.setElisionLineCount(38)
+        ownedConversation.setElisionCharCount(38 * 40)
+        ownedConversation.setElisionCharsPerLine(40)
         positionViewAtEnd()
     }
 
@@ -63,6 +66,7 @@ ListView {
         readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
                                                         author)
         property alias highlight: bubbleActual.highlightItem
+        property bool elided: body.length !== fullBody.length
 
         anchors {
             right: outbound ? parent.right : undefined
@@ -83,6 +87,7 @@ ListView {
                 authorName: authName
                 receiptImage: proxyReceiptImage
                 authorColor: userColor
+                elided: chatRow.elided
             }
         }
 
@@ -95,6 +100,7 @@ ListView {
                 authorName: authName
                 authorColor: userColor
                 replyId: opMsgId
+                elided: chatRow.elided
                 //mousearea handling jump behavior
                 jumpHandler.onClicked: {
                     var msgIndex = ownedConversation.indexById(replyId)
@@ -119,6 +125,7 @@ ListView {
                     attachmentsMsgId: msgId
                 }
                 authorColor: userColor
+                elided: chatRow.elided
             }
         }
 
