@@ -31,22 +31,23 @@ ListView {
         onMessageClicked: {
             const conv_idx = herald.conversations.indexById(
                                searchConversationId)
+
             // early return on out of bounds
             if (conv_idx < 0)
                 return
 
             conversationList.currentIndex = conv_idx
 
-            appRoot.chatView.sourceComponent = conversationList.currentItem.childChatView
+            chatView.sourceComponent = conversationList.currentItem.childChatView
 
-            const msg_idx = conversationList.currentItem.convoContent.messages.indexById(
+            const msg_idx = conversationList.currentItem.convContent.messages.indexById(
                               searchMsgId)
 
             // early return on out of bounds
             if (msg_idx < 0)
                 return
 
-            appRoot.chatView.item.conversationWindow.positionViewAtIndex(
+            chatView.item.conversationWindow.positionViewAtIndex(
                         msg_idx, ListView.Center)
         }
     }
@@ -66,7 +67,7 @@ ListView {
             CV.ChatViewMain {
                 id: cvMain
                 conversationItem: conversationData
-                ownedConversation: convoContent.messages
+                ownedConversation: convContent.messages
             }
         }
 
@@ -83,11 +84,11 @@ ListView {
             //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
-                lastBody: !convoContent.messages.isEmpty ? lastAuthor + ": "
-                                                           + convoContent.messages.lastBody : ""
-                lastAuthor: outbound ? "You" : convoContent.messages.lastAuthor
-                lastTimestamp: !convoContent.messages.isEmpty ? Utils.friendlyTimestamp(
-                                                                    convoContent.messages.lastTime) : ""
+                lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
+                                                          + convContent.messages.lastBody : ""
+                lastAuthor: outbound ? "You" : convContent.messages.lastAuthor
+                lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
+                                                                   convContent.messages.lastTime) : ""
                 labelColor: CmnCfg.palette.black
                 labelSize: 14
             }
