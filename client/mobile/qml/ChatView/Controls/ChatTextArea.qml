@@ -13,7 +13,7 @@ RowLayout {
 
     TextArea {
         id: cta
-        height: textareaHeight
+        height: chatRowLayout.textareaHeight
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignBottom
         placeholderText: "Send a message..."
@@ -49,7 +49,5 @@ RowLayout {
             } : function () {}
             imageSource: send ? "qrc:/send-icon.svg" : "qrc:/plus-icon.svg"
         }
-
-
     }
 }
