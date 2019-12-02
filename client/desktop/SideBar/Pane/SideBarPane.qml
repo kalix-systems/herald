@@ -5,6 +5,8 @@ import LibHerald 1.0
 import "qrc:/common" as Common
 
 Flickable {
+    id: sideBarPaneRoot
+
     property alias messageSearchLoader: messageSearchLoader
     property alias sideBarBodyLoader: sideBarBodyLoader
     anchors.fill: parent

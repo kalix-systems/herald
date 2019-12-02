@@ -24,6 +24,17 @@ ListView {
     currentIndex: -1
     interactive: false
     height: contentHeight
+
+    Connections {
+        target: sideBarPaneRoot.messageSearchLoader.children[0]
+        onMessageClicked: {
+            const conv_idx = herald.conversations.indexById(
+                               searchConversationId)
+            conversationList.currentIndex = conv_idx
+            chatView.sourceComponent = conversationList.currentItem.childChatView
+        }
+    }
+
     delegate: Item {
         id: conversationItem
 
@@ -34,7 +45,6 @@ ListView {
         property ConversationContent convoContent: ConversationContent {
             conversationId: conversationIdProxy
         }
-
 
         property var childChatView: Component {
             CV.ChatViewMain {
