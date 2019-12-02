@@ -11,18 +11,16 @@ Page {
 
     header: Loader {
         id: headerLoader
-        sourceComponent: CVHeader {
-        }
+        sourceComponent: CVHeader {}
     }
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     Common.Drawer {
         id: contextDrawer
-        DrawerContents {
-        }
+        DrawerContents {}
     }
 
     // the body of this entire element
@@ -39,9 +37,11 @@ Page {
             delegate: CVListItem {
                 readonly property var conversationIdProxy: conversationId
                 readonly property int colorProxy: model.color
-                readonly property Messages ownedMessages: Messages {
+                readonly property ConversationContent ownedConversationContent: ConversationContent {
                     conversationId: conversationIdProxy
                 }
+                convContent: ownedConversationContent
+
                 colorCode: colorProxy
             }
         }

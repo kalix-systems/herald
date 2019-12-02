@@ -1,4 +1,5 @@
 use super::*;
+use location::Location;
 
 #[derive(Default)]
 /// Builder for storing outbound messages
@@ -25,8 +26,8 @@ pub enum StoreAndSend {
     Error {
         /// The error
         error: HErr,
-        /// The line number the error occured on
-        line_number: u32,
+        /// The location the error was thrown at
+        location: Location,
     },
     /// A signal that the message has been stored successfully
     StoreDone(MsgId),

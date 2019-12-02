@@ -3,18 +3,29 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 TextEdit {
-    text: body
+    text: if (parent.elided) {
+              if (parent.expanded) {
+                  fullBody
+              } else {
+                  body + "..."
+              }
+          } else {
+              body
+          }
+
     Layout.maximumWidth: maxWidth
     Layout.topMargin: CmnCfg.margin / 2
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
     Layout.bottomMargin: CmnCfg.smallPadding
+
     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
     Layout.alignment: Qt.AlignLeft
     selectByMouse: true
     selectByKeyboard: true
     readOnly: true
     font.family: CmnCfg.chatFont.name
-    color: CmnCfg.palette.mainTextColor
-    textFormat: TextEdit.RichText
+    color: CmnCfg.palette.black
+    textFormat: TextEdit.AutoText
+    selectionColor: CmnCfg.palette.highlightColor
 }

@@ -9,14 +9,6 @@ import "../../ChatView" as CV
 import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-
 /// --- displays a list of conversations
 ListView {
     id: conversationList
@@ -24,21 +16,44 @@ ListView {
     currentIndex: -1
     interactive: false
     height: contentHeight
+
+    signal messagePositionRequested(var requestedMsgId)
+
+    Connections {
+        target: sideBarPaneRoot.messageSearchLoader.item
+
+        onMessageClicked: {
+            const conv_idx = herald.conversations.indexById(
+                               searchConversationId)
+
+            // early return on out of bounds
+            if (conv_idx < 0)
+                return
+
+            conversationList.currentIndex = conv_idx
+
+            chatView.sourceComponent = conversationList.currentItem.childChatView
+
+            conversationList.messagePositionRequested(searchMsgId)
+        }
+    }
+
     delegate: Item {
         id: conversationItem
 
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-        property bool outbound: convoContent.messages.lastAuthor === herald.config.configId
-        property ConversationContent convoContent: ConversationContent {
+        property bool outbound: convContent.messages.lastAuthor === herald.config.configId
+        property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }
 
         property var childChatView: Component {
             CV.ChatViewMain {
+                id: cvMain
                 conversationItem: conversationData
-                ownedConversation: convoContent.messages
+                ownedConversation: convContent.messages
             }
         }
 
@@ -52,14 +67,14 @@ ListView {
             boxColor: conversationData.color
             picture: Utils.safeStringOrDefault(conversationData.picture, "")
             groupPicture: !conversationData.pairwise
-            //this is in here instead of platonic rectangle bc different for contact and convo
             labelComponent: Av.ConversationLabel {
                 contactName: title
-                lastBody: !convoContent.messages.isEmpty ? lastAuthor + ": " + convoContent.messages.lastBody : ""
-                lastAuthor: outbound ? "You" : convoContent.messages.lastAuthor
-                lastTimestamp: !convoContent.messages.isEmpty ? Utils.friendlyTimestamp(
-                                                           convoContent.messages.lastTime) : ""
-                labelColor: CmnCfg.palette.secondaryColor
+                lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
+                                                          + convContent.messages.lastBody : ""
+                lastAuthor: outbound ? "You" : convContent.messages.lastAuthor
+                lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
+                                                                   convContent.messages.lastTime) : ""
+                labelColor: CmnCfg.palette.black
                 labelSize: 14
             }
 

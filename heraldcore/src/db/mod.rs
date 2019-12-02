@@ -1,6 +1,6 @@
 use crate::errors::*;
 use lazy_static::*;
-use platform_dirs::DB_DIR;
+use platform_dirs::db_dir;
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
     ops::{Deref, DerefMut},
@@ -14,11 +14,8 @@ lazy_static! {
     static ref DB_POOL: Pool = Pool::new();
 }
 
-lazy_static! {
-    /// this can be set by the user so
-    /// that during testing, two instances of
-    /// herald may have different databases.
-    static ref DB_PATH: PathBuf = DB_DIR.join("store.sqlite3");
+fn db_path() -> PathBuf {
+    db_dir().join("store.sqlite3")
 }
 
 /// Thin wrapper around sqlite3 database connection.

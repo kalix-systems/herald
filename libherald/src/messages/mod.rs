@@ -37,6 +37,7 @@ pub struct Messages {
     container: Container,
     search: SearchState,
     builder: MessageBuilder,
+    elider: Elider,
 }
 
 impl Messages {

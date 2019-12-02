@@ -4,7 +4,8 @@ use coretypes::ids::ConversationId;
 use herald_common::*;
 use lazy_static::*;
 use parking_lot::Mutex;
-use platform_dirs::DB_DIR;
+use platform_dirs::db_dir;
+use rusqlite::params;
 
 #[derive(Debug)]
 pub enum ChainKeysError {
@@ -12,7 +13,7 @@ pub enum ChainKeysError {
     DecryptionFailed,
     StoreCorrupted,
     Kson(KsonError),
-    NoneError(Location),
+    NoneError(location::Location),
 }
 
 from_fn!(ChainKeysError, rusqlite::Error, ChainKeysError::Db);
@@ -23,7 +24,7 @@ lazy_static! {
     static ref CK_CONN: Mutex<rusqlite::Connection> = {
         kcl::init();
 
-        let path = DB_DIR.join("ck.sqlite3");
+        let path = db_dir().join("ck.sqlite3");
         let mut conn = abort_err!(rusqlite::Connection::open(path));
         let tx = abort_err!(conn.transaction());
 

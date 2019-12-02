@@ -8,185 +8,190 @@ import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
 import "../SideBar/js/ContactView.mjs" as CUtils
 
-Flickable {
-    id: cvPane
-    property alias chatScrollBar: chatScrollBar
+ListView {
+    id: chatListView
+    property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
-    clip: true
-    interactive: true
-    boundsBehavior: Flickable.StopAtBounds
-    contentHeight: textMessageCol.height
 
-    property var blankTransition: Transition {
+    //this should be in here and not in the bubble because conversation window
+    //needs access to it, add a separate animation to mobile
+    //do not move this back into foundation
+    property NumberAnimation highlightAnimation:   NumberAnimation {
+        id: bubbleHighlightAnimation
+        property: "opacity"
+        from: 1.0
+        to: 0.0
+        duration: 600
+        easing.type: Easing.InCubic
     }
+
+
+    // TODO this only clips because of highlight rectangles, figure out a way to
+    // not use clip
+    clip: true
+
+    maximumFlickVelocity: 1500
+    flickDeceleration: chatListView.height * 10
+
+    onFlickStarted: focus = true
+
+    highlightFollowsCurrentItem: false
+    cacheBuffer: chatListView.height * 3
+
+    Layout.maximumWidth: parent.width
 
     ScrollBar.vertical: ScrollBar {
-        id: chatScrollBar
+        id: chatScrollBarInner
         width: CmnCfg.padding
+
         policy: ScrollBar.AsNeeded
+        hoverEnabled: true
+
+        stepSize: 0.01
+        minimumSize: 0.1
     }
+
+    boundsBehavior: ListView.StopAtBounds
+    boundsMovement: Flickable.StopAtBounds
+
+    model: ownedConversation
 
     Component.onCompleted: {
-        chatScrollBar.position = 1.0 + chatScrollBar.size
+        ownedConversation.setElisionLineCount(38)
+        ownedConversation.setElisionCharCount(38 * 40)
+        ownedConversation.setElisionCharsPerLine(40)
+        positionViewAtEnd()
     }
 
-    Column {
-        id: textMessageCol
-        focus: true
+    delegate: Row {
+        id: chatRow
+        readonly property string proxyBody: body
+        property string proxyReceiptImage: CUtils.receiptStatusSwitch(
+                                               receiptStatus)
+        readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
+                                                                   author)]
+        readonly property string timestamp: Utils.friendlyTimestamp(
+                                                insertionTime)
 
-        //   spacing: CmnCfg.smallMargin
+        readonly property bool outbound: author === herald.config.configId
+
+        readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
+                                                          author)
+        readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
+                                                        author)
+        property alias highlight: bubbleActual.highlightItem
+        property bool elided: body.length !== fullBody.length
+
         anchors {
-            right: parent.right
-            left: parent.left
+            right: outbound ? parent.right : undefined
+            left: !outbound ? parent.left : undefined
+            rightMargin: CmnCfg.margin
+            leftMargin: CmnCfg.smallMargin
         }
 
-        Repeater {
-            id: chatListView
-            anchors.fill: parent
-            model: ownedConversation
-            delegate: Row {
-                id: chatRow
-                readonly property string proxyBody: body
-                property string proxyReceiptImage: CUtils.receiptStatusSwitch(
-                                                       receiptStatus)
-                readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
-                                                                           author)]
-                readonly property string timestamp: Utils.friendlyTimestamp(
-                                                        insertionTime)
+        spacing: CmnCfg.margin
+        bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
+        topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
-                readonly property bool outbound: author === herald.config.configId
-
-                readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
-                                                                  author)
-
-                spacing: CmnCfg.margin
-                readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
-                                                                author)
-                property alias highlight: bubbleActual.highlightItem
-
-                // column is most correct to resize for extra content
-                anchors {
-                    right: outbound ? parent.right : undefined
-                    left: !outbound ? parent.left : undefined
-                    rightMargin: CmnCfg.margin
-                    leftMargin: CmnCfg.smallMargin
-                }
-                bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-                topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
-
-                Component {
-                    id: std
-                    CB.StandardBubble {
-                        body: proxyBody
-                        friendlyTimestamp: timestamp
-                        authorName: authName
-                        receiptImage: proxyReceiptImage
-                        authorColor: userColor
-                    }
-                }
-
-                Component {
-                    id: reply
-                    CB.ReplyBubble {
-                        body: proxyBody
-                        friendlyTimestamp: timestamp
-                        receiptImage: proxyReceiptImage
-                        authorName: authName
-                        authorColor: userColor
-                        replyId: opMsgId
-                        //mousearea handling jump behavior
-                        jumpHandler.onClicked: {
-                            convWindow.state = "jumpState"
-                            convWindow.contentY = chatListView.itemAt(
-                                        ownedConversation.indexById(
-                                            replyId)).y - convWindow.height / 2
-                            convWindow.returnToBounds()
-                            convWindow.state = ""
-                            replyHighlightAnimation.target = chatListView.itemAt(
-                                        ownedConversation.indexById(
-                                            replyId)).highlight
-                            replyHighlightAnimation.start()
-                        }
-                    }
-                }
-
-                Component {
-                    id: image
-                    CB.ImageBubble {
-                        body: proxyBody
-                        friendlyTimestamp: timestamp
-                        receiptImage: proxyReceiptImage
-                        authorName: authName
-                        messageAttachments: Attachments {
-                            attachmentsMsgId: msgId
-                        }
-                        authorColor: userColor
-                    }
-                }
-
-                AvatarMain {
-                    iconColor: userColor
-                    initials: authName[0].toUpperCase()
-                    opacity: isTail && !outbound ? 1 : 0
-                    size: 28
-                    anchors {
-                        bottom: parent.bottom
-                        margins: CmnCfg.margin
-                        bottomMargin: parent.bottomPadding
-                    }
-                    z: 10
-                    pfpPath: parent.pfpUrl
-                    avatarHeight: 28
-                }
-
-                CB.ChatBubble {
-                    id: bubbleActual
-                    maxWidth: cvPane.width * 0.66
-                    color: CmnCfg.palette.paneColor
-                    senderColor: userColor
-                    highlight: matchStatus === 2
-                    content: if (hasAttachments && dataSaved) {
-                                 image
-                                 //reply types: 0 not reply, 1 dangling, 2 known reply
-                             } else if (replyType > 0) {
-                                 reply
-                             } else {
-                                 std
-                             }
-                    ChatBubbleHover {
-                    }
-                }
-
-                AvatarMain {
-                    iconColor: userColor
-                    initials: authName[0].toUpperCase()
-                    opacity: isTail && outbound ? 1 : 0
-                    size: 28
-                    anchors {
-                        bottom: parent.bottom
-                        margins: CmnCfg.margin
-                        bottomMargin: parent.bottomPadding
-                    }
-                    z: 10
-                    pfpPath: parent.pfpUrl
-                    avatarHeight: 28
-                }
-            } //bubble wrapper
-        } // Repeater
-    } //singleton Col
-
-    states: [
-        State {
-            name: "jumpState"
-            PropertyChanges {
-                target: cvPane
-                rebound: blankTransition
-            }
-
-            PropertyChanges {
-                target: chatScrollBar
-                policy: ScrollBar.AlwaysOn
+        Component {
+            id: std
+            CB.StandardBubble {
+                body: proxyBody
+                friendlyTimestamp: timestamp
+                authorName: authName
+                receiptImage: proxyReceiptImage
+                authorColor: userColor
+                elided: chatRow.elided
             }
         }
-    ]
-} // flickable
+
+        Component {
+            id: reply
+            CB.ReplyBubble {
+                body: proxyBody
+                friendlyTimestamp: timestamp
+                receiptImage: proxyReceiptImage
+                authorName: authName
+                authorColor: userColor
+                replyId: opMsgId
+                elided: chatRow.elided
+                //mousearea handling jump behavior
+                jumpHandler.onClicked: {
+                    const msgIndex = ownedConversation.indexById(replyId)
+                    if (msgIndex < 0)
+                        return
+
+                    const window = convWindow
+
+                    window.positionViewAtIndex(msgIndex, ListView.Center)
+                    window.highlightAnimation.target = window.itemAtIndex(
+                                msgIndex).highlight
+                    window.highlightAnimation.start()
+                }
+            }
+        }
+
+        Component {
+            id: image
+            CB.ImageBubble {
+                body: proxyBody
+                friendlyTimestamp: timestamp
+                receiptImage: proxyReceiptImage
+                authorName: authName
+                messageAttachments: Attachments {
+                    attachmentsMsgId: msgId
+                }
+                authorColor: userColor
+                elided: chatRow.elided
+            }
+        }
+
+        AvatarMain {
+            iconColor: userColor
+            initials: authName[0].toUpperCase()
+            opacity: isTail && !outbound ? 1 : 0
+            size: 28
+            anchors {
+                bottom: parent.bottom
+                margins: CmnCfg.margin
+                bottomMargin: parent.bottomPadding
+            }
+            z: 10
+            pfpPath: parent.pfpUrl
+            avatarHeight: 28
+        }
+
+        CB.ChatBubble {
+            id: bubbleActual
+            maxWidth: chatListView.width * 0.66
+            color: CmnCfg.palette.lightGrey
+            senderColor: userColor
+            convContainer: convWindow
+            highlight: matchStatus === 2
+            content: if (hasAttachments && dataSaved) {
+                         image
+                         //reply types: 0 not reply, 1 dangling, 2 known reply
+                     } else if (replyType > 0) {
+                         reply
+                     } else {
+                         std
+                     }
+            ChatBubbleHover {}
+        }
+
+        AvatarMain {
+            iconColor: userColor
+            initials: authName[0].toUpperCase()
+            opacity: isTail && outbound ? 1 : 0
+            size: 28
+            anchors {
+                bottom: parent.bottom
+                margins: CmnCfg.margin
+                bottomMargin: parent.bottomPadding
+            }
+            z: 10
+            pfpPath: parent.pfpUrl
+            avatarHeight: 28
+        }
+    }
+}

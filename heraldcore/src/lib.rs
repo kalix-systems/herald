@@ -30,6 +30,8 @@ mod user_keys;
 /// Utils
 pub mod utils;
 
+pub use platform_dirs::set_data_dir;
+
 #[cfg(test)]
 #[macro_use]
 extern crate coremacros;

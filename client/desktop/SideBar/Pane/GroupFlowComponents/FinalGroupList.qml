@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../../common" as Common
 import "qrc:/imports/Avatar" as Av
+import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 import QtQml 2.13
 
@@ -19,7 +20,7 @@ ListView {
         width: parent.width
 
         Common.PlatonicRectangle {
-            color: CmnCfg.palette.paneColor
+            color: CmnCfg.palette.lightGrey
             id: memberRectangle
             boxColor: herald.users.colorById(memberId)
             boxTitle: herald.users.nameById(memberId)
@@ -31,12 +32,12 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: herald.users.nameById(memberId)
-                labelColor: CmnCfg.palette.secondaryColor
+                labelColor: CmnCfg.palette.offBlack
                 labelSize: 14
                 lastBody: "@" + memberId
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: xIcon
                 anchors.right: parent.right
                 anchors.rightMargin: CmnCfg.largeMargin / 2

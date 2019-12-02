@@ -6,6 +6,7 @@ import "../../../common" as Common
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 
 Component {
 
@@ -13,7 +14,7 @@ Component {
     // spacing behaviour better. (there is no change in layout on resize, anchors more correct)
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
 
         //header includes group title and picture settings
         GroupHeaderComponent {
@@ -53,7 +54,7 @@ Component {
         }
 
         //create group button
-        Common.ButtonForm {
+        Imports.ButtonForm {
             anchors.top: groupSelectText.bottom
             anchors.topMargin: CmnCfg.smallMargin / 2
             anchors.right: parent.right
@@ -64,7 +65,7 @@ Component {
 
             background: Rectangle {
                 anchors.fill: parent
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.offBlack
             }
 
             Text {

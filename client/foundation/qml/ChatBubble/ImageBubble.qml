@@ -11,6 +11,10 @@ ColumnLayout {
     property string authorName: ""
     property Attachments messageAttachments: null
     property color authorColor
+    property bool elided: false
+    property bool expanded: false
+    id: wrapperCol
+    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
 
@@ -37,9 +41,7 @@ ColumnLayout {
         }
     }
 
-    StandardTextEdit {
-    }
+    StandardTextEdit {}
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

@@ -18,15 +18,18 @@ ColumnLayout {
     property color authorColor
     property var replyId
     property alias jumpHandler: jumpHandler
-    property alias replyHighlightAnimation: replyHighlightAnimation
     property bool knownReply: replyType == 2
+    property bool elided: false
+    property bool expanded: false
+
+    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
 
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: CmnCfg.palette.sideBarHighlightColor
+        color: CmnCfg.palette.medGrey
         Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: reply.width
 
@@ -47,15 +50,6 @@ ColumnLayout {
             height: reply.height
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
-        }
-
-        NumberAnimation {
-            id: replyHighlightAnimation
-            property: "opacity"
-            from: 1.0
-            to: 0.0
-            duration: 600
-            easing.type: Easing.InCubic
         }
 
         ColumnLayout {
@@ -107,33 +101,30 @@ ColumnLayout {
                 Layout.bottomMargin: CmnCfg.smallPadding
                 Layout.leftMargin: CmnCfg.smallMargin
                 Layout.rightMargin: CmnCfg.smallMargin
-            Label {
-                id: replyTs
-                Layout.margins: CmnCfg.smallMargin
-                Layout.topMargin: 0
-                font.pixelSize: 10
-                text: replyType === 2 ? Utils.friendlyTimestamp(opInsertionTime) : ""
-                color: CmnCfg.palette.secondaryTextColor
-            }
-
-            Button {
-                id: clock
-                icon.source: opExpirationTime
-                             !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
-                icon.height: 16
-                icon.width: 16
-                icon.color: "grey"
-                padding: 0
-                background: Item {
+                Label {
+                    id: replyTs
+                    Layout.margins: CmnCfg.smallMargin
+                    Layout.topMargin: 0
+                    font.pixelSize: 10
+                    text: replyType === 2 ? Utils.friendlyTimestamp(
+                                                opInsertionTime) : ""
+                    color: CmnCfg.palette.darkGrey
                 }
-                anchors.verticalCenter: replyTs.verticalCenter
+
+                Button {
+                    id: clock
+                    icon.source: opExpirationTime
+                                 !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+                    icon.height: 16
+                    icon.width: 16
+                    icon.color: "grey"
+                    padding: 0
+                    background: Item {}
+                    anchors.verticalCenter: replyTs.verticalCenter
+                }
             }
         }
-
-            }
-
-        }
-
+    }
 
     ChatLabel {
         id: uname
@@ -144,7 +135,7 @@ ColumnLayout {
     StandardTextEdit {
         id: messageBody
     }
+    ElideHandler {}
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

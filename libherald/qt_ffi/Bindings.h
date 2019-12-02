@@ -807,7 +807,7 @@ public:
   bool filterRegex() const;
   void setFilterRegex(bool v);
   Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE quint64 indexById(const QByteArray &conversation_id) const;
+  Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -969,6 +969,7 @@ public:
   Utils *utils();
   Q_INVOKABLE bool login();
   Q_INVOKABLE void registerNewUser(const QString &user_id);
+  Q_INVOKABLE void setAppLocalDataDir(const QString &path);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1350,9 +1351,12 @@ public:
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
-  Q_INVOKABLE quint64 indexById(const QByteArray &msg_id) const;
+  Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
+  Q_INVOKABLE void setElisionCharCount(quint16 char_count);
+  Q_INVOKABLE void setElisionCharsPerLine(quint8 chars_per_line);
+  Q_INVOKABLE void setElisionLineCount(quint8 line_count);
   Q_INVOKABLE void setSearchHint(float scrollbar_position,
                                  float scrollbar_height);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -1384,6 +1388,7 @@ public:
   Q_INVOKABLE QString body(int row) const;
   Q_INVOKABLE QVariant dataSaved(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
+  Q_INVOKABLE QString fullBody(int row) const;
   Q_INVOKABLE QVariant hasAttachments(int row) const;
   Q_INVOKABLE QVariant insertionTime(int row) const;
   Q_INVOKABLE QVariant isHead(int row) const;

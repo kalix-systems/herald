@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 Rectangle {
     id: background
-    property color bubbleColor: CmnCfg.palette.paneColor
+    property color bubbleColor: CmnCfg.palette.lightGrey
     property color senderColor: "white"
     property string receiptImage: ""
     property string friendlyTimestamp: ""
@@ -14,7 +14,7 @@ Rectangle {
     property bool highlight: false
     property alias highlightItem: bubbleHighlight
     property Component content
-
+    property Item convContainer
     color: bubbleColor
     width: contentLoader.width
     height: contentLoader.height
@@ -26,21 +26,22 @@ Rectangle {
         z: -1
         opacity: highlight == true ? 1.0 : 0.0
         Rectangle {
-            width: convWindow.width
+            width: convContainer.width
             anchors.right: parent.right
-            color: CmnCfg.palette.sideBarHighlightColor
+            color: CmnCfg.palette.medGrey
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height + CmnCfg.smallMargin
         }
 
         Rectangle {
-            width: convWindow.width
+            width: convContainer.width
             anchors.left: parent.right
-            color: CmnCfg.palette.sideBarHighlightColor
+            color: CmnCfg.palette.medGrey
             anchors.verticalCenter: parent.verticalCenter
             height: parent.height + CmnCfg.smallMargin
         }
     }
+
 
     Rectangle {
         id: verticalAccent

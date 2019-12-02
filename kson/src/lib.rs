@@ -6,6 +6,8 @@
 //!    backends, but for now we only support `Vec<u8>`
 //! 2) Support deserializing from anything other than `Bytes`.
 
+pub use location::loc;
+
 pub mod prelude {
     pub use crate::{de::*, errors::*, ser::*, *};
 

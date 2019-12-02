@@ -6,6 +6,7 @@ use coretypes::{
 };
 use herald_common::*;
 use image;
+use location::Location;
 use std::fmt;
 
 #[derive(Debug)]

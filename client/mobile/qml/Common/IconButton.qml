@@ -7,6 +7,7 @@ ToolButton {
     property var tapCallback: function anon() {
         throw "undefined callback"
     }
+
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
 

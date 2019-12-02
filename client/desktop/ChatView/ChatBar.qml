@@ -3,20 +3,12 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtQuick.Dialogs 1.3
-import Qt.labs.platform 1.1
-import "../common" as Common
+import Qt.labs.platform 1.0
+import "qrc:/imports" as Imports
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import "Controls" as CVUtils
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
 ToolBar {
     id: chatToolBar
     property var conversationItem
@@ -26,7 +18,7 @@ ToolBar {
     z: CmnCfg.middleZ
 
     background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
     }
 
     RowLayout {
@@ -66,7 +58,7 @@ ToolBar {
             Layout.fillWidth: true
             elide: Label.ElideRight
             text: conversationItem.title
-            color: CmnCfg.palette.mainColor
+            color: CmnCfg.palette.white
         }
 
         Loader {
@@ -81,40 +73,41 @@ ToolBar {
             Layout.alignment: Qt.AlignRight
             height: parent.height
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: searchButton
                 source: "qrc:/search-icon.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: chatToolBar.state = "searchState"
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: timerButton
                 source: timerMenu.chosenTimer
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 topPadding: 1
                 onClicked: timerMenu.open()
             }
 
-            CVUtils.TimerOptions {
+            Imports.TimerOptions {
                 id: timerMenu
+                conversationItem: chatToolBar.conversationItem
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: convOptionsButton
                 source: "qrc:/options-icon.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: convOptionsMenu.open()
                 Menu {
                     id: convOptionsMenu
 
                     MenuItem {
-                        text: "Archive"
+                        text: qsTr("Archive")
                     }
 
                     MenuItem {
-                        text: "Clear History"
+                        text: qsTr("Clear History")
                         onTriggered: ownedConversation.clearConversationHistory(
                                          )
                     }

@@ -8,13 +8,6 @@ import "../SideBar/Pane" as Pane
 import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 import "../SideBar/Pane/ContactFlowComponents" as ContactFlow
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
 Page {
     id: sideBar
     property real windowFraction: width / root.width
@@ -27,7 +20,7 @@ Page {
     property alias sideBarState: sideBarState
 
     background: Rectangle {
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
     }
 
     ///--- SearchBar for contacts, add contact button

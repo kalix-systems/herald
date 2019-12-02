@@ -31,7 +31,7 @@ Window {
                 Layout.fillHeight: true
                 color: modelData
                 radius: width / 2
-                border.color: CmnCfg.palette.tertiaryColor
+                border.color: "lightsteelblue"
                 border.width: focus ? 2 : 0
 
                 MouseArea {

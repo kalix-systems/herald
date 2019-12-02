@@ -8,6 +8,7 @@ import "../../SideBar" as SBUtils
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
+import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
 Component {
@@ -16,18 +17,17 @@ Component {
     ToolBar {
         height: CmnCfg.toolbarHeight
         background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
         RowLayout {
 
             anchors.fill: parent
 
-            Common.ConfigAvatar {
-            }
+            Common.ConfigAvatar {}
 
             Rectangle {
                 Layout.fillWidth: true
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.offBlack
                 height: parent.height
                 Layout.leftMargin: -12
 
@@ -42,7 +42,7 @@ Component {
                     anchors.topMargin: CmnCfg.smallMargin / 4
 
                     background: Rectangle {
-                        color: CmnCfg.palette.secondaryColor
+                        color: CmnCfg.palette.offBlack
                         anchors.fill: parent
                     }
 
@@ -54,10 +54,10 @@ Component {
                         }
                     }
 
-                    Common.ButtonForm {
+                    Imports.ButtonForm {
                         source: "qrc:/x-icon.svg"
                         scale: 0.8
-                        fill: CmnCfg.palette.paneColor
+                        fill: CmnCfg.palette.lightGrey
                         anchors.right: parent.right
                         anchors.rightMargin: CmnCfg.smallMargin / 2
                         anchors.verticalCenter: parent.verticalCenter

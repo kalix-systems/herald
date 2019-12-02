@@ -925,8 +925,8 @@ void conversations_filter_set(Conversations::Private *, const ushort *str,
 bool conversations_filter_regex_get(const Conversations::Private *);
 void conversations_filter_regex_set(Conversations::Private *, bool);
 void conversations_clear_filter(Conversations::Private *);
-quint64 conversations_index_by_id(const Conversations::Private *, const char *,
-                                  int);
+qint64 conversations_index_by_id(const Conversations::Private *, const char *,
+                                 int);
 bool conversations_remove_conversation(Conversations::Private *, quint64);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 }
@@ -1058,6 +1058,7 @@ UsersSearch::Private *herald_users_search_get(const Herald::Private *);
 Utils::Private *herald_utils_get(const Herald::Private *);
 bool herald_login(Herald::Private *);
 void herald_register_new_user(Herald::Private *, const ushort *, int);
+void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
 quint32 members_data_color(const Members::Private *, int);
@@ -1626,6 +1627,8 @@ void messages_data_author(const Messages::Private *, int, QString *,
 void messages_data_body(const Messages::Private *, int, QString *, qstring_set);
 option_bool messages_data_data_saved(const Messages::Private *, int);
 option_qint64 messages_data_expiration_time(const Messages::Private *, int);
+void messages_data_full_body(const Messages::Private *, int, QString *,
+                             qstring_set);
 option_bool messages_data_has_attachments(const Messages::Private *, int);
 option_qint64 messages_data_insertion_time(const Messages::Private *, int);
 option_bool messages_data_is_head(const Messages::Private *, int);
@@ -1728,6 +1731,12 @@ QVariant Messages::expirationTime(int row) const {
   QVariant v;
   v = messages_data_expiration_time(m_d, row);
   return v;
+}
+
+QString Messages::fullBody(int row) const {
+  QString s;
+  messages_data_full_body(m_d, row, &s, set_qstring);
+  return s;
 }
 
 QVariant Messages::hasAttachments(int row) const {
@@ -1834,34 +1843,36 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 3:
       return expirationTime(index.row());
     case Qt::UserRole + 4:
-      return hasAttachments(index.row());
+      return cleanNullQVariant(QVariant::fromValue(fullBody(index.row())));
     case Qt::UserRole + 5:
-      return insertionTime(index.row());
+      return hasAttachments(index.row());
     case Qt::UserRole + 6:
-      return isHead(index.row());
+      return insertionTime(index.row());
     case Qt::UserRole + 7:
-      return isTail(index.row());
+      return isHead(index.row());
     case Qt::UserRole + 8:
-      return matchStatus(index.row());
+      return isTail(index.row());
     case Qt::UserRole + 9:
-      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+      return matchStatus(index.row());
     case Qt::UserRole + 10:
-      return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
+      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
     case Qt::UserRole + 11:
-      return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
+      return cleanNullQVariant(QVariant::fromValue(opAuthor(index.row())));
     case Qt::UserRole + 12:
-      return opExpirationTime(index.row());
+      return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
     case Qt::UserRole + 13:
-      return opHasAttachments(index.row());
+      return opExpirationTime(index.row());
     case Qt::UserRole + 14:
-      return opInsertionTime(index.row());
+      return opHasAttachments(index.row());
     case Qt::UserRole + 15:
-      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
+      return opInsertionTime(index.row());
     case Qt::UserRole + 16:
-      return receiptStatus(index.row());
+      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
     case Qt::UserRole + 17:
-      return replyType(index.row());
+      return receiptStatus(index.row());
     case Qt::UserRole + 18:
+      return replyType(index.row());
+    case Qt::UserRole + 19:
       return serverTime(index.row());
     }
     break;
@@ -1885,21 +1896,22 @@ QHash<int, QByteArray> Messages::roleNames() const {
   names.insert(Qt::UserRole + 1, "body");
   names.insert(Qt::UserRole + 2, "dataSaved");
   names.insert(Qt::UserRole + 3, "expirationTime");
-  names.insert(Qt::UserRole + 4, "hasAttachments");
-  names.insert(Qt::UserRole + 5, "insertionTime");
-  names.insert(Qt::UserRole + 6, "isHead");
-  names.insert(Qt::UserRole + 7, "isTail");
-  names.insert(Qt::UserRole + 8, "matchStatus");
-  names.insert(Qt::UserRole + 9, "msgId");
-  names.insert(Qt::UserRole + 10, "opAuthor");
-  names.insert(Qt::UserRole + 11, "opBody");
-  names.insert(Qt::UserRole + 12, "opExpirationTime");
-  names.insert(Qt::UserRole + 13, "opHasAttachments");
-  names.insert(Qt::UserRole + 14, "opInsertionTime");
-  names.insert(Qt::UserRole + 15, "opMsgId");
-  names.insert(Qt::UserRole + 16, "receiptStatus");
-  names.insert(Qt::UserRole + 17, "replyType");
-  names.insert(Qt::UserRole + 18, "serverTime");
+  names.insert(Qt::UserRole + 4, "fullBody");
+  names.insert(Qt::UserRole + 5, "hasAttachments");
+  names.insert(Qt::UserRole + 6, "insertionTime");
+  names.insert(Qt::UserRole + 7, "isHead");
+  names.insert(Qt::UserRole + 8, "isTail");
+  names.insert(Qt::UserRole + 9, "matchStatus");
+  names.insert(Qt::UserRole + 10, "msgId");
+  names.insert(Qt::UserRole + 11, "opAuthor");
+  names.insert(Qt::UserRole + 12, "opBody");
+  names.insert(Qt::UserRole + 13, "opExpirationTime");
+  names.insert(Qt::UserRole + 14, "opHasAttachments");
+  names.insert(Qt::UserRole + 15, "opInsertionTime");
+  names.insert(Qt::UserRole + 16, "opMsgId");
+  names.insert(Qt::UserRole + 17, "receiptStatus");
+  names.insert(Qt::UserRole + 18, "replyType");
+  names.insert(Qt::UserRole + 19, "serverTime");
   return names;
 }
 
@@ -1951,9 +1963,12 @@ void messages_search_regex_set(Messages::Private *, bool);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
-quint64 messages_index_by_id(const Messages::Private *, const char *, int);
+qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+void messages_set_elision_char_count(Messages::Private *, quint16);
+void messages_set_elision_chars_per_line(Messages::Private *, quint8);
+void messages_set_elision_line_count(Messages::Private *, quint8);
 void messages_set_search_hint(Messages::Private *, float, float);
 }
 extern "C" {
@@ -2903,7 +2918,7 @@ void Conversations::setFilterRegex(bool v) {
   conversations_filter_regex_set(m_d, v);
 }
 void Conversations::clearFilter() { return conversations_clear_filter(m_d); }
-quint64 Conversations::indexById(const QByteArray &conversation_id) const {
+qint64 Conversations::indexById(const QByteArray &conversation_id) const {
   return conversations_index_by_id(m_d, conversation_id.data(),
                                    conversation_id.size());
 }
@@ -3222,6 +3237,9 @@ Utils *Herald::utils() { return m_utils; }
 bool Herald::login() { return herald_login(m_d); }
 void Herald::registerNewUser(const QString &user_id) {
   return herald_register_new_user(m_d, user_id.utf16(), user_id.size());
+}
+void Herald::setAppLocalDataDir(const QString &path) {
+  return herald_set_app_local_data_dir(m_d, path.utf16(), path.size());
 }
 
 Members::Members(bool /*owned*/, QObject *parent)
@@ -3689,11 +3707,20 @@ void Messages::clearSearch() { return messages_clear_search(m_d); }
 bool Messages::deleteMessage(quint64 row_index) {
   return messages_delete_message(m_d, row_index);
 }
-quint64 Messages::indexById(const QByteArray &msg_id) const {
+qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+void Messages::setElisionCharCount(quint16 char_count) {
+  return messages_set_elision_char_count(m_d, char_count);
+}
+void Messages::setElisionCharsPerLine(quint8 chars_per_line) {
+  return messages_set_elision_chars_per_line(m_d, chars_per_line);
+}
+void Messages::setElisionLineCount(quint8 line_count) {
+  return messages_set_elision_line_count(m_d, line_count);
+}
 void Messages::setSearchHint(float scrollbar_position, float scrollbar_height) {
   return messages_set_search_hint(m_d, scrollbar_position, scrollbar_height);
 }

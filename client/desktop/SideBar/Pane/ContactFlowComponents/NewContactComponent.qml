@@ -9,7 +9,7 @@ import "../../popups/js/NewContactDialogue.mjs" as JS
 Component {
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
 
         ScrollView {
             id: titleText

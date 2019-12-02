@@ -1,6 +1,6 @@
-#[cfg(not(any(target_os = "android", target_os = "ios")))]
+#[cfg(not(any(target_os = "android", target_os = "ios", target_os = "windows")))]
 /// App name on desktop, used for toasts
-const DESKTOP_APP_NAME: &str = "heraldqtDesktop";
+const DESKTOP_APP_NAME: &str = "herald";
 
 #[cfg(all(
     target_family = "unix",
@@ -10,8 +10,16 @@ mod imp {
     use heraldcore::message::Message;
 
     /// Displays a new message notification
+    // TODO: This should only be called if the user has notifications enabled.
     pub fn new_msg_toast(msg: &Message) {
         use notify_rust::*;
+
+        // Note: If a notification server isn't running, trying to show a notification will
+        // block the thread. TODO: Should we inform the user that they need might need to install a
+        // notifcation server if one isn't running?
+        if get_server_information().is_err() {
+            return;
+        }
 
         let mut notif = Notification::new();
         notif

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../../common" as Common
+import "qrc:/imports" as Imports
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 
@@ -11,7 +12,7 @@ Rectangle {
     anchors.top: parent.top
     height: 70
     width: parent.width
-    color: CmnCfg.palette.paneColor
+    color: CmnCfg.palette.lightGrey
     property alias profPic: groupImageLoader.imageSource
 
     Row {
@@ -38,15 +39,15 @@ Rectangle {
                 }
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 anchors.centerIn: parent
                 source: "qrc:/camera-icon.svg"
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: groupPicDialogue.open()
             }
         }
 
-        Common.ButtonForm {
+        Imports.ButtonForm {
             source: "qrc:/clear-photo-icon.svg"
             anchors.verticalCenter: parent.verticalCenter
             visible: groupImageLoader.imageSource !== ""

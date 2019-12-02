@@ -109,4 +109,11 @@ impl HeraldTrait for Herald {
     fn row_count(&self) -> usize {
         0
     }
+
+    fn set_app_local_data_dir(
+        &mut self,
+        path: String,
+    ) {
+        self.set_app_local_data_dir_(path)
+    }
 }

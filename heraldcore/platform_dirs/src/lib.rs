@@ -1,47 +1,56 @@
-use lazy_static::*;
-use std::{fs::create_dir_all, path::PathBuf};
+use std::{
+    fs::create_dir_all,
+    path::{Path, PathBuf},
+};
 
-#[cfg_attr(
-    not(any(target_os = "android", target_os = "ios")),
-    path = "desktop.rs"
-)]
-#[cfg_attr(target_os = "android", path = "android.rs")]
-#[cfg_attr(target_os = "ios", path = "ios.rs")]
-mod imp;
+static DIR: once_cell::sync::OnceCell<PathBuf> = once_cell::sync::OnceCell::new();
 
-lazy_static! {
-    pub static ref DB_DIR: PathBuf = db_dir();
-    pub static ref PICTURES_DIR: PathBuf = pictures_dir();
-    pub static ref ATTACHMENTS_DIR: PathBuf = attachments_dir();
+static FALLBACK_DIR: &str = ".data_dir";
+
+#[cfg(not(feature = "deploy_desktop"))]
+#[must_use]
+pub fn set_data_dir<P: AsRef<Path>>(_: P) -> Option<()> {
+    DIR.set(PathBuf::from(FALLBACK_DIR)).ok()
 }
 
-use imp::DATA_DIR;
+#[cfg(feature = "deploy_desktop")]
+#[must_use]
+pub fn set_data_dir<P: AsRef<Path>>(path: P) -> Option<()> {
+    DIR.set(path.as_ref().to_path_buf()).ok()
+}
 
-fn db_dir() -> PathBuf {
-    let db_dir = DATA_DIR.join("db");
-    if let Err(e) = create_dir_all(&db_dir) {
-        eprintln!("Error creating database directory: {}", e);
-    }
+#[cfg(feature = "deploy_desktop")]
+fn data_dir() -> PathBuf {
+    DIR.get()
+        .unwrap_or(&PathBuf::from(FALLBACK_DIR))
+        .to_path_buf()
+}
+
+#[cfg(not(feature = "deploy_desktop"))]
+fn data_dir() -> PathBuf {
+    PathBuf::from(FALLBACK_DIR)
+}
+
+pub fn db_dir() -> PathBuf {
+    let db_dir = data_dir().join("db");
+
+    drop(create_dir_all(&db_dir));
 
     db_dir
 }
 
-fn pictures_dir() -> PathBuf {
-    let pic_dir = DATA_DIR.join("pictures");
+pub fn pictures_dir() -> PathBuf {
+    let pic_dir = data_dir().join("pictures");
 
-    if let Err(e) = create_dir_all(&pic_dir) {
-        eprintln!("Error creating picture directory: {}", e);
-    }
+    drop(create_dir_all(&pic_dir));
 
     pic_dir
 }
 
-fn attachments_dir() -> PathBuf {
-    let attachments_dir = DATA_DIR.join("attachments");
+pub fn attachments_dir() -> PathBuf {
+    let attachments_dir = data_dir().join("attachments");
 
-    if let Err(e) = create_dir_all(&attachments_dir) {
-        eprintln!("Error creating attachments directory: {}", e);
-    }
+    drop(create_dir_all(&attachments_dir));
 
     attachments_dir
 }

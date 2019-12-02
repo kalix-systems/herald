@@ -49,23 +49,23 @@ impl NotifHandler {
             NewUser(update) => {
                 let (user, meta) = *update;
                 // add user
-                ret_err!(push(UserUpdate::NewUser(user)));
+                push(UserUpdate::NewUser(user));
 
                 // add pairwise conversation
-                ret_err!(push(ConvUpdate::NewConversation(meta)));
+                push(ConvUpdate::NewConversation(meta));
             }
             NewConversation(meta) => {
-                ret_err!(push(ConvUpdate::NewConversation(meta)));
+                push(ConvUpdate::NewConversation(meta));
             }
             AddUserResponse(cid, uid, accepted) => {
                 // handle response
-                ret_err!(push(UserUpdate::ReqResp(uid, accepted)));
+                push(UserUpdate::ReqResp(uid, accepted));
 
                 // add conversation
                 if accepted {
                     let meta = ret_err!(heraldcore::conversation::meta(&cid));
 
-                    ret_err!(push(ConvUpdate::NewConversation(meta)));
+                    push(ConvUpdate::NewConversation(meta));
                 }
             }
             AddConversationResponse(cid, uid, accepted) => {
@@ -73,7 +73,7 @@ impl NotifHandler {
                 ret_err!(content_push(cid, MemberUpdate::ReqResp(uid, accepted)));
             }
             Settings(cid, settings) => {
-                ret_err!(push(ConvUpdate::Settings(cid, settings)));
+                push(ConvUpdate::Settings(cid, settings));
             }
         }
     }

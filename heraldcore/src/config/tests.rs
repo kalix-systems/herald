@@ -1,6 +1,6 @@
 use super::*;
 use herald_common::sig::KeyPair;
-use platform_dirs::PICTURES_DIR;
+use platform_dirs::pictures_dir;
 use serial_test_derive::serial;
 use std::convert::TryInto;
 
@@ -74,7 +74,7 @@ fn complicated_add_get_set_config() {
     db::set_profile_picture(&conn, Some(test_picture.to_string()))
         .expect(womp!("failed to set picture"));
 
-    std::fs::remove_dir_all(PICTURES_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(pictures_dir()).expect(womp!());
 }
 
 #[test]

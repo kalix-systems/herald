@@ -22,8 +22,7 @@ ListView {
     clip: true
     currentIndex: -1
     boundsBehavior: Flickable.StopAtBounds
-    ScrollBar.vertical: ScrollBar {
-    }
+    ScrollBar.vertical: ScrollBar {}
 
     delegate: Item {
         id: contactItem
@@ -41,7 +40,7 @@ ListView {
 
             labelComponent: Av.ConversationLabel {
                 contactName: contactData.name
-                labelColor: CmnCfg.palette.secondaryColor
+                labelColor: CmnCfg.palette.black
                 labelSize: 14
                 lastBody: "@" + contactData.userId
             }

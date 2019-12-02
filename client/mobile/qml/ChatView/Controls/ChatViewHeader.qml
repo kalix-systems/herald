@@ -12,7 +12,7 @@ ToolBar {
     height: CmnCfg.toolbarHeight
 
     background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
     }
 
     RowLayout {

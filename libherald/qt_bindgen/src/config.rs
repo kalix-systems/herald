@@ -74,6 +74,7 @@ fn herald() -> Object {
     let funcs = functions! {
         mut registerNewUser(user_id: QString) => Void,
         mut login() => Bool,
+        mut setAppLocalDataDir(path: QString) => Void,
     };
 
     obj! {
@@ -124,7 +125,7 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        const indexById(conversation_id: QByteArray) => QUint64,
+        const indexById(conversation_id: QByteArray) => Qint64,
     };
 
     obj! {
@@ -220,11 +221,19 @@ fn messages() -> Object {
     let item_props = item_props! {
         // Main message properties
         msgId: ItemProp::new(QByteArray).optional(),
+        // Author of the message
         author: ItemProp::new(QString).optional(),
-        body: ItemProp::new(QString).optional(),
+        // Message body. Possibly truncated if the message is too long
+        body: ItemProp::new(QString).optional().get_by_value(),
+        // Full message body
+        fullBody: ItemProp::new(QString).optional(),
+        // Time the message was saved locally
         insertionTime: ItemProp::new(Qint64).optional(),
+        // Time the message arrived at the server (only valid for inbound messages)
         serverTime: ItemProp::new(Qint64).optional(),
+        // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
+        // Whether or not the message has attachments
         hasAttachments: ItemProp::new(Bool).optional(),
         receiptStatus: ItemProp::new(QUint32).optional(),
         dataSaved: ItemProp::new(Bool).optional(),
@@ -257,7 +266,10 @@ fn messages() -> Object {
         mut nextSearchMatch() => Qint64,
         mut prevSearchMatch() => Qint64,
         mut setSearchHint(scrollbar_position: Float, scrollbar_height: Float) => Void,
-        const indexById(msg_id: QByteArray) => QUint64,
+        mut setElisionLineCount(line_count: QUint8) => Void,
+        mut setElisionCharCount(char_count: QUint16) => Void,
+        mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
+        const indexById(msg_id: QByteArray) => Qint64,
     };
 
     obj! {
@@ -387,8 +399,11 @@ fn message_search() -> Object {
     let item_props = item_props! {
         msgId: ItemProp::new(QByteArray).optional(),
         author: ItemProp::new(QString).optional(),
+        // Conversation id
         conversation: ItemProp::new(QByteArray).optional(),
+        // Is the conversation pairwise?
         conversationPairwise: ItemProp::new(Bool).optional(),
+        // Path to conversation picture, if it exists
         conversationPicture: ItemProp::new(QString).optional().get_by_value(),
         conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
         conversationTitle: ItemProp::new(QString).optional().get_by_value(),

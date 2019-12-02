@@ -24,6 +24,7 @@ impl Messages {
             local_id: config::id().ok(),
             search: SearchState::new(),
             builder,
+            elider: Default::default(),
         }
     }
 
@@ -64,12 +65,10 @@ impl Messages {
     pub(crate) fn index_by_id_(
         &self,
         msg_id: ffi::MsgIdRef,
-    ) -> u64 {
-        let ret_val = std::u32::MAX as u64;
+    ) -> i64 {
+        let msg_id = ret_err!(msg_id.try_into(), -1);
 
-        let msg_id = ret_err!(msg_id.try_into(), ret_val);
-
-        ret_none!(self.container.index_by_id(msg_id), ret_val) as u64
+        ret_none!(self.container.index_by_id(msg_id), -1) as i64
     }
 
     pub(crate) fn is_tail_(
@@ -294,18 +293,32 @@ impl Messages {
     pub(crate) fn body_(
         &self,
         index: usize,
-    ) -> Option<&str> {
-        if self.container.msg_data(index)?.match_status.is_match() {
-            Some(
-                self.container
-                    .msg_data(index)?
-                    .search_buf
-                    .as_ref()?
-                    .as_str(),
-            )
+    ) -> Option<String> {
+        Some(if self.container.msg_data(index)?.match_status.is_match() {
+            self.container
+                .msg_data(index)?
+                .search_buf
+                .as_ref()?
+                .to_owned()
         } else {
-            Some(self.container.msg_data(index)?.body.as_ref()?.as_str())
-        }
+            self.elider
+                .elided_body(self.container.msg_data(index)?.body.as_ref()?)
+        })
+    }
+
+    pub(crate) fn full_body_(
+        &self,
+        index: usize,
+    ) -> Option<&str> {
+        Some(if self.container.msg_data(index)?.match_status.is_match() {
+            self.container
+                .msg_data(index)?
+                .search_buf
+                .as_ref()?
+                .as_str()
+        } else {
+            self.container.msg_data(index)?.body.as_ref()?.as_str()
+        })
     }
 
     pub(crate) fn insertion_time_(
@@ -436,5 +449,26 @@ impl Messages {
         index: usize,
     ) -> Option<u8> {
         Some(self.container.msg_data(index)?.match_status as u8)
+    }
+
+    pub(crate) fn set_elision_line_count_(
+        &mut self,
+        line_count: u8,
+    ) {
+        self.elider.set_line_count(line_count as usize);
+    }
+
+    pub(crate) fn set_elision_char_count_(
+        &mut self,
+        char_count: u16,
+    ) {
+        self.elider.set_char_count(char_count as usize);
+    }
+
+    pub(crate) fn set_elision_chars_per_line_(
+        &mut self,
+        chars_per_line: u8,
+    ) {
+        self.elider.set_char_per_line(chars_per_line as usize);
     }
 }

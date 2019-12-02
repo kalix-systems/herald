@@ -4,6 +4,7 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import "../../common" as Common
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 import "../../SideBar" as SideBar
 import "qrc:/imports/Avatar"
 import "../popups" as Popups
@@ -16,14 +17,13 @@ Component {
         id: headerBarComponent
         height: CmnCfg.toolbarHeight
         background: Rectangle {
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
         }
         RowLayout {
 
             anchors.fill: parent
 
-            Common.ConfigAvatar {
-            }
+            Common.ConfigAvatar {}
 
             Text {
                 id: text
@@ -32,15 +32,15 @@ Component {
                 font.family: CmnCfg.chatFont.name
                 font.bold: true
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
-                color: CmnCfg.palette.mainColor
+                color: CmnCfg.palette.white
             }
             Item {
                 Layout.fillWidth: true
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: xButton
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 source: "qrc:/x-icon.svg"
                 scale: 0.8
                 onClicked: {

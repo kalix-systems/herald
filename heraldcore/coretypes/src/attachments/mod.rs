@@ -1,7 +1,7 @@
 use herald_common::*;
 use hex::encode;
 use location::{loc, Location};
-use platform_dirs::ATTACHMENTS_DIR;
+use platform_dirs::attachments_dir;
 use std::{ffi::OsString, fmt, fs::read_dir, path::Path};
 use tar::{Archive, Builder};
 
@@ -93,7 +93,7 @@ impl Attachment {
     pub fn save(&self) -> Result<&str, Error> {
         let mut archive = Archive::new(self.data.as_slice());
 
-        let path = ATTACHMENTS_DIR.join(self.hash_dir());
+        let path = attachments_dir().join(self.hash_dir());
 
         archive.unpack(&path).map_err(|e| Error::Write(e, loc!()))?;
 
@@ -116,7 +116,7 @@ impl AttachmentMeta {
     pub fn into_flat_strings(self) -> Result<Vec<String>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
         for p in self.0 {
-            let mut path = ATTACHMENTS_DIR.to_path_buf();
+            let mut path = attachments_dir();
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {

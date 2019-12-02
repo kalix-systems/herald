@@ -4,9 +4,10 @@ import QtQuick.Layouts 1.12
 import QtQuick.Controls 2.13
 import LibHerald 1.0
 import Qt.labs.settings 1.0
+import Qt.labs.platform 1.1
 import "qrc:/imports" as Imports
+import "qrc:/imports/errors"
 import "SideBar/popups" as Popups
-import "errors" as ErrorUtils
 import QtQml 2.13
 
 ApplicationWindow {
@@ -20,6 +21,9 @@ ApplicationWindow {
 
     Herald {
         id: herald
+
+        property var errPopup: ErrorDialog {}
+
         errors.onTryPollChanged: {
             var errMsg = herald.errors.nextError()
             if (errMsg !== "") {
@@ -27,7 +31,15 @@ ApplicationWindow {
                 errPopup.open()
             }
         }
-        property var errPopup: ErrorUtils.ErrorDialog {}
+
+        // NOTE: This is very important.
+        // Until our initialization is cleaned up this has to happen immediately after `Herald`
+        // is initialized.
+        // TODO: This should probably be called from C++ before executing the application with a manually exposed
+        // extern "C" function.
+        Component.onCompleted: herald.setAppLocalDataDir(
+                                   StandardPaths.writableLocation(
+                                       StandardPaths.AppLocalDataLocation))
     }
 
     Loader {

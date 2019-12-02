@@ -63,7 +63,7 @@ Column {
 
                 labelComponent: Av.ConversationLabel {
                     contactName: contactData.name
-                    labelColor: CmnCfg.palette.secondaryColor
+                    labelColor: CmnCfg.palette.offBlack
                     labelSize: 14
                     lastBody: "@" + contactData.userId
                 }
@@ -82,6 +82,5 @@ Column {
         }
     }
     //component for selected group members
-    FinalGroupList {
-    }
+    FinalGroupList {}
 }

@@ -1,14 +1,18 @@
 import QtQuick 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../../common" as Common
 import QtQml 2.13
 import QtQuick.Controls 2.5
 import Qt.labs.platform 1.0
 
 Menu {
+    id: optMenu
+
+    // Item in `Conversations` model
+    property var conversationItem
     property int chosenPeriod: conversationItem.expirationPeriod
     property string chosenTimer: timerModel.get(chosenPeriod).path
+
     ListModel {
         id: timerModel
 
@@ -43,7 +47,6 @@ Menu {
         }
     }
 
-    id: optMenu
     Instantiator {
         model: timerModel
 

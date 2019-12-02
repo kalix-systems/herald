@@ -313,11 +313,26 @@ pub trait MessagesTrait {
     fn index_by_id(
         &self,
         msg_id: &[u8],
-    ) -> u64;
+    ) -> i64;
 
     fn next_search_match(&mut self) -> i64;
 
     fn prev_search_match(&mut self) -> i64;
+
+    fn set_elision_char_count(
+        &mut self,
+        char_count: u16,
+    ) -> ();
+
+    fn set_elision_chars_per_line(
+        &mut self,
+        chars_per_line: u8,
+    ) -> ();
+
+    fn set_elision_line_count(
+        &mut self,
+        line_count: u8,
+    ) -> ();
 
     fn set_search_hint(
         &mut self,
@@ -364,7 +379,7 @@ pub trait MessagesTrait {
     fn body(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn data_saved(
         &self,
@@ -375,6 +390,11 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<i64>;
+
+    fn full_body(
+        &self,
+        index: usize,
+    ) -> Option<&str>;
 
     fn has_attachments(
         &self,
@@ -601,7 +621,7 @@ pub unsafe extern "C" fn messages_index_by_id(
     ptr: *const Messages,
     msg_id_str: *const c_char,
     msg_id_len: c_int,
-) -> u64 {
+) -> i64 {
     let obj = &*ptr;
     let msg_id = { qba_slice!(msg_id_str, msg_id_len) };
     obj.index_by_id(msg_id)
@@ -617,6 +637,33 @@ pub unsafe extern "C" fn messages_next_search_match(ptr: *mut Messages) -> i64 {
 pub unsafe extern "C" fn messages_prev_search_match(ptr: *mut Messages) -> i64 {
     let obj = &mut *ptr;
     obj.prev_search_match()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_set_elision_char_count(
+    ptr: *mut Messages,
+    char_count: u16,
+) {
+    let obj = &mut *ptr;
+    obj.set_elision_char_count(char_count)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_set_elision_chars_per_line(
+    ptr: *mut Messages,
+    chars_per_line: u8,
+) {
+    let obj = &mut *ptr;
+    obj.set_elision_chars_per_line(chars_per_line)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_set_elision_line_count(
+    ptr: *mut Messages,
+    line_count: u8,
+) {
+    let obj = &mut *ptr;
+    obj.set_elision_line_count(line_count)
 }
 
 #[no_mangle]
@@ -880,6 +927,21 @@ pub unsafe extern "C" fn messages_data_expiration_time(
 ) -> COption<i64> {
     let obj = &*ptr;
     obj.expiration_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_full_body(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.full_body(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]

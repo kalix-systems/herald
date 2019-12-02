@@ -11,7 +11,7 @@ Page {
     padding: 0
 
     background: Rectangle {
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
     }
 
     Component {

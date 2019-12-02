@@ -15,19 +15,17 @@ RowLayout {
             id: timestamp
             font.pixelSize: 10
             text: friendlyTimestamp
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
 
         Button {
             id: clock
-            icon.source: expirationTime
-                         !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+            icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
             icon.height: 16
             icon.width: 16
             icon.color: "grey"
             padding: 0
-            background: Item {
-            }
+            background: Item {}
             anchors.verticalCenter: timestamp.verticalCenter
         }
     }
@@ -43,7 +41,6 @@ RowLayout {
         icon.width: 16
         icon.color: CmnCfg.palette.iconMatte
         padding: 0
-        background: Item {
-        }
+        background: Item {}
     }
 }

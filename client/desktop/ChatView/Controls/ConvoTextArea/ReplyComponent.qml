@@ -5,20 +5,11 @@ import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
-
-//NPB: just looks kind bad
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.sideBarHighlightColor
+    color: CmnCfg.palette.medGrey
     width: parent.width
     height: Math.max(textCol.height, 20)
 
@@ -35,7 +26,7 @@ Rectangle {
                                                ownedConversation.builderopAuthor)]
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: exitButton
         anchors {
             //  margins: CmnCfg.smallMargin
@@ -84,7 +75,7 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color: CmnCfg.palette.mainTextColor
+            color: CmnCfg.palette.black
         }
 
         Label {
@@ -95,7 +86,7 @@ Rectangle {
             font.pixelSize: 10
             text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
             id: timestamp
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
     }
 }

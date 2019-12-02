@@ -6,20 +6,21 @@ import "../../Common"
 
 RowLayout {
     id: chatRowLayout
-    readonly property real textareaHeight: CmnCfg.units.dp(36)
+    readonly property real textareaHeight: CmnCfg.units.dp(24)
     property bool send: cta.text.length > 0
     width: parent.width
     spacing: 0
 
-
     TextArea {
         id: cta
-        height: textareaHeight
+        height: chatRowLayout.textareaHeight
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignBottom
         placeholderText: "Send a message..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
-        color: CmnCfg.palette.iconFill
+        color: CmnCfg.palette.black
+        selectionColor: CmnCfg.palette.highlightColor
+
         font {
             pointSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
@@ -27,7 +28,8 @@ RowLayout {
     }
 
     Grid {
-        columns: cta.lineCount > 1 ? 1 : 2
+        // TODO: Collapse options into plus when typing
+        columns: 2 //cta.lineCount > 1 ? 1 : 2
         Layout.alignment: Qt.AlignRight | Qt.AlignBottom
         Layout.margins: CmnCfg.units.dp(12)
         Layout.bottomMargin: CmnCfg.units.dp(6)
@@ -35,13 +37,13 @@ RowLayout {
 
         IconButton {
             Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
+            color: CmnCfg.palette.black
             imageSource: "qrc:/camera-icon.svg"
         }
 
         IconButton {
             Layout.alignment: Qt.AlignRight
-            color: CmnCfg.palette.iconFill
+            color: CmnCfg.palette.black
             tapCallback: send ? function () {
                 ownedMessages.builder.body = cta.text
                 ownedMessages.builder.finalize()

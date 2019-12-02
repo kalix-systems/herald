@@ -120,7 +120,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
             let conv = ret_err!(inner.add());
 
             // send update to Conversations list
-            ret_err!(push(ConvUpdate::BuilderFinished(conv.meta.clone())));
+            push(ConvUpdate::BuilderFinished(conv.meta.clone()));
 
             ret_err!(start(conv));
         });
