@@ -39,7 +39,9 @@ ScrollView {
             if (ownedConversation.searchNumMatches > 0) {
                 ownedConversation.setSearchHint(x, y)
                 searchToolBar.state = "searchActiveState"
-                convWindow.positionViewAtIndex(ownedConversation.nextSearchMatch(), ListView.Center)
+                convWindow.positionViewAtIndex(
+                            ownedConversation.nextSearchMatch(),
+                            ListView.Center)
             }
         }
 
@@ -51,7 +53,9 @@ ScrollView {
             ownedConversation.setSearchHint(x, y)
             if (ownedConversation.searchNumMatches > 0) {
                 searchToolBar.state = "searchActiveState"
-                convWindow.positionViewAtIndex(ownedConversation.prevSearchMatch(), ListView.Center)
+                convWindow.positionViewAtIndex(
+                            ownedConversation.prevSearchMatch(),
+                            ListView.Center)
             } else {
                 //clear state to disable buttons
                 searchToolBar.state = ""

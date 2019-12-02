@@ -28,8 +28,7 @@ Component {
             }
 
             //main search component
-            SearchTextArea {
-            }
+            SearchTextArea {}
 
             Text {
                 id: indexText
@@ -51,7 +50,9 @@ Component {
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
                 onClicked: {
-                    convWindow.positionViewAtIndex(ownedConversation.prevSearchMatch(), ListView.Center)
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.prevSearchMatch(),
+                                ListView.Center)
                 }
             }
 
@@ -64,7 +65,9 @@ Component {
                 opacity: enabled ? 1 : 0.5
 
                 onClicked: {
-                    convWindow.positionViewAtIndex(ownedConversation.nextSearchMatch(), ListView.Center)
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.nextSearchMatch(),
+                                ListView.Center)
                 }
             }
 

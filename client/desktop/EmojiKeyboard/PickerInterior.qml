@@ -31,8 +31,7 @@ Item {
                 spacing: 0
                 Button {
                     padding: 0
-                    background: Item {
-                    }
+                    background: Item {}
                     icon.source: "qrc:/search-icon.svg"
                     icon.color: CmnCfg.palette.medGrey
                     icon.height: 17
@@ -55,8 +54,7 @@ Item {
                 Button {
                     id: exitButton
                     padding: 0
-                    background: Item {
-                    }
+                    background: Item {}
                     icon.source: "qrc:/x-icon.svg"
                     icon.color: CmnCfg.palette.medGrey
                     icon.height: 17
@@ -77,8 +75,7 @@ Item {
             width: 24
             currentIndex: CmnCfg.skinSwatchIndex
             model: ["#f4be40", "#f9dcbe", "#dfbb97", "#c18f6b", "#9a6440", "#59453a"]
-            indicator: Item {
-            }
+            indicator: Item {}
 
             delegate: ItemDelegate {
                 height: menu.height
@@ -141,8 +138,7 @@ Item {
             anchors.fill: parent
             boundsBehavior: Flickable.StopAtBounds
             clip: true
-            ScrollBar.vertical: ScrollBar {
-            }
+            ScrollBar.vertical: ScrollBar {}
             contentHeight: innerCol.height
             Column {
                 id: innerCol
