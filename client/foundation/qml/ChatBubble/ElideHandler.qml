@@ -6,7 +6,7 @@ TextEdit {
     visible: elided
     text: "Read more"
     font.bold: true
-    color: "darkblue"
+    color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
     Layout.bottomMargin: CmnCfg.smallPadding
@@ -17,7 +17,7 @@ TextEdit {
         anchors.fill: parent
         onClicked: {
             wrapperCol.expanded == true ? wrapperCol.expanded = false : wrapperCol.expanded = true
-            parent.text == "Read more" ? parent.text = "Collapse" : parent.text ="Read more"
+            parent.text == "Read more" ? parent.text = "Collapse" : parent.text = "Read more"
         }
     }
 }
