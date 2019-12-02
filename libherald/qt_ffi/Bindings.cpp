@@ -925,8 +925,8 @@ void conversations_filter_set(Conversations::Private *, const ushort *str,
 bool conversations_filter_regex_get(const Conversations::Private *);
 void conversations_filter_regex_set(Conversations::Private *, bool);
 void conversations_clear_filter(Conversations::Private *);
-quint64 conversations_index_by_id(const Conversations::Private *, const char *,
-                                  int);
+qint64 conversations_index_by_id(const Conversations::Private *, const char *,
+                                 int);
 bool conversations_remove_conversation(Conversations::Private *, quint64);
 bool conversations_toggle_filter_regex(Conversations::Private *);
 }
@@ -1963,7 +1963,7 @@ void messages_search_regex_set(Messages::Private *, bool);
 bool messages_clear_conversation_history(Messages::Private *);
 void messages_clear_search(Messages::Private *);
 bool messages_delete_message(Messages::Private *, quint64);
-quint64 messages_index_by_id(const Messages::Private *, const char *, int);
+qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
 void messages_set_elision_char_count(Messages::Private *, quint16);
@@ -2918,7 +2918,7 @@ void Conversations::setFilterRegex(bool v) {
   conversations_filter_regex_set(m_d, v);
 }
 void Conversations::clearFilter() { return conversations_clear_filter(m_d); }
-quint64 Conversations::indexById(const QByteArray &conversation_id) const {
+qint64 Conversations::indexById(const QByteArray &conversation_id) const {
   return conversations_index_by_id(m_d, conversation_id.data(),
                                    conversation_id.size());
 }
@@ -3707,7 +3707,7 @@ void Messages::clearSearch() { return messages_clear_search(m_d); }
 bool Messages::deleteMessage(quint64 row_index) {
   return messages_delete_message(m_d, row_index);
 }
-quint64 Messages::indexById(const QByteArray &msg_id) const {
+qint64 Messages::indexById(const QByteArray &msg_id) const {
   return messages_index_by_id(m_d, msg_id.data(), msg_id.size());
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }

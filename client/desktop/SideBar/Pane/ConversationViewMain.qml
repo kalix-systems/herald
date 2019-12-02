@@ -31,6 +31,10 @@ ListView {
         onMessageClicked: {
             const conv_idx = herald.conversations.indexById(
                                searchConversationId)
+            // early return on out of bounds
+            if (conv_idx < 0)
+                return
+
             conversationList.currentIndex = conv_idx
             chatView.sourceComponent = conversationList.currentItem.childChatView
         }

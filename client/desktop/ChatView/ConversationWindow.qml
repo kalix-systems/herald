@@ -105,8 +105,11 @@ ListView {
                 elided: chatRow.elided
                 //mousearea handling jump behavior
                 jumpHandler.onClicked: {
-                    var msgIndex = ownedConversation.indexById(replyId)
-                    var window = convWindow
+                    const msgIndex = ownedConversation.indexById(replyId)
+                    if (msgIndex < 0)
+                        return
+
+                    const window = convWindow
 
                     window.positionViewAtIndex(msgIndex, ListView.Center)
                     replyHighlightAnimation.target = window.itemAtIndex(

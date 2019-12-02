@@ -183,7 +183,7 @@ pub trait ConversationsTrait {
     fn index_by_id(
         &self,
         conversation_id: &[u8],
-    ) -> u64;
+    ) -> i64;
 
     fn remove_conversation(
         &mut self,
@@ -362,7 +362,7 @@ pub unsafe extern "C" fn conversations_index_by_id(
     ptr: *const Conversations,
     conversation_id_str: *const c_char,
     conversation_id_len: c_int,
-) -> u64 {
+) -> i64 {
     let obj = &*ptr;
     let conversation_id = { qba_slice!(conversation_id_str, conversation_id_len) };
     obj.index_by_id(conversation_id)
