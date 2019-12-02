@@ -22,8 +22,7 @@ ApplicationWindow {
     Herald {
         id: herald
 
-        property var errPopup: ErrorDialog {
-        }
+        property var errPopup: ErrorDialog {}
 
         errors.onTryPollChanged: {
             var errMsg = herald.errors.nextError()
@@ -47,15 +46,13 @@ ApplicationWindow {
         id: appLoader
         active: herald.configInit
         anchors.fill: parent
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 
     Loader {
         anchors.fill: parent
         id: registrationLoader
         active: !herald.configInit
-        sourceComponent: RegistrationPage {
-        }
+        sourceComponent: RegistrationPage {}
     }
 }

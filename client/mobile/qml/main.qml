@@ -14,8 +14,7 @@ ApplicationWindow {
     Herald {
         id: herald
 
-        property var errPopup: ErrorDialog {
-        }
+        property var errPopup: ErrorDialog {}
 
         errors.onTryPollChanged: {
             var errMsg = herald.errors.nextError()
@@ -35,8 +34,7 @@ ApplicationWindow {
     Loader {
         id: capitan
         active: false
-        sourceComponent: Item {
-        }
+        sourceComponent: Item {}
     }
 
     Loader {
@@ -54,7 +52,6 @@ ApplicationWindow {
         id: appLoader
         active: herald.configInit
         anchors.fill: parent
-        sourceComponent: App {
-        }
+        sourceComponent: App {}
     }
 }

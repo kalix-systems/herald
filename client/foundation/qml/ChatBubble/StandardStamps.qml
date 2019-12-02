@@ -25,8 +25,7 @@ RowLayout {
             icon.width: 16
             icon.color: "grey"
             padding: 0
-            background: Item {
-            }
+            background: Item {}
             anchors.verticalCenter: timestamp.verticalCenter
         }
     }
@@ -42,7 +41,6 @@ RowLayout {
         icon.width: 16
         icon.color: CmnCfg.palette.iconMatte
         padding: 0
-        background: Item {
-        }
+        background: Item {}
     }
 }

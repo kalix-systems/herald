@@ -37,9 +37,7 @@ ColumnLayout {
         }
     }
 
-    StandardTextEdit {
-    }
+    StandardTextEdit {}
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

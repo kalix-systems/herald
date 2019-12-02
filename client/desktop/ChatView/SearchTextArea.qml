@@ -35,17 +35,13 @@ ScrollView {
             ownedConversation.searchActive = true
             var x = convWindow.chatScrollBar.position
             var y = convWindow.chatScrollBar.size
-
             //key navigation handling
             if (ownedConversation.searchNumMatches > 0) {
                 ownedConversation.setSearchHint(x, y)
-                convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"
-                SearchUtils.jumpHandler(ownedConversation,
-                                        convWindow.chatListView, chatPane,
-                                        convWindow, true)
-                convWindow.returnToBounds()
-                convWindow.state = ""
+                convWindow.positionViewAtIndex(
+                            ownedConversation.nextSearchMatch(),
+                            ListView.Center)
             }
         }
 
@@ -56,12 +52,10 @@ ScrollView {
             var y = convWindow.chatScrollBar.size
             ownedConversation.setSearchHint(x, y)
             if (ownedConversation.searchNumMatches > 0) {
-                convWindow.state = "jumpState"
                 searchToolBar.state = "searchActiveState"
-                SearchUtils.searchTextHandler(ownedConversation,
-                                              convWindow.chatListView,
-                                              chatPane, convWindow)
-                convWindow.state = ""
+                convWindow.positionViewAtIndex(
+                            ownedConversation.prevSearchMatch(),
+                            ListView.Center)
             } else {
                 //clear state to disable buttons
                 searchToolBar.state = ""
