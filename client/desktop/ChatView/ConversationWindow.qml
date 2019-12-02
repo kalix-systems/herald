@@ -12,7 +12,6 @@ ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
-    property var blankTransition: Transition {}
 
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
@@ -25,6 +24,7 @@ ListView {
         duration: 600
         easing.type: Easing.InCubic
     }
+
 
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
@@ -194,19 +194,4 @@ ListView {
             avatarHeight: 28
         }
     }
-
-    states: [
-        State {
-            name: "jumpState"
-            PropertyChanges {
-                target: chatListView
-                rebound: blankTransition
-            }
-
-            PropertyChanges {
-                target: chatScrollBarInner
-                policy: ScrollBar.AlwaysOn
-            }
-        }
-    ]
 }
