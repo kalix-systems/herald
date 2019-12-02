@@ -26,6 +26,6 @@ TextEdit {
     readOnly: true
     font.family: CmnCfg.chatFont.name
     color: CmnCfg.palette.black
-    textFormat: TextEdit.RichText
+    textFormat: TextEdit.AutoText
     selectionColor: CmnCfg.palette.highlightColor
 }
