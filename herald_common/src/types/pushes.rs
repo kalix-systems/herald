@@ -1,19 +1,19 @@
 use super::*;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PushTag {
     User,
     Device,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Push {
     pub tag: PushTag,
     pub timestamp: Time,
     pub msg: Bytes,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PushMeta {
     pub tag: PushTag,
     pub timestamp: Time,
@@ -22,10 +22,10 @@ pub struct PushMeta {
 pub mod login {
     use super::*;
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
     pub struct SignAs(pub GlobalId);
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum SignAsResponse {
         Sign(UQ),
         SessionExists,
@@ -33,10 +33,10 @@ pub mod login {
         MissingUID,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
-    pub struct LoginToken(pub sign::Signature);
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
+    pub struct LoginToken(pub sig::Signature);
 
-    #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, Copy, PartialEq, Eq)]
     pub enum LoginTokenResponse {
         Success,
         BadSig,
@@ -48,12 +48,12 @@ pub mod catchup {
 
     pub const CHUNK_SIZE: u32 = 256;
 
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub enum Catchup {
         Messages(Vec<Push>),
         Done,
     }
 
-    #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+    #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct CatchupAck(pub u64);
 }

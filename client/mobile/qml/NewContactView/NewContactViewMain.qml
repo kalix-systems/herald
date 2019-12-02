@@ -7,8 +7,7 @@ import "Controls"
 
 Page {
 
-    header: NewContactHeader {
-    }
+    header: NewContactHeader {}
 
     ColumnLayout {
         anchors.fill: parent
@@ -41,7 +40,7 @@ Page {
         Button {
             text: "Send"
             onClicked: {
-                usersModel.add(usernameTextArea.text.trim())
+                herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()
             }
         }

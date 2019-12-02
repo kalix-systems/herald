@@ -9,38 +9,38 @@ RowLayout {
     Layout.topMargin: 0
     Layout.bottomMargin: CmnCfg.smallPadding
 
-    Label {
-        font.pixelSize: 10
-        text: friendlyTimestamp
-        id: timestamp
-        color: CmnCfg.palette.secondaryTextColor
+    Row {
+        spacing: 2
+        Label {
+            id: timestamp
+            font.pixelSize: 10
+            text: friendlyTimestamp
+            color: CmnCfg.palette.darkGrey
+        }
+
+        Button {
+            id: clock
+            icon.source: expirationTime !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+            icon.height: 16
+            icon.width: 16
+            icon.color: "grey"
+            padding: 0
+            background: Item {}
+            anchors.verticalCenter: timestamp.verticalCenter
+        }
     }
 
     Item {
         Layout.fillWidth: true
     }
 
-    Image {
+    Button {
         id: receipt
-        source: receiptImage
-        sourceSize: Qt.size(16, 16)
-        Layout.alignment: Qt.AlignRight
-        layer.enabled: true
-        layer.samplerName: "maskSource"
-        layer.effect: ShaderEffect {
-            property color overlay: CmnCfg.palette.iconMatte
-            property var source: background
-            fragmentShader: "
-uniform lowp sampler2D source;
-uniform lowp sampler2D maskSource;
-uniform vec4 overlay;
-varying highp vec2 qt_TexCoord0;
-void main() {
-lowp vec4 tex = texture2D(source, qt_TexCoord0);
-lowp vec4 mask = texture2D(maskSource, qt_TexCoord0);
-gl_FragColor = overlay * mask.a;
-}
-"
-        }
+        icon.source: receiptImage
+        icon.height: 16
+        icon.width: 16
+        icon.color: CmnCfg.palette.iconMatte
+        padding: 0
+        background: Item {}
     }
 }

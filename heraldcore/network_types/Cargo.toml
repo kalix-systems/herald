@@ -6,18 +6,20 @@ edition = "2018"
 
 [dependencies]
 serde = "1.0"
-serde_cbor = "0.10.1"
 
 [dependencies.herald_common]
 path             = "../../herald_common"
 default_features = false
 features         = ["rusqlite_"]
 
+[dependencies.channel_ratchet]
+path = "../../channel_ratchet"
+
+[dependencies.kson]
+path = "../../kson"
+
 [dependencies.coretypes]
 path = "../coretypes"
-
-[dependencies.chainmail]
-path = "../../chainmail"
 
 [dependencies.rusqlite]
 version          = "0.20.0"

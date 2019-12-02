@@ -228,7 +228,7 @@ impl OutboundMessageBuilder {
                     Err(e) => {
                         callback(StoreAndSend::Error {
                             error: e.into(),
-                            line_number: line!(),
+                            location: loc!(),
                         });
                         return;
                     }
@@ -258,13 +258,13 @@ impl OutboundMessageBuilder {
         }
 
         let conversation_id = e!(conversation.ok_or(MissingConversationId));
-        let msg_id: MsgId = utils::rand_id().into();
+        let msg_id = MsgId::gen_new();
         let timestamp = Time::now();
         let author = e!(crate::config::db::id(&db));
         let expiration_period = e!(expiration_period(&db, &conversation_id));
 
         let expiration = match expiration_period.into_millis() {
-            Some(period) => Some(Time(timestamp.0 + period.0)),
+            Some(period) => Some(timestamp + period),
             None => None,
         };
 
@@ -331,7 +331,7 @@ impl OutboundMessageBuilder {
         if let Some(op) = op {
             e!(tx.execute_named(
                 include_str!("sql/add_reply.sql"),
-                named_params! { "@msg_id": msg_id, "@op": op}
+                named_params! { "@msg_id": msg_id, "@op": op }
             ));
         }
 
@@ -367,13 +367,12 @@ impl OutboundMessageBuilder {
         self,
         db: &mut Conn,
     ) -> Result<Message, HErr> {
-        use crate::{channel_recv_err, loc};
+        use crate::channel_recv_err;
         use crossbeam_channel::*;
 
         let (tx, rx) = unbounded();
         self.store_and_send_db(db, move |m| {
-            tx.send(m)
-                .unwrap_or_else(|_| panic!("Send error at {}", loc!()));
+            tx.send(m).unwrap_or_else(|_| panic!("Send error"));
         });
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {
@@ -423,7 +422,7 @@ impl InboundMessageBuilder {
         {
             if let Some(expiration) = expiration {
                 // short circuit if message has already expired
-                if expiration.0 < Time::now().0 {
+                if expiration < Time::now() {
                     return Ok(None);
                 }
             }
@@ -434,8 +433,10 @@ impl InboundMessageBuilder {
         let server_timestamp = server_timestamp.ok_or(MissingTimestamp)?;
         let author = author.ok_or(MissingAuthor)?;
 
-        let res: Result<Vec<PathBuf>, HErr> =
-            attachments.into_iter().map(|a| Ok(a.save()?)).collect();
+        let res: Result<Vec<String>, HErr> = attachments
+            .into_iter()
+            .map(|a| Ok(a.save()?.into()))
+            .collect();
         let attachment_paths = res?;
         let has_attachments = !attachment_paths.is_empty();
 
@@ -500,7 +501,7 @@ impl InboundMessageBuilder {
         };
 
         if has_attachments {
-            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|p| p.as_path()))?;
+            attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|s| s.as_str()))?;
         }
 
         tx.commit()?;

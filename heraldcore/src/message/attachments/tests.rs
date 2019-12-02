@@ -1,6 +1,6 @@
 use super::*;
 use crate::config::test_config;
-use platform_dirs::ATTACHMENTS_DIR;
+use platform_dirs::attachments_dir;
 use serial_test_derive::serial;
 use std::{convert::TryInto, str::FromStr};
 
@@ -10,9 +10,9 @@ fn make_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
     let attach = Attachment::new(&path).expect(womp!());
 
-    let path = ATTACHMENTS_DIR.join(attach.save().expect(womp!()));
+    let path = attachments_dir().join(attach.save().expect(womp!()));
     std::fs::remove_dir_all(path).expect(womp!());
-    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(attachments_dir()).expect(womp!());
 }
 
 #[test]
@@ -34,7 +34,7 @@ fn outbound_message_attachment() {
         .expect(womp!());
 
     assert_eq!(meta.len(), 1);
-    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(attachments_dir()).expect(womp!());
 }
 
 #[test]
@@ -68,7 +68,7 @@ fn inbound_message_attachment() {
 
     assert_eq!(meta.len(), 1);
 
-    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(attachments_dir()).expect(womp!());
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn delete_message_with_attachment() {
     let path = PathBuf::from_str("test_resources/maryland.png").expect(womp!());
 
     let attach = Attachment::new(&path).expect(womp!());
-    let attach_path = ATTACHMENTS_DIR.join(attach.hash_dir());
+    let attach_path = attachments_dir().join(attach.hash_dir());
 
     let conv = receiver.pairwise_conversation;
 
@@ -121,5 +121,5 @@ fn delete_message_with_attachment() {
 
     assert!(!attach_path.exists());
 
-    std::fs::remove_dir_all(ATTACHMENTS_DIR.as_path()).expect(womp!());
+    std::fs::remove_dir_all(attachments_dir()).expect(womp!());
 }

@@ -7,34 +7,34 @@ import "../Common" as Common
 
 Page {
     id: configPage
-    header: ConfigHeader {
-    }
+    header: ConfigHeader {}
 
     ColumnLayout {
         id: configContent
         width: parent.width
         ConfigSection {
-            title: "Account"
+            title: qsTr("Account")
             content: Column {
 
                 Row {
                     Common.HeaderText {
                         font.pointSize: 18
-                        text: "Username : "
+                        text: qstr("Username:")
                         leftPadding: CmnCfg.margin
                     }
                     Common.HeaderText {
                         font.pointSize: 18
                         text: configModel.name
-                        color: CmnCfg.palette.secondaryTextColor
+                        color: CmnCfg.palette.darkGrey
                     }
                 }
 
                 Common.HeaderText {
                     font.pointSize: 12
-                    text: "     The primary identifying contact information of your account,\
-any of your contacts must know this identifier exactly. It is not searchable, nor can it be changed."
-                    color: CmnCfg.palette.secondaryTextColor
+                    text: qsTr("The primary identifying contact information of your account,\
+any of your contacts must know this identifier exactly. \
+It is not searchable, nor can it be changed.")
+                    color: CmnCfg.palette.darkGrey
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     leftPadding: CmnCfg.margin
                     width: parent.width
@@ -43,19 +43,19 @@ any of your contacts must know this identifier exactly. It is not searchable, no
         }
 
         ConfigSection {
-            title: "Appearance"
+            title: qsTr("Appearance")
         }
 
         ConfigSection {
-            title: "Notifications"
+            title: qsTr("Notifications")
         }
 
         ConfigSection {
-            title: "Advanced"
+            title: qsTr("Advanced")
         }
 
         ConfigSection {
-            title: "About"
+            title: qsTr("About")
         }
     }
 }

@@ -12,31 +12,30 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
-    property color opColor: CmnCfg.avatarColors[contactsModel.colorById(
-                                                    replyPreview.author)]
+    property color opColor: CmnCfg.avatarColors[herald.users.colorById(
+                                                    opAuthor)]
     property string authorName: ""
     property color authorColor
     property var replyId
     property alias jumpHandler: jumpHandler
-    property alias replyHighlightAnimation: replyHighlightAnimation
+    property bool knownReply: replyType == 2
+    property bool elided: false
+    property bool expanded: false
+
+    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
-
-    MessagePreview {
-        id: replyPreview
-        messageId: replyId === undefined ? null : replyId
-    }
 
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: reply.implicitHeight
-        color: CmnCfg.palette.sideBarHighlightColor
+        color: CmnCfg.palette.medGrey
         Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: reply.width
 
         Rectangle {
             id: verticalAccent
-            visible: !replyPreview.isDangling
+            visible: knownReply
             anchors.right: !outbound ? replyWrapper.left : undefined
             anchors.left: outbound ? replyWrapper.right : undefined
             height: replyWrapper.height
@@ -50,16 +49,7 @@ ColumnLayout {
             width: reply.width
             height: reply.height
             z: CmnCfg.overlayZ
-            enabled: !replyPreview.isDangling ? true : false
-        }
-
-        NumberAnimation {
-            id: replyHighlightAnimation
-            property: "opacity"
-            from: 1.0
-            to: 0.0
-            duration: 600
-            easing.type: Easing.InCubic
+            enabled: knownReply ? true : false
         }
 
         ColumnLayout {
@@ -69,22 +59,35 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: !replyPreview.isDangling ? contactsModel.nameById(
-                                                     replyPreview.author) : ""
+                text: knownReply ? herald.users.nameById(opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
 
-                Layout.preferredHeight: !replyPreview.isDangling ? implicitHeight : 0
+                Layout.preferredHeight: knownReply ? implicitHeight : 0
                 color: opColor
             }
 
             TextMetrics {
-                readonly property real constWidth: replyBody.width * 3
                 id: opBodyTextMetrics
-                text: !replyPreview.isDangling ? replyPreview.body : "Original message not found"
-                elideWidth: constWidth
+                property string decoration: knownReply
+                                            && opBody.length > 350 ? "..." : ""
+                property string shortenedText: knownReply ? truncate_text(
+                                                                opBody).slice(
+                                                                0,
+                                                                350) + decoration : "Original message not found"
+                text: shortenedText
+                elideWidth: maxWidth * 3
                 elide: Text.ElideRight
+
+                function truncate_text(body) {
+                    var bodyLines = body.split("\n")
+                    if (bodyLines.length > 3) {
+                        return bodyLines.slice(0, 3).join("\n")
+                    } else {
+                        return body
+                    }
+                }
             }
 
             StandardTextEdit {
@@ -93,13 +96,32 @@ ColumnLayout {
                 Layout.minimumWidth: messageBody.width
             }
 
-            Label {
-                Layout.margins: CmnCfg.smallMargin
-                Layout.topMargin: 0
-                font.pixelSize: 10
-                text: !replyPreview.isDangling ? Utils.friendlyTimestamp(
-                                                     replyPreview.epochTimestampMs) : ""
-                color: CmnCfg.palette.secondaryTextColor
+            Row {
+                spacing: 2
+                Layout.bottomMargin: CmnCfg.smallPadding
+                Layout.leftMargin: CmnCfg.smallMargin
+                Layout.rightMargin: CmnCfg.smallMargin
+                Label {
+                    id: replyTs
+                    Layout.margins: CmnCfg.smallMargin
+                    Layout.topMargin: 0
+                    font.pixelSize: 10
+                    text: replyType === 2 ? Utils.friendlyTimestamp(
+                                                opInsertionTime) : ""
+                    color: CmnCfg.palette.darkGrey
+                }
+
+                Button {
+                    id: clock
+                    icon.source: opExpirationTime
+                                 !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
+                    icon.height: 16
+                    icon.width: 16
+                    icon.color: "grey"
+                    padding: 0
+                    background: Item {}
+                    anchors.verticalCenter: replyTs.verticalCenter
+                }
             }
         }
     }
@@ -113,7 +135,7 @@ ColumnLayout {
     StandardTextEdit {
         id: messageBody
     }
+    ElideHandler {}
 
-    StandardStamps {
-    }
+    StandardStamps {}
 }

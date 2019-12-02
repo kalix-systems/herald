@@ -1,5 +1,8 @@
+#[macro_use]
+extern crate riqtshaw;
+
 pub mod config;
-use rust_qt_binding_generator::generate_bindings;
+use riqtshaw::generate_bindings;
 
 fn main() {
     let conf = config::get();

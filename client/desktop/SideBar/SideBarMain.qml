@@ -3,15 +3,11 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
 import "qrc:/common" as Common
-import "../SideBar/GroupFlowComponents" as GroupFlow
+import "../SideBar/Header" as Header
+import "../SideBar/Pane" as Pane
+import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
+import "../SideBar/Pane/ContactFlowComponents" as ContactFlow
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
 Page {
     id: sideBar
     property real windowFraction: width / root.width
@@ -19,14 +15,12 @@ Page {
     // maximum width, where root is ApplicationWindow
     SplitView.maximumWidth: root.width * maxWindowFraction
     SplitView.minimumWidth: 250
-    SplitView.preferredWidth: root.width * windowFraction
-    property alias groupMemberSelect: convoBuilderLoader.item
+    SplitView.preferredWidth: 300
     padding: 0 // All Interior Elements span the entire pane
     property alias sideBarState: sideBarState
-    property alias msgSearchModel: searchModelLoader.item
 
     background: Rectangle {
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
     }
 
     ///--- SearchBar for contacts, add contact button
@@ -36,7 +30,7 @@ Page {
         property bool contactsSearch: false
         property string headerText: ""
 
-        sourceComponent: ContextBar {
+        sourceComponent: Header.ContextBar {
             id: contextBarComponent
         }
 
@@ -46,12 +40,12 @@ Page {
     }
 
     //component loaded into header depending on sidebar state
-    HeaderComponent {
+    Header.HeaderComponent {
         id: headerBarComponent
     }
 
     //TODO: get rid of this once global search implemented
-    SearchComponent {
+    Header.SearchComponent {
         id: searchBarComponent
     }
 
@@ -59,18 +53,8 @@ Page {
         id: newGroupComponent
     }
 
-    NewContactComponent {
+    ContactFlow.NewContactComponent {
         id: newContactComponent
-    }
-
-    Loader {
-        active: false
-        id: convoBuilderLoader
-    }
-
-    Loader {
-        active: false
-        id: searchModelLoader
     }
 
     SideBarState {

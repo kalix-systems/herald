@@ -2,27 +2,28 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.13
 import LibHerald 1.0
-import "./ConversationView"
-import "../SideBar/GroupFlowComponents" as GroupFlow
+import "../SideBar/Header" as Header
+import "../SideBar/Pane" as Pane
+import "../SideBar/Pane/GroupFlowComponents" as GroupFlow
 
 Page {
     id: sideBarStateLoader
     padding: 0
 
     background: Rectangle {
-        color: CmnCfg.palette.paneColor
+        color: CmnCfg.palette.lightGrey
     }
 
     Component {
         id: contactslvComponent
-        ContactView {
+        Pane.ContactView {
             id: contactsListView
             anchors.fill: parent
-            model: contactsModel
+            model: herald.users
         }
     }
 
-    SideBarPane {
+    Pane.SideBarPane {
         id: sideBarPane
     }
 
@@ -54,11 +55,6 @@ Page {
                 headerText: "New group"
                 contactsSearch: true
             }
-            PropertyChanges {
-                target: convoBuilderLoader
-                active: true
-                source: "GroupFlowComponents/ConvoBuilder.qml"
-            }
         },
 
         State {
@@ -69,18 +65,10 @@ Page {
                 searchPlaceholder: "Search your conversations"
             }
 
-            //loader that loads message search model
-            PropertyChanges {
-                //loader in sidebarMain
-                target: searchModelLoader
-                active: true
-                source: "MessageSearchComponents/MessageSearch.qml"
-            }
-
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: msgSearchModel
+                searchModel: herald.messageSearch
             }
         },
 

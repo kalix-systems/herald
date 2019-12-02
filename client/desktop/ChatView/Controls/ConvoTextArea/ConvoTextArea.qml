@@ -5,17 +5,10 @@ import QtQuick.Dialogs 1.3
 import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
+import "qrc:/imports" as Imports
 import "../js/ChatTextAreaUtils.mjs" as CTUtils
 import "../../../common" as Common
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// RS: Rusts job
-// Factor Component: FC
 Rectangle {
     id: textWrapperRect
     property var parentPage
@@ -38,27 +31,29 @@ Rectangle {
     // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyUid === config.configId
+    property bool owned: replyUid === herald.config.configId
     property string replyUid
 
     property var replyId
 
-    color: CmnCfg.palette.mainColor
+    color: CmnCfg.palette.white
     clip: true
 
     height: containerCol.height
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: attachmentsButton
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/attach-icon.svg"
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: emojiButton
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        bottomPadding: CmnCfg.smallMargin * 0.5
         source: "qrc:/emoji-icon.svg"
     }
 
@@ -69,11 +64,13 @@ Rectangle {
         anchors {
             left: emojiButton.right
             right: attachmentsButton.left
-            leftMargin: CmnCfg.smallMargin / 2
-            rightMargin: CmnCfg.smallMargin / 2
+            leftMargin: CmnCfg.smallMargin * 0.5
+            rightMargin: CmnCfg.smallMargin * 0.5
+            bottomMargin: CmnCfg.smallMargin * 0.5
         }
 
-        topPadding: CmnCfg.smallMargin / 2
+        topPadding: CmnCfg.smallMargin * 0.5
+        bottomPadding: CmnCfg.smallMargin * 0.5
 
         Loader {
             id: replyLoader
@@ -82,7 +79,7 @@ Rectangle {
             active: false
             height: item ? item.height : 0
             sourceComponent: ReplyComponent {
-                startColor: CmnCfg.avatarColors[contactsModel.colorById(
+                startColor: CmnCfg.avatarColors[herald.users.colorById(
                                                     replyUid)]
             }
             width: textWrapperRect.width
@@ -93,8 +90,7 @@ Rectangle {
             id: attachmentLoader
             active: false
             height: item ? item.height : 0
-            sourceComponent: AttachmentsComponent {
-            }
+            sourceComponent: AttachmentsComponent {}
             width: scrollView.width
         }
 
@@ -103,20 +99,23 @@ Rectangle {
             height: Math.min(contentHeight, 100)
             width: containerCol.width
             focus: true
+
             TextArea {
                 id: chatText
                 background: Rectangle {
-                    color: CmnCfg.palette.mainColor
+                    color: CmnCfg.palette.white
                 }
-                bottomPadding: CmnCfg.smallMargin / 2
-                selectionColor: CmnCfg.palette.tertiaryColor
-                color: CmnCfg.palette.mainTextColor
+                bottomPadding: CmnCfg.smallMargin * 0.5
+                selectionColor: CmnCfg.palette.highlightColor
+                color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
                 placeholderText: "Message " + conversationItem.title
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
+
+                onEditingFinished: convWindow.focus = true
             }
         }
     }
@@ -125,14 +124,14 @@ Rectangle {
         id: attachmentsDialogue
         folder: shortcuts.home
         onSelectionAccepted: {
-            builder.addAttachment(attachmentsDialogue.fileUrl)
+            ownedConversation.builder.addAttachment(attachmentsDialogue.fileUrl)
         }
     }
 
     states: [
         State {
             name: "replystate"
-            when: builder.isReply
+            when: ownedConversation.builder.isReply
             PropertyChanges {
                 target: replyLoader
                 active: true
@@ -145,7 +144,7 @@ Rectangle {
 
         State {
             name: "attachmentstate"
-            when: builder.isMediaMessage
+            when: ownedConversation.builder.isMediaMessage
             PropertyChanges {
                 target: attachmentLoader
                 active: true

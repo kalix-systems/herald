@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 ColumnLayout {
+    id: wrapperCol
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property string body: ""
     property string friendlyTimestamp: ""
@@ -11,6 +12,8 @@ ColumnLayout {
     property string authorName: ""
     property color authorColor
     spacing: 0
+    property bool expanded: false
+    property bool elided: false
 
     ChatLabel {
         id: uname
@@ -18,8 +21,10 @@ ColumnLayout {
         senderColor: authorColor
     }
 
-    StandardTextEdit {
-    }
-    StandardStamps {
-    }
+    Component.onCompleted: wrapperCol.expanded = false
+
+    StandardTextEdit {}
+    ElideHandler {}
+
+    StandardStamps {}
 }

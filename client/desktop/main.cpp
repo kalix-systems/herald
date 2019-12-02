@@ -13,25 +13,26 @@ int main(int argc, char* argv[])
   qmlRegisterType<Messages>("LibHerald", 1, 0, "Messages");
   qmlRegisterType<Conversations>("LibHerald", 1, 0, "Conversations");
   qmlRegisterType<Config>("LibHerald", 1, 0, "Config");
-  qmlRegisterType<HeraldState>("LibHerald", 1, 0, "HeraldState");
-  qmlRegisterType<HeraldUtils>("LibHerald", 1, 0, "HeraldUtils");
+  qmlRegisterType<Herald>("LibHerald", 1, 0, "Herald");
+  qmlRegisterType<Utils>("LibHerald", 1, 0, "Utils");
   qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
   qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
-  qmlRegisterType<MessagePreview>("LibHerald", 1, 0, "MessagePreview");
   qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
+  qmlRegisterType<ConversationContent>("LibHerald", 1, 0, "ConversationContent");
 
-  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
-                           1, 0, "CmnCfg");
+  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "CmnCfg");
 
   app.setOrganizationName("Kalix Systems");
   app.setOrganizationDomain("kalix.io");
   app.setApplicationName("Herald");
 
   QQmlApplicationEngine engine;
+
   engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
   if (engine.rootObjects().isEmpty()) return -1;
 
   return app.exec();

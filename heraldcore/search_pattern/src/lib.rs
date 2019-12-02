@@ -1,3 +1,4 @@
+pub use regex::Captures;
 pub use regex::Error as SearchPatternError;
 use regex::{escape, Error, Regex, RegexBuilder};
 

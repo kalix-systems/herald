@@ -5,6 +5,7 @@ import LibHerald 1.0
 import "." as CVUtils
 import "./Controls/js/ChatTextAreaUtils.mjs" as JS
 import "./Controls/ConvoTextArea"
+import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
@@ -16,19 +17,12 @@ Page {
     property Messages ownedConversation
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     header: CVUtils.ChatBar {
         id: messageBar
         conversationItem: parent.conversationItem
-    }
-
-    Component {
-        id: chatBarComponent
-        CVUtils.ChatBar {
-            conversationItem: messageBar.conversationItem
-        }
     }
 
     ChatSearchComponent {
@@ -42,7 +36,6 @@ Page {
     }
 
     CVUtils.ConversationWindow {
-
         id: convWindow
         focus: true
         anchors {
@@ -51,13 +44,33 @@ Page {
             left: parent.left
             right: parent.right
         }
+
         Component.onCompleted: forceActiveFocus()
-        Keys.onUpPressed: chatScrollBar.decrease()
-        Keys.onDownPressed: chatScrollBar.increase()
+        Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
+                                                    chatListView,
+                                                    ScrollBar.AlwaysOn,
+                                                    ScrollBar.AsNeeded)
+
         Connections {
             target: ownedConversation
             onRowsInserted: {
                 convWindow.contentY = convWindow.contentHeight
+            }
+        }
+
+        Connections {
+            target: conversationList
+            onMessagePositionRequested: {
+                const msg_idx = chatPane.ownedConversation.indexById(
+                                  requestedMsgId)
+
+                // early return on out of bounds
+                if (msg_idx < 0)
+                    return
+
+                convWindow.positionViewAtIndex(msg_idx, ListView.Center)
+                convWindow.highlightAnimation.target = convWindow.itemAtIndex(msg_idx).highlight
+                convWindow.highlightAnimation.start()
             }
         }
     }
@@ -75,14 +88,17 @@ Page {
 
     Popups.EmojiPopup {
         id: emoKeysPopup
-        anchors.bottom: chatTextArea.top
-        anchors.left: chatTextArea.left
+        anchors {
+            margins: 12
+            bottom: chatTextArea.top
+            left: parent.left
+        }
     }
 
     Common.Divider {
         height: 1
-        color: CmnCfg.palette.borderColor
-        bottomAnchor: chatTextArea.top
+        color: CmnCfg.palette.black
+        anchors.bottom: chatTextArea.top
     }
 
     ///--- Text entry area, for typing
@@ -94,17 +110,15 @@ Page {
             right: parent.right
             bottom: parent.bottom
             margins: CmnCfg.margin
-            bottomMargin: CmnCfg.smallMargin
+            bottomMargin: 0
         }
 
         keysProxy: Item {
-            MessageBuilder {
-                id: builder
-            }
-            Keys.onReturnPressed: JS.enterKeyHandler(
-                                      event, chatTextArea.chatText, builder,
-                                      // this is actually a text area TODO rename
-                                      ownedConversation, chatTextArea)
+            Keys.onReturnPressed: JS.enterKeyHandler(event,
+                                                     chatTextArea.chatText,
+                                                     ownedConversation.builder,
+                                                     ownedConversation,
+                                                     chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

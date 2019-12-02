@@ -5,20 +5,11 @@ import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
+import "qrc:/imports" as Imports
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
-
-//NPB: just looks kind bad
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.sideBarHighlightColor
+    color: CmnCfg.palette.medGrey
     width: parent.width
     height: Math.max(textCol.height, 20)
 
@@ -26,21 +17,16 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    MessagePreview {
-        id: replyCompPreview
-        messageId: builder.replyingTo
-    }
-
     Rectangle {
         id: verticalAccent
         anchors.right: wrapper.left
         height: wrapper.height
         width: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.avatarColors[contactsModel.colorById(
-                                               replyCompPreview.author)]
+        color: CmnCfg.palette.avatarColors[herald.users.colorById(
+                                               ownedConversation.builderopAuthor)]
     }
 
-    Common.ButtonForm {
+    Imports.ButtonForm {
         id: exitButton
         anchors {
             //  margins: CmnCfg.smallMargin
@@ -50,7 +36,7 @@ Rectangle {
         source: "qrc:/x-icon.svg"
         scale: 0.8
         onClicked: {
-            builder.clearReply()
+            ownedConversation.builder.clearReply()
         }
     }
 
@@ -59,20 +45,20 @@ Rectangle {
 
         Label {
             id: sender
-            text: contactsModel.nameById(replyCompPreview.author)
+            text: herald.users.nameById(ownedConversation.builder.opAuthor)
             Layout.leftMargin: CmnCfg.smallMargin
             Layout.rightMargin: CmnCfg.smallMargin
             Layout.bottomMargin: CmnCfg.margin / 2
             Layout.topMargin: CmnCfg.margin / 2
             Layout.preferredHeight: CmnCfg.smallMargin
             font.bold: true
-            color: CmnCfg.palette.avatarColors[contactsModel.colorById(
-                                                   replyCompPreview.author)]
+            color: CmnCfg.palette.avatarColors[herald.users.colorById(
+                                                   ownedConversation.builder.opAuthor)]
         }
 
         TextMetrics {
             id: opTextMetrics
-            text: replyCompPreview.body
+            text: ownedConversation.builder.opBody
             elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
             elide: Text.ElideRight
         }
@@ -89,7 +75,7 @@ Rectangle {
             selectByMouse: true
             selectByKeyboard: true
             readOnly: true
-            color: CmnCfg.palette.mainTextColor
+            color: CmnCfg.palette.black
         }
 
         Label {
@@ -98,9 +84,9 @@ Rectangle {
             Layout.topMargin: 0
             Layout.rightMargin: CmnCfg.smallMargin
             font.pixelSize: 10
-            text: Utils.friendlyTimestamp(replyCompPreview.epochTimestampMs)
+            text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
             id: timestamp
-            color: CmnCfg.palette.secondaryTextColor
+            color: CmnCfg.palette.darkGrey
         }
     }
 }

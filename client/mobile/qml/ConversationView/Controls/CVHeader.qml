@@ -13,7 +13,7 @@ ToolBar {
     height: CmnCfg.toolbarHeight
 
     background: Rectangle {
-        color: CmnCfg.palette.secondaryColor
+        color: CmnCfg.palette.offBlack
     }
 
     RowLayout {
@@ -30,7 +30,7 @@ ToolBar {
             }
             Label {
                 id: stateLabel
-                text: "Messages"
+                text: "Conversations"
                 font {
                     pointSize: CmnCfg.chatPreviewSize
                     family: CmnCfg.chatFont.name

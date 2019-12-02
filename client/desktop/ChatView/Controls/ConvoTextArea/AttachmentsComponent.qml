@@ -19,7 +19,7 @@ ScrollView {
         spacing: 5
         Repeater {
             id: imageRepeater
-            model: builder
+            model: ownedConversation.builder
             delegate: Rectangle {
                 height: 100
                 width: 100
@@ -59,7 +59,8 @@ ScrollView {
                             sourceSize: Qt.size(25, 25)
                         }
                         onClicked: {
-                            builder.removeAttachmentByIndex(index)
+                            ownedConversation.builder.removeAttachmentByIndex(
+                                        index)
                         }
                     }
                 }

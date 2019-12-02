@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "./Controls"
+import "../Common" as Common
 
 Page {
     //swappable message model, set by the appstate
@@ -14,7 +15,7 @@ Page {
     }
 
     background: Rectangle {
-        color: CmnCfg.palette.mainColor
+        color: CmnCfg.palette.white
     }
 
     ScrollView {
@@ -26,8 +27,9 @@ Page {
         ScrollBar.vertical: ScrollBar {
             id: scrollControl
         }
+
         TextMessageList {
-            model: ownedMessages
+            messageListModel: ownedMessages
             width: parent.width
         }
 
@@ -46,6 +48,11 @@ Page {
         }
     }
 
+    Common.Divider {
+        width: parent.width
+        anchors.bottom: chatTextArea.top
+    }
+
     ChatTextArea {
         id: chatTextArea
         anchors {
@@ -53,11 +60,5 @@ Page {
             right: parent.right
             left: parent.left
         }
-    }
-
-    Rectangle {
-        anchors.fill: chatTextArea
-        color: CmnCfg.palette.secondaryColor
-        z: -1
     }
 }

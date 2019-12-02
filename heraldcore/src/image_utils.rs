@@ -1,6 +1,6 @@
 use crate::errors::HErr;
 use image::{self, FilterType, ImageFormat};
-use platform_dirs::PICTURES_DIR;
+use platform_dirs::pictures_dir;
 use std::path::{Path, PathBuf};
 
 const IMAGE_SIZE: u32 = 300;
@@ -14,7 +14,7 @@ pub fn update_picture<P>(
 where
     P: AsRef<Path>,
 {
-    std::fs::create_dir_all(PICTURES_DIR.as_path())?;
+    std::fs::create_dir_all(pictures_dir())?;
 
     if let Some(old_path) = old_path {
         std::fs::remove_file(old_path)?;
@@ -30,10 +30,10 @@ where
 }
 
 pub(crate) fn image_path() -> PathBuf {
-    let rid = crate::utils::rand_id();
-    let text = hex::encode(rid);
+    let rid = kcl::random::UQ::gen_new();
+    let text = hex::encode(rid.as_ref());
 
-    let mut image_path = PICTURES_DIR.join(text);
+    let mut image_path = pictures_dir().join(text);
     image_path.set_extension("png");
 
     image_path

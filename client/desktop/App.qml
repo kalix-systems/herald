@@ -9,19 +9,13 @@ import "./SideBar"
 Item {
     id: appRoot
 
+    focus: true
     anchors.fill: parent.fill
+
     TopMenuBar {
         Popups.ConfigPopup {
             id: preferencesPopup
         }
-    }
-
-    Users {
-        id: contactsModel
-    }
-
-    Conversations {
-        id: conversationsModel
     }
 
     Popups.ColorPicker {
@@ -40,23 +34,17 @@ Item {
         id: convoMenu
     }
 
-    Config {
-        id: config
-    }
-
-    focus: true
-
     Component {
         id: splash
 
         Rectangle {
             anchors.fill: parent
-            color: CmnCfg.palette.sideBarHighlightColor
+            color: CmnCfg.palette.medGrey
 
             Rectangle {
                 anchors.top: parent.top
                 width: parent.width
-                color: CmnCfg.palette.secondaryColor
+                color: CmnCfg.palette.offBlack
                 height: CmnCfg.toolbarHeight + 1
 
                 Text {
@@ -67,7 +55,7 @@ Item {
                     font.pixelSize: CmnCfg.headerSize
                     font.family: CmnCfg.chatFont.name
                     font.bold: true
-                    color: CmnCfg.palette.mainColor
+                    color: CmnCfg.palette.white
                 }
             }
 
@@ -99,7 +87,7 @@ Item {
             Rectangle {
                 id: toolBarHandle
                 implicitWidth: 1
-                color: "white"
+                color: CmnCfg.palette.medGrey
                 height: CmnCfg.toolbarHeight
                 anchors {
                     top: parent.top
@@ -107,7 +95,7 @@ Item {
             }
             Rectangle {
                 implicitWidth: 1
-                color: CmnCfg.palette.borderColor
+                color: CmnCfg.palette.black
                 anchors {
                     top: toolBarHandle.bottom
                     bottom: parent.bottom
@@ -116,5 +104,5 @@ Item {
         }
     }
 
-    Component.onCompleted: heraldState.login()
+    Component.onCompleted: herald.login()
 }

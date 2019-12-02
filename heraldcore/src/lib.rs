@@ -1,10 +1,6 @@
 //! Core logic for herald client.
 
 #![warn(missing_docs)]
-
-#[macro_use]
-extern crate coremacros;
-
 /// User configuration
 pub mod config;
 /// Conversations
@@ -32,4 +28,8 @@ mod user_keys;
 /// Utils
 pub mod utils;
 
-pub use location::{loc, Location};
+pub use platform_dirs::set_data_dir;
+
+#[cfg(test)]
+#[macro_use]
+extern crate coremacros;

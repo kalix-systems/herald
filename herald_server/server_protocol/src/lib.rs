@@ -3,8 +3,8 @@ use futures::stream::*;
 use herald_common::*;
 use server_errors::*;
 use server_store::*;
-use sodiumoxide::crypto::sign;
 use std::time::Duration;
+use stream_cancel::{Trigger, Tripwire, Valved};
 use tokio::{
     prelude::*,
     sync::{
@@ -19,9 +19,35 @@ use warp::filters::ws::{self, WebSocket};
 
 type WTx = SplitSink<WebSocket, ws::Message>;
 
+pub struct ActiveSession {
+    interrupt: Trigger,
+    done: Tripwire,
+    emitter: Sender<()>,
+}
+
+impl ActiveSession {
+    #[allow(clippy::unneeded_field_pattern)]
+    pub async fn interrupt(self) -> bool {
+        let ActiveSession {
+            interrupt,
+            done,
+            emitter: _,
+        } = self;
+
+        interrupt.cancel();
+        done.await
+    }
+
+    pub fn emit(&self) -> Result<(), tokio::sync::mpsc::error::UnboundedTrySendError<()>> {
+        self.emitter.clone().try_send(())
+    }
+}
+
+type ActiveSessions = DashMap<sig::PublicKey, ActiveSession>;
+
 #[derive(Default)]
 pub struct State {
-    pub active: DashMap<sig::PublicKey, Sender<()>>,
+    pub active: ActiveSessions,
     pub pool: Pool,
 }
 
@@ -73,12 +99,21 @@ impl State {
 
         let gid: GlobalId = login::login(&self.active, &mut store, &mut wtx, &mut rrx).await?;
 
-        self.active.insert(gid.did, ptx);
+        let (interrupt, prx) = Valved::new(prx);
+        let (trigger_done, done) = Tripwire::new();
+        let sess = ActiveSession {
+            interrupt,
+            done,
+            emitter: ptx,
+        };
+        self.active.insert(gid.did, sess);
 
         // remove active session on graceful exit
         tokio::spawn(async move {
             drop(closed.await);
-            self.active.remove(&gid.did);
+            if let Some((_, s)) = self.active.remove(&gid.did) {
+                s.interrupt().await;
+            }
         });
 
         // TODO: handle this error somehow?
@@ -87,14 +122,17 @@ impl State {
             .await
             .is_ok()
         {
-            let mut prx: Timeout<Receiver<()>> = prx.timeout(Duration::from_secs(60));
+            let mut prx: Timeout<Valved<Receiver<()>>> = prx.timeout(Duration::from_secs(60));
             drop(
                 self.send_pushes(&mut store, &mut wtx, &mut rrx, &mut prx, gid.did)
                     .await,
             );
+            trigger_done.cancel();
         }
 
-        self.active.remove(&gid.did);
+        if let Some((_, s)) = self.active.remove(&gid.did) {
+            s.interrupt().await;
+        }
 
         Ok(())
     }
@@ -168,12 +206,11 @@ impl State {
         to_devs: Vec<sig::PublicKey>,
         msg: Push,
     ) -> Result<(), Error> {
-        con.add_pending(to_devs.clone(), [msg].iter()).await?;
+        con.add_pending(to_devs.clone(), &[msg]).await?;
 
         for dev in to_devs {
             if let Some(s) = self.active.async_get(dev).await {
-                let mut sender = s.clone();
-                drop(sender.send(()).await);
+                drop(s.emit());
             }
         }
 
@@ -185,7 +222,7 @@ impl State {
         store: &mut Conn,
         wtx: &mut WTx,
         rrx: &mut Receiver<Vec<u8>>,
-        rx: &mut Timeout<Receiver<()>>,
+        rx: &mut Timeout<Valved<Receiver<()>>>,
         did: sig::PublicKey,
     ) -> Result<(), Error> {
         while let Some(p) = rx.next().await {
@@ -203,7 +240,7 @@ impl State {
 }
 
 async fn catchup(
-    did: sign::PublicKey,
+    did: sig::PublicKey,
     s: &mut Conn,
     wtx: &mut WTx,
     rrx: &mut Receiver<Vec<u8>>,
@@ -238,15 +275,15 @@ const TIMEOUT_DUR: std::time::Duration = Duration::from_secs(10);
 
 async fn read_msg<T>(rx: &mut Receiver<Vec<u8>>) -> Result<T, Error>
 where
-    T: serde::de::DeserializeOwned,
+    T: De,
 {
     let m = rx.next().await.ok_or(StreamDied)?;
-    let t = serde_cbor::from_slice(&m)?;
+    let t = kson::from_slice(&m)?;
     Ok(t)
 }
 
-fn ser_msg<T: Serialize>(t: &T) -> Result<ws::Message, Error> {
-    Ok(ws::Message::binary(serde_cbor::to_vec(t)?))
+fn ser_msg<T: Ser>(t: &T) -> ws::Message {
+    ws::Message::binary(kson::to_vec(t))
 }
 
 async fn write_msg<T>(
@@ -255,22 +292,22 @@ async fn write_msg<T>(
     rrx: &mut Receiver<Vec<u8>>,
 ) -> Result<(), Error>
 where
-    T: Serialize,
+    T: Ser,
 {
-    let bvec = Bytes::from(serde_cbor::to_vec(t)?);
+    let bvec = Bytes::from(kson::to_vec(t));
     let packets = Packet::from_bytes(bvec);
     let len = packets.len() as u64;
 
     loop {
-        wtx.send(ser_msg(&len)?).timeout(TIMEOUT_DUR).await??;
+        wtx.send(ser_msg(&len)).timeout(TIMEOUT_DUR).await??;
 
         if len == read_msg::<u64>(rrx).timeout(TIMEOUT_DUR).await?? {
-            wtx.send(ser_msg(&PacketResponse::Success)?)
+            wtx.send(ser_msg(&PacketResponse::Success))
                 .timeout(TIMEOUT_DUR)
                 .await??;
             break;
         } else {
-            wtx.send(ser_msg(&PacketResponse::Retry)?)
+            wtx.send(ser_msg(&PacketResponse::Retry))
                 .timeout(TIMEOUT_DUR)
                 .await??;
         }
@@ -278,7 +315,7 @@ where
 
     loop {
         for packet in packets.iter() {
-            wtx.send(ser_msg(packet)?).timeout(TIMEOUT_DUR).await??;
+            wtx.send(ser_msg(packet)).timeout(TIMEOUT_DUR).await??;
         }
 
         match read_msg(rrx).timeout(TIMEOUT_DUR).await?? {

@@ -2,7 +2,8 @@
     "compilerOptions": {
         "declaration": true,
         "strict": true,
-        "target": "ES2017"
+        "target": "ES2017",
+        "noEmitOnError": true
     },
     "files": [
         "ChatView/Controls/ts/ChatTextAreaUtils.ts",
@@ -10,13 +11,13 @@
         "SideBar/ts/ContactView.ts",
         "SideBar/ts/ContactViewTypes.d.ts",
         "SideBar/popups/ts/ConfigPopupSubmission.ts",
-        "SideBar/popups/ts/ContactClickedPopup.ts",
         "SideBar/popups/ts/NewContactDialogue.ts",
-        "common/ts/Avatar.ts",
         "../foundation/ts/HeraldTypes.d.ts",
         "../foundation/ts/HeraldUITypes.d.ts",
         "../foundation/ts/QtTypes.d.ts",
         "../foundation/ts/utils.ts",
-        "ChatView/ts/SearchHandler.ts"
+        "../foundation/ts/Avatar.ts",
+        "ChatView/ts/SearchHandler.ts",
+        "ChatView/ts/KeyNavigation.ts"
     ]
 }

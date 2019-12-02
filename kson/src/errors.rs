@@ -1,11 +1,12 @@
 use backtrace::Backtrace;
 use bytes::Bytes;
+use location::Location;
 use std::{fmt, str::Utf8Error, sync::Arc};
 
-pub type KsonError = Arc<Error>;
+pub type KsonError = Arc<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
-pub struct Error {
+pub struct KsonErrorInner {
     pub backtrace: Backtrace,
     pub location: Location,
     pub message: Option<String>,
@@ -49,12 +50,13 @@ pub enum Variant {
     },
     BadUtf8String(Utf8Error),
     UnknownConst(u8),
+    UnknownType(u8),
     CustomError(String),
 }
 
 use Variant::*;
 
-impl fmt::Display for Error {
+impl fmt::Display for KsonErrorInner {
     fn fmt(
         &self,
         f: &mut fmt::Formatter<'_>,
@@ -69,7 +71,6 @@ impl fmt::Display for Error {
              Raw bytes were: {:#?}\n\
              Error found at offset: {}\n\
              Variant was: {}\n\
-             Backtrace was:\n\
              {:#?}
              ",
             self.bytes,
@@ -108,6 +109,7 @@ impl fmt::Display for Error {
                     max_len, found
                 ),
                 BadUtf8String(u) => format!("bad utf-8 string, error was {}", u),
+                UnknownType(u) => format!("unknown type found: {}", u),
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
                 CustomError(s) => s.clone(),
             }),
@@ -116,48 +118,10 @@ impl fmt::Display for Error {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-/// A location in source code
-pub struct Location {
-    /// The line where the error occurred
-    pub line: u32,
-    /// The column where the error occurred
-    pub col: u32,
-    /// The file where the error occurred
-    pub file: &'static str,
-}
-
-impl fmt::Display for Location {
-    fn fmt(
-        &self,
-        f: &mut fmt::Formatter<'_>,
-    ) -> fmt::Result {
-        write!(
-            f,
-            "{file}:{line}:{column}",
-            file = self.file,
-            line = self.line,
-            column = self.file
-        )
-    }
-}
-
-#[macro_export]
-/// Returns the location this macro was called from
-macro_rules! loc {
-    () => {
-        $crate::errors::Location {
-            file: file!(),
-            line: line!(),
-            col: column!(),
-        }
-    };
-}
-
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -171,7 +135,7 @@ macro_rules! E {
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        ::std::sync::Arc::new($crate::errors::Error {
+        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,

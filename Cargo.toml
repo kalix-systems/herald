@@ -1,7 +1,6 @@
 [workspace]
 
 members = [
-  "chainmail",
   "channel_ratchet",
   "herald_common",
   "herald_server",
@@ -12,13 +11,13 @@ members = [
   "heraldcore/coretypes",
   "heraldcore/coremacros",
   "heraldcore/coreconf",
-  "heraldcore/crypto_helpers",
   "heraldcore/network_types",
   "heraldcore/chainkeys",
   "heraldcore/platform_dirs",
   "heraldcore/search_pattern",
   "heraldcore/location",
   "libherald",
+  "libherald/messages_helper",
   "libherald/qt_bindgen",
   "kcl",
   "kson",

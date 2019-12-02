@@ -11,7 +11,7 @@ import "qrc:/imports/Avatar"
 Rectangle {
     property alias conversationItemAvatar: conversationItemAvatar
     id: bgBox
-    color: CmnCfg.palette.paneColor
+    color: CmnCfg.palette.lightGrey
     anchors.fill: parent
     property string boxTitle
     property int boxColor
@@ -38,7 +38,7 @@ Rectangle {
             name: "hovering"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.sideBarHighlightColor
+                color: CmnCfg.palette.medGrey
             }
         },
         State {
@@ -46,7 +46,7 @@ Rectangle {
             name: "selected"
             PropertyChanges {
                 target: bgBox
-                color: CmnCfg.palette.sideBarHighlightColor
+                color: CmnCfg.palette.medGrey
             }
         }
     ]

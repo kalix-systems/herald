@@ -1,16 +1,16 @@
-use chainmail::block::Genesis;
+use channel_ratchet::*;
 use coretypes::ids::ConversationId;
 use herald_common::*;
+use kcl::box_;
 
-#[derive(Serialize, Deserialize, Hash, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
 /// A message sent to a specific device.
 pub struct DeviceMessage {
     /// The sender of the message
     pub from: GlobalId,
     /// The ciphertext of the message. After decryption, this should deserialize as a
     /// [`DeviceMessageBody`]
-    pub content: Vec<u8>,
-    pub nonce: box_::Nonce,
+    pub content: Bytes,
     pub tag: box_::Tag,
     /// The prekey used to encrypt the message.
     /// If none, the message was encrypted with this device's public signing key treated as an
@@ -19,16 +19,16 @@ pub struct DeviceMessage {
     pub prekey: Option<box_::PublicKey>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A contact request.
 pub struct UserReq {
     /// The genesis block for the conversation.
-    pub gen: Genesis,
+    pub ratchet: RatchetState,
     /// The proposed conversation id.
     pub cid: ConversationId,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// Types of device message.
 pub enum DeviceMessageBody {
     /// A contact request

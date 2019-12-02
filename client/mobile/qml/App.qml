@@ -12,36 +12,17 @@ Item {
 
     Component {
         id: cvMain
-        CVView.ConversationViewMain {
-        }
+        CVView.ConversationViewMain {}
     }
 
     Component {
         id: configMain
-        ConfigMenu.ConfigMenuMain {
-        }
+        ConfigMenu.ConfigMenuMain {}
     }
 
     Component {
         id: newContactViewMain
-        NewContactView.NewContactViewMain {
-        }
-    }
-
-    HeraldUtils {
-        id: heraldUtils
-    }
-
-    Conversations {
-        id: conversationsModel
-    }
-
-    Config {
-        id: configModel
-    }
-
-    Users {
-        id: usersModel
+        NewContactView.NewContactViewMain {}
     }
 
     StackView {
@@ -50,5 +31,5 @@ Item {
         initialItem: cvMain
     }
 
-    Component.onCompleted: heraldState.login()
+    Component.onCompleted: herald.login()
 }

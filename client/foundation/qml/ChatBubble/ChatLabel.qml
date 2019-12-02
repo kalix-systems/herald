@@ -11,8 +11,8 @@ Label {
     color: senderColor
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin
-    Layout.bottomMargin: CmnCfg.margin / 2
-    Layout.topMargin: CmnCfg.margin / 2
+    Layout.bottomMargin: CmnCfg.margin * 0.5
+    Layout.topMargin: CmnCfg.margin * 0.5
     Layout.preferredHeight: CmnCfg.smallMargin
     font.bold: true
 }

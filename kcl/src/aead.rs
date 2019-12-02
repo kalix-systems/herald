@@ -18,7 +18,7 @@ new_type! {
     public Mac(MAC_LEN)
 }
 
-#[derive(Ser, De, Copy, Clone, Debug)]
+#[derive(Debug, Hash, Ser, De, Copy, Clone, Eq, PartialEq)]
 pub struct Tag(Mac, Nonce);
 
 #[must_use = "you should definitely check if the decryption was successful"]

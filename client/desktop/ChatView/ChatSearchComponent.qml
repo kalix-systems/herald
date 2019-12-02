@@ -6,6 +6,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls.Styles 1.0
 import "Controls/" as CVUtils
 import "../common" as Common
+import "qrc:/imports" as Imports
 import "js/SearchHandler.mjs" as SearchUtils
 
 Component {
@@ -27,60 +28,53 @@ Component {
             }
 
             //main search component
-            SearchTextArea {
-            }
+            SearchTextArea {}
 
             Text {
                 id: indexText
                 property bool active: searchToolBar.state == "searchActiveState"
                 property int searchPlace: active ? ownedConversation.searchIndex : 0
                 property int numMatches: active ? ownedConversation.searchNumMatches : 0
-                color: CmnCfg.palette.paneColor
+                color: CmnCfg.palette.lightGrey
                 font.family: CmnCfg.chatFont.name
                 text: active ? searchPlace + "/" + numMatches : ""
                 Layout.minimumWidth: 24
                 Layout.leftMargin: -20
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: back
                 source: "qrc:/up-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
                 onClicked: {
-                    convWindow.state = "jumpState"
-                    SearchUtils.jumpHandler(ownedConversation,
-                                            convWindow.chatListView, chatPane,
-                                            convWindow, false)
-                    convWindow.returnToBounds()
-                    convWindow.state = ""
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.prevSearchMatch(),
+                                ListView.Center)
                 }
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 id: forward
                 source: "qrc:/down-chevron-icon-white.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
 
                 onClicked: {
-                    convWindow.state = "jumpState"
-                    SearchUtils.jumpHandler(ownedConversation,
-                                            convWindow.chatListView, chatPane,
-                                            convWindow, true)
-                    convWindow.returnToBounds()
-                    convWindow.state = ""
+                    convWindow.positionViewAtIndex(
+                                ownedConversation.nextSearchMatch(),
+                                ListView.Center)
                 }
             }
 
-            Common.ButtonForm {
+            Imports.ButtonForm {
                 source: "qrc:/x-icon.svg"
                 Layout.alignment: Qt.AlignVCenter
-                fill: CmnCfg.palette.paneColor
+                fill: CmnCfg.palette.lightGrey
                 onClicked: {
                     ownedConversation.searchActive = false
                     messageBar.state = ""
@@ -99,5 +93,7 @@ Component {
             anchors.horizontalCenter: parent.horizontalCenter
             color: "white"
         }
+
+        Component.onDestruction: ownedConversation.searchActive = false
     }
 }

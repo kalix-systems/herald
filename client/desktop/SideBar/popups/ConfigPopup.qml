@@ -27,7 +27,7 @@ Window {
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
         onSelectionAccepted: {
-            config.profilePicture = fileUrl
+            herald.config.profilePicture = fileUrl
             print("set to", fileUrl)
         }
     }
@@ -64,16 +64,16 @@ Window {
                     id: cfgUid
                     enabled: false
                     property bool userIdValid: true
-                    placeholderText: enabled ? "Enter UID " : config.configId
-                    selectionColor: CmnCfg.palette.tertiaryColor
+                    placeholderText: enabled ? "Enter UID " : herald.config.configId
+                    selectionColor: "lightsteelblue"
                 }
 
                 TextField {
                     id: cfgUname
                     maximumLength: 256
                     property bool usernameValid: true
-                    text: config.name
-                    selectionColor: CmnCfg.palette.tertiaryColor
+                    text: herald.config.name
+                    selectionColor: "lightsteelblue"
                 }
             }
 
@@ -85,7 +85,7 @@ Window {
             Button {
                 text: "Submit"
                 onClicked: {
-                    JS.submit(config, cfgUname)
+                    JS.submit(herald.config, cfgUname)
                     close()
                 }
             }

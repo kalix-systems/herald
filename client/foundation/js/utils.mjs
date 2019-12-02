@@ -15,7 +15,7 @@ export function friendlyTimestamp(msEpochTime) {
     const secondsPerDay = 3600 * 24;
     const secondsPerWeek = 3600 * 24 * 7;
     const secondsPerYear = 3600 * 24 * 365;
-    var weekdays = new Array(7);
+    const weekdays = new Array(7);
     weekdays[0] = "Sun";
     weekdays[1] = "Mon";
     weekdays[2] = "Tues";
@@ -23,7 +23,7 @@ export function friendlyTimestamp(msEpochTime) {
     weekdays[4] = "Thurs";
     weekdays[5] = "Fri";
     weekdays[6] = "Sat";
-    var months = new Array(12);
+    const months = new Array(12);
     months[0] = "Jan";
     months[1] = "Feb";
     months[2] = "Mar";
@@ -126,9 +126,9 @@ export function safeStringOrDefault(maybeString, fallback) {
     return "";
 }
 /*
-* returns the uri of an icon corresponding to the
-* receipt code
-* */
+ * returns the uri of an icon corresponding to the
+ * receipt code
+ * */
 export function receiptCodeSwitch(receiptCode) {
     switch (receiptCode) {
         case 0: {

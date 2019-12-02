@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::HErr, types::*, utils};
+use crate::{db::Database, errors::HErr, types::*};
 use herald_common::*;
 use rusqlite::params;
 use std::{collections::HashMap, path::PathBuf};

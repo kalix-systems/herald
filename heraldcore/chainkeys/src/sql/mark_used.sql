@@ -1,6 +1,6 @@
-UPDATE
-  chainkeys
-SET
-  used = 1
+UPDATE derived_keys
+  SET used = 1
 WHERE
-  (conversation_id=@1) AND (hash = @2)
+  conversation_id = @1
+  AND ix = @2
+  
