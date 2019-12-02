@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 TextEdit {
     visible: elided
-    text: "Read more"
+    text: wrapperCol.expanded == false ? "Read more" : "Collapse"
     font.bold: true
     color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
@@ -17,7 +17,6 @@ TextEdit {
         anchors.fill: parent
         onClicked: {
             wrapperCol.expanded == true ? wrapperCol.expanded = false : wrapperCol.expanded = true
-            parent.text == "Read more" ? parent.text = "Collapse" : parent.text = "Read more"
         }
     }
 }
