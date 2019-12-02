@@ -32,6 +32,8 @@ ListView {
                                searchConversationId)
             conversationList.currentIndex = conv_idx
             chatView.sourceComponent = conversationList.currentItem.childChatView
+            const position = conversationList.currentItem.convoContent.messages.indexById(searchMsgId)
+            conversationList.currentItem.childChatView.children[0].conversationWindow.positionViewAtIndex(position, ListView.Center)
         }
     }
 
@@ -48,6 +50,7 @@ ListView {
 
         property var childChatView: Component {
             CV.ChatViewMain {
+                id: cvMain
                 conversationItem: conversationData
                 ownedConversation: convoContent.messages
             }

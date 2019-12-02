@@ -15,6 +15,7 @@ Page {
 
     property var conversationItem
     property Messages ownedConversation
+    property var conversationWindow: convWindow
 
     background: Rectangle {
         color: CmnCfg.palette.white
