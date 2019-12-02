@@ -14,6 +14,7 @@
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
+        <file>ChatBubble/ElideHandler.qml</file>
         <file>TeamColumn.qml</file>
         <file>Units.qml</file>
         <file>errors/ErrorDialog.qml</file>
@@ -26,9 +27,5 @@
         <file>themes/MetaThemes.qml</file>
         <file>themes/SolarizedDark.qml</file>
         <file>themes/SolarizedLight.qml</file>
-        <file>ChatBubble/ElideHandler.qml</file>
-    </qresource>
-    <qresource prefix="/">
-        <file>ChatBubble/ElideHandler.qml</file>
     </qresource>
 </RCC>

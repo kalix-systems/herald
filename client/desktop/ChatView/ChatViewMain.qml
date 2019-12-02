@@ -51,6 +51,7 @@ Page {
         Connections {
             target: ownedConversation
             onRowsInserted: {
+
                 convWindow.contentY = convWindow.contentHeight
             }
         }

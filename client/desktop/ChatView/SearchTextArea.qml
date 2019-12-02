@@ -35,8 +35,10 @@ ScrollView {
             event.accepted = true
 
             ownedConversation.searchActive = true
+
             const x = convWindow.chatScrollBar.position
             const y = convWindow.chatScrollBar.size
+
             //key navigation handling
             if (ownedConversation.searchNumMatches > 0) {
                 ownedConversation.setSearchHint(x, y)
@@ -60,6 +62,7 @@ ScrollView {
 
             const x = convWindow.chatScrollBar.position
             const y = convWindow.chatScrollBar.size
+
             ownedConversation.setSearchHint(x, y)
 
             if (ownedConversation.searchNumMatches > 0) {
