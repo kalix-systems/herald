@@ -16,6 +16,7 @@ ListView {
 
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
+    //do not move this back into foundation
     property NumberAnimation highlightAnimation:   NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
