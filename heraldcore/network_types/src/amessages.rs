@@ -27,13 +27,13 @@ pub struct DepKey(pub Signed<sig::PublicKey>);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// New ratchets to associate with conversations
-pub struct NewRatchets(pub HashMap<ConversationId, RatchetState>);
+pub struct NewRatchets(pub Vec<(ConversationId, u32, RatchetState)>);
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 /// A message received by a user when they are addeded to a conversation.
 pub struct AddedToConvo {
     /// The current ratchet states in the conversation
-    pub ratchets: HashMap<sig::PublicKey, (u32, RatchetState)>,
+    pub ratchets: Vec<(sig::PublicKey, u32, RatchetState)>,
     /// The members of the conversation
     pub members: Vec<UserId>,
     /// The [`ConversationId`]

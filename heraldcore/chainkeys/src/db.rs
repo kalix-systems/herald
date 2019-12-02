@@ -245,4 +245,19 @@ impl Tx<'_> {
         self.store_derived_key(cid, pk, gen, ix, key)?;
         Ok((gen, cipher))
     }
+
+    pub fn deprecate_before(
+        &mut self,
+        cid: ConversationId,
+        pk: sig::PublicKey,
+        gen: u32,
+    ) -> Result<(), ChainKeysError> {
+        let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_before.sql"))?;
+        store_stmt.execute_named(named_params! {
+            "@cid": cid,
+            "@pk": pk.as_ref(),
+            "@gen": gen
+        })?;
+        Ok(())
+    }
 }

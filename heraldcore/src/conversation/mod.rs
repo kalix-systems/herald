@@ -32,7 +32,7 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
     let gen = 0;
     chainkeys::store_state(cid, pk, gen, &ratchet)?;
 
-    let ratchets = std::iter::once((pk, (gen, ratchet))).collect();
+    let ratchets = vec![(pk, gen, ratchet)];
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),

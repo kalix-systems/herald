@@ -148,6 +148,7 @@ impl Event {
             let (cid, from, msg) = amessages::open(msg)?;
             match msg {
                 AuxMessage::NewKey(nk) => crate::user_keys::add_keys(from.uid, &[nk.0])?,
+                // TODO: deprecate ratchets
                 AuxMessage::DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
                 AuxMessage::AddedToConvo(ac) => {
                     use crate::{image_utils::image_path, types::amessages::AddedToConvo};
@@ -181,16 +182,20 @@ impl Event {
 
                     let conv = conv_builder.add_db(crate::db::Database::get()?.deref_mut())?;
 
-                    for (did, (gen, ratchet)) in ratchets {
-                        chainkeys::store_state(cid, did, gen, &ratchet)?;
+                    for (did, gen, ratchet) in ratchets {
+                        chainkeys::store_new_state(cid, did, gen, &ratchet)?;
                     }
 
                     ev.add_notif(Notification::NewConversation(conv.meta));
                 }
-                // UserReqAck(cr) => ev
-                //     .notifications
-                //     .push(Notification::AddUserResponse(cid, uid, cr.0)),
-                _ => {}
+                AuxMessage::UserReqAck(cr) => {
+                    ev.add_notif(Notification::AddUserResponse(cid, from.uid, cr.0));
+                }
+                AuxMessage::NewRatchets(nr) => {
+                    for (cid, gen, ratchet) in nr.0 {
+                        chainkeys::store_new_state(cid, from.did, gen, &ratchet)?;
+                    }
+                }
             }
             unimplemented!()
         })

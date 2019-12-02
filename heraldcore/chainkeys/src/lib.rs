@@ -67,8 +67,21 @@ pub fn store_state(
     gen: u32,
     ratchet: &kdf_ratchet::RatchetState,
 ) -> Result<(), ChainKeysError> {
-    db::with_tx(move |tx| {
+    db::with_tx(|tx| {
         tx.store_ratchet_state(cid, pk, gen, ratchet)?;
+        Ok(())
+    })
+}
+
+pub fn store_new_state(
+    cid: ConversationId,
+    pk: sig::PublicKey,
+    gen: u32,
+    ratchet: &kdf_ratchet::RatchetState,
+) -> Result<(), ChainKeysError> {
+    db::with_tx(|tx| {
+        tx.store_ratchet_state(cid, pk, gen, ratchet)?;
+        tx.deprecate_before(cid, pk, gen)?;
         Ok(())
     })
 }
