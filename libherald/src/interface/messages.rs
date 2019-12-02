@@ -313,7 +313,7 @@ pub trait MessagesTrait {
     fn index_by_id(
         &self,
         msg_id: &[u8],
-    ) -> u64;
+    ) -> i64;
 
     fn next_search_match(&mut self) -> i64;
 
@@ -621,7 +621,7 @@ pub unsafe extern "C" fn messages_index_by_id(
     ptr: *const Messages,
     msg_id_str: *const c_char,
     msg_id_len: c_int,
-) -> u64 {
+) -> i64 {
     let obj = &*ptr;
     let msg_id = { qba_slice!(msg_id_str, msg_id_len) };
     obj.index_by_id(msg_id)

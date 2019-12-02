@@ -304,13 +304,12 @@ impl super::Conversations {
     pub(crate) fn index_by_id_(
         &self,
         cid: ffi::ConversationIdRef,
-    ) -> u64 {
-        let ret_val = std::u32::MAX as u64;
-        let conversation_id = ret_err!(ConversationId::try_from(cid), ret_val);
+    ) -> i64 {
+        let conversation_id = ret_err!(ConversationId::try_from(cid), -1);
         self.list
             .iter()
             .position(|super::Conversation { id, .. }| id == &conversation_id)
-            .map(|n| n as u64)
-            .unwrap_or(ret_val)
+            .map(|n| n as i64)
+            .unwrap_or(-1)
     }
 }

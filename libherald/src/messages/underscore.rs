@@ -65,12 +65,10 @@ impl Messages {
     pub(crate) fn index_by_id_(
         &self,
         msg_id: ffi::MsgIdRef,
-    ) -> u64 {
-        let ret_val = std::u32::MAX as u64;
+    ) -> i64 {
+        let msg_id = ret_err!(msg_id.try_into(), -1);
 
-        let msg_id = ret_err!(msg_id.try_into(), ret_val);
-
-        ret_none!(self.container.index_by_id(msg_id), ret_val) as u64
+        ret_none!(self.container.index_by_id(msg_id), -1) as i64
     }
 
     pub(crate) fn is_tail_(

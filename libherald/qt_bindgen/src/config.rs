@@ -125,7 +125,7 @@ fn conversations() -> Object {
         mut removeConversation(row_index: QUint64) => Bool,
         mut toggleFilterRegex() => Bool,
         mut clearFilter() => Void,
-        const indexById(conversation_id: QByteArray) => QUint64,
+        const indexById(conversation_id: QByteArray) => Qint64,
     };
 
     obj! {
@@ -269,7 +269,7 @@ fn messages() -> Object {
         mut setElisionLineCount(line_count: QUint8) => Void,
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
-        const indexById(msg_id: QByteArray) => QUint64,
+        const indexById(msg_id: QByteArray) => Qint64,
     };
 
     obj! {
