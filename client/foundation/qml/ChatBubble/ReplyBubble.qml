@@ -18,7 +18,6 @@ ColumnLayout {
     property color authorColor
     property var replyId
     property alias jumpHandler: jumpHandler
-    property alias replyHighlightAnimation: replyHighlightAnimation
     property bool knownReply: replyType == 2
     property bool elided: false
     property bool expanded: false
@@ -51,15 +50,6 @@ ColumnLayout {
             height: reply.height
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
-        }
-
-        NumberAnimation {
-            id: replyHighlightAnimation
-            property: "opacity"
-            from: 1.0
-            to: 0.0
-            duration: 600
-            easing.type: Easing.InCubic
         }
 
         ColumnLayout {

@@ -42,6 +42,7 @@ Rectangle {
         }
     }
 
+
     Rectangle {
         id: verticalAccent
         anchors.right: !outbound ? contentLoader.left : undefined

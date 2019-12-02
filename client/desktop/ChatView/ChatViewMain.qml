@@ -69,6 +69,8 @@ Page {
                     return
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
+                convWindow.highlightAnimation.target = convWindow.itemAtIndex(msg_idx).highlight
+                convWindow.highlightAnimation.start()
             }
         }
     }

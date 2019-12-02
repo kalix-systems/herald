@@ -14,6 +14,17 @@ ListView {
     property alias chatListView: chatListView
     property var blankTransition: Transition {}
 
+    //this should be in here and not in the bubble because conversation window
+    //needs access to it, add a separate animation to mobile
+    property NumberAnimation highlightAnimation:   NumberAnimation {
+        id: bubbleHighlightAnimation
+        property: "opacity"
+        from: 1.0
+        to: 0.0
+        duration: 600
+        easing.type: Easing.InCubic
+    }
+
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
@@ -112,9 +123,9 @@ ListView {
                     const window = convWindow
 
                     window.positionViewAtIndex(msgIndex, ListView.Center)
-                    replyHighlightAnimation.target = window.itemAtIndex(
+                    window.highlightAnimation.target = window.itemAtIndex(
                                 msgIndex).highlight
-                    replyHighlightAnimation.start()
+                    window.highlightAnimation.start()
                 }
             }
         }
