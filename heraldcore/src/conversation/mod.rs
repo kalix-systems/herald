@@ -29,9 +29,10 @@ pub fn start(conversation: Conversation) -> Result<(), HErr> {
 
     let ratchet = RatchetState::gen_new();
     let pk = *config::keypair()?.public_key();
-    chainkeys::store_state(cid, pk, 0, &ratchet)?;
+    let gen = 0;
+    chainkeys::store_state(cid, pk, gen, &ratchet)?;
 
-    let ratchets = std::iter::once((pk, ratchet)).collect();
+    let ratchets = std::iter::once((pk, (gen, ratchet))).collect();
 
     let picture = match picture_path {
         Some(path) => Some(fs::read(path)?),

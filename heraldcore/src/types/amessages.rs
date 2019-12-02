@@ -30,7 +30,7 @@ pub fn seal(
 }
 
 /// Opens the message.
-pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, ConversationMessage), HErr> {
+pub fn open(cipher: Cipher) -> Result<(ConversationId, GlobalId, AuxMessage), HErr> {
     let AuxAD { cid, to, from, gen } = kson::from_bytes(cipher.ad.clone())?;
 
     if to != config::id()? {

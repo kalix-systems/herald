@@ -33,7 +33,7 @@ pub struct NewRatchets(pub HashMap<ConversationId, RatchetState>);
 /// A message received by a user when they are addeded to a conversation.
 pub struct AddedToConvo {
     /// The current ratchet states in the conversation
-    pub ratchets: HashMap<sig::PublicKey, RatchetState>,
+    pub ratchets: HashMap<sig::PublicKey, (u32, RatchetState)>,
     /// The members of the conversation
     pub members: Vec<UserId>,
     /// The [`ConversationId`]
