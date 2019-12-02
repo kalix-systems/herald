@@ -399,8 +399,11 @@ fn message_search() -> Object {
     let item_props = item_props! {
         msgId: ItemProp::new(QByteArray).optional(),
         author: ItemProp::new(QString).optional(),
+        // Conversation id
         conversation: ItemProp::new(QByteArray).optional(),
+        // Is the conversation pairwise?
         conversationPairwise: ItemProp::new(Bool).optional(),
+        // Path to conversation picture, if it exists
         conversationPicture: ItemProp::new(QString).optional().get_by_value(),
         conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
         conversationTitle: ItemProp::new(QString).optional().get_by_value(),
