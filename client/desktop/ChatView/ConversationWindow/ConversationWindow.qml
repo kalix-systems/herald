@@ -26,8 +26,6 @@ ListView {
         easing.type: Easing.InCubic
     }
 
-    Popups.ImagePopup {}
-
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
@@ -141,9 +139,13 @@ ListView {
                 receiptImage: proxyReceiptImage
                 authorName: authName
                 messageAttachments: Attachments {
+                    id: atc
                     attachmentsMsgId: msgId
                 }
-                imageTapCallback: function () {}
+                imageTapCallback: function () {
+                    imagePopup.sourceAtc = atc
+                    imagePopup.show()
+                }
                 authorColor: userColor
                 elided: chatRow.elided
             }

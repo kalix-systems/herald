@@ -7,7 +7,6 @@ ColumnLayout {
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
-    property string imageSource: ""
     property string authorName: ""
     property Attachments messageAttachments: null
     property var imageTapCallback: function () {
@@ -29,7 +28,6 @@ ColumnLayout {
 
     Repeater {
         model: messageAttachments
-
         delegate: Image {
             id: image
             property real aspectRatio: sourceSize.height / sourceSize.width

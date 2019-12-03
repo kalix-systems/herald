@@ -8,6 +8,7 @@ import Qt.labs.platform 1.1
 import "qrc:/imports" as Imports
 import "qrc:/imports/errors"
 import "SideBar/popups" as Popups
+import "ChatView/Popups" as CvPopups
 import QtQml 2.13
 
 ApplicationWindow {
@@ -40,6 +41,11 @@ ApplicationWindow {
         Component.onCompleted: herald.setAppLocalDataDir(
                                    StandardPaths.writableLocation(
                                        StandardPaths.AppLocalDataLocation))
+    }
+
+    // must be at root level .
+    CvPopups.ImagePopup {
+        id: imagePopup
     }
 
     Loader {
