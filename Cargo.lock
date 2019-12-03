@@ -680,7 +680,6 @@ version = "0.1.0"
 dependencies = [
  "coremacros 0.1.0",
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "dashmap 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",

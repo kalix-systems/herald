@@ -37,7 +37,7 @@ fn emitter() -> Option<&'static Mutex<Emitter>> {
 }
 
 fn bus() -> &'static Bus {
-    BUS.get_or_init(|| Bus::new())
+    BUS.get_or_init(Bus::new)
 }
 
 /// Emits a signal to the QML runtime, returns `None` if the emitter has not been provided yet.

@@ -80,7 +80,7 @@ impl Interface for Users {
 
         self.model.begin_insert_rows(pos, pos);
         self.list.insert(pos, user);
-        shared::user_data().insert(data.id, data);
+        shared::user_data().write().insert(data.id, data);
         self.model.end_insert_rows();
 
         spawn!(
@@ -105,7 +105,8 @@ impl Interface for Users {
         row_index: usize,
     ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
+        let lock = user_data().read();
+        let inner = ret_none!(lock.get(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
@@ -135,7 +136,8 @@ impl Interface for Users {
         name: String,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(get_user_mut(&uid), false);
+        let mut lock = user_data().write();
+        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         {
             let name = name.clone();
@@ -173,7 +175,8 @@ impl Interface for Users {
         picture: Option<String>,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(get_user_mut(&uid), false);
+        let mut lock = user_data().write();
+        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         let picture = picture.and_then(crate::utils::strip_qrc);
 
@@ -209,7 +212,8 @@ impl Interface for Users {
         color: u32,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(get_user_mut(&uid), false);
+        let mut lock = user_data().write();
+        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         spawn!(user::set_color(uid, color), false);
 
@@ -222,7 +226,8 @@ impl Interface for Users {
         row_index: usize,
     ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(get_user(&uid), 0);
+        let mut lock = user_data().write();
+        let inner = ret_none!(lock.get_mut(&uid), 0);
         inner.status as u8
     }
 
@@ -233,7 +238,8 @@ impl Interface for Users {
     ) -> bool {
         let status = ret_err!(UserStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut inner = ret_none!(get_user_mut(&uid), false);
+        let mut lock = user_data().write();
+        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         spawn!(user::set_status(uid, status), false);
 
@@ -242,7 +248,7 @@ impl Interface for Users {
         if status == UserStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);
             self.list.remove(row_index);
-            user_data().remove(&uid);
+            user_data().write().remove(&uid);
             self.model.end_remove_rows();
         }
 

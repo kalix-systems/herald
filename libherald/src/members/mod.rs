@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none, users::shared::get_user};
+use crate::{ffi, interface::*, ret_err, ret_none};
 use herald_common::UserId;
 use heraldcore::{types::*, user};
 use search_pattern::SearchPattern;
@@ -65,7 +65,8 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let inner = ret_none!(get_user(uid), ffi::NULL_CONV_ID.to_vec());
+        let lock = crate::users::shared::user_data().read();
+        let inner = ret_none!(lock.get(uid), ffi::NULL_CONV_ID.to_vec());
         inner.pairwise_conversation.to_vec()
     }
 
@@ -75,9 +76,7 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
-        let inner = ret_none!(get_user(uid), uid.to_string());
-
-        inner.name.clone()
+        crate::users::shared::name(uid).unwrap_or_else(|| uid.to_string())
     }
 
     /// Returns profile picture
@@ -86,8 +85,7 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> Option<String> {
         let uid = &self.list.get(row_index)?.id;
-        let inner = get_user(uid)?;
-        inner.profile_picture.clone()
+        crate::users::shared::profile_picture(uid)
     }
 
     /// Returns user's color
@@ -96,8 +94,7 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> u32 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(get_user(&uid), 0);
-        inner.color
+        ret_none!(crate::users::shared::color(&uid), 0)
     }
 
     fn status(
@@ -105,7 +102,8 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let inner = ret_none!(get_user(&uid), 0);
+        let lock = crate::users::shared::user_data().read();
+        let inner = ret_none!(lock.get(&uid), 0);
         inner.status as u8
     }
 
@@ -194,7 +192,9 @@ impl MembersTrait for Members {
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let user = ret_none!(get_user(&user_id), false);
+        let lock = crate::users::shared::user_data().read();
+        let user = ret_none!(lock.get(&user_id), false);
+
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
@@ -242,7 +242,9 @@ impl Members {
 
     fn inner_filter(&mut self) {
         for (ix, user) in self.list.iter_mut().enumerate() {
-            let inner = ret_none!(get_user(&user.id));
+            let lock = crate::users::shared::user_data().read();
+            let inner = ret_none!(lock.get(&user.id));
+
             user.matched = self
                 .filter
                 .as_ref()
@@ -261,7 +263,7 @@ impl Members {
         match update {
             ReqResp(uid, accepted) => {
                 if accepted {
-                    let matched = match get_user(&uid) {
+                    let matched = match crate::users::shared::user_data().read().get(&uid) {
                         Some(meta) => self
                             .filter
                             .as_ref()

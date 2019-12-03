@@ -8,28 +8,13 @@ impl Conversations {
     ) -> Option<ConversationId> {
         Some(self.list.get(index)?.id)
     }
-
-    pub(crate) fn data(
-        &self,
-        index: usize,
-    ) -> Option<Ref> {
-        let id = &self.list.get(index).as_ref()?.id;
-        shared::data(id)
-    }
-
-    pub(crate) fn data_mut(
-        &self,
-        index: usize,
-    ) -> Option<RefMut> {
-        let id = &self.list.get(index).as_ref()?.id;
-        shared::data_mut(id)
-    }
 }
 
 macro_rules! imp {
     ($($name: ident, $field: ident, $ret: ty),*) => {
        $(pub(crate) fn $name(&self, index: usize) -> Option<$ret> {
-            Some(self.data(index)?.$field)
+            let id = &self.list.get(index).as_ref()?.id;
+            Some(shared::conv_data().read().get(id)?.$field)
        })*
     }
 }
@@ -37,7 +22,9 @@ macro_rules! imp {
 macro_rules! set_imp {
     ($($name: ident, $field: ident, $val: ty),*) => {
        $(pub(crate) fn $name(&mut self, index: usize, val: $val) -> Option<()> {
-            let mut data = self.data_mut(index)?;
+            let id = &self.list.get(index).as_ref()?.id;
+            let mut lock = shared::conv_data().write();
+            let data = lock.get_mut(id)?;
             data.$field = val;
             Some(())
        })*
@@ -47,7 +34,8 @@ macro_rules! set_imp {
 macro_rules! imp_clone {
     ($($name: ident, $field: ident, $ret: ty),*) => {
        $(pub(super) fn $name(&self, index: usize) -> Option<$ret> {
-            Some(self.data(index)?.$field.clone())
+            let id = &self.list.get(index).as_ref()?.id;
+            Some(shared::conv_data().read().get(id)?.$field.clone())
        })*
     }
 }
@@ -58,7 +46,8 @@ impl Conversations {
 
         let list = &mut self.list;
         for (ix, Conversation { matched, id }) in list.iter_mut().enumerate() {
-            let data = cont_none!(shared::data(id));
+            let lock = shared::conv_data().read();
+            let data = cont_none!(lock.get(id));
 
             let new_matched = match &data.title {
                 Some(title) => filter.is_match(&title),
@@ -99,16 +88,16 @@ impl crate::Loadable for Conversations {
     type Error = std::io::Error;
 
     fn try_load(&mut self) -> Result<(), std::io::Error> {
-        //std::thread::Builder::new().spawn(|| {
-        //    let mut list = Vector::new();
-        //    for meta in ret_err!(conversation::all_meta()).into_iter() {
-        //        let (conv, data) = split_meta(meta);
-        //        shared::insert_data(conv.id, data);
-        //        list.push_back(conv);
-        //    }
+        std::thread::Builder::new().spawn(|| {
+            let mut list = Vector::new();
+            for meta in ret_err!(conversation::all_meta()).into_iter() {
+                let (conv, data) = split_meta(meta);
+                shared::insert_data(conv.id, data);
+                list.push_back(conv);
+            }
 
-        //    push(ConvUpdate::Init(list));
-        //})?;
+            push(ConvUpdate::Init(list));
+        })?;
 
         Ok(())
     }

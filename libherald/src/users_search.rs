@@ -2,7 +2,7 @@ use crate::{
     ffi,
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
     ret_err,
-    users::shared::{color, get_user, name, profile_picture, user_ids},
+    users::shared::{color, name, profile_picture, user_ids},
 };
 use herald_common::UserId;
 use search_pattern::SearchPattern;
@@ -161,7 +161,7 @@ impl UsersSearch {
     fn inner_filter(&mut self) -> Option<()> {
         let filter = &self.filter.as_ref()?;
         for (ix, user) in self.list.iter_mut().enumerate() {
-            match get_user(&user.id) {
+            match crate::users::shared::user_data().read().get(&user.id) {
                 Some(inner) => {
                     user.matched = inner.matches(filter);
 

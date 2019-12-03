@@ -4,7 +4,8 @@ use heraldcore::errors::HErr;
 impl Users {
     pub(super) fn inner_filter(&mut self) {
         for (ix, user) in self.list.iter_mut().enumerate() {
-            let inner = ret_none!(get_user(&user.id));
+            let lock = shared::user_data().read();
+            let inner = ret_none!(lock.get(&user.id));
             let old_matched = user.matched;
             user.matched = self
                 .filter
@@ -39,7 +40,7 @@ impl Users {
 
                 self.model.begin_insert_rows(pos, pos);
                 self.list.push(new_user);
-                user_data().insert(data.id, data);
+                user_data().write().insert(data.id, data);
                 self.model.end_insert_rows();
             }
             UserUpdate::ReqResp(uid, accepted) => {
