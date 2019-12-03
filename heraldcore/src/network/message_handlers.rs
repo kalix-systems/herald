@@ -156,13 +156,20 @@ impl Event {
                         )));
                     }
                 },
-                // TODO: deprecate ratchets
                 AuxMessage::DepKey(dk) => match dk.0.verify_sig() {
                     SigValid::Yes => {
-                        ev.with_simple_comp(|| crate::user_keys::deprecate_keys(&[dk.0]));
+                        crate::user_keys::deprecate_keys(&[dk.0])?;
                         ev.with_simple_comp(|| {
                             chainkeys::deprecate_all(*dk.0.data()).map_err(HErr::from)
                         });
+                        ev.with_simple_comp(|| {
+                            let mut conn = crate::db::Database::get()?;
+                            let cids = crate::members::db::conversations_with(&mut conn, from.uid)?;
+                            // for cid in cids {
+                            //     // chainkeys::deprecate_all_in_convo
+                            // }
+                            Ok(())
+                        })
                     }
                     f => {
                         return Err(HErr::HeraldError(format!(

@@ -1,4 +1,5 @@
 use super::*;
+use rusqlite::named_params;
 
 pub(crate) fn add_keys(
     conn: &mut rusqlite::Connection,
@@ -83,4 +84,20 @@ pub(crate) fn deprecate_keys(
 
     tx.commit()?;
     Ok(())
+}
+
+pub(crate) fn get_user_by_key(
+    conn: &mut rusqlite::Connection,
+    key: &sig::PublicKey,
+) -> Result<Option<UserId>, HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/get_user_by_key.sql"))?;
+
+    let res = stmt
+        .query_map_named(named_params! {"@key": key.as_ref()}, |row| {
+            row.get("user_id")
+        })?
+        .next()
+        .transpose()?;
+
+    Ok(res)
 }
