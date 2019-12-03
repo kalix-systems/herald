@@ -3,8 +3,10 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "." as CVUtils
-import "./Controls/js/ChatTextAreaUtils.mjs" as JS
-import "./Controls/ConvoTextArea"
+import "./ConversationWindow" as ConvoWindow
+import "./ChatTextArea" as CTA
+import "./Header" as Header
+import "./ChatTextArea/js/ChatTextAreaUtils.mjs" as TextJs
 import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
@@ -20,12 +22,12 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    header: CVUtils.ChatBar {
+    header: Header.ChatBar {
         id: messageBar
         conversationItem: parent.conversationItem
     }
 
-    ChatSearchComponent {
+    Header.ChatSearchComponent {
         id: chatSearchComponent
     }
 
@@ -35,7 +37,7 @@ Page {
         z: messageBar.z
     }
 
-    CVUtils.ConversationWindow {
+    ConvoWindow.ConversationWindow {
         id: convWindow
         focus: true
         anchors {
@@ -102,7 +104,7 @@ Page {
     }
 
     ///--- Text entry area, for typing
-    ConvoTextArea {
+    CTA.ConvoTextArea {
         id: chatTextArea
 
         anchors {
@@ -114,7 +116,7 @@ Page {
         }
 
         keysProxy: Item {
-            Keys.onReturnPressed: JS.enterKeyHandler(event,
+            Keys.onReturnPressed: TextJs.enterKeyHandler(event,
                                                      chatTextArea.chatText,
                                                      ownedConversation.builder,
                                                      ownedConversation,

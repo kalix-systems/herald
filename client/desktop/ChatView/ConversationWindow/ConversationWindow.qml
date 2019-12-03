@@ -6,7 +6,7 @@ import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
-import "../SideBar/js/ContactView.mjs" as CUtils
+import "../../SideBar/js/ContactView.mjs" as CUtils
 
 ListView {
     id: chatListView

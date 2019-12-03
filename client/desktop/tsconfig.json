@@ -6,8 +6,8 @@
         "noEmitOnError": true
     },
     "files": [
-        "ChatView/Controls/ts/ChatTextAreaUtils.ts",
-        "ChatView/Controls/ts/ChatViewTypes.d.ts",
+        "ChatView/ChatTextArea/ts/ChatTextAreaUtils.ts",
+        "ChatView/ChatTextArea/ts/ChatViewTypes.d.ts",
         "SideBar/ts/ContactView.ts",
         "SideBar/ts/ContactViewTypes.d.ts",
         "SideBar/popups/ts/ConfigPopupSubmission.ts",

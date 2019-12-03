@@ -7,7 +7,6 @@ import Qt.labs.platform 1.0
 import "qrc:/imports" as Imports
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
-import "Controls" as CVUtils
 
 ToolBar {
     id: chatToolBar
