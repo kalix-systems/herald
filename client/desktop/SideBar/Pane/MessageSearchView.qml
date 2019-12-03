@@ -47,7 +47,7 @@ ListView {
             }
             labelComponent: GridLayout {
                 id: labelGrid
-                rows: bodyText.truncated ? 3 : 2
+                rows: bodyText.lineCount > 1 ? 3 : 2
                 columns: 2
                 width: parent.width
                 Label {
@@ -78,18 +78,32 @@ ListView {
                     color: CmnCfg.palette.offBlack
                 }
 
+                TextMetrics {
+                    id: prefix
+                    text: messageData.beforeFirstMatch + messageData.firstMatch
+                    elide: Text.ElideLeft
+                    elideWidth: labelGrid.width * 2
+                }
+
+                TextMetrics {
+                    id: suffix
+                    text: messageData.afterFirstMatch
+                    elide: Text.ElideRight
+                    elideWidth: labelGrid.width * 2
+                }
+
                 Label {
                     id: bodyText
                     font {
                         family: CmnCfg.chatFont.name
                         pixelSize: 13
                     }
-                    Layout.topMargin: -CmnCfg.smallMargin
+                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     elide: "ElideRight"
                     text: if (messageData.beforeFirstMatch.length === 0) {
                               messageData.firstMatch + messageData.afterFirstMatch }
                           else {
-                              messageData.beforeFirstMatch + messageData.firstMatch + messageData.afterFirstMatch
+                              prefix.elidedText + suffix.elidedText
                           }
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
