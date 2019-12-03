@@ -10,10 +10,19 @@ const END_TAG: &str = "</b>";
 fn process(
     pattern: &SearchPattern,
     body: &str,
+    take_num: usize,
+    rev: bool,
 ) -> String {
-    let body: String = UnicodeSegmentation::graphemes(body, true)
-        .take(60)
-        .collect();
+    let body: String = if rev {
+        UnicodeSegmentation::graphemes(body, true)
+            .rev()
+            .take(take_num)
+            .collect()
+    } else {
+        UnicodeSegmentation::graphemes(body, true)
+            .take(take_num)
+            .collect()
+    };
 
     pattern
         .replace_all(&body, |caps: &Captures| {
@@ -67,9 +76,9 @@ impl Search {
                     let (before_first, tail) = body.as_str().split_at(p_match.start());
                     let (first_match, after_first) = tail.split_at(p_match.end() - p_match.start());
 
-                    let before_first = process(pattern, before_first);
-                    let first_match = process(pattern, first_match);
-                    let after_first = process(pattern, after_first);
+                    let before_first = process(pattern, before_first, 70, true);
+                    let first_match = process(pattern, first_match, 40, false);
+                    let after_first = process(pattern, after_first, 70, false);
 
                     ResultBody {
                         before_first,
