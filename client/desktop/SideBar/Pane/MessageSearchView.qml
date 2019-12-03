@@ -38,7 +38,7 @@ ListView {
                 labelColor: CmnCfg.palette.black
                 labelSize: 14
                 lastAuthor: outbound ? qsTr("You") : messageData.author
-                lastBody: lastAuthor + ": " + messageData.body
+                lastBody: lastAuthor + ": " + messageData.firstMatch
                 lastTimestamp: Utils.friendlyTimestamp(messageData.time)
             }
 
