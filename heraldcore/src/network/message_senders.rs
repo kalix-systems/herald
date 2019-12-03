@@ -7,9 +7,19 @@ pub(crate) fn send_cmessage(
     content: &ConversationMessage,
 ) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
-        let cm = cmessages::seal(cid, &content)?;
+        let (gen, cm, new) = cmessages::seal(cid, &content)?;
 
         let to = crate::members::members(&cid)?;
+
+        if let Some(ratchet) = new {
+            let msg = amessages::AuxMessage::NewRatchets(amessages::NewRatchets(vec![(
+                cid, gen, ratchet,
+            )]));
+            for uid in to.iter() {
+                send_amessage(*uid, &msg)?;
+            }
+        }
+
         let exc = *crate::config::keypair()?.public_key();
         let msg = kson::to_vec(&cm).into();
 
@@ -62,29 +72,7 @@ pub(crate) fn send_umessage(
     uid: UserId,
     msg: &DeviceMessageBody,
 ) -> Result<(), HErr> {
-    let meta = match keys_of(vec![uid])?.pop() {
-        Some((u, m)) => {
-            if u == uid {
-                Ok(m)
-            } else {
-                Err(HErr::HeraldError(format!(
-                    "Response returned keys not associated with uid {}\n\
-                     failed at line {}",
-                    uid,
-                    line!()
-                )))
-            }
-        }
-        None => Err(HErr::HeraldError(format!(
-            "No keys associated with {}\n\
-             failed at line {}",
-            uid,
-            line!()
-        ))),
-    }?;
-
-    let keys: Vec<sig::PublicKey> = meta.keys.into_iter().map(|(k, _)| k).collect();
-    for key in keys {
+    for key in crate::user_keys::get_valid_keys(uid)? {
         send_dmessage(key, msg)?;
     }
 
@@ -95,5 +83,53 @@ pub(crate) fn send_amessage(
     uid: UserId,
     msg: &AuxMessage,
 ) -> Result<(), HErr> {
-    unimplemented!()
+    if CAUGHT_UP.load(Ordering::Acquire) {
+        let (gen, am, new) = amessages::seal(uid, &msg)?;
+        let exc = *crate::config::keypair()?.public_key();
+
+        if let Some(ratchet) = new {
+            let dm = DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet });
+
+            for key in crate::user_keys::get_valid_keys(crate::config::id()?)? {
+                if key != exc {
+                    send_dmessage(key, &dm)?;
+                }
+            }
+
+            send_umessage(uid, &dm)?;
+        }
+
+        let msg = kson::to_vec(&am).into();
+
+        let req = push_aux::Req {
+            to: vec![uid],
+            exc,
+            msg,
+        };
+
+        match helper::push_aux(&req) {
+            Ok(push_aux::Res::Success) => Ok(()),
+            Ok(push_aux::Res::Missing(missing)) => Err(HeraldError(format!(
+                "tried to send messages to nonexistent aux {:?}",
+                missing
+            ))),
+            Err(e) => {
+                // TODO: maybe try more than once?
+                // maybe have some mechanism to send a signal that more things have gone wrong?
+                eprintln!(
+                    "failed to send message {:?}, error was {}\n\
+                     assuming failed session and adding to pending now",
+                    req, e
+                );
+
+                CAUGHT_UP.store(false, Ordering::Release);
+
+                // pending::add_to_pending(cid, content)
+                Ok(())
+            }
+        }
+    } else {
+        // pending::add_to_pending(cid, content)
+        Ok(())
+    }
 }

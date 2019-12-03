@@ -1,5 +1,5 @@
 use super::*;
-use kdf_ratchet::Cipher;
+use kdf_ratchet::{Cipher, RatchetState};
 pub(crate) use network_types::cmessages::*;
 
 #[derive(Ser, De)]
@@ -11,10 +11,9 @@ pub struct CAd {
 
 /// Seals the messages.
 pub fn seal(
-    // note: this is only mut because BlockStore thinks it should be
     cid: ConversationId,
     content: &ConversationMessage,
-) -> Result<Cipher, HErr> {
+) -> Result<(u32, Cipher, Option<RatchetState>), HErr> {
     let cbytes = kson::to_vec(content).into();
     let from = config::gid()?;
 
@@ -22,9 +21,7 @@ pub fn seal(
         let gen = tx.get_generation(cid, from.did)?;
         let ad = kson::to_vec(&CAd { cid, from, gen }).into();
 
-        let cipher = chainkeys::seal_msg(cid, from.did, ad, cbytes)?;
-
-        Ok(cipher)
+        tx.seal_msg(cid, from.did, ad, cbytes).map_err(HErr::from)
     })
 }
 

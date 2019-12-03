@@ -26,3 +26,4 @@ mk_request!(post, new_key);
 mk_request!(post, dep_key);
 mk_request!(post, push_users);
 mk_request!(post, push_devices);
+mk_request!(post, push_aux);

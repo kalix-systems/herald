@@ -1,7 +1,6 @@
 use coretypes::ids::*;
 use herald_common::*;
 use kdf_ratchet::RatchetState;
-use std::collections::HashMap;
 
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub enum AuxMessage {

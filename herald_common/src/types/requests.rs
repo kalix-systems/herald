@@ -63,6 +63,7 @@ pub mod push_aux {
     #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
     pub struct Req {
         pub to: Vec<UserId>,
+        pub exc: sig::PublicKey,
         pub msg: Bytes,
     }
 

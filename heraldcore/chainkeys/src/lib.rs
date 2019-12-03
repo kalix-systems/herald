@@ -52,15 +52,6 @@ pub fn open_msg(
     db::with_tx(move |tx| tx.open_msg(cid, pk, gen, cipher))
 }
 
-pub fn seal_msg(
-    cid: ConversationId,
-    pk: sig::PublicKey,
-    ad: Bytes,
-    msg: BytesMut,
-) -> Result<kdf_ratchet::Cipher, ChainKeysError> {
-    db::with_tx(move |tx| tx.seal_msg(cid, pk, ad, msg)).map(|t| t.1)
-}
-
 pub fn store_state(
     cid: ConversationId,
     pk: sig::PublicKey,

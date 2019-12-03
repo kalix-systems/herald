@@ -152,10 +152,6 @@ impl Event {
                     if crate::user_keys::get_user_by_key(nk.0.data())?.is_none() {
                         crate::user_keys::add_keys(from.uid, &[nk.0])?;
                     }
-                    // else {
-                    // // TODO: decide what to do here
-                    // return Err(HeraldError("received key signed by {}, who isn't {}",
-                    // }
                 }
                 AuxMessage::DepKey(dk) => {
                     crate::user_keys::guard_sig_valid(from.uid, &dk.0, loc!())?;
