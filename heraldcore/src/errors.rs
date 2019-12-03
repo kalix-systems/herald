@@ -51,9 +51,9 @@ pub enum HErr {
     /// Attachments error
     Attachment(coretypes::attachments::Error),
     /// An empty message body,
-    EmptyMessageBody,
-    /// Invalid `UserId`
-    InvalidUserId,
+    EmptyMessageBody(EmptyMessageBody),
+    /// Bad socket address
+    BadSocketAddr(std::net::AddrParseError),
 }
 
 impl fmt::Display for HErr {
@@ -65,7 +65,6 @@ impl fmt::Display for HErr {
         match self {
             DatabaseError(e) => write!(f, "Database Error: {}", e),
             HeraldError(s) => write!(f, "Herald Error: {}", s),
-            InvalidUserId => write!(f, "InvalidUserId"),
             IoError(e) => write!(f, "IoError: {}", e),
             ImageError(s) => write!(f, "ImageError: {}", s),
             KsonError(e) => write!(f, "KsonError error: {}", e),
@@ -83,7 +82,8 @@ impl fmt::Display for HErr {
             ChannelRecvError(location) => write!(f, "Channel receive error at {}", location),
             BadRandomId(e) => write!(f, "{}", e),
             Attachment(e) => write!(f, "{}", e),
-            EmptyMessageBody => write!(f, "{}", EmptyMessageBody),
+            EmptyMessageBody(e) => write!(f, "{}", e),
+            BadSocketAddr(e) => write!(f, "{}", e),
         }
     }
 }
@@ -111,6 +111,7 @@ macro_rules! herr {
 
 herr!(MissingOutboundMessageField, MissingOutboundMessageField);
 herr!(MissingInboundMessageField, MissingInboundMessageField);
+herr!(EmptyMessageBody, EmptyMessageBody);
 herr!(ChainKeysError, ChainError);
 herr!(rusqlite::Error, DatabaseError);
 herr!(std::io::Error, IoError);
@@ -119,12 +120,7 @@ herr!(websocket::result::WebSocketError, WebsocketError);
 herr!(search_pattern::SearchPatternError, RegexError);
 herr!(std::ffi::OsString, BadPath);
 herr!(coretypes::attachments::Error, Attachment);
-
-impl From<EmptyMessageBody> for HErr {
-    fn from(_: EmptyMessageBody) -> Self {
-        HErr::EmptyMessageBody
-    }
-}
+herr!(std::net::AddrParseError, BadSocketAddr);
 
 impl From<image::ImageError> for HErr {
     fn from(e: image::ImageError) -> Self {
@@ -140,7 +136,7 @@ impl From<image::ImageError> for HErr {
 /// Creates a `ChannelSendError`
 macro_rules! channel_send_err {
     () => {{
-        use herald_common::loc;
+        use ::herald_common::loc;
         $crate::errors::HErr::ChannelSendError(loc!())
     }};
 }
@@ -149,7 +145,7 @@ macro_rules! channel_send_err {
 /// Creates a `ChannelRecvError`
 macro_rules! channel_recv_err {
     () => {{
-        use herald_common::loc;
+        use ::herald_common::loc;
         $crate::errors::HErr::ChannelRecvError(loc!())
     }};
 }
@@ -158,7 +154,7 @@ macro_rules! channel_recv_err {
 #[macro_export]
 macro_rules! NE {
     () => {{
-        use herald_common::loc;
+        use ::herald_common::loc;
         $crate::errors::HErr::NoneError(loc!())
     }};
 }

@@ -1,5 +1,5 @@
 use crate::errors::*;
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 use platform_dirs::db_dir;
 use rusqlite::{Connection, NO_PARAMS};
 use std::{
@@ -10,8 +10,10 @@ use std::{
 mod pool;
 use pool::*;
 
-lazy_static! {
-    static ref DB_POOL: Pool = Pool::new();
+static DB_POOL: OnceCell<Pool> = OnceCell::new();
+
+fn db_pool() -> &'static Pool {
+    DB_POOL.get_or_init(Pool::new)
 }
 
 fn db_path() -> PathBuf {
@@ -23,7 +25,7 @@ pub(crate) struct Database(Connection);
 
 impl Database {
     pub(crate) fn get() -> Result<Wrapper, HErr> {
-        DB_POOL.get()
+        db_pool().get()
     }
 }
 

@@ -1054,7 +1054,8 @@ Users::Private *herald_users_get(const Herald::Private *);
 UsersSearch::Private *herald_users_search_get(const Herald::Private *);
 Utils::Private *herald_utils_get(const Herald::Private *);
 bool herald_login(Herald::Private *);
-void herald_register_new_user(Herald::Private *, const ushort *, int);
+void herald_register_new_user(Herald::Private *, const ushort *, int,
+                              const ushort *, int, const ushort *, int);
 void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
@@ -3251,8 +3252,11 @@ UsersSearch *Herald::usersSearch() { return m_usersSearch; }
 const Utils *Herald::utils() const { return m_utils; }
 Utils *Herald::utils() { return m_utils; }
 bool Herald::login() { return herald_login(m_d); }
-void Herald::registerNewUser(const QString &user_id) {
-  return herald_register_new_user(m_d, user_id.utf16(), user_id.size());
+void Herald::registerNewUser(const QString &user_id, const QString &addr,
+                             const QString &port) {
+  return herald_register_new_user(m_d, user_id.utf16(), user_id.size(),
+                                  addr.utf16(), addr.size(), port.utf16(),
+                                  port.size());
 }
 void Herald::setAppLocalDataDir(const QString &path) {
   return herald_set_app_local_data_dir(m_d, path.utf16(), path.size());
