@@ -238,20 +238,12 @@ impl OutboundMessageBuilder {
 
         let Self {
             conversation,
-            mut body,
+            body,
             op,
             attachments,
-            parse_markdown,
         } = self;
 
         use MissingOutboundMessageField::*;
-
-        if parse_markdown {
-            body = match body {
-                Some(body) => Some(e!(body.parse_markdown())),
-                None => None,
-            };
-        }
 
         if attachments.is_empty() && body.is_none() {
             return e!(Err(MissingBody));

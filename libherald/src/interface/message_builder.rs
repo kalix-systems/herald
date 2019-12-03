@@ -12,7 +12,6 @@ pub struct MessageBuilderEmitter {
     pub(super) op_has_attachments_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_id_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_time_changed: fn(*mut MessageBuilderQObject),
-    pub(super) parse_markdown_changed: fn(*mut MessageBuilderQObject),
     pub(super) new_data_ready: fn(*mut MessageBuilderQObject),
 }
 
@@ -34,7 +33,6 @@ impl MessageBuilderEmitter {
             op_has_attachments_changed: self.op_has_attachments_changed,
             op_id_changed: self.op_id_changed,
             op_time_changed: self.op_time_changed,
-            parse_markdown_changed: self.parse_markdown_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -106,14 +104,6 @@ impl MessageBuilderEmitter {
 
         if !ptr.is_null() {
             (self.op_time_changed)(ptr);
-        }
-    }
-
-    pub fn parse_markdown_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.parse_markdown_changed)(ptr);
         }
     }
 
@@ -255,13 +245,6 @@ pub trait MessageBuilderTrait {
 
     fn op_time(&self) -> Option<i64>;
 
-    fn parse_markdown(&self) -> bool;
-
-    fn set_parse_markdown(
-        &mut self,
-        value: bool,
-    );
-
     fn add_attachment(
         &mut self,
         path: String,
@@ -343,7 +326,6 @@ pub unsafe fn message_builder_new_inner(
         message_builder_op_has_attachments_changed,
         message_builder_op_id_changed,
         message_builder_op_time_changed,
-        message_builder_parse_markdown_changed,
         message_builder_new_data_ready,
         message_builder_layout_about_to_be_changed,
         message_builder_layout_changed,
@@ -367,7 +349,6 @@ pub unsafe fn message_builder_new_inner(
         op_has_attachments_changed: message_builder_op_has_attachments_changed,
         op_id_changed: message_builder_op_id_changed,
         op_time_changed: message_builder_op_time_changed,
-        parse_markdown_changed: message_builder_parse_markdown_changed,
         new_data_ready: message_builder_new_data_ready,
     };
     let model = MessageBuilderList {
@@ -559,19 +540,6 @@ pub unsafe extern "C" fn message_builder_op_time_get(ptr: *const MessageBuilder)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_parse_markdown_get(ptr: *const MessageBuilder) -> bool {
-    (&*ptr).parse_markdown()
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_builder_parse_markdown_set(
-    ptr: *mut MessageBuilder,
-    value: bool,
-) {
-    (&mut *ptr).set_parse_markdown(value)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn message_builder_row_count(ptr: *const MessageBuilder) -> c_int {
     to_c_int((&*ptr).row_count())
 }
@@ -644,7 +612,6 @@ pub struct MessageBuilderPtrBundle {
     message_builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_id_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_time_changed: fn(*mut MessageBuilderQObject),
-    message_builder_parse_markdown_changed: fn(*mut MessageBuilderQObject),
     message_builder_new_data_ready: fn(*mut MessageBuilderQObject),
     message_builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
     message_builder_layout_changed: fn(*mut MessageBuilderQObject),

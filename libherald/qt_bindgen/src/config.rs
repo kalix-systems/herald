@@ -283,7 +283,6 @@ fn message_builder() -> Object {
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
         isMediaMessage: Prop::new().simple(Bool),
-        parseMarkdown: Prop::new().simple(Bool).write(),
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional(),
