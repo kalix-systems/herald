@@ -47,10 +47,9 @@ ListView {
             }
             labelComponent: GridLayout {
                 id: labelGrid
-                rows: 3
+                rows: bodyText.truncated ? 3 : 2
                 columns: 2
                 width: parent.width
-                height: parent.height
                 Label {
                     id: uid
                     font {
@@ -58,6 +57,7 @@ ListView {
                         family: CmnCfg.chatFont.name
                         pixelSize: 13
                     }
+                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                     Layout.preferredHeight: labelGrid.height * 0.25
                     Layout.maximumWidth: parent.width
@@ -84,11 +84,16 @@ ListView {
                         family: CmnCfg.chatFont.name
                         pixelSize: 13
                     }
+                    Layout.topMargin: -CmnCfg.smallMargin
                     elide: "ElideRight"
-                    text: messageData.firstMatch + messageData.afterFirstMatch
+                    text: if (messageData.beforeFirstMatch.length === 0) {
+                              messageData.firstMatch + messageData.afterFirstMatch }
+                          else {
+                              messageData.beforeFirstMatch + messageData.firstMatch + messageData.afterFirstMatch
+                          }
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
-                    Layout.maximumHeight: labelGrid.height * 0.75
+                    Layout.maximumHeight: labelGrid.height
                     color: CmnCfg.palette.offBlack
                     textFormat: Text.AutoText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere

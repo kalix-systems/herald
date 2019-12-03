@@ -69,7 +69,6 @@ Item {
             Layout.alignment: Qt.AlignLeft | Qt.alignTop
             Layout.maximumHeight: labelGrid.height * 0.25
             color: CmnCfg.palette.offBlack
-            textFormat: Text.RichText
         }
 
         Button {
