@@ -98,7 +98,13 @@ impl Event {
 
                     ev.add_notif(Notification::Settings(cid, update));
                 }
-                Leave => unimplemented!(),
+                Leave => {
+                    ev.with_simple_comp(|| crate::members::remove_member(&cid, uid));
+                    chainkeys::deprecate_all_in_convo(
+                        cid,
+                        *crate::config::keypair()?.public_key(),
+                    )?;
+                }
             }
 
             Ok(())
@@ -219,7 +225,7 @@ impl Event {
                     }
                 }
             }
-            unimplemented!()
+            Ok(())
         })
     }
 }

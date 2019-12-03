@@ -83,3 +83,13 @@ pub fn deprecate_all(pk: sig::PublicKey) -> Result<(), ChainKeysError> {
         Ok(())
     })
 }
+
+pub fn deprecate_all_in_convo(
+    cid: ConversationId,
+    pk: sig::PublicKey,
+) -> Result<(), ChainKeysError> {
+    db::with_tx(|tx| {
+        tx.deprecate_all_in_convo(cid, pk)?;
+        Ok(())
+    })
+}
