@@ -14,6 +14,7 @@ serde             = "1.0.99"
 serde_bytes       = "0.11.2"
 tar               = "0.4.26"
 url               = "2.1"
+unicode-segmentation = "1.6.0"
 
 [dependencies.herald_common]
 path             = "../herald_common"

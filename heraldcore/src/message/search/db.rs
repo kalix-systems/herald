@@ -2,16 +2,21 @@ use super::*;
 use rusqlite::named_params;
 use search_pattern::Captures;
 use std::ops::Not;
+use unicode_segmentation::UnicodeSegmentation;
 
 const START_TAG: &str = "<b>";
 const END_TAG: &str = "</b>";
 
-fn add_tags<'a>(
+fn process(
     pattern: &SearchPattern,
-    body: &'a str,
+    body: &str,
 ) -> String {
+    let body: String = UnicodeSegmentation::graphemes(body, true)
+        .take(60)
+        .collect();
+
     pattern
-        .replace_all(body, |caps: &Captures| {
+        .replace_all(&body, |caps: &Captures| {
             format!(
                 "{}{}{}",
                 START_TAG,
@@ -62,9 +67,9 @@ impl Search {
                     let (before_first, tail) = body.as_str().split_at(p_match.start());
                     let (first_match, after_first) = tail.split_at(p_match.end() - p_match.start());
 
-                    let before_first = add_tags(pattern, before_first);
-                    let first_match = add_tags(pattern, first_match);
-                    let after_first = add_tags(pattern, after_first);
+                    let before_first = process(pattern, before_first);
+                    let first_match = process(pattern, first_match);
+                    let after_first = process(pattern, after_first);
 
                     ResultBody {
                         before_first,

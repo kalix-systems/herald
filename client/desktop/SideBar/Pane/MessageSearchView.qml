@@ -45,7 +45,7 @@ ListView {
                                                      messageData.msgId)
                 }
             }
-            labelComponent:    GridLayout {
+            labelComponent: GridLayout {
                 id: labelGrid
                 rows: 3
                 columns: 2
@@ -90,11 +90,10 @@ ListView {
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
                     Layout.maximumHeight: labelGrid.height * 0.75
                     color: CmnCfg.palette.offBlack
-                    textFormat: Text.RichText
+                    textFormat: Text.AutoText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
-
+            }
         }
     }
-}
 }
