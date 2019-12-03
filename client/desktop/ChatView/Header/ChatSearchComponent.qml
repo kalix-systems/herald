@@ -4,10 +4,9 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Controls.Styles 1.0
-import "Controls/" as CVUtils
-import "../common" as Common
+import "../../common" as Common
 import "qrc:/imports" as Imports
-import "js/SearchHandler.mjs" as SearchUtils
+import "../js/SearchHandler.mjs" as SearchUtils
 
 Component {
     id: searchBarComponent
