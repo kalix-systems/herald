@@ -154,7 +154,6 @@ struct ConversationContentPtrBundle {
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
-  void (*message_builder_parse_markdown_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
   void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
@@ -373,7 +372,6 @@ struct MessageBuilderPtrBundle {
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
-  void (*message_builder_parse_markdown_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
   void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
@@ -417,7 +415,6 @@ struct MessagesPtrBundle {
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
-  void (*message_builder_parse_markdown_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
   void (*message_builder_layout_about_to_be_changed)(MessageBuilder *);
@@ -1131,8 +1128,6 @@ private:
                  opHasAttachmentsChanged FINAL)
   Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
   Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
-  Q_PROPERTY(bool parseMarkdown READ parseMarkdown WRITE setParseMarkdown NOTIFY
-                 parseMarkdownChanged FINAL)
   explicit MessageBuilder(bool owned, QObject *parent);
 
 public:
@@ -1147,8 +1142,6 @@ public:
   QVariant opHasAttachments() const;
   QByteArray opId() const;
   QVariant opTime() const;
-  bool parseMarkdown() const;
-  void setParseMarkdown(bool v);
   Q_INVOKABLE bool addAttachment(const QString &path);
   Q_INVOKABLE void clearReply();
   Q_INVOKABLE void finalize();
@@ -1199,7 +1192,6 @@ Q_SIGNALS:
   void opHasAttachmentsChanged();
   void opIdChanged();
   void opTimeChanged();
-  void parseMarkdownChanged();
 };
 class MessageSearch : public QAbstractItemModel {
   Q_OBJECT

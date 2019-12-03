@@ -244,7 +244,6 @@ pub unsafe fn conversation_content_new_inner(
         builder_op_has_attachments_changed,
         builder_op_id_changed,
         builder_op_time_changed,
-        builder_parse_markdown_changed,
         builder_new_data_ready,
         builder_layout_about_to_be_changed,
         builder_layout_changed,
@@ -324,7 +323,6 @@ pub unsafe fn conversation_content_new_inner(
         op_has_attachments_changed: builder_op_has_attachments_changed,
         op_id_changed: builder_op_id_changed,
         op_time_changed: builder_op_time_changed,
-        parse_markdown_changed: builder_parse_markdown_changed,
         new_data_ready: builder_new_data_ready,
     };
     let model = MessageBuilderList {
@@ -528,7 +526,6 @@ pub struct ConversationContentPtrBundle {
     builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_id_changed: fn(*mut MessageBuilderQObject),
     builder_op_time_changed: fn(*mut MessageBuilderQObject),
-    builder_parse_markdown_changed: fn(*mut MessageBuilderQObject),
     builder_new_data_ready: fn(*mut MessageBuilderQObject),
     builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),
     builder_layout_changed: fn(*mut MessageBuilderQObject),

@@ -6,7 +6,6 @@ edition = "2018"
 
 [dependencies]
 hex = "0.4.0"
-pulldown-cmark = "0.6.0"
 tar = "0.4.26"
 
 [dependencies.herald_common]
