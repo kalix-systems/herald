@@ -65,9 +65,12 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let lock = crate::users::shared::user_data().read();
-        let inner = ret_none!(lock.get(uid), ffi::NULL_CONV_ID.to_vec());
-        inner.pairwise_conversation.to_vec()
+
+        ret_none!(
+            crate::users::shared::pairwise_cid(uid),
+            ffi::NULL_CONV_ID.to_vec()
+        )
+        .to_vec()
     }
 
     /// Returns users name
@@ -102,9 +105,7 @@ impl MembersTrait for Members {
         row_index: usize,
     ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let lock = crate::users::shared::user_data().read();
-        let inner = ret_none!(lock.get(&uid), 0);
-        inner.status as u8
+        ret_none!(crate::users::shared::status(&uid), 0) as u8
     }
 
     fn matched(
@@ -192,16 +193,13 @@ impl MembersTrait for Members {
         let conv_id = ret_none!(self.conversation_id, false);
         ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
-        let lock = crate::users::shared::user_data().read();
-        let user = ret_none!(lock.get(&user_id), false);
-
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
         self.list.push(User {
             matched: self
                 .filter
                 .as_ref()
-                .map(|filter| user.matches(filter))
+                .map(|filter| crate::users::shared::matches(&user_id, filter))
                 .unwrap_or(true),
             id: user_id,
         });
@@ -242,13 +240,10 @@ impl Members {
 
     fn inner_filter(&mut self) {
         for (ix, user) in self.list.iter_mut().enumerate() {
-            let lock = crate::users::shared::user_data().read();
-            let inner = ret_none!(lock.get(&user.id));
-
             user.matched = self
                 .filter
                 .as_ref()
-                .map(|filter| inner.matches(filter))
+                .map(|filter| crate::users::shared::matches(&user.id, filter))
                 .unwrap_or(true);
             self.model.data_changed(ix, ix);
         }
@@ -263,14 +258,11 @@ impl Members {
         match update {
             ReqResp(uid, accepted) => {
                 if accepted {
-                    let matched = match crate::users::shared::user_data().read().get(&uid) {
-                        Some(meta) => self
-                            .filter
-                            .as_ref()
-                            .map(|filter| meta.matches(filter))
-                            .unwrap_or(true),
-                        None => return,
-                    };
+                    let matched = self
+                        .filter
+                        .as_ref()
+                        .map(|filter| crate::users::shared::matches(&uid, filter))
+                        .unwrap_or(true);
 
                     let user = User { matched, id: uid };
                     self.list.push(user);

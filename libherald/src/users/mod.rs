@@ -80,7 +80,11 @@ impl Interface for Users {
 
         self.model.begin_insert_rows(pos, pos);
         self.list.insert(pos, user);
-        shared::user_data().write().insert(data.id, data);
+
+        {
+            shared::user_data().write().insert(data.id, data);
+        }
+
         self.model.end_insert_rows();
 
         spawn!(
@@ -105,9 +109,7 @@ impl Interface for Users {
         row_index: usize,
     ) -> ffi::ConversationId {
         let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        let lock = user_data().read();
-        let inner = ret_none!(lock.get(uid), ffi::NULL_CONV_ID.to_vec());
-        inner.pairwise_conversation.to_vec()
+        ret_none!(shared::pairwise_cid(uid), ffi::NULL_CONV_ID.to_vec()).to_vec()
     }
 
     /// Returns users name
@@ -117,7 +119,7 @@ impl Interface for Users {
     ) -> String {
         let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
 
-        ret_none!(name(uid), uid.to_string())
+        ret_none!(shared::name(uid), uid.to_string())
     }
 
     /// Returns name if it is set, otherwise returns empty string
@@ -136,15 +138,16 @@ impl Interface for Users {
         name: String,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut lock = user_data().write();
-        let mut inner = ret_none!(lock.get_mut(&uid), false);
-
         {
             let name = name.clone();
             spawn!(user::set_name(uid, name.as_str()), false);
         }
 
-        inner.name = name;
+        {
+            let mut lock = user_data().write();
+            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            inner.name = name;
+        }
         true
     }
 
@@ -175,15 +178,17 @@ impl Interface for Users {
         picture: Option<String>,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut lock = user_data().write();
-        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         let picture = picture.and_then(crate::utils::strip_qrc);
 
         // FIXME this is not exception safe
         let path = ret_err!(user::set_profile_picture(uid, picture), false);
 
-        inner.profile_picture = path;
+        {
+            let mut lock = user_data().write();
+            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            inner.profile_picture = path;
+        }
         true
     }
 
@@ -202,6 +207,7 @@ impl Interface for Users {
         id: ffi::UserId,
     ) -> u32 {
         let uid = &ret_err!(id.as_str().try_into(), 0);
+
         color(&uid).unwrap_or(0)
     }
 
@@ -212,12 +218,14 @@ impl Interface for Users {
         color: u32,
     ) -> bool {
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut lock = user_data().write();
-        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         spawn!(user::set_color(uid, color), false);
 
-        inner.color = color;
+        {
+            let mut lock = user_data().write();
+            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            inner.color = color;
+        }
         true
     }
 
@@ -226,9 +234,7 @@ impl Interface for Users {
         row_index: usize,
     ) -> u8 {
         let uid = ret_none!(self.list.get(row_index), 0).id;
-        let mut lock = user_data().write();
-        let inner = ret_none!(lock.get_mut(&uid), 0);
-        inner.status as u8
+        ret_none!(status(&uid), 0) as u8
     }
 
     fn set_status(
@@ -238,12 +244,14 @@ impl Interface for Users {
     ) -> bool {
         let status = ret_err!(UserStatus::try_from(status), false);
         let uid = ret_none!(self.list.get(row_index), false).id;
-        let mut lock = user_data().write();
-        let mut inner = ret_none!(lock.get_mut(&uid), false);
 
         spawn!(user::set_status(uid, status), false);
 
-        inner.status = status;
+        {
+            let mut lock = user_data().write();
+            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            inner.status = status;
+        }
 
         if status == UserStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);

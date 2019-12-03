@@ -53,7 +53,6 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     to: ConversationId,
     update: T,
 ) -> Result<(), HErr> {
-    dbg!();
     let maybe_tx = { txs().read().get(&to).cloned() };
 
     let tx = match maybe_tx {
@@ -112,10 +111,8 @@ impl super::ConversationContent {
     #[must_use]
     pub(super) fn register_model(&mut self) -> Option<()> {
         let id = self.id?;
-        dbg!();
 
         emitters().write().insert(id, self.emit.clone());
-        dbg!();
 
         Some(())
     }

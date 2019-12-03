@@ -58,11 +58,11 @@ impl crate::Loadable for Users {
     type Error = HErr;
 
     fn try_load(&mut self) -> Result<(), HErr> {
-        //for user in user::all()? {
-        //    let id = user.id;
-        //    shared::user_data().insert(id, user);
-        //    self.list.push(User { id, matched: true });
-        //}
+        for user in user::all()? {
+            let id = user.id;
+            shared::user_data().write().insert(id, user);
+            self.list.push(User { id, matched: true });
+        }
         self.loaded = true;
 
         Ok(())
