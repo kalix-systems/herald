@@ -85,3 +85,10 @@ pub fn store_new_state(
         Ok(())
     })
 }
+
+pub fn deprecate_all(pk: sig::PublicKey) -> Result<(), ChainKeysError> {
+    db::with_tx(|tx| {
+        tx.deprecate_all(pk)?;
+        Ok(())
+    })
+}

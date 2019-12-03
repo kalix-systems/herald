@@ -147,9 +147,30 @@ impl Event {
         self.with_comp(move |ev| {
             let (cid, from, msg) = amessages::open(msg)?;
             match msg {
-                AuxMessage::NewKey(nk) => crate::user_keys::add_keys(from.uid, &[nk.0])?,
+                AuxMessage::NewKey(nk) => match nk.0.verify_sig() {
+                    SigValid::Yes => crate::user_keys::add_keys(from.uid, &[nk.0])?,
+                    f => {
+                        return Err(HErr::HeraldError(format!(
+                            "invalid new key from {:#?}, error was {:?}",
+                            from, f
+                        )));
+                    }
+                },
                 // TODO: deprecate ratchets
-                AuxMessage::DepKey(dk) => crate::user_keys::deprecate_keys(&[dk.0])?,
+                AuxMessage::DepKey(dk) => match dk.0.verify_sig() {
+                    SigValid::Yes => {
+                        ev.with_simple_comp(|| crate::user_keys::deprecate_keys(&[dk.0]));
+                        ev.with_simple_comp(|| {
+                            chainkeys::deprecate_all(*dk.0.data()).map_err(HErr::from)
+                        });
+                    }
+                    f => {
+                        return Err(HErr::HeraldError(format!(
+                            "invalid new key from {:#?}, error was {:?}",
+                            from, f
+                        )));
+                    }
+                },
                 AuxMessage::AddedToConvo(ac) => {
                     use crate::{image_utils::image_path, types::amessages::AddedToConvo};
                     use std::fs;

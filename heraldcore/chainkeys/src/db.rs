@@ -261,15 +261,26 @@ impl Tx<'_> {
         Ok(())
     }
 
-    pub fn deprecate_all(
+    pub fn deprecate_all_in_convo(
         &mut self,
         cid: ConversationId,
         pk: sig::PublicKey,
     ) -> Result<(), rusqlite::Error> {
-        let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_all.sql"))?;
+        let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_all_in_convo.sql"))?;
         store_stmt.execute_named(named_params! {
             "@cid": cid,
             "@pk": pk.as_ref()
+        })?;
+        Ok(())
+    }
+
+    pub fn deprecate_all(
+        &mut self,
+        pk: sig::PublicKey,
+    ) -> Result<(), rusqlite::Error> {
+        let mut store_stmt = self.prepare_cached(include_str!("sql/deprecate_all.sql"))?;
+        store_stmt.execute_named(named_params! {
+            "@pk": pk.as_ref(),
         })?;
         Ok(())
     }

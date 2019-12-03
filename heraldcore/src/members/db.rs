@@ -1,4 +1,5 @@
 use super::*;
+use rusqlite::named_params;
 
 pub(crate) fn add_members_with_tx(
     tx: &rusqlite::Transaction,
@@ -46,12 +47,27 @@ pub fn members(
     conversation_id: &ConversationId,
 ) -> Result<Vec<UserId>, HErr> {
     let mut stmt = conn.prepare(include_str!("sql/get_conversation_members.sql"))?;
-    let res = stmt.query_map(params![conversation_id], |row| row.get(0))?;
 
-    let mut members = Vec::new();
-    for member in res {
-        members.push(member?);
-    }
+    let res = stmt
+        .query_map(params![conversation_id], |row| row.get(0))?
+        .collect::<Result<_, _>>()
+        .map_err(HErr::from);
 
-    Ok(members)
+    res
+}
+
+pub fn conversations_with(
+    conn: &rusqlite::Connection,
+    member: UserId,
+) -> Result<Vec<ConversationId>, HErr> {
+    let mut stmt = conn.prepare(include_str!("sql/conversations_with.sql"))?;
+
+    let res = stmt
+        .query_map_named(named_params! {"@uid": member}, |row| {
+            row.get("conversation_id")
+        })?
+        .collect::<Result<_, _>>()
+        .map_err(HErr::from);
+
+    res
 }
