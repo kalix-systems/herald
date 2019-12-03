@@ -147,37 +147,35 @@ impl Event {
         self.with_comp(move |ev| {
             let (cid, from, msg) = amessages::open(msg)?;
             match msg {
-                AuxMessage::NewKey(nk) => match nk.0.verify_sig() {
-                    SigValid::Yes => crate::user_keys::add_keys(from.uid, &[nk.0])?,
-                    f => {
-                        return Err(HErr::HeraldError(format!(
-                            "invalid new key from {:#?}, error was {:?}",
-                            from, f
+                AuxMessage::NewKey(nk) => {
+                    crate::user_keys::guard_sig_valid(from.uid, &nk.0, loc!())?;
+                    if crate::user_keys::get_user_by_key(nk.0.data())?.is_none() {
+                        crate::user_keys::add_keys(from.uid, &[nk.0])?;
+                    }
+                    // else {
+                    // // TODO: decide what to do here
+                    // return Err(HeraldError("received key signed by {}, who isn't {}",
+                    // }
+                }
+                AuxMessage::DepKey(dk) => {
+                    crate::user_keys::guard_sig_valid(from.uid, &dk.0, loc!())?;
+                    let key_belongs_to = crate::user_keys::get_user_by_key(dk.0.data())?;
+                    if let Some(belongs_to) = crate::user_keys::get_user_by_key(dk.0.data())? {
+                        if belongs_to == from.uid {
+                            crate::user_keys::add_keys(from.uid, &[dk.0])?;
+                        } else {
+                            return Err(HeraldError(format!(
+                                "received key deprecation for {} signed by {}",
+                                belongs_to, from.uid
+                            )));
+                        }
+                    } else {
+                        return Err(HeraldError(format!(
+                            "received key deprecation signed by {} for nonexistent key",
+                            from.uid
                         )));
                     }
-                },
-                AuxMessage::DepKey(dk) => match dk.0.verify_sig() {
-                    SigValid::Yes => {
-                        crate::user_keys::deprecate_keys(&[dk.0])?;
-                        ev.with_simple_comp(|| {
-                            chainkeys::deprecate_all(*dk.0.data()).map_err(HErr::from)
-                        });
-                        ev.with_simple_comp(|| {
-                            let mut conn = crate::db::Database::get()?;
-                            let cids = crate::members::db::conversations_with(&mut conn, from.uid)?;
-                            // for cid in cids {
-                            //     // chainkeys::deprecate_all_in_convo
-                            // }
-                            Ok(())
-                        })
-                    }
-                    f => {
-                        return Err(HErr::HeraldError(format!(
-                            "invalid new key from {:#?}, error was {:?}",
-                            from, f
-                        )));
-                    }
-                },
+                }
                 AuxMessage::AddedToConvo(ac) => {
                     use crate::{image_utils::image_path, types::amessages::AddedToConvo};
                     use std::fs;

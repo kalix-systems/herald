@@ -31,9 +31,14 @@ pub(crate) fn deprecate_keys(keys: &[Signed<sig::PublicKey>]) -> Result<(), HErr
     db::deprecate_keys(&mut db, keys)
 }
 
+pub(crate) fn get_user_by_key(key: &sig::PublicKey) -> Result<Option<UserId>, HErr> {
+    db::get_user_by_key(Database::get()?.deref_mut(), key)
+}
+
 pub(crate) fn guard_sig_valid<T: AsRef<[u8]>>(
     uid: UserId,
     sig: &Signed<T>,
+    loc: location::Location,
 ) -> Result<(), HErr> {
     match sig.verify_sig() {
         SigValid::Yes => {
@@ -44,12 +49,15 @@ pub(crate) fn guard_sig_valid<T: AsRef<[u8]>>(
                 Ok(())
             } else {
                 Err(HErr::HeraldError(format!(
-                    "invalid signature - expected signature by {}, found {}",
-                    uid, u_signed_by
+                    "invalid signature at {} - expected signature by {}, found {}",
+                    loc, uid, u_signed_by
                 )))
             }
         }
-        f => Err(HErr::HeraldError(format!("invalid signature {:#?}", f))),
+        f => Err(HErr::HeraldError(format!(
+            "invalid signature at {} - error was {:#?}",
+            loc, f
+        ))),
     }
 }
 
