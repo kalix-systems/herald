@@ -10,6 +10,9 @@ ColumnLayout {
     property string imageSource: ""
     property string authorName: ""
     property Attachments messageAttachments: null
+    property var imageTapCallback: function () {
+        throw "undefined callback"
+    }
     property color authorColor
     property bool elided: false
     property bool expanded: false
@@ -38,6 +41,10 @@ ColumnLayout {
             source: "file:" + attachmentPath
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
+            MouseArea {
+                anchors.fill: parent
+                onClicked: imageTapCallback()
+            }
         }
     }
 

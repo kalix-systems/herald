@@ -4,9 +4,10 @@ import QtQuick 2.13
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
-import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
+import "." as CVUtils
 import "../../SideBar/js/ContactView.mjs" as CUtils
+import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -16,7 +17,7 @@ ListView {
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
     //do not move this back into foundation
-    property NumberAnimation highlightAnimation:   NumberAnimation {
+    property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
         from: 1.0
@@ -25,6 +26,7 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    Popups.ImagePopup {}
 
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
@@ -141,6 +143,7 @@ ListView {
                 messageAttachments: Attachments {
                     attachmentsMsgId: msgId
                 }
+                imageTapCallback: function () {}
                 authorColor: userColor
                 elided: chatRow.elided
             }
