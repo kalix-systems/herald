@@ -107,6 +107,11 @@ impl MessageBody {
         self.as_ref().as_bytes()
     }
 
+    /// Returns inner `String`, consuming the body
+    pub fn into_inner(self) -> String {
+        self.0
+    }
+
     /// Parses the text as markdown, rendering it to HTML
     pub fn parse_markdown(&self) -> Result<Self, EmptyMessageBody> {
         use pulldown_cmark::{html, Parser};

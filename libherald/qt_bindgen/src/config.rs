@@ -407,7 +407,9 @@ fn message_search() -> Object {
         conversationPicture: ItemProp::new(QString).optional().get_by_value(),
         conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
         conversationTitle: ItemProp::new(QString).optional().get_by_value(),
-        body: ItemProp::new(QString).optional(),
+        beforeFirstMatch: ItemProp::new(QString),
+        firstMatch: ItemProp::new(QString),
+        afterFirstMatch: ItemProp::new(QString),
         time: ItemProp::new(Qint64).optional(),
         has_attachments: ItemProp::new(Bool).optional()
     };

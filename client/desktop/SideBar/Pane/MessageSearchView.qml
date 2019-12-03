@@ -8,6 +8,7 @@ import "./../js/ContactView.mjs" as JS
 import "../popups" as Popups
 import "qrc:/imports/Avatar" as Av
 import "../../ChatView" as CV
+import QtQuick.Layouts 1.3
 
 ListView {
     id: messageSearchList
@@ -33,14 +34,6 @@ ListView {
             picture: Utils.safeStringOrDefault(messageData.conversationPicture,
                                                "")
             groupPicture: !messageData.conversationPairwise
-            labelComponent: Av.ConversationLabel {
-                contactName: messageData.conversationTitle
-                labelColor: CmnCfg.palette.black
-                labelSize: 14
-                lastAuthor: outbound ? qsTr("You") : messageData.author
-                lastBody: lastAuthor + ": " + messageData.body
-                lastTimestamp: Utils.friendlyTimestamp(messageData.time)
-            }
 
             MouseArea {
                 id: hoverHandler
@@ -50,6 +43,74 @@ ListView {
                 onClicked: {
                     messageSearchList.messageClicked(messageData.conversation,
                                                      messageData.msgId)
+                }
+            }
+            labelComponent: GridLayout {
+                id: labelGrid
+                rows: bodyText.lineCount > 1 ? 3 : 2
+                columns: 2
+                width: parent.width
+                Label {
+                    id: uid
+                    font {
+                        bold: true
+                        family: CmnCfg.chatFont.name
+                        pixelSize: 13
+                    }
+                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
+                    Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                    Layout.preferredHeight: labelGrid.height * 0.25
+                    Layout.maximumWidth: parent.width
+                    elide: "ElideRight"
+                    text: messageData.author
+                    color: CmnCfg.palette.black
+                }
+
+                Label {
+                    id: ts
+                    font {
+                        family: CmnCfg.chatFont.name
+                        pixelSize: 11
+                    }
+                    text: Utils.friendlyTimestamp(messageData.time)
+                    Layout.preferredHeight: labelGrid.height * 0.25
+                    Layout.alignment: Qt.AlignRight | Qt.AlignTop
+                    color: CmnCfg.palette.offBlack
+                }
+
+                TextMetrics {
+                    id: prefix
+                    text: messageData.beforeFirstMatch + messageData.firstMatch
+                    elide: Text.ElideLeft
+                    elideWidth: labelGrid.width * 2
+                }
+
+                TextMetrics {
+                    id: suffix
+                    text: messageData.afterFirstMatch
+                    elide: Text.ElideRight
+                    elideWidth: labelGrid.width * 2
+                }
+
+                Label {
+                    id: bodyText
+                    font {
+                        family: CmnCfg.chatFont.name
+                        pixelSize: 13
+                    }
+                    Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
+                    elide: "ElideRight"
+                    text: if (messageData.beforeFirstMatch.length === 0) {
+                              messageData.firstMatch + messageData.afterFirstMatch }
+                          else {
+                              prefix.elidedText + suffix.elidedText
+                          }
+                    Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignLeft | Qt.alignTop
+                    Layout.maximumHeight: labelGrid.height
+                    color: CmnCfg.palette.offBlack
+                    textFormat: Text.AutoText
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
         }

@@ -1262,13 +1262,15 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
+  Q_INVOKABLE QString afterFirstMatch(int row) const;
   Q_INVOKABLE QString author(int row) const;
-  Q_INVOKABLE QString body(int row) const;
+  Q_INVOKABLE QString beforeFirstMatch(int row) const;
   Q_INVOKABLE QByteArray conversation(int row) const;
   Q_INVOKABLE QVariant conversationColor(int row) const;
   Q_INVOKABLE QVariant conversationPairwise(int row) const;
   Q_INVOKABLE QString conversationPicture(int row) const;
   Q_INVOKABLE QString conversationTitle(int row) const;
+  Q_INVOKABLE QString firstMatch(int row) const;
   Q_INVOKABLE QVariant has_attachments(int row) const;
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QVariant time(int row) const;

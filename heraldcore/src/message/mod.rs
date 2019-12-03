@@ -14,7 +14,7 @@ pub use coretypes::messages::*;
 mod builder;
 pub use builder::*;
 mod search;
-pub use search::{Search, SearchResult};
+pub use search::{ResultBody, Search, SearchResult};
 
 /// Get message by message id
 pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {

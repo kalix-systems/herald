@@ -65,12 +65,23 @@ pub struct SearchResult {
     /// Recipient user id
     pub conversation: ConversationId,
     /// Body of message
-    pub body: MessageBody,
+    pub body: ResultBody,
     /// Insertion time
     pub time: Time,
     /// Indicates whether the message has attachments
     pub has_attachments: bool,
     rowid: i64,
+}
+
+/// Text of search result
+#[derive(Clone, Debug)]
+pub struct ResultBody {
+    /// String before first match
+    pub before_first: String,
+    /// First match
+    pub first_match: String,
+    /// String after first match
+    pub after_first: String,
 }
 
 #[cfg(test)]
