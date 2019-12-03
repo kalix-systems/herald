@@ -14,10 +14,12 @@ fn process(
     rev: bool,
 ) -> String {
     let body: String = if rev {
-        UnicodeSegmentation::graphemes(body, true)
+        let rev_body: String = UnicodeSegmentation::graphemes(body, true)
             .rev()
             .take(take_num)
-            .collect()
+            .collect();
+
+        rev_body.chars().rev().collect()
     } else {
         UnicodeSegmentation::graphemes(body, true)
             .take(take_num)
