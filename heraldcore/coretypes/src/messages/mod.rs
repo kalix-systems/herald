@@ -111,19 +111,6 @@ impl MessageBody {
     pub fn into_inner(self) -> String {
         self.0
     }
-
-    /// Parses the text as markdown, rendering it to HTML
-    pub fn parse_markdown(&self) -> Result<Self, EmptyMessageBody> {
-        use pulldown_cmark::{html, Parser};
-
-        let body_str = self.as_str();
-
-        let parser = Parser::new(body_str);
-        let mut buf = String::with_capacity(body_str.len());
-        html::push_html(&mut buf, parser);
-
-        buf.try_into()
-    }
 }
 
 #[derive(Debug)]

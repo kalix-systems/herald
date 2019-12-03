@@ -161,9 +161,6 @@ inline void messageBuilderOpIdChanged(MessageBuilder *o) {
 inline void messageBuilderOpTimeChanged(MessageBuilder *o) {
   Q_EMIT o->opTimeChanged();
 }
-inline void messageBuilderParseMarkdownChanged(MessageBuilder *o) {
-  Q_EMIT o->parseMarkdownChanged();
-}
 inline void messageSearchRegexSearchChanged(MessageSearch *o) {
   Q_EMIT o->regexSearchChanged();
 }
@@ -1377,8 +1374,6 @@ message_builder_op_has_attachments_get(const MessageBuilder::Private *);
 void message_builder_op_id_get(const MessageBuilder::Private *, QByteArray *,
                                qbytearray_set);
 option_qint64 message_builder_op_time_get(const MessageBuilder::Private *);
-bool message_builder_parse_markdown_get(const MessageBuilder::Private *);
-void message_builder_parse_markdown_set(MessageBuilder::Private *, bool);
 bool message_builder_add_attachment(MessageBuilder::Private *, const ushort *,
                                     int);
 void message_builder_clear_reply(MessageBuilder::Private *);
@@ -2731,7 +2726,6 @@ ConversationContent::ConversationContent(QObject *parent)
           messageBuilderOpHasAttachmentsChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpTimeChanged,
-          messageBuilderParseMarkdownChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3349,7 +3343,6 @@ MessageBuilder::MessageBuilder(QObject *parent)
           messageBuilderOpHasAttachmentsChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpTimeChanged,
-          messageBuilderParseMarkdownChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3448,13 +3441,6 @@ QVariant MessageBuilder::opTime() const {
     v.setValue(r.value);
   }
   return r;
-}
-
-bool MessageBuilder::parseMarkdown() const {
-  return message_builder_parse_markdown_get(m_d);
-}
-void MessageBuilder::setParseMarkdown(bool v) {
-  message_builder_parse_markdown_set(m_d, v);
 }
 bool MessageBuilder::addAttachment(const QString &path) {
   return message_builder_add_attachment(m_d, path.utf16(), path.size());
@@ -3569,7 +3555,6 @@ Messages::Messages(QObject *parent)
           messageBuilderOpHasAttachmentsChanged,
           messageBuilderOpIdChanged,
           messageBuilderOpTimeChanged,
-          messageBuilderParseMarkdownChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
