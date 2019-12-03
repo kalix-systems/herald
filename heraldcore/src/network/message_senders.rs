@@ -86,11 +86,12 @@ pub(crate) fn send_amessage(
     if CAUGHT_UP.load(Ordering::Acquire) {
         let (gen, am, new) = amessages::seal(uid, &msg)?;
         let exc = *crate::config::keypair()?.public_key();
+        let me = crate::config::id()?;
 
         if let Some(ratchet) = new {
             let dm = DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet });
 
-            for key in crate::user_keys::get_valid_keys(crate::config::id()?)? {
+            for key in crate::user_keys::get_valid_keys(me)? {
                 if key != exc {
                     send_dmessage(key, &dm)?;
                 }
@@ -102,7 +103,7 @@ pub(crate) fn send_amessage(
         let msg = kson::to_vec(&am).into();
 
         let req = push_aux::Req {
-            to: vec![uid],
+            to: vec![uid, me],
             exc,
             msg,
         };

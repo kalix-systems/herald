@@ -176,7 +176,7 @@ impl State {
         &self,
         req: push_aux::Req,
     ) -> Result<push_aux::Res, Error> {
-        let push_aux::Req { to, msg } = req;
+        let push_aux::Req { to, exc, msg } = req;
         let push = Push {
             tag: PushTag::Aux,
             timestamp: Time::now(),
@@ -199,7 +199,9 @@ impl State {
             let mut to_devs: Vec<sig::PublicKey> = Vec::with_capacity(2 * to.len());
             for user in to {
                 for dev in conn.valid_keys(&user).await? {
-                    to_devs.push(dev);
+                    if dev != exc {
+                        to_devs.push(dev);
+                    }
                 }
             }
 
