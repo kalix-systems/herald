@@ -145,11 +145,34 @@ impl Interface for MessageSearch {
         Some(self.results.get(index).as_ref()?.author.as_str())
     }
 
-    fn body(
+    fn before_first_match(
         &self,
         index: usize,
-    ) -> Option<&str> {
-        Some(self.results.get(index).as_ref()?.body.as_str())
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.before_first.as_str(),
+            None => "",
+        }
+    }
+
+    fn first_match(
+        &self,
+        index: usize,
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.first_match.as_str(),
+            None => "",
+        }
+    }
+
+    fn after_first_match(
+        &self,
+        index: usize,
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.after_first.as_str(),
+            None => "",
+        }
     }
 
     fn conversation(

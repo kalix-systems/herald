@@ -1,6 +1,26 @@
 use super::*;
 use rusqlite::named_params;
+use search_pattern::Captures;
 use std::ops::Not;
+
+const START_TAG: &str = "<b>";
+const END_TAG: &str = "</b>";
+
+fn add_tags<'a>(
+    pattern: &SearchPattern,
+    body: &'a str,
+) -> String {
+    pattern
+        .replace_all(body, |caps: &Captures| {
+            format!(
+                "{}{}{}",
+                START_TAG,
+                caps.get(0).map(|m| m.as_str()).unwrap_or(""),
+                END_TAG
+            )
+        })
+        .to_string()
+}
 
 impl Search {
     pub(super) fn next_page_db(
@@ -30,6 +50,28 @@ impl Search {
                 if pattern.is_match(body.as_str()).not() {
                     return Ok(None);
                 }
+
+                let body = {
+                    let p_match = match pattern.find(body.as_str()) {
+                        Some(p_match) => p_match,
+                        None => {
+                            return Ok(None);
+                        }
+                    };
+
+                    let (before_first, tail) = body.as_str().split_at(p_match.start());
+                    let (first_match, after_first) = tail.split_at(p_match.end() - p_match.start());
+
+                    let before_first = add_tags(pattern, before_first);
+                    let first_match = add_tags(pattern, first_match);
+                    let after_first = add_tags(pattern, after_first);
+
+                    ResultBody {
+                        before_first,
+                        first_match,
+                        after_first,
+                    }
+                };
 
                 Ok(Some(SearchResult {
                     body,
