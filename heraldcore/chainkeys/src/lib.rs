@@ -2,7 +2,7 @@ use bytes::*;
 use coremacros::{abort_err, from_fn};
 use coretypes::ids::ConversationId;
 use herald_common::*;
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use platform_dirs::db_dir;
 use rusqlite::params;
@@ -18,10 +18,12 @@ pub enum ChainKeysError {
 
 from_fn!(ChainKeysError, rusqlite::Error, ChainKeysError::Db);
 
-// FIXME initialization can be done more cleanly
-// A lot of this is redundant
-lazy_static! {
-    static ref CK_CONN: Mutex<rusqlite::Connection> = {
+static CK_CONN: OnceCell<Mutex<rusqlite::Connection>> = OnceCell::new();
+
+fn ck_conn() -> &'static Mutex<rusqlite::Connection> {
+    CK_CONN.get_or_init(|| {
+        // FIXME initialization can be done more cleanly
+        // A lot of this is redundant
         kcl::init();
 
         let path = db_dir().join("ck.sqlite3");
@@ -32,7 +34,7 @@ lazy_static! {
         abort_err!(tx.commit());
 
         Mutex::new(conn)
-    };
+    })
 }
 
 pub mod db;
