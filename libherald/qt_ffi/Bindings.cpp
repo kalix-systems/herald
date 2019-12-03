@@ -1385,10 +1385,12 @@ bool message_builder_remove_attachment_by_index(MessageBuilder::Private *,
 void message_builder_remove_last(MessageBuilder::Private *);
 }
 extern "C" {
+void message_search_data_after_first_match(const MessageSearch::Private *, int,
+                                           QString *, qstring_set);
 void message_search_data_author(const MessageSearch::Private *, int, QString *,
                                 qstring_set);
-void message_search_data_body(const MessageSearch::Private *, int, QString *,
-                              qstring_set);
+void message_search_data_before_first_match(const MessageSearch::Private *, int,
+                                            QString *, qstring_set);
 void message_search_data_conversation(const MessageSearch::Private *, int,
                                       QByteArray *, qbytearray_set);
 option_quint32
@@ -1399,6 +1401,8 @@ void message_search_data_conversation_picture(const MessageSearch::Private *,
                                               int, QString *, qstring_set);
 void message_search_data_conversation_title(const MessageSearch::Private *, int,
                                             QString *, qstring_set);
+void message_search_data_first_match(const MessageSearch::Private *, int,
+                                     QString *, qstring_set);
 option_bool message_search_data_has_attachments(const MessageSearch::Private *,
                                                 int);
 void message_search_data_msg_id(const MessageSearch::Private *, int,
@@ -1465,15 +1469,21 @@ Qt::ItemFlags MessageSearch::flags(const QModelIndex &i) const {
   return flags;
 }
 
+QString MessageSearch::afterFirstMatch(int row) const {
+  QString s;
+  message_search_data_after_first_match(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QString MessageSearch::author(int row) const {
   QString s;
   message_search_data_author(m_d, row, &s, set_qstring);
   return s;
 }
 
-QString MessageSearch::body(int row) const {
+QString MessageSearch::beforeFirstMatch(int row) const {
   QString s;
-  message_search_data_body(m_d, row, &s, set_qstring);
+  message_search_data_before_first_match(m_d, row, &s, set_qstring);
   return s;
 }
 
@@ -1507,6 +1517,12 @@ QString MessageSearch::conversationTitle(int row) const {
   return s;
 }
 
+QString MessageSearch::firstMatch(int row) const {
+  QString s;
+  message_search_data_first_match(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant MessageSearch::has_attachments(int row) const {
   QVariant v;
   v = message_search_data_has_attachments(m_d, row);
@@ -1531,26 +1547,30 @@ QVariant MessageSearch::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return cleanNullQVariant(QVariant::fromValue(author(index.row())));
+      return QVariant::fromValue(afterFirstMatch(index.row()));
     case Qt::UserRole + 1:
-      return cleanNullQVariant(QVariant::fromValue(body(index.row())));
+      return cleanNullQVariant(QVariant::fromValue(author(index.row())));
     case Qt::UserRole + 2:
-      return cleanNullQVariant(QVariant::fromValue(conversation(index.row())));
+      return QVariant::fromValue(beforeFirstMatch(index.row()));
     case Qt::UserRole + 3:
-      return conversationColor(index.row());
+      return cleanNullQVariant(QVariant::fromValue(conversation(index.row())));
     case Qt::UserRole + 4:
-      return conversationPairwise(index.row());
+      return conversationColor(index.row());
     case Qt::UserRole + 5:
-      return cleanNullQVariant(
-          QVariant::fromValue(conversationPicture(index.row())));
+      return conversationPairwise(index.row());
     case Qt::UserRole + 6:
       return cleanNullQVariant(
-          QVariant::fromValue(conversationTitle(index.row())));
+          QVariant::fromValue(conversationPicture(index.row())));
     case Qt::UserRole + 7:
-      return has_attachments(index.row());
+      return cleanNullQVariant(
+          QVariant::fromValue(conversationTitle(index.row())));
     case Qt::UserRole + 8:
-      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+      return QVariant::fromValue(firstMatch(index.row()));
     case Qt::UserRole + 9:
+      return has_attachments(index.row());
+    case Qt::UserRole + 10:
+      return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
+    case Qt::UserRole + 11:
       return time(index.row());
     }
     break;
@@ -1570,16 +1590,18 @@ int MessageSearch::role(const char *name) const {
 }
 QHash<int, QByteArray> MessageSearch::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "author");
-  names.insert(Qt::UserRole + 1, "body");
-  names.insert(Qt::UserRole + 2, "conversation");
-  names.insert(Qt::UserRole + 3, "conversationColor");
-  names.insert(Qt::UserRole + 4, "conversationPairwise");
-  names.insert(Qt::UserRole + 5, "conversationPicture");
-  names.insert(Qt::UserRole + 6, "conversationTitle");
-  names.insert(Qt::UserRole + 7, "has_attachments");
-  names.insert(Qt::UserRole + 8, "msgId");
-  names.insert(Qt::UserRole + 9, "time");
+  names.insert(Qt::UserRole + 0, "afterFirstMatch");
+  names.insert(Qt::UserRole + 1, "author");
+  names.insert(Qt::UserRole + 2, "beforeFirstMatch");
+  names.insert(Qt::UserRole + 3, "conversation");
+  names.insert(Qt::UserRole + 4, "conversationColor");
+  names.insert(Qt::UserRole + 5, "conversationPairwise");
+  names.insert(Qt::UserRole + 6, "conversationPicture");
+  names.insert(Qt::UserRole + 7, "conversationTitle");
+  names.insert(Qt::UserRole + 8, "firstMatch");
+  names.insert(Qt::UserRole + 9, "has_attachments");
+  names.insert(Qt::UserRole + 10, "msgId");
+  names.insert(Qt::UserRole + 11, "time");
   return names;
 }
 

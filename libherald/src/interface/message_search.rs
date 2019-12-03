@@ -211,15 +211,20 @@ pub trait MessageSearchTrait {
     ) {
     }
 
+    fn after_first_match(
+        &self,
+        index: usize,
+    ) -> &str;
+
     fn author(
         &self,
         index: usize,
     ) -> Option<&str>;
 
-    fn body(
+    fn before_first_match(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> &str;
 
     fn conversation(
         &self,
@@ -245,6 +250,11 @@ pub trait MessageSearchTrait {
         &self,
         index: usize,
     ) -> Option<String>;
+
+    fn first_match(
+        &self,
+        index: usize,
+    ) -> &str;
 
     fn has_attachments(
         &self,
@@ -436,6 +446,19 @@ pub unsafe extern "C" fn message_search_sort(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn message_search_data_after_first_match(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.after_first_match(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn message_search_data_author(
     ptr: *const MessageSearch,
     row: c_int,
@@ -451,18 +474,16 @@ pub unsafe extern "C" fn message_search_data_author(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_search_data_body(
+pub unsafe extern "C" fn message_search_data_before_first_match(
     ptr: *const MessageSearch,
     row: c_int,
     d: *mut QString,
     set: fn(*mut QString, *const c_char, len: c_int),
 ) {
     let obj = &*ptr;
-    let data = obj.body(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let data = obj.before_first_match(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -526,6 +547,19 @@ pub unsafe extern "C" fn message_search_data_conversation_title(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn message_search_data_first_match(
+    ptr: *const MessageSearch,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.first_match(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

@@ -9,7 +9,7 @@ where
     F: FnOnce(&mut Tx) -> Result<O, E>,
     E: From<rusqlite::Error>,
 {
-    let mut conn = CK_CONN.lock();
+    let mut conn = ck_conn().lock();
     with_tx_from_conn(&mut conn, f)
     // let mut tx = Tx(conn.transaction()?);
     // let o = f(&mut tx)?;
