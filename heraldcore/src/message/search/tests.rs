@@ -39,8 +39,7 @@ fn search() {
         .body("patent".try_into().expect(womp!()));
     builder.store_db(&mut conn).expect(womp!());
 
-    let pattern = SearchPattern::new_normal("pat".into()).expect(womp!());
-
+    let pattern = SearchPattern::new_normal("t".into()).expect(womp!());
     let mut searcher = Search::new(pattern);
 
     let first_page = searcher
@@ -53,12 +52,23 @@ fn search() {
     assert_eq!(first_page.len(), 2);
     let (first, second) = (&first_page[0], &first_page[1]);
 
+    let split_check = |res: &SearchResult, before, first, after| {
+        let ResultBody {
+            before_first,
+            after_first,
+            first_match,
+        } = &res.body;
+
+        assert_eq!(before_first, before);
+        assert_eq!(after_first, after);
+        assert_eq!(first_match, first);
+    };
+
     assert_eq!(first_page[0].rowid, 3);
     assert_eq!(first_page[1].rowid, 2);
-    assert_eq!(first_page[0].body.as_str(), "patent");
-    assert_eq!(first_page[1].body.as_str(), "pattern");
-    assert!(first.time >= second.time);
 
-    let second_page = searcher.next_page_db(&mut conn).expect(womp!());
-    assert!(second_page.is_none());
+    split_check(&first_page[0], "pa", "<b>t</b>", "en<b>t</b>");
+    split_check(&first_page[1], "pa", "<b>t</b>", "<b>t</b>ern");
+
+    assert!(first.time >= second.time);
 }

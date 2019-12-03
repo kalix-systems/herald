@@ -2,7 +2,6 @@ import QtQuick 2.13
 import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "." as CVUtils
 import "./ConversationWindow" as ConvoWindow
 import "./ChatTextArea" as CTA
 import "./Header" as Header

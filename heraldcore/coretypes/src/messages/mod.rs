@@ -106,6 +106,11 @@ impl MessageBody {
     pub fn as_slice(&self) -> &[u8] {
         self.as_ref().as_bytes()
     }
+
+    /// Returns inner `String`, consuming the body
+    pub fn into_inner(self) -> String {
+        self.0
+    }
 }
 
 #[derive(Debug)]

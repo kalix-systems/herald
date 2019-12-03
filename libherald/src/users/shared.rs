@@ -1,46 +1,66 @@
-use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
+use heraldcore::types::ConversationId;
 use heraldcore::user;
-use lazy_static::*;
+use once_cell::sync::OnceCell;
+use parking_lot::RwLock;
+use search_pattern::SearchPattern;
+use std::collections::HashMap;
 
-lazy_static! {
-    /// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
-    pub(super) static ref USER_DATA: DashMap<UserId, user::User> = DashMap::default();
+/// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
+static USER_DATA: OnceCell<RwLock<HashMap<UserId, user::User>>> = OnceCell::new();
+
+pub(super) fn user_data() -> &'static RwLock<HashMap<UserId, user::User>> {
+    USER_DATA.get_or_init(|| RwLock::new(HashMap::default()))
 }
 
 pub fn user_in_cache(uid: &UserId) -> bool {
-    USER_DATA.contains_key(uid)
+    user_data().read().contains_key(uid)
 }
 
-pub fn get_user(uid: &UserId) -> Option<DashMapRef<UserId, user::User>> {
-    USER_DATA.get(uid)
-}
-
-pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, user::User>> {
-    USER_DATA.get_mut(uid)
+pub(crate) fn matches(
+    uid: &UserId,
+    pattern: &SearchPattern,
+) -> bool {
+    let lock = crate::users::shared::user_data().read();
+    match lock.get(&uid) {
+        Some(u) => u.matches(pattern),
+        None => false,
+    }
 }
 
 pub(crate) fn color(uid: &UserId) -> Option<u32> {
-    Some(get_user(&uid)?.color)
+    Some(user_data().read().get(uid)?.color)
+}
+
+pub(crate) fn status(uid: &UserId) -> Option<user::UserStatus> {
+    Some(user_data().read().get(uid)?.status)
 }
 
 pub(crate) fn name(uid: &UserId) -> Option<String> {
-    let inner = get_user(uid)?;
+    Some(user_data().read().get(uid)?.name.clone())
+}
 
-    Some(inner.name.clone())
+pub(crate) fn pairwise_cid(uid: &UserId) -> Option<ConversationId> {
+    Some(user_data().read().get(uid)?.pairwise_conversation)
 }
 
 pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
-    let inner = get_user(uid)?;
-
-    inner.profile_picture.clone()
+    Some(
+        user_data()
+            .read()
+            .get(uid)?
+            .profile_picture
+            .as_ref()?
+            .clone(),
+    )
 }
 
 #[inline]
 pub fn user_ids() -> Vec<UserId> {
-    let mut list: Vec<(String, UserId)> = USER_DATA
+    let mut list: Vec<(String, UserId)> = user_data()
+        .read()
         .iter()
-        .map(|kv| (kv.value().name.clone(), *kv.key()))
+        .map(|(key, value)| (value.name.clone(), *key))
         .collect();
 
     list.sort_unstable_by(|a, b| a.cmp(b));
