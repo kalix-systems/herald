@@ -1,6 +1,6 @@
 use super::Emitter;
 use crossbeam_channel::*;
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 
 pub enum Update {
@@ -27,17 +27,22 @@ impl Bus {
     }
 }
 
-lazy_static! {
-    static ref BUS: Bus = Bus::new();
+static BUS: OnceCell<Bus> = OnceCell::new();
 
-    /// `Herald` emitter, filled in when `Herald` is constructed
-    static ref EMITTER: Mutex<Option<Emitter>> = Mutex::new(None);
+/// `Herald` emitter, filled in when `Herald` is constructed
+static EMITTER: OnceCell<Mutex<Emitter>> = OnceCell::new();
+
+fn emitter() -> Option<&'static Mutex<Emitter>> {
+    EMITTER.get()
+}
+
+fn bus() -> &'static Bus {
+    BUS.get_or_init(|| Bus::new())
 }
 
 /// Emits a signal to the QML runtime, returns `None` if the emitter has not been provided yet.
 fn emit_new_data() -> Option<()> {
-    let mut lock = EMITTER.lock();
-    let emitter = lock.as_mut()?;
+    let mut emitter = emitter()?.lock();
 
     emitter.new_data_ready();
     Some(())
@@ -47,22 +52,21 @@ pub(crate) fn push<T: Into<Update>>(update: T) {
     // if this fails, our typical error reporting machinery is broken
     // (which would be odd given that the channel should never be dropped)
     // but we might want to log it some other way.  TODO
-    if BUS.tx.clone().send(update.into()).is_ok() {
+    if bus().tx.clone().send(update.into()).is_ok() {
         emit_new_data();
     }
 }
 
 pub(super) fn set_emitter(emit: crate::interface::HeraldEmitter) {
-    let mut lock = EMITTER.lock();
-    lock.replace(emit);
+    drop(EMITTER.set(Mutex::new(emit)));
 }
 
 pub(super) fn updates() -> TryIter<'static, Update> {
-    BUS.rx.try_iter()
+    bus().rx.try_iter()
 }
 
 pub(super) fn more_updates() -> bool {
-    !BUS.rx.is_empty()
+    !bus().rx.is_empty()
 }
 
 impl super::Herald {

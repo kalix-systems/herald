@@ -3,19 +3,29 @@ use crate::messages::MsgUpdate;
 use crossbeam_channel::*;
 use dashmap::DashMap;
 use heraldcore::{channel_send_err, errors::HErr};
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 
-lazy_static! {
-    /// Concurrent hash map from `ConversationId`s to an event stream.
-    /// This is used to route conversation members related notifications that arrive from the network.
-    pub(super) static ref RXS: DashMap<ConversationId, Receiver<ContentUpdate>> = DashMap::default();
+/// Concurrent hash map from `ConversationId`s to an event stream.
+/// This is used to route conversation members related notifications that arrive from the network.
+static RXS: OnceCell<DashMap<ConversationId, Receiver<ContentUpdate>>> = OnceCell::new();
 
-    /// Concurrent hash map from `ConversationId`s to a channel sendder.
-    /// This is used to route members related notifications that arrive from the network.
-    pub(super) static ref TXS: DashMap<ConversationId, Sender<ContentUpdate>> = DashMap::default();
-    /// Concurrent hash map of `MembersEmitter`. These are removed when the associated
-    /// `Members` object is dropped.
-    pub(super) static ref EMITTERS: DashMap<ConversationId, Emitter> = DashMap::default();
+/// Concurrent hash map from `ConversationId`s to a channel sendder.
+/// This is used to route members related notifications that arrive from the network.
+static TXS: OnceCell<DashMap<ConversationId, Sender<ContentUpdate>>> = OnceCell::new();
+/// Concurrent hash map of `MembersEmitter`. These are removed when the associated
+/// `Members` object is dropped.
+static EMITTERS: OnceCell<DashMap<ConversationId, Emitter>> = OnceCell::new();
+
+pub(super) fn txs() -> &'static DashMap<ConversationId, Sender<ContentUpdate>> {
+    TXS.get_or_init(|| DashMap::default())
+}
+
+pub(super) fn rxs() -> &'static DashMap<ConversationId, Receiver<ContentUpdate>> {
+    RXS.get_or_init(|| DashMap::default())
+}
+
+pub(super) fn emitters() -> &'static DashMap<ConversationId, Emitter> {
+    EMITTERS.get_or_init(|| DashMap::default())
 }
 
 /// An update to a conversation's message model or members model
@@ -42,26 +52,26 @@ pub(crate) fn content_push<T: Into<ContentUpdate>>(
     to: ConversationId,
     update: T,
 ) -> Result<(), HErr> {
-    let tx = match TXS.get(&to) {
+    let tx = match txs().get(&to) {
         Some(tx) => tx.clone(),
         None => {
             let (tx, rx) = unbounded();
 
-            TXS.insert(to, (&tx).clone());
-            RXS.insert(to, rx);
+            txs().insert(to, (&tx).clone());
+            rxs().insert(to, rx);
             tx
         }
     };
 
     tx.send(update.into()).map_err(|_| channel_send_err!())?;
-    if let Some(mut emitter) = EMITTERS.get_mut(&to) {
+    if let Some(mut emitter) = emitters().get_mut(&to) {
         emitter.new_data_ready();
     }
     Ok(())
 }
 
 pub(super) fn more_updates(cid: &ConversationId) -> bool {
-    match RXS.get(cid) {
+    match rxs().get(cid) {
         Some(rx) => !rx.is_empty(),
         None => false,
     }
@@ -71,7 +81,7 @@ impl super::ConversationContent {
     pub(super) fn process_updates(&mut self) -> Option<()> {
         let id = self.id?;
 
-        for update in RXS.get(&id)?.try_iter() {
+        for update in rxs().get(&id)?.try_iter() {
             use ContentUpdate::*;
             match update {
                 Msg(update) => {
@@ -90,7 +100,7 @@ impl super::ConversationContent {
     pub(super) fn register_model(&mut self) -> Option<()> {
         let id = self.id?;
 
-        EMITTERS.insert(id, self.emit.clone());
+        emitters().insert(id, self.emit.clone());
 
         Some(())
     }
@@ -100,9 +110,9 @@ impl Drop for ConversationContent {
     fn drop(&mut self) {
         use shared::*;
         if let Some(cid) = self.id {
-            EMITTERS.remove(&cid);
-            TXS.remove(&cid);
-            RXS.remove(&cid);
+            emitters().remove(&cid);
+            txs().remove(&cid);
+            rxs().remove(&cid);
         }
     }
 }

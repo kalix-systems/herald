@@ -1,23 +1,25 @@
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use herald_common::UserId;
 use heraldcore::user;
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 
-lazy_static! {
-    /// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
-    pub(super) static ref USER_DATA: DashMap<UserId, user::User> = DashMap::default();
+/// Concurrent hashmap from `UserId` to `User`. Used to avoid data replication.
+static USER_DATA: OnceCell<DashMap<UserId, user::User>> = OnceCell::new();
+
+pub(super) fn user_data() -> &'static DashMap<UserId, user::User> {
+    USER_DATA.get_or_init(|| DashMap::default())
 }
 
 pub fn user_in_cache(uid: &UserId) -> bool {
-    USER_DATA.contains_key(uid)
+    user_data().contains_key(uid)
 }
 
 pub fn get_user(uid: &UserId) -> Option<DashMapRef<UserId, user::User>> {
-    USER_DATA.get(uid)
+    user_data().get(uid)
 }
 
 pub fn get_user_mut(uid: &UserId) -> Option<DashMapRefMut<UserId, user::User>> {
-    USER_DATA.get_mut(uid)
+    user_data().get_mut(uid)
 }
 
 pub(crate) fn color(uid: &UserId) -> Option<u32> {
@@ -38,7 +40,7 @@ pub(crate) fn profile_picture(uid: &UserId) -> Option<String> {
 
 #[inline]
 pub fn user_ids() -> Vec<UserId> {
-    let mut list: Vec<(String, UserId)> = USER_DATA
+    let mut list: Vec<(String, UserId)> = user_data()
         .iter()
         .map(|kv| (kv.value().name.clone(), *kv.key()))
         .collect();

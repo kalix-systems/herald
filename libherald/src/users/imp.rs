@@ -39,7 +39,7 @@ impl Users {
 
                 self.model.begin_insert_rows(pos, pos);
                 self.list.push(new_user);
-                USER_DATA.insert(data.id, data);
+                user_data().insert(data.id, data);
                 self.model.end_insert_rows();
             }
             UserUpdate::ReqResp(uid, accepted) => {
@@ -57,14 +57,14 @@ impl crate::Loadable for Users {
     type Error = HErr;
 
     fn try_load(&mut self) -> Result<(), HErr> {
-        //self.list = user::all()?
-        //    .into_iter()
-        //    .map(|u| {
-        //        let id = u.id;
-        //        shared::USER_DATA.insert(id, u);
-        //        User { id, matched: true }
-        //    })
-        //    .collect();
+        self.list = user::all()?
+            .into_iter()
+            .map(|u| {
+                let id = u.id;
+                shared::user_data().insert(id, u);
+                User { id, matched: true }
+            })
+            .collect();
         self.loaded = true;
 
         Ok(())

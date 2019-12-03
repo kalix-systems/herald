@@ -80,7 +80,7 @@ impl Interface for Users {
 
         self.model.begin_insert_rows(pos, pos);
         self.list.insert(pos, user);
-        shared::USER_DATA.insert(data.id, data);
+        shared::user_data().insert(data.id, data);
         self.model.end_insert_rows();
 
         spawn!(
@@ -242,7 +242,7 @@ impl Interface for Users {
         if status == UserStatus::Deleted {
             self.model.begin_remove_rows(row_index, row_index);
             self.list.remove(row_index);
-            USER_DATA.remove(&uid);
+            user_data().remove(&uid);
             self.model.end_remove_rows();
         }
 

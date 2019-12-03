@@ -1,8 +1,7 @@
 use super::{types::Data, *};
-
 use dashmap::{DashMap, DashMapRef, DashMapRefMut};
 use heraldcore::{conversation::settings::SettingsUpdate, types::ConversationId};
-use lazy_static::*;
+use once_cell::sync::OnceCell;
 
 /// Conversation list updates
 #[derive(Debug)]
@@ -32,33 +31,35 @@ pub(crate) fn insert_data(
     cid: ConversationId,
     data: Data,
 ) {
-    CONV_DATA.insert(cid, data);
+    conv_data().insert(cid, data);
 }
 
 pub(crate) fn data(cid: &ConversationId) -> Option<Ref> {
-    CONV_DATA.get(cid)
+    conv_data().get(cid)
 }
 
 pub(crate) fn title(cid: &ConversationId) -> Option<String> {
-    CONV_DATA.get(cid)?.title.clone()
+    conv_data().get(cid)?.title.clone()
 }
 
 pub(crate) fn picture(cid: &ConversationId) -> Option<String> {
-    CONV_DATA.get(cid)?.picture.clone()
+    conv_data().get(cid)?.picture.clone()
 }
 
 pub(crate) fn color(cid: &ConversationId) -> Option<u32> {
-    Some(CONV_DATA.get(cid)?.color)
+    Some(conv_data().get(cid)?.color)
 }
 
 pub(crate) fn pairwise(cid: &ConversationId) -> Option<bool> {
-    Some(CONV_DATA.get(cid)?.pairwise)
+    Some(conv_data().get(cid)?.pairwise)
 }
 
 pub(crate) fn data_mut(cid: &ConversationId) -> Option<RefMut> {
-    CONV_DATA.get_mut(cid)
+    conv_data().get_mut(cid)
 }
 
-lazy_static! {
-    pub(crate) static ref CONV_DATA: DashMap<ConversationId, Data> = DashMap::default();
+pub(crate) fn conv_data() -> &'static DashMap<ConversationId, Data> {
+    CONV_DATA.get_or_init(|| DashMap::default())
 }
+
+static CONV_DATA: OnceCell<DashMap<ConversationId, Data>> = OnceCell::new();
