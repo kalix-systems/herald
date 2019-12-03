@@ -38,7 +38,7 @@ Item {
     Component {
         id: imageAvatar
         Rectangle {
-            color: CmnCfg.palette.secondaryColor
+            color: CmnCfg.palette.offBlack
             height: parent.height
             width: height
             radius: groupAvatar ? 0 : width

@@ -1,18 +1,9 @@
 <RCC>
     <qresource prefix="/">
         <file>App.qml</file>
-        <file>ChatView/ChatBar.qml</file>
-        <file>ChatView/ChatBubbleHover.qml</file>
-        <file>ChatView/ChatSearchComponent.qml</file>
         <file>ChatView/ChatViewMain.qml</file>
-        <file>ChatView/Controls/ConvoTextArea/AttachmentsComponent.qml</file>
-        <file>ChatView/Controls/ConvoTextArea/ConvoTextArea.qml</file>
-        <file>ChatView/Controls/ConvoTextArea/ReplyComponent.qml</file>
-        <file>ChatView/Controls/js/ChatTextAreaUtils.mjs</file>
-        <file>ChatView/ConversationWindow.qml</file>
         <file>ChatView/Popups/EmojiPopup.qml</file>
         <file>ChatView/Popups/MessageOptionsPopup.qml</file>
-        <file>ChatView/SearchTextArea.qml</file>
         <file>ChatView/js/SearchHandler.mjs</file>
         <file>EmojiKeyboard/AnchorButton.qml</file>
         <file>EmojiKeyboard/EmojiButton.qml</file>
@@ -48,5 +39,18 @@
         <file>common/EmojiJson.js</file>
         <file>common/PlatonicRectangle.qml</file>
         <file>main.qml</file>
+        <file>ChatView/js/KeyNavigation.mjs</file>
+        <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.d.ts</file>
+        <file>ChatView/ChatTextArea/ts/ChatTextAreaUtils.ts</file>
+        <file>ChatView/ChatTextArea/ts/ChatViewTypes.d.ts</file>
+        <file>ChatView/ChatTextArea/AttachmentsComponent.qml</file>
+        <file>ChatView/ChatTextArea/ConvoTextArea.qml</file>
+        <file>ChatView/ChatTextArea/ReplyComponent.qml</file>
+        <file>ChatView/ConversationWindow/ChatBubbleHover.qml</file>
+        <file>ChatView/ConversationWindow/ConversationWindow.qml</file>
+        <file>ChatView/Header/ChatSearchComponent.qml</file>
+        <file>ChatView/Header/SearchTextArea.qml</file>
+        <file>ChatView/Header/ChatBar.qml</file>
+        <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
     </qresource>
 </RCC>

@@ -159,7 +159,7 @@ impl ConversationsTrait for Conversations {
     fn index_by_id(
         &self,
         cid: ffi::ConversationIdRef,
-    ) -> u64 {
+    ) -> i64 {
         self.index_by_id_(cid)
     }
 }

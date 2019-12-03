@@ -6,20 +6,34 @@ import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
 import "." as CVUtils
 import "qrc:/imports/js/utils.mjs" as Utils
-import "../SideBar/js/ContactView.mjs" as CUtils
+import "../../SideBar/js/ContactView.mjs" as CUtils
 
 ListView {
     id: chatListView
     property alias chatScrollBar: chatScrollBarInner
     property alias chatListView: chatListView
+
+    //this should be in here and not in the bubble because conversation window
+    //needs access to it, add a separate animation to mobile
+    //do not move this back into foundation
+    property NumberAnimation highlightAnimation:   NumberAnimation {
+        id: bubbleHighlightAnimation
+        property: "opacity"
+        from: 1.0
+        to: 0.0
+        duration: 600
+        easing.type: Easing.InCubic
+    }
+
+
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
-    property var blankTransition: Transition {}
 
-    // TODO this shouldn't be set using pixels directly
     maximumFlickVelocity: 1500
     flickDeceleration: chatListView.height * 10
+
+    onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
     cacheBuffer: chatListView.height * 3
@@ -103,13 +117,16 @@ ListView {
                 elided: chatRow.elided
                 //mousearea handling jump behavior
                 jumpHandler.onClicked: {
-                    var msgIndex = ownedConversation.indexById(replyId)
-                    var window = convWindow
+                    const msgIndex = ownedConversation.indexById(replyId)
+                    if (msgIndex < 0)
+                        return
+
+                    const window = convWindow
 
                     window.positionViewAtIndex(msgIndex, ListView.Center)
-                    replyHighlightAnimation.target = window.itemAtIndex(
+                    window.highlightAnimation.target = window.itemAtIndex(
                                 msgIndex).highlight
-                    replyHighlightAnimation.start()
+                    window.highlightAnimation.start()
                 }
             }
         }
@@ -177,19 +194,4 @@ ListView {
             avatarHeight: 28
         }
     }
-
-    states: [
-        State {
-            name: "jumpState"
-            PropertyChanges {
-                target: chatListView
-                rebound: blankTransition
-            }
-
-            PropertyChanges {
-                target: chatScrollBarInner
-                policy: ScrollBar.AlwaysOn
-            }
-        }
-    ]
 }

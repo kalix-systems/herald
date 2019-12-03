@@ -6,6 +6,8 @@ import "../../../common" as Common
 import "qrc:/imports" as Imports
 import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
+import QtGraphicalEffects 1.0
+
 
 Rectangle {
     id: topRect
@@ -36,6 +38,38 @@ Rectangle {
                     source: imageSource
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
+
+
+                    ColorOverlay {
+                        id: overlay
+                        anchors.fill: parent
+                        source: parent
+                        visible: imageHover.containsMouse && groupImageLoader.imageSource !== ""
+                        color: CmnCfg.palette.black
+                        opacity: 0.5
+                        smooth: true
+                    }
+
+                    Imports.ButtonForm {
+                        id: clearPhoto
+                        source: "qrc:/x-icon.svg"
+                        anchors.centerIn: parent
+                        visible: imageHover.containsMouse && groupImageLoader.imageSource !== ""
+                        onClicked: groupImageLoader.imageSource = ""
+                        fill: CmnCfg.palette.white
+                        opacity: 1.0
+                        hoverEnabled: true
+                  }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        id: imageHover
+                        onClicked: mouse.accepted = false
+                        onReleased: mouse.accepted = false
+                        onPressed: mouse.accepted = false
+                        cursorShape: Qt.PointingHandCursor
+                    }
                 }
             }
 
@@ -45,14 +79,6 @@ Rectangle {
                 fill: CmnCfg.palette.lightGrey
                 onClicked: groupPicDialogue.open()
             }
-        }
-
-        Imports.ButtonForm {
-            source: "qrc:/clear-photo-icon.svg"
-            anchors.verticalCenter: parent.verticalCenter
-            visible: groupImageLoader.imageSource !== ""
-            enabled: visible
-            onClicked: groupImageLoader.imageSource = ""
         }
     }
 

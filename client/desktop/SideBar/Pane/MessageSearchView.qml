@@ -11,6 +11,8 @@ import "../../ChatView" as CV
 
 ListView {
     id: messageSearchList
+
+    signal messageClicked(var searchConversationId, var searchMsgId)
     clip: true
     currentIndex: -1
     height: contentHeight
@@ -35,9 +37,20 @@ ListView {
                 contactName: messageData.conversationTitle
                 labelColor: CmnCfg.palette.black
                 labelSize: 14
-                lastAuthor: outbound ? "You" : messageData.author
+                lastAuthor: outbound ? qsTr("You") : messageData.author
                 lastBody: lastAuthor + ": " + messageData.body
                 lastTimestamp: Utils.friendlyTimestamp(messageData.time)
+            }
+
+            MouseArea {
+                id: hoverHandler
+                hoverEnabled: true
+                z: CmnCfg.overlayZ
+                anchors.fill: parent
+                onClicked: {
+                    messageSearchList.messageClicked(messageData.conversation,
+                                                     messageData.msgId)
+                }
             }
         }
     }

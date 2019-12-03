@@ -6,8 +6,8 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.13
 import QtMultimedia 5.13
 import "qrc:/imports" as Imports
-import "../js/ChatTextAreaUtils.mjs" as CTUtils
-import "../../../common" as Common
+import "js/ChatTextAreaUtils.mjs" as CTUtils
+import "../../common" as Common
 
 Rectangle {
     id: textWrapperRect
@@ -114,6 +114,8 @@ Rectangle {
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
+
+                onEditingFinished: convWindow.focus = true
             }
         }
     }

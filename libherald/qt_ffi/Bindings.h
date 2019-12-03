@@ -807,7 +807,7 @@ public:
   bool filterRegex() const;
   void setFilterRegex(bool v);
   Q_INVOKABLE void clearFilter();
-  Q_INVOKABLE quint64 indexById(const QByteArray &conversation_id) const;
+  Q_INVOKABLE qint64 indexById(const QByteArray &conversation_id) const;
   Q_INVOKABLE bool removeConversation(quint64 row_index);
   Q_INVOKABLE bool toggleFilterRegex();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -1351,7 +1351,7 @@ public:
   Q_INVOKABLE bool clearConversationHistory();
   Q_INVOKABLE void clearSearch();
   Q_INVOKABLE bool deleteMessage(quint64 row_index);
-  Q_INVOKABLE quint64 indexById(const QByteArray &msg_id) const;
+  Q_INVOKABLE qint64 indexById(const QByteArray &msg_id) const;
   Q_INVOKABLE qint64 nextSearchMatch();
   Q_INVOKABLE qint64 prevSearchMatch();
   Q_INVOKABLE void setElisionCharCount(quint16 char_count);

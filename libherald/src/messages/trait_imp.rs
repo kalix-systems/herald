@@ -36,7 +36,7 @@ impl Interface for Messages {
     fn index_by_id(
         &self,
         msg_id: ffi::MsgIdRef,
-    ) -> u64 {
+    ) -> i64 {
         self.index_by_id_(msg_id)
     }
 

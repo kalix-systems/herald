@@ -3,8 +3,11 @@ import QtQuick.Controls 2.13
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "." as CVUtils
-import "./Controls/js/ChatTextAreaUtils.mjs" as JS
-import "./Controls/ConvoTextArea"
+import "./ConversationWindow" as ConvoWindow
+import "./ChatTextArea" as CTA
+import "./Header" as Header
+import "./ChatTextArea/js/ChatTextAreaUtils.mjs" as TextJs
+import "js/KeyNavigation.mjs" as KeyNav
 import "../EmojiKeyboard" as EK
 import "../common" as Common
 import "Popups" as Popups
@@ -19,12 +22,12 @@ Page {
         color: CmnCfg.palette.white
     }
 
-    header: CVUtils.ChatBar {
+    header: Header.ChatBar {
         id: messageBar
         conversationItem: parent.conversationItem
     }
 
-    ChatSearchComponent {
+    Header.ChatSearchComponent {
         id: chatSearchComponent
     }
 
@@ -34,7 +37,7 @@ Page {
         z: messageBar.z
     }
 
-    CVUtils.ConversationWindow {
+    ConvoWindow.ConversationWindow {
         id: convWindow
         focus: true
         anchors {
@@ -45,14 +48,31 @@ Page {
         }
 
         Component.onCompleted: forceActiveFocus()
-        Keys.onUpPressed: chatScrollBar.decrease()
-        Keys.onDownPressed: chatScrollBar.increase()
+        Keys.onPressed: KeyNav.convWindowKeyHandler(event, chatScrollBar,
+                                                    chatListView,
+                                                    ScrollBar.AlwaysOn,
+                                                    ScrollBar.AsNeeded)
 
         Connections {
             target: ownedConversation
             onRowsInserted: {
-
                 convWindow.contentY = convWindow.contentHeight
+            }
+        }
+
+        Connections {
+            target: conversationList
+            onMessagePositionRequested: {
+                const msg_idx = chatPane.ownedConversation.indexById(
+                                  requestedMsgId)
+
+                // early return on out of bounds
+                if (msg_idx < 0)
+                    return
+
+                convWindow.positionViewAtIndex(msg_idx, ListView.Center)
+                convWindow.highlightAnimation.target = convWindow.itemAtIndex(msg_idx).highlight
+                convWindow.highlightAnimation.start()
             }
         }
     }
@@ -84,7 +104,7 @@ Page {
     }
 
     ///--- Text entry area, for typing
-    ConvoTextArea {
+    CTA.ConvoTextArea {
         id: chatTextArea
 
         anchors {
@@ -96,7 +116,7 @@ Page {
         }
 
         keysProxy: Item {
-            Keys.onReturnPressed: JS.enterKeyHandler(event,
+            Keys.onReturnPressed: TextJs.enterKeyHandler(event,
                                                      chatTextArea.chatText,
                                                      ownedConversation.builder,
                                                      ownedConversation,
