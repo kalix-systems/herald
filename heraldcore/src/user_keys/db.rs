@@ -31,6 +31,26 @@ pub(crate) fn add_keys(
     Ok(())
 }
 
+pub(crate) fn add_umeta(
+    conn: &mut rusqlite::Connection,
+    uid: UserId,
+    meta: UserMeta,
+) -> Result<(), HErr> {
+    if meta.validate() {
+        for (pk, pm) in meta.keys {
+            // TODO: transactional
+            add_keys(conn, uid, &[Signed::from((pk, pm.sig))])?;
+            if let Some(dep) = pm.deprecated {
+                deprecate_keys(conn, &[Signed::from((pk, dep))])?;
+            }
+        }
+    } else {
+        unimplemented!()
+    }
+
+    Ok(())
+}
+
 pub(crate) fn get_valid_keys(
     conn: &rusqlite::Connection,
     uid: UserId,

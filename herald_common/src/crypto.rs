@@ -169,8 +169,8 @@ pub mod sig {
 
     #[derive(Ser, De, Hash, Debug, Clone, PartialEq, Eq)]
     pub struct PKMeta {
-        sig: SigMeta,
-        deprecated: Option<SigMeta>,
+        pub sig: SigMeta,
+        pub deprecated: Option<SigMeta>,
     }
 
     impl From<SigMeta> for PKMeta {

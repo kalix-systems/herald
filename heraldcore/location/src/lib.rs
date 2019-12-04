@@ -1,6 +1,7 @@
+pub use backtrace;
 use std::fmt;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 /// A location in source code
 pub struct Location {
     /// The line where the error occurred
@@ -9,6 +10,8 @@ pub struct Location {
     pub col: u32,
     /// The file where the error occurred
     pub file: &'static str,
+    /// The backtrace
+    pub backtrace: backtrace::Backtrace,
 }
 
 impl fmt::Display for Location {
@@ -18,10 +21,11 @@ impl fmt::Display for Location {
     ) -> fmt::Result {
         write!(
             f,
-            "{file}:{line}:{column}",
+            "{file}:{line}:{column}\n{backtrace:#?}",
             file = self.file,
             line = self.line,
-            column = self.file
+            column = self.file,
+            backtrace = self.backtrace
         )
     }
 }
@@ -34,6 +38,7 @@ macro_rules! loc {
             file: file!(),
             line: line!(),
             col: column!(),
+            backtrace: backtrace::Backtrace::new(),
         }
     };
 }

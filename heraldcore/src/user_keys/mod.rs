@@ -1,5 +1,5 @@
 use crate::{db::Database, errors::HErr, NE};
-use herald_common::{sig, SigValid, Signed, UserId};
+use herald_common::{sig, SigValid, Signed, UserId, UserMeta};
 use rusqlite::params;
 use std::ops::DerefMut;
 
@@ -12,6 +12,15 @@ pub(crate) fn add_keys(
     let mut db = Database::get()?;
 
     db::add_keys(&mut db, uid, keys)
+}
+
+pub(crate) fn add_umeta(
+    uid: UserId,
+    meta: UserMeta,
+) -> Result<(), HErr> {
+    let mut db = Database::get()?;
+
+    db::add_umeta(&mut db, uid, meta)
 }
 
 #[allow(unused)]

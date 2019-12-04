@@ -75,4 +75,15 @@ impl UserMeta {
             .filter(|(k, m)| m.key_is_valid(**k))
             .map(|(k, _)| *k)
     }
+
+    pub fn validate(&self) -> bool {
+        self.keys.iter().all(|(pk, pm)| {
+            self.verify_sig(&Signed::from((pk, pm.sig)))
+                && if let Some(sm) = pm.deprecated {
+                    self.verify_sig(&Signed::from((pk, sm)))
+                } else {
+                    true
+                }
+        })
+    }
 }

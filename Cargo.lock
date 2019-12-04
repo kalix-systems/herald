@@ -675,6 +675,7 @@ dependencies = [
 name = "herald"
 version = "0.1.0"
 dependencies = [
+ "backtrace 0.3.40 (registry+https://github.com/rust-lang/crates.io-index)",
  "coremacros 0.1.0",
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "dashmap 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -729,6 +730,7 @@ dependencies = [
 name = "heraldcore"
 version = "0.1.0"
 dependencies = [
+ "backtrace 0.3.40 (registry+https://github.com/rust-lang/crates.io-index)",
  "chainkeys 0.1.0",
  "coreconf 0.1.0",
  "coremacros 0.1.0",
@@ -1057,6 +1059,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "location"
 version = "0.1.0"
+dependencies = [
+ "backtrace 0.3.40 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "lock_api"

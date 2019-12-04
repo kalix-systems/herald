@@ -26,7 +26,8 @@ fn ser_struct_impl(
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
-                errors::KsonError
+                errors::KsonError,
+                prelude::*
             };
 
             #kser
@@ -52,7 +53,8 @@ fn de_struct_impl(
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
-                errors::KsonError
+                errors::KsonError,
+                prelude::*
             };
 
             #kde
@@ -78,7 +80,8 @@ fn ser_enum_impl(
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
-                errors::KsonError
+                errors::KsonError,
+                prelude::*
             };
 
             #kser
@@ -105,7 +108,8 @@ fn de_enum_impl(
                 *,
                 de::{De, Deserializer},
                 ser::{Ser, Serializer},
-                errors::KsonError
+                errors::KsonError,
+                prelude::*
             };
 
             #kde

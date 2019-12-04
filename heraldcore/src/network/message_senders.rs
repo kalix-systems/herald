@@ -84,7 +84,9 @@ pub(crate) fn send_amessage(
     msg: &AuxMessage,
 ) -> Result<(), HErr> {
     if CAUGHT_UP.load(Ordering::Acquire) {
+        dbg!();
         let (gen, am, new) = amessages::seal(uid, &msg)?;
+        dbg!();
         let exc = *crate::config::keypair()?.public_key();
         let me = crate::config::id()?;
 

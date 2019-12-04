@@ -6,12 +6,13 @@ macro_rules! mk_request {
     ($method: tt, $path: tt) => {
         pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
             use ::std::io::Read;
+            dbg!(req);
             let mut res_buf = Vec::new();
-            ureq::$method(&server_url(stringify!($path)))
+            dbg!(ureq::$method(&server_url(stringify!($path)))
                 .send_bytes(&kson::to_vec(req))
                 .into_reader()
-                .read_to_end(&mut res_buf)?;
-            let res = kson::from_bytes(res_buf.into())?;
+                .read_to_end(&mut res_buf))?;
+            let res = dbg!(kson::from_bytes(res_buf.into()))?;
             Ok(res)
         }
     };

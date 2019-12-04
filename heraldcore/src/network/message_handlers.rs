@@ -16,6 +16,8 @@ impl Event {
                 msg,
             } = push;
 
+            dbg!(&tag);
+
             match tag {
                 PushTag::User => {
                     let cmsg = kson::from_bytes(msg)?;
@@ -116,8 +118,9 @@ impl Event {
         _: Time,
         msg: DeviceMessage,
     ) {
+        dbg!();
         self.with_comp(|ev| {
-            let (from, msg) = dmessages::open(msg)?;
+            let (from, msg) = dbg!(dmessages::open(msg)?);
             let GlobalId { uid, did } = from;
 
             match msg {
@@ -126,14 +129,17 @@ impl Event {
                         .pairwise_conversation(cid)
                         .add()?;
 
+                    // get the keys from the server and put them in the database
+                    let (u, umeta) = keys_of(vec![uid])?.pop().ok_or(NE!())?;
+                    // TODO: push this error into errors instead
+                    debug_assert_eq!(u, uid);
+                    crate::user_keys::add_umeta(uid, umeta)?;
+
                     chainkeys::store_new_state(cid, did, 0, &ratchet)?;
 
                     ev.add_notif(Notification::NewUser(Box::new((user, conversation.meta))));
 
-                    ev.add_areply(
-                        from.uid,
-                        AuxMessage::UserReqAck(amessages::UserReqAck(true)),
-                    );
+                    ev.add_areply(uid, AuxMessage::UserReqAck(amessages::UserReqAck(true)));
                 }
                 DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet }) => {
                     let cid = crate::user::by_user_id(uid)?.pairwise_conversation;
@@ -151,7 +157,8 @@ impl Event {
         msg: Cipher,
     ) {
         self.with_comp(move |ev| {
-            let (cid, from, msg) = amessages::open(msg)?;
+            dbg!();
+            let (cid, from, msg) = dbg!(amessages::open(msg)?);
             match msg {
                 AuxMessage::NewKey(nk) => {
                     crate::user_keys::guard_sig_valid(from.uid, &nk.0, loc!())?;
@@ -218,6 +225,9 @@ impl Event {
                 }
                 AuxMessage::UserReqAck(cr) => {
                     ev.add_notif(Notification::AddUserResponse(cid, from.uid, cr.0));
+
+                    let keys = keys_of(vec![from.uid])?.pop().ok_or(NE!())?.1;
+                    crate::user_keys::add_umeta(from.uid, keys)?;
                 }
                 AuxMessage::NewRatchets(nr) => {
                     for (cid, gen, ratchet) in nr.0 {

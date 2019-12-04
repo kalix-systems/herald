@@ -169,7 +169,25 @@ impl Tx<'_> {
                 Ok(row.get("generation")?)
             })?
             .next()
-            .ok_or(ChainKeysError::NoneError(loc!()))??;
+            .transpose()?
+            .unwrap_or(0);
+        Ok(gen)
+    }
+
+    pub fn get_next_generation(
+        &self,
+        cid: ConversationId,
+        pk: sig::PublicKey,
+    ) -> Result<u32, ChainKeysError> {
+        let mut get_stmt = self.prepare_cached(include_str!("sql/get_generation.sql"))?;
+        let gen = get_stmt
+            .query_map_named(named_params! {"@cid": cid, "@pk": pk.as_ref()}, |row| {
+                Ok(row.get::<_, u32>("generation")?)
+            })?
+            .next()
+            .transpose()?
+            .map(|g| g + 1)
+            .unwrap_or(0);
         Ok(gen)
     }
 
@@ -253,7 +271,7 @@ impl Tx<'_> {
             Ok((gen, cipher, None))
         } else {
             let ret_ratchet = RatchetState::gen_new();
-            let gen = self.get_generation(cid, pk)? + 1;
+            let gen = self.get_next_generation(cid, pk)?;
             let mut ratchet = ret_ratchet.clone();
 
             let (ix, key, cipher) = ratchet.seal(ad, msg).destruct();

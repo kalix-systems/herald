@@ -91,6 +91,10 @@ pub fn send_user_req(
     cid: ConversationId,
 ) -> Result<(), HErr> {
     let ratchet = RatchetState::gen_new();
+
+    let keys = keys_of(vec![uid])?.pop().ok_or(NE!())?.1;
+    crate::user_keys::add_umeta(uid, keys)?;
+
     chainkeys::store_state(cid, *config::keypair()?.public_key(), 0, &ratchet)?;
 
     let req = dmessages::UserReq { ratchet, cid };
