@@ -102,7 +102,7 @@ impl Tx<'_> {
                 },
             )?
             .next()
-            .ok_or(ChainKeysError::NoneError(loc!()))??;
+            .ok_or_else(|| ChainKeysError::NoneError(loc!()))??;
 
         let ix = if raw_ix.len() != 8 {
             return Err(ChainKeysError::StoreCorrupted);

@@ -35,7 +35,7 @@ impl Time {
         (self.0 - other.0).abs() <= fuzz
     }
 
-    pub fn as_i64(&self) -> i64 {
+    pub fn as_i64(self) -> i64 {
         self.0
     }
 }
