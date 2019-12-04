@@ -1,4 +1,3 @@
-use backtrace::Backtrace;
 use bytes::Bytes;
 use location::Location;
 use std::{fmt, str::Utf8Error, sync::Arc};
@@ -7,7 +6,6 @@ pub type KsonError = Arc<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
 pub struct KsonErrorInner {
-    pub backtrace: Backtrace,
     pub location: Location,
     pub message: Option<String>,
     pub bytes: Bytes,
@@ -71,7 +69,6 @@ impl fmt::Display for KsonErrorInner {
              Raw bytes were: {:#?}\n\
              Error found at offset: {}\n\
              Variant was: {}\n\
-             {:#?}
              ",
             self.bytes,
             self.offset,
@@ -113,7 +110,6 @@ impl fmt::Display for KsonErrorInner {
                 UnknownConst(u) => format!("unknown constant with value {:x?}", u),
                 CustomError(s) => s.clone(),
             }),
-            self.backtrace
         )
     }
 }
@@ -122,7 +118,6 @@ impl fmt::Display for KsonErrorInner {
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
         ::std::sync::Arc::new($crate::errors::KsonErrorInner {
-            backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
             offset: $offset,
@@ -136,7 +131,6 @@ macro_rules! E {
 
     ($var: expr, $byt: expr, $offset: expr) => {
         ::std::sync::Arc::new($crate::errors::KsonErrorInner {
-            backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
             offset: $offset,
