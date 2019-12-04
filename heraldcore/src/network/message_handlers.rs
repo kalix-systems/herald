@@ -16,6 +16,8 @@ impl Event {
                 msg,
             } = push;
 
+            dbg!(tag);
+
             match tag {
                 PushTag::User => {
                     let cmsg = kson::from_bytes(msg)?;
