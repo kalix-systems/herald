@@ -20,9 +20,31 @@ Page {
         id: entryField
         anchors {
             horizontalCenter: newAccButton.horizontalCenter
+            bottom: serverAddrTextField.top
+            bottomMargin: CmnCfg.units.dp(30)
+        }
+    }
+
+    TextField {
+        id: serverAddrTextField
+        anchors {
+            horizontalCenter: newAccButton.horizontalCenter
+            bottom: serverPortTextField.top
+            bottomMargin: CmnCfg.units.dp(30)
+        }
+        width: CmnCfg.units.gu(15)
+        placeholderText: qsTr("Server address")
+    }
+
+    TextField {
+        id: serverPortTextField
+        anchors {
+            horizontalCenter: newAccButton.horizontalCenter
             bottom: newAccButton.top
             bottomMargin: CmnCfg.units.dp(30)
         }
+        width: CmnCfg.units.gu(15)
+        placeholderText: qsTr("Server port")
     }
 
     LoginButton {
@@ -37,12 +59,8 @@ Page {
             bottomMargin: loginLandingPage.height / 3
         }
 
-        onClicked: registerUser()
-    }
-
-    function registerUser() {
-        if (herald.registerNewUser(entryField.text.trim())) {
-            herald.configInit = true
-        }
+        onClicked: herald.registerNewUser(entryField.text.trim(),
+                                          serverAddrTextField.text.trim(),
+                                          serverPortTextField.text.trim())
     }
 }

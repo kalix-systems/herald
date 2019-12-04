@@ -1,7 +1,8 @@
 use crate::{db::Database, errors::*, types::*};
 pub use coretypes::config::Config;
 use herald_common::*;
-use rusqlite::{params, NO_PARAMS};
+use rusqlite::NO_PARAMS;
+use std::net::SocketAddr;
 
 /// Default name for the "Note to Self" conversation
 pub const NTS_CONVERSATION_NAME: &str = "Note to Self";
@@ -20,6 +21,7 @@ pub struct ConfigBuilder {
     /// Color of the local user
     color: Option<u32>,
     nts_conversation: Option<ConversationId>,
+    home_server: Option<SocketAddr>,
 }
 
 impl ConfigBuilder {
@@ -35,6 +37,7 @@ impl ConfigBuilder {
             color: None,
             colorscheme: None,
             nts_conversation: None,
+            home_server: None,
         }
     }
 
@@ -75,6 +78,15 @@ impl ConfigBuilder {
         self
     }
 
+    /// Sets the home server for this user
+    pub fn home_server(
+        mut self,
+        home_server: SocketAddr,
+    ) -> Self {
+        self.home_server.replace(home_server);
+        self
+    }
+
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
         let mut db = Database::get()?;
@@ -111,6 +123,12 @@ pub fn keypair() -> Result<sig::KeyPair, HErr> {
 pub fn gid() -> Result<GlobalId, HErr> {
     let db = Database::get()?;
     db::gid(&db)
+}
+
+/// Gets the server address where the current user is registered
+pub fn home_server() -> Result<std::net::SocketAddr, HErr> {
+    let db = Database::get()?;
+    db::home_server(&db)
 }
 
 /// Updates user's display name

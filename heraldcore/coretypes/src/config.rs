@@ -1,8 +1,9 @@
 use crate::ids::ConversationId;
 use herald_common::*;
+use std::net::SocketAddr;
 
 /// User configuration
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Config {
     /// ID of the local user
     pub id: UserId,
@@ -16,4 +17,6 @@ pub struct Config {
     pub color: u32,
     /// The *Note to Self* conversation id.
     pub nts_conversation: ConversationId,
+    /// The server this account is registered on
+    pub home_server: SocketAddr,
 }

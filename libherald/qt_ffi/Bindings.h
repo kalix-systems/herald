@@ -965,7 +965,8 @@ public:
   const Utils *utils() const;
   Utils *utils();
   Q_INVOKABLE bool login();
-  Q_INVOKABLE void registerNewUser(const QString &user_id);
+  Q_INVOKABLE void registerNewUser(const QString &user_id, const QString &addr,
+                                   const QString &port);
   Q_INVOKABLE void setAppLocalDataDir(const QString &path);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,

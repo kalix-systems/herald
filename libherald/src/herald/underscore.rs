@@ -40,12 +40,20 @@ impl Herald {
     pub(crate) fn register_new_user_(
         &mut self,
         user_id: ffi::UserId,
+        server_addr: String,
+        server_port: String,
     ) {
         use register::*;
 
+        let addr = if !(server_addr.is_empty() && server_port.is_empty()) {
+            Some(ret_err!(format!("{}:{}", server_addr, server_port).parse()))
+        } else {
+            None
+        };
+
         let uid = ret_err!(UserId::try_from(user_id.as_str()));
 
-        spawn!(match ret_err!(net::register(uid)) {
+        spawn!(match ret_err!(net::register(uid, addr)) {
             Res::UIDTaken => {
                 eprintln!("UID taken!");
             }
