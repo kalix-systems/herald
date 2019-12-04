@@ -64,7 +64,10 @@ Rectangle {
 
             onTextChanged: entryField.text = text.trim()
 
-            Keys.onReturnPressed: herald.registerNewUser(entryField.text.trim())
+            Keys.onReturnPressed: herald.registerNewUser(
+                                      entryField.text.trim(),
+                                      serverAddrTextField.text.trim(),
+                                      serverPortTextField.text.trim())
         }
 
         TextField {
