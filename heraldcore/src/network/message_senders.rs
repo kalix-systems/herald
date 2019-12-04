@@ -16,6 +16,7 @@ pub(crate) fn send_cmessage(
                 cid, gen, ratchet,
             )]));
             for uid in to.iter() {
+                dbg!(uid);
                 send_amessage(*uid, &msg)?;
             }
         }
@@ -89,6 +90,8 @@ pub(crate) fn send_amessage(
         let me = crate::config::id()?;
 
         if let Some(ratchet) = new {
+            dbg!(gen);
+
             let dm = DeviceMessageBody::NewRatchet(dmessages::NewRatchet { gen, ratchet });
 
             for key in crate::user_keys::get_valid_keys(me)? {

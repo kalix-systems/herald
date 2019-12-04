@@ -7,6 +7,9 @@ macro_rules! mk_request {
         pub fn $path(req: &$path::Req) -> Result<$path::Res, HErr> {
             use ::std::io::Read;
             let mut res_buf = Vec::new();
+
+            dbg!(stringify!($path));
+
             ureq::$method(&server_url(stringify!($path)))
                 .send_bytes(&kson::to_vec(req))
                 .into_reader()
