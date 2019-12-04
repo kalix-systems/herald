@@ -1,4 +1,5 @@
 use super::*;
+use crate::w;
 use coretypes::conversation::Conversation;
 use rusqlite::named_params;
 
@@ -7,9 +8,9 @@ pub(crate) fn name(
     conn: &rusqlite::Connection,
     id: UserId,
 ) -> Result<Option<String>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_name.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_name.sql")));
 
-    Ok(stmt.query_row(params![id], |row| row.get(0))?)
+    Ok(w!(stmt.query_row(params![id], |row| row.get(0))))
 }
 
 /// Change name of user by their `id`
@@ -18,9 +19,9 @@ pub(crate) fn set_name(
     id: UserId,
     name: &str,
 ) -> Result<(), HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/update_name.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/update_name.sql")));
 
-    stmt.execute(params![name, id])?;
+    w!(stmt.execute(params![name, id]));
     Ok(())
 }
 
@@ -29,9 +30,9 @@ pub fn profile_picture(
     conn: &rusqlite::Connection,
     id: UserId,
 ) -> Result<Option<String>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_profile_picture.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_profile_picture.sql")));
 
-    Ok(stmt.query_row(params![id], |row| row.get(0))?)
+    Ok(w!(stmt.query_row(params![id], |row| row.get(0))))
 }
 
 /// Returns all members of a conversation.
@@ -39,9 +40,9 @@ pub fn conversation_members(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<Vec<User>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_by_conversation.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_by_conversation.sql")));
 
-    let rows = stmt.query_map(params![conversation_id], from_db)?;
+    let rows = w!(stmt.query_map(params![conversation_id], from_db));
 
     let mut users: Vec<User> = Vec::new();
     for user in rows {
@@ -74,13 +75,13 @@ pub fn set_profile_picture(
         }
     };
 
-    let mut stmt = conn.prepare(include_str!("sql/set_conversation_picture.sql"))?;
-    stmt.execute_named(named_params! {"@picture": profile_picture, "@user_id": id})?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/set_conversation_picture.sql")));
+    w!(stmt.execute_named(named_params! {"@picture": profile_picture, "@user_id": id}));
 
-    conn.execute(
+    w!(conn.execute(
         include_str!("sql/update_profile_picture.sql"),
         params![profile_picture, id],
-    )?;
+    ));
     Ok(profile_picture)
 }
 
@@ -90,7 +91,7 @@ pub fn set_color(
     id: UserId,
     color: u32,
 ) -> Result<(), HErr> {
-    conn.execute(include_str!("sql/update_color.sql"), params![color, id])?;
+    w!(conn.execute(include_str!("sql/update_color.sql"), params![color, id]));
     Ok(())
 }
 
@@ -99,8 +100,8 @@ pub fn user_exists(
     conn: &rusqlite::Connection,
     id: UserId,
 ) -> Result<bool, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/user_exists.sql"))?;
-    Ok(stmt.exists(&[id])?)
+    let mut stmt = w!(conn.prepare(include_str!("sql/user_exists.sql")));
+    Ok(w!(stmt.exists(&[id])))
 }
 
 /// Sets user status
@@ -112,16 +113,16 @@ pub fn set_status(
     use UserStatus::*;
     match status {
         Deleted => {
-            let tx = conn.transaction()?;
-            tx.execute(include_str!("sql/delete_user_meta.sql"), params![id])?;
-            tx.execute_named(
+            let tx = w!(conn.transaction());
+            w!(tx.execute(include_str!("sql/delete_user_meta.sql"), params![id]));
+            w!(tx.execute_named(
                 include_str!("../message/sql/delete_pairwise_conversation.sql"),
                 named_params! {"@user_id": id},
-            )?;
-            tx.commit()?;
+            ));
+            w!(tx.commit());
         }
         _ => {
-            conn.execute(include_str!("sql/set_status.sql"), params![status, id])?;
+            w!(conn.execute(include_str!("sql/set_status.sql"), params![status, id]));
         }
     }
     Ok(())
@@ -132,16 +133,16 @@ pub fn status(
     conn: &rusqlite::Connection,
     id: UserId,
 ) -> Result<UserStatus, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_status.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_status.sql")));
 
-    Ok(stmt.query_row(&[id], |row| row.get(0))?)
+    Ok(w!(stmt.query_row(&[id], |row| row.get(0))))
 }
 
 /// Returns all users
 pub fn all(conn: &rusqlite::Connection) -> Result<Vec<User>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_all.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_all.sql")));
 
-    let rows = stmt.query_map(NO_PARAMS, from_db)?;
+    let rows = w!(stmt.query_map(NO_PARAMS, from_db));
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -156,9 +157,9 @@ pub fn by_user_id(
     conn: &rusqlite::Connection,
     user_id: UserId,
 ) -> Result<User, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_by_id.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_by_id.sql")));
 
-    Ok(stmt.query_row(params![user_id], from_db)?)
+    Ok(w!(stmt.query_row(params![user_id], from_db)))
 }
 
 /// Returns all users with the specified `status`
@@ -166,9 +167,9 @@ pub fn get_by_status(
     conn: &rusqlite::Connection,
     status: UserStatus,
 ) -> Result<Vec<User>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_by_status.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_by_status.sql")));
 
-    let rows = stmt.query_map(params![status], from_db)?;
+    let rows = w!(stmt.query_map(params![status], from_db));
 
     let mut names: Vec<User> = Vec::new();
     for name_res in rows {
@@ -183,9 +184,9 @@ impl UserBuilder {
         self,
         conn: &mut rusqlite::Connection,
     ) -> Result<(User, Conversation), HErr> {
-        let tx = conn.transaction()?;
+        let tx = w!(conn.transaction());
         let (user, conv) = Self::add_with_tx(self, &tx)?;
-        tx.commit()?;
+        w!(tx.commit());
         Ok((user, conv))
     }
 
@@ -226,9 +227,9 @@ impl UserBuilder {
         }
 
         let conv = if user_type == UserType::Local {
-            conv_builder.add_nts(&tx, self.id)?
+            w!(conv_builder.add_nts(&tx, self.id))
         } else {
-            conv_builder.add_tx(&tx)?
+            w!(conv_builder.add_tx(&tx))
         };
 
         let pairwise_conversation = conv.meta.conversation_id;
@@ -243,7 +244,7 @@ impl UserBuilder {
             user_type,
         };
 
-        tx.execute(
+        w!(tx.execute(
             include_str!("sql/add.sql"),
             params![
                 user.id,
@@ -254,11 +255,11 @@ impl UserBuilder {
                 user.pairwise_conversation,
                 user.user_type
             ],
-        )?;
-        tx.execute(
+        ));
+        w!(tx.execute(
             include_str!("../members/sql/add_member.sql"),
             params![user.pairwise_conversation, user.id],
-        )?;
+        ));
 
         Ok((user, conv))
     }

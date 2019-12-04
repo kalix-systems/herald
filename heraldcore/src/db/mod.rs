@@ -1,4 +1,5 @@
 use crate::errors::*;
+use crate::w;
 use once_cell::sync::OnceCell;
 use platform_dirs::db_dir;
 use rusqlite::{Connection, NO_PARAMS};
@@ -47,7 +48,7 @@ impl DerefMut for Database {
 pub fn init() -> Result<(), HErr> {
     let db = Database::get()?;
 
-    db.execute_batch(include_str!("../sql/create_all.sql"))?;
+    w!(db.execute_batch(include_str!("../sql/create_all.sql")));
 
     Ok(())
 }
@@ -65,29 +66,30 @@ impl Database {
             true
         }
 
-        conn.busy_handler(Some(busy_handler))?;
+        w!(conn.busy_handler(Some(busy_handler)));
 
         // set foreign key constraint
-        conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS)?;
+        w!(conn.execute("PRAGMA foreign_keys = ON", NO_PARAMS));
 
         // enable WAL
-        conn.query_row("PRAGMA journal_mode = WAL", NO_PARAMS, |_| Ok(()))?;
+        w!(conn.query_row("PRAGMA journal_mode = WAL", NO_PARAMS, |_| Ok(())));
 
         let db = Database(conn);
+
         Ok(db)
     }
 
     #[cfg(test)]
     pub(crate) fn in_memory() -> Result<Self, HErr> {
-        let conn = Connection::open_in_memory()?;
-        conn.execute_batch(include_str!("../sql/create_all.sql"))?;
+        let conn = w!(Connection::open_in_memory());
+        w!(conn.execute_batch(include_str!("../sql/create_all.sql")));
         Self::setup(conn)
     }
 
     #[cfg(test)]
     pub(crate) fn in_memory_with_config() -> Result<Self, HErr> {
-        let conn = Connection::open_in_memory()?;
-        conn.execute_batch(include_str!("../sql/create_all.sql"))?;
+        let conn = w!(Connection::open_in_memory());
+        w!(conn.execute_batch(include_str!("../sql/create_all.sql")));
         let mut conn = Self::setup(conn)?;
         crate::config::db::test_config(&mut conn);
         Ok(conn)
@@ -96,15 +98,15 @@ impl Database {
     /// Resets all tables in database
     #[cfg(test)]
     pub(crate) fn reset_all() -> Result<(), HErr> {
-        let mut db = Self::get()?;
-        let tx = db.transaction()?;
+        let mut db = w!(Self::get());
+        let tx = w!(db.transaction());
 
         // drop
-        tx.execute_batch(include_str!("../sql/drop_all.sql"))?;
+        w!(tx.execute_batch(include_str!("../sql/drop_all.sql")));
 
         // create
-        tx.execute_batch(include_str!("../sql/create_all.sql"))?;
-        tx.commit()?;
+        w!(tx.execute_batch(include_str!("../sql/create_all.sql")));
+        w!(tx.commit());
         Ok(())
     }
 }

@@ -1,5 +1,6 @@
 use super::*;
 use crate::message::MessageTime;
+use crate::w;
 use rusqlite::named_params;
 
 /// Deletes all messages in a conversation.
@@ -7,10 +8,10 @@ pub(crate) fn delete_conversation(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<(), HErr> {
-    conn.execute(
+    w!(conn.execute(
         include_str!("../message/sql/delete_conversation.sql"),
         &[conversation_id],
-    )?;
+    ));
     Ok(())
 }
 
@@ -19,8 +20,8 @@ pub(crate) fn conversation_messages(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<Vec<Message>, HErr> {
-    let mut stmt = conn.prepare(include_str!("../message/sql/conversation_messages.sql"))?;
-    let res = stmt.query_map_named(
+    let mut stmt = w!(conn.prepare(include_str!("../message/sql/conversation_messages.sql")));
+    let res = w!(stmt.query_map_named(
         named_params! {
             "@conversation_id": conversation_id
         },
@@ -53,11 +54,11 @@ pub(crate) fn conversation_messages(
                 replies,
             })
         },
-    )?;
+    ));
 
     let mut messages = Vec::new();
     for msg in res {
-        messages.push(msg?);
+        messages.push(w!(msg));
     }
 
     Ok(messages)
@@ -68,11 +69,11 @@ pub(crate) fn meta(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<ConversationMeta, HErr> {
-    Ok(conn.query_row(
+    Ok(w!(conn.query_row(
         include_str!("sql/get_conversation_meta.sql"),
         params![conversation_id],
         from_db,
-    )?)
+    )))
 }
 
 /// Gets expiration period for a conversation
@@ -80,13 +81,13 @@ pub(crate) fn expiration_period(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<ExpirationPeriod, HErr> {
-    let mut stmt = conn.prepare_cached(include_str!("sql/expiration_period.sql"))?;
-    Ok(stmt.query_row_named(
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/expiration_period.sql")));
+    Ok(w!(stmt.query_row_named(
         named_params! {
             "@conversation_id": conversation_id
         },
         |row| row.get("expiration_period"),
-    )?)
+    )))
 }
 
 /// Gets expiration period for a conversation
@@ -94,14 +95,14 @@ pub(crate) fn picture(
     conn: &rusqlite::Connection,
     conversation_id: &ConversationId,
 ) -> Result<Option<String>, HErr> {
-    let mut stmt = conn.prepare_cached(include_str!("sql/picture.sql"))?;
+    let mut stmt = w!(conn.prepare_cached(include_str!("sql/picture.sql")));
 
-    Ok(stmt.query_row_named(
+    Ok(w!(stmt.query_row_named(
         named_params! {
             "@conversation_id": conversation_id
         },
         |row| row.get("picture"),
-    )?)
+    )))
 }
 
 /// Sets color for a conversation
@@ -110,10 +111,10 @@ pub(crate) fn set_color(
     conversation_id: &ConversationId,
     color: u32,
 ) -> Result<(), HErr> {
-    conn.execute(
+    w!(conn.execute(
         include_str!("sql/update_color.sql"),
         params![color, conversation_id],
-    )?;
+    ));
     Ok(())
 }
 
@@ -123,10 +124,10 @@ pub(crate) fn set_muted(
     conversation_id: &ConversationId,
     muted: bool,
 ) -> Result<(), HErr> {
-    conn.execute(
+    w!(conn.execute(
         include_str!("sql/update_muted.sql"),
         params![muted, conversation_id],
-    )?;
+    ));
     Ok(())
 }
 
@@ -136,10 +137,10 @@ pub(crate) fn set_title(
     conversation_id: &ConversationId,
     title: Option<&str>,
 ) -> Result<(), HErr> {
-    conn.execute(
+    w!(conn.execute(
         include_str!("sql/update_title.sql"),
         params![title, conversation_id],
-    )?;
+    ));
     Ok(())
 }
 
@@ -177,7 +178,7 @@ pub(crate) fn set_picture(
 
 /// Get metadata of all conversations
 pub(crate) fn all_meta(conn: &rusqlite::Connection) -> Result<Vec<ConversationMeta>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/all_meta.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/all_meta.sql")));
     let res = stmt.query_map(NO_PARAMS, from_db)?;
 
     let mut meta = Vec::new();
@@ -192,11 +193,11 @@ pub(crate) fn get_pairwise_conversations(
     conn: &rusqlite::Connection,
     uids: &[UserId],
 ) -> Result<Vec<ConversationId>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/pairwise_cid.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/pairwise_cid.sql")));
 
     uids.iter()
-        .map(|uid| stmt.query_row(params![uid], |row| Ok(row.get(0)?)))
-        .map(|res| Ok(res?))
+        .map(|uid| stmt.query_row(params![uid], |row| Ok(w!(row.get(0)))))
+        .map(|res| Ok(w!(res)))
         .collect()
 }
 
@@ -205,12 +206,12 @@ pub(crate) fn set_expiration_period(
     conversation_id: &ConversationId,
     expiration_period: ExpirationPeriod,
 ) -> Result<(), HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/update_expiration_period.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/update_expiration_period.sql")));
 
-    stmt.execute_named(named_params! {
+    w!(stmt.execute_named(named_params! {
         "@conversation_id": conversation_id,
         "@expiration_period": expiration_period,
-    })?;
+    }));
     Ok(())
 }
 

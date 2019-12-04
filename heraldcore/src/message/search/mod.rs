@@ -1,5 +1,7 @@
 use super::*;
+use search_pattern::Captures;
 use search_pattern::SearchPattern;
+use unicode_segmentation::UnicodeSegmentation;
 
 mod db;
 
@@ -83,6 +85,73 @@ pub struct ResultBody {
     /// String after first match
     pub after_first: String,
 }
+
+impl ResultBody {
+    fn from_match(
+        pattern: &SearchPattern,
+        body: &MessageBody,
+    ) -> Option<ResultBody> {
+        let add_tags = |text| {
+            pattern
+                .replace_all(text, |caps: &Captures| {
+                    format!(
+                        "{}{}{}",
+                        START_TAG,
+                        caps.get(0).map(|m| m.as_str()).unwrap_or(""),
+                        END_TAG
+                    )
+                })
+                .to_string()
+        };
+
+        let p_match = pattern.find(body.as_str())?;
+
+        let (before, tail) = body.as_str().split_at(p_match.start());
+        let (first, after) = tail.split_at(p_match.end() - p_match.start());
+
+        let mut graphemes_used = 0;
+
+        let first_match: String = UnicodeSegmentation::graphemes(first, true)
+            .take(MATCH_CHARS)
+            .map(|g| {
+                graphemes_used += 1;
+                g
+            })
+            .collect();
+
+        let before_first: String = {
+            let rev: String = UnicodeSegmentation::graphemes(before, true)
+                .rev()
+                .take((TOTAL_CHARS - graphemes_used).min(TOTAL_CHARS - MATCH_CHARS))
+                .map(|g| {
+                    graphemes_used += 1;
+                    g
+                })
+                .collect();
+            rev.chars().rev().collect()
+        };
+
+        let after_first: String = UnicodeSegmentation::graphemes(after, true)
+            .take(TOTAL_CHARS - graphemes_used)
+            .collect();
+
+        let before_first = add_tags(&before_first);
+        let first_match = add_tags(&first_match);
+        let after_first = add_tags(&after_first);
+
+        Some(ResultBody {
+            before_first,
+            first_match,
+            after_first,
+        })
+    }
+}
+
+const START_TAG: &str = "<b>";
+const END_TAG: &str = "</b>";
+
+const TOTAL_CHARS: usize = 60;
+const MATCH_CHARS: usize = 40;
 
 #[cfg(test)]
 mod tests;

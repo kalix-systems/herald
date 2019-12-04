@@ -1,4 +1,5 @@
 use super::*;
+use crate::w;
 use rusqlite::named_params;
 
 impl ConversationBuilder {
@@ -39,7 +40,7 @@ impl ConversationBuilder {
 
         let last_active = Time::now();
 
-        tx.execute_named(
+        w!(tx.execute_named(
             include_str!("sql/add_conversation.sql"),
             named_params! {
                 "@conversation_id": id,
@@ -51,7 +52,7 @@ impl ConversationBuilder {
                 "@last_active_ts": last_active,
                 "@expiration_period": expiration_period
             },
-        )?;
+        ));
 
         Ok(Conversation {
             meta: ConversationMeta {
@@ -97,9 +98,9 @@ impl ConversationBuilder {
         self,
         conn: &mut rusqlite::Connection,
     ) -> Result<Conversation, HErr> {
-        let tx = conn.transaction()?;
-        let conv = self.add_tx(&tx)?;
-        tx.commit()?;
+        let tx = w!(conn.transaction());
+        let conv = w!(self.add_tx(&tx));
+        w!(tx.commit());
         Ok(conv)
     }
 }

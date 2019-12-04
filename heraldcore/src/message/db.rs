@@ -1,5 +1,5 @@
 use super::*;
-use crate::{conversation::db::expiration_period, message::MessageTime};
+use crate::{conversation::db::expiration_period, message::MessageTime, w};
 use rusqlite::{named_params, Connection as Conn};
 use std::collections::HashSet;
 
@@ -11,7 +11,7 @@ pub(crate) fn get_message(
     let receipts = get_receipts(conn, msg_id)?;
     let replies = self::replies(conn, msg_id)?;
 
-    Ok(conn.query_row_named(
+    Ok(w!(conn.query_row_named(
         include_str!("sql/get_message.sql"),
         named_params! {
             "@msg_id": msg_id
@@ -41,7 +41,7 @@ pub(crate) fn get_message(
                 replies,
             })
         },
-    )?)
+    )))
 }
 
 /// Get message by message id
@@ -49,7 +49,7 @@ pub(crate) fn get_message_opt(
     conn: &Conn,
     msg_id: &MsgId,
 ) -> Result<Option<Message>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/get_message.sql"))?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/get_message.sql")));
 
     let mut res = stmt.query_map_named(
         named_params! {
@@ -97,10 +97,11 @@ pub(crate) fn update_send_status(
     msg_id: MsgId,
     status: MessageSendStatus,
 ) -> Result<(), HErr> {
-    conn.execute(
+    w!(conn.execute(
         include_str!("sql/update_send_status.sql"),
         params![status, msg_id],
-    )?;
+    ));
+
     Ok(())
 }
 
@@ -108,23 +109,25 @@ pub(crate) fn get_receipts(
     conn: &rusqlite::Connection,
     msg_id: &MsgId,
 ) -> Result<HashMap<UserId, MessageReceiptStatus>, rusqlite::Error> {
-    let mut get_stmt = conn.prepare_cached(include_str!("sql/get_receipts.sql"))?;
+    let mut get_stmt = w!(conn.prepare_cached(include_str!("sql/get_receipts.sql")));
 
-    let res = get_stmt.query_map(params![msg_id], |row| Ok((row.get(0)?, row.get(1)?)))?;
-    res.collect()
+    let res = w!(get_stmt.query_map(params![msg_id], |row| Ok((row.get(0)?, row.get(1)?))));
+    Ok(w!(res.collect()))
 }
 
 pub(crate) fn replies(
     conn: &rusqlite::Connection,
     msg_id: &MsgId,
 ) -> Result<HashSet<MsgId>, rusqlite::Error> {
-    let mut get_stmt = conn.prepare_cached(include_str!("sql/replies.sql"))?;
+    let mut get_stmt = w!(conn.prepare_cached(include_str!("sql/replies.sql")));
 
-    let res = get_stmt.query_map_named(named_params!("@parent_msg_id": msg_id), |row| {
-        Ok(row.get("msg_id")?)
-    })?;
+    let res = w!(
+        get_stmt.query_map_named(named_params!("@parent_msg_id": msg_id), |row| {
+            Ok(row.get("msg_id")?)
+        })
+    );
 
-    res.collect()
+    Ok(w!(res.collect()))
 }
 
 pub(crate) fn add_receipt(
@@ -133,8 +136,8 @@ pub(crate) fn add_receipt(
     recip: UserId,
     receipt_status: MessageReceiptStatus,
 ) -> Result<(), HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/add_receipt.sql"))?;
-    stmt.execute(params![msg_id, recip, receipt_status])?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/add_receipt.sql")));
+    w!(stmt.execute(params![msg_id, recip, receipt_status]));
     Ok(())
 }
 
@@ -143,36 +146,38 @@ pub(crate) fn by_send_status(
     conn: &Conn,
     send_status: MessageSendStatus,
 ) -> Result<Vec<Message>, HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/by_send_status.sql"))?;
-    let res = stmt.query_map_named(named_params! { "@send_status": send_status }, |row| {
-        let message_id = row.get("msg_id")?;
-        let receipts = get_receipts(conn, &message_id)?;
-        let replies = self::replies(conn, &message_id)?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/by_send_status.sql")));
+    let res = w!(
+        stmt.query_map_named(named_params! { "@send_status": send_status }, |row| {
+            let message_id = row.get("msg_id")?;
+            let receipts = get_receipts(conn, &message_id)?;
+            let replies = self::replies(conn, &message_id)?;
 
-        let time = MessageTime {
-            insertion: row.get("insertion_ts")?,
-            server: row.get("server_ts")?,
-            expiration: row.get("expiration_ts")?,
-        };
+            let time = MessageTime {
+                insertion: row.get("insertion_ts")?,
+                server: row.get("server_ts")?,
+                expiration: row.get("expiration_ts")?,
+            };
 
-        let is_reply: bool = row.get("is_reply")?;
-        let op: Option<MsgId> = row.get("op_msg_id")?;
+            let is_reply: bool = row.get("is_reply")?;
+            let op: Option<MsgId> = row.get("op_msg_id")?;
 
-        let op = (op, is_reply).into();
+            let op = (op, is_reply).into();
 
-        Ok(Message {
-            message_id,
-            author: row.get("author")?,
-            conversation: row.get("conversation_id")?,
-            body: row.get("body")?,
-            op,
-            send_status: row.get("send_status")?,
-            has_attachments: row.get("has_attachments")?,
-            time,
-            receipts,
-            replies,
+            Ok(Message {
+                message_id,
+                author: row.get("author")?,
+                conversation: row.get("conversation_id")?,
+                body: row.get("body")?,
+                op,
+                send_status: row.get("send_status")?,
+                has_attachments: row.get("has_attachments")?,
+                time,
+                receipts,
+                replies,
+            })
         })
-    })?;
+    );
 
     let mut messages = Vec::new();
     for msg in res {
@@ -187,8 +192,8 @@ pub(crate) fn delete_message(
     conn: &Conn,
     id: &MsgId,
 ) -> Result<(), HErr> {
-    let mut stmt = conn.prepare(include_str!("sql/delete_message.sql"))?;
-    stmt.execute_named(named_params! { "@msg_id": id })?;
+    let mut stmt = w!(conn.prepare(include_str!("sql/delete_message.sql")));
+    w!(stmt.execute_named(named_params! { "@msg_id": id }));
     super::attachments::db::gc(conn)?;
     Ok(())
 }
@@ -420,15 +425,16 @@ impl InboundMessageBuilder {
             }
         }
 
-        let conversation_id = conversation.ok_or(MissingConversationId)?;
-        let msg_id = message_id.ok_or(MissingMessageId)?;
-        let server_timestamp = server_timestamp.ok_or(MissingTimestamp)?;
-        let author = author.ok_or(MissingAuthor)?;
+        let conversation_id = w!(conversation.ok_or(MissingConversationId));
+        let msg_id = w!(message_id.ok_or(MissingMessageId));
+        let server_timestamp = w!(server_timestamp.ok_or(MissingTimestamp));
+        let author = w!(author.ok_or(MissingAuthor));
 
         let res: Result<Vec<String>, HErr> = attachments
             .into_iter()
             .map(|a| Ok(a.save()?.into()))
             .collect();
+
         let attachment_paths = res?;
         let has_attachments = !attachment_paths.is_empty();
 
@@ -441,9 +447,9 @@ impl InboundMessageBuilder {
             expiration,
         };
 
-        let mut tx = conn.transaction()?;
+        let mut tx = w!(conn.transaction());
 
-        tx.execute_named(
+        w!(tx.execute_named(
             include_str!("sql/add.sql"),
             named_params! {
                 "@msg_id": msg_id,
@@ -457,16 +463,16 @@ impl InboundMessageBuilder {
                 "@expiration_ts": time.expiration,
                 "@is_reply": op.is_some()
             },
-        )?;
+        ));
 
-        tx.execute(
+        w!(tx.execute(
             include_str!("../conversation/sql/update_last_active.sql"),
             params![Time::now(), conversation_id],
-        )?;
+        ));
 
         let op = if let Some(op) = op {
             // what if you receive a reply to message you don't have?
-            let sp = tx.savepoint()?;
+            let sp = w!(tx.savepoint());
 
             // this succeeds in the happy case
             let res = sp.execute(include_str!("sql/add_reply.sql"), params![msg_id, op]);
@@ -474,16 +480,16 @@ impl InboundMessageBuilder {
             // and if it doesn't try making it a dangling reply
             match res {
                 Ok(_) => {
-                    sp.commit()?;
+                    w!(sp.commit());
                     ReplyId::Known(op)
                 }
                 Err(rusqlite::Error::SqliteFailure(..)) => {
                     let none_msg_id: Option<MsgId> = None;
-                    sp.execute(
+                    w!(sp.execute(
                         include_str!("sql/add_reply.sql"),
                         params![msg_id, none_msg_id],
-                    )?;
-                    sp.commit()?;
+                    ));
+                    w!(sp.commit());
                     ReplyId::Dangling
                 }
                 Err(e) => return Err(e.into()),
@@ -496,7 +502,7 @@ impl InboundMessageBuilder {
             attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|s| s.as_str()))?;
         }
 
-        tx.commit()?;
+        w!(tx.commit());
 
         let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
         let replies = self::replies(&conn, &msg_id).unwrap_or_default();
