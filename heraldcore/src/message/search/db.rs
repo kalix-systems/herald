@@ -1,4 +1,5 @@
 use super::*;
+use crate::w;
 use rusqlite::named_params;
 use search_pattern::Captures;
 use std::ops::Not;
@@ -43,14 +44,14 @@ impl Search {
         &mut self,
         conn: &mut rusqlite::Connection,
     ) -> Result<Option<Vec<SearchResult>>, HErr> {
-        let mut stmt = conn.prepare_cached(include_str!("sql/get_page.sql"))?;
+        let mut stmt = w!(conn.prepare_cached(include_str!("sql/get_page.sql")));
 
         let pattern = &self.pattern;
         let min_param = self.min;
 
         let min = &mut self.min;
 
-        let results = stmt.query_map_named(
+        let results = w!(stmt.query_map_named(
             named_params!("@old_min_time": min_param.time, "@old_row_id": min_param.row_id),
             |row| {
                 let time = row.get("insertion_ts")?;
@@ -99,7 +100,7 @@ impl Search {
                     rowid: row_id,
                 }))
             },
-        )?;
+        ));
 
         let mut out = Vec::new();
 

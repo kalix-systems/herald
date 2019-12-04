@@ -1,4 +1,5 @@
 use super::*;
+use crate::w;
 use crossbeam_channel::{bounded, Receiver, Sender};
 use std::ops::{Deref, DerefMut, Drop};
 
@@ -54,7 +55,7 @@ impl Pool {
     pub fn get(&self) -> Result<Wrapper, HErr> {
         let conn = match self.rx.try_recv() {
             Ok(db) => db,
-            Err(_) => Database::new(db_path())?,
+            Err(_) => w!(Database::new(db_path())),
         };
 
         Ok(Wrapper {
