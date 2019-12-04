@@ -46,6 +46,9 @@ impl fmt::Display for EmptyMessageBody {
         &self,
         f: &mut std::fmt::Formatter<'_>,
     ) -> std::fmt::Result {
-        write!(f, "Message bodies must have at least one character")
+        write!(
+            f,
+            "Encountered empty message body: bodies must have at least one character"
+        )
     }
 }

@@ -72,7 +72,7 @@ fn herald() -> Object {
     };
 
     let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Void,
+        mut registerNewUser(user_id: QString, addr: QString, port: QString) => Void,
         mut login() => Bool,
         mut setAppLocalDataDir(path: QString) => Void,
     };

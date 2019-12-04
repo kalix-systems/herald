@@ -26,7 +26,8 @@ where
         did: *kp.public_key(),
     };
 
-    let wsurl = format!("ws://{}/login", *SERVER_ADDR);
+    let wsurl = format!("ws://{}/login", home_server());
+
     let mut ws = wsclient::ClientBuilder::new(&wsurl)
         .expect("failed to parse server url")
         .connect_insecure()?;

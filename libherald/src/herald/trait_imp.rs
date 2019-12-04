@@ -64,8 +64,10 @@ impl HeraldTrait for Herald {
     fn register_new_user(
         &mut self,
         user_id: ffi::UserId,
+        server_addr: String,
+        server_port: String,
     ) {
-        self.register_new_user_(user_id)
+        self.register_new_user_(user_id, server_addr, server_port)
     }
 
     fn can_fetch_more(&self) -> bool {

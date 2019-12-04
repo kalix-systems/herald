@@ -38,7 +38,7 @@ void libherald::initTestCase()
   herald->setAppLocalDataDir("");
   QSignalSpy spy(herald, SIGNAL(configInitChanged()));
   qDebug() << "Registering New User 'Alice'";
-  herald -> registerNewUser("GAlice");
+  herald -> registerNewUser("GAlice", "0.0.0.0", "8080");
   QVERIFY(spy.wait(1000));
 }
 

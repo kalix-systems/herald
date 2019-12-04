@@ -225,6 +225,8 @@ pub trait HeraldTrait {
     fn register_new_user(
         &mut self,
         user_id: String,
+        addr: String,
+        port: String,
     ) -> ();
 
     fn set_app_local_data_dir(
@@ -548,11 +550,19 @@ pub unsafe extern "C" fn herald_register_new_user(
     ptr: *mut Herald,
     user_id_str: *const c_ushort,
     user_id_len: c_int,
+    addr_str: *const c_ushort,
+    addr_len: c_int,
+    port_str: *const c_ushort,
+    port_len: c_int,
 ) {
     let obj = &mut *ptr;
     let mut user_id = String::new();
     set_string_from_utf16(&mut user_id, user_id_str, user_id_len);
-    obj.register_new_user(user_id)
+    let mut addr = String::new();
+    set_string_from_utf16(&mut addr, addr_str, addr_len);
+    let mut port = String::new();
+    set_string_from_utf16(&mut port, port_str, port_len);
+    obj.register_new_user(user_id, addr, port)
 }
 
 #[no_mangle]

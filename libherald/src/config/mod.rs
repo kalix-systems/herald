@@ -7,7 +7,7 @@ mod imp;
 /// with a field containing emitters for Qt.
 pub struct Config {
     emit: ConfigEmitter,
-    inner: Option<Core>,
+    pub(crate) inner: Option<Core>,
 }
 
 impl ConfigTrait for Config {

@@ -48,8 +48,9 @@ Rectangle {
                 }
             }
         }
+
         /// username entry field
-        TextArea {
+        TextField {
             id: entryField
             anchors.horizontalCenter: parent.horizontalCenter
             width: 150
@@ -61,7 +62,28 @@ Rectangle {
                 radius: 2
             }
 
-            Keys.onReturnPressed: herald.registerNewUser(entryField.text.trim())
+            onTextChanged: entryField.text = text.trim()
+
+            Keys.onReturnPressed: herald.registerNewUser(
+                                      entryField.text.trim(),
+                                      serverAddrTextField.text.trim(),
+                                      serverPortTextField.text.trim())
+        }
+
+        TextField {
+            id: serverAddrTextField
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 150
+            height: 25
+            placeholderText: qsTr("Server address")
+        }
+
+        TextField {
+            id: serverPortTextField
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 150
+            height: 25
+            placeholderText: qsTr("Server port")
         }
 
         Button {
@@ -77,7 +99,9 @@ Rectangle {
                 color: "steelblue"
                 radius: 3
             }
-            onClicked: herald.registerNewUser(entryField.text.trim())
+            onClicked: herald.registerNewUser(entryField.text.trim(),
+                                              serverAddrTextField.text.trim(),
+                                              serverPortTextField.text.trim())
         }
     }
 
