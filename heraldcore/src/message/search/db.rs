@@ -1,43 +1,6 @@
 use super::*;
 use crate::w;
 use rusqlite::named_params;
-use search_pattern::Captures;
-use std::ops::Not;
-use unicode_segmentation::UnicodeSegmentation;
-
-const START_TAG: &str = "<b>";
-const END_TAG: &str = "</b>";
-
-fn process(
-    pattern: &SearchPattern,
-    body: &str,
-    take_num: usize,
-    rev: bool,
-) -> String {
-    let body: String = if rev {
-        let rev_body: String = UnicodeSegmentation::graphemes(body, true)
-            .rev()
-            .take(take_num)
-            .collect();
-
-        rev_body.chars().rev().collect()
-    } else {
-        UnicodeSegmentation::graphemes(body, true)
-            .take(take_num)
-            .collect()
-    };
-
-    pattern
-        .replace_all(&body, |caps: &Captures| {
-            format!(
-                "{}{}{}",
-                START_TAG,
-                caps.get(0).map(|m| m.as_str()).unwrap_or(""),
-                END_TAG
-            )
-        })
-        .to_string()
-}
 
 impl Search {
     pub(super) fn next_page_db(
@@ -64,30 +27,9 @@ impl Search {
 
                 *min = Index { time, row_id };
 
-                if pattern.is_match(body.as_str()).not() {
-                    return Ok(None);
-                }
-
-                let body = {
-                    let p_match = match pattern.find(body.as_str()) {
-                        Some(p_match) => p_match,
-                        None => {
-                            return Ok(None);
-                        }
-                    };
-
-                    let (before_first, tail) = body.as_str().split_at(p_match.start());
-                    let (first_match, after_first) = tail.split_at(p_match.end() - p_match.start());
-
-                    let before_first = process(pattern, before_first, 70, true);
-                    let first_match = process(pattern, first_match, 40, false);
-                    let after_first = process(pattern, after_first, 70, false);
-
-                    ResultBody {
-                        before_first,
-                        first_match,
-                        after_first,
-                    }
+                let body = match ResultBody::from_match(pattern, &body) {
+                    Some(body) => body,
+                    None => return Ok(None),
                 };
 
                 Ok(Some(SearchResult {

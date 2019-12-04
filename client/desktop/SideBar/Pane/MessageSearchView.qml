@@ -101,15 +101,15 @@ ListView {
                     Layout.topMargin: labelGrid.rows > 2 ? -CmnCfg.smallMargin : 0
                     elide: "ElideRight"
                     text: if (messageData.beforeFirstMatch.length === 0) {
-                              messageData.firstMatch + messageData.afterFirstMatch }
-                          else {
+                              messageData.firstMatch + messageData.afterFirstMatch
+                          } else {
                               prefix.elidedText + suffix.elidedText
                           }
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
                     Layout.maximumHeight: labelGrid.height
                     color: CmnCfg.palette.offBlack
-                    textFormat: Text.AutoText
+                    textFormat: Text.StyledText
                     wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
             }
