@@ -191,8 +191,43 @@ struct ConversationContentPtrBundle {
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_has_attachments_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
@@ -447,8 +482,43 @@ struct MembersPtrBundle {
 struct MessageBuilderPtrBundle {
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_has_attachments_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
@@ -490,8 +560,43 @@ struct MessagesPtrBundle {
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_has_attachments_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
   void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
@@ -1360,12 +1465,20 @@ public:
   class Private;
 
 private:
+  DocumentAttachments *const m_documentAttachments;
+  MediaAttachments *const m_mediaAttachments;
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
-  Q_PROPERTY(bool hasAttachments READ hasAttachments NOTIFY
-                 hasAttachmentsChanged FINAL)
+  Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
+                 NOTIFY documentAttachmentsChanged FINAL)
+  Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
+                 hasDocAttachmentChanged FINAL)
+  Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
+                 hasMediaAttachmentChanged FINAL)
   Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
+  Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
+                 mediaAttachmentsChanged FINAL)
   Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
   Q_PROPERTY(QVariant opHasAttachments READ opHasAttachments NOTIFY
@@ -1379,8 +1492,13 @@ public:
   ~MessageBuilder() override;
   QString body() const;
   void setBody(const QString &v);
-  bool hasAttachments() const;
+  const DocumentAttachments *documentAttachments() const;
+  DocumentAttachments *documentAttachments();
+  bool hasDocAttachment() const;
+  bool hasMediaAttachment() const;
   bool isReply() const;
+  const MediaAttachments *mediaAttachments() const;
+  MediaAttachments *mediaAttachments();
   QString opAuthor() const;
   QString opBody() const;
   QVariant opHasAttachments() const;
@@ -1389,9 +1507,8 @@ public:
   Q_INVOKABLE bool addAttachment(const QString &path);
   Q_INVOKABLE void clearReply();
   Q_INVOKABLE void finalize();
-  Q_INVOKABLE bool removeAttachment(const QString &path);
-  Q_INVOKABLE bool removeAttachmentByIndex(quint64 row_index);
-  Q_INVOKABLE void removeLast();
+  Q_INVOKABLE bool removeDoc(quint64 row_index);
+  Q_INVOKABLE bool removeMedia(quint64 row_index);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1417,8 +1534,6 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QString attachmentPath(int row) const;
-
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
   void newDataReady(const QModelIndex &parent) const;
@@ -1429,8 +1544,11 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void bodyChanged();
-  void hasAttachmentsChanged();
+  void documentAttachmentsChanged();
+  void hasDocAttachmentChanged();
+  void hasMediaAttachmentChanged();
   void isReplyChanged();
+  void mediaAttachmentsChanged();
   void opAuthorChanged();
   void opBodyChanged();
   void opHasAttachmentsChanged();

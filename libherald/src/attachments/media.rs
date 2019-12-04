@@ -9,7 +9,7 @@ pub(super) const IMG_EXT: [&str; 10] = [
     "BMP", "GIF", "JPG", "JPEG", "PNG", "PBM", "PGM", "PPM", "XBM", "XPM",
 ];
 
-pub(super) fn is_media(path: &Path) -> bool {
+pub(crate) fn is_media(path: &Path) -> bool {
     fn get_extension(path: &Path) -> Option<&str> {
         path.extension()?.to_str()
     }
@@ -66,5 +66,38 @@ impl MediaAttachments {
         self.model.begin_reset_model();
         self.contents = media;
         self.model.end_reset_model();
+    }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.contents.is_empty()
+    }
+
+    pub(crate) fn add_attachment(
+        &mut self,
+        path: std::path::PathBuf,
+    ) -> Option<()> {
+        let path = path.into_os_string().into_string().ok()?;
+
+        self.model
+            .begin_insert_rows(self.contents.len(), self.contents.len());
+        self.contents.push(path);
+        self.model.end_insert_rows();
+
+        Some(())
+    }
+
+    pub(crate) fn remove(
+        &mut self,
+        index: usize,
+    ) -> Option<()> {
+        if index >= self.contents.len() {
+            return None;
+        }
+
+        self.model.begin_remove_rows(index, index);
+        self.contents.remove(index);
+        self.model.end_remove_rows();
+
+        Some(())
     }
 }

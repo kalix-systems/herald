@@ -285,7 +285,11 @@ fn message_builder() -> Object {
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
-        hasAttachments: Prop::new().simple(Bool),
+
+        hasMediaAttachment: Prop::new().simple(Bool),
+        hasDocAttachment: Prop::new().simple(Bool),
+        documentAttachments: Prop::new().object(document_attachments()),
+        mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional(),
@@ -295,21 +299,16 @@ fn message_builder() -> Object {
         opHasAttachments: Prop::new().simple(Bool).optional()
     );
 
-    let item_props = item_props! {
-        attachmentPath: ItemProp::new(QString)
-    };
-
     let funcs = functions! {
         mut finalize() => Void,
         mut clearReply() => Void,
         mut addAttachment(path: QString) => Bool,
-        mut removeAttachment(path: QString) => Bool,
-        mut removeAttachmentByIndex(row_index: QUint64) => Bool,
-        mut removeLast() => Void,
+        mut removeDoc(row_index: QUint64) => Bool,
+        mut removeMedia(row_index: QUint64) => Bool,
     };
 
     obj! {
-        MessageBuilder: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+        MessageBuilder: Obj::new().list().funcs(funcs).props(props)
     }
 }
 

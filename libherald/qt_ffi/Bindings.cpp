@@ -140,8 +140,11 @@ inline void membersFilterRegexChanged(Members *o) {
 inline void messageBuilderBodyChanged(MessageBuilder *o) {
   Q_EMIT o->bodyChanged();
 }
-inline void messageBuilderHasAttachmentsChanged(MessageBuilder *o) {
-  Q_EMIT o->hasAttachmentsChanged();
+inline void messageBuilderHasDocAttachmentChanged(MessageBuilder *o) {
+  Q_EMIT o->hasDocAttachmentChanged();
+}
+inline void messageBuilderHasMediaAttachmentChanged(MessageBuilder *o) {
+  Q_EMIT o->hasMediaAttachmentChanged();
 }
 inline void messageBuilderIsReplyChanged(MessageBuilder *o) {
   Q_EMIT o->isReplyChanged();
@@ -1489,8 +1492,6 @@ bool members_remove_from_conversation_by_index(Members::Private *, quint64);
 bool members_toggle_filter_regex(Members::Private *);
 }
 extern "C" {
-void message_builder_data_attachment_path(const MessageBuilder::Private *, int,
-                                          QString *, qstring_set);
 void message_builder_sort(MessageBuilder::Private *, unsigned char column,
                           Qt::SortOrder order = Qt::AscendingOrder);
 int message_builder_row_count(const MessageBuilder::Private *);
@@ -1552,20 +1553,11 @@ Qt::ItemFlags MessageBuilder::flags(const QModelIndex &i) const {
   return flags;
 }
 
-QString MessageBuilder::attachmentPath(int row) const {
-  QString s;
-  message_builder_data_attachment_path(m_d, row, &s, set_qstring);
-  return s;
-}
-
 QVariant MessageBuilder::data(const QModelIndex &index, int role) const {
   Q_ASSERT(rowCount(index.parent()) > index.row());
   switch (index.column()) {
   case 0:
-    switch (role) {
-    case Qt::UserRole + 0:
-      return QVariant::fromValue(attachmentPath(index.row()));
-    }
+    switch (role) {}
     break;
   }
   return QVariant();
@@ -1583,7 +1575,6 @@ int MessageBuilder::role(const char *name) const {
 }
 QHash<int, QByteArray> MessageBuilder::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "attachmentPath");
   return names;
 }
 
@@ -1615,8 +1606,13 @@ void message_builder_body_get(const MessageBuilder::Private *, QString *,
 void message_builder_body_set(MessageBuilder::Private *, const ushort *str,
                               int len);
 void message_builder_body_set_none(MessageBuilder::Private *);
-bool message_builder_has_attachments_get(const MessageBuilder::Private *);
+DocumentAttachments::Private *
+message_builder_document_attachments_get(const MessageBuilder::Private *);
+bool message_builder_has_doc_attachment_get(const MessageBuilder::Private *);
+bool message_builder_has_media_attachment_get(const MessageBuilder::Private *);
 bool message_builder_is_reply_get(const MessageBuilder::Private *);
+MediaAttachments::Private *
+message_builder_media_attachments_get(const MessageBuilder::Private *);
 void message_builder_op_author_get(const MessageBuilder::Private *, QString *,
                                    qstring_set);
 void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
@@ -1630,11 +1626,8 @@ bool message_builder_add_attachment(MessageBuilder::Private *, const ushort *,
                                     int);
 void message_builder_clear_reply(MessageBuilder::Private *);
 void message_builder_finalize(MessageBuilder::Private *);
-bool message_builder_remove_attachment(MessageBuilder::Private *,
-                                       const ushort *, int);
-bool message_builder_remove_attachment_by_index(MessageBuilder::Private *,
-                                                quint64);
-void message_builder_remove_last(MessageBuilder::Private *);
+bool message_builder_remove_doc(MessageBuilder::Private *, quint64);
+bool message_builder_remove_media(MessageBuilder::Private *, quint64);
 }
 extern "C" {
 void message_search_data_after_first_match(const MessageSearch::Private *, int,
@@ -3059,8 +3052,65 @@ ConversationContent::ConversationContent(QObject *parent)
           m_messages,
           m_messages->m_builder,
           messageBuilderBodyChanged,
-          messageBuilderHasAttachmentsChanged,
+          m_builder->m_documentAttachments,
+          [](const DocumentAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](DocumentAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](DocumentAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](DocumentAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](DocumentAttachments *o) { o->beginResetModel(); },
+          [](DocumentAttachments *o) { o->endResetModel(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endInsertRows(); },
+          [](DocumentAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](DocumentAttachments *o) { o->endMoveRows(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          messageBuilderHasDocAttachmentChanged,
+          messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
+          m_builder->m_mediaAttachments,
+          [](const MediaAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](MediaAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](MediaAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](MediaAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](MediaAttachments *o) { o->beginResetModel(); },
+          [](MediaAttachments *o) { o->endResetModel(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endInsertRows(); },
+          [](MediaAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](MediaAttachments *o) { o->endMoveRows(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpHasAttachmentsChanged,
@@ -3160,9 +3210,29 @@ ConversationContent::ConversationContent(QObject *parent)
   m_members->m_d = conversation_content_members_get(m_d);
   m_messages->m_d = conversation_content_messages_get(m_d);
   m_messages->m_builder->m_d = messages_builder_get(m_messages->m_d);
+  m_builder->m_documentAttachments->m_d =
+      message_builder_document_attachments_get(m_builder->m_d);
+  m_builder->m_mediaAttachments->m_d =
+      message_builder_media_attachments_get(m_builder->m_d);
   connect(
       this->m_members, &Members::newDataReady, this->m_members,
       [this](const QModelIndex &i) { this->m_members->fetchMore(i); },
+      Qt::QueuedConnection);
+  connect(
+      this->m_messages->m_builder->m_documentAttachments,
+      &DocumentAttachments::newDataReady,
+      this->m_messages->m_builder->m_documentAttachments,
+      [this](const QModelIndex &i) {
+        this->m_messages->m_builder->m_documentAttachments->fetchMore(i);
+      },
+      Qt::QueuedConnection);
+  connect(
+      this->m_messages->m_builder->m_mediaAttachments,
+      &MediaAttachments::newDataReady,
+      this->m_messages->m_builder->m_mediaAttachments,
+      [this](const QModelIndex &i) {
+        this->m_messages->m_builder->m_mediaAttachments->fetchMore(i);
+      },
       Qt::QueuedConnection);
   connect(
       this->m_messages->m_builder, &MessageBuilder::newDataReady,
@@ -3772,17 +3842,79 @@ bool Members::removeFromConversationByIndex(quint64 row_index) {
 bool Members::toggleFilterRegex() { return members_toggle_filter_regex(m_d); }
 
 MessageBuilder::MessageBuilder(bool /*owned*/, QObject *parent)
-    : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
+    : QAbstractItemModel(parent),
+      m_documentAttachments(new DocumentAttachments(false, this)),
+      m_mediaAttachments(new MediaAttachments(false, this)), m_d(nullptr),
+      m_ownsPrivate(false) {
   initHeaderData();
 }
 
 MessageBuilder::MessageBuilder(QObject *parent)
     : QAbstractItemModel(parent),
+      m_documentAttachments(new DocumentAttachments(false, this)),
+      m_mediaAttachments(new MediaAttachments(false, this)),
       m_d(message_builder_new(new MessageBuilderPtrBundle{
           this,
           messageBuilderBodyChanged,
-          messageBuilderHasAttachmentsChanged,
+          m_documentAttachments,
+          [](const DocumentAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](DocumentAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](DocumentAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](DocumentAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](DocumentAttachments *o) { o->beginResetModel(); },
+          [](DocumentAttachments *o) { o->endResetModel(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endInsertRows(); },
+          [](DocumentAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](DocumentAttachments *o) { o->endMoveRows(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          messageBuilderHasDocAttachmentChanged,
+          messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
+          m_mediaAttachments,
+          [](const MediaAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](MediaAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](MediaAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](MediaAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](MediaAttachments *o) { o->beginResetModel(); },
+          [](MediaAttachments *o) { o->endResetModel(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endInsertRows(); },
+          [](MediaAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](MediaAttachments *o) { o->endMoveRows(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpHasAttachmentsChanged,
@@ -3816,6 +3948,20 @@ MessageBuilder::MessageBuilder(QObject *parent)
           },
           [](MessageBuilder *o) { o->endRemoveRows(); }})),
       m_ownsPrivate(true) {
+  m_documentAttachments->m_d = message_builder_document_attachments_get(m_d);
+  m_mediaAttachments->m_d = message_builder_media_attachments_get(m_d);
+  connect(
+      this->m_documentAttachments, &DocumentAttachments::newDataReady,
+      this->m_documentAttachments,
+      [this](const QModelIndex &i) {
+        this->m_documentAttachments->fetchMore(i);
+      },
+      Qt::QueuedConnection);
+  connect(
+      this->m_mediaAttachments, &MediaAttachments::newDataReady,
+      this->m_mediaAttachments,
+      [this](const QModelIndex &i) { this->m_mediaAttachments->fetchMore(i); },
+      Qt::QueuedConnection);
   connect(
       this, &MessageBuilder::newDataReady, this,
       [this](const QModelIndex &i) { this->fetchMore(i); },
@@ -3844,12 +3990,30 @@ void MessageBuilder::setBody(const QString &v) {
   }
 }
 
-bool MessageBuilder::hasAttachments() const {
-  return message_builder_has_attachments_get(m_d);
+const DocumentAttachments *MessageBuilder::documentAttachments() const {
+  return m_documentAttachments;
+}
+DocumentAttachments *MessageBuilder::documentAttachments() {
+  return m_documentAttachments;
+}
+
+bool MessageBuilder::hasDocAttachment() const {
+  return message_builder_has_doc_attachment_get(m_d);
+}
+
+bool MessageBuilder::hasMediaAttachment() const {
+  return message_builder_has_media_attachment_get(m_d);
 }
 
 bool MessageBuilder::isReply() const {
   return message_builder_is_reply_get(m_d);
+}
+
+const MediaAttachments *MessageBuilder::mediaAttachments() const {
+  return m_mediaAttachments;
+}
+MediaAttachments *MessageBuilder::mediaAttachments() {
+  return m_mediaAttachments;
 }
 
 QString MessageBuilder::opAuthor() const {
@@ -3892,13 +4056,12 @@ bool MessageBuilder::addAttachment(const QString &path) {
 }
 void MessageBuilder::clearReply() { return message_builder_clear_reply(m_d); }
 void MessageBuilder::finalize() { return message_builder_finalize(m_d); }
-bool MessageBuilder::removeAttachment(const QString &path) {
-  return message_builder_remove_attachment(m_d, path.utf16(), path.size());
+bool MessageBuilder::removeDoc(quint64 row_index) {
+  return message_builder_remove_doc(m_d, row_index);
 }
-bool MessageBuilder::removeAttachmentByIndex(quint64 row_index) {
-  return message_builder_remove_attachment_by_index(m_d, row_index);
+bool MessageBuilder::removeMedia(quint64 row_index) {
+  return message_builder_remove_media(m_d, row_index);
 }
-void MessageBuilder::removeLast() { return message_builder_remove_last(m_d); }
 
 MessageSearch::MessageSearch(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {
@@ -3993,8 +4156,65 @@ Messages::Messages(QObject *parent)
           this,
           m_builder,
           messageBuilderBodyChanged,
-          messageBuilderHasAttachmentsChanged,
+          m_builder->m_documentAttachments,
+          [](const DocumentAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](DocumentAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](DocumentAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](DocumentAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](DocumentAttachments *o) { o->beginResetModel(); },
+          [](DocumentAttachments *o) { o->endResetModel(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endInsertRows(); },
+          [](DocumentAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](DocumentAttachments *o) { o->endMoveRows(); },
+          [](DocumentAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](DocumentAttachments *o) { o->endRemoveRows(); },
+          messageBuilderHasDocAttachmentChanged,
+          messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
+          m_builder->m_mediaAttachments,
+          [](const MediaAttachments *o) {
+            Q_EMIT o->newDataReady(QModelIndex());
+          },
+          [](MediaAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
+          [](MediaAttachments *o) {
+            o->updatePersistentIndexes();
+            Q_EMIT o->layoutChanged();
+          },
+          [](MediaAttachments *o, quintptr first, quintptr last) {
+            o->dataChanged(o->createIndex(first, 0, first),
+                           o->createIndex(last, 0, last));
+          },
+          [](MediaAttachments *o) { o->beginResetModel(); },
+          [](MediaAttachments *o) { o->endResetModel(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginInsertRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endInsertRows(); },
+          [](MediaAttachments *o, int first, int last, int destination) {
+            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
+                             destination);
+          },
+          [](MediaAttachments *o) { o->endMoveRows(); },
+          [](MediaAttachments *o, int first, int last) {
+            o->beginRemoveRows(QModelIndex(), first, last);
+          },
+          [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
           messageBuilderOpHasAttachmentsChanged,
@@ -4065,6 +4285,25 @@ Messages::Messages(QObject *parent)
           [](Messages *o) { o->endRemoveRows(); }})),
       m_ownsPrivate(true) {
   m_builder->m_d = messages_builder_get(m_d);
+  m_builder->m_documentAttachments->m_d =
+      message_builder_document_attachments_get(m_builder->m_d);
+  m_builder->m_mediaAttachments->m_d =
+      message_builder_media_attachments_get(m_builder->m_d);
+  connect(
+      this->m_builder->m_documentAttachments,
+      &DocumentAttachments::newDataReady,
+      this->m_builder->m_documentAttachments,
+      [this](const QModelIndex &i) {
+        this->m_builder->m_documentAttachments->fetchMore(i);
+      },
+      Qt::QueuedConnection);
+  connect(
+      this->m_builder->m_mediaAttachments, &MediaAttachments::newDataReady,
+      this->m_builder->m_mediaAttachments,
+      [this](const QModelIndex &i) {
+        this->m_builder->m_mediaAttachments->fetchMore(i);
+      },
+      Qt::QueuedConnection);
   connect(
       this->m_builder, &MessageBuilder::newDataReady, this->m_builder,
       [this](const QModelIndex &i) { this->m_builder->fetchMore(i); },

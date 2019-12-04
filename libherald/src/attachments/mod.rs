@@ -10,6 +10,7 @@ use std::{convert::TryInto, ops::Not, path::PathBuf};
 mod documents;
 mod media;
 pub use documents::DocumentAttachments;
+pub(crate) use media::is_media;
 pub use media::MediaAttachments;
 
 type Contents = Vec<PathBuf>;

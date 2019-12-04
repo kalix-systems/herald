@@ -56,4 +56,37 @@ impl DocumentAttachments {
         self.contents = docs;
         self.model.end_reset_model();
     }
+
+    pub(crate) fn is_empty(&self) -> bool {
+        self.contents.is_empty()
+    }
+
+    pub(crate) fn add_attachment(
+        &mut self,
+        path: std::path::PathBuf,
+    ) -> Option<()> {
+        let path = path.into_os_string().into_string().ok()?;
+
+        self.model
+            .begin_insert_rows(self.contents.len(), self.contents.len());
+        self.contents.push(path);
+        self.model.end_insert_rows();
+
+        Some(())
+    }
+
+    pub(crate) fn remove(
+        &mut self,
+        index: usize,
+    ) -> Option<()> {
+        if index >= self.contents.len() {
+            return None;
+        }
+
+        self.model.begin_remove_rows(index, index);
+        self.contents.remove(index);
+        self.model.end_remove_rows();
+
+        Some(())
+    }
 }
