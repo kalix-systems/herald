@@ -16,8 +16,6 @@ impl Event {
                 msg,
             } = push;
 
-            dbg!(&tag);
-
             match tag {
                 PushTag::User => {
                     let cmsg = kson::from_bytes(msg)?;
@@ -118,9 +116,8 @@ impl Event {
         _: Time,
         msg: DeviceMessage,
     ) {
-        dbg!();
         self.with_comp(|ev| {
-            let (from, msg) = dbg!(dmessages::open(msg)?);
+            let (from, msg) = dmessages::open(msg)?;
             let GlobalId { uid, did } = from;
 
             match msg {
@@ -157,8 +154,7 @@ impl Event {
         msg: Cipher,
     ) {
         self.with_comp(move |ev| {
-            dbg!();
-            let (cid, from, msg) = dbg!(amessages::open(msg)?);
+            let (cid, from, msg) = amessages::open(msg)?;
             match msg {
                 AuxMessage::NewKey(nk) => {
                     crate::user_keys::guard_sig_valid(from.uid, &nk.0, loc!())?;
