@@ -70,7 +70,16 @@ fn ratchet_states() {
         ))
     });
 
-    let ((gr1, r1_), (gr2, r2_), (gr3, r3_), (gr4, r4_)) = res.expect(womp!());
+    let ((gr1, r1_), (gr2, r2_), (gr3, r3_), (gr4, r4_)) = res
+        .map(|(a, b, c, d)| {
+            (
+                a.expect(womp!()),
+                b.expect(womp!()),
+                c.expect(womp!()),
+                d.expect(womp!()),
+            )
+        })
+        .expect(womp!());
 
     assert_eq!(gr1, 0);
     assert_eq!(gr2, 0);
@@ -99,12 +108,17 @@ fn ratchet_states() {
         let c4 = tx.seal_msg(cid2, pk2, ad4.clone(), msg4.clone())?;
         Ok((c1, c2, c3, c4))
     });
-    let ((gc1, c1), (gc2, c2), (gc3, c3), (gc4, c4)) = res.expect(womp!());
+    let ((gc1, c1, or1), (gc2, c2, or2), (gc3, c3, or3), (gc4, c4, or4)) = res.expect(womp!());
 
     assert_eq!(gc1, 0);
     assert_eq!(gc2, 0);
     assert_eq!(gc3, 0);
     assert_eq!(gc4, 0);
+
+    assert_eq!(or1, None);
+    assert_eq!(or2, None);
+    assert_eq!(or3, None);
+    assert_eq!(or4, None);
 
     let res: Result<_, ChainKeysError> = db::with_tx_from_conn(&mut conn, |tx| {
         let m1 = tx.get_derived_key(cid1, pk1, 0, 0)?;
