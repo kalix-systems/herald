@@ -1,37 +1,45 @@
-use crate::{ffi, interface::*, ret_err, ret_none, spawn};
+use crate::{
+    ffi,
+    interface::{AttachmentsEmitter as Emitter, AttachmentsList as List, AttachmentsTrait},
+    ret_err, spawn,
+};
 use crossbeam_channel::{bounded, Receiver};
 use heraldcore::{channel_send_err, message::attachments, types::MsgId};
-use std::{convert::TryInto, ops::Not};
+use std::{convert::TryInto, ops::Not, path::PathBuf};
 
-type Emitter = AttachmentsEmitter;
-type List = AttachmentsList;
+mod documents;
+mod media;
+pub use documents::DocumentAttachments;
+pub use media::MediaAttachments;
 
-type Contents = Vec<String>;
+type Contents = Vec<PathBuf>;
 
 /// Attachments list model
 pub struct Attachments {
     msg_id: Option<MsgId>,
-    inner: Contents,
     emit: Emitter,
-    model: List,
+    document_attachments: DocumentAttachments,
+    media_attachments: MediaAttachments,
     rx: Option<Receiver<Contents>>,
 }
 
 impl AttachmentsTrait for Attachments {
     fn new(
-        emit: AttachmentsEmitter,
-        model: AttachmentsList,
+        emit: Emitter,
+        _: List,
+        document_attachments: DocumentAttachments,
+        media_attachments: MediaAttachments,
     ) -> Self {
         Self {
             emit,
-            model,
             msg_id: None,
-            inner: vec![],
             rx: None,
+            document_attachments,
+            media_attachments,
         }
     }
 
-    fn emit(&mut self) -> &mut AttachmentsEmitter {
+    fn emit(&mut self) -> &mut Emitter {
         &mut self.emit
     }
 
@@ -55,7 +63,7 @@ impl AttachmentsTrait for Attachments {
             let mut emit = self.emit().clone();
             spawn!({
                 let attachments = ret_err!(attachments::get(&msg_id));
-                let attachment_strings = ret_err!(attachments.into_flat_strings());
+                let attachment_strings = ret_err!(attachments.into_flat());
 
                 if attachment_strings.is_empty() {
                     return;
@@ -77,22 +85,42 @@ impl AttachmentsTrait for Attachments {
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
             if let Ok(contents) = rx.recv() {
-                self.model
-                    .begin_insert_rows(0, contents.len().saturating_sub(1));
-                self.inner = contents;
-                self.model.end_insert_rows();
+                let mut media = Vec::new();
+                let mut doc = Vec::new();
+
+                for path in contents {
+                    if media::is_media(&path) {
+                        if let Ok(path) = path.into_os_string().into_string() {
+                            media.push(path);
+                        }
+                    } else if let Ok(path) = path.into_os_string().into_string() {
+                        doc.push(path);
+                    }
+                }
+
+                self.media_attachments.fill(media);
+                self.document_attachments.fill(doc);
             }
         }
     }
 
-    fn row_count(&self) -> usize {
-        self.inner.len()
+    fn document_attachments(&self) -> &DocumentAttachments {
+        &self.document_attachments
     }
 
-    fn attachment_path(
-        &self,
-        index: usize,
-    ) -> &str {
-        ret_none!(self.inner.get(index), "")
+    fn document_attachments_mut(&mut self) -> &mut DocumentAttachments {
+        &mut self.document_attachments
+    }
+
+    fn media_attachments(&self) -> &MediaAttachments {
+        &self.media_attachments
+    }
+
+    fn media_attachments_mut(&mut self) -> &mut MediaAttachments {
+        &mut self.media_attachments
+    }
+
+    fn row_count(&self) -> usize {
+        0
     }
 }

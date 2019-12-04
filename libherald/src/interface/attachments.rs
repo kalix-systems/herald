@@ -150,6 +150,8 @@ pub trait AttachmentsTrait {
     fn new(
         emit: AttachmentsEmitter,
         model: AttachmentsList,
+        document_attachments: DocumentAttachments,
+        media_attachments: MediaAttachments,
     ) -> Self;
 
     fn emit(&mut self) -> &mut AttachmentsEmitter;
@@ -160,6 +162,14 @@ pub trait AttachmentsTrait {
         &mut self,
         value: Option<&[u8]>,
     );
+
+    fn document_attachments(&self) -> &DocumentAttachments;
+
+    fn document_attachments_mut(&mut self) -> &mut DocumentAttachments;
+
+    fn media_attachments(&self) -> &MediaAttachments;
+
+    fn media_attachments_mut(&mut self) -> &mut MediaAttachments;
 
     fn row_count(&self) -> usize;
 
@@ -191,11 +201,6 @@ pub trait AttachmentsTrait {
         _: SortOrder,
     ) {
     }
-
-    fn attachment_path(
-        &self,
-        index: usize,
-    ) -> &str;
 }
 
 #[no_mangle]
@@ -212,6 +217,32 @@ pub unsafe fn attachments_new_inner(ptr_bundle: *mut AttachmentsPtrBundle) -> At
     let AttachmentsPtrBundle {
         attachments,
         attachments_attachments_msg_id_changed,
+        document_attachments,
+        document_attachments_new_data_ready,
+        document_attachments_layout_about_to_be_changed,
+        document_attachments_layout_changed,
+        document_attachments_data_changed,
+        document_attachments_begin_reset_model,
+        document_attachments_end_reset_model,
+        document_attachments_begin_insert_rows,
+        document_attachments_end_insert_rows,
+        document_attachments_begin_move_rows,
+        document_attachments_end_move_rows,
+        document_attachments_begin_remove_rows,
+        document_attachments_end_remove_rows,
+        media_attachments,
+        media_attachments_new_data_ready,
+        media_attachments_layout_about_to_be_changed,
+        media_attachments_layout_changed,
+        media_attachments_data_changed,
+        media_attachments_begin_reset_model,
+        media_attachments_end_reset_model,
+        media_attachments_begin_insert_rows,
+        media_attachments_end_insert_rows,
+        media_attachments_begin_move_rows,
+        media_attachments_end_move_rows,
+        media_attachments_begin_remove_rows,
+        media_attachments_end_remove_rows,
         attachments_new_data_ready,
         attachments_layout_about_to_be_changed,
         attachments_layout_changed,
@@ -225,6 +256,44 @@ pub unsafe fn attachments_new_inner(ptr_bundle: *mut AttachmentsPtrBundle) -> At
         attachments_begin_remove_rows,
         attachments_end_remove_rows,
     } = ptr_bundle;
+    let document_attachments_emit = DocumentAttachmentsEmitter {
+        qobject: Arc::new(AtomicPtr::new(document_attachments)),
+        new_data_ready: document_attachments_new_data_ready,
+    };
+    let model = DocumentAttachmentsList {
+        qobject: document_attachments,
+        layout_about_to_be_changed: document_attachments_layout_about_to_be_changed,
+        layout_changed: document_attachments_layout_changed,
+        data_changed: document_attachments_data_changed,
+        begin_reset_model: document_attachments_begin_reset_model,
+        end_reset_model: document_attachments_end_reset_model,
+        begin_insert_rows: document_attachments_begin_insert_rows,
+        end_insert_rows: document_attachments_end_insert_rows,
+        begin_move_rows: document_attachments_begin_move_rows,
+        end_move_rows: document_attachments_end_move_rows,
+        begin_remove_rows: document_attachments_begin_remove_rows,
+        end_remove_rows: document_attachments_end_remove_rows,
+    };
+    let d_document_attachments = DocumentAttachments::new(document_attachments_emit, model);
+    let media_attachments_emit = MediaAttachmentsEmitter {
+        qobject: Arc::new(AtomicPtr::new(media_attachments)),
+        new_data_ready: media_attachments_new_data_ready,
+    };
+    let model = MediaAttachmentsList {
+        qobject: media_attachments,
+        layout_about_to_be_changed: media_attachments_layout_about_to_be_changed,
+        layout_changed: media_attachments_layout_changed,
+        data_changed: media_attachments_data_changed,
+        begin_reset_model: media_attachments_begin_reset_model,
+        end_reset_model: media_attachments_end_reset_model,
+        begin_insert_rows: media_attachments_begin_insert_rows,
+        end_insert_rows: media_attachments_end_insert_rows,
+        begin_move_rows: media_attachments_begin_move_rows,
+        end_move_rows: media_attachments_end_move_rows,
+        begin_remove_rows: media_attachments_begin_remove_rows,
+        end_remove_rows: media_attachments_end_remove_rows,
+    };
+    let d_media_attachments = MediaAttachments::new(media_attachments_emit, model);
     let attachments_emit = AttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(attachments)),
         attachments_msg_id_changed: attachments_attachments_msg_id_changed,
@@ -244,7 +313,12 @@ pub unsafe fn attachments_new_inner(ptr_bundle: *mut AttachmentsPtrBundle) -> At
         begin_remove_rows: attachments_begin_remove_rows,
         end_remove_rows: attachments_end_remove_rows,
     };
-    let d_attachments = Attachments::new(attachments_emit, model);
+    let d_attachments = Attachments::new(
+        attachments_emit,
+        model,
+        d_document_attachments,
+        d_media_attachments,
+    );
     d_attachments
 }
 
@@ -282,6 +356,20 @@ pub unsafe extern "C" fn attachments_attachments_msg_id_set(
 pub unsafe extern "C" fn attachments_attachments_msg_id_set_none(ptr: *mut Attachments) {
     let obj = &mut *ptr;
     obj.set_attachments_msg_id(None);
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_document_attachments_get(
+    ptr: *mut Attachments
+) -> *mut DocumentAttachments {
+    (&mut *ptr).document_attachments_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_media_attachments_get(
+    ptr: *mut Attachments
+) -> *mut MediaAttachments {
+    (&mut *ptr).media_attachments_mut()
 }
 
 #[no_mangle]
@@ -332,24 +420,37 @@ pub unsafe extern "C" fn attachments_sort(
     (&mut *ptr).sort(column, order)
 }
 
-#[no_mangle]
-pub unsafe extern "C" fn attachments_data_attachment_path(
-    ptr: *const Attachments,
-    row: c_int,
-    d: *mut QString,
-    set: fn(*mut QString, *const c_char, len: c_int),
-) {
-    let obj = &*ptr;
-    let data = obj.attachment_path(to_usize(row).unwrap_or(0));
-    let str_: *const c_char = data.as_ptr() as *const c_char;
-    set(d, str_, to_c_int(data.len()));
-}
-
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct AttachmentsPtrBundle {
     attachments: *mut AttachmentsQObject,
     attachments_attachments_msg_id_changed: fn(*mut AttachmentsQObject),
+    document_attachments: *mut DocumentAttachmentsQObject,
+    document_attachments_new_data_ready: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_layout_about_to_be_changed: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_layout_changed: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_data_changed: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_begin_reset_model: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_end_reset_model: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_insert_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_end_insert_rows: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_move_rows: fn(*mut DocumentAttachmentsQObject, usize, usize, usize),
+    document_attachments_end_move_rows: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_remove_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_end_remove_rows: fn(*mut DocumentAttachmentsQObject),
+    media_attachments: *mut MediaAttachmentsQObject,
+    media_attachments_new_data_ready: fn(*mut MediaAttachmentsQObject),
+    media_attachments_layout_about_to_be_changed: fn(*mut MediaAttachmentsQObject),
+    media_attachments_layout_changed: fn(*mut MediaAttachmentsQObject),
+    media_attachments_data_changed: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_begin_reset_model: fn(*mut MediaAttachmentsQObject),
+    media_attachments_end_reset_model: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_insert_rows: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_end_insert_rows: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_move_rows: fn(*mut MediaAttachmentsQObject, usize, usize, usize),
+    media_attachments_end_move_rows: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_remove_rows: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_end_remove_rows: fn(*mut MediaAttachmentsQObject),
     attachments_new_data_ready: fn(*mut AttachmentsQObject),
     attachments_layout_about_to_be_changed: fn(*mut AttachmentsQObject),
     attachments_layout_changed: fn(*mut AttachmentsQObject),

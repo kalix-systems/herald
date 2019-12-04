@@ -41,7 +41,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.op.is_some()
     }
 
-    fn is_media_message(&self) -> bool {
+    fn has_attachments(&self) -> bool {
         !self.inner.attachments.is_empty()
     }
 
@@ -63,7 +63,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.end_insert_rows();
 
         if len == 0 {
-            self.emit.is_media_message_changed();
+            self.emit.has_attachments_changed();
         }
 
         true
@@ -138,7 +138,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.end_remove_rows();
 
         if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
+            self.emit.has_attachments_changed();
         }
 
         true
@@ -159,7 +159,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.end_remove_rows();
 
         if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
+            self.emit.has_attachments_changed();
         }
 
         true
@@ -177,7 +177,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.end_remove_rows();
 
         if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
+            self.emit.has_attachments_changed();
         }
     }
 

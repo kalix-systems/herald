@@ -4,8 +4,10 @@ pub use config::*;
 pub use conversation_builder::*;
 pub use conversation_content::*;
 pub use conversations::*;
+pub use document_attachments::*;
 pub use errors::*;
 pub use herald::*;
+pub use media_attachments::*;
 pub use members::*;
 pub use message_builder::*;
 pub use message_search::*;
@@ -27,9 +29,13 @@ mod conversation_content;
 
 mod conversations;
 
+mod document_attachments;
+
 mod errors;
 
 mod herald;
+
+mod media_attachments;
 
 mod members;
 

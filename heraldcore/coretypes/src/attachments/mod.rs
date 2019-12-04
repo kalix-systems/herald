@@ -2,7 +2,12 @@ use herald_common::*;
 use hex::encode;
 use location::{loc, Location};
 use platform_dirs::attachments_dir;
-use std::{ffi::OsString, fmt, fs::read_dir, path::Path};
+use std::{
+    ffi::OsString,
+    fmt,
+    fs::read_dir,
+    path::{Path, PathBuf},
+};
 use tar::{Archive, Builder};
 
 #[derive(Debug)]
@@ -110,24 +115,18 @@ impl AttachmentMeta {
         Self(paths)
     }
 
-    /// Converts `AttachmentMeta` into a vector of `String`s
+    /// Converts `AttachmentMeta` into a vector of `PathBuf`s
     ///
     /// Note: this will ignore empty top level directories.
-    pub fn into_flat_strings(self) -> Result<Vec<String>, Error> {
+    pub fn into_flat(self) -> Result<Vec<PathBuf>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
+
         for p in self.0 {
             let mut path = attachments_dir();
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                out.push(
-                    entry
-                        .map_err(|e| Error::Read(e, loc!()))?
-                        .path()
-                        .into_os_string()
-                        .into_string()
-                        .map_err(Error::NonUnicodePath)?,
-                );
+                out.push(entry.map_err(|e| Error::Read(e, loc!()))?.path());
             }
         }
 

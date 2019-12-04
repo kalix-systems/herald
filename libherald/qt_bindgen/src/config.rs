@@ -50,7 +50,10 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        conversation_content(),
        messages(),
        message_builder(),
-       attachments()
+
+       attachments(),
+       media_attachments(),
+       document_attachments()
     }
 }
 
@@ -282,7 +285,7 @@ fn message_builder() -> Object {
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
-        isMediaMessage: Prop::new().simple(Bool),
+        hasAttachments: Prop::new().simple(Bool),
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional(),
@@ -373,19 +376,39 @@ fn users_search() -> Object {
     }
 }
 
-fn attachments() -> Object {
-    let props = props! {
-        // the message id the attachments list is associated with
-        attachmentsMsgId: Prop::new().simple(QByteArray).optional().write()
-    };
-
+fn media_attachments() -> Object {
     let item_props = item_props! {
         // Path the the attachment
-        attachmentPath: ItemProp::new(QString)
+        mediaAttachmentPath: ItemProp::new(QString)
     };
 
     obj! {
-        Attachments: Obj::new().list().props(props).item_props(item_props)
+        MediaAttachments: Obj::new().list().item_props(item_props)
+    }
+}
+
+fn document_attachments() -> Object {
+    let item_props = item_props! {
+        // Path the the attachment
+        documentAttachmentPath: ItemProp::new(QString),
+        documentAttachmentSize: ItemProp::new(QUint64)
+    };
+
+    obj! {
+        DocumentAttachments: Obj::new().list().item_props(item_props)
+    }
+}
+
+fn attachments() -> Object {
+    let props = props! {
+        // the message id the attachments list is associated with
+        attachmentsMsgId: Prop::new().simple(QByteArray).optional().write(),
+        documentAttachments: Prop::new().object(document_attachments()),
+        mediaAttachments: Prop::new().object(media_attachments())
+    };
+
+    obj! {
+        Attachments: Obj::new().list().props(props)
     }
 }
 

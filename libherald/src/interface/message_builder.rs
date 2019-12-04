@@ -5,7 +5,7 @@ pub struct MessageBuilderQObject;
 pub struct MessageBuilderEmitter {
     pub(super) qobject: Arc<AtomicPtr<MessageBuilderQObject>>,
     pub(super) body_changed: fn(*mut MessageBuilderQObject),
-    pub(super) is_media_message_changed: fn(*mut MessageBuilderQObject),
+    pub(super) has_attachments_changed: fn(*mut MessageBuilderQObject),
     pub(super) is_reply_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_author_changed: fn(*mut MessageBuilderQObject),
     pub(super) op_body_changed: fn(*mut MessageBuilderQObject),
@@ -26,7 +26,7 @@ impl MessageBuilderEmitter {
         MessageBuilderEmitter {
             qobject: self.qobject.clone(),
             body_changed: self.body_changed,
-            is_media_message_changed: self.is_media_message_changed,
+            has_attachments_changed: self.has_attachments_changed,
             is_reply_changed: self.is_reply_changed,
             op_author_changed: self.op_author_changed,
             op_body_changed: self.op_body_changed,
@@ -51,11 +51,11 @@ impl MessageBuilderEmitter {
         }
     }
 
-    pub fn is_media_message_changed(&mut self) {
+    pub fn has_attachments_changed(&mut self) {
         let ptr = self.qobject.load(Ordering::SeqCst);
 
         if !ptr.is_null() {
-            (self.is_media_message_changed)(ptr);
+            (self.has_attachments_changed)(ptr);
         }
     }
 
@@ -231,7 +231,7 @@ pub trait MessageBuilderTrait {
         value: Option<String>,
     );
 
-    fn is_media_message(&self) -> bool;
+    fn has_attachments(&self) -> bool;
 
     fn is_reply(&self) -> bool;
 
@@ -319,7 +319,7 @@ pub unsafe fn message_builder_new_inner(
     let MessageBuilderPtrBundle {
         message_builder,
         message_builder_body_changed,
-        message_builder_is_media_message_changed,
+        message_builder_has_attachments_changed,
         message_builder_is_reply_changed,
         message_builder_op_author_changed,
         message_builder_op_body_changed,
@@ -342,7 +342,7 @@ pub unsafe fn message_builder_new_inner(
     let message_builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(message_builder)),
         body_changed: message_builder_body_changed,
-        is_media_message_changed: message_builder_is_media_message_changed,
+        has_attachments_changed: message_builder_has_attachments_changed,
         is_reply_changed: message_builder_is_reply_changed,
         op_author_changed: message_builder_op_author_changed,
         op_body_changed: message_builder_op_body_changed,
@@ -458,8 +458,8 @@ pub unsafe extern "C" fn message_builder_body_set_none(ptr: *mut MessageBuilder)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn message_builder_is_media_message_get(ptr: *const MessageBuilder) -> bool {
-    (&*ptr).is_media_message()
+pub unsafe extern "C" fn message_builder_has_attachments_get(ptr: *const MessageBuilder) -> bool {
+    (&*ptr).has_attachments()
 }
 
 #[no_mangle]
@@ -605,7 +605,7 @@ pub unsafe extern "C" fn message_builder_data_attachment_path(
 pub struct MessageBuilderPtrBundle {
     message_builder: *mut MessageBuilderQObject,
     message_builder_body_changed: fn(*mut MessageBuilderQObject),
-    message_builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
+    message_builder_has_attachments_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_author_changed: fn(*mut MessageBuilderQObject),
     message_builder_op_body_changed: fn(*mut MessageBuilderQObject),
