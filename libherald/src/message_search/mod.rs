@@ -13,13 +13,19 @@ use std::ops::Not;
 
 mod imp;
 
+enum SearchThreadUpdate {
+    Res(Vec<SearchResult>),
+    Done,
+}
+
 /// Global message search handle
 pub struct MessageSearch {
     pattern: Option<SearchPattern>,
     emit: Emitter,
     model: List,
     results: Vec<SearchResult>,
-    rx: Option<Receiver<Vec<SearchResult>>>,
+    num_results: usize,
+    rx: Option<Receiver<SearchThreadUpdate>>,
 }
 
 impl Interface for MessageSearch {
@@ -29,7 +35,8 @@ impl Interface for MessageSearch {
     ) -> Self {
         Self {
             pattern: None,
-            results: vec![],
+            results: Vec::new(),
+            num_results: 0,
             model,
             emit,
             rx: None,
@@ -75,8 +82,9 @@ impl Interface for MessageSearch {
     ) {
         match (pattern, self.pattern.take()) {
             (Some(new), Some(mut old)) => {
-                self.clear_search();
+                self.num_results = 0;
                 if new.is_empty() {
+                    self.clear_search();
                     return;
                 }
 
@@ -87,8 +95,9 @@ impl Interface for MessageSearch {
                 ret_err!(self.start_search(old));
             }
             (Some(new), None) => {
-                self.clear_search();
+                self.num_results = 0;
                 if new.is_empty() {
+                    self.clear_search();
                     return;
                 }
 
@@ -107,6 +116,7 @@ impl Interface for MessageSearch {
         self.pattern = None;
         self.rx = None;
         self.results = Vec::new();
+        self.num_results = 0;
         self.model.end_reset_model();
     }
 
@@ -123,17 +133,39 @@ impl Interface for MessageSearch {
 
     fn fetch_more(&mut self) {
         if let Some(rx) = self.rx.as_ref() {
-            for mut new_results in rx.try_iter() {
-                if new_results.is_empty() {
-                    continue;
+            for new in rx.try_iter() {
+                match new {
+                    SearchThreadUpdate::Res(new_results) => {
+                        for new_res in new_results.into_iter() {
+                            match self.results.get_mut(self.num_results) {
+                                Some(old_res) => {
+                                    *old_res = new_res;
+                                    self.model.data_changed(self.num_results, self.num_results);
+                                }
+                                None => {
+                                    self.model
+                                        .begin_insert_rows(self.num_results, self.num_results);
+                                    self.results.push(new_res);
+                                    self.model.end_insert_rows();
+                                }
+                            }
+
+                            self.num_results += 1;
+                        }
+                    }
+                    SearchThreadUpdate::Done => {
+                        let diff = self.results.len().saturating_sub(self.num_results + 1);
+
+                        if diff != 0 {
+                            self.model.begin_remove_rows(
+                                self.num_results,
+                                self.results.len().saturating_sub(1),
+                            );
+                            self.results.truncate(self.num_results);
+                            self.model.end_remove_rows();
+                        }
+                    }
                 }
-
-                let last_ix = self.results.len().saturating_sub(1);
-
-                self.model
-                    .begin_insert_rows(last_ix, last_ix + new_results.len().saturating_sub(1));
-                self.results.append(&mut new_results);
-                self.model.end_insert_rows();
             }
         }
     }
@@ -145,11 +177,34 @@ impl Interface for MessageSearch {
         Some(self.results.get(index).as_ref()?.author.as_str())
     }
 
-    fn body(
+    fn before_first_match(
         &self,
         index: usize,
-    ) -> Option<&str> {
-        Some(self.results.get(index).as_ref()?.body.as_str())
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.before_first.as_str(),
+            None => "",
+        }
+    }
+
+    fn first_match(
+        &self,
+        index: usize,
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.first_match.as_str(),
+            None => "",
+        }
+    }
+
+    fn after_first_match(
+        &self,
+        index: usize,
+    ) -> &str {
+        match self.results.get(index).as_ref() {
+            Some(res) => res.body.after_first.as_str(),
+            None => "",
+        }
     }
 
     fn conversation(

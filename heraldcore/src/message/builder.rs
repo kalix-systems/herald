@@ -12,8 +12,6 @@ pub struct OutboundMessageBuilder {
     pub op: Option<MsgId>,
     /// Attachments
     pub attachments: Vec<PathBuf>,
-    /// Whether to treat the value as markdown
-    pub parse_markdown: bool,
 }
 
 /// Values `OutboundMessageBuilder`'s `store_and_send` function
@@ -69,16 +67,6 @@ impl OutboundMessageBuilder {
         path: PathBuf,
     ) -> &mut Self {
         self.attachments.push(path);
-        self
-    }
-
-    /// Parses the text as markdown, if possible, rendering it to HTML
-    pub fn parse_markdown(&mut self) -> &mut Self {
-        if let Some(body) = &self.body {
-            if let Ok(md) = body.parse_markdown() {
-                self.body.replace(md);
-            }
-        }
         self
     }
 

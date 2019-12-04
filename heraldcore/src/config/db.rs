@@ -1,4 +1,6 @@
 use super::*;
+use rusqlite::named_params;
+use std::net::SocketAddr;
 
 pub(crate) fn set_name(
     conn: &rusqlite::Connection,
@@ -42,15 +44,16 @@ pub(crate) fn set_colorscheme(
 
 /// Gets the user's configuration
 pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
-    let (id, name, profile_picture, color, colorscheme, nts_conversation) =
-        conn.query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
+    let (id, name, profile_picture, color, colorscheme, nts_conversation, home_server) = conn
+        .query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
             Ok((
-                row.get(0)?,
-                row.get(1)?,
-                row.get(2)?,
-                row.get(3)?,
-                row.get(4)?,
-                row.get(5)?,
+                row.get("id")?,
+                row.get("name")?,
+                row.get("profile_picture")?,
+                row.get("color")?,
+                row.get("colorscheme")?,
+                row.get("pairwise_conversation")?,
+                row.get::<_, String>("home_server")?,
             ))
         })?;
 
@@ -61,6 +64,7 @@ pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
         color,
         colorscheme,
         nts_conversation,
+        home_server: home_server.parse()?,
     })
 }
 
@@ -85,6 +89,16 @@ pub(crate) fn gid(conn: &rusqlite::Connection) -> Result<GlobalId, HErr> {
     Ok(GlobalId { uid, did })
 }
 
+/// Gets the server address where the current user is registered
+pub(crate) fn home_server(conn: &rusqlite::Connection) -> Result<SocketAddr, HErr> {
+    let server_addr_raw: String =
+        conn.query_row(include_str!("sql/home_server.sql"), NO_PARAMS, |row| {
+            row.get("home_server")
+        })?;
+
+    Ok(server_addr_raw.parse()?)
+}
+
 impl ConfigBuilder {
     /// Adds configuration.
     pub(crate) fn add_db(
@@ -98,10 +112,13 @@ impl ConfigBuilder {
             colorscheme,
             name,
             nts_conversation,
+            home_server,
         } = self;
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
+
+        let home_server = home_server.unwrap_or_else(|| *crate::network::default_server());
 
         let mut user_builder = crate::user::UserBuilder::new(id).local();
 
@@ -116,9 +133,9 @@ impl ConfigBuilder {
         user_builder = user_builder.color(color);
 
         let tx = conn.transaction()?;
-        tx.execute(
+        tx.execute_named(
             include_str!("sql/add_config.sql"),
-            params![id, keypair, colorscheme],
+            named_params!["@id": id, "@kp": keypair, "@colorscheme": colorscheme, "@home_server": home_server.to_string() ],
         )?;
 
         let (user, _conv) = user_builder.add_with_tx(&tx)?;
@@ -131,6 +148,7 @@ impl ConfigBuilder {
             color,
             colorscheme,
             nts_conversation: user.pairwise_conversation,
+            home_server,
         };
 
         Ok(config)

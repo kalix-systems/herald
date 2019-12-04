@@ -72,7 +72,7 @@ fn herald() -> Object {
     };
 
     let funcs = functions! {
-        mut registerNewUser(user_id: QString) => Void,
+        mut registerNewUser(user_id: QString, addr: QString, port: QString) => Void,
         mut login() => Bool,
         mut setAppLocalDataDir(path: QString) => Void,
     };
@@ -283,7 +283,6 @@ fn message_builder() -> Object {
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
         isMediaMessage: Prop::new().simple(Bool),
-        parseMarkdown: Prop::new().simple(Bool).write(),
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional(),
@@ -407,7 +406,9 @@ fn message_search() -> Object {
         conversationPicture: ItemProp::new(QString).optional().get_by_value(),
         conversationColor: ItemProp::new(QUint32).optional().get_by_value(),
         conversationTitle: ItemProp::new(QString).optional().get_by_value(),
-        body: ItemProp::new(QString).optional(),
+        beforeFirstMatch: ItemProp::new(QString),
+        firstMatch: ItemProp::new(QString),
+        afterFirstMatch: ItemProp::new(QString),
         time: ItemProp::new(Qint64).optional(),
         has_attachments: ItemProp::new(Bool).optional()
     };

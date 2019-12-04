@@ -10,15 +10,15 @@ use chainkeys;
 use coretypes::conversation::ConversationMeta;
 use herald_common::*;
 use kdf_ratchet::RatchetState;
-use lazy_static::*;
 use network_types::{amessages::*, cmessages::*, dmessages::*};
 use std::{
-    net::{SocketAddr, SocketAddrV4},
+    net::SocketAddr,
     sync::atomic::{AtomicBool, Ordering},
 };
 use websocket::{message::OwnedMessage as WMessage, sync::client as wsclient};
 
 mod statics;
+pub(crate) use statics::default_server;
 use statics::*;
 
 mod login_imp;
@@ -70,16 +70,25 @@ pub fn new_key(to_new: sig::PublicKey) -> Result<PKIResponse, HErr> {
 }
 
 /// Registers new user on the server.
-pub fn register(uid: UserId) -> Result<register::Res, HErr> {
+pub fn register(
+    uid: UserId,
+    home_server: Option<SocketAddr>,
+) -> Result<register::Res, HErr> {
     kcl::init();
+
+    let home_server = home_server.unwrap_or_else(|| *default_server());
 
     let kp = sig::KeyPair::gen_new();
     let sig = kp.sign(*kp.public_key());
     let req = register::Req(uid, sig);
-    let res = helper::register(&req)?;
+
+    let res = helper::register(&req, home_server)?;
+
     // TODO: retry if this fails?
     if let register::Res::Success = &res {
-        crate::config::ConfigBuilder::new(uid, kp).add()?;
+        crate::config::ConfigBuilder::new(uid, kp)
+            .home_server(home_server)
+            .add()?;
     }
 
     Ok(res)
@@ -117,7 +126,7 @@ pub(crate) fn send_conversation_settings_update(
 }
 
 pub(crate) fn server_url(ext: &str) -> String {
-    format!("http://{}/{}", *SERVER_ADDR, ext)
+    format!("http://{}/{}", home_server(), ext)
 }
 
 macro_rules! get_of_helper {

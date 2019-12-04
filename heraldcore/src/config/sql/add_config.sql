@@ -1,3 +1,3 @@
 INSERT INTO
-  config(id, kp, colorscheme)
-VALUES(@1, @2, @3)
+  config(id, kp, colorscheme, home_server)
+VALUES(@id, @kp, @colorscheme, @home_server)
