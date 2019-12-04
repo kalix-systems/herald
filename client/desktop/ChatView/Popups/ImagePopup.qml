@@ -5,6 +5,8 @@ import QtQuick.Window 2.13
 
 Window {
     id: imageWindow
+    property real scale: 1.0
+    property bool freeScroll: scale === 1.0
     property Attachments sourceAtc
     title: sourceAtc !== null ? sourceAtc.attachmentPath(0).substring(
                                     sourceAtc.attachmentPath(0).lastIndexOf(
@@ -31,7 +33,6 @@ Window {
         if (visibility === 2) {
             width = Math.min(image.sourceSize.width, 750)
             height = Math.min(image.sourceSize.height, 500)
-            image.scale = 1
             x = root.x
             y = root.y
         }
@@ -39,27 +40,28 @@ Window {
 
     Flickable {
         id: flickable
-        // allow for scrolling
-        anchors.centerIn: background
         anchors.fill: parent
+        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.horizontal: ScrollBar {}
+        contentHeight: height
+        contentWidth: width
         Image {
             id: image
             source: sourceAtc !== null ? "file:" + sourceAtc.attachmentPath(
                                              0) : ""
             fillMode: Image.PreserveAspectFit
-            width: Math.min(image.sourceSize.width, 750)
-            anchors.centerIn: parent
             anchors.fill: parent
         }
-        PinchArea {
-            id: pinchArea
-            property real imageScale: 1.0
-            anchors.fill: parent
-            onPinchUpdated: {
+    }
 
-            }
+    PinchArea {
+        id: pinchArea
+        anchors.fill: parent
+        onPinchUpdated: {
+            imageWindow.scale += (pinch.scale - pinch.previousScale) / 2.0
+            flickable.resizeContent(imageWindow.width * imageWindow.scale,
+                                    imageWindow.height * imageWindow.scale,
+                                    pinch.center)
         }
-        ScrollBar.vertical: ScrollBar {}
-        ScrollBar.horizontal: ScrollBar {}
     }
 }
