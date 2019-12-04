@@ -4,18 +4,17 @@ import LibHerald 1.0
 import QtQuick.Window 2.13
 
 Window {
+    id: imageWindow
     property Attachments sourceAtc
-
-    height: image.sourceSize.height
-    width: image.sourceSize.width
     title: sourceAtc !== null ? sourceAtc.attachmentPath(0).substring(
                                     sourceAtc.attachmentPath(0).lastIndexOf(
                                         '/') + 1) : ""
-    Connections {
-        onShow: {
-            y = root.y
-            x = root.width + root.x
-        }
+
+    width: Math.min(image.sourceSize.width, 750)
+    height: Math.min(image.sourceSize.height, 500)
+    Rectangle {
+        anchors.fill: parent
+        color: CmnCfg.palette.medGrey
     }
 
     Flickable {
@@ -24,6 +23,15 @@ Window {
             id: image
             source: sourceAtc !== null ? "file:" + sourceAtc.attachmentPath(
                                              0) : ""
+            fillMode: Image.PreserveAspectFit
+            anchors.fill: parent
+
+            PinchArea {
+                id: pinch
+                anchors.fill: parent
+            }
         }
+        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.horizontal: ScrollBar {}
     }
 }

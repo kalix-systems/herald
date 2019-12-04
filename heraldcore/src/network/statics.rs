@@ -1,7 +1,7 @@
 use super::*;
 
 const DEFAULT_PORT: u16 = 8080;
-const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [192, 168, 50, 64];
+const DEFAULT_SERVER_IP_ADDR: [u8; 4] = [127, 0, 0, 1];
 
 lazy_static! {
     pub(super) static ref SERVER_ADDR: SocketAddr = match &coreconf::CONF.server_addr {
