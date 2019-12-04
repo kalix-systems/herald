@@ -17,8 +17,34 @@ Window {
     minimumWidth: 350
     minimumHeight: 150
 
-    Item {
+    Row {
         id: controls
+        z: CmnCfg.overlayZ
+        spacing: CmnCfg.smallMargin
+        padding: CmnCfg.smallMargin
+        anchors {
+            right: imageWindow.right
+            top: imageWindow.top
+        }
+
+        Button {
+            text: "+"
+            font.bold: true
+            font.pointSize: 20
+            width: 50
+        }
+        Button {
+            text: "-"
+            font.bold: true
+            font.pointSize: 20
+            width: 50
+        }
+        Button {
+            text: "↓"
+            font.bold: true
+            font.pointSize: 20
+            width: 50
+        }
     }
 
     Rectangle {
@@ -51,6 +77,7 @@ Window {
                                              0) : ""
             fillMode: Image.PreserveAspectFit
             anchors.fill: parent
+            mipmap: true
         }
     }
 

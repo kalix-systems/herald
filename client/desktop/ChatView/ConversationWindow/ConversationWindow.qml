@@ -144,6 +144,7 @@ ListView {
                 }
                 imageTapCallback: function () {
                     imagePopup.sourceAtc = atc
+                    imagePopup.raise()
                     imagePopup.show()
                 }
                 authorColor: userColor
