@@ -50,6 +50,22 @@ impl Interface for MediaAttachments {
         self.contents.len()
     }
 
+    fn media_attachment_one(&self) -> Option<&str> {
+        self.contents.get(0).map(String::as_str)
+    }
+
+    fn media_attachment_two(&self) -> Option<&str> {
+        self.contents.get(1).map(String::as_str)
+    }
+
+    fn media_attachment_three(&self) -> Option<&str> {
+        self.contents.get(2).map(String::as_str)
+    }
+
+    fn media_attachment_four(&self) -> Option<&str> {
+        self.contents.get(3).map(String::as_str)
+    }
+
     fn media_attachment_path(
         &self,
         index: usize,

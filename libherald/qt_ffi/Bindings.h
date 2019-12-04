@@ -110,6 +110,10 @@ struct AttachmentsPtrBundle {
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
   MediaAttachments *media_attachments;
+  void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_three_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_two_changed)(MediaAttachments *);
 
   void (*media_attachments_new_data_ready)(const MediaAttachments *);
   void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
@@ -214,6 +218,10 @@ struct ConversationContentPtrBundle {
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
   MediaAttachments *media_attachments;
+  void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_three_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_two_changed)(MediaAttachments *);
 
   void (*media_attachments_new_data_ready)(const MediaAttachments *);
   void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
@@ -446,6 +454,10 @@ struct HeraldPtrBundle {
 };
 struct MediaAttachmentsPtrBundle {
   MediaAttachments *media_attachments;
+  void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_three_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_two_changed)(MediaAttachments *);
 
   void (*media_attachments_new_data_ready)(const MediaAttachments *);
   void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
@@ -505,6 +517,10 @@ struct MessageBuilderPtrBundle {
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
   MediaAttachments *media_attachments;
+  void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_three_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_two_changed)(MediaAttachments *);
 
   void (*media_attachments_new_data_ready)(const MediaAttachments *);
   void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
@@ -583,6 +599,10 @@ struct MessagesPtrBundle {
   void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
   MediaAttachments *media_attachments;
+  void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_three_changed)(MediaAttachments *);
+  void (*media_attachments_media_attachment_two_changed)(MediaAttachments *);
 
   void (*media_attachments_new_data_ready)(const MediaAttachments *);
   void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
@@ -1316,11 +1336,23 @@ public:
 private:
   Private *m_d;
   bool m_ownsPrivate;
+  Q_PROPERTY(QString mediaAttachmentFour READ mediaAttachmentFour NOTIFY
+                 mediaAttachmentFourChanged FINAL)
+  Q_PROPERTY(QString mediaAttachmentOne READ mediaAttachmentOne NOTIFY
+                 mediaAttachmentOneChanged FINAL)
+  Q_PROPERTY(QString mediaAttachmentThree READ mediaAttachmentThree NOTIFY
+                 mediaAttachmentThreeChanged FINAL)
+  Q_PROPERTY(QString mediaAttachmentTwo READ mediaAttachmentTwo NOTIFY
+                 mediaAttachmentTwoChanged FINAL)
   explicit MediaAttachments(bool owned, QObject *parent);
 
 public:
   explicit MediaAttachments(QObject *parent = nullptr);
   ~MediaAttachments() override;
+  QString mediaAttachmentFour() const;
+  QString mediaAttachmentOne() const;
+  QString mediaAttachmentThree() const;
+  QString mediaAttachmentTwo() const;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1357,6 +1389,10 @@ private:
   void initHeaderData();
   void updatePersistentIndexes();
 Q_SIGNALS:
+  void mediaAttachmentFourChanged();
+  void mediaAttachmentOneChanged();
+  void mediaAttachmentThreeChanged();
+  void mediaAttachmentTwoChanged();
 };
 class Members : public QAbstractItemModel {
   Q_OBJECT

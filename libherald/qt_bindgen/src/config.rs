@@ -376,13 +376,20 @@ fn users_search() -> Object {
 }
 
 fn media_attachments() -> Object {
+    let props = props! {
+        mediaAttachmentOne: Prop::new().simple(QString).optional(),
+        mediaAttachmentTwo: Prop::new().simple(QString).optional(),
+        mediaAttachmentThree: Prop::new().simple(QString).optional(),
+        mediaAttachmentFour: Prop::new().simple(QString).optional()
+    };
+
     let item_props = item_props! {
         // Path the the attachment
         mediaAttachmentPath: ItemProp::new(QString)
     };
 
     obj! {
-        MediaAttachments: Obj::new().list().item_props(item_props)
+        MediaAttachments: Obj::new().list().item_props(item_props).props(props)
     }
 }
 
