@@ -28,6 +28,7 @@ pub struct MediaAttachments {
     emit: Emitter,
     model: List,
     contents: Vec<String>,
+    dims: Vec<(u64, u64)>,
 }
 
 impl Interface for MediaAttachments {
@@ -39,6 +40,7 @@ impl Interface for MediaAttachments {
             emit,
             model,
             contents: Vec::new(),
+            dims: Vec::new(),
         }
     }
 
@@ -50,27 +52,38 @@ impl Interface for MediaAttachments {
         self.contents.len()
     }
 
-    fn media_attachment_one(&self) -> Option<&str> {
-        self.contents.get(0).map(String::as_str)
-    }
-
-    fn media_attachment_two(&self) -> Option<&str> {
-        self.contents.get(1).map(String::as_str)
-    }
-
-    fn media_attachment_three(&self) -> Option<&str> {
-        self.contents.get(2).map(String::as_str)
-    }
-
-    fn media_attachment_four(&self) -> Option<&str> {
-        self.contents.get(3).map(String::as_str)
-    }
-
     fn media_attachment_path(
         &self,
         index: usize,
     ) -> &str {
         ret_none!(self.contents.get(index), "")
+    }
+
+    fn media_attachment_height(
+        &self,
+        index: usize,
+    ) -> u64 {
+        let index = index as usize;
+        ret_none!(self.dims.get(index), 0).0
+    }
+
+    fn media_attachment_width(
+        &self,
+        index: usize,
+    ) -> u64 {
+        let index = index as usize;
+        ret_none!(self.dims.get(index), 0).1
+    }
+
+    fn set_media_attachment_dims(
+        &mut self,
+        index: u64,
+        height: u64,
+        width: u64,
+    ) {
+        let index = index as usize;
+        let dim = ret_none!(self.dims.get_mut(index));
+        *dim = (height, width);
     }
 }
 
@@ -82,32 +95,6 @@ impl MediaAttachments {
         self.model.begin_reset_model();
         self.contents = media;
         self.model.end_reset_model();
-
-        let len = self.contents.len();
-
-        if len == 0 {
-            return;
-        }
-
-        self.emit.media_attachment_one_changed();
-
-        if len == 1 {
-            return;
-        }
-
-        self.emit.media_attachment_two_changed();
-
-        if len == 2 {
-            return;
-        }
-
-        self.emit.media_attachment_three_changed();
-
-        if len == 3 {
-            return;
-        }
-
-        self.emit.media_attachment_four_changed();
     }
 
     pub(crate) fn is_empty(&self) -> bool {

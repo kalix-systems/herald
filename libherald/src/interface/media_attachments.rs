@@ -4,10 +4,6 @@ pub struct MediaAttachmentsQObject;
 
 pub struct MediaAttachmentsEmitter {
     pub(super) qobject: Arc<AtomicPtr<MediaAttachmentsQObject>>,
-    pub(super) media_attachment_four_changed: fn(*mut MediaAttachmentsQObject),
-    pub(super) media_attachment_one_changed: fn(*mut MediaAttachmentsQObject),
-    pub(super) media_attachment_three_changed: fn(*mut MediaAttachmentsQObject),
-    pub(super) media_attachment_two_changed: fn(*mut MediaAttachmentsQObject),
     pub(super) new_data_ready: fn(*mut MediaAttachmentsQObject),
 }
 
@@ -21,10 +17,6 @@ impl MediaAttachmentsEmitter {
     pub fn clone(&mut self) -> MediaAttachmentsEmitter {
         MediaAttachmentsEmitter {
             qobject: self.qobject.clone(),
-            media_attachment_four_changed: self.media_attachment_four_changed,
-            media_attachment_one_changed: self.media_attachment_one_changed,
-            media_attachment_three_changed: self.media_attachment_three_changed,
-            media_attachment_two_changed: self.media_attachment_two_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -33,38 +25,6 @@ impl MediaAttachmentsEmitter {
         let n: *const MediaAttachmentsQObject = null();
         self.qobject
             .store(n as *mut MediaAttachmentsQObject, Ordering::SeqCst);
-    }
-
-    pub fn media_attachment_four_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.media_attachment_four_changed)(ptr);
-        }
-    }
-
-    pub fn media_attachment_one_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.media_attachment_one_changed)(ptr);
-        }
-    }
-
-    pub fn media_attachment_three_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.media_attachment_three_changed)(ptr);
-        }
-    }
-
-    pub fn media_attachment_two_changed(&mut self) {
-        let ptr = self.qobject.load(Ordering::SeqCst);
-
-        if !ptr.is_null() {
-            (self.media_attachment_two_changed)(ptr);
-        }
     }
 
     pub fn new_data_ready(&mut self) {
@@ -184,13 +144,12 @@ pub trait MediaAttachmentsTrait {
 
     fn emit(&mut self) -> &mut MediaAttachmentsEmitter;
 
-    fn media_attachment_four(&self) -> Option<&str>;
-
-    fn media_attachment_one(&self) -> Option<&str>;
-
-    fn media_attachment_three(&self) -> Option<&str>;
-
-    fn media_attachment_two(&self) -> Option<&str>;
+    fn set_media_attachment_dims(
+        &mut self,
+        index: u64,
+        height: u64,
+        width: u64,
+    ) -> ();
 
     fn row_count(&self) -> usize;
 
@@ -223,10 +182,20 @@ pub trait MediaAttachmentsTrait {
     ) {
     }
 
+    fn media_attachment_height(
+        &self,
+        index: usize,
+    ) -> u64;
+
     fn media_attachment_path(
         &self,
         index: usize,
     ) -> &str;
+
+    fn media_attachment_width(
+        &self,
+        index: usize,
+    ) -> u64;
 }
 
 #[no_mangle]
@@ -244,10 +213,6 @@ pub unsafe fn media_attachments_new_inner(
 
     let MediaAttachmentsPtrBundle {
         media_attachments,
-        media_attachments_media_attachment_four_changed,
-        media_attachments_media_attachment_one_changed,
-        media_attachments_media_attachment_three_changed,
-        media_attachments_media_attachment_two_changed,
         media_attachments_new_data_ready,
         media_attachments_layout_about_to_be_changed,
         media_attachments_layout_changed,
@@ -263,10 +228,6 @@ pub unsafe fn media_attachments_new_inner(
     } = ptr_bundle;
     let media_attachments_emit = MediaAttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(media_attachments)),
-        media_attachment_four_changed: media_attachments_media_attachment_four_changed,
-        media_attachment_one_changed: media_attachments_media_attachment_one_changed,
-        media_attachment_three_changed: media_attachments_media_attachment_three_changed,
-        media_attachment_two_changed: media_attachments_media_attachment_two_changed,
         new_data_ready: media_attachments_new_data_ready,
     };
     let model = MediaAttachmentsList {
@@ -293,59 +254,14 @@ pub unsafe extern "C" fn media_attachments_free(ptr: *mut MediaAttachments) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn media_attachments_media_attachment_four_get(
-    ptr: *const MediaAttachments,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
+pub unsafe extern "C" fn media_attachments_set_media_attachment_dims(
+    ptr: *mut MediaAttachments,
+    index: u64,
+    height: u64,
+    width: u64,
 ) {
-    let obj = &*ptr;
-    let value = obj.media_attachment_four();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn media_attachments_media_attachment_one_get(
-    ptr: *const MediaAttachments,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.media_attachment_one();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn media_attachments_media_attachment_three_get(
-    ptr: *const MediaAttachments,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.media_attachment_three();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn media_attachments_media_attachment_two_get(
-    ptr: *const MediaAttachments,
-    prop: *mut QString,
-    set: fn(*mut QString, *const c_char, c_int),
-) {
-    let obj = &*ptr;
-    let value = obj.media_attachment_two();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
+    let obj = &mut *ptr;
+    obj.set_media_attachment_dims(index, height, width)
 }
 
 #[no_mangle]
@@ -397,6 +313,15 @@ pub unsafe extern "C" fn media_attachments_sort(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn media_attachments_data_media_attachment_height(
+    ptr: *const MediaAttachments,
+    row: c_int,
+) -> u64 {
+    let obj = &*ptr;
+    obj.media_attachment_height(to_usize(row).unwrap_or(0))
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn media_attachments_data_media_attachment_path(
     ptr: *const MediaAttachments,
     row: c_int,
@@ -409,14 +334,19 @@ pub unsafe extern "C" fn media_attachments_data_media_attachment_path(
     set(d, str_, to_c_int(data.len()));
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn media_attachments_data_media_attachment_width(
+    ptr: *const MediaAttachments,
+    row: c_int,
+) -> u64 {
+    let obj = &*ptr;
+    obj.media_attachment_width(to_usize(row).unwrap_or(0))
+}
+
 #[derive(Clone, Copy)]
 #[repr(C)]
 pub struct MediaAttachmentsPtrBundle {
     media_attachments: *mut MediaAttachmentsQObject,
-    media_attachments_media_attachment_four_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_one_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_three_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_two_changed: fn(*mut MediaAttachmentsQObject),
     media_attachments_new_data_ready: fn(*mut MediaAttachmentsQObject),
     media_attachments_layout_about_to_be_changed: fn(*mut MediaAttachmentsQObject),
     media_attachments_layout_changed: fn(*mut MediaAttachmentsQObject),

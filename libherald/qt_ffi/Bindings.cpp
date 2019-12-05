@@ -136,18 +136,6 @@ inline void heraldConnectionPendingChanged(Herald *o) {
 inline void heraldConnectionUpChanged(Herald *o) {
   Q_EMIT o->connectionUpChanged();
 }
-inline void mediaAttachmentsMediaAttachmentFourChanged(MediaAttachments *o) {
-  Q_EMIT o->mediaAttachmentFourChanged();
-}
-inline void mediaAttachmentsMediaAttachmentOneChanged(MediaAttachments *o) {
-  Q_EMIT o->mediaAttachmentOneChanged();
-}
-inline void mediaAttachmentsMediaAttachmentThreeChanged(MediaAttachments *o) {
-  Q_EMIT o->mediaAttachmentThreeChanged();
-}
-inline void mediaAttachmentsMediaAttachmentTwoChanged(MediaAttachments *o) {
-  Q_EMIT o->mediaAttachmentTwoChanged();
-}
 inline void membersFilterChanged(Members *o) { Q_EMIT o->filterChanged(); }
 inline void membersFilterRegexChanged(Members *o) {
   Q_EMIT o->filterRegexChanged();
@@ -1206,8 +1194,13 @@ void herald_register_new_user(Herald::Private *, const ushort *, int,
 void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
+quint64 media_attachments_data_media_attachment_height(
+    const MediaAttachments::Private *, int);
 void media_attachments_data_media_attachment_path(
     const MediaAttachments::Private *, int, QString *, qstring_set);
+quint64
+media_attachments_data_media_attachment_width(const MediaAttachments::Private *,
+                                              int);
 void media_attachments_sort(MediaAttachments::Private *, unsigned char column,
                             Qt::SortOrder order = Qt::AscendingOrder);
 int media_attachments_row_count(const MediaAttachments::Private *);
@@ -1269,10 +1262,18 @@ Qt::ItemFlags MediaAttachments::flags(const QModelIndex &i) const {
   return flags;
 }
 
+quint64 MediaAttachments::mediaAttachmentHeight(int row) const {
+  return media_attachments_data_media_attachment_height(m_d, row);
+}
+
 QString MediaAttachments::mediaAttachmentPath(int row) const {
   QString s;
   media_attachments_data_media_attachment_path(m_d, row, &s, set_qstring);
   return s;
+}
+
+quint64 MediaAttachments::mediaAttachmentWidth(int row) const {
+  return media_attachments_data_media_attachment_width(m_d, row);
 }
 
 QVariant MediaAttachments::data(const QModelIndex &index, int role) const {
@@ -1281,7 +1282,11 @@ QVariant MediaAttachments::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
+      return QVariant::fromValue(mediaAttachmentHeight(index.row()));
+    case Qt::UserRole + 1:
       return QVariant::fromValue(mediaAttachmentPath(index.row()));
+    case Qt::UserRole + 2:
+      return QVariant::fromValue(mediaAttachmentWidth(index.row()));
     }
     break;
   }
@@ -1300,7 +1305,9 @@ int MediaAttachments::role(const char *name) const {
 }
 QHash<int, QByteArray> MediaAttachments::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "mediaAttachmentPath");
+  names.insert(Qt::UserRole + 0, "mediaAttachmentHeight");
+  names.insert(Qt::UserRole + 1, "mediaAttachmentPath");
+  names.insert(Qt::UserRole + 2, "mediaAttachmentWidth");
   return names;
 }
 
@@ -1327,14 +1334,8 @@ bool MediaAttachments::setHeaderData(int section, Qt::Orientation orientation,
 extern "C" {
 MediaAttachments::Private *media_attachments_new(MediaAttachmentsPtrBundle *);
 void media_attachments_free(MediaAttachments::Private *);
-void media_attachments_media_attachment_four_get(
-    const MediaAttachments::Private *, QString *, qstring_set);
-void media_attachments_media_attachment_one_get(
-    const MediaAttachments::Private *, QString *, qstring_set);
-void media_attachments_media_attachment_three_get(
-    const MediaAttachments::Private *, QString *, qstring_set);
-void media_attachments_media_attachment_two_get(
-    const MediaAttachments::Private *, QString *, qstring_set);
+void media_attachments_set_media_attachment_dims(MediaAttachments::Private *,
+                                                 quint64, quint64, quint64);
 }
 extern "C" {
 quint32 members_data_color(const Members::Private *, int);
@@ -2784,10 +2785,6 @@ Attachments::Attachments(QObject *parent)
           [](DocumentAttachments *o) { o->endRemoveRows(); },
           attachmentsLoadedChanged,
           m_mediaAttachments,
-          mediaAttachmentsMediaAttachmentFourChanged,
-          mediaAttachmentsMediaAttachmentOneChanged,
-          mediaAttachmentsMediaAttachmentThreeChanged,
-          mediaAttachmentsMediaAttachmentTwoChanged,
           [](const MediaAttachments *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3115,10 +3112,6 @@ ConversationContent::ConversationContent(QObject *parent)
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
           m_messages->m_builder->m_mediaAttachments,
-          mediaAttachmentsMediaAttachmentFourChanged,
-          mediaAttachmentsMediaAttachmentOneChanged,
-          mediaAttachmentsMediaAttachmentThreeChanged,
-          mediaAttachmentsMediaAttachmentTwoChanged,
           [](const MediaAttachments *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3765,10 +3758,7 @@ MediaAttachments::MediaAttachments(bool /*owned*/, QObject *parent)
 MediaAttachments::MediaAttachments(QObject *parent)
     : QAbstractItemModel(parent),
       m_d(media_attachments_new(new MediaAttachmentsPtrBundle{
-          this, mediaAttachmentsMediaAttachmentFourChanged,
-          mediaAttachmentsMediaAttachmentOneChanged,
-          mediaAttachmentsMediaAttachmentThreeChanged,
-          mediaAttachmentsMediaAttachmentTwoChanged,
+          this,
           [](const MediaAttachments *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -3810,29 +3800,9 @@ MediaAttachments::~MediaAttachments() {
   }
 }
 void MediaAttachments::initHeaderData() {}
-
-QString MediaAttachments::mediaAttachmentFour() const {
-  QString v;
-  media_attachments_media_attachment_four_get(m_d, &v, set_qstring);
-  return v;
-}
-
-QString MediaAttachments::mediaAttachmentOne() const {
-  QString v;
-  media_attachments_media_attachment_one_get(m_d, &v, set_qstring);
-  return v;
-}
-
-QString MediaAttachments::mediaAttachmentThree() const {
-  QString v;
-  media_attachments_media_attachment_three_get(m_d, &v, set_qstring);
-  return v;
-}
-
-QString MediaAttachments::mediaAttachmentTwo() const {
-  QString v;
-  media_attachments_media_attachment_two_get(m_d, &v, set_qstring);
-  return v;
+void MediaAttachments::setMediaAttachmentDims(quint64 index, quint64 height,
+                                              quint64 width) {
+  return media_attachments_set_media_attachment_dims(m_d, index, height, width);
 }
 
 Members::Members(bool /*owned*/, QObject *parent)
@@ -3950,10 +3920,6 @@ MessageBuilder::MessageBuilder(QObject *parent)
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
           m_mediaAttachments,
-          mediaAttachmentsMediaAttachmentFourChanged,
-          mediaAttachmentsMediaAttachmentOneChanged,
-          mediaAttachmentsMediaAttachmentThreeChanged,
-          mediaAttachmentsMediaAttachmentTwoChanged,
           [](const MediaAttachments *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },
@@ -4254,10 +4220,6 @@ Messages::Messages(QObject *parent)
           messageBuilderHasMediaAttachmentChanged,
           messageBuilderIsReplyChanged,
           m_builder->m_mediaAttachments,
-          mediaAttachmentsMediaAttachmentFourChanged,
-          mediaAttachmentsMediaAttachmentOneChanged,
-          mediaAttachmentsMediaAttachmentThreeChanged,
-          mediaAttachmentsMediaAttachmentTwoChanged,
           [](const MediaAttachments *o) {
             Q_EMIT o->newDataReady(QModelIndex());
           },

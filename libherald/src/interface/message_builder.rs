@@ -351,10 +351,6 @@ pub unsafe fn message_builder_new_inner(
         message_builder_has_media_attachment_changed,
         message_builder_is_reply_changed,
         media_attachments,
-        media_attachments_media_attachment_four_changed,
-        media_attachments_media_attachment_one_changed,
-        media_attachments_media_attachment_three_changed,
-        media_attachments_media_attachment_two_changed,
         media_attachments_new_data_ready,
         media_attachments_layout_about_to_be_changed,
         media_attachments_layout_changed,
@@ -406,10 +402,6 @@ pub unsafe fn message_builder_new_inner(
     let d_document_attachments = DocumentAttachments::new(document_attachments_emit, model);
     let media_attachments_emit = MediaAttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(media_attachments)),
-        media_attachment_four_changed: media_attachments_media_attachment_four_changed,
-        media_attachment_one_changed: media_attachments_media_attachment_one_changed,
-        media_attachment_three_changed: media_attachments_media_attachment_three_changed,
-        media_attachment_two_changed: media_attachments_media_attachment_two_changed,
         new_data_ready: media_attachments_new_data_ready,
     };
     let model = MediaAttachmentsList {
@@ -717,10 +709,6 @@ pub struct MessageBuilderPtrBundle {
     message_builder_has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     message_builder_is_reply_changed: fn(*mut MessageBuilderQObject),
     media_attachments: *mut MediaAttachmentsQObject,
-    media_attachments_media_attachment_four_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_one_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_three_changed: fn(*mut MediaAttachmentsQObject),
-    media_attachments_media_attachment_two_changed: fn(*mut MediaAttachmentsQObject),
     media_attachments_new_data_ready: fn(*mut MediaAttachmentsQObject),
     media_attachments_layout_about_to_be_changed: fn(*mut MediaAttachmentsQObject),
     media_attachments_layout_changed: fn(*mut MediaAttachmentsQObject),

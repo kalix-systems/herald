@@ -376,20 +376,19 @@ fn users_search() -> Object {
 }
 
 fn media_attachments() -> Object {
-    let props = props! {
-        mediaAttachmentOne: Prop::new().simple(QString).optional(),
-        mediaAttachmentTwo: Prop::new().simple(QString).optional(),
-        mediaAttachmentThree: Prop::new().simple(QString).optional(),
-        mediaAttachmentFour: Prop::new().simple(QString).optional()
-    };
-
     let item_props = item_props! {
         // Path the the attachment
-        mediaAttachmentPath: ItemProp::new(QString)
+        mediaAttachmentPath: ItemProp::new(QString),
+        mediaAttachmentWidth: ItemProp::new(QUint64),
+        mediaAttachmentHeight: ItemProp::new(QUint64)
+    };
+
+    let funcs = functions! {
+       mut setMediaAttachmentDims(index: QUint64, height: QUint64, width: QUint64) => Void,
     };
 
     obj! {
-        MediaAttachments: Obj::new().list().item_props(item_props).props(props)
+        MediaAttachments: Obj::new().list().item_props(item_props).funcs(funcs)
     }
 }
 
