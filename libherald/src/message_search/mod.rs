@@ -213,13 +213,6 @@ impl Interface for MessageSearch {
         Some(self.results.get(index).as_ref()?.conversation.as_slice())
     }
 
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        Some(self.results.get(index).as_ref()?.has_attachments)
-    }
-
     fn msg_id(
         &self,
         index: usize,

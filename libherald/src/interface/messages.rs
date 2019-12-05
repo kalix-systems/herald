@@ -381,10 +381,10 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<String>;
 
-    fn data_saved(
+    fn doc_attachments(
         &self,
         index: usize,
-    ) -> Option<bool>;
+    ) -> Option<String>;
 
     fn expiration_time(
         &self,
@@ -395,11 +395,6 @@ pub trait MessagesTrait {
         &self,
         index: usize,
     ) -> Option<&str>;
-
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool>;
 
     fn insertion_time(
         &self,
@@ -421,6 +416,11 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<u8>;
 
+    fn media_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+
     fn msg_id(
         &self,
         index: usize,
@@ -436,20 +436,25 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<&str>;
 
+    fn op_doc_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String>;
+
     fn op_expiration_time(
         &self,
         index: usize,
     ) -> Option<i64>;
 
-    fn op_has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool>;
-
     fn op_insertion_time(
         &self,
         index: usize,
     ) -> Option<i64>;
+
+    fn op_media_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String>;
 
     fn op_msg_id(
         &self,
@@ -516,8 +521,9 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         media_attachments_end_remove_rows,
         builder_op_author_changed,
         builder_op_body_changed,
-        builder_op_has_attachments_changed,
+        builder_op_doc_attachments_changed,
         builder_op_id_changed,
+        builder_op_media_attachments_changed,
         builder_op_time_changed,
         builder_new_data_ready,
         builder_layout_about_to_be_changed,
@@ -601,8 +607,9 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         is_reply_changed: builder_is_reply_changed,
         op_author_changed: builder_op_author_changed,
         op_body_changed: builder_op_body_changed,
-        op_has_attachments_changed: builder_op_has_attachments_changed,
+        op_doc_attachments_changed: builder_op_doc_attachments_changed,
         op_id_changed: builder_op_id_changed,
+        op_media_attachments_changed: builder_op_media_attachments_changed,
         op_time_changed: builder_op_time_changed,
         new_data_ready: builder_new_data_ready,
     };
@@ -981,12 +988,18 @@ pub unsafe extern "C" fn messages_data_body(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_data_saved(
+pub unsafe extern "C" fn messages_data_doc_attachments(
     ptr: *const Messages,
     row: c_int,
-) -> COption<bool> {
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
     let obj = &*ptr;
-    obj.data_saved(to_usize(row).unwrap_or(0)).into()
+    let data = obj.doc_attachments(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -1011,15 +1024,6 @@ pub unsafe extern "C" fn messages_data_full_body(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_has_attachments(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<bool> {
-    let obj = &*ptr;
-    obj.has_attachments(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -1056,6 +1060,21 @@ pub unsafe extern "C" fn messages_data_match_status(
 ) -> COption<u8> {
     let obj = &*ptr;
     obj.match_status(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_media_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.media_attachments(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -1104,6 +1123,21 @@ pub unsafe extern "C" fn messages_data_op_body(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_op_doc_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.op_doc_attachments(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_expiration_time(
     ptr: *const Messages,
     row: c_int,
@@ -1113,21 +1147,27 @@ pub unsafe extern "C" fn messages_data_op_expiration_time(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_op_has_attachments(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<bool> {
-    let obj = &*ptr;
-    obj.op_has_attachments(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_insertion_time(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<i64> {
     let obj = &*ptr;
     obj.op_insertion_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_media_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.op_media_attachments(to_usize(row).unwrap_or(0));
+    if let Some(data) = data {
+        let str_: *const c_char = data.as_ptr() as (*const c_char);
+        set(d, str_, to_c_int(data.len()));
+    }
 }
 
 #[no_mangle]
@@ -1209,8 +1249,9 @@ pub struct MessagesPtrBundle {
     media_attachments_end_remove_rows: fn(*mut MediaAttachmentsQObject),
     builder_op_author_changed: fn(*mut MessageBuilderQObject),
     builder_op_body_changed: fn(*mut MessageBuilderQObject),
-    builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
+    builder_op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_id_changed: fn(*mut MessageBuilderQObject),
+    builder_op_media_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_time_changed: fn(*mut MessageBuilderQObject),
     builder_new_data_ready: fn(*mut MessageBuilderQObject),
     builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),

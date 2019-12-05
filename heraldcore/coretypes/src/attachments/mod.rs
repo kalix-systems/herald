@@ -17,6 +17,7 @@ pub enum Error {
     Hash,
     InvalidPathComponent(OsString),
     NonUnicodePath(OsString),
+    Image(image_utils::ImageError),
 }
 
 impl fmt::Display for Error {
@@ -49,6 +50,7 @@ impl fmt::Display for Error {
                 os_str
             ),
             Hash => write!(f, "Couldn't hash attachment data"),
+            Image(e) => write!(f, "Couldn't read image dimensions: {}", e),
         }
     }
 }
@@ -107,8 +109,14 @@ impl Attachment {
 }
 
 /// Attachments
-#[derive(Debug)]
+#[derive(Debug, Clone, Default)]
 pub struct AttachmentMeta(Vec<String>);
+
+impl From<Vec<String>> for AttachmentMeta {
+    fn from(v: Vec<String>) -> AttachmentMeta {
+        Self(v)
+    }
+}
 
 impl AttachmentMeta {
     pub fn new(paths: Vec<String>) -> Self {
@@ -118,10 +126,10 @@ impl AttachmentMeta {
     /// Converts `AttachmentMeta` into a vector of `PathBuf`s
     ///
     /// Note: this will ignore empty top level directories.
-    pub fn into_flat(self) -> Result<Vec<PathBuf>, Error> {
+    pub fn flat(&self) -> Result<Vec<PathBuf>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
-        for p in self.0 {
+        for p in self.0.iter() {
             let mut path = attachments_dir();
             path.push(p);
 
@@ -132,4 +140,124 @@ impl AttachmentMeta {
 
         Ok(out)
     }
+
+    /// Converts `AttachmentMeta` into a vector of `String`s
+    ///
+    /// Note: this will ignore empty top level directories.
+    pub fn flat_strings(&self) -> Result<Vec<String>, Error> {
+        let mut out = Vec::with_capacity(self.0.len());
+
+        for p in self.0.iter() {
+            let mut path = attachments_dir();
+
+            path.push(p);
+
+            for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
+                out.push(
+                    entry
+                        .map_err(|e| Error::Read(e, loc!()))?
+                        .path()
+                        .into_os_string()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?,
+                );
+            }
+        }
+
+        Ok(out)
+    }
+
+    pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
+        let mut out = Vec::with_capacity(self.0.len());
+
+        for p in self.0.as_slice().iter().filter(is_media) {
+            let mut path = attachments_dir();
+
+            path.push(p);
+
+            for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
+                let attach_path = entry
+                    .map_err(|e| Error::Read(e, loc!()))?
+                    .path()
+                    .into_os_string()
+                    .into_string()
+                    .map_err(Error::NonUnicodePath)?;
+
+                let (width, height) =
+                    image_utils::image_dimensions(&attach_path).map_err(Error::Image)?;
+
+                out.push(MediaMeta {
+                    width,
+                    height,
+                    path: attach_path,
+                });
+            }
+        }
+
+        Ok(out)
+    }
+
+    pub fn doc_attachments(&self) -> Result<Vec<String>, Error> {
+        let mut out = Vec::with_capacity(self.0.len());
+
+        for p in self.0.iter().filter(|p| !is_media(p)) {
+            let mut path = attachments_dir();
+
+            path.push(p);
+
+            for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
+                out.push(
+                    entry
+                        .map_err(|e| Error::Read(e, loc!()))?
+                        .path()
+                        .into_os_string()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?,
+                )
+            }
+        }
+
+        Ok(out)
+    }
+
+    /// Indicicates whether `AttachmentMeta` is empty.
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+pub struct MediaMeta {
+    pub path: String,
+    pub width: u32,
+    pub height: u32,
+}
+
+impl From<MediaMeta> for json::JsonValue {
+    fn from(meta: MediaMeta) -> json::JsonValue {
+        let MediaMeta {
+            path,
+            width,
+            height,
+        } = meta;
+        let mut obj = json::object::Object::new();
+
+        obj.insert("path", path.into());
+        obj.insert("width", width.into());
+        obj.insert("height", height.into());
+        obj.into()
+    }
+}
+
+const IMG_EXT: [&str; 8] = ["BMP", "GIF", "JPG", "JPEG", "PNG", "PGM", "PBM", "PPM"];
+
+pub fn is_media<'a, P: AsRef<Path>>(path: &'a P) -> bool {
+    let get_extension = |path: &'a Path| -> Option<&'a str> { path.extension()?.to_str() };
+
+    get_extension(path.as_ref())
+        .map(|ext| {
+            IMG_EXT
+                .iter()
+                .any(|img_ext| img_ext.eq_ignore_ascii_case(ext))
+        })
+        .unwrap_or(false)
 }

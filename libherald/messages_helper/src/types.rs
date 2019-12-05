@@ -21,8 +21,7 @@ pub struct MsgData {
     pub time: MessageTime,
     pub op: ReplyId,
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    pub has_attachments: bool,
-    pub save_status: SaveStatus,
+    pub attachments: heraldcore::message::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
     pub match_status: MatchStatus,
     pub replies: HashSet<MsgId>,
@@ -62,12 +61,6 @@ impl MsgData {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum SaveStatus {
-    Saved,
-    Unsaved,
-}
-
 #[derive(Copy, Clone, PartialEq, Eq)]
 /// A thin wrapper around a `MsgId`
 pub struct Message {
@@ -75,10 +68,7 @@ pub struct Message {
     pub insertion_time: Time,
 }
 
-pub fn split_msg(
-    msg: Msg,
-    save_status: SaveStatus,
-) -> (Message, MsgData) {
+pub fn split_msg(msg: Msg) -> (Message, MsgData) {
     let Msg {
         message_id,
         author,
@@ -86,7 +76,7 @@ pub fn split_msg(
         time,
         op,
         receipts,
-        has_attachments,
+        attachments,
         send_status,
         replies,
         ..
@@ -97,10 +87,9 @@ pub fn split_msg(
         receipts,
         body,
         op,
-        has_attachments,
+        attachments,
         time,
         send_status,
-        save_status,
         match_status: MatchStatus::NotMatched,
         replies,
         search_buf: None,

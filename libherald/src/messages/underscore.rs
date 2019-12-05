@@ -153,6 +153,20 @@ impl Messages {
             .unwrap_or("")
     }
 
+    pub(crate) fn doc_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.doc_attachments_data_json(index)
+    }
+
+    pub(crate) fn media_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.media_attachments_data_json(index)
+    }
+
     pub(crate) fn op_body_(
         &self,
         index: usize,
@@ -276,13 +290,6 @@ impl Messages {
         Some(self.container.last_msg()?.time.insertion.into())
     }
 
-    pub(crate) fn data_saved_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        Some(self.container.msg_data(index)?.save_status == SaveStatus::Saved)
-    }
-
     pub(crate) fn author_(
         &self,
         index: usize,
@@ -375,11 +382,18 @@ impl Messages {
         self.container.op_author(index).map(UserId::as_str)
     }
 
-    pub(crate) fn op_has_attachments_(
+    pub(crate) fn op_doc_attachments_(
         &self,
         index: usize,
-    ) -> Option<bool> {
-        self.container.op_has_attachments(index)
+    ) -> Option<String> {
+        self.container.op_doc_attachments_json(index)
+    }
+
+    pub(crate) fn op_media_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.op_media_attachments_json(index)
     }
 
     pub(crate) fn op_insertion_time_(
@@ -401,13 +415,6 @@ impl Messages {
         index: usize,
     ) -> Option<ffi::MsgIdRef> {
         Some(self.container.get(index)?.msg_id.as_slice())
-    }
-
-    pub(crate) fn has_attachments_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        Some(self.container.msg_data(index)?.has_attachments)
     }
 
     pub(crate) fn emit_(&mut self) -> &mut Emitter {

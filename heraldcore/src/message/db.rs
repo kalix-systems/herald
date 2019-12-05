@@ -10,6 +10,7 @@ pub(crate) fn get_message(
 ) -> Result<Message, HErr> {
     let receipts = get_receipts(conn, msg_id)?;
     let replies = self::replies(conn, msg_id)?;
+    let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
 
     Ok(w!(conn.query_row_named(
         include_str!("sql/get_message.sql"),
@@ -35,7 +36,7 @@ pub(crate) fn get_message(
                 body: row.get("body")?,
                 op,
                 send_status: row.get("send_status")?,
-                has_attachments: row.get("has_attachments")?,
+                attachments,
                 time,
                 receipts,
                 replies,
@@ -58,6 +59,7 @@ pub(crate) fn get_message_opt(
         |row| {
             let receipts = get_receipts(conn, msg_id)?;
             let replies = self::replies(conn, msg_id)?;
+            let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -77,7 +79,7 @@ pub(crate) fn get_message_opt(
                 body: row.get("body")?,
                 op,
                 send_status: row.get("send_status")?,
-                has_attachments: row.get("has_attachments")?,
+                attachments,
                 time,
                 receipts,
                 replies,
@@ -152,6 +154,7 @@ pub(crate) fn by_send_status(
             let message_id = row.get("msg_id")?;
             let receipts = get_receipts(conn, &message_id)?;
             let replies = self::replies(conn, &message_id)?;
+            let attachments = crate::message::attachments::db::get(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -171,7 +174,7 @@ pub(crate) fn by_send_status(
                 body: row.get("body")?,
                 op,
                 send_status: row.get("send_status")?,
-                has_attachments: row.get("has_attachments")?,
+                attachments,
                 time,
                 receipts,
                 replies,
@@ -267,8 +270,6 @@ impl OutboundMessageBuilder {
 
         let send_status = MessageSendStatus::NoAck;
 
-        let has_attachments = !attachments.is_empty();
-
         let time = MessageTime {
             server: None,
             expiration,
@@ -283,7 +284,7 @@ impl OutboundMessageBuilder {
             conversation: conversation_id,
             time,
             send_status,
-            has_attachments,
+            attachments: vec![].into(),
             receipts: HashMap::new(),
             replies: HashSet::new(),
         };
@@ -300,6 +301,7 @@ impl OutboundMessageBuilder {
                 Ok(attach)
             })
             .collect();
+
         let attachments = e!(attachments);
 
         let tx = e!(db.transaction());
@@ -312,7 +314,6 @@ impl OutboundMessageBuilder {
                 "@conversation_id": conversation_id,
                 "@body": body,
                 "@send_status": send_status,
-                "@has_attachments": has_attachments,
                 "@insertion_ts": time.insertion,
                 "@server_ts": time.server,
                 "@expiration_ts": time.expiration,
@@ -332,28 +333,32 @@ impl OutboundMessageBuilder {
             ));
         }
 
-        if !attachments.is_empty() {
+        let attachment_meta = if !attachments.is_empty() {
             e!(attachments::db::add(
                 &tx,
                 &msg_id,
-                attachments.iter().map(|a| a.hash_dir())
-            ));
-        }
+                attachments.iter().map(Attachment::hash_dir)
+            ))
+        } else {
+            Default::default()
+        };
 
         e!(tx.commit());
 
-        callback(StoreAndSend::StoreDone(msg_id));
+        callback(StoreAndSend::StoreDone(msg_id, attachment_meta));
 
         let content = cmessages::Message {
             body,
             attachments,
             expiration,
         };
+
         let msg = cmessages::Msg {
             mid: msg_id,
             content,
             op,
         };
+
         e!(crate::network::send_normal_message(conversation_id, msg));
 
         callback(StoreAndSend::SendDone(msg_id));
@@ -382,7 +387,7 @@ impl OutboundMessageBuilder {
         };
 
         match rx.recv().map_err(|_| channel_recv_err!())? {
-            StoreAndSend::StoreDone(_) => {}
+            StoreAndSend::StoreDone(..) => {}
             other => {
                 panic!("Unexpected variant {:?}", other);
             }
@@ -436,7 +441,6 @@ impl InboundMessageBuilder {
             .collect();
 
         let attachment_paths = res?;
-        let has_attachments = !attachment_paths.is_empty();
 
         // this can be inferred from the fact that this message was received
         let send_status = MessageSendStatus::Ack;
@@ -457,7 +461,6 @@ impl InboundMessageBuilder {
                 "@conversation_id": conversation_id,
                 "@body": body,
                 "@send_status": send_status,
-                "@has_attachments": has_attachments,
                 "@insertion_ts": time.insertion,
                 "@server_ts": time.server,
                 "@expiration_ts": time.expiration,
@@ -498,7 +501,7 @@ impl InboundMessageBuilder {
             ReplyId::None
         };
 
-        if has_attachments {
+        if !attachment_paths.is_empty() {
             attachments::db::add(&tx, &msg_id, attachment_paths.iter().map(|s| s.as_str()))?;
         }
 
@@ -506,12 +509,13 @@ impl InboundMessageBuilder {
 
         let receipts = get_receipts(&conn, &msg_id).unwrap_or_default();
         let replies = self::replies(&conn, &msg_id).unwrap_or_default();
+        let attachments = crate::message::attachments::db::get(&conn, &msg_id).unwrap_or_default();
 
         Ok(Some(Message {
             message_id: msg_id,
             author,
             body,
-            has_attachments,
+            attachments,
             conversation: conversation_id,
             send_status: MessageSendStatus::Ack,
             op,

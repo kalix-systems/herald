@@ -49,10 +49,10 @@ impl Messages {
             MsgUpdate::NewMsg(new) => {
                 new_msg_toast(new.as_ref());
 
-                ret_err!(self.insert_helper(*new, SaveStatus::Saved));
+                ret_err!(self.insert_helper(*new));
             }
             MsgUpdate::BuilderMsg(msg) => {
-                ret_err!(self.insert_helper(*msg, SaveStatus::Unsaved));
+                ret_err!(self.insert_helper(*msg));
             }
             MsgUpdate::Receipt {
                 msg_id,
@@ -67,10 +67,11 @@ impl Messages {
                     &mut self.model
                 ));
             }
-            MsgUpdate::StoreDone(mid) => {
+            MsgUpdate::StoreDone(mid, meta) => {
                 ret_none!(container::handle_store_done(
                     &mut self.container,
                     mid,
+                    meta,
                     &mut self.model
                 ));
             }
@@ -104,7 +105,7 @@ pub(crate) enum MsgUpdate {
     /// A rendered message from the `MessageBuilder`
     BuilderMsg(Box<heraldcore::message::Message>),
     /// Save is complete
-    StoreDone(MsgId),
+    StoreDone(MsgId, heraldcore::message::attachments::AttachmentMeta),
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
     /// The container contents, sent when the conversation id is first set.

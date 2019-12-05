@@ -48,15 +48,6 @@ impl Interface for DocumentAttachments {
 }
 
 impl DocumentAttachments {
-    pub(super) fn fill(
-        &mut self,
-        docs: Vec<String>,
-    ) {
-        self.model.begin_reset_model();
-        self.contents = docs;
-        self.model.end_reset_model();
-    }
-
     pub(crate) fn is_empty(&self) -> bool {
         self.contents.is_empty()
     }

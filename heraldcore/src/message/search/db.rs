@@ -22,7 +22,6 @@ impl Search {
                 let message_id = row.get("msg_id")?;
                 let author = row.get("author")?;
                 let conversation = row.get("conversation_id")?;
-                let has_attachments = row.get("has_attachments")?;
                 let body: MessageBody = row.get("body")?;
 
                 *min = Index { time, row_id };
@@ -38,7 +37,6 @@ impl Search {
                     message_id,
                     author,
                     conversation,
-                    has_attachments,
                     rowid: row_id,
                 }))
             },

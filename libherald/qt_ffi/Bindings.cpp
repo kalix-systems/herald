@@ -96,12 +96,6 @@ inline QVariant cleanNullQVariant(const QVariant &v) {
   return (v.isNull()) ? QVariant() : v;
 }
 
-inline void attachmentsAttachmentsMsgIdChanged(Attachments *o) {
-  Q_EMIT o->attachmentsMsgIdChanged();
-}
-inline void attachmentsLoadedChanged(Attachments *o) {
-  Q_EMIT o->loadedChanged();
-}
 inline void configColorChanged(Config *o) { Q_EMIT o->colorChanged(); }
 inline void configColorschemeChanged(Config *o) {
   Q_EMIT o->colorschemeChanged();
@@ -158,11 +152,14 @@ inline void messageBuilderOpAuthorChanged(MessageBuilder *o) {
 inline void messageBuilderOpBodyChanged(MessageBuilder *o) {
   Q_EMIT o->opBodyChanged();
 }
-inline void messageBuilderOpHasAttachmentsChanged(MessageBuilder *o) {
-  Q_EMIT o->opHasAttachmentsChanged();
+inline void messageBuilderOpDocAttachmentsChanged(MessageBuilder *o) {
+  Q_EMIT o->opDocAttachmentsChanged();
 }
 inline void messageBuilderOpIdChanged(MessageBuilder *o) {
   Q_EMIT o->opIdChanged();
+}
+inline void messageBuilderOpMediaAttachmentsChanged(MessageBuilder *o) {
+  Q_EMIT o->opMediaAttachmentsChanged();
 }
 inline void messageBuilderOpTimeChanged(MessageBuilder *o) {
   Q_EMIT o->opTimeChanged();
@@ -212,127 +209,6 @@ inline void usersSearchFilterChanged(UsersSearch *o) {
   Q_EMIT o->filterChanged();
 }
 } // namespace
-extern "C" {
-void attachments_sort(Attachments::Private *, unsigned char column,
-                      Qt::SortOrder order = Qt::AscendingOrder);
-int attachments_row_count(const Attachments::Private *);
-bool attachments_insert_rows(Attachments::Private *, int, int);
-bool attachments_remove_rows(Attachments::Private *, int, int);
-bool attachments_can_fetch_more(const Attachments::Private *);
-void attachments_fetch_more(Attachments::Private *);
-}
-int Attachments::columnCount(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : 1;
-}
-
-bool Attachments::hasChildren(const QModelIndex &parent) const {
-  return rowCount(parent) > 0;
-}
-
-int Attachments::rowCount(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : attachments_row_count(m_d);
-}
-
-bool Attachments::insertRows(int row, int count, const QModelIndex &) {
-  return attachments_insert_rows(m_d, row, count);
-}
-
-bool Attachments::removeRows(int row, int count, const QModelIndex &) {
-  return attachments_remove_rows(m_d, row, count);
-}
-
-QModelIndex Attachments::index(int row, int column,
-                               const QModelIndex &parent) const {
-  if (!parent.isValid() && row >= 0 && row < rowCount(parent) && column >= 0 &&
-      column < 1) {
-    return createIndex(row, column, static_cast<quintptr>(row));
-  }
-  return QModelIndex();
-}
-
-QModelIndex Attachments::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
-
-bool Attachments::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : attachments_can_fetch_more(m_d);
-}
-
-void Attachments::fetchMore(const QModelIndex &parent) {
-  if (!parent.isValid()) {
-    attachments_fetch_more(m_d);
-  }
-}
-void Attachments::updatePersistentIndexes() {}
-
-void Attachments::sort(int column, Qt::SortOrder order) {
-  attachments_sort(m_d, column, order);
-}
-
-Qt::ItemFlags Attachments::flags(const QModelIndex &i) const {
-  auto flags = QAbstractItemModel::flags(i);
-  return flags;
-}
-
-QVariant Attachments::data(const QModelIndex &index, int role) const {
-  Q_ASSERT(rowCount(index.parent()) > index.row());
-  switch (index.column()) {
-  case 0:
-    switch (role) {}
-    break;
-  }
-  return QVariant();
-}
-int Attachments::role(const char *name) const {
-  auto names = roleNames();
-  auto i = names.constBegin();
-  while (i != names.constEnd()) {
-    if (i.value() == name) {
-      return i.key();
-    }
-    ++i;
-  }
-  return -1;
-}
-QHash<int, QByteArray> Attachments::roleNames() const {
-  QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  return names;
-}
-
-QVariant Attachments::headerData(int section, Qt::Orientation orientation,
-                                 int role) const {
-  if (orientation != Qt::Horizontal) {
-    return QVariant();
-  }
-  return m_headerData.value(
-      qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
-      role == Qt::DisplayRole ? QString::number(section + 1) : QVariant());
-}
-
-bool Attachments::setHeaderData(int section, Qt::Orientation orientation,
-                                const QVariant &value, int role) {
-  if (orientation != Qt::Horizontal) {
-    return false;
-  }
-  m_headerData.insert(qMakePair(section, static_cast<Qt::ItemDataRole>(role)),
-                      value);
-  return true;
-}
-
-extern "C" {
-Attachments::Private *attachments_new(AttachmentsPtrBundle *);
-void attachments_free(Attachments::Private *);
-void attachments_attachments_msg_id_get(const Attachments::Private *,
-                                        QByteArray *, qbytearray_set);
-void attachments_attachments_msg_id_set(Attachments::Private *,
-                                        const char *bytes, int len);
-void attachments_attachments_msg_id_set_none(Attachments::Private *);
-DocumentAttachments::Private *
-attachments_document_attachments_get(const Attachments::Private *);
-bool attachments_loaded_get(const Attachments::Private *);
-MediaAttachments::Private *
-attachments_media_attachments_get(const Attachments::Private *);
-}
 extern "C" {
 Config::Private *config_new(ConfigPtrBundle *);
 void config_free(Config::Private *);
@@ -1194,13 +1070,8 @@ void herald_register_new_user(Herald::Private *, const ushort *, int,
 void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
-quint32 media_attachments_data_media_attachment_height(
-    const MediaAttachments::Private *, int);
 void media_attachments_data_media_attachment_path(
     const MediaAttachments::Private *, int, QString *, qstring_set);
-quint32
-media_attachments_data_media_attachment_width(const MediaAttachments::Private *,
-                                              int);
 void media_attachments_sort(MediaAttachments::Private *, unsigned char column,
                             Qt::SortOrder order = Qt::AscendingOrder);
 int media_attachments_row_count(const MediaAttachments::Private *);
@@ -1262,18 +1133,10 @@ Qt::ItemFlags MediaAttachments::flags(const QModelIndex &i) const {
   return flags;
 }
 
-quint32 MediaAttachments::mediaAttachmentHeight(int row) const {
-  return media_attachments_data_media_attachment_height(m_d, row);
-}
-
 QString MediaAttachments::mediaAttachmentPath(int row) const {
   QString s;
   media_attachments_data_media_attachment_path(m_d, row, &s, set_qstring);
   return s;
-}
-
-quint32 MediaAttachments::mediaAttachmentWidth(int row) const {
-  return media_attachments_data_media_attachment_width(m_d, row);
 }
 
 QVariant MediaAttachments::data(const QModelIndex &index, int role) const {
@@ -1282,11 +1145,7 @@ QVariant MediaAttachments::data(const QModelIndex &index, int role) const {
   case 0:
     switch (role) {
     case Qt::UserRole + 0:
-      return QVariant::fromValue(mediaAttachmentHeight(index.row()));
-    case Qt::UserRole + 1:
       return QVariant::fromValue(mediaAttachmentPath(index.row()));
-    case Qt::UserRole + 2:
-      return QVariant::fromValue(mediaAttachmentWidth(index.row()));
     }
     break;
   }
@@ -1305,9 +1164,7 @@ int MediaAttachments::role(const char *name) const {
 }
 QHash<int, QByteArray> MediaAttachments::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
-  names.insert(Qt::UserRole + 0, "mediaAttachmentHeight");
-  names.insert(Qt::UserRole + 1, "mediaAttachmentPath");
-  names.insert(Qt::UserRole + 2, "mediaAttachmentWidth");
+  names.insert(Qt::UserRole + 0, "mediaAttachmentPath");
   return names;
 }
 
@@ -1640,10 +1497,12 @@ void message_builder_op_author_get(const MessageBuilder::Private *, QString *,
                                    qstring_set);
 void message_builder_op_body_get(const MessageBuilder::Private *, QString *,
                                  qstring_set);
-option_bool
-message_builder_op_has_attachments_get(const MessageBuilder::Private *);
+void message_builder_op_doc_attachments_get(const MessageBuilder::Private *,
+                                            QString *, qstring_set);
 void message_builder_op_id_get(const MessageBuilder::Private *, QByteArray *,
                                qbytearray_set);
+void message_builder_op_media_attachments_get(const MessageBuilder::Private *,
+                                              QString *, qstring_set);
 option_qint64 message_builder_op_time_get(const MessageBuilder::Private *);
 bool message_builder_add_attachment(MessageBuilder::Private *, const ushort *,
                                     int);
@@ -1671,8 +1530,6 @@ void message_search_data_conversation_title(const MessageSearch::Private *, int,
                                             QString *, qstring_set);
 void message_search_data_first_match(const MessageSearch::Private *, int,
                                      QString *, qstring_set);
-option_bool message_search_data_has_attachments(const MessageSearch::Private *,
-                                                int);
 void message_search_data_msg_id(const MessageSearch::Private *, int,
                                 QByteArray *, qbytearray_set);
 option_qint64 message_search_data_time(const MessageSearch::Private *, int);
@@ -1791,12 +1648,6 @@ QString MessageSearch::firstMatch(int row) const {
   return s;
 }
 
-QVariant MessageSearch::has_attachments(int row) const {
-  QVariant v;
-  v = message_search_data_has_attachments(m_d, row);
-  return v;
-}
-
 QByteArray MessageSearch::msgId(int row) const {
   QByteArray b;
   message_search_data_msg_id(m_d, row, &b, set_qbytearray);
@@ -1835,10 +1686,8 @@ QVariant MessageSearch::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 8:
       return QVariant::fromValue(firstMatch(index.row()));
     case Qt::UserRole + 9:
-      return has_attachments(index.row());
-    case Qt::UserRole + 10:
       return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
-    case Qt::UserRole + 11:
+    case Qt::UserRole + 10:
       return time(index.row());
     }
     break;
@@ -1867,9 +1716,8 @@ QHash<int, QByteArray> MessageSearch::roleNames() const {
   names.insert(Qt::UserRole + 6, "conversationPicture");
   names.insert(Qt::UserRole + 7, "conversationTitle");
   names.insert(Qt::UserRole + 8, "firstMatch");
-  names.insert(Qt::UserRole + 9, "has_attachments");
-  names.insert(Qt::UserRole + 10, "msgId");
-  names.insert(Qt::UserRole + 11, "time");
+  names.insert(Qt::UserRole + 9, "msgId");
+  names.insert(Qt::UserRole + 10, "time");
   return names;
 }
 
@@ -1910,24 +1758,29 @@ extern "C" {
 void messages_data_author(const Messages::Private *, int, QString *,
                           qstring_set);
 void messages_data_body(const Messages::Private *, int, QString *, qstring_set);
-option_bool messages_data_data_saved(const Messages::Private *, int);
+void messages_data_doc_attachments(const Messages::Private *, int, QString *,
+                                   qstring_set);
 option_qint64 messages_data_expiration_time(const Messages::Private *, int);
 void messages_data_full_body(const Messages::Private *, int, QString *,
                              qstring_set);
-option_bool messages_data_has_attachments(const Messages::Private *, int);
 option_qint64 messages_data_insertion_time(const Messages::Private *, int);
 option_bool messages_data_is_head(const Messages::Private *, int);
 option_bool messages_data_is_tail(const Messages::Private *, int);
 option_quint8 messages_data_match_status(const Messages::Private *, int);
+void messages_data_media_attachments(const Messages::Private *, int, QString *,
+                                     qstring_set);
 void messages_data_msg_id(const Messages::Private *, int, QByteArray *,
                           qbytearray_set);
 void messages_data_op_author(const Messages::Private *, int, QString *,
                              qstring_set);
 void messages_data_op_body(const Messages::Private *, int, QString *,
                            qstring_set);
+void messages_data_op_doc_attachments(const Messages::Private *, int, QString *,
+                                      qstring_set);
 option_qint64 messages_data_op_expiration_time(const Messages::Private *, int);
-option_bool messages_data_op_has_attachments(const Messages::Private *, int);
 option_qint64 messages_data_op_insertion_time(const Messages::Private *, int);
+void messages_data_op_media_attachments(const Messages::Private *, int,
+                                        QString *, qstring_set);
 void messages_data_op_msg_id(const Messages::Private *, int, QByteArray *,
                              qbytearray_set);
 option_quint32 messages_data_receipt_status(const Messages::Private *, int);
@@ -2006,10 +1859,10 @@ QString Messages::body(int row) const {
   return s;
 }
 
-QVariant Messages::dataSaved(int row) const {
-  QVariant v;
-  v = messages_data_data_saved(m_d, row);
-  return v;
+QString Messages::docAttachments(int row) const {
+  QString s;
+  messages_data_doc_attachments(m_d, row, &s, set_qstring);
+  return s;
 }
 
 QVariant Messages::expirationTime(int row) const {
@@ -2022,12 +1875,6 @@ QString Messages::fullBody(int row) const {
   QString s;
   messages_data_full_body(m_d, row, &s, set_qstring);
   return s;
-}
-
-QVariant Messages::hasAttachments(int row) const {
-  QVariant v;
-  v = messages_data_has_attachments(m_d, row);
-  return v;
 }
 
 QVariant Messages::insertionTime(int row) const {
@@ -2054,6 +1901,12 @@ QVariant Messages::matchStatus(int row) const {
   return v;
 }
 
+QString Messages::mediaAttachments(int row) const {
+  QString s;
+  messages_data_media_attachments(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QByteArray Messages::msgId(int row) const {
   QByteArray b;
   messages_data_msg_id(m_d, row, &b, set_qbytearray);
@@ -2072,15 +1925,15 @@ QString Messages::opBody(int row) const {
   return s;
 }
 
+QString Messages::opDocAttachments(int row) const {
+  QString s;
+  messages_data_op_doc_attachments(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant Messages::opExpirationTime(int row) const {
   QVariant v;
   v = messages_data_op_expiration_time(m_d, row);
-  return v;
-}
-
-QVariant Messages::opHasAttachments(int row) const {
-  QVariant v;
-  v = messages_data_op_has_attachments(m_d, row);
   return v;
 }
 
@@ -2088,6 +1941,12 @@ QVariant Messages::opInsertionTime(int row) const {
   QVariant v;
   v = messages_data_op_insertion_time(m_d, row);
   return v;
+}
+
+QString Messages::opMediaAttachments(int row) const {
+  QString s;
+  messages_data_op_media_attachments(m_d, row, &s, set_qstring);
+  return s;
 }
 
 QByteArray Messages::opMsgId(int row) const {
@@ -2124,21 +1983,23 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 1:
       return cleanNullQVariant(QVariant::fromValue(body(index.row())));
     case Qt::UserRole + 2:
-      return dataSaved(index.row());
+      return cleanNullQVariant(
+          QVariant::fromValue(docAttachments(index.row())));
     case Qt::UserRole + 3:
       return expirationTime(index.row());
     case Qt::UserRole + 4:
       return cleanNullQVariant(QVariant::fromValue(fullBody(index.row())));
     case Qt::UserRole + 5:
-      return hasAttachments(index.row());
-    case Qt::UserRole + 6:
       return insertionTime(index.row());
-    case Qt::UserRole + 7:
+    case Qt::UserRole + 6:
       return isHead(index.row());
-    case Qt::UserRole + 8:
+    case Qt::UserRole + 7:
       return isTail(index.row());
-    case Qt::UserRole + 9:
+    case Qt::UserRole + 8:
       return matchStatus(index.row());
+    case Qt::UserRole + 9:
+      return cleanNullQVariant(
+          QVariant::fromValue(mediaAttachments(index.row())));
     case Qt::UserRole + 10:
       return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
     case Qt::UserRole + 11:
@@ -2146,18 +2007,22 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 12:
       return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
     case Qt::UserRole + 13:
-      return opExpirationTime(index.row());
+      return cleanNullQVariant(
+          QVariant::fromValue(opDocAttachments(index.row())));
     case Qt::UserRole + 14:
-      return opHasAttachments(index.row());
+      return opExpirationTime(index.row());
     case Qt::UserRole + 15:
       return opInsertionTime(index.row());
     case Qt::UserRole + 16:
-      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
+      return cleanNullQVariant(
+          QVariant::fromValue(opMediaAttachments(index.row())));
     case Qt::UserRole + 17:
-      return receiptStatus(index.row());
+      return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
     case Qt::UserRole + 18:
-      return replyType(index.row());
+      return receiptStatus(index.row());
     case Qt::UserRole + 19:
+      return replyType(index.row());
+    case Qt::UserRole + 20:
       return serverTime(index.row());
     }
     break;
@@ -2179,24 +2044,25 @@ QHash<int, QByteArray> Messages::roleNames() const {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
   names.insert(Qt::UserRole + 0, "author");
   names.insert(Qt::UserRole + 1, "body");
-  names.insert(Qt::UserRole + 2, "dataSaved");
+  names.insert(Qt::UserRole + 2, "docAttachments");
   names.insert(Qt::UserRole + 3, "expirationTime");
   names.insert(Qt::UserRole + 4, "fullBody");
-  names.insert(Qt::UserRole + 5, "hasAttachments");
-  names.insert(Qt::UserRole + 6, "insertionTime");
-  names.insert(Qt::UserRole + 7, "isHead");
-  names.insert(Qt::UserRole + 8, "isTail");
-  names.insert(Qt::UserRole + 9, "matchStatus");
+  names.insert(Qt::UserRole + 5, "insertionTime");
+  names.insert(Qt::UserRole + 6, "isHead");
+  names.insert(Qt::UserRole + 7, "isTail");
+  names.insert(Qt::UserRole + 8, "matchStatus");
+  names.insert(Qt::UserRole + 9, "mediaAttachments");
   names.insert(Qt::UserRole + 10, "msgId");
   names.insert(Qt::UserRole + 11, "opAuthor");
   names.insert(Qt::UserRole + 12, "opBody");
-  names.insert(Qt::UserRole + 13, "opExpirationTime");
-  names.insert(Qt::UserRole + 14, "opHasAttachments");
+  names.insert(Qt::UserRole + 13, "opDocAttachments");
+  names.insert(Qt::UserRole + 14, "opExpirationTime");
   names.insert(Qt::UserRole + 15, "opInsertionTime");
-  names.insert(Qt::UserRole + 16, "opMsgId");
-  names.insert(Qt::UserRole + 17, "receiptStatus");
-  names.insert(Qt::UserRole + 18, "replyType");
-  names.insert(Qt::UserRole + 19, "serverTime");
+  names.insert(Qt::UserRole + 16, "opMediaAttachments");
+  names.insert(Qt::UserRole + 17, "opMsgId");
+  names.insert(Qt::UserRole + 18, "receiptStatus");
+  names.insert(Qt::UserRole + 19, "replyType");
+  names.insert(Qt::UserRole + 20, "serverTime");
   return names;
 }
 
@@ -2738,159 +2604,6 @@ bool utils_compare_byte_array(const Utils::Private *, const char *, int,
 bool utils_is_valid_rand_id(const Utils::Private *, const char *, int);
 }
 
-Attachments::Attachments(bool /*owned*/, QObject *parent)
-    : QAbstractItemModel(parent),
-      m_documentAttachments(new DocumentAttachments(false, this)),
-      m_mediaAttachments(new MediaAttachments(false, this)), m_d(nullptr),
-      m_ownsPrivate(false) {
-  initHeaderData();
-}
-
-Attachments::Attachments(QObject *parent)
-    : QAbstractItemModel(parent),
-      m_documentAttachments(new DocumentAttachments(false, this)),
-      m_mediaAttachments(new MediaAttachments(false, this)),
-      m_d(attachments_new(new AttachmentsPtrBundle{
-          this,
-          attachmentsAttachmentsMsgIdChanged,
-          m_documentAttachments,
-          [](const DocumentAttachments *o) {
-            Q_EMIT o->newDataReady(QModelIndex());
-          },
-          [](DocumentAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
-          [](DocumentAttachments *o) {
-            o->updatePersistentIndexes();
-            Q_EMIT o->layoutChanged();
-          },
-          [](DocumentAttachments *o, quintptr first, quintptr last) {
-            o->dataChanged(o->createIndex(first, 0, first),
-                           o->createIndex(last, 0, last));
-          },
-          [](DocumentAttachments *o) { o->beginResetModel(); },
-          [](DocumentAttachments *o) { o->endResetModel(); },
-          [](DocumentAttachments *o, int first, int last) {
-            o->beginInsertRows(QModelIndex(), first, last);
-          },
-          [](DocumentAttachments *o) { o->endInsertRows(); },
-          [](DocumentAttachments *o, int first, int last, int destination) {
-            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
-                             destination);
-          },
-          [](DocumentAttachments *o) { o->endMoveRows(); },
-          [](DocumentAttachments *o, int first, int last) {
-            o->beginRemoveRows(QModelIndex(), first, last);
-          },
-          [](DocumentAttachments *o) { o->endRemoveRows(); },
-          attachmentsLoadedChanged,
-          m_mediaAttachments,
-          [](const MediaAttachments *o) {
-            Q_EMIT o->newDataReady(QModelIndex());
-          },
-          [](MediaAttachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
-          [](MediaAttachments *o) {
-            o->updatePersistentIndexes();
-            Q_EMIT o->layoutChanged();
-          },
-          [](MediaAttachments *o, quintptr first, quintptr last) {
-            o->dataChanged(o->createIndex(first, 0, first),
-                           o->createIndex(last, 0, last));
-          },
-          [](MediaAttachments *o) { o->beginResetModel(); },
-          [](MediaAttachments *o) { o->endResetModel(); },
-          [](MediaAttachments *o, int first, int last) {
-            o->beginInsertRows(QModelIndex(), first, last);
-          },
-          [](MediaAttachments *o) { o->endInsertRows(); },
-          [](MediaAttachments *o, int first, int last, int destination) {
-            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
-                             destination);
-          },
-          [](MediaAttachments *o) { o->endMoveRows(); },
-          [](MediaAttachments *o, int first, int last) {
-            o->beginRemoveRows(QModelIndex(), first, last);
-          },
-          [](MediaAttachments *o) { o->endRemoveRows(); },
-          [](const Attachments *o) { Q_EMIT o->newDataReady(QModelIndex()); },
-          [](Attachments *o) { Q_EMIT o->layoutAboutToBeChanged(); },
-          [](Attachments *o) {
-            o->updatePersistentIndexes();
-            Q_EMIT o->layoutChanged();
-          },
-          [](Attachments *o, quintptr first, quintptr last) {
-            o->dataChanged(o->createIndex(first, 0, first),
-                           o->createIndex(last, 0, last));
-          },
-          [](Attachments *o) { o->beginResetModel(); },
-          [](Attachments *o) { o->endResetModel(); },
-          [](Attachments *o, int first, int last) {
-            o->beginInsertRows(QModelIndex(), first, last);
-          },
-          [](Attachments *o) { o->endInsertRows(); },
-          [](Attachments *o, int first, int last, int destination) {
-            o->beginMoveRows(QModelIndex(), first, last, QModelIndex(),
-                             destination);
-          },
-          [](Attachments *o) { o->endMoveRows(); },
-          [](Attachments *o, int first, int last) {
-            o->beginRemoveRows(QModelIndex(), first, last);
-          },
-          [](Attachments *o) { o->endRemoveRows(); }})),
-      m_ownsPrivate(true) {
-  m_documentAttachments->m_d = attachments_document_attachments_get(m_d);
-  m_mediaAttachments->m_d = attachments_media_attachments_get(m_d);
-  connect(
-      this->m_documentAttachments, &DocumentAttachments::newDataReady,
-      this->m_documentAttachments,
-      [this](const QModelIndex &i) {
-        this->m_documentAttachments->fetchMore(i);
-      },
-      Qt::QueuedConnection);
-  connect(
-      this->m_mediaAttachments, &MediaAttachments::newDataReady,
-      this->m_mediaAttachments,
-      [this](const QModelIndex &i) { this->m_mediaAttachments->fetchMore(i); },
-      Qt::QueuedConnection);
-  connect(
-      this, &Attachments::newDataReady, this,
-      [this](const QModelIndex &i) { this->fetchMore(i); },
-      Qt::QueuedConnection);
-  initHeaderData();
-}
-
-Attachments::~Attachments() {
-  if (m_ownsPrivate) {
-    attachments_free(m_d);
-  }
-}
-void Attachments::initHeaderData() {}
-
-QByteArray Attachments::attachmentsMsgId() const {
-  QByteArray v;
-  attachments_attachments_msg_id_get(m_d, &v, set_qbytearray);
-  return v;
-}
-void Attachments::setAttachmentsMsgId(const QByteArray &v) {
-  if (v.isNull()) {
-    attachments_attachments_msg_id_set_none(m_d);
-  } else {
-    attachments_attachments_msg_id_set(m_d, v.data(), v.size());
-  }
-}
-
-const DocumentAttachments *Attachments::documentAttachments() const {
-  return m_documentAttachments;
-}
-DocumentAttachments *Attachments::documentAttachments() {
-  return m_documentAttachments;
-}
-
-bool Attachments::loaded() const { return attachments_loaded_get(m_d); }
-
-const MediaAttachments *Attachments::mediaAttachments() const {
-  return m_mediaAttachments;
-}
-MediaAttachments *Attachments::mediaAttachments() { return m_mediaAttachments; }
-
 Config::Config(bool /*owned*/, QObject *parent)
     : QObject(parent), m_d(nullptr), m_ownsPrivate(false) {}
 
@@ -3139,8 +2852,9 @@ ConversationContent::ConversationContent(QObject *parent)
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
-          messageBuilderOpHasAttachmentsChanged,
+          messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpIdChanged,
+          messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());
@@ -3943,8 +3657,9 @@ MessageBuilder::MessageBuilder(QObject *parent)
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
-          messageBuilderOpHasAttachmentsChanged,
+          messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpIdChanged,
+          messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());
@@ -4054,18 +3769,21 @@ QString MessageBuilder::opBody() const {
   return v;
 }
 
-QVariant MessageBuilder::opHasAttachments() const {
-  QVariant v;
-  auto r = message_builder_op_has_attachments_get(m_d);
-  if (r.some) {
-    v.setValue(r.value);
-  }
-  return r;
+QString MessageBuilder::opDocAttachments() const {
+  QString v;
+  message_builder_op_doc_attachments_get(m_d, &v, set_qstring);
+  return v;
 }
 
 QByteArray MessageBuilder::opId() const {
   QByteArray v;
   message_builder_op_id_get(m_d, &v, set_qbytearray);
+  return v;
+}
+
+QString MessageBuilder::opMediaAttachments() const {
+  QString v;
+  message_builder_op_media_attachments_get(m_d, &v, set_qstring);
   return v;
 }
 
@@ -4243,8 +3961,9 @@ Messages::Messages(QObject *parent)
           [](MediaAttachments *o) { o->endRemoveRows(); },
           messageBuilderOpAuthorChanged,
           messageBuilderOpBodyChanged,
-          messageBuilderOpHasAttachmentsChanged,
+          messageBuilderOpDocAttachmentsChanged,
           messageBuilderOpIdChanged,
+          messageBuilderOpMediaAttachmentsChanged,
           messageBuilderOpTimeChanged,
           [](const MessageBuilder *o) {
             Q_EMIT o->newDataReady(QModelIndex());

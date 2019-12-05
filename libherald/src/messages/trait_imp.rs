@@ -40,13 +40,6 @@ impl Interface for Messages {
         self.index_by_id_(msg_id)
     }
 
-    fn data_saved(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.data_saved_(index)
-    }
-
     fn author(
         &self,
         index: usize,
@@ -87,6 +80,19 @@ impl Interface for Messages {
         index: usize,
     ) -> Option<bool> {
         self.is_tail_(index)
+    }
+
+    fn doc_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.doc_attachments_(index)
+    }
+    fn media_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.media_attachments_(index)
     }
 
     fn delete_message(
@@ -205,13 +211,6 @@ impl Interface for Messages {
         self.op_author_(index)
     }
 
-    fn op_has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.op_has_attachments_(index)
-    }
-
     fn op_insertion_time(
         &self,
         index: usize,
@@ -226,18 +225,25 @@ impl Interface for Messages {
         self.op_expiration_time_(index)
     }
 
+    fn op_media_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.op_media_attachments_(index)
+    }
+
+    fn op_doc_attachments(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.op_doc_attachments_(index)
+    }
+
     fn msg_id(
         &self,
         index: usize,
     ) -> Option<ffi::MsgIdRef> {
         self.msg_id_(index)
-    }
-
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.has_attachments_(index)
     }
 
     fn emit(&mut self) -> &mut Emitter {
