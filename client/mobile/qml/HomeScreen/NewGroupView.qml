@@ -10,7 +10,6 @@ import Qt.labs.platform 1.0
 
 Page {
     id: newGroupView
-
     header: ToolBar {
         id: conversationViewHeader
 
@@ -53,15 +52,15 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
-
     Rectangle {
         id: topRect
         anchors.top: parent.top
-        height: CmnCfg.units.dp(60)
-        width: parent.width
+        height: CmnCfg.units.dp(72)
+        width: mainView.width
         property alias profPic: groupImageLoader.imageSource
 
         Rectangle {
+            id: cameraSection
             width: CmnCfg.units.dp(42)
             height: width
             color: CmnCfg.palette.black
@@ -83,6 +82,32 @@ Page {
                 anchors.centerIn: parent
                 imageSource: "qrc:/camera-icon.svg"
                 color: CmnCfg.palette.iconFill
+
+                tapCallback: function () {
+                    print("TODO implement group pics")
+                }
+            }
+        }
+        Rectangle {
+            anchors.topMargin: CmnCfg.units.dp(24)
+            anchors.top: cameraSection.bottom
+            width: parent.width - CmnCfg.units.dp(56)
+            height: CmnCfg.units.dp(72)
+            anchors.horizontalCenter: parent.horizontalCenter
+            TextArea {
+                id: titleText
+                anchors.top: parent.top
+                anchors.left: parent.left
+                placeholderText: "Group title"
+                leftPadding: 0
+            }
+
+            Rectangle {
+                anchors.bottom: titleText.bottom
+                id: divider
+                height: 1
+                width: parent.width
+                color: "black"
             }
         }
     }

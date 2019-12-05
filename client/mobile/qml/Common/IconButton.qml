@@ -4,10 +4,10 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 ToolButton {
+
     property var tapCallback: function anon() {
         throw "undefined callback"
     }
-
     property string imageSource: ""
     property color color: CmnCfg.palette.iconMatte
 
