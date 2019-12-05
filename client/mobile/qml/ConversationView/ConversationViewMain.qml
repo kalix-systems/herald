@@ -57,7 +57,7 @@ Page {
             margins: CmnCfg.units.dp(12)
         }
 
-        iconSource: "qrc:/pencil-icon-black.svg"
+        iconSource: "qrc:/plus-icon.svg"
     }
 
     states: [

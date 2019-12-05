@@ -15,8 +15,8 @@ Button {
     icon.width: CmnCfg.units.dp(24)
 
     background: Rectangle {
-        color: pressed ? Qt.lighter(CmnCfg.palette.offBlack,
-                                    1.3) : CmnCfg.palette.offBlack
+        color: pressed ? Qt.darker(CmnCfg.palette.offBlack,
+                                   1.3) : CmnCfg.palette.black
         anchors.fill: parent
         radius: height
     }
