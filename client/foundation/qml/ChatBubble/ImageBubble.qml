@@ -25,50 +25,51 @@ ColumnLayout {
         senderColor: authorColor
     }
 
+    GridLayout {
 
-    RowLayout {
-        height: parent.height
-        Layout.leftMargin: CmnCfg.smallMargin
-        Layout.rightMargin: CmnCfg.smallMargin
-        Layout.topMargin: CmnCfg.smallMargin
-        Layout.maximumWidth: maxWidth
-        clip: true
+        width: 400
+        height: 200
 
-//        Rectangle {
-//            property var imageHeight
-//            width: messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
-//            height: messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
-//            clip: true
+        columns: 2
+        rows: 1
 
-//            Image {
-//                id: image
-//                property real aspectRatio: sourceSize.height / sourceSize.width
-//                //TODO: move common typescript into common
-//                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
-//                asynchronous: true
-//                anchors.centerIn: parent
-//            }
-//        }
+        Repeater {
 
-
-        Rectangle {
-            property var imageHeight
-            width: 100 //messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
-            height: 100 //messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
-            clip: true
-
-            Image {
-                id: image2
-                property real aspectRatio: sourceSize.height / sourceSize.width
-                //TODO: move common typescript into common
-                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
-                asynchronous: true
-                anchors.centerIn: parent
-
+            model: messageAttachments.mediaAttachments
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+            delegate: Rectangle {
+                width: 200
+                height: 200
+                clip: true
+                Image {
+                    id: image
+                    //TODO: move common typescript into common
+                    source: messageAttachments.loaded ? "file:" + mediaAttachmentPath : ""
+                    asynchronous: true
+                    anchors.centerIn: parent
+                }
             }
         }
     }
 
+    //        Rectangle {
+    //            property var imageHeight
+    //            width: messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
+    //            height: messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
+
+    //            Component.onCompleted: print(messageAttachments.mediaAttachments.mediaAttachmentWidth(0))
+    //            clip: true
+
+    //            Image {
+    //                id: image2
+    //                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
+    //                asynchronous: true
+    //                anchors.centerIn: parent
+
+    //            }
+    //        }
+    //    }
     StandardTextEdit {}
 
     StandardStamps {}
