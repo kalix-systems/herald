@@ -33,5 +33,6 @@
         <file>qml/HomeScreen/DrawerContents.qml</file>
         <file>qml/HomeScreen/HomeHeader.qml</file>
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
+        <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
     </qresource>
 </RCC>

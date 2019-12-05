@@ -5,6 +5,7 @@ import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
 import "./Controls"
 import "../Common" as Common
+import QtGraphicalEffects 1.0
 
 Page {
     id: cvMainView
@@ -47,17 +48,47 @@ Page {
         }
     }
 
-    // floating pencil button to trigger
-    // new message flow
-    ComposeButton {
+    ColorOverlay {
+        id: disabledOverlay
+        visible: false
+        anchors.fill: parent
+        color: "black"
+        opacity: 0.5
 
+        TapHandler {
+            grabPermissions: PointerHandler.TakeOverForbidden
+            onTapped: {
+                cvMainView.state = "default"
+            }
+        }
+    }
+
+    Component {
+        id: fab
+        FloatingActionButtons {}
+    }
+
+    Component {
+        id: plusButton
+        ComposeButton {
+            iconSource: "qrc:/plus-icon.svg"
+            TapHandler {
+                onTapped: {
+                    cvMainView.state = "fabButtonState"
+                    buttonLoader.sourceComponent = fab
+                }
+            }
+        }
+    }
+
+    Loader {
+        id: buttonLoader
         anchors {
             bottom: parent.bottom
             right: parent.right
             margins: CmnCfg.units.dp(12)
         }
-
-        iconSource: "qrc:/plus-icon.svg"
+        sourceComponent: plusButton
     }
 
     states: [
@@ -68,6 +99,18 @@ Page {
             name: "search"
             PropertyChanges {
                 target: listViewLoader
+            }
+        },
+
+        State {
+            name: "fabButtonState"
+            PropertyChanges {
+                target: disabledOverlay
+                visible: true
+            }
+            PropertyChanges {
+                target: buttonLoader
+                sourceComponent: fab
             }
         }
     ]
