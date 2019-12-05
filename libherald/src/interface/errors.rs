@@ -9,7 +9,7 @@ pub struct ErrorsEmitter {
 
 impl ErrorsEmitter {
     /// Clone the emitter
-    /// 
+    ///
     /// The emitter can only be cloned when it is mutable. The emitter calls
     /// into C++ code which may call into Rust again. If emmitting is possible
     /// from immutable structures, that might lead to access to a mutable
@@ -23,7 +23,8 @@ impl ErrorsEmitter {
 
     pub fn clear(&self) {
         let n: *const ErrorsQObject = null();
-        self.qobject.store(n as *mut ErrorsQObject, Ordering::SeqCst);
+        self.qobject
+            .store(n as *mut ErrorsQObject, Ordering::SeqCst);
     }
 
     pub fn try_poll_changed(&mut self) {
@@ -55,16 +56,14 @@ pub unsafe fn errors_new_inner(ptr_bundle: *mut ErrorsPtrBundle) -> Errors {
     let ptr_bundle = *ptr_bundle;
 
     let ErrorsPtrBundle {
-        errors
-        ,
+        errors,
         errors_try_poll_changed,
     } = ptr_bundle;
     let errors_emit = ErrorsEmitter {
         qobject: Arc::new(AtomicPtr::new(errors)),
         try_poll_changed: errors_try_poll_changed,
     };
-    let d_errors = Errors::new(errors_emit
-    );
+    let d_errors = Errors::new(errors_emit);
     d_errors
 }
 
@@ -74,11 +73,13 @@ pub unsafe extern "C" fn errors_free(ptr: *mut Errors) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn errors_next_error(ptr: *mut Errors, data: *mut QString, set: fn(*mut QString, str_: *const c_char, len: c_int)) {
+pub unsafe extern "C" fn errors_next_error(
+    ptr: *mut Errors,
+    data: *mut QString,
+    set: fn(*mut QString, str_: *const c_char, len: c_int),
+) {
     let obj = &mut *ptr;
-    let ret = obj.next_error(
-    )
-    ;
+    let ret = obj.next_error();
     let str_: *const c_char = ret.as_ptr() as (*const c_char);
     set(data, str_, ret.len() as i32);
 }
