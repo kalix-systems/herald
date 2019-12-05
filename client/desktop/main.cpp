@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
   qmlRegisterType<ConversationContent>("LibHerald", 1, 0, "ConversationContent");
 
-  qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
   qmlRegisterType<MediaAttachments>("LibHerald", 1, 0, "MediaAttachments");
   qmlRegisterType<DocumentAttachments>("LibHerald", 1, 0,
                                        "DocumentAttachments");
