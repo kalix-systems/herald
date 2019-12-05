@@ -38,7 +38,8 @@ Rectangle {
             iconColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
             initials: CVJS.initialize(title)
-            size: CmnCfg.units.dp(32)
+            size: CmnCfg.units.dp(36)
+            avatarHeight: CmnCfg.units.dp(36)
 
             anchors {
                 right: parent.right

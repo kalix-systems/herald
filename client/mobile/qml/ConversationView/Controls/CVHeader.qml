@@ -5,6 +5,8 @@ import LibHerald 1.0
 import "../../Common"
 import "../../ConfigMenu"
 import "../js/CVViewUtils.js" as CVJS
+import "qrc:/imports/Avatar"
+import "qrc:/imports/js/utils.mjs" as Utils
 
 ToolBar {
     id: conversationViewHeader
@@ -28,6 +30,18 @@ ToolBar {
                 imageSource: "qrc:/hamburger-icon.svg"
                 tapCallback: contextDrawer.open
             }
+
+            AvatarMain {
+                iconColor: CmnCfg.palette.avatarColors[herald.config.color]
+                initials: herald.config.name[0].toUpperCase()
+                pfpPath: Utils.safeStringOrDefault(
+                             herald.config.profilePicture, "")
+                size: CmnCfg.units.dp(24)
+                avatarHeight: CmnCfg.units.dp(24)
+                Layout.alignment: Qt.AlignCenter
+                Layout.leftMargin: CmnCfg.units.dp(12)
+            }
+
             Label {
                 id: stateLabel
                 text: "Conversations"
