@@ -24,48 +24,46 @@ ColumnLayout {
         senderColor: authorColor
     }
 
-//    Repeater {
-//        model: messageAttachments.mediaAttachments
+    //    Repeater {
+    //        model: messageAttachments.mediaAttachments
 
-//        delegate: Image {
-//            id: image
-//            property real aspectRatio: sourceSize.height / sourceSize.width
-//            Layout.maximumWidth: 400
-//            Layout.minimumWidth: 200
-//            Layout.preferredWidth: sourceSize.width
-//            Layout.maximumHeight: 300
-//            //TODO: move common typescript into common
-//            source: "file:" + mediaAttachmentPath
-//            fillMode: Image.PreserveAspectCrop
-//            asynchronous: true
-//        }
-//    }
-
+    //        delegate: Image {
+    //            id: image
+    //            property real aspectRatio: sourceSize.height / sourceSize.width
+    //            Layout.maximumWidth: 400
+    //            Layout.minimumWidth: 200
+    //            Layout.preferredWidth: sourceSize.width
+    //            Layout.maximumHeight: 300
+    //            //TODO: move common typescript into common
+    //            source: "file:" + mediaAttachmentPath
+    //            fillMode: Image.PreserveAspectCrop
+    //            asynchronous: true
+    //        }
+    //    }
     RowLayout {
         height: parent.height
         width: parent.width
         Image {
-                    id: image
-                    property real aspectRatio: sourceSize.height / sourceSize.width
-                    width: 100
-                     height: width
-                    //TODO: move common typescript into common
-                    source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentOne
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                }
+            id: image
+            property real aspectRatio: sourceSize.height / sourceSize.width
+            width: 100
+            height: width
+            //TODO: move common typescript into common
+            source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentOne
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
 
         Image {
-                    id: image2
-                    property real aspectRatio: sourceSize.height / sourceSize.width
-                   width: 100
-                    height: width
-                    //TODO: move common typescript into common
-                    source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentTwo
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
-                }
-
+            id: image2
+            property real aspectRatio: sourceSize.height / sourceSize.width
+            width: 100
+            height: width
+            //TODO: move common typescript into common
+            source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentTwo
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
     }
 
     StandardTextEdit {}

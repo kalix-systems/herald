@@ -82,6 +82,32 @@ impl MediaAttachments {
         self.model.begin_reset_model();
         self.contents = media;
         self.model.end_reset_model();
+
+        let len = self.contents.len();
+
+        if len == 0 {
+            return;
+        }
+
+        self.emit.media_attachment_one_changed();
+
+        if len == 1 {
+            return;
+        }
+
+        self.emit.media_attachment_two_changed();
+
+        if len == 2 {
+            return;
+        }
+
+        self.emit.media_attachment_three_changed();
+
+        if len == 3 {
+            return;
+        }
+
+        self.emit.media_attachment_four_changed();
     }
 
     pub(crate) fn is_empty(&self) -> bool {

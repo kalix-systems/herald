@@ -81,6 +81,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.inner
             .attachments
             .extend(&mut self.media_attachments.all().into_iter().map(PathBuf::from));
+
         self.inner.attachments.extend(
             &mut self
                 .document_attachments
