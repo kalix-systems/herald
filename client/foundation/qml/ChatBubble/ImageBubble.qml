@@ -10,6 +10,7 @@ ColumnLayout {
     property string imageSource: ""
     property string authorName: ""
     property Attachments messageAttachments: null
+    property real maxWidth: Math.min(parent.maxWidth, 600)
     property color authorColor
     property bool elided: false
     property bool expanded: false
@@ -24,45 +25,47 @@ ColumnLayout {
         senderColor: authorColor
     }
 
-    //    Repeater {
-    //        model: messageAttachments.mediaAttachments
 
-    //        delegate: Image {
-    //            id: image
-    //            property real aspectRatio: sourceSize.height / sourceSize.width
-    //            Layout.maximumWidth: 400
-    //            Layout.minimumWidth: 200
-    //            Layout.preferredWidth: sourceSize.width
-    //            Layout.maximumHeight: 300
-    //            //TODO: move common typescript into common
-    //            source: "file:" + mediaAttachmentPath
-    //            fillMode: Image.PreserveAspectCrop
-    //            asynchronous: true
-    //        }
-    //    }
     RowLayout {
         height: parent.height
-        width: parent.width
-        Image {
-            id: image
-            property real aspectRatio: sourceSize.height / sourceSize.width
-            width: 100
-            height: width
-            //TODO: move common typescript into common
-            source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentOne
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-        }
+        Layout.leftMargin: CmnCfg.smallMargin
+        Layout.rightMargin: CmnCfg.smallMargin
+        Layout.topMargin: CmnCfg.smallMargin
+        Layout.maximumWidth: maxWidth
+        clip: true
 
-        Image {
-            id: image2
-            property real aspectRatio: sourceSize.height / sourceSize.width
-            width: 100
-            height: width
-            //TODO: move common typescript into common
-            source: "file:" + messageAttachments.mediaAttachments.mediaAttachmentTwo
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
+//        Rectangle {
+//            property var imageHeight
+//            width: messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
+//            height: messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
+//            clip: true
+
+//            Image {
+//                id: image
+//                property real aspectRatio: sourceSize.height / sourceSize.width
+//                //TODO: move common typescript into common
+//                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
+//                asynchronous: true
+//                anchors.centerIn: parent
+//            }
+//        }
+
+
+        Rectangle {
+            property var imageHeight
+            width: 100 //messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
+            height: 100 //messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
+            clip: true
+
+            Image {
+                id: image2
+                property real aspectRatio: sourceSize.height / sourceSize.width
+                //TODO: move common typescript into common
+                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
+                asynchronous: true
+                anchors.centerIn: parent
+
+            }
         }
     }
 
