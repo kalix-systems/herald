@@ -28,7 +28,7 @@ pub enum StoreAndSend {
         location: Location,
     },
     /// A signal that the message has been stored successfully
-    StoreDone(MsgId),
+    StoreDone(MsgId, AttachmentMeta),
     /// A signal that the message has been sent
     SendDone(MsgId),
 }

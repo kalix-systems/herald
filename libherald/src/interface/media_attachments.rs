@@ -175,20 +175,10 @@ pub trait MediaAttachmentsTrait {
     ) {
     }
 
-    fn media_attachment_height(
-        &self,
-        index: usize,
-    ) -> u32;
-
     fn media_attachment_path(
         &self,
         index: usize,
     ) -> &str;
-
-    fn media_attachment_width(
-        &self,
-        index: usize,
-    ) -> u32;
 }
 
 #[no_mangle]
@@ -295,15 +285,6 @@ pub unsafe extern "C" fn media_attachments_sort(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn media_attachments_data_media_attachment_height(
-    ptr: *const MediaAttachments,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.media_attachment_height(to_usize(row).unwrap_or(0))
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn media_attachments_data_media_attachment_path(
     ptr: *const MediaAttachments,
     row: c_int,
@@ -314,15 +295,6 @@ pub unsafe extern "C" fn media_attachments_data_media_attachment_path(
     let data = obj.media_attachment_path(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn media_attachments_data_media_attachment_width(
-    ptr: *const MediaAttachments,
-    row: c_int,
-) -> u32 {
-    let obj = &*ptr;
-    obj.media_attachment_width(to_usize(row).unwrap_or(0))
 }
 
 #[derive(Clone, Copy)]

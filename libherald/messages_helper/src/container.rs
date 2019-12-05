@@ -69,6 +69,60 @@ impl Container {
         self.map.get_mut(&msg?.msg_id)
     }
 
+    pub fn media_attachments_data_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.list.get(index)?.msg_id;
+        self.get_media_attachments_data_json(&mid)
+    }
+
+    pub fn get_media_attachments_data_json(
+        &self,
+        mid: &MsgId,
+    ) -> Option<String> {
+        let attachments = &self.get_data(mid)?.attachments;
+
+        if attachments.is_empty() {
+            return None;
+        }
+
+        let json_vals: Vec<json::JsonValue> = attachments
+            .media_attachments()
+            .into_iter()
+            .map(json::JsonValue::from)
+            .collect();
+
+        Some(json::from(json_vals).dump())
+    }
+
+    pub fn doc_attachments_data_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.list.get(index)?.msg_id;
+        self.get_doc_attachments_data_json(&mid)
+    }
+
+    pub fn get_doc_attachments_data_json(
+        &self,
+        mid: &MsgId,
+    ) -> Option<String> {
+        let attachments = &self.get_data(mid)?.attachments;
+
+        if attachments.is_empty() {
+            return None;
+        }
+
+        let json_vals: Vec<json::JsonValue> = attachments
+            .doc_attachments()
+            .into_iter()
+            .map(json::JsonValue::from)
+            .collect();
+
+        Some(json::from(json_vals).dump())
+    }
+
     pub fn last(&self) -> Option<&Message> {
         self.list.last()
     }
@@ -129,9 +183,7 @@ impl Container {
 
         Some(())
     }
-}
 
-impl Container {
     fn op(
         &self,
         index: usize,
@@ -187,10 +239,19 @@ impl Container {
         Some(self.op(index)?.time.expiration?)
     }
 
-    pub fn op_has_attachments(
+    pub fn op_doc_attachments_json(
         &self,
         index: usize,
-    ) -> Option<bool> {
-        Some(self.op(index)?.has_attachments)
+    ) -> Option<String> {
+        let mid = self.list.get(index)?.msg_id;
+        self.get_doc_attachments_data_json(&mid)
+    }
+
+    pub fn op_media_attachments_json(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        let mid = self.list.get(index)?.msg_id;
+        self.get_media_attachments_data_json(&mid)
     }
 }

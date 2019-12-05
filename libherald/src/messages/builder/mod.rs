@@ -1,12 +1,12 @@
 use crate::{
-    attachments::{is_media, DocumentAttachments, MediaAttachments},
+    attachments::{DocumentAttachments, MediaAttachments},
     content_push, ffi,
     interface::*,
     push, ret_err, ret_none, spawn,
 };
 use herald_common::{Time, UserId};
 use heraldcore::{
-    message::*,
+    message::{attachments::is_media, *},
     types::{ConversationId, InvalidRandomIdLength, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
@@ -105,8 +105,8 @@ impl MessageBuilderTrait for MessageBuilder {
                     Error { error, location } => {
                         push((Err::<(), HErr>(error), location));
                     }
-                    StoreDone(mid) => {
-                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid)));
+                    StoreDone(mid, meta) => {
+                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
                     }
                     SendDone(_) => {
                         // TODO: send status?
@@ -140,8 +140,12 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
-    fn op_has_attachments(&self) -> Option<bool> {
-        Some(self.op.as_ref()?.has_attachments)
+    fn op_doc_attachments(&self) -> Option<&str> {
+        None
+    }
+
+    fn op_media_attachments(&self) -> Option<&str> {
+        None
     }
 
     fn add_attachment(

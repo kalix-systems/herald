@@ -50,7 +50,8 @@ impl MessageBuilder {
         self.emit.op_body_changed();
         self.emit.op_author_changed();
         self.emit.op_time_changed();
-        self.emit.op_has_attachments_changed();
+        self.emit.op_doc_attachments_changed();
+        self.emit.op_media_attachments_changed();
     }
 
     pub(in crate::messages) fn try_clear_reply(
@@ -70,7 +71,6 @@ pub(super) struct Reply {
     pub(super) time: Time,
     pub(super) body: Option<MessageBody>,
     pub(super) author: UserId,
-    pub(super) has_attachments: bool,
 }
 
 impl Reply {
@@ -79,7 +79,6 @@ impl Reply {
             time: data.time.insertion,
             body: data.body.clone(),
             author: data.author,
-            has_attachments: data.has_attachments,
         }
     }
 }

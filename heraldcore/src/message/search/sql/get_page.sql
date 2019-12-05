@@ -4,7 +4,6 @@ SELECT
     conversation_id,
     body,
     insertion_ts,
-    has_attachments,
     rowid
 FROM
     messages

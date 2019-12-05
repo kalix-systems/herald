@@ -30,7 +30,7 @@ fn outbound_message_attachment() {
 
     let meta = super::get(&msg.message_id)
         .expect(womp!())
-        .into_flat()
+        .flat()
         .expect(womp!());
 
     assert_eq!(meta.len(), 1);
@@ -64,7 +64,7 @@ fn inbound_message_attachment() {
     builder.store_db(&mut conn).expect(womp!());
 
     let meta = db::get(&conn, &mid).expect(womp!());
-    let meta = meta.into_flat().expect(womp!());
+    let meta = meta.flat().expect(womp!());
 
     assert_eq!(meta.len(), 1);
 

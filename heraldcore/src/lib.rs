@@ -9,8 +9,6 @@ pub mod conversation;
 pub mod db;
 /// Errors
 pub mod errors;
-/// Image processing
-pub mod image_utils;
 /// Members of conversations
 pub mod members;
 /// Functions and data structures related to messages.
@@ -28,6 +26,7 @@ mod user_keys;
 /// Utils
 pub mod utils;
 
+pub use image_utils;
 pub use platform_dirs::set_data_dir;
 
 #[cfg(test)]
