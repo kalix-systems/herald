@@ -1,17 +1,19 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.12
 import LibHerald 1.0
+import QtQuick 2.12
 
 Column {
     width: CmnCfg.units.dp(48)
     spacing: CmnCfg.units.dp(16)
 
     Button {
-
+        id: button
         height: CmnCfg.units.dp(36)
         width: height
 
         Label {
+            id: label
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
@@ -20,7 +22,7 @@ Column {
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
-                color: CmnCfg.palette.white
+                color: CmnCfg.palette.lightGrey
             }
         }
 
@@ -51,7 +53,7 @@ Column {
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
-                color: CmnCfg.palette.white
+                color: CmnCfg.palette.lightGrey
             }
         }
 
@@ -67,6 +69,10 @@ Column {
             anchors.fill: parent
             radius: height
         }
+
+        TapHandler {
+            onTapped: mainView.push(newGroupViewMain)
+        }
     }
 
     Button {
@@ -80,7 +86,7 @@ Column {
             background: Rectangle {
                 anchors.fill: parent
                 anchors.margins: -CmnCfg.units.dp(3)
-                color: CmnCfg.palette.white
+                color: CmnCfg.palette.lightGrey
             }
         }
 

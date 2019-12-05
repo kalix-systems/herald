@@ -56,7 +56,7 @@ Page {
         opacity: 0.5
 
         TapHandler {
-            grabPermissions: PointerHandler.TakeOverForbidden
+            //grabPermissions: PointerHandler.TakeOverForbidden
             onTapped: {
                 cvMainView.state = "default"
             }

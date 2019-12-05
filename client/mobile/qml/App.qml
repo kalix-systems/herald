@@ -25,6 +25,11 @@ Item {
         NewContactView.NewContactViewMain {}
     }
 
+    Component {
+        id: newGroupViewMain
+        HomeScreen.NewGroupView {}
+    }
+
     StackView {
         id: mainView
         anchors.fill: parent
