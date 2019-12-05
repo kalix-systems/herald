@@ -64,7 +64,7 @@ impl Interface for MediaAttachments {
         index: usize,
     ) -> u64 {
         let index = index as usize;
-        ret_none!(self.dims.get(index), 0).0
+        self.dims.get(index).map(|(h, _)| *h).unwrap_or(0)
     }
 
     fn media_attachment_width(
@@ -72,7 +72,7 @@ impl Interface for MediaAttachments {
         index: usize,
     ) -> u64 {
         let index = index as usize;
-        ret_none!(self.dims.get(index), 0).1
+        self.dims.get(index).map(|(_, w)| *w).unwrap_or(0)
     }
 
     fn set_media_attachment_dims(
@@ -84,6 +84,7 @@ impl Interface for MediaAttachments {
         let index = index as usize;
         let dim = ret_none!(self.dims.get_mut(index));
         *dim = (height, width);
+        self.data_changed(index, index);
     }
 }
 
@@ -94,6 +95,7 @@ impl MediaAttachments {
     ) {
         self.model.begin_reset_model();
         self.contents = media;
+        self.dims = vec![(0, 0); self.contents.len()];
         self.model.end_reset_model();
     }
 
