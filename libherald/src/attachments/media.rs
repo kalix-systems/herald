@@ -84,7 +84,7 @@ impl Interface for MediaAttachments {
         let index = index as usize;
         let dim = ret_none!(self.dims.get_mut(index));
         *dim = (height, width);
-        self.data_changed(index, index);
+        self.model.data_changed(index, index);
     }
 }
 
