@@ -77,6 +77,18 @@ impl MessageBuilderTrait for MessageBuilder {
     /// Finalizes the builder, stores and sends the message, and resets the builder.
     fn finalize(&mut self) {
         self.model.begin_reset_model();
+
+        self.inner
+            .attachments
+            .extend(&mut self.media_attachments.all().into_iter().map(PathBuf::from));
+        self.inner.attachments.extend(
+            &mut self
+                .document_attachments
+                .all()
+                .into_iter()
+                .map(PathBuf::from),
+        );
+
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();

@@ -89,4 +89,8 @@ impl DocumentAttachments {
 
         Some(())
     }
+
+    pub(crate) fn all(&mut self) -> Vec<String> {
+        std::mem::replace(&mut self.contents, Vec::new())
+    }
 }
