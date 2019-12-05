@@ -71,7 +71,9 @@ Column {
         }
 
         TapHandler {
-            onTapped: mainView.push(newGroupViewMain)
+            onTapped: {
+                mainView.push(newGroupViewMain)
+            }
         }
     }
 

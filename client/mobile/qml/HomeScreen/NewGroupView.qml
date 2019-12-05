@@ -31,7 +31,7 @@ Page {
                     color: CmnCfg.palette.iconFill
                     imageSource: "qrc:/back-arrow-icon.svg"
                     tapCallback: function () {
-                        mainView.pop()
+                        mainView.pop(null)
                     }
                 }
 
