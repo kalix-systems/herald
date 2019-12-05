@@ -7,9 +7,10 @@ Window {
     id: imageWindow
     property real scale: 1.0
     property bool freeScroll: scale === 1.0
+    property int index: 0
     property Attachments sourceAtc
-    title: sourceAtc !== null ? sourceAtc.attachmentPath(0).substring(
-                                    sourceAtc.attachmentPath(0).lastIndexOf(
+    title: sourceAtc !== null ? sourceAtc.attachmentPath(index).substring(
+                                    sourceAtc.attachmentPath(index).lastIndexOf(
                                         '/') + 1) : ""
 
     width: Math.min(image.sourceSize.width, 750)
@@ -26,18 +27,31 @@ Window {
             right: imageWindow.right
             top: imageWindow.top
         }
-
         Button {
             text: "+"
             font.bold: true
             font.pointSize: 20
             width: 50
+            onClicked: {
+                imageWindow.scale += 0.3
+                flickable.resizeContent(imageWindow.width * imageWindow.scale,
+                                        imageWindow.height * imageWindow.scale,
+                                        Qt.point(image.width / 2 + image.x,
+                                                 image.height / 2 + image.y))
+            }
         }
         Button {
             text: "-"
             font.bold: true
             font.pointSize: 20
             width: 50
+            onClicked: {
+                imageWindow.scale -= 0.3
+                flickable.resizeContent(imageWindow.width * imageWindow.scale,
+                                        imageWindow.height * imageWindow.scale,
+                                        Qt.point(image.width / 2 + image.x,
+                                                 image.height / 2 + image.y))
+            }
         }
         Button {
             text: "↓"
@@ -48,9 +62,8 @@ Window {
     }
 
     Rectangle {
-        id: background
         anchors.fill: parent
-        color: CmnCfg.palette.medGrey
+        color: CmnCfg.palette.darkGrey
     }
 
     onVisibilityChanged: {
@@ -74,7 +87,7 @@ Window {
         Image {
             id: image
             source: sourceAtc !== null ? "file:" + sourceAtc.attachmentPath(
-                                             0) : ""
+                                             index) : ""
             fillMode: Image.PreserveAspectFit
             anchors.fill: parent
             mipmap: true
