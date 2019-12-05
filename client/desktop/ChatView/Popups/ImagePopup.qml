@@ -88,8 +88,8 @@ Window {
         anchors.fill: parent
         ScrollBar.vertical: ScrollBar {}
         ScrollBar.horizontal: ScrollBar {}
-        //        contentHeight: height
-        //        contentWidth: width
+        contentHeight: height
+        contentWidth: width
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
         Image {
             id: image
@@ -105,7 +105,7 @@ Window {
         id: pinchArea
         anchors.fill: parent
         onPinchUpdated: {
-            imageWindow.scale += (pinch.scale - pinch.previousScale)
+            imageWindow.scale += (pinch.scale - pinch.previousScale) * 1.2
             flickable.resizeContent(imageWindow.width * imageWindow.scale,
                                     imageWindow.height * imageWindow.scale,
                                     pinch.center)
