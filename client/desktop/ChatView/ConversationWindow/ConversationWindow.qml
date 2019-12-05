@@ -16,7 +16,7 @@ ListView {
     //this should be in here and not in the bubble because conversation window
     //needs access to it, add a separate animation to mobile
     //do not move this back into foundation
-    property NumberAnimation highlightAnimation:   NumberAnimation {
+    property NumberAnimation highlightAnimation: NumberAnimation {
         id: bubbleHighlightAnimation
         property: "opacity"
         from: 1.0
@@ -24,7 +24,6 @@ ListView {
         duration: 600
         easing.type: Easing.InCubic
     }
-
 
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
@@ -138,9 +137,8 @@ ListView {
                 friendlyTimestamp: timestamp
                 receiptImage: proxyReceiptImage
                 authorName: authName
-                messageAttachments: Attachments {
-                    attachmentsMsgId: msgId
-                }
+                mediaAttachments: ownedConversation.mediaAttachments
+                documentAttachments: ownedConversation.documentAttachments
                 authorColor: userColor
                 elided: chatRow.elided
             }

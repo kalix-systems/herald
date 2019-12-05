@@ -14,6 +14,8 @@ ColumnLayout {
     property color authorColor
     property bool elided: false
     property bool expanded: false
+    property string mediaAttachments
+    property string documentAttachments
     id: wrapperCol
     Component.onCompleted: wrapperCol.expanded = false
 
