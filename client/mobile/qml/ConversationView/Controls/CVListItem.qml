@@ -6,6 +6,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 import "../../ChatView" as ChatView
 import "../js/CVViewUtils.js" as CVJS
 
+
 Rectangle {
     id: contactItem
 

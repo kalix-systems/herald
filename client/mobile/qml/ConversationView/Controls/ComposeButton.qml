@@ -6,7 +6,7 @@ Button {
     property string iconSource: ""
     property color iconColor: CmnCfg.palette.iconFill
 
-    height: CmnCfg.units.dp(56)
+    height: CmnCfg.units.dp(48)
     width: height
 
     icon.source: iconSource

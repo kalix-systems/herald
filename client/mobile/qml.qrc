@@ -19,9 +19,6 @@
         <file>qml/SearchView/SearchViewMain.qml</file>
         <file>qml/ConversationView/Controls/ComposeButton.qml</file>
         <file>qml/ConversationView/js/CVViewUtils.js</file>
-        <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
-        <file>qml/ChatView/Controls/TextMessageList.qml</file>
-        <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/Common/Drawer.qml</file>
@@ -35,5 +32,8 @@
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
         <file>qml/App.qml</file>
+        <file>qml/ChatView/TextMessageList.qml</file>
+        <file>qml/ChatView/ChatViewHeader.qml</file>
+        <file>qml/ChatView/ChatTextArea.qml</file>
     </qresource>
 </RCC>

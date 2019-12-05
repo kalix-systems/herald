@@ -7,6 +7,7 @@ import "../../ConfigMenu"
 import "../js/CVViewUtils.js" as CVJS
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
+import Qt.labs.platform 1.0
 
 ToolBar {
     id: conversationViewHeader
