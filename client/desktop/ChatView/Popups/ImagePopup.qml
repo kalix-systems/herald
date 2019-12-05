@@ -7,7 +7,6 @@ import Qt.labs.platform 1.1
 Window {
     id: imageWindow
     property real scale: 1.0
-    property bool freeScroll: scale === 1.0
     property int index: 0
     property Attachments sourceAtc
     title: sourceAtc !== null ? sourceAtc.attachmentPath(index).substring(
@@ -89,8 +88,8 @@ Window {
         anchors.fill: parent
         ScrollBar.vertical: ScrollBar {}
         ScrollBar.horizontal: ScrollBar {}
-        contentHeight: height
-        contentWidth: width
+        //        contentHeight: height
+        //        contentWidth: width
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
         Image {
             id: image
@@ -106,7 +105,7 @@ Window {
         id: pinchArea
         anchors.fill: parent
         onPinchUpdated: {
-            imageWindow.scale += (pinch.scale - pinch.previousScale) / 2.0
+            imageWindow.scale += (pinch.scale - pinch.previousScale)
             flickable.resizeContent(imageWindow.width * imageWindow.scale,
                                     imageWindow.height * imageWindow.scale,
                                     pinch.center)
