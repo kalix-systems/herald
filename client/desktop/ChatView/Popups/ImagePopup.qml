@@ -53,6 +53,7 @@ Window {
                                                  image.height / 2 + image.y))
             }
         }
+
         Button {
             text: "↓"
             font.bold: true
@@ -84,6 +85,7 @@ Window {
         ScrollBar.horizontal: ScrollBar {}
         contentHeight: height
         contentWidth: width
+        contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
         Image {
             id: image
             source: sourceAtc !== null ? "file:" + sourceAtc.attachmentPath(
