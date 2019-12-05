@@ -154,14 +154,13 @@ impl Interface for MessageSearch {
                         }
                     }
                     SearchThreadUpdate::Done => {
-                        let diff = self.results.len().saturating_sub(self.num_results + 1);
+                        let new_len = self.num_results;
+                        let diff = self.results.len().saturating_sub(new_len);
 
                         if diff != 0 {
-                            self.model.begin_remove_rows(
-                                self.num_results,
-                                self.results.len().saturating_sub(1),
-                            );
-                            self.results.truncate(self.num_results);
+                            self.model
+                                .begin_remove_rows(new_len, self.results.len().saturating_sub(1));
+                            self.results.truncate(new_len);
                             self.model.end_remove_rows();
                         }
                     }
