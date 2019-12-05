@@ -100,6 +100,7 @@ fn utils() -> Object {
     let functions = functions! {
         const compareByteArray(bs1: QByteArray, bs2: QByteArray) => Bool,
         const isValidRandId(bs: QByteArray) => Bool,
+        const saveFile(fpath: QString, target_path: QString) => Bool,
     };
 
     obj! {

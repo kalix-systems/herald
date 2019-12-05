@@ -2749,6 +2749,8 @@ void            utils_free(Utils::Private*);
 bool utils_compare_byte_array(const Utils::Private*, const char*, int,
                               const char*, int);
 bool utils_is_valid_rand_id(const Utils::Private*, const char*, int);
+bool utils_save_file(const Utils::Private*, const ushort*, int, const ushort*,
+                     int);
 }
 
 Attachments::Attachments(bool /*owned*/, QObject* parent)
@@ -4313,4 +4315,9 @@ bool Utils::compareByteArray(const QByteArray& bs1, const QByteArray& bs2) const
 bool Utils::isValidRandId(const QByteArray& bs) const
 {
   return utils_is_valid_rand_id(m_d, bs.data(), bs.size());
+}
+bool Utils::saveFile(const QString& fpath, const QString& target_path) const
+{
+  return utils_save_file(m_d, fpath.utf16(), fpath.size(), target_path.utf16(),
+                         target_path.size());
 }

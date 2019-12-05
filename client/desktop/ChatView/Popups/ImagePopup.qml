@@ -2,6 +2,7 @@ import QtQuick 2.13
 import QtQuick.Controls 2.12
 import LibHerald 1.0
 import QtQuick.Window 2.13
+import Qt.labs.platform 1.1
 
 Window {
     id: imageWindow
@@ -59,6 +60,11 @@ Window {
             font.bold: true
             font.pointSize: 20
             width: 50
+            onClicked: {
+                print(herald.utils.saveFile(sourceAtc.attachmentPath(index),
+                                            StandardPaths.writableLocation(
+                                                StandardPaths.DesktopLocation)))
+            }
         }
     }
 
