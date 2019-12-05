@@ -62,7 +62,7 @@ ListView {
                     Layout.preferredHeight: labelGrid.height * 0.25
                     Layout.maximumWidth: parent.width
                     elide: "ElideRight"
-                    text: messageData.author
+                    text: messageData.conversationTitle
                     color: CmnCfg.palette.black
                 }
 
@@ -80,17 +80,11 @@ ListView {
 
                 TextMetrics {
                     id: prefix
-                    text: messageData.beforeFirstMatch + messageData.firstMatch
+                    text: messageData.beforeFirstMatch
                     elide: Text.ElideLeft
                     elideWidth: labelGrid.width * 2
                 }
 
-                TextMetrics {
-                    id: suffix
-                    text: messageData.afterFirstMatch
-                    elide: Text.ElideRight
-                    elideWidth: labelGrid.width * 2
-                }
 
                 Label {
                     id: bodyText
@@ -102,9 +96,12 @@ ListView {
                     elide: "ElideRight"
                     text: if (messageData.beforeFirstMatch.length === 0) {
                               messageData.firstMatch + messageData.afterFirstMatch
+                          } else if (prefix.length === messageData.beforeFirstMatch.length) {
+                             prefix.elidedText + messageData.firstMatch + messageData.afterFirstMatch
                           } else {
-                              prefix.elidedText + suffix.elidedText
+                              "..." + prefix.elidedText + messageData.firstMatch + messageData.afterFirstMatch
                           }
+
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignLeft | Qt.alignTop
                     Layout.maximumHeight: labelGrid.height
