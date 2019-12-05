@@ -5,6 +5,7 @@ pub struct AttachmentsQObject;
 pub struct AttachmentsEmitter {
     pub(super) qobject: Arc<AtomicPtr<AttachmentsQObject>>,
     pub(super) attachments_msg_id_changed: fn(*mut AttachmentsQObject),
+    pub(super) loaded_changed: fn(*mut AttachmentsQObject),
     pub(super) new_data_ready: fn(*mut AttachmentsQObject),
 }
 
@@ -19,6 +20,7 @@ impl AttachmentsEmitter {
         AttachmentsEmitter {
             qobject: self.qobject.clone(),
             attachments_msg_id_changed: self.attachments_msg_id_changed,
+            loaded_changed: self.loaded_changed,
             new_data_ready: self.new_data_ready,
         }
     }
@@ -34,6 +36,14 @@ impl AttachmentsEmitter {
 
         if !ptr.is_null() {
             (self.attachments_msg_id_changed)(ptr);
+        }
+    }
+
+    pub fn loaded_changed(&mut self) {
+        let ptr = self.qobject.load(Ordering::SeqCst);
+
+        if !ptr.is_null() {
+            (self.loaded_changed)(ptr);
         }
     }
 
@@ -167,6 +177,8 @@ pub trait AttachmentsTrait {
 
     fn document_attachments_mut(&mut self) -> &mut DocumentAttachments;
 
+    fn loaded(&self) -> bool;
+
     fn media_attachments(&self) -> &MediaAttachments;
 
     fn media_attachments_mut(&mut self) -> &mut MediaAttachments;
@@ -230,6 +242,7 @@ pub unsafe fn attachments_new_inner(ptr_bundle: *mut AttachmentsPtrBundle) -> At
         document_attachments_end_move_rows,
         document_attachments_begin_remove_rows,
         document_attachments_end_remove_rows,
+        attachments_loaded_changed,
         media_attachments,
         media_attachments_media_attachment_four_changed,
         media_attachments_media_attachment_one_changed,
@@ -305,6 +318,7 @@ pub unsafe fn attachments_new_inner(ptr_bundle: *mut AttachmentsPtrBundle) -> At
     let attachments_emit = AttachmentsEmitter {
         qobject: Arc::new(AtomicPtr::new(attachments)),
         attachments_msg_id_changed: attachments_attachments_msg_id_changed,
+        loaded_changed: attachments_loaded_changed,
         new_data_ready: attachments_new_data_ready,
     };
     let model = AttachmentsList {
@@ -371,6 +385,11 @@ pub unsafe extern "C" fn attachments_document_attachments_get(
     ptr: *mut Attachments
 ) -> *mut DocumentAttachments {
     (&mut *ptr).document_attachments_mut()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn attachments_loaded_get(ptr: *const Attachments) -> bool {
+    (&*ptr).loaded()
 }
 
 #[no_mangle]
@@ -446,6 +465,7 @@ pub struct AttachmentsPtrBundle {
     document_attachments_end_move_rows: fn(*mut DocumentAttachmentsQObject),
     document_attachments_begin_remove_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
     document_attachments_end_remove_rows: fn(*mut DocumentAttachmentsQObject),
+    attachments_loaded_changed: fn(*mut AttachmentsQObject),
     media_attachments: *mut MediaAttachmentsQObject,
     media_attachments_media_attachment_four_changed: fn(*mut MediaAttachmentsQObject),
     media_attachments_media_attachment_one_changed: fn(*mut MediaAttachmentsQObject),

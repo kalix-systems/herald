@@ -410,7 +410,8 @@ fn attachments() -> Object {
         // the message id the attachments list is associated with
         attachmentsMsgId: Prop::new().simple(QByteArray).optional().write(),
         documentAttachments: Prop::new().object(document_attachments()),
-        mediaAttachments: Prop::new().object(media_attachments())
+        mediaAttachments: Prop::new().object(media_attachments()),
+        loaded: Prop::new().simple(Bool)
     };
 
     obj! {

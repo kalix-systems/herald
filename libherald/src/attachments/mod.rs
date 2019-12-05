@@ -22,6 +22,7 @@ pub struct Attachments {
     document_attachments: DocumentAttachments,
     media_attachments: MediaAttachments,
     rx: Option<Receiver<Contents>>,
+    loaded: bool,
 }
 
 impl AttachmentsTrait for Attachments {
@@ -37,6 +38,7 @@ impl AttachmentsTrait for Attachments {
             rx: None,
             document_attachments,
             media_attachments,
+            loaded: false,
         }
     }
 
@@ -101,6 +103,8 @@ impl AttachmentsTrait for Attachments {
 
                 self.media_attachments.fill(media);
                 self.document_attachments.fill(doc);
+                self.loaded = true;
+                self.emit.loaded_changed();
             }
         }
     }
@@ -123,5 +127,9 @@ impl AttachmentsTrait for Attachments {
 
     fn row_count(&self) -> usize {
         0
+    }
+
+    fn loaded(&self) -> bool {
+        self.loaded
     }
 }

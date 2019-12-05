@@ -99,6 +99,9 @@ inline QVariant cleanNullQVariant(const QVariant &v) {
 inline void attachmentsAttachmentsMsgIdChanged(Attachments *o) {
   Q_EMIT o->attachmentsMsgIdChanged();
 }
+inline void attachmentsLoadedChanged(Attachments *o) {
+  Q_EMIT o->loadedChanged();
+}
 inline void configColorChanged(Config *o) { Q_EMIT o->colorChanged(); }
 inline void configColorschemeChanged(Config *o) {
   Q_EMIT o->colorschemeChanged();
@@ -338,6 +341,7 @@ void attachments_attachments_msg_id_set(Attachments::Private *,
 void attachments_attachments_msg_id_set_none(Attachments::Private *);
 DocumentAttachments::Private *
 attachments_document_attachments_get(const Attachments::Private *);
+bool attachments_loaded_get(const Attachments::Private *);
 MediaAttachments::Private *
 attachments_media_attachments_get(const Attachments::Private *);
 }
@@ -2778,6 +2782,7 @@ Attachments::Attachments(QObject *parent)
             o->beginRemoveRows(QModelIndex(), first, last);
           },
           [](DocumentAttachments *o) { o->endRemoveRows(); },
+          attachmentsLoadedChanged,
           m_mediaAttachments,
           mediaAttachmentsMediaAttachmentFourChanged,
           mediaAttachmentsMediaAttachmentOneChanged,
@@ -2883,6 +2888,8 @@ const DocumentAttachments *Attachments::documentAttachments() const {
 DocumentAttachments *Attachments::documentAttachments() {
   return m_documentAttachments;
 }
+
+bool Attachments::loaded() const { return attachments_loaded_get(m_d); }
 
 const MediaAttachments *Attachments::mediaAttachments() const {
   return m_mediaAttachments;

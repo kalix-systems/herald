@@ -109,6 +109,7 @@ struct AttachmentsPtrBundle {
   void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
                                                  int);
   void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*attachments_loaded_changed)(Attachments *);
   MediaAttachments *media_attachments;
   void (*media_attachments_media_attachment_four_changed)(MediaAttachments *);
   void (*media_attachments_media_attachment_one_changed)(MediaAttachments *);
@@ -729,6 +730,7 @@ private:
                  setAttachmentsMsgId NOTIFY attachmentsMsgIdChanged FINAL)
   Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
                  NOTIFY documentAttachmentsChanged FINAL)
+  Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged FINAL)
   Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
                  mediaAttachmentsChanged FINAL)
   explicit Attachments(bool owned, QObject *parent);
@@ -740,6 +742,7 @@ public:
   void setAttachmentsMsgId(const QByteArray &v);
   const DocumentAttachments *documentAttachments() const;
   DocumentAttachments *documentAttachments();
+  bool loaded() const;
   const MediaAttachments *mediaAttachments() const;
   MediaAttachments *mediaAttachments();
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -778,6 +781,7 @@ private:
 Q_SIGNALS:
   void attachmentsMsgIdChanged();
   void documentAttachmentsChanged();
+  void loadedChanged();
   void mediaAttachmentsChanged();
 };
 class Config : public QObject {
