@@ -3,9 +3,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
-import "../../ChatView" as ChatView
-import "../js/CVViewUtils.js" as CVJS
-
+import "../ChatView" as ChatView
 
 Rectangle {
     id: contactItem
@@ -38,7 +36,7 @@ Rectangle {
             id: avatar
             iconColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
-            initials: CVJS.initialize(title)
+            initials: Utils.initialize(title)
             size: CmnCfg.units.dp(36)
             avatarHeight: CmnCfg.units.dp(36)
 

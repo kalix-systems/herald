@@ -2,9 +2,8 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
-import "../../Common"
-import "../../ConfigMenu"
-import "../js/CVViewUtils.js" as CVJS
+import "../Common"
+import "../ConfigMenu"
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
 import Qt.labs.platform 1.0
@@ -62,7 +61,6 @@ ToolBar {
 
             IconButton {
                 id: searchButton
-                tapCallback: CVJS.searchBarTr
                 color: CmnCfg.palette.iconFill
                 imageSource: "qrc:/search-icon.svg"
             }

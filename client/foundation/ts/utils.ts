@@ -155,6 +155,15 @@ export function safeStringOrDefault(
   return "";
 }
 
+export function initialize(name: string): string {
+    const tokens = name.split(' ').slice(0, 3)
+    var str = ""
+    tokens.forEach(function anon(string) {
+        str += string[0].toUpperCase()
+    })
+    return str
+}
+
 /*
  * returns the uri of an icon corresponding to the
  * receipt code

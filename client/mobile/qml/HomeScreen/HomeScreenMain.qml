@@ -11,7 +11,7 @@ Page {
 
     header: Loader {
         id: headerLoader
-        sourceComponent: CVHeader {}
+        sourceComponent: HomeHeader {}
     }
 
     background: Rectangle {
@@ -34,7 +34,7 @@ Page {
             boundsBehavior: ListView.StopAtBounds
             anchors.fill: parent
             model: herald.conversations
-            delegate: CVListItem {
+            delegate: ConversationItem {
                 readonly property var conversationIdProxy: conversationId
                 readonly property int colorProxy: model.color
                 readonly property ConversationContent ownedConversationContent: ConversationContent {
