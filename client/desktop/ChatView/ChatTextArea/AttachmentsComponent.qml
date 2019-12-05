@@ -19,7 +19,7 @@ ScrollView {
         spacing: 5
         Repeater {
             id: imageRepeater
-            model: ownedConversation.builder
+            model: ownedConversation.builder.mediaAttachments
             delegate: Rectangle {
                 height: 100
                 width: 100
@@ -31,7 +31,7 @@ ScrollView {
                     id: image
                     anchors.fill: parent
                     anchors.margins: CmnCfg.smallMargin
-                    source: "file:" + attachmentPath
+                    source: "file:" + mediaAttachmentPath
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
 
@@ -59,8 +59,7 @@ ScrollView {
                             sourceSize: Qt.size(25, 25)
                         }
                         onClicked: {
-                            ownedConversation.builder.removeAttachmentByIndex(
-                                        index)
+                            ownedConversation.builder.removeMedia(index)
                         }
                     }
                 }
