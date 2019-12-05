@@ -5,9 +5,7 @@ use crate::interface::{
 use crate::ret_none;
 use std::path::Path;
 
-pub(super) const IMG_EXT: [&str; 10] = [
-    "BMP", "GIF", "JPG", "JPEG", "PNG", "PBM", "PGM", "PPM", "XBM", "XPM",
-];
+pub(super) const IMG_EXT: [&str; 8] = ["BMP", "GIF", "JPG", "JPEG", "PNG", "PGM", "PBM", "PPM"];
 
 pub(crate) fn is_media(path: &Path) -> bool {
     fn get_extension(path: &Path) -> Option<&str> {
@@ -27,8 +25,7 @@ pub(crate) fn is_media(path: &Path) -> bool {
 pub struct MediaAttachments {
     emit: Emitter,
     model: List,
-    contents: Vec<String>,
-    dims: Vec<(u64, u64)>,
+    contents: Vec<(String, u32, u32)>,
 }
 
 impl Interface for MediaAttachments {
@@ -40,7 +37,6 @@ impl Interface for MediaAttachments {
             emit,
             model,
             contents: Vec::new(),
-            dims: Vec::new(),
         }
     }
 
@@ -56,35 +52,23 @@ impl Interface for MediaAttachments {
         &self,
         index: usize,
     ) -> &str {
-        ret_none!(self.contents.get(index), "")
+        ret_none!(self.contents.get(index), "").0.as_str()
     }
 
     fn media_attachment_height(
         &self,
         index: usize,
-    ) -> u64 {
+    ) -> u32 {
         let index = index as usize;
-        self.dims.get(index).map(|(h, _)| *h).unwrap_or(0)
+        self.contents.get(index).map(|(_, _, h)| *h).unwrap_or(0)
     }
 
     fn media_attachment_width(
         &self,
         index: usize,
-    ) -> u64 {
+    ) -> u32 {
         let index = index as usize;
-        self.dims.get(index).map(|(_, w)| *w).unwrap_or(0)
-    }
-
-    fn set_media_attachment_dims(
-        &mut self,
-        index: u64,
-        height: u64,
-        width: u64,
-    ) {
-        let index = index as usize;
-        let dim = ret_none!(self.dims.get_mut(index));
-        *dim = (height, width);
-        self.model.data_changed(index, index);
+        self.contents.get(index).map(|(_, w, _)| *w).unwrap_or(0)
     }
 }
 
@@ -94,8 +78,11 @@ impl MediaAttachments {
         media: Vec<String>,
     ) {
         self.model.begin_reset_model();
-        self.contents = media;
-        self.dims = vec![(0, 0); self.contents.len()];
+        for path in media {
+            if let Ok((width, height)) = heraldcore::image_utils::image_dimensions(&path) {
+                self.contents.push((path, width, height));
+            }
+        }
         self.model.end_reset_model();
     }
 
@@ -111,7 +98,9 @@ impl MediaAttachments {
 
         self.model
             .begin_insert_rows(self.contents.len(), self.contents.len());
-        self.contents.push(path);
+        if let Ok((width, height)) = heraldcore::image_utils::image_dimensions(&path) {
+            self.contents.push((path, width, height));
+        }
         self.model.end_insert_rows();
 
         Some(())
@@ -132,7 +121,10 @@ impl MediaAttachments {
         Some(())
     }
 
-    pub(crate) fn all(&mut self) -> Vec<String> {
+    pub(crate) fn all(&mut self) -> Vec<std::path::PathBuf> {
         std::mem::replace(&mut self.contents, Vec::new())
+            .into_iter()
+            .map(|(p, _, _)| std::path::PathBuf::from(p))
+            .collect()
     }
 }

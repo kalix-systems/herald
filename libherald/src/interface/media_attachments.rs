@@ -144,13 +144,6 @@ pub trait MediaAttachmentsTrait {
 
     fn emit(&mut self) -> &mut MediaAttachmentsEmitter;
 
-    fn set_media_attachment_dims(
-        &mut self,
-        index: u64,
-        height: u64,
-        width: u64,
-    ) -> ();
-
     fn row_count(&self) -> usize;
 
     fn insert_rows(
@@ -185,7 +178,7 @@ pub trait MediaAttachmentsTrait {
     fn media_attachment_height(
         &self,
         index: usize,
-    ) -> u64;
+    ) -> u32;
 
     fn media_attachment_path(
         &self,
@@ -195,7 +188,7 @@ pub trait MediaAttachmentsTrait {
     fn media_attachment_width(
         &self,
         index: usize,
-    ) -> u64;
+    ) -> u32;
 }
 
 #[no_mangle]
@@ -254,17 +247,6 @@ pub unsafe extern "C" fn media_attachments_free(ptr: *mut MediaAttachments) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn media_attachments_set_media_attachment_dims(
-    ptr: *mut MediaAttachments,
-    index: u64,
-    height: u64,
-    width: u64,
-) {
-    let obj = &mut *ptr;
-    obj.set_media_attachment_dims(index, height, width)
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn media_attachments_row_count(ptr: *const MediaAttachments) -> c_int {
     to_c_int((&*ptr).row_count())
 }
@@ -316,7 +298,7 @@ pub unsafe extern "C" fn media_attachments_sort(
 pub unsafe extern "C" fn media_attachments_data_media_attachment_height(
     ptr: *const MediaAttachments,
     row: c_int,
-) -> u64 {
+) -> u32 {
     let obj = &*ptr;
     obj.media_attachment_height(to_usize(row).unwrap_or(0))
 }
@@ -338,7 +320,7 @@ pub unsafe extern "C" fn media_attachments_data_media_attachment_path(
 pub unsafe extern "C" fn media_attachments_data_media_attachment_width(
     ptr: *const MediaAttachments,
     row: c_int,
-) -> u64 {
+) -> u32 {
     let obj = &*ptr;
     obj.media_attachment_width(to_usize(row).unwrap_or(0))
 }

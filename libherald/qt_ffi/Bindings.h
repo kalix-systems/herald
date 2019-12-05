@@ -1325,8 +1325,6 @@ private:
 public:
   explicit MediaAttachments(QObject *parent = nullptr);
   ~MediaAttachments() override;
-  Q_INVOKABLE void setMediaAttachmentDims(quint64 index, quint64 height,
-                                          quint64 width);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1352,9 +1350,9 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE quint64 mediaAttachmentHeight(int row) const;
+  Q_INVOKABLE quint32 mediaAttachmentHeight(int row) const;
   Q_INVOKABLE QString mediaAttachmentPath(int row) const;
-  Q_INVOKABLE quint64 mediaAttachmentWidth(int row) const;
+  Q_INVOKABLE quint32 mediaAttachmentWidth(int row) const;
 
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()

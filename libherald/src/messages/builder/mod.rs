@@ -78,13 +78,10 @@ impl MessageBuilderTrait for MessageBuilder {
     fn finalize(&mut self) {
         self.model.begin_reset_model();
 
-        self.inner
-            .attachments
-            .extend(&mut self.media_attachments.all().into_iter().map(PathBuf::from));
+        self.inner.attachments.extend(self.media_attachments.all());
 
         self.inner.attachments.extend(
-            &mut self
-                .document_attachments
+            self.document_attachments
                 .all()
                 .into_iter()
                 .map(PathBuf::from),

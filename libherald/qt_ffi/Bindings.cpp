@@ -1194,11 +1194,11 @@ void herald_register_new_user(Herald::Private *, const ushort *, int,
 void herald_set_app_local_data_dir(Herald::Private *, const ushort *, int);
 }
 extern "C" {
-quint64 media_attachments_data_media_attachment_height(
+quint32 media_attachments_data_media_attachment_height(
     const MediaAttachments::Private *, int);
 void media_attachments_data_media_attachment_path(
     const MediaAttachments::Private *, int, QString *, qstring_set);
-quint64
+quint32
 media_attachments_data_media_attachment_width(const MediaAttachments::Private *,
                                               int);
 void media_attachments_sort(MediaAttachments::Private *, unsigned char column,
@@ -1262,7 +1262,7 @@ Qt::ItemFlags MediaAttachments::flags(const QModelIndex &i) const {
   return flags;
 }
 
-quint64 MediaAttachments::mediaAttachmentHeight(int row) const {
+quint32 MediaAttachments::mediaAttachmentHeight(int row) const {
   return media_attachments_data_media_attachment_height(m_d, row);
 }
 
@@ -1272,7 +1272,7 @@ QString MediaAttachments::mediaAttachmentPath(int row) const {
   return s;
 }
 
-quint64 MediaAttachments::mediaAttachmentWidth(int row) const {
+quint32 MediaAttachments::mediaAttachmentWidth(int row) const {
   return media_attachments_data_media_attachment_width(m_d, row);
 }
 
@@ -1334,8 +1334,6 @@ bool MediaAttachments::setHeaderData(int section, Qt::Orientation orientation,
 extern "C" {
 MediaAttachments::Private *media_attachments_new(MediaAttachmentsPtrBundle *);
 void media_attachments_free(MediaAttachments::Private *);
-void media_attachments_set_media_attachment_dims(MediaAttachments::Private *,
-                                                 quint64, quint64, quint64);
 }
 extern "C" {
 quint32 members_data_color(const Members::Private *, int);
@@ -3800,10 +3798,6 @@ MediaAttachments::~MediaAttachments() {
   }
 }
 void MediaAttachments::initHeaderData() {}
-void MediaAttachments::setMediaAttachmentDims(quint64 index, quint64 height,
-                                              quint64 width) {
-  return media_attachments_set_media_attachment_dims(m_d, index, height, width);
-}
 
 Members::Members(bool /*owned*/, QObject *parent)
     : QAbstractItemModel(parent), m_d(nullptr), m_ownsPrivate(false) {

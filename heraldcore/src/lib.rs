@@ -10,7 +10,7 @@ pub mod db;
 /// Errors
 pub mod errors;
 /// Image processing
-pub(crate) mod image_utils;
+pub mod image_utils;
 /// Members of conversations
 pub mod members;
 /// Functions and data structures related to messages.

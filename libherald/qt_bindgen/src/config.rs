@@ -379,16 +379,12 @@ fn media_attachments() -> Object {
     let item_props = item_props! {
         // Path the the attachment
         mediaAttachmentPath: ItemProp::new(QString),
-        mediaAttachmentWidth: ItemProp::new(QUint64),
-        mediaAttachmentHeight: ItemProp::new(QUint64)
-    };
-
-    let funcs = functions! {
-       mut setMediaAttachmentDims(index: QUint64, height: QUint64, width: QUint64) => Void,
+        mediaAttachmentWidth: ItemProp::new(QUint32),
+        mediaAttachmentHeight: ItemProp::new(QUint32)
     };
 
     obj! {
-        MediaAttachments: Obj::new().list().item_props(item_props).funcs(funcs)
+        MediaAttachments: Obj::new().list().item_props(item_props)
     }
 }
 

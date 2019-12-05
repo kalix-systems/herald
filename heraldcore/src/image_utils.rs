@@ -7,7 +7,7 @@ const IMAGE_SIZE: u32 = 300;
 
 /// Given a path to an existing picture (`source`), generates a thumbnail and moves the picture to
 /// herald's storage.
-pub fn update_picture<P>(
+pub(crate) fn update_picture<P>(
     source: P,
     old_path: Option<P>,
 ) -> Result<PathBuf, HErr>
@@ -37,4 +37,12 @@ pub(crate) fn image_path() -> PathBuf {
     image_path.set_extension("png");
 
     image_path
+}
+
+/// Returns image dimensions
+pub fn image_dimensions<P>(source: P) -> Result<(u32, u32), HErr>
+where
+    P: AsRef<Path>,
+{
+    Ok(image::image_dimensions(source)?)
 }
