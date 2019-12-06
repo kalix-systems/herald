@@ -140,6 +140,7 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
+    // TODO
     fn op_doc_attachments(&self) -> Option<&str> {
         None
     }

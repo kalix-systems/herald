@@ -237,9 +237,9 @@ fn messages() -> Object {
         expirationTime: ItemProp::new(Qint64).optional(),
 
         // Media attachments metadata, serialized as JSON
-        mediaAttachments: ItemProp::new(QString).optional().get_by_value(),
+        mediaAttachments: ItemProp::new(QString).get_by_value(),
         // Document attachments metadata, serialized as JSON
-        docAttachments: ItemProp::new(QString).optional().get_by_value(),
+        docAttachments: ItemProp::new(QString).get_by_value(),
 
         receiptStatus: ItemProp::new(QUint32).optional(),
         isHead: ItemProp::new(Bool).optional(),
@@ -263,9 +263,9 @@ fn messages() -> Object {
         opExpirationTime: ItemProp::new(Qint64).optional(),
 
         // Media attachments metadata, serialized as JSON
-        opMediaAttachments: ItemProp::new(QString).optional().get_by_value(),
+        opMediaAttachments: ItemProp::new(QString).get_by_value(),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: ItemProp::new(QString).optional().get_by_value()
+        opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
     let funcs = functions! {

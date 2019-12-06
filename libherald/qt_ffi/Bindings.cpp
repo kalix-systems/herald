@@ -1983,8 +1983,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 1:
       return cleanNullQVariant(QVariant::fromValue(body(index.row())));
     case Qt::UserRole + 2:
-      return cleanNullQVariant(
-          QVariant::fromValue(docAttachments(index.row())));
+      return QVariant::fromValue(docAttachments(index.row()));
     case Qt::UserRole + 3:
       return expirationTime(index.row());
     case Qt::UserRole + 4:
@@ -1998,8 +1997,7 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 8:
       return matchStatus(index.row());
     case Qt::UserRole + 9:
-      return cleanNullQVariant(
-          QVariant::fromValue(mediaAttachments(index.row())));
+      return QVariant::fromValue(mediaAttachments(index.row()));
     case Qt::UserRole + 10:
       return cleanNullQVariant(QVariant::fromValue(msgId(index.row())));
     case Qt::UserRole + 11:
@@ -2007,15 +2005,13 @@ QVariant Messages::data(const QModelIndex &index, int role) const {
     case Qt::UserRole + 12:
       return cleanNullQVariant(QVariant::fromValue(opBody(index.row())));
     case Qt::UserRole + 13:
-      return cleanNullQVariant(
-          QVariant::fromValue(opDocAttachments(index.row())));
+      return QVariant::fromValue(opDocAttachments(index.row()));
     case Qt::UserRole + 14:
       return opExpirationTime(index.row());
     case Qt::UserRole + 15:
       return opInsertionTime(index.row());
     case Qt::UserRole + 16:
-      return cleanNullQVariant(
-          QVariant::fromValue(opMediaAttachments(index.row())));
+      return QVariant::fromValue(opMediaAttachments(index.row()));
     case Qt::UserRole + 17:
       return cleanNullQVariant(QVariant::fromValue(opMsgId(index.row())));
     case Qt::UserRole + 18:

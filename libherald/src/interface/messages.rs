@@ -384,7 +384,7 @@ pub trait MessagesTrait {
     fn doc_attachments(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn expiration_time(
         &self,
@@ -419,7 +419,7 @@ pub trait MessagesTrait {
     fn media_attachments(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn msg_id(
         &self,
@@ -439,7 +439,7 @@ pub trait MessagesTrait {
     fn op_doc_attachments(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn op_expiration_time(
         &self,
@@ -454,7 +454,7 @@ pub trait MessagesTrait {
     fn op_media_attachments(
         &self,
         index: usize,
-    ) -> Option<String>;
+    ) -> String;
 
     fn op_msg_id(
         &self,
@@ -996,10 +996,8 @@ pub unsafe extern "C" fn messages_data_doc_attachments(
 ) {
     let obj = &*ptr;
     let data = obj.doc_attachments(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1071,10 +1069,8 @@ pub unsafe extern "C" fn messages_data_media_attachments(
 ) {
     let obj = &*ptr;
     let data = obj.media_attachments(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1131,10 +1127,8 @@ pub unsafe extern "C" fn messages_data_op_doc_attachments(
 ) {
     let obj = &*ptr;
     let data = obj.op_doc_attachments(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1164,10 +1158,8 @@ pub unsafe extern "C" fn messages_data_op_media_attachments(
 ) {
     let obj = &*ptr;
     let data = obj.op_media_attachments(to_usize(row).unwrap_or(0));
-    if let Some(data) = data {
-        let str_: *const c_char = data.as_ptr() as (*const c_char);
-        set(d, str_, to_c_int(data.len()));
-    }
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]

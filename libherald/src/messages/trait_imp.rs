@@ -85,14 +85,14 @@ impl Interface for Messages {
     fn doc_attachments(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.doc_attachments_(index)
+    ) -> String {
+        self.doc_attachments_(index).unwrap_or_default()
     }
     fn media_attachments(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.media_attachments_(index)
+    ) -> String {
+        self.media_attachments_(index).unwrap_or_default()
     }
 
     fn delete_message(
@@ -228,15 +228,15 @@ impl Interface for Messages {
     fn op_media_attachments(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_media_attachments_(index)
+    ) -> String {
+        self.op_media_attachments_(index).unwrap_or_default()
     }
 
     fn op_doc_attachments(
         &self,
         index: usize,
-    ) -> Option<String> {
-        self.op_doc_attachments_(index)
+    ) -> String {
+        self.op_doc_attachments_(index).unwrap_or_default()
     }
 
     fn msg_id(
