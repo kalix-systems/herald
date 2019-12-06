@@ -87,12 +87,13 @@ impl Container {
             return None;
         }
 
-        attachments
-            .media_attachments()
-            .ok()
-            .map(json::JsonValue::from)
-            .as_ref()
-            .map(json::JsonValue::dump)
+        let media = attachments.media_attachments().ok()?;
+
+        if media.is_empty() {
+            return None;
+        }
+
+        Some(json::JsonValue::from(media).dump())
     }
 
     pub fn doc_attachments_data_json(
@@ -113,12 +114,13 @@ impl Container {
             return None;
         }
 
-        attachments
-            .doc_attachments()
-            .ok()
-            .map(json::JsonValue::from)
-            .as_ref()
-            .map(json::JsonValue::dump)
+        let docs = attachments.doc_attachments().ok()?;
+
+        if docs.is_empty() {
+            return None;
+        }
+
+        Some(json::JsonValue::from(docs).dump())
     }
 
     pub fn last(&self) -> Option<&Message> {
