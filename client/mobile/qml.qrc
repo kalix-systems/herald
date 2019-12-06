@@ -12,16 +12,8 @@
         <file>qml/Common/Divider.qml</file>
         <file>qml/Common/IconButton.qml</file>
         <file>qml/Common/StdText.qml</file>
-        <file>qml/ConversationView/Controls/CVHeader.qml</file>
-        <file>qml/ConversationView/Controls/CVListItem.qml</file>
-        <file>qml/ConversationView/ConversationViewMain.qml</file>
         <file>qml/SearchView/SearchViewHeader.qml</file>
         <file>qml/SearchView/SearchViewMain.qml</file>
-        <file>qml/ConversationView/Controls/ComposeButton.qml</file>
-        <file>qml/ConversationView/js/CVViewUtils.js</file>
-        <file>qml/ChatView/Controls/ChatViewHeader.qml</file>
-        <file>qml/ChatView/Controls/TextMessageList.qml</file>
-        <file>qml/ChatView/Controls/ChatTextArea.qml</file>
         <file>qml/LoginPage/Controls/LoginButton.qml</file>
         <file>qml/LoginPage/Controls/LoginField.qml</file>
         <file>qml/Common/Drawer.qml</file>
@@ -29,11 +21,19 @@
         <file>qml/ConfigMenu/Controls/ConfigHeader.qml</file>
         <file>qml/Common/HeaderText.qml</file>
         <file>qml/ConfigMenu/Controls/ConfigSection.qml</file>
-        <file>qml/ConversationView/DrawerContents.qml</file>
-        <file>qml/ConversationView/Controls/CVSearchHeader.qml</file>
-        <file>qml/ConversationView/Controls/CVSearchList.qml</file>
         <file>qml/NewContactView/NewContactViewMain.qml</file>
         <file>qml/NewContactView/Controls/NewContactHeader.qml</file>
         <file>qml/App.qml</file>
+        <file>qml/ChatView/TextMessageList.qml</file>
+        <file>qml/ChatView/ChatViewHeader.qml</file>
+        <file>qml/ChatView/ChatTextArea.qml</file>
+        <file>qml/HomeScreen/Controls/ComposeButton.qml</file>
+        <file>qml/HomeScreen/Controls/CVToolButton.qml</file>
+        <file>qml/HomeScreen/ConversationItem.qml</file>
+        <file>qml/HomeScreen/DrawerContents.qml</file>
+        <file>qml/HomeScreen/HomeHeader.qml</file>
+        <file>qml/HomeScreen/HomeScreenMain.qml</file>
+        <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
+        <file>qml/HomeScreen/NewGroupView.qml</file>
     </qresource>
 </RCC>
