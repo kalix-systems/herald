@@ -9,15 +9,14 @@ ColumnLayout {
     property string receiptImage: ""
     property string imageSource: ""
     property string authorName: ""
-    property var messageAttachments: null
+    //  property var messageAttachments: null
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color authorColor
     property bool elided: false
     property bool expanded: false
-    property string mediaAttachments
+    property string medAttachments
     property string documentAttachments
     id: wrapperCol
-    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
 
@@ -27,6 +26,32 @@ ColumnLayout {
         senderColor: authorColor
     }
 
+    Component.onCompleted: {
+        wrapperCol.expanded = false
+        print("image")
+        const media = JSON.parse(medAttachments)
+        const docs = JSON.parse(documentAttachments)
+        const mediaLen = media.length
+        const docLen = docs.length
+
+        switch (mediaLen) {
+        case 0:
+        case 1:
+            const first = media[0]
+            const path = first.path
+            console.log(path, mediaLen, media[0])
+            break
+        case 2:
+
+            break
+        case 3:
+            break
+        case 4:
+            break
+        default:
+
+        }
+    }
     GridLayout {
 
         width: 400
@@ -35,24 +60,24 @@ ColumnLayout {
         columns: 2
         rows: 1
 
-        Repeater {
+        //        Repeater {
 
-            model: messageAttachments.mediaAttachments
-            Layout.fillHeight: true
-            Layout.fillWidth: true
-            delegate: Rectangle {
-                width: 200
-                height: 200
-                clip: true
-                Image {
-                    id: image
-                    //TODO: move common typescript into common
-                    source: messageAttachments.loaded ? "file:" + mediaAttachmentPath : ""
-                    asynchronous: true
-                    anchors.centerIn: parent
-                }
-            }
-        }
+        //            model: messageAttachments.mediaAttachments
+        //            Layout.fillHeight: true
+        //            Layout.fillWidth: true
+        //            delegate: Rectangle {
+        //                width: 200
+        //                height: 200
+        //                clip: true
+        //                Image {
+        //                    id: image
+        //                    //TODO: move common typescript into common
+        //                    source: messageAttachments.loaded ? "file:" + mediaAttachmentPath : ""
+        //                    asynchronous: true
+        //                    anchors.centerIn: parent
+        //                }
+        //            }
+        //        }
     }
 
     //        Rectangle {

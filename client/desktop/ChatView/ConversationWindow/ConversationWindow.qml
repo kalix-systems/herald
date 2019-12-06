@@ -137,8 +137,8 @@ ListView {
                 friendlyTimestamp: timestamp
                 receiptImage: proxyReceiptImage
                 authorName: authName
-                mediaAttachments: ownedConversation.mediaAttachments
-                documentAttachments: ownedConversation.documentAttachments
+                medAttachments: mediaAttachments
+                documentAttachments: docAttachments
                 authorColor: userColor
                 elided: chatRow.elided
             }
@@ -166,8 +166,8 @@ ListView {
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (ownedConversation.mediaAttachments.length !== 0
-                             && ownedConversation.documentAttachments.length !== 0) {
+            content: if (mediaAttachments.length !== 0
+                             || docAttachments.length !== 0) {
                          image
                          //reply types: 0 not reply, 1 dangling, 2 known reply
                      } else if (replyType > 0) {
@@ -175,6 +175,7 @@ ListView {
                      } else {
                          std
                      }
+
             ChatBubbleHover {}
         }
 
