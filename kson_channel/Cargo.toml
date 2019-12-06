@@ -1,0 +1,18 @@
+[package]
+name = "kson_channel"
+version = "0.1.0"
+authors = ["theseriousadult <jack@kalix.io>"]
+edition = "2018"
+
+[dependencies]
+crc32fast = "1.2.0"
+
+[dependencies.tokio]
+version = "0.2"
+features = ["full"]
+
+[dependencies.kson]
+path = "../kson"
+
+[dev-dependencies]
+port_check = "0.1.2"
