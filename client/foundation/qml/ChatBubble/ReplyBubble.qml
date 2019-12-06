@@ -10,10 +10,12 @@ ColumnLayout {
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[herald.users.colorById(
-                                                    opAuthor)]
+                                                    modelData.opAuthor)]
     property var replyId
     property alias jumpHandler: jumpHandler
-    property bool knownReply: replyType == 2
+    property var modelData: bubbleRoot.messageModelData
+    property bool knownReply: modelData.replyType === 2
+    property string replyBody: knownReply ? modelData.opBody : ""
 
     spacing: 0
 
@@ -63,7 +65,8 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: knownReply ? herald.users.nameById(opAuthor) : ""
+                text: knownReply ? herald.users.nameById(
+                                       modelData.opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
@@ -74,10 +77,9 @@ ColumnLayout {
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string decoration: knownReply
-                                            && opBody.length > 350 ? "..." : ""
+                property string decoration: replyBody > 350 ? "..." : ""
                 property string shortenedText: knownReply ? truncate_text(
-                                                                opBody).slice(
+                                                                modelData.opBody).slice(
                                                                 0,
                                                                 350) + decoration : "Original message not found"
                 text: shortenedText
@@ -111,14 +113,14 @@ ColumnLayout {
                     Layout.margins: CmnCfg.smallMargin
                     Layout.topMargin: 0
                     font.pixelSize: 10
-                    text: replyType === 2 ? Utils.friendlyTimestamp(
-                                                opInsertionTime) : ""
+                    text: modelData.replyType === 2 ? Utils.friendlyTimestamp(
+                                                          modelData.opInsertionTime) : ""
                     color: CmnCfg.palette.darkGrey
                 }
 
                 Button {
                     id: clock
-                    icon.source: opExpirationTime
+                    icon.source: modelData.opExpirationTime
                                  !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
                     icon.height: 16
                     icon.width: 16

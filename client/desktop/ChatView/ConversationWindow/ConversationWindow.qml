@@ -81,6 +81,7 @@ ListView {
         property alias highlight: bubbleActual.highlightItem
         property bool elided: body.length !== fullBody.length
 
+        property var messageModelData: model
         anchors {
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
@@ -108,6 +109,7 @@ ListView {
                 replyId: opMsgId
                 reply: replyType > 0
                 maxWidth: chatListView.width * 0.66
+                messageModelData: chatRow.messageModelData
             }
         }
         AvatarMain {

@@ -20,6 +20,7 @@ ColumnLayout {
     property string medAttachments
     property string documentAttachments
     property var replyId
+    property var messageModelData
 
     ChatLabel {
         id: uname
