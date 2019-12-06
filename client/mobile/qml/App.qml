@@ -1,7 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Controls 2.12
 import LibHerald 1.0
-import "./ConversationView" as CVView
+import "./HomeScreen" as HomeScreen
 import "./NewContactView" as NewContactView
 import "./ChatView" as ChatView
 import "./ConfigMenu" as ConfigMenu
@@ -12,7 +12,7 @@ Item {
 
     Component {
         id: cvMain
-        CVView.ConversationViewMain {}
+        HomeScreen.HomeScreenMain {}
     }
 
     Component {
@@ -23,6 +23,11 @@ Item {
     Component {
         id: newContactViewMain
         NewContactView.NewContactViewMain {}
+    }
+
+    Component {
+        id: newGroupViewMain
+        HomeScreen.NewGroupView {}
     }
 
     StackView {
