@@ -9,7 +9,7 @@ ColumnLayout {
     property string receiptImage: ""
     property string imageSource: ""
     property string authorName: ""
-    property Attachments messageAttachments: null
+    property var messageAttachments: null
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color authorColor
     property bool elided: false
