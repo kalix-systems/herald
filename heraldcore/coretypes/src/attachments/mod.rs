@@ -243,13 +243,13 @@ impl From<MediaMeta> for json::JsonValue {
             height,
         } = meta;
 
-        let mut obj = json::object::Object::new();
+        use json::object;
 
-        obj.insert("path", path.into());
-        obj.insert("width", width.into());
-        obj.insert("height", height.into());
-
-        json::JsonValue::Object(obj)
+        object! {
+            "path" => path,
+            "width" => width,
+            "height" => height
+        }
     }
 }
 

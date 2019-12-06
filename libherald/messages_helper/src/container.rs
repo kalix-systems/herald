@@ -87,17 +87,12 @@ impl Container {
             return None;
         }
 
-        let mut json_array = json::Array::new();
-
-        for attachment in attachments
+        attachments
             .media_attachments()
-            .into_iter()
+            .ok()
             .map(json::JsonValue::from)
-        {
-            json_array.push(dbg!(attachment));
-        }
-
-        Some(json::JsonValue::from(json_array).dump())
+            .as_ref()
+            .map(json::JsonValue::dump)
     }
 
     pub fn doc_attachments_data_json(
@@ -118,13 +113,12 @@ impl Container {
             return None;
         }
 
-        let mut json_array = json::Array::new();
-
-        for attachment in attachments.doc_attachments().into_iter() {
-            json_array.push(attachment.into());
-        }
-
-        Some(json::JsonValue::Array(json_array).dump())
+        attachments
+            .doc_attachments()
+            .ok()
+            .map(json::JsonValue::from)
+            .as_ref()
+            .map(json::JsonValue::dump)
     }
 
     pub fn last(&self) -> Option<&Message> {
