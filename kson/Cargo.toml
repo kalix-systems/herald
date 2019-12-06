@@ -17,9 +17,8 @@ path = "./kson_derive"
 [dependencies.location]
 path = "../heraldcore/location"
 
-[dependencies.proptest]
-version = "0.9.4"
-optional = true
+[dev-dependencies]
+proptest = "0.9.4"
 
-[features]
-default = []
+[dev-dependencies.kson_strategy]
+path = "./kson_strategy"

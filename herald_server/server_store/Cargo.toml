@@ -10,10 +10,9 @@ edition = "2018"
 async-trait       = "0.1.19"
 bytes             = "0.4.12"
 crossbeam-channel = "0.3.9"
-futures-preview   = "0.3.0-alpha.19"
 lazy_static       = "1.4.0"
-tokio             = "0.2.0-alpha.6"
-tokio-postgres    = "0.5.0-alpha.1"
+tokio             = "0.2"
+tokio-postgres    = "0.5.0-alpha.2"
 
 [dependencies.server_errors]
 path = "../server_errors"

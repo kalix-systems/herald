@@ -8,8 +8,6 @@
 
 pub use location::loc;
 use std::convert::TryFrom;
-#[cfg(feature = "proptest")]
-pub mod strategy;
 
 pub mod prelude {
     pub use crate::{de::*, errors::*, ser::*, *};

@@ -20,5 +20,7 @@ members = [
   "libherald/qt_bindgen",
   "kcl",
   "kson",
-  "kson/kson_derive"
+  "kson/kson_derive",
+  "kson/kson_strategy",
+  "kson_channel"
 ]
