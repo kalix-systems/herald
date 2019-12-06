@@ -108,17 +108,9 @@ ListView {
 
                 replyId: opMsgId
                 reply: replyType > 0
+                maxWidth: chatListView.width * 0.66
             }
         }
-
-//                Component {
-//                    id: reply
-//                    CB.ReplyBubble {
-//                        replyId: opMsgId
-//                        //mousearea handling jump behavior
-
-//                    }
-//                }
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
@@ -136,7 +128,6 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            maxWidth: chatListView.width * 0.66
             color: CmnCfg.palette.lightGrey
             senderColor: userColor
             convContainer: convWindow

@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 ColumnLayout {
-    id: wrapperCol
-    property real maxWidth: Math.min(parent.maxWidth, 600)
+    id: bubbleRoot
+    property real maxWidth: attach ? 300 : Math.min(parent.maxWidth, 600)
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
@@ -28,19 +28,14 @@ ColumnLayout {
 
     Component {
         id: image
-        AttachmentContent {
-
-            // maxWidth: wrapperCol.maxWidth
-            medAttachments: wrapperCol.medAttachments
-            documentAttachments: wrapperCol.documentAttachments
-        }
+        AttachmentContent {}
     }
 
     Component {
         id: replyContent
         ReplyBubble {
-            // maxWidth: wrapperCol.maxWidth
-            replyId: wrapperCol.replyId
+            maxWidth: bubbleRoot.maxWidth
+            replyId: bubbleRoot.replyId
         }
     }
 
@@ -55,7 +50,9 @@ ColumnLayout {
         }
     }
 
-    Component.onCompleted: wrapperCol.expanded = false
+    Component.onCompleted: {
+        bubbleRoot.expanded = false
+    }
 
     StandardTextEdit {
         id: messageBody

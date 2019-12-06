@@ -97,8 +97,7 @@ ColumnLayout {
             StandardTextEdit {
                 id: replyBody
                 text: opBodyTextMetrics.elidedText
-                Layout.minimumWidth: Math.max(imageLoader.width,
-                                              messageBody.width)
+                Layout.minimumWidth: attach ? 300 : messageBody.width
             }
 
             Row {
