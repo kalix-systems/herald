@@ -101,49 +101,35 @@ ListView {
                 receiptImage: proxyReceiptImage
                 authorColor: userColor
                 elided: chatRow.elided
-            }
-        }
-
-        Component {
-            id: reply
-            CB.ReplyBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
-                authorColor: userColor
-                replyId: opMsgId
-                elided: chatRow.elided
-                //mousearea handling jump behavior
-                jumpHandler.onClicked: {
-                    const msgIndex = ownedConversation.indexById(replyId)
-                    if (msgIndex < 0)
-                        return
-
-                    const window = convWindow
-
-                    window.positionViewAtIndex(msgIndex, ListView.Center)
-                    window.highlightAnimation.target = window.itemAtIndex(
-                                msgIndex).highlight
-                    window.highlightAnimation.start()
-                }
-            }
-        }
-
-        Component {
-            id: image
-            CB.ImageBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
                 medAttachments: mediaAttachments
                 documentAttachments: docAttachments
-                authorColor: userColor
-                elided: chatRow.elided
+                attach: mediaAttachments.length !== 0
+                        || docAttachments.length !== 0
+
+                replyId: opMsgId
+                reply: replyType > 0
             }
         }
 
+        //        Component {
+        //            id: reply
+        //            CB.ReplyBubble {
+        //                replyId: opMsgId
+        //                //mousearea handling jump behavior
+        //                jumpHandler.onClicked: {
+        //                    const msgIndex = ownedConversation.indexById(replyId)
+        //                    if (msgIndex < 0)
+        //                        return
+
+        //                    const window = convWindow
+
+        //                    window.positionViewAtIndex(msgIndex, ListView.Center)
+        //                    window.highlightAnimation.target = window.itemAtIndex(
+        //                                msgIndex).highlight
+        //                    window.highlightAnimation.start()
+        //                }
+        //            }
+        //        }
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
@@ -166,15 +152,7 @@ ListView {
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (mediaAttachments.length !== 0
-                             || docAttachments.length !== 0) {
-                         image
-                         //reply types: 0 not reply, 1 dangling, 2 known reply
-                     } else if (replyType > 0) {
-                         reply
-                     } else {
-                         std
-                     }
+            content: std
 
             ChatBubbleHover {}
         }

@@ -9,7 +9,7 @@
         <file>TimerOptions.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/ChatLabel.qml</file>
-        <file>ChatBubble/ImageBubble.qml</file>
+        <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ReplyBubble.qml</file>
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>

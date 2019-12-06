@@ -9,20 +9,11 @@ ColumnLayout {
     id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property string body: ""
-    property string friendlyTimestamp: ""
-    property string receiptImage: ""
     property color opColor: CmnCfg.avatarColors[herald.users.colorById(
                                                     opAuthor)]
-    property string authorName: ""
-    property color authorColor
     property var replyId
     property alias jumpHandler: jumpHandler
     property bool knownReply: replyType == 2
-    property bool elided: false
-    property bool expanded: false
-
-    Component.onCompleted: wrapperCol.expanded = false
 
     spacing: 0
 
@@ -93,7 +84,8 @@ ColumnLayout {
             StandardTextEdit {
                 id: replyBody
                 text: opBodyTextMetrics.elidedText
-                Layout.minimumWidth: messageBody.width
+                Layout.minimumWidth: Math.max(imageLoader.width,
+                                              messageBody.width)
             }
 
             Row {
@@ -125,17 +117,4 @@ ColumnLayout {
             }
         }
     }
-
-    ChatLabel {
-        id: uname
-        senderName: authorName
-        senderColor: authorColor
-    }
-
-    StandardTextEdit {
-        id: messageBody
-    }
-    ElideHandler {}
-
-    StandardStamps {}
 }

@@ -14,6 +14,11 @@ ColumnLayout {
     spacing: 0
     property bool expanded: false
     property bool elided: false
+    property bool attach: false
+    property bool reply: false
+    property string medAttachments
+    property string documentAttachments
+    property var replyId
 
     ChatLabel {
         id: uname
@@ -21,9 +26,39 @@ ColumnLayout {
         senderColor: authorColor
     }
 
+    Component {
+        id: image
+        AttachmentContent {
+            maxWidth: wrapperCol.maxWidth
+            medAttachments: wrapperCol.medAttachments
+            documentAttachments: wrapperCol.documentAttachments
+        }
+    }
+
+    Component {
+        id: replyContent
+        ReplyBubble {
+            maxWidth: wrapperCol.maxWidth
+            replyId: wrapperCol.replyId
+        }
+    }
+
+    Column {
+        Loader {
+            sourceComponent: reply ? replyContent : undefined
+        }
+
+        Loader {
+            id: imageLoader
+            sourceComponent: attach ? image : undefined
+        }
+    }
+
     Component.onCompleted: wrapperCol.expanded = false
 
-    StandardTextEdit {}
+    StandardTextEdit {
+        id: messageBody
+    }
     ElideHandler {}
 
     StandardStamps {}

@@ -5,16 +5,8 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ColumnLayout {
-    property string body: ""
-    property string friendlyTimestamp: ""
-    property string receiptImage: ""
-    property string imageSource: ""
-    property string authorName: ""
     //  property var messageAttachments: null
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property color authorColor
-    property bool elided: false
-    property bool expanded: false
     property string medAttachments
     property string documentAttachments
     property var mediaParsed
@@ -22,14 +14,7 @@ ColumnLayout {
 
     spacing: 0
 
-    ChatLabel {
-        id: uname
-        senderName: authorName
-        senderColor: authorColor
-    }
-
     Component.onCompleted: {
-        wrapperCol.expanded = false
         const media = JSON.parse(medAttachments)
         const docs = JSON.parse(documentAttachments)
         const mediaLen = media.length
@@ -124,8 +109,4 @@ ColumnLayout {
             count: mediaParsed.length - 4
         }
     }
-
-    StandardTextEdit {}
-
-    StandardStamps {}
 }
