@@ -52,13 +52,12 @@ impl Interface for ConversationContent {
         if let (Some(id), None) = (cid, self.id) {
             let id = ret_err!(ConversationId::try_from(id));
 
-            self.messages.set_conversation_id(id);
-            ret_err!(self.members.set_conversation_id(id));
-
             self.id.replace(id);
             self.emit.conversation_id_changed();
-
             ret_none!(self.register_model());
+
+            self.messages.set_conversation_id(id);
+            ret_err!(self.members.set_conversation_id(id));
         }
     }
 
