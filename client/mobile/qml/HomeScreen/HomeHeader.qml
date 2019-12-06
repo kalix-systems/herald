@@ -47,7 +47,8 @@ ToolBar {
                 text: "Conversations"
                 font {
                     pointSize: CmnCfg.chatPreviewSize
-                    family: CmnCfg.chatFont.name
+                    family: CmnCfg.labelFont.name
+                    bold: true
                 }
                 anchors.verticalCenter: parent.verticalCenter
                 color: CmnCfg.palette.iconFill

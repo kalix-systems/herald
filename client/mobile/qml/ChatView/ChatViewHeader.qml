@@ -37,8 +37,12 @@ ToolBar {
 
             Label {
                 text: title
-                font.pointSize: CmnCfg.chatPreviewSize
-                font.family: CmnCfg.chatFont.name
+                font {
+                    pointSize: CmnCfg.chatPreviewSize
+                    family: CmnCfg.labelFont.name
+                    bold: true
+                }
+
                 anchors.verticalCenter: parent.verticalCenter
                 color: CmnCfg.palette.iconFill
             }

@@ -26,6 +26,10 @@ Column {
             }
         }
 
+        onClicked: {
+            mainView.push(newContactViewMain)
+            cvMainView.state = "default"
+        }
         icon.source: "qrc:/add-contact-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.units.dp(36)
