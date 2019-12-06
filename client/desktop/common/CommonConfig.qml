@@ -66,6 +66,8 @@ Item {
 
     property FontLoader chatFont: metaTheme.chatFont
 
+    property FontLoader chatFontSemiBold: metaTheme.chatFontSemiBold
+
     Settings {
         id: settings
         property alias theme: cfg.theme

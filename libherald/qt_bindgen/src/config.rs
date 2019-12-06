@@ -50,7 +50,9 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        conversation_content(),
        messages(),
        message_builder(),
-       attachments()
+
+       media_attachments(),
+       document_attachments()
     }
 }
 
@@ -234,10 +236,13 @@ fn messages() -> Object {
         serverTime: ItemProp::new(Qint64).optional(),
         // Time the message will expire, if ever
         expirationTime: ItemProp::new(Qint64).optional(),
-        // Whether or not the message has attachments
-        hasAttachments: ItemProp::new(Bool).optional(),
+
+        // Media attachments metadata, serialized as JSON
+        mediaAttachments: ItemProp::new(QString).get_by_value(),
+        // Document attachments metadata, serialized as JSON
+        docAttachments: ItemProp::new(QString).get_by_value(),
+
         receiptStatus: ItemProp::new(QUint32).optional(),
-        dataSaved: ItemProp::new(Bool).optional(),
         isHead: ItemProp::new(Bool).optional(),
         isTail: ItemProp::new(Bool).optional(),
 
@@ -257,7 +262,11 @@ fn messages() -> Object {
         opBody: ItemProp::new(QString).optional(),
         opInsertionTime: ItemProp::new(Qint64).optional(),
         opExpirationTime: ItemProp::new(Qint64).optional(),
-        opHasAttachments: ItemProp::new(Bool).optional()
+
+        // Media attachments metadata, serialized as JSON
+        opMediaAttachments: ItemProp::new(QString).get_by_value(),
+        // Document attachments metadata, serialized as JSON
+        opDocAttachments: ItemProp::new(QString).get_by_value()
     };
 
     let funcs = functions! {
@@ -283,31 +292,33 @@ fn message_builder() -> Object {
         isReply: Prop::new().simple(Bool),
         // Body of the message
         body: Prop::new().simple(QString).optional().write(),
-        isMediaMessage: Prop::new().simple(Bool),
+
+        hasMediaAttachment: Prop::new().simple(Bool),
+        hasDocAttachment: Prop::new().simple(Bool),
+        documentAttachments: Prop::new().object(document_attachments()),
+        mediaAttachments: Prop::new().object(media_attachments()),
 
         // Message id of the message being replied to, if any
         opId: Prop::new().simple(QByteArray).optional(),
         opAuthor: Prop::new().simple(QString).optional(),
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),
-        opHasAttachments: Prop::new().simple(Bool).optional()
+        // Media attachments metadata, serialized as JSON
+        opMediaAttachments: Prop::new().simple(QString).optional(),
+        // Document attachments metadata, serialized as JSON
+        opDocAttachments: Prop::new().simple(QString).optional()
     );
-
-    let item_props = item_props! {
-        attachmentPath: ItemProp::new(QString)
-    };
 
     let funcs = functions! {
         mut finalize() => Void,
         mut clearReply() => Void,
         mut addAttachment(path: QString) => Bool,
-        mut removeAttachment(path: QString) => Bool,
-        mut removeAttachmentByIndex(row_index: QUint64) => Bool,
-        mut removeLast() => Void,
+        mut removeDoc(row_index: QUint64) => Bool,
+        mut removeMedia(row_index: QUint64) => Bool,
     };
 
     obj! {
-        MessageBuilder: Obj::new().list().funcs(funcs).item_props(item_props).props(props)
+        MessageBuilder: Obj::new().list().funcs(funcs).props(props)
     }
 }
 
@@ -374,19 +385,26 @@ fn users_search() -> Object {
     }
 }
 
-fn attachments() -> Object {
-    let props = props! {
-        // the message id the attachments list is associated with
-        attachmentsMsgId: Prop::new().simple(QByteArray).optional().write()
-    };
-
+fn media_attachments() -> Object {
     let item_props = item_props! {
         // Path the the attachment
-        attachmentPath: ItemProp::new(QString)
+        mediaAttachmentPath: ItemProp::new(QString)
     };
 
     obj! {
-        Attachments: Obj::new().list().props(props).item_props(item_props)
+        MediaAttachments: Obj::new().list().item_props(item_props)
+    }
+}
+
+fn document_attachments() -> Object {
+    let item_props = item_props! {
+        // Path the the attachment
+        documentAttachmentPath: ItemProp::new(QString),
+        documentAttachmentSize: ItemProp::new(QUint64)
+    };
+
+    obj! {
+        DocumentAttachments: Obj::new().list().item_props(item_props)
     }
 }
 
@@ -410,8 +428,7 @@ fn message_search() -> Object {
         beforeFirstMatch: ItemProp::new(QString),
         firstMatch: ItemProp::new(QString),
         afterFirstMatch: ItemProp::new(QString),
-        time: ItemProp::new(Qint64).optional(),
-        has_attachments: ItemProp::new(Bool).optional()
+        time: ItemProp::new(Qint64).optional()
     };
 
     let funcs = functions! {

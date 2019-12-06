@@ -7,4 +7,4 @@ license = "GPLv2"
 
 [dependencies.riqtshaw]
 git = "https://github.com/kalix-systems/riqtshaw"
-rev = "5199e4b2fc26ab361a7d37acdc8bf8cddbd25d2a"
+rev = "a025cfde46c86ed9395b35f959d4be839d288f4f"

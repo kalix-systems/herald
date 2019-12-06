@@ -4,10 +4,9 @@ import QtQuick 2.13
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
-import "qrc:/imports/js/utils.mjs" as Utils
 import "." as CVUtils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
-import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -138,15 +137,8 @@ ListView {
                 friendlyTimestamp: timestamp
                 receiptImage: proxyReceiptImage
                 authorName: authName
-                messageAttachments: Attachments {
-                    id: atc
-                    attachmentsMsgId: msgId
-                }
-                imageTapCallback: function () {
-                    imagePopup.sourceAtc = atc
-                    imagePopup.raise()
-                    imagePopup.show()
-                }
+                medAttachments: mediaAttachments
+                documentAttachments: docAttachments
                 authorColor: userColor
                 elided: chatRow.elided
             }
@@ -174,7 +166,8 @@ ListView {
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (hasAttachments && dataSaved) {
+            content: if (mediaAttachments.length !== 0
+                             || docAttachments.length !== 0) {
                          image
                          //reply types: 0 not reply, 1 dangling, 2 known reply
                      } else if (replyType > 0) {
@@ -182,6 +175,7 @@ ListView {
                      } else {
                          std
                      }
+
             ChatBubbleHover {}
         }
 

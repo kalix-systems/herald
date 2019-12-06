@@ -7,7 +7,6 @@ SELECT
   messages.server_ts,
   messages.expiration_ts,
   messages.send_status,
-  messages.has_attachments,
   messages.is_reply
 FROM
   messages LEFT OUTER JOIN replies ON messages.msg_id = replies.msg_id

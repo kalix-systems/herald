@@ -70,8 +70,6 @@ pub struct SearchResult {
     pub body: ResultBody,
     /// Insertion time
     pub time: Time,
-    /// Indicates whether the message has attachments
-    pub has_attachments: bool,
     rowid: i64,
 }
 
