@@ -166,7 +166,8 @@ ListView {
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (hasAttachments && dataSaved) {
+            content: if (ownedConversation.mediaAttachments.length !== 0
+                             && ownedConversation.documentAttachments.length !== 0) {
                          image
                          //reply types: 0 not reply, 1 dangling, 2 known reply
                      } else if (replyType > 0) {
