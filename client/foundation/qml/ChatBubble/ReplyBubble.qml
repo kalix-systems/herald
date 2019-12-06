@@ -98,7 +98,7 @@ ColumnLayout {
                 id: replyBody
                 text: opBodyTextMetrics.elidedText
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
-                // Layout.maximumWidth: bubbleRoot.maxWidth
+                Layout.maximumWidth: bubbleRoot.maxWidth
             }
 
             Row {

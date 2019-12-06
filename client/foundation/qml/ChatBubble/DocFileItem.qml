@@ -29,7 +29,9 @@ ListView {
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
             elide: Text.ElideRight
-            width: Math.max(40, messageBody.width - CmnCfg.largeMargin * 2)
+            width: imageAttach ? 300 - CmnCfg.largeMargin * 2 : Math.max(
+                                     40,
+                                     messageBody.width - CmnCfg.largeMargin * 2)
         }
 
         Image {

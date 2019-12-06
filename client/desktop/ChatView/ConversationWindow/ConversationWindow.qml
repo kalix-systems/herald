@@ -104,9 +104,6 @@ ListView {
                 medAttachments: mediaAttachments
                 documentAttachments: docAttachments
                 imageAttach: mediaAttachments.length !== 0
-                Component.onCompleted: print("length: ", body,
-                                             documentAttachments.length,
-                                             mediaAttachments)
                 docAttach: docAttachments.length !== 0
                 replyId: opMsgId
                 reply: replyType > 0

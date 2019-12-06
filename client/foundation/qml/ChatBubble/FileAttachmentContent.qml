@@ -36,8 +36,8 @@ ColumnLayout {
     Loader {
         Layout.rightMargin: CmnCfg.smallMargin
         Layout.leftMargin: CmnCfg.smallMargin
-        //Layout.topMargin: CmnCfg.smallMargin
-        Layout.bottomMargin: CmnCfg.smallMargin
+        Layout.topMargin: CmnCfg.smallMargin
+        Layout.bottomMargin: CmnCfg.smallMargin * 2
         id: docLoader
     }
 
