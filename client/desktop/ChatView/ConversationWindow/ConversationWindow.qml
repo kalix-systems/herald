@@ -111,25 +111,14 @@ ListView {
             }
         }
 
-        //        Component {
-        //            id: reply
-        //            CB.ReplyBubble {
-        //                replyId: opMsgId
-        //                //mousearea handling jump behavior
-        //                jumpHandler.onClicked: {
-        //                    const msgIndex = ownedConversation.indexById(replyId)
-        //                    if (msgIndex < 0)
-        //                        return
+//                Component {
+//                    id: reply
+//                    CB.ReplyBubble {
+//                        replyId: opMsgId
+//                        //mousearea handling jump behavior
 
-        //                    const window = convWindow
-
-        //                    window.positionViewAtIndex(msgIndex, ListView.Center)
-        //                    window.highlightAnimation.target = window.itemAtIndex(
-        //                                msgIndex).highlight
-        //                    window.highlightAnimation.start()
-        //                }
-        //            }
-        //        }
+//                    }
+//                }
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()

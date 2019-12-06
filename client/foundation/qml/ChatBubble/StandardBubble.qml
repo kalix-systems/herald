@@ -29,7 +29,8 @@ ColumnLayout {
     Component {
         id: image
         AttachmentContent {
-            maxWidth: wrapperCol.maxWidth
+
+            // maxWidth: wrapperCol.maxWidth
             medAttachments: wrapperCol.medAttachments
             documentAttachments: wrapperCol.documentAttachments
         }
@@ -38,7 +39,7 @@ ColumnLayout {
     Component {
         id: replyContent
         ReplyBubble {
-            maxWidth: wrapperCol.maxWidth
+            // maxWidth: wrapperCol.maxWidth
             replyId: wrapperCol.replyId
         }
     }

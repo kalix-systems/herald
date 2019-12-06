@@ -43,7 +43,7 @@ ColumnLayout {
     }
 
     Loader {
-        Layout.margins: CmnCfg.smallMargin
+        // Layout.margins: CmnCfg.smallMargin
         id: imageLoader
 
         DropShadow {

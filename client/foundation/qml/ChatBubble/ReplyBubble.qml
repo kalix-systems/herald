@@ -41,6 +41,19 @@ ColumnLayout {
             height: reply.height
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
+
+            onClicked: {
+                const msgIndex = ownedConversation.indexById(replyId)
+                if (msgIndex < 0)
+                    return
+
+                const window = convWindow
+
+                window.positionViewAtIndex(msgIndex, ListView.Center)
+                window.highlightAnimation.target = window.itemAtIndex(
+                            msgIndex).highlight
+                window.highlightAnimation.start()
+            }
         }
 
         ColumnLayout {
