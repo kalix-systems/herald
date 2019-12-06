@@ -7,7 +7,6 @@ import QtGraphicalEffects 1.12
 ColumnLayout {
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property var mediaParsed
-    property var docParsed
     id: wrapperCol
 
     spacing: 0
@@ -15,20 +14,8 @@ ColumnLayout {
     Component.onCompleted: {
         const media = medAttachments.length == 0 ? "" : JSON.parse(
                                                        medAttachments)
-        const docs = documentAttachments.length == 0 ? "" : JSON.parse(
-                                                           documentAttachments)
         const mediaLen = media.length
-        const docLen = docs.length
         mediaParsed = media
-        docParsed = docs
-
-        for (var i in docParsed) {
-            docModel.append({
-                                "path": docParsed[i]
-                            })
-            print(docParsed)
-        }
-
         switch (mediaLen) {
         case 0:
             break
@@ -47,20 +34,6 @@ ColumnLayout {
         default:
             imageLoader.sourceComponent = fiveImage
             break
-        }
-    }
-
-    ListModel {
-        id: docModel
-    }
-
-    ListView {
-        model: docModel
-        delegate: Text {
-            color: CmnCfg.palette.black
-            text: path
-            font.family: CmnCfg.chatFontSemiBold.name
-            font.pixelSize: 14
         }
     }
 

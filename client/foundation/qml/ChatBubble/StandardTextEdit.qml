@@ -11,7 +11,6 @@ TextEdit {
               body
           }
 
-    Layout.maximumWidth: attach ? 300 : maxWidth
     Layout.topMargin: CmnCfg.margin / 2
     Layout.leftMargin: CmnCfg.smallMargin
     Layout.rightMargin: CmnCfg.smallMargin

@@ -5,7 +5,7 @@ import LibHerald 1.0
 
 ColumnLayout {
     id: bubbleRoot
-    property real maxWidth: attach ? 300 : Math.min(parent.maxWidth, 600)
+    property real maxWidth: imageAttach ? 300 : Math.min(parent.maxWidth, 600)
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""
@@ -14,7 +14,8 @@ ColumnLayout {
     spacing: 0
     property bool expanded: false
     property bool elided: false
-    property bool attach: false
+    property bool imageAttach: false
+    property bool docAttach: false
     property bool reply: false
     property string medAttachments
     property string documentAttachments
@@ -39,14 +40,25 @@ ColumnLayout {
         }
     }
 
+    Component {
+        id: doc
+        FileAttachmentContent {}
+    }
+
     Column {
+        // width: background.width
         Loader {
             sourceComponent: reply ? replyContent : undefined
         }
 
         Loader {
             id: imageLoader
-            sourceComponent: attach ? image : undefined
+            sourceComponent: imageAttach ? image : undefined
+        }
+
+        Loader {
+            id: fileLoader
+            sourceComponent: docAttach ? doc : undefined
         }
     }
 
@@ -56,6 +68,9 @@ ColumnLayout {
 
     StandardTextEdit {
         id: messageBody
+        Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : Math.min(
+                                                          bubbleRoot.maxWidth,
+                                                          600)
     }
     ElideHandler {}
 

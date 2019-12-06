@@ -56,5 +56,7 @@
         <file>attach-icon.svg</file>
         <file>clear-photo-icon.svg</file>
         <file>countdown-icon-temp.svg</file>
+        <file>file-icon.svg</file>
+        <file>download-icon.svg</file>
     </qresource>
 </RCC>

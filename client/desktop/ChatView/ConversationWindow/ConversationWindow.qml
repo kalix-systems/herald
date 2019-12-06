@@ -103,9 +103,11 @@ ListView {
                 elided: chatRow.elided
                 medAttachments: mediaAttachments
                 documentAttachments: docAttachments
-                attach: mediaAttachments.length !== 0
-                        || docAttachments.length !== 0
-
+                imageAttach: mediaAttachments.length !== 0
+                Component.onCompleted: print("length: ", body,
+                                             documentAttachments.length,
+                                             mediaAttachments)
+                docAttach: docAttachments.length !== 0
                 replyId: opMsgId
                 reply: replyType > 0
                 maxWidth: chatListView.width * 0.66
@@ -133,6 +135,7 @@ ListView {
             convContainer: convWindow
             highlight: matchStatus === 2
             content: std
+            maxWidth: chatListView.width * 0.66
 
             ChatBubbleHover {}
         }
