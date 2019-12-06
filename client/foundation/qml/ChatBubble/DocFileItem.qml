@@ -5,8 +5,8 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ListView {
+    interactive: false
     width: 80
-    Layout.minimumWidth: 80
     Layout.maximumWidth: parent.width
     delegate: Item {
         height: 24
@@ -29,9 +29,9 @@ ListView {
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
             elide: Text.ElideRight
-            width: imageAttach ? 300 - CmnCfg.largeMargin * 2 : Math.max(
+            width: imageAttach ? 300 - CmnCfg.largeMargin * 3 : Math.max(
                                      40,
-                                     messageBody.width - CmnCfg.largeMargin * 2)
+                                     messageBody.width - CmnCfg.largeMargin * 3)
         }
 
         Image {
@@ -41,7 +41,7 @@ ListView {
             source: "qrc:/download-icon.svg"
             height: 20
             width: height
-            anchors.rightMargin: CmnCfg.smallMargin
+            anchors.rightMargin: CmnCfg.mediumMargin
         }
     }
 }
