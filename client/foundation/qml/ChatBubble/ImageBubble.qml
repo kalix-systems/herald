@@ -28,7 +28,6 @@ ColumnLayout {
 
     Component.onCompleted: {
         wrapperCol.expanded = false
-        print("image")
         const media = JSON.parse(medAttachments)
         const docs = JSON.parse(documentAttachments)
         const mediaLen = media.length

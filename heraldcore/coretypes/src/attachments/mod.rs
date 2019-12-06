@@ -170,27 +170,29 @@ impl AttachmentMeta {
     pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
-        for p in self.0.as_slice().iter().filter(is_media) {
+        for p in self.0.as_slice().iter() {
             let mut path = attachments_dir();
 
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                let attach_path = entry
-                    .map_err(|e| Error::Read(e, loc!()))?
-                    .path()
-                    .into_os_string()
-                    .into_string()
-                    .map_err(Error::NonUnicodePath)?;
+                let file = entry.map_err(|e| Error::Read(e, loc!()))?.path();
 
-                let (width, height) =
-                    image_utils::image_dimensions(&attach_path).map_err(Error::Image)?;
+                if is_media(&file) {
+                    let path = file
+                        .into_os_string()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?;
 
-                out.push(MediaMeta {
-                    width,
-                    height,
-                    path: attach_path,
-                });
+                    let (width, height) =
+                        image_utils::image_dimensions(&path).map_err(Error::Image)?;
+
+                    out.push(MediaMeta {
+                        width,
+                        height,
+                        path,
+                    });
+                }
             }
         }
 
@@ -200,20 +202,21 @@ impl AttachmentMeta {
     pub fn doc_attachments(&self) -> Result<Vec<String>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
-        for p in self.0.iter().filter(|p| !is_media(p)) {
+        for p in self.0.iter() {
             let mut path = attachments_dir();
 
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                out.push(
-                    entry
-                        .map_err(|e| Error::Read(e, loc!()))?
-                        .path()
-                        .into_os_string()
-                        .into_string()
-                        .map_err(Error::NonUnicodePath)?,
-                )
+                let file = entry.map_err(|e| Error::Read(e, loc!()))?.path();
+
+                if !is_media(&file) {
+                    out.push(
+                        file.into_os_string()
+                            .into_string()
+                            .map_err(Error::NonUnicodePath)?,
+                    )
+                }
             }
         }
 
@@ -239,12 +242,14 @@ impl From<MediaMeta> for json::JsonValue {
             width,
             height,
         } = meta;
+
         let mut obj = json::object::Object::new();
 
         obj.insert("path", path.into());
         obj.insert("width", width.into());
         obj.insert("height", height.into());
-        obj.into()
+
+        json::JsonValue::Object(obj)
     }
 }
 
