@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import QtGraphicalEffects 1.12
 
 ColumnLayout {
     property string body: ""
@@ -16,6 +17,7 @@ ColumnLayout {
     property bool expanded: false
     property string medAttachments
     property string documentAttachments
+    property var mediaParsed
     id: wrapperCol
 
     spacing: 0
@@ -32,70 +34,97 @@ ColumnLayout {
         const docs = JSON.parse(documentAttachments)
         const mediaLen = media.length
         const docLen = docs.length
+        mediaParsed = media
 
         switch (mediaLen) {
         case 0:
+            break
         case 1:
-            const first = media[0]
-            const path = first.path
-            console.log(path, mediaLen, media[0])
+            imageLoader.sourceComponent = oneImage
             break
         case 2:
-
+            imageLoader.sourceComponent = twoImage
             break
         case 3:
+            imageLoader.sourceComponent = threeImage
             break
         case 4:
+            imageLoader.sourceComponent = fourImage
             break
         default:
-
+            imageLoader.sourceComponent = fiveImage
+            break
         }
     }
-    GridLayout {
 
-        width: 400
-        height: 200
+    Loader {
+        Layout.margins: CmnCfg.smallMargin
+        id: imageLoader
 
-        columns: 2
-        rows: 1
-
-        //        Repeater {
-
-        //            model: messageAttachments.mediaAttachments
-        //            Layout.fillHeight: true
-        //            Layout.fillWidth: true
-        //            delegate: Rectangle {
-        //                width: 200
-        //                height: 200
-        //                clip: true
-        //                Image {
-        //                    id: image
-        //                    //TODO: move common typescript into common
-        //                    source: messageAttachments.loaded ? "file:" + mediaAttachmentPath : ""
-        //                    asynchronous: true
-        //                    anchors.centerIn: parent
-        //                }
-        //            }
-        //        }
+        DropShadow {
+            source: parent.item
+            anchors.fill: parent.item
+            horizontalOffset: 3
+            verticalOffset: 3
+            radius: 8.0
+            samples: 12
+            color: CmnCfg.palette.black
+            opacity: 0.55
+        }
     }
 
-    //        Rectangle {
-    //            property var imageHeight
-    //            width: messageAttachments.mediaAttachments.mediaAttachmentWidth(0)
-    //            height: messageAttachments.mediaAttachments.mediaAttachmentHeight(0)
+    Component {
+        id: oneImage
 
-    //            Component.onCompleted: print(messageAttachments.mediaAttachments.mediaAttachmentWidth(0))
-    //            clip: true
+        Image {
+            property var aspectRatio: mediaParsed[0].width / mediaParsed[0].height
+            sourceSize.width: aspectRatio < 1 ? 400 * aspectRatio : maxWidth
+            sourceSize.height: aspectRatio < 1 ? 400 : maxWidth / aspectRatio
+            source: "file:" + mediaParsed[0].path
+            anchors.centerIn: parent
+            fillMode: Image.PreserveAspectCrop
+            asynchronous: true
+        }
+    }
 
-    //            Image {
-    //                id: image2
-    //                source: messageAttachments.loaded ? "file:" + messageAttachments.mediaAttachments.mediaAttachmentPath(0) : ""
-    //                asynchronous: true
-    //                anchors.centerIn: parent
+    Component {
+        id: twoImage
+        TwoImageLayout {
+            firstImage: mediaParsed[0]
+            secondImage: mediaParsed[1]
+        }
+    }
 
-    //            }
-    //        }
-    //    }
+    Component {
+        id: threeImage
+        ThreeImageLayout {
+            firstImage: mediaParsed[0]
+            secondImage: mediaParsed[1]
+            thirdImage: mediaParsed[2]
+        }
+    }
+
+    Component {
+        id: fourImage
+        FourImageLayout {
+            firstImage: mediaParsed[0]
+            secondImage: mediaParsed[1]
+            thirdImage: mediaParsed[2]
+            fourthImage: mediaParsed[3]
+        }
+    }
+
+    Component {
+        id: fiveImage
+        MultiImageLayout {
+            firstImage: mediaParsed[0]
+            secondImage: mediaParsed[1]
+            thirdImage: mediaParsed[2]
+            fourthImage: mediaParsed[3]
+            count: mediaParsed.length - 4
+        }
+    }
+
     StandardTextEdit {}
 
     StandardStamps {}

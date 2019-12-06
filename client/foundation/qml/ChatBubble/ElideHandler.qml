@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 TextEdit {
     visible: elided
-    text: wrapperCol.expanded == false ? "Read more" : "Collapse"
+    text: wrapperCol.expanded === false ? "Read more" : "Collapse"
     font.bold: true
     color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
