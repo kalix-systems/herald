@@ -49,11 +49,12 @@ pub(in crate::messages) fn handle_receipt(
 pub(in crate::messages) fn handle_store_done(
     container: &mut Container,
     mid: MsgId,
+    meta: heraldcore::message::attachments::AttachmentMeta,
     model: &mut List,
 ) -> Option<()> {
     let data = container.map.get_mut(&mid)?;
 
-    data.save_status = SaveStatus::Saved;
+    data.attachments = meta;
     let ix = container
         .list
         .iter()

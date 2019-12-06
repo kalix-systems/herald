@@ -18,10 +18,13 @@ int main(int argc, char* argv[])
   qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
   qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
-  qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
   qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
   qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
   qmlRegisterType<ConversationContent>("LibHerald", 1, 0, "ConversationContent");
+
+  qmlRegisterType<MediaAttachments>("LibHerald", 1, 0, "MediaAttachments");
+  qmlRegisterType<DocumentAttachments>("LibHerald", 1, 0,
+                                       "DocumentAttachments");
 
   qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "CmnCfg");
 

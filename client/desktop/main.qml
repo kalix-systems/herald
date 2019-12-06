@@ -43,11 +43,6 @@ ApplicationWindow {
                                        StandardPaths.AppLocalDataLocation))
     }
 
-    // must be at root level .
-    CvPopups.ImagePopup {
-        id: imagePopup
-    }
-
     Loader {
         id: appLoader
         active: herald.configInit

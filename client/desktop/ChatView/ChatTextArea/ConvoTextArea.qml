@@ -144,7 +144,7 @@ Rectangle {
 
         State {
             name: "attachmentstate"
-            when: ownedConversation.builder.isMediaMessage
+            when: ownedConversation.builder.hasDocAttachment || ownedConversation.builder.hasMediaAttachment
             PropertyChanges {
                 target: attachmentLoader
                 active: true

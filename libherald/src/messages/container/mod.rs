@@ -35,7 +35,7 @@ pub(super) fn fill(cid: ConversationId) {
                 .into_iter()
                 .map(|m| {
                     let mid = m.message_id;
-                    let (message, data) = split_msg(m, SaveStatus::Saved);
+                    let (message, data) = split_msg(m);
 
                     (message, (mid, data))
                 })

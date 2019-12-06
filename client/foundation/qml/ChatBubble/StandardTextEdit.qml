@@ -3,12 +3,10 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 TextEdit {
-    text: if (parent.elided) {
-              if (parent.expanded) {
-                  fullBody
-              } else {
-                  body + "..."
-              }
+    text: if (parent.elided && parent.expanded) {
+              fullBody
+          } else if (parent.elided) {
+              body + "..."
           } else {
               body
           }

@@ -6,10 +6,6 @@
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QObject>
 
-class Attachments;
-typedef Attachments *AttachmentsRef;
-Q_DECLARE_METATYPE(AttachmentsRef);
-
 class Config;
 typedef Config *ConfigRef;
 Q_DECLARE_METATYPE(ConfigRef);
@@ -26,6 +22,10 @@ class Conversations;
 typedef Conversations *ConversationsRef;
 Q_DECLARE_METATYPE(ConversationsRef);
 
+class DocumentAttachments;
+typedef DocumentAttachments *DocumentAttachmentsRef;
+Q_DECLARE_METATYPE(DocumentAttachmentsRef);
+
 class Errors;
 typedef Errors *ErrorsRef;
 Q_DECLARE_METATYPE(ErrorsRef);
@@ -33,6 +33,10 @@ Q_DECLARE_METATYPE(ErrorsRef);
 class Herald;
 typedef Herald *HeraldRef;
 Q_DECLARE_METATYPE(HeraldRef);
+
+class MediaAttachments;
+typedef MediaAttachments *MediaAttachmentsRef;
+Q_DECLARE_METATYPE(MediaAttachmentsRef);
 
 class Members;
 typedef Members *MembersRef;
@@ -63,13 +67,14 @@ typedef Utils *UtilsRef;
 Q_DECLARE_METATYPE(UtilsRef);
 
 extern "C" {
-typedef struct AttachmentsPtrBundle AttachmentsPtrBundle;
 typedef struct ConfigPtrBundle ConfigPtrBundle;
 typedef struct ConversationBuilderPtrBundle ConversationBuilderPtrBundle;
 typedef struct ConversationContentPtrBundle ConversationContentPtrBundle;
 typedef struct ConversationsPtrBundle ConversationsPtrBundle;
+typedef struct DocumentAttachmentsPtrBundle DocumentAttachmentsPtrBundle;
 typedef struct ErrorsPtrBundle ErrorsPtrBundle;
 typedef struct HeraldPtrBundle HeraldPtrBundle;
+typedef struct MediaAttachmentsPtrBundle MediaAttachmentsPtrBundle;
 typedef struct MembersPtrBundle MembersPtrBundle;
 typedef struct MessageBuilderPtrBundle MessageBuilderPtrBundle;
 typedef struct MessageSearchPtrBundle MessageSearchPtrBundle;
@@ -77,23 +82,6 @@ typedef struct MessagesPtrBundle MessagesPtrBundle;
 typedef struct UsersPtrBundle UsersPtrBundle;
 typedef struct UsersSearchPtrBundle UsersSearchPtrBundle;
 typedef struct UtilsPtrBundle UtilsPtrBundle;
-struct AttachmentsPtrBundle {
-  Attachments *attachments;
-  void (*attachments_attachments_msg_id_changed)(Attachments *);
-
-  void (*attachments_new_data_ready)(const Attachments *);
-  void (*attachments_layout_about_to_be_changed)(Attachments *);
-  void (*attachments_layout_changed)(Attachments *);
-  void (*attachments_data_changed)(Attachments *, quintptr, quintptr);
-  void (*attachments_begin_reset_model)(Attachments *);
-  void (*attachments_end_reset_model)(Attachments *);
-  void (*attachments_begin_insert_rows)(Attachments *, int, int);
-  void (*attachments_end_insert_rows)(Attachments *);
-  void (*attachments_begin_move_rows)(Attachments *, int, int, int);
-  void (*attachments_end_move_rows)(Attachments *);
-  void (*attachments_begin_remove_rows)(Attachments *, int, int);
-  void (*attachments_end_remove_rows)(Attachments *);
-};
 struct ConfigPtrBundle {
   Config *config;
   void (*config_color_changed)(Config *);
@@ -147,12 +135,48 @@ struct ConversationContentPtrBundle {
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_is_media_message_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
@@ -227,6 +251,27 @@ struct ConversationsPtrBundle {
   void (*conversations_end_move_rows)(Conversations *);
   void (*conversations_begin_remove_rows)(Conversations *, int, int);
   void (*conversations_end_remove_rows)(Conversations *);
+};
+struct DocumentAttachmentsPtrBundle {
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
 };
 struct ErrorsPtrBundle {
   Errors *errors;
@@ -344,6 +389,23 @@ struct HeraldPtrBundle {
   void (*herald_begin_remove_rows)(Herald *, int, int);
   void (*herald_end_remove_rows)(Herald *);
 };
+struct MediaAttachmentsPtrBundle {
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
+};
 struct MembersPtrBundle {
   Members *members;
   void (*members_filter_changed)(Members *);
@@ -365,12 +427,48 @@ struct MembersPtrBundle {
 struct MessageBuilderPtrBundle {
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_is_media_message_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
@@ -408,12 +506,48 @@ struct MessagesPtrBundle {
   Messages *messages;
   MessageBuilder *message_builder;
   void (*message_builder_body_changed)(MessageBuilder *);
-  void (*message_builder_is_media_message_changed)(MessageBuilder *);
+  DocumentAttachments *document_attachments;
+
+  void (*document_attachments_new_data_ready)(const DocumentAttachments *);
+  void (*document_attachments_layout_about_to_be_changed)(
+      DocumentAttachments *);
+  void (*document_attachments_layout_changed)(DocumentAttachments *);
+  void (*document_attachments_data_changed)(DocumentAttachments *, quintptr,
+                                            quintptr);
+  void (*document_attachments_begin_reset_model)(DocumentAttachments *);
+  void (*document_attachments_end_reset_model)(DocumentAttachments *);
+  void (*document_attachments_begin_insert_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_insert_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_move_rows)(DocumentAttachments *, int, int,
+                                               int);
+  void (*document_attachments_end_move_rows)(DocumentAttachments *);
+  void (*document_attachments_begin_remove_rows)(DocumentAttachments *, int,
+                                                 int);
+  void (*document_attachments_end_remove_rows)(DocumentAttachments *);
+  void (*message_builder_has_doc_attachment_changed)(MessageBuilder *);
+  void (*message_builder_has_media_attachment_changed)(MessageBuilder *);
   void (*message_builder_is_reply_changed)(MessageBuilder *);
+  MediaAttachments *media_attachments;
+
+  void (*media_attachments_new_data_ready)(const MediaAttachments *);
+  void (*media_attachments_layout_about_to_be_changed)(MediaAttachments *);
+  void (*media_attachments_layout_changed)(MediaAttachments *);
+  void (*media_attachments_data_changed)(MediaAttachments *, quintptr,
+                                         quintptr);
+  void (*media_attachments_begin_reset_model)(MediaAttachments *);
+  void (*media_attachments_end_reset_model)(MediaAttachments *);
+  void (*media_attachments_begin_insert_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_insert_rows)(MediaAttachments *);
+  void (*media_attachments_begin_move_rows)(MediaAttachments *, int, int, int);
+  void (*media_attachments_end_move_rows)(MediaAttachments *);
+  void (*media_attachments_begin_remove_rows)(MediaAttachments *, int, int);
+  void (*media_attachments_end_remove_rows)(MediaAttachments *);
   void (*message_builder_op_author_changed)(MessageBuilder *);
   void (*message_builder_op_body_changed)(MessageBuilder *);
-  void (*message_builder_op_has_attachments_changed)(MessageBuilder *);
+  void (*message_builder_op_doc_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_id_changed)(MessageBuilder *);
+  void (*message_builder_op_media_attachments_changed)(MessageBuilder *);
   void (*message_builder_op_time_changed)(MessageBuilder *);
 
   void (*message_builder_new_data_ready)(const MessageBuilder *);
@@ -492,83 +626,15 @@ struct UtilsPtrBundle {
   Utils *utils;
 };
 }
-class Attachments : public QAbstractItemModel {
-  Q_OBJECT
-  friend class Config;
-  friend class ConversationBuilder;
-  friend class ConversationContent;
-  friend class Conversations;
-  friend class Errors;
-  friend class Herald;
-  friend class Members;
-  friend class MessageBuilder;
-  friend class MessageSearch;
-  friend class Messages;
-  friend class Users;
-  friend class UsersSearch;
-  friend class Utils;
-
-public:
-  class Private;
-
-private:
-  Private *m_d;
-  bool m_ownsPrivate;
-  Q_PROPERTY(QByteArray attachmentsMsgId READ attachmentsMsgId WRITE
-                 setAttachmentsMsgId NOTIFY attachmentsMsgIdChanged FINAL)
-  explicit Attachments(bool owned, QObject *parent);
-
-public:
-  explicit Attachments(QObject *parent = nullptr);
-  ~Attachments() override;
-  QByteArray attachmentsMsgId() const;
-  void setAttachmentsMsgId(const QByteArray &v);
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-  QVariant data(const QModelIndex &index,
-                int role = Qt::DisplayRole) const override;
-  QModelIndex index(int row, int column,
-                    const QModelIndex &parent = QModelIndex()) const override;
-  QModelIndex parent(const QModelIndex &index) const override;
-  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  bool canFetchMore(const QModelIndex &parent) const override;
-  void fetchMore(const QModelIndex &parent) override;
-  Qt::ItemFlags flags(const QModelIndex &index) const override;
-  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
-  int role(const char *name) const;
-  QHash<int, QByteArray> roleNames() const override;
-  QVariant headerData(int section, Qt::Orientation orientation,
-                      int role = Qt::DisplayRole) const override;
-  bool setHeaderData(int section, Qt::Orientation orientation,
-                     const QVariant &value, int role = Qt::EditRole) override;
-  Q_INVOKABLE bool
-  insertRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-  Q_INVOKABLE bool
-  removeRows(int row, int count,
-             const QModelIndex &parent = QModelIndex()) override;
-
-  Q_INVOKABLE QString attachmentPath(int row) const;
-
-Q_SIGNALS:
-  // new data is ready to be made available to the model with fetchMore()
-  void newDataReady(const QModelIndex &parent) const;
-
-private:
-  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
-  void initHeaderData();
-  void updatePersistentIndexes();
-Q_SIGNALS:
-  void attachmentsMsgIdChanged();
-};
 class Config : public QObject {
   Q_OBJECT
-  friend class Attachments;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -617,12 +683,13 @@ Q_SIGNALS:
 };
 class ConversationBuilder : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -693,12 +760,13 @@ Q_SIGNALS:
 };
 class ConversationContent : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -770,12 +838,13 @@ Q_SIGNALS:
 };
 class Conversations : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -860,14 +929,81 @@ Q_SIGNALS:
   void filterChanged();
   void filterRegexChanged();
 };
-class Errors : public QObject {
+class DocumentAttachments : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  explicit DocumentAttachments(bool owned, QObject *parent);
+
+public:
+  explicit DocumentAttachments(QObject *parent = nullptr);
+  ~DocumentAttachments() override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
+  Q_INVOKABLE QString documentAttachmentPath(int row) const;
+  Q_INVOKABLE quint64 documentAttachmentSize(int row) const;
+
+Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
+Q_SIGNALS:
+};
+class Errors : public QObject {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -895,12 +1031,13 @@ Q_SIGNALS:
 };
 class Herald : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -1014,15 +1151,81 @@ Q_SIGNALS:
   void usersSearchChanged();
   void utilsChanged();
 };
-class Members : public QAbstractItemModel {
+class MediaAttachments : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  explicit MediaAttachments(bool owned, QObject *parent);
+
+public:
+  explicit MediaAttachments(QObject *parent = nullptr);
+  ~MediaAttachments() override;
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override;
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex parent(const QModelIndex &index) const override;
+  bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+  bool canFetchMore(const QModelIndex &parent) const override;
+  void fetchMore(const QModelIndex &parent) override;
+  Qt::ItemFlags flags(const QModelIndex &index) const override;
+  void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+  int role(const char *name) const;
+  QHash<int, QByteArray> roleNames() const override;
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override;
+  bool setHeaderData(int section, Qt::Orientation orientation,
+                     const QVariant &value, int role = Qt::EditRole) override;
+  Q_INVOKABLE bool
+  insertRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+  Q_INVOKABLE bool
+  removeRows(int row, int count,
+             const QModelIndex &parent = QModelIndex()) override;
+
+  Q_INVOKABLE QString mediaAttachmentPath(int row) const;
+
+Q_SIGNALS:
+  // new data is ready to be made available to the model with fetchMore()
+  void newDataReady(const QModelIndex &parent) const;
+
+private:
+  QHash<QPair<int, Qt::ItemDataRole>, QVariant> m_headerData;
+  void initHeaderData();
+  void updatePersistentIndexes();
+Q_SIGNALS:
+};
+class Members : public QAbstractItemModel {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
@@ -1099,13 +1302,14 @@ Q_SIGNALS:
 };
 class MessageBuilder : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageSearch;
   friend class Messages;
@@ -1117,17 +1321,27 @@ public:
   class Private;
 
 private:
+  DocumentAttachments *const m_documentAttachments;
+  MediaAttachments *const m_mediaAttachments;
   Private *m_d;
   bool m_ownsPrivate;
   Q_PROPERTY(QString body READ body WRITE setBody NOTIFY bodyChanged FINAL)
-  Q_PROPERTY(bool isMediaMessage READ isMediaMessage NOTIFY
-                 isMediaMessageChanged FINAL)
+  Q_PROPERTY(DocumentAttachments *documentAttachments READ documentAttachments
+                 NOTIFY documentAttachmentsChanged FINAL)
+  Q_PROPERTY(bool hasDocAttachment READ hasDocAttachment NOTIFY
+                 hasDocAttachmentChanged FINAL)
+  Q_PROPERTY(bool hasMediaAttachment READ hasMediaAttachment NOTIFY
+                 hasMediaAttachmentChanged FINAL)
   Q_PROPERTY(bool isReply READ isReply NOTIFY isReplyChanged FINAL)
+  Q_PROPERTY(MediaAttachments *mediaAttachments READ mediaAttachments NOTIFY
+                 mediaAttachmentsChanged FINAL)
   Q_PROPERTY(QString opAuthor READ opAuthor NOTIFY opAuthorChanged FINAL)
   Q_PROPERTY(QString opBody READ opBody NOTIFY opBodyChanged FINAL)
-  Q_PROPERTY(QVariant opHasAttachments READ opHasAttachments NOTIFY
-                 opHasAttachmentsChanged FINAL)
+  Q_PROPERTY(QString opDocAttachments READ opDocAttachments NOTIFY
+                 opDocAttachmentsChanged FINAL)
   Q_PROPERTY(QByteArray opId READ opId NOTIFY opIdChanged FINAL)
+  Q_PROPERTY(QString opMediaAttachments READ opMediaAttachments NOTIFY
+                 opMediaAttachmentsChanged FINAL)
   Q_PROPERTY(QVariant opTime READ opTime NOTIFY opTimeChanged FINAL)
   explicit MessageBuilder(bool owned, QObject *parent);
 
@@ -1136,19 +1350,24 @@ public:
   ~MessageBuilder() override;
   QString body() const;
   void setBody(const QString &v);
-  bool isMediaMessage() const;
+  const DocumentAttachments *documentAttachments() const;
+  DocumentAttachments *documentAttachments();
+  bool hasDocAttachment() const;
+  bool hasMediaAttachment() const;
   bool isReply() const;
+  const MediaAttachments *mediaAttachments() const;
+  MediaAttachments *mediaAttachments();
   QString opAuthor() const;
   QString opBody() const;
-  QVariant opHasAttachments() const;
+  QString opDocAttachments() const;
   QByteArray opId() const;
+  QString opMediaAttachments() const;
   QVariant opTime() const;
   Q_INVOKABLE bool addAttachment(const QString &path);
   Q_INVOKABLE void clearReply();
   Q_INVOKABLE void finalize();
-  Q_INVOKABLE bool removeAttachment(const QString &path);
-  Q_INVOKABLE bool removeAttachmentByIndex(quint64 row_index);
-  Q_INVOKABLE void removeLast();
+  Q_INVOKABLE bool removeDoc(quint64 row_index);
+  Q_INVOKABLE bool removeMedia(quint64 row_index);
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override;
@@ -1174,8 +1393,6 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QString attachmentPath(int row) const;
-
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
   void newDataReady(const QModelIndex &parent) const;
@@ -1186,23 +1403,28 @@ private:
   void updatePersistentIndexes();
 Q_SIGNALS:
   void bodyChanged();
-  void isMediaMessageChanged();
+  void documentAttachmentsChanged();
+  void hasDocAttachmentChanged();
+  void hasMediaAttachmentChanged();
   void isReplyChanged();
+  void mediaAttachmentsChanged();
   void opAuthorChanged();
   void opBodyChanged();
-  void opHasAttachmentsChanged();
+  void opDocAttachmentsChanged();
   void opIdChanged();
+  void opMediaAttachmentsChanged();
   void opTimeChanged();
 };
 class MessageSearch : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class Messages;
@@ -1264,7 +1486,6 @@ public:
   Q_INVOKABLE QString conversationPicture(int row) const;
   Q_INVOKABLE QString conversationTitle(int row) const;
   Q_INVOKABLE QString firstMatch(int row) const;
-  Q_INVOKABLE QVariant has_attachments(int row) const;
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QVariant time(int row) const;
 
@@ -1282,13 +1503,14 @@ Q_SIGNALS:
 };
 class Messages : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -1381,20 +1603,21 @@ public:
 
   Q_INVOKABLE QString author(int row) const;
   Q_INVOKABLE QString body(int row) const;
-  Q_INVOKABLE QVariant dataSaved(int row) const;
+  Q_INVOKABLE QString docAttachments(int row) const;
   Q_INVOKABLE QVariant expirationTime(int row) const;
   Q_INVOKABLE QString fullBody(int row) const;
-  Q_INVOKABLE QVariant hasAttachments(int row) const;
   Q_INVOKABLE QVariant insertionTime(int row) const;
   Q_INVOKABLE QVariant isHead(int row) const;
   Q_INVOKABLE QVariant isTail(int row) const;
   Q_INVOKABLE QVariant matchStatus(int row) const;
+  Q_INVOKABLE QString mediaAttachments(int row) const;
   Q_INVOKABLE QByteArray msgId(int row) const;
   Q_INVOKABLE QString opAuthor(int row) const;
   Q_INVOKABLE QString opBody(int row) const;
+  Q_INVOKABLE QString opDocAttachments(int row) const;
   Q_INVOKABLE QVariant opExpirationTime(int row) const;
-  Q_INVOKABLE QVariant opHasAttachments(int row) const;
   Q_INVOKABLE QVariant opInsertionTime(int row) const;
+  Q_INVOKABLE QString opMediaAttachments(int row) const;
   Q_INVOKABLE QByteArray opMsgId(int row) const;
   Q_INVOKABLE QVariant receiptStatus(int row) const;
   Q_INVOKABLE QVariant replyType(int row) const;
@@ -1424,13 +1647,14 @@ Q_SIGNALS:
 };
 class Users : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -1516,13 +1740,14 @@ Q_SIGNALS:
 };
 class UsersSearch : public QAbstractItemModel {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
@@ -1595,13 +1820,14 @@ Q_SIGNALS:
 };
 class Utils : public QObject {
   Q_OBJECT
-  friend class Attachments;
   friend class Config;
   friend class ConversationBuilder;
   friend class ConversationContent;
   friend class Conversations;
+  friend class DocumentAttachments;
   friend class Errors;
   friend class Herald;
+  friend class MediaAttachments;
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;

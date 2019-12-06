@@ -15,6 +15,7 @@ members = [
   "heraldcore/platform_dirs",
   "heraldcore/search_pattern",
   "heraldcore/location",
+  "heraldcore/image_utils",
   "libherald",
   "libherald/messages_helper",
   "libherald/qt_bindgen",

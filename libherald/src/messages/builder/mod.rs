@@ -1,7 +1,12 @@
-use crate::{content_push, ffi, interface::*, push, ret_err, ret_none, spawn};
+use crate::{
+    attachments::{DocumentAttachments, MediaAttachments},
+    content_push, ffi,
+    interface::*,
+    push, ret_err, ret_none, spawn,
+};
 use herald_common::{Time, UserId};
 use heraldcore::{
-    message::*,
+    message::{attachments::is_media, *},
     types::{ConversationId, InvalidRandomIdLength, MsgId},
 };
 use std::{convert::TryInto, path::PathBuf};
@@ -15,6 +20,8 @@ pub struct MessageBuilder {
     model: List,
     inner: OutboundMessageBuilder,
     op: Option<Reply>,
+    document_attachments: DocumentAttachments,
+    media_attachments: MediaAttachments,
 }
 
 type Emitter = MessageBuilderEmitter;
@@ -24,12 +31,16 @@ impl MessageBuilderTrait for MessageBuilder {
     fn new(
         emit: MessageBuilderEmitter,
         model: MessageBuilderList,
+        document_attachments: DocumentAttachments,
+        media_attachments: MediaAttachments,
     ) -> Self {
         Self {
             emit,
             model,
             inner: OutboundMessageBuilder::default(),
             op: None,
+            document_attachments,
+            media_attachments,
         }
     }
 
@@ -39,34 +50,6 @@ impl MessageBuilderTrait for MessageBuilder {
 
     fn is_reply(&self) -> bool {
         self.op.is_some()
-    }
-
-    fn is_media_message(&self) -> bool {
-        !self.inner.attachments.is_empty()
-    }
-
-    fn add_attachment(
-        &mut self,
-        path: String,
-    ) -> bool {
-        let path = match crate::utils::strip_qrc(path) {
-            Some(path) => path,
-            None => return false,
-        };
-
-        let path = PathBuf::from(path);
-
-        let len = self.inner.attachments.len();
-
-        self.model.begin_insert_rows(len, len);
-        self.inner.add_attachment(path);
-        self.model.end_insert_rows();
-
-        if len == 0 {
-            self.emit.is_media_message_changed();
-        }
-
-        true
     }
 
     fn set_body(
@@ -94,6 +77,16 @@ impl MessageBuilderTrait for MessageBuilder {
     /// Finalizes the builder, stores and sends the message, and resets the builder.
     fn finalize(&mut self) {
         self.model.begin_reset_model();
+
+        self.inner.attachments.extend(self.media_attachments.all());
+
+        self.inner.attachments.extend(
+            self.document_attachments
+                .all()
+                .into_iter()
+                .map(PathBuf::from),
+        );
+
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();
@@ -112,8 +105,8 @@ impl MessageBuilderTrait for MessageBuilder {
                     Error { error, location } => {
                         push((Err::<(), HErr>(error), location));
                     }
-                    StoreDone(mid) => {
-                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid)));
+                    StoreDone(mid, meta) => {
+                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
                     }
                     SendDone(_) => {
                         // TODO: send status?
@@ -123,76 +116,8 @@ impl MessageBuilderTrait for MessageBuilder {
         });
     }
 
-    fn remove_attachment(
-        &mut self,
-        path: String,
-    ) -> bool {
-        let path = PathBuf::from(path);
-        let pos = ret_none!(
-            self.inner.attachments.iter().rposition(|p| p == &path),
-            false
-        );
-
-        self.model.begin_remove_rows(pos, pos);
-        self.inner.attachments.remove(pos);
-        self.model.end_remove_rows();
-
-        if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
-        }
-
-        true
-    }
-
-    fn remove_attachment_by_index(
-        &mut self,
-        row_index: u64,
-    ) -> bool {
-        let row_index = row_index as usize;
-
-        if row_index > self.inner.attachments.len() {
-            return false;
-        }
-
-        self.model.begin_remove_rows(row_index, row_index);
-        self.inner.attachments.remove(row_index);
-        self.model.end_remove_rows();
-
-        if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
-        }
-
-        true
-    }
-
-    fn remove_last(&mut self) {
-        if self.inner.attachments.is_empty() {
-            return;
-        }
-        self.model.begin_remove_rows(
-            self.inner.attachments.len().saturating_sub(1),
-            self.inner.attachments.len().saturating_sub(1),
-        );
-        self.inner.attachments.pop();
-        self.model.end_remove_rows();
-
-        if self.inner.attachments.is_empty() {
-            self.emit.is_media_message_changed();
-        }
-    }
-
     fn row_count(&self) -> usize {
         self.inner.attachments.len()
-    }
-
-    fn attachment_path(
-        &self,
-        index: usize,
-    ) -> &str {
-        ret_none!(
-            ret_none!(self.inner.attachments.get(index), "").to_str(),
-            ""
-        )
     }
 
     fn clear_reply(&mut self) {
@@ -215,8 +140,101 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
-    fn op_has_attachments(&self) -> Option<bool> {
-        Some(self.op.as_ref()?.has_attachments)
+    // TODO
+    fn op_doc_attachments(&self) -> Option<&str> {
+        None
+    }
+
+    fn op_media_attachments(&self) -> Option<&str> {
+        None
+    }
+
+    fn add_attachment(
+        &mut self,
+        path: String,
+    ) -> bool {
+        let path = match crate::utils::strip_qrc(path) {
+            Some(path) => path,
+            None => return false,
+        };
+
+        let path = PathBuf::from(path);
+
+        if is_media(&path) {
+            let was_empty = self.media_attachments.is_empty();
+
+            if self.media_attachments.add_attachment(path).is_some() && was_empty {
+                self.emit.has_media_attachment_changed();
+            }
+        } else {
+            let was_empty = self.document_attachments.is_empty();
+
+            if self.document_attachments.add_attachment(path).is_some() && was_empty {
+                self.emit.has_doc_attachment_changed();
+            }
+        }
+
+        true
+    }
+
+    fn remove_media(
+        &mut self,
+        index: u64,
+    ) -> bool {
+        let index = index as usize;
+        let was_empty = self.media_attachments.is_empty();
+
+        match self.media_attachments.remove(index) {
+            Some(()) => {
+                if !was_empty {
+                    self.emit.has_media_attachment_changed();
+                }
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn media_attachments(&self) -> &MediaAttachments {
+        &self.media_attachments
+    }
+
+    fn media_attachments_mut(&mut self) -> &mut MediaAttachments {
+        &mut self.media_attachments
+    }
+
+    fn remove_doc(
+        &mut self,
+        index: u64,
+    ) -> bool {
+        let index = index as usize;
+        let was_empty = self.document_attachments.is_empty();
+
+        match self.document_attachments.remove(index) {
+            Some(()) => {
+                if !was_empty {
+                    self.emit.has_doc_attachment_changed();
+                }
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn document_attachments(&self) -> &DocumentAttachments {
+        &self.document_attachments
+    }
+
+    fn document_attachments_mut(&mut self) -> &mut DocumentAttachments {
+        &mut self.document_attachments
+    }
+
+    fn has_doc_attachment(&self) -> bool {
+        !self.document_attachments.is_empty()
+    }
+
+    fn has_media_attachment(&self) -> bool {
+        !self.media_attachments.is_empty()
     }
 }
 

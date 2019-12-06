@@ -123,9 +123,8 @@ impl Messages {
     pub(super) fn insert_helper(
         &mut self,
         msg: Msg,
-        save_status: SaveStatus,
     ) -> Result<(), HErr> {
-        let (message, data) = split_msg(msg, save_status);
+        let (message, data) = split_msg(msg);
 
         let cid = self.conversation_id.ok_or(NE!())?;
 

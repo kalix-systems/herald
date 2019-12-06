@@ -256,11 +256,6 @@ pub trait MessageSearchTrait {
         index: usize,
     ) -> &str;
 
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool>;
-
     fn msg_id(
         &self,
         index: usize,
@@ -560,15 +555,6 @@ pub unsafe extern "C" fn message_search_data_first_match(
     let data = obj.first_match(to_usize(row).unwrap_or(0));
     let str_: *const c_char = data.as_ptr() as *const c_char;
     set(d, str_, to_c_int(data.len()));
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn message_search_data_has_attachments(
-    ptr: *const MessageSearch,
-    row: c_int,
-) -> COption<bool> {
-    let obj = &*ptr;
-    obj.has_attachments(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]

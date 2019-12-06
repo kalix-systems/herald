@@ -1,4 +1,4 @@
-use crate::ids::*;
+use crate::{attachments::AttachmentMeta, ids::*};
 use herald_common::*;
 use std::{
     collections::{HashMap, HashSet},
@@ -29,10 +29,10 @@ pub struct Message {
     pub send_status: MessageSendStatus,
     /// Receipts
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
-    /// Indicates whether the message has attachments
-    pub has_attachments: bool,
     /// Messages that replied to this message
     pub replies: HashSet<MsgId>,
+    /// Attachment metadata
+    pub attachments: AttachmentMeta,
 }
 
 /// An isolated message receipt.
