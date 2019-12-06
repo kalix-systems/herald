@@ -7,6 +7,9 @@
 //! 2) Support deserializing from anything other than `Bytes`.
 
 pub use location::loc;
+use std::convert::TryFrom;
+#[cfg(feature = "proptest")]
+pub mod strategy;
 
 pub mod prelude {
     pub use crate::{de::*, errors::*, ser::*, *};
@@ -21,7 +24,6 @@ pub mod ser;
 pub mod utils;
 pub mod value;
 pub use kson_derive::*;
-use std::convert::TryFrom;
 
 pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
     use ser::*;

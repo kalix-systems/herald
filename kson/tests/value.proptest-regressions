@@ -5,3 +5,4 @@
 # It is recommended to check this file in to source control so that
 # everyone who runs the test benefits from these saved cases.
 cc 36162e8e0a465d793ddd4f56a62dc7d03fa65e0e32e817ceafe7b4e6b8feb31e # shrinks to k = Arr([])
+cc 48eba94cfdb6bc61880ced433ca8b3001f0eab579d3475ffe6d56069ef7aae00 # shrinks to k = Cons(Atom(Null), Arr([]))
