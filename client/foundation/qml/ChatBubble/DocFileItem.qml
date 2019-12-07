@@ -6,11 +6,10 @@ import QtGraphicalEffects 1.12
 
 ListView {
     interactive: false
-    width: 80
-    Layout.maximumWidth: parent.width
+    width: 100
     delegate: Item {
+        width: Math.max(bubbleRoot.width, 100)
         height: 24
-        width: bubbleRoot.width
         Image {
             id: fileIcon
             anchors.verticalCenter: parent.verticalCenter
