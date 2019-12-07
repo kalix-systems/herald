@@ -5,8 +5,8 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ColumnLayout {
-    id: atcCol
-    property real maxWidth: Math.min(parent.maxWidth, 600)
+    id: wrapperCol
+    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
     property var imageTappedCallBack: function (source) {
@@ -52,8 +52,10 @@ ColumnLayout {
     }
 
     Loader {
-        Layout.margins: CmnCfg.smallMargin
         id: imageLoader
+
+        Layout.margins: CmnCfg.smallMargin
+
         DropShadow {
             source: parent.item
             anchors.fill: parent.item
@@ -70,7 +72,7 @@ ColumnLayout {
         id: oneImage
         OneImageLayout {
             firstImage: mediaParsed[0]
-            imageTappedCallback: atcCol.imageTappedCallBack
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -79,7 +81,7 @@ ColumnLayout {
         TwoImageLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
-            imageTappedCallback: atcCol.imageTappedCallBack
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -89,7 +91,7 @@ ColumnLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
-            imageTappedCallback: atcCol.imageTappedCallBack
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -100,7 +102,7 @@ ColumnLayout {
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
-            imageTappedCallback: atcCol.imageTappedCallBack
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -112,7 +114,7 @@ ColumnLayout {
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
             count: mediaParsed.length - 4
-            imageTappedCallback: atcCol.imageTappedCallBack
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 }

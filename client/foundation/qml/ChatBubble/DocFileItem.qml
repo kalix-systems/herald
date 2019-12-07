@@ -5,11 +5,13 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ListView {
+    id: docFileItemRoot
     interactive: false
-    width: 100
+    width: 150
     delegate: Item {
         width: Math.max(bubbleRoot.width, 100)
         height: 24
+
         Image {
             id: fileIcon
             anchors.verticalCenter: parent.verticalCenter
@@ -28,9 +30,16 @@ ListView {
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
             elide: Text.ElideRight
-            width: imageAttach ? 300 - CmnCfg.largeMargin * 3 : Math.max(
-                                     40,
-                                     messageBody.width - CmnCfg.largeMargin * 3)
+            width: {
+                const threeMargins = CmnCfg.largeMargin * 3
+
+                if (imageAttach) {
+                    return 300 - threeMargins
+                } else {
+                    return Math.max(docFileItemRoot - 60,
+                                    bubbleRoot.messageBody.width - threeMargins)
+                }
+            }
         }
 
         Image {

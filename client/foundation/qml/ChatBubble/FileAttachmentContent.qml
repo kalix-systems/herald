@@ -5,32 +5,23 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ColumnLayout {
-    property real maxWidth: Math.min(parent.maxWidth, 600)
-    property var docParsed
     id: wrapperCol
+
+    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property var docParsed
 
     spacing: 0
 
     Component.onCompleted: {
-        const docs = documentAttachments.length === 0 ? "" : JSON.parse(
-                                                            documentAttachments)
-        const docLen = docs.length
-        docParsed = docs
-
-        for (var i in docParsed) {
-            docModel.append({
-                                "path": docParsed[i].path,
-                                "name": docParsed[i].name,
-                                "size": docParsed[i].size
-                            })
+        if (documentAttachments.length === 0) {
+            return
         }
 
-        switch (docLen) {
-        case 0:
-            break
-        default:
-            docLoader.sourceComponent = docList
-        }
+        JSON.parse(documentAttachments).forEach(function (doc) {
+            docModel.append(doc)
+        })
+
+        docLoader.sourceComponent = docList
     }
 
     Loader {
@@ -48,7 +39,7 @@ ColumnLayout {
     Component {
         id: docList
         DocFileItem {
-            height: 20 * docParsed.length
+            height: 20 * docModel.count
             model: docModel
         }
     }
