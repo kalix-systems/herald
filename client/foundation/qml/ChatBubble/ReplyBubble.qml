@@ -46,6 +46,7 @@ ColumnLayout {
 
             onClicked: {
                 const msgIndex = ownedConversation.indexById(replyId)
+
                 if (msgIndex < 0)
                     return
 
@@ -87,7 +88,7 @@ ColumnLayout {
                 elide: Text.ElideRight
 
                 function truncate_text(body) {
-                    var bodyLines = body.split("\n")
+                    const bodyLines = body.split("\n")
                     if (bodyLines.length > 3) {
                         return bodyLines.slice(0, 3).join("\n")
                     } else {

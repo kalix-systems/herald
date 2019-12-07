@@ -5,9 +5,9 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ColumnLayout {
-    property real maxWidth: Math.min(parent.maxWidth, 600)
-    property var mediaParsed
     id: wrapperCol
+    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property var mediaParsed
 
     spacing: 0
 
@@ -38,8 +38,10 @@ ColumnLayout {
     }
 
     Loader {
-        Layout.margins: CmnCfg.smallMargin
         id: imageLoader
+
+        Layout.margins: CmnCfg.smallMargin
+
         DropShadow {
             source: parent.item
             anchors.fill: parent.item

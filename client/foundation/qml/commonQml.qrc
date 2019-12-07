@@ -41,12 +41,4 @@
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>
     </qresource>
-    <qresource prefix="/">
-        <file>ChatBubble/FourImageLayout.qml</file>
-        <file>ChatBubble/ThreeImageLayout.qml</file>
-        <file>ChatBubble/TwoImageLayout.qml</file>
-        <file>ChatBubble/OneImageLayout.qml</file>
-        <file>ChatBubble/DocFileItem.qml</file>
-        <file>ChatBubble/FileAttachmentContent.qml</file>
-    </qresource>
 </RCC>

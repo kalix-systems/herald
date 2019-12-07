@@ -22,6 +22,9 @@ ColumnLayout {
     property var replyId
     property var messageModelData
 
+    // Text edit alias
+    property alias messageBody: messageBody
+
     ChatLabel {
         id: uname
         senderName: authorName
@@ -64,9 +67,7 @@ ColumnLayout {
         }
     }
 
-    Component.onCompleted: {
-        bubbleRoot.expanded = false
-    }
+    Component.onCompleted: bubbleRoot.expanded = false
 
     StandardTextEdit {
         id: messageBody
