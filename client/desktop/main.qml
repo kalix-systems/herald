@@ -43,6 +43,10 @@ ApplicationWindow {
                                        StandardPaths.AppLocalDataLocation))
     }
 
+    CvPopups.ImageViewerPopup {
+        id: imageViewerPopup
+    }
+
     Loader {
         id: appLoader
         active: herald.configInit

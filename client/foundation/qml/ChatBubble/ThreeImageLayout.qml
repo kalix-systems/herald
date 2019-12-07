@@ -32,7 +32,7 @@ Row {
             mipmap: true
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack
+                onClicked: imageTappedCallBack(image1.source)
                 anchors.fill: parent
             }
         }
@@ -57,7 +57,7 @@ Row {
                 mipmap: true
                 asynchronous: true
                 MouseArea {
-                    onClicked: imageTappedCallBack
+                    onClicked: imageTappedCallBack(image2.source)
                     anchors.fill: parent
                 }
             }
@@ -80,7 +80,7 @@ Row {
                 mipmap: true
                 asynchronous: true
                 MouseArea {
-                    onClicked: imageTappedCallBack
+                    onClicked: imageTappedCallBack(image3.source)
                     anchors.fill: parent
                 }
             }

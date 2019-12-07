@@ -20,9 +20,17 @@ ColumnLayout {
     property string documentAttachments
     property var mediaParsed
     // callback triggered whenever an image is tapped
-    property var imageTappedCallBack: function () {
+    property var imageTappedCallBack: function (source) {
 
-        print("SHILLLLLENJJK")
+        let currentIndex = mediaParsed.findIndex(function (object) {
+            // can't use triple equality here because it
+            // checks for pointer equivalence...
+            return ("file:" + object.path) == source
+        })
+        imageViewerPopup.sourceAtc = mediaParsed
+        imageViewerPopup.index = currentIndex
+        imageViewerPopup.reset()
+        imageViewerPopup.show()
     }
 
     spacing: 0
@@ -88,7 +96,7 @@ ColumnLayout {
             fillMode: Image.PreserveAspectCrop
             asynchronous: true
             MouseArea {
-                onClicked: imageTappedCallBack()
+                onClicked: wrapperCol.imageTappedCallBack(parent.source)
                 anchors.fill: parent
             }
         }
@@ -99,7 +107,7 @@ ColumnLayout {
         TwoImageLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
-            imageTappedCallback: wrapperCol.imageTappedCallBack()
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -109,7 +117,7 @@ ColumnLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
-            imageTappedCallback: wrapperCol.imageTappedCallBack()
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -120,7 +128,7 @@ ColumnLayout {
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
-            imageTappedCallback: wrapperCol.imageTappedCallBack()
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -132,7 +140,7 @@ ColumnLayout {
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
             count: mediaParsed.length - 4
-            imageTappedCallback: wrapperCol.imageTappedCallBack()
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
