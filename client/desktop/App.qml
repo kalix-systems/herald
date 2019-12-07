@@ -52,8 +52,9 @@ Item {
                     anchors.leftMargin: CmnCfg.largeMargin
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Herald"
+
                     font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.chatFont.name
+                    font.family: CmnCfg.labelFont.name
                     font.bold: true
                     color: CmnCfg.palette.white
                 }

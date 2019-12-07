@@ -34,7 +34,7 @@ ToolBar {
             Layout.fillWidth: true
             font {
                 pixelSize: CmnCfg.headerSize
-                family: CmnCfg.chatFont.name
+                family: CmnCfg.labelFont.name
                 bold: true
             }
             elide: Text.ElideRight

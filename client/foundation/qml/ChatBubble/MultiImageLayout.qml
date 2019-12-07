@@ -28,6 +28,10 @@ Row {
             anchors.centerIn: parent
             mipmap: true
             asynchronous: true
+            MouseArea {
+                onClicked: imageTappedCallBack(parent.source)
+                anchors.fill: parent
+            }
         }
     }
     Column {
@@ -46,6 +50,10 @@ Row {
                 anchors.centerIn: parent
                 mipmap: true
                 asynchronous: true
+                MouseArea {
+                    onClicked: imageTappedCallBack(parent.source)
+                    anchors.fill: parent
+                }
             }
         }
         spacing: CmnCfg.smallMargin
@@ -66,6 +74,10 @@ Row {
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true
+                    MouseArea {
+                        onClicked: imageTappedCallBack(parent.source)
+                        anchors.fill: parent
+                    }
                 }
             }
 
@@ -82,6 +94,10 @@ Row {
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true
+                    MouseArea {
+                        onClicked: imageTappedCallBack(parent.source)
+                        anchors.fill: parent
+                    }
                 }
 
                 ColorOverlay {
@@ -95,7 +111,8 @@ Row {
                     anchors.centerIn: parent
                     text: "+ " + count
                     color: CmnCfg.palette.white
-                    font.family: CmnCfg.chatFontSemiBold.name
+                    font.family: CmnCfg.chatFont.name
+                    style: Font.DemiBold
                     font.pointSize: 20
                 }
             }

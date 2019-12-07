@@ -123,8 +123,15 @@ Rectangle {
     FileDialog {
         id: attachmentsDialogue
         folder: shortcuts.home
+        selectMultiple: true
         onSelectionAccepted: {
-            ownedConversation.builder.addAttachment(attachmentsDialogue.fileUrl)
+            if (fileUrl != "") {
+                ownedConversation.builder.addAttachment(fileUrl)
+            } else {
+                for (var i = 0; i < fileUrls.length; i++) {
+                    ownedConversation.builder.addAttachment(fileUrls[i])
+                }
+            }
         }
     }
 
@@ -144,7 +151,8 @@ Rectangle {
 
         State {
             name: "attachmentstate"
-            when: ownedConversation.builder.hasDocAttachment || ownedConversation.builder.hasMediaAttachment
+            when: ownedConversation.builder.hasDocAttachment
+                  || ownedConversation.builder.hasMediaAttachment
             PropertyChanges {
                 target: attachmentLoader
                 active: true

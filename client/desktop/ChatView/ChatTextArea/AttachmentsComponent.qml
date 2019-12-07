@@ -5,11 +5,13 @@ import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 
-ScrollView {
+Flickable {
     width: parent.width
     height: wrapperRow.height
-    // ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
-    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+    ScrollBar.horizontal: ScrollBar {}
+    // ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+    boundsBehavior: Flickable.StopAtBounds
+    boundsMovement: Flickable.StopAtBounds
 
     Row {
         id: wrapperRow
@@ -45,11 +47,14 @@ ScrollView {
                     Button {
                         anchors.top: parent.top
                         anchors.right: parent.right
-                        anchors.margins: CmnCfg.smallMargin
+                        anchors.margins: 2
                         background: Rectangle {
-                            color: "transparent"
+                            color: CmnCfg.palette.medGrey
+                            opacity: 0.5
                             width: x.width
                             height: x.height
+                            radius: x.height
+                            anchors.centerIn: x
                         }
 
                         Image {
@@ -66,5 +71,4 @@ ScrollView {
             }
         }
     }
-    bottomPadding: 5
 }
