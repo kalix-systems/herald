@@ -8,6 +8,7 @@ use heraldcore::{
     config, conversation,
     message::{self, MessageBody, MessageReceiptStatus},
 };
+use messages_helper::search::SearchState;
 use std::convert::TryInto;
 
 impl Messages {
@@ -215,23 +216,41 @@ impl Messages {
         } else if !self.search.active {
             self.search.active = true;
             self.emit.search_active_changed();
-            self.search.set_matches(
-                apply_search(
-                    &mut self.container,
+
+            let emit = &mut self.emit;
+            let mut emit_index = emit.clone();
+
+            let model = &mut self.model;
+
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit_index.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            self.search.set_matches(
+                matches,
+                || emit.search_num_matches_changed(),
+                || emit_index.search_index_changed(),
             );
         }
     }
 
     /// Clears search
     pub(crate) fn clear_search_(&mut self) {
-        clear_search(&mut self.container, &mut self.model);
-        ret_err!(self.search.clear_search(&mut self.emit));
+        let model = &mut self.model;
+        let emit = &mut self.emit;
+        self.container.clear_search(|ix| model.data_changed(ix, ix));
+
+        ret_err!(self.search.clear_search(|| {
+            emit.search_index_changed();
+            emit.search_pattern_changed();
+            emit.search_regex_changed();
+            emit.search_num_matches_changed();
+        }));
     }
 
     pub(crate) fn set_search_pattern_(
@@ -243,18 +262,30 @@ impl Messages {
             return;
         }
 
-        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed()
-            && self.search.active
-        {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
+        let emit = &mut self.emit;
+
+        let changed = ret_err!(self
+            .search
+            .set_pattern(pattern, || emit.search_pattern_changed()))
+        .changed();
+
+        if changed && self.search.active {
+            let model = &mut self.model;
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            let mut emit_index = emit.clone();
+
+            self.search.set_matches(
+                matches,
+                || emit_index.search_index_changed(),
+                || emit.search_num_matches_changed(),
             );
         }
     }
@@ -264,16 +295,30 @@ impl Messages {
         &mut self,
         use_regex: bool,
     ) {
-        if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
+        let emit = &mut self.emit;
+
+        let changed = ret_err!(self
+            .search
+            .set_regex(use_regex, || emit.search_regex_changed()))
+        .changed();
+
+        if changed {
+            let model = &mut self.model;
+
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            let mut emit_index = emit.clone();
+            self.search.set_matches(
+                matches,
+                || emit.search_num_matches_changed(),
+                || emit_index.search_index_changed(),
             );
         }
     }

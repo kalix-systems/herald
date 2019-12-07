@@ -1,10 +1,11 @@
 use super::*;
 use search_pattern::Captures;
+
 impl SearchState {
     pub(crate) fn set_pattern_inner(
         &mut self,
         pattern: String,
-    ) -> Result<SearchChanged, HErr> {
+    ) -> Result<SearchChanged, SearchPatternError> {
         match self.pattern.as_mut() {
             Some(old_pattern) => {
                 if pattern == old_pattern.raw() {
@@ -32,7 +33,7 @@ impl SearchState {
     pub(crate) fn set_regex_inner(
         &mut self,
         use_regex: bool,
-    ) -> Result<SearchChanged, HErr> {
+    ) -> Result<SearchChanged, SearchPatternError> {
         match (use_regex, self.is_regex(), self.pattern.as_mut()) {
             (true, false, Some(pattern)) => {
                 pattern.regex_mode()?;
@@ -46,7 +47,7 @@ impl SearchState {
         }
     }
 
-    pub(super) fn clear_search_inner(&mut self) -> Result<(), HErr> {
+    pub(super) fn clear_search_inner(&mut self) -> Result<(), SearchPatternError> {
         if let Some(pattern) = self.pattern.as_mut() {
             pattern.set_pattern("".into())?;
         }

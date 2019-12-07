@@ -1,17 +1,26 @@
-use crate::types::*;
+use crate::*;
 use herald_common::{Time, UserId};
 use im::vector::Vector;
+use search::*;
 use std::collections::HashMap;
+use types::*;
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
 /// and a hash map.
 pub struct Container {
     pub list: Vector<Message>,
-    pub map: HashMap<MsgId, MsgData>,
+    map: HashMap<MsgId, MsgData>,
 }
 
 impl Container {
+    pub fn new(
+        list: Vector<Message>,
+        map: HashMap<MsgId, MsgData>,
+    ) -> Self {
+        Self { list, map }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.list.is_empty()
     }
@@ -251,5 +260,68 @@ impl Container {
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
         self.get_media_attachments_data_json(&mid)
+    }
+
+    pub fn clear_search<F: FnMut(usize)>(
+        &mut self,
+        mut data_changed: F,
+    ) -> Option<()> {
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg_id)?;
+
+            if data.match_status.is_match() {
+                data.match_status = MatchStatus::NotMatched;
+                data_changed(ix);
+            }
+        }
+
+        Some(())
+    }
+
+    pub fn apply_search<D: FnMut(usize), N: FnMut()>(
+        &mut self,
+        search: &SearchState,
+        mut data_changed: D,
+        mut num_matches_changed: N,
+    ) -> Option<Vec<Match>> {
+        let pattern = search.pattern.as_ref()?;
+
+        if !search.active || pattern.raw().is_empty() {
+            return None;
+        }
+
+        let mut matches: Vec<Match> = Vec::new();
+
+        for (ix, msg) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg.msg_id)?;
+            let matched = data.matches(pattern);
+
+            data.match_status = if matched {
+                MatchStatus::Matched
+            } else {
+                MatchStatus::NotMatched
+            };
+
+            data.search_buf = if data.match_status.is_match() {
+                Some(highlight_message(
+                    search.pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                None
+            };
+
+            data_changed(ix);
+
+            if !matched {
+                continue;
+            };
+
+            matches.push(Match(*msg))
+        }
+
+        num_matches_changed();
+
+        Some(matches)
     }
 }

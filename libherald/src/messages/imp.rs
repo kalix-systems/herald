@@ -2,6 +2,7 @@ use super::*;
 use crate::interface::MessagesTrait as Interface;
 use crate::push;
 use heraldcore::{errors::HErr, message::Message as Msg, NE};
+use messages_helper::search::Match;
 
 impl Messages {
     pub(super) fn emit_last_changed(&mut self) {
@@ -23,7 +24,7 @@ impl Messages {
     pub(super) fn prev_match_helper(&mut self) -> Option<usize> {
         let old = (self.search.current(), self.search.index);
 
-        let new = (self.search.prev(), self.search.index);
+        let new = (self.search.prev_match(), self.search.index);
 
         self.match_helper(old, new)
     }
@@ -31,7 +32,7 @@ impl Messages {
     pub(super) fn next_match_helper(&mut self) -> Option<usize> {
         let old = (self.search.current(), self.search.index);
 
-        let new = (self.search.next(), self.search.index);
+        let new = (self.search.next_match(), self.search.index);
 
         self.match_helper(old, new)
     }
@@ -73,12 +74,19 @@ impl Messages {
         msg_id: MsgId,
         ix: usize,
     ) {
-        self.search.try_remove_match(
-            &msg_id,
-            &mut self.container,
-            &mut self.emit,
-            &mut self.model,
-        );
+        {
+            let emit = &mut self.emit;
+            let mut emit_num = emit.clone();
+            let model = &mut self.model;
+
+            self.search.try_remove_match(
+                &msg_id,
+                &mut self.container,
+                || emit.search_index_changed(),
+                || emit_num.search_num_matches_changed(),
+                |ix| model.data_changed(ix, ix),
+            );
+        }
         self.builder.try_clear_reply(&msg_id);
 
         let len = self.container.len();
@@ -155,13 +163,17 @@ impl Messages {
         self.model.begin_insert_rows(ix, ix);
         self.model.end_insert_rows();
 
-        self.search.try_insert_match(
-            msg_id,
-            ix,
-            &mut self.container,
-            &mut self.emit,
-            &mut self.model,
-        );
+        {
+            let emit = &mut self.emit;
+            let model = &mut self.model;
+            self.search.try_insert_match(
+                msg_id,
+                ix,
+                &mut self.container,
+                || emit.search_num_matches_changed(),
+                |ix| model.data_changed(ix, ix),
+            );
+        }
 
         if ix + 1 == self.container.len() {
             self.emit_last_changed();
