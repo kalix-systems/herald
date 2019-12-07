@@ -29,7 +29,7 @@ Row {
             width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
-            mipmap: true
+            mipmap: false
             asynchronous: true
             MouseArea {
                 onClicked: imageTappedCallBack(image1.source)
@@ -54,7 +54,7 @@ Row {
                 width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 anchors.centerIn: parent
                 fillMode: Image.PreserveAspectFit
-                mipmap: true
+                mipmap: false
                 asynchronous: true
                 MouseArea {
                     onClicked: imageTappedCallBack(image2.source)
@@ -77,7 +77,7 @@ Row {
                 width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 fillMode: Image.PreserveAspectFit
                 anchors.centerIn: parent
-                mipmap: true
+                mipmap: false
                 asynchronous: true
                 MouseArea {
                     onClicked: imageTappedCallBack(image3.source)

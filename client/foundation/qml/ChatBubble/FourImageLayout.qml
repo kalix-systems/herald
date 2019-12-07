@@ -25,7 +25,7 @@ Row {
             height: aspectRatio > 1 ? 150 : 150 / aspectRatio
             width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
-            mipmap: true
+            mipmap: false
             asynchronous: true
             MouseArea {
                 onClicked: imageTappedCallBack(parent.source)
@@ -47,7 +47,7 @@ Row {
                 height: aspectRatio > 1 ? 150 : 150 / aspectRatio
                 width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 anchors.centerIn: parent
-                mipmap: true
+                mipmap: false
                 asynchronous: true
                 MouseArea {
                     onClicked: imageTappedCallBack(parent.source)
@@ -71,7 +71,7 @@ Row {
                     height: aspectRatio > 1 ? 75 : 75 / aspectRatio
                     width: aspectRatio > 1 ? 75 * aspectRatio : 75
                     anchors.centerIn: parent
-                    mipmap: true
+                    mipmap: false
                     asynchronous: true
                     MouseArea {
                         onClicked: imageTappedCallBack(parent.source)
@@ -91,7 +91,7 @@ Row {
                     height: aspectRatio > 1 ? 75 : 75 / aspectRatio
                     width: aspectRatio > 1 ? 75 * aspectRatio : 75
                     anchors.centerIn: parent
-                    mipmap: true
+                    mipmap: false
                     asynchronous: true
                     MouseArea {
                         onClicked: imageTappedCallBack(parent.source)

@@ -5,14 +5,12 @@ import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
 
-Flickable {
+ScrollView {
     width: parent.width
     height: wrapperRow.height
     ScrollBar.horizontal: ScrollBar {}
-    // ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-    boundsBehavior: Flickable.StopAtBounds
-    boundsMovement: Flickable.StopAtBounds
 
+    // ScrollBar.vertical.policy: ScrollBar.AlwaysOff
     Row {
         id: wrapperRow
         height: 100
@@ -50,7 +48,7 @@ Flickable {
                         anchors.margins: 2
                         background: Rectangle {
                             color: CmnCfg.palette.medGrey
-                            opacity: 0.5
+                            opacity: 0.7
                             width: x.width
                             height: x.height
                             radius: x.height
