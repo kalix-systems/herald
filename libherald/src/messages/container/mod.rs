@@ -4,7 +4,6 @@ pub use messages_helper::{container::*, types::*};
 use std::collections::HashSet;
 
 mod handlers;
-mod search;
 pub(super) use handlers::*;
 
 /// Sets the reply type of a message to "dangling"
