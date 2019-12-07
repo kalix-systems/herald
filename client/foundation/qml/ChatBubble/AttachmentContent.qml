@@ -71,10 +71,7 @@ ColumnLayout {
         id: oneImage
         OneImageLayout {
             firstImage: mediaParsed[0]
-            MouseArea {
-                onClicked: atcCol.imageTappedCallBack(parent.source)
-                anchors.fill: parent
-            }
+            imageTappedCallback: atcCol.imageTappedCallBack
         }
     }
 
