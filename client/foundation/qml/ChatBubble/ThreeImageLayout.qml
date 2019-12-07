@@ -25,6 +25,8 @@ Row {
             id: image1
             property var aspectRatio: firstImage.width / firstImage.height
             source: "file:" + firstImage.path
+            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
             height: aspectRatio > 1 ? 150 : 150 / aspectRatio
             width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
@@ -50,6 +52,8 @@ Row {
                 id: image2
                 property var aspectRatio: secondImage.width / secondImage.height
                 source: "file:" + secondImage.path
+                sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+                sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 height: aspectRatio > 1 ? 150 : 150 / aspectRatio
                 width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 anchors.centerIn: parent
@@ -73,6 +77,8 @@ Row {
                 id: image3
                 property var aspectRatio: thirdImage.width / thirdImage.height
                 source: "file:" + thirdImage.path
+                sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+                sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 height: aspectRatio > 1 ? 150 : 150 / aspectRatio
                 width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 fillMode: Image.PreserveAspectFit

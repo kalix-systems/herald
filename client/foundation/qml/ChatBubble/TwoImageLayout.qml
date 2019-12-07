@@ -20,6 +20,8 @@ Row {
         Image {
             property var aspectRatio: firstImage.width / firstImage.height
             source: "file:" + firstImage.path
+            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
             height: aspectRatio > 1 ? 150 : 150 / aspectRatio
             width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
@@ -40,6 +42,8 @@ Row {
         Image {
             property var aspectRatio: secondImage.width / secondImage.height
             source: "file:" + secondImage.path
+            sourceSize.height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            sourceSize.width: aspectRatio > 1 ? 150 * aspectRatio : 150
             height: aspectRatio > 1 ? 150 : 150 / aspectRatio
             width: aspectRatio > 1 ? 150 * aspectRatio : 150
             fillMode: Image.PreserveAspectFit

@@ -116,7 +116,6 @@ ListView {
             iconColor: userColor
             initials: authName[0].toUpperCase()
             opacity: isTail && !outbound ? 1 : 0
-            visible: !pairwise
             size: 28
             anchors {
                 bottom: parent.bottom
@@ -144,7 +143,6 @@ ListView {
             iconColor: userColor
             initials: authName[0].toUpperCase()
             opacity: isTail && outbound ? 1 : 0
-            visible: !pairwise
             size: 28
             anchors {
                 bottom: parent.bottom
