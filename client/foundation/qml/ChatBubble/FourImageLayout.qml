@@ -8,36 +8,36 @@ Row {
     property var secondImage
     property var thirdImage
     property var fourthImage
-    height: 200
+    height: 150
     spacing: CmnCfg.smallMargin
     Rectangle {
-        height: 200
+        height: 150
         width: height
         clip: true
         color: "transparent"
         Image {
             property var aspectRatio: firstImage.width / firstImage.height
             source: "file:" + firstImage.path
-            height: aspectRatio > 1 ? 210 : 210 / aspectRatio
-            width: aspectRatio > 1 ? 210 * aspectRatio : 210
+            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
             mipmap: true
             asynchronous: true
         }
     }
     Column {
-        width: 200
+        width: 150
 
         Rectangle {
-            height: 100 - CmnCfg.smallMargin / 2
-            width: 200
+            height: 75 - CmnCfg.smallMargin / 2
+            width: 150
             clip: true
             color: "transparent"
             Image {
                 property var aspectRatio: secondImage.width / secondImage.height
                 source: "file:" + secondImage.path
-                height: aspectRatio > 1 ? 210 : 210 / aspectRatio
-                width: aspectRatio > 1 ? 210 * aspectRatio : 210
+                height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+                width: aspectRatio > 1 ? 150 * aspectRatio : 150
                 anchors.centerIn: parent
                 mipmap: true
                 asynchronous: true
@@ -46,18 +46,18 @@ Row {
         spacing: CmnCfg.smallMargin
 
         Row {
-            height: 100
+            height: 75
             spacing: CmnCfg.smallMargin
             Rectangle {
-                height: 100 - CmnCfg.smallMargin / 2
+                height: 75 - CmnCfg.smallMargin / 2
                 width: height
                 clip: true
                 color: "transparent"
                 Image {
                     property var aspectRatio: thirdImage.width / thirdImage.height
                     source: "file:" + thirdImage.path
-                    height: aspectRatio > 1 ? 100 : 100 / aspectRatio
-                    width: aspectRatio > 1 ? 100 * aspectRatio : 100
+                    height: aspectRatio > 1 ? 75 : 75 / aspectRatio
+                    width: aspectRatio > 1 ? 75 * aspectRatio : 75
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true
@@ -65,15 +65,15 @@ Row {
             }
 
             Rectangle {
-                height: 100 - CmnCfg.smallMargin / 2
+                height: 75 - CmnCfg.smallMargin / 2
                 width: height
                 clip: true
                 color: "transparent"
                 Image {
                     property var aspectRatio: fourthImage.width / fourthImage.height
                     source: "file:" + fourthImage.path
-                    height: aspectRatio > 1 ? 100 : 100 / aspectRatio
-                    width: aspectRatio > 1 ? 100 * aspectRatio : 100
+                    height: aspectRatio > 1 ? 75 : 75 / aspectRatio
+                    width: aspectRatio > 1 ? 75 * aspectRatio : 75
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true

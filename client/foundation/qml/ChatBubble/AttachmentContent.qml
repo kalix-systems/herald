@@ -5,37 +5,17 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
 ColumnLayout {
-    property string body: ""
-    property string friendlyTimestamp: ""
-    property string receiptImage: ""
-    property string imageSource: ""
-    property string authorName: ""
-    //  property var messageAttachments: null
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property color authorColor
-    property bool elided: false
-    property bool expanded: false
-    property string medAttachments
-    property string documentAttachments
     property var mediaParsed
     id: wrapperCol
 
     spacing: 0
 
-    ChatLabel {
-        id: uname
-        senderName: authorName
-        senderColor: authorColor
-    }
-
     Component.onCompleted: {
-        wrapperCol.expanded = false
-        const media = JSON.parse(medAttachments)
-        const docs = JSON.parse(documentAttachments)
+        const media = medAttachments.length == 0 ? "" : JSON.parse(
+                                                       medAttachments)
         const mediaLen = media.length
-        const docLen = docs.length
         mediaParsed = media
-
         switch (mediaLen) {
         case 0:
             break
@@ -60,7 +40,6 @@ ColumnLayout {
     Loader {
         Layout.margins: CmnCfg.smallMargin
         id: imageLoader
-
         DropShadow {
             source: parent.item
             anchors.fill: parent.item
@@ -76,14 +55,8 @@ ColumnLayout {
     Component {
         id: oneImage
 
-        Image {
-            property var aspectRatio: mediaParsed[0].width / mediaParsed[0].height
-            sourceSize.width: aspectRatio < 1 ? 400 * aspectRatio : maxWidth
-            sourceSize.height: aspectRatio < 1 ? 400 : maxWidth / aspectRatio
-            source: "file:" + mediaParsed[0].path
-            anchors.centerIn: parent
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
+        OneImageLayout {
+            firstImage: mediaParsed[0]
         }
     }
 
@@ -124,8 +97,4 @@ ColumnLayout {
             count: mediaParsed.length - 4
         }
     }
-
-    StandardTextEdit {}
-
-    StandardStamps {}
 }
