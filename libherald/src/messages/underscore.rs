@@ -171,11 +171,11 @@ impl Messages {
     pub(crate) fn op_body_(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.container
-            .op_body(index)?
-            .as_ref()
-            .map(MessageBody::as_str)
+            .op_body(index)
+            .cloned()?
+            .map(MessageBody::into_inner)
     }
 
     pub(crate) fn set_builder_op_msg_id_(
@@ -338,8 +338,8 @@ impl Messages {
     pub(crate) fn author_(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
-        Some(self.container.msg_data(index)?.author.as_str())
+    ) -> Option<ffi::UserId> {
+        Some(self.container.msg_data(index)?.author.to_string())
     }
 
     pub(crate) fn body_(
@@ -361,15 +361,15 @@ impl Messages {
     pub(crate) fn full_body_(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         Some(if self.container.msg_data(index)?.match_status.is_match() {
             self.container
                 .msg_data(index)?
                 .search_buf
                 .as_ref()?
-                .as_str()
+                .to_string()
         } else {
-            self.container.msg_data(index)?.body.as_ref()?.as_str()
+            self.container.msg_data(index)?.body.as_ref()?.to_string()
         })
     }
 
@@ -423,8 +423,11 @@ impl Messages {
     pub(crate) fn op_author_(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
-        self.container.op_author(index).map(UserId::as_str)
+    ) -> Option<ffi::UserId> {
+        self.container
+            .op_author(index)
+            .map(UserId::as_str)
+            .map(str::to_string)
     }
 
     pub(crate) fn op_doc_attachments_(
