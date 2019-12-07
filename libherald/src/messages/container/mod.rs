@@ -41,7 +41,7 @@ pub(super) fn fill(cid: ConversationId) {
 
         ret_err!(content_push(
             cid,
-            MsgUpdate::Container(Container::new(list, map))
+            MsgUpdate::Container(Box::new(Container::new(list, map)))
         ));
     });
 }

@@ -374,7 +374,7 @@ pub trait MessagesTrait {
     fn author(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn body(
         &self,
@@ -394,7 +394,7 @@ pub trait MessagesTrait {
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn insertion_time(
         &self,
@@ -429,12 +429,12 @@ pub trait MessagesTrait {
     fn op_author(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn op_doc_attachments(
         &self,
