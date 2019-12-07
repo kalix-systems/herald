@@ -57,7 +57,6 @@ ColumnLayout {
         DropShadow {
             source: parent.item
             anchors.fill: parent.item
-            visible: mediaParsed.length > 1
             horizontalOffset: 3
             verticalOffset: 3
             radius: 8.0
