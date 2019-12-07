@@ -43,7 +43,7 @@ impl Interface for Messages {
     fn author(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
+    ) -> Option<ffi::UserId> {
         self.author_(index)
     }
 
@@ -57,7 +57,7 @@ impl Interface for Messages {
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.full_body_(index)
     }
 
@@ -153,7 +153,7 @@ impl Interface for Messages {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.op_body_(index)
     }
 
@@ -207,7 +207,7 @@ impl Interface for Messages {
     fn op_author(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
+    ) -> Option<ffi::UserId> {
         self.op_author_(index)
     }
 

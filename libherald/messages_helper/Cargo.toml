@@ -17,3 +17,6 @@ path    = "../../heraldcore"
 
 [dependencies.search_pattern]
 path    = "../../heraldcore/search_pattern"
+
+[dev-dependencies.coremacros]
+path = "../../heraldcore/coremacros"

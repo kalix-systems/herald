@@ -4,19 +4,12 @@ use crate::{
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
-use heraldcore::{
-    conversation,
-    errors::HErr,
-    message::{MessageBody, MessageReceiptStatus},
-    types::*,
-    NE,
-};
+use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*, NE};
 use im::vector::Vector;
+use messages_helper::search::SearchState;
 use search_pattern::SearchPattern;
 use std::collections::HashMap;
 
-mod search;
-use search::*;
 mod container;
 use container::*;
 mod imp;
@@ -83,7 +76,7 @@ impl Messages {
 
                 self.model
                     .begin_insert_rows(0, container.len().saturating_sub(1));
-                self.container = container;
+                self.container = *container;
                 self.model.end_insert_rows();
                 self.emit.is_empty_changed();
                 self.emit_last_changed();
@@ -109,5 +102,5 @@ pub(crate) enum MsgUpdate {
     /// There are expired messages that need to be pruned
     ExpiredMessages(Vec<MsgId>),
     /// The container contents, sent when the conversation id is first set.
-    Container(Container),
+    Container(Box<Container>),
 }

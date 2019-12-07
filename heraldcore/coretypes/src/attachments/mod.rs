@@ -199,7 +199,7 @@ impl AttachmentMeta {
         Ok(out)
     }
 
-    pub fn doc_attachments(&self) -> Result<Vec<String>, Error> {
+    pub fn doc_attachments(&self) -> Result<Vec<DocMeta>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
         for p in self.0.iter() {
@@ -208,14 +208,25 @@ impl AttachmentMeta {
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                let file = entry.map_err(|e| Error::Read(e, loc!()))?.path();
+                let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
+
+                let file = entry.path();
 
                 if !is_media(&file) {
-                    out.push(
-                        file.into_os_string()
+                    let size = entry.metadata().map_err(|e| Error::Read(e, loc!()))?.len();
+                    let name = entry
+                        .file_name()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?;
+
+                    out.push(DocMeta {
+                        path: file
+                            .into_os_string()
                             .into_string()
                             .map_err(Error::NonUnicodePath)?,
-                    )
+                        name,
+                        size,
+                    })
                 }
             }
         }
@@ -249,6 +260,26 @@ impl From<MediaMeta> for json::JsonValue {
             "path" => path,
             "width" => width,
             "height" => height
+        }
+    }
+}
+
+pub struct DocMeta {
+    pub path: String,
+    pub name: String,
+    pub size: u64,
+}
+
+impl From<DocMeta> for json::JsonValue {
+    fn from(meta: DocMeta) -> json::JsonValue {
+        let DocMeta { path, name, size } = meta;
+
+        use json::object;
+
+        object! {
+            "path" => path,
+            "name" => name,
+            "size" => size
         }
     }
 }

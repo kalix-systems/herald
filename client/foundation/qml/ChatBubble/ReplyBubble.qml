@@ -9,20 +9,13 @@ ColumnLayout {
     id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property string body: ""
-    property string friendlyTimestamp: ""
-    property string receiptImage: ""
     property color opColor: CmnCfg.avatarColors[herald.users.colorById(
-                                                    opAuthor)]
-    property string authorName: ""
-    property color authorColor
+                                                    modelData.opAuthor)]
     property var replyId
     property alias jumpHandler: jumpHandler
-    property bool knownReply: replyType == 2
-    property bool elided: false
-    property bool expanded: false
-
-    Component.onCompleted: wrapperCol.expanded = false
+    property bool knownReply: modelData.replyType === 2
+    property string replyBody: knownReply ? modelData.opBody : ""
+    property var modelData
 
     spacing: 0
 
@@ -50,6 +43,20 @@ ColumnLayout {
             height: reply.height
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
+
+            onClicked: {
+                const msgIndex = ownedConversation.indexById(replyId)
+
+                if (msgIndex < 0)
+                    return
+
+                const window = convWindow
+
+                window.positionViewAtIndex(msgIndex, ListView.Center)
+                window.highlightAnimation.target = window.itemAtIndex(
+                            msgIndex).highlight
+                window.highlightAnimation.start()
+            }
         }
 
         ColumnLayout {
@@ -59,7 +66,8 @@ ColumnLayout {
 
             Label {
                 id: opLabel
-                text: knownReply ? herald.users.nameById(opAuthor) : ""
+                text: knownReply ? herald.users.nameById(
+                                       modelData.opAuthor) : ""
                 font.bold: true
                 Layout.margins: CmnCfg.smallMargin
                 Layout.bottomMargin: 0
@@ -70,10 +78,9 @@ ColumnLayout {
 
             TextMetrics {
                 id: opBodyTextMetrics
-                property string decoration: knownReply
-                                            && opBody.length > 350 ? "..." : ""
+                property string decoration: replyBody > 350 ? "..." : ""
                 property string shortenedText: knownReply ? truncate_text(
-                                                                opBody).slice(
+                                                                modelData.opBody).slice(
                                                                 0,
                                                                 350) + decoration : "Original message not found"
                 text: shortenedText
@@ -81,7 +88,7 @@ ColumnLayout {
                 elide: Text.ElideRight
 
                 function truncate_text(body) {
-                    var bodyLines = body.split("\n")
+                    const bodyLines = body.split("\n")
                     if (bodyLines.length > 3) {
                         return bodyLines.slice(0, 3).join("\n")
                     } else {
@@ -93,7 +100,8 @@ ColumnLayout {
             StandardTextEdit {
                 id: replyBody
                 text: opBodyTextMetrics.elidedText
-                Layout.minimumWidth: messageBody.width
+                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
+                Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
             }
 
             Row {
@@ -106,14 +114,14 @@ ColumnLayout {
                     Layout.margins: CmnCfg.smallMargin
                     Layout.topMargin: 0
                     font.pixelSize: 10
-                    text: replyType === 2 ? Utils.friendlyTimestamp(
-                                                opInsertionTime) : ""
+                    text: modelData.replyType === 2 ? Utils.friendlyTimestamp(
+                                                          modelData.opInsertionTime) : ""
                     color: CmnCfg.palette.darkGrey
                 }
 
                 Button {
                     id: clock
-                    icon.source: opExpirationTime
+                    icon.source: modelData.opExpirationTime
                                  !== undefined ? "qrc:/countdown-icon-temp.svg" : ""
                     icon.height: 16
                     icon.width: 16
@@ -125,17 +133,4 @@ ColumnLayout {
             }
         }
     }
-
-    ChatLabel {
-        id: uname
-        senderName: authorName
-        senderColor: authorColor
-    }
-
-    StandardTextEdit {
-        id: messageBody
-    }
-    ElideHandler {}
-
-    StandardStamps {}
 }

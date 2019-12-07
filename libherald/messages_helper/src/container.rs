@@ -1,17 +1,32 @@
-use crate::types::*;
+use crate::*;
 use herald_common::{Time, UserId};
 use im::vector::Vector;
+use search::*;
 use std::collections::HashMap;
+use types::*;
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
 /// and a hash map.
 pub struct Container {
     pub list: Vector<Message>,
-    pub map: HashMap<MsgId, MsgData>,
+    map: HashMap<MsgId, MsgData>,
+    last: Option<MsgData>,
 }
 
 impl Container {
+    pub fn new(
+        list: Vector<Message>,
+        map: HashMap<MsgId, MsgData>,
+    ) -> Self {
+        let last = match list.last().as_ref() {
+            Some(Message { ref msg_id, .. }) => map.get(msg_id).cloned(),
+            None => None,
+        };
+
+        Self { map, last, list }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.list.is_empty()
     }
@@ -49,8 +64,7 @@ impl Container {
     }
 
     pub fn last_msg(&self) -> Option<&MsgData> {
-        let mid = self.list.last()?.msg_id;
-        self.map.get(&mid)
+        self.last.as_ref()
     }
 
     pub fn msg_data(
@@ -87,12 +101,13 @@ impl Container {
             return None;
         }
 
-        attachments
-            .media_attachments()
-            .ok()
-            .map(json::JsonValue::from)
-            .as_ref()
-            .map(json::JsonValue::dump)
+        let media = attachments.media_attachments().ok()?;
+
+        if media.is_empty() {
+            return None;
+        }
+
+        Some(json::JsonValue::from(media).dump())
     }
 
     pub fn doc_attachments_data_json(
@@ -113,12 +128,13 @@ impl Container {
             return None;
         }
 
-        attachments
-            .doc_attachments()
-            .ok()
-            .map(json::JsonValue::from)
-            .as_ref()
-            .map(json::JsonValue::dump)
+        let docs = attachments.doc_attachments().ok()?;
+
+        if docs.is_empty() {
+            return None;
+        }
+
+        Some(json::JsonValue::from(docs).dump())
     }
 
     pub fn last(&self) -> Option<&Message> {
@@ -146,12 +162,21 @@ impl Container {
         &mut self,
         ix: usize,
     ) -> Option<MsgData> {
-        if ix >= self.len() {
+        let old_len = self.len();
+        if ix >= old_len {
             return None;
         }
 
         let msg = self.list.remove(ix);
         let data = self.map.remove(&msg.msg_id)?;
+
+        if ix + 1 == old_len {
+            self.last = self
+                .list
+                .last()
+                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
+                .cloned();
+        }
 
         Some(data)
     }
@@ -170,6 +195,7 @@ impl Container {
         msg: Message,
         data: MsgData,
     ) -> Option<()> {
+        let old_len = self.list.len();
         let mid = msg.msg_id;
 
         if let ReplyId::Known(op) = &data.op {
@@ -178,6 +204,14 @@ impl Container {
 
         self.list.insert(ix, msg);
         self.map.insert(mid, data);
+
+        if ix == old_len {
+            self.last = self
+                .list
+                .last()
+                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
+                .cloned();
+        }
 
         Some(())
     }
@@ -251,5 +285,68 @@ impl Container {
     ) -> Option<String> {
         let mid = self.list.get(index)?.msg_id;
         self.get_media_attachments_data_json(&mid)
+    }
+
+    pub fn clear_search<F: FnMut(usize)>(
+        &mut self,
+        mut data_changed: F,
+    ) -> Option<()> {
+        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg_id)?;
+
+            if data.match_status.is_match() {
+                data.match_status = MatchStatus::NotMatched;
+                data_changed(ix);
+            }
+        }
+
+        Some(())
+    }
+
+    pub fn apply_search<D: FnMut(usize), N: FnMut()>(
+        &mut self,
+        search: &SearchState,
+        mut data_changed: D,
+        mut num_matches_changed: N,
+    ) -> Option<Vec<Match>> {
+        let pattern = search.pattern.as_ref()?;
+
+        if !search.active || pattern.raw().is_empty() {
+            return None;
+        }
+
+        let mut matches: Vec<Match> = Vec::new();
+
+        for (ix, msg) in self.list.iter().enumerate() {
+            let data = self.map.get_mut(&msg.msg_id)?;
+            let matched = data.matches(pattern);
+
+            data.match_status = if matched {
+                MatchStatus::Matched
+            } else {
+                MatchStatus::NotMatched
+            };
+
+            data.search_buf = if data.match_status.is_match() {
+                Some(highlight_message(
+                    search.pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                None
+            };
+
+            data_changed(ix);
+
+            if !matched {
+                continue;
+            };
+
+            matches.push(Match(*msg))
+        }
+
+        num_matches_changed();
+
+        Some(matches)
     }
 }
