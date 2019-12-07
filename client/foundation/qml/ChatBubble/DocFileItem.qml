@@ -3,6 +3,9 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.12
+import "./../"
+import Qt.labs.platform 1.1
+import QtQuick.Dialogs 1.3
 
 ListView {
     id: docFileItemRoot
@@ -42,14 +45,31 @@ ListView {
             }
         }
 
-        Image {
+        FileDialog {
+            id: fileChooser
+            selectExisting: false
+            selectFolder: true
+            selectMultiple: false
+            folder: StandardPaths.writableLocation(
+                        StandardPaths.DesktopLocation)
+            onAccepted: {
+                herald.utils.saveFile(path, fileUrl)
+            }
+        }
+
+        ButtonForm {
             id: downloadIcon
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
             source: "qrc:/download-icon.svg"
             height: 20
             width: height
+            fill: CmnCfg.palette.black
             anchors.rightMargin: CmnCfg.mediumMargin
+
+            onClicked: {
+                fileChooser.open()
+            }
         }
     }
 }
