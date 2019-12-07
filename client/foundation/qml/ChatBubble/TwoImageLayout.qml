@@ -8,6 +8,10 @@ Row {
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
+    property var imageTappedCallback: function () {
+        throw "undefined callback"
+    }
+
     Rectangle {
         height: 150
         width: height
@@ -21,6 +25,10 @@ Row {
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
             asynchronous: true
+            MouseArea {
+                onClicked: imageTappedCallBack(parent.source)
+                anchors.fill: parent
+            }
         }
     }
 
@@ -37,6 +45,10 @@ Row {
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
             asynchronous: true
+            MouseArea {
+                onClicked: imageTappedCallBack(parent.source)
+                anchors.fill: parent
+            }
         }
     }
 }

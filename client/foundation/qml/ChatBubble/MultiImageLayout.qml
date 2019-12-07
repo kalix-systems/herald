@@ -10,6 +10,9 @@ Row {
     property var thirdImage
     property var fourthImage
     property int count
+    property var imageTappedCallback: function () {
+        throw "undefined callback"
+    }
     height: 150
     spacing: CmnCfg.smallMargin
     Rectangle {

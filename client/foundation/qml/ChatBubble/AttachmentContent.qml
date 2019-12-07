@@ -8,6 +8,20 @@ ColumnLayout {
     id: wrapperCol
     property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
     property var mediaParsed
+    // callback triggered whenever an image is tapped
+    property var imageTappedCallBack: function (source) {
+
+        let currentIndex = mediaParsed.findIndex(function (object) {
+            // can't use triple equality here because it
+            // checks for pointer equivalence...
+            return ("file:" + object.path) == source
+        })
+        imageViewerPopup.sourceAtc = mediaParsed
+        imageViewerPopup.index = currentIndex
+        imageViewerPopup.reset()
+        imageViewerPopup.show()
+        imageViewerPopup.raise()
+    }
 
     spacing: 0
 
@@ -56,9 +70,9 @@ ColumnLayout {
 
     Component {
         id: oneImage
-
         OneImageLayout {
             firstImage: mediaParsed[0]
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -67,6 +81,7 @@ ColumnLayout {
         TwoImageLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -76,6 +91,7 @@ ColumnLayout {
             firstImage: mediaParsed[0]
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -86,6 +102,7 @@ ColumnLayout {
             secondImage: mediaParsed[1]
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 
@@ -97,6 +114,7 @@ ColumnLayout {
             thirdImage: mediaParsed[2]
             fourthImage: mediaParsed[3]
             count: mediaParsed.length - 4
+            imageTappedCallback: wrapperCol.imageTappedCallBack
         }
     }
 }

@@ -8,6 +8,10 @@ Row {
     property var secondImage
     property var thirdImage
     property var fourthImage
+    property var imageTappedCallback: function () {
+        throw "undefined callback"
+    }
+
     height: 150
     spacing: CmnCfg.smallMargin
     Rectangle {
@@ -23,6 +27,10 @@ Row {
             anchors.centerIn: parent
             mipmap: true
             asynchronous: true
+            MouseArea {
+                onClicked: imageTappedCallBack(parent.source)
+                anchors.fill: parent
+            }
         }
     }
     Column {
@@ -41,6 +49,10 @@ Row {
                 anchors.centerIn: parent
                 mipmap: true
                 asynchronous: true
+                MouseArea {
+                    onClicked: imageTappedCallBack(parent.source)
+                    anchors.fill: parent
+                }
             }
         }
         spacing: CmnCfg.smallMargin
@@ -61,6 +73,10 @@ Row {
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true
+                    MouseArea {
+                        onClicked: imageTappedCallBack(parent.source)
+                        anchors.fill: parent
+                    }
                 }
             }
 
@@ -77,6 +93,10 @@ Row {
                     anchors.centerIn: parent
                     mipmap: true
                     asynchronous: true
+                    MouseArea {
+                        onClicked: imageTappedCallBack(parent.source)
+                        anchors.fill: parent
+                    }
                 }
             }
         }

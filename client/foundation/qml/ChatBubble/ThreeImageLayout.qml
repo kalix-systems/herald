@@ -11,6 +11,9 @@ Row {
     property var firstImage
     property var secondImage
     property var thirdImage
+    property var imageTappedCallback: function () {
+        throw "undefined callback"
+    }
 
     Rectangle {
         id: wrapperRect
@@ -28,6 +31,10 @@ Row {
             fillMode: Image.PreserveAspectFit
             mipmap: true
             asynchronous: true
+            MouseArea {
+                onClicked: imageTappedCallBack(image1.source)
+                anchors.fill: parent
+            }
         }
     }
 
@@ -49,6 +56,10 @@ Row {
                 fillMode: Image.PreserveAspectFit
                 mipmap: true
                 asynchronous: true
+                MouseArea {
+                    onClicked: imageTappedCallBack(image2.source)
+                    anchors.fill: parent
+                }
             }
         }
         spacing: CmnCfg.smallMargin
@@ -68,6 +79,10 @@ Row {
                 anchors.centerIn: parent
                 mipmap: true
                 asynchronous: true
+                MouseArea {
+                    onClicked: imageTappedCallBack(image3.source)
+                    anchors.fill: parent
+                }
             }
         }
     }
