@@ -13,9 +13,9 @@ ColumnLayout {
                                                     modelData.opAuthor)]
     property var replyId
     property alias jumpHandler: jumpHandler
-    property var modelData: bubbleRoot.messageModelData
     property bool knownReply: modelData.replyType === 2
     property string replyBody: knownReply ? modelData.opBody : ""
+    property var modelData
 
     spacing: 0
 

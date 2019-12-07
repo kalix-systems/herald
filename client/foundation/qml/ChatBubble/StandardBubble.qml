@@ -38,6 +38,7 @@ ColumnLayout {
         ReplyBubble {
             maxWidth: bubbleRoot.maxWidth
             replyId: bubbleRoot.replyId
+            modelData: bubbleRoot.messageModelData
         }
     }
 
