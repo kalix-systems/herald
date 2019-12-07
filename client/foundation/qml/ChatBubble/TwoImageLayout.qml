@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Row {
-    height: 200
+    height: 150
     spacing: CmnCfg.smallMargin
     property var firstImage
     property var secondImage
@@ -13,15 +13,15 @@ Row {
     }
 
     Rectangle {
-        height: 200
+        height: 150
         width: height
         clip: true
         color: "transparent"
         Image {
             property var aspectRatio: firstImage.width / firstImage.height
             source: "file:" + firstImage.path
-            height: aspectRatio > 1 ? 210 : 210 / aspectRatio
-            width: aspectRatio > 1 ? 210 * aspectRatio : 210
+            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            width: aspectRatio > 1 ? 150 * aspectRatio : 150
             anchors.centerIn: parent
             fillMode: Image.PreserveAspectFit
             asynchronous: true
@@ -33,15 +33,15 @@ Row {
     }
 
     Rectangle {
-        height: 200
+        height: 150
         width: height
         clip: true
         color: "transparent"
         Image {
             property var aspectRatio: secondImage.width / secondImage.height
             source: "file:" + secondImage.path
-            height: aspectRatio > 1 ? 210 : 210 / aspectRatio
-            width: aspectRatio > 1 ? 210 * aspectRatio : 210
+            height: aspectRatio > 1 ? 150 : 150 / aspectRatio
+            width: aspectRatio > 1 ? 150 * aspectRatio : 150
             fillMode: Image.PreserveAspectFit
             anchors.centerIn: parent
             asynchronous: true

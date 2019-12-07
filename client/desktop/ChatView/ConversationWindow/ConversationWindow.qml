@@ -81,6 +81,7 @@ ListView {
         property alias highlight: bubbleActual.highlightItem
         property bool elided: body.length !== fullBody.length
 
+        property var messageModelData: model
         anchors {
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
@@ -101,49 +102,16 @@ ListView {
                 receiptImage: proxyReceiptImage
                 authorColor: userColor
                 elided: chatRow.elided
-            }
-        }
-
-        Component {
-            id: reply
-            CB.ReplyBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
-                authorColor: userColor
-                replyId: opMsgId
-                elided: chatRow.elided
-                //mousearea handling jump behavior
-                jumpHandler.onClicked: {
-                    const msgIndex = ownedConversation.indexById(replyId)
-                    if (msgIndex < 0)
-                        return
-
-                    const window = convWindow
-
-                    window.positionViewAtIndex(msgIndex, ListView.Center)
-                    window.highlightAnimation.target = window.itemAtIndex(
-                                msgIndex).highlight
-                    window.highlightAnimation.start()
-                }
-            }
-        }
-
-        Component {
-            id: image
-            CB.ImageBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
                 medAttachments: mediaAttachments
                 documentAttachments: docAttachments
-                authorColor: userColor
-                elided: chatRow.elided
+                imageAttach: mediaAttachments.length !== 0
+                docAttach: docAttachments.length !== 0
+                replyId: opMsgId
+                reply: replyType > 0
+                maxWidth: chatListView.width * 0.66
+                messageModelData: chatRow.messageModelData
             }
         }
-
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
@@ -161,20 +129,12 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            maxWidth: chatListView.width * 0.66
             color: CmnCfg.palette.lightGrey
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (mediaAttachments.length !== 0
-                             || docAttachments.length !== 0) {
-                         image
-                         //reply types: 0 not reply, 1 dangling, 2 known reply
-                     } else if (replyType > 0) {
-                         reply
-                     } else {
-                         std
-                     }
+            content: std
+            maxWidth: chatListView.width * 0.66
 
             ChatBubbleHover {}
         }

@@ -4,19 +4,12 @@ use crate::{
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
-use heraldcore::{
-    conversation,
-    errors::HErr,
-    message::{MessageBody, MessageReceiptStatus},
-    types::*,
-    NE,
-};
+use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, types::*, NE};
 use im::vector::Vector;
+use messages_helper::search::SearchState;
 use search_pattern::SearchPattern;
 use std::collections::HashMap;
 
-mod search;
-use search::*;
 mod container;
 use container::*;
 mod imp;

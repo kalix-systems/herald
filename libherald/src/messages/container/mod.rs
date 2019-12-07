@@ -4,9 +4,7 @@ pub use messages_helper::{container::*, types::*};
 use std::collections::HashSet;
 
 mod handlers;
-mod search;
 pub(super) use handlers::*;
-pub(super) use search::*;
 
 /// Sets the reply type of a message to "dangling"
 pub(super) fn set_dangling(
@@ -43,7 +41,7 @@ pub(super) fn fill(cid: ConversationId) {
 
         ret_err!(content_push(
             cid,
-            MsgUpdate::Container(Container { list, map })
+            MsgUpdate::Container(Container::new(list, map))
         ));
     });
 }
