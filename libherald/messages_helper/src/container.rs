@@ -11,6 +11,7 @@ use types::*;
 pub struct Container {
     pub list: Vector<Message>,
     map: HashMap<MsgId, MsgData>,
+    last: Option<MsgData>,
 }
 
 impl Container {
@@ -18,7 +19,12 @@ impl Container {
         list: Vector<Message>,
         map: HashMap<MsgId, MsgData>,
     ) -> Self {
-        Self { list, map }
+        let last = match list.last().as_ref() {
+            Some(Message { ref msg_id, .. }) => map.get(msg_id).cloned(),
+            None => None,
+        };
+
+        Self { map, last, list }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -58,8 +64,7 @@ impl Container {
     }
 
     pub fn last_msg(&self) -> Option<&MsgData> {
-        let mid = self.list.last()?.msg_id;
-        self.map.get(&mid)
+        self.last.as_ref()
     }
 
     pub fn msg_data(
@@ -157,12 +162,21 @@ impl Container {
         &mut self,
         ix: usize,
     ) -> Option<MsgData> {
-        if ix >= self.len() {
+        let old_len = self.len();
+        if ix >= old_len {
             return None;
         }
 
         let msg = self.list.remove(ix);
         let data = self.map.remove(&msg.msg_id)?;
+
+        if ix + 1 == old_len {
+            self.last = self
+                .list
+                .last()
+                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
+                .cloned();
+        }
 
         Some(data)
     }
@@ -181,6 +195,7 @@ impl Container {
         msg: Message,
         data: MsgData,
     ) -> Option<()> {
+        let old_len = self.list.len();
         let mid = msg.msg_id;
 
         if let ReplyId::Known(op) = &data.op {
@@ -189,6 +204,14 @@ impl Container {
 
         self.list.insert(ix, msg);
         self.map.insert(mid, data);
+
+        if ix == old_len {
+            self.last = self
+                .list
+                .last()
+                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
+                .cloned();
+        }
 
         Some(())
     }
