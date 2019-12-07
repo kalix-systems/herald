@@ -1156,6 +1156,7 @@ dependencies = [
 name = "messages_helper"
 version = "0.1.0"
 dependencies = [
+ "coremacros 0.1.0",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
