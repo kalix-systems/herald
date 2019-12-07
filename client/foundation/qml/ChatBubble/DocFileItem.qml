@@ -31,7 +31,7 @@ ListView {
             id: nameMetrics
             text: name
             elide: Text.ElideMiddle
-            elideWidth: fileRow.width * 0.7 - fileSize.width
+            elideWidth: fileRow.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
         }
 
         Text {
