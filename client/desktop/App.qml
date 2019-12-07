@@ -63,7 +63,7 @@ Item {
             Image {
                 anchors.centerIn: parent
                 source: "qrc:/herald.icns"
-                mipmap: false
+                mipmap: true
             }
         }
     }

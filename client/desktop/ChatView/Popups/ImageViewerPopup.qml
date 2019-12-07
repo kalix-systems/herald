@@ -142,7 +142,7 @@ Window {
             source: sourceAtc !== undefined ? "file:" + sourceAtc[index].path : ""
             fillMode: Image.PreserveAspectFit
             anchors.fill: parent
-            mipmap: false
+            mipmap: true
         }
     }
 

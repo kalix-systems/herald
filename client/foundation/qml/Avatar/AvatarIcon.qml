@@ -51,7 +51,7 @@ Item {
                     maskSource: mask
                 }
                 clip: true
-                mipmap: false
+                mipmap: true
             }
         }
     }
