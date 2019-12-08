@@ -29,6 +29,8 @@ int main(int argc, char* argv[])
 
   qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
 
+  qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
+
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
 
