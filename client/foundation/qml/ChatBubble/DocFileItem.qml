@@ -43,6 +43,7 @@ ListView {
             text: nameMetrics.elidedText
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 13
+            font.weight: Font.Medium
         }
 
         Text {
@@ -53,6 +54,7 @@ ListView {
             text: Utils.friendlyFileSize(size)
             font.family: CmnCfg.chatFont.name
             font.pixelSize: 10
+            font.weight: Font.Light
             color: CmnCfg.palette.darkGrey
         }
 

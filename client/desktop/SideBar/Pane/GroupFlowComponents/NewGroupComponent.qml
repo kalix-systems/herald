@@ -72,7 +72,7 @@ Component {
                 text: "CREATE"
                 anchors.centerIn: parent
                 color: "white"
-                font.family: CmnCfg.chatFont.name
+                font.family: CmnCfg.labelFont.name
             }
             onClicked: {
                 titleText.text == "" ? herald.conversationBuilder.setTitle(
