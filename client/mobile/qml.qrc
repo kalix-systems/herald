@@ -35,6 +35,8 @@
         <file>qml/HomeScreen/HomeScreenMain.qml</file>
         <file>qml/HomeScreen/Controls/FloatingActionButtons.qml</file>
         <file>qml/HomeScreen/NewGroupView.qml</file>
-        <file>qml/HomeScreen/GroupHeaderComponent.qml</file>
+        <file>qml/HomeScreen/GroupFlowComponents/ContactsSearchComponent.qml</file>
+        <file>qml/HomeScreen/GroupFlowComponents/FinalGroupList.qml</file>
+        <file>qml/HomeScreen/GroupFlowComponents/GroupHeaderComponent.qml</file>
     </qresource>
 </RCC>

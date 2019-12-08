@@ -3,8 +3,8 @@ import QtQuick.Layouts 1.12
 import QtQuick 2.12
 import LibHerald 1.0
 // Includes CVFLoatingButton. ListItem, and Header
-import "./Controls"
-import "../Common"
+import "./../Controls"
+import "../../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 
@@ -13,6 +13,7 @@ Column {
     anchors.top: parent.top
     width: mainView.width
     property alias profPic: groupImageLoader.imageSource
+    property alias groupTitle: titleText.text
     spacing: CmnCfg.units.dp(12)
     topPadding: CmnCfg.units.dp(24)
     Rectangle {

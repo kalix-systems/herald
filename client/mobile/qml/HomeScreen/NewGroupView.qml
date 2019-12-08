@@ -9,6 +9,7 @@ import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
 import "qrc:/imports/Avatar"
 import "qrc:/imports/js/utils.mjs" as Utils
+import "GroupFlowComponents"
 
 Page {
     id: newGroupView
@@ -68,90 +69,42 @@ Page {
         color: CmnCfg.palette.black
     }
 
-    Column {
+    ContactsSearchComponent {
+        id: groupSelectText
+    }
 
-        topPadding: CmnCfg.units.dp(24)
-        Component.onCompleted: herald.usersSearch.refresh()
-        width: mainView.width - CmnCfg.units.dp(56)
-        anchors.top: bigDivider.bottom
-        anchors.horizontalCenter: parent.horizontalCenter
-        TextArea {
-            id: groupSelectText
-            leftPadding: 0
-            placeholderText: "Add members"
-            onTextChanged: {
-                herald.usersSearch.filter = groupSelectText.text
-                contactPopup.popup.open()
-            }
+    Button {
+        anchors.top: groupSelectText.bottom
+        anchors.topMargin: CmnCfg.margin / 2
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.units.dp(28)
+
+        width: CmnCfg.units.dp(60)
+        height: CmnCfg.units.dp(30)
+
+        background: Rectangle {
+            anchors.fill: parent
+            color: CmnCfg.palette.offBlack
         }
 
-        Rectangle {
-            height: 1
-            width: parent.width
-            color: "black"
+        Text {
+            text: "CREATE"
+            anchors.centerIn: parent
+            color: "white"
+            font.family: CmnCfg.chatFont.name
         }
-
-        ComboBox {
-            id: contactPopup
-            model: herald.usersSearch
-            width: parent.width
-            anchors.horizontalCenter: parent.horizontalCenter
-            height: CmnCfg.units.dp(6)
-            leftPadding: CmnCfg.margin
-
-            background: Rectangle {
-                visible: false
-            }
-
-            indicator: Rectangle {
-                visible: false
-            }
-            delegate: Rectangle {
-                property var contactData: model
-                height: visible ? CmnCfg.units.dp(48) : 0
-                width: parent.width
-                visible: matched
-                         && contactData.userId !== herald.config.configId
-                anchors {
-                    rightMargin: CmnCfg.units.dp(12)
-                    leftMargin: CmnCfg.units.dp(12)
+        TapHandler {
+            onTapped: {
+                topRect.groupTitle
+                        == "" ? herald.conversationBuilder.setTitle(
+                                    "Untitled Group") : herald.conversationBuilder.setTitle(
+                                    topRect.groupTitle)
+                if (topRect.profPic !== "") {
+                    herald.conversationBuilder.picture = topRect.profPic
                 }
-
-                AvatarMain {
-                    id: avatar
-                    iconColor: CmnCfg.palette.avatarColors[contactData.color]
-                    anchors.verticalCenter: parent.verticalCenter
-                    initials: Utils.initialize(contactData.name)
-                    size: CmnCfg.units.dp(36)
-                    avatarHeight: CmnCfg.units.dp(36)
-
-                    anchors {
-                        right: parent.right
-                        left: parent.left
-                        leftMargin: CmnCfg.units.dp(12)
-                    }
-
-                    labelComponent: ConversationLabel {
-                        contactName: contactData.name
-                        labelColor: CmnCfg.palette.offBlack
-                        labelSize: 14
-                        lastBody: "@" + contactData.userId
-                    }
-                }
-
-                //                MouseArea {
-                //                    anchors.fill: parent
-                //                    onClicked: {
-                //                        //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
-                //                        herald.conversationBuilder.addMember(contactData.userId)
-                //                        contactPopup.popup.close()
-                //                        herald.usersSearch.clearFilter()
-                //                        groupSelectText.text = ""
-                //                    }
-                //                }
+                herald.conversationBuilder.finalize()
+                mainView.pop()
             }
         }
-        //component for selected group members
-        // FinalGroupList {}
     }
 }

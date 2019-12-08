@@ -77,6 +77,7 @@ Column {
         TapHandler {
             onTapped: {
                 mainView.push(newGroupViewMain)
+                cvMainView.state = "default"
             }
         }
     }
