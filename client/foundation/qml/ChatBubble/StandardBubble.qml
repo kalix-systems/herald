@@ -25,12 +25,6 @@ ColumnLayout {
     // Text edit alias
     property alias messageBody: messageBody
 
-    ChatLabel {
-        id: uname
-        senderName: authorName
-        senderColor: authorColor
-    }
-
     Component {
         id: image
         AttachmentContent {}
@@ -51,10 +45,19 @@ ColumnLayout {
     }
 
     Column {
-        // width: background.width
+        width: bubbleRoot.width
         Loader {
             sourceComponent: reply ? replyContent : undefined
         }
+    }
+
+    ChatLabel {
+        id: uname
+        senderName: authorName
+        senderColor: authorColor
+    }
+
+    Column {
 
         Loader {
             id: imageLoader
