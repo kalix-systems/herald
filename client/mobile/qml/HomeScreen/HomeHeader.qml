@@ -24,13 +24,6 @@ ToolBar {
             Layout.alignment: Qt.AlignLeft
             Layout.leftMargin: CmnCfg.units.dp(12)
             spacing: CmnCfg.units.dp(16)
-            IconButton {
-                id: drawerButton
-                color: CmnCfg.palette.iconFill
-                imageSource: "qrc:/hamburger-icon.svg"
-                tapCallback: contextDrawer.open
-            }
-
             AvatarMain {
                 iconColor: CmnCfg.palette.avatarColors[herald.config.color]
                 initials: herald.config.name[0].toUpperCase()
