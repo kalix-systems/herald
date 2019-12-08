@@ -99,14 +99,11 @@ Page {
             height: CmnCfg.units.dp(6)
             leftPadding: CmnCfg.margin
 
-            //width: 200
             background: Rectangle {
                 visible: false
             }
 
             indicator: Rectangle {
-                height: 50
-                width: 100
                 visible: false
             }
             delegate: Rectangle {
@@ -114,9 +111,8 @@ Page {
                 height: visible ? CmnCfg.units.dp(48) : 0
                 width: parent.width
                 visible: matched
-                // && contactData.userId !== herald.config.configId
+                         && contactData.userId !== herald.config.configId
                 anchors {
-                    // fill: parent
                     rightMargin: CmnCfg.units.dp(12)
                     leftMargin: CmnCfg.units.dp(12)
                 }
@@ -143,16 +139,16 @@ Page {
                     }
                 }
 
-                MouseArea {
-                    anchors.fill: parent
-                    onClicked: {
-                        //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
-                        herald.conversationBuilder.addMember(contactData.userId)
-                        contactPopup.popup.close()
-                        herald.usersSearch.clearFilter()
-                        groupSelectText.text = ""
-                    }
-                }
+                //                MouseArea {
+                //                    anchors.fill: parent
+                //                    onClicked: {
+                //                        //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
+                //                        herald.conversationBuilder.addMember(contactData.userId)
+                //                        contactPopup.popup.close()
+                //                        herald.usersSearch.clearFilter()
+                //                        groupSelectText.text = ""
+                //                    }
+                //                }
             }
         }
         //component for selected group members
