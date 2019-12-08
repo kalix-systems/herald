@@ -73,9 +73,12 @@ impl MediaAttachments {
     }
 
     pub(crate) fn all(&mut self) -> Vec<std::path::PathBuf> {
-        std::mem::replace(&mut self.contents, Vec::new())
+        self.model.begin_reset_model();
+        let all = std::mem::replace(&mut self.contents, Vec::new())
             .into_iter()
             .map(std::path::PathBuf::from)
-            .collect()
+            .collect();
+        self.model.end_reset_model();
+        all
     }
 }
