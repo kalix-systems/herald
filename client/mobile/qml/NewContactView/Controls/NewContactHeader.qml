@@ -34,7 +34,7 @@ ToolBar {
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
             font.pointSize: CmnCfg.chatPreviewSize
-            font.family: CmnCfg.chatFont.name
+            font.family: CmnCfg.labelFont.name
             color: CmnCfg.palette.iconFill
         }
     }

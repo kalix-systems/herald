@@ -44,7 +44,7 @@ Page {
                     text: "New group"
                     font {
                         pointSize: CmnCfg.chatPreviewSize
-                        family: CmnCfg.chatFont.name
+                        family: CmnCfg.labelFont.name
                     }
                     anchors.verticalCenter: parent.verticalCenter
                     color: CmnCfg.palette.iconFill
@@ -90,8 +90,8 @@ Page {
         Text {
             text: "CREATE"
             anchors.centerIn: parent
-            color: "white"
-            font.family: CmnCfg.chatFont.name
+            color: CmnCfg.palette.white
+            font.family: CmnCfg.labelFont.name
         }
         TapHandler {
             onTapped: {

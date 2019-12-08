@@ -24,14 +24,14 @@ Page {
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
             }
-            placeholderText: "Enter a UserName..."
+            placeholderText: "Enter a UID"
         }
 
         TextArea {
             Layout.alignment: Qt.AlignLeft
             Layout.preferredWidth: parent.width * 0.8
             Layout.preferredHeight: parent.height * 0.5
-            placeholderText: "Attach a message..."
+            placeholderText: "Enter message text"
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
             }
