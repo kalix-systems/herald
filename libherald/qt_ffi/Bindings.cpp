@@ -136,10 +136,6 @@ inline void conversationsFilterRegexChanged(Conversations* o)
 {
   Q_EMIT o->filterRegexChanged();
 }
-inline void emojiPickerSearchResultChanged(EmojiPicker* o)
-{
-  Q_EMIT o->searchResultChanged();
-}
 inline void emojiPickerSearchStringChanged(EmojiPicker* o)
 {
   Q_EMIT o->searchStringChanged();
@@ -1073,6 +1069,8 @@ DocumentAttachments::Private*
 void document_attachments_free(DocumentAttachments::Private*);
 }
 extern "C" {
+void emoji_picker_data_emoji(const EmojiPicker::Private*, int, QString*,
+                             qstring_set);
 void emoji_picker_sort(EmojiPicker::Private*, unsigned char column,
                        Qt::SortOrder order = Qt::AscendingOrder);
 int  emoji_picker_row_count(const EmojiPicker::Private*);
@@ -1145,12 +1143,21 @@ Qt::ItemFlags EmojiPicker::flags(const QModelIndex& i) const
   return flags;
 }
 
+QString EmojiPicker::emoji(int row) const
+{
+  QString s;
+  emoji_picker_data_emoji(m_d, row, &s, set_qstring);
+  return s;
+}
+
 QVariant EmojiPicker::data(const QModelIndex& index, int role) const
 {
   Q_ASSERT(rowCount(index.parent()) > index.row());
   switch (index.column()) {
   case 0:
     switch (role) {
+    case Qt::UserRole + 0:
+      return QVariant::fromValue(emoji(index.row()));
     }
     break;
   }
@@ -1171,6 +1178,7 @@ int EmojiPicker::role(const char* name) const
 QHash<int, QByteArray> EmojiPicker::roleNames() const
 {
   QHash<int, QByteArray> names = QAbstractItemModel::roleNames();
+  names.insert(Qt::UserRole + 0, "emoji");
   return names;
 }
 
@@ -1199,8 +1207,6 @@ bool EmojiPicker::setHeaderData(int section, Qt::Orientation orientation,
 extern "C" {
 EmojiPicker::Private* emoji_picker_new(EmojiPickerPtrBundle*);
 void                  emoji_picker_free(EmojiPicker::Private*);
-void emoji_picker_search_result_get(const EmojiPicker::Private*, QString*,
-                                    qstring_set);
 void emoji_picker_search_string_get(const EmojiPicker::Private*, QString*,
                                     qstring_set);
 void emoji_picker_search_string_set(EmojiPicker::Private*, const ushort* str,
@@ -3638,7 +3644,7 @@ EmojiPicker::EmojiPicker(bool /*owned*/, QObject* parent)
 EmojiPicker::EmojiPicker(QObject* parent)
     : QAbstractItemModel(parent),
       m_d(emoji_picker_new(new EmojiPickerPtrBundle{
-          this, emojiPickerSearchResultChanged, emojiPickerSearchStringChanged,
+          this, emojiPickerSearchStringChanged,
           [](const EmojiPicker* o) { Q_EMIT o->newDataReady(QModelIndex()); },
           [](EmojiPicker* o) { Q_EMIT o->layoutAboutToBeChanged(); },
           [](EmojiPicker* o) {
@@ -3680,13 +3686,6 @@ EmojiPicker::~EmojiPicker()
   }
 }
 void EmojiPicker::initHeaderData() {}
-
-QString EmojiPicker::searchResult() const
-{
-  QString v;
-  emoji_picker_search_result_get(m_d, &v, set_qstring);
-  return v;
-}
 
 QString EmojiPicker::searchString() const
 {

@@ -203,16 +203,19 @@ fn members() -> Object {
 
 fn emoji_picker() -> Object {
     let props = props! {
-        searchString: Prop::new().simple(QString).optional().write(),
-        searchResult: Prop::new().simple(QString).optional()
+        searchString: Prop::new().simple(QString).optional().write()
     };
 
     let funcs = functions! {
         mut clearSearch() => Void,
     };
 
+    let item_props = item_props! {
+     emoji: ItemProp::new(QString).get_by_value()
+    };
+
     obj! {
-        EmojiPicker: Obj::new().list().funcs(funcs).props(props)
+        EmojiPicker: Obj::new().list().funcs(funcs).props(props).item_props(item_props)
     }
 }
 

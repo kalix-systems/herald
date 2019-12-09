@@ -275,7 +275,6 @@ struct DocumentAttachmentsPtrBundle {
 };
 struct EmojiPickerPtrBundle {
   EmojiPicker* emoji_picker;
-  void (*emoji_picker_search_result_changed)(EmojiPicker*);
   void (*emoji_picker_search_string_changed)(EmojiPicker*);
 
   void (*emoji_picker_new_data_ready)(const EmojiPicker*);
@@ -1036,8 +1035,6 @@ public:
 private:
   Private* m_d;
   bool     m_ownsPrivate;
-  Q_PROPERTY(
-      QString searchResult READ searchResult NOTIFY searchResultChanged FINAL)
   Q_PROPERTY(QString searchString READ searchString WRITE setSearchString NOTIFY
                  searchStringChanged FINAL)
   explicit EmojiPicker(bool owned, QObject* parent);
@@ -1045,7 +1042,6 @@ private:
 public:
   explicit EmojiPicker(QObject* parent = nullptr);
   ~EmojiPicker() override;
-  QString          searchResult() const;
   QString          searchString() const;
   void             setSearchString(const QString& v);
   Q_INVOKABLE void clearSearch();
@@ -1074,6 +1070,8 @@ public:
   removeRows(int row, int count,
              const QModelIndex& parent = QModelIndex()) override;
 
+  Q_INVOKABLE QString emoji(int row) const;
+
 Q_SIGNALS:
   // new data is ready to be made available to the model with fetchMore()
   void newDataReady(const QModelIndex& parent) const;
@@ -1083,7 +1081,6 @@ private:
   void                                          initHeaderData();
   void                                          updatePersistentIndexes();
 Q_SIGNALS:
-  void searchResultChanged();
   void searchStringChanged();
 };
 class Errors : public QObject {
