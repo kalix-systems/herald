@@ -52,7 +52,8 @@ fn objects() -> BTreeMap<String, Rc<Object>> {
        message_builder(),
 
        media_attachments(),
-       document_attachments()
+       document_attachments(),
+       emoji_picker()
     }
 }
 
@@ -197,6 +198,21 @@ fn members() -> Object {
 
     obj! {
         Members: Obj::new().list().props(props).funcs(funcs).item_props(item_props)
+    }
+}
+
+fn emoji_picker() -> Object {
+    let props = props! {
+        searchString: Prop::new().simple(QString).optional().write(),
+        searchResult: Prop::new().simple(QString).optional()
+    };
+
+    let funcs = functions! {
+        mut clearSearch() => Void,
+    };
+
+    obj! {
+        EmojiPicker: Obj::new().list().funcs(funcs).props(props)
     }
 }
 
