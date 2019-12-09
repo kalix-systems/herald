@@ -79,7 +79,6 @@ impl MessageBuilderTrait for MessageBuilder {
         self.model.begin_reset_model();
 
         self.inner.attachments.extend(self.media_attachments.all());
-
         self.inner.attachments.extend(
             self.document_attachments
                 .all()
@@ -90,6 +89,12 @@ impl MessageBuilderTrait for MessageBuilder {
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();
+
+        self.emit.is_reply_changed();
+        self.emit.has_media_attachment_changed();
+        self.emit.has_doc_attachment_changed();
+        self.emit.body_changed();
+        self.emit_op_changed();
 
         let cid = ret_none!(builder.conversation);
 
