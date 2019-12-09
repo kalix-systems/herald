@@ -72,26 +72,29 @@ Rectangle {
         topPadding: CmnCfg.smallMargin * 0.5
         bottomPadding: CmnCfg.smallMargin * 0.5
 
-        Loader {
-            id: replyLoader
-            property string opName: replyName
-            property string opText: replyText
-            active: false
-            height: item ? item.height : 0
-            sourceComponent: ReplyComponent {
-                startColor: CmnCfg.avatarColors[herald.users.colorById(
-                                                    replyUid)]
+        Column {
+            width: parent.width
+            Loader {
+                id: replyLoader
+                property string opName: replyName
+                property string opText: replyText
+                active: ownedConversation.builder.isReply
+                height: item ? item.height : 0
+                sourceComponent: ReplyComponent {
+                    startColor: CmnCfg.avatarColors[herald.users.colorById(
+                                                        replyUid)]
+                }
+                width: textWrapperRect.width
+                anchors.horizontalCenter: parent.horizontalCenter
             }
-            width: textWrapperRect.width
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
 
-        Loader {
-            id: attachmentLoader
-            active: false
-            height: item ? item.height : 0
-            sourceComponent: AttachmentsComponent {}
-            width: scrollView.width
+            Loader {
+                id: attachmentLoader
+                active: ownedConversation.builder.hasMediaAttachment
+                height: item ? item.height : 0
+                sourceComponent: AttachmentsComponent {}
+                width: scrollView.width
+            }
         }
 
         ScrollView {
@@ -136,7 +139,9 @@ Rectangle {
     }
 
     states: [
-        State {
+
+
+        /*State {
             name: "replystate"
             when: ownedConversation.builder.isReply
             PropertyChanges {
@@ -157,8 +162,7 @@ Rectangle {
                 target: attachmentLoader
                 active: true
             }
-        },
-
+        },*/
         State {
             name: "default"
             PropertyChanges {
