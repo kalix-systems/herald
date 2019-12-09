@@ -97,17 +97,7 @@ impl Container {
     ) -> Option<String> {
         let attachments = &self.get_data(mid)?.attachments;
 
-        if attachments.is_empty() {
-            return None;
-        }
-
-        let media = attachments.media_attachments().ok()?;
-
-        if media.is_empty() {
-            return None;
-        }
-
-        Some(json::JsonValue::from(media).dump())
+        crate::media_attachments_json(attachments)
     }
 
     pub fn doc_attachments_data_json(
@@ -124,17 +114,7 @@ impl Container {
     ) -> Option<String> {
         let attachments = &self.get_data(mid)?.attachments;
 
-        if attachments.is_empty() {
-            return None;
-        }
-
-        let docs = attachments.doc_attachments().ok()?;
-
-        if docs.is_empty() {
-            return None;
-        }
-
-        Some(json::JsonValue::from(docs).dump())
+        crate::doc_attachments_json(attachments)
     }
 
     pub fn last(&self) -> Option<&Message> {

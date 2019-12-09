@@ -304,9 +304,9 @@ fn message_builder() -> Object {
         opBody: Prop::new().simple(QString).optional(),
         opTime: Prop::new().simple(Qint64).optional(),
         // Media attachments metadata, serialized as JSON
-        opMediaAttachments: Prop::new().simple(QString).optional(),
+        opMediaAttachments: Prop::new().simple(QString),
         // Document attachments metadata, serialized as JSON
-        opDocAttachments: Prop::new().simple(QString).optional()
+        opDocAttachments: Prop::new().simple(QString)
     );
 
     let funcs = functions! {

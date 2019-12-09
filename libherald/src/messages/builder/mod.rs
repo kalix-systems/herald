@@ -85,12 +85,14 @@ impl MessageBuilderTrait for MessageBuilder {
                 .into_iter()
                 .map(PathBuf::from),
         );
-
         let builder = std::mem::replace(&mut self.inner, Default::default());
         self.inner.conversation = builder.conversation;
         self.model.end_reset_model();
 
-        self.emit.is_reply_changed();
+        if self.op.take().is_some() {
+            self.emit.is_reply_changed();
+        }
+
         self.emit.has_media_attachment_changed();
         self.emit.has_doc_attachment_changed();
         self.emit.body_changed();
@@ -145,13 +147,12 @@ impl MessageBuilderTrait for MessageBuilder {
         Some(self.op.as_ref()?.time.into())
     }
 
-    // TODO
-    fn op_doc_attachments(&self) -> Option<&str> {
-        None
+    fn op_doc_attachments(&self) -> &str {
+        self.op.as_ref().map(Reply::doc).unwrap_or("")
     }
 
-    fn op_media_attachments(&self) -> Option<&str> {
-        None
+    fn op_media_attachments(&self) -> &str {
+        self.op.as_ref().map(Reply::media).unwrap_or("")
     }
 
     fn add_attachment(
@@ -259,7 +260,9 @@ impl MessageBuilder {
         match op_msg_id {
             Some(op_msg_id) => {
                 let op_msg_id = op_msg_id.try_into()?;
-                Ok(self.update_op_id(&op_msg_id, container))
+                let out = Ok(self.update_op_id(&op_msg_id, container));
+                self.emit.is_reply_changed();
+                out
             }
             None => Ok(self.clear_reply_()),
         }

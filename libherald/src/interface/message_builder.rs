@@ -271,11 +271,11 @@ pub trait MessageBuilderTrait {
 
     fn op_body(&self) -> Option<&str>;
 
-    fn op_doc_attachments(&self) -> Option<&str>;
+    fn op_doc_attachments(&self) -> &str;
 
     fn op_id(&self) -> Option<&[u8]>;
 
-    fn op_media_attachments(&self) -> Option<&str>;
+    fn op_media_attachments(&self) -> &str;
 
     fn op_time(&self) -> Option<i64>;
 
@@ -617,10 +617,8 @@ pub unsafe extern "C" fn message_builder_op_doc_attachments_get(
 ) {
     let obj = &*ptr;
     let value = obj.op_doc_attachments();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
 }
 
 #[no_mangle]
@@ -645,10 +643,8 @@ pub unsafe extern "C" fn message_builder_op_media_attachments_get(
 ) {
     let obj = &*ptr;
     let value = obj.op_media_attachments();
-    if let Some(value) = value {
-        let str_: *const c_char = value.as_ptr() as (*const c_char);
-        set(prop, str_, to_c_int(value.len()));
-    }
+    let str_: *const c_char = value.as_ptr() as *const c_char;
+    set(prop, str_, to_c_int(value.len()));
 }
 
 #[no_mangle]
