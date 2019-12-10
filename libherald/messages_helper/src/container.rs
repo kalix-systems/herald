@@ -255,7 +255,7 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<String> {
-        let mid = self.list.get(index)?.msg_id;
+        let mid = self.op_msg_id(index)?;
         self.get_doc_attachments_data_json(&mid)
     }
 
@@ -263,7 +263,7 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<String> {
-        let mid = self.list.get(index)?.msg_id;
+        let mid = self.op_msg_id(index)?;
         self.get_media_attachments_data_json(&mid)
     }
 
