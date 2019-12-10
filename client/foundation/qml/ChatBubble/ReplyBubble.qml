@@ -18,6 +18,20 @@ ColumnLayout {
 
     spacing: 0
 
+    Component.onCompleted: {
+        const media = modelData.opMediaAttachments.length === 0 ? "" : JSON.parse(
+                                                                      modelData.opMediaAttachments)
+        switch (media.length) {
+        case 0:
+            break
+        default:
+            imageClipLoader.sourceComponent = imageClipComponent
+            imageClipLoader.item.imageSource = "file:" + media[0].path
+            imageClipLoader.item.count = media.length - 1
+            imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        }
+    }
+
     Rectangle {
         id: replyWrapper
         Layout.preferredHeight: replyWrapperCol.height
@@ -141,26 +155,16 @@ ColumnLayout {
                         }
                     }
                 }
-                Rectangle {
-                    width: 64
-                    height: 64
-                    clip: true
-                    Layout.margins: CmnCfg.smallMargin
-                    Layout.leftMargin: 0
-                    color: "transparent"
-                    Image {
-                        id: replyImage
-                        property real aspectRatio
-                        sourceSize.width: aspectRatio < 1 ? 64 : 64 * aspectRatio
-                        sourceSize.height: aspectRatio < 1 ? 64 / aspectRatio : 64
-                        anchors.centerIn: parent
-                    }
+
+                Component {
+                    id: imageClipComponent
+                    ReplyImageClip {}
                 }
 
-                Component.onCompleted: {
-                    const parsed = JSON.parse(modelData.opMediaAttachments)
-                    replyImage.aspectRatio = parsed[0].width / parsed[0].height
-                    replyImage.source = "file:" + parsed[0].path
+                Loader {
+                    id: imageClipLoader
+                    Layout.margins: CmnCfg.smallMargin
+                    Layout.leftMargin: 0
                 }
             }
         }
