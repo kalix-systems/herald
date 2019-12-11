@@ -4,6 +4,7 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
+import "qrc:/imports"
 import "../../common" as Common
 import "./ConfigComponents" as CfgComps
 import "./js/ConfigPopupSubmission.mjs" as JS
@@ -28,165 +29,92 @@ Window {
             print("set to", fileUrl)
         }
     }
-    SplitView {
+
+    Page {
         anchors.fill: parent
-        handle: Item {
-            id: handle
-            implicitWidth: 1
-            Rectangle {
-                id: toolBarHandle
-                implicitWidth: 1
-                color: CmnCfg.palette.medGrey
-                height: CmnCfg.toolbarHeight
-                anchors {
-                    top: parent.top
+
+        header: Rectangle {
+            id: headerRect
+            color: CmnCfg.palette.offBlack
+            height: CmnCfg.toolbarHeight
+            Row {
+                leftPadding: CmnCfg.margin
+                anchors.fill: parent
+                Label {
+                    id: label
+                    text: qsTr("Settings")
+                    color: CmnCfg.palette.white
+                    font.pixelSize: CmnCfg.headerSize
+                    font.family: CmnCfg.labelFont.name
+                    font.bold: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    elide: Label.ElideRight
                 }
             }
             Rectangle {
-                implicitWidth: 1
-                color: CmnCfg.palette.black
-                anchors {
-                    top: toolBarHandle.bottom
-                    bottom: parent.bottom
-                }
+                height: 1
+                width: parent.width
+                color: CmnCfg.palette.white
+                anchors.top: headerRect.bottom
             }
         }
 
-        Page {
-            SplitView.preferredWidth: 0.3 * 600
-            SplitView.minimumWidth: label.width
-            SplitView.preferredHeight: parent.height
-            header: Rectangle {
+        Row {
+            anchors.fill: parent
+            Rectangle {
+                width: 0.3 * 600
+                height: parent.height
                 color: CmnCfg.palette.offBlack
-                height: CmnCfg.toolbarHeight
-                Row {
-                    leftPadding: CmnCfg.margin
-                    anchors.fill: parent
-                    Label {
-                        id: label
-                        text: qsTr("Settings")
-                        color: CmnCfg.palette.white
-                        font.pixelSize: CmnCfg.headerSize
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        anchors.verticalCenter: parent.verticalCenter
-                        elide: Label.ElideRight
-                    }
-                }
-            }
-
-            ScrollView {
-                anchors.fill: parent
-            }
-        }
-
-        Page {
-
-            SplitView.preferredWidth: 600 / 4
-            SplitView.minimumWidth: label.width
-            SplitView.preferredHeight: parent.height
-            header: Rectangle {
-                color: CmnCfg.palette.offBlack
-                height: CmnCfg.toolbarHeight
-                Row {
-                    leftPadding: CmnCfg.margin
-                    anchors.fill: parent
-                }
-            }
-
-            Flickable {
-                anchors.fill: parent
-
                 Column {
                     spacing: CmnCfg.margin
-                    leftPadding: CmnCfg.margin
-                    CfgComps.ConfigListItem {
-                        headerText: "Account"
+                    padding: CmnCfg.margin
+                    StandardLabel {
+                        text: qsTr("Notifications")
                     }
-                    CfgComps.ConfigListItem {
-                        headerText: "UI"
+                    StandardLabel {
+                        text: qsTr("Appearance")
                     }
-                    CfgComps.ConfigListItem {
-                        headerText: "Authentication"
+                    StandardLabel {
+                        text: qsTr("Privacy & Security")
                     }
-                    CfgComps.ConfigListItem {
-                        headerText: "Notifications"
+                    StandardLabel {
+                        text: qsTr("Data & Storage")
                     }
+                    StandardLabel {
+                        text: qsTr("Advanced")
+                    }
+                    StandardLabel {
+                        text: qsTr("Help & Feedback")
+                    }
+                }
+            }
+
+            Column {
+                spacing: CmnCfg.margin
+                padding: CmnCfg.margin
+                CfgComps.ConfigListItem {
+                    headerText: qsTr("Notifications")
+                    configContent: CfgComps.Notifications {}
+                }
+                CfgComps.ConfigListItem {
+                    headerText: qsTr("Appearance")
+                }
+                CfgComps.ConfigListItem {
+                    headerText: "Privacy & Security"
+                }
+
+                CfgComps.ConfigListItem {
+                    headerText: "Data & Storage"
+                }
+
+                CfgComps.ConfigListItem {
+                    headerText: "Advanced"
+                }
+
+                CfgComps.ConfigListItem {
+                    headerText: "Help & Feedback"
                 }
             }
         }
     }
-
-    //    TabBar {
-    //        width: parent.width
-    //        height: 50
-    //        id: bar
-    //        TabButton {
-    //            text: qsTr("Account")
-    //        }
-    //        TabButton {
-    //            text: qsTr("UI")
-    //        }
-    //        TabButton {
-    //            text: qsTr("Authentication")
-    //        }
-    //        TabButton {
-    //            text: qsTr("Notifications")
-    //        }
-    //    }
-
-    //    StackLayout {
-    //        width: parent.width
-    //        currentIndex: bar.currentIndex
-    //        anchors.top: bar.bottom
-    //        ColumnLayout {
-    //            id: accountPreferences
-    //            Layout.alignment: Qt.AlignCenter
-    //            Layout.fillWidth: true
-    //            /// RS: check with the server to prevent duplicate ID's
-    //            RowLayout {
-    //                TextField {
-    //                    id: cfgUid
-    //                    enabled: false
-    //                    property bool userIdValid: true
-    //                    placeholderText: enabled ? "Enter UID " : herald.config.configId
-    //                    selectionColor: "lightsteelblue"
-    //                }
-
-    //                TextField {
-    //                    id: cfgUname
-    //                    maximumLength: 256
-    //                    property bool usernameValid: true
-    //                    text: herald.config.name
-    //                    selectionColor: "lightsteelblue"
-    //                }
-    //            }
-
-    //            Button {
-    //                text: "select profile picture"
-    //                onClicked: cfgPfp.open()
-    //            }
-
-    //            Button {
-    //                text: "Submit"
-    //                onClicked: {
-    //                    JS.submit(herald.config, cfgUname)
-    //                    close()
-    //                }
-    //            }
-    //        }
-    //        Item {
-    //            id: uiPreferences
-    //            Button {
-    //                text: "toggle solarized dark"
-    //                onClicked: CmnCfg.theme = CmnCfg.theme === 1 ? 0 : 1
-    //            }
-    //        }
-    //        Item {
-    //            id: authenticationPreferences
-    //        }
-    //        Item {
-    //            id: notificationPreferences
-    //        }
-    //    }
 }

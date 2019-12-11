@@ -55,5 +55,6 @@
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
         <file>SideBar/popups/ConfigComponents/ConfigListItem.qml</file>
         <file>SideBar/popups/ConfigComponents/AccountComponent.qml</file>
+        <file>SideBar/popups/ConfigComponents/Notifications.qml</file>
     </qresource>
 </RCC>

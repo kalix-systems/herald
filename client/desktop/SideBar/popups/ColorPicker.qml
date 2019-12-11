@@ -44,6 +44,7 @@ Window {
             }
         }
     }
+
     Button {
         id: colorSubmissionButton
         text: "Submit"
