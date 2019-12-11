@@ -12,8 +12,9 @@ pub(crate) fn get_message(
     let replies = self::replies(conn, msg_id)?;
     let attachments = crate::message::attachments::db::get(conn, &msg_id)?;
 
-    Ok(w!(conn.query_row_named(
-        include_str!("sql/get_message.sql"),
+    let mut stmt = conn.prepare_cached(include_str!("sql/get_message.sql"))?;
+
+    Ok(w!(stmt.query_row_named(
         named_params! {
             "@msg_id": msg_id
         },
