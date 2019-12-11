@@ -6,7 +6,7 @@ use std::ops::Not;
 use types::*;
 
 mod search_helper;
-pub(crate) use search_helper::highlight_message;
+pub use search_helper::highlight_message;
 
 #[derive(PartialEq, Debug)]
 pub enum SearchChanged {
@@ -102,10 +102,9 @@ impl SearchState {
     pub fn msg_matches(
         &self,
         msg_id: &MsgId,
-        container: &Container,
     ) -> Option<bool> {
-        let data = container.get_data(msg_id)?;
-        Some(data.matches(self.pattern.as_ref()?))
+        let pattern = self.pattern.as_ref()?;
+        crate::container::access(msg_id, |m| m.matches(pattern))
     }
 
     pub fn set_regex<F: FnMut()>(
@@ -206,7 +205,7 @@ impl SearchState {
         mut num_matches_changed: N,
         mut data_changed: D,
     ) -> Option<()> {
-        if self.active.not() || self.msg_matches(msg_id, container)?.not() {
+        if self.active.not() || self.msg_matches(msg_id)?.not() {
             return Some(());
         }
 
@@ -228,13 +227,13 @@ impl SearchState {
             if (0..=ix).contains(&pos) {
                 let new_ix = ix.saturating_sub(1);
                 self.index.replace(new_ix);
+
                 index_changed();
 
                 let Match(msg) = self.matches.get(new_ix)?;
-                let data = container.get_data_mut(&msg.msg_id)?;
-                data.match_status = MatchStatus::Focused;
 
-                let container_ix = container.index_of(msg)?;
+                let container_ix = container.index_by_id(msg.msg_id)?;
+                container.list.get_mut(container_ix)?.match_status = MatchStatus::Focused;
 
                 data_changed(container_ix);
             }
@@ -251,11 +250,11 @@ impl SearchState {
         mut num_matches_changed: N,
         mut data_changed: D,
     ) -> Option<()> {
-        if self.active.not() || self.msg_matches(&msg_id, container)?.not() {
+        if self.active.not() || self.msg_matches(&msg_id)?.not() {
             return Some(());
         }
 
-        let message = from_msg_id(msg_id, &container)?;
+        let message = from_msg_id(msg_id)?;
         let ix = self.index;
 
         let pos = if self
@@ -276,12 +275,8 @@ impl SearchState {
         };
 
         self.matches.insert(pos, Match(message));
-        let data = container.get_data_mut(&msg_id)?;
-        data.match_status = MatchStatus::Matched;
-        data.search_buf = Some(highlight_message(
-            self.pattern.as_ref()?,
-            data.body.as_ref()?,
-        ));
+
+        container.list.get_mut(pos)?.match_status = MatchStatus::Matched;
 
         data_changed(pos);
         num_matches_changed();

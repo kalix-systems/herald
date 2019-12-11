@@ -257,7 +257,7 @@ fn messages() -> Object {
         replyType: ItemProp::new(QUint8).optional(),
 
         // Message preview properties
-        opMsgId: ItemProp::new(QByteArray).optional(),
+        opMsgId: ItemProp::new(QByteArray).optional().get_by_value(),
         opAuthor: ItemProp::new(QString).optional().get_by_value(),
         opBody: ItemProp::new(QString).optional().get_by_value(),
         opInsertionTime: ItemProp::new(Qint64).optional(),

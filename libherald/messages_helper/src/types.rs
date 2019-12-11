@@ -1,4 +1,3 @@
-use crate::container::*;
 use herald_common::{Time, UserId};
 pub use heraldcore::{
     message::{
@@ -23,13 +22,11 @@ pub struct MsgData {
     pub receipts: HashMap<UserId, MessageReceiptStatus>,
     pub attachments: heraldcore::message::attachments::AttachmentMeta,
     pub send_status: MessageSendStatus,
-    pub match_status: MatchStatus,
     pub replies: HashSet<MsgId>,
-    pub search_buf: Option<String>,
 }
 
 #[repr(u8)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MatchStatus {
     NotMatched = 0,
     Matched = 1,
@@ -66,6 +63,7 @@ impl MsgData {
 pub struct Message {
     pub msg_id: MsgId,
     pub insertion_time: Time,
+    pub match_status: MatchStatus,
 }
 
 pub fn split_msg(msg: Msg) -> (Message, MsgData) {
@@ -90,28 +88,25 @@ pub fn split_msg(msg: Msg) -> (Message, MsgData) {
         attachments,
         time,
         send_status,
-        match_status: MatchStatus::NotMatched,
         replies,
-        search_buf: None,
     };
 
     let message = Message {
         msg_id: message_id,
         insertion_time: time.insertion,
+        match_status: MatchStatus::NotMatched,
     };
 
     (message, data)
 }
 
-pub fn from_msg_id(
-    msg_id: MsgId,
-    container: &Container,
-) -> Option<Message> {
-    let insertion_time = container.get_data(&msg_id)?.time.insertion;
+pub fn from_msg_id(msg_id: MsgId) -> Option<Message> {
+    let insertion_time = crate::container::access(&msg_id, |m| m.time.insertion)?;
 
     Some(Message {
         msg_id,
         insertion_time,
+        match_status: MatchStatus::NotMatched,
     })
 }
 

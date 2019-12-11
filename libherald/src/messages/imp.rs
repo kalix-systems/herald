@@ -52,20 +52,18 @@ impl Messages {
         }
 
         if let Some(Match(old)) = old {
-            if let Some(data) = self.container.get_data_mut(&old.msg_id) {
-                data.match_status = MatchStatus::Matched;
-                let ix = self.container.index_of(&old)?;
-                self.entry_changed(ix);
-            }
+            let ix = self.container.index_of(&old)?;
+            self.container.list.get_mut(ix)?.match_status = MatchStatus::Matched;
+            self.entry_changed(ix);
         }
 
         let Match(new) = new?;
 
-        let data = self.container.get_data_mut(&new.msg_id)?;
-        data.match_status = MatchStatus::Focused;
-
         let ix = self.container.index_of(&new)?;
+        self.container.list.get_mut(ix)?.match_status = MatchStatus::Focused;
+
         self.entry_changed(ix);
+
         Some(ix)
     }
 
@@ -104,7 +102,9 @@ impl Messages {
         self.model.end_remove_rows();
 
         if let Some(MsgData { replies, .. }) = data {
-            container::set_dangling(&mut self.container, replies, &mut self.model);
+            let model = &mut self.model;
+            self.container
+                .set_dangling(replies, |ix| model.data_changed(ix, ix));
         }
 
         if ix > 0 {

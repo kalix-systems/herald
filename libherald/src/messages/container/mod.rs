@@ -1,30 +1,9 @@
 use super::*;
 use crate::{content_push, spawn};
 pub use messages_helper::{container::*, types::*};
-use std::collections::HashSet;
 
 mod handlers;
 pub(super) use handlers::*;
-
-/// Sets the reply type of a message to "dangling"
-pub(super) fn set_dangling(
-    container: &mut Container,
-    ids: HashSet<MsgId>,
-    model: &mut List,
-) -> Option<()> {
-    for id in ids.into_iter() {
-        if let Some(data) = container.get_data_mut(&id) {
-            if data.op != ReplyId::Dangling {
-                data.op = ReplyId::Dangling;
-
-                let ix = container.index_by_id(id)?;
-                model.data_changed(ix, ix);
-            }
-        }
-    }
-
-    Some(())
-}
 
 pub(super) fn fill(cid: ConversationId) {
     spawn!({
