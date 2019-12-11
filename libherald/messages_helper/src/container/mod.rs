@@ -2,7 +2,6 @@ use crate::*;
 use herald_common::{Time, UserId};
 use im::vector::Vector;
 use search::*;
-use std::collections::HashMap;
 use std::collections::HashSet;
 use types::*;
 
