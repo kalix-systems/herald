@@ -53,5 +53,7 @@
         <file>ChatView/Header/ChatBar.qml</file>
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
         <file>ChatView/Popups/ImageViewerPopup.qml</file>
+        <file>SideBar/popups/ConfigComponents/ConfigListItem.qml</file>
+        <file>SideBar/popups/ConfigComponents/AccountComponent.qml</file>
     </qresource>
 </RCC>

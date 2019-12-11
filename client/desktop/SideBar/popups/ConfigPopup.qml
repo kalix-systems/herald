@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
 import "../../common" as Common
+import "./ConfigComponents" as CfgComps
 import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {
@@ -29,7 +30,6 @@ Window {
     }
     SplitView {
         anchors.fill: parent
-
         handle: Item {
             id: handle
             implicitWidth: 1
@@ -75,18 +75,8 @@ Window {
                 }
             }
 
-            RowLayout {
+            ScrollView {
                 anchors.fill: parent
-
-                Rectangle {
-                    Layout.fillHeight: true
-                    width: 1
-                    color: CmnCfg.palette.offBlack
-                }
-
-                ScrollView {
-                    Layout.fillWidth: true
-                }
             }
         }
 
@@ -101,6 +91,27 @@ Window {
                 Row {
                     leftPadding: CmnCfg.margin
                     anchors.fill: parent
+                }
+            }
+
+            Flickable {
+                anchors.fill: parent
+
+                Column {
+                    spacing: CmnCfg.margin
+                    leftPadding: CmnCfg.margin
+                    CfgComps.ConfigListItem {
+                        headerText: "Account"
+                    }
+                    CfgComps.ConfigListItem {
+                        headerText: "UI"
+                    }
+                    CfgComps.ConfigListItem {
+                        headerText: "Authentication"
+                    }
+                    CfgComps.ConfigListItem {
+                        headerText: "Notifications"
+                    }
                 }
             }
         }
