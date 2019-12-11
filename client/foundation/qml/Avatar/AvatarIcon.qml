@@ -5,6 +5,7 @@ import QtGraphicalEffects 1.0
 
 Item {
     id: wrapperItem
+
     property string pfpUrl
     property bool groupAvatar: false
     property color color
