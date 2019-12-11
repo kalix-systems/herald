@@ -98,8 +98,10 @@ Rectangle {
                     Layout.leftMargin: CmnCfg.smallMargin
                     Layout.rightMargin: CmnCfg.smallMargin
                     Layout.bottomMargin: CmnCfg.smallPadding
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     Layout.alignment: Qt.AlignLeft
+                    Layout.fillWidth: true
+
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                     selectByMouse: true
                     selectByKeyboard: true
                     readOnly: true
