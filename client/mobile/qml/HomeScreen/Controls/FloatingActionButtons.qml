@@ -17,7 +17,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New contact"
+            text: qsTr("New contact")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent
@@ -52,7 +52,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New group"
+            text: qsTr("New group")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent
@@ -88,7 +88,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New conversation"
+            text: qsTr("New conversation")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent

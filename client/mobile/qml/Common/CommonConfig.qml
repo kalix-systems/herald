@@ -4,14 +4,6 @@ import "qrc:/imports/themes" as Themes
 import "qrc:/imports" as Imports
 pragma Singleton
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-// FS: Fix scoping
 Item {
     id: cfg
 

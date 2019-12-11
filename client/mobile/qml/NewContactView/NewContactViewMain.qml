@@ -15,7 +15,7 @@ Page {
         anchors.leftMargin: parent.width * 0.1
 
         Label {
-            text: "Request a New Contact"
+            text: qsTr("Request a New Contact")
         }
 
         TextArea {
@@ -24,21 +24,21 @@ Page {
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
             }
-            placeholderText: "Enter a UID"
+            placeholderText: qsTr("Enter a UID")
         }
 
         TextArea {
             Layout.alignment: Qt.AlignLeft
             Layout.preferredWidth: parent.width * 0.8
             Layout.preferredHeight: parent.height * 0.5
-            placeholderText: "Enter message text"
+            placeholderText: qsTr("Enter message text")
             background: Rectangle {
                 border.color: CmnCfg.palette.borderColor
             }
         }
 
         Button {
-            text: "Send"
+            text: qsTr("Send")
             onClicked: {
                 herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()

@@ -19,7 +19,7 @@ Page {
                 Row {
                     Common.HeaderText {
                         font.pointSize: 18
-                        text: "Username: "
+                        text: qsTr("Username:") + " "
                         leftPadding: CmnCfg.margin
                     }
                     Common.HeaderText {

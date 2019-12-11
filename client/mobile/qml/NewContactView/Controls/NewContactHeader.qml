@@ -30,7 +30,7 @@ ToolBar {
         }
 
         Label {
-            text: "New Contact"
+            text: qsTr("New Contact")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
             font.pointSize: CmnCfg.chatPreviewSize

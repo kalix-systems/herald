@@ -51,7 +51,7 @@ Column {
         anchors.horizontalCenter: parent.horizontalCenter
         TextArea {
             id: titleText
-            placeholderText: "Group title"
+            placeholderText: qsTr("Group title")
             leftPadding: 0
         }
 
@@ -64,7 +64,7 @@ Column {
         //TODO: This doesn't do anything yet
         CheckBox {
             topPadding: CmnCfg.units.dp(12)
-            text: "Enable channels"
+            text: qsTr("Enable channels")
             font.family: CmnCfg.chatFont.name
             checked: false
             indicator.width: CmnCfg.units.dp(18)

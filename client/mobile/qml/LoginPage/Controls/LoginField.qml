@@ -5,7 +5,7 @@ import LibHerald 1.0
 TextField {
     id: lpTextField
 
-    placeholderText: "Enter Username..."
+    placeholderText: qsTr("Enter Username") + "..."
 
     width: CmnCfg.units.gu(15)
 

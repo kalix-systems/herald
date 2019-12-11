@@ -37,7 +37,7 @@ ToolBar {
 
             Label {
                 id: stateLabel
-                text: "Conversations"
+                text: qsTr("Conversations")
                 font {
                     pointSize: CmnCfg.chatPreviewSize
                     family: CmnCfg.labelFont.name

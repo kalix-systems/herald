@@ -39,9 +39,8 @@ ListView {
         readonly property string authName: herald.users.nameById(author)
         readonly property bool outbound: author === herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
-        // column is most correct to resize for extra content
+
         anchors {
-            // This is okay as a ternary, the types are enforced by QML.
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
             rightMargin: CmnCfg.margin * 2.0

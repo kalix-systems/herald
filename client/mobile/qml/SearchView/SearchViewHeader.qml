@@ -24,7 +24,10 @@ RowLayout {
     }
 
     function searchBarTr() {
-        var cvs = contactViewMain.state
-        contactViewMain.state = cvs === "search" ? "default" : "search"
+        if (contactViewMain.state === "search") {
+            contactViewMain.state = "default"
+        } else {
+            contactViewMain.state = "search"
+        }
     }
 }
