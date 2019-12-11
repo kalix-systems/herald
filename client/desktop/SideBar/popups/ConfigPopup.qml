@@ -32,7 +32,6 @@ Window {
 
     Page {
         anchors.fill: parent
-
         header: Rectangle {
             id: headerRect
             color: CmnCfg.palette.offBlack
@@ -59,11 +58,12 @@ Window {
             }
         }
 
-        Row {
+        RowLayout {
             anchors.fill: parent
+            spacing: 0
             Rectangle {
-                width: 0.3 * 600
-                height: parent.height
+                Layout.minimumWidth: 0.3 * 600
+                Layout.fillHeight: true
                 color: CmnCfg.palette.offBlack
                 Column {
                     spacing: CmnCfg.margin
@@ -89,30 +89,36 @@ Window {
                 }
             }
 
-            Column {
-                spacing: CmnCfg.margin
-                padding: CmnCfg.margin
-                CfgComps.ConfigListItem {
-                    headerText: qsTr("Notifications")
-                    configContent: CfgComps.Notifications {}
-                }
-                CfgComps.ConfigListItem {
-                    headerText: qsTr("Appearance")
-                }
-                CfgComps.ConfigListItem {
-                    headerText: "Privacy & Security"
-                }
+            Flickable {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentHeight: col.height
+                Column {
+                    id: col
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    CfgComps.ConfigListItem {
+                        headerText: qsTr("Notifications")
+                        configContent: CfgComps.Notifications {}
+                    }
+                    CfgComps.ConfigListItem {
+                        headerText: qsTr("Appearance")
+                    }
+                    CfgComps.ConfigListItem {
+                        headerText: "Privacy & Security"
+                    }
 
-                CfgComps.ConfigListItem {
-                    headerText: "Data & Storage"
-                }
+                    CfgComps.ConfigListItem {
+                        headerText: "Data & Storage"
+                    }
 
-                CfgComps.ConfigListItem {
-                    headerText: "Advanced"
-                }
+                    CfgComps.ConfigListItem {
+                        headerText: "Advanced"
+                    }
 
-                CfgComps.ConfigListItem {
-                    headerText: "Help & Feedback"
+                    CfgComps.ConfigListItem {
+                        headerText: "Help & Feedback"
+                    }
                 }
             }
         }

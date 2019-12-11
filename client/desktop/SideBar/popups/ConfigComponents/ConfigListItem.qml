@@ -5,7 +5,11 @@ import LibHerald 1.0
 Column {
     property string headerText
     property Component configContent
-    spacing: CmnCfg.margin
+    leftPadding: CmnCfg.margin
+    anchors {
+        right: parent.right
+        left: parent.left
+    }
     Label {
         text: headerText
         font.family: CmnCfg.labelFont.name
@@ -13,6 +17,10 @@ Column {
         font.pointSize: CmnCfg.headerSize
     }
     Loader {
+        anchors {
+            right: parent.right
+            left: parent.left
+        }
         sourceComponent: configContent
     }
 }
