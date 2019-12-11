@@ -35,7 +35,7 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 3
+    cacheBuffer: chatListView.height * 5
 
     Layout.maximumWidth: parent.width
 

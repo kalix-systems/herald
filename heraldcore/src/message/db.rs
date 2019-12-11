@@ -46,6 +46,24 @@ pub(crate) fn get_message(
     )))
 }
 
+/// Get message metadata by message id
+pub(crate) fn message_meta(
+    conn: &Conn,
+    msg_id: &MsgId,
+) -> Result<MessageMeta, HErr> {
+    let mut stmt = conn.prepare_cached(include_str!("sql/message_meta.sql"))?;
+    Ok(w!(stmt.query_row_named(
+        named_params! { "@msg_id": msg_id },
+        |row| {
+            Ok(MessageMeta {
+                insertion_time: row.get("insertion_ts")?,
+                msg_id: *msg_id,
+                match_status: MatchStatus::NotMatched,
+            })
+        }
+    )))
+}
+
 /// Get message by message id
 pub(crate) fn get_message_opt(
     conn: &Conn,

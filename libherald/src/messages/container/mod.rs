@@ -7,7 +7,7 @@ pub(super) use handlers::*;
 
 pub(super) fn fill(cid: ConversationId) {
     spawn!({
-        let (list, map): (Vector<Message>, HashMap<MsgId, MsgData>) =
+        let (list, map): (Vector<MessageMeta>, HashMap<MsgId, MsgData>) =
             ret_err!(conversation::conversation_messages(&cid))
                 .into_iter()
                 .map(|m| {

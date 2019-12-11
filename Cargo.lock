@@ -309,6 +309,7 @@ dependencies = [
  "rusqlite 0.20.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
  "tar 0.4.26 (registry+https://github.com/rust-lang/crates.io-index)",
+ "unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1165,6 +1166,7 @@ name = "messages_helper"
 version = "0.1.0"
 dependencies = [
  "coremacros 0.1.0",
+ "coretypes 0.1.0",
  "herald_common 0.1.0",
  "heraldcore 0.1.0",
  "im 14.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1173,7 +1175,6 @@ dependencies = [
  "once_cell 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "search_pattern 0.1.0",
- "unicode-segmentation 1.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

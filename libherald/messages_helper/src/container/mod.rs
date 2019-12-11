@@ -13,17 +13,17 @@ pub use cache::{access, update};
 /// A container type for messages backed by an RRB-tree vector
 /// and a hash map.
 pub struct Container {
-    pub list: Vector<Message>,
+    pub list: Vector<MessageMeta>,
     last: Option<MsgData>,
 }
 
 impl Container {
     pub fn new(
-        list: Vector<Message>,
+        list: Vector<MessageMeta>,
         map: HashMap<MsgId, MsgData>,
     ) -> Self {
         let last = match list.last().as_ref() {
-            Some(Message { ref msg_id, .. }) => map.get(msg_id).cloned(),
+            Some(MessageMeta { ref msg_id, .. }) => map.get(msg_id).cloned(),
             None => None,
         };
 
@@ -41,7 +41,7 @@ impl Container {
     pub fn get(
         &self,
         ix: usize,
-    ) -> Option<&Message> {
+    ) -> Option<&MessageMeta> {
         self.list.get(ix)
     }
 
@@ -114,13 +114,13 @@ impl Container {
         access(mid, |m| crate::doc_attachments_json(&m.attachments))?
     }
 
-    pub fn last(&self) -> Option<&Message> {
+    pub fn last(&self) -> Option<&MessageMeta> {
         self.list.last()
     }
 
     pub fn index_of(
         &self,
-        msg: &Message,
+        msg: &MessageMeta,
     ) -> Option<usize> {
         self.list.binary_search(&msg).ok()
     }
@@ -151,7 +151,7 @@ impl Container {
             self.last = self
                 .list
                 .last()
-                .and_then(|Message { ref msg_id, .. }| cache::get(msg_id));
+                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
         data
@@ -159,7 +159,7 @@ impl Container {
 
     pub fn binary_search(
         &self,
-        msg: &Message,
+        msg: &MessageMeta,
     ) -> Result<usize, usize> {
         self.list.binary_search(msg)
     }
@@ -168,7 +168,7 @@ impl Container {
     pub fn insert(
         &mut self,
         ix: usize,
-        msg: Message,
+        msg: MessageMeta,
         data: MsgData,
     ) -> Option<()> {
         let old_len = self.list.len();
@@ -187,7 +187,7 @@ impl Container {
             self.last = self
                 .list
                 .last()
-                .and_then(|Message { ref msg_id, .. }| cache::get(msg_id));
+                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
         Some(())

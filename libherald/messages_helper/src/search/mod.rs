@@ -21,7 +21,7 @@ impl SearchChanged {
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Match(pub Message);
+pub struct Match(pub MessageMeta);
 
 pub struct SearchState {
     pub pattern: Option<SearchPattern>,
@@ -212,7 +212,7 @@ impl SearchState {
         let pos = self
             .matches
             .iter()
-            .position(|Match(Message { msg_id: mid, .. })| mid == msg_id)?;
+            .position(|Match(MessageMeta { msg_id: mid, .. })| mid == msg_id)?;
 
         self.matches.remove(pos);
         num_matches_changed();
