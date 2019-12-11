@@ -149,14 +149,17 @@ ColumnLayout {
                         }
                     }
                 }
+
+                Loader {
+                    id: imageClipLoader
+
+                    Layout.alignment: Qt.AlignTop
+                    Layout.topMargin: CmnCfg.smallMargin
+                }
+
                 Component {
                     id: imageClipComponent
                     ReplyImageClip {}
-                }
-
-                Loader {
-                    Layout.alignment: Qt.AlignRight
-                    id: imageClipLoader
                 }
             }
 
