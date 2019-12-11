@@ -78,9 +78,7 @@ ListView {
             selectMultiple: false
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
-            onAccepted: {
-                herald.utils.saveFile(path, fileUrl)
-            }
+            onAccepted: herald.utils.saveFile(path, fileUrl)
         }
     }
 }

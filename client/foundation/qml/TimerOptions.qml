@@ -17,32 +17,32 @@ Menu {
         id: timerModel
 
         ListElement {
-            name: "Off"
+            name: qsTr("Off")
             path: "qrc:/timer-icons/off.svg"
         }
 
         ListElement {
-            name: "1 minute"
+            name: qsTr("1 minute")
             path: "qrc:/timer-icons/1min.svg"
         }
         ListElement {
-            name: "1 hour"
+            name: qsTr("1 hour")
             path: "qrc:/timer-icons/1h.svg"
         }
         ListElement {
-            name: "1 day"
+            name: qsTr("1 day")
             path: "qrc:/timer-icons/1d.svg"
         }
         ListElement {
-            name: "1 week"
+            name: qsTr("1 week")
             path: "qrc:/timer-icons/1w.svg"
         }
         ListElement {
-            name: "1 month"
+            name: qsTr("1 month")
             path: "qrc:/timer-icons/1mo.svg"
         }
         ListElement {
-            name: "1 year"
+            name: qsTr("1 year")
             path: "qrc:/timer-icons/1y.svg"
         }
     }

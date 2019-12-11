@@ -114,9 +114,7 @@ Window {
         selectFolder: true
         selectMultiple: false
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: {
-            herald.utils.saveFile(sourceAtc[index].path, fileUrl)
-        }
+        onAccepted: herald.utils.saveFile(sourceAtc[index].path, fileUrl)
     }
 
     Rectangle {
@@ -125,7 +123,7 @@ Window {
     }
 
     onVisibilityChanged: {
-        // 2 is the enum for Qwindow::Windowed
+        // 2 is the enum for QWindow::Windowed
         // it is not in scope nor in the window namespace
         if (visibility === 2) {
             width = Math.min(image.sourceSize.width, 750)

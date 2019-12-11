@@ -171,7 +171,8 @@ ColumnLayout {
                     property string shortenedText: knownReply ? truncate_text(
                                                                     modelData.opBody).slice(
                                                                     0,
-                                                                    350) + decoration : "Original message not found"
+                                                                    350) + decoration : qsTr(
+                                                                    "Original message not found")
                     text: shortenedText
                     elideWidth: maxWidth * 2
                     elide: Text.ElideRight
