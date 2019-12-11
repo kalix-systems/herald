@@ -21,20 +21,22 @@ ColumnLayout {
 
     Component.onCompleted: {
         const doc = JSON.parse(modelData.opDocAttachments)
+
         nameMetrics.text = doc[0].name
         fileSize.text = Utils.friendlyFileSize(doc[0].size)
 
-        const media = modelData.opMediaAttachments.length === 0 ? "" : JSON.parse(
-                                                                      modelData.opMediaAttachments)
-        switch (media.length) {
-        case 0:
-            break
-        default:
-            imageClipLoader.sourceComponent = imageClipComponent
-            imageClipLoader.item.imageSource = "file:" + media[0].path
-            imageClipLoader.item.count = media.length - 1
-            imageClipLoader.item.aspectRatio = media[0].width / media[0].height
-        }
+        if (modelData.opMediaAttachments.length === 0)
+            return
+
+        const media = JSON.parse(modelData.opMediaAttachments)
+
+        if (media.length === 0)
+            return
+
+        imageClipLoader.sourceComponent = imageClipComponent
+        imageClipLoader.item.imageSource = "file:" + media[0].path
+        imageClipLoader.item.count = media.length - 1
+        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
     }
 
     Rectangle {
