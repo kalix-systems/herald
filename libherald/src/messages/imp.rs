@@ -85,6 +85,7 @@ impl Messages {
                 |ix| model.data_changed(ix, ix),
             );
         }
+
         self.builder.try_clear_reply(&msg_id);
 
         let len = self.container.len();

@@ -38,13 +38,11 @@ pub fn access<T, F: FnOnce(&MsgData) -> T>(
     Some(f(&data))
 }
 
-pub fn update<F: FnOnce(&mut MsgData)>(
+pub fn update<T, F: FnOnce(&mut MsgData) -> T>(
     mid: &MsgId,
     f: F,
-) -> Option<()> {
-    f(cache().lock().get_mut(mid)?);
-
-    Some(())
+) -> Option<T> {
+    Some(f(cache().lock().get_mut(mid)?))
 }
 
 pub(super) fn remove(mid: &MsgId) -> Option<MsgData> {

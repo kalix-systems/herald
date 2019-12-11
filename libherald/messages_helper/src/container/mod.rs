@@ -331,15 +331,20 @@ impl Container {
         mut data_changed: F,
     ) -> Option<()> {
         for id in ids.into_iter() {
-            update(&id, |data| {
+            let changed = update(&id, |data| {
                 if data.op != ReplyId::Dangling {
                     data.op = ReplyId::Dangling;
-
-                    if let Some(ix) = self.index_by_id(id) {
-                        data_changed(ix);
-                    }
+                    true
+                } else {
+                    false
                 }
             });
+
+            if changed.unwrap_or(false) {
+                if let Some(ix) = self.index_by_id(id) {
+                    data_changed(ix);
+                }
+            }
         }
 
         Some(())
