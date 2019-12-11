@@ -40,16 +40,13 @@ CONFIG(release, debug|profile|release) {
 
 # platform specific settings
 iphonesimulator {
-    LIBS += $${PWD}/../../target/x86_64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
+    LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -l sqlite3
 }
 
 macx {
   LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
 }
-
-
-
 
 
 android {

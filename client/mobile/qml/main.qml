@@ -13,9 +13,7 @@ ApplicationWindow {
 
     Herald {
         id: herald
-
         property var errPopup: ErrorDialog {}
-
         errors.onTryPollChanged: {
             var errMsg = herald.errors.nextError()
             if (errMsg !== "") {

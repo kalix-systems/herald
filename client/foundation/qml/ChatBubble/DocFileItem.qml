@@ -5,7 +5,7 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 import "./../"
 import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
+//import QtQuick.Dialogs 1.3
 import "../js/utils.mjs" as Utils
 
 ListView {
@@ -73,9 +73,9 @@ ListView {
 
         FileDialog {
             id: fileChooser
-            selectExisting: false
-            selectFolder: true
-            selectMultiple: false
+            //            selectExisting: false
+            //            selectFolder: true
+            //            selectMultiple: false
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
             onAccepted: {

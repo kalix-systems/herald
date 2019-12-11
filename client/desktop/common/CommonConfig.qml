@@ -36,7 +36,7 @@ Item {
     property int popupHeight: 250
     /// standard config width and height
     property int configWidth: 600
-    property int configHeight: 200
+    property int configHeight: 400
     /// standard z values
     property int overlayZ: 10
     property int topZ: 9
