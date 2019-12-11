@@ -11,6 +11,7 @@ pub(super) fn cache() -> &'static Mutex<LruCache<MsgId, MsgData>> {
 
 pub(super) fn get(mid: &MsgId) -> Option<MsgData> {
     let maybe = cache().lock().get(mid).cloned();
+
     match maybe {
         data @ Some(_) => data,
         None => db_data(mid),

@@ -348,12 +348,12 @@ impl Messages {
 
         self.container.access_by_index(index, |data| {
             if match_status.is_match() {
-                Some(elider.elided_body(data.body.as_ref()?))
-            } else {
                 Some(messages_helper::search::highlight_message(
                     pattern.as_ref()?,
                     data.body.as_ref()?,
                 ))
+            } else {
+                Some(elider.elided_body(data.body.as_ref()?))
             }
         })?
     }
@@ -367,12 +367,12 @@ impl Messages {
 
         self.container.access_by_index(index, |data| {
             if match_status.is_match() {
-                data.body.as_ref().map(MessageBody::to_string)
-            } else {
                 Some(messages_helper::search::highlight_message(
                     pattern.as_ref()?,
                     data.body.as_ref()?,
                 ))
+            } else {
+                data.body.as_ref().map(MessageBody::to_string)
             }
         })?
     }
