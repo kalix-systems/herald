@@ -8,7 +8,6 @@ use heraldcore::{conversation, errors::HErr, message::MessageReceiptStatus, type
 use im::vector::Vector;
 use messages_helper::search::SearchState;
 use search_pattern::SearchPattern;
-use std::collections::HashMap;
 
 mod container;
 use container::*;

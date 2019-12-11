@@ -20,13 +20,8 @@ pub struct Container {
 impl Container {
     pub fn new(
         list: Vector<MessageMeta>,
-        map: HashMap<MsgId, MsgData>,
+        last: Option<MsgData>,
     ) -> Self {
-        let last = match list.last().as_ref() {
-            Some(MessageMeta { ref msg_id, .. }) => map.get(msg_id).cloned(),
-            None => None,
-        };
-
         Self { last, list }
     }
 
