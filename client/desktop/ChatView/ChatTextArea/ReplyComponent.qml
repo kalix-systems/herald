@@ -59,6 +59,7 @@ Rectangle {
     ColumnLayout {
         RowLayout {
             Layout.preferredWidth: wrapper.width - CmnCfg.smallMargin
+            Layout.maximumWidth: wrapper.width - CmnCfg.smallMargin
             clip: true
             ColumnLayout {
                 id: textCol
