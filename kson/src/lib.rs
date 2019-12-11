@@ -23,6 +23,8 @@ pub mod utils;
 pub mod value;
 pub use kson_derive::*;
 
+use prelude::*;
+
 pub fn to_vec<T: ser::Ser + ?Sized>(t: &T) -> Vec<u8> {
     use ser::*;
     let mut out = Serializer::new();
@@ -35,7 +37,7 @@ pub fn from_bytes<T: de::De>(from: prelude::Bytes) -> Result<T, errors::KsonErro
 }
 
 pub fn from_slice<T: de::De>(from: &[u8]) -> Result<T, errors::KsonError> {
-    from_bytes(from.into())
+    from_bytes(Bytes::copy_from_slice(from))
 }
 
 pub const MASK_TYPE: u8 = 0b1110_0000;

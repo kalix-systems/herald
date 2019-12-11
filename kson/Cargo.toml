@@ -9,7 +9,7 @@ edition = "2018"
 [dependencies]
 arrayvec = "0.5.1"
 backtrace = "0.3.40"
-bytes = "0.4.12"
+bytes = "0.5"
 
 [dependencies.kson_derive]
 path = "./kson_derive"

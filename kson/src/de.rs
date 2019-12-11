@@ -68,7 +68,7 @@ impl Deserializer {
             )
         }
 
-        let out = self.data.slice(self.ix, self.ix + len);
+        let out = self.data.slice(self.ix..self.ix + len);
         self.ix += len;
 
         Ok(out)
