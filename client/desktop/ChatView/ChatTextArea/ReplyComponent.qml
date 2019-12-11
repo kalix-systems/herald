@@ -18,7 +18,7 @@ Rectangle {
     property string opText: parent.opText
     property string opName: parent.opName
 
-    Component.onCompleted: {
+    function loadMedia() {
         const media = ownedConversation.builder.opMediaAttachments.length
                     === 0 ? "" : JSON.parse(
                                 ownedConversation.builder.opMediaAttachments)
@@ -31,6 +31,14 @@ Rectangle {
             imageClipLoader.item.count = media.length - 1
             imageClipLoader.item.aspectRatio = media[0].width / media[0].height
         }
+    }
+
+    Component.onCompleted: loadMedia()
+    Connections {
+        target: ownedConversation.builder
+        onOpIdChanged: if (ownedConversation.builder.isReply) {
+                           loadMedia()
+                       }
     }
 
     Rectangle {

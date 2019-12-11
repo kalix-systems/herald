@@ -260,9 +260,7 @@ impl MessageBuilder {
         match op_msg_id {
             Some(op_msg_id) => {
                 let op_msg_id = op_msg_id.try_into()?;
-                let out = Ok(self.update_op_id(&op_msg_id, container));
-                self.emit.is_reply_changed();
-                out
+                Ok(self.update_op_id(&op_msg_id, container))
             }
             None => Ok(self.clear_reply_()),
         }
