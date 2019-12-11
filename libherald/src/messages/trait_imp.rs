@@ -200,7 +200,7 @@ impl Interface for Messages {
     fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<ffi::MsgIdRef> {
+    ) -> Option<ffi::MsgId> {
         self.op_msg_id_(index)
     }
 

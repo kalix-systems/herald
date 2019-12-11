@@ -35,11 +35,9 @@ impl Messages {
     ) -> Option<u32> {
         Some(
             self.container
-                .msg_data(index)?
-                .receipts
-                .values()
-                .map(|r| *r as u32)
-                .max()
+                .access_by_index(index, |data| {
+                    data.receipts.values().map(|r| *r as u32).max()
+                })?
                 .unwrap_or(MessageReceiptStatus::NoAck as u32),
         )
     }
@@ -91,7 +89,7 @@ impl Messages {
             self.container.msg_data(index + 1)?,
         );
 
-        Some(!msg.same_flurry(succ))
+        Some(!msg.same_flurry(&succ))
     }
 
     pub(crate) fn is_head_(
@@ -113,7 +111,7 @@ impl Messages {
             self.container.msg_data(index - 1)?,
         );
 
-        Some(!msg.same_flurry(prev))
+        Some(!msg.same_flurry(&prev))
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
@@ -172,10 +170,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.container
-            .op_body(index)
-            .cloned()?
-            .map(MessageBody::into_inner)
+        self.container.op_body(index).map(MessageBody::into_inner)
     }
 
     pub(crate) fn set_builder_op_msg_id_(
@@ -339,38 +334,47 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<ffi::UserId> {
-        Some(self.container.msg_data(index)?.author.to_string())
+        self.container
+            .access_by_index(index, |data| data.author.to_string())
     }
 
     pub(crate) fn body_(
         &self,
         index: usize,
     ) -> Option<String> {
-        Some(if self.container.msg_data(index)?.match_status.is_match() {
-            self.container
-                .msg_data(index)?
-                .search_buf
-                .as_ref()?
-                .to_owned()
-        } else {
-            self.elider
-                .elided_body(self.container.msg_data(index)?.body.as_ref()?)
-        })
+        let elider = &self.elider;
+        let pattern = &self.search.pattern;
+        let match_status = self.container.get(index).as_ref()?.match_status;
+
+        self.container.access_by_index(index, |data| {
+            if match_status.is_match() {
+                Some(messages_helper::search::highlight_message(
+                    pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                Some(elider.elided_body(data.body.as_ref()?))
+            }
+        })?
     }
 
     pub(crate) fn full_body_(
         &self,
         index: usize,
     ) -> Option<String> {
-        Some(if self.container.msg_data(index)?.match_status.is_match() {
-            self.container
-                .msg_data(index)?
-                .search_buf
-                .as_ref()?
-                .to_string()
-        } else {
-            self.container.msg_data(index)?.body.as_ref()?.to_string()
-        })
+        let pattern = &self.search.pattern;
+        let match_status = self.container.get(index).as_ref()?.match_status;
+
+        self.container.access_by_index(index, |data| {
+            if match_status.is_match() {
+                Some(messages_helper::search::highlight_message(
+                    pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                data.body.as_ref().map(MessageBody::to_string)
+            }
+        })?
     }
 
     pub(crate) fn insertion_time_(
@@ -384,14 +388,18 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.expiration?.into())
+        self.container.access_by_index(index, |data| {
+            data.time.expiration.map(herald_common::Time::into)
+        })?
     }
 
     pub(crate) fn server_time_(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.server?.into())
+        self.container.access_by_index(index, |data| {
+            data.time.server.map(herald_common::Time::into)
+        })?
     }
 
     pub(crate) fn reply_type_(
@@ -416,8 +424,8 @@ impl Messages {
     pub(crate) fn op_msg_id_(
         &self,
         index: usize,
-    ) -> Option<ffi::MsgIdRef> {
-        self.container.op_msg_id(index).map(MsgId::as_slice)
+    ) -> Option<ffi::MsgId> {
+        self.container.op_msg_id(index).map(MsgId::to_vec)
     }
 
     pub(crate) fn op_author_(
@@ -426,6 +434,7 @@ impl Messages {
     ) -> Option<ffi::UserId> {
         self.container
             .op_author(index)
+            .as_ref()
             .map(UserId::as_str)
             .map(str::to_string)
     }
@@ -503,7 +512,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<u8> {
-        Some(self.container.msg_data(index)?.match_status as u8)
+        Some(self.container.list.get(index)?.match_status as u8)
     }
 
     pub(crate) fn set_elision_line_count_(

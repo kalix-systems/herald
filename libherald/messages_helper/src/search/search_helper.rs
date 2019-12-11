@@ -60,7 +60,7 @@ impl SearchState {
     }
 }
 
-pub(crate) fn highlight_message(
+pub fn highlight_message(
     search: &SearchPattern,
     body: &MessageBody,
 ) -> String {

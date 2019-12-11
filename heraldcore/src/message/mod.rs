@@ -22,6 +22,12 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     db::get_message(&db, msg_id)
 }
 
+/// Get message by message id
+pub fn message_meta(msg_id: &MsgId) -> Result<MessageMeta, HErr> {
+    let db = Database::get()?;
+    db::message_meta(&db, msg_id)
+}
+
 /// Gets a message by message id. If the message cannot be found, it returns an option rather than
 /// an error.
 pub fn get_message_opt(msg_id: &MsgId) -> Result<Option<Message>, HErr> {
