@@ -71,7 +71,7 @@ ListView {
                 contactName: title
                 lastBody: !convContent.messages.isEmpty ? lastAuthor + ": "
                                                           + convContent.messages.lastBody : ""
-                lastAuthor: outbound ? "You" : convContent.messages.lastAuthor
+                lastAuthor: outbound ? qsTr("You") : convContent.messages.lastAuthor
                 lastTimestamp: !convContent.messages.isEmpty ? Utils.friendlyTimestamp(
                                                                    convContent.messages.lastTime) : ""
                 labelColor: CmnCfg.palette.black

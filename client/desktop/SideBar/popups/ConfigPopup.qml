@@ -26,16 +26,14 @@ Window {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: {
-            herald.config.profilePicture = fileUrl
-            print("set to", fileUrl)
-        }
+        onSelectionAccepted: herald.config.profilePicture = fileUrl
     }
 
     TabBar {
+        id: bar
         width: parent.width
         height: 50
-        id: bar
+
         TabButton {
             text: qsTr("Account")
         }
@@ -64,26 +62,27 @@ Window {
                     id: cfgUid
                     enabled: false
                     property bool userIdValid: true
-                    placeholderText: enabled ? "Enter UID " : herald.config.configId
+                    placeholderText: enabled ? qsTr("Enter UID") + " " : herald.config.configId
                     selectionColor: "lightsteelblue"
                 }
 
                 TextField {
                     id: cfgUname
-                    maximumLength: 256
                     property bool usernameValid: true
+
+                    maximumLength: 256
                     text: herald.config.name
                     selectionColor: "lightsteelblue"
                 }
             }
 
             Button {
-                text: "select profile picture"
+                text: qsTr("select profile picture")
                 onClicked: cfgPfp.open()
             }
 
             Button {
-                text: "Submit"
+                text: qsTr("Submit")
                 onClicked: {
                     JS.submit(herald.config, cfgUname)
                     close()
@@ -93,7 +92,7 @@ Window {
         Item {
             id: uiPreferences
             Button {
-                text: "toggle solarized dark"
+                text: qsTr("toggle solarized dark")
                 onClicked: CmnCfg.theme = CmnCfg.theme === 1 ? 0 : 1
             }
         }

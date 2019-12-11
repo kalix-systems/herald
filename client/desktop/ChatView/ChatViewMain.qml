@@ -70,7 +70,8 @@ Page {
                     return
 
                 convWindow.positionViewAtIndex(msg_idx, ListView.Center)
-                convWindow.highlightAnimation.target = convWindow.itemAtIndex(msg_idx).highlight
+                convWindow.highlightAnimation.target = convWindow.itemAtIndex(
+                            msg_idx).highlight
                 convWindow.highlightAnimation.start()
             }
         }
@@ -115,11 +116,10 @@ Page {
         }
 
         keysProxy: Item {
-            Keys.onReturnPressed: TextJs.enterKeyHandler(event,
-                                                     chatTextArea.chatText,
-                                                     ownedConversation.builder,
-                                                     ownedConversation,
-                                                     chatTextArea)
+            Keys.onReturnPressed: TextJs.enterKeyHandler(
+                                      event, chatTextArea.chatText,
+                                      ownedConversation.builder,
+                                      ownedConversation, chatTextArea)
             // TODO: Tab should cycle through a hierarchy of items as far as focus
         }
         emojiButton.onClicked: emoKeysPopup.active = !!!emoKeysPopup.active

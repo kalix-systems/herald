@@ -59,9 +59,7 @@ Rectangle {
         }
         source: "qrc:/x-icon.svg"
         scale: 0.8
-        onClicked: {
-            ownedConversation.builder.clearReply()
-        }
+        onClicked: ownedConversation.builder.clearReply()
     }
 
     ColumnLayout {

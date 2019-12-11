@@ -69,22 +69,27 @@ Component {
             }
 
             Text {
-                text: "CREATE"
+                text: qsTr("CREATE")
                 anchors.centerIn: parent
                 color: "white"
                 font.family: CmnCfg.labelFont.name
             }
             onClicked: {
-                titleText.text == "" ? herald.conversationBuilder.setTitle(
-                                           "Untitled Group") : herald.conversationBuilder.setTitle(
-                                           titleText.text)
+                if (titleText.text === "") {
+                    herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                } else {
+                    herald.conversationBuilder.setTitle(titleText.text)
+                }
+
                 if (topRect.profPic !== "") {
                     herald.conversationBuilder.picture = topRect.profPic
                 }
+
                 herald.conversationBuilder.finalize()
                 sideBarState.state = ""
             }
         }
+
         Component.onCompleted: herald.usersSearch.refresh()
         Component.onDestruction: herald.conversationBuilder.clear()
     }

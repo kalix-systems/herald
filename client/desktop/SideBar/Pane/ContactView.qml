@@ -8,14 +8,6 @@ import ".././js/ContactView.mjs" as JS
 import "../popups" as Popups
 import "qrc:/imports/Avatar" as Av
 
-// Reveiw Key
-// OS Dependent: OSD
-// Global State: GS
-// Just Hacky: JH
-// Type Script: TS
-// Needs polish badly: NPB
-// Factor Component: FC
-
 /// --- displays a list of contacts
 ListView {
     id: contactList

@@ -51,7 +51,7 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: CmnCfg.largeMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Herald"
+                    text: qsTr("Herald")
 
                     font.pixelSize: CmnCfg.headerSize
                     font.family: CmnCfg.labelFont.name

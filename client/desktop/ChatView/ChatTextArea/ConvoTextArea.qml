@@ -113,7 +113,7 @@ Rectangle {
                 color: CmnCfg.palette.black
                 selectByMouse: true
                 wrapMode: TextArea.WrapAtWordBoundaryOrAnywhere
-                placeholderText: "Message " + conversationItem.title
+                placeholderText: qsTr("Message") + " " + conversationItem.title
 
                 Keys.forwardTo: keysProxy
                 Keys.onEscapePressed: focus = false
