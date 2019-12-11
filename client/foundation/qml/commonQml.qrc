@@ -41,5 +41,6 @@
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>
         <file>ChatBubble/ReplyImageClip.qml</file>
+        <file>ChatBubble/ReplyDocBubble.qml</file>
     </qresource>
 </RCC>

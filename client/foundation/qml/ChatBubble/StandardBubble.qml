@@ -31,6 +31,15 @@ ColumnLayout {
     }
 
     Component {
+        id: replyDocContent
+        ReplyDocBubble {
+            maxWidth: bubbleRoot.maxWidth
+            replyId: bubbleRoot.replyId
+            modelData: bubbleRoot.messageModelData
+        }
+    }
+
+    Component {
         id: replyContent
         ReplyBubble {
             maxWidth: bubbleRoot.maxWidth
@@ -47,7 +56,14 @@ ColumnLayout {
     Column {
         width: bubbleRoot.width
         Loader {
-            sourceComponent: reply ? replyContent : undefined
+            sourceComponent: {
+                if (reply) {
+                    if (messageModelData.opDocAttachments.length === 0)
+                        return replyContent
+                    return replyDocContent
+                }
+                return undefined
+            }
         }
     }
 
