@@ -137,43 +137,4 @@ Rectangle {
             }
         }
     }
-
-    states: [
-
-
-        /*State {
-            name: "replystate"
-            when: ownedConversation.builder.isReply
-            PropertyChanges {
-                target: replyLoader
-                active: true
-            }
-            PropertyChanges {
-                target: scrollView
-                focus: true
-            }
-        },
-
-        State {
-            name: "attachmentstate"
-            when: ownedConversation.builder.hasDocAttachment
-                  || ownedConversation.builder.hasMediaAttachment
-            PropertyChanges {
-                target: attachmentLoader
-                active: true
-            }
-        },*/
-        State {
-            name: "default"
-            PropertyChanges {
-                target: replyLoader
-                active: false
-            }
-
-            PropertyChanges {
-                target: scrollView
-                focus: true
-            }
-        }
-    ]
 }

@@ -21,7 +21,6 @@ export function enterKeyHandler(
 
   builder.body = text;
   builder.finalize();
-  textAreaForm.state = "default";
 }
 
 export function appendToTextArea(text: string, target: TextArea): void {
