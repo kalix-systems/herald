@@ -1,4 +1,4 @@
-use crate::{hash, new_type, random};
+use crate::{new_type, random};
 use kson::prelude::*;
 use libsodium_sys::*;
 
@@ -101,18 +101,6 @@ impl SecretKey {
 
         // generate a random nonce
         random::gen_into(&mut nonce_buf);
-
-        // take the hash code of their public key and the msg
-        // we'll then xor this with the nonce to ensure nonce uniqueness
-        // this makes encryption slightly slower but also harder to screw up
-        let mut hasher = hash::Builder::new().out_len(NONCE_LEN).build();
-        hasher.update(them.as_ref());
-        hasher.update(msg);
-        let hash = hasher.finalize();
-
-        for (n, h) in nonce_buf.iter_mut().zip(hash.0) {
-            *n ^= h;
-        }
 
         let res = unsafe {
             crypto_box_curve25519xchacha20poly1305_detached(

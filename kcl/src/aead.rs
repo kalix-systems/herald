@@ -1,4 +1,4 @@
-use crate::{hash, new_type, random};
+use crate::{new_type, random};
 use kson::prelude::*;
 use libsodium_sys::*;
 
@@ -41,18 +41,6 @@ impl Key {
 
         // generate a random nonce
         random::gen_into(&mut nonce_buf);
-
-        // take the hash code of the associated data and the message
-        // we'll then xor this with the nonce to ensure nonce uniqueness
-        // this makes encryption slightly slower but also harder to screw up
-        let mut hasher = hash::Builder::new().out_len(NONCE_LEN).build();
-        hasher.update(ad);
-        hasher.update(msg);
-        let hash = hasher.finalize();
-
-        for (n, h) in nonce_buf.iter_mut().zip(hash.0) {
-            *n ^= h;
-        }
 
         let mut mac_len = 0u64;
         let res = unsafe {
