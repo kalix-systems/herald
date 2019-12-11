@@ -7,25 +7,20 @@ pub(in crate::messages) fn handle_receipt(
     recipient: UserId,
     model: &mut List,
 ) -> Result<(), HErr> {
-    let msg: &mut MsgData = match container.get_data_mut(&mid) {
-        None => {
-            // This can (possibly) happen if the message
-            // was deleted between the receipt
-            // being received over the network
-            // and this part of the code.
-            return Ok(());
-        }
-        Some(msg) => msg,
-    };
+    let res = update(&mid, |msg| {
+        msg.receipts
+            .entry(recipient)
+            .and_modify(|v| {
+                if *v < status {
+                    *v = status
+                }
+            })
+            .or_insert(status);
+    });
 
-    msg.receipts
-        .entry(recipient)
-        .and_modify(|v| {
-            if *v < status {
-                *v = status
-            }
-        })
-        .or_insert(status);
+    if res.is_none() {
+        return Ok(());
+    }
 
     // NOTE: If this fails, there is a bug somewhere
     // in libherald.
@@ -52,9 +47,9 @@ pub(in crate::messages) fn handle_store_done(
     meta: heraldcore::message::attachments::AttachmentMeta,
     model: &mut List,
 ) -> Option<()> {
-    let data = container.get_data_mut(&mid)?;
-
-    data.attachments = meta;
+    update(&mid, move |data| {
+        data.attachments = meta;
+    })?;
 
     let ix = container
         .list

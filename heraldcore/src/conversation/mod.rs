@@ -64,6 +64,14 @@ pub fn conversation_messages(conversation_id: &ConversationId) -> Result<Vec<Mes
     db::conversation_messages(&db, conversation_id)
 }
 
+/// Get all message metadata in a conversation.
+pub fn conversation_message_meta(
+    conversation_id: &ConversationId
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let db = Database::get()?;
+    db::conversation_message_meta(&db, conversation_id)
+}
+
 /// Get conversation metadata
 pub fn meta(conversation_id: &ConversationId) -> Result<ConversationMeta, HErr> {
     let db = Database::get()?;

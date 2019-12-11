@@ -459,7 +459,7 @@ pub trait MessagesTrait {
     fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<&[u8]>;
+    ) -> Option<Vec<u8>>;
 
     fn receipt_status(
         &self,

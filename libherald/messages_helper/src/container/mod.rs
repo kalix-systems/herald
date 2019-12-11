@@ -3,28 +3,31 @@ use herald_common::{Time, UserId};
 use im::vector::Vector;
 use search::*;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use types::*;
+
+mod cache;
+pub use cache::{access, update};
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector
 /// and a hash map.
 pub struct Container {
-    pub list: Vector<Message>,
-    map: HashMap<MsgId, MsgData>,
+    pub list: Vector<MessageMeta>,
     last: Option<MsgData>,
 }
 
 impl Container {
     pub fn new(
-        list: Vector<Message>,
+        list: Vector<MessageMeta>,
         map: HashMap<MsgId, MsgData>,
     ) -> Self {
         let last = match list.last().as_ref() {
-            Some(Message { ref msg_id, .. }) => map.get(msg_id).cloned(),
+            Some(MessageMeta { ref msg_id, .. }) => map.get(msg_id).cloned(),
             None => None,
         };
 
-        Self { map, last, list }
+        Self { last, list }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -35,32 +38,18 @@ impl Container {
         self.list.len()
     }
 
-    pub fn contains(
-        &self,
-        msg_id: &MsgId,
-    ) -> bool {
-        self.map.contains_key(msg_id)
-    }
-
     pub fn get(
         &self,
         ix: usize,
-    ) -> Option<&Message> {
+    ) -> Option<&MessageMeta> {
         self.list.get(ix)
-    }
-
-    pub fn get_data_mut(
-        &mut self,
-        msg_id: &MsgId,
-    ) -> Option<&mut MsgData> {
-        self.map.get_mut(msg_id)
     }
 
     pub fn get_data(
         &self,
-        msg_id: &MsgId,
-    ) -> Option<&MsgData> {
-        self.map.get(msg_id)
+        mid: &MsgId,
+    ) -> Option<MsgData> {
+        cache::get(mid)
     }
 
     pub fn last_msg(&self) -> Option<&MsgData> {
@@ -70,17 +59,29 @@ impl Container {
     pub fn msg_data(
         &self,
         index: usize,
-    ) -> Option<&MsgData> {
+    ) -> Option<MsgData> {
         let msg = self.list.get(index);
-        self.map.get(&msg?.msg_id)
+        cache::get(&msg?.msg_id)
     }
 
-    pub fn msg_data_mut(
-        &mut self,
+    pub fn access_by_index<T, F: FnOnce(&MsgData) -> T>(
+        &self,
         index: usize,
-    ) -> Option<&mut MsgData> {
-        let msg = self.list.get(index);
-        self.map.get_mut(&msg?.msg_id)
+        f: F,
+    ) -> Option<T> {
+        let mid = self.msg_id(index)?;
+
+        access(&mid, f)
+    }
+
+    pub fn update_by_index<T, F: FnOnce(&mut MsgData)>(
+        &self,
+        index: usize,
+        f: F,
+    ) -> Option<()> {
+        let mid = self.msg_id(index)?;
+
+        update(&mid, f)
     }
 
     pub fn media_attachments_data_json(
@@ -95,9 +96,7 @@ impl Container {
         &self,
         mid: &MsgId,
     ) -> Option<String> {
-        let attachments = &self.get_data(mid)?.attachments;
-
-        crate::media_attachments_json(attachments)
+        access(mid, |m| crate::media_attachments_json(&m.attachments))?
     }
 
     pub fn doc_attachments_data_json(
@@ -112,18 +111,16 @@ impl Container {
         &self,
         mid: &MsgId,
     ) -> Option<String> {
-        let attachments = &self.get_data(mid)?.attachments;
-
-        crate::doc_attachments_json(attachments)
+        access(mid, |m| crate::doc_attachments_json(&m.attachments))?
     }
 
-    pub fn last(&self) -> Option<&Message> {
+    pub fn last(&self) -> Option<&MessageMeta> {
         self.list.last()
     }
 
     pub fn index_of(
         &self,
-        msg: &Message,
+        msg: &MessageMeta,
     ) -> Option<usize> {
         self.list.binary_search(&msg).ok()
     }
@@ -132,7 +129,7 @@ impl Container {
         &self,
         msg_id: MsgId,
     ) -> Option<usize> {
-        let m = from_msg_id(msg_id, &self)?;
+        let m = from_msg_id(msg_id)?;
 
         self.list.binary_search(&m).ok()
     }
@@ -148,22 +145,21 @@ impl Container {
         }
 
         let msg = self.list.remove(ix);
-        let data = self.map.remove(&msg.msg_id)?;
+        let data = cache::remove(&msg.msg_id);
 
         if ix + 1 == old_len {
             self.last = self
                 .list
                 .last()
-                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
-                .cloned();
+                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
-        Some(data)
+        data
     }
 
     pub fn binary_search(
         &self,
-        msg: &Message,
+        msg: &MessageMeta,
     ) -> Result<usize, usize> {
         self.list.binary_search(msg)
     }
@@ -172,36 +168,46 @@ impl Container {
     pub fn insert(
         &mut self,
         ix: usize,
-        msg: Message,
+        msg: MessageMeta,
         data: MsgData,
     ) -> Option<()> {
         let old_len = self.list.len();
         let mid = msg.msg_id;
 
         if let ReplyId::Known(op) = &data.op {
-            self.get_data_mut(op)?.replies.insert(mid);
+            cache::update(op, |m| {
+                m.replies.insert(mid);
+            });
         }
 
         self.list.insert(ix, msg);
-        self.map.insert(mid, data);
+        cache::insert(mid, data);
 
         if ix == old_len {
             self.last = self
                 .list
                 .last()
-                .and_then(|Message { ref msg_id, .. }| self.map.get(msg_id))
-                .cloned();
+                .and_then(|MessageMeta { ref msg_id, .. }| cache::get(msg_id));
         }
 
         Some(())
     }
 
+    fn msg_id(
+        &self,
+        index: usize,
+    ) -> Option<&MsgId> {
+        Some(&self.list.get(index).as_ref()?.msg_id)
+    }
+
     fn op(
         &self,
         index: usize,
-    ) -> Option<&MsgData> {
-        match self.msg_data(index)?.op {
-            ReplyId::Known(mid) => self.get_data(&mid),
+    ) -> Option<MsgData> {
+        let mid = self.msg_id(index)?;
+
+        match cache::access(mid, |m| m.op)? {
+            ReplyId::Known(op_mid) => cache::get(&op_mid),
             _ => None,
         }
     }
@@ -210,14 +216,14 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<ReplyType> {
-        Some(reply_type(&self.msg_data(index)?.op))
+        Some(reply_type(&cache::access(self.msg_id(index)?, |m| m.op)?))
     }
 
     pub fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<&MsgId> {
-        match &self.msg_data(index).as_ref()?.op {
+    ) -> Option<MsgId> {
+        match cache::access(self.msg_id(index)?, |m| m.op)? {
             ReplyId::Known(mid) => Some(mid),
             _ => None,
         }
@@ -226,15 +232,15 @@ impl Container {
     pub fn op_author(
         &self,
         index: usize,
-    ) -> Option<&UserId> {
-        Some(&self.op(index)?.author)
+    ) -> Option<UserId> {
+        Some(self.op(index)?.author)
     }
 
     pub fn op_body(
         &self,
         index: usize,
-    ) -> Option<&Option<MessageBody>> {
-        Some(&self.op(index)?.body)
+    ) -> Option<MessageBody> {
+        self.op(index)?.body
     }
 
     pub fn op_insertion_time(
@@ -271,11 +277,9 @@ impl Container {
         &mut self,
         mut data_changed: F,
     ) -> Option<()> {
-        for (ix, Message { msg_id, .. }) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(&msg_id)?;
-
-            if data.match_status.is_match() {
-                data.match_status = MatchStatus::NotMatched;
+        for (ix, msg) in self.list.iter_mut().enumerate() {
+            if msg.match_status.is_match() {
+                msg.match_status = MatchStatus::NotMatched;
                 data_changed(ix);
             }
         }
@@ -297,23 +301,13 @@ impl Container {
 
         let mut matches: Vec<Match> = Vec::new();
 
-        for (ix, msg) in self.list.iter().enumerate() {
-            let data = self.map.get_mut(&msg.msg_id)?;
-            let matched = data.matches(pattern);
+        for (ix, msg) in self.list.iter_mut().enumerate() {
+            let matched = access(&msg.msg_id, |m| m.matches(pattern))?;
 
-            data.match_status = if matched {
+            msg.match_status = if matched {
                 MatchStatus::Matched
             } else {
                 MatchStatus::NotMatched
-            };
-
-            data.search_buf = if data.match_status.is_match() {
-                Some(highlight_message(
-                    search.pattern.as_ref()?,
-                    data.body.as_ref()?,
-                ))
-            } else {
-                None
             };
 
             data_changed(ix);
@@ -328,5 +322,31 @@ impl Container {
         num_matches_changed();
 
         Some(matches)
+    }
+
+    /// Sets the reply type of a message to "dangling"
+    pub fn set_dangling<F: FnMut(usize)>(
+        &self,
+        ids: HashSet<MsgId>,
+        mut data_changed: F,
+    ) -> Option<()> {
+        for id in ids.into_iter() {
+            let changed = update(&id, |data| {
+                if data.op != ReplyId::Dangling {
+                    data.op = ReplyId::Dangling;
+                    true
+                } else {
+                    false
+                }
+            });
+
+            if changed.unwrap_or(false) {
+                if let Some(ix) = self.index_by_id(id) {
+                    data_changed(ix);
+                }
+            }
+        }
+
+        Some(())
     }
 }

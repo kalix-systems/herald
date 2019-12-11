@@ -65,6 +65,35 @@ pub(crate) fn conversation_messages(
     Ok(messages)
 }
 
+pub(crate) fn conversation_message_meta(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("../message/sql/conversation_message_meta.sql")));
+
+    let res = w!(stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            Ok(crate::message::MessageMeta {
+                msg_id: row.get("msg_id")?,
+                insertion_time: row.get("insertion_ts")?,
+                match_status: crate::message::MatchStatus::NotMatched,
+            })
+        }
+    ));
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(w!(msg));
+    }
+
+    Ok(messages)
+}
+
+/// Get all message metadata in a conversation.
+
 /// Get conversation metadata
 pub(crate) fn meta(
     conn: &rusqlite::Connection,
