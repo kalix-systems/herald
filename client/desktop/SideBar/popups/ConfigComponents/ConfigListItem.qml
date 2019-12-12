@@ -14,6 +14,7 @@ Column {
         text: headerText
         font.family: CmnCfg.labelFont.name
         font.bold: true
+        font.weight: Font.Black
         font.pointSize: CmnCfg.headerSize
     }
     Loader {

@@ -95,6 +95,8 @@ Window {
                 contentHeight: col.height
                 Column {
                     id: col
+                    spacing: CmnCfg.smallMargin
+                    topPadding: CmnCfg.margin
                     anchors.right: parent.right
                     anchors.left: parent.left
                     CfgComps.ConfigListItem {
@@ -103,21 +105,26 @@ Window {
                     }
                     CfgComps.ConfigListItem {
                         headerText: qsTr("Appearance")
+                        configContent: CfgComps.Appearance {}
                     }
                     CfgComps.ConfigListItem {
                         headerText: "Privacy & Security"
+                        configContent: CfgComps.Privacy {}
                     }
 
                     CfgComps.ConfigListItem {
                         headerText: "Data & Storage"
+                        configContent: CfgComps.Storage {}
                     }
 
                     CfgComps.ConfigListItem {
                         headerText: "Advanced"
+                        configContent: CfgComps.Advanced {}
                     }
 
                     CfgComps.ConfigListItem {
                         headerText: "Help & Feedback"
+                        configContent: CfgComps.Feedback {}
                     }
                 }
             }

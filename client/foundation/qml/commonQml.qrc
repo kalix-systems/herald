@@ -42,5 +42,6 @@
         <file>ChatBubble/FileAttachmentContent.qml</file>
         <file>ChatBubble/ReplyImageClip.qml</file>
         <file>StandardLabel.qml</file>
+        <file>StandardCombo.qml</file>
     </qresource>
 </RCC>
