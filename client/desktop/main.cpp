@@ -6,6 +6,10 @@
 int main(int argc, char* argv[])
 {
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
+  QApplication::setOrganizationName("Kalix Systems");
+  QApplication::setOrganizationDomain("kalix.io");
+  QApplication::setApplicationName("Herald");
   QApplication app(argc, argv);
 
   qmlRegisterType<Users>("LibHerald", 1, 0, "Users");
@@ -26,11 +30,8 @@ int main(int argc, char* argv[])
   qmlRegisterType<DocumentAttachments>("LibHerald", 1, 0,
                                        "DocumentAttachments");
 
-  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald", 1, 0, "CmnCfg");
-
-  app.setOrganizationName("Kalix Systems");
-  app.setOrganizationDomain("kalix.io");
-  app.setApplicationName("Herald");
+  qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"), "LibHerald",
+                           1, 0, "CmnCfg");
 
   QQmlApplicationEngine engine;
 
@@ -38,5 +39,5 @@ int main(int argc, char* argv[])
 
   if (engine.rootObjects().isEmpty()) return -1;
 
-  return app.exec();
+  return QApplication::exec();
 }

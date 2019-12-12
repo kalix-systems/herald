@@ -70,13 +70,13 @@ public:
 };
 static_assert(std::is_pod<option_quintptr>::value,
               "option_quintptr must be a POD type.");
-typedef void (*qstring_set)(QString *val, const char *utf8, int nbytes);
+using qstring_set = void (*)(QString *val, const char *utf8, int nbytes);
 
 void set_qstring(QString *val, const char *utf8, int nbytes) {
   *val = QString::fromUtf8(utf8, nbytes);
 }
 
-typedef void (*qbytearray_set)(QByteArray *val, const char *bytes, int nbytes);
+using qbytearray_set = void (*)(QByteArray *val, const char *bytes, int nbytes);
 
 void set_qbytearray(QByteArray *v, const char *bytes, int nbytes) {
   if (v->isNull() && nbytes == 0) {
@@ -264,15 +264,15 @@ QModelIndex ConversationBuilder::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
 QModelIndex ConversationBuilder::parent(const QModelIndex &) const {
-  return QModelIndex();
+  return {};
 }
 
 bool ConversationBuilder::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : conversation_builder_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : conversation_builder_can_fetch_more(m_d);
 }
 
 void ConversationBuilder::fetchMore(const QModelIndex &parent) {
@@ -405,15 +405,15 @@ QModelIndex ConversationContent::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
 QModelIndex ConversationContent::parent(const QModelIndex &) const {
-  return QModelIndex();
+  return {};
 }
 
 bool ConversationContent::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : conversation_content_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : conversation_content_can_fetch_more(m_d);
 }
 
 void ConversationContent::fetchMore(const QModelIndex &parent) {
@@ -551,15 +551,13 @@ QModelIndex Conversations::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex Conversations::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex Conversations::parent(const QModelIndex &) const { return {}; }
 
 bool Conversations::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : conversations_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : conversations_can_fetch_more(m_d);
 }
 
 void Conversations::fetchMore(const QModelIndex &parent) {
@@ -842,15 +840,15 @@ QModelIndex DocumentAttachments::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
 QModelIndex DocumentAttachments::parent(const QModelIndex &) const {
-  return QModelIndex();
+  return {};
 }
 
 bool DocumentAttachments::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : document_attachments_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : document_attachments_can_fetch_more(m_d);
 }
 
 void DocumentAttachments::fetchMore(const QModelIndex &parent) {
@@ -979,13 +977,13 @@ QModelIndex Herald::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex Herald::parent(const QModelIndex &) const { return QModelIndex(); }
+QModelIndex Herald::parent(const QModelIndex &) const { return {}; }
 
 bool Herald::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : herald_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : herald_can_fetch_more(m_d);
 }
 
 void Herald::fetchMore(const QModelIndex &parent) {
@@ -1106,15 +1104,13 @@ QModelIndex MediaAttachments::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex MediaAttachments::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex MediaAttachments::parent(const QModelIndex &) const { return {}; }
 
 bool MediaAttachments::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : media_attachments_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : media_attachments_can_fetch_more(m_d);
 }
 
 void MediaAttachments::fetchMore(const QModelIndex &parent) {
@@ -1237,13 +1233,13 @@ QModelIndex Members::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex Members::parent(const QModelIndex &) const { return QModelIndex(); }
+QModelIndex Members::parent(const QModelIndex &) const { return {}; }
 
 bool Members::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : members_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : members_can_fetch_more(m_d);
 }
 
 void Members::fetchMore(const QModelIndex &parent) {
@@ -1406,15 +1402,13 @@ QModelIndex MessageBuilder::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex MessageBuilder::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex MessageBuilder::parent(const QModelIndex &) const { return {}; }
 
 bool MessageBuilder::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : message_builder_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : message_builder_can_fetch_more(m_d);
 }
 
 void MessageBuilder::fetchMore(const QModelIndex &parent) {
@@ -1567,15 +1561,13 @@ QModelIndex MessageSearch::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex MessageSearch::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex MessageSearch::parent(const QModelIndex &) const { return {}; }
 
 bool MessageSearch::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : message_search_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : message_search_can_fetch_more(m_d);
 }
 
 void MessageSearch::fetchMore(const QModelIndex &parent) {
@@ -1820,15 +1812,13 @@ QModelIndex Messages::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex Messages::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex Messages::parent(const QModelIndex &) const { return {}; }
 
 bool Messages::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : messages_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : messages_can_fetch_more(m_d);
 }
 
 void Messages::fetchMore(const QModelIndex &parent) {
@@ -2167,13 +2157,13 @@ QModelIndex Users::index(int row, int column, const QModelIndex &parent) const {
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex Users::parent(const QModelIndex &) const { return QModelIndex(); }
+QModelIndex Users::parent(const QModelIndex &) const { return {}; }
 
 bool Users::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : users_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : users_can_fetch_more(m_d);
 }
 
 void Users::fetchMore(const QModelIndex &parent) {
@@ -2431,15 +2421,13 @@ QModelIndex UsersSearch::index(int row, int column,
       column < 1) {
     return createIndex(row, column, static_cast<quintptr>(row));
   }
-  return QModelIndex();
+  return {};
 }
 
-QModelIndex UsersSearch::parent(const QModelIndex &) const {
-  return QModelIndex();
-}
+QModelIndex UsersSearch::parent(const QModelIndex &) const { return {}; }
 
 bool UsersSearch::canFetchMore(const QModelIndex &parent) const {
-  return (parent.isValid()) ? 0 : users_search_can_fetch_more(m_d);
+  return (parent.isValid()) ? false : users_search_can_fetch_more(m_d);
 }
 
 void UsersSearch::fetchMore(const QModelIndex &parent) {

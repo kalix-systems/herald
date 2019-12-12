@@ -23,3 +23,7 @@ members = [
   "kson",
   "kson/kson_derive"
 ]
+
+[profile.release]
+debug = true
+lto = false

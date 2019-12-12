@@ -84,9 +84,10 @@ ColumnLayout {
 
             RowLayout {
                 Layout.topMargin: 0
-                Layout.fillHeight: true
+                Layout.bottomMargin: 0
+
                 ColumnLayout {
-                    Layout.fillWidth: true
+                    id: fileWrapper
                     Label {
                         id: opLabel
                         text: knownReply ? herald.users.nameById(
@@ -152,7 +153,6 @@ ColumnLayout {
 
                 Loader {
                     id: imageClipLoader
-
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: CmnCfg.smallMargin
                 }
@@ -166,10 +166,11 @@ ColumnLayout {
             ColumnLayout {
                 id: reply
                 spacing: 0
+                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: -CmnCfg.largeMargin
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
-
                 TextMetrics {
                     id: opBodyTextMetrics
                     property string decoration: replyBody > 350 ? "..." : ""

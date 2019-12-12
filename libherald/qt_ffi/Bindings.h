@@ -7,81 +7,36 @@
 #include <QtCore/QObject>
 
 class Config;
-typedef Config *ConfigRef;
-Q_DECLARE_METATYPE(ConfigRef);
-
 class ConversationBuilder;
-typedef ConversationBuilder *ConversationBuilderRef;
-Q_DECLARE_METATYPE(ConversationBuilderRef);
-
 class ConversationContent;
-typedef ConversationContent *ConversationContentRef;
-Q_DECLARE_METATYPE(ConversationContentRef);
-
 class Conversations;
-typedef Conversations *ConversationsRef;
-Q_DECLARE_METATYPE(ConversationsRef);
-
 class DocumentAttachments;
-typedef DocumentAttachments *DocumentAttachmentsRef;
-Q_DECLARE_METATYPE(DocumentAttachmentsRef);
-
 class Errors;
-typedef Errors *ErrorsRef;
-Q_DECLARE_METATYPE(ErrorsRef);
-
 class Herald;
-typedef Herald *HeraldRef;
-Q_DECLARE_METATYPE(HeraldRef);
-
 class MediaAttachments;
-typedef MediaAttachments *MediaAttachmentsRef;
-Q_DECLARE_METATYPE(MediaAttachmentsRef);
-
 class Members;
-typedef Members *MembersRef;
-Q_DECLARE_METATYPE(MembersRef);
-
 class MessageBuilder;
-typedef MessageBuilder *MessageBuilderRef;
-Q_DECLARE_METATYPE(MessageBuilderRef);
-
 class MessageSearch;
-typedef MessageSearch *MessageSearchRef;
-Q_DECLARE_METATYPE(MessageSearchRef);
-
 class Messages;
-typedef Messages *MessagesRef;
-Q_DECLARE_METATYPE(MessagesRef);
-
 class Users;
-typedef Users *UsersRef;
-Q_DECLARE_METATYPE(UsersRef);
-
 class UsersSearch;
-typedef UsersSearch *UsersSearchRef;
-Q_DECLARE_METATYPE(UsersSearchRef);
-
 class Utils;
-typedef Utils *UtilsRef;
-Q_DECLARE_METATYPE(UtilsRef);
-
 extern "C" {
-typedef struct ConfigPtrBundle ConfigPtrBundle;
-typedef struct ConversationBuilderPtrBundle ConversationBuilderPtrBundle;
-typedef struct ConversationContentPtrBundle ConversationContentPtrBundle;
-typedef struct ConversationsPtrBundle ConversationsPtrBundle;
-typedef struct DocumentAttachmentsPtrBundle DocumentAttachmentsPtrBundle;
-typedef struct ErrorsPtrBundle ErrorsPtrBundle;
-typedef struct HeraldPtrBundle HeraldPtrBundle;
-typedef struct MediaAttachmentsPtrBundle MediaAttachmentsPtrBundle;
-typedef struct MembersPtrBundle MembersPtrBundle;
-typedef struct MessageBuilderPtrBundle MessageBuilderPtrBundle;
-typedef struct MessageSearchPtrBundle MessageSearchPtrBundle;
-typedef struct MessagesPtrBundle MessagesPtrBundle;
-typedef struct UsersPtrBundle UsersPtrBundle;
-typedef struct UsersSearchPtrBundle UsersSearchPtrBundle;
-typedef struct UtilsPtrBundle UtilsPtrBundle;
+using ConfigPtrBundle = struct ConfigPtrBundle;
+using ConversationBuilderPtrBundle = struct ConversationBuilderPtrBundle;
+using ConversationContentPtrBundle = struct ConversationContentPtrBundle;
+using ConversationsPtrBundle = struct ConversationsPtrBundle;
+using DocumentAttachmentsPtrBundle = struct DocumentAttachmentsPtrBundle;
+using ErrorsPtrBundle = struct ErrorsPtrBundle;
+using HeraldPtrBundle = struct HeraldPtrBundle;
+using MediaAttachmentsPtrBundle = struct MediaAttachmentsPtrBundle;
+using MembersPtrBundle = struct MembersPtrBundle;
+using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
+using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
+using MessagesPtrBundle = struct MessagesPtrBundle;
+using UsersPtrBundle = struct UsersPtrBundle;
+using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
+using UtilsPtrBundle = struct UtilsPtrBundle;
 struct ConfigPtrBundle {
   Config *config;
   void (*config_color_changed)(Config *);
