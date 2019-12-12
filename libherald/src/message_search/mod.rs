@@ -1,10 +1,9 @@
 use crate::{
     conversations::shared as conv,
-    ffi,
+    err, ffi,
     interface::{
         MessageSearchEmitter as Emitter, MessageSearchList as List, MessageSearchTrait as Interface,
     },
-    err,
 };
 use crossbeam_channel::{unbounded, Receiver};
 use heraldcore::message::{Search, SearchResult};

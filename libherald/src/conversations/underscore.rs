@@ -1,5 +1,5 @@
 use crate::interface::{ConversationsEmitter, ConversationsList};
-use crate::{ffi, err, none, spawn};
+use crate::{err, ffi, none, spawn};
 use heraldcore::{
     conversation::{self, ExpirationPeriod},
     types::ConversationId,

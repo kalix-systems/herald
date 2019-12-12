@@ -1,7 +1,7 @@
 use crate::{
-    ffi,
+    err, ffi,
     interface::{UsersEmitter as Emitter, UsersList as List, UsersTrait as Interface},
-    err, none, spawn,
+    none, spawn,
 };
 use herald_common::UserId;
 use heraldcore::{

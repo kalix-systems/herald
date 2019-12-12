@@ -1,12 +1,12 @@
 use crate::{
-    ffi,
+    err, ffi,
     imp::{Members, Messages},
     interface::{
         ConversationContentEmitter as Emitter, ConversationContentList as List,
         ConversationContentTrait as Interface,
     },
     members::MemberUpdate,
-    err, none,
+    none,
 };
 use heraldcore::types::ConversationId;
 use std::convert::TryFrom;

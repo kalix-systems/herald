@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, err, none};
+use crate::{err, ffi, interface::*, none};
 use herald_common::UserId;
 use heraldcore::{types::*, user};
 use search_pattern::SearchPattern;

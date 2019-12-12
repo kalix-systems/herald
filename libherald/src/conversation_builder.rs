@@ -1,5 +1,5 @@
 use crate::{
-    conversations::shared::ConvUpdate, ffi, interface::*, push, err, none, spawn,
+    conversations::shared::ConvUpdate, err, ffi, interface::*, none, push, spawn,
     users::shared::user_in_cache,
 };
 use herald_common::UserId;

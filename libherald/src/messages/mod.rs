@@ -1,6 +1,7 @@
 use crate::{
+    err,
     interface::{MessagesEmitter as Emitter, MessagesList as List},
-    err, none,
+    none,
     toasts::new_msg_toast,
 };
 use herald_common::UserId;

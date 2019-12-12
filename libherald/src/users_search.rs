@@ -1,7 +1,6 @@
 use crate::{
-    ffi,
+    err, ffi,
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
-    err,
     users::shared::{color, name, profile_picture, user_ids},
 };
 use herald_common::UserId;

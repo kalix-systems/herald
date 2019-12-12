@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, err, none, spawn};
+use crate::{err, ffi, interface::*, none, spawn};
 use heraldcore::config::{self as core, Config as Core};
 
 mod imp;
@@ -17,9 +17,7 @@ impl ConfigTrait for Config {
 
     /// UserId of the current user as an `&str`.
     fn config_id(&self) -> ffi::UserIdRef {
-        none!(self.inner.as_ref(), &ffi::NULL_USER_ID)
-            .id
-            .as_str()
+        none!(self.inner.as_ref(), &ffi::NULL_USER_ID).id.as_str()
     }
 
     /// Name of the current user

@@ -1,8 +1,8 @@
 use super::*;
 use crate::{
-    ffi,
+    err, ffi,
     interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
-    err, none, spawn,
+    none, spawn,
 };
 use heraldcore::{
     config, conversation,
