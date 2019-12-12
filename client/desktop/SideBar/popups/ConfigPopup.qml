@@ -59,73 +59,59 @@ Window {
             }
         }
 
+        ListModel {
+            id: settingsModel
+            ListElement {
+                name: qsTr("Notifications")
+            }
+            ListElement {
+                name: qsTr("Appearance")
+            }
+            ListElement {
+                name: qsTr("Privacy & Security")
+            }
+            ListElement {
+                name: qsTr("Data & Storage")
+            }
+
+            ListElement {
+                name: qsTr("Advanced")
+            }
+
+            ListElement {
+                name: qsTr("Help & Feedback")
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             spacing: 0
             Rectangle {
                 id: headersRect
-                Layout.minimumWidth: 250
+                Layout.preferredWidth: 250
                 Layout.fillHeight: true
                 color: CmnCfg.palette.offBlack
-                Column {
-                    id: wrapperCol
-                    spacing: CmnCfg.margin
-                    padding: CmnCfg.margin
-                    width: parent.width
 
-                    StandardLabel {
-                        text: qsTr("Notifications")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            id: notifHover
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = notifications.y
+                ListView {
+                    anchors.fill: parent
+                    model: settingsModel
+                    delegate: Rectangle {
+                        height: 40
+                        width: parent.width
+                        color: hover.containsMouse ? CmnCfg.palette.darkGrey : "transparent"
+                        StandardLabel {
+                            text: name
+                            font.family: CmnCfg.labelFont.name
+                            font.bold: true
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: CmnCfg.margin
                         }
-                    }
-                    StandardLabel {
-                        text: qsTr("Appearance")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
                         MouseArea {
+                            id: hover
+                            hoverEnabled: true
                             anchors.fill: parent
-                            onClicked: configScroll.contentY = appearance.y
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Privacy & Security")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = security.y
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Data & Storage")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = storage.y
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Advanced")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = advanced.y
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Help & Feedback")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = feedback.y
+                            onClicked: configScroll.contentY = col.children[index].y
                         }
                     }
                 }
