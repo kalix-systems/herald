@@ -6,7 +6,7 @@ import "qrc:/common" as Common
 import LibHerald 1.0
 import "qrc:/imports/js/utils.mjs" as Utils
 import "qrc:/imports" as Imports
-import "qrc:/imports/ChatBubble"
+import "qrc:/imports/ChatBubble/ReplyBubble"
 
 Rectangle {
     id: wrapper
