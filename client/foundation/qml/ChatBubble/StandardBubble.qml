@@ -25,11 +25,22 @@ ColumnLayout {
     // Text edit alias
     property alias messageBody: messageBody
 
+    // all messages are un-expanded on completion
+    Component.onCompleted: bubbleRoot.expanded = false
+
+    //image component
     Component {
         id: image
         AttachmentContent {}
     }
 
+    // document component
+    Component {
+        id: doc
+        FileAttachmentContent {}
+    }
+
+    // reply bubble if there is doc file content
     Component {
         id: replyDocContent
         ReplyDocBubble {
@@ -39,6 +50,7 @@ ColumnLayout {
         }
     }
 
+    // reply bubble if there is no doc file content
     Component {
         id: replyContent
         ReplyBubble {
@@ -48,11 +60,7 @@ ColumnLayout {
         }
     }
 
-    Component {
-        id: doc
-        FileAttachmentContent {}
-    }
-
+    //reply bubble column
     Column {
         width: bubbleRoot.width
         Loader {
@@ -67,14 +75,15 @@ ColumnLayout {
         }
     }
 
+    //author name
     ChatLabel {
         id: uname
         senderName: authorName
         senderColor: authorColor
     }
 
+    //media and file column loader
     Column {
-
         Loader {
             id: imageLoader
             sourceComponent: imageAttach ? image : undefined
@@ -86,8 +95,7 @@ ColumnLayout {
         }
     }
 
-    Component.onCompleted: bubbleRoot.expanded = false
-
+    //message body
     StandardTextEdit {
         id: messageBody
         Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : Math.min(
