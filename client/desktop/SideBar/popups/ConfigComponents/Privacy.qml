@@ -4,24 +4,79 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../../common" as CMN
 import "qrc:/imports"
+import Qt.labs.platform 1.0
 
 ColumnLayout {
 
     RowLayout {
         Layout.fillWidth: true
         StandardLabel {
-            text: qsTr("Default message exipration time")
+            text: qsTr("Default message expiration time: ") + qsTr(
+                      expirationMenu.currentSelection)
             color: "black"
             Layout.leftMargin: CmnCfg.margin
             font.pointSize: 14
+        }
+
+        ButtonForm {
+            source: "qrc:/dropdown-arrow-icon.svg"
+            onClicked: expirationMenu.open()
         }
 
         Item {
             Layout.fillWidth: true
         }
 
-        StandardCombo {
-            model: ["Off", "1 Minute", "1 Hour", "1 Day", "1 Week", "1 Month", "1 Year"]
+        //TODO: THIS SHOULD COME FROM THE CONFIG MODEL
+        Menu {
+            id: expirationMenu
+            property string currentSelection
+            MenuItem {
+                text: qsTr("Off")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+            MenuItem {
+                text: qsTr("1 minute")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+            MenuItem {
+                text: qsTr("1 hour")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+
+            MenuItem {
+                text: qsTr("1 day")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+
+            MenuItem {
+                text: qsTr("1 week")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+
+            MenuItem {
+                text: qsTr("1 month")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
+
+            MenuItem {
+                text: qsTr("1 year")
+                checkable: true
+                checked: text === expirationMenu.currentSelection
+                onTriggered: expirationMenu.currentSelection = text
+            }
         }
     }
 

@@ -53,5 +53,6 @@
         <file>countdown-icon-temp.svg</file>
         <file>file-icon.svg</file>
         <file>download-icon.svg</file>
+        <file>dropdown-arrow-icon.svg</file>
     </qresource>
 </RCC>
