@@ -81,11 +81,7 @@ ColumnLayout {
         }
         ColumnLayout {
             id: replyWrapperCol
-
-            RowLayout {
-                Layout.topMargin: 0
-                Layout.bottomMargin: 0
-
+            Row {
                 ColumnLayout {
                     id: fileWrapper
                     Label {
@@ -103,58 +99,55 @@ ColumnLayout {
                     Item {
                         id: attachmentRow
                         Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 20
                         Layout.topMargin: 0
-                        Item {
-                            height: 24
-                            anchors.leftMargin: CmnCfg.smallMargin
+                        Layout.leftMargin: CmnCfg.smallMargin
+                        Image {
+                            id: fileIcon
                             anchors.left: parent.left
-                            Image {
-                                id: fileIcon
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                source: "qrc:/file-icon.svg"
-                                height: 20
-                                width: height
-                            }
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: "qrc:/file-icon.svg"
+                            height: 20
+                            width: height
+                        }
 
-                            TextMetrics {
-                                id: nameMetrics
-                                elide: Text.ElideMiddle
-                                elideWidth: reply.width - 80 - fileSize.width
-                                            - 40 - CmnCfg.smallMargin * 2
-                            }
+                        TextMetrics {
+                            id: nameMetrics
+                            elide: Text.ElideMiddle
+                            elideWidth: reply.width - imageClipLoader.size
+                                        - fileSize.width - 40 - CmnCfg.smallMargin * 2
+                        }
 
-                            Text {
-                                id: fileName
-                                anchors.left: fileIcon.right
-                                anchors.leftMargin: CmnCfg.smallMargin
-                                anchors.verticalCenter: parent.verticalCenter
-                                color: CmnCfg.palette.black
-                                text: nameMetrics.elidedText
-                                font.family: CmnCfg.chatFont.name
-                                font.pixelSize: 13
-                                font.weight: Font.Medium
-                            }
+                        Text {
+                            id: fileName
+                            anchors.left: fileIcon.right
+                            anchors.leftMargin: CmnCfg.smallMargin
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: CmnCfg.palette.black
+                            text: nameMetrics.elidedText
+                            font.family: CmnCfg.chatFont.name
+                            font.pixelSize: 13
+                            font.weight: Font.Medium
+                        }
 
-                            Text {
-                                id: fileSize
-                                anchors.left: fileName.right
-                                anchors.leftMargin: CmnCfg.smallMargin
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: CmnCfg.chatFont.name
-                                font.pixelSize: 10
-                                font.weight: Font.Light
-                                color: CmnCfg.palette.darkGrey
-                            }
+                        Text {
+                            id: fileSize
+                            anchors.left: fileName.right
+                            anchors.leftMargin: CmnCfg.smallMargin
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.family: CmnCfg.chatFont.name
+                            font.pixelSize: 10
+                            font.weight: Font.Light
+                            color: CmnCfg.palette.darkGrey
                         }
                     }
                 }
 
                 Loader {
+                    property int size: item == undefined ? 16 : 80
                     id: imageClipLoader
-                    Layout.alignment: Qt.AlignTop
-                    Layout.topMargin: CmnCfg.smallMargin
+                    anchors.top: parent.top
+                    anchors.topMargin: CmnCfg.smallMargin
                 }
 
                 Component {
@@ -167,10 +160,11 @@ ColumnLayout {
                 id: reply
                 spacing: 0
                 Layout.alignment: Qt.AlignTop
-                Layout.topMargin: -CmnCfg.largeMargin
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
-                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
+                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
+                                                                  300,
+                                                                  messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
                     property string decoration: replyBody > 350 ? "..." : ""

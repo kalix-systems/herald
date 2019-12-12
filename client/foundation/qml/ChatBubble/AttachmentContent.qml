@@ -15,9 +15,7 @@ ColumnLayout {
                 return false
             }
 
-            // can't use triple equality here because it
-            // checks for pointer equivalence...
-            return ("file:" + String(object.path)) === source
+            return String("file:" + object.path) === String(source)
         })
 
         imageViewerPopup.sourceAtc = mediaParsed

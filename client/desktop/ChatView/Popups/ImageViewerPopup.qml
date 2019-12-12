@@ -7,6 +7,7 @@ import QtQuick.Dialogs 1.3
 
 Window {
     id: imageWindow
+
     property real scale: 1.0
     property int index: 0
     property var sourceAtc
@@ -90,7 +91,7 @@ Window {
         }
 
         Button {
-            text: "-"
+            text: "―"
             font.bold: true
             font.pointSize: 20
             width: 50
@@ -102,9 +103,7 @@ Window {
             font.bold: true
             font.pointSize: 20
             width: 50
-            onClicked: {
-                dirChooser.open()
-            }
+            onClicked: dirChooser.open()
         }
     }
 
