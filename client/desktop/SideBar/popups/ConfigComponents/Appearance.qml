@@ -20,12 +20,12 @@ ColumnLayout {
             Layout.fillWidth: true
         }
 
-        RadioButton {
+        ConfRadio {
             Layout.alignment: Qt.AlignRight
             text: qsTr("Dark")
         }
 
-        RadioButton {
+        ConfRadio {
             Layout.alignment: Qt.AlignRight
             text: qsTr("Light")
             checked: true
