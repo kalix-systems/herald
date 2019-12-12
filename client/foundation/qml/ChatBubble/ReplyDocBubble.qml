@@ -102,10 +102,10 @@ ColumnLayout {
                         id: attachmentRow
                         Layout.alignment: Qt.AlignTop
                         Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.preferredHeight: fileCount > 0 ? fileIcon.height + CmnCfg.smallMargin
-                                                                * 3 : fileIcon.height
-                        Layout.topMargin: 0
+                        Layout.minimumHeight: 20
                         Layout.leftMargin: CmnCfg.smallMargin
+                        Layout.bottomMargin: CmnCfg.smallMargin
+                        Layout.fillHeight: true
                         Image {
                             id: fileIcon
                             anchors.left: parent.left
@@ -122,6 +122,7 @@ ColumnLayout {
                                 font.family: CmnCfg.chatFont.name
                                 color: CmnCfg.palette.darkGrey
                                 font.pixelSize: 13
+                                bottomPadding: CmnCfg.smallMargin
                             }
                         }
 
