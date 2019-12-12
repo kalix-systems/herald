@@ -2,6 +2,7 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
+import "./ReplyBubble"
 
 ColumnLayout {
     id: bubbleRoot
@@ -42,8 +43,18 @@ ColumnLayout {
 
     // reply bubble if there is doc file content
     Component {
+        id: replyHybridContent
+        ReplyHybrid {
+            maxWidth: bubbleRoot.maxWidth
+            replyId: bubbleRoot.replyId
+            modelData: bubbleRoot.messageModelData
+        }
+    }
+
+    // reply bubble if there is doc file content
+    Component {
         id: replyDocContent
-        ReplyDocBubble {
+        ReplyDoc {
             maxWidth: bubbleRoot.maxWidth
             replyId: bubbleRoot.replyId
             modelData: bubbleRoot.messageModelData
@@ -53,7 +64,7 @@ ColumnLayout {
     // reply bubble if there is no doc file content
     Component {
         id: replyContent
-        ReplyBubble {
+        StdReply {
             maxWidth: bubbleRoot.maxWidth
             replyId: bubbleRoot.replyId
             modelData: bubbleRoot.messageModelData
@@ -66,7 +77,11 @@ ColumnLayout {
             if (reply) {
                 if (messageModelData.opDocAttachments.length === 0)
                     return replyContent
-                return replyDocContent
+                else if (messageModelData.opDocAttachments.length !== 0
+                         && messageModelData.opMediaAttachments.length !== 0)
+                    return replyHybridContent
+                else
+                    return replyDocContent
             }
             return undefined
         }

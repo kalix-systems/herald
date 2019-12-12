@@ -10,7 +10,6 @@
         <file>ChatBubble/ChatBubble.qml</file>
         <file>ChatBubble/ChatLabel.qml</file>
         <file>ChatBubble/AttachmentContent.qml</file>
-        <file>ChatBubble/ReplyBubble.qml</file>
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
@@ -40,9 +39,11 @@
         <file>ChatBubble/OneImageLayout.qml</file>
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/FileAttachmentContent.qml</file>
-        <file>ChatBubble/ReplyImageClip.qml</file>
         <file>StandardLabel.qml</file>
         <file>StandardCombo.qml</file>
-        <file>ChatBubble/ReplyDocBubble.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
+        <file>ChatBubble/ReplyBubble/StdReply.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyImageClip.qml</file>
     </qresource>
 </RCC>

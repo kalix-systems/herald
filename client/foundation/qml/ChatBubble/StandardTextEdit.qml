@@ -5,8 +5,6 @@ import LibHerald 1.0
 TextEdit {
     text: if (parent.elided && parent.expanded) {
               fullBody
-          } else if (parent.elided) {
-              body + "..."
           } else {
               body
           }
