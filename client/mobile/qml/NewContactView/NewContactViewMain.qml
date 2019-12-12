@@ -40,7 +40,7 @@ Page {
         Button {
             text: qsTr("Send")
             onClicked: {
-                herald.users.add(usernameTextArea.text.trim())
+                Herald.users.add(usernameTextArea.text.trim())
                 mainView.pop()
             }
         }

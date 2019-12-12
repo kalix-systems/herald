@@ -11,23 +11,20 @@ ApplicationWindow {
     width: 300
     height: 500
 
-    Herald {
-        id: herald
-        property var errPopup: ErrorDialog {}
-        errors.onTryPollChanged: {
-            const errMsg = herald.errors.nextError()
+    ErrorDialog {
+        id: errPopup
 
-            if (errMsg !== "") {
-                errPopup.errorMsg = errMsg
-                errPopup.open()
+        Connections {
+            target: Herald.errors
+            onTryPollChanged: {
+                const errMsg = Herald.errors.nextError()
+
+                if (errMsg !== "") {
+                    errPopup.errorMsg = errMsg
+                    errPopup.open()
+                }
             }
         }
-
-        // NOTE: This is very important. Until our initialization is cleaned up this has to happen immediately after `Herald`
-        // is initialized.
-        Component.onCompleted: herald.setAppLocalDataDir(
-                                   StandardPaths.writableLocation(
-                                       StandardPaths.AppLocalDataLocation))
     }
 
     Loader {
@@ -38,7 +35,7 @@ ApplicationWindow {
 
     Loader {
         id: loginPageLoader
-        active: !herald.configInit
+        active: !Herald.configInit
         anchors.fill: parent
         // windows cannot be filled, unless reffered to as parent
         sourceComponent: LoginPage.LoginLandingPage {
@@ -49,7 +46,7 @@ ApplicationWindow {
 
     Loader {
         id: appLoader
-        active: herald.configInit
+        active: Herald.configInit
         anchors.fill: parent
         sourceComponent: App {}
     }

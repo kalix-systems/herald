@@ -96,16 +96,16 @@ Page {
         TapHandler {
             onTapped: {
                 if (topRect.groupTitle === "") {
-                    herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
                 } else {
-                    herald.conversationBuilder.setTitle(topRect.groupTitle)
+                    Herald.conversationBuilder.setTitle(topRect.groupTitle)
                 }
 
                 if (topRect.profPic !== "") {
-                    herald.conversationBuilder.picture = topRect.profPic
+                    Herald.conversationBuilder.picture = topRect.profPic
                 }
 
-                herald.conversationBuilder.finalize()
+                Herald.conversationBuilder.finalize()
                 mainView.pop()
             }
         }

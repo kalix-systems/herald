@@ -62,8 +62,8 @@ Component {
                         anchors.rightMargin: CmnCfg.smallMargin / 2
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
-                            herald.messageSearch.clearSearch()
-                            herald.conversations.filter = ""
+                            Herald.messageSearch.clearSearch()
+                            Herald.conversations.filter = ""
                             sideBarState.state = ""
                         }
                     }
@@ -71,20 +71,20 @@ Component {
                     onTextChanged: {
                         if (contactsSearch) {
                             Qt.callLater(function (text) {
-                                herald.users.filter = text
+                                Herald.users.filter = text
                             }, searchText.text)
                         } else {
                             Qt.callLater(function (text) {
-                                herald.conversations.filter = text
-                                herald.messageSearch.searchPattern = text
+                                Herald.conversations.filter = text
+                                Herald.messageSearch.searchPattern = text
                             }, searchText.text)
                         }
                     }
 
                     Component.onDestruction: {
-                        herald.users.clearFilter()
-                        herald.conversations.clearFilter()
-                        herald.messageSearch.clearSearch()
+                        Herald.users.clearFilter()
+                        Herald.conversations.clearFilter()
+                        Herald.messageSearch.clearSearch()
                     }
                 }
 

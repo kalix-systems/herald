@@ -26,7 +26,7 @@ Window {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: herald.config.profilePicture = fileUrl
+        onSelectionAccepted: Herald.config.profilePicture = fileUrl
     }
 
     Page {

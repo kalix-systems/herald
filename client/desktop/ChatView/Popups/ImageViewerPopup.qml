@@ -113,7 +113,7 @@ Window {
         selectFolder: true
         selectMultiple: false
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: herald.utils.saveFile(sourceAtc[index].path, fileUrl)
+        onAccepted: Herald.utils.saveFile(sourceAtc[index].path, fileUrl)
     }
 
     Rectangle {

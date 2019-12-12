@@ -10,7 +10,7 @@ ColumnLayout {
     id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property color opColor: CmnCfg.avatarColors[herald.users.colorById(
+    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     modelData.opAuthor)]
     property var replyId
     property bool knownReply: modelData.replyType === 2
@@ -86,7 +86,7 @@ ColumnLayout {
                     id: fileWrapper
                     Label {
                         id: opLabel
-                        text: knownReply ? herald.users.nameById(
+                        text: knownReply ? Herald.users.nameById(
                                                modelData.opAuthor) : ""
                         font.bold: true
                         Layout.margins: CmnCfg.smallMargin

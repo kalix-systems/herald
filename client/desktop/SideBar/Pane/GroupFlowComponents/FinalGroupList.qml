@@ -11,7 +11,7 @@ import QtQml 2.13
 ListView {
     height: contentHeight
     width: parent.width
-    model: herald.conversationBuilder
+    model: Herald.conversationBuilder
 
     delegate: Item {
         id: memberItem
@@ -22,16 +22,16 @@ ListView {
         Common.PlatonicRectangle {
             color: CmnCfg.palette.lightGrey
             id: memberRectangle
-            boxColor: herald.users.colorById(memberId)
-            boxTitle: herald.users.nameById(memberId)
-            picture: Utils.safeStringOrDefault(herald.users.profilePictureById(
+            boxColor: Herald.users.colorById(memberId)
+            boxTitle: Herald.users.nameById(memberId)
+            picture: Utils.safeStringOrDefault(Herald.users.profilePictureById(
                                                    memberId), "")
 
             //no hover state
             states: []
 
             labelComponent: Av.ConversationLabel {
-                contactName: herald.users.nameById(memberId)
+                contactName: Herald.users.nameById(memberId)
                 labelColor: CmnCfg.palette.offBlack
                 labelSize: 14
                 lastBody: "@" + memberId
@@ -43,7 +43,7 @@ ListView {
                 anchors.rightMargin: CmnCfg.largeMargin / 2
                 anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/x-icon.svg"
-                onClicked: herald.conversationBuilder.removeMemberById(memberId)
+                onClicked: Herald.conversationBuilder.removeMemberById(memberId)
             }
         }
     }

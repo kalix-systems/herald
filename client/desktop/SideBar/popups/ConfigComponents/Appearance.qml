@@ -50,7 +50,7 @@ ColumnLayout {
 
         StandardLabel {
             color: "black"
-            text: qsTr("Current display name: ") + (herald.config.name)
+            text: qsTr("Current display name: ") + (Herald.config.name)
             Layout.leftMargin: CmnCfg.margin
             font.pointSize: 14
         }
@@ -73,7 +73,7 @@ ColumnLayout {
             text: qsTr("Submit")
             onClicked: {
                 submissionCol.visible = false
-                herald.config.name = displayNameArea.text
+                Herald.config.name = displayNameArea.text
             }
         }
     }
@@ -89,7 +89,7 @@ ColumnLayout {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: herald.config.profilePicture = fileUrl
+        onSelectionAccepted: Herald.config.profilePicture = fileUrl
     }
 
     RowLayout {

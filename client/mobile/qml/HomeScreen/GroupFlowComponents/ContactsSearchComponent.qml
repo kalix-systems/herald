@@ -13,7 +13,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 Column {
 
     topPadding: CmnCfg.units.dp(24)
-    Component.onCompleted: herald.usersSearch.refresh()
+    Component.onCompleted: Herald.usersSearch.refresh()
     width: mainView.width - CmnCfg.units.dp(56)
     anchors.top: bigDivider.bottom
     anchors.horizontalCenter: parent.horizontalCenter
@@ -22,7 +22,7 @@ Column {
         leftPadding: 0
         placeholderText: qsTr("Add members")
         onTextChanged: {
-            herald.usersSearch.filter = groupSelectText.text
+            Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
     }
@@ -35,7 +35,7 @@ Column {
 
     ComboBox {
         id: contactPopup
-        model: herald.usersSearch
+        model: Herald.usersSearch
         width: parent.width
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.units.dp(6)
@@ -52,7 +52,7 @@ Column {
             property var contactData: model
             height: visible ? CmnCfg.units.dp(48) : 0
             width: parent.width
-            visible: matched && contactData.userId !== herald.config.configId
+            visible: matched && contactData.userId !== Herald.config.configId
             anchors {
                 rightMargin: CmnCfg.units.dp(12)
                 leftMargin: CmnCfg.units.dp(12)
@@ -82,9 +82,9 @@ Column {
 
             TapHandler {
                 onTapped: {
-                    herald.conversationBuilder.addMember(contactData.userId)
+                    Herald.conversationBuilder.addMember(contactData.userId)
                     contactPopup.popup.close()
-                    herald.usersSearch.clearFilter()
+                    Herald.usersSearch.clearFilter()
                     groupSelectText.text = ""
                 }
             }

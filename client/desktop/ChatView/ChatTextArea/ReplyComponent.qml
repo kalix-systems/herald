@@ -46,7 +46,7 @@ Rectangle {
         anchors.right: wrapper.left
         height: wrapper.height
         width: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.avatarColors[herald.users.colorById(
+        color: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                ownedConversation.builder.opAuthor)]
     }
 
@@ -71,7 +71,7 @@ Rectangle {
                 id: textCol
                 Label {
                     id: sender
-                    text: herald.users.nameById(
+                    text: Herald.users.nameById(
                               ownedConversation.builder.opAuthor)
                     Layout.leftMargin: CmnCfg.smallMargin
                     Layout.rightMargin: CmnCfg.smallMargin
@@ -79,7 +79,7 @@ Rectangle {
                     Layout.topMargin: CmnCfg.margin / 2
                     Layout.preferredHeight: CmnCfg.smallMargin
                     font.bold: true
-                    color: CmnCfg.palette.avatarColors[herald.users.colorById(
+                    color: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                            ownedConversation.builder.opAuthor)]
                 }
 

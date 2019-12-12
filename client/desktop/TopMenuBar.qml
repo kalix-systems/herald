@@ -1,7 +1,7 @@
 import QtQuick 2.13
 import Qt.labs.platform 1.1
 
-// note: this really on works on macOS
+// note: this really only works on macOS
 MenuBar {
     Menu {
         MenuItem {
