@@ -103,7 +103,7 @@ ColumnLayout {
                     Item {
                         id: attachmentRow
                         Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.preferredHeight: 80
+                        Layout.preferredHeight: 24
                         Layout.topMargin: 0
                         Item {
                             height: 24
@@ -121,8 +121,8 @@ ColumnLayout {
                             TextMetrics {
                                 id: nameMetrics
                                 elide: Text.ElideMiddle
-                                elideWidth: reply.width - 80 - fileSize.width
-                                            - 40 - CmnCfg.smallMargin * 2
+                                elideWidth: reply.width - imageClipLoader.size
+                                            - fileSize.width - 40 - CmnCfg.smallMargin * 2
                             }
 
                             Text {
@@ -152,6 +152,7 @@ ColumnLayout {
                 }
 
                 Loader {
+                    property int size: item == undefined ? 16 : 80
                     id: imageClipLoader
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: CmnCfg.smallMargin
@@ -167,10 +168,11 @@ ColumnLayout {
                 id: reply
                 spacing: 0
                 Layout.alignment: Qt.AlignTop
-                Layout.topMargin: -CmnCfg.largeMargin
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
-                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
+                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
+                                                                  300,
+                                                                  messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
                     property string decoration: replyBody > 350 ? "..." : ""
