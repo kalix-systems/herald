@@ -178,7 +178,7 @@ ColumnLayout {
                                                                   messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
-                    property string decoration: replyBody > 350 ? "..." : ""
+                    property string decoration: replyBody.length > 350 ? "..." : ""
                     property string shortenedText: knownReply ? truncate_text(
                                                                     modelData.opBody).slice(
                                                                     0,
