@@ -29,7 +29,9 @@ macx {
 
 
 CONFIG(debug, debug|profile|release) {
-    CONFIG+=sanitizer CONFIG+=sanitize_address sanitize_memory sanitize_undefined
+    linux {
+        CONFIG+=sanitizer CONFIG+=sanitize_address sanitize_memory sanitize_undefined
+    }
 }
 
 unix:!macx {
