@@ -16,12 +16,13 @@ mod imp {
 
         // Note: If a notification server isn't running, trying to show a notification will
         // block the thread. TODO: Should we inform the user that they need might need to install a
-        // notifcation server if one isn't running?
+        // notification server if one isn't running?
         if get_server_information().is_err() {
             return;
         }
 
         let mut notif = Notification::new();
+
         notif
             .appname(super::DESKTOP_APP_NAME)
             .summary(&format!("New message from {}", msg.author));
