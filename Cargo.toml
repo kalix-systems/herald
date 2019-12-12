@@ -19,8 +19,9 @@ members = [
   "libherald/messages_helper",
   "libherald/qt_bindgen",
   "kcl",
+  "krpc",
   "kson",
   "kson/kson_derive",
   "kson/kson_strategy",
-  "kson_channel"
+  "kson_channel",
 ]
