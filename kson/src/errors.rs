@@ -118,6 +118,8 @@ impl fmt::Display for KsonErrorInner {
     }
 }
 
+impl std::error::Error for KsonErrorInner {}
+
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
