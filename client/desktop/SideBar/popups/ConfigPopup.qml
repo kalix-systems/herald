@@ -63,17 +63,22 @@ Window {
             anchors.fill: parent
             spacing: 0
             Rectangle {
+                id: headersRect
                 Layout.minimumWidth: 250
                 Layout.fillHeight: true
                 color: CmnCfg.palette.offBlack
                 Column {
+                    id: wrapperCol
                     spacing: CmnCfg.margin
                     padding: CmnCfg.margin
+                    width: parent.width
+
                     StandardLabel {
                         text: qsTr("Notifications")
                         font.family: CmnCfg.labelFont.name
                         font.bold: true
                         MouseArea {
+                            id: notifHover
                             anchors.fill: parent
                             onClicked: configScroll.contentY = notifications.y
                         }
@@ -84,7 +89,7 @@ Window {
                         font.bold: true
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: configScroll.contentY = appearence.y
+                            onClicked: configScroll.contentY = appearance.y
                         }
                     }
                     StandardLabel {
@@ -143,7 +148,7 @@ Window {
                         configContent: CfgComps.Notifications {}
                     }
                     CfgComps.ConfigListItem {
-                        id: appearence
+                        id: appearance
                         headerText: qsTr("Appearance")
                         configContent: CfgComps.Appearance {}
                     }

@@ -16,6 +16,7 @@ ColumnLayout {
     property bool knownReply: modelData.replyType === 2
     property string replyBody: knownReply ? modelData.opBody : ""
     property var modelData
+    property string fileCount
 
     spacing: 0
 
@@ -24,6 +25,7 @@ ColumnLayout {
 
         nameMetrics.text = doc[0].name
         fileSize.text = Utils.friendlyFileSize(doc[0].size)
+        fileCount = doc.length - 1
 
         if (modelData.opMediaAttachments.length === 0)
             return
@@ -98,8 +100,10 @@ ColumnLayout {
 
                     Item {
                         id: attachmentRow
+                        Layout.alignment: Qt.AlignTop
                         Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.preferredHeight: 20
+                        Layout.preferredHeight: fileCount > 0 ? fileIcon.height + CmnCfg.smallMargin
+                                                                * 3 : fileIcon.height
                         Layout.topMargin: 0
                         Layout.leftMargin: CmnCfg.smallMargin
                         Image {
@@ -109,6 +113,16 @@ ColumnLayout {
                             source: "qrc:/file-icon.svg"
                             height: 20
                             width: height
+
+                            Text {
+                                anchors.top: parent.bottom
+                                visible: fileCount > 0
+                                text: "+ " + fileCount + " more"
+                                font.weight: Font.Light
+                                font.family: CmnCfg.chatFont.name
+                                color: CmnCfg.palette.darkGrey
+                                font.pixelSize: 13
+                            }
                         }
 
                         TextMetrics {
