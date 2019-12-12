@@ -117,7 +117,7 @@ ColumnLayout {
                             Text {
                                 anchors.top: parent.bottom
                                 visible: fileCount > 0
-                                text: "+ " + fileCount + " more"
+                                text: "+ " + fileCount + qsTr(" more")
                                 font.weight: Font.Light
                                 font.family: CmnCfg.chatFont.name
                                 color: CmnCfg.palette.darkGrey
