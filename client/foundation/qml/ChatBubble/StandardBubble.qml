@@ -60,18 +60,15 @@ ColumnLayout {
         }
     }
 
-    //reply bubble column
-    Column {
-        width: bubbleRoot.width
-        Loader {
-            sourceComponent: {
-                if (reply) {
-                    if (messageModelData.opDocAttachments.length === 0)
-                        return replyContent
-                    return replyDocContent
-                }
-                return undefined
+    //reply bubble loader
+    Loader {
+        sourceComponent: {
+            if (reply) {
+                if (messageModelData.opDocAttachments.length === 0)
+                    return replyContent
+                return replyDocContent
             }
+            return undefined
         }
     }
 
