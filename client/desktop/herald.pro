@@ -24,7 +24,15 @@ SOURCES   += main.cpp
 include(../foundation/foundation.pri)
 
 macx {
-   ICON = ../foundation/icons/herald.icns
+    ICON = ../foundation/icons/herald.icns
+}
+
+
+CONFIG(debug, debug|profile|release) {
+    linux {
+        CONFIG+=sanitizer
+        CONFIG+=sanitize_address sanitize_memory sanitize_undefined
+    }
 }
 
 unix:!macx {
