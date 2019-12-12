@@ -81,11 +81,7 @@ ColumnLayout {
         }
         ColumnLayout {
             id: replyWrapperCol
-
             Row {
-                Layout.topMargin: 0
-                Layout.bottomMargin: 0
-
                 ColumnLayout {
                     id: fileWrapper
                     Label {
@@ -103,50 +99,46 @@ ColumnLayout {
                     Item {
                         id: attachmentRow
                         Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.preferredHeight: 24
+                        Layout.preferredHeight: 20
                         Layout.topMargin: 0
-                        Item {
-                            height: 24
-                            anchors.leftMargin: CmnCfg.smallMargin
+                        Layout.leftMargin: CmnCfg.smallMargin
+                        Image {
+                            id: fileIcon
                             anchors.left: parent.left
-                            Image {
-                                id: fileIcon
-                                anchors.left: parent.left
-                                anchors.verticalCenter: parent.verticalCenter
-                                source: "qrc:/file-icon.svg"
-                                height: 20
-                                width: height
-                            }
+                            anchors.verticalCenter: parent.verticalCenter
+                            source: "qrc:/file-icon.svg"
+                            height: 20
+                            width: height
+                        }
 
-                            TextMetrics {
-                                id: nameMetrics
-                                elide: Text.ElideMiddle
-                                elideWidth: reply.width - imageClipLoader.size
-                                            - fileSize.width - 40 - CmnCfg.smallMargin * 2
-                            }
+                        TextMetrics {
+                            id: nameMetrics
+                            elide: Text.ElideMiddle
+                            elideWidth: reply.width - imageClipLoader.size
+                                        - fileSize.width - 40 - CmnCfg.smallMargin * 2
+                        }
 
-                            Text {
-                                id: fileName
-                                anchors.left: fileIcon.right
-                                anchors.leftMargin: CmnCfg.smallMargin
-                                anchors.verticalCenter: parent.verticalCenter
-                                color: CmnCfg.palette.black
-                                text: nameMetrics.elidedText
-                                font.family: CmnCfg.chatFont.name
-                                font.pixelSize: 13
-                                font.weight: Font.Medium
-                            }
+                        Text {
+                            id: fileName
+                            anchors.left: fileIcon.right
+                            anchors.leftMargin: CmnCfg.smallMargin
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: CmnCfg.palette.black
+                            text: nameMetrics.elidedText
+                            font.family: CmnCfg.chatFont.name
+                            font.pixelSize: 13
+                            font.weight: Font.Medium
+                        }
 
-                            Text {
-                                id: fileSize
-                                anchors.left: fileName.right
-                                anchors.leftMargin: CmnCfg.smallMargin
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: CmnCfg.chatFont.name
-                                font.pixelSize: 10
-                                font.weight: Font.Light
-                                color: CmnCfg.palette.darkGrey
-                            }
+                        Text {
+                            id: fileSize
+                            anchors.left: fileName.right
+                            anchors.leftMargin: CmnCfg.smallMargin
+                            anchors.verticalCenter: parent.verticalCenter
+                            font.family: CmnCfg.chatFont.name
+                            font.pixelSize: 10
+                            font.weight: Font.Light
+                            color: CmnCfg.palette.darkGrey
                         }
                     }
                 }
