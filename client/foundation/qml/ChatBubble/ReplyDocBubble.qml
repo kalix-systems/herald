@@ -22,23 +22,19 @@ ColumnLayout {
 
     Component.onCompleted: {
         const doc = JSON.parse(modelData.opDocAttachments)
-
-        nameMetrics.text = doc[0].name
-        fileSize.text = Utils.friendlyFileSize(doc[0].size)
-        fileCount = doc.length - 1
+        nameMetrics.text = doc.first.name
+        fileSize.text = Utils.friendlyFileSize(doc.first.size)
+        fileCount = doc.count - 1
 
         if (modelData.opMediaAttachments.length === 0)
             return
 
         const media = JSON.parse(modelData.opMediaAttachments)
 
-        if (media.length === 0)
-            return
-
         imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media[0].path
-        imageClipLoader.item.count = media.length - 1
-        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        imageClipLoader.item.imageSource = "file:" + media.first.path
+        imageClipLoader.item.count = media.count - 1
+        imageClipLoader.item.aspectRatio = media.first.width / media.first.height
     }
 
     Rectangle {
@@ -182,24 +178,11 @@ ColumnLayout {
                                                                   messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
-                    property string decoration: replyBody > 350 ? "..." : ""
-                    property string shortenedText: knownReply ? truncate_text(
-                                                                    modelData.opBody).slice(
-                                                                    0,
-                                                                    350) + decoration : qsTr(
+                    property string shortenedText: knownReply ? modelData.opBody : qsTr(
                                                                     "Original message not found")
                     text: shortenedText
                     elideWidth: maxWidth * 2
                     elide: Text.ElideRight
-
-                    function truncate_text(body) {
-                        const bodyLines = body.split("\n")
-                        if (bodyLines.length > 3) {
-                            return bodyLines.slice(0, 3).join("\n")
-                        } else {
-                            return body
-                        }
-                    }
                 }
 
                 StandardTextEdit {

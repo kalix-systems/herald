@@ -175,9 +175,15 @@ impl AttachmentMeta {
             path.push(p);
 
             for entry in read_dir(path).map_err(|e| Error::Read(e, loc!()))? {
-                let file = entry.map_err(|e| Error::Read(e, loc!()))?.path();
+                let entry: std::fs::DirEntry = entry.map_err(|e| Error::Read(e, loc!()))?;
+
+                let file = entry.path();
 
                 if is_media(&file) {
+                    let name = entry
+                        .file_name()
+                        .into_string()
+                        .map_err(Error::NonUnicodePath)?;
                     let path = file
                         .into_os_string()
                         .into_string()
@@ -189,6 +195,7 @@ impl AttachmentMeta {
                     out.push(MediaMeta {
                         width,
                         height,
+                        name,
                         path,
                     });
                 }
@@ -241,6 +248,7 @@ impl AttachmentMeta {
 
 pub struct MediaMeta {
     pub path: String,
+    pub name: String,
     pub width: u32,
     pub height: u32,
 }
@@ -251,6 +259,7 @@ impl From<MediaMeta> for json::JsonValue {
             path,
             width,
             height,
+            name,
         } = meta;
 
         use json::object;
@@ -258,7 +267,8 @@ impl From<MediaMeta> for json::JsonValue {
         object! {
             "path" => path,
             "width" => width,
-            "height" => height
+            "height" => height,
+            "name" => name,
         }
     }
 }
