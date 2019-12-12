@@ -1,7 +1,7 @@
 use crate::{
     ffi,
     interface::{UsersEmitter as Emitter, UsersList as List, UsersTrait as Interface},
-    ret_err, ret_none, spawn,
+    err, none, spawn,
 };
 use herald_common::UserId;
 use heraldcore::{
@@ -59,8 +59,8 @@ impl Interface for Users {
         &mut self,
         id: ffi::UserId,
     ) -> ffi::ConversationId {
-        let id = ret_err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
-        let (data, _) = ret_err!(UserBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
+        let id = err!(id.as_str().try_into(), ffi::NULL_CONV_ID.to_vec());
+        let (data, _) = err!(UserBuilder::new(id).add(), ffi::NULL_CONV_ID.to_vec());
 
         let pairwise_conversation = data.pairwise_conversation;
 
@@ -88,7 +88,7 @@ impl Interface for Users {
         self.model.end_insert_rows();
 
         spawn!(
-            ret_err!(network::send_user_req(id, pairwise_conversation)),
+            err!(network::send_user_req(id, pairwise_conversation)),
             ffi::NULL_CONV_ID.to_vec()
         );
 
@@ -100,7 +100,7 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> ffi::UserIdRef {
-        ret_none!(self.list.get(row_index), "").id.as_str()
+        none!(self.list.get(row_index), "").id.as_str()
     }
 
     /// Returns conversation id.
@@ -108,8 +108,8 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> ffi::ConversationId {
-        let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
-        ret_none!(shared::pairwise_cid(uid), ffi::NULL_CONV_ID.to_vec()).to_vec()
+        let uid = &none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
+        none!(shared::pairwise_cid(uid), ffi::NULL_CONV_ID.to_vec()).to_vec()
     }
 
     /// Returns users name
@@ -117,9 +117,9 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
+        let uid = &none!(self.list.get(row_index), "".to_owned()).id;
 
-        ret_none!(shared::name(uid), uid.to_string())
+        none!(shared::name(uid), uid.to_string())
     }
 
     /// Returns name if it is set, otherwise returns empty string
@@ -127,7 +127,7 @@ impl Interface for Users {
         &self,
         id: ffi::UserId,
     ) -> String {
-        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
+        let uid = &err!(id.as_str().try_into(), "".to_owned());
         name(uid).unwrap_or_else(|| "".to_owned())
     }
 
@@ -137,7 +137,7 @@ impl Interface for Users {
         row_index: usize,
         name: String,
     ) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
+        let uid = none!(self.list.get(row_index), false).id;
         {
             let name = name.clone();
             spawn!(user::set_name(uid, name.as_str()), false);
@@ -145,7 +145,7 @@ impl Interface for Users {
 
         {
             let mut lock = user_data().write();
-            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            let mut inner = none!(lock.get_mut(&uid), false);
             inner.name = name;
         }
         true
@@ -165,7 +165,7 @@ impl Interface for Users {
         &self,
         id: ffi::UserId,
     ) -> String {
-        let uid = &ret_err!(id.as_str().try_into(), "".to_owned());
+        let uid = &err!(id.as_str().try_into(), "".to_owned());
         profile_picture(uid).unwrap_or_else(|| "".to_owned())
     }
 
@@ -177,16 +177,16 @@ impl Interface for Users {
         row_index: usize,
         picture: Option<String>,
     ) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
+        let uid = none!(self.list.get(row_index), false).id;
 
         let picture = picture.and_then(crate::utils::strip_qrc);
 
         // FIXME this is not exception safe
-        let path = ret_err!(user::set_profile_picture(uid, picture), false);
+        let path = err!(user::set_profile_picture(uid, picture), false);
 
         {
             let mut lock = user_data().write();
-            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            let mut inner = none!(lock.get_mut(&uid), false);
             inner.profile_picture = path;
         }
         true
@@ -197,7 +197,7 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> u32 {
-        let uid = ret_none!(self.list.get(row_index), 0).id;
+        let uid = none!(self.list.get(row_index), 0).id;
         color(&uid).unwrap_or(0)
     }
 
@@ -206,7 +206,7 @@ impl Interface for Users {
         &self,
         id: ffi::UserId,
     ) -> u32 {
-        let uid = &ret_err!(id.as_str().try_into(), 0);
+        let uid = &err!(id.as_str().try_into(), 0);
 
         color(&uid).unwrap_or(0)
     }
@@ -217,13 +217,13 @@ impl Interface for Users {
         row_index: usize,
         color: u32,
     ) -> bool {
-        let uid = ret_none!(self.list.get(row_index), false).id;
+        let uid = none!(self.list.get(row_index), false).id;
 
         spawn!(user::set_color(uid, color), false);
 
         {
             let mut lock = user_data().write();
-            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            let mut inner = none!(lock.get_mut(&uid), false);
             inner.color = color;
         }
         true
@@ -233,8 +233,8 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> u8 {
-        let uid = ret_none!(self.list.get(row_index), 0).id;
-        ret_none!(status(&uid), 0) as u8
+        let uid = none!(self.list.get(row_index), 0).id;
+        none!(status(&uid), 0) as u8
     }
 
     fn set_status(
@@ -242,14 +242,14 @@ impl Interface for Users {
         row_index: usize,
         status: u8,
     ) -> bool {
-        let status = ret_err!(UserStatus::try_from(status), false);
-        let uid = ret_none!(self.list.get(row_index), false).id;
+        let status = err!(UserStatus::try_from(status), false);
+        let uid = none!(self.list.get(row_index), false).id;
 
         spawn!(user::set_status(uid, status), false);
 
         {
             let mut lock = user_data().write();
-            let mut inner = ret_none!(lock.get_mut(&uid), false);
+            let mut inner = none!(lock.get_mut(&uid), false);
             inner.status = status;
         }
 
@@ -267,7 +267,7 @@ impl Interface for Users {
         &self,
         row_index: usize,
     ) -> bool {
-        ret_none!(self.list.get(row_index), true).matched
+        none!(self.list.get(row_index), true).matched
     }
 
     fn filter(&self) -> &str {
@@ -285,7 +285,7 @@ impl Interface for Users {
 
         self.filter = match self.filter.take() {
             Some(mut pat) => {
-                ret_err!(pat.set_pattern(pattern));
+                err!(pat.set_pattern(pattern));
                 Some(pat)
             }
             None => SearchPattern::new_normal(pattern).ok(),
@@ -309,10 +309,10 @@ impl Interface for Users {
         self.filter = match self.filter.take() {
             Some(mut filter) => {
                 if use_regex {
-                    ret_err!(filter.regex_mode());
+                    err!(filter.regex_mode());
                     Some(filter)
                 } else {
-                    ret_err!(filter.normal_mode());
+                    err!(filter.normal_mode());
                     Some(filter)
                 }
             }

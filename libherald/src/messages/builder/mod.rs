@@ -2,7 +2,7 @@ use crate::{
     attachments::{DocumentAttachments, MediaAttachments},
     content_push, ffi,
     interface::*,
-    push, ret_err, ret_none, spawn,
+    push, err, none, spawn,
 };
 use herald_common::{Time, UserId};
 use heraldcore::{
@@ -59,7 +59,7 @@ impl MessageBuilderTrait for MessageBuilder {
         match body {
             Some(body) => {
                 if !body.is_empty() {
-                    self.inner.body(ret_err!(body.try_into()));
+                    self.inner.body(err!(body.try_into()));
                 } else {
                     self.inner.body = None;
                 }
@@ -98,7 +98,7 @@ impl MessageBuilderTrait for MessageBuilder {
         self.emit.body_changed();
         self.emit_op_changed();
 
-        let cid = ret_none!(builder.conversation);
+        let cid = none!(builder.conversation);
 
         spawn!({
             builder.store_and_send(move |m| {
@@ -107,16 +107,16 @@ impl MessageBuilderTrait for MessageBuilder {
 
                 match m {
                     Msg(msg) => {
-                        ret_err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
+                        err!(content_push(cid, MsgUpdate::BuilderMsg(msg)));
                     }
                     Error { error, location } => {
                         push((Err::<(), HErr>(error), location));
                     }
                     StoreDone(mid, meta) => {
-                        ret_err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
+                        err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
                     }
                     SendDone(mid) => {
-                        ret_err!(content_push(cid, MsgUpdate::SendDone(mid)));
+                        err!(content_push(cid, MsgUpdate::SendDone(mid)));
                     }
                 }
             })

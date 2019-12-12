@@ -2,7 +2,7 @@ use super::*;
 use crate::{
     ffi,
     interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
-    ret_err, ret_none, spawn,
+    err, none, spawn,
 };
 use heraldcore::{
     config, conversation,
@@ -65,9 +65,9 @@ impl Messages {
         &self,
         msg_id: ffi::MsgIdRef,
     ) -> i64 {
-        let msg_id = ret_err!(msg_id.try_into(), -1);
+        let msg_id = err!(msg_id.try_into(), -1);
 
-        ret_none!(self.container.index_by_id(msg_id), -1) as i64
+        none!(self.container.index_by_id(msg_id), -1) as i64
     }
 
     pub(crate) fn is_tail_(
@@ -115,7 +115,7 @@ impl Messages {
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
-        let id = ret_none!(self.conversation_id, false);
+        let id = none!(self.conversation_id, false);
 
         spawn!(conversation::delete_conversation(&id), false);
 
@@ -136,7 +136,7 @@ impl Messages {
     ) -> bool {
         let ix = index as usize;
 
-        let id = ret_none!(self.container.get(ix), false).msg_id;
+        let id = none!(self.container.get(ix), false).msg_id;
 
         self.remove_helper(id, ix);
         spawn!(message::delete_message(&id), false);
@@ -179,7 +179,7 @@ impl Messages {
     ) {
         use builder::OpChanged;
 
-        match ret_err!(self.builder.set_op_id(id, &self.container)) {
+        match err!(self.builder.set_op_id(id, &self.container)) {
             OpChanged::Changed => {
                 self.emit.builder_op_msg_id_changed();
             }
@@ -240,7 +240,7 @@ impl Messages {
         let emit = &mut self.emit;
         self.container.clear_search(|ix| model.data_changed(ix, ix));
 
-        ret_err!(self.search.clear_search(|| {
+        err!(self.search.clear_search(|| {
             emit.search_index_changed();
             emit.search_pattern_changed();
             emit.search_regex_changed();
@@ -259,7 +259,7 @@ impl Messages {
 
         let emit = &mut self.emit;
 
-        let changed = ret_err!(self
+        let changed = err!(self
             .search
             .set_pattern(pattern, || emit.search_pattern_changed()))
         .changed();
@@ -292,7 +292,7 @@ impl Messages {
     ) {
         let emit = &mut self.emit;
 
-        let changed = ret_err!(self
+        let changed = err!(self
             .search
             .set_regex(use_regex, || emit.search_regex_changed()))
         .changed();

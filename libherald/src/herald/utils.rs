@@ -1,6 +1,6 @@
 use crate::interface::*;
 use crate::utils::strip_qrc;
-use crate::{ret_err, ret_none};
+use crate::{err, none};
 use std::fs::copy;
 use std::path::Path;
 /// A collection of pure functions that are used in QML.
@@ -35,9 +35,9 @@ impl UtilsTrait for Utils {
     ) -> bool {
         if let Some(target_path) = strip_qrc(target_path) {
             let existing_path = Path::new(&fpath);
-            let fname = ret_none!(existing_path.file_name(), false);
+            let fname = none!(existing_path.file_name(), false);
             let target_path = Path::new(&target_path).join(&fname);
-            ret_err!(copy(existing_path, target_path), false);
+            err!(copy(existing_path, target_path), false);
             true
         } else {
             false

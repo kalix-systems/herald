@@ -4,7 +4,7 @@ use crate::{
     interface::{
         MessageSearchEmitter as Emitter, MessageSearchList as List, MessageSearchTrait as Interface,
     },
-    ret_err,
+    err,
 };
 use crossbeam_channel::{unbounded, Receiver};
 use heraldcore::message::{Search, SearchResult};
@@ -56,16 +56,16 @@ impl Interface for MessageSearch {
                 (true, false) => {
                     self.clear_search();
 
-                    ret_err!(pattern.regex_mode());
+                    err!(pattern.regex_mode());
                     self.pattern = Some(pattern.clone());
                     self.emit.regex_search_changed();
 
-                    ret_err!(self.start_search(pattern));
+                    err!(self.start_search(pattern));
                 }
                 (false, true) => {
-                    ret_err!(pattern.normal_mode());
+                    err!(pattern.normal_mode());
                     self.emit.regex_search_changed();
-                    ret_err!(self.start_search(pattern));
+                    err!(self.start_search(pattern));
                 }
                 _ => {}
             }
@@ -88,11 +88,11 @@ impl Interface for MessageSearch {
                     return;
                 }
 
-                ret_err!(old.set_pattern(new));
+                err!(old.set_pattern(new));
                 self.pattern = Some(old.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(self.start_search(old));
+                err!(self.start_search(old));
             }
             (Some(new), None) => {
                 self.num_results = 0;
@@ -101,11 +101,11 @@ impl Interface for MessageSearch {
                     return;
                 }
 
-                let pattern = ret_err!(SearchPattern::new_normal(new));
+                let pattern = err!(SearchPattern::new_normal(new));
                 self.pattern = Some(pattern.clone());
                 self.emit.search_pattern_changed();
 
-                ret_err!(self.start_search(pattern));
+                err!(self.start_search(pattern));
             }
             (None, _) => self.clear_search(),
         }

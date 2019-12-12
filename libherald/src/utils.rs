@@ -22,7 +22,7 @@ pub(crate) fn err_string_msg(
     )
 }
 
-pub(crate) fn ret_err_string(
+pub(crate) fn err_string(
     e: &dyn std::error::Error,
     file: &str,
     line: u32,
@@ -37,15 +37,15 @@ pub(crate) fn ret_err_string(
 
 #[macro_export]
 /// Early return on error
-macro_rules! ret_err {
+macro_rules! err {
     ($maybe: expr) => {
-        ret_err!($maybe, ())
+        err!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+                let err_string = crate::utils::err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
                 $crate::push(crate::Update::Error(err_string));
@@ -63,7 +63,7 @@ macro_rules! cont_err {
             Ok(val) => val,
             Err(e) => {
                 use $crate::shared::SingletonBus;
-                let err_string = crate::utils::ret_err_string(&e, file!(), line!());
+                let err_string = crate::utils::err_string(&e, file!(), line!());
 
                 eprintln!("{}", err_string);
                 $crate::push(crate::Update::Error(err_string)).ok();
@@ -90,7 +90,7 @@ macro_rules! push_err {
     };
 }
 
-pub(crate) fn ret_none_string(
+pub(crate) fn none_string(
     file: &str,
     line: u32,
 ) -> String {
@@ -103,15 +103,15 @@ pub(crate) fn ret_none_string(
 
 #[macro_export]
 /// Early return on unexpected `None`
-macro_rules! ret_none {
+macro_rules! none {
     ($maybe: expr) => {
-        ret_none!($maybe, ())
+        none!($maybe, ())
     };
     ($maybe: expr, $retval: expr) => {
         match $maybe {
             Some(val) => val,
             None => {
-                let err_string = $crate::utils::ret_none_string(file!(), line!());
+                let err_string = $crate::utils::none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
                 $crate::push(crate::Update::Error(err_string));
@@ -128,7 +128,7 @@ macro_rules! cont_none {
         match $maybe {
             Some(val) => val,
             None => {
-                let err_string = $crate::utils::ret_none_string(file!(), line!());
+                let err_string = $crate::utils::none_string(file!(), line!());
 
                 eprintln!("{}", err_string);
                 $crate::push(crate::Update::Error(err_string));
@@ -145,7 +145,7 @@ macro_rules! spawn {
         spawn!($code, ())
     };
     ($code: expr, $retval: expr) => {
-        ret_err!(
+        err!(
             ::std::thread::Builder::new().spawn(move || { $code }),
             $retval
         )

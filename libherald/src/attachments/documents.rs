@@ -2,7 +2,7 @@ use crate::interface::{
     DocumentAttachmentsEmitter as Emitter, DocumentAttachmentsList as List,
     DocumentAttachmentsTrait as Interface,
 };
-use crate::{ret_err, ret_none};
+use crate::{err, none};
 
 /// Document attachments
 pub struct DocumentAttachments {
@@ -35,15 +35,15 @@ impl Interface for DocumentAttachments {
         &self,
         index: usize,
     ) -> &str {
-        ret_none!(self.contents.get(index), "")
+        none!(self.contents.get(index), "")
     }
 
     fn document_attachment_size(
         &self,
         index: usize,
     ) -> u64 {
-        let path = ret_none!(self.contents.get(index), 0);
-        ret_err!(std::fs::metadata(&path), 0).len()
+        let path = none!(self.contents.get(index), 0);
+        err!(std::fs::metadata(&path), 0).len()
     }
 }
 

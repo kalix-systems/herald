@@ -1,6 +1,6 @@
 use crate::{
     interface::{MessagesEmitter as Emitter, MessagesList as List},
-    ret_err, ret_none,
+    err, none,
     toasts::new_msg_toast,
 };
 use herald_common::UserId;
@@ -41,10 +41,10 @@ impl Messages {
             MsgUpdate::NewMsg(new) => {
                 new_msg_toast(new.as_ref());
 
-                ret_err!(self.insert_helper(*new));
+                err!(self.insert_helper(*new));
             }
             MsgUpdate::BuilderMsg(msg) => {
-                ret_err!(self.insert_helper(*msg));
+                err!(self.insert_helper(*msg));
             }
             MsgUpdate::Receipt {
                 msg_id,
@@ -53,21 +53,21 @@ impl Messages {
             } => {
                 let model = &mut self.model;
 
-                ret_none!(&self
+                none!(&self
                     .container
                     .handle_receipt(msg_id, status, recipient, |ix| model.data_changed(ix, ix)));
             }
             MsgUpdate::StoreDone(mid, meta) => {
                 let model = &mut self.model;
 
-                ret_none!(&self
+                none!(&self
                     .container
                     .handle_store_done(mid, meta, |ix| model.data_changed(ix, ix)));
             }
             MsgUpdate::SendDone(mid) => {
                 let model = &mut self.model;
 
-                ret_none!(&self
+                none!(&self
                     .container
                     .handle_send_done(mid, |ix| { model.data_changed(ix, ix) }));
             }
