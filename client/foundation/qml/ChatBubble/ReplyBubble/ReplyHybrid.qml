@@ -27,15 +27,11 @@ ColumnLayout {
         fileSize.text = Utils.friendlyFileSize(doc.first.size)
         fileCount = doc.count - 1
 
-        if (modelData.opMediaAttachments.length === 0)
-            return
-
         const media = JSON.parse(modelData.opMediaAttachments)
 
-        imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media.first.path
-        imageClipLoader.item.count = media.count - 1
-        imageClipLoader.item.aspectRatio = media.first.width / media.first.height
+        imageClip.imageSource = "file:" + media.first.path
+        imageClip.count = media.count - 1
+        imageClip.aspectRatio = media.first.width / media.first.height
     }
 
     Rectangle {
@@ -80,9 +76,13 @@ ColumnLayout {
         }
         ColumnLayout {
             id: replyWrapperCol
-            Row {
+            spacing: 0
+            Item {
+                Layout.preferredWidth: reply.width
+                Layout.preferredHeight: 80
                 ColumnLayout {
-                    id: fileWrapper
+                    anchors.left: parent.left
+                    id: fileLabelWrapper
                     Label {
                         id: opLabel
                         text: knownReply ? Herald.users.nameById(
@@ -90,19 +90,15 @@ ColumnLayout {
                         font.bold: true
                         Layout.margins: CmnCfg.smallMargin
                         Layout.bottomMargin: 0
-                        Layout.topMargin: CmnCfg.smallMargin
                         Layout.preferredHeight: knownReply ? implicitHeight : 0
                         color: opColor
                     }
 
                     Item {
-                        id: attachmentRow
-                        Layout.alignment: Qt.AlignTop
-                        Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.minimumHeight: 20
+                        id: fileClip
+                        Layout.topMargin: CmnCfg.smallMargin
                         Layout.leftMargin: CmnCfg.smallMargin
-                        Layout.bottomMargin: CmnCfg.smallMargin
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: fileIcon.height
                         Image {
                             id: fileIcon
                             anchors.left: parent.left
@@ -110,24 +106,12 @@ ColumnLayout {
                             source: "qrc:/file-icon.svg"
                             height: 20
                             width: height
-
-                            Text {
-                                anchors.top: parent.bottom
-                                visible: fileCount > 0
-                                text: "+ " + fileCount + qsTr(" more")
-                                font.weight: Font.Light
-                                font.family: CmnCfg.chatFont.name
-                                color: CmnCfg.palette.darkGrey
-                                font.pixelSize: 13
-                                bottomPadding: CmnCfg.smallMargin
-                            }
                         }
 
                         TextMetrics {
                             id: nameMetrics
                             elide: Text.ElideMiddle
-                            elideWidth: reply.width - imageClipLoader.size
-                                        - fileSize.width - 40 - CmnCfg.smallMargin * 2
+                            elideWidth: reply.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
                         }
 
                         Text {
@@ -153,25 +137,32 @@ ColumnLayout {
                             color: CmnCfg.palette.darkGrey
                         }
                     }
+
+                    Text {
+                        id: fileSurplus
+                        Layout.leftMargin: CmnCfg.smallMargin
+                        Layout.topMargin: -CmnCfg.smallMargin / 2
+                        visible: fileCount > 0
+                        text: "+ " + fileCount + qsTr(" more")
+                        font.weight: Font.Light
+                        font.family: CmnCfg.chatFont.name
+                        color: CmnCfg.palette.darkGrey
+                        font.pixelSize: 13
+                    }
                 }
 
-                Loader {
-                    property int size: item == undefined ? 16 : 80
-                    id: imageClipLoader
-                    anchors.top: parent.top
+                ReplyImageClip {
+                    id: imageClip
                     anchors.topMargin: CmnCfg.smallMargin
-
-                    Component {
-                        id: imageClipComponent
-                        ReplyImageClip {}
-                    }
+                    anchors.top: parent.top
+                    anchors.right: parent.right
                 }
             }
 
             ColumnLayout {
                 id: reply
                 spacing: 0
-                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: 0
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
