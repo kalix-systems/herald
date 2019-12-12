@@ -82,7 +82,7 @@ ColumnLayout {
         ColumnLayout {
             id: replyWrapperCol
 
-            RowLayout {
+            Row {
                 Layout.topMargin: 0
                 Layout.bottomMargin: 0
 
@@ -154,8 +154,8 @@ ColumnLayout {
                 Loader {
                     property int size: item == undefined ? 16 : 80
                     id: imageClipLoader
-                    Layout.alignment: Qt.AlignTop
-                    Layout.topMargin: CmnCfg.smallMargin
+                    anchors.top: parent.top
+                    anchors.topMargin: CmnCfg.smallMargin
                 }
 
                 Component {
