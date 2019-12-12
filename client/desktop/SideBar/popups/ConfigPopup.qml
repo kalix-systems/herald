@@ -35,6 +35,7 @@ Window {
             id: headerRect
             color: CmnCfg.palette.offBlack
             height: CmnCfg.toolbarHeight
+
             Row {
                 leftPadding: CmnCfg.margin
                 anchors.fill: parent
@@ -49,6 +50,7 @@ Window {
                     elide: Label.ElideRight
                 }
             }
+
             Rectangle {
                 height: 1
                 width: parent.width
@@ -61,7 +63,7 @@ Window {
             anchors.fill: parent
             spacing: 0
             Rectangle {
-                Layout.minimumWidth: 0.3 * 600
+                Layout.minimumWidth: 250
                 Layout.fillHeight: true
                 color: CmnCfg.palette.offBlack
                 Column {
@@ -147,25 +149,25 @@ Window {
                     }
                     CfgComps.ConfigListItem {
                         id: security
-                        headerText: "Privacy & Security"
+                        headerText: qsTr("Privacy & Security")
                         configContent: CfgComps.Privacy {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: storage
-                        headerText: "Data & Storage"
+                        headerText: qsTr("Data & Storage")
                         configContent: CfgComps.Storage {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: advanced
-                        headerText: "Advanced"
+                        headerText: qsTr("Advanced")
                         configContent: CfgComps.Advanced {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: feedback
-                        headerText: "Help & Feedback"
+                        headerText: qsTr("Help & Feedback")
                         configContent: CfgComps.Feedback {}
                     }
                 }

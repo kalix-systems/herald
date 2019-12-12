@@ -15,7 +15,7 @@ mod imp {
         use notify_rust::*;
 
         // Note: If a notification server isn't running, trying to show a notification will
-        // block the thread. TODO: Should we inform the user that they need might need to install a
+        // block the thread on XDG desktops. TODO: Should we inform the user that they need might need to install a
         // notification server if one isn't running?
         if get_server_information().is_err() {
             return;
@@ -31,10 +31,11 @@ mod imp {
             notif.body(body.as_str());
         }
 
-        notif
-            .hint(NotificationHint::Category("im.received".to_owned()))
-            .show()
-            .ok();
+        drop(
+            notif
+                .hint(NotificationHint::Category("im.received".to_owned()))
+                .show(),
+        );
     }
 }
 
