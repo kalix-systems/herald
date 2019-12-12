@@ -44,9 +44,8 @@ ColumnLayout {
 
         Button {
             text: qsTr("Change display name")
-            onClicked: {
-                submissionCol.visible = true
-            }
+            onClicked: submissionCol.visible = true
+            Keys.onEscapePressed: submissionCol.visible = false
         }
 
         StandardLabel {
@@ -61,6 +60,7 @@ ColumnLayout {
         id: submissionCol
         Layout.leftMargin: CmnCfg.margin
         visible: false
+
         TextArea {
             id: displayNameArea
             placeholderText: qsTr("Enter New Display Name...")
