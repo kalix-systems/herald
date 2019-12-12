@@ -26,7 +26,7 @@ ColumnLayout {
 
     Button {
         Layout.leftMargin: CmnCfg.margin
-        text: qsTr("Restore To Backup")
+        text: qsTr("Restore From Backup")
     }
 
     Rectangle {
