@@ -41,7 +41,6 @@ mod imp {
 mod imp {
     use heraldcore::message::Message;
     use notify_rust::*;
-    use once_cell::sync::OnceCell;
 
     pub fn new_msg_toast(msg: &Message) {
         if set_application(super::DESKTOP_APP_NAME).is_ok() {
@@ -54,7 +53,7 @@ mod imp {
                 notif.body(body.as_str());
             }
 
-            notif.show().ok();
+            drop(notif.show());
         }
     }
 }
