@@ -14,7 +14,7 @@ ColumnLayout {
             text: qsTr("Theme")
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
 
         Item {
@@ -53,7 +53,7 @@ ColumnLayout {
             color: "black"
             text: qsTr("Current display name: ") + (herald.config.name)
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
     }
 

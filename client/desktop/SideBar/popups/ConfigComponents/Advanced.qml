@@ -13,7 +13,7 @@ ColumnLayout {
             text: qsTr("Language")
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
 
         Item {
@@ -38,7 +38,7 @@ ColumnLayout {
             text: qsTr("App Info")
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
 
         Item {
@@ -49,7 +49,7 @@ ColumnLayout {
             text: qsTr("Version ") + "0.0.1"
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
     }
 

@@ -13,7 +13,7 @@ ColumnLayout {
             text: qsTr("Default message exipration time")
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
 
         Item {
