@@ -102,9 +102,7 @@ Window {
             font.bold: true
             font.pointSize: 20
             width: 50
-            onClicked: {
-                dirChooser.open()
-            }
+            onClicked: dirChooser.open()
         }
     }
 
