@@ -26,14 +26,10 @@ ColumnLayout {
 
         const media = JSON.parse(modelData.opMediaAttachments)
 
-        if (media.length === 0) {
-            return
-        }
-
         imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media[0].path
-        imageClipLoader.item.count = media.length - 1
-        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        imageClipLoader.item.imageSource = "file:" + media.first.path
+        imageClipLoader.item.count = media.count - 1
+        imageClipLoader.item.aspectRatio = media.first.width / media.first.height
     }
 
     Rectangle {

@@ -1,5 +1,6 @@
 use crate::*;
 use herald_common::{Time, UserId};
+use heraldcore::message::attachments::{DocMeta, MediaMeta};
 use im::vector::Vector;
 use search::*;
 use std::collections::HashSet;
@@ -257,7 +258,26 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-        self.get_doc_attachments_data_json(&mid)
+
+        let (first, len): (DocMeta, usize) = access(&mid, |m| -> Option<_> {
+            let docs = m.attachments.doc_attachments().ok()?;
+
+            if docs.is_empty() {
+                return None;
+            }
+
+            let len = docs.len();
+            let first = docs.into_iter().next()?;
+            Some((first, len))
+        })??;
+
+        Some(
+            json::object! {
+                "first" => first,
+                "count" => len,
+            }
+            .dump(),
+        )
     }
 
     pub fn op_media_attachments_json(
@@ -265,7 +285,26 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-        self.get_media_attachments_data_json(&mid)
+
+        let (first, len): (MediaMeta, usize) = access(&mid, |m| -> Option<_> {
+            let medias = m.attachments.media_attachments().ok()?;
+
+            if medias.is_empty() {
+                return None;
+            }
+
+            let len = medias.len();
+            let first = medias.into_iter().next()?;
+            Some((first, len))
+        })??;
+
+        Some(
+            json::object! {
+                "first" => first,
+                "count" => len,
+            }
+            .dump(),
+        )
     }
 
     pub fn clear_search<F: FnMut(usize)>(
