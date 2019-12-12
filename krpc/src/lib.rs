@@ -1,141 +1,180 @@
 use async_trait::*;
 use futures::{future::*, stream::*};
 use kson::prelude::*;
-use std::io::Error as IOErr;
-use tokio::prelude::*;
+use location::*;
+use std::{error::Error, fmt::Debug, io::Error as IOErr};
+use thiserror::Error;
 
 #[async_trait]
-pub trait MuxConn<Tx, Rx>
-where
-    Tx: AsyncWrite,
-    Rx: AsyncRead,
-{
-    type Error;
+pub trait KrpcServer {
+    type InitError: Debug + Error;
+    type ConnInfo: Debug;
 
-    async fn create_chan(&self) -> Result<(Tx, Rx), Self::Error>;
-    async fn accept_chan(&self) -> Result<(Tx, Rx), Self::Error>;
-}
+    const MAX_CONCURRENT_REQS: usize;
+    const MAX_CONCURRENT_PUSHES: usize;
 
-#[async_trait]
-pub trait KrpcServer<Req: De, Resp: Ser, Push: Ser> {
-    type InitError;
-    type ConnInfo;
-    type Tx: AsyncWrite + Unpin;
-    type Rx: AsyncRead + Unpin;
+    const MAX_REQ_SIZE: usize;
+    const MAX_ACK_SIZE: usize;
 
     async fn init(
         &self,
-        tx: Self::Tx,
-        rx: Self::Rx,
+        tx: quinn::SendStream,
+        rx: quinn::RecvStream,
     ) -> Result<Self::ConnInfo, Self::InitError>;
 
-    type Pushes: Stream<Item = Vec<Push>> + Unpin;
+    type Push: Ser;
+    type Pushes: Stream<Item = Self::Push> + Unpin;
     async fn pushes(
         &self,
         meta: &Self::ConnInfo,
     ) -> Self::Pushes;
 
-    async fn on_pushes_sent(
+    type PushAck: De;
+    async fn on_push_ack(
         &self,
-        pushes: Vec<Push>,
+        push: Self::Push,
+        ack: Self::PushAck,
     );
+
+    type Req: De;
+    type Resp: Ser;
 
     async fn handle_req(
         &self,
         conn: &Self::ConnInfo,
-        req: Req,
-    ) -> Resp;
+        req: Self::Req,
+    ) -> Self::Resp;
 
     async fn on_close(
         &self,
-        conn: Self::ConnInfo,
+        cinfo: Self::ConnInfo,
+        conn: quinn::Connection,
     );
 }
 
-pub async fn handle_conn<Req, Resp, Push, Server, Conn, Error>(
+#[derive(Debug, Error)]
+pub enum ServerError<InitError: Error> {
+    #[error("Init: {0}")]
+    Init(InitError),
+    #[error("Connection: {0}")]
+    Connection(#[from] quinn::ConnectionError),
+    #[error("Error writing to stream: {0}")]
+    WriteError(#[from] quinn::WriteError),
+    #[error("Error reading from stream: {0}")]
+    ReadExactError(#[from] quinn::ReadToEndError),
+    #[error("IO: {0}")]
+    IO(#[from] IOErr),
+    #[error("Kson: {0}")]
+    Kson(#[from] KsonError),
+    #[error("Special: {0}")]
+    Special(String, Location),
+}
+
+pub async fn handle_conn<Server>(
     server: &Server,
-    conn: &Conn,
-) -> Result<(), Error>
+    conn: quinn::Connection,
+    mut incoming: quinn::IncomingBiStreams,
+) -> Result<(), ServerError<Server::InitError>>
 where
-    Req: De,
-    Resp: Ser,
-    Push: Ser,
-    Server: KrpcServer<Req, Resp, Push>,
-    Conn: MuxConn<Server::Tx, Server::Rx>,
-    Error: From<Server::InitError> + From<Conn::Error> + From<IOErr> + From<KsonError>,
+    Server: KrpcServer,
 {
-    let (handshake_tx, handshake_rx) = conn.accept_chan().await?;
-    let cinfo = server.init(handshake_tx, handshake_rx).await?;
+    let (handshake_tx, handshake_rx) = incoming
+        .next()
+        .await
+        .ok_or_else(|| ServerError::Special("didn't receive handshake stream".into(), loc!()))??;
+    let cinfo = server
+        .init(handshake_tx, handshake_rx)
+        .await
+        .map_err(ServerError::Init)?;
 
-    let send_pushes = async {
-        let mut pushes = server.pushes(&cinfo).await;
+    let send_pushes =
+        server
+            .pushes(&cinfo)
+            .await
+            .for_each_concurrent(Server::MAX_CONCURRENT_PUSHES, |push| {
+                let fut = async {
+                    let (mut push_tx, push_rx) = conn.open_bi().await?;
+                    let bytes = kson::to_vec(&push);
 
-        let (mut push_tx, mut push_rx) = conn.create_chan().await?;
+                    push_tx.write_all(&bytes).await?;
+                    push_tx.finish();
 
-        while let Some(pushes) = pushes.next().await {
-            let bytes = kson::to_vec(&pushes);
-            let len = bytes.len() as u64;
-            push_tx.write_all(&len.to_le_bytes()).await?;
-            push_tx.write_all(&bytes).await?;
-            push_rx.read_exact(&mut [0]).await?;
-            server.on_pushes_sent(pushes).await;
-        }
+                    let ack_bytes = push_rx.read_to_end(Server::MAX_ACK_SIZE).await?;
+                    let ack = kson::from_bytes(ack_bytes.into())?;
 
-        Ok(())
-    };
+                    server.on_push_ack(push, ack).await;
 
-    let req_resp = async {
-        loop {
-            let (mut tx, mut rx) = conn.accept_chan().await?;
+                    Ok::<(), ServerError<Server::InitError>>(())
+                };
 
-            let mut len_buf = [0u8; 4];
-            rx.read_exact(&mut len_buf).await?;
-            let len = u32::from_le_bytes(len_buf) as usize;
+                async {
+                    if let Err(e) = fut.await {
+                        // TODO: do something better here
+                        eprintln!(
+                            "error sending push along connection {:?}, error was:\n{}",
+                            cinfo, e
+                        );
+                    }
+                }
+            });
 
-            let mut req_buf = vec![0u8; len];
-            rx.read_exact(&mut req_buf).await?;
+    let req_resp = incoming.for_each_concurrent(Server::MAX_CONCURRENT_REQS, |res| {
+        let fut = async {
+            let (mut tx, rx) = res?;
 
-            let as_req = kson::from_bytes(req_buf.into())?;
-            let resp = server.handle_req(&cinfo, as_req).await;
+            let req_bytes = rx.read_to_end(Server::MAX_REQ_SIZE).await?;
+            let req = kson::from_bytes(req_bytes.into())?;
 
+            let resp = server.handle_req(&cinfo, req).await;
             let rbytes = kson::to_vec(&resp);
-            let len_bytes = (rbytes.len() as u64).to_le_bytes();
-
-            tx.write_all(&len_bytes).await?;
             tx.write_all(&rbytes).await?;
+
+            tx.finish().await?;
+
+            Ok::<(), ServerError<Server::InitError>>(())
+        };
+
+        async {
+            if let Err(e) = fut.await {
+                // TODO: do something better here
+                eprintln!("error in connection {:?}, error was:\n{}", cinfo, e);
+            }
         }
-    };
+    });
 
-    let _: Result<((), ()), Error> = try_join(send_pushes, req_resp).await;
-
-    server.on_close(cinfo).await;
+    join(send_pushes, req_resp).await;
+    server.on_close(cinfo, conn).await;
 
     Ok(())
 }
 
-#[async_trait]
-pub trait KrpcClient<Req: Ser, Resp: De, Push: De> {
-    type InitError;
-    type ConnInfo;
+// #[async_trait]
+// pub trait KrpcClient {
+//     type Req: Ser;
+//     type Resp: De;
+//     type Push: De;
 
-    async fn init<Tx, Rx>(
-        &self,
-        tx: &mut Tx,
-        rx: &mut Rx,
-    ) -> Result<Self::ConnInfo, Self::InitError>
-    where
-        Tx: AsyncWrite + Unpin,
-        Rx: AsyncRead + Unpin;
+//     type InitError;
+//     type ConnInfo;
 
-    type PushError;
-    async fn handle_push(
-        &self,
-        conn: &Self::ConnInfo,
-        push: Push,
-    ) -> Result<(), Self::PushError>;
+//     async fn init<Tx, Rx>(
+//         &self,
+//         tx: &mut Tx,
+//         rx: &mut Rx,
+//     ) -> Result<Self::ConnInfo, Self::InitError>
+//     where
+//         Tx: AsyncWrite + Unpin,
+//         Rx: AsyncRead + Unpin;
 
-    async fn on_close(
-        &self,
-        conn: Self::ConnInfo,
-    );
-}
+//     type PushError;
+//     async fn handle_push(
+//         &self,
+//         conn: &Self::ConnInfo,
+//         push: Push,
+//     ) -> Result<(), Self::PushError>;
+
+//     async fn on_close(
+//         &self,
+//         conn: Self::ConnInfo,
+//     );
+// }
