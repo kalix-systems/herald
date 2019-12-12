@@ -62,7 +62,7 @@ default_features = false
 features         = ["bundled"]
 
 [features]
-deploy_desktop = ["platform_dirs/deploy_desktop"]
+deploy = ["platform_dirs/deploy"]
 
 [dev-dependencies]
 serial_test        = "0.2.0"

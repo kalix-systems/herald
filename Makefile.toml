@@ -6,12 +6,12 @@ OUT_DIR = ".appimage"
 # Builds libherald with desktop deployment feature
 [tasks.build_libherald]
 private = true
-command = "cargo"
-args = ["build", "--release",
-	"-p", "herald",
-	"--features", "deploy_desktop"
+script = [
+    '''
+    cd libherald
+    cargo build --release --features deploy
+    '''
 ]
-
 
 # Creates AppImage build directory if it does not already exist
 [tasks.make_out_dir]

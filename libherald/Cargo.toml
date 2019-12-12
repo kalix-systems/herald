@@ -44,4 +44,4 @@ serial_test_derive = "0.2.0"
 path = "../heraldcore/coremacros"
 
 [features]
-deploy_desktop = ["heraldcore/deploy_desktop"]
+deploy = ["heraldcore/deploy"]
