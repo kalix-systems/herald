@@ -61,7 +61,6 @@ impl std::error::Error for Error {}
 #[derive(Ser, De, Debug, Clone, PartialEq, Eq)]
 pub struct Attachment {
     data: Vec<u8>,
-    // TODO: make a Path newtype
     hash_dir: String,
 }
 

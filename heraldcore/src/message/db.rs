@@ -398,7 +398,6 @@ impl OutboundMessageBuilder {
 
         let out = match rx.recv().map_err(|_| channel_recv_err!())? {
             StoreAndSend::Msg(msg) => msg,
-            // TODO use line number
             StoreAndSend::Error { error, .. } => return Err(error),
             other => {
                 panic!("Unexpected  variant {:?}", other);

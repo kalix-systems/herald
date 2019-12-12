@@ -115,8 +115,8 @@ impl MessageBuilderTrait for MessageBuilder {
                     StoreDone(mid, meta) => {
                         ret_err!(content_push(cid, MsgUpdate::StoreDone(mid, meta)));
                     }
-                    SendDone(_) => {
-                        // TODO: send status?
+                    SendDone(mid) => {
+                        ret_err!(content_push(cid, MsgUpdate::SendDone(mid)));
                     }
                 }
             })

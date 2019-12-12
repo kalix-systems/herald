@@ -2,9 +2,6 @@ use super::*;
 use crate::{content_push, spawn};
 pub use messages_helper::{container::*, types::*};
 
-mod handlers;
-pub(super) use handlers::*;
-
 pub(super) fn fill(cid: ConversationId) {
     spawn!({
         let list: Vector<MessageMeta> = ret_err!(conversation::conversation_message_meta(&cid))

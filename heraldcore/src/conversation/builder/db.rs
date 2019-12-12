@@ -31,7 +31,6 @@ impl ConversationBuilder {
 
         let picture = match picture.as_ref() {
             Some(picture) => {
-                // TODO Give more specific error
                 let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
                 path.into_os_string().into_string().ok()
             }

@@ -6,6 +6,7 @@ use std::collections::HashSet;
 use types::*;
 
 mod cache;
+pub mod handlers;
 pub use cache::{access, update};
 
 #[derive(Default)]
