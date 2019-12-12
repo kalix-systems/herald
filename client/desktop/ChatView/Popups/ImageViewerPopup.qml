@@ -24,7 +24,7 @@ Window {
            }
 
     width: Math.min(image.sourceSize.width, 750)
-    height: Math.min(image.sourceSize.height, 500)
+    height: Math.min(image.sourceSize.height, 500) + controls.height * 2.0
     minimumWidth: 350
     minimumHeight: 150
 
@@ -126,7 +126,8 @@ Window {
         // it is not in scope nor in the window namespace
         if (visibility === 2) {
             width = Math.min(image.sourceSize.width, 750)
-            height = Math.min(image.sourceSize.height, 500)
+            height = Math.min(image.sourceSize.height,
+                              500) + controls.height * 2.0
             x = root.x
             y = root.y
         }

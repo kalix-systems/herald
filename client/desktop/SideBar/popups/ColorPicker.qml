@@ -45,6 +45,7 @@ Window {
             }
         }
     }
+
     Button {
         id: colorSubmissionButton
         text: qsTr("Submit")

@@ -4,17 +4,17 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
+import "qrc:/imports"
 import "../../common" as Common
+import "./ConfigComponents" as CfgComps
 import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {
     id: configPopup
     width: CmnCfg.configWidth
     height: CmnCfg.configHeight
-    maximumHeight: height
-    minimumHeight: height
-    maximumWidth: width
-    minimumWidth: width
+    minimumWidth: 500
+    minimumHeight: 250
 
     Component.onCompleted: {
         x = root.x + root.width / 3
@@ -29,78 +29,147 @@ Window {
         onSelectionAccepted: herald.config.profilePicture = fileUrl
     }
 
-    TabBar {
-        id: bar
-        width: parent.width
-        height: 50
-
-        TabButton {
-            text: qsTr("Account")
-        }
-        TabButton {
-            text: qsTr("UI")
-        }
-        TabButton {
-            text: qsTr("Authentication")
-        }
-        TabButton {
-            text: qsTr("Notifications")
-        }
-    }
-
-    StackLayout {
-        width: parent.width
-        currentIndex: bar.currentIndex
-        anchors.top: bar.bottom
-        ColumnLayout {
-            id: accountPreferences
-            Layout.alignment: Qt.AlignCenter
-            Layout.fillWidth: true
-            /// RS: check with the server to prevent duplicate ID's
-            RowLayout {
-                TextField {
-                    id: cfgUid
-                    enabled: false
-                    property bool userIdValid: true
-                    placeholderText: enabled ? qsTr("Enter UID") + " " : herald.config.configId
-                    selectionColor: "lightsteelblue"
-                }
-
-                TextField {
-                    id: cfgUname
-                    property bool usernameValid: true
-
-                    maximumLength: 256
-                    text: herald.config.name
-                    selectionColor: "lightsteelblue"
+    Page {
+        anchors.fill: parent
+        header: Rectangle {
+            id: headerRect
+            color: CmnCfg.palette.offBlack
+            height: CmnCfg.toolbarHeight
+            Row {
+                leftPadding: CmnCfg.margin
+                anchors.fill: parent
+                Label {
+                    id: label
+                    text: qsTr("Settings")
+                    color: CmnCfg.palette.white
+                    font.pixelSize: CmnCfg.headerSize
+                    font.family: CmnCfg.labelFont.name
+                    font.bold: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    elide: Label.ElideRight
                 }
             }
-
-            Button {
-                text: qsTr("select profile picture")
-                onClicked: cfgPfp.open()
+            Rectangle {
+                height: 1
+                width: parent.width
+                color: CmnCfg.palette.white
+                anchors.top: headerRect.bottom
             }
+        }
 
-            Button {
-                text: qsTr("Submit")
-                onClicked: {
-                    JS.submit(herald.config, cfgUname)
-                    close()
+        RowLayout {
+            anchors.fill: parent
+            spacing: 0
+            Rectangle {
+                Layout.minimumWidth: 0.3 * 600
+                Layout.fillHeight: true
+                color: CmnCfg.palette.offBlack
+                Column {
+                    spacing: CmnCfg.margin
+                    padding: CmnCfg.margin
+                    StandardLabel {
+                        text: qsTr("Notifications")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = notifications.y
+                        }
+                    }
+                    StandardLabel {
+                        text: qsTr("Appearance")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = appearence.y
+                        }
+                    }
+                    StandardLabel {
+                        text: qsTr("Privacy & Security")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = security.y
+                        }
+                    }
+                    StandardLabel {
+                        text: qsTr("Data & Storage")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = storage.y
+                        }
+                    }
+                    StandardLabel {
+                        text: qsTr("Advanced")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = advanced.y
+                        }
+                    }
+                    StandardLabel {
+                        text: qsTr("Help & Feedback")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = feedback.y
+                        }
+                    }
                 }
             }
-        }
-        Item {
-            id: uiPreferences
-            Button {
-                text: qsTr("toggle solarized dark")
-                onClicked: CmnCfg.theme = CmnCfg.theme === 1 ? 0 : 1
+
+            Flickable {
+                id: configScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentHeight: col.height
+                Column {
+                    id: col
+                    spacing: CmnCfg.smallMargin
+                    topPadding: CmnCfg.margin
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    CfgComps.ConfigListItem {
+                        id: notifications
+                        headerText: qsTr("Notifications")
+                        configContent: CfgComps.Notifications {}
+                    }
+                    CfgComps.ConfigListItem {
+                        id: appearence
+                        headerText: qsTr("Appearance")
+                        configContent: CfgComps.Appearance {}
+                    }
+                    CfgComps.ConfigListItem {
+                        id: security
+                        headerText: "Privacy & Security"
+                        configContent: CfgComps.Privacy {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: storage
+                        headerText: "Data & Storage"
+                        configContent: CfgComps.Storage {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: advanced
+                        headerText: "Advanced"
+                        configContent: CfgComps.Advanced {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: feedback
+                        headerText: "Help & Feedback"
+                        configContent: CfgComps.Feedback {}
+                    }
+                }
             }
-        }
-        Item {
-            id: authenticationPreferences
-        }
-        Item {
-            id: notificationPreferences
         }
     }
 }
