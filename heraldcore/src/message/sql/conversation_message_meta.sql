@@ -1,6 +1,6 @@
 SELECT
   messages.msg_id,
-  messages.insertion_ts,
+  messages.insertion_ts
 FROM
   messages
 WHERE

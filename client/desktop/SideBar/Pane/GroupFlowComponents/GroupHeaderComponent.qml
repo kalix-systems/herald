@@ -8,7 +8,6 @@ import QtQuick.Dialogs 1.3
 import QtMultimedia 5.13
 import QtGraphicalEffects 1.0
 
-
 Rectangle {
     id: topRect
     anchors.top: parent.top
@@ -39,12 +38,12 @@ Rectangle {
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
 
-
                     ColorOverlay {
                         id: overlay
                         anchors.fill: parent
                         source: parent
-                        visible: imageHover.containsMouse && groupImageLoader.imageSource !== ""
+                        visible: imageHover.containsMouse
+                                 && groupImageLoader.imageSource !== ""
                         color: CmnCfg.palette.black
                         opacity: 0.5
                         smooth: true
@@ -54,12 +53,13 @@ Rectangle {
                         id: clearPhoto
                         source: "qrc:/x-icon.svg"
                         anchors.centerIn: parent
-                        visible: imageHover.containsMouse && groupImageLoader.imageSource !== ""
+                        visible: imageHover.containsMouse
+                                 && groupImageLoader.imageSource !== ""
                         onClicked: groupImageLoader.imageSource = ""
                         fill: CmnCfg.palette.white
                         opacity: 1.0
                         hoverEnabled: true
-                  }
+                    }
 
                     MouseArea {
                         anchors.fill: parent

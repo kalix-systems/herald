@@ -27,7 +27,7 @@ ColumnLayout {
     }
 
     StandardLabel {
-        text: qsTr("Report and issue")
+        text: qsTr("Report an issue")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.margin
         font.pointSize: 14

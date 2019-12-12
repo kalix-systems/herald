@@ -50,7 +50,7 @@ Page {
     LoginButton {
         id: newAccButton
 
-        lbText: "Register New Device"
+        lbText: qsTr("Register New Device")
         lbColor: bgStartColor
 
         anchors {

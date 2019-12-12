@@ -118,7 +118,7 @@ Rectangle {
         Text {
             anchors.centerIn: parent
             color: "white"
-            text: "Register Device To Existing Account ▸"
+            text: qsTr("Register Device To Existing Account ▸")
         }
     }
 }

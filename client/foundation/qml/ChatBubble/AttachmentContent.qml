@@ -10,12 +10,16 @@ ColumnLayout {
     property var mediaParsed
     // callback triggered whenever an image is tapped
     property var imageTappedCallBack: function (source) {
-
         let currentIndex = mediaParsed.findIndex(function (object) {
+            if (object === undefined || object === null) {
+                return false
+            }
+
             // can't use triple equality here because it
             // checks for pointer equivalence...
-            return ("file:" + object.path) == source
+            return ("file:" + String(object.path)) === source
         })
+
         imageViewerPopup.sourceAtc = mediaParsed
         imageViewerPopup.index = currentIndex
         imageViewerPopup.reset()
@@ -26,11 +30,13 @@ ColumnLayout {
     spacing: 0
 
     Component.onCompleted: {
-        const media = medAttachments.length == 0 ? "" : JSON.parse(
-                                                       medAttachments)
-        const mediaLen = media.length
-        mediaParsed = media
-        switch (mediaLen) {
+        if (medAttachments.length === 0) {
+            return
+        }
+
+        wrapperCol.mediaParsed = JSON.parse(medAttachments)
+
+        switch (wrapperCol.mediaParsed.length) {
         case 0:
             break
         case 1:

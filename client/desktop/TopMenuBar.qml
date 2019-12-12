@@ -1,37 +1,38 @@
 import QtQuick 2.13
 import Qt.labs.platform 1.1
 
-// note: this will not work on windows
+// note: this really on works on macOS
 MenuBar {
     Menu {
         MenuItem {
-            text: "Preferences..."
+            text: qsTr("Preferences") + "..."
             shortcut: StandardKey.Preferences
             onTriggered: preferencesPopup.show()
         }
     }
+
     // TODO: when we have memory for chatTextAreas bind these events to them
     Menu {
-        title: "Edit"
+        title: qsTr("Edit")
         MenuItem {
-            text: "Undo"
+            text: qsTr("Undo")
             shortcut: StandardKey.Undo
             onTriggered: print("does Nothing")
         }
         MenuItem {
-            text: "Redo"
+            text: qsTr("Redo")
             shortcut: StandardKey.Redo
             onTriggered: print("does Nothing")
         }
     }
     Menu {
-        title: "View"
+        title: qsTr("View")
         MenuItem {
-            text: "Minimize"
+            text: qsTr("Minimize")
             onTriggered: root.showMinimized()
         }
         MenuItem {
-            text: "Fullscreen"
+            text: qsTr("Fullscreen")
             shortcut: StandardKey.FullScreen
             onTriggered: root.showFullScreen()
         }

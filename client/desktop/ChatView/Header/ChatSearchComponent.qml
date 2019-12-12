@@ -48,11 +48,9 @@ Component {
                 fill: CmnCfg.palette.lightGrey
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
-                onClicked: {
-                    convWindow.positionViewAtIndex(
-                                ownedConversation.prevSearchMatch(),
-                                ListView.Center)
-                }
+                onClicked: convWindow.positionViewAtIndex(
+                               ownedConversation.prevSearchMatch(),
+                               ListView.Center)
             }
 
             Imports.ButtonForm {
@@ -63,11 +61,9 @@ Component {
                 enabled: searchToolBar.state === "searchActiveState"
                 opacity: enabled ? 1 : 0.5
 
-                onClicked: {
-                    convWindow.positionViewAtIndex(
-                                ownedConversation.nextSearchMatch(),
-                                ListView.Center)
-                }
+                onClicked: convWindow.positionViewAtIndex(
+                               ownedConversation.nextSearchMatch(),
+                               ListView.Center)
             }
 
             Imports.ButtonForm {

@@ -221,7 +221,7 @@ impl MsgData {
     }
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 /// A thin wrapper around a `MsgId`
 pub struct MessageMeta {
     pub msg_id: MsgId,

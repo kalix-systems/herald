@@ -2,11 +2,11 @@ use crate::*;
 use herald_common::{Time, UserId};
 use im::vector::Vector;
 use search::*;
-use std::collections::HashMap;
 use std::collections::HashSet;
 use types::*;
 
 mod cache;
+pub mod handlers;
 pub use cache::{access, update};
 
 #[derive(Default)]
@@ -20,13 +20,8 @@ pub struct Container {
 impl Container {
     pub fn new(
         list: Vector<MessageMeta>,
-        map: HashMap<MsgId, MsgData>,
+        last: Option<MsgData>,
     ) -> Self {
-        let last = match list.last().as_ref() {
-            Some(MessageMeta { ref msg_id, .. }) => map.get(msg_id).cloned(),
-            None => None,
-        };
-
         Self { last, list }
     }
 

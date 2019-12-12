@@ -37,7 +37,7 @@ Rectangle {
         visible: overlay.visible
         color: CmnCfg.palette.white
         font.family: CmnCfg.chatFont.name
-        style: Font.DemiBold
+        font.weight: Font.DemiBold
         font.pointSize: 20
     }
 }

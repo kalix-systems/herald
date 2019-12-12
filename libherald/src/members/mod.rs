@@ -1,4 +1,4 @@
-use crate::{ffi, interface::*, ret_err, ret_none};
+use crate::{err, ffi, interface::*, none};
 use herald_common::UserId;
 use heraldcore::{types::*, user};
 use search_pattern::SearchPattern;
@@ -54,7 +54,7 @@ impl MembersTrait for Members {
         &self,
         row_index: usize,
     ) -> ffi::UserIdRef {
-        ret_none!(self.list.get(row_index), ffi::NULL_USER_ID)
+        none!(self.list.get(row_index), ffi::NULL_USER_ID)
             .id
             .as_str()
     }
@@ -64,9 +64,9 @@ impl MembersTrait for Members {
         &self,
         row_index: usize,
     ) -> ffi::ConversationId {
-        let uid = &ret_none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
+        let uid = &none!(self.list.get(row_index), ffi::NULL_CONV_ID.to_vec()).id;
 
-        ret_none!(
+        none!(
             crate::users::shared::pairwise_cid(uid),
             ffi::NULL_CONV_ID.to_vec()
         )
@@ -78,7 +78,7 @@ impl MembersTrait for Members {
         &self,
         row_index: usize,
     ) -> String {
-        let uid = &ret_none!(self.list.get(row_index), "".to_owned()).id;
+        let uid = &none!(self.list.get(row_index), "".to_owned()).id;
         crate::users::shared::name(uid).unwrap_or_else(|| uid.to_string())
     }
 
@@ -96,23 +96,23 @@ impl MembersTrait for Members {
         &self,
         row_index: usize,
     ) -> u32 {
-        let uid = ret_none!(self.list.get(row_index), 0).id;
-        ret_none!(crate::users::shared::color(&uid), 0)
+        let uid = none!(self.list.get(row_index), 0).id;
+        none!(crate::users::shared::color(&uid), 0)
     }
 
     fn status(
         &self,
         row_index: usize,
     ) -> u8 {
-        let uid = ret_none!(self.list.get(row_index), 0).id;
-        ret_none!(crate::users::shared::status(&uid), 0) as u8
+        let uid = none!(self.list.get(row_index), 0).id;
+        none!(crate::users::shared::status(&uid), 0) as u8
     }
 
     fn matched(
         &self,
         row_index: usize,
     ) -> bool {
-        ret_none!(self.list.get(row_index), true).matched
+        none!(self.list.get(row_index), true).matched
     }
 
     fn filter(&self) -> &str {
@@ -130,7 +130,7 @@ impl MembersTrait for Members {
 
         self.filter = match self.filter.take() {
             Some(mut filter) => {
-                ret_err!(filter.set_pattern(pattern));
+                err!(filter.set_pattern(pattern));
                 Some(filter)
             }
             None => SearchPattern::new_regex(pattern).ok(),
@@ -154,9 +154,9 @@ impl MembersTrait for Members {
         self.filter = match self.filter.take() {
             Some(mut filter) => {
                 if use_regex {
-                    ret_err!(filter.regex_mode());
+                    err!(filter.regex_mode());
                 } else {
-                    ret_err!(filter.normal_mode());
+                    err!(filter.normal_mode());
                 }
                 Some(filter)
             }
@@ -189,9 +189,9 @@ impl MembersTrait for Members {
         &mut self,
         user_id: ffi::UserId,
     ) -> bool {
-        let user_id = ret_err!(user_id.as_str().try_into(), false);
-        let conv_id = ret_none!(self.conversation_id, false);
-        ret_err!(heraldcore::members::add_member(&conv_id, user_id), false);
+        let user_id = err!(user_id.as_str().try_into(), false);
+        let conv_id = none!(self.conversation_id, false);
+        err!(heraldcore::members::add_member(&conv_id, user_id), false);
 
         self.model
             .begin_insert_rows(self.list.len(), self.list.len());
@@ -212,13 +212,13 @@ impl MembersTrait for Members {
         index: u64,
     ) -> bool {
         let index = index as usize;
-        let conv_id = ret_err!(
-            ConversationId::try_from(ret_none!(self.conversation_id, false)),
+        let conv_id = err!(
+            ConversationId::try_from(none!(self.conversation_id, false)),
             false
         );
-        let uid = ret_none!(self.list.get(index), false).id;
+        let uid = none!(self.list.get(index), false).id;
 
-        ret_err!(heraldcore::members::remove_member(&conv_id, uid), false);
+        err!(heraldcore::members::remove_member(&conv_id, uid), false);
         true
     }
 }
@@ -233,7 +233,7 @@ impl Members {
         }
 
         if let Some(filter) = self.filter.as_mut() {
-            ret_err!(filter.set_pattern("".into()));
+            err!(filter.set_pattern("".into()));
             self.emit.filter_changed();
         }
     }

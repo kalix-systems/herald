@@ -20,25 +20,28 @@ ColumnLayout {
     spacing: 0
 
     Component.onCompleted: {
-        const media = modelData.opMediaAttachments.length === 0 ? "" : JSON.parse(
-                                                                      modelData.opMediaAttachments)
-        switch (media.length) {
-        case 0:
-            break
-        default:
-            imageClipLoader.sourceComponent = imageClipComponent
-            imageClipLoader.item.imageSource = "file:" + media[0].path
-            imageClipLoader.item.count = media.length - 1
-            imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        if (modelData.opMediaAttachments.length === 0) {
+            return
         }
+
+        const media = JSON.parse(modelData.opMediaAttachments)
+
+        if (media.length === 0) {
+            return
+        }
+
+        imageClipLoader.sourceComponent = imageClipComponent
+        imageClipLoader.item.imageSource = "file:" + media[0].path
+        imageClipLoader.item.count = media.length - 1
+        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
     }
 
     Rectangle {
         id: replyWrapper
-        Layout.preferredHeight: replyWrapperCol.height
         color: CmnCfg.palette.medGrey
+
         Layout.margins: CmnCfg.smallMargin
-        // Layout.minimumWidth: replyWrapperCol.width
+        Layout.preferredHeight: replyWrapperCol.height
         Layout.preferredWidth: replyWrapperCol.width
 
         Rectangle {
@@ -56,6 +59,7 @@ ColumnLayout {
             anchors.centerIn: replyWrapperCol
             width: replyWrapperCol.width
             height: replyWrapperCol.height
+
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
 
@@ -73,6 +77,7 @@ ColumnLayout {
                 window.highlightAnimation.start()
             }
         }
+
         ColumnLayout {
             id: replyWrapperCol
 
@@ -92,13 +97,13 @@ ColumnLayout {
                         id: opLabel
                         text: knownReply ? herald.users.nameById(
                                                modelData.opAuthor) : ""
+                        color: opColor
+
                         font.bold: true
                         Layout.margins: CmnCfg.smallMargin
                         Layout.bottomMargin: 0
                         Layout.topMargin: CmnCfg.smallMargin
-
                         Layout.preferredHeight: knownReply ? implicitHeight : 0
-                        color: opColor
                     }
 
                     TextMetrics {
@@ -107,7 +112,8 @@ ColumnLayout {
                         property string shortenedText: knownReply ? truncate_text(
                                                                         modelData.opBody).slice(
                                                                         0,
-                                                                        350) + decoration : "Original message not found"
+                                                                        350) + decoration : qsTr(
+                                                                        "Original message not found")
                         text: shortenedText
                         elideWidth: maxWidth * 2
                         elide: Text.ElideRight
@@ -133,6 +139,7 @@ ColumnLayout {
                         Layout.bottomMargin: CmnCfg.smallPadding
                         Layout.leftMargin: CmnCfg.smallMargin
                         Layout.rightMargin: CmnCfg.smallMargin
+
                         Label {
                             id: replyTs
                             Layout.margins: CmnCfg.smallMargin

@@ -7,16 +7,6 @@ ComboBox {
     background: Rectangle {
         implicitWidth: 100
         implicitHeight: 40
-        Rectangle {
-            color: CmnCfg.palette.offBlack
-            height: 1
-            anchors {
-                right: parent.right
-                left: parent.left
-                bottom: parent.bottom
-                margins: CmnCfg.smallMargin
-            }
-        }
     }
 
     indicator: Canvas {

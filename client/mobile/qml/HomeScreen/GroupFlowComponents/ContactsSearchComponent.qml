@@ -20,7 +20,7 @@ Column {
     TextArea {
         id: groupSelectText
         leftPadding: 0
-        placeholderText: "Add members"
+        placeholderText: qsTr("Add members")
         onTextChanged: {
             herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()

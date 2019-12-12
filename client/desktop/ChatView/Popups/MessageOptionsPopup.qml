@@ -8,10 +8,10 @@ import Qt.labs.platform 1.1
 Menu {
     id: messageOptionsMenu
     MenuItem {
-        text: "Delete Message"
+        text: qsTr("Delete Message")
         onTriggered: ownedConversation.deleteMessage(index)
     }
     MenuItem {
-        text: "More Info..."
+        text: qsTr("More Info") + "..."
     }
 }

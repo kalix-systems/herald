@@ -41,7 +41,7 @@ Page {
 
                 Label {
                     id: stateLabel
-                    text: "New group"
+                    text: qsTr("New group")
                     font {
                         pointSize: CmnCfg.chatPreviewSize
                         family: CmnCfg.labelFont.name
@@ -88,20 +88,23 @@ Page {
         }
 
         Text {
-            text: "CREATE"
+            text: qsTr("CREATE")
             anchors.centerIn: parent
             color: CmnCfg.palette.white
             font.family: CmnCfg.labelFont.name
         }
         TapHandler {
             onTapped: {
-                topRect.groupTitle
-                        == "" ? herald.conversationBuilder.setTitle(
-                                    "Untitled Group") : herald.conversationBuilder.setTitle(
-                                    topRect.groupTitle)
+                if (topRect.groupTitle === "") {
+                    herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                } else {
+                    herald.conversationBuilder.setTitle(topRect.groupTitle)
+                }
+
                 if (topRect.profPic !== "") {
                     herald.conversationBuilder.picture = topRect.profPic
                 }
+
                 herald.conversationBuilder.finalize()
                 mainView.pop()
             }

@@ -85,7 +85,6 @@ ListView {
                     elideWidth: labelGrid.width * 2
                 }
 
-
                 Label {
                     id: bodyText
                     font {
@@ -97,9 +96,11 @@ ListView {
                     text: if (messageData.beforeFirstMatch.length === 0) {
                               messageData.firstMatch + messageData.afterFirstMatch
                           } else if (prefix.length === messageData.beforeFirstMatch.length) {
-                             prefix.elidedText + messageData.firstMatch + messageData.afterFirstMatch
+                              prefix.elidedText + messageData.firstMatch
+                                      + messageData.afterFirstMatch
                           } else {
-                              "..." + prefix.elidedText + messageData.firstMatch + messageData.afterFirstMatch
+                              "..." + prefix.elidedText + messageData.firstMatch
+                                      + messageData.afterFirstMatch
                           }
 
                     Layout.fillWidth: true

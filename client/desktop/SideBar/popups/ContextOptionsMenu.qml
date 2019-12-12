@@ -3,12 +3,12 @@ import Qt.labs.platform 1.1
 Menu {
     id: utilityOptionsMenu
     MenuItem {
-        text: "Add contact"
+        text: qsTr("Add contact")
         onTriggered: sideBar.sideBarState.state = "newContactState"
     }
 
     MenuItem {
-        text: "Config settings"
+        text: qsTr("Config settings")
         onTriggered: configPopup.show()
     }
 }

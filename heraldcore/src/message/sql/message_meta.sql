@@ -1,5 +1,5 @@
 SELECT
-  messages.insertion_ts,
+  messages.insertion_ts
 FROM
   messages
 WHERE

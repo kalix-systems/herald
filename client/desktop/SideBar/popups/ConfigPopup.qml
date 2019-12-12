@@ -13,6 +13,8 @@ Window {
     id: configPopup
     width: CmnCfg.configWidth
     height: CmnCfg.configHeight
+    minimumWidth: 500
+    minimumHeight: 250
 
     Component.onCompleted: {
         x = root.x + root.width / 3
@@ -24,10 +26,7 @@ Window {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: {
-            herald.config.profilePicture = fileUrl
-            print("set to", fileUrl)
-        }
+        onSelectionAccepted: herald.config.profilePicture = fileUrl
     }
 
     Page {
@@ -70,26 +69,63 @@ Window {
                     padding: CmnCfg.margin
                     StandardLabel {
                         text: qsTr("Notifications")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = notifications.y
+                        }
                     }
                     StandardLabel {
                         text: qsTr("Appearance")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = appearence.y
+                        }
                     }
                     StandardLabel {
                         text: qsTr("Privacy & Security")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = security.y
+                        }
                     }
                     StandardLabel {
                         text: qsTr("Data & Storage")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = storage.y
+                        }
                     }
                     StandardLabel {
                         text: qsTr("Advanced")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = advanced.y
+                        }
                     }
                     StandardLabel {
                         text: qsTr("Help & Feedback")
+                        font.family: CmnCfg.labelFont.name
+                        font.bold: true
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = feedback.y
+                        }
                     }
                 }
             }
 
             Flickable {
+                id: configScroll
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentHeight: col.height
@@ -100,29 +136,35 @@ Window {
                     anchors.right: parent.right
                     anchors.left: parent.left
                     CfgComps.ConfigListItem {
+                        id: notifications
                         headerText: qsTr("Notifications")
                         configContent: CfgComps.Notifications {}
                     }
                     CfgComps.ConfigListItem {
+                        id: appearence
                         headerText: qsTr("Appearance")
                         configContent: CfgComps.Appearance {}
                     }
                     CfgComps.ConfigListItem {
+                        id: security
                         headerText: "Privacy & Security"
                         configContent: CfgComps.Privacy {}
                     }
 
                     CfgComps.ConfigListItem {
+                        id: storage
                         headerText: "Data & Storage"
                         configContent: CfgComps.Storage {}
                     }
 
                     CfgComps.ConfigListItem {
+                        id: advanced
                         headerText: "Advanced"
                         configContent: CfgComps.Advanced {}
                     }
 
                     CfgComps.ConfigListItem {
+                        id: feedback
                         headerText: "Help & Feedback"
                         configContent: CfgComps.Feedback {}
                     }

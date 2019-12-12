@@ -13,7 +13,7 @@ Column {
     TextArea {
         id: groupSelectText
         leftPadding: 12
-        placeholderText: "Add members"
+        placeholderText: qsTr("Add members")
         onTextChanged: {
             herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
@@ -53,6 +53,7 @@ Column {
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
             visible: matched && contactData.userId !== herald.config.configId
+
             Common.PlatonicRectangle {
                 color: "white"
                 id: contactRectangle

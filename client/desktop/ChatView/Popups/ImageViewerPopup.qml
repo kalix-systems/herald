@@ -10,11 +10,17 @@ Window {
     property real scale: 1.0
     property int index: 0
     property var sourceAtc
+
+    readonly property bool sourceValid: sourceAtc !== undefined && index >= 0
     readonly property var reset: function () {//should reset the window
     }
-    title: sourceAtc !== undefined ? sourceAtc[index].path.substring(
-                                         sourceAtc[index].path.lastIndexOf(
-                                             '/') + 1) : ""
+
+    title: if (imageWindow.sourceValid) {
+               sourceAtc[index].path.substring(
+                           sourceAtc[index].path.lastIndexOf('/') + 1)
+           } else {
+               ""
+           }
 
     width: Math.min(image.sourceSize.width, 750)
     height: Math.min(image.sourceSize.height, 500) + controls.height * 2.0
@@ -108,9 +114,7 @@ Window {
         selectFolder: true
         selectMultiple: false
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: {
-            herald.utils.saveFile(sourceAtc[index].path, fileUrl)
-        }
+        onAccepted: herald.utils.saveFile(sourceAtc[index].path, fileUrl)
     }
 
     Rectangle {
@@ -119,7 +123,7 @@ Window {
     }
 
     onVisibilityChanged: {
-        // 2 is the enum for Qwindow::Windowed
+        // 2 is the enum for QWindow::Windowed
         // it is not in scope nor in the window namespace
         if (visibility === 2) {
             width = Math.min(image.sourceSize.width, 750)
@@ -140,7 +144,7 @@ Window {
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
         Image {
             id: image
-            source: sourceAtc !== undefined ? "file:" + sourceAtc[index].path : ""
+            source: imageWindow.sourceValid ? "file:" + sourceAtc[index].path : ""
             fillMode: Image.PreserveAspectFit
             anchors.fill: parent
             mipmap: true

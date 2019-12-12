@@ -12,7 +12,7 @@ impl Conversations {
             NewConversation(inner) => self.handle_new_conversation(inner),
             BuilderFinished(inner) => self.handle_builder_finished(inner),
             NewActivity(cid) => self.handle_new_activity(cid),
-            Settings(cid, update) => ret_none!(self.handle_settings_update(cid, update)),
+            Settings(cid, update) => none!(self.handle_settings_update(cid, update)),
             Init(contents) => self.handle_init(contents),
         }
     }

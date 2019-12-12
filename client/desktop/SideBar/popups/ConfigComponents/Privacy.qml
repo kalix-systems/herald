@@ -10,7 +10,7 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         StandardLabel {
-            text: qsTr("Default Message Exipration Time")
+            text: qsTr("Default message exipration time")
             color: "black"
             Layout.leftMargin: CmnCfg.margin
             font.pointSize: 14

@@ -16,7 +16,7 @@ GridLayout {
         Layout.leftMargin: CmnCfg.margin
     }
 
-    Switch {
+    ConfSwitch {
         checked: true
     }
 
@@ -34,7 +34,7 @@ GridLayout {
         Layout.leftMargin: CmnCfg.margin
     }
 
-    Switch {
+    ConfSwitch {
         checked: false
     }
 
@@ -46,12 +46,13 @@ GridLayout {
     }
 
     StandardLabel {
-        text: qsTr("Show Author in Notification")
+        text: qsTr("Show author in notification")
         color: "black"
         font.pointSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
-    Switch {
+
+    ConfSwitch {
         checked: false
     }
 
@@ -63,12 +64,13 @@ GridLayout {
     }
 
     StandardLabel {
-        text: qsTr("Show Message Body in Notification")
+        text: qsTr("Show message body in notification")
         color: "black"
         font.pointSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
-    Switch {
+
+    ConfSwitch {
         checked: false
     }
 

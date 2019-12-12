@@ -15,7 +15,8 @@ ApplicationWindow {
         id: herald
         property var errPopup: ErrorDialog {}
         errors.onTryPollChanged: {
-            var errMsg = herald.errors.nextError()
+            const errMsg = herald.errors.nextError()
+
             if (errMsg !== "") {
                 errPopup.errorMsg = errMsg
                 errPopup.open()
