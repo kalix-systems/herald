@@ -1,18 +1,25 @@
 #[macro_export]
-/// Convenience macro to abort on error.
-macro_rules! abort_err {
+/// Convenience macro to exit on error.
+macro_rules! exit_err {
     ($maybe: expr) => {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                eprintln!(
-                    "{error} at {file}:{line}:{column}, aborting",
+                use ::std::io::Write;
+                let mut se = ::std::io::stderr();
+
+                writeln!(
+                    &mut se,
+                    "{error} at {file}:{line}:{column}, exiting",
                     error = e,
                     file = file!(),
                     line = line!(),
                     column = column!()
-                );
-                ::std::process::abort();
+                )
+                .ok();
+
+                // TODO error codes
+                ::std::process::exit(1);
             }
         }
     };
@@ -20,15 +27,21 @@ macro_rules! abort_err {
         match $maybe {
             Ok(val) => val,
             Err(e) => {
-                eprintln!(
-                    "{error} at {file}:{line}:{column}, message was {msg}, aborting",
+                use ::std::io::Write;
+                let mut se = ::std::io::stderr();
+
+                writeln!(
+                    &mut se,
+                    "{error} at {file}:{line}:{column}, message was {msg}, exiting",
                     error = e,
                     file = file!(),
                     line = line!(),
                     column = column!(),
                     msg = $msg
-                );
-                ::std::process::abort();
+                )
+                .ok();
+
+                ::std::process::exit(1);
             }
         }
     };
