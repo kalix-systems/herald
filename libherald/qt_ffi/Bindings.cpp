@@ -105,6 +105,9 @@ inline void configNameChanged(Config *o) { Q_EMIT o->nameChanged(); }
 inline void configNtsConversationIdChanged(Config *o) {
   Q_EMIT o->ntsConversationIdChanged();
 }
+inline void configPreferredExpirationChanged(Config *o) {
+  Q_EMIT o->preferredExpirationChanged();
+}
 inline void configProfilePictureChanged(Config *o) {
   Q_EMIT o->profilePictureChanged();
 }
@@ -221,6 +224,8 @@ void config_name_get(const Config::Private *, QString *, qstring_set);
 void config_name_set(Config::Private *, const ushort *str, int len);
 void config_nts_conversation_id_get(const Config::Private *, QByteArray *,
                                     qbytearray_set);
+quint8 config_preferred_expiration_get(const Config::Private *);
+void config_preferred_expiration_set(Config::Private *, quint8);
 void config_profile_picture_get(const Config::Private *, QString *,
                                 qstring_set);
 void config_profile_picture_set(Config::Private *, const ushort *str, int len);
@@ -2598,7 +2603,8 @@ Config::Config(QObject *parent)
       m_d(config_new(new ConfigPtrBundle{
           this, configColorChanged, configColorschemeChanged,
           configConfigIdChanged, configNameChanged,
-          configNtsConversationIdChanged, configProfilePictureChanged})),
+          configNtsConversationIdChanged, configPreferredExpirationChanged,
+          configProfilePictureChanged})),
       m_ownsPrivate(true) {}
 
 Config::~Config() {
@@ -2632,6 +2638,13 @@ QByteArray Config::ntsConversationId() const {
   QByteArray v;
   config_nts_conversation_id_get(m_d, &v, set_qbytearray);
   return v;
+}
+
+quint8 Config::preferredExpiration() const {
+  return config_preferred_expiration_get(m_d);
+}
+void Config::setPreferredExpiration(quint8 v) {
+  config_preferred_expiration_set(m_d, v);
 }
 
 QString Config::profilePicture() const {
@@ -3182,6 +3195,7 @@ Herald::Herald(QObject *parent)
           configConfigIdChanged,
           configNameChanged,
           configNtsConversationIdChanged,
+          configPreferredExpirationChanged,
           configProfilePictureChanged,
           heraldConfigInitChanged,
           heraldConnectionPendingChanged,
