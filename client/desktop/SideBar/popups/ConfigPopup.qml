@@ -74,6 +74,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = notifications.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                     StandardLabel {
@@ -83,6 +84,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = appearence.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                     StandardLabel {
@@ -92,6 +94,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = security.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                     StandardLabel {
@@ -101,6 +104,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = storage.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                     StandardLabel {
@@ -110,6 +114,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = advanced.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                     StandardLabel {
@@ -119,6 +124,7 @@ Window {
                         MouseArea {
                             anchors.fill: parent
                             onClicked: configScroll.contentY = feedback.y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                 }
@@ -129,6 +135,8 @@ Window {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentHeight: col.height
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds
                 Column {
                     id: col
                     spacing: CmnCfg.smallMargin
