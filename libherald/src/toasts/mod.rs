@@ -47,9 +47,8 @@ mod imp {
     pub fn new_msg_toast(msg: &Message) {
         if set_application(super::DESKTOP_APP_NAME).is_ok() {
             let mut notif = Notification::new();
-            notif
-                .summary(&format!("New message from {}", msg.author))
-                .subtitle("TODO: macOS has subtitles! Do we want them?");
+
+            notif.summary(&format!("New message from {}", msg.author));
 
             if let Some(body) = &msg.body {
                 notif.body(body.as_str());
