@@ -178,24 +178,11 @@ ColumnLayout {
                                                                   messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
-                    property string decoration: replyBody.length > 350 ? "..." : ""
-                    property string shortenedText: knownReply ? truncate_text(
-                                                                    modelData.opBody).slice(
-                                                                    0,
-                                                                    350) + decoration : qsTr(
+                    property string shortenedText: knownReply ? modelData.opBody : qsTr(
                                                                     "Original message not found")
                     text: shortenedText
                     elideWidth: maxWidth * 2
                     elide: Text.ElideRight
-
-                    function truncate_text(body) {
-                        const bodyLines = body.split("\n")
-                        if (bodyLines.length > 3) {
-                            return bodyLines.slice(0, 3).join("\n")
-                        } else {
-                            return body
-                        }
-                    }
                 }
 
                 StandardTextEdit {

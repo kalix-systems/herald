@@ -170,7 +170,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<String> {
-        self.container.op_body(index).map(MessageBody::into_inner)
+        self.container.op_body(index)
     }
 
     pub(crate) fn set_builder_op_msg_id_(
