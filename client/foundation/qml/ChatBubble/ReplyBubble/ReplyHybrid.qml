@@ -70,7 +70,6 @@ ColumnLayout {
                 //op image clip
                 ReplyImageClip {
                     id: imageClip
-                    anchors.topMargin: CmnCfg.smallMargin
                     anchors.top: parent.top
                     anchors.right: parent.right
                 }
