@@ -80,8 +80,6 @@ ColumnLayout {
             ColumnLayout {
                 id: reply
                 spacing: 0
-                Layout.topMargin: 0
-                Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
                                                                   300,
