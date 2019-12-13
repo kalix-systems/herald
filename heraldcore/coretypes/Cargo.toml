@@ -25,7 +25,7 @@ path = "../image_utils"
 path = "../search_pattern"
 
 [dependencies.location]
-path = "../location"
+path = "../../location"
 
 [dependencies.kson]
 path = "../../kson"

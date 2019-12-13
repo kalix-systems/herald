@@ -15,7 +15,7 @@ bytes = "0.5"
 path = "./kson_derive"
 
 [dependencies.location]
-path = "../heraldcore/location"
+path = "../location"
 
 [dev-dependencies]
 proptest = "0.9.4"
