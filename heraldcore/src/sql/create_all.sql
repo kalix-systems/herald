@@ -114,6 +114,8 @@ CREATE TABLE IF NOT EXISTS config (
   -- colorscheme
   colorscheme INTEGER NOT NULL,
   kp BLOB NOT NULL,
+  -- default preferred expiration period
+  preferred_expiration INTEGER DEFAULT NULL,
   -- Address of the server the account is registered on
   home_server BLOB NOT NULL,
   -- enforce this table having no more than one row (for now)

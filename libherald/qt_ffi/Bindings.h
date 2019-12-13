@@ -44,6 +44,7 @@ struct ConfigPtrBundle {
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
+  void (*config_preferred_expiration_changed)(Config *);
   void (*config_profile_picture_changed)(Config *);
 };
 struct ConversationBuilderPtrBundle {
@@ -240,6 +241,7 @@ struct HeraldPtrBundle {
   void (*config_config_id_changed)(Config *);
   void (*config_name_changed)(Config *);
   void (*config_nts_conversation_id_changed)(Config *);
+  void (*config_preferred_expiration_changed)(Config *);
   void (*config_profile_picture_changed)(Config *);
   void (*herald_config_init_changed)(Herald *);
   void (*herald_connection_pending_changed)(Herald *);
@@ -611,6 +613,8 @@ private:
   Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged FINAL)
   Q_PROPERTY(QByteArray ntsConversationId READ ntsConversationId NOTIFY
                  ntsConversationIdChanged FINAL)
+  Q_PROPERTY(quint8 preferredExpiration READ preferredExpiration WRITE
+                 setPreferredExpiration NOTIFY preferredExpirationChanged FINAL)
   Q_PROPERTY(QString profilePicture READ profilePicture WRITE setProfilePicture
                  NOTIFY profilePictureChanged FINAL)
   explicit Config(bool owned, QObject *parent);
@@ -626,6 +630,8 @@ public:
   QString name() const;
   void setName(const QString &v);
   QByteArray ntsConversationId() const;
+  quint8 preferredExpiration() const;
+  void setPreferredExpiration(quint8 v);
   QString profilePicture() const;
   void setProfilePicture(const QString &v);
 Q_SIGNALS:
@@ -634,6 +640,7 @@ Q_SIGNALS:
   void configIdChanged();
   void nameChanged();
   void ntsConversationIdChanged();
+  void preferredExpirationChanged();
   void profilePictureChanged();
 };
 class ConversationBuilder : public QAbstractItemModel {

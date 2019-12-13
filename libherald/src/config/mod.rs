@@ -1,5 +1,8 @@
 use crate::{err, ffi, interface::*, none, spawn};
-use heraldcore::config::{self as core, Config as Core};
+use heraldcore::{
+    config::{self as core, Config as Core},
+    conversation::ExpirationPeriod,
+};
 
 mod imp;
 
@@ -51,6 +54,11 @@ impl ConfigTrait for Config {
         none!(self.inner.as_ref(), 0).colorscheme
     }
 
+    /// Returns of the preferred expiration period of the current user.
+    fn preferred_expiration(&self) -> u8 {
+        none!(self.inner.as_ref(), 0).preferred_expiration as u8
+    }
+
     /// Sets the color of the current user.
     fn set_color(
         &mut self,
@@ -98,6 +106,18 @@ impl ConfigTrait for Config {
         inner.colorscheme = colorscheme;
 
         self.emit.colorscheme_changed();
+    }
+
+    /// Set  the preferred expiration period of the current user.
+    fn set_preferred_expiration(
+        &mut self,
+        period: u8,
+    ) {
+        let inner = none!(self.inner.as_mut());
+        let period = ExpirationPeriod::from(period);
+        spawn!(core::set_preferred_expiration(period));
+
+        inner.preferred_expiration = period;
     }
 
     /// Sets the profile picture of the current user to the picture at the specified path.
