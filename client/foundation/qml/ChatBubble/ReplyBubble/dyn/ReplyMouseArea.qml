@@ -5,9 +5,7 @@ import LibHerald 1.0
 // NOTE: Here be dragons: this relies on dynamic scoping
 // Don't use this outside of the ReplyBubble directory
 MouseArea {
-    anchors.centerIn: replyWrapperCol
-    width: replyWrapperCol.width
-    height: replyWrapperCol.height
+    anchors.fill: replyWrapper
 
     z: CmnCfg.overlayZ
     enabled: knownReply ? true : false

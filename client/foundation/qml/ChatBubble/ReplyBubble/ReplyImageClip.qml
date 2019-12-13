@@ -12,8 +12,8 @@ Rectangle {
     property int count
     width: 64
     height: 64
-    clip: true
 
+    clip: true
     color: "transparent"
     Image {
         id: replyImage

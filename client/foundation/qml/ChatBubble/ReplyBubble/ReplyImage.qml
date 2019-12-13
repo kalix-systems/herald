@@ -6,6 +6,7 @@ import "./js/utils.js" as JS
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
 import "../"
+import "."
 // Components that depend on dynamic scope
 import "dyn"
 
@@ -24,8 +25,7 @@ ColumnLayout {
         if (modelData.opMediaAttachments.length === 0)
             return
 
-        imageClipLoader.sourceComponent = imageClipComponent
-        JS.parseMedia(modelData, imageClipLoader.item)
+        JS.parseMedia(modelData, imageClip)
     }
 
     Rectangle {
@@ -34,10 +34,19 @@ ColumnLayout {
         Layout.margins: CmnCfg.smallMargin
 
         Layout.preferredHeight: replyWrapperCol.height
-        Layout.preferredWidth: replyElidedBody.width
-                               > messageBody.width ? Math.min(
-                                                         replyElidedBody.width,
-                                                         bubbleRoot.maxWidth) : messageBody.width
+        Layout.preferredWidth: {
+            // TODO move this and other complex layout calculations into Rust or C++
+            if (imageAttach)
+                return 300
+
+            if (replyElidedBody.width > messageBody.width) {
+                return Math.min(replyElidedBody.width, bubbleRoot.maxWidth)
+            } else {
+                const labelMax = Math.max(replyLabel.width, messageLabel.width)
+                const bodyMax = Math.max(labelMax, messageBody.width)
+                return bodyMax + CmnCfg.smallMargin * 2
+            }
+        }
 
         ReplyVerticalAccent {}
         ReplyMouseArea {}
@@ -59,14 +68,9 @@ ColumnLayout {
 
             ReplyTimeInfo {}
 
-            Loader {
-                id: imageClipLoader
+            ReplyImageClip {
+                id: imageClip
                 Layout.rowSpan: 3
-
-                Component {
-                    id: imageClipComponent
-                    ReplyImageClip {}
-                }
             }
         }
     }
