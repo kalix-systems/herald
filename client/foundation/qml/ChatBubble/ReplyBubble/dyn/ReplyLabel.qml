@@ -9,9 +9,4 @@ Label {
     color: opColor
 
     Layout.preferredHeight: knownReply ? implicitHeight : 0
-
-    background: Rectangle {
-        opacity: 1
-        color: "red"
-    }
 }

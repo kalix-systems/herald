@@ -108,7 +108,7 @@ ListView {
                 docAttach: docAttachments.length !== 0
                 replyId: opMsgId
                 reply: replyType > 0
-                maxWidth: chatListView.width * 0.66
+                defaultWidth: chatListView.width * 0.66
                 messageModelData: chatRow.messageModelData
             }
         }

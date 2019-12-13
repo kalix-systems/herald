@@ -15,6 +15,7 @@ Rectangle {
     property alias highlightItem: bubbleHighlight
     property Component content
     property Item convContainer
+
     color: bubbleColor
     width: contentLoader.width
     height: contentLoader.height

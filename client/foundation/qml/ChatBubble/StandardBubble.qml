@@ -6,7 +6,10 @@ import "./ReplyBubble"
 
 ColumnLayout {
     id: bubbleRoot
-    property real maxWidth: imageAttach ? 300 : Math.min(parent.maxWidth, 600)
+    property real defaultWidth
+    readonly property real maxWidth: imageAttach ? 300 : Math.min(
+                                                       bubbleRoot.defaultWidth,
+                                                       600)
     property string body: ""
     property string friendlyTimestamp: ""
     property string receiptImage: ""

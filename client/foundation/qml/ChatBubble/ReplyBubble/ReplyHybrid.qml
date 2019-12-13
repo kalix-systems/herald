@@ -32,10 +32,12 @@ ColumnLayout {
 
     Rectangle {
         id: replyWrapper
-        Layout.preferredHeight: replyWrapperCol.height
         color: CmnCfg.palette.medGrey
+
         Layout.margins: CmnCfg.smallMargin
         Layout.minimumWidth: 150
+
+        Layout.preferredHeight: replyWrapperCol.height
         Layout.preferredWidth: replyWrapperCol.width
 
         ReplyVerticalAccent {}

@@ -20,13 +20,12 @@ ColumnLayout {
     property string replyBody: knownReply ? modelData.opBody : ""
     property var modelData
 
-    // spacing: 0
     Component.onCompleted: {
         if (modelData.opMediaAttachments.length === 0)
             return
 
-        //   imageClipLoader.sourceComponent = imageClipComponent
-        JS.parseMedia(modelData, imageClip)
+        imageClipLoader.sourceComponent = imageClipComponent
+        JS.parseMedia(modelData, imageClipLoader.item)
     }
 
     Rectangle {
@@ -35,35 +34,38 @@ ColumnLayout {
         Layout.margins: CmnCfg.smallMargin
 
         Layout.preferredHeight: replyWrapperCol.height
-        Layout.preferredWidth: replyWrapperCol.width
+        Layout.preferredWidth: replyElidedBody.width
+                               > messageBody.width ? Math.min(
+                                                         replyElidedBody.width,
+                                                         bubbleRoot.maxWidth) : messageBody.width
+
         ReplyVerticalAccent {}
         ReplyMouseArea {}
 
-        ColumnLayout {
+        GridLayout {
             id: replyWrapperCol
-            Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
-            Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
 
-            Item {
-                id: replyRow
-                Layout.preferredWidth: reply.width
+            columns: 2
+            rows: 3
+            flow: GridLayout.TopToBottom
 
-                ColumnLayout {
-                    id: reply
-                    spacing: 0
-                    anchors.left: parent.left
+            ReplyLabel {
+                Layout.alignment: Qt.AlignTop
+            }
 
-                    ReplyLabel {}
+            ReplyElidedBody {
+                id: replyElidedBody
+            }
 
-                    ReplyElidedBody {}
+            ReplyTimeInfo {}
 
-                    ReplyTimeInfo {}
-                }
+            Loader {
+                id: imageClipLoader
+                Layout.rowSpan: 3
 
-                ReplyImageClip {
-                    id: imageClip
-                    anchors.top: parent.top
-                    anchors.right: parent.right
+                Component {
+                    id: imageClipComponent
+                    ReplyImageClip {}
                 }
             }
         }
