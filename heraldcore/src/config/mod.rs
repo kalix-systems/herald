@@ -1,4 +1,4 @@
-use crate::{db::Database, errors::*, types::*};
+use crate::{conversation::ExpirationPeriod, db::Database, errors::*, types::*};
 pub use coretypes::config::Config;
 use herald_common::*;
 use rusqlite::NO_PARAMS;
@@ -22,6 +22,7 @@ pub struct ConfigBuilder {
     color: Option<u32>,
     nts_conversation: Option<ConversationId>,
     home_server: Option<SocketAddr>,
+    preferred_expiration: Option<ExpirationPeriod>,
 }
 
 impl ConfigBuilder {
@@ -38,6 +39,7 @@ impl ConfigBuilder {
             colorscheme: None,
             nts_conversation: None,
             home_server: None,
+            preferred_expiration: None,
         }
     }
 
@@ -87,6 +89,15 @@ impl ConfigBuilder {
         self
     }
 
+    /// Sets the preferred expiration period
+    pub fn preferred_expiration(
+        mut self,
+        expiration: ExpirationPeriod,
+    ) -> Self {
+        self.preferred_expiration.replace(expiration);
+        self
+    }
+
     /// Adds configuration.
     pub fn add(self) -> Result<Config, HErr> {
         let mut db = Database::get()?;
@@ -110,7 +121,7 @@ pub fn id() -> Result<UserId, HErr> {
     db::id(&db)
 }
 
-/// Gets the current user's kepair directly from the database.
+/// Gets the current user's keypair
 pub fn keypair() -> Result<sig::KeyPair, HErr> {
     let db = Database::get()?;
     db::keypair(&db)
@@ -120,6 +131,12 @@ pub fn keypair() -> Result<sig::KeyPair, HErr> {
 pub fn gid() -> Result<GlobalId, HErr> {
     let db = Database::get()?;
     db::gid(&db)
+}
+
+/// Gets the current user's preferred expiration period
+pub fn preferred_expiration() -> Result<ExpirationPeriod, HErr> {
+    let db = Database::get()?;
+    Ok(db::preferred_expiration(&db)?)
 }
 
 /// Gets the server address where the current user is registered
@@ -138,6 +155,12 @@ pub fn set_name(name: String) -> Result<(), HErr> {
 pub fn set_profile_picture(profile_picture: Option<String>) -> Result<Option<String>, HErr> {
     let db = Database::get()?;
     db::set_profile_picture(&db, profile_picture)
+}
+
+/// Update user's preferred expiration period
+pub fn set_preferred_expiration(period: ExpirationPeriod) -> Result<(), HErr> {
+    let db = Database::get()?;
+    Ok(db::set_preferred_expiration(&db, period)?)
 }
 
 /// Update user's color

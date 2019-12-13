@@ -73,12 +73,9 @@ ListView {
 
         FileDialog {
             id: fileChooser
-            //            selectExisting: false
-            //            selectFolder: true
-            //            selectMultiple: false
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
-            onAccepted: herald.utils.saveFile(path, fileUrl)
+            onAccepted: Herald.utils.saveFile(path, fileUrl)
         }
     }
 }

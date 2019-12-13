@@ -31,7 +31,7 @@ Rectangle {
     // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
-    property bool owned: replyUid === herald.config.configId
+    property bool owned: replyUid === Herald.config.configId
     property string replyUid
 
     property var replyId
@@ -81,7 +81,7 @@ Rectangle {
                 active: ownedConversation.builder.isReply
                 height: item ? item.height : 0
                 sourceComponent: ReplyComponent {
-                    startColor: CmnCfg.avatarColors[herald.users.colorById(
+                    startColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                         replyUid)]
                 }
                 width: textWrapperRect.width

@@ -1,5 +1,7 @@
-use crate::ids::ConversationId;
+use crate::*;
+use conversation::ExpirationPeriod;
 use herald_common::*;
+use ids::ConversationId;
 use std::net::SocketAddr;
 
 /// User configuration
@@ -19,4 +21,6 @@ pub struct Config {
     pub nts_conversation: ConversationId,
     /// The server this account is registered on
     pub home_server: SocketAddr,
+    /// The default preferred expiration period
+    pub preferred_expiration: ExpirationPeriod,
 }

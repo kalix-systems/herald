@@ -17,8 +17,7 @@ Window {
     }
 
     title: if (imageWindow.sourceValid) {
-               sourceAtc[index].path.substring(
-                           sourceAtc[index].path.lastIndexOf('/') + 1)
+               sourceAtc[index].name
            } else {
                ""
            }
@@ -113,7 +112,7 @@ Window {
         selectFolder: true
         selectMultiple: false
         folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
-        onAccepted: herald.utils.saveFile(sourceAtc[index].path, fileUrl)
+        onAccepted: Herald.utils.saveFile(sourceAtc[index].path, fileUrl)
     }
 
     Rectangle {
@@ -141,6 +140,7 @@ Window {
         contentHeight: height
         contentWidth: width
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
+
         Image {
             id: image
             source: imageWindow.sourceValid ? "file:" + sourceAtc[index].path : ""

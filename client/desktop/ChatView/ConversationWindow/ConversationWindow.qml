@@ -67,16 +67,16 @@ ListView {
         readonly property string proxyBody: body
         property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                receiptStatus)
-        readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
+        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                    author)]
         readonly property string timestamp: Utils.friendlyTimestamp(
                                                 insertionTime)
 
-        readonly property bool outbound: author === herald.config.configId
+        readonly property bool outbound: author === Herald.config.configId
 
-        readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
+        readonly property string authName: outbound ? Herald.config.name : Herald.users.nameById(
                                                           author)
-        readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
+        readonly property string pfpUrl: outbound ? Herald.config.profilePicture : Herald.users.profilePictureById(
                                                         author)
         property alias highlight: bubbleActual.highlightItem
         property bool elided: body.length !== fullBody.length

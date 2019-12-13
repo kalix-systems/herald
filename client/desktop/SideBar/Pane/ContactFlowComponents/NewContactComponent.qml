@@ -23,7 +23,7 @@ Component {
                 placeholderText: qsTr("Enter username or display name")
 
                 Keys.onReturnPressed: {
-                    JS.insertContact(text, herald.users)
+                    JS.insertContact(text, Herald.users)
                     sideBarState.state = ""
                 }
             }

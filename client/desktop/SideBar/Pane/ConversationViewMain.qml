@@ -23,7 +23,7 @@ ListView {
         target: sideBarPaneRoot.messageSearchLoader.item
 
         onMessageClicked: {
-            const conv_idx = herald.conversations.indexById(
+            const conv_idx = Herald.conversations.indexById(
                                searchConversationId)
 
             // early return on out of bounds
@@ -44,7 +44,7 @@ ListView {
         readonly property var conversationData: model
         readonly property var conversationIdProxy: conversationId
         property bool isPairwise: pairwise
-        property bool outbound: convContent.messages.lastAuthor === herald.config.configId
+        property bool outbound: convContent.messages.lastAuthor === Herald.config.configId
         property ConversationContent convContent: ConversationContent {
             conversationId: conversationIdProxy
         }

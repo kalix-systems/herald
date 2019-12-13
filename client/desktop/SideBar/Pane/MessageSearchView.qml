@@ -22,7 +22,7 @@ ListView {
     delegate: Item {
         id: messageItem
         property var messageData: model
-        property bool outbound: messageData.author === herald.config.configId
+        property bool outbound: messageData.author === Herald.config.configId
 
         height: CmnCfg.convoHeight
         width: parent.width

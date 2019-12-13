@@ -1,4 +1,5 @@
 use super::*;
+use crate::conversation::ExpirationPeriod;
 use crate::w;
 use rusqlite::named_params;
 use std::net::SocketAddr;
@@ -43,10 +44,31 @@ pub(crate) fn set_colorscheme(
     Ok(())
 }
 
+pub(crate) fn set_preferred_expiration(
+    conn: &rusqlite::Connection,
+    expiration: ExpirationPeriod,
+) -> Result<(), rusqlite::Error> {
+    w!(conn.execute_named(
+        include_str!("sql/update_preferred_expiration.sql"),
+        named_params!["@preferred_expiration": expiration]
+    ));
+
+    Ok(())
+}
+
 /// Gets the user's configuration
 pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
-    let (id, name, profile_picture, color, colorscheme, nts_conversation, home_server) = w!(conn
-        .query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
+    let (
+        id,
+        name,
+        profile_picture,
+        color,
+        colorscheme,
+        nts_conversation,
+        home_server,
+        preferred_expiration,
+    ) = w!(
+        conn.query_row(include_str!("sql/get_config.sql"), NO_PARAMS, |row| {
             Ok((
                 row.get("id")?,
                 row.get("name")?,
@@ -55,8 +77,10 @@ pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
                 row.get("colorscheme")?,
                 row.get("pairwise_conversation")?,
                 row.get::<_, String>("home_server")?,
+                row.get::<_, ExpirationPeriod>("preferred_expiration")?,
             ))
-        }));
+        })
+    );
 
     Ok(Config {
         id,
@@ -66,6 +90,7 @@ pub(crate) fn get(conn: &rusqlite::Connection) -> Result<Config, HErr> {
         colorscheme,
         nts_conversation,
         home_server: home_server.parse()?,
+        preferred_expiration,
     })
 }
 
@@ -75,6 +100,17 @@ pub(crate) fn id(conn: &rusqlite::Connection) -> Result<UserId, HErr> {
         include_str!("sql/get_id.sql"),
         NO_PARAMS,
         |row| row.get(0)
+    )))
+}
+
+/// Gets the preferred expiration period
+pub(crate) fn preferred_expiration(
+    conn: &rusqlite::Connection
+) -> Result<ExpirationPeriod, rusqlite::Error> {
+    Ok(w!(conn.query_row(
+        include_str!("sql/preferred_expiration.sql"),
+        NO_PARAMS,
+        |row| row.get("preferred_expiration")
     )))
 }
 
@@ -119,7 +155,10 @@ impl ConfigBuilder {
             name,
             nts_conversation,
             home_server,
+            preferred_expiration,
         } = self;
+
+        let preferred_expiration = preferred_expiration.unwrap_or_default();
 
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(id.as_str()));
         let colorscheme = colorscheme.unwrap_or(0);
@@ -141,10 +180,17 @@ impl ConfigBuilder {
         let tx = w!(conn.transaction());
         w!(tx.execute_named(
             include_str!("sql/add_config.sql"),
-            named_params!["@id": id, "@kp": keypair, "@colorscheme": colorscheme, "@home_server": home_server.to_string() ],
+            named_params! {
+                "@id": id,
+                "@kp": keypair,
+                "@colorscheme": colorscheme,
+                "@home_server": home_server.to_string(),
+                "@preferred_expiration": preferred_expiration
+            },
         ));
 
         let (user, _conv) = w!(user_builder.add_with_tx(&tx));
+
         w!(tx.commit());
 
         let config = Config {
@@ -155,6 +201,7 @@ impl ConfigBuilder {
             colorscheme,
             nts_conversation: user.pairwise_conversation,
             home_server,
+            preferred_expiration,
         };
 
         Ok(config)

@@ -76,21 +76,21 @@ Component {
             }
             onClicked: {
                 if (titleText.text === "") {
-                    herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
                 } else {
-                    herald.conversationBuilder.setTitle(titleText.text)
+                    Herald.conversationBuilder.setTitle(titleText.text)
                 }
 
                 if (topRect.profPic !== "") {
-                    herald.conversationBuilder.picture = topRect.profPic
+                    Herald.conversationBuilder.picture = topRect.profPic
                 }
 
-                herald.conversationBuilder.finalize()
+                Herald.conversationBuilder.finalize()
                 sideBarState.state = ""
             }
         }
 
-        Component.onCompleted: herald.usersSearch.refresh()
-        Component.onDestruction: herald.conversationBuilder.clear()
+        Component.onCompleted: Herald.usersSearch.refresh()
+        Component.onDestruction: Herald.conversationBuilder.clear()
     }
 }

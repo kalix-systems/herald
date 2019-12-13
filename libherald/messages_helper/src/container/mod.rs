@@ -1,5 +1,9 @@
 use crate::*;
 use herald_common::{Time, UserId};
+use heraldcore::message::{
+    attachments::{DocMeta, MediaMeta},
+    Elider,
+};
 use im::vector::Vector;
 use search::*;
 use std::collections::HashSet;
@@ -15,6 +19,7 @@ pub use cache::{access, update};
 pub struct Container {
     pub list: Vector<MessageMeta>,
     last: Option<MsgData>,
+    op_body_elider: Elider,
 }
 
 impl Container {
@@ -22,7 +27,15 @@ impl Container {
         list: Vector<MessageMeta>,
         last: Option<MsgData>,
     ) -> Self {
-        Self { last, list }
+        Self {
+            last,
+            list,
+            op_body_elider: Elider {
+                line_count: 3,
+                char_per_line: 60,
+                char_count: 3 * 60,
+            },
+        }
     }
 
     pub fn is_empty(&self) -> bool {
@@ -195,18 +208,6 @@ impl Container {
         Some(&self.list.get(index).as_ref()?.msg_id)
     }
 
-    fn op(
-        &self,
-        index: usize,
-    ) -> Option<MsgData> {
-        let mid = self.msg_id(index)?;
-
-        match cache::access(mid, |m| m.op)? {
-            ReplyId::Known(op_mid) => cache::get(&op_mid),
-            _ => None,
-        }
-    }
-
     pub fn op_reply_type(
         &self,
         index: usize,
@@ -228,28 +229,35 @@ impl Container {
         &self,
         index: usize,
     ) -> Option<UserId> {
-        Some(self.op(index)?.author)
+        let mid = self.op_msg_id(index)?;
+        access(&mid, |m| m.author)
     }
 
     pub fn op_body(
         &self,
         index: usize,
-    ) -> Option<MessageBody> {
-        self.op(index)?.body
+    ) -> Option<String> {
+        let mid = self.op_msg_id(index)?;
+
+        access(&mid, |m| {
+            m.body.as_ref().map(|b| self.op_body_elider.elided_body(b))
+        })?
     }
 
     pub fn op_insertion_time(
         &self,
         index: usize,
     ) -> Option<Time> {
-        Some(self.op(index)?.time.insertion)
+        let mid = self.op_msg_id(index)?;
+        access(&mid, |m| m.time.insertion)
     }
 
     pub fn op_expiration_time(
         &self,
         index: usize,
     ) -> Option<Time> {
-        Some(self.op(index)?.time.expiration?)
+        let mid = self.op_msg_id(index)?;
+        access(&mid, |m| m.time.expiration)?
     }
 
     pub fn op_doc_attachments_json(
@@ -257,7 +265,26 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-        self.get_doc_attachments_data_json(&mid)
+
+        let (first, len): (DocMeta, usize) = access(&mid, |m| -> Option<_> {
+            let docs = m.attachments.doc_attachments().ok()?;
+
+            if docs.is_empty() {
+                return None;
+            }
+
+            let len = docs.len();
+            let first = docs.into_iter().next()?;
+            Some((first, len))
+        })??;
+
+        Some(
+            json::object! {
+                "first" => first,
+                "count" => len,
+            }
+            .dump(),
+        )
     }
 
     pub fn op_media_attachments_json(
@@ -265,7 +292,26 @@ impl Container {
         index: usize,
     ) -> Option<String> {
         let mid = self.op_msg_id(index)?;
-        self.get_media_attachments_data_json(&mid)
+
+        let (first, len): (MediaMeta, usize) = access(&mid, |m| -> Option<_> {
+            let medias = m.attachments.media_attachments().ok()?;
+
+            if medias.is_empty() {
+                return None;
+            }
+
+            let len = medias.len();
+            let first = medias.into_iter().next()?;
+            Some((first, len))
+        })??;
+
+        Some(
+            json::object! {
+                "first" => first,
+                "count" => len,
+            }
+            .dump(),
+        )
     }
 
     pub fn clear_search<F: FnMut(usize)>(

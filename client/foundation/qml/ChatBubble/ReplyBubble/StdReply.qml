@@ -2,15 +2,16 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../js/utils.mjs" as Utils
+import "../../js/utils.mjs" as Utils
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
+import "../"
 
 ColumnLayout {
     id: wrapperCol
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
-    property color opColor: CmnCfg.avatarColors[herald.users.colorById(
+    property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     modelData.opAuthor)]
     property var replyId
     property bool knownReply: modelData.replyType === 2
@@ -26,14 +27,10 @@ ColumnLayout {
 
         const media = JSON.parse(modelData.opMediaAttachments)
 
-        if (media.length === 0) {
-            return
-        }
-
         imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media[0].path
-        imageClipLoader.item.count = media.length - 1
-        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        imageClipLoader.item.imageSource = "file:" + media.first.path
+        imageClipLoader.item.count = media.count - 1
+        imageClipLoader.item.aspectRatio = media.first.width / media.first.height
     }
 
     Rectangle {
@@ -95,7 +92,7 @@ ColumnLayout {
 
                     Label {
                         id: opLabel
-                        text: knownReply ? herald.users.nameById(
+                        text: knownReply ? Herald.users.nameById(
                                                modelData.opAuthor) : ""
                         color: opColor
 
@@ -108,24 +105,11 @@ ColumnLayout {
 
                     TextMetrics {
                         id: opBodyTextMetrics
-                        property string decoration: replyBody > 350 ? "..." : ""
-                        property string shortenedText: knownReply ? truncate_text(
-                                                                        modelData.opBody).slice(
-                                                                        0,
-                                                                        350) + decoration : qsTr(
+                        property string shortenedText: knownReply ? modelData.opBody : qsTr(
                                                                         "Original message not found")
                         text: shortenedText
                         elideWidth: maxWidth * 2
                         elide: Text.ElideRight
-
-                        function truncate_text(body) {
-                            const bodyLines = body.split("\n")
-                            if (bodyLines.length > 3) {
-                                return bodyLines.slice(0, 3).join("\n")
-                            } else {
-                                return body
-                            }
-                        }
                     }
 
                     StandardTextEdit {

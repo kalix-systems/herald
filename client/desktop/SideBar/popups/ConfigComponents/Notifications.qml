@@ -65,8 +65,8 @@ GridLayout {
 
     StandardLabel {
         text: qsTr("Show message body in notification")
-        color: "black"
-        font.pixelSize: 14
+        color: CmnCfg.palette.black
+        font.pointSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
 

@@ -36,5 +36,5 @@ Item {
         initialItem: cvMain
     }
 
-    Component.onCompleted: herald.login()
+    Component.onCompleted: Herald.login()
 }

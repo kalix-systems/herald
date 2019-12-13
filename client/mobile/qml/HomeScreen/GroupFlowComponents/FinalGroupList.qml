@@ -13,7 +13,7 @@ import "qrc:/imports/js/utils.mjs" as Utils
 ListView {
     height: contentHeight
     width: parent.width
-    model: herald.conversationBuilder
+    model: Herald.conversationBuilder
 
     delegate: Rectangle {
         height: CmnCfg.units.dp(48)
@@ -21,10 +21,10 @@ ListView {
 
         AvatarMain {
             id: contactAvatar
-            iconColor: CmnCfg.palette.avatarColors[herald.users.colorById(
+            iconColor: CmnCfg.palette.avatarColors[Herald.users.colorById(
                                                        memberId)]
             anchors.verticalCenter: parent.verticalCenter
-            initials: Utils.initialize(herald.users.nameById(memberId))
+            initials: Utils.initialize(Herald.users.nameById(memberId))
             size: CmnCfg.units.dp(36)
             avatarHeight: CmnCfg.units.dp(36)
 
@@ -35,7 +35,7 @@ ListView {
             }
 
             labelComponent: ConversationLabel {
-                contactName: herald.users.nameById(memberId)
+                contactName: Herald.users.nameById(memberId)
                 labelColor: CmnCfg.palette.offBlack
                 labelSize: 14
                 lastBody: "@" + memberId
@@ -49,7 +49,7 @@ ListView {
             anchors.verticalCenter: parent.verticalCenter
             imageSource: "qrc:/x-icon.svg"
             tapCallback: function () {
-                herald.conversationBuilder.removeMemberById(memberId)
+                Herald.conversationBuilder.removeMemberById(memberId)
             }
         }
     }

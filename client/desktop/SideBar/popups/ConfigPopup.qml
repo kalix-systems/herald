@@ -26,7 +26,7 @@ Window {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: herald.config.profilePicture = fileUrl
+        onSelectionAccepted: Herald.config.profilePicture = fileUrl
     }
 
     Page {
@@ -35,6 +35,7 @@ Window {
             id: headerRect
             color: CmnCfg.palette.offBlack
             height: CmnCfg.toolbarHeight
+
             Row {
                 leftPadding: CmnCfg.margin
                 anchors.fill: parent
@@ -49,6 +50,7 @@ Window {
                     elide: Label.ElideRight
                 }
             }
+
             Rectangle {
                 height: 1
                 width: parent.width
@@ -57,73 +59,59 @@ Window {
             }
         }
 
+        ListModel {
+            id: settingsModel
+            ListElement {
+                name: qsTr("Notifications")
+            }
+            ListElement {
+                name: qsTr("Appearance")
+            }
+            ListElement {
+                name: qsTr("Privacy & Security")
+            }
+            ListElement {
+                name: qsTr("Data & Storage")
+            }
+
+            ListElement {
+                name: qsTr("Advanced")
+            }
+
+            ListElement {
+                name: qsTr("Help & Feedback")
+            }
+        }
+
         RowLayout {
             anchors.fill: parent
             spacing: 0
             Rectangle {
-                Layout.minimumWidth: 0.3 * 600
+                id: headersRect
+                Layout.preferredWidth: 250
                 Layout.fillHeight: true
                 color: CmnCfg.palette.offBlack
-                Column {
-                    spacing: CmnCfg.margin
-                    padding: CmnCfg.margin
-                    StandardLabel {
-                        text: qsTr("Notifications")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = notifications.y
-                            cursorShape: Qt.PointingHandCursor
+
+                ListView {
+                    anchors.fill: parent
+                    model: settingsModel
+                    delegate: Rectangle {
+                        height: 40
+                        width: parent.width
+                        color: hover.containsMouse ? CmnCfg.palette.darkGrey : "transparent"
+                        StandardLabel {
+                            text: name
+                            font.family: CmnCfg.labelFont.name
+                            font.bold: true
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: CmnCfg.margin
                         }
-                    }
-                    StandardLabel {
-                        text: qsTr("Appearance")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
                         MouseArea {
+                            id: hover
+                            hoverEnabled: true
                             anchors.fill: parent
-                            onClicked: configScroll.contentY = appearence.y
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Privacy & Security")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = security.y
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Data & Storage")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = storage.y
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Advanced")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = advanced.y
-                            cursorShape: Qt.PointingHandCursor
-                        }
-                    }
-                    StandardLabel {
-                        text: qsTr("Help & Feedback")
-                        font.family: CmnCfg.labelFont.name
-                        font.bold: true
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: configScroll.contentY = feedback.y
+                            onClicked: configScroll.contentY = col.children[index].y
                             cursorShape: Qt.PointingHandCursor
                         }
                     }
@@ -149,31 +137,31 @@ Window {
                         configContent: CfgComps.Notifications {}
                     }
                     CfgComps.ConfigListItem {
-                        id: appearence
+                        id: appearance
                         headerText: qsTr("Appearance")
                         configContent: CfgComps.Appearance {}
                     }
                     CfgComps.ConfigListItem {
                         id: security
-                        headerText: "Privacy & Security"
+                        headerText: qsTr("Privacy & Security")
                         configContent: CfgComps.Privacy {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: storage
-                        headerText: "Data & Storage"
+                        headerText: qsTr("Data & Storage")
                         configContent: CfgComps.Storage {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: advanced
-                        headerText: "Advanced"
+                        headerText: qsTr("Advanced")
                         configContent: CfgComps.Advanced {}
                     }
 
                     CfgComps.ConfigListItem {
                         id: feedback
-                        headerText: "Help & Feedback"
+                        headerText: qsTr("Help & Feedback")
                         configContent: CfgComps.Feedback {}
                     }
                 }

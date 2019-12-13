@@ -25,10 +25,10 @@ ToolBar {
             Layout.leftMargin: CmnCfg.units.dp(12)
             spacing: CmnCfg.units.dp(16)
             AvatarMain {
-                iconColor: CmnCfg.palette.avatarColors[herald.config.color]
-                initials: herald.config.name[0].toUpperCase()
+                iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+                initials: Herald.config.name[0].toUpperCase()
                 pfpPath: Utils.safeStringOrDefault(
-                             herald.config.profilePicture, "")
+                             Herald.config.profilePicture, "")
                 size: CmnCfg.units.dp(24)
                 avatarHeight: CmnCfg.units.dp(24)
                 Layout.alignment: Qt.AlignCenter

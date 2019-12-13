@@ -12,15 +12,14 @@ import QtGraphicalEffects 1.0
 
 //header component loaded during new group & new contact flow
 Component {
-
     ToolBar {
         id: headerBarComponent
         height: CmnCfg.toolbarHeight
         background: Rectangle {
             color: CmnCfg.palette.offBlack
         }
-        RowLayout {
 
+        RowLayout {
             anchors.fill: parent
 
             Common.ConfigAvatar {}
@@ -34,6 +33,7 @@ Component {
                 Layout.alignment: Qt.AlignVCenter | Qt.AlignLeft
                 color: CmnCfg.palette.white
             }
+
             Item {
                 Layout.fillWidth: true
             }
@@ -45,7 +45,7 @@ Component {
                 scale: 0.8
                 onClicked: {
                     sideBarState.state = ""
-                    herald.conversationBuilder.clear()
+                    Herald.conversationBuilder.clear()
                 }
             }
         }

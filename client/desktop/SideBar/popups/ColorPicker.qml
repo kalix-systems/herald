@@ -56,7 +56,7 @@ Window {
         }
 
         onClicked: {
-            herald.users.setColor(gsSelectedIndex, avatarColorPicker.colorIndex)
+            Herald.users.setColor(gsSelectedIndex, avatarColorPicker.colorIndex)
             avatarColorPicker.close()
         }
     }

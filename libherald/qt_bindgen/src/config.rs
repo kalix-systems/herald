@@ -329,7 +329,8 @@ fn config() -> Object {
         profilePicture: Prop::new().simple(QString).write().optional(),
         color: Prop::new().simple(QUint32).write(),
         colorscheme: Prop::new().simple(QUint32).write(),
-        ntsConversationId: Prop::new().simple(QByteArray)
+        ntsConversationId: Prop::new().simple(QByteArray),
+        preferredExpiration: Prop::new().simple(QUint8).write()
     };
 
     obj! {

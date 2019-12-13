@@ -11,7 +11,7 @@ ColumnLayout {
         Layout.fillWidth: true
         StandardLabel {
             text: qsTr("Language")
-            color: "black"
+            color: CmnCfg.palette.black
             Layout.leftMargin: CmnCfg.margin
             font.pixelSize: 14
         }
@@ -46,7 +46,7 @@ ColumnLayout {
         }
 
         StandardLabel {
-            text: qsTr("Version ") + "0.0.1"
+            text: qsTr("Version ") + "0.0.1-alpha.1-rc.1"
             color: "black"
             Layout.leftMargin: CmnCfg.margin
             font.pixelSize: 14

@@ -34,7 +34,7 @@ Page {
             clip: true
             boundsBehavior: ListView.StopAtBounds
             anchors.fill: parent
-            model: herald.conversations
+            model: Herald.conversations
             delegate: ConversationItem {
                 readonly property var conversationIdProxy: conversationId
                 readonly property int colorProxy: model.color

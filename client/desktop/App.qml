@@ -5,6 +5,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "./SideBar"
+import "."
 
 Item {
     id: appRoot
@@ -105,5 +106,5 @@ Item {
         }
     }
 
-    Component.onCompleted: herald.login()
+    Component.onCompleted: Herald.login()
 }
