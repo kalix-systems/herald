@@ -5,7 +5,7 @@ use futures::{
 };
 use kson::prelude::*;
 use location::*;
-use std::{error::Error, fmt::Debug, io::Error as IOErr};
+use std::{error::Error, fmt::Debug, io::Error as IOErr, net::SocketAddr, sync::Arc};
 use thiserror::Error;
 
 #[async_trait]
@@ -56,11 +56,13 @@ pub trait KrpcServer: Sync {
 }
 
 #[derive(Debug, Error)]
-pub enum ServerError<InitError: Error> {
+pub enum KrpcError<InitError: Error> {
     #[error("Init: {0}")]
     Init(InitError),
     #[error("Connection: {0}")]
     Connection(#[from] quinn::ConnectionError),
+    #[error("Connect: {0}")]
+    Connect(#[from] quinn::ConnectError),
     #[error("Error writing to stream: {0}")]
     Write(#[from] quinn::WriteError),
     #[error("Error reading from stream: {0}")]
@@ -75,28 +77,28 @@ pub enum ServerError<InitError: Error> {
     Special(String, Location),
 }
 
-pub async fn handle_conn<Server>(
-    server: &Server,
+pub async fn handle_conn<S>(
+    server: &S,
     conn: quinn::Connection,
     mut incoming: quinn::IncomingBiStreams,
-) -> Result<(), ServerError<Server::InitError>>
+) -> Result<(), KrpcError<S::InitError>>
 where
-    Server: KrpcServer,
+    S: KrpcServer,
 {
     let (handshake_tx, handshake_rx) = incoming
         .next()
         .await
-        .ok_or_else(|| ServerError::Special("didn't receive handshake stream".into(), loc!()))??;
+        .ok_or_else(|| KrpcError::Special("didn't receive handshake stream".into(), loc!()))??;
 
     let cinfo = server
         .init(handshake_tx, handshake_rx)
         .await
-        .map_err(ServerError::Init)?;
+        .map_err(KrpcError::Init)?;
 
     let send_pushes = server
         .pushes(&cinfo)
         .await
-        .for_each_concurrent(Server::MAX_CONCURRENT_PUSHES, |push| {
+        .for_each_concurrent(S::MAX_CONCURRENT_PUSHES, |push| {
             async {
                 let (mut push_tx, push_rx) = conn.open_bi().await?;
                 let bytes = kson::to_vec(&push);
@@ -104,23 +106,23 @@ where
                 push_tx.write_all(&bytes).await?;
                 push_tx.finish();
 
-                let ack_bytes = push_rx.read_to_end(Server::MAX_ACK_SIZE).await?;
+                let ack_bytes = push_rx.read_to_end(S::MAX_ACK_SIZE).await?;
                 let ack = kson::from_bytes(ack_bytes.into())?;
 
                 server.on_push_ack(push, ack).await;
 
-                Ok::<(), ServerError<Server::InitError>>(())
+                Ok(())
             }
-                .unwrap_or_else(|e| eprintln!("{}", e))
+                .unwrap_or_else(|e: KrpcError<S::InitError>| eprintln!("{}", e))
         })
         .boxed();
 
     let req_resp = incoming
-        .for_each_concurrent(Server::MAX_CONCURRENT_REQS, |res| {
+        .for_each_concurrent(S::MAX_CONCURRENT_REQS, |res| {
             async {
                 let (mut tx, rx) = res?;
 
-                let req_bytes = rx.read_to_end(Server::MAX_REQ_SIZE).await?;
+                let req_bytes = rx.read_to_end(S::MAX_REQ_SIZE).await?;
                 let req = kson::from_bytes(req_bytes.into())?;
 
                 let resp = server.handle_req(&cinfo, req).await;
@@ -129,9 +131,9 @@ where
 
                 tx.finish().await?;
 
-                Ok::<(), ServerError<Server::InitError>>(())
+                Ok(())
             }
-                .unwrap_or_else(|e| eprintln!("{}", e))
+                .unwrap_or_else(|e: KrpcError<S::InitError>| eprintln!("{}", e))
         })
         .boxed();
 
@@ -145,8 +147,8 @@ pub async fn serve<Server: KrpcServer>(
     server: &'static Server,
     endpoint_config: quinn_proto::EndpointConfig,
     server_config: quinn::ServerConfig,
-    socket: &std::net::SocketAddr,
-) -> Result<(), ServerError<Server::InitError>> {
+    socket: &SocketAddr,
+) -> Result<(), KrpcError<Server::InitError>> {
     let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
     endpoint_builder.listen(server_config);
     let (driver, _endpoint, listener) = endpoint_builder.bind(socket)?;
@@ -178,33 +180,104 @@ pub async fn serve<Server: KrpcServer>(
     Ok(())
 }
 
-// #[async_trait]
-// pub trait KrpcClient {
-//     type Req: Ser;
-//     type Resp: De;
-//     type Push: De;
+#[async_trait]
+pub trait KrpcClient: Send + Sync + Sized + 'static {
+    const MAX_CONCURRENT_REQS: usize;
+    const MAX_CONCURRENT_PUSHES: usize;
 
-//     type InitError;
-//     type ConnInfo;
+    const MAX_RESP_SIZE: usize;
+    const MAX_PUSH_SIZE: usize;
 
-//     async fn init<Tx, Rx>(
-//         &self,
-//         tx: &mut Tx,
-//         rx: &mut Rx,
-//     ) -> Result<Self::ConnInfo, Self::InitError>
-//     where
-//         Tx: AsyncWrite + Unpin,
-//         Rx: AsyncRead + Unpin;
+    type Req: Ser + Send;
+    type Resp: De + Send;
+    type Push: De + Send;
+    type PushAck: Ser + Send;
 
-//     type PushError;
-//     async fn handle_push(
-//         &self,
-//         conn: &Self::ConnInfo,
-//         push: Push,
-//     ) -> Result<(), Self::PushError>;
+    type InitInfo: Send + Sized;
+    type InitError: Debug + Error + Send;
 
-//     async fn on_close(
-//         &self,
-//         conn: Self::ConnInfo,
-//     );
+    async fn init(
+        info: Self::InitInfo,
+        tx: quinn::SendStream,
+        rx: quinn::RecvStream,
+    ) -> Result<Self, Self::InitError>;
+
+    async fn handle_push(
+        &self,
+        push: Self::Push,
+    ) -> Self::PushAck;
+
+    async fn on_close(&self);
+}
+
+pub struct Client<K: KrpcClient> {
+    inner: Arc<K>,
+    connection: quinn::Connection,
+}
+
+impl<K: KrpcClient> Drop for Client<K> {
+    fn drop(&mut self) {
+        tokio::spawn({
+            let c = self.inner.clone();
+            async move { c.on_close().await }
+        });
+    }
+}
+
+impl<K: KrpcClient> Client<K> {
+    pub async fn connect(
+        info: K::InitInfo,
+        endpoint_config: quinn_proto::EndpointConfig,
+        client_config: quinn::ClientConfig,
+        client_socket: &SocketAddr,
+        server_socket: &SocketAddr,
+        server_name: &str,
+    ) -> Result<Self, KrpcError<K::InitError>> {
+        let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
+        endpoint_builder.default_client_config(client_config);
+        let (driver, endpoint, _incoming) = endpoint_builder.bind(client_socket)?;
+
+        tokio::spawn(driver.unwrap_or_else(|e| eprintln!("{}", e)));
+
+        let quinn::NewConnection {
+            driver,
+            connection,
+            bi_streams,
+            ..
+        } = endpoint.connect(server_socket, server_name)?.await?;
+
+        tokio::spawn(driver.unwrap_or_else(|e| eprintln!("{}", e)));
+
+        let (handshake_tx, handshake_rx) = connection.open_bi().await?;
+
+        let inner = Arc::new(
+            K::init(info, handshake_tx, handshake_rx)
+                .map_err(KrpcError::Init)
+                .await?,
+        );
+
+        tokio::spawn({
+            let k = inner.clone();
+            bi_streams.for_each_concurrent(K::MAX_CONCURRENT_PUSHES, move |conn| {
+                let k = k.clone();
+                async move {
+                    let (mut tx, rx) = conn?;
+                    let push_bytes = rx.read_to_end(K::MAX_PUSH_SIZE).await?;
+                    let push = kson::from_bytes(push_bytes.into())?;
+
+                    let ack = k.handle_push(push).await;
+                    let ack_bytes = kson::to_vec(&ack);
+                    tx.write_all(&ack_bytes).await?;
+                    tx.finish().await?;
+
+                    Ok(())
+                }
+                    .unwrap_or_else(|e: KrpcError<K::InitError>| eprintln!("{}", e))
+            })
+        });
+
+        Ok(Client { inner, connection })
+    }
+}
+
 // }

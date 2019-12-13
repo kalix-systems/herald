@@ -1,9 +1,9 @@
 use backtrace::Backtrace;
 use bytes::Bytes;
 use location::Location;
-use std::{fmt, str::Utf8Error, sync::Arc};
+use std::{fmt, str::Utf8Error};
 
-pub type KsonError = Arc<KsonErrorInner>;
+pub type KsonError = Box<KsonErrorInner>;
 
 #[derive(Debug, Clone)]
 pub struct KsonErrorInner {
@@ -123,7 +123,7 @@ impl std::error::Error for KsonErrorInner {}
 #[macro_export]
 macro_rules! E {
     ($var: expr, $byt: expr, $offset: expr, $($t: tt),*) => {
-        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
+        Box::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
@@ -137,7 +137,7 @@ macro_rules! E {
     };
 
     ($var: expr, $byt: expr, $offset: expr) => {
-        ::std::sync::Arc::new($crate::errors::KsonErrorInner {
+        Box::new($crate::errors::KsonErrorInner {
             backtrace: $crate::prelude::backtrace::Backtrace::new(),
             location: $crate::loc!(),
             bytes: $byt,
