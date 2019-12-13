@@ -20,7 +20,7 @@ ColumnLayout {
             text: qsTr("Last Backup Was : ") + "Never"
             color: "black"
             Layout.leftMargin: CmnCfg.margin
-            font.pointSize: 14
+            font.pixelSize: 14
         }
     }
 

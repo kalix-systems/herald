@@ -14,9 +14,14 @@ RadioButton {
         Rectangle {
             radius: 20
             color: CmnCfg.palette.black
-            visible: control.checked
             anchors.fill: parent
-            anchors.margins: 4
+            anchors.margins: control.checked ? 4 : 10
+            Behavior on anchors.margins {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCirc
+                }
+            }
         }
     }
     contentItem: Text {

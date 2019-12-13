@@ -3,6 +3,6 @@ import LibHerald 1.0
 
 Label {
     font.family: CmnCfg.chatFont.name
-    font.pointSize: CmnCfg.headerSize
+    font.pixelSize: CmnCfg.headerSize
     color: CmnCfg.palette.white
 }
