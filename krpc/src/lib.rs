@@ -1,7 +1,7 @@
 use async_trait::*;
 use futures::{
     future::{self, FutureExt, TryFutureExt},
-    stream::*,
+    stream::{Stream, StreamExt},
 };
 use kson::prelude::*;
 use location::*;
@@ -23,7 +23,7 @@ pub trait KrpcServer: Sync {
         &self,
         tx: quinn::SendStream,
         rx: quinn::RecvStream,
-    ) -> Result<Self::ConnInfo, Self::InitError>;
+    ) -> Result<Self::ConnInfo, KrpcError<Self::InitError>>;
 
     type Push: Ser + Send;
     type Pushes: Stream<Item = Self::Push> + Send;
@@ -90,10 +90,7 @@ where
         .await
         .ok_or_else(|| KrpcError::Special("didn't receive handshake stream".into(), loc!()))??;
 
-    let cinfo = server
-        .init(handshake_tx, handshake_rx)
-        .await
-        .map_err(KrpcError::Init)?;
+    let cinfo = server.init(handshake_tx, handshake_rx).await?;
 
     let send_pushes = server
         .pushes(&cinfo)
@@ -200,7 +197,7 @@ pub trait KrpcClient: Send + Sync + Sized + 'static {
         info: Self::InitInfo,
         tx: quinn::SendStream,
         rx: quinn::RecvStream,
-    ) -> Result<Self, Self::InitError>;
+    ) -> Result<Self, KrpcError<Self::InitError>>;
 
     async fn handle_push(
         &self,
@@ -250,11 +247,7 @@ impl<K: KrpcClient> Client<K> {
 
         let (handshake_tx, handshake_rx) = connection.open_bi().await?;
 
-        let inner = Arc::new(
-            K::init(info, handshake_tx, handshake_rx)
-                .map_err(KrpcError::Init)
-                .await?,
-        );
+        let inner = Arc::new(K::init(info, handshake_tx, handshake_rx).await?);
 
         tokio::spawn({
             let k = inner.clone();

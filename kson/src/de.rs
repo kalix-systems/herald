@@ -143,7 +143,6 @@ macro_rules! tag_reader_method {
                         $message
                     )
                 }
-
                 Ok(TagByte { is_big, val })
             }
         }
@@ -501,6 +500,7 @@ macro_rules! trivial_de {
     };
 }
 
+trivial_de!((), read_null);
 trivial_de!(bool, read_bool);
 trivial_de!(u8, read_u8);
 trivial_de!(u16, read_u16);

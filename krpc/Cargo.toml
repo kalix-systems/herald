@@ -9,17 +9,24 @@ edition = "2018"
 [dependencies]
 async-trait = "0.1"
 bytes = "0.5"
-futures = "0.3"
+futures = "0.3.1"
 thiserror = "1.0"
 quinn = "0.5"
 quinn-proto = "0.5"
 
 [dependencies.tokio]
-version = "0.2"
-features = ["rt-core"]
+version = "=0.2.4"
+features = ["rt-core","sync"]
 
 [dependencies.kson]
 path = "../kson"
 
 [dependencies.location]
 path = "../location"
+
+[dev-dependencies]
+tokio-macros = "0.2"
+void = "1.0"
+
+[dev-dependencies.kcl]
+path = "../kcl"
