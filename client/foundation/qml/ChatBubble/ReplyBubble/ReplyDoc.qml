@@ -6,6 +6,7 @@ import "../../js/utils.mjs" as Utils
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
 import "../"
+import "./js/utils.js" as JS
 
 ColumnLayout {
     id: wrapperCol
@@ -21,12 +22,8 @@ ColumnLayout {
 
     spacing: 0
 
-    Component.onCompleted: {
-        const doc = JSON.parse(modelData.opDocAttachments)
-        nameMetrics.text = doc.first.name
-        fileSize.text = Utils.friendlyFileSize(doc.first.size)
-        fileCount = doc.count - 1
-    }
+    Component.onCompleted: JS.parseDocs(nameMetrics, modelData, fileSize,
+                                        fileCount)
 
     Rectangle {
         id: replyWrapper
@@ -54,19 +51,7 @@ ColumnLayout {
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
 
-            onClicked: {
-                const msgIndex = ownedConversation.indexById(replyId)
-
-                if (msgIndex < 0)
-                    return
-
-                const window = convWindow
-
-                window.positionViewAtIndex(msgIndex, ListView.Center)
-                window.highlightAnimation.target = window.itemAtIndex(
-                            msgIndex).highlight
-                window.highlightAnimation.start()
-            }
+            onClicked: JS.jumpHandler(replyId, ownedConversation, convWindow)
         }
 
         // wraps op label + op doc clip + op message body

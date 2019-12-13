@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../js/utils.mjs" as Utils
+import "./js/utils.js" as JS
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
 import "../"
@@ -25,12 +26,8 @@ ColumnLayout {
             return
         }
 
-        const media = JSON.parse(modelData.opMediaAttachments)
-
         imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media.first.path
-        imageClipLoader.item.count = media.count - 1
-        imageClipLoader.item.aspectRatio = media.first.width / media.first.height
+        JS.parseMedia(modelData, imageClipLoader.item)
     }
 
     Rectangle {
@@ -60,19 +57,7 @@ ColumnLayout {
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
 
-            onClicked: {
-                const msgIndex = ownedConversation.indexById(replyId)
-
-                if (msgIndex < 0)
-                    return
-
-                const window = convWindow
-
-                window.positionViewAtIndex(msgIndex, ListView.Center)
-                window.highlightAnimation.target = window.itemAtIndex(
-                            msgIndex).highlight
-                window.highlightAnimation.start()
-            }
+            onClicked: JS.jumpHandler(replyId, ownedConversation, convWindow)
         }
 
         ColumnLayout {

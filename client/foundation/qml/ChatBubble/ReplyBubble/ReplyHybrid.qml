@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../js/utils.mjs" as Utils
+import "./js/utils.js" as JS
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
 import "../"
@@ -22,16 +23,8 @@ ColumnLayout {
     spacing: 0
 
     Component.onCompleted: {
-        const doc = JSON.parse(modelData.opDocAttachments)
-        nameMetrics.text = doc.first.name
-        fileSize.text = Utils.friendlyFileSize(doc.first.size)
-        fileCount = doc.count - 1
-
-        const media = JSON.parse(modelData.opMediaAttachments)
-
-        imageClip.imageSource = "file:" + media.first.path
-        imageClip.count = media.count - 1
-        imageClip.aspectRatio = media.first.width / media.first.height
+        JS.parseDocs(nameMetrics, modelData, fileSize, fileCount)
+        JS.parseMedia(modelData, imageClip)
     }
 
     Rectangle {
@@ -60,20 +53,9 @@ ColumnLayout {
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
 
-            onClicked: {
-                const msgIndex = ownedConversation.indexById(replyId)
-
-                if (msgIndex < 0)
-                    return
-
-                const window = convWindow
-
-                window.positionViewAtIndex(msgIndex, ListView.Center)
-                window.highlightAnimation.target = window.itemAtIndex(
-                            msgIndex).highlight
-                window.highlightAnimation.start()
-            }
+            onClicked: JS.jumpHandler(replyId, ownedConversation, convWindow)
         }
+
         //wraps attachment content and op message body
         ColumnLayout {
             id: replyWrapperCol
