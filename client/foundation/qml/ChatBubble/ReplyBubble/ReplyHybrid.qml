@@ -50,7 +50,6 @@ ColumnLayout {
             //wraps op label + op doc clip + op media clip
             Item {
                 Layout.preferredWidth: reply.width
-                Layout.preferredHeight: 80
 
                 //wraps op label + op doc clip
                 ColumnLayout {
