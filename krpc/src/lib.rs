@@ -278,4 +278,15 @@ impl<K: KrpcClient> Client<K> {
 
         Ok(Client { inner, connection })
     }
+
+    pub async fn req(
+        &self,
+        req: &K::Req,
+    ) -> Result<K::Resp, KrpcError<K::InitError>> {
+        let (mut tx, rx) = self.connection.open_bi().await?;
+        let req_bytes = kson::to_vec(req);
+        tx.write_all(&req_bytes).await?;
+        let resp_bytes = rx.read_to_end(K::MAX_RESP_SIZE).await?;
+        Ok(kson::from_bytes(resp_bytes.into())?)
+    }
 }
