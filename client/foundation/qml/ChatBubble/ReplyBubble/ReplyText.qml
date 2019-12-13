@@ -9,6 +9,7 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
+// TODO this should be a grid layout, but this requires doing more things at the contentLoader site
 ColumnLayout {
     id: wrapperCol
 

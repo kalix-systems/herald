@@ -7,7 +7,7 @@ import LibHerald 1.0
 /// Don't use this outside of the ReplyBubble directory
 StandardTextEdit {
     text: opBodyTextMetrics.elidedText
-
+    property real elideConstraint: 0
     Layout.topMargin: 0
     Layout.rightMargin: 0
     Layout.bottomMargin: 0
@@ -19,7 +19,7 @@ StandardTextEdit {
         property string shortenedText: knownReply ? modelData.opBody : qsTr(
                                                         "Original message not found")
         text: shortenedText
-        elideWidth: bubbleRoot.maxWidth * 2
+        elideWidth: (bubbleRoot.maxWidth - elideConstraint) * 2
         elide: Text.ElideRight
     }
 }

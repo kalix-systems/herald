@@ -46,49 +46,63 @@ ColumnLayout {
         FileAttachmentContent {}
     }
 
-    // reply bubble if there is doc file content
-    Component {
-        id: replyHybridContent
-        ReplyHybrid {
-            maxWidth: bubbleRoot.maxWidth
-            replyId: bubbleRoot.replyId
-            modelData: bubbleRoot.messageModelData
-        }
-    }
-
-    // reply bubble if there is doc file content
-    Component {
-        id: replyDocContent
-        ReplyDoc {
-            maxWidth: bubbleRoot.maxWidth
-            replyId: bubbleRoot.replyId
-            modelData: bubbleRoot.messageModelData
-        }
-    }
-
-    // reply bubble if there is no doc file content
-    Component {
-        id: replyContent
-        ReplyText {
-            // maxWidth: bubbleRoot.maxWidth
-            replyId: bubbleRoot.replyId
-            modelData: bubbleRoot.messageModelData
-        }
-    }
-
     //reply bubble loader
     Loader {
         sourceComponent: {
-            if (reply) {
-                if (messageModelData.opDocAttachments.length === 0)
-                    return replyContent
-                else if (messageModelData.opDocAttachments.length !== 0
-                         && messageModelData.opMediaAttachments.length !== 0)
-                    return replyHybridContent
-                else
-                    return replyDocContent
+            if (!reply)
+                return undefined
+
+            const hasDoc = messageModelData.opDocAttachments.length > 0
+            const hasMedia = messageModelData.opMediaAttachments.length > 0
+
+            if (hasDoc && hasMedia) {
+                return replyHybridContent
+            } else if (hasDoc) {
+                return replyDocContent
+            } else if (hasMedia) {
+                return replyMediaContent
+            } else {
+                return replyContent
             }
-            return undefined
+        }
+
+        // reply bubble if there is doc file content
+        Component {
+            id: replyHybridContent
+            ReplyHybrid {
+                maxWidth: bubbleRoot.maxWidth
+                replyId: bubbleRoot.replyId
+                modelData: bubbleRoot.messageModelData
+            }
+        }
+
+        // reply bubble if there is doc file content
+        Component {
+            id: replyDocContent
+            ReplyDoc {
+                maxWidth: bubbleRoot.maxWidth
+                replyId: bubbleRoot.replyId
+                modelData: bubbleRoot.messageModelData
+            }
+        }
+
+        // reply media bubble if there is media file content
+        Component {
+            id: replyMediaContent
+            ReplyImage {
+                replyId: bubbleRoot.replyId
+                modelData: bubbleRoot.messageModelData
+            }
+        }
+
+        // reply bubble if there is no doc file content
+        Component {
+            id: replyContent
+            ReplyText {
+                // maxWidth: bubbleRoot.maxWidth
+                replyId: bubbleRoot.replyId
+                modelData: bubbleRoot.messageModelData
+            }
         }
     }
 

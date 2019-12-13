@@ -13,6 +13,8 @@ import "dyn"
 ColumnLayout {
     id: wrapperCol
 
+    // TODO move this into CmnCfg
+    readonly property real imageSize: 80
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     modelData.opAuthor)]
@@ -38,13 +40,13 @@ ColumnLayout {
             // TODO move this and other complex layout calculations into Rust or C++
             if (imageAttach)
                 return 300
-
             if (replyElidedBody.width > messageBody.width) {
-                return Math.min(replyElidedBody.width, bubbleRoot.maxWidth)
+                return Math.min(replyElidedBody.width,
+                                bubbleRoot.maxWidth) + imageSize
             } else {
                 const labelMax = Math.max(replyLabel.width, messageLabel.width)
                 const bodyMax = Math.max(labelMax, messageBody.width)
-                return bodyMax + CmnCfg.smallMargin * 2
+                return bodyMax + CmnCfg.smallMargin * 2 + imageSize
             }
         }
 
@@ -53,17 +55,18 @@ ColumnLayout {
 
         GridLayout {
             id: replyWrapperCol
-
-            columns: 2
+            width: parent.width
             rows: 3
             flow: GridLayout.TopToBottom
 
             ReplyLabel {
+                id: replyLabel
                 Layout.alignment: Qt.AlignTop
             }
 
             ReplyElidedBody {
                 id: replyElidedBody
+                elideConstraint: imageClip.width
             }
 
             ReplyTimeInfo {}
@@ -71,6 +74,7 @@ ColumnLayout {
             ReplyImageClip {
                 id: imageClip
                 Layout.rowSpan: 3
+                Layout.alignment: Qt.AlignRight
             }
         }
     }
