@@ -3,6 +3,7 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "./ReplyBubble"
+import "../js/utils.mjs" as Utils
 
 ColumnLayout {
     id: bubbleRoot
@@ -10,21 +11,25 @@ ColumnLayout {
     readonly property real maxWidth: imageAttach ? 300 : Math.min(
                                                        bubbleRoot.defaultWidth,
                                                        600)
-    property string body: ""
-    property string friendlyTimestamp: ""
-    property string receiptImage: ""
-    property string authorName: ""
-    property color authorColor
-    spacing: 0
+    readonly property string body: messageModelData.body
+    readonly property string friendlyTimestamp: Utils.friendlyTimestamp(
+                                                    messageModelData.insertionTime)
+    readonly property string receiptImage: Utils.receiptCodeSwitch(
+                                               messageModelData.receiptStatus)
+    readonly property string authorId: messageModelData.author
+    readonly property string authorName: Herald.users.nameById(authorId)
+    readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
+                                                                 authorId)]
+    readonly property string medAttachments: messageModelData.mediaAttachments
+    readonly property string documentAttachments: messageModelData.docAttachments
+    readonly property bool imageAttach: medAttachments.length !== 0
+    readonly property bool docAttach: documentAttachments.length !== 0
+    readonly property var replyId: messageModelData.opMsgId
+    readonly property bool reply: messageModelData.replyType > 0
+    property bool elided: body.length !== messageModelData.fullBody.length
+
     property bool expanded: false
-    property bool elided: false
-    property bool imageAttach: false
-    property bool docAttach: false
-    property bool reply: false
-    property string medAttachments
-    property string documentAttachments
-    property var replyId
-    property var messageModelData
+    property var messageModelData: parent.messageModelData
 
     // Text edit alias
     property alias messageBody: messageBody
@@ -34,6 +39,7 @@ ColumnLayout {
     // all messages are un-expanded on completion
     Component.onCompleted: bubbleRoot.expanded = false
 
+    spacing: 0
     //image component
     Component {
         id: image

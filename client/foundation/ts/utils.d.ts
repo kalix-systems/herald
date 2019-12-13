@@ -5,4 +5,4 @@ export declare function safeSwitch<T>(cond: boolean, first: T, second: T): T | u
 export declare function safeToQrcURI(url: string): string;
 export declare function safeStringOrDefault(maybeString: unknown, fallback?: unknown): string;
 export declare function initialize(name: string): string;
-export declare function receiptCodeSwitch(receiptCode: number): string;
+export declare function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string;

@@ -5,20 +5,23 @@ import LibHerald 1.0
 
 Rectangle {
     id: background
-    property color bubbleColor: CmnCfg.palette.lightGrey
-    property color senderColor: "white"
-    property string receiptImage: ""
-    property string friendlyTimestamp: ""
+
+    readonly property color bubbleColor: CmnCfg.palette.lightGrey
+    readonly property color senderColor: bubbleContent.authorColor
+    readonly property bool highlight: messageModelData.matchStatus === 2
+
     property bool outbound: parent.outbound
-    property real maxWidth: 0.0
-    property bool highlight: false
+
+    //property real maxWidth: 0.0
     property alias highlightItem: bubbleHighlight
-    property Component content
     property Item convContainer
 
+    property alias defaultWidth: bubbleContent.defaultWidth
+    property var messageModelData
+
     color: bubbleColor
-    width: contentLoader.width
-    height: contentLoader.height
+    width: bubbleContent.width
+    height: bubbleContent.height
 
     //two rectangles to extend to both sides of pane
     Item {
@@ -45,17 +48,15 @@ Rectangle {
 
     Rectangle {
         id: verticalAccent
-        anchors.right: !outbound ? contentLoader.left : undefined
-        anchors.left: outbound ? contentLoader.right : undefined
-        height: contentLoader.height
+        anchors.right: !outbound ? bubbleContent.left : undefined
+        anchors.left: outbound ? bubbleContent.right : undefined
+        height: bubbleContent.height
         width: CmnCfg.smallMargin / 4
         color: senderColor
     }
 
-    Loader {
-        id: contentLoader
-        property int maxWidth: parent.maxWidth
-        sourceComponent: content
+    BubbleContent {
+        id: bubbleContent
     }
 
     Item {
