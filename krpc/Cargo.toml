@@ -12,6 +12,11 @@ bytes = "0.5"
 futures = "0.3"
 thiserror = "1.0"
 quinn = "0.5"
+quinn-proto = "0.5"
+
+[dependencies.tokio]
+version = "0.2"
+features = ["rt-core"]
 
 [dependencies.kson]
 path = "../kson"

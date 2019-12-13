@@ -1,14 +1,17 @@
 use async_trait::*;
-use futures::{future::*, stream::*};
+use futures::{
+    future::{self, FutureExt, TryFutureExt},
+    stream::*,
+};
 use kson::prelude::*;
 use location::*;
 use std::{error::Error, fmt::Debug, io::Error as IOErr};
 use thiserror::Error;
 
 #[async_trait]
-pub trait KrpcServer {
-    type InitError: Debug + Error;
-    type ConnInfo: Debug;
+pub trait KrpcServer: Sync {
+    type InitError: Debug + Error + Send;
+    type ConnInfo: Debug + Send + Sync;
 
     const MAX_CONCURRENT_REQS: usize;
     const MAX_CONCURRENT_PUSHES: usize;
@@ -22,22 +25,22 @@ pub trait KrpcServer {
         rx: quinn::RecvStream,
     ) -> Result<Self::ConnInfo, Self::InitError>;
 
-    type Push: Ser;
-    type Pushes: Stream<Item = Self::Push> + Unpin;
+    type Push: Ser + Send;
+    type Pushes: Stream<Item = Self::Push> + Send;
     async fn pushes(
         &self,
         meta: &Self::ConnInfo,
     ) -> Self::Pushes;
 
-    type PushAck: De;
+    type PushAck: De + Send;
     async fn on_push_ack(
         &self,
         push: Self::Push,
         ack: Self::PushAck,
     );
 
-    type Req: De;
-    type Resp: Ser;
+    type Req: De + Send;
+    type Resp: Ser + Send;
 
     async fn handle_req(
         &self,
@@ -59,9 +62,11 @@ pub enum ServerError<InitError: Error> {
     #[error("Connection: {0}")]
     Connection(#[from] quinn::ConnectionError),
     #[error("Error writing to stream: {0}")]
-    WriteError(#[from] quinn::WriteError),
+    Write(#[from] quinn::WriteError),
     #[error("Error reading from stream: {0}")]
-    ReadExactError(#[from] quinn::ReadToEndError),
+    ReadToEnd(#[from] quinn::ReadToEndError),
+    #[error("Error setting up endpoint: {0}")]
+    Endpoint(#[from] quinn::EndpointError),
     #[error("IO: {0}")]
     IO(#[from] IOErr),
     #[error("Kson: {0}")]
@@ -82,68 +87,93 @@ where
         .next()
         .await
         .ok_or_else(|| ServerError::Special("didn't receive handshake stream".into(), loc!()))??;
+
     let cinfo = server
         .init(handshake_tx, handshake_rx)
         .await
         .map_err(ServerError::Init)?;
 
-    let send_pushes =
-        server
-            .pushes(&cinfo)
-            .await
-            .for_each_concurrent(Server::MAX_CONCURRENT_PUSHES, |push| {
-                let fut = async {
-                    let (mut push_tx, push_rx) = conn.open_bi().await?;
-                    let bytes = kson::to_vec(&push);
+    let send_pushes = server
+        .pushes(&cinfo)
+        .await
+        .for_each_concurrent(Server::MAX_CONCURRENT_PUSHES, |push| {
+            async {
+                let (mut push_tx, push_rx) = conn.open_bi().await?;
+                let bytes = kson::to_vec(&push);
 
-                    push_tx.write_all(&bytes).await?;
-                    push_tx.finish();
+                push_tx.write_all(&bytes).await?;
+                push_tx.finish();
 
-                    let ack_bytes = push_rx.read_to_end(Server::MAX_ACK_SIZE).await?;
-                    let ack = kson::from_bytes(ack_bytes.into())?;
+                let ack_bytes = push_rx.read_to_end(Server::MAX_ACK_SIZE).await?;
+                let ack = kson::from_bytes(ack_bytes.into())?;
 
-                    server.on_push_ack(push, ack).await;
+                server.on_push_ack(push, ack).await;
 
-                    Ok::<(), ServerError<Server::InitError>>(())
-                };
-
-                async {
-                    if let Err(e) = fut.await {
-                        // TODO: do something better here
-                        eprintln!(
-                            "error sending push along connection {:?}, error was:\n{}",
-                            cinfo, e
-                        );
-                    }
-                }
-            });
-
-    let req_resp = incoming.for_each_concurrent(Server::MAX_CONCURRENT_REQS, |res| {
-        let fut = async {
-            let (mut tx, rx) = res?;
-
-            let req_bytes = rx.read_to_end(Server::MAX_REQ_SIZE).await?;
-            let req = kson::from_bytes(req_bytes.into())?;
-
-            let resp = server.handle_req(&cinfo, req).await;
-            let rbytes = kson::to_vec(&resp);
-            tx.write_all(&rbytes).await?;
-
-            tx.finish().await?;
-
-            Ok::<(), ServerError<Server::InitError>>(())
-        };
-
-        async {
-            if let Err(e) = fut.await {
-                // TODO: do something better here
-                eprintln!("error in connection {:?}, error was:\n{}", cinfo, e);
+                Ok::<(), ServerError<Server::InitError>>(())
             }
-        }
+                .unwrap_or_else(|e| eprintln!("{}", e))
+        })
+        .boxed();
+
+    let req_resp = incoming
+        .for_each_concurrent(Server::MAX_CONCURRENT_REQS, |res| {
+            async {
+                let (mut tx, rx) = res?;
+
+                let req_bytes = rx.read_to_end(Server::MAX_REQ_SIZE).await?;
+                let req = kson::from_bytes(req_bytes.into())?;
+
+                let resp = server.handle_req(&cinfo, req).await;
+                let rbytes = kson::to_vec(&resp);
+                tx.write_all(&rbytes).await?;
+
+                tx.finish().await?;
+
+                Ok::<(), ServerError<Server::InitError>>(())
+            }
+                .unwrap_or_else(|e| eprintln!("{}", e))
+        })
+        .boxed();
+
+    future::join(send_pushes, req_resp).await;
+    server.on_close(cinfo, conn).await;
+
+    Ok(())
+}
+
+pub async fn serve<Server: KrpcServer>(
+    server: &'static Server,
+    endpoint_config: quinn_proto::EndpointConfig,
+    server_config: quinn::ServerConfig,
+    socket: &std::net::SocketAddr,
+) -> Result<(), ServerError<Server::InitError>> {
+    let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
+    endpoint_builder.listen(server_config);
+    let (driver, _endpoint, listener) = endpoint_builder.bind(socket)?;
+
+    let serve_conns = listener.for_each(move |conn| {
+        tokio::spawn(
+            async move {
+                let quinn::NewConnection {
+                    driver,
+                    connection,
+                    bi_streams,
+                    ..
+                } = conn.await?;
+
+                future::try_join(
+                    driver.map_err(|e| e.into()),
+                    handle_conn(server, connection, bi_streams),
+                )
+                .map_ok(drop)
+                .await
+            }
+                .unwrap_or_else(|e| eprintln!("{}", e)),
+        );
+        future::ready(())
     });
 
-    join(send_pushes, req_resp).await;
-    server.on_close(cinfo, conn).await;
+    future::try_join(driver, serve_conns.map(Ok)).await?;
 
     Ok(())
 }
