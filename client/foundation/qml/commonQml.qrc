@@ -24,7 +24,8 @@
         <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyImageClip.qml</file>
-        <file>ChatBubble/ReplyBubble/StdReply.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyImage.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyText.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyElidedBody.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyFileClip.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyFileSurplus.qml</file>

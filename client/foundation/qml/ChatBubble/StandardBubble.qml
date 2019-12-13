@@ -28,6 +28,8 @@ ColumnLayout {
 
     // Text edit alias
     property alias messageBody: messageBody
+    /// User name label alias
+    property alias messageLabel: uname
 
     // all messages are un-expanded on completion
     Component.onCompleted: bubbleRoot.expanded = false
@@ -67,8 +69,8 @@ ColumnLayout {
     // reply bubble if there is no doc file content
     Component {
         id: replyContent
-        StdReply {
-            maxWidth: bubbleRoot.maxWidth
+        ReplyText {
+            // maxWidth: bubbleRoot.maxWidth
             replyId: bubbleRoot.replyId
             modelData: bubbleRoot.messageModelData
         }
