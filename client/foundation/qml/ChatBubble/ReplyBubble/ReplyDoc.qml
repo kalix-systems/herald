@@ -68,6 +68,8 @@ ColumnLayout {
                 window.highlightAnimation.start()
             }
         }
+
+        // wraps op label + op doc clip + op message body
         ColumnLayout {
             id: replyWrapperCol
             Label {
@@ -82,6 +84,7 @@ ColumnLayout {
                 color: opColor
             }
 
+            // wraps op file clip
             Item {
                 id: fileClip
                 Layout.topMargin: CmnCfg.smallMargin
@@ -126,6 +129,7 @@ ColumnLayout {
                 }
             }
 
+            // file +n count
             Text {
                 id: fileSurplus
                 Layout.leftMargin: CmnCfg.smallMargin
@@ -138,6 +142,7 @@ ColumnLayout {
                 font.pixelSize: 13
             }
 
+            // op message body
             ColumnLayout {
                 id: reply
                 spacing: 0

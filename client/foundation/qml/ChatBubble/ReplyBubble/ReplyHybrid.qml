@@ -74,15 +74,20 @@ ColumnLayout {
                 window.highlightAnimation.start()
             }
         }
+        //wraps attachment content and op message body
         ColumnLayout {
             id: replyWrapperCol
             spacing: 0
+
+            //wraps op label + op doc clip + op media clip
             Item {
                 Layout.preferredWidth: reply.width
                 Layout.preferredHeight: 80
+
+                //wraps op label + op doc clip
                 ColumnLayout {
-                    anchors.left: parent.left
                     id: fileLabelWrapper
+                    anchors.left: parent.left
                     Label {
                         id: opLabel
                         text: knownReply ? Herald.users.nameById(
@@ -94,6 +99,7 @@ ColumnLayout {
                         color: opColor
                     }
 
+                    //wraps doc clip
                     Item {
                         id: fileClip
                         Layout.topMargin: CmnCfg.smallMargin
@@ -138,6 +144,7 @@ ColumnLayout {
                         }
                     }
 
+                    //+ n more file count
                     Text {
                         id: fileSurplus
                         Layout.leftMargin: CmnCfg.smallMargin
@@ -151,6 +158,7 @@ ColumnLayout {
                     }
                 }
 
+                //op image clip
                 ReplyImageClip {
                     id: imageClip
                     anchors.topMargin: CmnCfg.smallMargin
@@ -159,6 +167,7 @@ ColumnLayout {
                 }
             }
 
+            //op message body + timestamp
             ColumnLayout {
                 id: reply
                 spacing: 0
