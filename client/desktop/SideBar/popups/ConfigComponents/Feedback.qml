@@ -17,7 +17,7 @@ ColumnLayout {
         text: qsTr("Open help center")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.margin
-        font.pointSize: 14
+        font.pixelSize: 14
     }
 
     Rectangle {
@@ -30,7 +30,7 @@ ColumnLayout {
         text: qsTr("Report an issue")
         color: "#0066cc"
         Layout.leftMargin: CmnCfg.margin
-        font.pointSize: 14
+        font.pixelSize: 14
     }
 
     Rectangle {

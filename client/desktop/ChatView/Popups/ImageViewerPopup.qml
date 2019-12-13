@@ -84,7 +84,7 @@ Window {
         Button {
             text: "+"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             action: zoomAction
         }
@@ -92,7 +92,7 @@ Window {
         Button {
             text: "―"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             action: zoomOutAction
         }
@@ -100,7 +100,7 @@ Window {
         Button {
             text: "↓"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             onClicked: dirChooser.open()
         }
