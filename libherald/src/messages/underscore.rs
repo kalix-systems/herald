@@ -1,13 +1,14 @@
 use super::*;
 use crate::{
-    ffi,
+    err, ffi,
     interface::{MessagesEmitter as Emitter, MessagesList as List, MessagesTrait as Interface},
-    ret_err, ret_none, spawn,
+    none, spawn,
 };
 use heraldcore::{
     config, conversation,
     message::{self, MessageBody, MessageReceiptStatus},
 };
+use messages_helper::search::SearchState;
 use std::convert::TryInto;
 
 impl Messages {
@@ -34,11 +35,9 @@ impl Messages {
     ) -> Option<u32> {
         Some(
             self.container
-                .msg_data(index)?
-                .receipts
-                .values()
-                .map(|r| *r as u32)
-                .max()
+                .access_by_index(index, |data| {
+                    data.receipts.values().map(|r| *r as u32).max()
+                })?
                 .unwrap_or(MessageReceiptStatus::NoAck as u32),
         )
     }
@@ -66,9 +65,9 @@ impl Messages {
         &self,
         msg_id: ffi::MsgIdRef,
     ) -> i64 {
-        let msg_id = ret_err!(msg_id.try_into(), -1);
+        let msg_id = err!(msg_id.try_into(), -1);
 
-        ret_none!(self.container.index_by_id(msg_id), -1) as i64
+        none!(self.container.index_by_id(msg_id), -1) as i64
     }
 
     pub(crate) fn is_tail_(
@@ -90,7 +89,7 @@ impl Messages {
             self.container.msg_data(index + 1)?,
         );
 
-        Some(!msg.same_flurry(succ))
+        Some(!msg.same_flurry(&succ))
     }
 
     pub(crate) fn is_head_(
@@ -112,11 +111,11 @@ impl Messages {
             self.container.msg_data(index - 1)?,
         );
 
-        Some(!msg.same_flurry(prev))
+        Some(!msg.same_flurry(&prev))
     }
 
     pub(crate) fn clear_conversation_history_(&mut self) -> bool {
-        let id = ret_none!(self.conversation_id, false);
+        let id = none!(self.conversation_id, false);
 
         spawn!(conversation::delete_conversation(&id), false);
 
@@ -137,7 +136,7 @@ impl Messages {
     ) -> bool {
         let ix = index as usize;
 
-        let id = ret_none!(self.container.get(ix), false).msg_id;
+        let id = none!(self.container.get(ix), false).msg_id;
 
         self.remove_helper(id, ix);
         spawn!(message::delete_message(&id), false);
@@ -153,14 +152,25 @@ impl Messages {
             .unwrap_or("")
     }
 
+    pub(crate) fn doc_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.doc_attachments_data_json(index)
+    }
+
+    pub(crate) fn media_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.media_attachments_data_json(index)
+    }
+
     pub(crate) fn op_body_(
         &self,
         index: usize,
-    ) -> Option<&str> {
-        self.container
-            .op_body(index)?
-            .as_ref()
-            .map(MessageBody::as_str)
+    ) -> Option<String> {
+        self.container.op_body(index)
     }
 
     pub(crate) fn set_builder_op_msg_id_(
@@ -169,7 +179,7 @@ impl Messages {
     ) {
         use builder::OpChanged;
 
-        match ret_err!(self.builder.set_op_id(id, &self.container)) {
+        match err!(self.builder.set_op_id(id, &self.container)) {
             OpChanged::Changed => {
                 self.emit.builder_op_msg_id_changed();
             }
@@ -201,23 +211,41 @@ impl Messages {
         } else if !self.search.active {
             self.search.active = true;
             self.emit.search_active_changed();
-            self.search.set_matches(
-                apply_search(
-                    &mut self.container,
+
+            let emit = &mut self.emit;
+            let mut emit_index = emit.clone();
+
+            let model = &mut self.model;
+
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit_index.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            self.search.set_matches(
+                matches,
+                || emit.search_num_matches_changed(),
+                || emit_index.search_index_changed(),
             );
         }
     }
 
     /// Clears search
     pub(crate) fn clear_search_(&mut self) {
-        clear_search(&mut self.container, &mut self.model);
-        ret_err!(self.search.clear_search(&mut self.emit));
+        let model = &mut self.model;
+        let emit = &mut self.emit;
+        self.container.clear_search(|ix| model.data_changed(ix, ix));
+
+        err!(self.search.clear_search(|| {
+            emit.search_index_changed();
+            emit.search_pattern_changed();
+            emit.search_regex_changed();
+            emit.search_num_matches_changed();
+        }));
     }
 
     pub(crate) fn set_search_pattern_(
@@ -229,18 +257,30 @@ impl Messages {
             return;
         }
 
-        if ret_err!(self.search.set_pattern(pattern, &mut self.emit)).changed()
-            && self.search.active
-        {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
+        let emit = &mut self.emit;
+
+        let changed = err!(self
+            .search
+            .set_pattern(pattern, || emit.search_pattern_changed()))
+        .changed();
+
+        if changed && self.search.active {
+            let model = &mut self.model;
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            let mut emit_index = emit.clone();
+
+            self.search.set_matches(
+                matches,
+                || emit_index.search_index_changed(),
+                || emit.search_num_matches_changed(),
             );
         }
     }
@@ -250,16 +290,30 @@ impl Messages {
         &mut self,
         use_regex: bool,
     ) {
-        if ret_err!(self.search.set_regex(use_regex, &mut self.emit)).changed() {
-            self.search.set_matches(
-                container::apply_search(
-                    &mut self.container,
+        let emit = &mut self.emit;
+
+        let changed = err!(self
+            .search
+            .set_regex(use_regex, || emit.search_regex_changed()))
+        .changed();
+
+        if changed {
+            let model = &mut self.model;
+
+            let matches = self
+                .container
+                .apply_search(
                     &self.search,
-                    &mut self.model,
-                    &mut self.emit,
+                    |ix| model.data_changed(ix, ix),
+                    || emit.search_num_matches_changed(),
                 )
-                .unwrap_or_default(),
-                &mut self.emit,
+                .unwrap_or_default();
+
+            let mut emit_index = emit.clone();
+            self.search.set_matches(
+                matches,
+                || emit.search_num_matches_changed(),
+                || emit_index.search_index_changed(),
             );
         }
     }
@@ -276,49 +330,51 @@ impl Messages {
         Some(self.container.last_msg()?.time.insertion.into())
     }
 
-    pub(crate) fn data_saved_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        Some(self.container.msg_data(index)?.save_status == SaveStatus::Saved)
-    }
-
     pub(crate) fn author_(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
-        Some(self.container.msg_data(index)?.author.as_str())
+    ) -> Option<ffi::UserId> {
+        self.container
+            .access_by_index(index, |data| data.author.to_string())
     }
 
     pub(crate) fn body_(
         &self,
         index: usize,
     ) -> Option<String> {
-        Some(if self.container.msg_data(index)?.match_status.is_match() {
-            self.container
-                .msg_data(index)?
-                .search_buf
-                .as_ref()?
-                .to_owned()
-        } else {
-            self.elider
-                .elided_body(self.container.msg_data(index)?.body.as_ref()?)
-        })
+        let elider = &self.elider;
+        let pattern = &self.search.pattern;
+        let match_status = self.container.get(index).as_ref()?.match_status;
+
+        self.container.access_by_index(index, |data| {
+            if match_status.is_match() {
+                Some(messages_helper::search::highlight_message(
+                    pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                Some(elider.elided_body(data.body.as_ref()?))
+            }
+        })?
     }
 
     pub(crate) fn full_body_(
         &self,
         index: usize,
-    ) -> Option<&str> {
-        Some(if self.container.msg_data(index)?.match_status.is_match() {
-            self.container
-                .msg_data(index)?
-                .search_buf
-                .as_ref()?
-                .as_str()
-        } else {
-            self.container.msg_data(index)?.body.as_ref()?.as_str()
-        })
+    ) -> Option<String> {
+        let pattern = &self.search.pattern;
+        let match_status = self.container.get(index).as_ref()?.match_status;
+
+        self.container.access_by_index(index, |data| {
+            if match_status.is_match() {
+                Some(messages_helper::search::highlight_message(
+                    pattern.as_ref()?,
+                    data.body.as_ref()?,
+                ))
+            } else {
+                data.body.as_ref().map(MessageBody::to_string)
+            }
+        })?
     }
 
     pub(crate) fn insertion_time_(
@@ -332,14 +388,18 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.expiration?.into())
+        self.container.access_by_index(index, |data| {
+            data.time.expiration.map(herald_common::Time::into)
+        })?
     }
 
     pub(crate) fn server_time_(
         &self,
         index: usize,
     ) -> Option<i64> {
-        Some(self.container.msg_data(index)?.time.server?.into())
+        self.container.access_by_index(index, |data| {
+            data.time.server.map(herald_common::Time::into)
+        })?
     }
 
     pub(crate) fn reply_type_(
@@ -364,22 +424,33 @@ impl Messages {
     pub(crate) fn op_msg_id_(
         &self,
         index: usize,
-    ) -> Option<ffi::MsgIdRef> {
-        self.container.op_msg_id(index).map(MsgId::as_slice)
+    ) -> Option<ffi::MsgId> {
+        self.container.op_msg_id(index).map(MsgId::to_vec)
     }
 
     pub(crate) fn op_author_(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
-        self.container.op_author(index).map(UserId::as_str)
+    ) -> Option<ffi::UserId> {
+        self.container
+            .op_author(index)
+            .as_ref()
+            .map(UserId::as_str)
+            .map(str::to_string)
     }
 
-    pub(crate) fn op_has_attachments_(
+    pub(crate) fn op_doc_attachments_(
         &self,
         index: usize,
-    ) -> Option<bool> {
-        self.container.op_has_attachments(index)
+    ) -> Option<String> {
+        self.container.op_doc_attachments_json(index)
+    }
+
+    pub(crate) fn op_media_attachments_(
+        &self,
+        index: usize,
+    ) -> Option<String> {
+        self.container.op_media_attachments_json(index)
     }
 
     pub(crate) fn op_insertion_time_(
@@ -401,13 +472,6 @@ impl Messages {
         index: usize,
     ) -> Option<ffi::MsgIdRef> {
         Some(self.container.get(index)?.msg_id.as_slice())
-    }
-
-    pub(crate) fn has_attachments_(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        Some(self.container.msg_data(index)?.has_attachments)
     }
 
     pub(crate) fn emit_(&mut self) -> &mut Emitter {
@@ -448,7 +512,7 @@ impl Messages {
         &self,
         index: usize,
     ) -> Option<u8> {
-        Some(self.container.msg_data(index)?.match_status as u8)
+        Some(self.container.list.get(index)?.match_status as u8)
     }
 
     pub(crate) fn set_elision_line_count_(

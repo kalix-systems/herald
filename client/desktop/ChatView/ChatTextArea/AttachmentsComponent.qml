@@ -4,34 +4,31 @@ import QtGraphicalEffects 1.13
 import QtQuick.Layouts 1.12
 import "qrc:/common" as Common
 import LibHerald 1.0
+import "qrc:/imports" as Imports
 
 ScrollView {
     width: parent.width
     height: wrapperRow.height
-    // ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
-    ScrollBar.vertical.policy: ScrollBar.AlwaysOff
+    ScrollBar.horizontal: ScrollBar {}
 
     Row {
         id: wrapperRow
         height: 100
-        Layout.margins: 10
+        Layout.margins: CmnCfg.mediumMargin
         width: parent.width
         spacing: 5
         Repeater {
             id: imageRepeater
-            model: ownedConversation.builder
+            model: ownedConversation.builder.mediaAttachments
             delegate: Rectangle {
                 height: 100
                 width: 100
-                border.color: image.focus ? "light blue" : "black"
-                border.width: image.focus ? 2 : 1
-                radius: CmnCfg.radius
                 clip: true
                 Image {
                     id: image
                     anchors.fill: parent
-                    anchors.margins: CmnCfg.smallMargin
-                    source: "file:" + attachmentPath
+                    // anchors.margins: CmnCfg.smallMargin
+                    source: "file:" + mediaAttachmentPath
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
 
@@ -42,30 +39,38 @@ ScrollView {
                         }
                     }
 
-                    Button {
-                        anchors.top: parent.top
-                        anchors.right: parent.right
-                        anchors.margins: CmnCfg.smallMargin
-                        background: Rectangle {
-                            color: "transparent"
-                            width: x.width
-                            height: x.height
-                        }
+                    ColorOverlay {
+                        id: overlay
+                        anchors.fill: parent
+                        source: parent
+                        visible: imageHover.containsMouse
+                        color: CmnCfg.palette.black
+                        opacity: 0.5
+                        smooth: true
+                    }
 
-                        Image {
-                            id: x
-                            source: "qrc:/x-icon.svg"
-                            anchors.centerIn: parent
-                            sourceSize: Qt.size(25, 25)
-                        }
-                        onClicked: {
-                            ownedConversation.builder.removeAttachmentByIndex(
-                                        index)
-                        }
+                    Imports.ButtonForm {
+                        id: clearPhoto
+                        source: "qrc:/x-icon.svg"
+                        anchors.centerIn: parent
+                        visible: imageHover.containsMouse
+                        onClicked: ownedConversation.builder.removeMedia(index)
+                        fill: CmnCfg.palette.white
+                        opacity: 1.0
+                        hoverEnabled: true
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        id: imageHover
+                        onClicked: mouse.accepted = false
+                        onReleased: mouse.accepted = false
+                        onPressed: mouse.accepted = false
+                        cursorShape: Qt.PointingHandCursor
                     }
                 }
             }
         }
     }
-    bottomPadding: 5
 }

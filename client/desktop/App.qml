@@ -5,6 +5,7 @@ import QtQuick.Controls 2.13
 import LibHerald 1.0
 import "SideBar/popups" as Popups
 import "./SideBar"
+import "."
 
 Item {
     id: appRoot
@@ -51,9 +52,10 @@ Item {
                     anchors.left: parent.left
                     anchors.leftMargin: CmnCfg.largeMargin
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Herald"
+                    text: qsTr("Herald")
+
                     font.pixelSize: CmnCfg.headerSize
-                    font.family: CmnCfg.chatFont.name
+                    font.family: CmnCfg.labelFont.name
                     font.bold: true
                     color: CmnCfg.palette.white
                 }
@@ -104,5 +106,5 @@ Item {
         }
     }
 
-    Component.onCompleted: herald.login()
+    Component.onCompleted: Herald.login()
 }

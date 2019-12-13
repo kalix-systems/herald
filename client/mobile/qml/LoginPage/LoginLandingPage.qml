@@ -50,7 +50,7 @@ Page {
     LoginButton {
         id: newAccButton
 
-        lbText: "Register New Device"
+        lbText: qsTr("Register New Device")
         lbColor: bgStartColor
 
         anchors {
@@ -59,7 +59,7 @@ Page {
             bottomMargin: loginLandingPage.height / 3
         }
 
-        onClicked: herald.registerNewUser(entryField.text.trim(),
+        onClicked: Herald.registerNewUser(entryField.text.trim(),
                                           serverAddrTextField.text.trim(),
                                           serverPortTextField.text.trim())
     }

@@ -12,7 +12,7 @@ Loader {
         z: exit.z + 2
         window: convWindow
         Component.onCompleted: {
-            emojiPicker.send.connect(function anon(emoji) {
+            emojiPicker.send.connect(function (emoji) {
                 JS.appendToTextArea(emoji, chatTextArea.chatText)
             })
         }

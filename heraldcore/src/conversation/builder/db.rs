@@ -27,11 +27,12 @@ impl ConversationBuilder {
         let color = color.unwrap_or_else(|| crate::utils::id_to_color(&id));
         let pairwise = pairwise.unwrap_or(false);
         let muted = muted.unwrap_or(false);
-        let expiration_period = expiration_period.unwrap_or_default();
+
+        let expiration_period = expiration_period
+            .unwrap_or_else(|| crate::config::db::preferred_expiration(tx).unwrap_or_default());
 
         let picture = match picture.as_ref() {
             Some(picture) => {
-                // TODO Give more specific error
                 let path: std::path::PathBuf = crate::image_utils::update_picture(picture, None)?;
                 path.into_os_string().into_string().ok()
             }

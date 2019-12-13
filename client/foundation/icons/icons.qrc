@@ -39,13 +39,8 @@
         <file>emoji-categories/sports.svg</file>
         <file>emoji-categories/symbols.svg</file>
         <file>emoji-categories/transport.svg</file>
-        <file>timer-icons/10s.svg</file>
         <file>timer-icons/12h.svg</file>
-        <file>timer-icons/1d.svg</file>
-        <file>timer-icons/1h.svg</file>
         <file>timer-icons/1min.svg</file>
-        <file>timer-icons/1mo.svg</file>
-        <file>timer-icons/1w.svg</file>
         <file>timer-icons/1y.svg</file>
         <file>timer-icons/30min.svg</file>
         <file>timer-icons/off.svg</file>
@@ -56,5 +51,8 @@
         <file>attach-icon.svg</file>
         <file>clear-photo-icon.svg</file>
         <file>countdown-icon-temp.svg</file>
+        <file>file-icon.svg</file>
+        <file>download-icon.svg</file>
+        <file>dropdown-arrow-icon.svg</file>
     </qresource>
 </RCC>

@@ -12,7 +12,8 @@ Window {
     minimumHeight: height
     maximumWidth: width
     minimumWidth: width
-    title: "Choose Color"
+    title: qsTr("Choose Color")
+
     property int colorIndex: -1
     property int selectedIndex: -1
 
@@ -44,9 +45,10 @@ Window {
             }
         }
     }
+
     Button {
         id: colorSubmissionButton
-        text: "Submit"
+        text: qsTr("Submit")
 
         anchors {
             right: parent.right
@@ -54,7 +56,7 @@ Window {
         }
 
         onClicked: {
-            herald.users.setColor(gsSelectedIndex, avatarColorPicker.colorIndex)
+            Herald.users.setColor(gsSelectedIndex, avatarColorPicker.colorIndex)
             avatarColorPicker.close()
         }
     }

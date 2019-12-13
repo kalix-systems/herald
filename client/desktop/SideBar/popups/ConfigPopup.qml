@@ -4,17 +4,17 @@ import QtQuick.Dialogs 1.3
 import QtQuick.Layouts 1.13
 import QtQuick.Window 2.2
 import LibHerald 1.0
+import "qrc:/imports"
 import "../../common" as Common
+import "./ConfigComponents" as CfgComps
 import "./js/ConfigPopupSubmission.mjs" as JS
 
 Window {
     id: configPopup
     width: CmnCfg.configWidth
     height: CmnCfg.configHeight
-    maximumHeight: height
-    minimumHeight: height
-    maximumWidth: width
-    minimumWidth: width
+    minimumWidth: 500
+    minimumHeight: 250
 
     Component.onCompleted: {
         x = root.x + root.width / 3
@@ -26,82 +26,146 @@ Window {
         property bool pfpValid: true
         folder: shortcuts.desktop
         nameFilters: ["(*.jpg *.png *.jpeg)"]
-        onSelectionAccepted: {
-            herald.config.profilePicture = fileUrl
-            print("set to", fileUrl)
-        }
+        onSelectionAccepted: Herald.config.profilePicture = fileUrl
     }
 
-    TabBar {
-        width: parent.width
-        height: 50
-        id: bar
-        TabButton {
-            text: qsTr("Account")
-        }
-        TabButton {
-            text: qsTr("UI")
-        }
-        TabButton {
-            text: qsTr("Authentication")
-        }
-        TabButton {
-            text: qsTr("Notifications")
-        }
-    }
+    Page {
+        anchors.fill: parent
+        header: Rectangle {
+            id: headerRect
+            color: CmnCfg.palette.offBlack
+            height: CmnCfg.toolbarHeight
 
-    StackLayout {
-        width: parent.width
-        currentIndex: bar.currentIndex
-        anchors.top: bar.bottom
-        ColumnLayout {
-            id: accountPreferences
-            Layout.alignment: Qt.AlignCenter
-            Layout.fillWidth: true
-            /// RS: check with the server to prevent duplicate ID's
-            RowLayout {
-                TextField {
-                    id: cfgUid
-                    enabled: false
-                    property bool userIdValid: true
-                    placeholderText: enabled ? "Enter UID " : herald.config.configId
-                    selectionColor: "lightsteelblue"
-                }
-
-                TextField {
-                    id: cfgUname
-                    maximumLength: 256
-                    property bool usernameValid: true
-                    text: herald.config.name
-                    selectionColor: "lightsteelblue"
+            Row {
+                leftPadding: CmnCfg.margin
+                anchors.fill: parent
+                Label {
+                    id: label
+                    text: qsTr("Settings")
+                    color: CmnCfg.palette.white
+                    font.pixelSize: CmnCfg.headerSize
+                    font.family: CmnCfg.labelFont.name
+                    font.bold: true
+                    anchors.verticalCenter: parent.verticalCenter
+                    elide: Label.ElideRight
                 }
             }
 
-            Button {
-                text: "select profile picture"
-                onClicked: cfgPfp.open()
+            Rectangle {
+                height: 1
+                width: parent.width
+                color: CmnCfg.palette.white
+                anchors.top: headerRect.bottom
+            }
+        }
+
+        ListModel {
+            id: settingsModel
+            ListElement {
+                name: qsTr("Notifications")
+            }
+            ListElement {
+                name: qsTr("Appearance")
+            }
+            ListElement {
+                name: qsTr("Privacy & Security")
+            }
+            ListElement {
+                name: qsTr("Data & Storage")
             }
 
-            Button {
-                text: "Submit"
-                onClicked: {
-                    JS.submit(herald.config, cfgUname)
-                    close()
+            ListElement {
+                name: qsTr("Advanced")
+            }
+
+            ListElement {
+                name: qsTr("Help & Feedback")
+            }
+        }
+
+        RowLayout {
+            anchors.fill: parent
+            spacing: 0
+            Rectangle {
+                id: headersRect
+                Layout.preferredWidth: 250
+                Layout.fillHeight: true
+                color: CmnCfg.palette.offBlack
+
+                ListView {
+                    anchors.fill: parent
+                    model: settingsModel
+                    delegate: Rectangle {
+                        height: 40
+                        width: parent.width
+                        color: hover.containsMouse ? CmnCfg.palette.darkGrey : "transparent"
+                        StandardLabel {
+                            text: name
+                            font.family: CmnCfg.labelFont.name
+                            font.bold: true
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: CmnCfg.margin
+                        }
+                        MouseArea {
+                            id: hover
+                            hoverEnabled: true
+                            anchors.fill: parent
+                            onClicked: configScroll.contentY = col.children[index].y
+                            cursorShape: Qt.PointingHandCursor
+                        }
+                    }
                 }
             }
-        }
-        Item {
-            id: uiPreferences
-            Button {
-                text: "toggle solarized dark"
-                onClicked: CmnCfg.theme = CmnCfg.theme === 1 ? 0 : 1
+
+            Flickable {
+                id: configScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                contentHeight: col.height
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds
+                Column {
+                    id: col
+                    spacing: CmnCfg.smallMargin
+                    topPadding: CmnCfg.margin
+                    anchors.right: parent.right
+                    anchors.left: parent.left
+                    CfgComps.ConfigListItem {
+                        id: notifications
+                        headerText: qsTr("Notifications")
+                        configContent: CfgComps.Notifications {}
+                    }
+                    CfgComps.ConfigListItem {
+                        id: appearance
+                        headerText: qsTr("Appearance")
+                        configContent: CfgComps.Appearance {}
+                    }
+                    CfgComps.ConfigListItem {
+                        id: security
+                        headerText: qsTr("Privacy & Security")
+                        configContent: CfgComps.Privacy {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: storage
+                        headerText: qsTr("Data & Storage")
+                        configContent: CfgComps.Storage {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: advanced
+                        headerText: qsTr("Advanced")
+                        configContent: CfgComps.Advanced {}
+                    }
+
+                    CfgComps.ConfigListItem {
+                        id: feedback
+                        headerText: qsTr("Help & Feedback")
+                        configContent: CfgComps.Feedback {}
+                    }
+                }
             }
-        }
-        Item {
-            id: authenticationPreferences
-        }
-        Item {
-            id: notificationPreferences
         }
     }
 }

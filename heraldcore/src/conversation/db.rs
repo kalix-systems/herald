@@ -29,6 +29,7 @@ pub(crate) fn conversation_messages(
             let message_id = row.get("msg_id")?;
             let receipts = crate::message::db::get_receipts(conn, &message_id)?;
             let replies = crate::message::db::replies(conn, &message_id)?;
+            let attachments = crate::message::attachments::db::get(conn, &message_id)?;
 
             let time = MessageTime {
                 insertion: row.get("insertion_ts")?,
@@ -49,7 +50,7 @@ pub(crate) fn conversation_messages(
                 op,
                 time,
                 send_status: row.get("send_status")?,
-                has_attachments: row.get("has_attachments")?,
+                attachments,
                 receipts,
                 replies,
             })
@@ -63,6 +64,35 @@ pub(crate) fn conversation_messages(
 
     Ok(messages)
 }
+
+pub(crate) fn conversation_message_meta(
+    conn: &rusqlite::Connection,
+    conversation_id: &ConversationId,
+) -> Result<Vec<crate::message::MessageMeta>, HErr> {
+    let mut stmt = w!(conn.prepare(include_str!("../message/sql/conversation_message_meta.sql")));
+
+    let res = w!(stmt.query_map_named(
+        named_params! {
+            "@conversation_id": conversation_id
+        },
+        |row| {
+            Ok(crate::message::MessageMeta {
+                msg_id: row.get("msg_id")?,
+                insertion_time: row.get("insertion_ts")?,
+                match_status: crate::message::MatchStatus::NotMatched,
+            })
+        }
+    ));
+
+    let mut messages = Vec::new();
+    for msg in res {
+        messages.push(w!(msg));
+    }
+
+    Ok(messages)
+}
+
+/// Get all message metadata in a conversation.
 
 /// Get conversation metadata
 pub(crate) fn meta(
@@ -150,8 +180,6 @@ pub(crate) fn set_picture(
     conversation_id: &ConversationId,
     picture: Option<&str>,
 ) -> Result<Option<String>, HErr> {
-    use crate::image_utils;
-
     let old_picture = self::picture(&conn, conversation_id)?;
 
     let path = match picture {

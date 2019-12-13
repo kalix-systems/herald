@@ -1,34 +1,44 @@
-use super::*;
+use crate::*;
+use container::Container;
+use heraldcore::types::MsgId;
+use search_pattern::{SearchPattern, SearchPatternError};
 use std::ops::Not;
+use types::*;
 
 mod search_helper;
-pub(crate) use search_helper::highlight_message;
+pub use search_helper::highlight_message;
 
 #[derive(PartialEq, Debug)]
-pub(super) enum SearchChanged {
+pub enum SearchChanged {
     Changed,
     NotChanged,
 }
 
 impl SearchChanged {
-    pub(super) fn changed(&self) -> bool {
+    pub fn changed(&self) -> bool {
         self == &SearchChanged::Changed
     }
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, Ord, PartialOrd)]
-pub(super) struct Match(pub(super) Message);
+pub struct Match(pub MessageMeta);
 
-pub(super) struct SearchState {
-    pub(super) pattern: Option<SearchPattern>,
-    pub(super) active: bool,
+pub struct SearchState {
+    pub pattern: Option<SearchPattern>,
+    pub active: bool,
     matches: Vec<Match>,
     start_index: Option<usize>,
-    pub(super) index: Option<usize>,
+    pub index: Option<usize>,
+}
+
+impl Default for SearchState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl SearchState {
-    pub(super) fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             pattern: SearchPattern::new_normal("".into()).ok(),
             active: false,
@@ -38,14 +48,14 @@ impl SearchState {
         }
     }
 
-    pub(super) fn is_regex(&self) -> bool {
+    pub fn is_regex(&self) -> bool {
         match self.pattern {
             Some(SearchPattern::Regex { .. }) => true,
             _ => false,
         }
     }
 
-    pub(super) fn start_hint(
+    pub fn start_hint(
         &mut self,
         hint: f32,
         container: &Container,
@@ -64,86 +74,83 @@ impl SearchState {
         Some(())
     }
 
-    pub(super) fn set_pattern(
+    pub fn set_pattern<F: FnMut()>(
         &mut self,
         pattern: String,
-        emit: &mut Emitter,
-    ) -> Result<SearchChanged, HErr> {
+        mut pattern_changed: F,
+    ) -> Result<SearchChanged, SearchPatternError> {
         match self.set_pattern_inner(pattern)? {
             SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
             SearchChanged::Changed => {
-                emit.search_pattern_changed();
+                pattern_changed();
                 Ok(SearchChanged::Changed)
             }
         }
     }
 
-    pub(super) fn set_matches(
+    pub fn set_matches<N: FnMut(), I: FnMut()>(
         &mut self,
         matches: Vec<Match>,
-        emit: &mut Emitter,
+        mut num_matches_changed: N,
+        mut index_changed: I,
     ) {
         self.set_matches_inner(matches);
-        emit.search_num_matches_changed();
-        emit.search_index_changed();
+        num_matches_changed();
+        index_changed();
     }
 
-    pub(super) fn msg_matches(
+    pub fn msg_matches(
         &self,
         msg_id: &MsgId,
-        container: &Container,
     ) -> Option<bool> {
-        let data = container.get_data(msg_id)?;
-        Some(data.matches(self.pattern.as_ref()?))
+        let pattern = self.pattern.as_ref()?;
+        crate::container::access(msg_id, |m| m.matches(pattern))
     }
 
-    pub(super) fn set_regex(
+    pub fn set_regex<F: FnMut()>(
         &mut self,
         use_regex: bool,
-        emit: &mut Emitter,
-    ) -> Result<SearchChanged, HErr> {
+        mut regex_changed: F,
+    ) -> Result<SearchChanged, SearchPatternError> {
         match self.set_regex_inner(use_regex)? {
             SearchChanged::NotChanged => Ok(SearchChanged::NotChanged),
             SearchChanged::Changed => {
-                emit.search_regex_changed();
+                regex_changed();
                 Ok(SearchChanged::Changed)
             }
         }
     }
 
-    pub(super) fn num_matches(&self) -> usize {
+    pub fn num_matches(&self) -> usize {
         self.matches.len()
     }
 
-    pub(super) fn clear_search(
+    pub fn clear_search<F: FnMut()>(
         &mut self,
-        emit: &mut Emitter,
-    ) -> Result<(), HErr> {
+        mut emit_cleared: F,
+    ) -> Result<(), SearchPatternError> {
         self.clear_search_inner()?;
 
-        emit.search_index_changed();
-        emit.search_pattern_changed();
-        emit.search_regex_changed();
-        emit.search_num_matches_changed();
+        emit_cleared();
 
         Ok(())
     }
 
-    pub(super) fn initial_next_index(&self) -> usize {
+    pub fn initial_next_index(&self) -> usize {
         self.start_index.unwrap_or(0)
     }
 
-    pub(super) fn initial_prev_index(&self) -> usize {
+    pub fn initial_prev_index(&self) -> usize {
         self.start_index
             .unwrap_or_else(|| self.num_matches().saturating_sub(1))
     }
 
-    pub(super) fn current(&self) -> Option<Match> {
+    pub fn current(&self) -> Option<Match> {
         let ix = self.index?;
         self.matches.get(ix).copied()
     }
 
-    pub(super) fn next(&mut self) -> Option<Match> {
+    pub fn next_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
@@ -164,7 +171,7 @@ impl SearchState {
         }
     }
 
-    pub(super) fn prev(&mut self) -> Option<Match> {
+    pub fn prev_match(&mut self) -> Option<Match> {
         if self.active.not() {
             return None;
         }
@@ -190,28 +197,29 @@ impl SearchState {
         }
     }
 
-    pub(super) fn try_remove_match(
+    pub fn try_remove_match<I: FnMut(), N: FnMut(), D: FnMut(usize)>(
         &mut self,
         msg_id: &MsgId,
         container: &mut Container,
-        emit: &mut Emitter,
-        model: &mut List,
+        mut index_changed: I,
+        mut num_matches_changed: N,
+        mut data_changed: D,
     ) -> Option<()> {
-        if self.active.not() || self.msg_matches(msg_id, container)?.not() {
+        if self.active.not() || self.msg_matches(msg_id)?.not() {
             return Some(());
         }
 
         let pos = self
             .matches
             .iter()
-            .position(|Match(Message { msg_id: mid, .. })| mid == msg_id)?;
+            .position(|Match(MessageMeta { msg_id: mid, .. })| mid == msg_id)?;
 
         self.matches.remove(pos);
-        emit.search_num_matches_changed();
+        num_matches_changed();
 
         if self.matches.is_empty() {
             self.index = None;
-            emit.search_index_changed();
+            index_changed();
             return Some(());
         }
 
@@ -219,34 +227,34 @@ impl SearchState {
             if (0..=ix).contains(&pos) {
                 let new_ix = ix.saturating_sub(1);
                 self.index.replace(new_ix);
-                emit.search_index_changed();
+
+                index_changed();
 
                 let Match(msg) = self.matches.get(new_ix)?;
-                let data = container.get_data_mut(&msg.msg_id)?;
-                data.match_status = MatchStatus::Focused;
 
-                let container_ix = container.index_of(msg)?;
+                let container_ix = container.index_by_id(msg.msg_id)?;
+                container.list.get_mut(container_ix)?.match_status = MatchStatus::Focused;
 
-                model.data_changed(container_ix, container_ix);
+                data_changed(container_ix);
             }
         }
 
         Some(())
     }
 
-    pub(super) fn try_insert_match(
+    pub fn try_insert_match<N: FnMut(), D: FnMut(usize)>(
         &mut self,
         msg_id: MsgId,
         model_ix: usize,
         container: &mut Container,
-        emit: &mut Emitter,
-        model: &mut List,
+        mut num_matches_changed: N,
+        mut data_changed: D,
     ) -> Option<()> {
-        if self.active.not() || self.msg_matches(&msg_id, container)?.not() {
+        if self.active.not() || self.msg_matches(&msg_id)?.not() {
             return Some(());
         }
 
-        let message = from_msg_id(msg_id, &container)?;
+        let message = from_msg_id(msg_id)?;
         let ix = self.index;
 
         let pos = if self
@@ -267,19 +275,16 @@ impl SearchState {
         };
 
         self.matches.insert(pos, Match(message));
-        let data = container.get_data_mut(&msg_id)?;
-        data.match_status = MatchStatus::Matched;
-        data.search_buf = Some(highlight_message(
-            self.pattern.as_ref()?,
-            data.body.as_ref()?,
-        ));
-        model.data_changed(pos, pos);
-        emit.search_num_matches_changed();
+
+        container.list.get_mut(pos)?.match_status = MatchStatus::Matched;
+
+        data_changed(pos);
+        num_matches_changed();
 
         if let Some(ix) = ix {
             if (0..=ix).contains(&pos) {
                 self.index.replace((ix + 1) % self.matches.len());
-                model.data_changed(model_ix, model_ix);
+                data_changed(model_ix);
             }
         }
 

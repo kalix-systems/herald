@@ -1,7 +1,8 @@
-use crate::errors::HErr;
 use image::{self, FilterType, ImageFormat};
 use platform_dirs::pictures_dir;
 use std::path::{Path, PathBuf};
+
+pub use image::ImageError;
 
 const IMAGE_SIZE: u32 = 300;
 
@@ -10,7 +11,7 @@ const IMAGE_SIZE: u32 = 300;
 pub fn update_picture<P>(
     source: P,
     old_path: Option<P>,
-) -> Result<PathBuf, HErr>
+) -> Result<PathBuf, image::ImageError>
 where
     P: AsRef<Path>,
 {
@@ -29,7 +30,7 @@ where
     Ok(image_path)
 }
 
-pub(crate) fn image_path() -> PathBuf {
+pub fn image_path() -> PathBuf {
     let rid = kcl::random::UQ::gen_new();
     let text = hex::encode(rid.as_ref());
 
@@ -37,4 +38,12 @@ pub(crate) fn image_path() -> PathBuf {
     image_path.set_extension("png");
 
     image_path
+}
+
+/// Returns image dimensions
+pub fn image_dimensions<P>(source: P) -> Result<(u32, u32), image::ImageError>
+where
+    P: AsRef<Path>,
+{
+    Ok(image::image_dimensions(source)?)
 }

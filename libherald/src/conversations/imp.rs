@@ -90,7 +90,7 @@ impl crate::Loadable for Conversations {
     fn try_load(&mut self) -> Result<(), std::io::Error> {
         std::thread::Builder::new().spawn(|| {
             let mut list = Vector::new();
-            for meta in ret_err!(conversation::all_meta()).into_iter() {
+            for meta in err!(conversation::all_meta()).into_iter() {
                 let (conv, data) = split_meta(meta);
                 shared::insert_data(conv.id, data);
                 list.push_back(conv);

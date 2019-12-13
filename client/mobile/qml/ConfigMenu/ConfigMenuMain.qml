@@ -19,12 +19,12 @@ Page {
                 Row {
                     Common.HeaderText {
                         font.pointSize: 18
-                        text: "Username: "
+                        text: qsTr("Username:") + " "
                         leftPadding: CmnCfg.margin
                     }
                     Common.HeaderText {
                         font.pointSize: 18
-                        text: herald.config.name
+                        text: Herald.config.name
                         color: CmnCfg.palette.darkGrey
                     }
                 }

@@ -15,13 +15,14 @@ mod imp {
         use notify_rust::*;
 
         // Note: If a notification server isn't running, trying to show a notification will
-        // block the thread. TODO: Should we inform the user that they need might need to install a
-        // notifcation server if one isn't running?
+        // block the thread on XDG desktops. TODO: Should we inform the user that they need might need to install a
+        // notification server if one isn't running?
         if get_server_information().is_err() {
             return;
         }
 
         let mut notif = Notification::new();
+
         notif
             .appname(super::DESKTOP_APP_NAME)
             .summary(&format!("New message from {}", msg.author));
@@ -30,10 +31,11 @@ mod imp {
             notif.body(body.as_str());
         }
 
-        notif
-            .hint(NotificationHint::Category("im.received".to_owned()))
-            .show()
-            .ok();
+        drop(
+            notif
+                .hint(NotificationHint::Category("im.received".to_owned()))
+                .show(),
+        );
     }
 }
 
@@ -41,20 +43,18 @@ mod imp {
 mod imp {
     use heraldcore::message::Message;
     use notify_rust::*;
-    use once_cell::sync::OnceCell;
 
     pub fn new_msg_toast(msg: &Message) {
         if set_application(super::DESKTOP_APP_NAME).is_ok() {
             let mut notif = Notification::new();
-            notif
-                .summary(&format!("New message from {}", msg.author))
-                .subtitle("TODO: macOS has subtitles! Do we want them?");
+
+            notif.summary(&format!("New message from {}", msg.author));
 
             if let Some(body) = &msg.body {
                 notif.body(body.as_str());
             }
 
-            notif.show().ok();
+            drop(notif.show());
         }
     }
 }

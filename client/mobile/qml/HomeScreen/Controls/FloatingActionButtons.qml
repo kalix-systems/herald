@@ -17,7 +17,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New contact"
+            text: qsTr("New contact")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent
@@ -26,6 +26,10 @@ Column {
             }
         }
 
+        onClicked: {
+            mainView.push(newContactViewMain)
+            cvMainView.state = "default"
+        }
         icon.source: "qrc:/add-contact-icon.svg"
         icon.color: CmnCfg.palette.black
         icon.height: CmnCfg.units.dp(36)
@@ -48,7 +52,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New group"
+            text: qsTr("New group")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent
@@ -73,6 +77,7 @@ Column {
         TapHandler {
             onTapped: {
                 mainView.push(newGroupViewMain)
+                cvMainView.state = "default"
             }
         }
     }
@@ -83,7 +88,7 @@ Column {
             anchors.right: parent.left
             anchors.verticalCenter: parent.verticalCenter
             anchors.rightMargin: CmnCfg.units.dp(16)
-            text: "New conversation"
+            text: qsTr("New conversation")
             font.pointSize: 12
             background: Rectangle {
                 anchors.fill: parent

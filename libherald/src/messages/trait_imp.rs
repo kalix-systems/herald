@@ -40,17 +40,10 @@ impl Interface for Messages {
         self.index_by_id_(msg_id)
     }
 
-    fn data_saved(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.data_saved_(index)
-    }
-
     fn author(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
+    ) -> Option<ffi::UserId> {
         self.author_(index)
     }
 
@@ -64,7 +57,7 @@ impl Interface for Messages {
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.full_body_(index)
     }
 
@@ -87,6 +80,19 @@ impl Interface for Messages {
         index: usize,
     ) -> Option<bool> {
         self.is_tail_(index)
+    }
+
+    fn doc_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.doc_attachments_(index).unwrap_or_default()
+    }
+    fn media_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.media_attachments_(index).unwrap_or_default()
     }
 
     fn delete_message(
@@ -147,7 +153,7 @@ impl Interface for Messages {
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<&str> {
+    ) -> Option<String> {
         self.op_body_(index)
     }
 
@@ -194,22 +200,15 @@ impl Interface for Messages {
     fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<ffi::MsgIdRef> {
+    ) -> Option<ffi::MsgId> {
         self.op_msg_id_(index)
     }
 
     fn op_author(
         &self,
         index: usize,
-    ) -> Option<ffi::UserIdRef> {
+    ) -> Option<ffi::UserId> {
         self.op_author_(index)
-    }
-
-    fn op_has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.op_has_attachments_(index)
     }
 
     fn op_insertion_time(
@@ -226,18 +225,25 @@ impl Interface for Messages {
         self.op_expiration_time_(index)
     }
 
+    fn op_media_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.op_media_attachments_(index).unwrap_or_default()
+    }
+
+    fn op_doc_attachments(
+        &self,
+        index: usize,
+    ) -> String {
+        self.op_doc_attachments_(index).unwrap_or_default()
+    }
+
     fn msg_id(
         &self,
         index: usize,
     ) -> Option<ffi::MsgIdRef> {
         self.msg_id_(index)
-    }
-
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool> {
-        self.has_attachments_(index)
     }
 
     fn emit(&mut self) -> &mut Emitter {

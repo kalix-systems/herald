@@ -1,12 +1,12 @@
 use crate::{
-    ffi,
+    err, ffi,
     imp::{Members, Messages},
     interface::{
         ConversationContentEmitter as Emitter, ConversationContentList as List,
         ConversationContentTrait as Interface,
     },
     members::MemberUpdate,
-    ret_err, ret_none,
+    none,
 };
 use heraldcore::types::ConversationId;
 use std::convert::TryFrom;
@@ -50,15 +50,14 @@ impl Interface for ConversationContent {
         cid: Option<ffi::ConversationIdRef>,
     ) {
         if let (Some(id), None) = (cid, self.id) {
-            let id = ret_err!(ConversationId::try_from(id));
-
-            self.messages.set_conversation_id(id);
-            ret_err!(self.members.set_conversation_id(id));
+            let id = err!(ConversationId::try_from(id));
 
             self.id.replace(id);
             self.emit.conversation_id_changed();
+            none!(self.register_model());
 
-            ret_none!(self.register_model());
+            self.messages.set_conversation_id(id);
+            err!(self.members.set_conversation_id(id));
         }
     }
 
@@ -67,7 +66,7 @@ impl Interface for ConversationContent {
     }
 
     fn fetch_more(&mut self) {
-        ret_none!(self.process_updates());
+        none!(self.process_updates());
     }
 
     fn members(&self) -> &Members {

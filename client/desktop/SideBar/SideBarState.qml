@@ -19,7 +19,7 @@ Page {
         Pane.ContactView {
             id: contactsListView
             anchors.fill: parent
-            model: herald.users
+            model: Herald.users
         }
     }
 
@@ -37,8 +37,8 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: headerBarComponent
-                searchPlaceholder: "Search your conversations"
-                headerText: "Add contact"
+                searchPlaceholder: qsTr("Search your conversations")
+                headerText: qsTr("Add contact")
             }
         },
 
@@ -52,7 +52,7 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: headerBarComponent
-                headerText: "New group"
+                headerText: qsTr("New group")
                 contactsSearch: true
             }
         },
@@ -62,13 +62,13 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: searchBarComponent
-                searchPlaceholder: "Search your conversations"
+                searchPlaceholder: qsTr("Search your conversations")
             }
 
             //load model into view
             PropertyChanges {
                 target: sideBarPane.messageSearchLoader
-                searchModel: herald.messageSearch
+                searchModel: Herald.messageSearch
             }
         },
 
@@ -83,7 +83,7 @@ Page {
             PropertyChanges {
                 target: headerLoader
                 sourceComponent: searchBarComponent
-                searchPlaceholder: "Enter contact name"
+                searchPlaceholder: qsTr("Enter contact name")
                 contactsSearch: true
             }
         }

@@ -1,0 +1,19 @@
+[package]
+name = "image_utils"
+version = "0.1.0"
+authors = ["Baeo Maltinsky <baeo.maltinsky@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+hex                  = "0.4.0"
+
+[dependencies.platform_dirs]
+path = "../platform_dirs"
+
+[dependencies.kcl]
+path = "../../kcl"
+
+[dependencies.image]
+version          = "0.22.1"
+default_features = false
+features         = ["gif_codec", "jpeg", "png_codec", "bmp", "pnm"]

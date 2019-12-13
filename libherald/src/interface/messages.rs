@@ -374,17 +374,17 @@ pub trait MessagesTrait {
     fn author(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn body(
         &self,
         index: usize,
     ) -> Option<String>;
 
-    fn data_saved(
+    fn doc_attachments(
         &self,
         index: usize,
-    ) -> Option<bool>;
+    ) -> String;
 
     fn expiration_time(
         &self,
@@ -394,12 +394,7 @@ pub trait MessagesTrait {
     fn full_body(
         &self,
         index: usize,
-    ) -> Option<&str>;
-
-    fn has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool>;
+    ) -> Option<String>;
 
     fn insertion_time(
         &self,
@@ -421,6 +416,11 @@ pub trait MessagesTrait {
         index: usize,
     ) -> Option<u8>;
 
+    fn media_attachments(
+        &self,
+        index: usize,
+    ) -> String;
+
     fn msg_id(
         &self,
         index: usize,
@@ -429,32 +429,37 @@ pub trait MessagesTrait {
     fn op_author(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
 
     fn op_body(
         &self,
         index: usize,
-    ) -> Option<&str>;
+    ) -> Option<String>;
+
+    fn op_doc_attachments(
+        &self,
+        index: usize,
+    ) -> String;
 
     fn op_expiration_time(
         &self,
         index: usize,
     ) -> Option<i64>;
 
-    fn op_has_attachments(
-        &self,
-        index: usize,
-    ) -> Option<bool>;
-
     fn op_insertion_time(
         &self,
         index: usize,
     ) -> Option<i64>;
 
+    fn op_media_attachments(
+        &self,
+        index: usize,
+    ) -> String;
+
     fn op_msg_id(
         &self,
         index: usize,
-    ) -> Option<&[u8]>;
+    ) -> Option<Vec<u8>>;
 
     fn receipt_status(
         &self,
@@ -485,12 +490,40 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         messages,
         builder,
         builder_body_changed,
-        builder_is_media_message_changed,
+        document_attachments,
+        document_attachments_new_data_ready,
+        document_attachments_layout_about_to_be_changed,
+        document_attachments_layout_changed,
+        document_attachments_data_changed,
+        document_attachments_begin_reset_model,
+        document_attachments_end_reset_model,
+        document_attachments_begin_insert_rows,
+        document_attachments_end_insert_rows,
+        document_attachments_begin_move_rows,
+        document_attachments_end_move_rows,
+        document_attachments_begin_remove_rows,
+        document_attachments_end_remove_rows,
+        builder_has_doc_attachment_changed,
+        builder_has_media_attachment_changed,
         builder_is_reply_changed,
+        media_attachments,
+        media_attachments_new_data_ready,
+        media_attachments_layout_about_to_be_changed,
+        media_attachments_layout_changed,
+        media_attachments_data_changed,
+        media_attachments_begin_reset_model,
+        media_attachments_end_reset_model,
+        media_attachments_begin_insert_rows,
+        media_attachments_end_insert_rows,
+        media_attachments_begin_move_rows,
+        media_attachments_end_move_rows,
+        media_attachments_begin_remove_rows,
+        media_attachments_end_remove_rows,
         builder_op_author_changed,
         builder_op_body_changed,
-        builder_op_has_attachments_changed,
+        builder_op_doc_attachments_changed,
         builder_op_id_changed,
+        builder_op_media_attachments_changed,
         builder_op_time_changed,
         builder_new_data_ready,
         builder_layout_about_to_be_changed,
@@ -528,15 +561,55 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         messages_begin_remove_rows,
         messages_end_remove_rows,
     } = ptr_bundle;
+    let document_attachments_emit = DocumentAttachmentsEmitter {
+        qobject: Arc::new(AtomicPtr::new(document_attachments)),
+        new_data_ready: document_attachments_new_data_ready,
+    };
+    let model = DocumentAttachmentsList {
+        qobject: document_attachments,
+        layout_about_to_be_changed: document_attachments_layout_about_to_be_changed,
+        layout_changed: document_attachments_layout_changed,
+        data_changed: document_attachments_data_changed,
+        begin_reset_model: document_attachments_begin_reset_model,
+        end_reset_model: document_attachments_end_reset_model,
+        begin_insert_rows: document_attachments_begin_insert_rows,
+        end_insert_rows: document_attachments_end_insert_rows,
+        begin_move_rows: document_attachments_begin_move_rows,
+        end_move_rows: document_attachments_end_move_rows,
+        begin_remove_rows: document_attachments_begin_remove_rows,
+        end_remove_rows: document_attachments_end_remove_rows,
+    };
+    let d_document_attachments = DocumentAttachments::new(document_attachments_emit, model);
+    let media_attachments_emit = MediaAttachmentsEmitter {
+        qobject: Arc::new(AtomicPtr::new(media_attachments)),
+        new_data_ready: media_attachments_new_data_ready,
+    };
+    let model = MediaAttachmentsList {
+        qobject: media_attachments,
+        layout_about_to_be_changed: media_attachments_layout_about_to_be_changed,
+        layout_changed: media_attachments_layout_changed,
+        data_changed: media_attachments_data_changed,
+        begin_reset_model: media_attachments_begin_reset_model,
+        end_reset_model: media_attachments_end_reset_model,
+        begin_insert_rows: media_attachments_begin_insert_rows,
+        end_insert_rows: media_attachments_end_insert_rows,
+        begin_move_rows: media_attachments_begin_move_rows,
+        end_move_rows: media_attachments_end_move_rows,
+        begin_remove_rows: media_attachments_begin_remove_rows,
+        end_remove_rows: media_attachments_end_remove_rows,
+    };
+    let d_media_attachments = MediaAttachments::new(media_attachments_emit, model);
     let builder_emit = MessageBuilderEmitter {
         qobject: Arc::new(AtomicPtr::new(builder)),
         body_changed: builder_body_changed,
-        is_media_message_changed: builder_is_media_message_changed,
+        has_doc_attachment_changed: builder_has_doc_attachment_changed,
+        has_media_attachment_changed: builder_has_media_attachment_changed,
         is_reply_changed: builder_is_reply_changed,
         op_author_changed: builder_op_author_changed,
         op_body_changed: builder_op_body_changed,
-        op_has_attachments_changed: builder_op_has_attachments_changed,
+        op_doc_attachments_changed: builder_op_doc_attachments_changed,
         op_id_changed: builder_op_id_changed,
+        op_media_attachments_changed: builder_op_media_attachments_changed,
         op_time_changed: builder_op_time_changed,
         new_data_ready: builder_new_data_ready,
     };
@@ -554,7 +627,12 @@ pub unsafe fn messages_new_inner(ptr_bundle: *mut MessagesPtrBundle) -> Messages
         begin_remove_rows: builder_begin_remove_rows,
         end_remove_rows: builder_end_remove_rows,
     };
-    let d_builder = MessageBuilder::new(builder_emit, model);
+    let d_builder = MessageBuilder::new(
+        builder_emit,
+        model,
+        d_document_attachments,
+        d_media_attachments,
+    );
     let messages_emit = MessagesEmitter {
         qobject: Arc::new(AtomicPtr::new(messages)),
         builder_op_msg_id_changed: messages_builder_op_msg_id_changed,
@@ -910,12 +988,16 @@ pub unsafe extern "C" fn messages_data_body(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_data_saved(
+pub unsafe extern "C" fn messages_data_doc_attachments(
     ptr: *const Messages,
     row: c_int,
-) -> COption<bool> {
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
     let obj = &*ptr;
-    obj.data_saved(to_usize(row).unwrap_or(0)).into()
+    let data = obj.doc_attachments(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -940,15 +1022,6 @@ pub unsafe extern "C" fn messages_data_full_body(
         let str_: *const c_char = data.as_ptr() as (*const c_char);
         set(d, str_, to_c_int(data.len()));
     }
-}
-
-#[no_mangle]
-pub unsafe extern "C" fn messages_data_has_attachments(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<bool> {
-    let obj = &*ptr;
-    obj.has_attachments(to_usize(row).unwrap_or(0)).into()
 }
 
 #[no_mangle]
@@ -985,6 +1058,19 @@ pub unsafe extern "C" fn messages_data_match_status(
 ) -> COption<u8> {
     let obj = &*ptr;
     obj.match_status(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_media_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.media_attachments(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1033,6 +1119,19 @@ pub unsafe extern "C" fn messages_data_op_body(
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn messages_data_op_doc_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.op_doc_attachments(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
+}
+
+#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_expiration_time(
     ptr: *const Messages,
     row: c_int,
@@ -1042,21 +1141,25 @@ pub unsafe extern "C" fn messages_data_op_expiration_time(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn messages_data_op_has_attachments(
-    ptr: *const Messages,
-    row: c_int,
-) -> COption<bool> {
-    let obj = &*ptr;
-    obj.op_has_attachments(to_usize(row).unwrap_or(0)).into()
-}
-
-#[no_mangle]
 pub unsafe extern "C" fn messages_data_op_insertion_time(
     ptr: *const Messages,
     row: c_int,
 ) -> COption<i64> {
     let obj = &*ptr;
     obj.op_insertion_time(to_usize(row).unwrap_or(0)).into()
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn messages_data_op_media_attachments(
+    ptr: *const Messages,
+    row: c_int,
+    d: *mut QString,
+    set: fn(*mut QString, *const c_char, len: c_int),
+) {
+    let obj = &*ptr;
+    let data = obj.op_media_attachments(to_usize(row).unwrap_or(0));
+    let str_: *const c_char = data.as_ptr() as *const c_char;
+    set(d, str_, to_c_int(data.len()));
 }
 
 #[no_mangle]
@@ -1107,12 +1210,40 @@ pub struct MessagesPtrBundle {
     messages: *mut MessagesQObject,
     builder: *mut MessageBuilderQObject,
     builder_body_changed: fn(*mut MessageBuilderQObject),
-    builder_is_media_message_changed: fn(*mut MessageBuilderQObject),
+    document_attachments: *mut DocumentAttachmentsQObject,
+    document_attachments_new_data_ready: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_layout_about_to_be_changed: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_layout_changed: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_data_changed: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_begin_reset_model: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_end_reset_model: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_insert_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_end_insert_rows: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_move_rows: fn(*mut DocumentAttachmentsQObject, usize, usize, usize),
+    document_attachments_end_move_rows: fn(*mut DocumentAttachmentsQObject),
+    document_attachments_begin_remove_rows: fn(*mut DocumentAttachmentsQObject, usize, usize),
+    document_attachments_end_remove_rows: fn(*mut DocumentAttachmentsQObject),
+    builder_has_doc_attachment_changed: fn(*mut MessageBuilderQObject),
+    builder_has_media_attachment_changed: fn(*mut MessageBuilderQObject),
     builder_is_reply_changed: fn(*mut MessageBuilderQObject),
+    media_attachments: *mut MediaAttachmentsQObject,
+    media_attachments_new_data_ready: fn(*mut MediaAttachmentsQObject),
+    media_attachments_layout_about_to_be_changed: fn(*mut MediaAttachmentsQObject),
+    media_attachments_layout_changed: fn(*mut MediaAttachmentsQObject),
+    media_attachments_data_changed: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_begin_reset_model: fn(*mut MediaAttachmentsQObject),
+    media_attachments_end_reset_model: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_insert_rows: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_end_insert_rows: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_move_rows: fn(*mut MediaAttachmentsQObject, usize, usize, usize),
+    media_attachments_end_move_rows: fn(*mut MediaAttachmentsQObject),
+    media_attachments_begin_remove_rows: fn(*mut MediaAttachmentsQObject, usize, usize),
+    media_attachments_end_remove_rows: fn(*mut MediaAttachmentsQObject),
     builder_op_author_changed: fn(*mut MessageBuilderQObject),
     builder_op_body_changed: fn(*mut MessageBuilderQObject),
-    builder_op_has_attachments_changed: fn(*mut MessageBuilderQObject),
+    builder_op_doc_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_id_changed: fn(*mut MessageBuilderQObject),
+    builder_op_media_attachments_changed: fn(*mut MessageBuilderQObject),
     builder_op_time_changed: fn(*mut MessageBuilderQObject),
     builder_new_data_ready: fn(*mut MessageBuilderQObject),
     builder_layout_about_to_be_changed: fn(*mut MessageBuilderQObject),

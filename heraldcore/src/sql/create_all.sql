@@ -15,8 +15,6 @@ CREATE TABLE IF NOT EXISTS messages (
   expiration_ts INTEGER DEFAULT NULL,
   -- send status of the message
   send_status INTEGER NOT NULL DEFAULT(0),
-  -- does the message have attachments?
-  has_attachments INTEGER NOT NULL DEFAULT(0),
   -- is the message a reply?
   is_reply INTEGER NOT NULL DEFAULT(0),
   FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id),
@@ -116,6 +114,8 @@ CREATE TABLE IF NOT EXISTS config (
   -- colorscheme
   colorscheme INTEGER NOT NULL,
   kp BLOB NOT NULL,
+  -- default preferred expiration period
+  preferred_expiration INTEGER DEFAULT NULL,
   -- Address of the server the account is registered on
   home_server BLOB NOT NULL,
   -- enforce this table having no more than one row (for now)

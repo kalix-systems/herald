@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 TextEdit {
     visible: elided
-    text: wrapperCol.expanded == false ? "Read more" : "Collapse"
+    text: !!bubbleRoot.expanded ? qsTr("Read more") : qsTr("Collapse")
     font.bold: true
     color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
@@ -15,10 +15,10 @@ TextEdit {
     readOnly: true
     MouseArea {
         anchors.fill: parent
-        onClicked: wrapperCol.expanded = !wrapperCol.expanded
+        onClicked: bubbleRoot.expanded = !bubbleRoot.expanded
     }
 
     TapHandler {
-        onTapped: wrapperCol.expanded = !wrapperCol.expanded
+        onTapped: bubbleRoot.expanded = !bubbleRoot.expanded
     }
 }

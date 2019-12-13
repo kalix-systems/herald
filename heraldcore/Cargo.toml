@@ -41,9 +41,11 @@ path = "./search_pattern"
 [dependencies.platform_dirs]
 path = "./platform_dirs"
 
+[dependencies.image_utils]
+path = "./image_utils"
+
 [dependencies.chainkeys]
 path = "./chainkeys"
-
 
 [dependencies.websocket]
 version          = "0.23"
@@ -59,13 +61,8 @@ version          = "0.20.0"
 default_features = false
 features         = ["bundled"]
 
-[dependencies.image]
-version          = "0.22.1"
-default_features = false
-features         = ["jpeg", "png_codec"]
-
 [features]
-deploy_desktop = ["platform_dirs/deploy_desktop"]
+deploy = ["platform_dirs/deploy"]
 
 [dev-dependencies]
 serial_test        = "0.2.0"

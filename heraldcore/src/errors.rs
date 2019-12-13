@@ -5,7 +5,6 @@ use coretypes::{
     messages::{EmptyMessageBody, MissingInboundMessageField, MissingOutboundMessageField},
 };
 use herald_common::*;
-use image;
 use location::Location;
 use std::fmt;
 
@@ -26,7 +25,7 @@ pub enum HErr {
     /// IO Error
     IoError(std::io::Error),
     /// Error processing images
-    ImageError(image::ImageError),
+    ImageError(image_utils::ImageError),
     /// Error compiling regex
     RegexError(search_pattern::SearchPatternError),
     /// Deserialization error
@@ -122,9 +121,9 @@ herr!(std::ffi::OsString, BadPath);
 herr!(coretypes::attachments::Error, Attachment);
 herr!(std::net::AddrParseError, BadSocketAddr);
 
-impl From<image::ImageError> for HErr {
-    fn from(e: image::ImageError) -> Self {
-        use image::ImageError;
+impl From<image_utils::ImageError> for HErr {
+    fn from(e: image_utils::ImageError) -> Self {
+        use image_utils::ImageError;
         match e {
             ImageError::IoError(e) => e.into(),
             e => HErr::ImageError(e),

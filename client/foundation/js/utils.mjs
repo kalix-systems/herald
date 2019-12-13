@@ -8,6 +8,21 @@ export function unwrapOr(maybeVal, fallback) {
         return fallback;
     }
 }
+export function friendlyFileSize(byteSize) {
+    if (byteSize < 1000) {
+        return byteSize + " B";
+    }
+    if (byteSize < 10 ** 6) {
+        const kb = byteSize / 1000;
+        return Math.round(kb) + " KB";
+    }
+    if (byteSize < 10 ** 9) {
+        const mb = byteSize / 10 ** 6;
+        return Math.round(10 * mb) / 10 + " MB";
+    }
+    const gb = byteSize / 10 ** 9;
+    return Math.round(10 * gb) / gb + " GB";
+}
 export function friendlyTimestamp(msEpochTime) {
     const secondMsRatio = 1000;
     const secondsPerMinute = 60;

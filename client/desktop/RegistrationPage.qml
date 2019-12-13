@@ -64,7 +64,7 @@ Rectangle {
 
             onTextChanged: entryField.text = text.trim()
 
-            Keys.onReturnPressed: herald.registerNewUser(
+            Keys.onReturnPressed: Herald.registerNewUser(
                                       entryField.text.trim(),
                                       serverAddrTextField.text.trim(),
                                       serverPortTextField.text.trim())
@@ -90,6 +90,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             width: 80
             height: 25
+
             Text {
                 anchors.centerIn: parent
                 color: "white"
@@ -99,7 +100,8 @@ Rectangle {
                 color: "steelblue"
                 radius: 3
             }
-            onClicked: herald.registerNewUser(entryField.text.trim(),
+
+            onClicked: Herald.registerNewUser(entryField.text.trim(),
                                               serverAddrTextField.text.trim(),
                                               serverPortTextField.text.trim())
         }
@@ -118,7 +120,7 @@ Rectangle {
         Text {
             anchors.centerIn: parent
             color: "white"
-            text: "Register Device To Existing Account ▸"
+            text: qsTr("Register Device To Existing Account ▸")
         }
     }
 }

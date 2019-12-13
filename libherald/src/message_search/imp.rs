@@ -13,7 +13,7 @@ impl MessageSearch {
         std::thread::Builder::new().spawn(move || -> Option<()> {
             let mut searcher = Search::new(pattern);
 
-            while let Some(results) = ret_err!(searcher.next_page(), None) {
+            while let Some(results) = err!(searcher.next_page(), None) {
                 if results.is_empty().not() {
                     tx.send(SearchThreadUpdate::Res(results)).ok()?;
                     emit.new_data_ready();

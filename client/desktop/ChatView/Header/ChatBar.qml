@@ -50,7 +50,7 @@ ToolBar {
             id: uid
             font {
                 bold: true
-                family: CmnCfg.chatFont.name
+                family: CmnCfg.labelFont.name
                 pixelSize: 18
             }
             Layout.alignment: Qt.AlignLeft

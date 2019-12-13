@@ -1,4 +1,4 @@
-pub use crate::attachments::Attachments;
+pub use crate::attachments::{DocumentAttachments, MediaAttachments};
 pub use crate::config::Config;
 pub use crate::conversation_builder::ConversationBuilder;
 pub use crate::conversation_content::ConversationContent;

@@ -1,5 +1,5 @@
 use crate::{
-    conversations::shared::ConvUpdate, ffi, interface::*, push, ret_err, ret_none, spawn,
+    conversations::shared::ConvUpdate, err, ffi, interface::*, none, push, spawn,
     users::shared::user_in_cache,
 };
 use herald_common::UserId;
@@ -38,9 +38,9 @@ impl ConversationBuilderTrait for ConversationBuilder {
         &mut self,
         user_id: ffi::UserId,
     ) -> bool {
-        let local_id = ret_none!(self.local_id, false);
+        let local_id = none!(self.local_id, false);
 
-        let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+        let user_id: UserId = err!(user_id.as_str().try_into(), false);
 
         // don't allow users to add themselves
         if user_id == local_id {
@@ -65,13 +65,13 @@ impl ConversationBuilderTrait for ConversationBuilder {
         &mut self,
         user_id: ffi::UserId,
     ) -> bool {
-        let user_id: UserId = ret_err!(user_id.as_str().try_into(), false);
+        let user_id: UserId = err!(user_id.as_str().try_into(), false);
 
         if !self.inner.has_member(&user_id) {
             return false;
         }
 
-        let ix = ret_none!(
+        let ix = none!(
             self.inner.members().iter().position(|uid| uid == &user_id),
             false
         );
@@ -117,12 +117,12 @@ impl ConversationBuilderTrait for ConversationBuilder {
         self.model.end_reset_model();
 
         spawn!({
-            let conv = ret_err!(inner.add());
+            let conv = err!(inner.add());
 
             // send update to Conversations list
             push(ConvUpdate::BuilderFinished(conv.meta.clone()));
 
-            ret_err!(start(conv));
+            err!(start(conv));
         });
     }
 
@@ -159,7 +159,7 @@ impl ConversationBuilderTrait for ConversationBuilder {
         &self,
         index: usize,
     ) -> ffi::UserIdRef {
-        ret_none!(self.inner.members().get(index), "").as_str()
+        none!(self.inner.members().get(index), "").as_str()
     }
 }
 

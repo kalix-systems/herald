@@ -11,9 +11,9 @@ import "qrc:/imports/js/utils.mjs" as Utils
 //common desktop config avatar with overlay
 AvatarMain {
     id: configAvatar
-    iconColor: CmnCfg.palette.avatarColors[herald.config.color]
-    initials: herald.config.name[0].toUpperCase()
-    pfpPath: Utils.safeStringOrDefault(herald.config.profilePicture, "")
+    iconColor: CmnCfg.palette.avatarColors[Herald.config.color]
+    initials: Herald.config.name[0].toUpperCase()
+    pfpPath: Utils.safeStringOrDefault(Herald.config.profilePicture, "")
 
     size: 28
     Layout.alignment: Qt.AlignCenter

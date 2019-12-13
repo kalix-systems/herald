@@ -1,7 +1,6 @@
 use crate::{
-    ffi,
+    err, ffi,
     interface::{UsersSearchEmitter as Emitter, UsersSearchList as List, UsersSearchTrait},
-    ret_err,
     users::shared::{color, name, profile_picture, user_ids},
 };
 use herald_common::UserId;
@@ -132,7 +131,7 @@ impl UsersSearchTrait for UsersSearch {
                     self.clear_filter();
                     return;
                 }
-                let pattern = ret_err!(SearchPattern::new_normal(pattern));
+                let pattern = err!(SearchPattern::new_normal(pattern));
                 self.filter = Some(pattern);
                 self.inner_filter();
                 self.emit.filter_changed();

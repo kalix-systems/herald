@@ -16,7 +16,7 @@ RowLayout {
         height: chatRowLayout.textareaHeight
         Layout.fillWidth: true
         Layout.alignment: Qt.AlignBottom
-        placeholderText: "Send a message..."
+        placeholderText: qsTr("Send a message") + "..."
         wrapMode: "WrapAtWordBoundaryOrAnywhere"
         color: CmnCfg.palette.black
         selectionColor: CmnCfg.palette.highlightColor

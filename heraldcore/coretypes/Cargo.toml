@@ -7,6 +7,8 @@ edition = "2018"
 [dependencies]
 hex = "0.4.0"
 tar = "0.4.26"
+json = "0.12.0"
+unicode-segmentation = "1.6.0"
 
 [dependencies.herald_common]
 path             = "../../herald_common"
@@ -15,6 +17,9 @@ features         = ["rusqlite_"]
 
 [dependencies.platform_dirs]
 path = "../platform_dirs"
+
+[dependencies.image_utils]
+path = "../image_utils"
 
 [dependencies.search_pattern]
 path = "../search_pattern"

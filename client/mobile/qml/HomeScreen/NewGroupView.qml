@@ -7,9 +7,13 @@ import "./Controls"
 import "../Common"
 import QtGraphicalEffects 1.0
 import Qt.labs.platform 1.0
+import "qrc:/imports/Avatar"
+import "qrc:/imports/js/utils.mjs" as Utils
+import "GroupFlowComponents"
 
 Page {
     id: newGroupView
+    height: mainView.height
     header: ToolBar {
         id: conversationViewHeader
 
@@ -37,10 +41,10 @@ Page {
 
                 Label {
                     id: stateLabel
-                    text: "New group"
+                    text: qsTr("New group")
                     font {
                         pointSize: CmnCfg.chatPreviewSize
-                        family: CmnCfg.chatFont.name
+                        family: CmnCfg.labelFont.name
                     }
                     anchors.verticalCenter: parent.verticalCenter
                     color: CmnCfg.palette.iconFill
@@ -52,62 +56,57 @@ Page {
     background: Rectangle {
         color: CmnCfg.palette.white
     }
-    Rectangle {
+
+    GroupHeaderComponent {
         id: topRect
-        anchors.top: parent.top
-        height: CmnCfg.units.dp(72)
-        width: mainView.width
-        property alias profPic: groupImageLoader.imageSource
+    }
 
-        Rectangle {
-            id: cameraSection
-            width: CmnCfg.units.dp(42)
-            height: width
-            color: CmnCfg.palette.black
-            anchors.centerIn: parent
-            Loader {
-                id: groupImageLoader
-                active: false
-                z: 100
-                property string imageSource
-                anchors.fill: parent
-                sourceComponent: Image {
-                    //  source: imageSource
-                    anchors.fill: parent
-                    fillMode: Image.PreserveAspectCrop
-                }
-            }
+    Rectangle {
+        anchors.top: topRect.bottom
+        id: bigDivider
+        height: 1
+        width: parent.width
+        color: CmnCfg.palette.black
+    }
 
-            IconButton {
-                anchors.centerIn: parent
-                imageSource: "qrc:/camera-icon.svg"
-                color: CmnCfg.palette.iconFill
+    ContactsSearchComponent {
+        id: groupSelectText
+    }
 
-                tapCallback: function () {
-                    print("TODO implement group pics")
-                }
-            }
+    Button {
+        anchors.top: groupSelectText.bottom
+        anchors.topMargin: CmnCfg.margin / 2
+        anchors.right: parent.right
+        anchors.rightMargin: CmnCfg.units.dp(28)
+
+        width: CmnCfg.units.dp(60)
+        height: CmnCfg.units.dp(30)
+
+        background: Rectangle {
+            anchors.fill: parent
+            color: CmnCfg.palette.offBlack
         }
-        Rectangle {
-            anchors.topMargin: CmnCfg.units.dp(24)
-            anchors.top: cameraSection.bottom
-            width: parent.width - CmnCfg.units.dp(56)
-            height: CmnCfg.units.dp(72)
-            anchors.horizontalCenter: parent.horizontalCenter
-            TextArea {
-                id: titleText
-                anchors.top: parent.top
-                anchors.left: parent.left
-                placeholderText: "Group title"
-                leftPadding: 0
-            }
 
-            Rectangle {
-                anchors.bottom: titleText.bottom
-                id: divider
-                height: 1
-                width: parent.width
-                color: "black"
+        Text {
+            text: qsTr("CREATE")
+            anchors.centerIn: parent
+            color: CmnCfg.palette.white
+            font.family: CmnCfg.labelFont.name
+        }
+        TapHandler {
+            onTapped: {
+                if (topRect.groupTitle === "") {
+                    Herald.conversationBuilder.setTitle(qsTr("Untitled Group"))
+                } else {
+                    Herald.conversationBuilder.setTitle(topRect.groupTitle)
+                }
+
+                if (topRect.profPic !== "") {
+                    Herald.conversationBuilder.picture = topRect.profPic
+                }
+
+                Herald.conversationBuilder.finalize()
+                mainView.pop()
             }
         }
     }

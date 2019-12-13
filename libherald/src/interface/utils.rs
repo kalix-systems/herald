@@ -40,6 +40,12 @@ pub trait UtilsTrait {
         &self,
         bs: &[u8],
     ) -> bool;
+
+    fn save_file(
+        &self,
+        fpath: String,
+        target_path: String,
+    ) -> bool;
 }
 
 #[no_mangle]
@@ -87,6 +93,22 @@ pub unsafe extern "C" fn utils_is_valid_rand_id(
     let obj = &*ptr;
     let bs = { qba_slice!(bs_str, bs_len) };
     obj.is_valid_rand_id(bs)
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn utils_save_file(
+    ptr: *const Utils,
+    fpath_str: *const c_ushort,
+    fpath_len: c_int,
+    target_path_str: *const c_ushort,
+    target_path_len: c_int,
+) -> bool {
+    let obj = &*ptr;
+    let mut fpath = String::new();
+    set_string_from_utf16(&mut fpath, fpath_str, fpath_len);
+    let mut target_path = String::new();
+    set_string_from_utf16(&mut target_path, target_path_str, target_path_len);
+    obj.save_file(fpath, target_path)
 }
 
 #[derive(Clone, Copy)]

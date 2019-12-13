@@ -35,8 +35,8 @@ Item {
     property int popupWidth: 200
     property int popupHeight: 250
     /// standard config width and height
-    property int configWidth: 600
-    property int configHeight: 200
+    property int configWidth: 750
+    property int configHeight: 400
     /// standard z values
     property int overlayZ: 10
     property int topZ: 9
@@ -65,6 +65,11 @@ Item {
     }
 
     property FontLoader chatFont: metaTheme.chatFont
+    property FontLoader labelFont: metaTheme.labelFont
+
+    SystemPalette {
+        id: sysPalette
+    }
 
     Settings {
         id: settings

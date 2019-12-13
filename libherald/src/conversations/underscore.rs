@@ -1,5 +1,5 @@
 use crate::interface::{ConversationsEmitter, ConversationsList};
-use crate::{ffi, ret_err, ret_none, spawn};
+use crate::{err, ffi, none, spawn};
 use heraldcore::{
     conversation::{self, ExpirationPeriod},
     types::ConversationId,
@@ -38,7 +38,7 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> u32 {
-        ret_none!(self.color_inner(index), 0)
+        none!(self.color_inner(index), 0)
     }
 
     pub(crate) fn set_color_(
@@ -46,20 +46,20 @@ impl super::Conversations {
         index: usize,
         color: u32,
     ) -> bool {
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
 
         spawn!(
             {
                 use heraldcore::conversation::settings::*;
                 let update = SettingsUpdate::Color(color);
 
-                ret_err!(apply(&update, &cid));
-                ret_err!(send_update(update, &cid));
+                err!(apply(&update, &cid));
+                err!(send_update(update, &cid));
             },
             false
         );
 
-        ret_none!(self.set_color_inner(index, color), false);
+        none!(self.set_color_inner(index, color), false);
         true
     }
 
@@ -67,14 +67,14 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> ffi::ConversationId {
-        ret_none!(self.list.get(index), vec![]).id.to_vec()
+        none!(self.list.get(index), vec![]).id.to_vec()
     }
 
     pub(crate) fn expiration_period_(
         &self,
         index: usize,
     ) -> u8 {
-        ret_none!(
+        none!(
             self.expiration_inner(index),
             ExpirationPeriod::default() as u8
         ) as u8
@@ -87,20 +87,20 @@ impl super::Conversations {
     ) -> bool {
         let period = period.into();
 
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
 
         spawn!(
             {
                 use conversation::settings::*;
                 let update = SettingsUpdate::Expiration(period);
 
-                ret_err!(apply(&update, &cid));
-                ret_err!(send_update(update, &cid));
+                err!(apply(&update, &cid));
+                err!(send_update(update, &cid));
             },
             false
         );
 
-        ret_none!(self.set_expiration_inner(index, period), false);
+        none!(self.set_expiration_inner(index, period), false);
 
         true
     }
@@ -109,7 +109,7 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> bool {
-        ret_none!(self.muted_inner(index), true)
+        none!(self.muted_inner(index), true)
     }
 
     pub(crate) fn set_muted_(
@@ -117,14 +117,14 @@ impl super::Conversations {
         index: usize,
         muted: bool,
     ) -> bool {
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
 
         spawn!(
-            ret_err!(heraldcore::conversation::set_muted(&cid, muted)),
+            err!(heraldcore::conversation::set_muted(&cid, muted)),
             false
         );
 
-        ret_none!(self.set_muted_inner(index, muted), false);
+        none!(self.set_muted_inner(index, muted), false);
 
         true
     }
@@ -145,10 +145,10 @@ impl super::Conversations {
             return false;
         }
 
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
 
         // FIXME exception safety
-        let path = ret_err!(
+        let path = err!(
             conversation::set_picture(&cid, picture.as_ref().map(|p| p.as_str())),
             false
         );
@@ -169,7 +169,7 @@ impl super::Conversations {
         index: usize,
         title: Option<String>,
     ) -> bool {
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
         {
             let title = title.clone();
             spawn!(
@@ -177,8 +177,8 @@ impl super::Conversations {
                     use heraldcore::conversation::settings::*;
                     let update = SettingsUpdate::Title(title);
 
-                    ret_err!(apply(&update, &cid));
-                    ret_err!(send_update(update, &cid));
+                    err!(apply(&update, &cid));
+                    err!(send_update(update, &cid));
                 },
                 false
             );
@@ -192,7 +192,7 @@ impl super::Conversations {
         &self,
         index: usize,
     ) -> bool {
-        ret_none!(self.pairwise_inner(index), false)
+        none!(self.pairwise_inner(index), false)
     }
 
     pub(crate) fn remove_conversation_(
@@ -200,14 +200,14 @@ impl super::Conversations {
         index: u64,
     ) -> bool {
         let index = index as usize;
-        let cid = ret_none!(self.id(index), false);
+        let cid = none!(self.id(index), false);
 
         // cannot remove pairwise conversation!
         if self.pairwise_inner(index).unwrap_or(false) {
             return false;
         }
 
-        spawn!(ret_err!(conversation::delete_conversation(&cid)), false);
+        spawn!(err!(conversation::delete_conversation(&cid)), false);
 
         self.model.begin_remove_rows(index, index);
         self.list.remove(index);
@@ -220,7 +220,7 @@ impl super::Conversations {
         &self,
         row_index: usize,
     ) -> bool {
-        ret_none!(self.list.get(row_index), true).matched
+        none!(self.list.get(row_index), true).matched
     }
 
     pub(crate) fn filter_(&self) -> &str {
@@ -237,9 +237,9 @@ impl super::Conversations {
         }
 
         let pattern = if self.filter_regex_() {
-            ret_err!(SearchPattern::new_regex(pattern))
+            err!(SearchPattern::new_regex(pattern))
         } else {
-            ret_err!(SearchPattern::new_normal(pattern))
+            err!(SearchPattern::new_normal(pattern))
         };
 
         self.filter.replace(pattern);
@@ -259,13 +259,13 @@ impl super::Conversations {
         use_regex: bool,
     ) {
         if use_regex {
-            ret_err!(self
+            err!(self
                 .filter
                 .as_mut()
                 .map(SearchPattern::regex_mode)
                 .transpose());
         } else {
-            ret_err!(self
+            err!(self
                 .filter
                 .as_mut()
                 .map(SearchPattern::normal_mode)
@@ -295,7 +295,7 @@ impl super::Conversations {
         }
 
         if let Some(filter) = self.filter.as_mut() {
-            ret_err!(filter.set_pattern("".to_owned()));
+            err!(filter.set_pattern("".to_owned()));
         }
 
         self.emit.filter_changed();
@@ -305,7 +305,7 @@ impl super::Conversations {
         &self,
         cid: ffi::ConversationIdRef,
     ) -> i64 {
-        let conversation_id = ret_err!(ConversationId::try_from(cid), -1);
+        let conversation_id = err!(ConversationId::try_from(cid), -1);
         self.list
             .iter()
             .position(|super::Conversation { id, .. }| id == &conversation_id)

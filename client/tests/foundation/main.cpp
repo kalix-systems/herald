@@ -18,7 +18,6 @@ public:
 	qmlRegisterType<Errors>("LibHerald", 1, 0, "Errors");
 	qmlRegisterType<ConversationBuilder>("LibHerald", 1, 0, "ConversationBuilder");
 	qmlRegisterType<MessageBuilder>("LibHerald", 1, 0, "MessageBuilder");
-	qmlRegisterType<Attachments>("LibHerald", 1, 0, "Attachments");
 	qmlRegisterType<UsersSearch>("LibHerald", 1, 0, "UsersSearch");
 	qmlRegisterType<MessageSearch>("LibHerald", 1, 0, "MessageSearch");
     qmlRegisterSingletonType(QUrl("qrc:///common/CommonConfig.qml"),

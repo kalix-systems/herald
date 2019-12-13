@@ -31,17 +31,16 @@ ListView {
         // no receipt images for now
         property string proxyReceiptImage
 
-        readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
+        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                    author)]
         readonly property string timestamp: Utils.friendlyTimestamp(
                                                 insertionTime)
 
-        readonly property string authName: herald.users.nameById(author)
-        readonly property bool outbound: author === herald.config.configId
+        readonly property string authName: Herald.users.nameById(author)
+        readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
-        // column is most correct to resize for extra content
+
         anchors {
-            // This is okay as a ternary, the types are enforced by QML.
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
             rightMargin: CmnCfg.margin * 2.0

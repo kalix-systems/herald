@@ -1,6 +1,6 @@
 use crate::{
-    config::Config, conversation_builder::ConversationBuilder, conversations::Conversations,
-    errors::Errors, ffi, interface::*, message_search::MessageSearch, push_err, ret_err, spawn,
+    config::Config, conversation_builder::ConversationBuilder, conversations::Conversations, err,
+    errors::Errors, ffi, interface::*, message_search::MessageSearch, push_err, spawn,
     users::Users, users_search::UsersSearch, Loadable,
 };
 use herald_common::*;

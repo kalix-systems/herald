@@ -29,7 +29,7 @@ ToolBar {
         }
 
         Label {
-            text: "Settings"
+            text: qsTr("Settings")
             Layout.alignment: Qt.AlignCenter
             Layout.fillWidth: true
             font.pointSize: CmnCfg.chatPreviewSize

@@ -52,6 +52,15 @@
         <file>ChatView/Header/SearchTextArea.qml</file>
         <file>ChatView/Header/ChatBar.qml</file>
         <file>ChatView/ChatTextArea/js/ChatTextAreaUtils.mjs</file>
-        <file>ChatView/Popups/ImagePopup.qml</file>
+        <file>ChatView/Popups/ImageViewerPopup.qml</file>
+        <file>SideBar/popups/ConfigComponents/ConfigListItem.qml</file>
+        <file>SideBar/popups/ConfigComponents/Notifications.qml</file>
+        <file>SideBar/popups/ConfigComponents/Appearance.qml</file>
+        <file>SideBar/popups/ConfigComponents/Privacy.qml</file>
+        <file>SideBar/popups/ConfigComponents/Advanced.qml</file>
+        <file>SideBar/popups/ConfigComponents/Storage.qml</file>
+        <file>SideBar/popups/ConfigComponents/Feedback.qml</file>
+        <file>SideBar/popups/ConfigComponents/ConfSwitch.qml</file>
+        <file>SideBar/popups/ConfigComponents/ConfRadio.qml</file>
     </qresource>
 </RCC>

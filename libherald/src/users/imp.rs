@@ -5,7 +5,7 @@ impl Users {
     pub(super) fn inner_filter(&mut self) {
         for (ix, user) in self.list.iter_mut().enumerate() {
             let lock = shared::user_data().read();
-            let inner = ret_none!(lock.get(&user.id));
+            let inner = none!(lock.get(&user.id));
             let old_matched = user.matched;
             user.matched = self
                 .filter

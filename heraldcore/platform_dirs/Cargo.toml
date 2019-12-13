@@ -9,4 +9,4 @@ version = "1.2.0"
 
 [features]
 default = []
-deploy_desktop = []
+deploy = []

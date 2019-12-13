@@ -13,9 +13,9 @@ Column {
     TextArea {
         id: groupSelectText
         leftPadding: 12
-        placeholderText: "Add members"
+        placeholderText: qsTr("Add members")
         onTextChanged: {
-            herald.usersSearch.filter = groupSelectText.text
+            Herald.usersSearch.filter = groupSelectText.text
             contactPopup.popup.open()
         }
     }
@@ -29,7 +29,7 @@ Column {
 
     ComboBox {
         id: contactPopup
-        model: herald.usersSearch
+        model: Herald.usersSearch
         width: parent.width - CmnCfg.largeMargin
         anchors.horizontalCenter: parent.horizontalCenter
         height: CmnCfg.smallMargin / 2
@@ -52,7 +52,8 @@ Column {
             property var contactData: model
             height: visible ? CmnCfg.convoHeight : 0
             width: parent.width
-            visible: matched && contactData.userId !== herald.config.configId
+            visible: matched && contactData.userId !== Herald.config.configId
+
             Common.PlatonicRectangle {
                 color: "white"
                 id: contactRectangle
@@ -72,9 +73,9 @@ Column {
                     anchors.fill: parent
                     onClicked: {
                         //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
-                        herald.conversationBuilder.addMember(contactData.userId)
+                        Herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
-                        herald.usersSearch.clearFilter()
+                        Herald.usersSearch.clearFilter()
                         groupSelectText.text = ""
                     }
                 }

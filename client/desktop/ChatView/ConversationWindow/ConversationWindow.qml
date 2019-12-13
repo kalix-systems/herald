@@ -4,10 +4,9 @@ import QtQuick 2.13
 import LibHerald 1.0
 import "qrc:/imports/ChatBubble" as CB
 import "qrc:/imports/Avatar"
-import "qrc:/imports/js/utils.mjs" as Utils
 import "." as CVUtils
+import "qrc:/imports/js/utils.mjs" as Utils
 import "../../SideBar/js/ContactView.mjs" as CUtils
-import "../Popups" as Popups
 
 ListView {
     id: chatListView
@@ -36,7 +35,7 @@ ListView {
     onFlickStarted: focus = true
 
     highlightFollowsCurrentItem: false
-    cacheBuffer: chatListView.height * 3
+    cacheBuffer: chatListView.height * 5
 
     Layout.maximumWidth: parent.width
 
@@ -68,20 +67,21 @@ ListView {
         readonly property string proxyBody: body
         property string proxyReceiptImage: CUtils.receiptStatusSwitch(
                                                receiptStatus)
-        readonly property color userColor: CmnCfg.avatarColors[herald.users.colorById(
+        readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                    author)]
         readonly property string timestamp: Utils.friendlyTimestamp(
                                                 insertionTime)
 
-        readonly property bool outbound: author === herald.config.configId
+        readonly property bool outbound: author === Herald.config.configId
 
-        readonly property string authName: outbound ? herald.config.name : herald.users.nameById(
+        readonly property string authName: outbound ? Herald.config.name : Herald.users.nameById(
                                                           author)
-        readonly property string pfpUrl: outbound ? herald.config.profilePicture : herald.users.profilePictureById(
+        readonly property string pfpUrl: outbound ? Herald.config.profilePicture : Herald.users.profilePictureById(
                                                         author)
         property alias highlight: bubbleActual.highlightItem
         property bool elided: body.length !== fullBody.length
 
+        property var messageModelData: model
         anchors {
             right: outbound ? parent.right : undefined
             left: !outbound ? parent.left : undefined
@@ -102,55 +102,16 @@ ListView {
                 receiptImage: proxyReceiptImage
                 authorColor: userColor
                 elided: chatRow.elided
-            }
-        }
-
-        Component {
-            id: reply
-            CB.ReplyBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
-                authorColor: userColor
+                medAttachments: mediaAttachments
+                documentAttachments: docAttachments
+                imageAttach: mediaAttachments.length !== 0
+                docAttach: docAttachments.length !== 0
                 replyId: opMsgId
-                elided: chatRow.elided
-                //mousearea handling jump behavior
-                jumpHandler.onClicked: {
-                    const msgIndex = ownedConversation.indexById(replyId)
-                    if (msgIndex < 0)
-                        return
-
-                    const window = convWindow
-
-                    window.positionViewAtIndex(msgIndex, ListView.Center)
-                    window.highlightAnimation.target = window.itemAtIndex(
-                                msgIndex).highlight
-                    window.highlightAnimation.start()
-                }
+                reply: replyType > 0
+                maxWidth: chatListView.width * 0.66
+                messageModelData: chatRow.messageModelData
             }
         }
-
-        Component {
-            id: image
-            CB.ImageBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                receiptImage: proxyReceiptImage
-                authorName: authName
-                messageAttachments: Attachments {
-                    id: atc
-                    attachmentsMsgId: msgId
-                }
-                imageTapCallback: function () {
-                    imagePopup.sourceAtc = atc
-                    imagePopup.show()
-                }
-                authorColor: userColor
-                elided: chatRow.elided
-            }
-        }
-
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
@@ -168,19 +129,13 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            maxWidth: chatListView.width * 0.66
             color: CmnCfg.palette.lightGrey
             senderColor: userColor
             convContainer: convWindow
             highlight: matchStatus === 2
-            content: if (hasAttachments && dataSaved) {
-                         image
-                         //reply types: 0 not reply, 1 dangling, 2 known reply
-                     } else if (replyType > 0) {
-                         reply
-                     } else {
-                         std
-                     }
+            content: std
+            maxWidth: chatListView.width * 0.66
+
             ChatBubbleHover {}
         }
 

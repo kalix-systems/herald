@@ -20,10 +20,10 @@ Component {
             TextArea {
                 id: text
                 leftPadding: 12
-                placeholderText: "Enter username or display name"
+                placeholderText: qsTr("Enter username or display name")
 
                 Keys.onReturnPressed: {
-                    JS.insertContact(text, herald.users)
+                    JS.insertContact(text, Herald.users)
                     sideBarState.state = ""
                 }
             }

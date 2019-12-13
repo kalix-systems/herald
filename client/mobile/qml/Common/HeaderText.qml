@@ -4,4 +4,5 @@ import LibHerald 1.0
 
 Text {
     font.pointSize: 24
+    font.family: CmnCfg.labelFont.name
 }
