@@ -279,5 +279,3 @@ impl<K: KrpcClient> Client<K> {
         Ok(Client { inner, connection })
     }
 }
-
-// }
