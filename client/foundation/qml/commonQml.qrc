@@ -25,6 +25,13 @@
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyImageClip.qml</file>
         <file>ChatBubble/ReplyBubble/StdReply.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyElidedBody.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyFileClip.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyFileSurplus.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyMouseArea.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyTimeInfo.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyLabel.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyVerticalAccent.qml</file>
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
         <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
