@@ -10,72 +10,69 @@ import "."
 // Components that depend on dynamic scope
 import "dyn"
 
-ColumnLayout {
-    id: wrapperCol
+Rectangle {
+    id: replyWrapper
 
     // TODO move this into CmnCfg
     readonly property real imageSize: 80
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    modelData.opAuthor)]
-    property var replyId
-    property bool knownReply: modelData.replyType === 2
-    property string replyBody: knownReply ? modelData.opBody : ""
-    property var modelData
+                                                    messageModelData.opAuthor)]
+    property bool knownReply: messageModelData.replyType === 2
+    property string replyBody: knownReply ? messageModelData.opBody : ""
 
     Component.onCompleted: {
-        if (modelData.opMediaAttachments.length === 0)
+        if (messageModelData.opMediaAttachments.length === 0)
             return
 
-        JS.parseMedia(modelData, imageClip)
+        JS.parseMedia(messageModelData, imageClip)
     }
 
-    Rectangle {
-        id: replyWrapper
-        color: CmnCfg.palette.medGrey
-        Layout.margins: CmnCfg.smallMargin
+    color: CmnCfg.palette.medGrey
 
-        Layout.preferredHeight: replyWrapperCol.height
-        Layout.preferredWidth: {
-            // TODO move this and other complex layout calculations into Rust or C++
-            if (imageAttach)
-                return 300
-            if (replyElidedBody.width > messageBody.width) {
-                return Math.min(replyElidedBody.width,
-                                bubbleRoot.maxWidth) + imageSize
-            } else {
-                const labelMax = Math.max(replyLabel.width, messageLabel.width)
-                const bodyMax = Math.max(labelMax, messageBody.width)
-                return bodyMax + CmnCfg.smallMargin * 2 + imageSize
-            }
+    height: Math.max(imageClip.height, replyWrapperCol.height)
+    width: {
+        // TODO move this and other complex layout calculations into Rust or C++
+        if (imageAttach)
+            return 300
+
+        let out = 0
+
+        if (replyElidedBody.width > messageBody.width) {
+            out = replyWrapperCol.width
+        } else {
+            const labelMax = Math.max(replyLabel.width,
+                                      contentRoot.messageLabel.width)
+            const bodyMax = Math.max(labelMax, messageBody.width)
+            out = bodyMax
         }
 
-        ReplyVerticalAccent {}
-        ReplyMouseArea {}
+        return Math.min(bubbleRoot.maxWidth, out + imageClip.width)
+    }
 
-        GridLayout {
-            id: replyWrapperCol
-            width: parent.width
-            rows: 3
-            flow: GridLayout.TopToBottom
+    ReplyMouseArea {}
 
-            ReplyLabel {
-                id: replyLabel
-                Layout.alignment: Qt.AlignTop
-            }
+    ReplyVerticalAccent {}
 
-            ReplyElidedBody {
-                id: replyElidedBody
-                elideConstraint: imageClip.width
-            }
+    Column {
+        id: replyWrapperCol
+        anchors.left: parent.left
 
-            ReplyTimeInfo {}
-
-            ReplyImageClip {
-                id: imageClip
-                Layout.rowSpan: 3
-                Layout.alignment: Qt.AlignRight
-            }
+        ReplyLabel {
+            id: replyLabel
         }
+
+        ReplyElidedBody {
+            id: replyElidedBody
+            elideConstraint: imageSize
+            maximumWidth: bubbleRoot.maxWidth - imageSize
+        }
+
+        ReplyTimeInfo {}
+    }
+
+    ReplyImageClip {
+        id: imageClip
+        anchors.right: replyWrapper.right
     }
 }

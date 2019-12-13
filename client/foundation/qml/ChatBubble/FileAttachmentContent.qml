@@ -7,7 +7,7 @@ import QtGraphicalEffects 1.12
 ColumnLayout {
     id: wrapperCol
 
-    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var docParsed
 
     spacing: 0

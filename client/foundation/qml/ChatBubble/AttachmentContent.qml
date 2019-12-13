@@ -6,7 +6,7 @@ import QtGraphicalEffects 1.12
 
 ColumnLayout {
     id: wrapperCol
-    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
     property var imageTappedCallBack: function (source) {

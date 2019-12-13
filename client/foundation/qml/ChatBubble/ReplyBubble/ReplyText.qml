@@ -9,53 +9,55 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-// TODO this should be a grid layout, but this requires doing more things at the contentLoader site
-ColumnLayout {
-    id: wrapperCol
+Rectangle {
+    id: replyWrapper
 
     property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    modelData.opAuthor)]
+                                                    messageModelData.opAuthor)]
     property var replyId
-    property bool knownReply: modelData.replyType === 2
-    property string replyBody: knownReply ? modelData.opBody : ""
-    property var modelData
+    property bool knownReply: messageModelData.replyType === 2
+    property string replyBody: knownReply ? messageModelData.opBody : ""
 
-    Rectangle {
-        id: replyWrapper
-        color: CmnCfg.palette.medGrey
-        Layout.margins: CmnCfg.smallMargin
+    color: CmnCfg.palette.medGrey
 
-        Layout.preferredHeight: replyWrapperCol.height
-        Layout.preferredWidth: {
-            // TODO move this and other complex layout calculations into Rust or C++
-            if (imageAttach)
-                return 300
-            if (replyElidedBody.width > messageBody.width) {
-                return Math.min(replyElidedBody.width, bubbleRoot.maxWidth)
-            } else {
-                const labelMax = Math.max(replyLabel.width, messageLabel.width)
-                const bodyMax = Math.max(labelMax, messageBody.width)
-                return bodyMax + CmnCfg.smallMargin * 2
-            }
+    height: replyWrapperCol.height
+    width: {
+        // TODO move this and other complex layout calculations into Rust or C++
+        if (imageAttach)
+            return 300
+
+        const labelMax = Math.max(replyLabel.width,
+                                  contentRoot.messageLabel.width)
+
+        const bodyMax = Math.max(labelMax, contentRoot.messageBody.width)
+
+        if (replyElidedBody.width > contentRoot.messageBody.width) {
+            return Math.min(Math.max(replyElidedBody.width, bodyMax),
+                            bubbleRoot.maxWidth)
+        } else {
+            return bodyMax
+        }
+    }
+
+    ReplyMouseArea {}
+
+    ReplyVerticalAccent {
+        id: replyVerticalAccent
+    }
+
+    Column {
+        id: replyWrapperCol
+
+        ReplyLabel {
+            id: replyLabel
         }
 
-        ReplyVerticalAccent {}
-        ReplyMouseArea {}
-
-        ColumnLayout {
-            id: replyWrapperCol
-
-            ReplyLabel {
-                id: replyLabel
-                Layout.alignment: Qt.AlignTop
-            }
-
-            ReplyElidedBody {
-                id: replyElidedBody
-            }
-
-            ReplyTimeInfo {}
+        ReplyElidedBody {
+            id: replyElidedBody
+            maximumWidth: bubbleRoot.maxWidth
         }
+
+        ReplyTimeInfo {}
     }
 }

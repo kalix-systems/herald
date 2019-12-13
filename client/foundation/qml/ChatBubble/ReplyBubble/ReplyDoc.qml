@@ -57,8 +57,8 @@ ColumnLayout {
             ColumnLayout {
                 id: reply
                 spacing: 0
-                Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
-                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
+                Layout.maximumWidth: contentRoot.imageAttach ? 300 : contentRoot.maxWidth
+                Layout.minimumWidth: contentRoot.imageAttach ? 300 : Math.max(
                                                                   300,
                                                                   messageBody.width)
 

@@ -14,6 +14,7 @@
         <file>ButtonForm.qml</file>
         <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
+        <file>ChatBubble/Highlight.qml</file>
         <file>ChatBubble/ChatLabel.qml</file>
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/ElideHandler.qml</file>
@@ -34,7 +35,6 @@
         <file>ChatBubble/ReplyBubble/dyn/ReplyLabel.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyVerticalAccent.qml</file>
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
-        <file>ChatBubble/BubbleContent.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/ThreeImageLayout.qml</file>

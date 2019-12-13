@@ -14,7 +14,7 @@ ListView {
     width: 200
     delegate: Item {
         id: fileRow
-        width: Math.max(bubbleRoot.width - CmnCfg.smallMargin * 2, 100)
+        width: Math.max(contentRoot.width - CmnCfg.smallMargin * 2, 100)
         height: 24
         clip: true
 

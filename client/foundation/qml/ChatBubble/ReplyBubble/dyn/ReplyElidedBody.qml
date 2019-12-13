@@ -8,15 +8,10 @@ import LibHerald 1.0
 StandardTextEdit {
     text: opBodyTextMetrics.elidedText
     property real elideConstraint: 0
-    Layout.topMargin: 0
-    Layout.rightMargin: 0
-    Layout.bottomMargin: 0
-    Layout.leftMargin: 0
-    Layout.maximumWidth: bubbleRoot.maxWidth
 
     TextMetrics {
         id: opBodyTextMetrics
-        property string shortenedText: knownReply ? modelData.opBody : qsTr(
+        property string shortenedText: knownReply ? messageModelData.opBody : qsTr(
                                                         "Original message not found")
         text: shortenedText
         elideWidth: (bubbleRoot.maxWidth - elideConstraint) * 2
