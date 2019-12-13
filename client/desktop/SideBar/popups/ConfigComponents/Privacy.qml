@@ -11,8 +11,7 @@ ColumnLayout {
     RowLayout {
         Layout.fillWidth: true
         StandardLabel {
-            text: qsTr("Default message expiration time: ") + qsTr(
-                      expirationMenu.currentSelection)
+            text: qsTr("Default message expiration time: ") + expirationMenu.currentSelection
             color: "black"
             Layout.leftMargin: CmnCfg.margin
             font.pixelSize: 14
@@ -30,7 +29,7 @@ ColumnLayout {
         //TODO: THIS SHOULD COME FROM THE CONFIG MODEL
         Menu {
             id: expirationMenu
-            property string currentSelection
+            property string currentSelection: qsTr("None Selected")
             MenuItem {
                 text: qsTr("Off")
                 checkable: true
