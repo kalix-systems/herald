@@ -20,39 +20,38 @@ ColumnLayout {
     property string replyBody: knownReply ? modelData.opBody : ""
     property var modelData
 
-    spacing: 0
-
+    // spacing: 0
     Component.onCompleted: {
         if (modelData.opMediaAttachments.length === 0)
             return
 
-        imageClipLoader.sourceComponent = imageClipComponent
-        JS.parseMedia(modelData, imageClipLoader.item)
+        //   imageClipLoader.sourceComponent = imageClipComponent
+        JS.parseMedia(modelData, imageClip)
     }
 
     Rectangle {
         id: replyWrapper
         color: CmnCfg.palette.medGrey
         Layout.margins: CmnCfg.smallMargin
-        //   Layout.preferredHeight: replyWrapperCol.height
-        Layout.preferredWidth: replyWrapperCol.width
 
+        Layout.preferredHeight: replyWrapperCol.height
+        Layout.preferredWidth: replyWrapperCol.width
         ReplyVerticalAccent {}
         ReplyMouseArea {}
 
         ColumnLayout {
             id: replyWrapperCol
+            Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
+            Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
 
-            RowLayout {
+            Item {
                 id: replyRow
-
-                Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
-                Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
-                clip: true
+                Layout.preferredWidth: reply.width
 
                 ColumnLayout {
                     id: reply
                     spacing: 0
+                    anchors.left: parent.left
 
                     ReplyLabel {}
 
@@ -61,13 +60,10 @@ ColumnLayout {
                     ReplyTimeInfo {}
                 }
 
-                Loader {
-                    id: imageClipLoader
-
-                    Component {
-                        id: imageClipComponent
-                        ReplyImageClip {}
-                    }
+                ReplyImageClip {
+                    id: imageClip
+                    anchors.top: parent.top
+                    anchors.right: parent.right
                 }
             }
         }
