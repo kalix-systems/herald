@@ -1,0 +1,32 @@
+[workspace]
+
+members = [
+  "channel_ratchet",
+  "herald_common",
+  "herald_server",
+  "herald_server/server_store",
+  "herald_server/server_errors",
+  "herald_server/server_protocol",
+  "heraldcore",
+  "heraldcore/coretypes",
+  "heraldcore/coremacros",
+  "heraldcore/network_types",
+  "heraldcore/chainkeys",
+  "heraldcore/platform_dirs",
+  "heraldcore/search_pattern",
+  "heraldcore/image_utils",
+  "libherald",
+  "libherald/messages_helper",
+  "libherald/qt_bindgen",
+  "location",
+  "kcl",
+  "krpc",
+  "kson",
+  "kson/kson_derive",
+  "kson/kson_strategy",
+  "kson_channel",
+]
+
+[profile.release]
+debug = true
+lto = false
