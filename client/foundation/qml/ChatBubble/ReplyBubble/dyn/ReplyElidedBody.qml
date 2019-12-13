@@ -9,6 +9,10 @@ StandardTextEdit {
     text: opBodyTextMetrics.elidedText
     Layout.fillWidth: true
 
+    Layout.topMargin: 0
+    Layout.rightMargin: 0
+    Layout.bottomMargin: 0
+    Layout.leftMargin: 0
     TextMetrics {
         id: opBodyTextMetrics
         property string shortenedText: knownReply ? modelData.opBody : qsTr(

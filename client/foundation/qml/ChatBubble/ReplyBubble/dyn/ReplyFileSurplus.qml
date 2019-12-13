@@ -7,8 +7,7 @@ import QtQuick.Layouts 1.14
 //+ n more file count
 Text {
     id: fileSurplus
-    Layout.leftMargin: CmnCfg.smallMargin
-    Layout.topMargin: -CmnCfg.smallMargin / 2
+
     visible: fileCount > 0
     text: "+ " + fileCount + qsTr(" more")
     font.weight: Font.Light

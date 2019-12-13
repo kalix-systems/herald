@@ -33,8 +33,8 @@ ColumnLayout {
     Rectangle {
         id: replyWrapper
         color: CmnCfg.palette.medGrey
-        Layout.preferredHeight: replyWrapperCol.height
         Layout.margins: CmnCfg.smallMargin
+        Layout.preferredHeight: replyWrapperCol.height
         Layout.preferredWidth: replyWrapperCol.width
 
         ReplyVerticalAccent {}
@@ -42,13 +42,11 @@ ColumnLayout {
 
         ColumnLayout {
             id: replyWrapperCol
-            Layout.topMargin: 0
 
             RowLayout {
                 id: replyRow
                 height: reply.implicitHeight
 
-                Layout.topMargin: 0
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : messageBody.width
                 clip: true
@@ -56,7 +54,6 @@ ColumnLayout {
                 ColumnLayout {
                     id: reply
                     spacing: 0
-                    Layout.rightMargin: CmnCfg.smallMargin
 
                     ReplyLabel {}
 
@@ -67,8 +64,6 @@ ColumnLayout {
 
                 Loader {
                     id: imageClipLoader
-                    Layout.margins: CmnCfg.smallMargin
-                    Layout.leftMargin: 0
 
                     Component {
                         id: imageClipComponent

@@ -9,8 +9,7 @@ Item {
     id: fileClip
     property alias nameMetrics: nameMetrics
     property alias fileSize: fileSize
-    Layout.topMargin: CmnCfg.smallMargin
-    Layout.leftMargin: CmnCfg.smallMargin
+
     Layout.preferredHeight: fileIcon.height
 
     Image {

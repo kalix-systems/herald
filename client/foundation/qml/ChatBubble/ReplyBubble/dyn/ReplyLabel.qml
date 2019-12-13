@@ -8,8 +8,6 @@ Label {
     font.bold: true
     color: opColor
 
-    // Layout.margins: CmnCfg.smallMargin
-    // Layout.bottomMargin: 0
     Layout.preferredHeight: knownReply ? implicitHeight : 0
 
     background: Rectangle {
