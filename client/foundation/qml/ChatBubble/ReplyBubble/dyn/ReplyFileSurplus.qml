@@ -8,10 +8,10 @@ import QtQuick.Layouts 1.14
 Text {
     id: fileSurplus
 
-    visible: fileCount > 0
-    text: "+ " + fileCount + qsTr(" more")
+    visible: replyWrapper.fileCount > 0
+    text: "+ " + replyWrapper.fileCount + qsTr(" more")
     font.weight: Font.Light
     font.family: CmnCfg.chatFont.name
     color: CmnCfg.palette.darkGrey
-    font.pixelSize: 13
+    font.pixelSize: 12
 }

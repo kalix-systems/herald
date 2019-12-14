@@ -10,62 +10,63 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-ColumnLayout {
-    id: wrapperCol
+Rectangle {
+    id: replyWrapper
 
-    property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
-                                                    modelData.opAuthor)]
-    property var replyId
-    property bool knownReply: modelData.replyType === 2
-    property string replyBody: knownReply ? modelData.opBody : ""
-    property var modelData
-    property string fileCount
+                                                    messageModelData.opAuthor)]
+    property string replyBody: messageModelData.opBody
+    property int fileCount
 
-    spacing: 0
+    Component.onCompleted: replyWrapper.fileCount = JS.parseDocs(
+                               replyFileClip.nameMetrics, messageModelData,
+                               replyFileClip.fileSize, replyWrapper)
+    color: CmnCfg.palette.medGrey
+    height: replyWrapperCol.height
+    width: {
+        if (imageAttach)
+            return 300
 
-    Component.onCompleted: JS.parseDocs(replyFileClip.nameMetrics, modelData,
-                                        replyFileClip.fileSize, fileCount)
+        const rLabelWidth = replyLabel.opNameWidth
+        const labelWidth = contentRoot.unameWidth
 
-    Rectangle {
-        id: replyWrapper
-        Layout.preferredHeight: replyWrapperCol.height
-        color: CmnCfg.palette.medGrey
-        Layout.margins: CmnCfg.smallMargin
-        Layout.minimumWidth: 150
-        Layout.preferredWidth: replyWrapperCol.width
+        const bodyWidth = messageBody.width
+        const rBodyWidth = replyElidedBody.width
 
-        ReplyVerticalAccent {}
+        const stampWidth = contentRoot.messageStamps.width
+        const rTsWidth = replyTimeInfo.width
 
-        ReplyMouseArea {}
+        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
 
-        // wraps op label + op doc clip + op message body
-        ColumnLayout {
-            id: replyWrapperCol
+        const bubWidth = bubbleRoot.maxWidth
 
-            ReplyLabel {}
+        return Math.max(150, Math.min(bubbleRoot.maxWidth,
+                                      Math.max(mWidth, rWidth,
+                                               replyFileClip.width)))
+    }
 
-            // wraps op file clip
-            ReplyFileClip {
-                id: replyFileClip
-            }
+    ReplyMouseArea {}
 
-            // file +n count
-            ReplyFileSurplus {}
+    Column {
+        id: replyWrapperCol
 
-            // op message body
-            ColumnLayout {
-                id: reply
-                spacing: 0
-                Layout.maximumWidth: contentRoot.imageAttach ? 300 : contentRoot.maxWidth
-                Layout.minimumWidth: contentRoot.imageAttach ? 300 : Math.max(
-                                                                  300,
-                                                                  messageBody.width)
+        ReplyLabel {
+            id: replyLabel
+        }
 
-                ReplyElidedBody {}
+        ReplyFileClip {
+            id: replyFileClip
+        }
 
-                ReplyTimeInfo {}
-            }
+        ReplyFileSurplus {}
+        ReplyElidedBody {
+            id: replyElidedBody
+            maximumWidth: bubbleRoot.maxWidth
+        }
+
+        ReplyTimeInfo {
+            id: replyTimeInfo
         }
     }
 }

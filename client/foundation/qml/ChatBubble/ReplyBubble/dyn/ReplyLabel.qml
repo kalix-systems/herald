@@ -4,9 +4,17 @@ import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 
 Label {
-    text: knownReply ? Herald.users.nameById(messageModelData.opAuthor) : ""
-    font.bold: true
-    color: opColor
+    readonly property real opNameWidth: opNameTM.width
+    text: opNameTM.text
+    font.weight: Font.Bold
+    font.family: CmnCfg.chatFont.name
 
-    Layout.preferredHeight: knownReply ? implicitHeight : 0
+    color: opColor
+    width: bubbleRoot.width
+    horizontalAlignment: Text.AlignLeft
+
+    TextMetrics {
+        id: opNameTM
+        text: Herald.users.nameById(messageModelData.opAuthor)
+    }
 }

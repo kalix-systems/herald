@@ -8,13 +8,14 @@ import QtGraphicalEffects 1.0
 
 Rectangle {
     property real aspectRatio
-    property string imageSource
+    property url imageSource
     property int count
+
     width: 64
     height: 64
 
     clip: true
-    color: "transparent"
+
     Image {
         id: replyImage
         sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio

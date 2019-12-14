@@ -49,37 +49,38 @@ Rectangle {
         id: bubbleHighlight
     }
 
-    Rectangle {
-        id: verticalAccent
-        anchors.right: !outbound ? contentRoot.left : undefined
-        anchors.left: outbound ? contentRoot.right : undefined
-        height: contentRoot.height
-        width: CmnCfg.smallMargin / 4
-        color: authorColor
-    }
-
     Column {
         id: contentRoot
 
         // Text edit alias
-        property alias messageBody: messageBody
+        readonly property alias messageBody: messageBody
         /// User name label alias
-        property alias messageLabel: uname
+        readonly property real unameWidth: authorNameTM.width
+        // Stamps alias
+        readonly property alias messageStamps: messageStamps
 
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
         spacing: 0
-        //image component
-        Component {
-            id: image
-            AttachmentContent {}
-        }
 
-        // document component
-        Component {
-            id: doc
-            FileAttachmentContent {}
+        Label {
+            width: parent.width
+            text: authorName
+            horizontalAlignment: Text.AlignLeft
+            font.weight: Font.Bold
+            font.family: CmnCfg.chatFont.name
+
+            color: CmnCfg.palette.white
+
+            background: Rectangle {
+                color: authorColor
+            }
+
+            TextMetrics {
+                id: authorNameTM
+                text: authorName
+            }
         }
 
         //reply bubble loader
@@ -87,6 +88,10 @@ Rectangle {
             sourceComponent: {
                 if (!reply)
                     return undefined
+
+                if (replyType === 1) {
+                    return replyDanglingContent
+                }
 
                 const hasDoc = messageModelData.opDocAttachments.length > 0
                 const hasMedia = messageModelData.opMediaAttachments.length > 0
@@ -105,21 +110,19 @@ Rectangle {
             // reply bubble if there is doc file content
             Component {
                 id: replyHybridContent
-                ReplyHybrid {
-                    maxWidth: contentRoot.maxWidth
-                    replyId: contentRoot.replyId
-                    modelData: contentRoot.messageModelData
-                }
+                ReplyHybrid {}
+            }
+
+            // reply bubble if there is doc file content
+            Component {
+                id: replyDanglingContent
+                ReplyDangling {}
             }
 
             // reply bubble if there is doc file content
             Component {
                 id: replyDocContent
-                ReplyDoc {
-                    maxWidth: contentRoot.maxWidth
-                    replyId: contentRoot.replyId
-                    modelData: contentRoot.messageModelData
-                }
+                ReplyDoc {}
             }
 
             // reply media bubble if there is media file content
@@ -131,18 +134,8 @@ Rectangle {
             // reply bubble if there is no doc file content
             Component {
                 id: replyContent
-                ReplyText {
-                    // maxWidth: bubbleRoot.maxWidth
-                    replyId: bubbleRoot.replyId
-                }
+                ReplyText {}
             }
-        }
-
-        //author name
-        ChatLabel {
-            id: uname
-            senderName: authorName
-            senderColor: authorColor
         }
 
         //media and file column loader
@@ -150,11 +143,22 @@ Rectangle {
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined
+
+                //image component
+                Component {
+                    id: image
+                    AttachmentContent {}
+                }
             }
 
             Loader {
                 id: fileLoader
                 sourceComponent: docAttach ? doc : undefined
+                // document component
+                Component {
+                    id: doc
+                    FileAttachmentContent {}
+                }
             }
         }
 
@@ -167,6 +171,8 @@ Rectangle {
 
         ElideHandler {}
 
-        StandardStamps {}
+        StandardStamps {
+            id: messageStamps
+        }
     }
 }

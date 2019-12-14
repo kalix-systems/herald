@@ -22,6 +22,7 @@
         <file>ChatBubble/FourImageLayout.qml</file>
         <file>ChatBubble/MultiImageLayout.qml</file>
         <file>ChatBubble/OneImageLayout.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyDangling.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyImageClip.qml</file>

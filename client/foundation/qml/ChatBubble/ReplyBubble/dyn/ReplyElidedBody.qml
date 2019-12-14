@@ -11,9 +11,7 @@ StandardTextEdit {
 
     TextMetrics {
         id: opBodyTextMetrics
-        property string shortenedText: knownReply ? messageModelData.opBody : qsTr(
-                                                        "Original message not found")
-        text: shortenedText
+        text: messageModelData.opBody
         elideWidth: (bubbleRoot.maxWidth - elideConstraint) * 2
         elide: Text.ElideRight
     }

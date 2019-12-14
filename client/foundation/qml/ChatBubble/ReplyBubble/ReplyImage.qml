@@ -15,11 +15,9 @@ Rectangle {
 
     // TODO move this into CmnCfg
     readonly property real imageSize: 80
-    property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
-    property bool knownReply: messageModelData.replyType === 2
-    property string replyBody: knownReply ? messageModelData.opBody : ""
+    property string replyBody: messageModelData.opBody
 
     Component.onCompleted: {
         if (messageModelData.opMediaAttachments.length === 0)
@@ -36,23 +34,28 @@ Rectangle {
         if (imageAttach)
             return 300
 
-        let out = 0
+        const rLabelWidth = replyLabel.opNameWidth
+        const labelWidth = contentRoot.unameWidth
 
-        if (replyElidedBody.width > messageBody.width) {
-            out = replyWrapperCol.width
+        const bodyWidth = messageBody.width
+        const rBodyWidth = replyElidedBody.width
+
+        const stampWidth = contentRoot.messageStamps.width
+        const rTsWidth = replyTimeInfo.width
+
+        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+
+        const bubWidth = bubbleRoot.maxWidth
+
+        if ((mWidth - rWidth) < 80) {
+            return Math.min(bubWidth, rWidth + imageClip.width)
         } else {
-            const labelMax = Math.max(replyLabel.width,
-                                      contentRoot.messageLabel.width)
-            const bodyMax = Math.max(labelMax, messageBody.width)
-            out = bodyMax
+            return Math.min(bubWidth, mWidth)
         }
-
-        return Math.min(bubbleRoot.maxWidth, out + imageClip.width)
     }
 
     ReplyMouseArea {}
-
-    ReplyVerticalAccent {}
 
     Column {
         id: replyWrapperCol
@@ -68,7 +71,9 @@ Rectangle {
             maximumWidth: bubbleRoot.maxWidth - imageSize
         }
 
-        ReplyTimeInfo {}
+        ReplyTimeInfo {
+            id: replyTimeInfo
+        }
     }
 
     ReplyImageClip {

@@ -6,9 +6,6 @@ import LibHerald 1.0
 // Don't use this outside of the ReplyBubble directory
 MouseArea {
     anchors.fill: replyWrapper
-
     z: CmnCfg.overlayZ
-    enabled: knownReply ? true : false
-
     onClicked: JS.jumpHandler(replyId, ownedConversation, convWindow)
 }

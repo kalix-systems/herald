@@ -12,12 +12,9 @@ import "dyn"
 Rectangle {
     id: replyWrapper
 
-    property real maxWidth: Math.min(parent.maxWidth, 600)
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
-    property var replyId
-    property bool knownReply: messageModelData.replyType === 2
-    property string replyBody: knownReply ? messageModelData.opBody : ""
+    property string replyBody: messageModelData.opBody
 
     color: CmnCfg.palette.medGrey
 
@@ -27,24 +24,24 @@ Rectangle {
         if (imageAttach)
             return 300
 
-        const labelMax = Math.max(replyLabel.width,
-                                  contentRoot.messageLabel.width)
+        const rLabelWidth = replyLabel.opNameWidth
+        const labelWidth = contentRoot.unameWidth
 
-        const bodyMax = Math.max(labelMax, contentRoot.messageBody.width)
+        const bodyWidth = messageBody.width
+        const rBodyWidth = replyElidedBody.width
 
-        if (replyElidedBody.width > contentRoot.messageBody.width) {
-            return Math.min(Math.max(replyElidedBody.width, bodyMax),
-                            bubbleRoot.maxWidth)
-        } else {
-            return bodyMax
-        }
+        const stampWidth = contentRoot.messageStamps.width
+        const rTsWidth = replyTimeInfo.width
+
+        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+
+        const bubWidth = bubbleRoot.maxWidth
+
+        return Math.min(bubWidth, Math.max(rWidth, mWidth))
     }
 
     ReplyMouseArea {}
-
-    ReplyVerticalAccent {
-        id: replyVerticalAccent
-    }
 
     Column {
         id: replyWrapperCol
@@ -58,6 +55,8 @@ Rectangle {
             maximumWidth: bubbleRoot.maxWidth
         }
 
-        ReplyTimeInfo {}
+        ReplyTimeInfo {
+            id: replyTimeInfo
+        }
     }
 }
