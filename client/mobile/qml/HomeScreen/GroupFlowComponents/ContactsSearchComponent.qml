@@ -63,8 +63,8 @@ Column {
                 iconColor: CmnCfg.palette.avatarColors[contactData.color]
                 anchors.verticalCenter: parent.verticalCenter
                 initials: Utils.initialize(contactData.name)
-                size: CmnCfg.units.dp(36)
-                avatarHeight: CmnCfg.units.dp(36)
+                size: CmnCfg.units.dp(48)
+                avatarHeight: CmnCfg.units.dp(48)
 
                 anchors {
                     right: parent.right
@@ -74,8 +74,8 @@ Column {
 
                 labelComponent: ConversationLabel {
                     contactName: contactData.name
-                    labelColor: CmnCfg.palette.offBlack
-                    labelSize: 14
+                    labelColor: CmnCfg.palette.black
+                    labelSize: 8
                     lastBody: "@" + contactData.userId
                 }
             }

@@ -39,7 +39,7 @@ ToolBar {
                 id: stateLabel
                 text: qsTr("Conversations")
                 font {
-                    pointSize: CmnCfg.chatPreviewSize
+                    pixelSize: CmnCfg.chatPreviewSize
                     family: CmnCfg.labelFont.name
                     bold: true
                 }

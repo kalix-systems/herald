@@ -37,8 +37,8 @@ Rectangle {
             iconColor: CmnCfg.avatarColors[colorCode]
             anchors.verticalCenter: parent.verticalCenter
             initials: Utils.initialize(title)
-            size: CmnCfg.units.dp(36)
-            avatarHeight: CmnCfg.units.dp(36)
+            size: CmnCfg.units.dp(56)
+            avatarHeight: CmnCfg.units.dp(48)
 
             anchors {
                 right: parent.right

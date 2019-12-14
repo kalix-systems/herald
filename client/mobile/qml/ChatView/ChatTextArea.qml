@@ -22,7 +22,7 @@ RowLayout {
         selectionColor: CmnCfg.palette.highlightColor
 
         font {
-            pointSize: CmnCfg.chatPreviewSize
+            pixelSize: CmnCfg.chatPreviewSize
             family: CmnCfg.chatFont.name
         }
     }
