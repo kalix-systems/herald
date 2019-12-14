@@ -9,14 +9,17 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Page {
     id: replyWrapper
 
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
 
-    color: CmnCfg.palette.medGrey
+    background: Rectangle {
+        color: CmnCfg.palette.medGrey
+        ReplyMouseArea {}
+    }
 
     height: replyWrapperCol.height
     width: {
@@ -38,21 +41,21 @@ Rectangle {
 
         const bubWidth = bubbleRoot.maxWidth
 
-        return Math.min(bubWidth, Math.max(rWidth, mWidth))
+        return Math.min(bubWidth, Math.max(rWidth,
+                                           mWidth) + CmnCfg.smallMargin * 2)
     }
-
-    ReplyMouseArea {}
 
     Column {
         id: replyWrapperCol
-
+        spacing: CmnCfg.smallMargin
+        padding: CmnCfg.smallMargin
         ReplyLabel {
             id: replyLabel
         }
 
         ReplyElidedBody {
             id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth
+            maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 2
         }
 
         ReplyTimeInfo {

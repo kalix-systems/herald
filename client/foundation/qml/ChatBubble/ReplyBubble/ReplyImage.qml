@@ -49,9 +49,10 @@ Rectangle {
         const bubWidth = bubbleRoot.maxWidth
 
         if ((mWidth - rWidth) < 80) {
-            return Math.min(bubWidth, rWidth + imageClip.width)
+            return Math.min(bubWidth,
+                            rWidth + imageClip.width + CmnCfg.smallMargin * 4)
         } else {
-            return Math.min(bubWidth, mWidth)
+            return Math.min(bubWidth, mWidth + CmnCfg.smallMargin * 4)
         }
     }
 
@@ -60,6 +61,9 @@ Rectangle {
     Column {
         id: replyWrapperCol
         anchors.left: parent.left
+
+        spacing: CmnCfg.smallMargin
+        padding: CmnCfg.smallMargin
 
         ReplyLabel {
             id: replyLabel
@@ -79,5 +83,7 @@ Rectangle {
     ReplyImageClip {
         id: imageClip
         anchors.right: replyWrapper.right
+        anchors.rightMargin: CmnCfg.smallMargin
+        anchors.verticalCenter: parent.verticalCenter
     }
 }

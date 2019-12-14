@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 
 Row {
-    spacing: 2
+    // spacing: 2
     Label {
         id: timestamp
         font.pixelSize: 10

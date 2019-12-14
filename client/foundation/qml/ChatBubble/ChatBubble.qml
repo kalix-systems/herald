@@ -5,7 +5,7 @@ import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
 
-Rectangle {
+Page {
     id: bubbleRoot
 
     property real defaultWidth
@@ -41,17 +41,38 @@ Rectangle {
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
 
-    color: bubbleColor
     width: contentRoot.width
-    height: contentRoot.height
+    height: contentRoot.height + implicitHeaderHeight
+    background: Rectangle {
+        color: bubbleColor
+        anchors.fill: parent
+    }
 
     Highlight {
         id: bubbleHighlight
     }
 
+    header: Label {
+        id: authorLabel
+        text: authorName
+        horizontalAlignment: Text.AlignLeft
+        font.weight: Font.Bold
+        font.family: CmnCfg.chatFont.name
+        padding: CmnCfg.smallMargin / 2
+        color: CmnCfg.palette.white
+
+        background: Rectangle {
+            color: authorColor
+        }
+
+        TextMetrics {
+            id: authorNameTM
+            text: authorName
+        }
+    }
+
     Column {
         id: contentRoot
-
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
@@ -62,26 +83,11 @@ Rectangle {
         // all messages are un-expanded on completion
         Component.onCompleted: bubbleRoot.expanded = false
 
-        spacing: 0
-
-        Label {
-            width: parent.width
-            text: authorName
-            horizontalAlignment: Text.AlignLeft
-            font.weight: Font.Bold
-            font.family: CmnCfg.chatFont.name
-
-            color: CmnCfg.palette.white
-
-            background: Rectangle {
-                color: authorColor
-            }
-
-            TextMetrics {
-                id: authorNameTM
-                text: authorName
-            }
-        }
+        spacing: CmnCfg.smallMargin
+        padding: CmnCfg.smallMargin
+        // anchors.horizontalCenter: parent.horizontalCenter
+        //  leftPadding: CmnCfg.smallMargin
+        //  rightPadding: CmnCfg.smallMargin
 
         //reply bubble loader
         Loader {
@@ -169,10 +175,10 @@ Rectangle {
                                                        bubbleRoot.maxWidth, 600)
         }
 
-        ElideHandler {}
-
         StandardStamps {
             id: messageStamps
         }
+
+        ElideHandler {}
     }
 }
