@@ -44,8 +44,10 @@ Page {
     width: contentRoot.width
     height: contentRoot.height + implicitHeaderHeight
     background: Rectangle {
-        color: bubbleColor
+        color: CmnCfg.palette.white
         anchors.fill: parent
+        border.color: "black"
+        border.width: 1
     }
 
     Highlight {
@@ -58,11 +60,14 @@ Page {
         horizontalAlignment: Text.AlignLeft
         font.weight: Font.Bold
         font.family: CmnCfg.chatFont.name
-        padding: CmnCfg.smallMargin / 2
+        padding: CmnCfg.smallMargin / 4
         color: CmnCfg.palette.white
+        leftPadding: CmnCfg.smallMargin / 2
 
         background: Rectangle {
             color: authorColor
+            border.color: Qt.darker(color, 1.3)
+            border.width: 1
         }
 
         TextMetrics {

@@ -16,12 +16,39 @@ Page {
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
 
+    height: implicitHeaderHeight + replyWrapperCol.height
     background: Rectangle {
-        color: CmnCfg.palette.medGrey
+        color: CmnCfg.palette.lightGrey
+        anchors.fill: parent
+        border.color: "black"
+        border.width: 1
         ReplyMouseArea {}
     }
 
-    height: replyWrapperCol.height
+    header: Label {
+        id: replyLabel
+        readonly property real opNameWidth: opNameTM.width
+        text: opNameTM.text
+        font.weight: Font.Bold
+        font.family: CmnCfg.chatFont.name
+
+        padding: CmnCfg.smallMargin / 2
+        color: CmnCfg.palette.white
+        horizontalAlignment: Text.AlignLeft
+
+        background: Rectangle {
+            color: opColor
+            border.color: Qt.darker(color, 1.5)
+            border.width: 1
+        }
+
+        TextMetrics {
+            id: opNameTM
+            text: Herald.users.nameById(messageModelData.opAuthor)
+        }
+    }
+
+    // height: replyWrapperCol.height
     width: {
         // TODO move this and other complex layout calculations into Rust or C++
         if (imageAttach)
@@ -49,10 +76,10 @@ Page {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
         padding: CmnCfg.smallMargin
-        ReplyLabel {
-            id: replyLabel
-        }
 
+        //        ReplyLabel {
+        //            id: replyLabel
+        //        }
         ReplyElidedBody {
             id: replyElidedBody
             maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 2

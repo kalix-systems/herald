@@ -39,6 +39,7 @@ ListView {
         readonly property string authName: Herald.users.nameById(author)
         readonly property bool outbound: author === Herald.config.configId
         readonly property bool elided: body.length !== fullBody.length
+        property var messageModelData: model
 
         anchors {
             right: outbound ? parent.right : undefined
@@ -47,23 +48,20 @@ ListView {
             leftMargin: CmnCfg.margin * 2.0
         }
 
-        Component {
-            id: std
-            CB.StandardBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                authorName: authName
-                receiptImage: proxyReceiptImage
-                authorColor: userColor
-                elided: containerCol.elided
-            }
-        }
-
+        //        Component {
+        //            id: std
+        //            CB.StandardBubble {
+        //                body: proxyBody
+        //                friendlyTimestamp: timestamp
+        //                authorName: authName
+        //                receiptImage: proxyReceiptImage
+        //                authorColor: userColor
+        //                elided: containerCol.elided
+        //            }
+        //        }
         CB.ChatBubble {
-            maxWidth: chatListView.width * 0.66
-            color: CmnCfg.palette.lightGrey
-            senderColor: userColor
-            content: std
+            defaultWidth: chatListView.width * 0.66
+            messageModelData: containerCol.messageModelData
             convContainer: parent
         }
     }
