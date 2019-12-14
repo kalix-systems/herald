@@ -134,20 +134,67 @@ impl KrpcServer for Server {
                 Resp::Success
             }
             Req::Subscribe(t) => {
-                let mut topics = self.topics.lock().await;
-                let mut subscriptions = self.subscriptions.lock().await;
-                topics.entry(t).or_insert(HashSet::new()).insert(*user);
-                subscriptions
-                    .entry(*user)
-                    .or_insert(HashSet::new())
-                    .insert(t);
-                Resp::Success
+                let members = {
+                    let mut topics = self.topics.lock().await;
+                    let mut subscriptions = self.subscriptions.lock().await;
+                    subscriptions
+                        .entry(*user)
+                        .or_insert(HashSet::new())
+                        .insert(t);
+
+                    let set = topics.entry(t).or_insert(HashSet::new());
+                    set.insert(*user);
+                    set.clone()
+                };
+
+                let mut senders = Vec::with_capacity(members.len());
+                {
+                    let sess = self.sessions.lock().await;
+                    for member in &members {
+                        if let Some(s) = sess.get(member) {
+                            senders.push(s.clone());
+                        }
+                    }
+                }
+
+                for s in &mut senders {
+                    s.send(Push::UserJoined(t, *user))
+                        .await
+                        .expect("failed to send user joined update");
+                }
+
+                Resp::Members(members.clone())
             }
             Req::Unsubscribe(t) => {
-                let mut topics = self.topics.lock().await;
-                let mut subscriptions = self.subscriptions.lock().await;
-                subscriptions.get_mut(user).map(|ts| ts.remove(&t));
-                topics.get_mut(&t).map(|s| s.remove(user));
+                let members = {
+                    let mut topics = self.topics.lock().await;
+                    let mut subscriptions = self.subscriptions.lock().await;
+                    subscriptions.get_mut(user).map(|s| s.remove(&t));
+
+                    topics
+                        .get_mut(&t)
+                        .map(|s| {
+                            s.remove(user);
+                            s.clone()
+                        })
+                        .unwrap_or_default()
+                };
+
+                let mut senders = Vec::with_capacity(members.len());
+                {
+                    let sess = self.sessions.lock().await;
+                    for member in &members {
+                        if let Some(s) = sess.get(member) {
+                            senders.push(s.clone());
+                        }
+                    }
+                }
+
+                for s in &mut senders {
+                    s.send(Push::UserLeft(t, *user))
+                        .await
+                        .expect("failed to send user joined update");
+                }
                 Resp::Success
             }
         }
@@ -170,7 +217,7 @@ impl KrpcServer for Server {
 }
 
 struct ClientInner {
-    log: Mutex<HashMap<Topic, Vec<Push>>>,
+    log: Mutex<HashMap<Topic, Vec<(User, Bytes)>>>,
     members: Mutex<HashMap<Topic, HashSet<User>>>,
 }
 
@@ -210,6 +257,17 @@ impl KrpcClient for ClientInner {
         &self,
         push: Self::Push,
     ) -> Self::PushAck {
+        match push {
+            Push::UserJoined(t, u) => {
+                self.members.lock().await.entry(t).or_default().insert(u);
+            }
+            Push::UserLeft(t, u) => {
+                self.members.lock().await.get_mut(&t).map(|m| m.remove(&u));
+            }
+            Push::NewMessage(t, u, b) => {
+                self.log.lock().await.entry(t).or_default().push((u, b));
+            }
+        }
     }
 
     async fn on_close(&self) {}
