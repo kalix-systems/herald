@@ -5,7 +5,7 @@ use futures::{
 };
 use kson::prelude::*;
 use location::*;
-use std::{error::Error, fmt::Debug, io::Error as IOErr, net::SocketAddr, sync::Arc};
+use std::{error::Error, fmt::Debug, io::Error as IOErr, net::SocketAddr, ops::Deref, sync::Arc};
 use thiserror::Error;
 
 #[async_trait]
@@ -101,7 +101,7 @@ where
                 let bytes = kson::to_vec(&push);
 
                 push_tx.write_all(&bytes).await?;
-                push_tx.finish();
+                push_tx.finish().await?;
 
                 let ack_bytes = push_rx.read_to_end(S::MAX_ACK_SIZE).await?;
                 let ack = kson::from_bytes(ack_bytes.into())?;
@@ -140,7 +140,7 @@ where
     Ok(())
 }
 
-pub async fn serve<Server: KrpcServer>(
+pub async fn serve_static<Server: KrpcServer>(
     server: &'static Server,
     endpoint_config: quinn_proto::EndpointConfig,
     server_config: quinn::ServerConfig,
@@ -177,6 +177,43 @@ pub async fn serve<Server: KrpcServer>(
     Ok(())
 }
 
+pub async fn serve_arc<Server: KrpcServer + Send + 'static>(
+    server: Arc<Server>,
+    endpoint_config: quinn_proto::EndpointConfig,
+    server_config: quinn::ServerConfig,
+    socket: &SocketAddr,
+) -> Result<(), KrpcError<Server::InitError>> {
+    let mut endpoint_builder = quinn::EndpointBuilder::new(endpoint_config);
+    endpoint_builder.listen(server_config);
+    let (driver, _endpoint, listener) = endpoint_builder.bind(socket)?;
+
+    let serve_conns = listener.for_each(move |conn| {
+        tokio::spawn({
+            let server = server.clone();
+            async move {
+                let quinn::NewConnection {
+                    driver,
+                    connection,
+                    bi_streams,
+                    ..
+                } = conn.await?;
+
+                future::try_join(
+                    driver.map_err(|e| e.into()),
+                    handle_conn(server.deref(), connection, bi_streams),
+                )
+                .map_ok(drop)
+                .await
+            }
+                .unwrap_or_else(|e| eprintln!("{}", e))
+        });
+        future::ready(())
+    });
+
+    future::try_join(driver, serve_conns.map(Ok)).await?;
+
+    Ok(())
+}
 #[async_trait]
 pub trait KrpcClient: Send + Sync + Sized + 'static {
     const MAX_CONCURRENT_REQS: usize;
@@ -204,6 +241,12 @@ pub trait KrpcClient: Send + Sync + Sized + 'static {
         push: Self::Push,
     ) -> Self::PushAck;
 
+    async fn on_resp(
+        &self,
+        req: &Self::Req,
+        resp: &Self::Resp,
+    ) -> Result<(), KrpcError<Self::InitError>>;
+
     async fn on_close(&self);
 }
 
@@ -218,6 +261,14 @@ impl<K: KrpcClient> Drop for Client<K> {
             let c = self.inner.clone();
             async move { c.on_close().await }
         });
+    }
+}
+
+impl<K: KrpcClient> Deref for Client<K> {
+    type Target = Arc<K>;
+
+    fn deref(&self) -> &Arc<K> {
+        &self.inner
     }
 }
 
@@ -255,10 +306,12 @@ impl<K: KrpcClient> Client<K> {
                 let k = k.clone();
                 async move {
                     let (mut tx, rx) = conn?;
+
                     let push_bytes = rx.read_to_end(K::MAX_PUSH_SIZE).await?;
                     let push = kson::from_bytes(push_bytes.into())?;
 
                     let ack = k.handle_push(push).await;
+
                     let ack_bytes = kson::to_vec(&ack);
                     tx.write_all(&ack_bytes).await?;
                     tx.finish().await?;
@@ -279,7 +332,10 @@ impl<K: KrpcClient> Client<K> {
         let (mut tx, rx) = self.connection.open_bi().await?;
         let req_bytes = kson::to_vec(req);
         tx.write_all(&req_bytes).await?;
+        tx.finish().await?;
         let resp_bytes = rx.read_to_end(K::MAX_RESP_SIZE).await?;
-        Ok(kson::from_bytes(resp_bytes.into())?)
+        let resp = kson::from_bytes(resp_bytes.into())?;
+        self.on_resp(req, &resp).await?;
+        Ok(resp)
     }
 }
