@@ -4,8 +4,8 @@
     <title>download-icon</title>
     <desc>Created with Sketch.</desc>
     <g id="download-icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <polygon id="Path" points="0 0 24 0 24 24 0 24"></polygon>
-        <polygon id="Path" fill="#000000" fill-rule="nonzero" points="5 18.5 5 20.5 19 20.5 19 18.5"></polygon>
-        <polygon id="Path" fill="#000000" fill-rule="nonzero" transform="translate(12.000000, 10.000000) scale(1, -1) translate(-12.000000, -10.000000) " points="5 10.5 9 10.5 9 16.5 15 16.5 15 10.5 19 10.5 12 3.5"></polygon>
+        <polygon id="Path" points="0 1.13686838e-13 24 1.13686838e-13 24 24 0 24"></polygon>
+        <path d="M13,13 L13,3 L11,3 L11,13 L11,15 L12,17 L13,15 L13,13 Z M4,19 L4,21 L20,21 L20,19 L4,19 Z" id="Shape" fill="#000000" fill-rule="nonzero"></path>
+        <path d="M9.54903679,8.35832611 L9.54803679,14.2573261 L15.4490368,14.2583261 L15.4490368,15.2583261 L8.64903679,15.2583261 L8.64803679,15.1573261 L8.54903679,15.1583261 L8.54903679,8.35832611 L9.54903679,8.35832611 Z" id="Combined-Shape" stroke="#000000" stroke-width="0.8" fill="#000000" transform="translate(11.999037, 11.808326) rotate(-45.000000) translate(-11.999037, -11.808326) "></path>
     </g>
 </svg>
