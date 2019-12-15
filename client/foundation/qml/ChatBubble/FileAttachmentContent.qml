@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import QtGraphicalEffects 1.12
 
-ColumnLayout {
+Column {
     id: wrapperCol
 
     property real maxWidth: Math.min(contentRoot.maxWidth, 600)
@@ -12,35 +12,16 @@ ColumnLayout {
 
     spacing: 0
 
-    Component.onCompleted: {
-        if (documentAttachments.length === 0) {
-            return
-        }
-
-        JSON.parse(documentAttachments).forEach(function (doc) {
-            docModel.append(doc)
-        })
-
-        docLoader.sourceComponent = docList
-    }
-
-    Loader {
-        Layout.rightMargin: CmnCfg.smallMargin
-        Layout.leftMargin: CmnCfg.smallMargin
-        Layout.topMargin: CmnCfg.smallMargin
-        Layout.bottomMargin: CmnCfg.smallMargin * 2
-        id: docLoader
-    }
+    Component.onCompleted: JSON.parse(documentAttachments).forEach(
+                               function (doc) {
+                                   docModel.append(doc)
+                               })
 
     ListModel {
         id: docModel
     }
 
-    Component {
-        id: docList
-        DocFileItem {
-            height: 20 * docModel.count
-            model: docModel
-        }
+    DocFileItem {
+        model: docModel
     }
 }

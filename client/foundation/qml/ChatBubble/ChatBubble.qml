@@ -5,7 +5,7 @@ import LibHerald 1.0
 import "./ReplyBubble"
 import "../js/utils.mjs" as Utils
 
-Page {
+Pane {
     id: bubbleRoot
 
     property real defaultWidth
@@ -41,38 +41,43 @@ Page {
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
 
-    width: contentRoot.width
-    height: contentRoot.height + implicitHeaderHeight
+    contentWidth: contentRoot.width
+    contentHeight: contentRoot.height
+    padding: CmnCfg.smallMargin
     background: Rectangle {
+        id: background
         color: CmnCfg.palette.white
         anchors.fill: parent
         border.color: "black"
         border.width: 1
-    }
+        Label {
+            id: authorLabel
+            text: authorName
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            horizontalAlignment: Text.AlignLeft
+            font.weight: Font.Bold
+            font.family: CmnCfg.chatFont.name
+            padding: CmnCfg.smallMargin / 4
+            color: CmnCfg.palette.white
 
-    Highlight {
-        id: bubbleHighlight
-    }
+            leftPadding: CmnCfg.smallMargin / 2
+            background: Rectangle {
+                color: authorColor
+                border.color: Qt.darker(color, 1.3)
+                border.width: 1
+            }
 
-    header: Label {
-        id: authorLabel
-        text: authorName
-        horizontalAlignment: Text.AlignLeft
-        font.weight: Font.Bold
-        font.family: CmnCfg.chatFont.name
-        padding: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.white
-        leftPadding: CmnCfg.smallMargin / 2
-
-        background: Rectangle {
-            color: authorColor
-            border.color: Qt.darker(color, 1.3)
-            border.width: 1
+            TextMetrics {
+                id: authorNameTM
+                text: authorName
+            }
         }
 
-        TextMetrics {
-            id: authorNameTM
-            text: authorName
+        Highlight {
+            id: bubbleHighlight
+            z: background.z - 1
         }
     }
 
@@ -89,10 +94,7 @@ Page {
         Component.onCompleted: bubbleRoot.expanded = false
 
         spacing: CmnCfg.smallMargin
-        padding: CmnCfg.smallMargin
-        // anchors.horizontalCenter: parent.horizontalCenter
-        //  leftPadding: CmnCfg.smallMargin
-        //  rightPadding: CmnCfg.smallMargin
+        topPadding: authorLabel.height
 
         //reply bubble loader
         Loader {
@@ -151,6 +153,7 @@ Page {
 
         //media and file column loader
         Column {
+            spacing: CmnCfg.smallMargin
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined

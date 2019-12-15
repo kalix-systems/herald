@@ -10,7 +10,7 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Page {
     id: replyWrapper
 
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
@@ -25,70 +25,81 @@ Rectangle {
                                               replyFileClip.fileSize, fileCount)
         JS.parseMedia(messageModelData, imageClip)
     }
-    color: CmnCfg.palette.medGrey
-    height: replyWrapperCol.height
-    width: {
-        if (imageAttach)
-            return 300
 
-        const rLabelWidth = replyLabel.opNameWidth
-        const labelWidth = contentRoot.unameWidth
+    padding: CmnCfg.smallMargin
 
-        const bodyWidth = messageBody.width
-        const rBodyWidth = replyElidedBody.width
+    background: ReplyBackground {}
 
-        const stampWidth = contentRoot.messageStamps.width
-        const rTsWidth = replyTimeInfo.width
-
-        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
-
-        const bubWidth = bubbleRoot.maxWidth
-
-        const docWidth = Math.max(
-                           150, Math.min(
-                               bubbleRoot.maxWidth,
-                               Math.max(mWidth, rWidth,
-                                        replyFileClip.width + imageClip.width)))
-
-        let imageWidth
-        if ((mWidth - rWidth) < 80) {
-            imageWidth = Math.min(bubWidth, rWidth + imageClip.width)
-        } else {
-            imageWidth = Math.min(bubWidth, mWidth)
-        }
-
-        return Math.max(docWidth, imageWidth)
+    header: ReplyLabel {
+        id: replyLabel
     }
+    contentHeight: wrapRow.implicitHeight
+    contentWidth: wrapRow.implicitWidth
 
-    ReplyMouseArea {}
+    Row {
+        id: wrapRow
+        spacing: CmnCfg.smallMargin
 
-    Column {
-        id: replyWrapperCol
+        Column {
+            id: replyWrapperCol
+            spacing: CmnCfg.smallMargin
 
-        ReplyLabel {
-            id: replyLabel
+            width: {
+
+                if (imageAttach)
+                    return 300 - imageClip.width
+
+                const rLabelWidth = replyLabel.opNameWidth
+                const labelWidth = contentRoot.unameWidth
+
+                const bodyWidth = messageBody.width
+                const rBodyWidth = replyElidedBody.width
+
+                const stampWidth = contentRoot.messageStamps.width
+                const rTsWidth = replyTimeInfo.width
+
+                const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+                const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+
+                const bubWidth = bubbleRoot.maxWidth
+
+                const docWidth = Math.max(150, Math.min(
+                                              bubbleRoot.maxWidth,
+                                              Math.max(mWidth, rWidth,
+                                                       replyFileClip.width)))
+
+                let imageWidth
+                if ((mWidth - rWidth) < 80) {
+                    imageWidth = Math.min(bubWidth, rWidth)
+                    console.log("that")
+                } else {
+                    imageWidth = Math.min(bubWidth, mWidth)
+                    console.log("this")
+                }
+
+                return Math.max(docWidth, imageWidth)
+            }
+
+            ReplyFileClip {
+                id: replyFileClip
+                constraint: imageSize
+            }
+
+            ReplyFileSurplus {}
+
+            ReplyElidedBody {
+                id: replyElidedBody
+                maximumWidth: bubbleRoot.maxWidth
+            }
+
+            ReplyTimeInfo {
+                id: replyTimeInfo
+            }
         }
 
-        ReplyFileClip {
-            id: replyFileClip
-            constraint: imageSize
+        ReplyImageClip {
+            id: imageClip
+            anchors.top: replyWrapperCol.top
         }
-
-        ReplyFileSurplus {}
-
-        ReplyElidedBody {
-            id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth
-        }
-
-        ReplyTimeInfo {
-            id: replyTimeInfo
-        }
-    }
-
-    ReplyImageClip {
-        id: imageClip
-        anchors.right: replyWrapper.right
     }
 }

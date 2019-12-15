@@ -10,7 +10,7 @@ import "."
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Page {
     id: replyWrapper
 
     // TODO move this into CmnCfg
@@ -25,65 +25,60 @@ Rectangle {
 
         JS.parseMedia(messageModelData, imageClip)
     }
+    padding: CmnCfg.smallMargin
 
-    color: CmnCfg.palette.medGrey
+    background: ReplyBackground {}
 
-    height: Math.max(imageClip.height, replyWrapperCol.height)
-    width: {
-        // TODO move this and other complex layout calculations into Rust or C++
-        if (imageAttach)
-            return 300
-
-        const rLabelWidth = replyLabel.opNameWidth
-        const labelWidth = contentRoot.unameWidth
-
-        const bodyWidth = messageBody.width
-        const rBodyWidth = replyElidedBody.width
-
-        const stampWidth = contentRoot.messageStamps.width
-        const rTsWidth = replyTimeInfo.width
-
-        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
-
-        const bubWidth = bubbleRoot.maxWidth
-
-        if ((mWidth - rWidth) < 80) {
-            return Math.min(bubWidth,
-                            rWidth + imageClip.width + CmnCfg.smallMargin * 4)
-        } else {
-            return Math.min(bubWidth, mWidth + CmnCfg.smallMargin * 4)
-        }
+    header: ReplyLabel {
+        id: replyLabel
     }
 
-    ReplyMouseArea {}
+    contentHeight: wrapRow.implicitHeight
+    contentWidth: wrapRow.implicitWidth
 
-    Column {
-        id: replyWrapperCol
-        anchors.left: parent.left
-
+    Row {
+        id: wrapRow
         spacing: CmnCfg.smallMargin
-        padding: CmnCfg.smallMargin
+        Item {
+            id: replyWrapperCol
+            height: 64
+            width: {
+                if (imageAttach)
+                    return 300 - imageClip.width
 
-        ReplyLabel {
-            id: replyLabel
+                const rLabelWidth = replyLabel.opNameWidth
+                const labelWidth = contentRoot.unameWidth
+
+                const bodyWidth = messageBody.width
+                const rBodyWidth = replyElidedBody.width
+
+                const stampWidth = contentRoot.messageStamps.width
+                const rTsWidth = replyTimeInfo.width
+
+                const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+                const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+
+                const bubWidth = bubbleRoot.maxWidth
+
+                return Math.min(bubWidth, Math.max(rWidth, mWidth))
+            }
+
+            ReplyElidedBody {
+                anchors.top: parent.top
+                id: replyElidedBody
+                elideConstraint: imageSize
+                maximumWidth: bubbleRoot.maxWidth - imageSize
+            }
+
+            ReplyTimeInfo {
+                anchors.bottom: parent.bottom
+                id: replyTimeInfo
+            }
         }
 
-        ReplyElidedBody {
-            id: replyElidedBody
-            elideConstraint: imageSize
-            maximumWidth: bubbleRoot.maxWidth - imageSize
+        ReplyImageClip {
+            id: imageClip
+            anchors.top: replyWrapperCol.top
         }
-
-        ReplyTimeInfo {
-            id: replyTimeInfo
-        }
-    }
-
-    ReplyImageClip {
-        id: imageClip
-        anchors.right: replyWrapper.right
-        anchors.rightMargin: CmnCfg.smallMargin
-        anchors.verticalCenter: parent.verticalCenter
     }
 }

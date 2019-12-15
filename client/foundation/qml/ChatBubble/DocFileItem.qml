@@ -11,51 +11,55 @@ import "../js/utils.mjs" as Utils
 ListView {
     id: docFileItemRoot
     interactive: false
-    width: 200
+    width: contentItem.childrenRect.width
+    height: contentItem.childrenRect.height
+    spacing: CmnCfg.smallMargin / 2
+
+    Rectangle {
+        anchors.fill: parent
+        border.color: "black"
+        border.width: 1
+        opacity: 0
+    }
+
     delegate: Item {
         id: fileRow
-        width: Math.max(contentRoot.width - CmnCfg.smallMargin * 2, 100)
-        height: 24
+        width: bubbleRoot.width
+        height: 20
         clip: true
 
-        Image {
+        RowLayout {
+
             anchors.left: parent.left
-            id: fileIcon
             anchors.verticalCenter: parent.verticalCenter
-            source: "qrc:/file-icon.svg"
-            height: 20
-            width: height
-        }
-
-        TextMetrics {
-            id: nameMetrics
-            text: name
-            elide: Text.ElideMiddle
-            elideWidth: fileRow.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
-        }
-
-        Text {
-            anchors.left: fileIcon.right
             anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
-            id: fileName
-            color: CmnCfg.palette.black
-            text: nameMetrics.elidedText
-            font.family: CmnCfg.chatFont.name
-            font.pixelSize: 13
-            font.weight: Font.Medium
-        }
 
-        Text {
-            id: fileSize
-            anchors.left: fileName.right
-            anchors.leftMargin: CmnCfg.smallMargin
-            anchors.verticalCenter: parent.verticalCenter
-            text: Utils.friendlyFileSize(size)
-            font.family: CmnCfg.chatFont.name
-            font.pixelSize: 10
-            font.weight: Font.Light
-            color: CmnCfg.palette.darkGrey
+            Image {
+                id: fileIcon
+                source: "qrc:/file-icon.svg"
+                height: 20
+                width: height
+            }
+            Text {
+                id: fileName
+                color: CmnCfg.palette.black
+                text: name
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: 13
+                font.weight: Font.Medium
+                elide: Text.ElideMiddle
+                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - 40
+                                     - CmnCfg.smallMargin * 2
+            }
+
+            Text {
+                id: fileSize
+                text: Utils.friendlyFileSize(size)
+                font.family: CmnCfg.chatFont.name
+                font.pixelSize: 10
+                font.weight: Font.Light
+                color: CmnCfg.palette.darkGrey
+            }
         }
 
         ButtonForm {
@@ -63,12 +67,10 @@ ListView {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             source: "qrc:/download-icon.svg"
-            height: 20
-            width: height
+            icon.width: 20
+            icon.height: 20
             fill: CmnCfg.palette.black
-            onClicked: {
-                fileChooser.open()
-            }
+            onClicked: fileChooser.open()
         }
 
         FileDialog {

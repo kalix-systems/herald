@@ -10,7 +10,7 @@ import "./js/utils.js" as JS
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Page {
     id: replyWrapper
 
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
@@ -21,9 +21,17 @@ Rectangle {
     Component.onCompleted: replyWrapper.fileCount = JS.parseDocs(
                                replyFileClip.nameMetrics, messageModelData,
                                replyFileClip.fileSize, replyWrapper)
-    color: CmnCfg.palette.medGrey
-    height: replyWrapperCol.height
-    width: {
+
+    padding: CmnCfg.smallMargin
+
+    background: ReplyBackground {}
+
+    header: ReplyLabel {
+        id: replyLabel
+    }
+
+    contentHeight: replyWrapperCol.implicitHeight
+    contentWidth: {
         if (imageAttach)
             return 300
 
@@ -46,14 +54,9 @@ Rectangle {
                                                replyFileClip.width)))
     }
 
-    ReplyMouseArea {}
-
     Column {
         id: replyWrapperCol
-
-        ReplyLabel {
-            id: replyLabel
-        }
+        spacing: CmnCfg.smallMargin
 
         ReplyFileClip {
             id: replyFileClip

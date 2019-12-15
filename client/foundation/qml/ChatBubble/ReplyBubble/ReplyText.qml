@@ -15,41 +15,16 @@ Page {
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
+    padding: CmnCfg.smallMargin
 
-    height: implicitHeaderHeight + replyWrapperCol.height
-    background: Rectangle {
-        color: CmnCfg.palette.lightGrey
-        anchors.fill: parent
-        border.color: "black"
-        border.width: 1
-        ReplyMouseArea {}
-    }
+    background: ReplyBackground {}
 
-    header: Label {
+    header: ReplyLabel {
         id: replyLabel
-        readonly property real opNameWidth: opNameTM.width
-        text: opNameTM.text
-        font.weight: Font.Bold
-        font.family: CmnCfg.chatFont.name
-
-        padding: CmnCfg.smallMargin / 2
-        color: CmnCfg.palette.white
-        horizontalAlignment: Text.AlignLeft
-
-        background: Rectangle {
-            color: opColor
-            border.color: Qt.darker(color, 1.5)
-            border.width: 1
-        }
-
-        TextMetrics {
-            id: opNameTM
-            text: Herald.users.nameById(messageModelData.opAuthor)
-        }
     }
 
-    // height: replyWrapperCol.height
-    width: {
+    contentHeight: replyWrapperCol.height
+    contentWidth: {
         // TODO move this and other complex layout calculations into Rust or C++
         if (imageAttach)
             return 300
@@ -75,11 +50,6 @@ Page {
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
-        padding: CmnCfg.smallMargin
-
-        //        ReplyLabel {
-        //            id: replyLabel
-        //        }
         ReplyElidedBody {
             id: replyElidedBody
             maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 2
