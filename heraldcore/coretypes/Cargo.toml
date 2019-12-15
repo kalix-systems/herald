@@ -34,6 +34,6 @@ path = "../../kson"
 path = "../../kcl"
 
 [dependencies.rusqlite]
-version          = "0.20.0"
+version          = "0.21"
 default_features = false
 features         = ["functions", "bundled"]
