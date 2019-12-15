@@ -24,7 +24,7 @@ ListView {
 
     delegate: Item {
         id: fileRow
-        width: bubbleRoot.width
+        width: contentWidth
         height: 20
         clip: true
 
