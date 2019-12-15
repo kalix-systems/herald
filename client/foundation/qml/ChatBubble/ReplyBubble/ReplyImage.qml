@@ -19,12 +19,8 @@ Page {
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
 
-    Component.onCompleted: {
-        if (messageModelData.opMediaAttachments.length === 0)
-            return
+    Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
-        JS.parseMedia(messageModelData, imageClip)
-    }
     padding: CmnCfg.smallMargin
 
     background: ReplyBackground {}
@@ -39,6 +35,7 @@ Page {
     Row {
         id: wrapRow
         spacing: CmnCfg.smallMargin
+
         Item {
             id: replyWrapperCol
             height: 64
@@ -58,7 +55,7 @@ Page {
                 const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
                 const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
 
-                const bubWidth = bubbleRoot.maxWidth
+                const bubWidth = bubbleRoot.maxWidth - imageSize
 
                 return Math.min(bubWidth, Math.max(rWidth, mWidth))
             }
@@ -74,6 +71,15 @@ Page {
                 anchors.bottom: parent.bottom
                 id: replyTimeInfo
             }
+
+            // Debug component
+            //Rectangle {
+            //    anchors.fill: parent
+            //    opacity: 0.5
+            //    color: "blue"
+            //    border.color: "black"
+            //    border.width: 1
+            //}
         }
 
         ReplyImageClip {

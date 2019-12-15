@@ -15,10 +15,10 @@ TextEdit {
     readOnly: true
     MouseArea {
         anchors.fill: parent
-        onClicked: contentRoot.expanded = !contentRoot.expanded
+        onClicked: bubbleRoot.expanded = !bubbleRoot.expanded
     }
 
     TapHandler {
-        onTapped: contentRoot.expanded = !contentRoot.expanded
+        onTapped: bubbleRoot.expanded = !bubbleRoot.expanded
     }
 }
