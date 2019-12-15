@@ -10,7 +10,7 @@ edition = "2018"
 crc32fast   = "1.2"
 
 [dependencies.rusqlite]
-version = "0.20.0"
+version = "0.21"
 optional = true
 
 [dependencies.kson]
