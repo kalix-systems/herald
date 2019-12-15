@@ -283,6 +283,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         config_config_id_changed,
         config_name_changed,
         config_nts_conversation_id_changed,
+        config_preferred_expiration_changed,
         config_profile_picture_changed,
         herald_config_init_changed,
         herald_connection_pending_changed,
@@ -383,6 +384,7 @@ pub unsafe fn herald_new_inner(ptr_bundle: *mut HeraldPtrBundle) -> Herald {
         config_id_changed: config_config_id_changed,
         name_changed: config_name_changed,
         nts_conversation_id_changed: config_nts_conversation_id_changed,
+        preferred_expiration_changed: config_preferred_expiration_changed,
         profile_picture_changed: config_profile_picture_changed,
     };
     let d_config = Config::new(config_emit);
@@ -692,6 +694,7 @@ pub struct HeraldPtrBundle {
     config_config_id_changed: fn(*mut ConfigQObject),
     config_name_changed: fn(*mut ConfigQObject),
     config_nts_conversation_id_changed: fn(*mut ConfigQObject),
+    config_preferred_expiration_changed: fn(*mut ConfigQObject),
     config_profile_picture_changed: fn(*mut ConfigQObject),
     herald_config_init_changed: fn(*mut HeraldQObject),
     herald_connection_pending_changed: fn(*mut HeraldQObject),

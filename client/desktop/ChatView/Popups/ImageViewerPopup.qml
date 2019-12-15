@@ -17,8 +17,7 @@ Window {
     }
 
     title: if (imageWindow.sourceValid) {
-               sourceAtc[index].path.substring(
-                           sourceAtc[index].path.lastIndexOf('/') + 1)
+               sourceAtc[index].name
            } else {
                ""
            }
@@ -85,7 +84,7 @@ Window {
         Button {
             text: "+"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             action: zoomAction
         }
@@ -93,7 +92,7 @@ Window {
         Button {
             text: "―"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             action: zoomOutAction
         }
@@ -101,7 +100,7 @@ Window {
         Button {
             text: "↓"
             font.bold: true
-            font.pointSize: 20
+            font.pixelSize: 20
             width: 50
             onClicked: dirChooser.open()
         }
@@ -141,6 +140,7 @@ Window {
         contentHeight: height
         contentWidth: width
         contentItem.anchors.centerIn: (contentHeight < flickable.height) ? flickable : undefined
+
         Image {
             id: image
             source: imageWindow.sourceValid ? "file:" + sourceAtc[index].path : ""

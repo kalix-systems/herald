@@ -59,29 +59,40 @@ pub struct Conversation {
 pub enum ExpirationPeriod {
     /// Messages never expire
     Never = 0,
+    /// Messages expire after 30 seconds
+    ThirtySeconds = 1,
     /// Messages expire after one minute
-    OneMinute = 1,
+    OneMinute = 2,
+    /// Messages expire after one minute
+    ThirtyMinutes = 3,
     /// Messages expire after one hour
-    OneHour = 2,
+    OneHour = 4,
+    /// Messages expire after twelve hours
+    TwelveHours = 5,
     /// Messages expire after one day
-    OneDay = 3,
+    OneDay = 6,
     /// Message expire after one week
-    OneWeek = 4,
+    OneWeek = 7,
     /// Messages expire after one month
-    OneMonth = 5,
+    OneMonth = 8,
     /// Messages expire after one year
-    OneYear = 6,
+    OneYear = 9,
 }
 
 const MIN_SECS: u64 = 60;
+const THIRTY_MIN_SECS: u64 = MIN_SECS * 30;
 const HOUR_SECS: u64 = MIN_SECS * 60;
+const TWELVE_HOUR_SECS: u64 = HOUR_SECS * 12;
 const DAY_SECS: u64 = HOUR_SECS * 24;
 const WEEK_SECS: u64 = DAY_SECS * 7;
 const MONTH_SECS: u64 = DAY_SECS * 30;
 const YEAR_SECS: u64 = DAY_SECS * 365;
 
+const THIRTY_SEC: Duration = Duration::from_secs(30);
 const MIN: Duration = Duration::from_secs(MIN_SECS);
+const THIRTY_MIN: Duration = Duration::from_secs(THIRTY_MIN_SECS);
 const HOUR: Duration = Duration::from_secs(HOUR_SECS);
+const TWELVE_HOUR: Duration = Duration::from_secs(TWELVE_HOUR_SECS);
 const DAY: Duration = Duration::from_secs(DAY_SECS);
 const WEEK: Duration = Duration::from_secs(WEEK_SECS);
 const MONTH: Duration = Duration::from_secs(MONTH_SECS);
@@ -92,8 +103,11 @@ impl ExpirationPeriod {
     pub fn into_duration(self) -> Option<Duration> {
         use ExpirationPeriod::*;
         match self {
+            ThirtySeconds => Some(THIRTY_SEC),
             OneMinute => Some(MIN),
+            ThirtyMinutes => Some(THIRTY_MIN),
             OneHour => Some(HOUR),
+            TwelveHours => Some(TWELVE_HOUR),
             OneDay => Some(DAY),
             OneWeek => Some(WEEK),
             OneMonth => Some(MONTH),
@@ -137,12 +151,15 @@ impl From<u8> for ExpirationPeriod {
         use ExpirationPeriod::*;
         match val {
             0 => Never,
-            1 => OneMinute,
-            2 => OneHour,
-            3 => OneDay,
-            4 => OneWeek,
-            5 => OneMonth,
-            6 => OneYear,
+            1 => ThirtySeconds,
+            2 => OneMinute,
+            3 => ThirtyMinutes,
+            4 => OneHour,
+            5 => TwelveHours,
+            6 => OneDay,
+            7 => OneWeek,
+            8 => OneMonth,
+            9 => OneYear,
             _ => Self::default(),
         }
     }

@@ -5,13 +5,26 @@ declare class MsgId extends ByteArray {}
 declare class MessageSearch {}
 
 declare const enum ExpirationPeriod {
+  // Messages never expire
   Never = 0,
-  OneMinute = 1,
-  OneHour = 2,
-  OneDay = 3,
-  OneWeek = 4,
-  OneMonth = 5,
-  OneYear = 6
+  // Messages expire after 30 seconds
+  ThirtySeconds = 1,
+  // Messages expire after one minute
+  OneMinute = 2,
+  // Messages expire after one minute
+  ThirtyMinutes = 3,
+  // Messages expire after one hour
+  OneHour = 4,
+  // Messages expire after twelve hours
+  TwelveHours = 5,
+  // Messages expire after one day
+  OneDay = 6,
+  // Message expire after one week
+  OneWeek = 7,
+  // Messages expire after one month
+  OneMonth = 8,
+  // Messages expire after one year
+  OneYear = 9
 }
 
 declare const enum MatchStatus {

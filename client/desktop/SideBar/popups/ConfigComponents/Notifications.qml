@@ -12,7 +12,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Notifications Enabled")
         color: "black"
-        font.pointSize: 14
+        font.pixelSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
 
@@ -30,7 +30,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Silent")
         color: "black"
-        font.pointSize: 14
+        font.pixelSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
 
@@ -48,7 +48,7 @@ GridLayout {
     StandardLabel {
         text: qsTr("Show author in notification")
         color: "black"
-        font.pointSize: 14
+        font.pixelSize: 14
         Layout.leftMargin: CmnCfg.margin
     }
 
@@ -65,7 +65,7 @@ GridLayout {
 
     StandardLabel {
         text: qsTr("Show message body in notification")
-        color: "black"
+        color: CmnCfg.palette.black
         font.pointSize: 14
         Layout.leftMargin: CmnCfg.margin
     }

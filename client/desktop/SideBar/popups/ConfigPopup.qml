@@ -112,6 +112,7 @@ Window {
                             hoverEnabled: true
                             anchors.fill: parent
                             onClicked: configScroll.contentY = col.children[index].y
+                            cursorShape: Qt.PointingHandCursor
                         }
                     }
                 }
@@ -122,6 +123,8 @@ Window {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 contentHeight: col.height
+                boundsBehavior: Flickable.StopAtBounds
+                boundsMovement: Flickable.StopAtBounds
                 Column {
                     id: col
                     spacing: CmnCfg.smallMargin

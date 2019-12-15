@@ -2,9 +2,11 @@ import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
-import "../js/utils.mjs" as Utils
+import "../../js/utils.mjs" as Utils
+import "./js/utils.js" as JS
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
+import "../"
 
 ColumnLayout {
     id: wrapperCol
@@ -21,24 +23,8 @@ ColumnLayout {
     spacing: 0
 
     Component.onCompleted: {
-        const doc = JSON.parse(modelData.opDocAttachments)
-
-        nameMetrics.text = doc[0].name
-        fileSize.text = Utils.friendlyFileSize(doc[0].size)
-        fileCount = doc.length - 1
-
-        if (modelData.opMediaAttachments.length === 0)
-            return
-
-        const media = JSON.parse(modelData.opMediaAttachments)
-
-        if (media.length === 0)
-            return
-
-        imageClipLoader.sourceComponent = imageClipComponent
-        imageClipLoader.item.imageSource = "file:" + media[0].path
-        imageClipLoader.item.count = media.length - 1
-        imageClipLoader.item.aspectRatio = media[0].width / media[0].height
+        JS.parseDocs(nameMetrics, modelData, fileSize, fileCount)
+        JS.parseMedia(modelData, imageClip)
     }
 
     Rectangle {
@@ -67,25 +53,23 @@ ColumnLayout {
             z: CmnCfg.overlayZ
             enabled: knownReply ? true : false
 
-            onClicked: {
-                const msgIndex = ownedConversation.indexById(replyId)
-
-                if (msgIndex < 0)
-                    return
-
-                const window = convWindow
-
-                window.positionViewAtIndex(msgIndex, ListView.Center)
-                window.highlightAnimation.target = window.itemAtIndex(
-                            msgIndex).highlight
-                window.highlightAnimation.start()
-            }
+            onClicked: JS.jumpHandler(replyId, ownedConversation, convWindow)
         }
+
+        //wraps attachment content and op message body
         ColumnLayout {
             id: replyWrapperCol
-            Row {
+            spacing: 0
+
+            //wraps op label + op doc clip + op media clip
+            Item {
+                Layout.preferredWidth: reply.width
+                Layout.preferredHeight: 80
+
+                //wraps op label + op doc clip
                 ColumnLayout {
-                    id: fileWrapper
+                    id: fileLabelWrapper
+                    anchors.left: parent.left
                     Label {
                         id: opLabel
                         text: knownReply ? Herald.users.nameById(
@@ -93,19 +77,16 @@ ColumnLayout {
                         font.bold: true
                         Layout.margins: CmnCfg.smallMargin
                         Layout.bottomMargin: 0
-                        Layout.topMargin: CmnCfg.smallMargin
                         Layout.preferredHeight: knownReply ? implicitHeight : 0
                         color: opColor
                     }
 
+                    //wraps doc clip
                     Item {
-                        id: attachmentRow
-                        Layout.alignment: Qt.AlignTop
-                        Layout.preferredWidth: replyWrapper.width - 80
-                        Layout.minimumHeight: 20
+                        id: fileClip
+                        Layout.topMargin: CmnCfg.smallMargin
                         Layout.leftMargin: CmnCfg.smallMargin
-                        Layout.bottomMargin: CmnCfg.smallMargin
-                        Layout.fillHeight: true
+                        Layout.preferredHeight: fileIcon.height
                         Image {
                             id: fileIcon
                             anchors.left: parent.left
@@ -113,24 +94,12 @@ ColumnLayout {
                             source: "qrc:/file-icon.svg"
                             height: 20
                             width: height
-
-                            Text {
-                                anchors.top: parent.bottom
-                                visible: fileCount > 0
-                                text: "+ " + fileCount + qsTr(" more")
-                                font.weight: Font.Light
-                                font.family: CmnCfg.chatFont.name
-                                color: CmnCfg.palette.darkGrey
-                                font.pixelSize: 13
-                                bottomPadding: CmnCfg.smallMargin
-                            }
                         }
 
                         TextMetrics {
                             id: nameMetrics
                             elide: Text.ElideMiddle
-                            elideWidth: reply.width - imageClipLoader.size
-                                        - fileSize.width - 40 - CmnCfg.smallMargin * 2
+                            elideWidth: reply.width - fileSize.width - 40 - CmnCfg.smallMargin * 2
                         }
 
                         Text {
@@ -156,25 +125,35 @@ ColumnLayout {
                             color: CmnCfg.palette.darkGrey
                         }
                     }
+
+                    //+ n more file count
+                    Text {
+                        id: fileSurplus
+                        Layout.leftMargin: CmnCfg.smallMargin
+                        Layout.topMargin: -CmnCfg.smallMargin / 2
+                        visible: fileCount > 0
+                        text: "+ " + fileCount + qsTr(" more")
+                        font.weight: Font.Light
+                        font.family: CmnCfg.chatFont.name
+                        color: CmnCfg.palette.darkGrey
+                        font.pixelSize: 13
+                    }
                 }
 
-                Loader {
-                    property int size: item == undefined ? 16 : 80
-                    id: imageClipLoader
-                    anchors.top: parent.top
+                //op image clip
+                ReplyImageClip {
+                    id: imageClip
                     anchors.topMargin: CmnCfg.smallMargin
-                }
-
-                Component {
-                    id: imageClipComponent
-                    ReplyImageClip {}
+                    anchors.top: parent.top
+                    anchors.right: parent.right
                 }
             }
 
+            //op message body + timestamp
             ColumnLayout {
                 id: reply
                 spacing: 0
-                Layout.alignment: Qt.AlignTop
+                Layout.topMargin: 0
                 Layout.rightMargin: CmnCfg.smallMargin
                 Layout.maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
                 Layout.minimumWidth: bubbleRoot.imageAttach ? 300 : Math.max(
@@ -182,24 +161,11 @@ ColumnLayout {
                                                                   messageBody.width)
                 TextMetrics {
                     id: opBodyTextMetrics
-                    property string decoration: replyBody > 350 ? "..." : ""
-                    property string shortenedText: knownReply ? truncate_text(
-                                                                    modelData.opBody).slice(
-                                                                    0,
-                                                                    350) + decoration : qsTr(
+                    property string shortenedText: knownReply ? modelData.opBody : qsTr(
                                                                     "Original message not found")
                     text: shortenedText
                     elideWidth: maxWidth * 2
                     elide: Text.ElideRight
-
-                    function truncate_text(body) {
-                        const bodyLines = body.split("\n")
-                        if (bodyLines.length > 3) {
-                            return bodyLines.slice(0, 3).join("\n")
-                        } else {
-                            return body
-                        }
-                    }
                 }
 
                 StandardTextEdit {

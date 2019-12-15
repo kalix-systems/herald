@@ -300,9 +300,9 @@ impl Ord for MessageMeta {
 }
 
 pub struct Elider {
-    line_count: usize,
-    char_count: usize,
-    char_per_line: usize,
+    pub line_count: usize,
+    pub char_count: usize,
+    pub char_per_line: usize,
 }
 
 impl Default for Elider {
@@ -355,8 +355,12 @@ impl Elider {
 
         let chars_to_take = self.char_count.min(self.line_count * self.char_per_line);
 
-        UnicodeSegmentation::graphemes(body.as_str(), true)
+        let mut out: String = UnicodeSegmentation::graphemes(body.as_str(), true)
             .take(chars_to_take)
-            .collect()
+            .collect();
+
+        out.push_str("...");
+
+        out
     }
 }
