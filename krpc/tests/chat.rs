@@ -114,6 +114,7 @@ impl KrpcServer for Server {
     }
 
     type PushAck = PushAck;
+    #[allow(clippy::unit_arg)]
     async fn on_push_ack(
         &self,
         _: Self::Push,
