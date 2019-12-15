@@ -61,23 +61,23 @@ Page {
                 const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
                 const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
 
-                const bubWidth = bubbleRoot.maxWidth
+                const bubWidth = bubbleRoot.maxWidth - imageSize
 
-                const docWidth = Math.max(150, Math.min(
-                                              bubbleRoot.maxWidth,
-                                              Math.max(mWidth, rWidth,
+                const docWidth = Math.max(150,
+                                          Math.min(bubWidth, Math.max(
+                                                       mWidth, rWidth,
                                                        replyFileClip.width)))
 
-                let imageWidth
-                if ((mWidth - rWidth) < 80) {
-                    imageWidth = Math.min(bubWidth, rWidth)
-                    console.log("that")
-                } else {
-                    imageWidth = Math.min(bubWidth, mWidth)
-                    console.log("this")
-                }
+                //     let imageWidth
+                //     if ((mWidth - rWidth) < 80) {
+                //         imageWidth = Math.min(bubWidth, rWidth)
+                //         console.log("that")
+                //     } else {
+                //         imageWidth = Math.min(bubWidth, mWidth)
+                //         console.log("this")
+                //     }
 
-                return Math.max(docWidth, imageWidth)
+                //     return Math.max(docWidth, imageWidth)
             }
 
             ReplyFileClip {
@@ -89,7 +89,8 @@ Page {
 
             ReplyElidedBody {
                 id: replyElidedBody
-                maximumWidth: bubbleRoot.maxWidth
+                elideConstraint: imageSize
+                maximumWidth: bubbleRoot.maxWidth - imageSize
             }
 
             ReplyTimeInfo {
