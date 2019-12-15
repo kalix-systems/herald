@@ -151,12 +151,15 @@ impl From<u8> for ExpirationPeriod {
         use ExpirationPeriod::*;
         match val {
             0 => Never,
-            1 => OneMinute,
-            2 => OneHour,
-            3 => OneDay,
-            4 => OneWeek,
-            5 => OneMonth,
-            6 => OneYear,
+            1 => ThirtySeconds,
+            2 => OneMinute,
+            3 => ThirtyMinutes,
+            4 => OneHour,
+            5 => TwelveHours,
+            6 => OneDay,
+            7 => OneWeek,
+            8 => OneMonth,
+            9 => OneYear,
             _ => Self::default(),
         }
     }
