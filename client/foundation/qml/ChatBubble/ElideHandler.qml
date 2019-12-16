@@ -4,7 +4,7 @@ import LibHerald 1.0
 
 TextEdit {
     visible: elided
-    text: !!contentRoot.expanded ? qsTr("Read more") : qsTr("Collapse")
+    text: !bubbleRoot.expanded ? qsTr("Read more") : qsTr("Collapse")
     font.bold: true
     color: CmnCfg.palette.offBlack
     Layout.leftMargin: CmnCfg.smallMargin
