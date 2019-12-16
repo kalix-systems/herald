@@ -32,11 +32,11 @@ Row {
 
         delegate: RowLayout {
             clip: true
-            Image {
+            ButtonForm {
                 id: fileIcon
-                source: "qrc:/file-icon.svg"
-                height: 24
-                width: height
+                icon.source: "qrc:/file-icon.svg"
+                icon.height: 20
+                icon.width: height
             }
             Text {
                 id: fileName
@@ -70,8 +70,8 @@ Row {
         delegate: ButtonForm {
             id: downloadIcon
             source: "qrc:/download-icon.svg"
-            icon.width: 24
-            icon.height: 24
+            icon.width: 20
+            icon.height: 20
             fill: CmnCfg.palette.black
             onClicked: fileChooser.open()
         }
