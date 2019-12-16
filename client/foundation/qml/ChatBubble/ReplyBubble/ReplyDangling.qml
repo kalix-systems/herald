@@ -23,10 +23,14 @@ Pane {
                                     contentRoot.unameWidth,
                                     contentRoot.messageBody.width,
                                     unknownBody.width)
-
-    StandardTextEdit {
-        id: unknownBody
-        maximumWidth: bubbleRoot.maxWidth
-        text: qsTr("Original message not found")
+    RowLayout {
+        Text {
+            id: unknownBody
+            Layout.maximumWidth: bubbleRoot.maxWidth
+            font.family: CmnCfg.chatFont.name
+            color: CmnCfg.palette.black
+            textFormat: TextEdit.AutoText
+            text: qsTr("Original message not found")
+        }
     }
 }
