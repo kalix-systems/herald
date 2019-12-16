@@ -156,8 +156,7 @@ Pane {
         //message body
         StandardTextEdit {
             id: messageBody
-            maximumWidth: bubbleRoot.imageAttach ? 300 : Math.min(
-                                                       bubbleRoot.maxWidth, 600)
+            maximumWidth: bubbleRoot.imageAttach ? 300 : bubbleRoot.maxWidth
         }
 
         StandardStamps {
