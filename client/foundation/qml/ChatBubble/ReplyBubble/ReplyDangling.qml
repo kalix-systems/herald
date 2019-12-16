@@ -18,11 +18,11 @@ Pane {
     padding: CmnCfg.smallMargin
 
     contentHeight: unknownBody.height
-    contentWidth: ReplyWidthCalc.unknown(imageAttach, bubbleRoot.maxWidth,
-                                  contentRoot.unameWidth,
-                                  contentRoot.messageBody.width,
-                                  unknownBody.width)
-
+    contentWidth: imageAttach ? 300 : ReplyWidthCalc.unknown(
+                                    bubbleRoot.maxWidth,
+                                    contentRoot.unameWidth,
+                                    contentRoot.messageBody.width,
+                                    unknownBody.width)
 
     StandardTextEdit {
         id: unknownBody

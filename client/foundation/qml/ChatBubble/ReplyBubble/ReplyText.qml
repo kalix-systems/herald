@@ -24,29 +24,35 @@ Page {
     }
 
     contentHeight: replyWrapperCol.height
-    contentWidth: {
-        // TODO move this and other complex layout calculations into Rust or C++
-        if (imageAttach)
-            return 300
+    contentWidth: imageAttach ? 300 : ReplyWidthCalc.text(
+                                    bubbleRoot.maxWidth,
+                                    contentRoot.unameWidth, messageBody.width,
+                                    contentRoot.messageStamps.width,
+                                    replyLabel.opNameWidth,
+                                    replyElidedBody.width, replyTimeInfo.width)
 
-        const rLabelWidth = replyLabel.opNameWidth
-        const labelWidth = contentRoot.unameWidth
+    //{
+    //    // TODO move this and other complex layout calculations into Rust or C++
+    //    if (imageAttach)
+    //        return 300
 
-        const bodyWidth = messageBody.width
-        const rBodyWidth = replyElidedBody.width
+    //    const rLabelWidth = replyLabel.opNameWidth
+    //    const labelWidth = contentRoot.unameWidth
 
-        const stampWidth = contentRoot.messageStamps.width
-        const rTsWidth = replyTimeInfo.width
+    //    const bodyWidth = messageBody.width
+    //    const rBodyWidth = replyElidedBody.width
 
-        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+    //    const stampWidth = contentRoot.messageStamps.width
+    //    const rTsWidth = replyTimeInfo.width
 
-        const bubWidth = bubbleRoot.maxWidth
+    //    const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+    //    const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
 
-        return Math.min(bubWidth, Math.max(rWidth,
-                                           mWidth)) //+ CmnCfg.smallMargin * 2)
-    }
+    //    const bubWidth = bubbleRoot.maxWidth
 
+    //    return Math.min(bubWidth, Math.max(rWidth,
+    //                                       mWidth)) //+ CmnCfg.smallMargin * 2)
+    //}
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin

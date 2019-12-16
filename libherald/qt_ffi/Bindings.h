@@ -1653,12 +1653,16 @@ private:
 public:
   explicit ReplyWidthCalc(QObject *parent = nullptr);
   ~ReplyWidthCalc() override;
-  Q_INVOKABLE double doc(bool image_attach, double bubble_max_width,
-                         double reply_label_width, double message_label_width,
-                         double message_body_width, double reply_body_width,
-                         double stamp_width, double reply_ts_width,
-                         double file_clip_width) const;
-  Q_INVOKABLE double unknown(bool image_attach, double bubble_max_width,
+  Q_INVOKABLE double doc(double bubble_max_width, double message_label_width,
+                         double message_body_width, double stamp_width,
+                         double reply_label_width, double reply_body_width,
+                         double reply_ts_width,
+                         double reply_file_clip_width) const;
+  Q_INVOKABLE double text(double bubble_max_width, double message_label_width,
+                          double message_body_width, double stamp_width,
+                          double reply_label_width, double reply_body_width,
+                          double reply_ts_width) const;
+  Q_INVOKABLE double unknown(double bubble_max_width,
                              double message_label_width,
                              double message_body_width,
                              double unknown_body_width) const;

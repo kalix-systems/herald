@@ -103,23 +103,36 @@ fn errors() -> Object {
 fn reply_width_calc() -> Object {
     let functions = functions! {
         const unknown(
-            image_attach: Bool,
             bubble_max_width: Double,
+
             message_label_width: Double,
             message_body_width: Double,
+
             unknown_body_width: Double
         ) => Double,
 
         const doc(
-            image_attach: Bool,
             bubble_max_width: Double,
-            reply_label_width: Double,
+
             message_label_width: Double,
             message_body_width: Double,
-            reply_body_width: Double,
             stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
             reply_ts_width: Double,
-            file_clip_width: Double
+            reply_file_clip_width: Double
+        ) => Double,
+
+        const text(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double
         ) => Double,
     };
 
