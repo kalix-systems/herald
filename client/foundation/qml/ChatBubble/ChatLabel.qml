@@ -22,6 +22,7 @@ Label {
     font.family: CmnCfg.chatFont.name
 
     color: CmnCfg.palette.white
+
     background: Rectangle {
         color: authorColor
         border.color: Qt.darker(color, 1.3)
@@ -31,6 +32,8 @@ Label {
     TextMetrics {
         id: authorNameTM
         text: authorName
+        font.weight: Font.Bold
+        font.family: CmnCfg.chatFont.name
         elideWidth: bubbleRoot.maxWidth
         elide: Text.ElideRight
     }
