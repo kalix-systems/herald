@@ -33,20 +33,29 @@ pub trait ReplyWidthCalcTrait {
 
     fn doc(
         &self,
-        image_attach: bool,
         bubble_max_width: f64,
-        reply_label_width: f64,
         message_label_width: f64,
         message_body_width: f64,
-        reply_body_width: f64,
         stamp_width: f64,
+        reply_label_width: f64,
+        reply_body_width: f64,
         reply_ts_width: f64,
-        file_clip_width: f64,
+        reply_file_clip_width: f64,
+    ) -> f64;
+
+    fn text(
+        &self,
+        bubble_max_width: f64,
+        message_label_width: f64,
+        message_body_width: f64,
+        stamp_width: f64,
+        reply_label_width: f64,
+        reply_body_width: f64,
+        reply_ts_width: f64,
     ) -> f64;
 
     fn unknown(
         &self,
-        image_attach: bool,
         bubble_max_width: f64,
         message_label_width: f64,
         message_body_width: f64,
@@ -83,34 +92,54 @@ pub unsafe extern "C" fn reply_width_calc_free(ptr: *mut ReplyWidthCalc) {
 #[no_mangle]
 pub unsafe extern "C" fn reply_width_calc_doc(
     ptr: *const ReplyWidthCalc,
-    image_attach: bool,
     bubble_max_width: f64,
-    reply_label_width: f64,
     message_label_width: f64,
     message_body_width: f64,
-    reply_body_width: f64,
     stamp_width: f64,
+    reply_label_width: f64,
+    reply_body_width: f64,
     reply_ts_width: f64,
-    file_clip_width: f64,
+    reply_file_clip_width: f64,
 ) -> f64 {
     let obj = &*ptr;
     obj.doc(
-        image_attach,
         bubble_max_width,
-        reply_label_width,
         message_label_width,
         message_body_width,
-        reply_body_width,
         stamp_width,
+        reply_label_width,
+        reply_body_width,
         reply_ts_width,
-        file_clip_width,
+        reply_file_clip_width,
+    )
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn reply_width_calc_text(
+    ptr: *const ReplyWidthCalc,
+    bubble_max_width: f64,
+    message_label_width: f64,
+    message_body_width: f64,
+    stamp_width: f64,
+    reply_label_width: f64,
+    reply_body_width: f64,
+    reply_ts_width: f64,
+) -> f64 {
+    let obj = &*ptr;
+    obj.text(
+        bubble_max_width,
+        message_label_width,
+        message_body_width,
+        stamp_width,
+        reply_label_width,
+        reply_body_width,
+        reply_ts_width,
     )
 }
 
 #[no_mangle]
 pub unsafe extern "C" fn reply_width_calc_unknown(
     ptr: *const ReplyWidthCalc,
-    image_attach: bool,
     bubble_max_width: f64,
     message_label_width: f64,
     message_body_width: f64,
@@ -118,7 +147,6 @@ pub unsafe extern "C" fn reply_width_calc_unknown(
 ) -> f64 {
     let obj = &*ptr;
     obj.unknown(
-        image_attach,
         bubble_max_width,
         message_label_width,
         message_body_width,

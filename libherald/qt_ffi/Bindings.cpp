@@ -2116,11 +2116,12 @@ void messages_set_search_hint(Messages::Private *, float, float);
 extern "C" {
 ReplyWidthCalc::Private *reply_width_calc_new(ReplyWidthCalcPtrBundle *);
 void reply_width_calc_free(ReplyWidthCalc::Private *);
-double reply_width_calc_doc(const ReplyWidthCalc::Private *, bool, double,
-                            double, double, double, double, double, double,
-                            double);
-double reply_width_calc_unknown(const ReplyWidthCalc::Private *, bool, double,
-                                double, double, double);
+double reply_width_calc_doc(const ReplyWidthCalc::Private *, double, double,
+                            double, double, double, double, double, double);
+double reply_width_calc_text(const ReplyWidthCalc::Private *, double, double,
+                             double, double, double, double, double);
+double reply_width_calc_unknown(const ReplyWidthCalc::Private *, double, double,
+                                double, double);
 }
 extern "C" {
 quint32 users_data_color(const Users::Private *, int);
@@ -4183,23 +4184,30 @@ ReplyWidthCalc::~ReplyWidthCalc() {
     reply_width_calc_free(m_d);
   }
 }
-double ReplyWidthCalc::doc(bool image_attach, double bubble_max_width,
-                           double reply_label_width, double message_label_width,
-                           double message_body_width, double reply_body_width,
-                           double stamp_width, double reply_ts_width,
-                           double file_clip_width) const {
-  return reply_width_calc_doc(m_d, image_attach, bubble_max_width,
-                              reply_label_width, message_label_width,
-                              message_body_width, reply_body_width, stamp_width,
-                              reply_ts_width, file_clip_width);
+double ReplyWidthCalc::doc(double bubble_max_width, double message_label_width,
+                           double message_body_width, double stamp_width,
+                           double reply_label_width, double reply_body_width,
+                           double reply_ts_width,
+                           double reply_file_clip_width) const {
+  return reply_width_calc_doc(m_d, bubble_max_width, message_label_width,
+                              message_body_width, stamp_width,
+                              reply_label_width, reply_body_width,
+                              reply_ts_width, reply_file_clip_width);
 }
-double ReplyWidthCalc::unknown(bool image_attach, double bubble_max_width,
+double ReplyWidthCalc::text(double bubble_max_width, double message_label_width,
+                            double message_body_width, double stamp_width,
+                            double reply_label_width, double reply_body_width,
+                            double reply_ts_width) const {
+  return reply_width_calc_text(
+      m_d, bubble_max_width, message_label_width, message_body_width,
+      stamp_width, reply_label_width, reply_body_width, reply_ts_width);
+}
+double ReplyWidthCalc::unknown(double bubble_max_width,
                                double message_label_width,
                                double message_body_width,
                                double unknown_body_width) const {
-  return reply_width_calc_unknown(m_d, image_attach, bubble_max_width,
-                                  message_label_width, message_body_width,
-                                  unknown_body_width);
+  return reply_width_calc_unknown(m_d, bubble_max_width, message_label_width,
+                                  message_body_width, unknown_body_width);
 }
 
 Users::Users(bool /*owned*/, QObject *parent)

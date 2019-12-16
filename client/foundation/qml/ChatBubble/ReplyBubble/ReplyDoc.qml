@@ -31,12 +31,13 @@ Page {
     }
 
     contentHeight: replyWrapperCol.implicitHeight
-    contentWidth: ReplyWidthCalc.doc(imageAttach, bubbleRoot.maxWidth,
-                                     replyLabel.opNameWidth,
-                                     contentRoot.unameWidth, messageBody.width,
-                                     replyElidedBody.width,
-                                     contentRoot.messageStamps.width,
-                                     replyTimeInfo.width, replyFileClip.width)
+    contentWidth: imageAttach ? 300 : ReplyWidthCalc.doc(
+                                    bubbleRoot.maxWidth,
+                                    contentRoot.unameWidth, messageBody.width,
+                                    contentRoot.messageStamps.width,
+                                    replyLabel.opNameWidth,
+                                    replyElidedBody.width,
+                                    replyTimeInfo.width, replyFileClip.width)
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
