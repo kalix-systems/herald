@@ -35,7 +35,7 @@ Row {
             Image {
                 id: fileIcon
                 source: "qrc:/file-icon.svg"
-                height: 20
+                height: 24
                 width: height
             }
             Text {
@@ -59,12 +59,6 @@ Row {
                 color: CmnCfg.palette.darkGrey
             }
         }
-
-        Rectangle {
-            anchors.fill: parent
-            color: "red"
-            opacity: 0.5
-        }
     }
 
     ListView {
@@ -76,8 +70,8 @@ Row {
         delegate: ButtonForm {
             id: downloadIcon
             source: "qrc:/download-icon.svg"
-            icon.width: 20
-            icon.height: 20
+            icon.width: 24
+            icon.height: 24
             fill: CmnCfg.palette.black
             onClicked: fileChooser.open()
         }
@@ -87,12 +81,6 @@ Row {
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
             onAccepted: Herald.utils.saveFile(path, fileUrl)
-        }
-
-        Rectangle {
-            anchors.fill: parent
-            color: "red"
-            opacity: 0.5
         }
     }
 }
