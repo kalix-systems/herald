@@ -10,16 +10,16 @@ Rectangle {
     property real aspectRatio
     property url imageSource
     property int count
-
-    width: 64
-    height: 64
+    property int clipSize: 64
+    width: clipSize
+    height: clipSize
 
     clip: true
 
     Image {
         id: replyImage
-        sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio
-        sourceSize.height: parent.aspectRatio < 1 ? 64 / parent.aspectRatio : 64
+        sourceSize.width: parent.aspectRatio < 1 ? clipSize : clipSize * parent.aspectRatio
+        sourceSize.height: parent.aspectRatio < 1 ? clipSize / parent.aspectRatio : clipSize
         anchors.centerIn: parent
         source: parent.imageSource
     }
