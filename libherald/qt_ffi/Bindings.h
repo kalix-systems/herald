@@ -954,7 +954,7 @@ public:
   removeRows(int row, int count,
              const QModelIndex &parent = QModelIndex()) override;
 
-  Q_INVOKABLE QString documentAttachmentPath(int row) const;
+  Q_INVOKABLE QString documentAttachmentName(int row) const;
   Q_INVOKABLE quint64 documentAttachmentSize(int row) const;
 
 Q_SIGNALS:

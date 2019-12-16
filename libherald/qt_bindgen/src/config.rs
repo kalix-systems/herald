@@ -465,8 +465,8 @@ fn media_attachments() -> Object {
 
 fn document_attachments() -> Object {
     let item_props = item_props! {
-        // Path the the attachment
-        documentAttachmentPath: ItemProp::new(QString),
+        // File name
+        documentAttachmentName: ItemProp::new(QString).get_by_value(),
         documentAttachmentSize: ItemProp::new(QUint64)
     };
 
