@@ -8,22 +8,16 @@ import Qt.labs.platform 1.1
 //import QtQuick.Dialogs 1.3
 import "../js/utils.mjs" as Utils
 
-Item {
+Row {
     property alias fileModel: docFileItemRoot.model
     property alias downloadModel: downloadList.model
     height: childrenRect.height
     width: childrenRect.width
-
-    Rectangle {
-        anchors.fill: parent
-        color: "red"
-        opacity: 0.5
-    }
+    spacing: CmnCfg.smallMargin / 2
 
     ListView {
-        anchors.left: parent.left
-        anchors.top: parent.top
         id: docFileItemRoot
+        anchors.top: parent.top
         interactive: false
         width: contentItem.childrenRect.width
         height: contentItem.childrenRect.height
@@ -66,29 +60,39 @@ Item {
             }
         }
 
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            opacity: 0.5
+        }
+    }
+
+    ListView {
+        id: downloadList
+        height: docFileItemRoot.height
+        width: contentItem.childrenRect.width
+        anchors.top: parent.top
+        spacing: CmnCfg.smallMargin / 2
+        delegate: ButtonForm {
+            id: downloadIcon
+            source: "qrc:/download-icon.svg"
+            icon.width: 20
+            icon.height: 20
+            fill: CmnCfg.palette.black
+            onClicked: fileChooser.open()
+        }
+
         FileDialog {
             id: fileChooser
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
             onAccepted: Herald.utils.saveFile(path, fileUrl)
         }
-    }
 
-    ListView {
-        id: downloadList
-        height: contentItem.childrenRect.height
-        width: contentItem.childrenRect.width
-        anchors.right: parent.right
-        anchors.top: parent.top
-        spacing: CmnCfg.smallMargin / 2
-        delegate: ButtonForm {
-            id: downloadIcon
-            //anchors.verticalCenter: parent.verticalCenter
-            source: "qrc:/download-icon.svg"
-            icon.width: 20
-            icon.height: 20
-            fill: CmnCfg.palette.black
-            onClicked: fileChooser.open()
+        Rectangle {
+            anchors.fill: parent
+            color: "red"
+            opacity: 0.5
         }
     }
 }
