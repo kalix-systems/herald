@@ -67,15 +67,15 @@ Row {
             icon.height: 20
             fill: CmnCfg.palette.black
             onClicked: fileChooser.open()
-        }
 
-        FileDialog {
-            id: fileChooser
-            selectFolder: true
-            folder: StandardPaths.writableLocation(
-                        StandardPaths.DesktopLocation)
-            onAccepted: Herald.utils.saveFile(path, fileUrl)
-            selectExisting: false
+            FileDialog {
+                id: fileChooser
+                selectFolder: true
+                folder: StandardPaths.writableLocation(
+                            StandardPaths.DesktopLocation)
+                onAccepted: Herald.utils.saveFile(path, fileUrl)
+                selectExisting: false
+            }
         }
     }
 }
