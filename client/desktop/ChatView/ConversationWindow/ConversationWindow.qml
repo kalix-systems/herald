@@ -105,6 +105,7 @@ ListView {
             iconColor: userColor
             initials: authName[0].toUpperCase()
             size: 28
+            opacity: isTail ? 1 : 0
             anchors {
                 bottom: parent.bottom
                 margins: CmnCfg.margin
