@@ -15,21 +15,10 @@ Rectangle {
     color: CmnCfg.palette.medGrey
 
     height: unknownBody.height * 2
-    width: {
-        // TODO move this and other complex layout calculations into Rust or C++
-        if (imageAttach)
-            return 300
-
-        const bodyMax = Math.max(contentRoot.messageLabel.width,
-                                 contentRoot.messageBody.width)
-
-        if (unknownBody.width > contentRoot.messageBody.width) {
-            return Math.min(Math.max(unknownBody.width, bodyMax),
-                            bubbleRoot.maxWidth)
-        } else {
-            return bodyMax
-        }
-    }
+    width: ReplyWidthCalc.unknown(imageAttach, bubbleRoot.maxWidth,
+                                  contentRoot.unameWidth,
+                                  contentRoot.messageBody.width,
+                                  unknownBody.width)
 
     StandardTextEdit {
         id: unknownBody

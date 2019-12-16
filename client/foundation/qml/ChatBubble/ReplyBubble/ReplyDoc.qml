@@ -31,29 +31,12 @@ Page {
     }
 
     contentHeight: replyWrapperCol.implicitHeight
-    contentWidth: {
-        if (imageAttach)
-            return 300
-
-        const rLabelWidth = replyLabel.opNameWidth
-        const labelWidth = contentRoot.unameWidth
-
-        const bodyWidth = messageBody.width
-        const rBodyWidth = replyElidedBody.width
-
-        const stampWidth = contentRoot.messageStamps.width
-        const rTsWidth = replyTimeInfo.width
-
-        const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-        const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
-
-        const bubWidth = bubbleRoot.maxWidth
-
-        return Math.max(150, Math.min(bubbleRoot.maxWidth,
-                                      Math.max(mWidth, rWidth,
-                                               replyFileClip.width)))
-    }
-
+    contentWidth: ReplyWidthCalc.doc(imageAttach, bubbleRoot.maxWidth,
+                                     replyLabel.opNameWidth,
+                                     contentRoot.unameWidth, messageBody.width,
+                                     replyElidedBody.width,
+                                     contentRoot.messageStamps.width,
+                                     replyTimeInfo.width, replyFileClip.width)
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin
