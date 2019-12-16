@@ -9,26 +9,19 @@ import Qt.labs.platform 1.1
 import "../js/utils.mjs" as Utils
 
 Row {
-    property alias fileModel: docFileItemRoot.model
+    property alias fileModel: fileList.model
     property alias downloadModel: downloadList.model
     height: childrenRect.height
     width: childrenRect.width
     spacing: CmnCfg.smallMargin / 2
 
     ListView {
-        id: docFileItemRoot
+        id: fileList
         anchors.top: parent.top
         interactive: false
         width: contentItem.childrenRect.width
         height: contentItem.childrenRect.height
         spacing: CmnCfg.smallMargin / 2
-
-        Rectangle {
-            anchors.fill: parent
-            border.color: "black"
-            border.width: 1
-            opacity: 0
-        }
 
         delegate: RowLayout {
             clip: true
@@ -46,7 +39,7 @@ Row {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - 20
+                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - fileIcon.width
                                      - CmnCfg.smallMargin * 2 - downloadList.width
             }
 
@@ -63,7 +56,7 @@ Row {
 
     ListView {
         id: downloadList
-        height: docFileItemRoot.height
+        height: fileList.height
         width: contentItem.childrenRect.width
         anchors.top: parent.top
         spacing: CmnCfg.smallMargin / 2

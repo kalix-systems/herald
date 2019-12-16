@@ -49,29 +49,8 @@ Pane {
         anchors.fill: parent
         border.color: "black"
         border.width: 1
-        Label {
+        ChatLabel {
             id: authorLabel
-            text: authorName
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.right: parent.right
-            horizontalAlignment: Text.AlignLeft
-            font.weight: Font.Bold
-            font.family: CmnCfg.chatFont.name
-            padding: CmnCfg.smallMargin / 4
-            color: CmnCfg.palette.white
-
-            leftPadding: CmnCfg.smallMargin / 2
-            background: Rectangle {
-                color: authorColor
-                border.color: Qt.darker(color, 1.3)
-                border.width: 1
-            }
-
-            TextMetrics {
-                id: authorNameTM
-                text: authorName
-            }
         }
 
         Highlight {
@@ -85,7 +64,7 @@ Pane {
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
-        readonly property real unameWidth: authorNameTM.width
+        readonly property real unameWidth: authorLabel.authorNameTM.width
         // Stamps alias
         readonly property alias messageStamps: messageStamps
 
@@ -156,7 +135,6 @@ Pane {
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined
-
                 //image component
                 Component {
                     id: image

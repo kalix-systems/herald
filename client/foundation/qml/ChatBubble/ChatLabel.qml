@@ -4,15 +4,31 @@ import LibHerald 1.0
 import QtQuick.Layouts 1.12
 
 Label {
-    id: sender
-    property string senderName
-    property color senderColor
-    text: senderName
-    color: senderColor
-    Layout.leftMargin: CmnCfg.smallMargin
-    Layout.rightMargin: CmnCfg.smallMargin
-    Layout.bottomMargin: CmnCfg.margin * 0.5
-    Layout.topMargin: CmnCfg.margin * 0.5
-    Layout.preferredHeight: CmnCfg.smallMargin
-    font.bold: true
+    id: authorLabel
+    text: authorName
+    property alias authorNameTM: authorNameTM
+
+    anchors {
+        top: parent.top
+        left: parent.left
+        right: parent.right
+    }
+    padding: CmnCfg.smallMargin / 4
+    leftPadding: CmnCfg.smallMargin / 2
+
+    horizontalAlignment: Text.AlignLeft
+    font.weight: Font.Bold
+    font.family: CmnCfg.chatFont.name
+
+    color: CmnCfg.palette.white
+    background: Rectangle {
+        color: authorColor
+        border.color: Qt.darker(color, 1.3)
+        border.width: 1
+    }
+
+    TextMetrics {
+        id: authorNameTM
+        text: authorName
+    }
 }

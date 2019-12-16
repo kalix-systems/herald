@@ -9,16 +9,20 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Pane {
     id: replyWrapper
 
-    color: CmnCfg.palette.medGrey
+    background: ReplyBackground {
+        clickEnabled: false
+    }
+    padding: CmnCfg.smallMargin
 
-    height: unknownBody.height * 2
-    width: ReplyWidthCalc.unknown(imageAttach, bubbleRoot.maxWidth,
+    contentHeight: unknownBody.height
+    contentWidth: ReplyWidthCalc.unknown(imageAttach, bubbleRoot.maxWidth,
                                   contentRoot.unameWidth,
                                   contentRoot.messageBody.width,
                                   unknownBody.width)
+
 
     StandardTextEdit {
         id: unknownBody
