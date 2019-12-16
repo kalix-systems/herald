@@ -62,5 +62,6 @@
         <file>SideBar/popups/ConfigComponents/Feedback.qml</file>
         <file>SideBar/popups/ConfigComponents/ConfSwitch.qml</file>
         <file>SideBar/popups/ConfigComponents/ConfRadio.qml</file>
+        <file>ChatView/ChatTextArea/FileAttachmentsComponent.qml</file>
     </qresource>
 </RCC>

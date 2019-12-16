@@ -95,6 +95,13 @@ Rectangle {
                 sourceComponent: AttachmentsComponent {}
                 width: scrollView.width
             }
+            Loader {
+                id: fileLoader
+                active: ownedConversation.builder.hasDocAttachment
+                height: item ? item.height : 0
+                sourceComponent: FileAttachmentsComponent {}
+                width: scrollView.width
+            }
         }
 
         ScrollView {

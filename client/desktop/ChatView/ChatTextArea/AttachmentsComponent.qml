@@ -27,7 +27,6 @@ ScrollView {
                 Image {
                     id: image
                     anchors.fill: parent
-                    // anchors.margins: CmnCfg.smallMargin
                     source: "file:" + mediaAttachmentPath
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
