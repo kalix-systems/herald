@@ -1658,6 +1658,15 @@ public:
                          double reply_label_width, double reply_body_width,
                          double reply_ts_width,
                          double reply_file_clip_width) const;
+  Q_INVOKABLE double hybrid(double bubble_max_width, double message_label_width,
+                            double message_body_width, double stamp_width,
+                            double reply_label_width, double reply_body_width,
+                            double reply_ts_width,
+                            double reply_file_clip_width) const;
+  Q_INVOKABLE double image(double bubble_max_width, double message_label_width,
+                           double message_body_width, double stamp_width,
+                           double reply_label_width, double reply_body_width,
+                           double reply_ts_width) const;
   Q_INVOKABLE double text(double bubble_max_width, double message_label_width,
                           double message_body_width, double stamp_width,
                           double reply_label_width, double reply_body_width,

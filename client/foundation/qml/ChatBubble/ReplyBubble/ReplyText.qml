@@ -31,28 +31,6 @@ Page {
                                     replyLabel.opNameWidth,
                                     replyElidedBody.width, replyTimeInfo.width)
 
-    //{
-    //    // TODO move this and other complex layout calculations into Rust or C++
-    //    if (imageAttach)
-    //        return 300
-
-    //    const rLabelWidth = replyLabel.opNameWidth
-    //    const labelWidth = contentRoot.unameWidth
-
-    //    const bodyWidth = messageBody.width
-    //    const rBodyWidth = replyElidedBody.width
-
-    //    const stampWidth = contentRoot.messageStamps.width
-    //    const rTsWidth = replyTimeInfo.width
-
-    //    const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-    //    const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
-
-    //    const bubWidth = bubbleRoot.maxWidth
-
-    //    return Math.min(bubWidth, Math.max(rWidth,
-    //                                       mWidth)) //+ CmnCfg.smallMargin * 2)
-    //}
     Column {
         id: replyWrapperCol
         spacing: CmnCfg.smallMargin

@@ -134,6 +134,29 @@ fn reply_width_calc() -> Object {
             reply_body_width: Double,
             reply_ts_width: Double
         ) => Double,
+
+        const image(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double
+        ) => Double,
+
+        const hybrid(
+            bubble_max_width: Double,
+            message_label_width: Double,
+            message_body_width: Double,
+            stamp_width: Double,
+
+            reply_label_width: Double,
+            reply_body_width: Double,
+            reply_ts_width: Double,
+            reply_file_clip_width: Double
+        ) => Double,
     };
 
     obj! {

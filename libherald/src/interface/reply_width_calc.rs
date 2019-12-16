@@ -43,6 +43,29 @@ pub trait ReplyWidthCalcTrait {
         reply_file_clip_width: f64,
     ) -> f64;
 
+    fn hybrid(
+        &self,
+        bubble_max_width: f64,
+        message_label_width: f64,
+        message_body_width: f64,
+        stamp_width: f64,
+        reply_label_width: f64,
+        reply_body_width: f64,
+        reply_ts_width: f64,
+        reply_file_clip_width: f64,
+    ) -> f64;
+
+    fn image(
+        &self,
+        bubble_max_width: f64,
+        message_label_width: f64,
+        message_body_width: f64,
+        stamp_width: f64,
+        reply_label_width: f64,
+        reply_body_width: f64,
+        reply_ts_width: f64,
+    ) -> f64;
+
     fn text(
         &self,
         bubble_max_width: f64,
@@ -111,6 +134,54 @@ pub unsafe extern "C" fn reply_width_calc_doc(
         reply_body_width,
         reply_ts_width,
         reply_file_clip_width,
+    )
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn reply_width_calc_hybrid(
+    ptr: *const ReplyWidthCalc,
+    bubble_max_width: f64,
+    message_label_width: f64,
+    message_body_width: f64,
+    stamp_width: f64,
+    reply_label_width: f64,
+    reply_body_width: f64,
+    reply_ts_width: f64,
+    reply_file_clip_width: f64,
+) -> f64 {
+    let obj = &*ptr;
+    obj.hybrid(
+        bubble_max_width,
+        message_label_width,
+        message_body_width,
+        stamp_width,
+        reply_label_width,
+        reply_body_width,
+        reply_ts_width,
+        reply_file_clip_width,
+    )
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn reply_width_calc_image(
+    ptr: *const ReplyWidthCalc,
+    bubble_max_width: f64,
+    message_label_width: f64,
+    message_body_width: f64,
+    stamp_width: f64,
+    reply_label_width: f64,
+    reply_body_width: f64,
+    reply_ts_width: f64,
+) -> f64 {
+    let obj = &*ptr;
+    obj.image(
+        bubble_max_width,
+        message_label_width,
+        message_body_width,
+        stamp_width,
+        reply_label_width,
+        reply_body_width,
+        reply_ts_width,
     )
 }
 

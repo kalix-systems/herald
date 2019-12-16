@@ -39,27 +39,33 @@ Page {
         Item {
             id: replyWrapperCol
             height: 64
-            width: {
-                if (imageAttach)
-                    return 300 - imageClip.width
+            width: imageAttach ? 300 : ReplyWidthCalc.image(
+                                     bubbleRoot.maxWidth,
+                                     contentRoot.unameWidth, messageBody.width,
+                                     contentRoot.messageStamps.width,
+                                     replyLabel.opNameWidth,
+                                     replyElidedBody.width, replyTimeInfo.width)
 
-                const rLabelWidth = replyLabel.opNameWidth
-                const labelWidth = contentRoot.unameWidth
+            //{
+            //    if (imageAttach)
+            //        return 300 - imageClip.width
 
-                const bodyWidth = messageBody.width
-                const rBodyWidth = replyElidedBody.width
+            //    const rLabelWidth = replyLabel.opNameWidth
+            //    const labelWidth = contentRoot.unameWidth
 
-                const stampWidth = contentRoot.messageStamps.width
-                const rTsWidth = replyTimeInfo.width
+            //    const bodyWidth = messageBody.width
+            //    const rBodyWidth = replyElidedBody.width
 
-                const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-                const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
+            //    const stampWidth = contentRoot.messageStamps.width
+            //    const rTsWidth = replyTimeInfo.width
 
-                const bubWidth = bubbleRoot.maxWidth - imageSize
+            //    const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
+            //    const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
 
-                return Math.min(bubWidth, Math.max(rWidth, mWidth))
-            }
+            //    const bubWidth = bubbleRoot.maxWidth - imageSize
 
+            //    return Math.min(bubWidth, Math.max(rWidth, mWidth))
+            //}
             ReplyElidedBody {
                 anchors.top: parent.top
                 id: replyElidedBody

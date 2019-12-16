@@ -2118,6 +2118,10 @@ ReplyWidthCalc::Private *reply_width_calc_new(ReplyWidthCalcPtrBundle *);
 void reply_width_calc_free(ReplyWidthCalc::Private *);
 double reply_width_calc_doc(const ReplyWidthCalc::Private *, double, double,
                             double, double, double, double, double, double);
+double reply_width_calc_hybrid(const ReplyWidthCalc::Private *, double, double,
+                               double, double, double, double, double, double);
+double reply_width_calc_image(const ReplyWidthCalc::Private *, double, double,
+                              double, double, double, double, double);
 double reply_width_calc_text(const ReplyWidthCalc::Private *, double, double,
                              double, double, double, double, double);
 double reply_width_calc_unknown(const ReplyWidthCalc::Private *, double, double,
@@ -4193,6 +4197,26 @@ double ReplyWidthCalc::doc(double bubble_max_width, double message_label_width,
                               message_body_width, stamp_width,
                               reply_label_width, reply_body_width,
                               reply_ts_width, reply_file_clip_width);
+}
+double ReplyWidthCalc::hybrid(double bubble_max_width,
+                              double message_label_width,
+                              double message_body_width, double stamp_width,
+                              double reply_label_width, double reply_body_width,
+                              double reply_ts_width,
+                              double reply_file_clip_width) const {
+  return reply_width_calc_hybrid(m_d, bubble_max_width, message_label_width,
+                                 message_body_width, stamp_width,
+                                 reply_label_width, reply_body_width,
+                                 reply_ts_width, reply_file_clip_width);
+}
+double ReplyWidthCalc::image(double bubble_max_width,
+                             double message_label_width,
+                             double message_body_width, double stamp_width,
+                             double reply_label_width, double reply_body_width,
+                             double reply_ts_width) const {
+  return reply_width_calc_image(
+      m_d, bubble_max_width, message_label_width, message_body_width,
+      stamp_width, reply_label_width, reply_body_width, reply_ts_width);
 }
 double ReplyWidthCalc::text(double bubble_max_width, double message_label_width,
                             double message_body_width, double stamp_width,
