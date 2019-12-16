@@ -74,6 +74,7 @@ Rectangle {
 
         Column {
             width: parent.width
+            spacing: CmnCfg.smallMargin
             Loader {
                 id: replyLoader
                 property string opName: replyName

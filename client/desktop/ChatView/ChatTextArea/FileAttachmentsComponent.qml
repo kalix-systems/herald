@@ -11,23 +11,30 @@ ScrollView {
     width: parent.width
     height: wrapperRow.height
     ScrollBar.horizontal: ScrollBar {
-        policy: ScrollBar.AsNeeded
+        policy: ScrollBar.AlwaysOn
+        visible: true
     }
 
     Row {
         id: wrapperRow
-        height: 28
+        height: 24
         Layout.margins: CmnCfg.mediumMargin
         width: parent.width
-        spacing: 5
+        spacing: CmnCfg.mediumMargin
         Repeater {
             id: fileRepeater
             model: ownedConversation.builder.documentAttachments
             delegate: RowLayout {
                 clip: true
+                spacing: CmnCfg.smallMargin / 2
                 Imports.ButtonForm {
-                    id: fileIcon
-                    icon.source: "qrc:/file-icon.svg"
+                    id: clearFile
+                    source: "qrc:/x-icon.svg"
+                    Layout.alignment: Qt.AlignVCenter
+                    Layout.topMargin: 1
+                    onClicked: ownedConversation.builder.removeDoc(index)
+                    fill: CmnCfg.palette.black
+                    opacity: 1.0
                     icon.height: 20
                     icon.width: height
                 }
@@ -38,6 +45,7 @@ ScrollView {
                     font.family: CmnCfg.chatFont.name
                     font.pixelSize: 13
                     font.weight: Font.Medium
+                    Layout.alignment: Qt.AlignVCenter
                     elide: Text.ElideMiddle
                     Layout.maximumWidth: chatTextArea.width - fileSize.width
                                          - fileIcon.width - CmnCfg.smallMargin * 2
@@ -50,6 +58,7 @@ ScrollView {
                     font.pixelSize: 10
                     font.weight: Font.Light
                     color: CmnCfg.palette.darkGrey
+                    Layout.alignment: Qt.AlignVCenter
                 }
             }
         }
