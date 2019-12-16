@@ -37,7 +37,8 @@ Row {
             font.weight: Font.Medium
             maximumLineCount: 1
             elide: Text.ElideMiddle
-            Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - fileIcon.width - constraint
+            Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width
+                                 - fileIcon.width - constraint - parent.spacing * 2
         }
     }
 

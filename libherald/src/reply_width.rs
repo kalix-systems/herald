@@ -1,6 +1,7 @@
 use crate::interface::{ReplyWidthCalcEmitter as Emit, ReplyWidthCalcTrait as Interface};
 
 const SENSIBLE_MIN: f64 = 150.0;
+
 const IMAGE_CLIP_SIZE: f64 = 80.0;
 
 /// Reply width calculator
