@@ -34,7 +34,7 @@ void = "1.0"
 
 [dev-dependencies.tokio]
 version = "0.2.4"
-features = ["macros", "rt-threaded",  "sync", "time"]
+features = ["full"] 
 
 [dev-dependencies.kcl]
 path = "../kcl"

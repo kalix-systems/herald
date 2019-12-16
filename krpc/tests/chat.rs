@@ -1,9 +1,5 @@
 use async_trait::*;
-use futures::{
-    channel::mpsc::{unbounded, UnboundedReceiver as Receiver, UnboundedSender as Sender},
-    future::{self, *},
-    sink::*,
-};
+use futures::future::*;
 use kcl::random::UQ;
 use krpc::*;
 use kson::prelude::*;
@@ -14,7 +10,16 @@ use std::{
     sync::Arc,
     time::Duration,
 };
-use tokio::{sync::*, time::*};
+use tokio::{
+    sync::{
+        mpsc::{
+            unbounded_channel as unbounded, UnboundedReceiver as Receiver,
+            UnboundedSender as Sender,
+        },
+        *,
+    },
+    time::*,
+};
 
 use void::Void;
 
@@ -98,14 +103,15 @@ impl KrpcServer for Server {
         &self,
         meta: &Self::ConnInfo,
     ) -> Self::Pushes {
-        let (mut tx, rx) = unbounded();
+        let (tx, rx) = unbounded();
 
         let mut sess = self.sessions.lock().await;
 
         for (u, sender) in sess.iter_mut().filter(|(u, _)| *u != meta) {
-            future::try_join(sender.send(Push::Joined(*meta)), tx.send(Push::Joined(*u)))
-                .await
+            sender
+                .send(Push::Joined(*meta))
                 .expect("failed to sink join msg");
+            tx.send(Push::Joined(*u)).expect("failed to sink join msg");
         }
 
         sess.insert(*meta, tx);
@@ -133,10 +139,9 @@ impl KrpcServer for Server {
         match req {
             Req::CheckOnline => Resp::Users(self.sessions.lock().await.keys().copied().collect()),
             Req::Send(b) => {
-                for mut sender in self.senders_except(user).await {
+                for sender in self.senders_except(user).await {
                     sender
                         .send(Push::Msg(*user, b.clone()))
-                        .await
                         .expect("failed to send push");
                 }
 
