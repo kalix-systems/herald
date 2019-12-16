@@ -60,6 +60,7 @@ Row {
         width: contentItem.childrenRect.width
         anchors.top: parent.top
         spacing: CmnCfg.smallMargin / 2
+        interactive: false
         delegate: ButtonForm {
             id: downloadIcon
             source: "qrc:/download-icon.svg"

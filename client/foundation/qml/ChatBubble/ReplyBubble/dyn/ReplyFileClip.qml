@@ -12,7 +12,7 @@ Row {
     property alias fileSize: fileSize
     property real constraint: 0
     height: fileIcon.height
-    spacing: CmnCfg.smallMargin
+    spacing: CmnCfg.smallMargin / 2
 
     Image {
         id: fileIcon
@@ -38,7 +38,7 @@ Row {
             maximumLineCount: 1
             elide: Text.ElideMiddle
             Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width
-                                 - fileIcon.width - constraint - parent.spacing * 2
+                                 - fileIcon.width - constraint - parent.spacing * 3
         }
     }
 
