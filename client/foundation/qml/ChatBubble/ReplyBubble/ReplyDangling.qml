@@ -12,7 +12,9 @@ import "dyn"
 Pane {
     id: replyWrapper
 
-    background: ReplyBackground {}
+    background: ReplyBackground {
+        clickEnabled: false
+    }
     padding: CmnCfg.smallMargin
 
     contentHeight: unknownBody.height
