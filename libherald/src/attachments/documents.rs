@@ -41,7 +41,7 @@ impl Interface for DocumentAttachments {
                 .get(index)
                 .and_then(|p| p.file_name())
                 .and_then(OsStr::to_str)
-                .map(String::from_str),
+                .map(|p| p.to_string()),
             "".to_owned()
         )
     }

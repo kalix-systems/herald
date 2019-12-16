@@ -10,11 +10,13 @@ import "qrc:/imports/js/utils.mjs" as Utils
 ScrollView {
     width: parent.width
     height: wrapperRow.height
-    ScrollBar.horizontal: ScrollBar {}
+    ScrollBar.horizontal: ScrollBar {
+        policy: ScrollBar.AsNeeded
+    }
 
     Row {
         id: wrapperRow
-        height: 24
+        height: 28
         Layout.margins: CmnCfg.mediumMargin
         width: parent.width
         spacing: 5
@@ -37,8 +39,8 @@ ScrollView {
                     font.pixelSize: 13
                     font.weight: Font.Medium
                     elide: Text.ElideMiddle
-                    Layout.maximumWidth: 100 - fileSize.width - fileIcon.width
-                                         - CmnCfg.smallMargin * 2
+                    Layout.maximumWidth: chatTextArea.width - fileSize.width
+                                         - fileIcon.width - CmnCfg.smallMargin * 2
                 }
 
                 Text {
