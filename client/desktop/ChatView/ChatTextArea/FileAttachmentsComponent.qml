@@ -8,12 +8,11 @@ import "qrc:/imports" as Imports
 import "qrc:/imports/js/utils.mjs" as Utils
 
 ScrollView {
-    width: parent.width
-    height: wrapperRow.height
-    ScrollBar.horizontal: ScrollBar {
-        policy: ScrollBar.AlwaysOn
-        visible: true
-    }
+    width: chatTextArea.width
+    height: 30
+    focus: true
+    clip: true
+    ScrollBar.horizontal.policy: contentWidth > width ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
 
     Row {
         id: wrapperRow
@@ -48,7 +47,7 @@ ScrollView {
                     Layout.alignment: Qt.AlignVCenter
                     elide: Text.ElideMiddle
                     Layout.maximumWidth: chatTextArea.width - fileSize.width
-                                         - fileIcon.width - CmnCfg.smallMargin * 2
+                                         - clearFile.width - CmnCfg.smallMargin * 2
                 }
 
                 Text {

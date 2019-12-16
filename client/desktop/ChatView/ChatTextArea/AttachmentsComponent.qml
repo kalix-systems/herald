@@ -8,9 +8,10 @@ import "qrc:/imports" as Imports
 
 ScrollView {
     width: parent.width
-    height: wrapperRow.height
-    ScrollBar.horizontal: ScrollBar {}
+    height: wrapperRow.height + 10
 
+    clip: true
+    ScrollBar.horizontal.policy: contentWidth > width ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
     Row {
         id: wrapperRow
         height: 100

@@ -27,8 +27,6 @@ Rectangle {
     // summy file Dialog
     property alias attachmentsDialogue: attachmentsDialogue
 
-    // camera button
-    // property alias cameraButton: cameraButton
     property string replyText: ""
     property string replyName: ""
     property bool owned: replyUid === Herald.config.configId
