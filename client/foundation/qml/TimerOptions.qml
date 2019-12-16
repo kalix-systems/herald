@@ -75,9 +75,7 @@ Menu {
             text: name
             checkable: true
             checked: conversationItem.expirationPeriod === index
-            onTriggered: {
-                conversationItem.expirationPeriod = index
-            }
+            onTriggered: conversationItem.expirationPeriod = index
         }
 
         onObjectAdded: optMenu.insertItem(index, object)

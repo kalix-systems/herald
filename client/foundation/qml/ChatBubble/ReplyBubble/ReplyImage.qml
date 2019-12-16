@@ -1,30 +1,25 @@
-import QtQuick 2.12
 import QtQuick.Controls 2.12
 import QtQuick.Layouts 1.12
 import LibHerald 1.0
 import "../../js/utils.mjs" as Utils
+import "./js/utils.js" as JS
 import QtQuick 2.13
 import QtGraphicalEffects 1.12
 import "../"
-import "./js/utils.js" as JS
+import "."
 // Components that depend on dynamic scope
 import "dyn"
 
 Page {
     id: replyWrapper
 
+    // TODO move this into CmnCfg
+    readonly property real imageSize: 80
     property color opColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                     messageModelData.opAuthor)]
     property string replyBody: messageModelData.opBody
-    property int fileCount
-    readonly property real imageSize: 80
 
-    Component.onCompleted: {
-        replyWrapper.fileCount = JS.parseDocs(replyFileClip.nameMetrics,
-                                              messageModelData,
-                                              replyFileClip.fileSize, fileCount)
-        JS.parseMedia(messageModelData, imageClip)
-    }
+    Component.onCompleted: JS.parseMedia(messageModelData, imageClip)
 
     padding: CmnCfg.smallMargin
 
@@ -33,6 +28,7 @@ Page {
     header: ReplyLabel {
         id: replyLabel
     }
+
     contentHeight: wrapRow.implicitHeight
     contentWidth: wrapRow.implicitWidth
 
@@ -40,31 +36,24 @@ Page {
         id: wrapRow
         spacing: CmnCfg.smallMargin
 
-        Column {
+        Item {
             id: replyWrapperCol
-            spacing: CmnCfg.smallMargin
-
-            width: imageAttach ? (300 - imageClip.width) : ReplyWidthCalc.hybrid(
+            height: 64
+            width: imageAttach ? 300 : ReplyWidthCalc.image(
                                      bubbleRoot.maxWidth,
                                      contentRoot.unameWidth, messageBody.width,
                                      contentRoot.messageStamps.width,
                                      replyLabel.opNameWidth,
-                                     replyElidedBody.width,
-                                     replyTimeInfo.width, replyFileClip.width)
-            ReplyFileClip {
-                id: replyFileClip
-                constraint: imageSize
-            }
-
-            ReplyFileSurplus {}
-
+                                     replyElidedBody.width, replyTimeInfo.width)
             ReplyElidedBody {
+                anchors.top: parent.top
                 id: replyElidedBody
                 elideConstraint: imageSize
                 maximumWidth: bubbleRoot.maxWidth - imageSize
             }
 
             ReplyTimeInfo {
+                anchors.bottom: parent.bottom
                 id: replyTimeInfo
             }
         }

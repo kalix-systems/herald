@@ -93,25 +93,6 @@ ListView {
         bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
         topPadding: isHead ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
 
-        Component {
-            id: std
-            CB.StandardBubble {
-                body: proxyBody
-                friendlyTimestamp: timestamp
-                authorName: authName
-                receiptImage: proxyReceiptImage
-                authorColor: userColor
-                elided: chatRow.elided
-                medAttachments: mediaAttachments
-                documentAttachments: docAttachments
-                imageAttach: mediaAttachments.length !== 0
-                docAttach: docAttachments.length !== 0
-                replyId: opMsgId
-                reply: replyType > 0
-                maxWidth: chatListView.width * 0.66
-                messageModelData: chatRow.messageModelData
-            }
-        }
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
@@ -122,6 +103,7 @@ ListView {
                 margins: CmnCfg.margin
                 bottomMargin: parent.bottomPadding
             }
+
             z: 10
             pfpPath: parent.pfpUrl
             avatarHeight: 28
@@ -129,12 +111,9 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            color: CmnCfg.palette.lightGrey
-            senderColor: userColor
             convContainer: convWindow
-            highlight: matchStatus === 2
-            content: std
-            maxWidth: chatListView.width * 0.66
+            defaultWidth: chatListView.width * 0.66
+            messageModelData: chatRow.messageModelData
 
             ChatBubbleHover {}
         }

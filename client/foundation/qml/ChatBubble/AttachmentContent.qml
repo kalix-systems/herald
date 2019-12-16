@@ -6,7 +6,7 @@ import QtGraphicalEffects 1.12
 
 ColumnLayout {
     id: wrapperCol
-    property real maxWidth: Math.min(bubbleRoot.maxWidth, 600)
+    property real maxWidth: Math.min(contentRoot.maxWidth, 600)
     property var mediaParsed
     // callback triggered whenever an image is tapped
     property var imageTappedCallBack: function (source) {
@@ -58,18 +58,16 @@ ColumnLayout {
     Loader {
         id: imageLoader
 
-        Layout.margins: CmnCfg.smallMargin
-
-        DropShadow {
-            source: parent.item
-            anchors.fill: parent.item
-            horizontalOffset: 3
-            verticalOffset: 3
-            radius: 8.0
-            samples: 12
-            color: CmnCfg.palette.black
-            opacity: 0.55
-        }
+           DropShadow {
+               source: parent.item
+               anchors.fill: parent.item
+               horizontalOffset: 3
+               verticalOffset: 3
+               radius: 8.0
+               samples: 12
+               color: CmnCfg.palette.black
+               opacity: 0.55
+           }
     }
 
     Component {

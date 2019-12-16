@@ -14,18 +14,18 @@ export function friendlyFileSize(byteSize: number): string {
     return byteSize + " B";
   }
 
-  if (byteSize < 10**6) {
+  if (byteSize < 10 ** 6) {
     const kb = byteSize / 1000;
     return Math.round(kb) + " KB";
   }
 
-  if (byteSize < 10**9) {
-    const mb = byteSize / 10**6;
-    return Math.round(10*mb) / 10 + " MB";
+  if (byteSize < 10 ** 9) {
+    const mb = byteSize / 10 ** 6;
+    return Math.round(10 * mb) / 10 + " MB";
   }
 
-  const gb = byteSize / 10**9;
-  return Math.round(10*gb) / gb + " GB";
+  const gb = byteSize / 10 ** 9;
+  return Math.round(10 * gb) / gb + " GB";
 }
 
 export function friendlyTimestamp(msEpochTime: number): string {
@@ -175,32 +175,33 @@ export function safeStringOrDefault(
 }
 
 export function initialize(name: string): string {
-    const tokens = name.split(' ').slice(0, 3)
-    var str = ""
-    tokens.forEach(function anon(string) {
-        str += string[0].toUpperCase()
-    })
-    return str
+  const tokens = name.split(" ").slice(0, 3);
+  var str = "";
+  tokens.forEach(function anon(string) {
+    str += string[0].toUpperCase();
+  });
+  return str;
 }
 
 /*
  * returns the uri of an icon corresponding to the
  * receipt code
  * */
-export function receiptCodeSwitch(receiptCode: number): string {
+export function receiptCodeSwitch(receiptCode: MessageReceiptStatus): string {
   switch (receiptCode) {
-    case 0: {
+    case MessageReceiptStatus.NoAck: {
       return "";
     }
-    case 1: {
+    case MessageReceiptStatus.Received: {
       return "qrc:/single-check-receipt-icon.svg";
     }
-    case 2: {
+    case MessageReceiptStatus.Read: {
       return "qrc:/double-check-receipt-icon.svg";
     }
-    case 3: {
+    case MessageReceiptStatus.AckTerminal: {
       return "qrc:/single-check-receipt-icon.svg";
     }
+    default:
+      return "";
   }
-  return "";
 }
