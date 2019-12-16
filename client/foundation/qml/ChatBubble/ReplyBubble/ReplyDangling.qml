@@ -12,7 +12,10 @@ import "dyn"
 Rectangle {
     id: replyWrapper
 
-    color: CmnCfg.palette.medGrey
+    color: CmnCfg.palette.white
+    border.color: CmnCfg.palette.black
+    border.width: 1
+    anchors.margins: CmnCfg.smallMargin
 
     height: unknownBody.height * 2
     width: {
@@ -20,19 +23,20 @@ Rectangle {
         if (imageAttach)
             return 300
 
-        const bodyMax = Math.max(contentRoot.messageLabel.width,
-                                 contentRoot.messageBody.width)
+        const bodyMax = Math.max(contentRoot.unameWidth, messageBody.width)
 
-        if (unknownBody.width > contentRoot.messageBody.width) {
+        if (unknownBody.width > messageBody.width) {
             return Math.min(Math.max(unknownBody.width, bodyMax),
-                            bubbleRoot.maxWidth)
+                            bubbleRoot.maxWidth) + CmnCfg.smallMargin * 2
         } else {
-            return bodyMax
+            return bodyMax + CmnCfg.smallMargin * 2
         }
     }
 
     StandardTextEdit {
         id: unknownBody
+        rowSpacing: CmnCfg.smallMargin
+        columnSpacing: CmnCfg.smallMargin
         maximumWidth: bubbleRoot.maxWidth
         text: qsTr("Original message not found")
     }

@@ -65,7 +65,7 @@ Pane {
         // Text edit alias
         readonly property alias messageBody: messageBody
         /// User name label alias
-        readonly property real unameWidth: authorNameTM.width
+        readonly property real unameWidth: authorLabel.authorNameTM.width
         // Stamps alias
         readonly property alias messageStamps: messageStamps
 
@@ -136,7 +136,6 @@ Pane {
             Loader {
                 id: imageLoader
                 sourceComponent: imageAttach ? image : undefined
-
                 //image component
                 Component {
                     id: image
