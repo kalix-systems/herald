@@ -21,7 +21,7 @@ Item {
     property int lastReceipt: 0
     property string lastAuthor
     property color labelColor
-    property int labelSize: 11
+    property int labelSize
 
     // labeling constants
     GridLayout {

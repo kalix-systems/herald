@@ -5,7 +5,6 @@ import LibHerald 1.0
 import QtGraphicalEffects 1.12
 import "./../"
 import Qt.labs.platform 1.1
-import QtQuick.Dialogs 1.3
 import "../js/utils.mjs" as Utils
 
 Row {
@@ -71,11 +70,9 @@ Row {
 
             FileDialog {
                 id: fileChooser
-                selectFolder: true
                 folder: StandardPaths.writableLocation(
                             StandardPaths.DesktopLocation)
                 onAccepted: Herald.utils.saveFile(path, fileUrl)
-                selectExisting: false
             }
         }
     }

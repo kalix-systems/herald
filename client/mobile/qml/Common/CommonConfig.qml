@@ -31,9 +31,9 @@ Item {
 
     /// Font sizes, IMPORTANT: these are in PT, not pixels
     /// standard chat text size
-    property int chatTextSize: 14
+    property int chatTextSize: 16
     /// Chat preview size
-    property int chatPreviewSize: 15
+    property int chatPreviewSize: 18
     /// standard header size
     property int headerTextSize: 20
     /// standard button text size

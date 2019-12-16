@@ -39,6 +39,8 @@ Rectangle {
             initials: Utils.initialize(title)
             size: CmnCfg.units.dp(56)
             avatarHeight: CmnCfg.units.dp(48)
+            topTextMargin: CmnCfg.units.dp(8)
+            bottomTextMargin: CmnCfg.units.dp(12)
 
             anchors {
                 right: parent.right

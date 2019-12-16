@@ -38,7 +38,7 @@ ToolBar {
             Label {
                 text: title
                 font {
-                    pixelSize: CmnCfg.chatPreviewSize
+                    pixelSize: CmnCfg.headerTextSize
                     family: CmnCfg.labelFont.name
                     bold: true
                 }

@@ -75,7 +75,6 @@ Column {
                 labelComponent: ConversationLabel {
                     contactName: contactData.name
                     labelColor: CmnCfg.palette.black
-                    labelSize: 8
                     lastBody: "@" + contactData.userId
                 }
             }
