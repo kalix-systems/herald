@@ -7,16 +7,20 @@ Label {
     id: authorLabel
     text: authorName
     property alias authorNameTM: authorNameTM
-    anchors.top: parent.top
-    anchors.left: parent.left
-    anchors.right: parent.right
+
+    anchors {
+        top: parent.top
+        left: parent.left
+        right: parent.right
+    }
+    padding: CmnCfg.smallMargin / 4
+    leftPadding: CmnCfg.smallMargin / 2
+
     horizontalAlignment: Text.AlignLeft
     font.weight: Font.Bold
     font.family: CmnCfg.chatFont.name
-    padding: CmnCfg.smallMargin / 4
-    color: CmnCfg.palette.white
 
-    leftPadding: CmnCfg.smallMargin / 2
+    color: CmnCfg.palette.white
     background: Rectangle {
         color: authorColor
         border.color: Qt.darker(color, 1.3)
