@@ -5,7 +5,7 @@ import LibHerald 1.0
 Rectangle {
     color: CmnCfg.palette.lightGrey
     anchors.fill: parent
-    border.color: "black"
+    border.color: CmnCfg.palette.black
     border.width: 1
     ReplyMouseArea {}
 }
