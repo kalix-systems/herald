@@ -68,16 +68,7 @@ Page {
                                                        mWidth, rWidth,
                                                        replyFileClip.width)))
 
-                //     let imageWidth
-                //     if ((mWidth - rWidth) < 80) {
-                //         imageWidth = Math.min(bubWidth, rWidth)
-                //         console.log("that")
-                //     } else {
-                //         imageWidth = Math.min(bubWidth, mWidth)
-                //         console.log("this")
-                //     }
-
-                //     return Math.max(docWidth, imageWidth)
+                return docWidth
             }
 
             ReplyFileClip {
