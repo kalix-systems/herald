@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.12
 
 Label {
     id: authorLabel
-    text: authorName
+    text: authorNameTM.elidedText
     property alias authorNameTM: authorNameTM
 
     anchors {
@@ -31,5 +31,7 @@ Label {
     TextMetrics {
         id: authorNameTM
         text: authorName
+        elideWidth: bubbleRoot.maxWidth
+        elide: Text.ElideRight
     }
 }
