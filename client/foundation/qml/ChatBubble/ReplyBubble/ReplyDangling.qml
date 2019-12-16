@@ -9,16 +9,14 @@ import "../"
 // Components that depend on dynamic scope
 import "dyn"
 
-Rectangle {
+Pane {
     id: replyWrapper
 
-    color: CmnCfg.palette.white
-    border.color: CmnCfg.palette.black
-    border.width: 1
-    anchors.margins: CmnCfg.smallMargin
+    background: ReplyBackground {}
+    padding: CmnCfg.smallMargin
 
-    height: unknownBody.height * 2
-    width: {
+    contentHeight: unknownBody.height
+    contentWidth: {
         // TODO move this and other complex layout calculations into Rust or C++
         if (imageAttach)
             return 300
@@ -27,16 +25,14 @@ Rectangle {
 
         if (unknownBody.width > messageBody.width) {
             return Math.min(Math.max(unknownBody.width, bodyMax),
-                            bubbleRoot.maxWidth) + CmnCfg.smallMargin * 2
+                            bubbleRoot.maxWidth)
         } else {
-            return bodyMax + CmnCfg.smallMargin * 2
+            return bodyMax
         }
     }
 
     StandardTextEdit {
         id: unknownBody
-        rowSpacing: CmnCfg.smallMargin
-        columnSpacing: CmnCfg.smallMargin
         maximumWidth: bubbleRoot.maxWidth
         text: qsTr("Original message not found")
     }
