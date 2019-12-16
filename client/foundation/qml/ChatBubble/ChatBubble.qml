@@ -43,6 +43,7 @@ Pane {
     contentWidth: Math.max(contentRoot.width, contentRoot.unameWidth)
     contentHeight: contentRoot.height
     padding: CmnCfg.smallMargin
+
     background: Rectangle {
         id: background
         color: CmnCfg.palette.white

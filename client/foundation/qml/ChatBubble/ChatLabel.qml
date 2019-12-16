@@ -8,11 +8,8 @@ Label {
     text: authorNameTM.elidedText
     property alias authorNameTM: authorNameTM
 
-    anchors {
-        top: parent.top
-        left: parent.left
-        right: parent.right
-    }
+    width: parent.width
+    anchors.top: parent.top
 
     padding: CmnCfg.smallMargin / 4
     leftPadding: CmnCfg.smallMargin / 2
@@ -34,12 +31,7 @@ Label {
         text: authorName
         font.weight: Font.Bold
         font.family: CmnCfg.chatFont.name
-        elideWidth: {
-            if (imageAttach) {
-                return 300
-            }
-                bubbleRoot.maxWidth
-        }
+        elideWidth: imageAttach ? 300 : bubbleRoot.maxWidth
         elide: Text.ElideRight
     }
 }
