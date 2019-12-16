@@ -71,15 +71,6 @@ Page {
                 anchors.bottom: parent.bottom
                 id: replyTimeInfo
             }
-
-            // Debug component
-            //Rectangle {
-            //    anchors.fill: parent
-            //    opacity: 0.5
-            //    color: "blue"
-            //    border.color: "black"
-            //    border.width: 1
-            //}
         }
 
         ReplyImageClip {

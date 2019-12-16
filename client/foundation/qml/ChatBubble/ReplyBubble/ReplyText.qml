@@ -44,7 +44,7 @@ Page {
         const bubWidth = bubbleRoot.maxWidth
 
         return Math.min(bubWidth, Math.max(rWidth,
-                                           mWidth) + CmnCfg.smallMargin * 2)
+                                           mWidth)) //+ CmnCfg.smallMargin * 2)
     }
 
     Column {
@@ -52,7 +52,7 @@ Page {
         spacing: CmnCfg.smallMargin
         ReplyElidedBody {
             id: replyElidedBody
-            maximumWidth: bubbleRoot.maxWidth - CmnCfg.smallMargin * 2
+            maximumWidth: bubbleRoot.maxWidth // - CmnCfg.smallMargin * 2
         }
 
         ReplyTimeInfo {

@@ -39,7 +39,7 @@ Row {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - 20
+                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - fileIcon.width
                                      - CmnCfg.smallMargin * 2 - downloadList.width
             }
 
