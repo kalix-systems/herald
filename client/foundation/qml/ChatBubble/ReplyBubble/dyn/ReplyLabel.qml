@@ -6,7 +6,7 @@ import QtQuick.Layouts 1.12
 Label {
     id: replyLabel
     readonly property real opNameWidth: opNameTM.width
-    text: opNameTM.text
+    text: opNameTM.elidedText
     font.weight: Font.Bold
     font.family: CmnCfg.chatFont.name
 
@@ -24,5 +24,14 @@ Label {
     TextMetrics {
         id: opNameTM
         text: Herald.users.nameById(messageModelData.opAuthor)
+        font.weight: Font.Bold
+        font.family: CmnCfg.chatFont.name
+        elideWidth: {
+            if (imageAttach) {
+                return 300
+            }
+            bubbleRoot.maxWidth
+        }
+        elide: Text.ElideRight
     }
 }

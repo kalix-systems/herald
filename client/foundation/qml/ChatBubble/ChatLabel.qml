@@ -34,7 +34,12 @@ Label {
         text: authorName
         font.weight: Font.Bold
         font.family: CmnCfg.chatFont.name
-        elideWidth: bubbleRoot.maxWidth
+        elideWidth: {
+            if (imageAttach) {
+                return 300
+            }
+                bubbleRoot.maxWidth
+        }
         elide: Text.ElideRight
     }
 }
