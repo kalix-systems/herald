@@ -57,16 +57,23 @@ ListView {
     boundsBehavior: ListView.StopAtBounds
     boundsMovement: Flickable.StopAtBounds
 
-    model: ownedConversation
+    model: chatPane.ownedConversation
 
     Component.onCompleted: {
-        ownedConversation.setElisionLineCount(38)
-        ownedConversation.setElisionCharCount(38 * 40)
-        ownedConversation.setElisionCharsPerLine(40)
+        model.setElisionLineCount(38)
+        model.setElisionCharCount(38 * 40)
+        model.setElisionCharsPerLine(40)
         positionViewAtEnd()
 
         // heuristic overshoot
         chatScrollBarInner.setPosition(2)
+    }
+
+    Connections {
+        target: model
+        onRowsInserted: {
+            chatListView.contentY = chatListView.contentHeight
+        }
     }
 
     delegate: Row {
@@ -119,7 +126,7 @@ ListView {
 
         CB.ChatBubble {
             id: bubbleActual
-            convContainer: convWindow
+            convContainer: chatListView
             defaultWidth: chatListView.width * 0.66
             messageModelData: chatRow.messageModelData
 
