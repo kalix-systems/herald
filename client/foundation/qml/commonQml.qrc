@@ -14,6 +14,7 @@
         <file>ButtonForm.qml</file>
         <file>ChatBubble/AttachmentContent.qml</file>
         <file>ChatBubble/ChatBubble.qml</file>
+        <file>ChatBubble/Highlight.qml</file>
         <file>ChatBubble/ChatLabel.qml</file>
         <file>ChatBubble/DocFileItem.qml</file>
         <file>ChatBubble/ElideHandler.qml</file>
@@ -21,12 +22,20 @@
         <file>ChatBubble/FourImageLayout.qml</file>
         <file>ChatBubble/MultiImageLayout.qml</file>
         <file>ChatBubble/OneImageLayout.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyDangling.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyDoc.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyHybrid.qml</file>
         <file>ChatBubble/ReplyBubble/ReplyImageClip.qml</file>
-        <file>ChatBubble/ReplyBubble/StdReply.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyImage.qml</file>
+        <file>ChatBubble/ReplyBubble/ReplyText.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyElidedBody.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyFileClip.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyFileSurplus.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyMouseArea.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyTimeInfo.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyLabel.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyVerticalAccent.qml</file>
         <file>ChatBubble/ReplyBubble/js/utils.js</file>
-        <file>ChatBubble/StandardBubble.qml</file>
         <file>ChatBubble/StandardStamps.qml</file>
         <file>ChatBubble/StandardTextEdit.qml</file>
         <file>ChatBubble/ThreeImageLayout.qml</file>
@@ -46,5 +55,6 @@
         <file>themes/MetaThemes.qml</file>
         <file>themes/SolarizedDark.qml</file>
         <file>themes/SolarizedLight.qml</file>
+        <file>ChatBubble/ReplyBubble/dyn/ReplyBackground.qml</file>
     </qresource>
 </RCC>

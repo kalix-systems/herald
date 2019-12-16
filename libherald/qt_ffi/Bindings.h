@@ -18,6 +18,7 @@ class Members;
 class MessageBuilder;
 class MessageSearch;
 class Messages;
+class ReplyWidthCalc;
 class Users;
 class UsersSearch;
 class Utils;
@@ -34,6 +35,7 @@ using MembersPtrBundle = struct MembersPtrBundle;
 using MessageBuilderPtrBundle = struct MessageBuilderPtrBundle;
 using MessageSearchPtrBundle = struct MessageSearchPtrBundle;
 using MessagesPtrBundle = struct MessagesPtrBundle;
+using ReplyWidthCalcPtrBundle = struct ReplyWidthCalcPtrBundle;
 using UsersPtrBundle = struct UsersPtrBundle;
 using UsersSearchPtrBundle = struct UsersSearchPtrBundle;
 using UtilsPtrBundle = struct UtilsPtrBundle;
@@ -544,6 +546,9 @@ struct MessagesPtrBundle {
   void (*messages_begin_remove_rows)(Messages *, int, int);
   void (*messages_end_remove_rows)(Messages *);
 };
+struct ReplyWidthCalcPtrBundle {
+  ReplyWidthCalc *reply_width_calc;
+};
 struct UsersPtrBundle {
   Users *users;
   void (*users_filter_changed)(Users *);
@@ -596,6 +601,7 @@ class Config : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -656,6 +662,7 @@ class ConversationBuilder : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -733,6 +740,7 @@ class ConversationContent : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -811,6 +819,7 @@ class Conversations : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -904,6 +913,7 @@ class DocumentAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -970,6 +980,7 @@ class Errors : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1004,6 +1015,7 @@ class Herald : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1126,6 +1138,7 @@ class MediaAttachments : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1191,6 +1204,7 @@ class Members : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1275,6 +1289,7 @@ class MessageBuilder : public QAbstractItemModel {
   friend class Members;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1390,6 +1405,7 @@ class MessageSearch : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1476,6 +1492,7 @@ class Messages : public QAbstractItemModel {
   friend class Members;
   friend class MessageBuilder;
   friend class MessageSearch;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
   friend class Utils;
@@ -1607,6 +1624,59 @@ Q_SIGNALS:
   void searchPatternChanged();
   void searchRegexChanged();
 };
+class ReplyWidthCalc : public QObject {
+  Q_OBJECT
+  friend class Config;
+  friend class ConversationBuilder;
+  friend class ConversationContent;
+  friend class Conversations;
+  friend class DocumentAttachments;
+  friend class Errors;
+  friend class Herald;
+  friend class MediaAttachments;
+  friend class Members;
+  friend class MessageBuilder;
+  friend class MessageSearch;
+  friend class Messages;
+  friend class Users;
+  friend class UsersSearch;
+  friend class Utils;
+
+public:
+  class Private;
+
+private:
+  Private *m_d;
+  bool m_ownsPrivate;
+  explicit ReplyWidthCalc(bool owned, QObject *parent);
+
+public:
+  explicit ReplyWidthCalc(QObject *parent = nullptr);
+  ~ReplyWidthCalc() override;
+  Q_INVOKABLE double doc(double bubble_max_width, double message_label_width,
+                         double message_body_width, double stamp_width,
+                         double reply_label_width, double reply_body_width,
+                         double reply_ts_width,
+                         double reply_file_clip_width) const;
+  Q_INVOKABLE double hybrid(double bubble_max_width, double message_label_width,
+                            double message_body_width, double stamp_width,
+                            double reply_label_width, double reply_body_width,
+                            double reply_ts_width,
+                            double reply_file_clip_width) const;
+  Q_INVOKABLE double image(double bubble_max_width, double message_label_width,
+                           double message_body_width, double stamp_width,
+                           double reply_label_width, double reply_body_width,
+                           double reply_ts_width) const;
+  Q_INVOKABLE double text(double bubble_max_width, double message_label_width,
+                          double message_body_width, double stamp_width,
+                          double reply_label_width, double reply_body_width,
+                          double reply_ts_width) const;
+  Q_INVOKABLE double unknown(double bubble_max_width,
+                             double message_label_width,
+                             double message_body_width,
+                             double unknown_body_width) const;
+Q_SIGNALS:
+};
 class Users : public QAbstractItemModel {
   Q_OBJECT
   friend class Config;
@@ -1621,6 +1691,7 @@ class Users : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class UsersSearch;
   friend class Utils;
 
@@ -1714,6 +1785,7 @@ class UsersSearch : public QAbstractItemModel {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class Utils;
 
@@ -1794,6 +1866,7 @@ class Utils : public QObject {
   friend class MessageBuilder;
   friend class MessageSearch;
   friend class Messages;
+  friend class ReplyWidthCalc;
   friend class Users;
   friend class UsersSearch;
 

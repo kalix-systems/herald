@@ -656,6 +656,8 @@ declare enum ScrollBarPolicy {
 
 declare class ScrollBar extends Item {
   policy: ScrollBarPolicy;
+  position: number;
+  setPosition(pos: number): void;
   increase(): void;
   decrease(): void;
 }
@@ -666,6 +668,7 @@ declare class ListView<T extends Item> extends Flickable {
   itemAtIndex(index: number): Item;
 
   positionViewAtEnd(): void;
+  forceLayout(): void;
   positionViewAtBeginning(): void;
 }
 

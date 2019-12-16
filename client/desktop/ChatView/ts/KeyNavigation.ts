@@ -14,22 +14,29 @@ export function convWindowKeyHandler(
       chatListView.contentY -= chatListView.height;
       break;
     case Qt.Key_Home:
-      chatListView.positionViewAtBeginning();
+      toBeginning(chatListView);
       break;
     case Qt.Key_End:
-      chatListView.positionViewAtEnd();
+      toEnd(chatListView);
       break;
     case Qt.Key_Up:
-      chatScrollBar.decrease();
+      moveUp(chatScrollBar);
       break;
     case Qt.Key_Down:
-      chatScrollBar.increase();
+      moveDown(chatScrollBar);
+      break;
+    case Qt.Key_G:
+      if (event.modifiers & Qt.ShiftModifier) {
+        toEnd(chatListView);
+      } else {
+        toBeginning(chatListView);
+      }
       break;
     case Qt.Key_J:
-      chatScrollBar.increase();
+      moveDown(chatScrollBar);
       break;
     case Qt.Key_K:
-      chatScrollBar.decrease();
+      moveUp(chatScrollBar);
       break;
     case Qt.Key_Space:
       if (event.modifiers & Qt.ShiftModifier) {
@@ -40,4 +47,29 @@ export function convWindowKeyHandler(
       break;
   }
   chatScrollBar.policy = asNeededPolicy;
+}
+
+function moveDown(chatScrollBar: ScrollBar): void {
+  chatScrollBar.increase();
+}
+
+function moveUp(chatScrollBar: ScrollBar): void {
+  chatScrollBar.decrease();
+}
+
+function toEnd(chatListView: ListView<Message>): void {
+  // this is a workaround to the ListView's efficiency heurisitics
+  // if someone else knows a better way, please fix this. This doesn't even
+  // quite work
+  chatListView.positionViewAtEnd();
+  chatListView.forceLayout();
+  chatListView.positionViewAtEnd();
+}
+
+function toBeginning(chatListView: ListView<Message>): void {
+  // this is a workaround to the ListView's efficiency heurisitics
+  // if someone else knows a better way, please fix this
+  chatListView.contentY = 0;
+  chatListView.forceLayout();
+  chatListView.contentY = 0;
 }

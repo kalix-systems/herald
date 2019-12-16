@@ -15,22 +15,3 @@ export function formatSummary(author, body) {
         return "";
     }
 }
-//see herald_common/types.rs
-export function receiptStatusSwitch(receipt) {
-    switch (receipt) {
-        case 0: {
-            // animated svg in the future
-            return "";
-        }
-        case 1: {
-            return "qrc:/single-check-receipt-icon.svg";
-        }
-        case 2: {
-            return "qrc:/double-check-receipt-icon.svg";
-        }
-        case 3: {
-            return "qrc:/single-check-receipt-icon.svg";
-        }
-    }
-    return "";
-}

@@ -13,7 +13,6 @@ MouseArea {
     width: parent.width + 50
 
     anchors {
-        // Ternary is okay, types are enforced, cases are explicit.
         left: !outbound ? parent.left : undefined
         right: outbound ? parent.right : undefined
         bottom: parent.bottom
