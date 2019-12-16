@@ -8,32 +8,36 @@ import Qt.labs.platform 1.1
 //import QtQuick.Dialogs 1.3
 import "../js/utils.mjs" as Utils
 
-ListView {
-    id: docFileItemRoot
-    interactive: false
-    width: contentItem.childrenRect.width
-    height: contentItem.childrenRect.height
-    spacing: CmnCfg.smallMargin / 2
+Item {
+    property alias fileModel: docFileItemRoot.model
+    property alias downloadModel: downloadList.model
+    height: childrenRect.height
+    width: childrenRect.width
 
     Rectangle {
         anchors.fill: parent
-        border.color: "black"
-        border.width: 1
-        opacity: 0
+        color: "red"
+        opacity: 0.5
     }
 
-    delegate: Item {
-        id: fileRow
-        width: contentWidth
-        height: 20
-        clip: true
+    ListView {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        id: docFileItemRoot
+        interactive: false
+        width: contentItem.childrenRect.width
+        height: contentItem.childrenRect.height
+        spacing: CmnCfg.smallMargin / 2
 
-        RowLayout {
+        Rectangle {
+            anchors.fill: parent
+            border.color: "black"
+            border.width: 1
+            opacity: 0
+        }
 
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: CmnCfg.smallMargin
-
+        delegate: RowLayout {
+            clip: true
             Image {
                 id: fileIcon
                 source: "qrc:/file-icon.svg"
@@ -48,8 +52,8 @@ ListView {
                 font.pixelSize: 13
                 font.weight: Font.Medium
                 elide: Text.ElideMiddle
-                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - 40
-                                     - CmnCfg.smallMargin * 2
+                Layout.maximumWidth: bubbleRoot.maxWidth - fileSize.width - 20
+                                     - CmnCfg.smallMargin * 2 - downloadList.width
             }
 
             Text {
@@ -62,22 +66,29 @@ ListView {
             }
         }
 
-        ButtonForm {
-            id: downloadIcon
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.right: parent.right
-            source: "qrc:/download-icon.svg"
-            icon.width: 20
-            icon.height: 20
-            fill: CmnCfg.palette.black
-            onClicked: fileChooser.open()
-        }
-
         FileDialog {
             id: fileChooser
             folder: StandardPaths.writableLocation(
                         StandardPaths.DesktopLocation)
             onAccepted: Herald.utils.saveFile(path, fileUrl)
+        }
+    }
+
+    ListView {
+        id: downloadList
+        height: contentItem.childrenRect.height
+        width: contentItem.childrenRect.width
+        anchors.right: parent.right
+        anchors.top: parent.top
+        spacing: CmnCfg.smallMargin / 2
+        delegate: ButtonForm {
+            id: downloadIcon
+            //anchors.verticalCenter: parent.verticalCenter
+            source: "qrc:/download-icon.svg"
+            icon.width: 20
+            icon.height: 20
+            fill: CmnCfg.palette.black
+            onClicked: fileChooser.open()
         }
     }
 }

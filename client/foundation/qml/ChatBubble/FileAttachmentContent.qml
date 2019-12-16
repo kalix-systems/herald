@@ -22,6 +22,7 @@ Column {
     }
 
     DocFileItem {
-        model: docModel
+        fileModel: docModel
+        downloadModel: docModel
     }
 }
