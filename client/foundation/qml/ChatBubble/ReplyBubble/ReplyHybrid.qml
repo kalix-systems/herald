@@ -51,31 +51,6 @@ Page {
                                      replyLabel.opNameWidth,
                                      replyElidedBody.width,
                                      replyTimeInfo.width, replyFileClip.width)
-            //width: {
-            //    if (imageAttach)
-            //        return 300 - imageClip.width
-
-            //    const rLabelWidth = replyLabel.opNameWidth
-            //    const labelWidth = contentRoot.unameWidth
-
-            //    const bodyWidth = messageBody.width
-            //    const rBodyWidth = replyElidedBody.width
-
-            //    const stampWidth = contentRoot.messageStamps.width
-            //    const rTsWidth = replyTimeInfo.width
-
-            //    const rWidth = Math.max(rLabelWidth, rBodyWidth, rTsWidth)
-            //    const mWidth = Math.max(labelWidth, bodyWidth, stampWidth)
-
-            //    const bubWidth = bubbleRoot.maxWidth - imageSize
-
-            //    const docWidth = Math.max(150,
-            //                              Math.min(bubWidth, Math.max(
-            //                                           mWidth, rWidth,
-            //                                           replyFileClip.width)))
-
-            //    return docWidth
-            //}
             ReplyFileClip {
                 id: replyFileClip
                 constraint: imageSize

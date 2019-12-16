@@ -36,9 +36,9 @@ int main(int argc, char* argv[])
         Q_UNUSED(engine);
         Q_UNUSED(scriptEngine);
 
-        ReplyWidthCalc* state = new ReplyWidthCalc();
+        ReplyWidthCalc* rw_calc = new ReplyWidthCalc();
 
-        return state;
+        return rw_calc;
       });
 
   qmlRegisterAnonymousType<Users>("LibHerald", 1);

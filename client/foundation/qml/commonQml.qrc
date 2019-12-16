@@ -57,7 +57,4 @@
         <file>themes/SolarizedLight.qml</file>
         <file>ChatBubble/ReplyBubble/dyn/ReplyBackground.qml</file>
     </qresource>
-    <qresource prefix="/">
-        <file>ChatBubble/ReplyBubble/dyn/ReplyBackground.qml</file>
-    </qresource>
 </RCC>

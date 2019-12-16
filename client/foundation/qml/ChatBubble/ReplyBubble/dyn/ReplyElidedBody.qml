@@ -15,6 +15,7 @@ GridLayout {
         text: opBodyTextMetrics.elidedText
 
         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+
         Layout.alignment: Qt.AlignLeft
         font.family: CmnCfg.chatFont.name
         color: CmnCfg.palette.black

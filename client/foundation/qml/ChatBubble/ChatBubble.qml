@@ -40,7 +40,7 @@ Pane {
                                                messageModelData.receiptStatus)
     readonly property color authorColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                  authorId)]
-    contentWidth: contentRoot.width
+    contentWidth: Math.max(contentRoot.width, contentRoot.unameWidth)
     contentHeight: contentRoot.height
     padding: CmnCfg.smallMargin
     background: Rectangle {

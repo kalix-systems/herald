@@ -13,6 +13,7 @@ Label {
         left: parent.left
         right: parent.right
     }
+
     padding: CmnCfg.smallMargin / 4
     leftPadding: CmnCfg.smallMargin / 2
 
