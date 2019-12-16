@@ -3,7 +3,7 @@ use crate::interface::{
     DocumentAttachmentsTrait as Interface,
 };
 use crate::{err, none};
-use std::{ffi::OsStr, path::PathBuf, str::FromStr};
+use std::{ffi::OsStr, path::PathBuf};
 
 /// Document attachments
 pub struct DocumentAttachments {
