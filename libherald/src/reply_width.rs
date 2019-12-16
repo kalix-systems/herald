@@ -16,6 +16,7 @@ impl Interface for ReplyWidthCalc {
         &mut self.0
     }
 
+    #[inline]
     fn unknown(
         &self,
         bubble_max_width: f64,
@@ -32,6 +33,7 @@ impl Interface for ReplyWidthCalc {
         }
     }
 
+    #[inline]
     fn hybrid(
         &self,
         bubble_max_width: f64,
@@ -53,6 +55,7 @@ impl Interface for ReplyWidthCalc {
         SENSIBLE_MIN.max(adjusted_bub_width.min(content_max))
     }
 
+    #[inline]
     fn image(
         &self,
         bubble_max_width: f64,
@@ -73,6 +76,7 @@ impl Interface for ReplyWidthCalc {
         adjusted_bub_width.min(content_max)
     }
 
+    #[inline]
     fn text(
         &self,
         bubble_max_width: f64,
@@ -91,6 +95,7 @@ impl Interface for ReplyWidthCalc {
         bubble_max_width.min(content_max)
     }
 
+    #[inline]
     fn doc(
         &self,
         bubble_max_width: f64,
