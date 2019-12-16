@@ -88,6 +88,7 @@ ListView {
             rightMargin: CmnCfg.margin
             leftMargin: CmnCfg.smallMargin
         }
+        layoutDirection: outbound ? Qt.RightToLeft : Qt.LeftToRight
 
         spacing: CmnCfg.margin
         bottomPadding: isTail ? CmnCfg.mediumMargin / 2 : CmnCfg.smallMargin / 2
@@ -96,7 +97,7 @@ ListView {
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
-            opacity: isTail && !outbound ? 1 : 0
+            opacity: isTail ? 1 : 0
             size: 28
             anchors {
                 bottom: parent.bottom
@@ -116,21 +117,6 @@ ListView {
             messageModelData: chatRow.messageModelData
 
             ChatBubbleHover {}
-        }
-
-        AvatarMain {
-            iconColor: userColor
-            initials: authName[0].toUpperCase()
-            opacity: isTail && outbound ? 1 : 0
-            size: 28
-            anchors {
-                bottom: parent.bottom
-                margins: CmnCfg.margin
-                bottomMargin: parent.bottomPadding
-            }
-            z: 10
-            pfpPath: parent.pfpUrl
-            avatarHeight: 28
         }
     }
 }
