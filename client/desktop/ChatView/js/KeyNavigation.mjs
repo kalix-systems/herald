@@ -9,8 +9,10 @@ export function convWindowKeyHandler(event, chatScrollBar, chatListView, alwaysO
             break;
         case Qt.Key_Home:
             chatListView.positionViewAtBeginning();
+            chatListView.positionViewAtBeginning();
             break;
         case Qt.Key_End:
+            chatListView.positionViewAtEnd();
             chatListView.positionViewAtEnd();
             break;
         case Qt.Key_Up:

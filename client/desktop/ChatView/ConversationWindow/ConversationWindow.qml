@@ -25,6 +25,10 @@ ListView {
         easing.type: Easing.InCubic
     }
 
+    // disable these, we're handling them differently
+    keyNavigationEnabled: false
+    keyNavigationWraps: false
+
     // TODO this only clips because of highlight rectangles, figure out a way to
     // not use clip
     clip: true
@@ -60,12 +64,15 @@ ListView {
         ownedConversation.setElisionCharCount(38 * 40)
         ownedConversation.setElisionCharsPerLine(40)
         positionViewAtEnd()
+
+        // heuristic overshoot
+        chatScrollBarInner.setPosition(2)
     }
 
     delegate: Row {
         id: chatRow
         readonly property string proxyBody: body
-        property string proxyReceiptImage: CUtils.receiptStatusSwitch(
+        property string proxyReceiptImage: Utils.receiptCodeSwitch(
                                                receiptStatus)
         readonly property color userColor: CmnCfg.avatarColors[Herald.users.colorById(
                                                                    author)]
@@ -97,7 +104,6 @@ ListView {
         AvatarMain {
             iconColor: userColor
             initials: authName[0].toUpperCase()
-            opacity: isTail ? 1 : 0
             size: 28
             anchors {
                 bottom: parent.bottom
