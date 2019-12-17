@@ -16,6 +16,12 @@ Rectangle {
     width: parent.width
     height: Math.max(wrapperRow.height + label.height, 20)
 
+    Connections {
+        target: appRoot.globalTimer
+        onRefreshTime: timestamp.text = Utils.friendlyTimestamp(
+                           ownedConversation.builder.opTime)
+    }
+
     Label {
         id: label
         anchors.top: parent.top
@@ -138,11 +144,11 @@ Rectangle {
             }
 
             Label {
+                id: timestamp
                 Layout.topMargin: 0
                 Layout.rightMargin: CmnCfg.smallMargin
                 font.pixelSize: 10
                 text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
-                id: timestamp
                 color: CmnCfg.palette.darkGrey
             }
         }

@@ -66,7 +66,7 @@ Component {
 
             background: Rectangle {
                 anchors.fill: parent
-                color: CmnCfg.palette.lightGrey
+                color: CmnCfg.palette.medGrey
             }
 
             Text {
