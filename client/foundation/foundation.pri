@@ -1,13 +1,15 @@
 QT += quick svg xml
 VERSION = 0.0.1
 
-INCLUDEPATH += $$PWD/../../libherald/qt_ffi
+INCLUDEPATH += $$PWD/../../libherald/qt_ffi \
+               $$PWD
 
 HEADERS += \
-     $$PWD/../../libherald/qt_ffi/Bindings.h
+     $$PWD/../../libherald/qt_ffi/Bindings.h \
+
 
 SOURCES += \
-    $$PWD/../../libherald/qt_ffi/Bindings.cpp
+    $$PWD/../../libherald/qt_ffi/Bindings.cpp \
 
 
 # set build type for Rust library
@@ -48,11 +50,15 @@ iphoneos {
     LIBS += $${PWD}/../../target/aarch64-apple-ios/$${RUST_BUILD_TYPE}/libherald.a \
         -l sqlite3
     ENABLE_BITCODE = NO
+    HEADERS += $$PWD/objectiveutils.h
+    SOURCES += $$PWD/objectiveutils.mm
 }
 
 
 macx {
   LIBS += -L $${PWD}/../../target/$${RUST_BUILD_TYPE} -lherald
+  HEADERS += $$PWD/objectiveutils.h
+  SOURCES += $$PWD/objectiveutils.mm
 }
 
 

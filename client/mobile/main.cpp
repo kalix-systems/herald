@@ -1,5 +1,6 @@
 #include "Bindings.h"
-#include <QtDebug>
+#include "ios_sources/iosutils.h"
+#include <QWindow>
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QStandardPaths>
@@ -12,12 +13,12 @@ int main(int argc, char* argv[])
   // if this breaks android scale remove it entirely
   QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-
   QApplication::setOrganizationName("Kalix Systems");
   QApplication::setOrganizationDomain("kalix.io");
   QApplication::setApplicationName("Herald");
 
   QApplication app(argc, argv);
+
 
   qmlRegisterSingletonType<Herald>(
       "LibHerald", 1, 0, "Herald",
@@ -29,8 +30,6 @@ int main(int argc, char* argv[])
             QStandardPaths::AppDataLocation;
 
         QString path = QStandardPaths::writableLocation(local);
-
-        qDebug() << path;
 
         Herald* state = new Herald();
         state->setAppLocalDataDir(path);
@@ -70,6 +69,7 @@ int main(int argc, char* argv[])
                            "LibHerald", 1, 0, "CmnCfg");
 
   QQmlApplicationEngine engine;
+
   engine.load(QUrl(QStringLiteral("qrc:/qml/main.qml")));
   if (engine.rootObjects().isEmpty()) return -1;
 

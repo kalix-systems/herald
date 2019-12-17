@@ -1,6 +1,8 @@
 #include "Bindings.h"
+#include "objectiveutils.h"
 #include <QApplication>
 #include <QQmlApplicationEngine>
+#include <QWindow>
 #include <QStandardPaths>
 #include <QtQml/qqml.h>
 
@@ -66,6 +68,12 @@ int main(int argc, char* argv[])
   engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
   if (engine.rootObjects().isEmpty()) return -1;
+
+
+#ifdef Q_OS_MAC
+  auto wid = qobject_cast<QWindow*>(engine.rootObjects().first());
+  ObjectiveUtils::set_window_color(wid->winId());
+#endif
 
   return QApplication::exec();
 }
