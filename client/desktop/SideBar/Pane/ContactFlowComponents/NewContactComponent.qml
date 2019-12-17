@@ -9,7 +9,7 @@ import "../../popups/js/NewContactDialogue.mjs" as JS
 Component {
     Rectangle {
         anchors.fill: parent
-        color: CmnCfg.palette.lightGrey
+        color: CmnCfg.palette.offBlack
 
         ScrollView {
             id: titleText
@@ -20,6 +20,7 @@ Component {
             TextArea {
                 id: text
                 leftPadding: 12
+                color: CmnCfg.palette.white
                 placeholderText: qsTr("Enter username or display name")
 
                 Keys.onReturnPressed: {
@@ -36,7 +37,7 @@ Component {
             height: 1
             width: parent.width - CmnCfg.largeMargin
             anchors.horizontalCenter: parent.horizontalCenter
-            color: "black"
+            color: CmnCfg.palette.white
         }
 
         Rectangle {
@@ -45,7 +46,7 @@ Component {
             id: bigDivider
             height: 1
             width: parent.width
-            color: "black"
+            color: CmnCfg.palette.white
         }
     }
 }

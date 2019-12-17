@@ -46,7 +46,6 @@ Page {
         id: headerBarComponent
     }
 
-    //TODO: get rid of this once global search implemented
     Header.SearchComponent {
         id: searchBarComponent
     }

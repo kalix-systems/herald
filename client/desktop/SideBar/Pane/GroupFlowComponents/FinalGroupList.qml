@@ -30,6 +30,10 @@ ListView {
             //no hover state
             states: []
 
+            MouseArea {
+                id: hoverHandler
+            }
+
             labelComponent: Av.ConversationLabel {
                 contactName: Herald.users.nameById(memberId)
                 labelColor: CmnCfg.palette.white

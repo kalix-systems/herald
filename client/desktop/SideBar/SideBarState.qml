@@ -70,22 +70,6 @@ Page {
                 target: sideBarPane.messageSearchLoader
                 searchModel: Herald.messageSearch
             }
-        },
-
-        //TODO: following state should be reworked to match new design
-        State {
-            name: "newConversationState"
-            PropertyChanges {
-                target: sideBarBodyLoader
-                sourceComponent: contactslvComponent
-            }
-
-            PropertyChanges {
-                target: headerLoader
-                sourceComponent: searchBarComponent
-                searchPlaceholder: qsTr("Enter contact name")
-                contactsSearch: true
-            }
         }
     ]
 }

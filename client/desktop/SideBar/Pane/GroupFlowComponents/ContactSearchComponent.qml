@@ -69,11 +69,12 @@ Column {
                     labelSize: 14
                     lastBody: "@" + contactData.userId
                 }
+                states: []
 
                 MouseArea {
+                    id: hoverHandler
                     anchors.fill: parent
                     onClicked: {
-                        //TODO: THIS WILL TAKE MODEL OWNED BY GLOBAL STATE
                         Herald.conversationBuilder.addMember(contactData.userId)
                         contactPopup.popup.close()
                         Herald.usersSearch.clearFilter()
