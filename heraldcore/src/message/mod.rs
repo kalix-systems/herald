@@ -22,10 +22,16 @@ pub fn get_message(msg_id: &MsgId) -> Result<Message, HErr> {
     db::get_message(&db, msg_id)
 }
 
-/// Get message by message id
+/// Get message metadata by message id
 pub fn message_meta(msg_id: &MsgId) -> Result<MessageMeta, HErr> {
     let db = Database::get()?;
     db::message_meta(&db, msg_id)
+}
+
+/// Get message data by message id
+pub fn message_data(msg_id: &MsgId) -> Result<MsgData, HErr> {
+    let db = Database::get()?;
+    db::message_data(&db, msg_id)
 }
 
 /// Gets a message by message id. If the message cannot be found, it returns an option rather than

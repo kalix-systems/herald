@@ -65,6 +65,30 @@ fn message_meta() {
 }
 
 #[test]
+fn message_data() {
+    let mut conn = Database::in_memory_with_config().expect(womp!());
+
+    let receiver = crate::user::db::test_user(&mut conn, "receiver");
+
+    let conv = receiver.pairwise_conversation;
+
+    let mut builder = InboundMessageBuilder::default();
+    let msg_id = [0; 32].into();
+    builder
+        .id(msg_id)
+        .author(receiver.id)
+        .conversation_id(conv)
+        .timestamp(Time::now())
+        .body("hi".try_into().expect(womp!()));
+
+    let stored = builder.store_db(&mut conn).expect(womp!()).expect(womp!());
+
+    let data = db::message_data(&conn, &msg_id).expect(womp!("unable to get message"));
+
+    assert_eq!(stored.time.insertion, data.time.insertion);
+}
+
+#[test]
 fn reply() {
     let mut conn = Database::in_memory_with_config().expect(womp!());
 

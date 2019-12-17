@@ -49,12 +49,8 @@ pub(super) fn remove(mid: &MsgId) -> Option<MsgData> {
     cache().lock().pop(mid)
 }
 
-// TODO support this use case better in the heraldcore API
 fn db_data(mid: &MsgId) -> Option<MsgData> {
-    let data = heraldcore::message::get_message(mid)
-        .ok()
-        .map(split_msg)
-        .map(|m| m.1)?;
+    let data = heraldcore::message::message_data(mid).ok()?;
 
     insert(*mid, data.clone());
 
