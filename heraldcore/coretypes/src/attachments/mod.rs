@@ -252,8 +252,9 @@ impl AttachmentMeta {
     ) -> Result<(), Error> {
         fs::create_dir_all(&dest).map_err(|e| Error::Write(e, loc!()))?;
 
+        let attach = attachments_dir();
         for p in self.0.iter() {
-            fs::copy(p, dest.as_ref().join(p)).map_err(|e| Error::Write(e, loc!()))?;
+            fs::copy(attach.join(p), dest.as_ref().join(p)).map_err(|e| Error::Write(e, loc!()))?;
         }
 
         Ok(())
