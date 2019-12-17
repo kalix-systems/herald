@@ -2,6 +2,7 @@ import QtQuick.Controls 2.5
 import QtQuick.Layouts 1.3
 import QtQuick 2.9
 import LibHerald 1.0
+import "qrc:/imports/js/utils.mjs" as Utils
 
 Row {
     id: fileClip
@@ -10,8 +11,6 @@ Row {
     property real constraint: 0
     height: fileIcon.height
     spacing: CmnCfg.smallMargin / 2
-    leftPadding: CmnCfg.smallMargin
-    topPadding: CmnCfg.smallMargin
 
     Image {
         id: fileIcon

@@ -14,8 +14,7 @@ Rectangle {
     border.color: CmnCfg.palette.black
     border.width: 1
     width: parent.width
-    height: Math.max(
-                textCol.implicitHeight + label.height + CmnCfg.smallMargin, 20)
+    height: Math.max(wrapperRow.height + label.height, 20)
 
     Label {
         id: label
@@ -66,7 +65,7 @@ Rectangle {
         default:
             fileClipLoader.sourceComponent = fileClipComponent
             fileClipLoader.item.nameMetrics = doc[0].name
-            fileClipLoader.item.fileSize = doc[0].size
+            fileClipLoader.item.fileSize = Utils.friendlyFileSize(doc[0].size)
         }
     }
 
@@ -85,7 +84,6 @@ Rectangle {
     Imports.ButtonForm {
         id: exitButton
         anchors {
-            //  margins: CmnCfg.smallMargin
             right: parent.right
             top: parent.top
         }
@@ -95,71 +93,65 @@ Rectangle {
         onClicked: ownedConversation.builder.clearReply()
     }
 
-    ColumnLayout {
+    Row {
+        width: wrapper.width - CmnCfg.smallMargin
+        id: wrapperRow
+        clip: true
+        padding: CmnCfg.smallMargin
+        spacing: CmnCfg.smallMargin
+
         anchors.top: label.bottom
-        RowLayout {
-            Layout.preferredWidth: wrapper.width - CmnCfg.smallMargin
-            Layout.maximumWidth: wrapper.width - CmnCfg.smallMargin
-            clip: true
-            ColumnLayout {
-                id: textCol
+        ColumnLayout {
+            id: textCol
+            width: parent.width - imageClipLoader.width - CmnCfg.smallMargin * 2
+            spacing: CmnCfg.smallMargin
+            TextMetrics {
+                id: opTextMetrics
+                text: ownedConversation.builder.opBody
+                elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
+                elide: Text.ElideRight
+            }
 
-                TextMetrics {
-                    id: opTextMetrics
-                    text: ownedConversation.builder.opBody
-                    elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
-                    elide: Text.ElideRight
-                }
-
-                Loader {
-                    id: fileClipLoader
-                    height: item ? item.height : 0
-                    onHeightChanged: print(height)
-                }
-
+            Loader {
+                id: fileClipLoader
+                Layout.preferredHeight: item ? item.height : 0
+                Layout.preferredWidth: item ? item.width : 0
                 Component {
                     id: fileClipComponent
                     FileClip {}
                 }
-
-                TextEdit {
-                    text: opTextMetrics.elidedText
-                    Layout.topMargin: CmnCfg.margin / 2
-                    Layout.leftMargin: CmnCfg.smallMargin
-                    Layout.rightMargin: CmnCfg.smallMargin
-                    Layout.bottomMargin: CmnCfg.smallPadding
-                    Layout.alignment: Qt.AlignLeft
-                    Layout.fillWidth: true
-
-                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
-                    selectByMouse: true
-                    selectByKeyboard: true
-                    readOnly: true
-                    color: CmnCfg.palette.black
-                }
-
-                Label {
-                    Layout.leftMargin: CmnCfg.smallMargin
-                    Layout.bottomMargin: CmnCfg.smallPadding
-                    Layout.topMargin: 0
-                    Layout.rightMargin: CmnCfg.smallMargin
-                    font.pixelSize: 10
-                    text: Utils.friendlyTimestamp(
-                              ownedConversation.builder.opTime)
-                    id: timestamp
-                    color: CmnCfg.palette.darkGrey
-                }
             }
 
+            TextEdit {
+                text: opTextMetrics.elidedText
+                Layout.rightMargin: CmnCfg.smallMargin
+                Layout.alignment: Qt.AlignLeft
+                Layout.fillWidth: true
+
+                wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                selectByMouse: true
+                selectByKeyboard: true
+                readOnly: true
+                color: CmnCfg.palette.black
+            }
+
+            Label {
+                Layout.topMargin: 0
+                Layout.rightMargin: CmnCfg.smallMargin
+                font.pixelSize: 10
+                text: Utils.friendlyTimestamp(ownedConversation.builder.opTime)
+                id: timestamp
+                color: CmnCfg.palette.darkGrey
+            }
+        }
+
+        Loader {
+            id: imageClipLoader
+            height: item ? 64 : 0
+            width: item ? 64 : 0
             Component {
                 id: imageClipComponent
                 ReplyImageClip {}
-            }
-
-            Loader {
-                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                Layout.rightMargin: CmnCfg.largeMargin
-                id: imageClipLoader
             }
         }
     }
