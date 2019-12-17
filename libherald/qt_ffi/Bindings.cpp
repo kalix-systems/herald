@@ -2108,6 +2108,8 @@ bool messages_delete_message(Messages::Private *, quint64);
 qint64 messages_index_by_id(const Messages::Private *, const char *, int);
 qint64 messages_next_search_match(Messages::Private *);
 qint64 messages_prev_search_match(Messages::Private *);
+bool messages_save_all_attachments(const Messages::Private *, quint64,
+                                   const ushort *, int);
 void messages_set_elision_char_count(Messages::Private *, quint16);
 void messages_set_elision_chars_per_line(Messages::Private *, quint8);
 void messages_set_elision_line_count(Messages::Private *, quint8);
@@ -4162,6 +4164,9 @@ qint64 Messages::indexById(const QByteArray &msg_id) const {
 }
 qint64 Messages::nextSearchMatch() { return messages_next_search_match(m_d); }
 qint64 Messages::prevSearchMatch() { return messages_prev_search_match(m_d); }
+bool Messages::saveAllAttachments(quint64 index, const QString &dest) const {
+  return messages_save_all_attachments(m_d, index, dest.utf16(), dest.size());
+}
 void Messages::setElisionCharCount(quint16 char_count) {
   return messages_set_elision_char_count(m_d, char_count);
 }

@@ -305,4 +305,12 @@ impl Interface for Messages {
     ) {
         self.set_elision_chars_per_line_(chars_per_line)
     }
+
+    fn save_all_attachments(
+        &self,
+        index: u64,
+        dest: String,
+    ) -> bool {
+        self.save_all_attachments_(index as usize, dest)
+    }
 }

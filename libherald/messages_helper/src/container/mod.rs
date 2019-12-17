@@ -11,7 +11,7 @@ use types::*;
 
 mod cache;
 pub mod handlers;
-pub use cache::{access, update};
+pub use cache::{access, get, update};
 
 #[derive(Default)]
 /// A container type for messages backed by an RRB-tree vector

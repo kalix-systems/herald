@@ -535,4 +535,14 @@ impl Messages {
     ) {
         self.elider.set_char_per_line(chars_per_line as usize);
     }
+
+    pub(crate) fn save_all_attachments_(
+        &self,
+        index: usize,
+        dest: String,
+    ) -> bool {
+        let data = none!(self.container.access_by_index(index, MsgData::clone), false);
+        err!(data.save_all_attachments(dest), false);
+        true
+    }
 }

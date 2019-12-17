@@ -346,6 +346,7 @@ fn messages() -> Object {
         mut setElisionCharCount(char_count: QUint16) => Void,
         mut setElisionCharsPerLine(chars_per_line: QUint8) => Void,
         const indexById(msg_id: QByteArray) => Qint64,
+        const saveAllAttachments(index: QUint64, dest: QString) => Bool,
     };
 
     obj! {

@@ -5,7 +5,7 @@ use platform_dirs::attachments_dir;
 use std::{
     ffi::OsString,
     fmt,
-    fs::read_dir,
+    fs::{self, read_dir},
     path::{Path, PathBuf},
 };
 use tar::{Archive, Builder};
@@ -169,7 +169,7 @@ impl AttachmentMeta {
     pub fn media_attachments(&self) -> Result<Vec<MediaMeta>, Error> {
         let mut out = Vec::with_capacity(self.0.len());
 
-        for p in self.0.as_slice().iter() {
+        for p in self.0.iter() {
             let mut path = attachments_dir();
 
             path.push(p);
@@ -243,6 +243,20 @@ impl AttachmentMeta {
     /// Indicicates whether `AttachmentMeta` is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    /// Saves all attachments to the `dest` directory
+    pub fn save_all<P: AsRef<Path>>(
+        &self,
+        dest: P,
+    ) -> Result<(), Error> {
+        fs::create_dir_all(&dest).map_err(|e| Error::Write(e, loc!()))?;
+
+        for p in self.0.iter() {
+            fs::copy(p, dest.as_ref().join(p)).map_err(|e| Error::Write(e, loc!()))?;
+        }
+
+        Ok(())
     }
 }
 
