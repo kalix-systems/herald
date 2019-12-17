@@ -53,7 +53,7 @@ Pane {
         id: background
         color: CmnCfg.palette.white
         anchors.fill: parent
-        border.color: "black"
+        border.color: CmnCfg.palette.black
         border.width: 1
         ChatLabel {
             id: authorLabel

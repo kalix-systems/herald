@@ -38,6 +38,7 @@ Page {
 
         Common.Divider {
             anchors.top: parent.bottom
+            color: CmnCfg.palette.lightGrey
         }
     }
 
