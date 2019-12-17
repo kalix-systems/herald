@@ -173,20 +173,6 @@ impl Messages {
         self.container.op_body(index)
     }
 
-    pub(crate) fn set_builder_op_msg_id_(
-        &mut self,
-        id: Option<ffi::MsgIdRef>,
-    ) {
-        use builder::OpChanged;
-
-        match err!(self.builder.set_op_id(id, &self.container)) {
-            OpChanged::Changed => {
-                self.emit.builder_op_msg_id_changed();
-            }
-            OpChanged::NotChanged => {}
-        }
-    }
-
     pub(crate) fn set_search_hint_(
         &mut self,
         scroll_position: f32,
@@ -415,10 +401,6 @@ impl Messages {
 
     pub(crate) fn builder_mut_(&mut self) -> &mut MessageBuilder {
         &mut self.builder
-    }
-
-    pub(crate) fn builder_op_msg_id_(&self) -> Option<ffi::MsgIdRef> {
-        self.builder.op_id_slice()
     }
 
     pub(crate) fn op_msg_id_(

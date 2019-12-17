@@ -77,8 +77,6 @@ declare class Messages {
   isEmpty: string;
   lastTime: number;
   builder: MessageBuilder;
-  // id of the message the message builder is replying to, if any
-  builderOpMsgId: MsgId;
 
   deleteMessage(rowIndex: number): boolean;
   clearConversationHistory(): void;
