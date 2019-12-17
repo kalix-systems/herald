@@ -10,9 +10,30 @@ import "qrc:/imports/ChatBubble/ReplyBubble"
 
 Rectangle {
     id: wrapper
-    color: CmnCfg.palette.medGrey
+    color: CmnCfg.palette.white
+    border.color: CmnCfg.palette.black
+    border.width: 1
     width: parent.width
-    height: Math.max(textCol.height, 20)
+    height: Math.max(
+                textCol.implicitHeight + label.height + CmnCfg.smallMargin, 20)
+
+    Label {
+        id: label
+        anchors.top: parent.top
+        anchors.left: parent.left
+        width: parent.width
+        font.family: CmnCfg.chatFont.name
+        font.weight: Font.Bold
+        padding: CmnCfg.smallMargin / 4
+        leftPadding: CmnCfg.smallMargin / 2
+
+        color: CmnCfg.palette.white
+        text: Herald.users.nameById(ownedConversation.builder.opAuthor)
+        background: Rectangle {
+            color: CmnCfg.palette.avatarColors[Herald.users.colorById(
+                                                   ownedConversation.builder.opAuthor)]
+        }
+    }
 
     property color startColor
     property string opText: parent.opText
@@ -24,6 +45,7 @@ Rectangle {
                                 ownedConversation.builder.opMediaAttachments)
         switch (media.length) {
         case 0:
+            imageClipLoader.sourceComponent = undefined
             break
         default:
             imageClipLoader.sourceComponent = imageClipComponent
@@ -33,21 +55,31 @@ Rectangle {
         }
     }
 
-    Component.onCompleted: loadMedia()
+    function loadDocs() {
+        const doc = ownedConversation.builder.opDocAttachments.length
+                  === 0 ? "" : JSON.parse(
+                              ownedConversation.builder.opDocAttachments)
+        switch (doc.length) {
+        case 0:
+            fileClipLoader.sourceComponent = undefined
+            break
+        default:
+            fileClipLoader.sourceComponent = fileClipComponent
+            fileClipLoader.item.nameMetrics = doc[0].name
+            fileClipLoader.item.fileSize = doc[0].size
+        }
+    }
+
+    Component.onCompleted: {
+        loadMedia()
+        loadDocs()
+    }
     Connections {
         target: ownedConversation.builder
         onOpIdChanged: if (ownedConversation.builder.isReply) {
                            loadMedia()
+                           loadDocs()
                        }
-    }
-
-    Rectangle {
-        id: verticalAccent
-        anchors.right: wrapper.left
-        height: wrapper.height
-        width: CmnCfg.smallMargin / 4
-        color: CmnCfg.palette.avatarColors[Herald.users.colorById(
-                                               ownedConversation.builder.opAuthor)]
     }
 
     Imports.ButtonForm {
@@ -59,35 +91,35 @@ Rectangle {
         }
         source: "qrc:/x-icon.svg"
         scale: 0.8
+        fill: CmnCfg.palette.white
         onClicked: ownedConversation.builder.clearReply()
     }
 
     ColumnLayout {
+        anchors.top: label.bottom
         RowLayout {
             Layout.preferredWidth: wrapper.width - CmnCfg.smallMargin
             Layout.maximumWidth: wrapper.width - CmnCfg.smallMargin
             clip: true
             ColumnLayout {
                 id: textCol
-                Label {
-                    id: sender
-                    text: Herald.users.nameById(
-                              ownedConversation.builder.opAuthor)
-                    Layout.leftMargin: CmnCfg.smallMargin
-                    Layout.rightMargin: CmnCfg.smallMargin
-                    Layout.bottomMargin: CmnCfg.margin / 2
-                    Layout.topMargin: CmnCfg.margin / 2
-                    Layout.preferredHeight: CmnCfg.smallMargin
-                    font.bold: true
-                    color: CmnCfg.palette.avatarColors[Herald.users.colorById(
-                                                           ownedConversation.builder.opAuthor)]
-                }
 
                 TextMetrics {
                     id: opTextMetrics
                     text: ownedConversation.builder.opBody
                     elideWidth: (wrapper.width - CmnCfg.smallMargin) * 2
                     elide: Text.ElideRight
+                }
+
+                Loader {
+                    id: fileClipLoader
+                    height: item ? item.height : 0
+                    onHeightChanged: print(height)
+                }
+
+                Component {
+                    id: fileClipComponent
+                    FileClip {}
                 }
 
                 TextEdit {

@@ -30,7 +30,7 @@ ToolBar {
 
         Label {
             id: headerText
-            text: qsTr("Conversations")
+            text: qsTr("Converzations")
             Layout.fillWidth: true
             font {
                 pixelSize: CmnCfg.headerSize
