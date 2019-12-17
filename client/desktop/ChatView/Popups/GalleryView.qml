@@ -4,6 +4,8 @@ import LibHerald 1.0
 import QtQuick.Window 2.13
 import Qt.labs.platform 1.1
 import QtQuick.Dialogs 1.3
+import "qrc:/imports"
+import QtGraphicalEffects 1.0
 
 Popup {
     id: galleryPopup
@@ -14,12 +16,64 @@ Popup {
     }
     onClosed: galleryLoader.active = false
 
-    height: parent.height
-    width: parent.width
+    height: root.height
+    width: root.width
     anchors.centerIn: parent
     background: Rectangle {
         color: "black"
     }
+
+    ButtonForm {
+        id: xIcon
+        source: "qrc:/x-icon.svg"
+        icon.height: 30
+        icon.width: 30
+        anchors.top: parent.top
+        anchors.right: parent.right
+        fill: CmnCfg.palette.white
+        z: galleryPopup.z + 1
+        onClicked: {
+            galleryLoader.active = false
+            galleryPopup.close()
+        }
+    }
+
+    ButtonForm {
+        id: next
+        z: galleryPopup.z + 1
+        icon.height: 30
+        icon.width: 30
+        anchors.verticalCenter: flickable.verticalCenter
+        anchors.horizontalCenter: xIcon.horizontalCenter
+        source: "qrc:/forward-arrow-icon.svg"
+        enabled: currentIndex !== imageAttachments.length - 1
+        fill: CmnCfg.palette.white
+        opacity: enabled ? 1.0 : 0.5
+        onClicked: {
+            galleryView.currentIndex += 1
+            clipScroll.positionViewAtIndex(galleryView.currentIndex,
+                                           ListView.Contain)
+        }
+    }
+
+    ButtonForm {
+        id: back
+        z: galleryPopup.z + 1
+        icon.height: 30
+        icon.width: 30
+        anchors.verticalCenter: flickable.verticalCenter
+        anchors.left: parent.left
+        source: "qrc:/back-arrow-icon.svg"
+        enabled: currentIndex !== 0
+        fill: CmnCfg.palette.white
+        opacity: enabled ? 1.0 : 0.5
+        onClicked: {
+            galleryView.currentIndex -= 1
+            clipScroll.positionViewAtIndex(galleryView.currentIndex,
+                                           ListView.Contain)
+        }
+    }
+
     Action {
         shortcut: StandardKey.MoveToNextChar
         onTriggered: flickable.contentX += flickable.contentWidth * 0.1
@@ -44,11 +98,12 @@ Popup {
         id: zoomAction
         shortcut: StandardKey.ZoomIn
         onTriggered: {
-            galleryPopup.scale += 0.3
-            flickable.resizeContent(galleryPopup.width * galleryPopup.scale,
-                                    galleryPopup.height * galleryPopup.scale,
-                                    Qt.point(image.width / 2 + image.x,
-                                             image.height / 2 + image.y))
+            galleryPopup.imageScale += 0.3
+            flickable.resizeContent(
+                        galleryPopup.width * galleryPopup.imageScale,
+                        galleryPopup.height * galleryPopup.imageScale,
+                        Qt.point(image.width / 2 + image.x,
+                                 image.height / 2 + image.y))
         }
     }
 
@@ -56,19 +111,23 @@ Popup {
         id: zoomOutAction
         shortcut: StandardKey.ZoomOut
         onTriggered: {
-            galleryPopup.scale -= 0.3
-            flickable.resizeContent(galleryPopup.width * galleryPopup.scale,
-                                    galleryPopup.height * galleryPopup.scale,
-                                    Qt.point(image.width / 2 + image.x,
-                                             image.height / 2 + image.y))
+            galleryPopup.imageScale -= 0.3
+            flickable.resizeContent(
+                        galleryPopup.width * galleryPopup.imageScale,
+                        galleryPopup.height * galleryPopup.imageScale,
+                        Qt.point(image.width / 2 + image.x,
+                                 image.height / 2 + image.y))
         }
     }
 
     Flickable {
         id: flickable
-        width: parent.width
+        width: parent.width - 50
         height: parent.height - 80
         anchors.top: parent.top
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.rightMargin: CmnCfg.smallMargin
+
         clip: true
         ScrollBar.vertical: ScrollBar {}
         ScrollBar.horizontal: ScrollBar {}
@@ -98,41 +157,50 @@ Popup {
         }
     }
 
-    Flickable {
+    ListView {
+        id: clipScroll
         width: parent.width
+        height: 80
+        Component.onCompleted: print(height, width)
+        clip: true
+        orientation: Qt.Horizontal
         anchors.top: flickable.bottom
         anchors.topMargin: CmnCfg.smallMargin
         anchors.horizontalCenter: flickable.horizontalCenter
-        Row {
-            height: parent.height
-            spacing: CmnCfg.smallMargin
-            Repeater {
-                model: imageAttachments
-                delegate: Rectangle {
-                    property var imageModel: model
-                    height: 64
-                    width: 64
-                    clip: true
-                    property real aspectRatio: imageAttachments[index].width
-                                               / imageAttachments[index].height
-                    property var imageSource: "file:" + imageAttachments[index].path
-                    Image {
-                        id: clip
-                        sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio
-                        sourceSize.height: parent.aspectRatio < 1 ? 64 / parent.aspectRatio : 64
-                        anchors.centerIn: parent
-                        source: parent.imageSource
-                    }
+        model: imageAttachments
+        spacing: CmnCfg.smallMargin
+        delegate: Rectangle {
+            property var imageModel: model
+            height: 64
+            width: 64
+            clip: true
+            property real aspectRatio: imageAttachments[index].width
+                                       / imageAttachments[index].height
+            property var imageSource: "file:" + imageAttachments[index].path
+            Image {
+                id: clip
+                sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio
+                sourceSize.height: parent.aspectRatio < 1 ? 64 / parent.aspectRatio : 64
+                anchors.centerIn: parent
+                source: parent.imageSource
+                ColorOverlay {
+                    id: overlay
+                    anchors.fill: parent
+                    source: parent
+                    visible: galleryPopup.currentIndex !== index
+                    color: CmnCfg.palette.black
+                    opacity: 0.7
+                    smooth: true
+                }
+            }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            currentIndex = index
-                            imageScale = 1.0
-                            flickable.contentHeight = flickable.height
-                            flickable.contentWidth = flickable.width
-                        }
-                    }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    currentIndex = index
+                    imageScale = 1.0
+                    flickable.contentHeight = flickable.height
+                    flickable.contentWidth = flickable.width
                 }
             }
         }
