@@ -23,18 +23,86 @@ Popup {
         color: "black"
     }
 
-    ButtonForm {
-        id: xIcon
-        source: "qrc:/x-icon.svg"
-        icon.height: 30
-        icon.width: 30
+    Row {
+        id: buttonRowRight
         anchors.top: parent.top
         anchors.right: parent.right
-        fill: CmnCfg.palette.white
-        z: galleryPopup.z + 1
-        onClicked: {
-            galleryLoader.active = false
-            galleryPopup.close()
+        layoutDirection: Qt.RightToLeft
+        height: 30
+        spacing: CmnCfg.smallMargin
+
+        ButtonForm {
+            id: xIcon
+            source: "qrc:/x-icon.svg"
+            icon.height: 30
+            icon.width: 30
+            fill: CmnCfg.palette.white
+            z: galleryPopup.z + 1
+            onClicked: {
+                galleryLoader.active = false
+                galleryPopup.close()
+            }
+        }
+
+        ButtonForm {
+            id: download
+            source: "qrc:/download-icon.svg"
+            fill: CmnCfg.palette.white
+            icon.height: 30
+            icon.width: 30
+            z: galleryPopup.z + 1
+            onClicked: downloadImage.open()
+        }
+    }
+
+    FileDialog {
+        id: downloadImage
+        selectExisting: false
+        selectFolder: true
+        selectMultiple: false
+        folder: StandardPaths.writableLocation(StandardPaths.DesktopLocation)
+        onAccepted: Herald.utils.saveFile(imageAttachments[currentIndex].path,
+                                          fileUrl)
+    }
+
+    Label {
+        anchors.top: parent.top
+        anchors.left: buttonRowLeft.right
+        anchors.right: buttonRowRight.left
+        anchors.leftMargin: CmnCfg.smallMargin
+        anchors.rightMargin: CmnCfg.smallMargin
+        text: imageAttachments[currentIndex].name
+        font.pixelSize: 20
+        font.family: CmnCfg.chatFont.name
+        color: CmnCfg.palette.white
+        elide: Text.ElideMiddle
+        horizontalAlignment: Text.AlignHCenter
+    }
+
+    Row {
+        id: buttonRowLeft
+        anchors.top: parent.top
+        anchors.left: parent.left
+        height: 30
+        spacing: CmnCfg.smallMargin
+
+        ButtonForm {
+            id: zoomIn
+            source: "qrc:/plus-icon.svg"
+            action: zoomAction
+            fill: CmnCfg.palette.white
+            icon.height: 30
+            icon.width: 30
+            z: galleryPopup.z + 1
+        }
+        ButtonForm {
+            id: zoomOut
+            source: "qrc:/minus-icon.svg"
+            action: zoomOutAction
+            fill: CmnCfg.palette.white
+            icon.height: 30
+            icon.width: 30
+            z: galleryPopup.z + 1
         }
     }
 
@@ -44,7 +112,7 @@ Popup {
         icon.height: 30
         icon.width: 30
         anchors.verticalCenter: flickable.verticalCenter
-        anchors.horizontalCenter: xIcon.horizontalCenter
+        anchors.right: parent.right
         source: "qrc:/forward-arrow-icon.svg"
         enabled: currentIndex !== imageAttachments.length - 1
         fill: CmnCfg.palette.white
@@ -123,10 +191,10 @@ Popup {
     Flickable {
         id: flickable
         width: parent.width - 50
-        height: parent.height - 80
+        height: parent.height - 110
         anchors.top: parent.top
+        anchors.topMargin: 30
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.rightMargin: CmnCfg.smallMargin
 
         clip: true
         ScrollBar.vertical: ScrollBar {}
@@ -156,53 +224,7 @@ Popup {
                         pinch.center)
         }
     }
-
-    ListView {
+    ImageClipRow {
         id: clipScroll
-        width: parent.width
-        height: 80
-        Component.onCompleted: print(height, width)
-        clip: true
-        orientation: Qt.Horizontal
-        anchors.top: flickable.bottom
-        anchors.topMargin: CmnCfg.smallMargin
-        anchors.horizontalCenter: flickable.horizontalCenter
-        model: imageAttachments
-        spacing: CmnCfg.smallMargin
-        delegate: Rectangle {
-            property var imageModel: model
-            height: 64
-            width: 64
-            clip: true
-            property real aspectRatio: imageAttachments[index].width
-                                       / imageAttachments[index].height
-            property var imageSource: "file:" + imageAttachments[index].path
-            Image {
-                id: clip
-                sourceSize.width: parent.aspectRatio < 1 ? 64 : 64 * parent.aspectRatio
-                sourceSize.height: parent.aspectRatio < 1 ? 64 / parent.aspectRatio : 64
-                anchors.centerIn: parent
-                source: parent.imageSource
-                ColorOverlay {
-                    id: overlay
-                    anchors.fill: parent
-                    source: parent
-                    visible: galleryPopup.currentIndex !== index
-                    color: CmnCfg.palette.black
-                    opacity: 0.7
-                    smooth: true
-                }
-            }
-
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    currentIndex = index
-                    imageScale = 1.0
-                    flickable.contentHeight = flickable.height
-                    flickable.contentWidth = flickable.width
-                }
-            }
-        }
     }
 }
