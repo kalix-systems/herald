@@ -896,8 +896,8 @@ dependencies = [
  "kson 0.1.0",
  "location 0.1.0",
  "portpicker 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "quinn 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "quinn-proto 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quinn 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quinn-proto 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rcgen 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls-native-certs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1580,7 +1580,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "quinn"
-version = "0.5.1"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bytes 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1589,7 +1589,7 @@ dependencies = [
  "futures 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.66 (registry+https://github.com/rust-lang/crates.io-index)",
  "mio 0.6.21 (registry+https://github.com/rust-lang/crates.io-index)",
- "quinn-proto 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quinn-proto 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustls-native-certs 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "tokio 0.2.4 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1599,7 +1599,7 @@ dependencies = [
 
 [[package]]
 name = "quinn-proto"
-version = "0.5.0"
+version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bytes 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2041,6 +2041,7 @@ dependencies = [
  "crossbeam-channel 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "dashmap 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "herald_common 0.1.0",
+ "krpc 0.1.0",
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serial_test_derive 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2829,8 +2830,8 @@ dependencies = [
 "checksum proptest 0.9.4 (registry+https://github.com/rust-lang/crates.io-index)" = "cf147e022eacf0c8a054ab864914a7602618adba841d800a9a9868a5237a529f"
 "checksum qstring 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "267047d2df92990367cbbf6b686c363c1518eb98e225b5193c8b936e52ab565a"
 "checksum quick-error 1.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "9274b940887ce9addde99c4eee6b5c44cc494b182b97e73dc8ffdcb3397fd3f0"
-"checksum quinn 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3144338072948e76b97cf3ec3b0a243292822f8571cefc8d60763d23eaf885f5"
-"checksum quinn-proto 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "fdc04086222193131a32eb4705dfe2b68d53ea2974c60435aed7be5e5c86e38d"
+"checksum quinn 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b544f6ceafbc37a47b78a32b7a5cd187eb189a27405d7accb8056df153880714"
+"checksum quinn-proto 0.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "36f238b2b3252726f41171302f3976bc22ef4d4845bad6bc2f4fce000a833ee7"
 "checksum quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)" = "6ce23b6b870e8f94f81fb0a363d65d86675884b34a09043c81e5562f11c1f8e1"
 "checksum quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "053a8c8bcc71fcce321828dc897a98ab9760bef03a4fc36693c231e5b3216cfe"
 "checksum rand 0.6.5 (registry+https://github.com/rust-lang/crates.io-index)" = "6d71dacdc3c88c1fde3885a3be3fbab9f35724e6ce99467f7d9c5026132184ca"
